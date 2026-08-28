@@ -208,14 +208,23 @@ export default function Servir() {
             <h2>Quem é você?</h2>
             <p className="dim pequeno">Só o essencial. Nada disso vai para lugar nenhum além da liderança da área.</p>
             <label htmlFor="w-nome">Nome completo</label>
+            {/* Três campos, três teclados diferentes. Sem type/inputMode o
+                celular abre o mesmo teclado de letras nos três e a pessoa
+                tem que achar o "123" para digitar o próprio telefone.
+                enterKeyHint="next" põe "próximo" na tecla de baixo à
+                direita: dá para preencher a ficha inteira sem tirar o
+                polegar do teclado. */}
             <input id="w-nome" value={nome} autoComplete="name" placeholder="nome e sobrenome"
+              autoCapitalize="words" enterKeyHint="next"
               onChange={e => setNome(e.target.value)} />
             <label htmlFor="w-tel">WhatsApp com DDD</label>
-            <input id="w-tel" value={tel} inputMode="tel" autoComplete="tel" placeholder="21999998888"
+            <input id="w-tel" value={tel} type="tel" inputMode="tel" autoComplete="tel" placeholder="21999998888"
+              enterKeyHint="next"
               onChange={e => setTel(soTel(e.target.value))} />
             <p className="dim peq">É por aqui que a liderança fala com você.</p>
             <label htmlFor="w-mail">E-mail <span className="dim">(opcional)</span></label>
-            <input id="w-mail" value={email} inputMode="email" autoComplete="email" placeholder="seu@email.com"
+            <input id="w-mail" value={email} type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com"
+              autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onChange={e => setEmail(e.target.value)} />
           </>
         )}
@@ -264,11 +273,11 @@ export default function Servir() {
                 {q.ajuda && <p className="dim peq" style={{ margin: '2px 0 8px' }}>{q.ajuda}</p>}
 
                 {q.tipo === 'texto' && (
-                  <input id={`q-${q.id}`} value={resp[q.id] || ''}
+                  <input enterKeyHint="done" id={`q-${q.id}`} value={resp[q.id] || ''}
                     onChange={e => setResp(r => ({ ...r, [q.id]: e.target.value }))} />
                 )}
                 {q.tipo === 'numero' && (
-                  <input id={`q-${q.id}`} inputMode="numeric" value={resp[q.id] || ''}
+                  <input enterKeyHint="done" id={`q-${q.id}`} inputMode="numeric" value={resp[q.id] || ''}
                     onChange={e => setResp(r => ({ ...r, [q.id]: e.target.value.replace(/\D/g, '') }))} />
                 )}
                 {q.tipo === 'texto_longo' && (

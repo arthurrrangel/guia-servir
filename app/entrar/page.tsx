@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { sb, lerCredenciais } from '@/lib/supabase';
 import { Conexao } from '@/components/Shell';
 import { Logo } from '@/components/Marca';
@@ -54,7 +55,14 @@ export default function Entrar() {
        sobre ela. O que separa é o mesmo fio de sempre. */
     <main className="lid entrada">
       <div className="entrada-marca">
-        <Logo className="logo entrada-logo" />
+        {/* A marca era um desenho parado. Esta é a única tela do produto sem
+            barra, sem migalha e sem nada por baixo: quem tocasse em "Sou da
+            organização" por engano, no celular, não tinha nenhuma saída na
+            página — só o gesto de voltar do navegador, que muita gente não
+            usa. A marca vira a saída, que é onde todo mundo procura primeiro. */}
+        <Link href="/" className="marca-link" aria-label="Voltar para o site da GUIA Church">
+          <Logo className="logo entrada-logo" />
+        </Link>
         <span className="rot">Área do organizador</span>
         <h1 className="entrada-titulo">Entrar</h1>
         <p className="entrada-sub">
@@ -64,13 +72,20 @@ export default function Entrar() {
 
       <form onSubmit={modo === 'link' ? porLink : porSenha}>
         <label>Seu email</label>
+        {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
+            "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
+            enterKeyHint troca o "return" do teclado por "ir" — a tecla que
+            manda o formulário sem a pessoa ter que fechar o teclado e
+            procurar o botão embaixo dele. */}
         <input type="email" required autoComplete="email" value={email}
+          inputMode="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
+          enterKeyHint="go"
           onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
         {modo === 'senha' && (
           <>
             <div style={{ height: 12 }} />
             <label>Sua senha</label>
-            <input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)} />
+            <input type="password" required autoComplete="current-password" enterKeyHint="go" value={senha} onChange={e => setSenha(e.target.value)} />
           </>
         )}
         <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>

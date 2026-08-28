@@ -461,7 +461,7 @@ export default function EntradaEquipe() {
         {fase === 'pin' && (
           <div className="escalacao">
             <label>Seu PIN</label>
-            <input ref={refPin} value={pin} inputMode="numeric" autoComplete="one-time-code"
+            <input enterKeyHint="done" ref={refPin} value={pin} inputMode="numeric" autoComplete="one-time-code"
               className="campo-pin" placeholder="••••" disabled={ocupado}
               onChange={e => { const v = so4(e.target.value); setPin(v); if (v.length === 4) setTimeout(() => entrarComPin(v), 10); }} />
             <button className="pri" style={{ marginTop: 14, width: '100%' }}
@@ -488,11 +488,11 @@ export default function EntradaEquipe() {
               </Aviso>
             )}
             <label>Os 4 últimos números do seu WhatsApp</label>
-            <input value={dig} inputMode="numeric" className="campo-pin" placeholder="••••"
+            <input enterKeyHint="done" value={dig} inputMode="numeric" className="campo-pin" placeholder="••••"
               disabled={ocupado || !alvo?.tem_tel} onChange={e => setDig(so4(e.target.value))} />
 
             <label style={{ marginTop: 16, display: 'block' }}>Agora crie um PIN de 4 números</label>
-            <input value={pinNovo} inputMode="numeric" className="campo-pin" placeholder="••••"
+            <input enterKeyHint="done" value={pinNovo} inputMode="numeric" className="campo-pin" placeholder="••••"
               disabled={ocupado || !alvo?.tem_tel} onChange={e => setPinNovo(so4(e.target.value))} />
             <p className="dim pequeno" style={{ margin: '8px 0 0' }}>
               É esse PIN que você vai usar daqui pra frente. Não use os mesmos 4 números do telefone,
@@ -514,18 +514,20 @@ export default function EntradaEquipe() {
           <div className="escalacao">
             <label>Seu nome completo</label>
             <input value={fNome} disabled={ocupado} placeholder="nome e sobrenome"
-              autoComplete="name" onChange={e => setFNome(e.target.value)} />
+              autoComplete="name" autoCapitalize="words" enterKeyHint="next"
+              onChange={e => setFNome(e.target.value)} />
 
             <label style={{ marginTop: 14, display: 'block' }}>Seu WhatsApp (com DDD)</label>
-            <input value={fTel} disabled={ocupado} placeholder="11999998888" inputMode="tel"
-              autoComplete="tel" onChange={e => setFTel(e.target.value)} />
+            <input value={fTel} disabled={ocupado} placeholder="11999998888" type="tel" inputMode="tel"
+              autoComplete="tel" enterKeyHint="next" onChange={e => setFTel(e.target.value)} />
             <p className="dim pequeno" style={{ margin: '6px 0 0' }}>
               É por ele que você confirma que é você, e é onde a organização te chama.
             </p>
 
             <label style={{ marginTop: 14, display: 'block' }}>E-mail <span className="dim">(opcional)</span></label>
-            <input value={fEmail} disabled={ocupado} placeholder="seu@email.com" inputMode="email"
-              autoComplete="email" onChange={e => setFEmail(e.target.value)} />
+            <input value={fEmail} disabled={ocupado} placeholder="seu@email.com" type="email" inputMode="email"
+              autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
+              onChange={e => setFEmail(e.target.value)} />
 
             <label style={{ marginTop: 22, display: 'block' }}>Onde você serve?</label>
             <p className="dim pequeno" style={{ margin: '-2px 0 12px' }}>

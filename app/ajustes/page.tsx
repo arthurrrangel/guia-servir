@@ -97,7 +97,11 @@ function Ajustes() {
           nome e confirma, você não manda link no privado de ninguém.
         </p>
         <label>Link de convite do grupo (opcional, só para você guardar)</label>
-        <input key={equipe?.whatsapp_grupo || ''} defaultValue={equipe?.whatsapp_grupo || ''}
+        {/* endereço, não frase: sem inputMode="url" o iPhone abre teclado de
+            texto com corretor ligado e a primeira letra maiúscula — colar um
+            link e ver "Https://" é o resultado. */}
+        <input enterKeyHint="done" key={equipe?.whatsapp_grupo || ''} defaultValue={equipe?.whatsapp_grupo || ''}
+          type="url" inputMode="url" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           placeholder="https://chat.whatsapp.com/..."
           onBlur={async e => {
             const v = e.target.value.trim();
@@ -135,7 +139,7 @@ function Ajustes() {
           </div>
           <div>
             <label>Prazo para confirmar</label>
-            <input key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar" defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
+            <input enterKeyHint="done" key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar" defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
           </div>
           <div>
             <label>Equilibrar a carga olhando</label>
@@ -151,7 +155,7 @@ function Ajustes() {
           <span className="rot">Texto do aviso mensal</span>
         </div>
         <label>Como você começa o aviso</label>
-        <input key={S.config.saudacao} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
+        <input enterKeyHint="done" key={S.config.saudacao} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
         <div style={{ height: 14 }} />
         <label>Como você termina ({'{PRAZO}'} vira o prazo acima)</label>
         <textarea key={S.config.rodape} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
@@ -175,7 +179,7 @@ function Ajustes() {
         <div className="ajt-lista">
           {S.funcoes.map(f => (
             <div className={`ajt-item ${f.ativa ? '' : 'off'}`} key={f.id}>
-              <input className="ajt-nome" key={f.nome} defaultValue={f.nome} aria-label="nome da função"
+              <input enterKeyHint="done" className="ajt-nome" key={f.nome} defaultValue={f.nome} aria-label="nome da função"
                 onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
               <Escolha valor={f.simultanea ? '1' : '0'} rotulo="quando acontece" classe="ajt-quando"
                 mostra={f.simultanea ? 'durante o culto' : 'depois do culto'}
@@ -194,7 +198,7 @@ function Ajustes() {
           ))}
         </div>
         <div className="linha" style={{ marginTop: 14 }}>
-          <input value={nova} onChange={e => setNova(e.target.value)} placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
+          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)} placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
           <button disabled={gravando || !nova.trim()} onClick={addFn}>Criar função</button>
         </div>
       </section>
@@ -231,7 +235,8 @@ function Ajustes() {
         </div>
         {geral ? (
           <div className="linha" style={{ marginTop: 14 }}>
-            <input value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
+            <input enterKeyHint="done" value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
+              inputMode="email" autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false}
               placeholder="email do organizador" style={{ maxWidth: 260 }} />
             <select aria-label="Qual ministério essa pessoa organiza" value={equipeDoLider}
               onChange={e => setEquipeDoLider(e.target.value)} style={{ maxWidth: 220 }}>
@@ -264,7 +269,7 @@ function Ajustes() {
         <div className="ajt-lista">
           {equipes.map(e => (
             <div className="ajt-item" key={e.id}>
-              <input className="ajt-nome" key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
+              <input enterKeyHint="done" className="ajt-nome" key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
                 onBlur={async ev => {
                   const v = ev.target.value.trim();
                   if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err: any) { aviso('Não salvou: ' + err.message); } }
@@ -292,7 +297,7 @@ function Ajustes() {
           ))}
         </div>
         <div className="linha" style={{ marginTop: 12 }}>
-          <input value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
+          <input enterKeyHint="done" value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
           <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
             setGravando(true);
             try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado, agora crie as funções e cadastre o time'); }

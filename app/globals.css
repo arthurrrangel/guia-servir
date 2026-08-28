@@ -118,7 +118,33 @@ body{
   font:17px/1.6 var(--fonte);
   font-feature-settings:"cv05" 1,"cv11" 1,"ss03" 1,"tnum" 0;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
+  /* 100vh no iPhone conta a barra do Safari que some ao rolar: a página
+     nasce mais alta que o visível e o rodapé fica atrás do navegador.
+     svh é a altura pequena — a que sempre existe. */
   min-height:100vh;
+  min-height:100svh;
+}
+
+/* ---- O DEDO ------------------------------------------------------------
+   Contei antes de mexer: 65 regras `:hover` contra 2 regras `:active`.
+   No celular hover não existe. Isso quer dizer que quase todo o retorno
+   visual do produto — o botão que escurece, a seta que anda, a foto que
+   aproxima, o traço que aparece — estava invisível para quem usa o dedo.
+   Tocar não acendia nada, e a única resposta que sobrava era a página já
+   ter mudado.
+
+   Por cima disso o iOS desenhava seu próprio retângulo cinza ARREDONDADO
+   em cima de cada toque: exatamente a forma que este sistema passou o dia
+   inteiro tirando da tela. O highlight sai; o retorno entra em :active,
+   colado em cada :hover que já existia. */
+*{-webkit-tap-highlight-color:transparent}
+
+/* touch-action:manipulation desliga o duplo-toque-para-ampliar em cima de
+   controle. Sem isso, dois toques rápidos no mesmo botão — que é o que
+   acontece quando a pessoa acha que o primeiro não pegou — ampliam a
+   página em vez de repetir a ação. */
+a,button,summary,label,select,input,textarea,[role="button"],[role="tab"]{
+  touch-action:manipulation;
 }
 /* a granulação da logo. No papel claro o ruído precisa ESCURECER (multiply),
    senão ele clareia o branco e simplesmente não aparece. */
@@ -199,7 +225,8 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
   transition:color var(--t),border-color var(--t);white-space:nowrap;
   letter-spacing:-.005em;
 }
-.abas a:hover{color:var(--ink2)}
+.abas a:hover,
+.abas a:active{color:var(--ink2)}
 .abas a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
 .abas svg{width:16px;height:16px;opacity:.85}
 @media(max-width:719px){ .abas{display:none} }
@@ -254,35 +281,57 @@ button,.btn{
   max-width:100%;text-align:center;
   transition:background var(--t),border-color var(--t),transform var(--t),opacity var(--t);
 }
-button:hover,.btn:hover{background:var(--card3);border-color:var(--linha3)}
+button:hover,
+button:active,
+.btn:hover,
+.btn:active{background:var(--card3);border-color:var(--linha3)}
 button:active,.btn:active{transform:scale(.985)}
 button:disabled{opacity:.38;cursor:not-allowed;transform:none}
 button svg,.btn svg{width:16px;height:16px;flex:none}
 
 /* a única ação primária da tela: branco sólido, contraste máximo */
 button.pri,.btn.pri{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:620}
-button.pri:hover,.btn.pri:hover{background:var(--preto-toque);border-color:var(--preto-toque)}
+button.pri:hover,
+button.pri:active,
+.btn.pri:hover,
+.btn.pri:active{background:var(--preto-toque);border-color:var(--preto-toque)}
 /* "Confirmo" é o sim do voluntário: preenchimento sólido e texto escuro, mesma
    gramática do .pri. Era verde escuro com texto branco, 3.38:1 — reprovava no
    AA justamente no botão mais importante da tela dele. Agora dá 9:1. */
 button.verde,.btn.verde{background:var(--ok);border-color:transparent;color:#fff;font-weight:640}
-button.verde:hover,.btn.verde:hover{opacity:.88}
+button.verde:hover,
+button.verde:active,
+.btn.verde:hover,
+.btn.verde:active{opacity:.88}
 /* WhatsApp é ação secundária: contorno, não preenchimento, para não competir
    com a ação principal da tela. */
 button.zap,.btn.zap{background:transparent;border-color:var(--ok-ln);color:var(--ok)}
-button.zap:hover,.btn.zap:hover{background:var(--ok-bg);border-color:var(--ok)}
+button.zap:hover,
+button.zap:active,
+.btn.zap:hover,
+.btn.zap:active{background:var(--ok-bg);border-color:var(--ok)}
 button.fantasma,.btn.fantasma{background:transparent;border-color:transparent;color:var(--ink2)}
-button.fantasma:hover,.btn.fantasma:hover{background:var(--card2);color:var(--ink)}
+button.fantasma:hover,
+button.fantasma:active,
+.btn.fantasma:hover,
+.btn.fantasma:active{background:var(--card2);color:var(--ink)}
 /* VERMELHO É ESTADO, NÃO ÊNFASE. A ação destrutiva vinha pintada de vermelho
    o tempo todo: em /ajustes isso rendia nove "APAGAR" vermelhos descendo a
    página, e a coisa mais colorida da tela virava justamente a que ninguém
    deveria tocar sem querer. Agora ela fala baixo até a pessoa chegar nela —
    aí, sim, avisa. */
 button.perigo,.btn.perigo{background:transparent;border-color:var(--linha2);color:var(--cinza)}
-button.perigo:hover,.btn.perigo:focus-visible,.btn.perigo:hover,button.perigo:focus-visible{
+button.perigo:hover,
+button.perigo:active,
+.btn.perigo:focus-visible,
+.btn.perigo:hover,
+.btn.perigo:active,
+button.perigo:focus-visible{
   background:var(--bad-bg);border-color:var(--bad-ln);color:var(--bad)}
 .lid-bt-txt.perigo{ color:var(--cinza) }
-.lid-bt-txt.perigo:hover,.lid-bt-txt.perigo:focus-visible{ color:var(--bad) }
+.lid-bt-txt.perigo:hover,
+.lid-bt-txt.perigo:active,
+.lid-bt-txt.perigo:focus-visible{ color:var(--bad) }
 button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:var(--t-apoio);min-height:var(--toque);border-radius:var(--r-pill)}
 button.mini svg,.btn.mini svg{width:14px;height:14px}
 
@@ -302,7 +351,12 @@ input,select,textarea{
   min-height:52px;transition:border-color var(--t),background var(--t);
 }
 input::placeholder{color:var(--mudo)}
-input:hover,select:hover,textarea:hover{border-color:var(--linha3)}
+input:hover,
+input:active,
+select:hover,
+select:active,
+textarea:hover,
+textarea:active{border-color:var(--linha3)}
 input:focus,select:focus,textarea:focus{border-color:var(--ink);background:transparent}
 /* tira o anel só no clique de mouse. Antes era `outline:none` no :focus e o
    anel de teclado morria junto: dava para tabular um formulário inteiro sem
@@ -339,7 +393,8 @@ select option{background:#fff;color:var(--ink)}
   border:1px solid var(--linha2);background:var(--card2);color:var(--ink2);
   transition:background var(--t),border-color var(--t),color var(--t);letter-spacing:-.005em;
 }
-.chip:hover{border-color:var(--linha3);color:var(--ink)}
+.chip:hover,
+.chip:active{border-color:var(--linha3);color:var(--ink)}
 .chip::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.75;flex:none}
 .chip.add{color:var(--mudo);border-style:dashed}
 .chip.add::before{display:none}
@@ -411,7 +466,10 @@ select option{background:#fff;color:var(--ink)}
 
 /* botão "claro" é o nome antigo da ação principal; mantém funcionando */
 .claro,.btn.claro{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:620}
-.claro:hover,.btn.claro:hover{background:var(--preto-toque);border-color:var(--preto-toque)}
+.claro:hover,
+.claro:active,
+.btn.claro:hover,
+.btn.claro:active{background:var(--preto-toque);border-color:var(--preto-toque)}
 
 @media(max-width:560px){
 
@@ -434,11 +492,21 @@ select option{background:#fff;color:var(--ink)}
 .hero .pri,.hero .btn.pri,.hero .claro,.hero .btn.claro{
   background:#fff;color:var(--preto);border-color:#fff;
 }
-.hero .pri:hover,.hero .btn.pri:hover,.hero .claro:hover,.hero .btn.claro:hover{
+.hero .pri:hover,
+.hero .pri:active,
+.hero .btn.pri:hover,
+.hero .btn.pri:active,
+.hero .claro:hover,
+.hero .claro:active,
+.hero .btn.claro:hover,
+.hero .btn.claro:active{
   background:#e6e6e9;border-color:#e6e6e9;
 }
 .hero .fantasma,.hero .btn.fantasma{color:rgba(244,244,246,.80);background:transparent}
-.hero .fantasma:hover,.hero .btn.fantasma:hover{background:rgba(255,255,255,.13);color:#fff}
+.hero .fantasma:hover,
+.hero .fantasma:active,
+.hero .btn.fantasma:hover,
+.hero .btn.fantasma:active{background:rgba(255,255,255,.13);color:#fff}
 .hero .pill,.eu-topo .pill{
   background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.22);color:rgba(244,244,246,.88);
 }
@@ -611,7 +679,8 @@ select option{background:#fff;color:var(--ink)}
   background:var(--card);border:1px solid var(--linha);min-height:56px;
   font-size:var(--t-ui);font-weight:530;letter-spacing:-.01em;
 }
-.pick-nome:hover{background:var(--card2);border-color:var(--linha3)}
+.pick-nome:hover,
+.pick-nome:active{background:var(--card2);border-color:var(--linha3)}
 .pick-nome svg{width:16px;height:16px;color:var(--mudo);margin-left:auto;flex:none}
 .campo-pin{
   display:flex;gap:var(--e2);justify-content:center;margin:var(--e4) 0;
@@ -690,7 +759,8 @@ select option{background:#fff;color:var(--ink)}
   padding:var(--e2) var(--e2);margin-left:calc(-1 * var(--e2));min-height:var(--toque);
   color:var(--mudo);font-size:var(--t-rot);text-transform:uppercase;letter-spacing:.09em;
 }
-.seletor-equipe:hover{background:transparent;color:var(--ink2)}
+.seletor-equipe:hover,
+.seletor-equipe:active{background:transparent;color:var(--ink2)}
 .seletor-nome{font-weight:600}
 .menu-fundo{position:fixed;inset:0;z-index:50;background:rgba(12,12,14,.32)}
 .menu-equipes{
@@ -702,7 +772,8 @@ select option{background:#fff;color:var(--ink)}
   text-align:left;padding:var(--e3) var(--e3);border-radius:var(--r-sm);background:transparent;
   border:0;min-height:44px;font-size:var(--t-apoio);
 }
-.menu-item:hover{background:var(--card2)}
+.menu-item:hover,
+.menu-item:active{background:var(--card2)}
 .menu-item[aria-current="true"]{background:var(--card3);font-weight:600}
 
 /* ------------------------------------------------------------- diversos --- */
@@ -771,7 +842,8 @@ select option{background:#fff;color:var(--ink)}
   background:var(--card);border:1px solid var(--linha);border-radius:var(--r);
   margin-bottom:var(--e2);overflow:hidden;transition:border-color var(--t);
 }
-.pessoa:hover{border-color:var(--linha2)}
+.pessoa:hover,
+.pessoa:active{border-color:var(--linha2)}
 .pessoa[open]{border-color:var(--linha2);background:var(--card2)}
 .pessoa > summary{
   display:flex;align-items:center;gap:var(--e3);padding:var(--e3) var(--e3);cursor:pointer;
@@ -826,7 +898,8 @@ select option{background:#fff;color:var(--ink)}
   border-bottom:2px solid transparent;
 }
 .conf-btns .seg:last-child{border-right:0}
-.conf-btns .seg:hover{background:var(--card2);color:var(--ink)}
+.conf-btns .seg:hover,
+.conf-btns .seg:active{background:var(--card2);color:var(--ink)}
 /* O ESCOLHIDO NÃO PODE SER O MAIS PESADO DA TELA. Antes a célula marcada era
    preto sólido com texto branco — e em /time isso rende 32 blocos pretos numa
    rolagem só, num sistema onde preto cheio é a UMA ação principal da tela.
@@ -835,7 +908,8 @@ select option{background:#fff;color:var(--ink)}
    e para de gritar de longe. */
 .conf-btns .seg.on{color:var(--ink);font-weight:680;border-bottom-color:var(--preto)}
 .conf-btns .seg.nao{color:var(--mudo)}
-.conf-btns .seg.nao:hover{color:var(--bad);background:var(--bad-bg)}
+.conf-btns .seg.nao:hover,
+.conf-btns .seg.nao:active{color:var(--bad);background:var(--bad-bg)}
 @media(max-width:620px){
   .conf-btns{width:100%}
   .conf-btns .seg{flex:1;padding:var(--e2) var(--e1);font-size:var(--t-rot)}
@@ -998,7 +1072,8 @@ details > summary::marker{content:""}
   padding:var(--e4) var(--e4);cursor:pointer;font:inherit;color:inherit;
   transition:border-color var(--t),background var(--t);min-height:56px;
 }
-.wiz-op:hover{border-color:var(--linha3)}
+.wiz-op:hover,
+.wiz-op:active{border-color:var(--linha3)}
 .wiz-op.on{border-color:var(--preto);background:var(--card)}
 .wiz-op:focus-visible{outline-offset:3px}
 .wiz-op-marca{
@@ -1019,7 +1094,8 @@ details > summary::marker{content:""}
   background:var(--card);border:1.5px solid var(--linha2);color:var(--ink2);
   transition:border-color var(--t),background var(--t),color var(--t);
 }
-.wiz-chip:hover{border-color:var(--linha3)}
+.wiz-chip:hover,
+.wiz-chip:active{border-color:var(--linha3)}
 .wiz-chip.on{background:var(--preto);border-color:var(--preto);color:#fff}
 .wiz-chip:focus-visible{outline-offset:3px}
 
@@ -1060,7 +1136,8 @@ details > summary::marker{content:""}
 .card.atencao ul{list-style:none;margin:var(--e2) 0 0;padding:0;display:grid;gap:var(--e2)}
 .card.atencao li{display:flex;align-items:center;gap:var(--e2);font-size:var(--t-ui);line-height:1.35}
 .card.atencao a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--linha2)}
-.card.atencao a:hover{border-bottom-color:var(--ink)}
+.card.atencao a:hover,
+.card.atencao a:active{border-bottom-color:var(--ink)}
 .card.atencao .ponto{width:8px;height:8px;border-radius:50%;flex:none;background:var(--mudo)}
 .card.atencao .ponto.bad{background:var(--bad)}
 .card.atencao .ponto.warn{background:var(--warn)}
@@ -1205,18 +1282,26 @@ html,body{overflow-x:clip}
   white-space:nowrap;
 }
 .acao svg{width:12px;height:12px;flex:none;transition:transform var(--t)}
-.acao:hover svg{transform:translateX(4px)}
+.acao:hover svg,
+.acao:active svg{transform:translateX(4px)}
 .acao:focus-visible{outline-offset:3px}
 .acao.cheia{background:var(--noite);border-color:var(--noite);color:#fff}
-.acao.cheia:hover{opacity:.84}
-.acao:not(.cheia):hover{background:var(--ink);color:var(--papel);border-color:var(--ink)}
+.acao.cheia:hover,
+.acao.cheia:active{opacity:.84}
+.acao:not(.cheia):hover,
+.acao:not(.cheia):active{background:var(--ink);color:var(--papel);border-color:var(--ink)}
 .casa-escuro .acao,.casa-heroi .acao,.casa-foto .acao{color:#fff;border-color:rgba(255,255,255,.58)}
 .casa-heroi .acao:not(.cheia),.casa-foto .acao:not(.cheia){background:rgba(7,7,8,.28);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
-.casa-heroi .acao:hover,.casa-foto .acao:hover{background:#fff;color:var(--noite);border-color:#fff}
+.casa-heroi .acao:hover,
+.casa-heroi .acao:active,
+.casa-foto .acao:hover,
+.casa-foto .acao:active{background:#fff;color:var(--noite);border-color:#fff}
 .casa-heroi .acao.cheia,.casa-foto .acao.cheia{background:#fff;color:var(--noite);border-color:#fff}
-.casa-escuro .acao:hover{background:#fff;color:var(--noite);border-color:#fff}
+.casa-escuro .acao:hover,
+.casa-escuro .acao:active{background:#fff;color:var(--noite);border-color:#fff}
 .casa-escuro .acao.cheia{background:#fff;color:var(--noite);border-color:#fff}
-.casa-escuro .acao.cheia:hover{background:rgba(255,255,255,.86)}
+.casa-escuro .acao.cheia:hover,
+.casa-escuro .acao.cheia:active{background:rgba(255,255,255,.86)}
 .acoes{display:flex;flex-wrap:wrap;gap:var(--e3);justify-content:center;margin-top:40px}
 
 /* ==========================================================================
@@ -1249,7 +1334,8 @@ html,body{overflow-x:clip}
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
   padding:var(--e1) 0;transition:opacity var(--t);
 }
-.casa-nav a:hover{opacity:1}
+.casa-nav a:hover,
+.casa-nav a:active{opacity:1}
 .casa-barra-fim{display:flex;align-items:center;gap:var(--e2);justify-content:flex-end;grid-column:3}
 @media(max-width:919px){ .casa-barra{grid-template-columns:auto 1fr} .casa-barra-fim{grid-column:2} }
 .bt-barra{
@@ -1260,12 +1346,17 @@ html,body{overflow-x:clip}
   transition:background var(--t),color var(--t),opacity var(--t);
 }
 .bt-barra svg{width:11px;height:11px}
-.bt-barra:hover{background:currentColor}
-.bt-barra:hover *{color:var(--noite)}
-.casa-barra.opaco .bt-barra:hover *{color:#fff}
+.bt-barra:hover,
+.bt-barra:active{background:currentColor}
+.bt-barra:hover *,
+.bt-barra:active *{color:var(--noite)}
+.casa-barra.opaco .bt-barra:hover *,
+.casa-barra.opaco .bt-barra:active *{color:#fff}
 .bt-barra.discreto{border-color:transparent;opacity:.7;padding-left:var(--e1);padding-right:var(--e1)}
-.bt-barra.discreto:hover{background:none;opacity:1}
-.bt-barra.discreto:hover *{color:inherit}
+.bt-barra.discreto:hover,
+.bt-barra.discreto:active{background:none;opacity:1}
+.bt-barra.discreto:hover *,
+.bt-barra.discreto:active *{color:inherit}
 @media(max-width:560px){ .bt-barra.discreto{display:none} }
 
 /* ==========================================================================
@@ -1401,8 +1492,10 @@ html,body{overflow-x:clip}
   background:linear-gradient(180deg,rgba(7,7,8,.42) 0%,rgba(7,7,8,.60) 50%,rgba(7,7,8,.88) 100%);
   transition:background var(--t);
 }
-.casa-area:hover img{transform:scale(1.05)}
-.casa-area:hover::after{background:linear-gradient(180deg,rgba(7,7,8,.34) 0%,rgba(7,7,8,.52) 50%,rgba(7,7,8,.84) 100%)}
+.casa-area:hover img,
+.casa-area:active img{transform:scale(1.05)}
+.casa-area:hover::after,
+.casa-area:active::after{background:linear-gradient(180deg,rgba(7,7,8,.34) 0%,rgba(7,7,8,.52) 50%,rgba(7,7,8,.84) 100%)}
 .casa-area:focus-visible{outline-color:#fff;outline-offset:-3px}
 .casa-area-nome{
   font-family:var(--fonte-display);font-weight:300;color:#fff;
@@ -1470,7 +1563,8 @@ html,body{overflow-x:clip}
 .casa-dados dd{margin:0;font-size:var(--t-ui);line-height:1.65;color:var(--cinza)}
 .casa-escuro .casa-dados dd{color:var(--cinza-cl)}
 .casa-dados a{color:inherit;text-decoration:none;border-bottom:1px solid var(--linha2)}
-.casa-dados a:hover{border-bottom-color:currentColor}
+.casa-dados a:hover,
+.casa-dados a:active{border-bottom-color:currentColor}
 .casa-escuro .casa-dados a{border-bottom-color:rgba(255,255,255,.3)}
 
 /* ==========================================================================
@@ -1487,7 +1581,8 @@ html,body{overflow-x:clip}
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
 }
 .casa-pe a{color:rgba(255,255,255,.7);text-decoration:none}
-.casa-pe a:hover{color:#fff}
+.casa-pe a:hover,
+.casa-pe a:active{color:#fff}
 .casa-pe .marca{color:#fff}
 
 /* revelação ao rolar: curta, e travada por .js-rev — se o efeito não rodar,
@@ -1654,7 +1749,9 @@ html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important}
   background:currentColor;transform:scaleX(0);transform-origin:50%;
   transition:transform var(--t-lento);
 }
-.casa-nav a:hover::after,.casa-nav a[aria-current="true"]::after{transform:scaleX(1)}
+.casa-nav a:hover::after,
+.casa-nav a:active::after,
+.casa-nav a[aria-current="true"]::after{transform:scaleX(1)}
 .casa-nav a[aria-current="true"]{opacity:1}
 
 /* --- a ação de servir não some no celular ------------------------------- */
@@ -1904,7 +2001,8 @@ body:has(.porta) { background:var(--papel) }
   font-family:var(--fonte-display);font-weight:500;
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
 }
-.tela-volta:hover{color:var(--ink)}
+.tela-volta:hover,
+.tela-volta:active{color:var(--ink)}
 .tela-volta svg{width:11px;height:11px;transform:rotate(180deg)}
 
 /* ==========================================================================
@@ -1946,7 +2044,8 @@ body:has(.porta) { background:var(--papel) }
   transition:background var(--t);font:inherit;
 }
 .escolha:last-child{border-bottom:1px solid var(--linha)}
-.escolha:hover{background:var(--papel2)}
+.escolha:hover,
+.escolha:active{background:var(--papel2)}
 .escolha:focus-visible{outline-offset:-3px}
 
 
@@ -2051,7 +2150,8 @@ body:has(.porta) { background:var(--papel) }
   padding:var(--e5) 0;border-top:1px solid var(--linha);
   text-decoration:none;color:inherit;transition:padding var(--t),color var(--t);
 }
-.atalho:hover{padding-left:var(--e2)}
+.atalho:hover,
+.atalho:active{padding-left:var(--e2)}
 .atalho[aria-disabled="true"]{opacity:.42;pointer-events:none}
 .atalho b{
   font-family:var(--fonte-display);font-weight:500;
@@ -2242,11 +2342,14 @@ body:has(.porta) { background:var(--papel) }
   color:var(--ink4);
 }
 .migalha a{color:inherit;text-decoration:none;padding:var(--e1) 0;min-height:32px;display:inline-flex;align-items:center}
-.migalha a:hover{color:var(--ink)}
+.migalha a:hover,
+.migalha a:active{color:var(--ink)}
 .migalha b{font-weight:500;color:var(--ink)}
 .migalha span{opacity:.5}
 .migalha.claro{color:rgba(255,255,255,.55)}
-.migalha.claro a:hover,.migalha.claro b{color:#fff}
+.migalha.claro a:hover,
+.migalha.claro a:active,
+.migalha.claro b{color:#fff}
 
 /* --- cabeça do cadastro ------------------------------------------------- */
 .wiz-cabeca{padding:var(--e5) 0 var(--e1);text-align:left}
@@ -2333,7 +2436,10 @@ button:disabled,.acao[aria-disabled="true"],.btn:disabled{
   opacity:1;cursor:not-allowed;
   background:var(--card2);color:var(--ink4);border-color:var(--linha2);
 }
-button:disabled:hover,.btn:disabled:hover{opacity:1;transform:none}
+button:disabled:hover,
+button:disabled:active,
+.btn:disabled:hover,
+.btn:disabled:active{opacity:1;transform:none}
 
 /* --- a intro da área era um parágrafo centralizado de quatro linhas ----- */
 .area-intro{max-width:44ch;margin-left:auto;margin-right:auto}
@@ -2430,7 +2536,8 @@ button:disabled:hover,.btn:disabled:hover{opacity:1;transform:none}
   background:var(--noite); color:#fff; padding:var(--e4) var(--e5); cursor:pointer;
   transition:opacity var(--t);
 }
-.lid-bt:hover{ opacity:.84 }
+.lid-bt:hover,
+.lid-bt:active{ opacity:.84 }
 .lid-faixa.fogo .lid-bt{ background:#fff; color:var(--noite); border-color:#fff }
 .lid-bt-txt{
   font-family:var(--fonte-display); font-weight:600;
@@ -2451,7 +2558,8 @@ button:disabled:hover,.btn:disabled:hover{opacity:1;transform:none}
   content:''; position:absolute; left:0; right:0; bottom:13px;
   border-bottom:1px solid currentColor;
 }
-.lid-bt-txt:hover{ opacity:1 }
+.lid-bt-txt:hover,
+.lid-bt-txt:active{ opacity:1 }
 .lid-bt-txt[disabled]{ opacity:.35; cursor:default }
 a.lid-bt-txt{ text-decoration:none; display:inline-block }
 
@@ -2499,7 +2607,8 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   font-size:var(--t-corpo); line-height:1.35; color:var(--ink); width:100%;
 }
 .ajt-nome.estatico{ display:flex; align-items:center; min-height:var(--toque); word-break:break-word }
-.ajt-nome:hover{ border:0 }
+.ajt-nome:hover,
+.ajt-nome:active{ border:0 }
 .ajt-nome:focus{ border:0; outline:2px solid currentColor; outline-offset:3px }
 
 .ajt-sub{
@@ -2578,7 +2687,8 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   text-decoration:none; color:inherit;
 }
 .lid-area:last-child{ border-bottom:0 }
-.lid-area:hover .lid-area-nome{ text-decoration:underline; text-underline-offset:3px }
+.lid-area:hover .lid-area-nome,
+.lid-area:active .lid-area-nome{ text-decoration:underline; text-underline-offset:3px }
 .lid-area-nome{ font-size:var(--t-corpo); color:var(--ink) }
 .lid-area-sub{
   margin-top:var(--e1); font-family:var(--fonte-display); font-weight:600;
@@ -2608,7 +2718,8 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   min-width:26px; font-variant-numeric:tabular-nums; color:var(--ink);
 }
 .lid-alerta a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--linha); }
-.lid-alerta a:hover{ border-bottom-color:var(--noite) }
+.lid-alerta a:hover,
+.lid-alerta a:active{ border-bottom-color:var(--noite) }
 .lid-alerta.ruim .lid-alerta-n{ color:var(--bad) }
 
 /* --------------------------------------------------------------- o resto */
@@ -2664,7 +2775,8 @@ body:has(.lid) .seletor-equipe{
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   background:none; border:0; padding:0; color:var(--cinza); gap:var(--e2);
 }
-body:has(.lid) .seletor-equipe:hover{ color:var(--noite) }
+body:has(.lid) .seletor-equipe:hover,
+body:has(.lid) .seletor-equipe:active{ color:var(--noite) }
 body:has(.lid) .seletor-equipe svg{ width:11px; height:11px; opacity:.6 }
 
 /* sair na mesma voz das abas. O seletor é largo de propósito: a barra já
@@ -2738,7 +2850,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); text-decoration:none;
 }
-.vol-quem:hover{ color:var(--noite) }
+.vol-quem:hover,
+.vol-quem:active{ color:var(--noite) }
 
 /* -------------------------------------------------------------- a chamada
    Quando há o que confirmar, ela é fundo tinta e ocupa a primeira dobra. Sem
@@ -2777,7 +2890,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   transition:opacity var(--t);
 }
 .vol-bt.nao{ background:transparent; color:#fff; border-color:rgba(255,255,255,.4) }
-.vol-bt:hover{ opacity:.86 }
+.vol-bt:hover,
+.vol-bt:active{ opacity:.86 }
 .vol-bt[disabled]{ opacity:.45; cursor:default }
 /* fora da chamada escura, os mesmos botões em tinta sobre papel */
 .vol-secao .vol-bt{ background:var(--noite); color:#fff; border-color:var(--noite) }
@@ -2848,7 +2962,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    pode num domingo é exatamente o contrário de um problema: é o aviso que
    permite trocar a tempo. Quem escolheu já está dito pela palavra preenchida;
    pintar a resposta honesta de vermelho repreende quem respondeu direito. */
-.vol-dia-bt:hover:not(.on){ border-color:var(--noite); color:var(--noite) }
+.vol-dia-bt:hover:not(.on),
+.vol-dia-bt:active:not(.on){ border-color:var(--noite); color:var(--noite) }
 
 /* ------------------------------------------------------------- a equipe */
 .vol-eq{ padding:var(--e5) 0 0 }
@@ -2901,7 +3016,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 }
 .lid-cand > summary::-webkit-details-marker{ display:none }
 .lid-cand > summary::marker{ content:'' }
-.lid-cand > summary:hover .lid-cand-nome{ text-decoration:underline; text-underline-offset:3px }
+.lid-cand > summary:hover .lid-cand-nome,
+.lid-cand > summary:active .lid-cand-nome{ text-decoration:underline; text-underline-offset:3px }
 .lid-cand > summary:focus-visible{ outline-offset:3px }
 .lid-cand .lid-marca{ align-self:stretch; background:transparent }
 .lid-cand.ruim .lid-marca{ background:var(--bad) }
@@ -3010,8 +3126,10 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   display:grid; place-items:center; font-size:calc(var(--toque) * .58); line-height:1;
   background:none; border:0; color:inherit; opacity:.5; cursor:pointer;
 }
-.esc-seta:hover{ background:none }
-.esc-seta:hover{ opacity:1 }
+.esc-seta:hover,
+.esc-seta:active{ background:none }
+.esc-seta:hover,
+.esc-seta:active{ opacity:1 }
 .esc-seta:focus-visible{ outline-offset:-3px }
 
 /* ------------------------------------------------------------- um culto */
@@ -3022,7 +3140,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 }
 .esc-dia > summary::-webkit-details-marker{ display:none }
 .esc-dia > summary::marker{ content:'' }
-.esc-dia > summary:hover .esc-dia-nome{ text-decoration:underline; text-underline-offset:3px }
+.esc-dia > summary:hover .esc-dia-nome,
+.esc-dia > summary:active .esc-dia-nome{ text-decoration:underline; text-underline-offset:3px }
 .esc-dia > summary:focus-visible{ outline-offset:3px }
 .esc-dia .lid-marca{ align-self:stretch; background:transparent }
 .esc-dia.ok   > summary .lid-marca{ background:var(--ok) }
@@ -3070,7 +3189,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   content:''; position:absolute; left:0; right:0; bottom:12px;
   border-bottom:1px solid var(--linha);
 }
-.esc-prob-ir:hover::after{ border-bottom-color:var(--noite) }
+.esc-prob-ir:hover::after,
+.esc-prob-ir:active::after{ border-bottom-color:var(--noite) }
 
 .esc-nota{ margin:var(--e4) 0 0; font-size:var(--t-ui); line-height:1.65; color:var(--cinza); max-width:56ch }
 .esc-mini{
@@ -3155,7 +3275,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 /* O NOME. Largura inteira, 17px, sem nada disputando espaço com ele. */
 .esc-quem{ margin-top:var(--e1) }
 .esc-quem .esc-sel-txt{ font-size:var(--t-corpo); line-height:1.35; color:var(--ink) }
-.esc-quem:hover .esc-sel-txt{ text-decoration:underline; text-underline-offset:3px }
+.esc-quem:hover .esc-sel-txt,
+.esc-quem:active .esc-sel-txt{ text-decoration:underline; text-underline-offset:3px }
 .esc-quem.vazio .esc-sel-txt{ color:var(--bad) }
 
 .esc-tags{ display:flex; gap:var(--e4); align-items:center; flex-wrap:wrap; margin-top:0 }
@@ -3170,8 +3291,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   content:''; position:absolute; left:0; right:0; bottom:13px;
   border-bottom:1px solid var(--linha);
 }
-.esc-tag:hover{ color:var(--ink) }
-.esc-tag:hover::after, .esc-tag.on::after{ border-bottom-color:var(--noite) }
+.esc-tag:hover,
+.esc-tag:active{ color:var(--ink) }
+.esc-tag:hover::after,
+.esc-tag:active::after,
+.esc-tag.on::after{ border-bottom-color:var(--noite) }
 .esc-tag.on{ color:var(--ink) }
 .esc-tag[disabled]{ opacity:.35; cursor:default }
 .esc-tag-nota{ font-size:var(--t-rot); color:var(--cinza) }
@@ -3184,7 +3308,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-posto.ok   .esc-sit .esc-sel-txt{ color:var(--ok) }
 .esc-posto.pend .esc-sit .esc-sel-txt{ color:var(--warn) }
 .esc-posto.ruim .esc-sit .esc-sel-txt{ color:var(--bad) }
-.esc-sit:hover .esc-sel-txt{ color:var(--ink) }
+.esc-sit:hover .esc-sel-txt,
+.esc-sit:active .esc-sel-txt{ color:var(--ink) }
 @media(max-width:640px){
   .esc-posto{ grid-template-columns:minmax(0,1fr); gap:0 }
   .esc-sit{ grid-column:1; justify-self:start; margin-top:var(--e3); max-width:none }
@@ -3235,6 +3360,166 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   content:''; position:absolute; left:0; right:0; bottom:13px;
   border-bottom:1px solid var(--linha);
 }
-.vol-acao:hover{ color:var(--ink) }
-.vol-acao:hover::after{ border-bottom-color:var(--noite) }
+.vol-acao:hover,
+.vol-acao:active{ color:var(--ink) }
+.vol-acao:hover::after,
+.vol-acao:active::after{ border-bottom-color:var(--noite) }
 .vol-acao[disabled]{ opacity:.4; cursor:default }
+
+/* =========================================================================
+   O CELULAR
+
+   Até aqui o produto era responsivo: cabia. Cabia não é o mesmo que ser bom
+   de usar com uma mão, num ônibus, com 4G ruim. O que segue é o que a
+   medição em viewport de iPhone real (390x844, dpr 3, toque ligado) mostrou
+   que faltava — e nada disso aparece no navegador do computador.
+   ========================================================================= */
+
+/* --- 1. O ZOOM QUE NINGUÉM PEDIU ---------------------------------------
+   O Safari do iPhone amplia a PÁGINA INTEIRA quando o dedo toca num campo
+   com fonte abaixo de 16px, e não desfaz o zoom quando o campo perde o
+   foco: a pessoa fica com a tela torta pelo resto da visita, e a culpa
+   parece ser dela. Um único <select> de 14px em /ajustes bastava.
+
+   Vale também para o <select> invisível que cobre a linha da escala: ele
+   é `font:inherit`, e ali o pai tem 11px. Transparente, mas amplia igual. */
+@media(max-width:719px){
+  input:not([type=checkbox]):not([type=radio]),
+  select, textarea, .esc-sel > select{
+    font-size:max(16px, var(--t-corpo));
+  }
+}
+
+/* --- 2. FRASE NÃO SE ESCREVE NO TAMANHO DE RÓTULO -----------------------
+   24 frases inteiras rodando a 14px, e algumas a 12px com o espaçamento
+   largo de rótulo por cima. A escala não estava errada: o uso estava. Só
+   que no celular a distância do olho é a mesma e a tela é um terço — os
+   dois degraus de baixo sobem um passo, e com eles sobem os alvos de
+   toque de .esc-tag e .vol-acao, que estavam parados em 43px. O mesmo
+   conserto resolve as duas coisas. */
+@media(max-width:719px){
+  :root{ --t-apoio:15px; --t-min:12px }
+}
+
+/* --- 3. HOVER QUE GRUDA -------------------------------------------------
+   Onde o :hover MOVE alguma coisa, o iOS deixa o estado preso depois do
+   toque: a seta fica adiantada, a foto fica ampliada, o traço fica aceso.
+   Em tela sem mouse esses três não têm por que existir — o :active, que
+   agora acompanha cada um, já dá o retorno na hora certa. */
+@media(hover:none){
+  .acao:hover svg{ transform:none }
+  .casa-area:hover img{ transform:none }
+  .casa-nav a:hover:not([aria-current="true"])::after{ transform:scaleX(0) }
+}
+
+/* --- 4. DUAS RESPOSTAS OPOSTAS A 4px UMA DA OUTRA -----------------------
+   "consegui, posso sim" e "não vou mais poder" estavam separadas por
+   var(--e1) — quatro pixels. A ponta do dedo cobre as duas. Erro de toque
+   aqui não é um clique errado: é a escala do domingo mudando sozinha. */
+.vol-dia-btns{ gap:var(--e3) }
+
+/* --- 5. RODAPÉ DE PÁGINA COM ALVO DE LINHA DE TEXTO ---------------------
+   O @guiachurch da home era um alvo de 20px de altura. */
+@media(max-width:719px){
+  .casa-dados a{ display:inline-flex; align-items:center; min-height:var(--toque) }
+}
+
+/* --- 6. ROLAGEM ---------------------------------------------------------
+   overscroll-behavior:contain no menu: rolar dentro dele parava de arrastar
+   a página que está atrás. scroll-padding-top porque o topo é fixo — sem
+   isso qualquer âncora entrega o alvo escondido embaixo da barra. */
+.menu{ overscroll-behavior:contain }
+html{ scroll-padding-top:88px }
+
+/* --- 7. TRÊS CAMADAS DE TOQUE EMPILHADAS EM 1px -------------------------
+   Na linha do posto da escala moram três alvos, um debaixo do outro: quem
+   vai, os marcadores e a situação. "Quem vai" e "situação" são <select>
+   nativos transparentes, esticados 11px para cada lado para o alvo chegar
+   aos 44px. No celular, com a coluna única, o empilhamento medido era:
+
+       quem vai     y 1212..1264
+       marcadores   y 1246..1290   <- começa 18px DENTRO do alvo de cima
+       situação     y 1291..1343   <- 1px depois dos marcadores
+
+   Ou seja: os 18px de cima de "travar" e "1ª vez" abriam a lista de nomes.
+   Isso não é toque impreciso, é o toque certo abrindo a coisa errada — e
+   sem nenhum sinal de que aconteceu. Foi o pior defeito que a medição
+   achou, e era invisível no computador porque o ponteiro do mouse tem um
+   pixel de largura e o dedo tem quarenta.
+
+   O alvo de cima para de crescer para baixo por cima do vizinho e passa a
+   crescer dentro do próprio fluxo.
+
+   Detalhe que custou uma medição a mais: pôr `bottom:0` no <select> não
+   bastou. Ele é um campo, e a regra base de campo dá `min-height:52px` —
+   o alvo continuava descendo 7px por fora da caixa, agora por baixo, sem
+   nada no seletor dele dizendo isso. Campo invisível não tem altura
+   mínima para respeitar: quem manda no tamanho é a caixa que ele cobre. */
+@media(max-width:640px){
+  .esc-sel > select{ min-height:0 }
+  /* tirar o piso de 52px derrubou a situação para 41px, porque o texto dela
+     é menor que o do nome. O piso volta, agora no número certo. */
+  .esc-sit > select{ min-height:var(--toque) }
+  .esc-quem > select{ bottom:0 }
+  .esc-quem{ padding-bottom:11px }
+  .esc-tags{ margin-top:var(--e2) }
+  .esc-sit{ margin-top:var(--e5) }
+}
+
+/* --- 8. RÓTULO DE CAIXA ALTA A 12px -------------------------------------
+   Sobraram sete frases inteiras escritas em tamanho de rótulo: maiúsculas,
+   com o espaçamento largo da marca, a 12px. Caixa alta com tracking largo
+   é ótima em três palavras e cansativa em vinte — e no celular a linha
+   quebra em três, o que multiplica o cansaço.
+   Um passo de tamanho e um passo a menos de tracking. */
+@media(max-width:719px){
+  :root{ --t-rot:13px }
+  label,.rot,.chapeu{ letter-spacing:.07em }
+}
+
+/* --- 9. OS ÚLTIMOS TRÊS VIZINHOS A MENOS DE 8px -------------------------
+   Mesma família de defeito do item 7, em outros três lugares. O <select>
+   transparente de "quando avisar" em /ajustes descia 11px para dentro dos
+   botões "ocultar" e "apagar" da mesma linha — e apagar é irreversível.
+
+   No menu de tela cheia da home, cinco destinos de navegação separados por
+   quatro pixels: alvo grande não protege de nada quando o vão entre eles é
+   menor que a imprecisão do dedo.
+
+   Na escala, o cabeçalho do dia a 4px do primeiro botão de dentro dele:
+   tocar em "copiar" perto da borda fechava o dia. */
+@media(max-width:640px){
+  .ajt-quando > select{ bottom:0 }
+  .ajt-quando{ padding-bottom:11px }
+}
+.menu ul{ gap:var(--e3) }
+.esc-dia > summary + *{ margin-top:var(--e2) }
+/* rodapé da home: no celular os links quebram um por linha e a folga entre
+   as linhas era menor que a folga entre as palavras da mesma linha */
+.casa-pe-in{ gap:var(--e5) var(--e6) }
+
+/* --- 10. A FILA DE CONFERÊNCIA, UMA ÁREA POR VEZ ------------------------
+   Ver o comentário no /time. O cabeçalho de cada área vira o alvo que abre
+   e fecha: 44px de altura, o nome da área à esquerda, quantas pessoas
+   esperam à direita. Sem o número no cabeçalho, fechar os blocos trocaria
+   uma parede por uma caça ao tesouro. */
+.area-conf{ margin-top:var(--e4) }
+.area-conf > summary{
+  display:flex; align-items:center; gap:var(--e3); cursor:pointer; list-style:none;
+  min-height:var(--toque); padding:var(--e2) 0; border-top:1px solid var(--linha);
+}
+.area-conf > summary::-webkit-details-marker{ display:none }
+.area-conf > summary::marker{ content:'' }
+.area-conf > summary:focus-visible{ outline-offset:3px }
+.area-conf .overline{ margin-bottom:0; flex:1; min-width:0 }
+.area-conf-n{
+  flex:none; font-family:var(--fonte-display); font-weight:600;
+  font-size:var(--t-rot); letter-spacing:var(--tr); color:var(--cinza);
+}
+.area-conf .giro{
+  flex:none; width:15px; height:15px; color:var(--mudo);
+  transition:transform var(--t);
+}
+.area-conf[open] .giro{ transform:rotate(90deg) }
+/* a primeira linha de dentro não repete o fio que o cabeçalho já desenhou */
+.area-conf > .conf-linha:first-of-type{ border-top:0 }

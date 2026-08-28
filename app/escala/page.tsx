@@ -424,7 +424,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           Ele vai na mensagem do grupo E na tela de quem está escalado. */}
       <label className="esc-recado">
         <span className="esc-mini">Recado deste dia</span>
-        <input defaultValue={dia?.obs || ''} disabled={ocupado}
+        <input enterKeyHint="done" defaultValue={dia?.obs || ''} disabled={ocupado}
           placeholder="ex: chegar 18h, tem batismo antes do culto"
           onBlur={e => { if (e.target.value !== (dia?.obs || '')) void salvarObs(d, e.target.value); }} />
         <span className="esc-recado-nota">

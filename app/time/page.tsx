@@ -169,9 +169,29 @@ function Time() {
             </details>
           )}
 
-          {fila.map(bl => (
-            <div className="area-conf" key={bl.funcao}>
-              <div className="overline">{bl.funcao}</div>
+          {/* UMA ÁREA ABERTA POR VEZ.
+              Medido no celular: esta fila sozinha tinha 4.882px — 5,8 telas,
+              55% de uma página de 10,5 telas, com 32 linhas iguais em nove
+              blocos, todos abertos ao mesmo tempo. Rolar cinco telas de itens
+              iguais não é ler, é procurar o fim.
+
+              O detalhe que decidiu: a lista de PESSOAS, logo abaixo, já vem
+              fechada em <details>. Ou seja, a tela colapsava o que se navega
+              e deixava aberto o que se executa — exatamente ao contrário. O
+              texto acima ainda por cima diz "vá área por área, é rápido", que
+              é o que um bloco por vez permite e nove blocos abertos impedem.
+
+              Não muda o que o líder decide nem onde: mesma fila, mesmas
+              opções, mesmo toque. Muda quanto dela pesa na mão de uma vez.
+              A contagem vai no cabeçalho para ninguém precisar abrir para
+              saber se tem alguém ali dentro. */}
+          {fila.map((bl, i) => (
+            <details className="area-conf" key={bl.funcao} open={i === 0}>
+              <summary>
+                <span className="overline">{bl.funcao}</span>
+                <span className="area-conf-n">{bl.pendentes.length}</span>
+                <IcSeta className="giro" />
+              </summary>
               {bl.pendentes.map(p => (
                 <div className="conf-linha" key={p.id}>
                   <div className="cresce">
@@ -197,7 +217,7 @@ function Time() {
                   </div>
                 </div>
               ))}
-            </div>
+            </details>
           ))}
         </section>
       )}
@@ -279,7 +299,8 @@ function Time() {
             <div className="linha" style={{ marginTop: 14 }}>
               <div style={{ width: 190 }}>
                 <label>WhatsApp</label>
-                <input key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888" inputMode="tel"
+                <input key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
+                  type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
                   onBlur={e => { if (e.target.value.trim() !== (v.tel || '')) void mudar(v.id, { telefone: e.target.value.trim() || null }); }} />
               </div>
               <div style={{ width: 200 }}>
@@ -357,9 +378,11 @@ function Time() {
         <h3>Adicionar pessoa</h3>
         <div className="grade">
           <div><label>Nome</label>
-            <input value={nome} onChange={e => setNome(e.target.value)} placeholder="como aparece no grupo do WhatsApp" /></div>
+            <input value={nome} onChange={e => setNome(e.target.value)} placeholder="como aparece no grupo do WhatsApp"
+              autoCapitalize="words" autoComplete="name" enterKeyHint="next" /></div>
           <div><label>WhatsApp, sem ele a pessoa não entra pelo link do grupo</label>
-            <input value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888" inputMode="tel" /></div>
+            <input value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
+              type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done" /></div>
         </div>
         <div style={{ marginTop: 14 }}>
           <label>O que essa pessoa sabe fazer</label>

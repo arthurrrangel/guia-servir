@@ -669,7 +669,7 @@ function TrocarPin({ token }: { token: string }) {
       ) : (
         <div className="escalacao">
           <label>Novo PIN de 4 números</label>
-          <input value={pin} inputMode="numeric" className="campo-pin" placeholder="••••"
+          <input enterKeyHint="done" value={pin} inputMode="numeric" className="campo-pin" placeholder="••••"
             disabled={salvando}
             onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setErro(''); }} />
           <p className="dim pequeno" style={{ margin: '8px 0 0' }}>
