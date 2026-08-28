@@ -1,5 +1,6 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
+import { Escolha } from '@/components/Ui';
 import { useEffect, useRef, useState } from 'react';
 import {
   addLider, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
@@ -71,15 +72,25 @@ function Ajustes() {
     + `_Não achou seu nome na lista? Me chama no privado que eu te cadastro._`
     : '';
 
+  /* AJUSTES FALAVA OUTRA LÍNGUA. Sete cartões cinza empilhados, h1 em Inter
+     pesada, fundo cinza — enquanto /painel e /escala já eram faixa preta,
+     Raleway leve e seção separada por fio. Era a mesma marca em dois produtos.
+     Aqui a tela passa para a língua do resto: nada mudou de função. */
   return (
-    <>
-      <h1>Ajustes</h1>
-      <p className="dim pequeno" style={{ marginTop: 4, marginBottom: 16 }}>
-        Você está em <strong>{equipe?.nome}</strong>. As configurações abaixo valem só para este ministério.
-      </p>
+    <div className="lid">
+      <div className="lid-faixa">
+        <div className="lid-faixa-in"><div className="lid-faixa-txt">
+          <span className="rot">Ajustes</span>
+          <h1>{equipe?.nome}</h1>
+          <p className="lid-faixa-sub">Tudo nesta página vale só para este ministério. Os outros seguem com os ajustes deles.</p>
+        </div></div>
+      </div>
 
-      <div className="card" id="grupo">
-        <h3>Grupo deste ministério no WhatsApp</h3>
+      <section className="lid-secao" id="grupo">
+        <div className="lid-secao-cab">
+          <span className="rot">O grupo no WhatsApp</span>
+          <span className="lid-secao-nota">Cole uma vez e fixe</span>
+        </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           <strong>O que fazer:</strong> copie a mensagem abaixo, cole no grupo do ministério e
           <strong> fixe</strong> ela lá. A partir daí cada pessoa entra sozinha pelo link, acha o próprio
@@ -102,10 +113,13 @@ function Ajustes() {
           <button className="pri" onClick={() => copiar(kit, aviso, 'Copiado. Cole e fixe no grupo da equipe.')}>Copiar mensagem do grupo</button>
           <a className="btn" href={linkGrupo} target="_blank" rel="noopener">abrir a página da equipe</a>
         </div>
-      </div>
+      </section>
 
-      <div className="card">
-        <h3>Regras do rodízio</h3>
+      <section className="lid-secao">
+        <div className="lid-secao-cab">
+          <span className="rot">Regras do rodízio</span>
+          <span className="lid-secao-nota">Valem para o sorteio automático</span>
+        </div>
         <div className="grade">
           <div>
             <label>Máximo de escalas por pessoa por mês</label>
@@ -130,84 +144,91 @@ function Ajustes() {
             </select>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="card">
-        <h3>Mensagem do grupo</h3>
+      <section className="lid-secao">
+        <div className="lid-secao-cab">
+          <span className="rot">Texto do aviso mensal</span>
+        </div>
         <label>Como você começa o aviso</label>
         <input key={S.config.saudacao} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
         <div style={{ height: 14 }} />
         <label>Como você termina ({'{PRAZO}'} vira o prazo acima)</label>
         <textarea key={S.config.rodape} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
-      </div>
+      </section>
 
-      <div className="card">
-        <h3>Funções</h3>
+      <section className="lid-secao">
+        <div className="lid-secao-cab">
+          <span className="rot">Funções</span>
+        </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           <strong>Durante o culto</strong> impede a mesma pessoa de pegar duas ao mesmo tempo.
           <strong> Depois do culto</strong> (como edição) pode acumular.
         </p>
-        <table>
-          <tbody>
-            {S.funcoes.map(f => (
-              <tr key={f.id}>
-                <td style={{ width: '40%' }}>
-                  <input key={f.nome} defaultValue={f.nome} aria-label="nome da função"
-                    onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
-                </td>
-                <td>
-                  <select defaultValue={f.simultanea ? '1' : '0'} aria-label="quando acontece"
-                    onChange={e => fn(f.id!, { simultanea: e.target.value === '1' })}>
-                    <option value="1">durante o culto</option>
-                    <option value="0">depois do culto</option>
-                  </select>
-                </td>
-                <td style={{ width: 92 }}>
-                  <button className="mini" onClick={() => fn(f.id!, { ativa: !f.ativa })}>{f.ativa ? 'ativa' : 'oculta'}</button>
-                </td>
-                <td style={{ width: 44 }}>
-                  <button className="mini perigo" aria-label={`apagar ${f.nome}`} onClick={() => delFn(f.id!, f.nome)}>×</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* ERA UMA TABELA DE QUATRO COLUNAS, com um controle em cada célula:
+            input, select, botão e botão. Num celular de 390px isso rendia 36
+            caixas com borda numa tela só, o nome cortado em "ILUMINAÇÃ(" e o
+            select inteiro reduzido a um "(". Tabela de quatro controles não
+            cabe em 390px por mais bem estilizada que esteja.
+            Vira a mesma linha do resto do sistema: nome em cima, o que ele é
+            embaixo, ações no fim, separados por fio. */}
+        <div className="ajt-lista">
+          {S.funcoes.map(f => (
+            <div className={`ajt-item ${f.ativa ? '' : 'off'}`} key={f.id}>
+              <input className="ajt-nome" key={f.nome} defaultValue={f.nome} aria-label="nome da função"
+                onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
+              <Escolha valor={f.simultanea ? '1' : '0'} rotulo="quando acontece" classe="ajt-quando"
+                mostra={f.simultanea ? 'durante o culto' : 'depois do culto'}
+                aoMudar={v => fn(f.id!, { simultanea: v === '1' })}>
+                <option value="1">durante o culto</option>
+                <option value="0">depois do culto</option>
+              </Escolha>
+              <div className="ajt-acoes">
+                <button className="lid-bt-txt" onClick={() => fn(f.id!, { ativa: !f.ativa })}>
+                  {f.ativa ? 'ocultar' : 'reativar'}
+                </button>
+                <button className="lid-bt-txt perigo" aria-label={`apagar ${f.nome}`}
+                  onClick={() => delFn(f.id!, f.nome)}>apagar</button>
+              </div>
+            </div>
+          ))}
+        </div>
         <div className="linha" style={{ marginTop: 14 }}>
           <input value={nova} onChange={e => setNova(e.target.value)} placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
           <button disabled={gravando || !nova.trim()} onClick={addFn}>Criar função</button>
         </div>
-      </div>
+      </section>
 
-      <div className="card">
-        <h3>Quem organiza a escala</h3>
+      <section className="lid-secao">
+        <div className="lid-secao-cab">
+          <span className="rot">Quem organiza</span>
+        </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           Só estes emails abrem a área do organizador. Cada um enxerga apenas o ministério que
           organiza: quem cuida da Mídia não vê o Serviço do Culto, e vice-versa.
           Quem está como <strong>todos</strong> enxerga tudo e é quem dá e tira acesso.
           Voluntário não precisa estar aqui, ele usa o link pessoal.
         </p>
-        <table>
-          <tbody>
-            {lideres.map(l => (
-              <tr key={l.email + (l.equipe_id || 'tudo')}>
-                <td className="forte">{l.email}</td>
-                <td className="dim pequeno">
-                  {l.equipe_id
-                    ? (equipes.find(q => q.id === l.equipe_id)?.nome || 'ministério removido')
-                    : 'todos os ministérios'}
-                </td>
-                <td style={{ width: 100, textAlign: 'right' }}>
-                  <button className="mini perigo" disabled={!geral || lideres.length < 2}
-                    onClick={async () => {
-                      if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
-                      try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
-                      catch (err: any) { aviso('erro: ' + err.message); }
-                    }}>remover</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="ajt-lista">
+          {lideres.map(l => (
+            <div className="ajt-item" key={l.email + (l.equipe_id || 'tudo')}>
+              <span className="ajt-nome estatico">{l.email}</span>
+              <span className="ajt-sub">
+                {l.equipe_id
+                  ? (equipes.find(q => q.id === l.equipe_id)?.nome || 'ministério removido')
+                  : 'todos os ministérios'}
+              </span>
+              <div className="ajt-acoes">
+                <button className="lid-bt-txt perigo" disabled={!geral || lideres.length < 2}
+                  onClick={async () => {
+                    if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
+                    try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
+                    catch (err: any) { aviso('erro: ' + err.message); }
+                  }}>tirar acesso</button>
+              </div>
+            </div>
+          ))}
+        </div>
         {geral ? (
           <div className="linha" style={{ marginTop: 14 }}>
             <input value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
@@ -231,48 +252,45 @@ function Ajustes() {
             Só quem organiza todos os ministérios pode liberar ou tirar acesso.
           </p>
         )}
-      </div>
+      </section>
 
-      <div className="card" id="equipes">
-        <h3>Ministérios</h3>
+      <section className="lid-secao" id="equipes">
+        <div className="lid-secao-cab">
+          <span className="rot">Ministérios</span>
+        </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           Cada ministério tem time, funções e escala próprios. A escala automática do dia 26 monta todos.
         </p>
-        <table>
-          <tbody>
-            {equipes.map(e => (
-              <tr key={e.id}>
-                <td>
-                  <input key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
-                    onBlur={async ev => {
-                      const v = ev.target.value.trim();
-                      if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err: any) { aviso('Não salvou: ' + err.message); } }
-                    }} />
-                </td>
-                <td style={{ width: 92 }}>
-                  {e.id === equipe?.id ? <span className="pill ok"><span className="ponto ok" />atual</span>
-                    : <button className="mini" onClick={() => trocarEquipe(e.id)}>abrir</button>}
-                </td>
-                <td style={{ width: 44 }}>
-                  <button className="mini perigo" aria-label={`apagar ${e.nome}`} disabled={equipes.length < 2}
-                    onClick={async () => {
-                      if (!confirm(`Apagar o ministério ${e.nome}? Todo o time, funções e escalas dele somem. Não dá para desfazer.`)) return;
-                      try {
-                        await removerEquipe(e.id);
-                        const lista = await recarregarEquipes();
-                        if (e.id === equipe?.id) {
-                          if (lista[0]) trocarEquipe(lista[0].id, lista);
-                          else { try { localStorage.removeItem('escala.equipe'); } catch {} location.reload(); return; }
-                        }
-                        aviso('Apagado');
+        <div className="ajt-lista">
+          {equipes.map(e => (
+            <div className="ajt-item" key={e.id}>
+              <input className="ajt-nome" key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
+                onBlur={async ev => {
+                  const v = ev.target.value.trim();
+                  if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err: any) { aviso('Não salvou: ' + err.message); } }
+                }} />
+              <span className="ajt-sub">{e.id === equipe?.id ? 'aberto agora' : ''}</span>
+              <div className="ajt-acoes">
+                {e.id !== equipe?.id &&
+                  <button className="lid-bt-txt" onClick={() => trocarEquipe(e.id)}>abrir</button>}
+                <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`} disabled={equipes.length < 2}
+                  onClick={async () => {
+                    if (!confirm(`Apagar o ministério ${e.nome}? Todo o time, funções e escalas dele somem. Não dá para desfazer.`)) return;
+                    try {
+                      await removerEquipe(e.id);
+                      const lista = await recarregarEquipes();
+                      if (e.id === equipe?.id) {
+                        if (lista[0]) trocarEquipe(lista[0].id, lista);
+                        else { try { localStorage.removeItem('escala.equipe'); } catch {} location.reload(); return; }
                       }
-                      catch (err: any) { aviso('Não deu: ' + err.message); }
-                    }}>×</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      aviso('Apagado');
+                    }
+                    catch (err: any) { aviso('Não deu: ' + err.message); }
+                  }}>apagar</button>
+              </div>
+            </div>
+          ))}
+        </div>
         <div className="linha" style={{ marginTop: 12 }}>
           <input value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
           <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
@@ -282,10 +300,12 @@ function Ajustes() {
             setGravando(false);
           }}>Criar ministério</button>
         </div>
-      </div>
+      </section>
 
-      <div className="card">
-        <h3>As 5 regras que fazem isso funcionar</h3>
+      <section className="lid-secao">
+        <div className="lid-secao-cab">
+          <span className="rot">As cinco regras</span>
+        </div>
         <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
           <li><strong>Quem não pode, acha o substituto.</strong> Você não caça substituto.</li>
           <li><strong>Confirmação é ativa.</strong> Ver a mensagem não é confirmar.</li>
@@ -293,10 +313,10 @@ function Ajustes() {
           <li><strong>Buraco vai publicado.</strong> Vaga escondida vira furo no domingo.</li>
           <li><strong>Toda função precisa de 3 pessoas.</strong> Menos que isso é dependência.</li>
         </ol>
-      </div>
+      </section>
 
-      <p className="dim pequeno centro">{funcoesAtivas(S).length} funções ativas · {S.voluntarios.length} pessoas cadastradas</p>
-    </>
+      <p className="lid-pe">{funcoesAtivas(S).length} funções ativas · {S.voluntarios.length} pessoas cadastradas</p>
+    </div>
   );
 }
 

@@ -121,7 +121,7 @@ export default function Area() {
         {/* --- onde você pode servir --- */}
         <div style={{ textAlign: 'center' }}>
           <span className="rot">Onde você pode servir</span>
-          <p className="area-intro" style={{ margin: '20px auto 0', fontSize: 16.5, lineHeight: 1.72, color: 'var(--cinza)' }}>
+          <p className="area-intro" style={{ margin: '20px auto 0', fontSize: 'var(--t-corpo)', lineHeight: 1.72, color: 'var(--cinza)' }}>
             Marque uma ou mais. Dá para marcar função que você ainda não sabe fazer.
           </p>
         </div>
@@ -191,7 +191,7 @@ export default function Area() {
         {/* --- a ação, uma só --- */}
         <div style={{ textAlign: 'center', marginTop: 'var(--e8)' }}>
           {min.convite && (
-            <p style={{ margin: '0 auto var(--e5)', maxWidth: '46ch', fontSize: 17, lineHeight: 1.7, color: 'var(--cinza)' }}>
+            <p style={{ margin: '0 auto var(--e5)', maxWidth: '46ch', fontSize: 'var(--t-corpo)', lineHeight: 1.7, color: 'var(--cinza)' }}>
               {min.convite}
             </p>
           )}
@@ -199,7 +199,7 @@ export default function Area() {
             Quero servir {na} {min.nome} <IcSeta />
           </Link>
           {!min.aberto && (
-            <p style={{ margin: 'var(--e4) auto 0', maxWidth: '42ch', fontSize: 14.5, lineHeight: 1.65, color: 'var(--cinza)' }}>
+            <p style={{ margin: 'var(--e4) auto 0', maxWidth: '42ch', fontSize: 'var(--t-apoio)', lineHeight: 1.65, color: 'var(--cinza)' }}>
               Essa área conversa com cada pessoa antes de escalar. Você preenche o
               cadastro e a liderança fala com você.
             </p>

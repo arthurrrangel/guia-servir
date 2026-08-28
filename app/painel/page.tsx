@@ -200,7 +200,7 @@ function Painel() {
               <span>
                 <span className="lid-fn">Passo {p.n}{p.feito ? ' · feito' : ''}</span>
                 <span className="lid-nome">{p.titulo}</span>
-                <p style={{ margin: '6px 0 0', fontSize: 15, lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '52ch' }}>{p.txt}</p>
+                <p style={{ margin: '6px 0 0', fontSize: 'var(--t-ui)', lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '52ch' }}>{p.txt}</p>
               </span>
               {p.mostra && <Link href={p.href} className="lid-bt">{p.rot}</Link>}
             </div>
@@ -391,7 +391,7 @@ function Painel() {
                       </div>
                     );
                   })}
-                  <p style={{ margin: '16px 0 0', fontSize: 14, lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '54ch' }}>
+                  <p style={{ margin: '16px 0 0', fontSize: 'var(--t-apoio)', lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '54ch' }}>
                     O botão abre o WhatsApp da pessoa com a mensagem já digitada. Você só aperta enviar.
                   </p>
                 </section>

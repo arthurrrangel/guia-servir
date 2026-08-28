@@ -420,7 +420,7 @@ export default function EntradaEquipe() {
 
             {!areas.length
               ? <div className="escalacao centro" style={{ padding: '30px 22px' }}>
-                  <div className="forte" style={{ fontSize: 17 }}>Ninguém cadastrado ainda</div>
+                  <div className="forte" style={{ fontSize: 'var(--t-corpo)' }}>Ninguém cadastrado ainda</div>
                   <p className="dim pequeno" style={{ margin: '6px 0 12px' }}>Seja o primeiro do time.</p>
                   <button className="pri" onClick={abrirCadastro}>Quero entrar no time</button>
                 </div>

@@ -45,44 +45,42 @@ export default function Entrar() {
   }
 
   return (
-    <main style={{ maxWidth: 420, paddingTop: 'clamp(40px, 12vh, 110px)' }}>
-      {/* Primeira tela que o líder vê: é onde a marca aparece inteira, com o
-          mesmo tracking largo da logo da igreja. */}
-      <div className="centro entrada-marca">
-        {/* a marca de verdade, e um h1: a auditoria pegou esta tela sem
-            nenhum título. O "ESCALA / MÍDIA" era um wordmark inventado, e
-            ainda dizia Mídia numa tela que serve as cinco áreas. */}
+    /* A PORTA DA FRENTE FALAVA A LÍNGUA VELHA. Fundo cinza, cartão branco
+       flutuando no meio com sombra, tudo em Inter — enquanto atrás dela o
+       sistema inteiro é papel branco, Raleway e fio de 1px. Era a primeira
+       coisa que o líder via, e prometia outro produto.
+
+       Sem cartão: o formulário é o conteúdo da página, não um objeto pousado
+       sobre ela. O que separa é o mesmo fio de sempre. */
+    <main className="lid entrada">
+      <div className="entrada-marca">
         <Logo className="logo entrada-logo" />
-        <h1 className="entrada-titulo">Área do organizador</h1>
-        <p className="dim pequeno" style={{ marginTop: 16 }}>
-          Área do organizador da escala. Voluntário não entra aqui: ele usa o link pessoal que você manda.
+        <span className="rot">Área do organizador</span>
+        <h1 className="entrada-titulo">Entrar</h1>
+        <p className="entrada-sub">
+          Voluntário não entra por aqui: ele usa o link pessoal que você manda.
         </p>
       </div>
 
-      <div className="card" style={{ boxShadow: 'var(--sombra-alta)' }}>
-        <form onSubmit={modo === 'link' ? porLink : porSenha}>
-          <label>Seu email</label>
-          <input type="email" required autoComplete="email" value={email}
-            onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
-          {modo === 'senha' && (
-            <>
-              <div style={{ height: 12 }} />
-              <label>Sua senha</label>
-              <input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)} />
-            </>
-          )}
-          <div style={{ height: 16 }} />
-          <button className="pri grande" type="submit" disabled={carregando}>
-            {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : 'Entrar'}
-          </button>
-        </form>
-        {msg && <div style={{ marginTop: 14 }}><Aviso tom={msg.startsWith('Erro') ? 'erro' : 'bom'}>{msg}</Aviso></div>}
-        <div className="centro" style={{ marginTop: 12 }}>
-          <button className="mini fantasma" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
-            {modo === 'link' ? 'prefiro entrar com senha' : 'prefiro receber um link no email'}
-          </button>
-        </div>
-      </div>
+      <form onSubmit={modo === 'link' ? porLink : porSenha}>
+        <label>Seu email</label>
+        <input type="email" required autoComplete="email" value={email}
+          onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
+        {modo === 'senha' && (
+          <>
+            <div style={{ height: 12 }} />
+            <label>Sua senha</label>
+            <input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)} />
+          </>
+        )}
+        <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
+          {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : 'Entrar'}
+        </button>
+      </form>
+      {msg && <div style={{ marginTop: 18 }}><Aviso tom={msg.startsWith('Erro') ? 'erro' : 'bom'}>{msg}</Aviso></div>}
+      <button className="lid-bt-txt entrada-troca" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
+        {modo === 'link' ? 'prefiro entrar com senha' : 'prefiro receber um link no email'}
+      </button>
     </main>
   );
 }

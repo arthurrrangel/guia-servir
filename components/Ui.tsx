@@ -1,16 +1,13 @@
 'use client';
-/* Peças visuais compartilhadas: avatar, medidor, anel de progresso, avisos. */
-import { IcAlerta, IcCheck, IcInfo, IcX } from './Icones';
+/* Peças visuais compartilhadas: medidor, anel de progresso, avisos, escolha.
 
-/* avatar com iniciais e cor estável por nome */
-export function Avatar({ nome, grande }: { nome?: string | null; grande?: boolean }) {
-  if (!nome) return <span className={`avatar vazio ${grande ? 'g' : ''}`}>?</span>;
-  const partes = nome.trim().split(/\s+/);
-  const ini = (partes[0][0] + (partes[1]?.[0] || '')).toUpperCase();
-  let h = 0;
-  for (const c of nome) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return <span className={`avatar av-${h % 8} ${grande ? 'g' : ''}`}>{ini}</span>;
-}
+   O AVATAR SAIU DAQUI. Ele desenhava um círculo colorido com as iniciais, e a
+   cor vinha de um hash do nome — ou seja, oito cores que não significavam
+   nada, num sistema onde cor significa estado. Em /time isso rendia 86
+   círculos coloridos numa tela só, e ao lado de cada um o nome inteiro
+   escrito por extenso: "AR" ao lado de "Amanda Ribeiro" não informa, ocupa.
+   /escala já tinha tirado pelo mesmo motivo. */
+import { IcAlerta, IcCheck, IcInfo, IcX } from './Icones';
 
 /* medidor: fill carrega a severidade; trilho é passo claro da MESMA rampa */
 export function Medidor({ valor, total, grau }: { valor: number; total: number; grau: 'ok' | 'warn' | 'bad' }) {

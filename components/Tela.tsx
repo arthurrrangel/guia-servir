@@ -75,7 +75,7 @@ export function Pessoa({ nome, papel, zap, texto }:
       </span>
       {link && (
         <a className="acao" href={link} target="_blank" rel="noreferrer"
-           style={{ fontSize: 10.5, padding: '12px 18px' }}>
+           style={{ fontSize: 'var(--t-min)', padding: '12px 18px' }}>
           WhatsApp
         </a>
       )}

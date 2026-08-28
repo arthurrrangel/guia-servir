@@ -73,7 +73,7 @@ export default function PortaDoEspaco() {
 
             <div style={{ textAlign: 'center', marginTop: 'var(--e7)' }}>
               <span className="rot">Ainda não tenho PIN</span>
-              <p style={{ margin: '20px auto 0', maxWidth: '46ch', fontSize: 16, lineHeight: 1.7, color: 'var(--cinza)' }}>
+              <p style={{ margin: '20px auto 0', maxWidth: '46ch', fontSize: 'var(--t-ui)', lineHeight: 1.7, color: 'var(--cinza)' }}>
                 Sem problema. Ache seu nome na lista da sua área e crie o PIN na
                 hora, com quatro números.
               </p>
@@ -81,7 +81,7 @@ export default function PortaDoEspaco() {
 
             <div style={{ textAlign: 'center', marginTop: 'var(--e6)' }}>
               <span className="rot">Não sirvo ainda</span>
-              <p style={{ margin: '20px auto 26px', maxWidth: '44ch', fontSize: 16, lineHeight: 1.7, color: 'var(--cinza)' }}>
+              <p style={{ margin: '20px auto 26px', maxWidth: '44ch', fontSize: 'var(--t-ui)', lineHeight: 1.7, color: 'var(--cinza)' }}>
                 Existe lugar. Veja as áreas e escolha por onde começar.
               </p>
               <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>

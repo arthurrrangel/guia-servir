@@ -1,12 +1,20 @@
-/* Ícones em SVG puro, traço 1.7, sem dependências. */
+/* Ícones em SVG puro, traço 1.7, sem dependências.
+
+   CANTO ZERO AQUI TAMBÉM. Os ícones eram a última coisa arredondada do
+   produto: rx=2, 2.5, 3 e 4 espalhados pelos retângulos, enquanto botão,
+   campo, card e tag já eram todos retos. Ícone com canto mole ao lado de
+   caixa reta lê como ícone emprestado de outro sistema.
+
+   O círculo fica, porque círculo aqui não é canto arredondado: é a outra
+   primitiva — a mesma que marca estado no ponto e no contador. */
 type P = { className?: string };
 const base = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, viewBox: '0 0 24 24', width: 18, height: 18 };
 
 export const IcPainel = ({ className }: P) => (
-  <svg {...base} className={className}><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+  <svg {...base} className={className}><rect x="3" y="3" width="7.5" height="7.5"/><rect x="13.5" y="3" width="7.5" height="7.5"/><rect x="3" y="13.5" width="7.5" height="7.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5"/></svg>
 );
 export const IcCalendario = ({ className }: P) => (
-  <svg {...base} className={className}><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+  <svg {...base} className={className}><rect x="3" y="5" width="18" height="16"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
 );
 export const IcTime = ({ className }: P) => (
   <svg {...base} className={className}><circle cx="9" cy="8.5" r="3.2"/><path d="M2.8 19.4c.9-3 3.3-4.6 6.2-4.6s5.3 1.6 6.2 4.6"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.4 14.9c2.4.2 4.2 1.6 4.9 3.9"/></svg>
@@ -15,16 +23,16 @@ export const IcAjustes = ({ className }: P) => (
   <svg {...base} className={className}><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="17" r="2"/></svg>
 );
 export const IcCopiar = ({ className }: P) => (
-  <svg {...base} className={className}><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M5 15.5A2.5 2.5 0 0 1 4 13.5V6.2A2.2 2.2 0 0 1 6.2 4h7.3A2.5 2.5 0 0 1 15.5 5"/></svg>
+  <svg {...base} className={className}><rect x="8" y="8" width="12" height="12"/><path d="M5 15.5A2.5 2.5 0 0 1 4 13.5V6.2A2.2 2.2 0 0 1 6.2 4h7.3A2.5 2.5 0 0 1 15.5 5"/></svg>
 );
 export const IcCadeado = ({ className, aberto }: P & { aberto?: boolean }) => (
   <svg {...base} className={className}>
-    <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/>
+    <rect x="5" y="10.5" width="14" height="9.5"/>
     {aberto ? <path d="M8 10.5V7.5a4 4 0 0 1 7.5-1.8"/> : <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>}
   </svg>
 );
 export const IcDado = ({ className }: P) => (
-  <svg {...base} className={className}><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.6" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="8.6" cy="15.4" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.4" r="1.15" fill="currentColor" stroke="none"/></svg>
+  <svg {...base} className={className}><rect x="3.5" y="3.5" width="17" height="17"/><circle cx="8.6" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="8.6" cy="15.4" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.4" r="1.15" fill="currentColor" stroke="none"/></svg>
 );
 export const IcCheck = ({ className }: P) => (
   <svg {...base} className={className}><path d="M4.5 12.5 10 18 19.5 6.5"/></svg>

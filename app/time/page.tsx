@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
 } from '@/lib/db';
-import { Avatar, Aviso, Medidor } from '@/components/Ui';
+import { Aviso, Medidor } from '@/components/Ui';
 import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import {
   Nivel, confirmada, declaracoesSuspeitas, filaDeConferencia, funcoesAtivas,
@@ -114,21 +114,39 @@ function Time() {
     (a, b) => Number(a.conferido !== false) - Number(b.conferido !== false)
   );
 
+  /* TIME FALAVA A LÍNGUA VELHA. Cartão cinza, avatar colorido, h1 em Inter
+     pesada — a mesma marca em dois produtos diferentes, dependendo da aba.
+     Aqui a tela passa para a faixa + seção do resto do sistema. Nada de
+     estrutura mudou: continua "conferir nível" no topo e a lista de pessoas
+     embaixo, que é a pergunta em aberto com o Arthur e não é minha para
+     responder sozinho. */
+  const ativos = S.voluntarios.filter(v => v.ativo).length;
   return (
-    <>
-      <div className="entre" style={{ marginBottom: 4 }}>
-        <h1>Time</h1>
-        {!!S.voluntarios.length && <span className="pill">{S.voluntarios.filter(v => v.ativo).length} ativos</span>}
+    <div className="lid">
+      <div className="lid-faixa">
+        <div className="lid-faixa-in"><div className="lid-faixa-txt">
+          <span className="rot">Time</span>
+          <h1>{equipe?.nome}</h1>
+          <p className="lid-faixa-sub">
+            {S.voluntarios.length
+              ? 'Quem serve, o que cada um sabe fazer e quanto cada um já pegou.'
+              : 'Sem saber quem sabe fazer o quê, não existe rodízio.'}
+          </p>
+        </div>
+        {!!S.voluntarios.length && (
+          <div className="lid-placar"><b>{ativos}</b><span>no time</span></div>
+        )}
+        </div>
       </div>
       {!S.voluntarios.length && (
         <Aviso tom="info">Sem saber quem sabe fazer o quê, não existe rodízio. Comece pelas pessoas que serviram no último domingo.</Aviso>
       )}
 
       {pendentes > 0 && (
-        <div className="card conferencia">
-          <div className="entre">
-            <h3 style={{ margin: 0 }}>Conferir nível</h3>
-            <span className="pill warn"><span className="ponto warn" />{pendentes} para conferir</span>
+        <section className="lid-secao conferencia">
+          <div className="lid-secao-cab">
+            <span className="rot">Conferir nível</span>
+            <span className="lid-secao-nota">{pendentes} para conferir</span>
           </div>
           <p className="dim pequeno" style={{ marginTop: 6 }}>
             Estas pessoas se cadastraram sozinhas e escolheram o próprio nível. Enquanto ninguém confere,
@@ -156,7 +174,6 @@ function Time() {
               <div className="overline">{bl.funcao}</div>
               {bl.pendentes.map(p => (
                 <div className="conf-linha" key={p.id}>
-                  <Avatar nome={p.nome} />
                   <div className="cresce">
                     <div className="forte">{p.nome.split(' ').slice(0, 2).join(' ')}</div>
                     <div className="dim pequeno">
@@ -182,7 +199,7 @@ function Time() {
               ))}
             </div>
           ))}
-        </div>
+        </section>
       )}
 
       {ordenados.map(v => {
@@ -195,7 +212,6 @@ function Time() {
         return (
           <details className={`pessoa ${novo ? 'card-novo' : ''}`} key={v.id} style={{ opacity: v.ativo ? 1 : .55 }}>
             <summary>
-              <Avatar nome={v.nome} />
               <span className="cresce">
                 <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="pill peq" style={{ marginLeft: 8 }}>pausado</span>}</span>
                 <span className="pessoa-areas">
@@ -293,13 +309,16 @@ function Time() {
 
       {!!S.voluntarios.length && (
         <>
-          <h3 style={{ marginTop: 28 }}>Onde o time é frágil</h3>
-          <div className="card tight">
+          <section className="lid-secao">
+          <div className="lid-secao-cab">
+            <span className="rot">Onde o time é frágil</span>
+            <span className="lid-secao-nota">a meta é 3 por função</span>
+          </div>
             {saude.funcoes.map(f => (
               <div className="slot" key={f.nome}>
                 <div className="rotulo"><span className="overline">{f.nome}</span></div>
                 <Medidor valor={f.aptos} total={3} grau={f.grau as any} />
-                <span className="dim pequeno num" style={{ width: 118, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                <span className="dim pequeno num" style={{ width: 118, textAlign: 'right' }}>
                   {f.aptos} de 3 pessoa{f.aptos === 1 ? '' : 's'}
                 </span>
                 <span className={`pill ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`}>
@@ -307,11 +326,11 @@ function Time() {
                 </span>
               </div>
             ))}
-          </div>
           <p className="dim pequeno">
-            A meta é 3 pessoas aptas por função. Abaixo disso a escala quebra na primeira gripe.
-            Cada mês, coloque alguém como <em>aprendendo</em> na função mais vermelha.
+            Abaixo de três, a escala quebra na primeira gripe. Cada mês, coloque
+            alguém como <em>aprendendo</em> na função mais vermelha.
           </p>
+          </section>
         </>
       )}
       {/* Cadastrar na mão virou exceção: quase todo mundo entra pelo link do
@@ -372,7 +391,7 @@ function Time() {
       </div>
         </div>
       </details>
-    </>
+    </div>
   );
 }
 

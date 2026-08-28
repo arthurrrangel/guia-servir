@@ -93,7 +93,7 @@ export default function Servir() {
                 tempo todo. Uma linha, no fim, sem competir com o resto. */}
             <div style={{ textAlign: 'center', marginTop: 'var(--e7)' }}>
               <span className="rot">Já serve na GUIA?</span>
-              <p style={{ margin: '20px auto 26px', maxWidth: '44ch', fontSize: 16, lineHeight: 1.7, color: 'var(--cinza)' }}>
+              <p style={{ margin: '20px auto 26px', maxWidth: '44ch', fontSize: 'var(--t-ui)', lineHeight: 1.7, color: 'var(--cinza)' }}>
                 Seu espaço tem sua escala, seus dias e seu líder.
               </p>
               <Link href="/eu" className="acao">Acessar meu espaço <IcSeta /></Link>

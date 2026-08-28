@@ -278,7 +278,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
             </a>
           )}
           {f.chama && !zapContato && (
-            <span style={{ fontSize: 15, color: 'var(--bad)' }}>
+            <span style={{ fontSize: 'var(--t-ui)', color: 'var(--bad)' }}>
               Sem WhatsApp cadastrado. Fale com quem indicou essa pessoa.
             </span>
           )}

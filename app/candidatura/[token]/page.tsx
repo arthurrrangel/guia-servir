@@ -143,7 +143,7 @@ export default function Candidatura() {
             <span className="rot">O que acontece agora</span>
             {!encerrada && <span className="vol-secao-nota">Passo {d.etapa_de} de {d.etapa_total}</span>}
           </div>
-          <p style={{ margin: '20px 0 0', fontSize: 18, lineHeight: 1.6, maxWidth: '46ch' }}>
+          <p style={{ margin: '20px 0 0', fontSize: 'var(--d-lead)', lineHeight: 1.6, maxWidth: '46ch' }}>
             {d.proximo_passo}
           </p>
 
@@ -199,7 +199,7 @@ export default function Candidatura() {
                   <span className="vol-marca" aria-hidden="true" />
                   <span>
                     <span className="vol-linha-dia">{e.rot}</span>
-                    <span className="vol-linha-fn" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 14 }}>
+                    <span className="vol-linha-fn" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 'var(--t-apoio)' }}>
                       {e.txt}
                     </span>
                   </span>
