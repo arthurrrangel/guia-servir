@@ -1,1 +1,77 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyBzYiB9IGZyb20gJy4vc3VwYWJhc2UnOwoKZXhwb3J0IHR5cGUgRXF1aXBlID0geyBpZDogc3RyaW5nOyBub21lOiBzdHJpbmc7IHNsdWc6IHN0cmluZzsgd2hhdHNhcHBfZ3J1cG86IHN0cmluZyB8IG51bGw7IG9yZGVtOiBudW1iZXIgfTsKCmZ1bmN0aW9uIHNsdWdpZnkobm9tZTogc3RyaW5nKSB7CiAgcmV0dXJuIG5vbWUubm9ybWFsaXplKCdORkQnKS5yZXBsYWNlKC9bzIAtza9dL2csICcnKQogICAgLnRvTG93ZXJDYXNlKCkucmVwbGFjZSgvW15hLXowLTldKy9nLCAnLScpLnJlcGxhY2UoL14tK3wtKyQvZywgJycpLnNsaWNlKDAsIDQwKSB8fCAnZXF1aXBlJzsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHNvdUxpZGVyKCk6IFByb21pc2U8Ym9vbGVhbj4gewogIGNvbnN0IHMgPSBzYigpOyBpZiAoIXMpIHJldHVybiBmYWxzZTsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzLnJwYygnc291X2xpZGVyJyk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKICByZXR1cm4gISFkYXRhOwp9CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gbGlzdGFyRXF1aXBlcygpOiBQcm9taXNlPEVxdWlwZVtdPiB7CiAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc2IoKSEuZnJvbSgnZXF1aXBlcycpLnNlbGVjdCgnKicpLm9yZGVyKCdvcmRlbScpLm9yZGVyKCdub21lJyk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKICByZXR1cm4gKGRhdGEgfHwgW10pIGFzIEVxdWlwZVtdOwp9CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gY3JpYXJFcXVpcGUobm9tZTogc3RyaW5nKTogUHJvbWlzZTxFcXVpcGU+IHsKICBjb25zdCBzID0gc2IoKSE7CiAgY29uc3QgYmFzZSA9IHNsdWdpZnkobm9tZSk7CiAgLy8gc2x1ZyDDum5pY286IHNlIGNvbGlkaXIsIHN1Zml4YSBjb20gbsO6bWVybwogIGxldCBzbHVnID0gYmFzZTsKICBmb3IgKGxldCBpID0gMjsgaSA8IDUwOyBpKyspIHsKICAgIGNvbnN0IHsgZGF0YSB9ID0gYXdhaXQgcy5mcm9tKCdlcXVpcGVzJykuc2VsZWN0KCdpZCcpLmVxKCdzbHVnJywgc2x1ZykubWF5YmVTaW5nbGUoKTsKICAgIGlmICghZGF0YSkgYnJlYWs7CiAgICBzbHVnID0gYCR7YmFzZX0tJHtpfWA7CiAgfQogIGNvbnN0IHsgZGF0YTogb3JkIH0gPSBhd2FpdCBzLmZyb20oJ2VxdWlwZXMnKS5zZWxlY3QoJ29yZGVtJykub3JkZXIoJ29yZGVtJywgeyBhc2NlbmRpbmc6IGZhbHNlIH0pLmxpbWl0KDEpLm1heWJlU2luZ2xlKCk7CiAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgcy5mcm9tKCdlcXVpcGVzJykKICAgIC5pbnNlcnQoeyBub21lOiBub21lLnRyaW0oKSwgc2x1Zywgb3JkZW06IChvcmQ/Lm9yZGVtIHx8IDApICsgMSB9KS5zZWxlY3QoJyonKS5zaW5nbGUoKTsKICBpZiAoZXJyb3IpIHRocm93IGVycm9yOwogIHJldHVybiBkYXRhIGFzIEVxdWlwZTsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGF0dWFsaXphckVxdWlwZShpZDogc3RyaW5nLCBjYW1wb3M6IFBhcnRpYWw8RXF1aXBlPikgewogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHNiKCkhLmZyb20oJ2VxdWlwZXMnKS51cGRhdGUoY2FtcG9zKS5lcSgnaWQnLCBpZCk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHJlbW92ZXJFcXVpcGUoaWQ6IHN0cmluZykgewogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHNiKCkhLmZyb20oJ2VxdWlwZXMnKS5kZWxldGUoKS5lcSgnaWQnLCBpZCk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKLyogLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gQSBWSVPDg08gREEgSUdSRUpBCgogICBUcsOqcyBkb3MgcXVhdHJvIG9yZ2FuaXphZG9yZXMgZGEgR1VJQSBzw6NvIGFkbWluIGRhIGlncmVqYSBpbnRlaXJhLiBQYXJhCiAgIHNhYmVyIHNlIG8gZG9taW5nbyBlc3TDoSBjb2JlcnRvLCBlbGVzIHByZWNpc2F2YW0gdHJvY2FyIGRlIGVxdWlwZSBjaW5jbwogICB2ZXplcyBlIHNvbWFyIGRlIGNhYmXDp2EuIGB2aXNhb19nZXJhbCgpYCAobWlncmHDp8OjbyAzNSkgcmVzcG9uZGUgcG9yIHRvZGFzIGFzCiAgIGVxdWlwZXMgcXVlIGEgcGVzc29hIG9yZ2FuaXphIG51bWEgY29uc3VsdGEgc8OzLCBqw6EgZmlsdHJhZGEgcG9yIHF1ZW0gZWxhIMOpLgoKICAgUXVlbSBvcmdhbml6YSB1bWEgw6FyZWEgc8OzIHJlY2ViZSB1bWEgbGluaGEsIGUgYSB0ZWxhIG7Do28gbW9zdHJhIG8gYmxvY286CiAgIHBhaW5lbCBkZSBjaW5jbyBwYXJhIHF1ZW0gY3VpZGEgZGUgdW0gbsOjbyDDqSB2aXPDo28gZ2VyYWwsIMOpIHJ1w61kby4gKi8KZXhwb3J0IHR5cGUgQXJlYVZpc2FvID0gewogIHNsdWc6IHN0cmluZzsgZXF1aXBlOiBzdHJpbmc7IG9yZGVtOiBudW1iZXI7CiAgcHJveGltYV9kYXRhOiBzdHJpbmcgfCBudWxsOyB0aXBvOiBzdHJpbmcgfCBudWxsOwogIHBvc3RvczogbnVtYmVyOyBwcmVlbmNoaWRvczogbnVtYmVyOyBjb25maXJtYWRvczogbnVtYmVyOwogIC8qIG51bG8gPSBuw6NvIGjDoSBwcsOzeGltbyBjdWx0byBtYXJjYWRvLiBaZXJvID0gaMOhIGN1bHRvIGUgZXN0w6EgY29iZXJ0by4KICAgICBTw6NvIGVzdGFkb3MgZGlmZXJlbnRlcyBlIGEgdGVsYSBkaXogY29pc2FzIGRpZmVyZW50ZXMuICovCiAgdmFnYXM6IG51bWJlciB8IG51bGw7CiAgZnVyb3M6IG51bWJlcjsgcmVjdXNhZG9zOiBudW1iZXI7IHBlbmRlbnRlczogbnVtYmVyOwogIGNhbmRpZGF0dXJhc19ub3ZhczogbnVtYmVyOwp9OwoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHZpc2FvR2VyYWwoKTogUHJvbWlzZTxBcmVhVmlzYW9bXT4gewogIGNvbnN0IHMgPSBzYigpOwogIGlmICghcykgcmV0dXJuIFtdOwogIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHMucnBjKCd2aXNhb19nZXJhbCcpOwogIGlmIChlcnJvcikgcmV0dXJuIFtdOwogIHJldHVybiAoZGF0YSB8fCBbXSkgYXMgQXJlYVZpc2FvW107Cn0K"}
+'use client';
+import { sb } from './supabase';
+
+export type Equipe = { id: string; nome: string; slug: string; whatsapp_grupo: string | null; ordem: number };
+
+function slugify(nome: string) {
+  return nome.normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'equipe';
+}
+
+export async function souLider(): Promise<boolean> {
+  const s = sb(); if (!s) return false;
+  const { data, error } = await s.rpc('sou_lider');
+  if (error) throw error;
+  return !!data;
+}
+
+export async function listarEquipes(): Promise<Equipe[]> {
+  const { data, error } = await sb()!.from('equipes').select('*').order('ordem').order('nome');
+  if (error) throw error;
+  return (data || []) as Equipe[];
+}
+
+export async function criarEquipe(nome: string): Promise<Equipe> {
+  const s = sb()!;
+  const base = slugify(nome);
+  // slug único: se colidir, sufixa com número
+  let slug = base;
+  for (let i = 2; i < 50; i++) {
+    const { data } = await s.from('equipes').select('id').eq('slug', slug).maybeSingle();
+    if (!data) break;
+    slug = `${base}-${i}`;
+  }
+  const { data: ord } = await s.from('equipes').select('ordem').order('ordem', { ascending: false }).limit(1).maybeSingle();
+  const { data, error } = await s.from('equipes')
+    .insert({ nome: nome.trim(), slug, ordem: (ord?.ordem || 0) + 1 }).select('*').single();
+  if (error) throw error;
+  return data as Equipe;
+}
+
+export async function atualizarEquipe(id: string, campos: Partial<Equipe>) {
+  const { error } = await sb()!.from('equipes').update(campos).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removerEquipe(id: string) {
+  const { error } = await sb()!.from('equipes').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* -------------------------------------------------------- A VISÃO DA IGREJA
+
+   Três dos quatro organizadores da GUIA são admin da igreja inteira. Para
+   saber se o domingo está coberto, eles precisavam trocar de equipe cinco
+   vezes e somar de cabeça. `visao_geral()` (migração 35) responde por todas as
+   equipes que a pessoa organiza numa consulta só, já filtrada por quem ela é.
+
+   Quem organiza uma área só recebe uma linha, e a tela não mostra o bloco:
+   painel de cinco para quem cuida de um não é visão geral, é ruído. */
+export type AreaVisao = {
+  slug: string; equipe: string; ordem: number;
+  proxima_data: string | null; tipo: string | null;
+  postos: number; preenchidos: number; confirmados: number;
+  /* nulo = não há próximo culto marcado. Zero = há culto e está coberto.
+     São estados diferentes e a tela diz coisas diferentes. */
+  vagas: number | null;
+  furos: number; recusados: number; pendentes: number;
+  candidaturas_novas: number;
+};
+
+export async function visaoGeral(): Promise<AreaVisao[]> {
+  const s = sb();
+  if (!s) return [];
+  const { data, error } = await s.rpc('visao_geral');
+  if (error) return [];
+  return (data || []) as AreaVisao[];
+}

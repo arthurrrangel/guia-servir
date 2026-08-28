@@ -1,1 +1,88 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnOwppbXBvcnQgeyBzYiwgbGVyQ3JlZGVuY2lhaXMgfSBmcm9tICdAL2xpYi9zdXBhYmFzZSc7CmltcG9ydCB7IENvbmV4YW8gfSBmcm9tICdAL2NvbXBvbmVudHMvU2hlbGwnOwppbXBvcnQgeyBMb2dvIH0gZnJvbSAnQC9jb21wb25lbnRzL01hcmNhJzsKaW1wb3J0IHsgQXZpc28gfSBmcm9tICdAL2NvbXBvbmVudHMvVWknOwoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gRW50cmFyKCkgewogIGNvbnN0IFtwcm9udG8sIHNldFByb250b10gPSB1c2VTdGF0ZShmYWxzZSk7CiAgY29uc3QgW3RlbUNvbmV4YW8sIHNldFRlbV0gPSB1c2VTdGF0ZShmYWxzZSk7CiAgY29uc3QgW21vZG8sIHNldE1vZG9dID0gdXNlU3RhdGU8J2xpbmsnIHwgJ3NlbmhhJz4oJ2xpbmsnKTsKICBjb25zdCBbZW1haWwsIHNldEVtYWlsXSA9IHVzZVN0YXRlKCcnKTsKICBjb25zdCBbc2VuaGEsIHNldFNlbmhhXSA9IHVzZVN0YXRlKCcnKTsKICBjb25zdCBbbXNnLCBzZXRNc2ddID0gdXNlU3RhdGUoJycpOwogIGNvbnN0IFtjYXJyZWdhbmRvLCBzZXRDYXJyZWdhbmRvXSA9IHVzZVN0YXRlKGZhbHNlKTsKCiAgdXNlRWZmZWN0KCgpID0+IHsKICAgIHNldFRlbSghIWxlckNyZWRlbmNpYWlzKCkpOwogICAgY29uc3QgcyA9IHNiKCk7CiAgICAvKiBzZSBhIGNoZWNhZ2VtIGRlIHNlc3PDo28gZmFsaGFyLCBvIGNlcnRvIMOpIGZpY2FyIG5vIGZvcm11bMOhcmlvIGRlIGxvZ2luOgogICAgICAgw6kgbyBxdWUgasOhIGVzdMOhIG5hIHRlbGEuIFNlbSBvIC5jYXRjaCBpc3NvIHZpcmF2YSByZWplacOnw6NvIHNlbSBkb25vLiAqLwogICAgaWYgKHMpIHMuYXV0aC5nZXRTZXNzaW9uKCkKICAgICAgLnRoZW4oKHsgZGF0YSB9KSA9PiB7IGlmIChkYXRhLnNlc3Npb24pIGxvY2F0aW9uLmhyZWYgPSAnL3BhaW5lbCc7IH0pCiAgICAgIC5jYXRjaCgoKSA9PiB7fSk7CiAgICBzZXRQcm9udG8odHJ1ZSk7CiAgfSwgW10pOwoKICBpZiAoIXByb250bykgcmV0dXJuIDxkaXYgY2xhc3NOYW1lPSJjYXJyZWdhbmRvIj7igKY8L2Rpdj47CiAgaWYgKCF0ZW1Db25leGFvKSByZXR1cm4gPENvbmV4YW8gYW9TYWx2YXI9eygpID0+IGxvY2F0aW9uLnJlbG9hZCgpfSAvPjsKCiAgYXN5bmMgZnVuY3Rpb24gcG9yTGluayhlOiBSZWFjdC5Gb3JtRXZlbnQpIHsKICAgIGUucHJldmVudERlZmF1bHQoKTsgc2V0Q2FycmVnYW5kbyh0cnVlKTsgc2V0TXNnKCcnKTsKICAgIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHNiKCkhLmF1dGguc2lnbkluV2l0aE90cCh7CiAgICAgIGVtYWlsOiBlbWFpbC50cmltKCksIG9wdGlvbnM6IHsgZW1haWxSZWRpcmVjdFRvOiB3aW5kb3cubG9jYXRpb24ub3JpZ2luIH0sCiAgICB9KTsKICAgIHNldENhcnJlZ2FuZG8oZmFsc2UpOwogICAgc2V0TXNnKGVycm9yID8gJ0Vycm86ICcgKyBlcnJvci5tZXNzYWdlIDogJ1Byb250by4gQWJyYSBzZXUgZW1haWwgZSBjbGlxdWUgbm8gbGluayBwYXJhIGVudHJhci4nKTsKICB9CgogIGFzeW5jIGZ1bmN0aW9uIHBvclNlbmhhKGU6IFJlYWN0LkZvcm1FdmVudCkgewogICAgZS5wcmV2ZW50RGVmYXVsdCgpOyBzZXRDYXJyZWdhbmRvKHRydWUpOyBzZXRNc2coJycpOwogICAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc2IoKSEuYXV0aC5zaWduSW5XaXRoUGFzc3dvcmQoeyBlbWFpbDogZW1haWwudHJpbSgpLCBwYXNzd29yZDogc2VuaGEgfSk7CiAgICBzZXRDYXJyZWdhbmRvKGZhbHNlKTsKICAgIGlmIChlcnJvcikgc2V0TXNnKCdFcnJvOiAnICsgZXJyb3IubWVzc2FnZSk7IGVsc2UgbG9jYXRpb24uaHJlZiA9ICcvcGFpbmVsJzsKICB9CgogIHJldHVybiAoCiAgICA8bWFpbiBzdHlsZT17eyBtYXhXaWR0aDogNDIwLCBwYWRkaW5nVG9wOiAnY2xhbXAoNDBweCwgMTJ2aCwgMTEwcHgpJyB9fT4KICAgICAgey8qIFByaW1laXJhIHRlbGEgcXVlIG8gbMOtZGVyIHbDqjogw6kgb25kZSBhIG1hcmNhIGFwYXJlY2UgaW50ZWlyYSwgY29tIG8KICAgICAgICAgIG1lc21vIHRyYWNraW5nIGxhcmdvIGRhIGxvZ28gZGEgaWdyZWphLiAqL30KICAgICAgPGRpdiBjbGFzc05hbWU9ImNlbnRybyBlbnRyYWRhLW1hcmNhIj4KICAgICAgICB7LyogYSBtYXJjYSBkZSB2ZXJkYWRlLCBlIHVtIGgxOiBhIGF1ZGl0b3JpYSBwZWdvdSBlc3RhIHRlbGEgc2VtCiAgICAgICAgICAgIG5lbmh1bSB0w610dWxvLiBPICJFU0NBTEEgLyBNw41ESUEiIGVyYSB1bSB3b3JkbWFyayBpbnZlbnRhZG8sIGUKICAgICAgICAgICAgYWluZGEgZGl6aWEgTcOtZGlhIG51bWEgdGVsYSBxdWUgc2VydmUgYXMgY2luY28gw6FyZWFzLiAqL30KICAgICAgICA8TG9nbyBjbGFzc05hbWU9ImxvZ28gZW50cmFkYS1sb2dvIiAvPgogICAgICAgIDxoMSBjbGFzc05hbWU9ImVudHJhZGEtdGl0dWxvIj7DgXJlYSBkbyBvcmdhbml6YWRvcjwvaDE+CiAgICAgICAgPHAgY2xhc3NOYW1lPSJkaW0gcGVxdWVubyIgc3R5bGU9e3sgbWFyZ2luVG9wOiAxNiB9fT4KICAgICAgICAgIMOBcmVhIGRvIG9yZ2FuaXphZG9yIGRhIGVzY2FsYS4gVm9sdW50w6FyaW8gbsOjbyBlbnRyYSBhcXVpOiBlbGUgdXNhIG8gbGluayBwZXNzb2FsIHF1ZSB2b2PDqiBtYW5kYS4KICAgICAgICA8L3A+CiAgICAgIDwvZGl2PgoKICAgICAgPGRpdiBjbGFzc05hbWU9ImNhcmQiIHN0eWxlPXt7IGJveFNoYWRvdzogJ3ZhcigtLXNvbWJyYS1hbHRhKScgfX0+CiAgICAgICAgPGZvcm0gb25TdWJtaXQ9e21vZG8gPT09ICdsaW5rJyA/IHBvckxpbmsgOiBwb3JTZW5oYX0+CiAgICAgICAgICA8bGFiZWw+U2V1IGVtYWlsPC9sYWJlbD4KICAgICAgICAgIDxpbnB1dCB0eXBlPSJlbWFpbCIgcmVxdWlyZWQgYXV0b0NvbXBsZXRlPSJlbWFpbCIgdmFsdWU9e2VtYWlsfQogICAgICAgICAgICBvbkNoYW5nZT17ZSA9PiBzZXRFbWFpbChlLnRhcmdldC52YWx1ZSl9IHBsYWNlaG9sZGVyPSJ2b2NlQGVtYWlsLmNvbSIgLz4KICAgICAgICAgIHttb2RvID09PSAnc2VuaGEnICYmICgKICAgICAgICAgICAgPD4KICAgICAgICAgICAgICA8ZGl2IHN0eWxlPXt7IGhlaWdodDogMTIgfX0gLz4KICAgICAgICAgICAgICA8bGFiZWw+U3VhIHNlbmhhPC9sYWJlbD4KICAgICAgICAgICAgICA8aW5wdXQgdHlwZT0icGFzc3dvcmQiIHJlcXVpcmVkIGF1dG9Db21wbGV0ZT0iY3VycmVudC1wYXNzd29yZCIgdmFsdWU9e3NlbmhhfSBvbkNoYW5nZT17ZSA9PiBzZXRTZW5oYShlLnRhcmdldC52YWx1ZSl9IC8+CiAgICAgICAgICAgIDwvPgogICAgICAgICAgKX0KICAgICAgICAgIDxkaXYgc3R5bGU9e3sgaGVpZ2h0OiAxNiB9fSAvPgogICAgICAgICAgPGJ1dHRvbiBjbGFzc05hbWU9InByaSBncmFuZGUiIHR5cGU9InN1Ym1pdCIgZGlzYWJsZWQ9e2NhcnJlZ2FuZG99PgogICAgICAgICAgICB7Y2FycmVnYW5kbyA/ICdhZ3VhcmRl4oCmJyA6IG1vZG8gPT09ICdsaW5rJyA/ICdSZWNlYmVyIGxpbmsgZGUgYWNlc3NvJyA6ICdFbnRyYXInfQogICAgICAgICAgPC9idXR0b24+CiAgICAgICAgPC9mb3JtPgogICAgICAgIHttc2cgJiYgPGRpdiBzdHlsZT17eyBtYXJnaW5Ub3A6IDE0IH19PjxBdmlzbyB0b209e21zZy5zdGFydHNXaXRoKCdFcnJvJykgPyAnZXJybycgOiAnYm9tJ30+e21zZ308L0F2aXNvPjwvZGl2Pn0KICAgICAgICA8ZGl2IGNsYXNzTmFtZT0iY2VudHJvIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDEyIH19PgogICAgICAgICAgPGJ1dHRvbiBjbGFzc05hbWU9Im1pbmkgZmFudGFzbWEiIG9uQ2xpY2s9eygpID0+IHsgc2V0TW9kbyhtb2RvID09PSAnbGluaycgPyAnc2VuaGEnIDogJ2xpbmsnKTsgc2V0TXNnKCcnKTsgfX0+CiAgICAgICAgICAgIHttb2RvID09PSAnbGluaycgPyAncHJlZmlybyBlbnRyYXIgY29tIHNlbmhhJyA6ICdwcmVmaXJvIHJlY2ViZXIgdW0gbGluayBubyBlbWFpbCd9CiAgICAgICAgICA8L2J1dHRvbj4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L21haW4+CiAgKTsKfQo="}
+'use client';
+import { useEffect, useState } from 'react';
+import { sb, lerCredenciais } from '@/lib/supabase';
+import { Conexao } from '@/components/Shell';
+import { Logo } from '@/components/Marca';
+import { Aviso } from '@/components/Ui';
+
+export default function Entrar() {
+  const [pronto, setPronto] = useState(false);
+  const [temConexao, setTem] = useState(false);
+  const [modo, setModo] = useState<'link' | 'senha'>('link');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [msg, setMsg] = useState('');
+  const [carregando, setCarregando] = useState(false);
+
+  useEffect(() => {
+    setTem(!!lerCredenciais());
+    const s = sb();
+    /* se a checagem de sessão falhar, o certo é ficar no formulário de login:
+       é o que já está na tela. Sem o .catch isso virava rejeição sem dono. */
+    if (s) s.auth.getSession()
+      .then(({ data }) => { if (data.session) location.href = '/painel'; })
+      .catch(() => {});
+    setPronto(true);
+  }, []);
+
+  if (!pronto) return <div className="carregando">…</div>;
+  if (!temConexao) return <Conexao aoSalvar={() => location.reload()} />;
+
+  async function porLink(e: React.FormEvent) {
+    e.preventDefault(); setCarregando(true); setMsg('');
+    const { error } = await sb()!.auth.signInWithOtp({
+      email: email.trim(), options: { emailRedirectTo: window.location.origin },
+    });
+    setCarregando(false);
+    setMsg(error ? 'Erro: ' + error.message : 'Pronto. Abra seu email e clique no link para entrar.');
+  }
+
+  async function porSenha(e: React.FormEvent) {
+    e.preventDefault(); setCarregando(true); setMsg('');
+    const { error } = await sb()!.auth.signInWithPassword({ email: email.trim(), password: senha });
+    setCarregando(false);
+    if (error) setMsg('Erro: ' + error.message); else location.href = '/painel';
+  }
+
+  return (
+    <main style={{ maxWidth: 420, paddingTop: 'clamp(40px, 12vh, 110px)' }}>
+      {/* Primeira tela que o líder vê: é onde a marca aparece inteira, com o
+          mesmo tracking largo da logo da igreja. */}
+      <div className="centro entrada-marca">
+        {/* a marca de verdade, e um h1: a auditoria pegou esta tela sem
+            nenhum título. O "ESCALA / MÍDIA" era um wordmark inventado, e
+            ainda dizia Mídia numa tela que serve as cinco áreas. */}
+        <Logo className="logo entrada-logo" />
+        <h1 className="entrada-titulo">Área do organizador</h1>
+        <p className="dim pequeno" style={{ marginTop: 16 }}>
+          Área do organizador da escala. Voluntário não entra aqui: ele usa o link pessoal que você manda.
+        </p>
+      </div>
+
+      <div className="card" style={{ boxShadow: 'var(--sombra-alta)' }}>
+        <form onSubmit={modo === 'link' ? porLink : porSenha}>
+          <label>Seu email</label>
+          <input type="email" required autoComplete="email" value={email}
+            onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
+          {modo === 'senha' && (
+            <>
+              <div style={{ height: 12 }} />
+              <label>Sua senha</label>
+              <input type="password" required autoComplete="current-password" value={senha} onChange={e => setSenha(e.target.value)} />
+            </>
+          )}
+          <div style={{ height: 16 }} />
+          <button className="pri grande" type="submit" disabled={carregando}>
+            {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : 'Entrar'}
+          </button>
+        </form>
+        {msg && <div style={{ marginTop: 14 }}><Aviso tom={msg.startsWith('Erro') ? 'erro' : 'bom'}>{msg}</Aviso></div>}
+        <div className="centro" style={{ marginTop: 12 }}>
+          <button className="mini fantasma" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
+            {modo === 'link' ? 'prefiro entrar com senha' : 'prefiro receber um link no email'}
+          </button>
+        </div>
+      </div>
+    </main>
+  );
+}

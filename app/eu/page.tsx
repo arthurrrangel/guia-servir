@@ -1,1 +1,94 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlIH0gZnJvbSAncmVhY3QnOwppbXBvcnQgTGluayBmcm9tICduZXh0L2xpbmsnOwppbXBvcnQgeyBzYlB1YmxpY28gYXMgc2IgfSBmcm9tICdAL2xpYi9zdXBhYmFzZSc7CmltcG9ydCB7IEljU2V0YSB9IGZyb20gJ0AvY29tcG9uZW50cy9JY29uZXMnOwppbXBvcnQgeyBUZWxhLCBDYWJlY2EsIENhcnJlZ2FuZG8sIFZhemlvIH0gZnJvbSAnQC9jb21wb25lbnRzL1RlbGEnOwoKLyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgL2V1IOKAlCBBIFBPUlRBIERPIEVTUEHDh08gRE8gVk9MVU5Uw4FSSU8KCiAgIFF1ZW0gasOhIHNlcnZlIHRpbmhhIHF1ZSBkZXNjb2JyaXIgc296aW5obyBxdWUgbyBjYW1pbmhvIGVyYSBhY2hhciBvIHByw7NwcmlvCiAgIG5vbWUgbnVtYSBsaXN0YSBkZW50cm8gZGEgcMOhZ2luYSBkYSBlcXVpcGUuIElzc28gbsOjbyDDqSBwb3J0YSwgw6kgYXRhbGhvIGRlCiAgIHF1ZW0gY29uc3RydWl1IG8gc2lzdGVtYS4KCiAgIEFnb3JhIGV4aXN0ZSB1bSBlbmRlcmXDp28gY3VydG8gcGFyYSBkaXplciBubyBncnVwbyBlIGVzY3JldmVyIG51bSBhdmlzbzoKICAgZ3VpYXNlcnZpci5jb20vZXUuIFVtYSBwZXJndW50YSBzw7Mg4oCUIGVtIHF1ZSDDoXJlYSB2b2PDqiBzZXJ2ZSDigJQgZSBhIHBhcnRpcgogICBkYWxpIGEgcGVzc29hIGFjaGEgbyBub21lIGUgZW50cmEgY29tIG8gUElOLgoKICAgUG9yIHF1ZSBuw6NvIHBlZGlyIG8gdGVsZWZvbmUgYXF1aTogc2VtIHNlc3PDo28sIHVtIGNhbXBvIGRlIHRlbGVmb25lIHF1ZQogICByZXNwb25kZSAiZXhpc3RlIC8gbsOjbyBleGlzdGUiIHZpcmEgY29uc3VsdGEgYWJlcnRhIGRlIGNhZGFzdHJvIHBhcmEKICAgcXVhbHF1ZXIgdW0gY29tIGEgY2hhdmUgcMO6YmxpY2EuIEEgbGlzdGEgcG9yIGVxdWlwZSBqw6Egw6kgcMO6YmxpY2EgcG9yCiAgIGRlc2VuaG8gKGEgZXNjYWxhIMOpIGFmaXhhZGEgbmEgcGFyZWRlKSwgZSBvIFBJTiDDqSBvIHF1ZSBwcm90ZWdlIG8gcXVlIMOpCiAgIHBlc3NvYWwuIE1hbnRlciBhIG1lc21hIHBvcnRhIMOpIG1haXMgc2VndXJvIGRvIHF1ZSBhYnJpciB1bWEgbm92YS4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCnR5cGUgTWluID0geyBzbHVnOiBzdHJpbmc7IG5vbWU6IHN0cmluZzsgcG9zdG9zOiBudW1iZXIgfTsKCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIFBvcnRhRG9Fc3BhY28oKSB7CiAgY29uc3QgW21pbnMsIHNldE1pbnNdID0gdXNlU3RhdGU8TWluW10+KFtdKTsKICBjb25zdCBbZmFzZSwgc2V0RmFzZV0gPSB1c2VTdGF0ZTwnY2FycmVnYW5kbycgfCAncHJvbnRvJyB8ICdyZWRlJz4oJ2NhcnJlZ2FuZG8nKTsKCiAgdXNlRWZmZWN0KCgpID0+IHsKICAgIGxldCB2aXZvID0gdHJ1ZTsKICAgIHZvaWQgKGFzeW5jICgpID0+IHsKICAgICAgY29uc3QgcyA9IHNiKCk7IGlmICghcykgeyBpZiAodml2bykgc2V0RmFzZSgncmVkZScpOyByZXR1cm47IH0KICAgICAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgcy5ycGMoJ21pbmlzdGVyaW9zX3B1YmxpY29zJyk7CiAgICAgIGlmICghdml2bykgcmV0dXJuOwogICAgICBpZiAoZXJyb3IpIHsgc2V0RmFzZSgncmVkZScpOyByZXR1cm47IH0KICAgICAgc2V0TWlucygoZGF0YSB8fCBbXSkgYXMgTWluW10pOyBzZXRGYXNlKCdwcm9udG8nKTsKICAgIH0pKCk7CiAgICByZXR1cm4gKCkgPT4geyB2aXZvID0gZmFsc2U7IH07CiAgfSwgW10pOwoKICByZXR1cm4gKAogICAgPFRlbGEgdm9sdGE9Ii8iIHZvbHRhUm90PSJJbsOtY2lvIj4KICAgICAgPG1haW4gY2xhc3NOYW1lPSJ0ZWxhLWNvcnBvIHRlbGEtZXN0cmVpdGEiPgogICAgICAgIDxDYWJlY2EKICAgICAgICAgIHJvdD0iRXNwYcOnbyBkbyB2b2x1bnTDoXJpbyIKICAgICAgICAgIHRpdHVsbz0iQWNlc3NhciBtZXUgZXNwYcOnbyIKICAgICAgICAgIGFwb2lvPSJTdWEgZXNjYWxhLCBzZXVzIGRpYXMgZSBzZXUgbMOtZGVyLiBDb21lY2UgZGl6ZW5kbyBlbSBxdWUgw6FyZWEgdm9jw6ogc2VydmUuIgogICAgICAgIC8+CgogICAgICAgIHtmYXNlID09PSAnY2FycmVnYW5kbycgJiYgPENhcnJlZ2FuZG8gbz0iQ2FycmVnYW5kbyBhcyDDoXJlYXMiIC8+fQogICAgICAgIHtmYXNlID09PSAncmVkZScgJiYgKAogICAgICAgICAgPFZhemlvIHRpdHVsbz0iU2VtIGNvbmV4w6NvIGFnb3JhIgogICAgICAgICAgICAgICAgIHRleHRvPSJOw6NvIGNvbnNlZ3VpIGNhcnJlZ2FyIGFzIMOhcmVhcy4gQXR1YWxpemUgYSBww6FnaW5hLiIKICAgICAgICAgICAgICAgICBhY2FvPXt7IGhyZWY6ICcvJywgcm90OiAnVm9sdGFyIGFvIGluw61jaW8nIH19IC8+CiAgICAgICAgKX0KCiAgICAgICAge2Zhc2UgPT09ICdwcm9udG8nICYmICgKICAgICAgICAgIDw+CiAgICAgICAgICAgIDxkaXY+CiAgICAgICAgICAgICAge21pbnMubWFwKG0gPT4gKAogICAgICAgICAgICAgICAgPExpbmsga2V5PXttLnNsdWd9IGhyZWY9e2AvZXF1aXBlLyR7bS5zbHVnfWB9IGNsYXNzTmFtZT0iZXNjb2xoYSI+CiAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0iZXNjb2xoYS10eHQiPgogICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0iZXNjb2xoYS1ub21lIj57bS5ub21lfTwvc3Bhbj4KICAgICAgICAgICAgICAgICAgICA8cCBjbGFzc05hbWU9ImVzY29saGEtZGVzYyI+QWNoZSBzZXUgbm9tZSBuYSBsaXN0YSBlIGVudHJlIGNvbSBzZXUgUElOLjwvcD4KICAgICAgICAgICAgICAgICAgPC9zcGFuPgogICAgICAgICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9ImVzY29saGEtZmltIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PEljU2V0YSAvPjwvc3Bhbj4KICAgICAgICAgICAgICAgIDwvTGluaz4KICAgICAgICAgICAgICApKX0KICAgICAgICAgICAgPC9kaXY+CgogICAgICAgICAgICA8ZGl2IHN0eWxlPXt7IHRleHRBbGlnbjogJ2NlbnRlcicsIG1hcmdpblRvcDogJ3ZhcigtLWU3KScgfX0+CiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJyb3QiPkFpbmRhIG7Do28gdGVuaG8gUElOPC9zcGFuPgogICAgICAgICAgICAgIDxwIHN0eWxlPXt7IG1hcmdpbjogJzIwcHggYXV0byAwJywgbWF4V2lkdGg6ICc0NmNoJywgZm9udFNpemU6IDE2LCBsaW5lSGVpZ2h0OiAxLjcsIGNvbG9yOiAndmFyKC0tY2luemEpJyB9fT4KICAgICAgICAgICAgICAgIFNlbSBwcm9ibGVtYS4gQWNoZSBzZXUgbm9tZSBuYSBsaXN0YSBkYSBzdWEgw6FyZWEgZSBjcmllIG8gUElOIG5hCiAgICAgICAgICAgICAgICBob3JhLCBjb20gcXVhdHJvIG7Dum1lcm9zLgogICAgICAgICAgICAgIDwvcD4KICAgICAgICAgICAgPC9kaXY+CgogICAgICAgICAgICA8ZGl2IHN0eWxlPXt7IHRleHRBbGlnbjogJ2NlbnRlcicsIG1hcmdpblRvcDogJ3ZhcigtLWU2KScgfX0+CiAgICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJyb3QiPk7Do28gc2lydm8gYWluZGE8L3NwYW4+CiAgICAgICAgICAgICAgPHAgc3R5bGU9e3sgbWFyZ2luOiAnMjBweCBhdXRvIDI2cHgnLCBtYXhXaWR0aDogJzQ0Y2gnLCBmb250U2l6ZTogMTYsIGxpbmVIZWlnaHQ6IDEuNywgY29sb3I6ICd2YXIoLS1jaW56YSknIH19PgogICAgICAgICAgICAgICAgRXhpc3RlIGx1Z2FyLiBWZWphIGFzIMOhcmVhcyBlIGVzY29saGEgcG9yIG9uZGUgY29tZcOnYXIuCiAgICAgICAgICAgICAgPC9wPgogICAgICAgICAgICAgIDxMaW5rIGhyZWY9Ii9zZXJ2aXIiIGNsYXNzTmFtZT0iYWNhbyI+UXVlcm8gc2VydmlyIDxJY1NldGEgLz48L0xpbms+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPC8+CiAgICAgICAgKX0KICAgICAgPC9tYWluPgogICAgPC9UZWxhPgogICk7Cn0K"}
+'use client';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { sbPublico as sb } from '@/lib/supabase';
+import { IcSeta } from '@/components/Icones';
+import { Tela, Cabeca, Carregando, Vazio } from '@/components/Tela';
+
+/* =============================================================================
+   /eu — A PORTA DO ESPAÇO DO VOLUNTÁRIO
+
+   Quem já serve tinha que descobrir sozinho que o caminho era achar o próprio
+   nome numa lista dentro da página da equipe. Isso não é porta, é atalho de
+   quem construiu o sistema.
+
+   Agora existe um endereço curto para dizer no grupo e escrever num aviso:
+   guiaservir.com/eu. Uma pergunta só — em que área você serve — e a partir
+   dali a pessoa acha o nome e entra com o PIN.
+
+   Por que não pedir o telefone aqui: sem sessão, um campo de telefone que
+   responde "existe / não existe" vira consulta aberta de cadastro para
+   qualquer um com a chave pública. A lista por equipe já é pública por
+   desenho (a escala é afixada na parede), e o PIN é o que protege o que é
+   pessoal. Manter a mesma porta é mais seguro do que abrir uma nova.
+   ============================================================================= */
+
+type Min = { slug: string; nome: string; postos: number };
+
+export default function PortaDoEspaco() {
+  const [mins, setMins] = useState<Min[]>([]);
+  const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
+
+  useEffect(() => {
+    let vivo = true;
+    void (async () => {
+      const s = sb(); if (!s) { if (vivo) setFase('rede'); return; }
+      const { data, error } = await s.rpc('ministerios_publicos');
+      if (!vivo) return;
+      if (error) { setFase('rede'); return; }
+      setMins((data || []) as Min[]); setFase('pronto');
+    })();
+    return () => { vivo = false; };
+  }, []);
+
+  return (
+    <Tela volta="/" voltaRot="Início">
+      <main className="tela-corpo tela-estreita">
+        <Cabeca
+          rot="Espaço do voluntário"
+          titulo="Acessar meu espaço"
+          apoio="Sua escala, seus dias e seu líder. Comece dizendo em que área você serve."
+        />
+
+        {fase === 'carregando' && <Carregando o="Carregando as áreas" />}
+        {fase === 'rede' && (
+          <Vazio titulo="Sem conexão agora"
+                 texto="Não consegui carregar as áreas. Atualize a página."
+                 acao={{ href: '/', rot: 'Voltar ao início' }} />
+        )}
+
+        {fase === 'pronto' && (
+          <>
+            <div>
+              {mins.map(m => (
+                <Link key={m.slug} href={`/equipe/${m.slug}`} className="escolha">
+                  <span className="escolha-txt">
+                    <span className="escolha-nome">{m.nome}</span>
+                    <p className="escolha-desc">Ache seu nome na lista e entre com seu PIN.</p>
+                  </span>
+                  <span className="escolha-fim" aria-hidden="true"><IcSeta /></span>
+                </Link>
+              ))}
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 'var(--e7)' }}>
+              <span className="rot">Ainda não tenho PIN</span>
+              <p style={{ margin: '20px auto 0', maxWidth: '46ch', fontSize: 16, lineHeight: 1.7, color: 'var(--cinza)' }}>
+                Sem problema. Ache seu nome na lista da sua área e crie o PIN na
+                hora, com quatro números.
+              </p>
+            </div>
+
+            <div style={{ textAlign: 'center', marginTop: 'var(--e6)' }}>
+              <span className="rot">Não sirvo ainda</span>
+              <p style={{ margin: '20px auto 26px', maxWidth: '44ch', fontSize: 16, lineHeight: 1.7, color: 'var(--cinza)' }}>
+                Existe lugar. Veja as áreas e escolha por onde começar.
+              </p>
+              <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
+            </div>
+          </>
+        )}
+      </main>
+    </Tela>
+  );
+}

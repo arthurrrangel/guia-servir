@@ -1,1 +1,191 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyBzYiB9IGZyb20gJy4vc3VwYWJhc2UnOwppbXBvcnQgeyBhZGREaWFzLCBFc3RhZG8sIGhvamVJU08sIE5pdmVsLCBTdGF0dXMgfSBmcm9tICcuL2VuZ2luZSc7CmltcG9ydCB7IG1vbnRhckVzdGFkbywgcGFyYVNhbHZhckRpYSB9IGZyb20gJy4vcG9udGUnOwoKLyogUG9udGUgZW50cmUgbyBiYW5jbyBlIG8gb2JqZXRvIGRlIGVzdGFkbyBxdWUgbyBtb3RvciBlbnRlbmRlLgogICBPIG1vdG9yIG51bmNhIHNhYmUgcXVlIGV4aXN0ZSBTdXBhYmFzZS4gKi8KCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBjYXJyZWdhckVzdGFkbyhlcXVpcGVJZDogc3RyaW5nLCBub21lRXF1aXBlID0gJycpOiBQcm9taXNlPEVzdGFkbz4gewogIGNvbnN0IHMgPSBzYigpOwogIGlmICghcykgdGhyb3cgbmV3IEVycm9yKCdzZW0gY29uZXjDo28nKTsKICAvKiBKYW5lbGE6IG8gYXBwIHPDsyBwcmVjaXNhIGRvIGhpc3TDs3JpY28gcmVjZW50ZSAoYSBjYXJnYSBvbGhhIG5vIG3DoXhpbW8KICAgICAxODAgZGlhcyBwYXJhIHRyw6FzKSBlIGRvIGZ1dHVyby4gU2VtIGlzc28sIGNhZGEgdHJvY2EgZGUgbWluaXN0w6lyaW8KICAgICBwdXhhdmEgbyBoaXN0w7NyaWNvIGludGVpcm8gZGEgaWdyZWphIGRlc2RlIHNlbXByZS4gKi8KICBjb25zdCBkZXNkZSA9IGFkZERpYXMoaG9qZUlTTygpLCAtMjAwKTsKICBjb25zdCBbZnVuY29lcywgdm9scywgY3VsdG9zLCBjZmddID0gYXdhaXQgUHJvbWlzZS5hbGwoWwogICAgcy5mcm9tKCdmdW5jb2VzJykuc2VsZWN0KCcqJykuZXEoJ2VxdWlwZV9pZCcsIGVxdWlwZUlkKS5vcmRlcignb3JkZW0nKSwKICAgIC8qIGNvbHVuYXMgZXhwbMOtY2l0YXMsIG7Do28gYCpgOiBkZXNkZSBhIG1pZ3Jhw6fDo28gMTggbyBgcGluX2hhc2hgIGVzdMOhIGZvcmEKICAgICAgIGRvIEdSQU5UIGRlIGBhdXRoZW50aWNhdGVkYCwgZSBgc2VsZWN0ICpgIG51bSBHUkFOVCBwb3IgY29sdW5hIGVzdG91cmEKICAgICAgIGNvbSAicGVybWlzc2lvbiBkZW5pZWQgZm9yIGNvbHVtbiIgZW0gdmV6IGRlIHNpbXBsZXNtZW50ZSBvbWl0aXIuICovCiAgICBzLmZyb20oJ3ZvbHVudGFyaW9zJykKICAgICAgLnNlbGVjdCgnaWQsbm9tZSx0ZWxlZm9uZSxhdGl2byxsaW1pdGVfbWVzLHRva2VuLGNyaWFkb19lbSxlcXVpcGVfaWQsY29uZmVyaWRvLGVtYWlsJykKICAgICAgLmVxKCdlcXVpcGVfaWQnLCBlcXVpcGVJZCkub3JkZXIoJ25vbWUnKSwKICAgIHMuZnJvbSgnY3VsdG9zJykuc2VsZWN0KCdpZCxkYXRhJykuZ3RlKCdkYXRhJywgZGVzZGUpLm9yZGVyKCdkYXRhJyksCiAgICBzLmZyb20oJ2NvbmZpZycpLnNlbGVjdCgnKicpLmVxKCdlcXVpcGVfaWQnLCBlcXVpcGVJZCkubWF5YmVTaW5nbGUoKSwKICBdKTsKICBjb25zdCBlMSA9IFtmdW5jb2VzLCB2b2xzLCBjdWx0b3NdLmZpbmQociA9PiByLmVycm9yKTsKICBpZiAoZTE/LmVycm9yKSB0aHJvdyBlMS5lcnJvcjsKCiAgY29uc3QgZnVuY2FvSWRzID0gKGZ1bmNvZXMuZGF0YSB8fCBbXSkubWFwKGYgPT4gZi5pZCk7CiAgY29uc3Qgdm9sSWRzID0gKHZvbHMuZGF0YSB8fCBbXSkubWFwKHYgPT4gdi5pZCk7CiAgY29uc3QgY3VsdG9JZHMgPSAoY3VsdG9zLmRhdGEgfHwgW10pLm1hcChjID0+IGMuaWQpOwogIGNvbnN0IHZhemlvID0gUHJvbWlzZS5yZXNvbHZlKHsgZGF0YTogW10gYXMgYW55W10gfSk7CiAgLy8gZmFzZSAyOiBsaW5oYXMgZGVwZW5kZW50ZXMsIGZpbHRyYWRhcyBwYXJhIGEgZXF1aXBlIChuYWRhIHZhemEgZGUgb3V0cmEpCiAgY29uc3QgW2hhYnMsIGluZGlzLCBlc2NzLCBwbGFudHMsIHJlY2Fkb3MsIGRpc3BdID0gYXdhaXQgUHJvbWlzZS5hbGwoWwogICAgdm9sSWRzLmxlbmd0aCA/IHMuZnJvbSgnaGFiaWxpZGFkZXMnKS5zZWxlY3QoJyonKS5pbigndm9sdW50YXJpb19pZCcsIHZvbElkcykgOiB2YXppbywKICAgIHZvbElkcy5sZW5ndGggPyBzLmZyb20oJ2luZGlzcG9uaWJpbGlkYWRlcycpLnNlbGVjdCgnKicpLmluKCd2b2x1bnRhcmlvX2lkJywgdm9sSWRzKSA6IHZhemlvLAogICAgZnVuY2FvSWRzLmxlbmd0aCA/IHMuZnJvbSgnZXNjYWxhY29lcycpLnNlbGVjdCgnKicpLmluKCdmdW5jYW9faWQnLCBmdW5jYW9JZHMpIDogdmF6aW8sCiAgICB2b2xJZHMubGVuZ3RoID8gcy5mcm9tKCdwbGFudG9lcycpLnNlbGVjdCgnKicpLmluKCd2b2x1bnRhcmlvX2lkJywgdm9sSWRzKSA6IHZhemlvLAogICAgY3VsdG9JZHMubGVuZ3RoID8gcy5mcm9tKCdjdWx0b19vYnMnKS5zZWxlY3QoJyonKS5lcSgnZXF1aXBlX2lkJywgZXF1aXBlSWQpLmluKCdjdWx0b19pZCcsIGN1bHRvSWRzKSA6IHZhemlvLAogICAgLyogcmVzcG9zdGFzIGRlICJwb3NzbyI6IMOpIG8gcXVlIG8gbMOtZGVyIHByZWNpc2EgdmVyIHBhcmEgbW9udGFyIGEgZXNjYWxhLgogICAgICAgU2VtIGlzdG8gbyB2b2x1bnTDoXJpbyByZXNwb25kaWEgZSBuaW5ndcOpbSBlbnhlcmdhdmEuICovCiAgICB2b2xJZHMubGVuZ3RoID8gcy5mcm9tKCdkaXNwb25pYmlsaWRhZGUnKS5zZWxlY3QoJyonKS5pbigndm9sdW50YXJpb19pZCcsIHZvbElkcykuZ3RlKCdkYXRhJywgZGVzZGUpIDogdmF6aW8sCiAgXSk7CiAgcmV0dXJuIG1vbnRhckVzdGFkbyh7CiAgICBmdW5jb2VzOiBmdW5jb2VzLmRhdGEgfHwgW10sIHZvbHVudGFyaW9zOiB2b2xzLmRhdGEgfHwgW10sIGhhYmlsaWRhZGVzOiAoaGFicyBhcyBhbnkpLmRhdGEgfHwgW10sCiAgICBpbmRpc3BvbmliaWxpZGFkZXM6IChpbmRpcyBhcyBhbnkpLmRhdGEgfHwgW10sIGN1bHRvczogY3VsdG9zLmRhdGEgfHwgW10sCiAgICBlc2NhbGFjb2VzOiAoZXNjcyBhcyBhbnkpLmRhdGEgfHwgW10sIHBsYW50b2VzOiAocGxhbnRzIGFzIGFueSkuZGF0YSB8fCBbXSwKICAgIHJlY2Fkb3M6IChyZWNhZG9zIGFzIGFueSkuZGF0YSB8fCBbXSwgZGlzcG9uaWJpbGlkYWRlczogKGRpc3AgYXMgYW55KS5kYXRhIHx8IFtdLAogICAgY29uZmlnOiBjZmc/LmRhdGEgfHwgbnVsbCwgZXF1aXBlOiBub21lRXF1aXBlLAogIH0pOwp9CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBlc2NyaXRhIC0tLSAqLwpleHBvcnQgYXN5bmMgZnVuY3Rpb24gc2FsdmFyRGlhKFM6IEVzdGFkbywgZGF0YTogc3RyaW5nLCBlcXVpcGVJZDogc3RyaW5nKSB7CiAgY29uc3QgcyA9IHNiKCkhOwogIGNvbnN0IHBhcmFtcyA9IHBhcmFTYWx2YXJEaWEoUywgZGF0YSwgZXF1aXBlSWQpOwogIGlmICghcGFyYW1zKSByZXR1cm47CiAgLy8gdW1hIHRyYW5zYcOnw6NvIHPDszogb3UgZ3JhdmEgbyBkb21pbmdvIGludGVpcm8sIG91IG7Do28gbWV4ZSBlbSBuYWRhCiAgY29uc3QgeyBkYXRhOiBjdWx0b0lkLCBlcnJvciB9ID0gYXdhaXQgcy5ycGMoJ3NhbHZhcl9kaWEnLCBwYXJhbXMpOwogIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7CiAgUy5lc2NhbGFzW2RhdGFdLmN1bHRvSWQgPSBjdWx0b0lkIGFzIHN0cmluZzsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHNhbHZhckRpYXMoUzogRXN0YWRvLCBkYXRhczogc3RyaW5nW10sIGVxdWlwZUlkOiBzdHJpbmcpIHsKICBmb3IgKGNvbnN0IGQgb2YgZGF0YXMpIGF3YWl0IHNhbHZhckRpYShTLCBkLCBlcXVpcGVJZCk7Cn0KCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBtdWRhclN0YXR1cyhjdWx0b0lkOiBzdHJpbmcsIGZ1bmNhb0lkOiBzdHJpbmcsIHN0YXR1czogU3RhdHVzKSB7CiAgY29uc3QgcyA9IHNiKCkhOwogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHMuZnJvbSgnZXNjYWxhY29lcycpLnVwZGF0ZSh7IHN0YXR1cywgcmVzcG9uZGlkb19lbTogbmV3IERhdGUoKS50b0lTT1N0cmluZygpIH0pCiAgICAuZXEoJ2N1bHRvX2lkJywgY3VsdG9JZCkuZXEoJ2Z1bmNhb19pZCcsIGZ1bmNhb0lkKTsKICBpZiAoZXJyb3IpIHRocm93IGVycm9yOwp9CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHZvbHVudMOhcmlvcyAtLS0gKi8KLyogQW50ZXMgaXN0byBlcmFtIERPSVMgaW5zZXJ0cyBhIHBhcnRpciBkbyBuYXZlZ2Fkb3I6IGEgcGVzc29hIGUsIGRlcG9pcywgYXMKICAgaGFiaWxpZGFkZXMgZGVsYS4gTyBzZWd1bmRvIG7Do28gb2xoYXZhIG8gZXJybywgZW50w6NvIHF1YW5kbyBlbGUgZmFsaGF2YSBhCiAgIHBlc3NvYSBuYXNjaWEgc2VtIGZ1bsOnw6NvIG5lbmh1bWEgZSBhIHRlbGEgZGl6aWEgcXVlIGVsYSB0aW5oYSBlbnRyYWRvIG5vCiAgIHRpbWUuIFRhbWLDqW0gbsOjbyBoYXZpYSB2YWxpZGHDp8OjbzogbyBjYW1pbmhvIHDDumJsaWNvIGV4aWdlIG5vbWUgY29tCiAgIHNvYnJlbm9tZSBlIHRlbGVmb25lIGRlIDEwIGEgMTMgZMOtZ2l0b3MsIG8gY2FtaW5obyBkbyBsw61kZXIgYWNlaXRhdmEKICAgcXVhbHF1ZXIgY29pc2EuCgogICBBZ29yYSDDqSBhIFJQQyBgY3JpYXJfdm9sdW50YXJpb2AgKG1pZ3Jhw6fDo28gMzIpLCBxdWUgZ3JhdmEgaWRlbnRpZGFkZSwKICAgdsOtbmN1bG8gZSBoYWJpbGlkYWRlcyBudW1hIHRyYW5zYcOnw6NvIHPDsyBlIHZhbGlkYSBubyBiYW5jby4gTWVzbW8gaWRpb21hIGRvCiAgIGBzYWx2YXJfZGlhYC4gTyBtYXBhIG5vbWXihpJpZCBkZWl4b3UgZGUgc2VyIG5lY2Vzc8OhcmlvOiBhIGZ1bsOnw6NvIGNhc2EgYQogICBmdW7Dp8OjbyBwZWxvIG5vbWUgZGVudHJvIGRvIFNRTC4gKi8KZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGNyaWFyVm9sdW50YXJpbygKICBlcXVpcGVJZDogc3RyaW5nLCBub21lOiBzdHJpbmcsIHRlbDogc3RyaW5nLCBsaW1pdGU6IG51bWJlciwgZnVuY29lczogUmVjb3JkPHN0cmluZywgTml2ZWw+LAopIHsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzYigpIS5ycGMoJ2NyaWFyX3ZvbHVudGFyaW8nLCB7CiAgICBwX2VxdWlwZTogZXF1aXBlSWQsIHBfbm9tZTogbm9tZSwgcF90ZWw6IHRlbCwgcF9saW1pdGU6IGxpbWl0ZSwgcF9mdW5jb2VzOiBmdW5jb2VzLAogIH0pOwogIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7CiAgY29uc3QgciA9IGRhdGEgYXMgeyBvazogYm9vbGVhbjsgZXJybz86IHN0cmluZzsgaWQ/OiBzdHJpbmcgfTsKICBpZiAoIXI/Lm9rKSB0aHJvdyBuZXcgRXJyb3IoUkVDQURPW3I/LmVycm8gfHwgJyddIHx8IHI/LmVycm8gfHwgJ27Do28gZGV1IHBhcmEgY2FkYXN0cmFyJyk7CiAgcmV0dXJuIHIuaWQgYXMgc3RyaW5nOwp9CgovKiBvIGJhbmNvIGZhbGEgZW0gY8OzZGlnbzsgYSB0ZWxhIGZhbGEgY29tIGdlbnRlLiAqLwpjb25zdCBSRUNBRE86IFJlY29yZDxzdHJpbmcsIHN0cmluZz4gPSB7CiAgTk9NRV9JTkNPTVBMRVRPOiAnRXNjcmV2YSBub21lIGUgc29icmVub21lJywKICBURUxFRk9ORV9JTlZBTElETzogJ1RlbGVmb25lIHByZWNpc2EgdGVyIERERCBlIG7Dum1lcm8nLAogIEpBX0NBREFTVFJBRE86ICdFc3NlIHRlbGVmb25lIGrDoSBlc3TDoSBubyB0aW1lJywKfTsKCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBhdHVhbGl6YXJWb2x1bnRhcmlvKGlkOiBzdHJpbmcsIGNhbXBvczogUmVjb3JkPHN0cmluZywgYW55PikgewogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHNiKCkhLmZyb20oJ3ZvbHVudGFyaW9zJykudXBkYXRlKGNhbXBvcykuZXEoJ2lkJywgaWQpOwogIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7Cn0KCmV4cG9ydCBhc3luYyBmdW5jdGlvbiByZW1vdmVyVm9sdW50YXJpbyhpZDogc3RyaW5nKSB7CiAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc2IoKSEuZnJvbSgndm9sdW50YXJpb3MnKS5kZWxldGUoKS5lcSgnaWQnLCBpZCk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKLyogUXVhbmRvIG8gTMONREVSIG1leGUgbm8gbsOtdmVsLCBlbGUgZXN0w6EgY29uZmVyaW5kbyDigJQgcG9yIGlzc28gdmFpIHBlbGEgUlBDLAogICBxdWUgZ3JhdmEgY29uZmlybWFkbyA9IHRydWUuIE7DrXZlbCBxdWUgYSBwZXNzb2EgZGVjbGFyb3Ugc296aW5oYSBjb250aW51YQogICB2YWxlbmRvIGNvbW8gcmVzZXJ2YSBhdMOpIHBhc3NhciBwb3IgYXF1aS4gKi8KZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGRlZmluaXJIYWJpbGlkYWRlKHZpZDogc3RyaW5nLCBmdW5jYW9JZDogc3RyaW5nLCBuaXZlbDogTml2ZWwgfCBudWxsKSB7CiAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc2IoKSEucnBjKCdjb25mZXJpcl9oYWJpbGlkYWRlJywgewogICAgcF92b2x1bnRhcmlvOiB2aWQsIHBfZnVuY2FvOiBmdW5jYW9JZCwgcF9uaXZlbDogbml2ZWwsCiAgfSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKLyogTk9UQTogbmVuaHVtYSB0ZWxhIGNoYW1hIGlzdG8gYWluZGEuIMOJIG8gY2FtaW5obyBwYXJhIG8gbMOtZGVyIHJlZ2lzdHJhciBxdWUKICAgYWxndcOpbSBhdmlzb3UgcG9yIFdoYXRzQXBwIHF1ZSBuw6NvIHBvZGUgbnVtIGRvbWluZ28sIGUgaG9qZSBlc3NlIGF2aXNvIG7Do28KICAgdGVtIG9uZGUgc2VyIGd1YXJkYWRvLiBGaWNhIGFxdWksIGNvcnJldG8sIGVzcGVyYW5kbyBhIHRlbGEgZGEgZmFzZSA1LgogICBBbnRlcyBlbmdvbGlhIG8gZXJybyBkb3MgZG9pcyBsYWRvcy4gKi8KZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGRlZmluaXJJbmRpc3BvbmliaWxpZGFkZSh2aWQ6IHN0cmluZywgZGF0YTogc3RyaW5nLCBtYXJjYXI6IGJvb2xlYW4pIHsKICBjb25zdCBzID0gc2IoKSE7CiAgY29uc3QgeyBlcnJvciB9ID0gbWFyY2FyCiAgICA/IGF3YWl0IHMuZnJvbSgnaW5kaXNwb25pYmlsaWRhZGVzJykudXBzZXJ0KHsgdm9sdW50YXJpb19pZDogdmlkLCBkYXRhIH0pCiAgICA6IGF3YWl0IHMuZnJvbSgnaW5kaXNwb25pYmlsaWRhZGVzJykuZGVsZXRlKCkuZXEoJ3ZvbHVudGFyaW9faWQnLCB2aWQpLmVxKCdkYXRhJywgZGF0YSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHNhbHZhckNvbmZpZyhlcXVpcGVJZDogc3RyaW5nLCBkYWRvczogYW55KSB7CiAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc2IoKSEuZnJvbSgnY29uZmlnJykudXBzZXJ0KHsgZXF1aXBlX2lkOiBlcXVpcGVJZCwgZGFkb3MgfSwgeyBvbkNvbmZsaWN0OiAnZXF1aXBlX2lkJyB9KTsKICBpZiAoZXJyb3IpIHRocm93IGVycm9yOwp9CgovKiBFcmEgdW0gdXBkYXRlIG91IGluc2VydCBwb3IgZnVuw6fDo28sIGVtIHPDqXJpZSwgZSBuZW5odW0gZGVsZXMgb2xoYXZhIG8gZXJybzoKICAgY2FpciBubyBtZWlvIGRlaXhhdmEgYSBsaXN0YSBkZSBwb3N0b3MgZGEgw6FyZWEgcGVsYSBtZXRhZGUgZSBhIHRlbGEgZGl6aWEKICAgIlNhbHZvIi4gQWdvcmEgw6kgYSBSUEMgYHNhbHZhcl9mdW5jb2VzYCAobWlncmHDp8OjbyAzMik6IHVtYSB0cmFuc2HDp8OjbywgZSBlbGEKICAgYWluZGEgcmVjdXNhIGV4cGxpY2l0YW1lbnRlIGZ1bsOnw6NvIGRlIG91dHJvIG1pbmlzdMOpcmlvIGVtIHZleiBkZSBkZWl4YXIgYQogICBSTFMgZmF6ZXIgYSBsaW5oYSBzdW1pciBlbSBzaWzDqm5jaW8uICovCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBzYWx2YXJGdW5jb2VzKGVxdWlwZUlkOiBzdHJpbmcsIGZ1bmNvZXM6IHsgaWQ/OiBzdHJpbmc7IG5vbWU6IHN0cmluZzsgc2ltdWx0YW5lYTogYm9vbGVhbjsgb3JkZW06IG51bWJlcjsgYXRpdmE6IGJvb2xlYW4gfVtdKSB7CiAgY29uc3QgeyBlcnJvciB9ID0gYXdhaXQgc2IoKSEucnBjKCdzYWx2YXJfZnVuY29lcycsIHsgcF9lcXVpcGU6IGVxdWlwZUlkLCBwX2Z1bmNvZXM6IGZ1bmNvZXMgfSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHJlbW92ZXJGdW5jYW8oaWQ6IHN0cmluZykgewogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHNiKCkhLmZyb20oJ2Z1bmNvZXMnKS5kZWxldGUoKS5lcSgnaWQnLCBpZCk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQoKLyogLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gbMOtZGVyZXMgLS0tICovCmV4cG9ydCB0eXBlIExpbmhhTGlkZXIgPSB7IGVtYWlsOiBzdHJpbmc7IGVxdWlwZV9pZDogc3RyaW5nIHwgbnVsbCB9OwoKLyogZXF1aXBlX2lkIG51bGwgPSBvcmdhbml6YSB0b2RvcyBvcyBtaW5pc3TDqXJpb3MuIFByZWVuY2hpZG8gPSBzw7MgYXF1ZWxlLgogICBBIG1lc21hIHBlc3NvYSBwb2RlIGFwYXJlY2VyIGR1YXMgdmV6ZXMsIHVtYSBwb3IgbWluaXN0w6lyaW8uICovCmV4cG9ydCBhc3luYyBmdW5jdGlvbiBsaXN0YXJMaWRlcmVzKCk6IFByb21pc2U8TGluaGFMaWRlcltdPiB7CiAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc2IoKSEuZnJvbSgnbGlkZXJlcycpLnNlbGVjdCgnZW1haWwsZXF1aXBlX2lkJykub3JkZXIoJ2VtYWlsJyk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKICByZXR1cm4gKGRhdGEgfHwgW10pIGFzIExpbmhhTGlkZXJbXTsKfQpleHBvcnQgYXN5bmMgZnVuY3Rpb24gYWRkTGlkZXIoZW1haWw6IHN0cmluZywgZXF1aXBlSWQ6IHN0cmluZyB8IG51bGwpIHsKICBjb25zdCB7IGVycm9yIH0gPSBhd2FpdCBzYigpIS5mcm9tKCdsaWRlcmVzJykKICAgIC5pbnNlcnQoeyBlbWFpbDogZW1haWwudHJpbSgpLnRvTG93ZXJDYXNlKCksIGVxdWlwZV9pZDogZXF1aXBlSWQgfSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQpleHBvcnQgYXN5bmMgZnVuY3Rpb24gcmVtb3ZlckxpZGVyKGVtYWlsOiBzdHJpbmcsIGVxdWlwZUlkOiBzdHJpbmcgfCBudWxsKSB7CiAgbGV0IHEgPSBzYigpIS5mcm9tKCdsaWRlcmVzJykuZGVsZXRlKCkuZXEoJ2VtYWlsJywgZW1haWwpOwogIHEgPSBlcXVpcGVJZCA/IHEuZXEoJ2VxdWlwZV9pZCcsIGVxdWlwZUlkKSA6IHEuaXMoJ2VxdWlwZV9pZCcsIG51bGwpOwogIGNvbnN0IHsgZXJyb3IgfSA9IGF3YWl0IHE7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKfQovKiBxdWVtIG9yZ2FuaXphIFRVRE8gw6kgcXVlbSBwb2RlIGRhciBlIHRpcmFyIGFjZXNzbyAqLwpleHBvcnQgYXN5bmMgZnVuY3Rpb24gc291T3JnYW5pemFkb3JHZXJhbCgpOiBQcm9taXNlPGJvb2xlYW4+IHsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzYigpIS5ycGMoJ2xpZGVyYV90dWRvJyk7CiAgaWYgKGVycm9yKSByZXR1cm4gZmFsc2U7CiAgcmV0dXJuICEhZGF0YTsKfQoKLyogbyBsw61kZXIgY29uZmVyZSBvIG7DrXZlbCBxdWUgYSBwZXNzb2EgZGVjbGFyb3Ugbm8gYXV0by1jYWRhc3RybyAqLwpleHBvcnQgYXN5bmMgZnVuY3Rpb24gY29uZmVyaXJWb2x1bnRhcmlvKGlkOiBzdHJpbmcpIHsKICBjb25zdCB7IGVycm9yIH0gPSBhd2FpdCBzYigpIS5ycGMoJ2NvbmZlcmlyX3ZvbHVudGFyaW8nLCB7IHBfaWQ6IGlkIH0pOwogIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7Cn0K"}
+'use client';
+import { sb } from './supabase';
+import { addDias, Estado, hojeISO, Nivel, Status } from './engine';
+import { montarEstado, paraSalvarDia } from './ponte';
+
+/* Ponte entre o banco e o objeto de estado que o motor entende.
+   O motor nunca sabe que existe Supabase. */
+
+export async function carregarEstado(equipeId: string, nomeEquipe = ''): Promise<Estado> {
+  const s = sb();
+  if (!s) throw new Error('sem conexão');
+  /* Janela: o app só precisa do histórico recente (a carga olha no máximo
+     180 dias para trás) e do futuro. Sem isso, cada troca de ministério
+     puxava o histórico inteiro da igreja desde sempre. */
+  const desde = addDias(hojeISO(), -200);
+  const [funcoes, vols, cultos, cfg] = await Promise.all([
+    s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
+    /* colunas explícitas, não `*`: desde a migração 18 o `pin_hash` está fora
+       do GRANT de `authenticated`, e `select *` num GRANT por coluna estoura
+       com "permission denied for column" em vez de simplesmente omitir. */
+    s.from('voluntarios')
+      .select('id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email')
+      .eq('equipe_id', equipeId).order('nome'),
+    s.from('cultos').select('id,data').gte('data', desde).order('data'),
+    s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
+  ]);
+  const e1 = [funcoes, vols, cultos].find(r => r.error);
+  if (e1?.error) throw e1.error;
+
+  const funcaoIds = (funcoes.data || []).map(f => f.id);
+  const volIds = (vols.data || []).map(v => v.id);
+  const cultoIds = (cultos.data || []).map(c => c.id);
+  const vazio = Promise.resolve({ data: [] as any[] });
+  // fase 2: linhas dependentes, filtradas para a equipe (nada vaza de outra)
+  const [habs, indis, escs, plants, recados, disp] = await Promise.all([
+    volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : vazio,
+    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds) : vazio,
+    funcaoIds.length ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds) : vazio,
+    volIds.length ? s.from('plantoes').select('*').in('voluntario_id', volIds) : vazio,
+    cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
+    /* respostas de "posso": é o que o líder precisa ver para montar a escala.
+       Sem isto o voluntário respondia e ninguém enxergava. */
+    volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
+  ]);
+  return montarEstado({
+    funcoes: funcoes.data || [], voluntarios: vols.data || [], habilidades: (habs as any).data || [],
+    indisponibilidades: (indis as any).data || [], cultos: cultos.data || [],
+    escalacoes: (escs as any).data || [], plantoes: (plants as any).data || [],
+    recados: (recados as any).data || [], disponibilidades: (disp as any).data || [],
+    config: cfg?.data || null, equipe: nomeEquipe,
+  });
+}
+
+/* -------------------------------------------------------------- escrita --- */
+export async function salvarDia(S: Estado, data: string, equipeId: string) {
+  const s = sb()!;
+  const params = paraSalvarDia(S, data, equipeId);
+  if (!params) return;
+  // uma transação só: ou grava o domingo inteiro, ou não mexe em nada
+  const { data: cultoId, error } = await s.rpc('salvar_dia', params);
+  if (error) throw error;
+  S.escalas[data].cultoId = cultoId as string;
+}
+
+export async function salvarDias(S: Estado, datas: string[], equipeId: string) {
+  for (const d of datas) await salvarDia(S, d, equipeId);
+}
+
+export async function mudarStatus(cultoId: string, funcaoId: string, status: Status) {
+  const s = sb()!;
+  const { error } = await s.from('escalacoes').update({ status, respondido_em: new Date().toISOString() })
+    .eq('culto_id', cultoId).eq('funcao_id', funcaoId);
+  if (error) throw error;
+}
+
+/* ---------------------------------------------------------- voluntários --- */
+/* Antes isto eram DOIS inserts a partir do navegador: a pessoa e, depois, as
+   habilidades dela. O segundo não olhava o erro, então quando ele falhava a
+   pessoa nascia sem função nenhuma e a tela dizia que ela tinha entrado no
+   time. Também não havia validação: o caminho público exige nome com
+   sobrenome e telefone de 10 a 13 dígitos, o caminho do líder aceitava
+   qualquer coisa.
+
+   Agora é a RPC `criar_voluntario` (migração 32), que grava identidade,
+   vínculo e habilidades numa transação só e valida no banco. Mesmo idioma do
+   `salvar_dia`. O mapa nome→id deixou de ser necessário: a função casa a
+   função pelo nome dentro do SQL. */
+export async function criarVoluntario(
+  equipeId: string, nome: string, tel: string, limite: number, funcoes: Record<string, Nivel>,
+) {
+  const { data, error } = await sb()!.rpc('criar_voluntario', {
+    p_equipe: equipeId, p_nome: nome, p_tel: tel, p_limite: limite, p_funcoes: funcoes,
+  });
+  if (error) throw error;
+  const r = data as { ok: boolean; erro?: string; id?: string };
+  if (!r?.ok) throw new Error(RECADO[r?.erro || ''] || r?.erro || 'não deu para cadastrar');
+  return r.id as string;
+}
+
+/* o banco fala em código; a tela fala com gente. */
+const RECADO: Record<string, string> = {
+  NOME_INCOMPLETO: 'Escreva nome e sobrenome',
+  TELEFONE_INVALIDO: 'Telefone precisa ter DDD e número',
+  JA_CADASTRADO: 'Esse telefone já está no time',
+};
+
+export async function atualizarVoluntario(id: string, campos: Record<string, any>) {
+  const { error } = await sb()!.from('voluntarios').update(campos).eq('id', id);
+  if (error) throw error;
+}
+
+export async function removerVoluntario(id: string) {
+  const { error } = await sb()!.from('voluntarios').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* Quando o LÍDER mexe no nível, ele está conferindo — por isso vai pela RPC,
+   que grava confirmado = true. Nível que a pessoa declarou sozinha continua
+   valendo como reserva até passar por aqui. */
+export async function definirHabilidade(vid: string, funcaoId: string, nivel: Nivel | null) {
+  const { error } = await sb()!.rpc('conferir_habilidade', {
+    p_voluntario: vid, p_funcao: funcaoId, p_nivel: nivel,
+  });
+  if (error) throw error;
+}
+
+/* NOTA: nenhuma tela chama isto ainda. É o caminho para o líder registrar que
+   alguém avisou por WhatsApp que não pode num domingo, e hoje esse aviso não
+   tem onde ser guardado. Fica aqui, correto, esperando a tela da fase 5.
+   Antes engolia o erro dos dois lados. */
+export async function definirIndisponibilidade(vid: string, data: string, marcar: boolean) {
+  const s = sb()!;
+  const { error } = marcar
+    ? await s.from('indisponibilidades').upsert({ voluntario_id: vid, data })
+    : await s.from('indisponibilidades').delete().eq('voluntario_id', vid).eq('data', data);
+  if (error) throw error;
+}
+
+export async function salvarConfig(equipeId: string, dados: any) {
+  const { error } = await sb()!.from('config').upsert({ equipe_id: equipeId, dados }, { onConflict: 'equipe_id' });
+  if (error) throw error;
+}
+
+/* Era um update ou insert por função, em série, e nenhum deles olhava o erro:
+   cair no meio deixava a lista de postos da área pela metade e a tela dizia
+   "Salvo". Agora é a RPC `salvar_funcoes` (migração 32): uma transação, e ela
+   ainda recusa explicitamente função de outro ministério em vez de deixar a
+   RLS fazer a linha sumir em silêncio. */
+export async function salvarFuncoes(equipeId: string, funcoes: { id?: string; nome: string; simultanea: boolean; ordem: number; ativa: boolean }[]) {
+  const { error } = await sb()!.rpc('salvar_funcoes', { p_equipe: equipeId, p_funcoes: funcoes });
+  if (error) throw error;
+}
+
+export async function removerFuncao(id: string) {
+  const { error } = await sb()!.from('funcoes').delete().eq('id', id);
+  if (error) throw error;
+}
+
+/* -------------------------------------------------------------- líderes --- */
+export type LinhaLider = { email: string; equipe_id: string | null };
+
+/* equipe_id null = organiza todos os ministérios. Preenchido = só aquele.
+   A mesma pessoa pode aparecer duas vezes, uma por ministério. */
+export async function listarLideres(): Promise<LinhaLider[]> {
+  const { data, error } = await sb()!.from('lideres').select('email,equipe_id').order('email');
+  if (error) throw error;
+  return (data || []) as LinhaLider[];
+}
+export async function addLider(email: string, equipeId: string | null) {
+  const { error } = await sb()!.from('lideres')
+    .insert({ email: email.trim().toLowerCase(), equipe_id: equipeId });
+  if (error) throw error;
+}
+export async function removerLider(email: string, equipeId: string | null) {
+  let q = sb()!.from('lideres').delete().eq('email', email);
+  q = equipeId ? q.eq('equipe_id', equipeId) : q.is('equipe_id', null);
+  const { error } = await q;
+  if (error) throw error;
+}
+/* quem organiza TUDO é quem pode dar e tirar acesso */
+export async function souOrganizadorGeral(): Promise<boolean> {
+  const { data, error } = await sb()!.rpc('lidera_tudo');
+  if (error) return false;
+  return !!data;
+}
+
+/* o líder confere o nível que a pessoa declarou no auto-cadastro */
+export async function conferirVoluntario(id: string) {
+  const { error } = await sb()!.rpc('conferir_voluntario', { p_id: id });
+  if (error) throw error;
+}

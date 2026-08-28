@@ -1,1 +1,117 @@
-{"data":"LS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IE7DjVZFTCBERUNMQVJBRE8geCBOw41WRUwgQ09ORkVSSURPID09PT09PT09PQotLSBPIGF1dG8tY2FkYXN0cm8gZGVpeG91ICJ0aXR1bGFyIiB2aXJhciB1bWEgY29pc2EgcXVlIGEgcGVzc29hIHNlIGTDoSwgbsOjbwotLSB1bWEgY29pc2EgcXVlIGVsYSByZWNlYmUuIERlIDE2IGNhZGFzdHJvcywgMTUgc2UgZGVjbGFyYXJhbSBlIHPDsyAxIHBlc3NvYQotLSB1c291ICJyZXNlcnZhIjogdG9kbyBtdW5kbyB0b2NvdSB1bWEgdmV6IGVtIGNhZGEgw6FyZWEgZSBmb2kgZW1ib3JhLCBwb3JxdWUKLS0gdW0gdG9xdWUgbm8gY2hpcCBqw6EgZXJhIHRpdHVsYXIuCi0tCi0tIE8gZXN0cmFnbyBuw6NvIMOpIHNvY2lhbCwgw6kgZGUgbW90b3I6IGNvbSB0b2RvIG11bmRvIHRpdHVsYXIsIG8gcGVzbyBkbyBuw612ZWwKLS0gZmljYSBpZ3VhbCBwYXJhIHRvZG9zIGUgbyBzb3J0ZWlvIGRlaXhhIGRlIGNvbnNpZGVyYXIgaGFiaWxpZGFkZS4gRSBhIHNhw7pkZQotLSBkbyB0aW1lIG1lbnRlLCBwb3JxdWUgY29udGEgY29tbyAiYXB0byIgcXVlbSBuaW5ndcOpbSB2ZXJpZmljb3UuCi0tCi0tIEEgY29ycmXDp8OjbyBOw4NPIMOpIGJsb3F1ZWFyIG5pbmd1w6ltLiDDiSBzZXBhcmFyIG8gcXVlIGEgcGVzc29hIERJWiBkbyBxdWUgbwotLSBsw61kZXIgQ09ORkVSSVUsIGUgZmF6ZXIgbyBtb3RvciBjb25maWFyIHPDsyBubyBzZWd1bmRvLgoKLS0gMSkgYSBjb2x1bmEuIERlZmF1bHQgdHJ1ZSBkZSBwcm9ww7NzaXRvOiBvIHF1ZSBqw6EgZXhpc3RpYSBmb2kgbyBsw61kZXIgcXVlCi0tICAgIGNhZGFzdHJvdSwgZW50w6NvIGNvbnRpbnVhIHZhbGVuZG8uIE8gYmFja2ZpbGwgbG9nbyBhYmFpeG8gw6kgcXVlIG1hcmNhCi0tICAgIGNvbW8gbsOjbyBjb25mZXJpZG8gdHVkbyBxdWUgdmVpbyBkZSBhdXRvLWNhZGFzdHJvLgphbHRlciB0YWJsZSBoYWJpbGlkYWRlcyBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgY29uZmlybWFkbyBib29sZWFuIG5vdCBudWxsIGRlZmF1bHQgdHJ1ZTsKCi0tIDIpIGJhY2tmaWxsOiBxdWVtIGVudHJvdSBzb3ppbmhvICh2b2x1bnRhcmlvcy5jb25mZXJpZG8gPSBmYWxzZSkgdGVtIFRPREFTCi0tICAgIGFzIGhhYmlsaWRhZGVzIGNvbW8gZGVjbGFyYWRhcywgbsOjbyBjb25mZXJpZGFzLgp1cGRhdGUgaGFiaWxpZGFkZXMgaCBzZXQgY29uZmlybWFkbyA9IGZhbHNlCiAgZnJvbSB2b2x1bnRhcmlvcyB2CiB3aGVyZSB2LmlkID0gaC52b2x1bnRhcmlvX2lkIGFuZCB2LmNvbmZlcmlkbyA9IGZhbHNlOwoKY29tbWVudCBvbiBjb2x1bW4gaGFiaWxpZGFkZXMuY29uZmlybWFkbyBpcwogICdmYWxzZSA9IGEgcGVzc29hIGRlY2xhcm91IG5vIGF1dG8tY2FkYXN0cm8gZSBuaW5ndcOpbSBkbyB0aW1lIGNvbmZlcml1IGFpbmRhLiBPIG1vdG9yIGzDqiB0aXR1bGFyIG7Do28gY29uZmlybWFkbyBjb21vIHJlc2VydmEuJzsKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCi0tIDMpIGF1dG8tY2FkYXN0cm8gcGFzc2EgYSBncmF2YXIgaGFiaWxpZGFkZSBjb21vIERFQ0xBUkFEQS4KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gaW5zY3JldmVyKAogIHBfc2x1ZyB0ZXh0LCBwX25vbWUgdGV4dCwgcF90ZWwgdGV4dCwgcF9lbWFpbCB0ZXh0LCBwX2Z1bmNvZXMganNvbmIKKSByZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlCiAgdl9lcSB1dWlkOyB2X2lkIHV1aWQ7IHZfdG9rZW4gdGV4dDsgdl9ub21lIHRleHQ7IHZfdGVsIHRleHQ7IHZfbWFpbCB0ZXh0OwogIHZfYXJlYXMgaW50OyB2X3JlY2VudGVzIGludDsKYmVnaW4KICBzZWxlY3QgaWQgaW50byB2X2VxIGZyb20gZXF1aXBlcyB3aGVyZSBzbHVnID0gcF9zbHVnOwogIGlmIHZfZXEgaXMgbnVsbCB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ0VRVUlQRScpOyBlbmQgaWY7CgogIHZfbm9tZSA6PSBidHJpbShjb2FsZXNjZShwX25vbWUsICcnKSk7CiAgdl90ZWwgIDo9IHJlZ2V4cF9yZXBsYWNlKGNvYWxlc2NlKHBfdGVsLCAnJyksICdbXjAtOV0nLCAnJywgJ2cnKTsKICB2X21haWwgOj0gbnVsbGlmKGJ0cmltKGxvd2VyKGNvYWxlc2NlKHBfZW1haWwsICcnKSkpLCAnJyk7CiAgaWYgbGVuZ3RoKHZfbm9tZSkgPCAzIHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTk9NRScpOyBlbmQgaWY7CiAgaWYgbGVuZ3RoKHZfdGVsKSA8IDEwIHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnVEVMRUZPTkUnKTsgZW5kIGlmOwoKICBpZiBleGlzdHMgKHNlbGVjdCAxIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgZXF1aXBlX2lkID0gdl9lcQogICAgICAgICAgICAgIGFuZCByZWdleHBfcmVwbGFjZShjb2FsZXNjZSh0ZWxlZm9uZSwnJyksICdbXjAtOV0nLCAnJywgJ2cnKSA9IHZfdGVsKSB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdKQV9FWElTVEUnKTsKICBlbmQgaWY7CgogIHNlbGVjdCBjb3VudCgqKSBpbnRvIHZfYXJlYXMgZnJvbSBqc29uYl9lYWNoX3RleHQoY29hbGVzY2UocF9mdW5jb2VzLCAne30nOjpqc29uYikpIHgKICAgd2hlcmUgeC52YWx1ZSBpbiAoJ3RpdHVsYXInLCAncmVzZXJ2YScsICd0cmVpbm8nKTsKICBpZiB2X2FyZWFzID0gMCB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ1NFTV9BUkVBJyk7IGVuZCBpZjsKCiAgc2VsZWN0IGNvdW50KCopIGludG8gdl9yZWNlbnRlcyBmcm9tIHZvbHVudGFyaW9zIHYKICAgd2hlcmUgdi5lcXVpcGVfaWQgPSB2X2VxIGFuZCB2LmNyaWFkb19lbSA+IG5vdygpIC0gaW50ZXJ2YWwgJzEgaG91cic7CiAgaWYgdl9yZWNlbnRlcyA+PSA0MCB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ01VSVRPU19DQURBU1RST1MnKTsgZW5kIGlmOwoKICBpbnNlcnQgaW50byB2b2x1bnRhcmlvcyAoZXF1aXBlX2lkLCBub21lLCB0ZWxlZm9uZSwgZW1haWwsIGNvbmZlcmlkbykKICAgICAgIHZhbHVlcyAodl9lcSwgdl9ub21lLCB2X3RlbCwgdl9tYWlsLCBmYWxzZSkKICAgIHJldHVybmluZyBpZCwgdG9rZW4gaW50byB2X2lkLCB2X3Rva2VuOwoKICBpbnNlcnQgaW50byBoYWJpbGlkYWRlcyAodm9sdW50YXJpb19pZCwgZnVuY2FvX2lkLCBuaXZlbCwgY29uZmlybWFkbykKICBzZWxlY3Qgdl9pZCwgZi5pZCwgeC52YWx1ZTo6bml2ZWxfaGFiaWxpZGFkZSwgZmFsc2UKICAgIGZyb20ganNvbmJfZWFjaF90ZXh0KHBfZnVuY29lcykgeAogICAgam9pbiBmdW5jb2VzIGYgb24gZi5lcXVpcGVfaWQgPSB2X2VxIGFuZCBmLm5vbWUgPSB4LmtleSBhbmQgZi5hdGl2YQogICB3aGVyZSB4LnZhbHVlIGluICgndGl0dWxhcicsICdyZXNlcnZhJywgJ3RyZWlubycpCiAgb24gY29uZmxpY3QgKHZvbHVudGFyaW9faWQsIGZ1bmNhb19pZCkgZG8gbm90aGluZzsKCiAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCB0cnVlLCAndG9rZW4nLCB2X3Rva2VuLCAnbm9tZScsIHZfbm9tZSk7CmVuZCAkZm4kOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGluc2NyZXZlcih0ZXh0LCB0ZXh0LCB0ZXh0LCB0ZXh0LCBqc29uYikgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gaW5zY3JldmVyKHRleHQsIHRleHQsIHRleHQsIHRleHQsIGpzb25iKSB0byBhbm9uLCBhdXRoZW50aWNhdGVkOwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoKLS0gNCkgbyBsw61kZXIgY29uZmVyZSB1bWEgaGFiaWxpZGFkZS4gcF9uaXZlbCBudWxsID0gYSBwZXNzb2EgbsOjbyBmYXogZXNzYSDDoXJlYS4KLS0gICAgQ29uZmlybWFyIMOpIG8gw7puaWNvIGNhbWluaG8gcGFyYSAidGl0dWxhciIgdmFsZXIgZGUgdmVyZGFkZSBubyBzb3J0ZWlvLgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBjb25mZXJpcl9oYWJpbGlkYWRlKAogIHBfdm9sdW50YXJpbyB1dWlkLCBwX2Z1bmNhbyB1dWlkLCBwX25pdmVsIHRleHQKKSByZXR1cm5zIHZvaWQKbGFuZ3VhZ2UgcGxwZ3NxbCBzZWN1cml0eSBpbnZva2VyIHNldCBzZWFyY2hfcGF0aCA9IHB1YmxpYyBhcyAkZm4kCmJlZ2luCiAgaWYgcF9uaXZlbCBpcyBudWxsIG9yIHBfbml2ZWwgPSAnJyB0aGVuCiAgICBkZWxldGUgZnJvbSBoYWJpbGlkYWRlcyB3aGVyZSB2b2x1bnRhcmlvX2lkID0gcF92b2x1bnRhcmlvIGFuZCBmdW5jYW9faWQgPSBwX2Z1bmNhbzsKICBlbHNlCiAgICBpbnNlcnQgaW50byBoYWJpbGlkYWRlcyAodm9sdW50YXJpb19pZCwgZnVuY2FvX2lkLCBuaXZlbCwgY29uZmlybWFkbykKICAgICAgICAgdmFsdWVzIChwX3ZvbHVudGFyaW8sIHBfZnVuY2FvLCBwX25pdmVsOjpuaXZlbF9oYWJpbGlkYWRlLCB0cnVlKQogICAgb24gY29uZmxpY3QgKHZvbHVudGFyaW9faWQsIGZ1bmNhb19pZCkKICAgICAgZG8gdXBkYXRlIHNldCBuaXZlbCA9IGV4Y2x1ZGVkLm5pdmVsLCBjb25maXJtYWRvID0gdHJ1ZTsKICBlbmQgaWY7CgogIC8qIHF1YW5kbyBuw6NvIHNvYnJhIG5lbmh1bWEgaGFiaWxpZGFkZSBwZW5kZW50ZSwgYSBwZXNzb2EgaW50ZWlyYSBlc3TDoQogICAgIGNvbmZlcmlkYTogw6kgaXNzbyBxdWUgdGlyYSBvIHNlbG8gZGUgIm5vdm8iIGRhIGFiYSBUaW1lLiAqLwogIHVwZGF0ZSB2b2x1bnRhcmlvcyB2IHNldCBjb25mZXJpZG8gPSB0cnVlCiAgIHdoZXJlIHYuaWQgPSBwX3ZvbHVudGFyaW8KICAgICBhbmQgbm90IGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBoYWJpbGlkYWRlcyBoCiAgICAgICAgICAgICAgICAgICAgICB3aGVyZSBoLnZvbHVudGFyaW9faWQgPSB2LmlkIGFuZCBoLmNvbmZpcm1hZG8gPSBmYWxzZSk7CmVuZCAkZm4kOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGNvbmZlcmlyX2hhYmlsaWRhZGUodXVpZCwgdXVpZCwgdGV4dCkgZnJvbSBwdWJsaWMsIGFub247CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gY29uZmVyaXJfaGFiaWxpZGFkZSh1dWlkLCB1dWlkLCB0ZXh0KSB0byBhdXRoZW50aWNhdGVkOwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoKLS0gNSkgImNvbmZlcmkgdHVkbyBkZXNzYSBwZXNzb2EiOiBvIGF0YWxobyBkYSBhYmEgVGltZS4gQW50ZXMgc8OzIHRpcmF2YSBvIHNlbG8KLS0gICAgZGUgIm5vdm8iIGUgZGVpeGF2YSBhcyBoYWJpbGlkYWRlcyBwZW5kZW50ZXMsIG91IHNlamEsIG8gYm90w6NvIG1lbnRpYS4KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gY29uZmVyaXJfdm9sdW50YXJpbyhwX2lkIHV1aWQpCnJldHVybnMgdm9pZApsYW5ndWFnZSBwbHBnc3FsIHNlY3VyaXR5IGludm9rZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKYmVnaW4KICB1cGRhdGUgaGFiaWxpZGFkZXMgc2V0IGNvbmZpcm1hZG8gPSB0cnVlIHdoZXJlIHZvbHVudGFyaW9faWQgPSBwX2lkOwogIHVwZGF0ZSB2b2x1bnRhcmlvcyBzZXQgY29uZmVyaWRvID0gdHJ1ZSB3aGVyZSBpZCA9IHBfaWQ7CmVuZCAkZm4kOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGNvbmZlcmlyX3ZvbHVudGFyaW8odXVpZCkgZnJvbSBwdWJsaWMsIGFub247CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gY29uZmVyaXJfdm9sdW50YXJpbyh1dWlkKSB0byBhdXRoZW50aWNhdGVkOwo="}
+-- ============================== NÍVEL DECLARADO x NÍVEL CONFERIDO =========
+-- O auto-cadastro deixou "titular" virar uma coisa que a pessoa se dá, não
+-- uma coisa que ela recebe. De 16 cadastros, 15 se declararam e só 1 pessoa
+-- usou "reserva": todo mundo tocou uma vez em cada área e foi embora, porque
+-- um toque no chip já era titular.
+--
+-- O estrago não é social, é de motor: com todo mundo titular, o peso do nível
+-- fica igual para todos e o sorteio deixa de considerar habilidade. E a saúde
+-- do time mente, porque conta como "apto" quem ninguém verificou.
+--
+-- A correção NÃO é bloquear ninguém. É separar o que a pessoa DIZ do que o
+-- líder CONFERIU, e fazer o motor confiar só no segundo.
+
+-- 1) a coluna. Default true de propósito: o que já existia foi o líder que
+--    cadastrou, então continua valendo. O backfill logo abaixo é que marca
+--    como não conferido tudo que veio de auto-cadastro.
+alter table habilidades add column if not exists confirmado boolean not null default true;
+
+-- 2) backfill: quem entrou sozinho (voluntarios.conferido = false) tem TODAS
+--    as habilidades como declaradas, não conferidas.
+update habilidades h set confirmado = false
+  from voluntarios v
+ where v.id = h.voluntario_id and v.conferido = false;
+
+comment on column habilidades.confirmado is
+  'false = a pessoa declarou no auto-cadastro e ninguém do time conferiu ainda. O motor lê titular não confirmado como reserva.';
+
+----------------------------------------------------------------------------
+
+-- 3) auto-cadastro passa a gravar habilidade como DECLARADA.
+create or replace function inscrever(
+  p_slug text, p_nome text, p_tel text, p_email text, p_funcoes jsonb
+) returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare
+  v_eq uuid; v_id uuid; v_token text; v_nome text; v_tel text; v_mail text;
+  v_areas int; v_recentes int;
+begin
+  select id into v_eq from equipes where slug = p_slug;
+  if v_eq is null then return jsonb_build_object('ok', false, 'erro', 'EQUIPE'); end if;
+
+  v_nome := btrim(coalesce(p_nome, ''));
+  v_tel  := regexp_replace(coalesce(p_tel, ''), '[^0-9]', '', 'g');
+  v_mail := nullif(btrim(lower(coalesce(p_email, ''))), '');
+  if length(v_nome) < 3 then return jsonb_build_object('ok', false, 'erro', 'NOME'); end if;
+  if length(v_tel) < 10 then return jsonb_build_object('ok', false, 'erro', 'TELEFONE'); end if;
+
+  if exists (select 1 from voluntarios where equipe_id = v_eq
+              and regexp_replace(coalesce(telefone,''), '[^0-9]', '', 'g') = v_tel) then
+    return jsonb_build_object('ok', false, 'erro', 'JA_EXISTE');
+  end if;
+
+  select count(*) into v_areas from jsonb_each_text(coalesce(p_funcoes, '{}'::jsonb)) x
+   where x.value in ('titular', 'reserva', 'treino');
+  if v_areas = 0 then return jsonb_build_object('ok', false, 'erro', 'SEM_AREA'); end if;
+
+  select count(*) into v_recentes from voluntarios v
+   where v.equipe_id = v_eq and v.criado_em > now() - interval '1 hour';
+  if v_recentes >= 40 then return jsonb_build_object('ok', false, 'erro', 'MUITOS_CADASTROS'); end if;
+
+  insert into voluntarios (equipe_id, nome, telefone, email, conferido)
+       values (v_eq, v_nome, v_tel, v_mail, false)
+    returning id, token into v_id, v_token;
+
+  insert into habilidades (voluntario_id, funcao_id, nivel, confirmado)
+  select v_id, f.id, x.value::nivel_habilidade, false
+    from jsonb_each_text(p_funcoes) x
+    join funcoes f on f.equipe_id = v_eq and f.nome = x.key and f.ativa
+   where x.value in ('titular', 'reserva', 'treino')
+  on conflict (voluntario_id, funcao_id) do nothing;
+
+  return jsonb_build_object('ok', true, 'token', v_token, 'nome', v_nome);
+end $fn$;
+revoke all on function inscrever(text, text, text, text, jsonb) from public;
+grant execute on function inscrever(text, text, text, text, jsonb) to anon, authenticated;
+
+----------------------------------------------------------------------------
+
+-- 4) o líder confere uma habilidade. p_nivel null = a pessoa não faz essa área.
+--    Confirmar é o único caminho para "titular" valer de verdade no sorteio.
+create or replace function conferir_habilidade(
+  p_voluntario uuid, p_funcao uuid, p_nivel text
+) returns void
+language plpgsql security invoker set search_path = public as $fn$
+begin
+  if p_nivel is null or p_nivel = '' then
+    delete from habilidades where voluntario_id = p_voluntario and funcao_id = p_funcao;
+  else
+    insert into habilidades (voluntario_id, funcao_id, nivel, confirmado)
+         values (p_voluntario, p_funcao, p_nivel::nivel_habilidade, true)
+    on conflict (voluntario_id, funcao_id)
+      do update set nivel = excluded.nivel, confirmado = true;
+  end if;
+
+  /* quando não sobra nenhuma habilidade pendente, a pessoa inteira está
+     conferida: é isso que tira o selo de "novo" da aba Time. */
+  update voluntarios v set conferido = true
+   where v.id = p_voluntario
+     and not exists (select 1 from habilidades h
+                      where h.voluntario_id = v.id and h.confirmado = false);
+end $fn$;
+revoke all on function conferir_habilidade(uuid, uuid, text) from public, anon;
+grant execute on function conferir_habilidade(uuid, uuid, text) to authenticated;
+
+----------------------------------------------------------------------------
+
+-- 5) "conferi tudo dessa pessoa": o atalho da aba Time. Antes só tirava o selo
+--    de "novo" e deixava as habilidades pendentes, ou seja, o botão mentia.
+create or replace function conferir_voluntario(p_id uuid)
+returns void
+language plpgsql security invoker set search_path = public as $fn$
+begin
+  update habilidades set confirmado = true where voluntario_id = p_id;
+  update voluntarios set conferido = true where id = p_id;
+end $fn$;
+revoke all on function conferir_voluntario(uuid) from public, anon;
+grant execute on function conferir_voluntario(uuid) to authenticated;

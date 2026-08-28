@@ -1,1 +1,100 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMDgg4oCUIFBJTiBwZXNzb2FsICsgbGlzdGEgZGEgZXF1aXBlIHBvciDDgVJFQQoKICAgUE9SIFFVRTogYSAwNyB0aXJvdSBhIGxpc3RhIGRlIG5vbWVzIHBhcmEgZmVjaGFyIGEgYnJlY2hhIGRvcyA0IGTDrWdpdG9zLCBtYXMKICAgaXNzbyBkZWl4b3UgcXVlbSBwZXJkZXUgbyBsaW5rIGRlcGVuZGVuZG8gZG8gbMOtZGVyIOKAlCBvIGzDrWRlciB2aXJhdmEgZ2FyZ2FsbywKICAgcXVlIMOpIG8gb3Bvc3RvIGRvIHF1ZSBvIHNpc3RlbWEgZXhpc3RlIHBhcmEgcmVzb2x2ZXIuCgogICBTT0xVw4fDg086IGEgbGlzdGEgdm9sdGEsIGFnb3JhIGFncnVwYWRhIHBvciDDoXJlYS4gT3MgNCDDumx0aW1vcyBkw61naXRvcyBkbwogICBXaGF0c0FwcCBzZXJ2ZW0gVU1BIHZleiBzw7MsIHBhcmEgYSBwZXNzb2EgQ1JJQVIgdW0gUElOIHByw7NwcmlvLiBEYSBzZWd1bmRhCiAgIHZleiBlbSBkaWFudGUgbyBQSU4gw6kgYSBjcmVkZW5jaWFsIOKAlCBlIFBJTiDDqSBzZWdyZWRvIGRlIHZlcmRhZGUsIGRpZmVyZW50ZQogICBkbyB0ZWxlZm9uZSwgcXVlIHRvZG8gbXVuZG8gZG8gZ3J1cG8gZW54ZXJnYS4KCiAgIE8gUElOIG51bmNhIMOpIGdyYXZhZG8gZW0gdGV4dG86IHZhaSBjb21vIHNoYTI1NihwaW4gfHwgdG9rZW4pIGVtIHBpbl9oYXNoLgogICBPIHRva2VuIMOpIMO6bmljbyBwb3IgcGVzc29hLCBlbnTDo28gZnVuY2lvbmEgY29tbyBzYWwuCiAgIGBlcXVpcGVfZW50cmFyYCAoYSBmdW7Dp8OjbyBhbnRpZ2EsIGluc2VndXJhKSBjb250aW51YSBSRVZPR0FEQSBkYSAwNy4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCmFsdGVyIHRhYmxlIHZvbHVudGFyaW9zIGFkZCBjb2x1bW4gaWYgbm90IGV4aXN0cyBwaW5faGFzaCB0ZXh0OwoKLyogLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBvIHRpbWUsIHBvciDDoXJlYSAqLwpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBlcXVpcGVfdGltZShwX3NsdWcgdGV4dCkKcmV0dXJucyB0YWJsZShhcmVhIHRleHQsIG9yZGVtIGludCwgdm9sdW50YXJpb19pZCB1dWlkLCBwcmltZWlyb19ub21lIHRleHQsIG5pdmVsIHRleHQsIHRlbV9waW4gYm9vbGVhbiwgdGVtX3RlbCBib29sZWFuKQpsYW5ndWFnZSBzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgc3RhYmxlIGFzICRmbiQKICBzZWxlY3QgZi5ub21lLCBmLm9yZGVtLCB2LmlkLAogICAgICAgICBzcGxpdF9wYXJ0KGJ0cmltKHYubm9tZSksICcgJywgMSksCiAgICAgICAgIGgubml2ZWw6OnRleHQsCiAgICAgICAgIHYucGluX2hhc2ggaXMgbm90IG51bGwsCiAgICAgICAgIG51bGxpZih0ZWxfbm9ybSh2LnRlbGVmb25lKSwnJykgaXMgbm90IG51bGwKICAgIGZyb20gdm9sdW50YXJpb3MgdgogICAgam9pbiBlcXVpcGVzIGUgb24gZS5pZCA9IHYuZXF1aXBlX2lkIGFuZCBlLnNsdWcgPSBwX3NsdWcKICAgIGpvaW4gaGFiaWxpZGFkZXMgaCBvbiBoLnZvbHVudGFyaW9faWQgPSB2LmlkCiAgICBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkID0gaC5mdW5jYW9faWQgYW5kIGYuYXRpdmEKICAgd2hlcmUgdi5hdGl2bwogICBvcmRlciBieSBmLm9yZGVtLCB2Lm5vbWU7CiRmbiQ7CnJldm9rZSBhbGwgb24gZnVuY3Rpb24gZXF1aXBlX3RpbWUodGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXF1aXBlX3RpbWUodGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCi8qIC0tLS0tLS0tLS0tLS0gcHJpbWVpcmEgZW50cmFkYTogY29uZmVyZSBvcyA0IGTDrWdpdG9zIGUgY3JpYSBvIFBJTgogICBwZ2NyeXB0byBtb3JhIG5vIHNjaGVtYSBgZXh0ZW5zaW9uc2A7IGNvbW8gbyBzZWFyY2hfcGF0aCBkYSBmdW7Dp8OjbyDDqSBzw7MKICAgYHB1YmxpY2AsIGRpZ2VzdCgpIHByZWNpc2EgdmlyIHF1YWxpZmljYWRvIG91IGVzdG91cmEgZW0gdGVtcG8gZGUgZXhlY3XDp8Ojby4gKi8KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZXF1aXBlX3Bpbl9jcmlhcihwX3NsdWcgdGV4dCwgcF92b2x1bnRhcmlvIHV1aWQsIHBfdWx0NCB0ZXh0LCBwX3BpbiB0ZXh0KQpyZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfdGVsIHRleHQ7IHZfdG9rIHRleHQ7IHZfcGluX2F0dWFsIHRleHQ7IHZfbiBpbnQ7IHZfbWF4IGNvbnN0YW50IGludCA6PSA4OwpiZWdpbgogIGlmIHBfcGluICF+ICdeWzAtOV17NH0kJyB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ1BJTl9JTlZBTElETycpOyBlbmQgaWY7CgogIHNlbGVjdCBudWxsaWYodGVsX25vcm0odi50ZWxlZm9uZSksJycpLCB2LnRva2VuLCB2LnBpbl9oYXNoCiAgICBpbnRvIHZfdGVsLCB2X3Rvaywgdl9waW5fYXR1YWwKICAgIGZyb20gdm9sdW50YXJpb3MgdiBqb2luIGVxdWlwZXMgZSBvbiBlLmlkID0gdi5lcXVpcGVfaWQKICAgd2hlcmUgdi5pZCA9IHBfdm9sdW50YXJpbyBhbmQgZS5zbHVnID0gcF9zbHVnIGFuZCB2LmF0aXZvOwoKICBpZiB2X3RvayBpcyBudWxsIHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTElOS19JTlZBTElETycpOyBlbmQgaWY7CiAgaWYgdl9waW5fYXR1YWwgaXMgbm90IG51bGwgdGhlbiByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdKQV9URU1fUElOJyk7IGVuZCBpZjsKICBpZiB2X3RlbCBpcyBudWxsIG9yIGxlbmd0aCh2X3RlbCkgPCA0IHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnU0VNX1RFTEVGT05FJyk7IGVuZCBpZjsKCiAgaW5zZXJ0IGludG8gZW50cmFyX3RlbnRhdGl2YXMgKHZvbHVudGFyaW9faWQpIHZhbHVlcyAocF92b2x1bnRhcmlvKQogIG9uIGNvbmZsaWN0ICh2b2x1bnRhcmlvX2lkLCBkaWEpIGRvIHVwZGF0ZSBzZXQgbiA9IGVudHJhcl90ZW50YXRpdmFzLm4gKyAxCiAgcmV0dXJuaW5nIG4gaW50byB2X247CiAgaWYgdl9uID4gdl9tYXggdGhlbiByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdNVUlUQVNfVEVOVEFUSVZBUycpOyBlbmQgaWY7CgogIGlmIHJpZ2h0KHZfdGVsLCA0KSA8PiB0ZWxfbm9ybShjb2FsZXNjZShwX3VsdDQsJycpKSB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdESUdJVE9TX05BT19DT05GRVJFTScsICdyZXN0YW0nLCBncmVhdGVzdCh2X21heCAtIHZfbiwgMCkpOwogIGVuZCBpZjsKCiAgdXBkYXRlIHZvbHVudGFyaW9zIHNldCBwaW5faGFzaCA9IGVuY29kZShleHRlbnNpb25zLmRpZ2VzdChwX3BpbiB8fCB2X3RvaywgJ3NoYTI1NicpLCAnaGV4Jykgd2hlcmUgaWQgPSBwX3ZvbHVudGFyaW87CiAgZGVsZXRlIGZyb20gZW50cmFyX3RlbnRhdGl2YXMgd2hlcmUgdm9sdW50YXJpb19pZCA9IHBfdm9sdW50YXJpbzsKICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIHRydWUsICd0b2tlbicsIHZfdG9rKTsKZW5kICRmbiQ7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gZW50cmFkYXMgc2VndWludGVzOiBzw7MgbyBQSU4gKi8KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZXF1aXBlX3Bpbl9lbnRyYXIocF9zbHVnIHRleHQsIHBfdm9sdW50YXJpbyB1dWlkLCBwX3BpbiB0ZXh0KQpyZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfdG9rIHRleHQ7IHZfaGFzaCB0ZXh0OyB2X24gaW50OyB2X21heCBjb25zdGFudCBpbnQgOj0gODsKYmVnaW4KICBzZWxlY3Qgdi50b2tlbiwgdi5waW5faGFzaCBpbnRvIHZfdG9rLCB2X2hhc2gKICAgIGZyb20gdm9sdW50YXJpb3MgdiBqb2luIGVxdWlwZXMgZSBvbiBlLmlkID0gdi5lcXVpcGVfaWQKICAgd2hlcmUgdi5pZCA9IHBfdm9sdW50YXJpbyBhbmQgZS5zbHVnID0gcF9zbHVnIGFuZCB2LmF0aXZvOwoKICBpZiB2X3RvayBpcyBudWxsIHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTElOS19JTlZBTElETycpOyBlbmQgaWY7CiAgaWYgdl9oYXNoIGlzIG51bGwgdGhlbiByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdTRU1fUElOJyk7IGVuZCBpZjsKCiAgaW5zZXJ0IGludG8gZW50cmFyX3RlbnRhdGl2YXMgKHZvbHVudGFyaW9faWQpIHZhbHVlcyAocF92b2x1bnRhcmlvKQogIG9uIGNvbmZsaWN0ICh2b2x1bnRhcmlvX2lkLCBkaWEpIGRvIHVwZGF0ZSBzZXQgbiA9IGVudHJhcl90ZW50YXRpdmFzLm4gKyAxCiAgcmV0dXJuaW5nIG4gaW50byB2X247CiAgaWYgdl9uID4gdl9tYXggdGhlbiByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdNVUlUQVNfVEVOVEFUSVZBUycpOyBlbmQgaWY7CgogIGlmIHZfaGFzaCA8PiBlbmNvZGUoZXh0ZW5zaW9ucy5kaWdlc3QoY29hbGVzY2UocF9waW4sJycpIHx8IHZfdG9rLCAnc2hhMjU2JyksICdoZXgnKSB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdQSU5fTkFPX0NPTkZFUkUnLCAncmVzdGFtJywgZ3JlYXRlc3Qodl9tYXggLSB2X24sIDApKTsKICBlbmQgaWY7CgogIGRlbGV0ZSBmcm9tIGVudHJhcl90ZW50YXRpdmFzIHdoZXJlIHZvbHVudGFyaW9faWQgPSBwX3ZvbHVudGFyaW87CiAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCB0cnVlLCAndG9rZW4nLCB2X3Rvayk7CmVuZCAkZm4kOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGVxdWlwZV9waW5fY3JpYXIodGV4dCwgdXVpZCwgdGV4dCwgdGV4dCkgZnJvbSBwdWJsaWM7CnJldm9rZSBhbGwgb24gZnVuY3Rpb24gZXF1aXBlX3Bpbl9lbnRyYXIodGV4dCwgdXVpZCwgdGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXF1aXBlX3Bpbl9jcmlhcih0ZXh0LCB1dWlkLCB0ZXh0LCB0ZXh0KSB0byBhbm9uLCBhdXRoZW50aWNhdGVkOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGVxdWlwZV9waW5fZW50cmFyKHRleHQsIHV1aWQsIHRleHQpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7Cg=="}
+/* =============================================================================
+   08 — PIN pessoal + lista da equipe por ÁREA
+
+   POR QUE: a 07 tirou a lista de nomes para fechar a brecha dos 4 dígitos, mas
+   isso deixou quem perdeu o link dependendo do líder — o líder virava gargalo,
+   que é o oposto do que o sistema existe para resolver.
+
+   SOLUÇÃO: a lista volta, agora agrupada por área. Os 4 últimos dígitos do
+   WhatsApp servem UMA vez só, para a pessoa CRIAR um PIN próprio. Da segunda
+   vez em diante o PIN é a credencial — e PIN é segredo de verdade, diferente
+   do telefone, que todo mundo do grupo enxerga.
+
+   O PIN nunca é gravado em texto: vai como sha256(pin || token) em pin_hash.
+   O token é único por pessoa, então funciona como sal.
+   `equipe_entrar` (a função antiga, insegura) continua REVOGADA da 07.
+   ============================================================================= */
+
+alter table voluntarios add column if not exists pin_hash text;
+
+/* ------------------------------------------------- o time, por área */
+create or replace function equipe_time(p_slug text)
+returns table(area text, ordem int, voluntario_id uuid, primeiro_nome text, nivel text, tem_pin boolean, tem_tel boolean)
+language sql security definer set search_path = public stable as $fn$
+  select f.nome, f.ordem, v.id,
+         split_part(btrim(v.nome), ' ', 1),
+         h.nivel::text,
+         v.pin_hash is not null,
+         nullif(tel_norm(v.telefone),'') is not null
+    from voluntarios v
+    join equipes e on e.id = v.equipe_id and e.slug = p_slug
+    join habilidades h on h.voluntario_id = v.id
+    join funcoes f on f.id = h.funcao_id and f.ativa
+   where v.ativo
+   order by f.ordem, v.nome;
+$fn$;
+revoke all on function equipe_time(text) from public;
+grant execute on function equipe_time(text) to anon, authenticated;
+
+/* ------------- primeira entrada: confere os 4 dígitos e cria o PIN
+   pgcrypto mora no schema `extensions`; como o search_path da função é só
+   `public`, digest() precisa vir qualificado ou estoura em tempo de execução. */
+create or replace function equipe_pin_criar(p_slug text, p_voluntario uuid, p_ult4 text, p_pin text)
+returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare v_tel text; v_tok text; v_pin_atual text; v_n int; v_max constant int := 8;
+begin
+  if p_pin !~ '^[0-9]{4}$' then return jsonb_build_object('ok', false, 'erro', 'PIN_INVALIDO'); end if;
+
+  select nullif(tel_norm(v.telefone),''), v.token, v.pin_hash
+    into v_tel, v_tok, v_pin_atual
+    from voluntarios v join equipes e on e.id = v.equipe_id
+   where v.id = p_voluntario and e.slug = p_slug and v.ativo;
+
+  if v_tok is null then return jsonb_build_object('ok', false, 'erro', 'LINK_INVALIDO'); end if;
+  if v_pin_atual is not null then return jsonb_build_object('ok', false, 'erro', 'JA_TEM_PIN'); end if;
+  if v_tel is null or length(v_tel) < 4 then return jsonb_build_object('ok', false, 'erro', 'SEM_TELEFONE'); end if;
+
+  insert into entrar_tentativas (voluntario_id) values (p_voluntario)
+  on conflict (voluntario_id, dia) do update set n = entrar_tentativas.n + 1
+  returning n into v_n;
+  if v_n > v_max then return jsonb_build_object('ok', false, 'erro', 'MUITAS_TENTATIVAS'); end if;
+
+  if right(v_tel, 4) <> tel_norm(coalesce(p_ult4,'')) then
+    return jsonb_build_object('ok', false, 'erro', 'DIGITOS_NAO_CONFEREM', 'restam', greatest(v_max - v_n, 0));
+  end if;
+
+  update voluntarios set pin_hash = encode(extensions.digest(p_pin || v_tok, 'sha256'), 'hex') where id = p_voluntario;
+  delete from entrar_tentativas where voluntario_id = p_voluntario;
+  return jsonb_build_object('ok', true, 'token', v_tok);
+end $fn$;
+
+/* ------------------------------------------ entradas seguintes: só o PIN */
+create or replace function equipe_pin_entrar(p_slug text, p_voluntario uuid, p_pin text)
+returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare v_tok text; v_hash text; v_n int; v_max constant int := 8;
+begin
+  select v.token, v.pin_hash into v_tok, v_hash
+    from voluntarios v join equipes e on e.id = v.equipe_id
+   where v.id = p_voluntario and e.slug = p_slug and v.ativo;
+
+  if v_tok is null then return jsonb_build_object('ok', false, 'erro', 'LINK_INVALIDO'); end if;
+  if v_hash is null then return jsonb_build_object('ok', false, 'erro', 'SEM_PIN'); end if;
+
+  insert into entrar_tentativas (voluntario_id) values (p_voluntario)
+  on conflict (voluntario_id, dia) do update set n = entrar_tentativas.n + 1
+  returning n into v_n;
+  if v_n > v_max then return jsonb_build_object('ok', false, 'erro', 'MUITAS_TENTATIVAS'); end if;
+
+  if v_hash <> encode(extensions.digest(coalesce(p_pin,'') || v_tok, 'sha256'), 'hex') then
+    return jsonb_build_object('ok', false, 'erro', 'PIN_NAO_CONFERE', 'restam', greatest(v_max - v_n, 0));
+  end if;
+
+  delete from entrar_tentativas where voluntario_id = p_voluntario;
+  return jsonb_build_object('ok', true, 'token', v_tok);
+end $fn$;
+revoke all on function equipe_pin_criar(text, uuid, text, text) from public;
+revoke all on function equipe_pin_entrar(text, uuid, text) from public;
+grant execute on function equipe_pin_criar(text, uuid, text, text) to anon, authenticated;
+grant execute on function equipe_pin_entrar(text, uuid, text) to anon, authenticated;

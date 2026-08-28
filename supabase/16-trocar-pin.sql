@@ -1,1 +1,80 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMTYg4oCUIFRST0NBUiBPIFBJTiBTT1pJTkhPLCBQRUxBIFBSw5NQUklBIFDDgUdJTkEKCiAgIFBPUiBRVUU6IGEgTGFuYSBjcmlvdSBvIFBJTiwgcmVzcG9uZGV1IGEgZGlzcG9uaWJpbGlkYWRlIGF0w6kgb3V0dWJybyBlIGRlcG9pcwogICBuw6NvIGNvbnNlZ3VpdSBtYWlzIGVudHJhci4gT3MgaGFzaGVzIGVzdMOjbyB0b2RvcyDDrW50ZWdyb3MgKGNvbmZlcmlkbzogcGFyYQogICBjYWRhIHVtYSBkYXMgMTkgcGVzc29hcyBjb20gUElOIGV4aXN0ZSBleGF0YW1lbnRlIFVNIGPDs2RpZ28gZGUgNCBkw61naXRvcyBxdWUKICAgZ2VyYSBvIGhhc2ggZ3VhcmRhZG8gY29tIG8gdG9rZW4gYXR1YWwpLiBPdSBzZWphLCBvIGJhbmNvIGVzdMOhIGNlcnRvIOKAlCBlbGEKICAgc2ltcGxlc21lbnRlIGVzcXVlY2V1IG8gUElOLgoKICAgRSBhw60gbyBzaXN0ZW1hIG7Do28gdGluaGEgc2HDrWRhOiBgZXF1aXBlX3Bpbl9jcmlhcmAgcmVjdXNhIGNvbSBKQV9URU1fUElOCiAgIHF1YW5kbyBwaW5faGFzaCBqw6EgZXhpc3RlLCBlIG7Do28gaGF2aWEgbmVuaHVtYSBvdXRyYSBwb3J0YS4gRXNxdWVjZXUgbyBQSU4gPQogICB0cmF2YWRvIGF0w6kgbyBvcmdhbml6YWRvciBtYW5kYXIgbyBsaW5rIHBlc3NvYWwgbm8gcHJpdmFkby4gSXNzbyDDqQogICBleGF0YW1lbnRlIG8gZ2FyZ2FsbyBxdWUgYSBtaWdyYcOnw6NvIDA4IGRpemlhIGVzdGFyIHJlc29sdmVuZG8sIHPDsyBxdWUKICAgZGVzbG9jYWRvOiBlbSB2ZXogZGUgZGVwZW5kZXIgZG8gbMOtZGVyIHBhcmEgRU5UUkFSLCB2b2PDqiBkZXBlbmRlIGRlbGUgcGFyYQogICBWT0xUQVIgQSBFTlRSQVIuCgogICBTT0xVw4fDg086IHF1ZW0gasOhIGVzdMOhIGNvbSBvIGxpbmsgcGVzc29hbCBuYSBtw6NvIGrDoSBwcm92b3UgcXVlbSDDqSDigJQgbyB0b2tlbgogICDDqSBhIGNyZWRlbmNpYWwgbWFpcyBmb3J0ZSBkbyBzaXN0ZW1hLiBFbnTDo28gZGUgZGVudHJvIGRlIC9ldS88dG9rZW4+IGEKICAgcGVzc29hIHBvZGUgZ3JhdmFyIHVtIFBJTiBub3ZvLCBzZW0gc2FiZXIgbyBhbnRpZ28uCgogICBPIHF1ZSBpc3RvIE7Dg08gYWJyZTogbmFkYS4gUXVlbSB0ZW0gbyB0b2tlbiBqw6EgZW50cmEgZGlyZXRvIG5hIHDDoWdpbmE7IHBvZGVyCiAgIGRlZmluaXIgbyBQSU4gbsOjbyBkw6EgYWNlc3NvIGEgbmFkYSBxdWUgZWxlIGrDoSBuw6NvIGRlc3NlLiBPIFBJTiBleGlzdGUgcGFyYQogICBxdWVtIE7Dg08gdGVtIG8gbGluayBndWFyZGFkby4KCiAgIERlIHF1ZWJyYSwgemVyYSBvIGNvbnRhZG9yIGRlIHRlbnRhdGl2YXMg4oCUIHF1ZW0gc2UgdHJhbmNvdSBmb3JhIGNvbSA4IGVycm9zCiAgIGRlc3RyYXZhIHNvemluaG8uCiAgID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICovCgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBldV90cm9jYXJfcGluKHBfdG9rZW4gdGV4dCwgcF9waW4gdGV4dCkKcmV0dXJucyBqc29uYgpsYW5ndWFnZSBwbHBnc3FsIHNlY3VyaXR5IGRlZmluZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKZGVjbGFyZSB2X2lkIHV1aWQ7CmJlZ2luCiAgaWYgcF9waW4gIX4gJ15bMC05XXs0fSQnIHRoZW4KICAgIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ1BJTl9JTlZBTElETycpOwogIGVuZCBpZjsKCiAgc2VsZWN0IHYuaWQgaW50byB2X2lkIGZyb20gdm9sdW50YXJpb3MgdiB3aGVyZSB2LnRva2VuID0gcF90b2tlbiBhbmQgdi5hdGl2bzsKICBpZiB2X2lkIGlzIG51bGwgdGhlbgogICAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTElOS19JTlZBTElETycpOwogIGVuZCBpZjsKCiAgLyogbWVzbW8gc2FsIGRhIDA4OiBzaGEyNTYocGluIHx8IHRva2VuKS4gVHJvY2FyIGEgZsOzcm11bGEgYXF1aSBlIG7Do28gbMOhCiAgICAgZmFyaWEgbyBQSU4gbm92byBudW5jYSBjb25mZXJpciBuYSB0ZWxhIGRlIGVudHJhZGEuICovCiAgdXBkYXRlIHZvbHVudGFyaW9zCiAgICAgc2V0IHBpbl9oYXNoID0gZW5jb2RlKGV4dGVuc2lvbnMuZGlnZXN0KHBfcGluIHx8IHBfdG9rZW4sICdzaGEyNTYnKSwgJ2hleCcpCiAgIHdoZXJlIGlkID0gdl9pZDsKCiAgZGVsZXRlIGZyb20gZW50cmFyX3RlbnRhdGl2YXMgd2hlcmUgdm9sdW50YXJpb19pZCA9IHZfaWQ7CiAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCB0cnVlKTsKZW5kICRmbiQ7CgpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGV1X3Ryb2Nhcl9waW4odGV4dCwgdGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXVfdHJvY2FyX3Bpbih0ZXh0LCB0ZXh0KSB0byBhbm9uLCBhdXRoZW50aWNhdGVkOwoKY29tbWVudCBvbiBmdW5jdGlvbiBldV90cm9jYXJfcGluKHRleHQsIHRleHQpIGlzCiAgJ2dyYXZhIHVtIFBJTiBub3ZvIHBhcmEgcXVlbSBlc3TDoSBjb20gbyBsaW5rIHBlc3NvYWwgbmEgbcOjby4gTsOjbyBwZWRlIG8gUElOIGFudGlnbzogbyB0b2tlbiBqw6Egw6kgcHJvdmEgZGUgaWRlbnRpZGFkZS4gWmVyYSBlbnRyYXJfdGVudGF0aXZhcy4nOwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotLSBjb25mZXLDqm5jaWE6IG8gUElOIG5vdm8gdGVtIHF1ZSBjb25mZXJpciBuYSBNRVNNQSBmw7NybXVsYSBkYSB0ZWxhIGRlIGVudHJhZGEKZG8gJCQKZGVjbGFyZSB2X3RvayB0ZXh0OyB2X2lkIHV1aWQ7IHZfaGFzaCB0ZXh0OyB2X29rIGJvb2xlYW47CmJlZ2luCiAgc2VsZWN0IGlkLCB0b2tlbiBpbnRvIHZfaWQsIHZfdG9rIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgYXRpdm8gYW5kIHBpbl9oYXNoIGlzIG5vdCBudWxsIGxpbWl0IDE7CiAgaWYgdl9pZCBpcyBudWxsIHRoZW4gcmFpc2Ugbm90aWNlICdzZW0gbmluZ3VlbSBwYXJhIHRlc3Rhcic7IHJldHVybjsgZW5kIGlmOwoKICBjcmVhdGUgdGVtcCB0YWJsZSBfYmsgYXMgc2VsZWN0IGlkLCBwaW5faGFzaCBmcm9tIHZvbHVudGFyaW9zIHdoZXJlIGlkID0gdl9pZDsKCiAgcGVyZm9ybSBldV90cm9jYXJfcGluKHZfdG9rLCAnNDczMScpOwogIHNlbGVjdCBwaW5faGFzaCBpbnRvIHZfaGFzaCBmcm9tIHZvbHVudGFyaW9zIHdoZXJlIGlkID0gdl9pZDsKICB2X29rIDo9IHZfaGFzaCA9IGVuY29kZShleHRlbnNpb25zLmRpZ2VzdCgnNDczMScgfHwgdl90b2ssICdzaGEyNTYnKSwgJ2hleCcpOwoKICB1cGRhdGUgdm9sdW50YXJpb3MgdiBzZXQgcGluX2hhc2ggPSBiLnBpbl9oYXNoIGZyb20gX2JrIGIgd2hlcmUgdi5pZCA9IGIuaWQ7CiAgZHJvcCB0YWJsZSBfYms7CgogIGlmIG5vdCB2X29rIHRoZW4gcmFpc2UgZXhjZXB0aW9uICdGT1JNVUxBIERJVkVSR0lVIGRhIDA4JzsgZW5kIGlmOwogIHJhaXNlIG5vdGljZSAnb2s6IFBJTiBub3ZvIGNvbmZlcmUgY29tIHNoYTI1NihwaW58fHRva2VuKSwgZSBvIGFudGlnbyBmb2kgcmVzdGF1cmFkbyc7CmVuZCAkJDsKCnNlbGVjdCAnZXVfdHJvY2FyX3BpbiBpbnN0YWxhZGEnIGFzIGZlaXRvOwo="}
+/* =============================================================================
+   16 — TROCAR O PIN SOZINHO, PELA PRÓPRIA PÁGINA
+
+   POR QUE: a Lana criou o PIN, respondeu a disponibilidade até outubro e depois
+   não conseguiu mais entrar. Os hashes estão todos íntegros (conferido: para
+   cada uma das 19 pessoas com PIN existe exatamente UM código de 4 dígitos que
+   gera o hash guardado com o token atual). Ou seja, o banco está certo — ela
+   simplesmente esqueceu o PIN.
+
+   E aí o sistema não tinha saída: `equipe_pin_criar` recusa com JA_TEM_PIN
+   quando pin_hash já existe, e não havia nenhuma outra porta. Esqueceu o PIN =
+   travado até o organizador mandar o link pessoal no privado. Isso é
+   exatamente o gargalo que a migração 08 dizia estar resolvendo, só que
+   deslocado: em vez de depender do líder para ENTRAR, você depende dele para
+   VOLTAR A ENTRAR.
+
+   SOLUÇÃO: quem já está com o link pessoal na mão já provou quem é — o token
+   é a credencial mais forte do sistema. Então de dentro de /eu/<token> a
+   pessoa pode gravar um PIN novo, sem saber o antigo.
+
+   O que isto NÃO abre: nada. Quem tem o token já entra direto na página; poder
+   definir o PIN não dá acesso a nada que ele já não desse. O PIN existe para
+   quem NÃO tem o link guardado.
+
+   De quebra, zera o contador de tentativas — quem se trancou fora com 8 erros
+   destrava sozinho.
+   ============================================================================= */
+
+create or replace function eu_trocar_pin(p_token text, p_pin text)
+returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare v_id uuid;
+begin
+  if p_pin !~ '^[0-9]{4}$' then
+    return jsonb_build_object('ok', false, 'erro', 'PIN_INVALIDO');
+  end if;
+
+  select v.id into v_id from voluntarios v where v.token = p_token and v.ativo;
+  if v_id is null then
+    return jsonb_build_object('ok', false, 'erro', 'LINK_INVALIDO');
+  end if;
+
+  /* mesmo sal da 08: sha256(pin || token). Trocar a fórmula aqui e não lá
+     faria o PIN novo nunca conferir na tela de entrada. */
+  update voluntarios
+     set pin_hash = encode(extensions.digest(p_pin || p_token, 'sha256'), 'hex')
+   where id = v_id;
+
+  delete from entrar_tentativas where voluntario_id = v_id;
+  return jsonb_build_object('ok', true);
+end $fn$;
+
+revoke all on function eu_trocar_pin(text, text) from public;
+grant execute on function eu_trocar_pin(text, text) to anon, authenticated;
+
+comment on function eu_trocar_pin(text, text) is
+  'grava um PIN novo para quem está com o link pessoal na mão. Não pede o PIN antigo: o token já é prova de identidade. Zera entrar_tentativas.';
+
+----------------------------------------------------------------------------
+-- conferência: o PIN novo tem que conferir na MESMA fórmula da tela de entrada
+do $$
+declare v_tok text; v_id uuid; v_hash text; v_ok boolean;
+begin
+  select id, token into v_id, v_tok from voluntarios where ativo and pin_hash is not null limit 1;
+  if v_id is null then raise notice 'sem ninguem para testar'; return; end if;
+
+  create temp table _bk as select id, pin_hash from voluntarios where id = v_id;
+
+  perform eu_trocar_pin(v_tok, '4731');
+  select pin_hash into v_hash from voluntarios where id = v_id;
+  v_ok := v_hash = encode(extensions.digest('4731' || v_tok, 'sha256'), 'hex');
+
+  update voluntarios v set pin_hash = b.pin_hash from _bk b where v.id = b.id;
+  drop table _bk;
+
+  if not v_ok then raise exception 'FORMULA DIVERGIU da 08'; end if;
+  raise notice 'ok: PIN novo confere com sha256(pin||token), e o antigo foi restaurado';
+end $$;
+
+select 'eu_trocar_pin instalada' as feito;

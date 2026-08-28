@@ -1,1 +1,103 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMjEg4oCUIEEgUE9SVEEgUMOaQkxJQ0EKCiAgIEhvamUgYGd1aWFzZXJ2aXIuY29tYCBhYnJlIG8gcGFpbmVsIGRvIG9yZ2FuaXphZG9yLiBRdWVtIG7Do28gw6kgb3JnYW5pemFkb3IgdsOqCiAgICJlc3RlIGVtYWlsIG7Do28gdGVtIGFjZXNzbyIg4oCUIHF1ZSDDqSBhIHByaW1laXJhIGNvaXNhIHF1ZSBhIGlncmVqYSBpbnRlaXJhIHZhaQogICBlbmNvbnRyYXIgcXVhbmRvIG8gQXJ0aHVyIGRpdnVsZ2FyIG8gZG9tw61uaW8uCgogICBBIGNhbXBhbmhhIGRlIGNhZGFzdHJvIGRvIExvdXZvciBlIGRhIERpYWNvbmlhIHZhaSBqb2dhciBkZXplbmFzIGRlIHBlc3NvYXMKICAgbmVzc2UgZW5kZXJlw6dvLiBFbGFzIHByZWNpc2FtIGRlIHVtYSBwb3J0YSwgbsOjbyBkZSB1bSBtdXJvLgoKICAgRXN0YSBtaWdyYcOnw6NvIHPDsyBjcmlhIG8gREFETyBxdWUgYSBwb3J0YSBwcmVjaXNhLiBBcyB0ZWxhcyB2w6ptIG5vIG1lc21vCiAgIGNvbW1pdCwgZW0gYXBwL3BhZ2UudHN4IGUgYXBwL21pbmlzdGVyaW9zL1tzbHVnXS9wYWdlLnRzeC4KCiAgIER1YXMgY29sdW5hcyBub3ZhcyBlbSBgZXF1aXBlc2AsIGUgdW1hIGZ1bsOnw6NvIHDDumJsaWNhIHF1ZSBhcyBkZXZvbHZlOgoKICAgwrcgZGVzY3JpY2FvIOKAlCBvIHF1ZSBvIG1pbmlzdMOpcmlvIGZheiwgZW0gdW1hIG91IGR1YXMgZnJhc2VzLiDDiSBvIHF1ZSBhIHBlc3NvYQogICAgIGzDqiBwYXJhIHNhYmVyIHNlIMOpIGFsaSBxdWUgZWxhIHNlIGVuY2FpeGEuCiAgIMK3IGNvbnZpdGUgIOKAlCBhIGZyYXNlIHF1ZSBmYWxhIGNvbSBxdWVtIGVzdMOhIGRlY2lkaW5kby4gRGVzY3Jpw6fDo28gZXhwbGljYTsKICAgICBjb252aXRlIGNoYW1hLiBTw6NvIGNvaXNhcyBkaWZlcmVudGVzIGUgbWlzdHVyw6EtbGFzIHByb2R1eiB0ZXh0byBtb3Juby4KCiAgIFBvciBxdWUgZnVuw6fDo28gZSBuw6NvIHBvbGljeTogYSB0YWJlbGEgYGVxdWlwZXNgIMOpIGxpZGEgcG9yIGBsaWRlcmFfZXF1aXBlKClgLAogICBlIGFmcm91eGFyIGlzc28gcGFyYSBvIHZpc2l0YW50ZSBhYnJpcmlhIGEgbGlzdGEgZGUgbWluaXN0w6lyaW9zIGp1bnRvIGNvbQogICB0dWRvIG1haXMgcXVlIGEgcG9saWN5IHByb3RlZ2UuIFNFQ1VSSVRZIERFRklORVIgZGV2b2x2ZSBleGF0YW1lbnRlIGFzCiAgIGNpbmNvIGNvbHVuYXMgcXVlIGEgdGVsYSBww7pibGljYSBwcmVjaXNhIGUgbmFkYSBhbMOpbS4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCmFsdGVyIHRhYmxlIGVxdWlwZXMgYWRkIGNvbHVtbiBpZiBub3QgZXhpc3RzIGRlc2NyaWNhbyB0ZXh0OwphbHRlciB0YWJsZSBlcXVpcGVzIGFkZCBjb2x1bW4gaWYgbm90IGV4aXN0cyBjb252aXRlICAgdGV4dDsKCmNvbW1lbnQgb24gY29sdW1uIGVxdWlwZXMuZGVzY3JpY2FvIGlzCiAgJ28gcXVlIG8gbWluaXN0w6lyaW8gZmF6LCAxLTIgZnJhc2VzLiBMaWRvIG5hIHBvcnRhIHDDumJsaWNhIHBvciBxdWVtIGFpbmRhIG7Do28gc2VydmUuJzsKY29tbWVudCBvbiBjb2x1bW4gZXF1aXBlcy5jb252aXRlIGlzCiAgJ2EgZnJhc2UgcXVlIGNoYW1hIHF1ZW0gZXN0w6EgZGVjaWRpbmRvLiBEZXNjcmnDp8OjbyBleHBsaWNhLCBjb252aXRlIGNvbnZpZGEuJzsKCgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIEEgTElTVEEgUMOaQkxJQ0EgREUgTUlOSVNUw4lSSU9TCi0tCi0tIGBwb3N0b3NgIHNhaSBkYXF1aSBjb250YWRvLCBlIG7Do28gZG8gY2xpZW50ZSwgcG9ycXVlIG8gdmlzaXRhbnRlIG7Do28gcG9kZQotLSBsZXIgYGZ1bmNvZXNgLiBgYWJlcnRvYCDDqSBhIGRpZmVyZW7Dp2EgZW50cmUgImVudHJlIGFnb3JhIiBlICJmYWxlIGNvbSBhCi0tIGxpZGVyYW7Dp2EiOiDDqSBgZXhpZ2VfYXByb3ZhY2FvYCBpbnZlcnRpZG8sIGNvbSBub21lIGRlIGdlbnRlLgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBtaW5pc3Rlcmlvc19wdWJsaWNvcygpCnJldHVybnMgdGFibGUgKAogIHNsdWcgdGV4dCwgbm9tZSB0ZXh0LCBkZXNjcmljYW8gdGV4dCwgY29udml0ZSB0ZXh0LAogIHBvc3RvcyBpbnQsIGFiZXJ0byBib29sZWFuCikKbGFuZ3VhZ2Ugc3FsIHNlY3VyaXR5IGRlZmluZXIgc3RhYmxlIHNldCBzZWFyY2hfcGF0aCA9IHB1YmxpYyBhcyAkZm4kCiAgc2VsZWN0IGUuc2x1ZywgZS5ub21lLCBlLmRlc2NyaWNhbywgZS5jb252aXRlLAogICAgICAgICAoc2VsZWN0IGNvdW50KCopOjppbnQgZnJvbSBmdW5jb2VzIGYgd2hlcmUgZi5lcXVpcGVfaWQgPSBlLmlkIGFuZCBmLmF0aXZhKSwKICAgICAgICAgbm90IGUuZXhpZ2VfYXByb3ZhY2FvCiAgICBmcm9tIGVxdWlwZXMgZQogICB3aGVyZSBleGlzdHMgKHNlbGVjdCAxIGZyb20gZnVuY29lcyBmIHdoZXJlIGYuZXF1aXBlX2lkID0gZS5pZCBhbmQgZi5hdGl2YSkKICAgb3JkZXIgYnkgZS5vcmRlbSwgZS5ub21lOwokZm4kOwoKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBtaW5pc3Rlcmlvc19wdWJsaWNvcygpIGZyb20gcHVibGljOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIG1pbmlzdGVyaW9zX3B1YmxpY29zKCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCmNvbW1lbnQgb24gZnVuY3Rpb24gbWluaXN0ZXJpb3NfcHVibGljb3MoKSBpcwogICdsaXN0YSBkZSBtaW5pc3TDqXJpb3MgcGFyYSBhIHBvcnRhIHDDumJsaWNhLiBTw7MgcXVlbSB0ZW0gcG9zdG8gYXRpdm8gYXBhcmVjZSDigJQgbWluaXN0w6lyaW8gc2VtIGZ1bsOnw6NvIG7Do28gdGVtIGNvbW8gcmVjZWJlciBuaW5ndcOpbS4nOwoKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gTyBURVhUTwotLQotLSBFc2NyaXRvIHBhcmEgcXVlbSBOVU5DQSB2aXUgbyBzaXN0ZW1hIGUgZXN0w6EgZGVjaWRpbmRvIHNlIHNlcnZlLiBTZW0KLS0gdm9jYWJ1bMOhcmlvIGludGVybm86IG5hZGEgZGUgcG9zdG8sIGVzY2FsYSwgZXF1aXBlX2lkLCBjb25mZXJpZG8uCi0tIENhZGEgY29udml0ZSBmYWxhIGRvIHF1ZSBhIHBlc3NvYSBWQUkgRkFaRVIsIG7Do28gZG8gcXVlIG8gbWluaXN0w6lyaW8gw6kuCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCnVwZGF0ZSBlcXVpcGVzIHNldAogIGRlc2NyaWNhbyA9ICdBIE3DrWRpYSDDqSBxdWVtIHJlZ2lzdHJhIGUgdHJhbnNtaXRlIG8gcXVlIGFjb250ZWNlIG5hIGlncmVqYTogY8OibWVyYSwgcHJvamXDp8OjbywgbHV6LCBmb3RvLCBlZGnDp8OjbyBlIGEgdHJhbnNtaXNzw6NvIGFvIHZpdm8uJywKICBjb252aXRlICAgPSAnU2Ugdm9jw6ogZ29zdGEgZGUgY8OibWVyYSwgY29tcHV0YWRvciBvdSBlZGnDp8OjbyDigJQgb3UgcXVlciBhcHJlbmRlciDigJQgdGVtIGx1Z2FyIGFxdWkuJwogd2hlcmUgc2x1ZyA9ICdtaWRpYSc7Cgp1cGRhdGUgZXF1aXBlcyBzZXQKICBkZXNjcmljYW8gPSAnTyBMb3V2b3IgY29uZHV6IGEgaWdyZWphIG5hIGFkb3Jhw6fDo28sIG5vIGRvbWluZ28gZSBubyBGb2xsb3c6IHZvY2FsLCBiYW5kYSwgc29tIGUgcGFsY28uJywKICBjb252aXRlICAgPSAnU2Ugdm9jw6ogY2FudGEgb3UgdG9jYSwgbyBwcmltZWlybyBwYXNzbyDDqSBjb252ZXJzYXIgY29tIGEgbGlkZXJhbsOnYS4nCiB3aGVyZSBzbHVnID0gJ2xvdXZvcic7Cgp1cGRhdGUgZXF1aXBlcyBzZXQKICBkZXNjcmljYW8gPSAnQSBEaWFjb25pYSBjdWlkYSBkZSBxdWVtIGNoZWdhOiByZWNlcMOnw6NvLCBlc3RhY2lvbmFtZW50bywgc2V0b3JlcyBkbyBzYWzDo28gZSBvIHF1ZSBmYXogbyBjdWx0byBhY29udGVjZXIgc2VtIG5pbmd1w6ltIHBlcmNlYmVyLicsCiAgY29udml0ZSAgID0gJ07Do28gcHJlY2lzYSBzYWJlciBuYWRhIGFudGVzLiBQcmVjaXNhIHF1ZXJlciByZWNlYmVyIGJlbS4nCiB3aGVyZSBzbHVnID0gJ3NlcnZpY28nOwoKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KLS0gQ09ORkVSw4pOQ0lBCnNlbGVjdCBzbHVnLCBub21lLCBhYmVydG8sIHBvc3RvcywKICAgICAgIGxlbmd0aChjb2FsZXNjZShkZXNjcmljYW8sJycpKSBhcyB0YW1fZGVzYywKICAgICAgIGxlbmd0aChjb2FsZXNjZShjb252aXRlLCcnKSkgICBhcyB0YW1fY29udml0ZQogIGZyb20gbWluaXN0ZXJpb3NfcHVibGljb3MoKTsKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gTyBOT01FIFFVRSBBIElHUkVKQSBVU0EKLS0KLS0gVG9kbyBtdW5kbyBjaGFtYSBkZSBEaWFjb25pYSwgZSBhIGNvbXVuaWRhZGUgbm8gV2hhdHNBcHAgbmFzY2V1IGNvbSBlc3NlCi0tIG5vbWUuIFPDsyBvIHNpc3RlbWEgZGl6aWEgIlNlcnZpw6dvIGRvIEN1bHRvIi4gTyBzbHVnIGZpY2EgJ3NlcnZpY28nIHBhcmEKLS0gbmVuaHVtIGxpbmsgasOhIGVzcGFsaGFkbyBxdWVicmFyIOKAlCBtdWRhIG8gcsOzdHVsbywgbsOjbyBvIGVuZGVyZcOnby4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQp1cGRhdGUgZXF1aXBlcyBzZXQgbm9tZSA9ICdEaWFjb25pYScgd2hlcmUgc2x1ZyA9ICdzZXJ2aWNvJzsK"}
+/* =============================================================================
+   21 — A PORTA PÚBLICA
+
+   Hoje `guiaservir.com` abre o painel do organizador. Quem não é organizador vê
+   "este email não tem acesso" — que é a primeira coisa que a igreja inteira vai
+   encontrar quando o Arthur divulgar o domínio.
+
+   A campanha de cadastro do Louvor e da Diaconia vai jogar dezenas de pessoas
+   nesse endereço. Elas precisam de uma porta, não de um muro.
+
+   Esta migração só cria o DADO que a porta precisa. As telas vêm no mesmo
+   commit, em app/page.tsx e app/ministerios/[slug]/page.tsx.
+
+   Duas colunas novas em `equipes`, e uma função pública que as devolve:
+
+   · descricao — o que o ministério faz, em uma ou duas frases. É o que a pessoa
+     lê para saber se é ali que ela se encaixa.
+   · convite  — a frase que fala com quem está decidindo. Descrição explica;
+     convite chama. São coisas diferentes e misturá-las produz texto morno.
+
+   Por que função e não policy: a tabela `equipes` é lida por `lidera_equipe()`,
+   e afrouxar isso para o visitante abriria a lista de ministérios junto com
+   tudo mais que a policy protege. SECURITY DEFINER devolve exatamente as
+   cinco colunas que a tela pública precisa e nada além.
+   ============================================================================= */
+
+alter table equipes add column if not exists descricao text;
+alter table equipes add column if not exists convite   text;
+
+comment on column equipes.descricao is
+  'o que o ministério faz, 1-2 frases. Lido na porta pública por quem ainda não serve.';
+comment on column equipes.convite is
+  'a frase que chama quem está decidindo. Descrição explica, convite convida.';
+
+
+-- =========================================================================
+-- A LISTA PÚBLICA DE MINISTÉRIOS
+--
+-- `postos` sai daqui contado, e não do cliente, porque o visitante não pode
+-- ler `funcoes`. `aberto` é a diferença entre "entre agora" e "fale com a
+-- liderança": é `exige_aprovacao` invertido, com nome de gente.
+-- =========================================================================
+
+create or replace function ministerios_publicos()
+returns table (
+  slug text, nome text, descricao text, convite text,
+  postos int, aberto boolean
+)
+language sql security definer stable set search_path = public as $fn$
+  select e.slug, e.nome, e.descricao, e.convite,
+         (select count(*)::int from funcoes f where f.equipe_id = e.id and f.ativa),
+         not e.exige_aprovacao
+    from equipes e
+   where exists (select 1 from funcoes f where f.equipe_id = e.id and f.ativa)
+   order by e.ordem, e.nome;
+$fn$;
+
+revoke all on function ministerios_publicos() from public;
+grant execute on function ministerios_publicos() to anon, authenticated;
+
+comment on function ministerios_publicos() is
+  'lista de ministérios para a porta pública. Só quem tem posto ativo aparece — ministério sem função não tem como receber ninguém.';
+
+
+-- =========================================================================
+-- O TEXTO
+--
+-- Escrito para quem NUNCA viu o sistema e está decidindo se serve. Sem
+-- vocabulário interno: nada de posto, escala, equipe_id, conferido.
+-- Cada convite fala do que a pessoa VAI FAZER, não do que o ministério é.
+-- =========================================================================
+
+update equipes set
+  descricao = 'A Mídia é quem registra e transmite o que acontece na igreja: câmera, projeção, luz, foto, edição e a transmissão ao vivo.',
+  convite   = 'Se você gosta de câmera, computador ou edição — ou quer aprender — tem lugar aqui.'
+ where slug = 'midia';
+
+update equipes set
+  descricao = 'O Louvor conduz a igreja na adoração, no domingo e no Follow: vocal, banda, som e palco.',
+  convite   = 'Se você canta ou toca, o primeiro passo é conversar com a liderança.'
+ where slug = 'louvor';
+
+update equipes set
+  descricao = 'A Diaconia cuida de quem chega: recepção, estacionamento, setores do salão e o que faz o culto acontecer sem ninguém perceber.',
+  convite   = 'Não precisa saber nada antes. Precisa querer receber bem.'
+ where slug = 'servico';
+
+
+----------------------------------------------------------------------------
+-- CONFERÊNCIA
+select slug, nome, aberto, postos,
+       length(coalesce(descricao,'')) as tam_desc,
+       length(coalesce(convite,''))   as tam_convite
+  from ministerios_publicos();
+
+-- =========================================================================
+-- O NOME QUE A IGREJA USA
+--
+-- Todo mundo chama de Diaconia, e a comunidade no WhatsApp nasceu com esse
+-- nome. Só o sistema dizia "Serviço do Culto". O slug fica 'servico' para
+-- nenhum link já espalhado quebrar — muda o rótulo, não o endereço.
+-- =========================================================================
+update equipes set nome = 'Diaconia' where slug = 'servico';

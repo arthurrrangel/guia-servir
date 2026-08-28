@@ -1,1 +1,93 @@
-{"data":"LS0gPT09PT09PT09PT09IFBPU1RPIEVYUExJQ0FETywgRSBNSU5JU1TDiVJJTyBTRU0gTsONVkVMIERFQ0xBUkFETyA9PT09PT09PT09PQotLSBEb2lzIHBlZGlkb3MgcXVlIGFuZGFtIGp1bnRvcywgZSBvcyBkb2lzIHPDo28gc29icmUgYSBtZXNtYSBjb2lzYTogcXVlbSBzZQotLSBjYWRhc3RyYSBubyBTZXJ2acOnbyBkbyBDdWx0byBwcmVjaXNhIHNhYmVyIG8gcXVlIG8gcG9zdG8gZXhpZ2UgQU5URVMgZGUKLS0gbWFyY2FyLCBlIG7Do28gcHJlY2lzYSBzZSBhdXRvLWF2YWxpYXIgZGVwb2lzLgotLQotLSAxKSBOw41WRUwgU0FJIERPIFNFUlZJw4dPLiBOYSBNw61kaWEgZmF6IHNlbnRpZG8gcGVyZ3VudGFyICJmYcOnbyBzb3ppbmhvIG91Ci0tICAgIGFqdWRvIiwgcG9ycXVlIG8gdGltZSBmb3JtYSBnZW50ZSBuYSBwcsOhdGljYSBlIG8gc29ydGVpbyBwcmVjaXNhIHNhYmVyCi0tICAgIHF1ZW0gc2VndXJhIGEgw6FyZWEuIE5vIFNlcnZpw6dvIGRvIEN1bHRvIG8gcG9zdG8gw6kgb2N1cGFkbyBwb3IgcXVlbSBqw6EKLS0gICAgc2FiZTogbsOjbyBleGlzdGUgbWVpby10ZXJtbyBwYXJhIGNvbmZlcmlyLCBlIHF1ZW0gcXVlciBhcHJlbmRlciBmYWxhIGNvbQotLSAgICBhIGxpZGVyYW7Dp2EgZW0gdmV6IGRlIHNlIG1hcmNhci4gTWFyY2FyIHVtIHBvc3RvIHBhc3NhIGEgc2VyIHVtYSBjb2lzYQotLSAgICBzw7M6IGV1IGZhw6dvLiBDb250aW51YSBlbnRyYW5kbyBjb21vIG7Do28gY29uZmVyaWRvLCBlbnTDo28gbyBsw61kZXIgYWluZGEKLS0gICAgdmFsaWRhIGFudGVzIGRlIHZhbGVyIG5vIHNvcnRlaW8uCi0tCi0tIDIpIENBREEgUE9TVE8gRVhQTElDQSBBIFBSw5NQUklBIEZVTsOHw4NPLiBVbWEgbGlzdGEgZGUgMTIgbm9tZXMgZW0gY2FpeGEgYWx0YQotLSAgICBuw6NvIGRpeiBhIG5pbmd1w6ltIG8gcXVlIMOpIHNlciBTRVRPUiBDLiBTZW0gaXNzbyBhIHBlc3NvYSBtYXJjYSBubyBjaHV0ZSBlCi0tICAgIGEgY29uZmVyw6puY2lhIGRvIGzDrWRlciB2aXJhIG8gcHJpbWVpcm8gbW9tZW50byBlbSBxdWUgYWxndcOpbSBkZXNjb2JyZSBvCi0tICAgIGVuZ2Fuby4KCmFsdGVyIHRhYmxlIGVxdWlwZXMgYWRkIGNvbHVtbiBpZiBub3QgZXhpc3RzIHNlbV9uaXZlaXMgICAgIGJvb2xlYW4gbm90IG51bGwgZGVmYXVsdCBmYWxzZTsKYWx0ZXIgdGFibGUgZXF1aXBlcyBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgYXZpc29fY2FkYXN0cm8gdGV4dDsKYWx0ZXIgdGFibGUgZnVuY29lcyBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgZGVzY3JpY2FvICAgICAgdGV4dDsKCmNvbW1lbnQgb24gY29sdW1uIGVxdWlwZXMuc2VtX25pdmVpcyBpcwogICd0cnVlID0gbWFyY2FyIHVtIHBvc3RvIMOpIHPDsyAiZXUgZmHDp28iLCBzZW0gZXNjb2xoZXIgbsOtdmVsLiBQYXJhIG1pbmlzdMOpcmlvIHF1ZSBzw7MgYWxvY2EgcXVlbSBqw6Egc2FiZS4nOwpjb21tZW50IG9uIGNvbHVtbiBlcXVpcGVzLmF2aXNvX2NhZGFzdHJvIGlzCiAgJ3JlY2FkbyBubyBhbHRvIGRhIHRlbGEgcMO6YmxpY2EgZGUgY2FkYXN0cm8gZGVzdGUgbWluaXN0w6lyaW8nOwpjb21tZW50IG9uIGNvbHVtbiBmdW5jb2VzLmRlc2NyaWNhbyBpcwogICdvIHF1ZSBlc3RlIHBvc3RvIGZheiwgZW0gdW1hIG91IGR1YXMgZnJhc2VzLCBtb3N0cmFkbyBuYSB0ZWxhIGRlIGNhZGFzdHJvJzsKCnVwZGF0ZSBlcXVpcGVzCiAgIHNldCBzZW1fbml2ZWlzID0gdHJ1ZSwKICAgICAgIGF2aXNvX2NhZGFzdHJvID0gJ0VzdGVzIHBvc3RvcyBzw6NvIHBhcmEgcXVlbSBqw6Egc2FiZSBhIGZ1bsOnw6NvLiBTZSB2b2PDqiBxdWVyIHNlIHZvbHVudGFyaWFyIGUgYXByZW5kZXIsIGNoYW1hIG5vICgyMSkgOTk1OTQtNjQ5MSBxdWUgYSBsaWRlcmFuw6dhIHRlIGVuY2FpeGEuJwogd2hlcmUgc2x1ZyA9ICdzZXJ2aWNvJzsKCi0tIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBkZXNjcmnDp8O1ZXMgLS0KZG8gJCQKZGVjbGFyZSB2X2VxIHV1aWQ7CmJlZ2luCiAgc2VsZWN0IGlkIGludG8gdl9lcSBmcm9tIGVxdWlwZXMgd2hlcmUgc2x1ZyA9ICdzZXJ2aWNvJzsKICBpZiB2X2VxIGlzIG51bGwgdGhlbiByZXR1cm47IGVuZCBpZjsKCiAgdXBkYXRlIGZ1bmNvZXMgc2V0IGRlc2NyaWNhbyA9IGQudHh0IGZyb20gKHZhbHVlcwogICAgKCdMw41ERVIgMScsICdDaGVnYSBhbnRlcyBkYXMgOWgsIHJlw7puZSBvIGdydXBvIHBhcmEgb3JhciBlIHJlc3BvbmRlIHBlbG8gc2VydmnDp28gZG8gZGlhLiBDdWlkYSBkbyBww7pscGl0byBlIGRhIMOhZ3VhIGRvIHBhc3RvciwgY29udGEgbyBvZmVydMOzcmlvIGp1bnRvIGNvbSBlbGUsIMOpIG8gw7psdGltbyBhIHNhaXIgZSBwcmVlbmNoZSBvIHJlbGF0w7NyaW8gbm8gZmltIGRvIGN1bHRvLicpLAogICAgKCdMw41ERVIgMicsICdNZXNtYSByZXNwb25zYWJpbGlkYWRlIGRvIEzDrWRlciAxOiBvcyBkb2lzIGxpZGVyYW0ganVudG9zLCBkw6NvIHVtYSB2b2x0YSBwZWxhIGlncmVqYSBkdXJhbnRlIG8gY3VsdG8gcGFyYSB2ZXIgY29tbyBlc3TDoSBvIHNlcnZpw6dvIGUgc2FlbSBkZXBvaXMgZGEgaW5zcGXDp8OjbyBmaW5hbC4nKSwKICAgICgnRVNUQUNJT05BTUVOVE8gMScsICdDaGVnYSDDoHMgOGgzMCBwYXJhIG9yZ2FuaXphciBvcyBjb25lcy4gT3JpZW50YSBxdWVtIGVzdGFjaW9uYSBwYXJhIG7Do28gYmxvcXVlYXIgYSBzYcOtZGEgZG9zIHZpemluaG9zIGUgZGVpeGEgbGl2cmVzIGFzIHZhZ2FzIHBlcnRvIGRhcyBlbnRyYWRhcyBkZWxlcy4nKSwKICAgICgnRVNUQUNJT05BTUVOVE8gMicsICdGaWNhIG5vIGVzdGFjaW9uYW1lbnRvIG8gY3VsdG8gaW50ZWlybzogc2UgdW0gcHJlY2lzYSBzYWlyLCBvIG91dHJvIHBlcm1hbmVjZS4gRW0gZGlhIGRlIGNodXZhLCBhanVkYSBvcyBpcm3Do29zIGNvbSBndWFyZGEtY2h1dmEuJyksCiAgICAoJ0VTVEFDSU9OQU1FTlRPIDMnLCAnWmVsYSBwYXJhIGFzIHZhZ2FzIHJlc2VydmFkYXMgc2VyZW0gcmVzcGVpdGFkYXMgZSBhcG9pYSBvcyBvdXRyb3MgZG9pcyBlbSBob3LDoXJpbyBkZSBwaWNvIGUgZW0gZGlhIGRlIGNodXZhLicpLAogICAgKCdSRUNFUMOHw4NPIDEnLCAnQ2hlZ2EgYW50ZXMgZGFzIDloIGUgcmVjZWJlIGNvbSBhbGVncmlhLCBuYSBwb3J0YSBkYSBydWEgb3UgbmEgcG9ydGEgZG8gdGVtcGxvLiBJZGVudGlmaWNhIG8gdmlzaXRhbnRlLCBhbm90YSBub21lIGUgdGVsZWZvbmUgZSBlbnRyZWdhIG5vIGZpbSBwYXJhIGEgc2FsYSBkbyB2aXNpdGFudGUuJyksCiAgICAoJ1JFQ0VQw4fDg08gMicsICdBanVkYSBvIHZpc2l0YW50ZSBhIHNlIHNpdHVhcjogYmFuaGVpcm8sIGJlYmVkb3Vybywgc2FsYSBLaWRzLiBGaWNhIG5hIHBvc2nDp8OjbyBkYXMgOWgzMCBhdMOpIG8gZmltIGRvIGxvdXZvciBlIGRlcG9pcyBuYSBlbnRyYWRhIGRvIHRlbXBsbywgZXZpdGFuZG8gcXVlIGNyaWFuw6dhIHNhaWEgZGVzYWNvbXBhbmhhZGEuJyksCiAgICAoJ0dBQklORVRFLCBDT1pJTkhBIEUgQkFOSEVJUk9TJywgJ8OJIHVtIGNhc2FsLiBQcmVwYXJhIG8gY2Fmw6kgZG9zIHBhc3RvcmVzIChzw7MgbyBob21lbSBlbnRyYSBubyBnYWJpbmV0ZSBzZSBvIHBhc3RvciBlc3RpdmVyIGzDoSksIGNvbmZlcmUgb3MgYmFuaGVpcm9zLCBjYWRhIHVtIG8gZG8gc2V1IHNleG8sIHRyb2NhIG8gZ2Fsw6NvIGRvIGJlYmVkb3VybyBlIG1hbnTDqW0gYSBwYXJ0ZSBkZSBmb3JhIGRvIHRlbXBsbyBvcmdhbml6YWRhLiBEZWZlaXRvIGVuY29udHJhZG8gdmFpIHBhcmEgbyBsw61kZXIgZG8gZGlhLicpLAogICAgKCdTRVRPUiBBJywgJ0ZyZW50ZSwgbGFkbyBlc3F1ZXJkbyBkZSBxdWVtIGVudHJhLiBSZWNlYmUgb3MgaXJtw6Nvcywgb3JpZW50YSBhIG9jdXBhw6fDo28gZGEgZnJlbnRlIHBhcmEgdHLDoXMsIGFqdWRhIG5vIGTDrXppbW8gZSBuYSBvZmVydGEgZSByZWNvbGhlIG9zIGPDoWxpY2VzIGRhIGNlaWEgbm8gc2V0b3IuJyksCiAgICAoJ1NFVE9SIEInLCAnRnJlbnRlLCBsYWRvIGRpcmVpdG8gZGUgcXVlbSBlbnRyYS4gTWVzbWFzIHRhcmVmYXMgZG8gc2V0b3IgQSwgc2VudGFkbyBubyBwb250byBxdWUgZMOhIGEgbWVsaG9yIHZpc8OjbyBkbyBwcsOzcHJpbyBzZXRvci4nKSwKICAgICgnU0VUT1IgQycsICdGdW5kb3MsIGxhZG8gZXNxdWVyZG8gZGUgcXVlbSBlbnRyYS4gUmVzb2x2ZSBvIHF1ZSDDqSBzaW1wbGVzIGUgY2hhbWEgb3V0cm8gc2V0b3Igb3UgbyBsw61kZXIgcXVhbmRvIHByZWNpc2EuJyksCiAgICAoJ1NFVE9SIEQnLCAnRnVuZG9zLCBsYWRvIGRpcmVpdG8gZGUgcXVlbSBlbnRyYS4gRmljYSBhdGVudG8gYSBxdWFscXVlciBjb2lzYSBxdWUgYXRyYXBhbGhlIG8gY3VsdG8gZSBzw7Mgc2FpIGRvIHNldG9yIHBhcmEgYWp1ZGFyIGVtIG91dHJhIHNpdHVhw6fDo28sIHZvbHRhbmRvIGxvZ28gZGVwb2lzLicpCiAgKSBhcyBkKG5vbWUsIHR4dCkKICB3aGVyZSBmdW5jb2VzLmVxdWlwZV9pZCA9IHZfZXEgYW5kIGZ1bmNvZXMubm9tZSA9IGQubm9tZTsKZW5kICQkOwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotLSBhcyBkdWFzIGZ1bsOnw7VlcyBww7pibGljYXMgcGFzc2FtIGEgY2FycmVnYXIgbyBxdWUgYSB0ZWxhIHByZWNpc2EKZHJvcCBmdW5jdGlvbiBpZiBleGlzdHMgZXF1aXBlX2Z1bmNvZXModGV4dCk7CmNyZWF0ZSBmdW5jdGlvbiBlcXVpcGVfZnVuY29lcyhwX3NsdWcgdGV4dCkKcmV0dXJucyB0YWJsZSAobm9tZSB0ZXh0LCBvcmRlbSBpbnQsIHRpcG9zIHRleHRbXSwgcmVsYXRhIGJvb2xlYW4sIGRlc2NyaWNhbyB0ZXh0KQpsYW5ndWFnZSBzcWwgc2VjdXJpdHkgZGVmaW5lciBzdGFibGUgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICQkCiAgc2VsZWN0IGYubm9tZSwgZi5vcmRlbSwgY29hbGVzY2UoZi50aXBvcywgYXJyYXlbJ2RvbWluZ28nLCdmb2xsb3cnXSksIGYucmVsYXRhLCBmLmRlc2NyaWNhbwogICAgZnJvbSBmdW5jb2VzIGYgam9pbiBlcXVpcGVzIGUgb24gZS5pZCA9IGYuZXF1aXBlX2lkCiAgIHdoZXJlIGUuc2x1ZyA9IHBfc2x1ZyBhbmQgZi5hdGl2YQogICBvcmRlciBieSBmLm9yZGVtLCBmLm5vbWU7CiQkOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGVxdWlwZV9mdW5jb2VzKHRleHQpIGZyb20gcHVibGljOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGVxdWlwZV9mdW5jb2VzKHRleHQpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7Cgpkcm9wIGZ1bmN0aW9uIGlmIGV4aXN0cyBlcXVpcGVfcHVibGljYSh0ZXh0KTsKY3JlYXRlIGZ1bmN0aW9uIGVxdWlwZV9wdWJsaWNhKHBfc2x1ZyB0ZXh0KQpyZXR1cm5zIHRhYmxlIChlcXVpcGUgdGV4dCwgdm9sdW50YXJpb19pZCB1dWlkLCBwcmltZWlyb19ub21lIHRleHQsIHByZWNpc2FfbGluayBib29sZWFuLAogICAgICAgICAgICAgICBzZW1fbml2ZWlzIGJvb2xlYW4sIGF2aXNvX2NhZGFzdHJvIHRleHQpCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJCQKICBzZWxlY3QgZS5ub21lLCB2LmlkLCBzcGxpdF9wYXJ0KHYubm9tZSwgJyAnLCAxKSwKICAgICAgICAgY29hbGVzY2UobGVuZ3RoKG51bGxpZih0ZWxfbm9ybSh2LnRlbGVmb25lKSwgJycpKSwgMCkgPCA0LAogICAgICAgICBlLnNlbV9uaXZlaXMsIGUuYXZpc29fY2FkYXN0cm8KICAgIGZyb20gZXF1aXBlcyBlCiAgICBsZWZ0IGpvaW4gdm9sdW50YXJpb3MgdiBvbiB2LmVxdWlwZV9pZCA9IGUuaWQgYW5kIHYuYXRpdm8KICAgd2hlcmUgZS5zbHVnID0gcF9zbHVnCiAgIG9yZGVyIGJ5IHYubm9tZTsKJCQ7CnJldm9rZSBhbGwgb24gZnVuY3Rpb24gZXF1aXBlX3B1YmxpY2EodGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXF1aXBlX3B1YmxpY2EodGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCi0tIGNvbmZlcsOqbmNpYQpzZWxlY3QgZS5ub21lLCBlLnNlbV9uaXZlaXMsIChlLmF2aXNvX2NhZGFzdHJvIGlzIG5vdCBudWxsKSBhcyB0ZW1fYXZpc28sCiAgICAgICAoc2VsZWN0IGNvdW50KCopIGZyb20gZnVuY29lcyBmIHdoZXJlIGYuZXF1aXBlX2lkID0gZS5pZCBhbmQgZi5kZXNjcmljYW8gaXMgbm90IG51bGwpIGFzIHBvc3Rvc19leHBsaWNhZG9zLAogICAgICAgKHNlbGVjdCBjb3VudCgqKSBmcm9tIGZ1bmNvZXMgZiB3aGVyZSBmLmVxdWlwZV9pZCA9IGUuaWQgYW5kIGYuYXRpdmEpIGFzIHBvc3RvcwogIGZyb20gZXF1aXBlcyBlIG9yZGVyIGJ5IGUub3JkZW07Cg=="}
+-- ============ POSTO EXPLICADO, E MINISTÉRIO SEM NÍVEL DECLARADO ===========
+-- Dois pedidos que andam juntos, e os dois são sobre a mesma coisa: quem se
+-- cadastra no Serviço do Culto precisa saber o que o posto exige ANTES de
+-- marcar, e não precisa se auto-avaliar depois.
+--
+-- 1) NÍVEL SAI DO SERVIÇO. Na Mídia faz sentido perguntar "faço sozinho ou
+--    ajudo", porque o time forma gente na prática e o sorteio precisa saber
+--    quem segura a área. No Serviço do Culto o posto é ocupado por quem já
+--    sabe: não existe meio-termo para conferir, e quem quer aprender fala com
+--    a liderança em vez de se marcar. Marcar um posto passa a ser uma coisa
+--    só: eu faço. Continua entrando como não conferido, então o líder ainda
+--    valida antes de valer no sorteio.
+--
+-- 2) CADA POSTO EXPLICA A PRÓPRIA FUNÇÃO. Uma lista de 12 nomes em caixa alta
+--    não diz a ninguém o que é ser SETOR C. Sem isso a pessoa marca no chute e
+--    a conferência do líder vira o primeiro momento em que alguém descobre o
+--    engano.
+
+alter table equipes add column if not exists sem_niveis     boolean not null default false;
+alter table equipes add column if not exists aviso_cadastro text;
+alter table funcoes add column if not exists descricao      text;
+
+comment on column equipes.sem_niveis is
+  'true = marcar um posto é só "eu faço", sem escolher nível. Para ministério que só aloca quem já sabe.';
+comment on column equipes.aviso_cadastro is
+  'recado no alto da tela pública de cadastro deste ministério';
+comment on column funcoes.descricao is
+  'o que este posto faz, em uma ou duas frases, mostrado na tela de cadastro';
+
+update equipes
+   set sem_niveis = true,
+       aviso_cadastro = 'Estes postos são para quem já sabe a função. Se você quer se voluntariar e aprender, chama no (21) 99594-6491 que a liderança te encaixa.'
+ where slug = 'servico';
+
+-- ------------------------------------------------------------ descrições --
+do $$
+declare v_eq uuid;
+begin
+  select id into v_eq from equipes where slug = 'servico';
+  if v_eq is null then return; end if;
+
+  update funcoes set descricao = d.txt from (values
+    ('LÍDER 1', 'Chega antes das 9h, reúne o grupo para orar e responde pelo serviço do dia. Cuida do púlpito e da água do pastor, conta o ofertório junto com ele, é o último a sair e preenche o relatório no fim do culto.'),
+    ('LÍDER 2', 'Mesma responsabilidade do Líder 1: os dois lideram juntos, dão uma volta pela igreja durante o culto para ver como está o serviço e saem depois da inspeção final.'),
+    ('ESTACIONAMENTO 1', 'Chega às 8h30 para organizar os cones. Orienta quem estaciona para não bloquear a saída dos vizinhos e deixa livres as vagas perto das entradas deles.'),
+    ('ESTACIONAMENTO 2', 'Fica no estacionamento o culto inteiro: se um precisa sair, o outro permanece. Em dia de chuva, ajuda os irmãos com guarda-chuva.'),
+    ('ESTACIONAMENTO 3', 'Zela para as vagas reservadas serem respeitadas e apoia os outros dois em horário de pico e em dia de chuva.'),
+    ('RECEPÇÃO 1', 'Chega antes das 9h e recebe com alegria, na porta da rua ou na porta do templo. Identifica o visitante, anota nome e telefone e entrega no fim para a sala do visitante.'),
+    ('RECEPÇÃO 2', 'Ajuda o visitante a se situar: banheiro, bebedouro, sala Kids. Fica na posição das 9h30 até o fim do louvor e depois na entrada do templo, evitando que criança saia desacompanhada.'),
+    ('GABINETE, COZINHA E BANHEIROS', 'É um casal. Prepara o café dos pastores (só o homem entra no gabinete se o pastor estiver lá), confere os banheiros, cada um o do seu sexo, troca o galão do bebedouro e mantém a parte de fora do templo organizada. Defeito encontrado vai para o líder do dia.'),
+    ('SETOR A', 'Frente, lado esquerdo de quem entra. Recebe os irmãos, orienta a ocupação da frente para trás, ajuda no dízimo e na oferta e recolhe os cálices da ceia no setor.'),
+    ('SETOR B', 'Frente, lado direito de quem entra. Mesmas tarefas do setor A, sentado no ponto que dá a melhor visão do próprio setor.'),
+    ('SETOR C', 'Fundos, lado esquerdo de quem entra. Resolve o que é simples e chama outro setor ou o líder quando precisa.'),
+    ('SETOR D', 'Fundos, lado direito de quem entra. Fica atento a qualquer coisa que atrapalhe o culto e só sai do setor para ajudar em outra situação, voltando logo depois.')
+  ) as d(nome, txt)
+  where funcoes.equipe_id = v_eq and funcoes.nome = d.nome;
+end $$;
+
+----------------------------------------------------------------------------
+-- as duas funções públicas passam a carregar o que a tela precisa
+drop function if exists equipe_funcoes(text);
+create function equipe_funcoes(p_slug text)
+returns table (nome text, ordem int, tipos text[], relata boolean, descricao text)
+language sql security definer stable set search_path = public as $$
+  select f.nome, f.ordem, coalesce(f.tipos, array['domingo','follow']), f.relata, f.descricao
+    from funcoes f join equipes e on e.id = f.equipe_id
+   where e.slug = p_slug and f.ativa
+   order by f.ordem, f.nome;
+$$;
+revoke all on function equipe_funcoes(text) from public;
+grant execute on function equipe_funcoes(text) to anon, authenticated;
+
+drop function if exists equipe_publica(text);
+create function equipe_publica(p_slug text)
+returns table (equipe text, voluntario_id uuid, primeiro_nome text, precisa_link boolean,
+               sem_niveis boolean, aviso_cadastro text)
+language sql security definer stable set search_path = public as $$
+  select e.nome, v.id, split_part(v.nome, ' ', 1),
+         coalesce(length(nullif(tel_norm(v.telefone), '')), 0) < 4,
+         e.sem_niveis, e.aviso_cadastro
+    from equipes e
+    left join voluntarios v on v.equipe_id = e.id and v.ativo
+   where e.slug = p_slug
+   order by v.nome;
+$$;
+revoke all on function equipe_publica(text) from public;
+grant execute on function equipe_publica(text) to anon, authenticated;
+
+-- conferência
+select e.nome, e.sem_niveis, (e.aviso_cadastro is not null) as tem_aviso,
+       (select count(*) from funcoes f where f.equipe_id = e.id and f.descricao is not null) as postos_explicados,
+       (select count(*) from funcoes f where f.equipe_id = e.id and f.ativa) as postos
+  from equipes e order by e.ordem;

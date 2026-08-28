@@ -1,1 +1,71 @@
-{"data":"Lyogw41jb25lcyBlbSBTVkcgcHVybywgdHJhw6dvIDEuNywgc2VtIGRlcGVuZMOqbmNpYXMuICovCnR5cGUgUCA9IHsgY2xhc3NOYW1lPzogc3RyaW5nIH07CmNvbnN0IGJhc2UgPSB7IGZpbGw6ICdub25lJywgc3Ryb2tlOiAnY3VycmVudENvbG9yJywgc3Ryb2tlV2lkdGg6IDEuNywgc3Ryb2tlTGluZWNhcDogJ3JvdW5kJyBhcyBjb25zdCwgc3Ryb2tlTGluZWpvaW46ICdyb3VuZCcgYXMgY29uc3QsIHZpZXdCb3g6ICcwIDAgMjQgMjQnLCB3aWR0aDogMTgsIGhlaWdodDogMTggfTsKCmV4cG9ydCBjb25zdCBJY1BhaW5lbCA9ICh7IGNsYXNzTmFtZSB9OiBQKSA9PiAoCiAgPHN2ZyB7Li4uYmFzZX0gY2xhc3NOYW1lPXtjbGFzc05hbWV9PjxyZWN0IHg9IjMiIHk9IjMiIHdpZHRoPSI3LjUiIGhlaWdodD0iNy41IiByeD0iMiIvPjxyZWN0IHg9IjEzLjUiIHk9IjMiIHdpZHRoPSI3LjUiIGhlaWdodD0iNy41IiByeD0iMiIvPjxyZWN0IHg9IjMiIHk9IjEzLjUiIHdpZHRoPSI3LjUiIGhlaWdodD0iNy41IiByeD0iMiIvPjxyZWN0IHg9IjEzLjUiIHk9IjEzLjUiIHdpZHRoPSI3LjUiIGhlaWdodD0iNy41IiByeD0iMiIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNDYWxlbmRhcmlvID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHJlY3QgeD0iMyIgeT0iNSIgd2lkdGg9IjE4IiBoZWlnaHQ9IjE2IiByeD0iMyIvPjxwYXRoIGQ9Ik04IDN2NE0xNiAzdjRNMyAxMGgxOCIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNUaW1lID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PGNpcmNsZSBjeD0iOSIgY3k9IjguNSIgcj0iMy4yIi8+PHBhdGggZD0iTTIuOCAxOS40Yy45LTMgMy4zLTQuNiA2LjItNC42czUuMyAxLjYgNi4yIDQuNiIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iOS41IiByPSIyLjUiLz48cGF0aCBkPSJNMTYuNCAxNC45YzIuNC4yIDQuMiAxLjYgNC45IDMuOSIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNBanVzdGVzID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHBhdGggZD0iTTQgN2g5TTE3IDdoM000IDEyaDNNMTEgMTJoOU00IDE3aDlNMTcgMTdoMyIvPjxjaXJjbGUgY3g9IjE1IiBjeT0iNyIgcj0iMiIvPjxjaXJjbGUgY3g9IjkiIGN5PSIxMiIgcj0iMiIvPjxjaXJjbGUgY3g9IjE1IiBjeT0iMTciIHI9IjIiLz48L3N2Zz4KKTsKZXhwb3J0IGNvbnN0IEljQ29waWFyID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHJlY3QgeD0iOCIgeT0iOCIgd2lkdGg9IjEyIiBoZWlnaHQ9IjEyIiByeD0iMi41Ii8+PHBhdGggZD0iTTUgMTUuNUEyLjUgMi41IDAgMCAxIDQgMTMuNVY2LjJBMi4yIDIuMiAwIDAgMSA2LjIgNGg3LjNBMi41IDIuNSAwIDAgMSAxNS41IDUiLz48L3N2Zz4KKTsKZXhwb3J0IGNvbnN0IEljQ2FkZWFkbyA9ICh7IGNsYXNzTmFtZSwgYWJlcnRvIH06IFAgJiB7IGFiZXJ0bz86IGJvb2xlYW4gfSkgPT4gKAogIDxzdmcgey4uLmJhc2V9IGNsYXNzTmFtZT17Y2xhc3NOYW1lfT4KICAgIDxyZWN0IHg9IjUiIHk9IjEwLjUiIHdpZHRoPSIxNCIgaGVpZ2h0PSI5LjUiIHJ4PSIyLjUiLz4KICAgIHthYmVydG8gPyA8cGF0aCBkPSJNOCAxMC41VjcuNWE0IDQgMCAwIDEgNy41LTEuOCIvPiA6IDxwYXRoIGQ9Ik04IDEwLjVWNy41YTQgNCAwIDAgMSA4IDB2MyIvPn0KICA8L3N2Zz4KKTsKZXhwb3J0IGNvbnN0IEljRGFkbyA9ICh7IGNsYXNzTmFtZSB9OiBQKSA9PiAoCiAgPHN2ZyB7Li4uYmFzZX0gY2xhc3NOYW1lPXtjbGFzc05hbWV9PjxyZWN0IHg9IjMuNSIgeT0iMy41IiB3aWR0aD0iMTciIGhlaWdodD0iMTciIHJ4PSI0Ii8+PGNpcmNsZSBjeD0iOC42IiBjeT0iOC42IiByPSIxLjE1IiBmaWxsPSJjdXJyZW50Q29sb3IiIHN0cm9rZT0ibm9uZSIvPjxjaXJjbGUgY3g9IjE1LjQiIGN5PSI4LjYiIHI9IjEuMTUiIGZpbGw9ImN1cnJlbnRDb2xvciIgc3Ryb2tlPSJub25lIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMS4xNSIgZmlsbD0iY3VycmVudENvbG9yIiBzdHJva2U9Im5vbmUiLz48Y2lyY2xlIGN4PSI4LjYiIGN5PSIxNS40IiByPSIxLjE1IiBmaWxsPSJjdXJyZW50Q29sb3IiIHN0cm9rZT0ibm9uZSIvPjxjaXJjbGUgY3g9IjE1LjQiIGN5PSIxNS40IiByPSIxLjE1IiBmaWxsPSJjdXJyZW50Q29sb3IiIHN0cm9rZT0ibm9uZSIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNDaGVjayA9ICh7IGNsYXNzTmFtZSB9OiBQKSA9PiAoCiAgPHN2ZyB7Li4uYmFzZX0gY2xhc3NOYW1lPXtjbGFzc05hbWV9PjxwYXRoIGQ9Ik00LjUgMTIuNSAxMCAxOCAxOS41IDYuNSIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNYID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHBhdGggZD0iTTYgNmwxMiAxMk0xOCA2IDYgMTgiLz48L3N2Zz4KKTsKZXhwb3J0IGNvbnN0IEljQWxlcnRhID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHBhdGggZD0iTTEyIDQgMi44IDE5LjVoMTguNFoiLz48cGF0aCBkPSJNMTIgMTB2NC4yIi8+PGNpcmNsZSBjeD0iMTIiIGN5PSIxNi45IiByPSIuNCIgZmlsbD0iY3VycmVudENvbG9yIi8+PC9zdmc+Cik7CmV4cG9ydCBjb25zdCBJY0luZm8gPSAoeyBjbGFzc05hbWUgfTogUCkgPT4gKAogIDxzdmcgey4uLmJhc2V9IGNsYXNzTmFtZT17Y2xhc3NOYW1lfT48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4LjUiLz48cGF0aCBkPSJNMTIgMTF2NSIvPjxjaXJjbGUgY3g9IjEyIiBjeT0iOCIgcj0iLjQiIGZpbGw9ImN1cnJlbnRDb2xvciIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNTZXRhID0gKHsgY2xhc3NOYW1lLCBkaXIgPSAnZCcgfTogUCAmIHsgZGlyPzogJ2UnIHwgJ2QnIH0pID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+e2RpciA9PT0gJ2UnID8gPHBhdGggZD0iTTE0LjUgNS41IDggMTJsNi41IDYuNSIvPiA6IDxwYXRoIGQ9Ik05LjUgNS41IDE2IDEybC02LjUgNi41Ii8+fTwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNTaW5vID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PHBhdGggZD0iTTYgMTBhNiA2IDAgMCAxIDEyIDBjMCA0IDEuNSA1LjUgMiA2SDRjLjUtLjUgMi0yIDItNloiLz48cGF0aCBkPSJNMTAgMTlhMi4yIDIuMiAwIDAgMCA0IDAiLz48L3N2Zz4KKTsKZXhwb3J0IGNvbnN0IEljU2FpciA9ICh7IGNsYXNzTmFtZSB9OiBQKSA9PiAoCiAgPHN2ZyB7Li4uYmFzZX0gY2xhc3NOYW1lPXtjbGFzc05hbWV9PjxwYXRoIGQ9Ik0xNCA0SDdhMiAyIDAgMCAwLTIgMnYxMmEyIDIgMCAwIDAgMiAyaDciLz48cGF0aCBkPSJNMTcgOC41IDIwLjUgMTIgMTcgMTUuNU0xMCAxMmgxMCIvPjwvc3ZnPgopOwovKiBBIG1hcmNhIMOpIG8gY2hldnJvbiBkYSBsb2dvIGRhIGlncmVqYS4gVW0gdHJhw6dvIHPDsywgc2VtIGNhaXhhIGVtIHZvbHRhOgogICBhIGNhaXhhIHByZXRhIGrDoSDDqSBvIHByw7NwcmlvIGJvdMOjby4gKi8KZXhwb3J0IGNvbnN0IEljTWFyY2EgPSAoeyBjbGFzc05hbWUgfTogUCkgPT4gKAogIDxzdmcgey4uLmJhc2V9IGNsYXNzTmFtZT17Y2xhc3NOYW1lfSBzdHJva2VXaWR0aD17Mi40fSB2aWV3Qm94PSIwIDAgMjQgMjQiPgogICAgPHBhdGggZD0iTTkgNS41IDE2LjUgMTIgOSAxOC41IiAvPgogIDwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNHcnVwbyA9ICh7IGNsYXNzTmFtZSB9OiBQKSA9PiAoCiAgPHN2ZyB7Li4uYmFzZX0gY2xhc3NOYW1lPXtjbGFzc05hbWV9PjxjaXJjbGUgY3g9IjgiIGN5PSI5IiByPSIzIi8+PHBhdGggZD0iTTIuNSAxOWMuNy0yLjggMi45LTQuMyA1LjUtNC4zczQuOCAxLjUgNS41IDQuMyIvPjxjaXJjbGUgY3g9IjE3IiBjeT0iOS41IiByPSIyLjQiLz48cGF0aCBkPSJNMTYgMTQuOGMyLjMuMiA0IDEuNiA0LjcgMy45Ii8+PC9zdmc+Cik7CmV4cG9ydCBjb25zdCBJY01haXMgPSAoeyBjbGFzc05hbWUgfTogUCkgPT4gKAogIDxzdmcgey4uLmJhc2V9IGNsYXNzTmFtZT17Y2xhc3NOYW1lfT48cGF0aCBkPSJNMTIgNS41djEzTTUuNSAxMmgxMyIvPjwvc3ZnPgopOwpleHBvcnQgY29uc3QgSWNFc3RyZWxhID0gKHsgY2xhc3NOYW1lLCBjaGVpYSB9OiBQICYgeyBjaGVpYT86IGJvb2xlYW4gfSkgPT4gKAogIDxzdmcgey4uLmJhc2V9IGNsYXNzTmFtZT17Y2xhc3NOYW1lfSBmaWxsPXtjaGVpYSA/ICdjdXJyZW50Q29sb3InIDogJ25vbmUnfT4KICAgIDxwYXRoIGQ9Ik0xMiAzLjVsMi42IDUuMjcgNS44Mi44NS00LjIxIDQuMS45OSA1Ljc5TDEyIDE2Ljc3IDYuOTkgMTkuNWwuOTktNS43OS00LjIxLTQuMSA1LjgyLS44NXoiLz4KICA8L3N2Zz4KKTsKCmV4cG9ydCBjb25zdCBJY0J1c2NhID0gKHsgY2xhc3NOYW1lIH06IFApID0+ICgKICA8c3ZnIHsuLi5iYXNlfSBjbGFzc05hbWU9e2NsYXNzTmFtZX0+PGNpcmNsZSBjeD0iMTEiIGN5PSIxMSIgcj0iNi41Ii8+PHBhdGggZD0ibTE2IDE2IDQgNCIvPjwvc3ZnPgopOwo="}
+/* Ícones em SVG puro, traço 1.7, sem dependências. */
+type P = { className?: string };
+const base = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, viewBox: '0 0 24 24', width: 18, height: 18 };
+
+export const IcPainel = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>
+);
+export const IcCalendario = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+);
+export const IcTime = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="9" cy="8.5" r="3.2"/><path d="M2.8 19.4c.9-3 3.3-4.6 6.2-4.6s5.3 1.6 6.2 4.6"/><circle cx="17" cy="9.5" r="2.5"/><path d="M16.4 14.9c2.4.2 4.2 1.6 4.9 3.9"/></svg>
+);
+export const IcAjustes = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h9M17 17h3"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="15" cy="17" r="2"/></svg>
+);
+export const IcCopiar = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M5 15.5A2.5 2.5 0 0 1 4 13.5V6.2A2.2 2.2 0 0 1 6.2 4h7.3A2.5 2.5 0 0 1 15.5 5"/></svg>
+);
+export const IcCadeado = ({ className, aberto }: P & { aberto?: boolean }) => (
+  <svg {...base} className={className}>
+    <rect x="5" y="10.5" width="14" height="9.5" rx="2.5"/>
+    {aberto ? <path d="M8 10.5V7.5a4 4 0 0 1 7.5-1.8"/> : <path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>}
+  </svg>
+);
+export const IcDado = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.6" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="8.6" r="1.15" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.15" fill="currentColor" stroke="none"/><circle cx="8.6" cy="15.4" r="1.15" fill="currentColor" stroke="none"/><circle cx="15.4" cy="15.4" r="1.15" fill="currentColor" stroke="none"/></svg>
+);
+export const IcCheck = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M4.5 12.5 10 18 19.5 6.5"/></svg>
+);
+export const IcX = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M6 6l12 12M18 6 6 18"/></svg>
+);
+export const IcAlerta = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M12 4 2.8 19.5h18.4Z"/><path d="M12 10v4.2"/><circle cx="12" cy="16.9" r=".4" fill="currentColor"/></svg>
+);
+export const IcInfo = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".4" fill="currentColor"/></svg>
+);
+export const IcSeta = ({ className, dir = 'd' }: P & { dir?: 'e' | 'd' }) => (
+  <svg {...base} className={className}>{dir === 'e' ? <path d="M14.5 5.5 8 12l6.5 6.5"/> : <path d="M9.5 5.5 16 12l-6.5 6.5"/>}</svg>
+);
+export const IcSino = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M6 10a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6Z"/><path d="M10 19a2.2 2.2 0 0 0 4 0"/></svg>
+);
+export const IcSair = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M14 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h7"/><path d="M17 8.5 20.5 12 17 15.5M10 12h10"/></svg>
+);
+/* A marca é o chevron da logo da igreja. Um traço só, sem caixa em volta:
+   a caixa preta já é o próprio botão. */
+export const IcMarca = ({ className }: P) => (
+  <svg {...base} className={className} strokeWidth={2.4} viewBox="0 0 24 24">
+    <path d="M9 5.5 16.5 12 9 18.5" />
+  </svg>
+);
+export const IcGrupo = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="8" cy="9" r="3"/><path d="M2.5 19c.7-2.8 2.9-4.3 5.5-4.3s4.8 1.5 5.5 4.3"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16 14.8c2.3.2 4 1.6 4.7 3.9"/></svg>
+);
+export const IcMais = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M12 5.5v13M5.5 12h13"/></svg>
+);
+export const IcEstrela = ({ className, cheia }: P & { cheia?: boolean }) => (
+  <svg {...base} className={className} fill={cheia ? 'currentColor' : 'none'}>
+    <path d="M12 3.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L12 16.77 6.99 19.5l.99-5.79-4.21-4.1 5.82-.85z"/>
+  </svg>
+);
+
+export const IcBusca = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
+);

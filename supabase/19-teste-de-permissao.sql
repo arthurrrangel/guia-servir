@@ -1,1 +1,236 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMTkg4oCUIFRFU1RFIEFVVE9NQVRJWkFETyBEQSBNQVRSSVogREUgUEVSTUlTU8ODTwoKICAgUE9SIFFVRSBJU1RPIEVYSVNURTogaG9qZSBvIGlzb2xhbWVudG8gcG9yIG1pbmlzdMOpcmlvIMOpIGNvbmZlcmlkbyDDoCBtw6NvLCBjb20KICAgSldUIHNpbXVsYWRvLCB1bWEgdmV6LCBwb3IgbWltLiBGb2kgYXNzaW0gcXVlIHNlIGRlc2NvYnJpdSBxdWUgYSBwb2xpY3kgZGUKICAgYGN1bHRvc2AgdGluaGEgZmljYWRvIHBhcmEgdHLDoXMgbmEgbWlncmHDp8OjbyAxMyDigJQgc29icm91IGRlIDAxIGUgbmluZ3XDqW0gdml1CiAgIHBvciBzZW1hbmFzLgoKICAgQSBhcnF1aXRldHVyYSBxdWVyIG3Ds2R1bG9zIG5vdm9zIChwZXNzb2FzLCBldmVudG9zLCBjb211bmljYcOnw6NvLCBmaW5hbmNlaXJvKS4KICAgQ2FkYSBtw7NkdWxvIG5vdm8gw6kgcG9saWN5IG5vdmEuIFNlbSB1bSB0ZXN0ZSBxdWUgcm9kZSwgYSBtYXRyaXogYXBvZHJlY2UgZW0KICAgc2lsw6puY2lvOiBuYWRhIHF1ZWJyYSwgbmFkYSBhdmlzYSwgZSB1bSBkaWEgbyBvcmdhbml6YWRvciBkZSB1bSBtaW5pc3TDqXJpbwogICBlc3TDoSBsZW5kbyBvIHRpbWUgZGUgb3V0cm8uCgogICBDT01PIFVTQVI6IGBzZWxlY3QgKiBmcm9tIHRlc3Rhcl9wZXJtaXNzb2VzKCk7YAogICBUb2RhIGxpbmhhIGNvbSBwYXNzb3UgPSBmYWxzZSDDqSB1bSBmdXJvLiBaZXJvIGxpbmhhcyBmYWxzYXMgPSBtYXRyaXogw61udGVncmEuCgogICBSb2RhIGludGVpcm8gZGVudHJvIGRhIHRyYW5zYcOnw6NvIGRhIHByw7NwcmlhIGNvbnN1bHRhLCBzw7MgY29tIFNFTEVDVCwgZQogICBkZXZvbHZlIG8gcGFwZWwgYW8gb3JpZ2luYWwgbm8gZmltIGRlIGNhZGEgY2Fzby4gTsOjbyBlc2NyZXZlIG5hZGEuCgogICDDiSBTRUNVUklUWSBJTlZPS0VSIGRlIHByb3DDs3NpdG86IG8gUG9zdGdyZXMgcHJvw61iZSBgc2V0IHJvbGVgIGRlbnRybyBkZQogICBTRUNVUklUWSBERUZJTkVSLCBlIHRyb2NhciBkZSBwYXBlbCDDqSBvIHF1ZSBvIHRlc3RlIGZhei4gU8OzIHF1ZW0gasOhIMOpIGRvbm8gZG8KICAgYmFuY28gY29uc2VndWUgcm9kYXIg4oCUIHF1ZSDDqSBleGF0YW1lbnRlIHF1ZW0gZGV2ZS4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIHRlc3Rhcl9wZXJtaXNzb2VzKCkKcmV0dXJucyB0YWJsZSAoZ3J1cG8gdGV4dCwgY2FzbyB0ZXh0LCBlc3BlcmFkbyB0ZXh0LCBvYnRpZG8gdGV4dCwgcGFzc291IGJvb2xlYW4pCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgaW52b2tlciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlCiAgdl9sb3V2b3IgdXVpZDsgdl9taWRpYSB1dWlkOyB2X3NlcnZpY28gdXVpZDsKICBuIGJpZ2ludDsgb2sgYm9vbGVhbjsgZXJybyB0ZXh0OwogIGp3dF9qYW5kZXIgY29uc3RhbnQgdGV4dCA6PSAneyJlbWFpbCI6ImphbmRlci5qcGNyaXNAZ21haWwuY29tIiwicm9sZSI6ImF1dGhlbnRpY2F0ZWQifSc7CiAgand0X2FydGh1ciBjb25zdGFudCB0ZXh0IDo9ICd7ImVtYWlsIjoiYXJ0aHVycmFuZ2VsNDI3QGdtYWlsLmNvbSIsInJvbGUiOiJhdXRoZW50aWNhdGVkIn0nOwogIGp3dF96w6kgICAgIGNvbnN0YW50IHRleHQgOj0gJ3siZW1haWwiOiJuaW5ndWVtQGV4ZW1wbG8uaW52YWxpZG8iLCJyb2xlIjoiYXV0aGVudGljYXRlZCJ9JzsKCmJlZ2luCiAgc2VsZWN0IGlkIGludG8gdl9sb3V2b3IgIGZyb20gZXF1aXBlcyB3aGVyZSBzbHVnID0gJ2xvdXZvcic7CiAgc2VsZWN0IGlkIGludG8gdl9taWRpYSAgIGZyb20gZXF1aXBlcyB3aGVyZSBzbHVnID0gJ21pZGlhJzsKICBzZWxlY3QgaWQgaW50byB2X3NlcnZpY28gZnJvbSBlcXVpcGVzIHdoZXJlIHNsdWcgPSAnc2Vydmljbyc7CgogIC0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIC0tIE9SR0FOSVpBRE9SIFBSRVNPIEEgVU0gTUlOSVNUw4lSSU8gKEphbmRlciDihpIgTG91dm9yKQogIC0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIHNldCBsb2NhbCByb2xlIGF1dGhlbnRpY2F0ZWQ7CiAgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKCiAgc2VsZWN0IGNvdW50KCopIGludG8gbiBmcm9tIHZvbHVudGFyaW9zIHYgd2hlcmUgdi5lcXVpcGVfaWQgPSB2X2xvdXZvcjsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGVzY29wYWRvJzo6dGV4dCwgJ3bDqiBvIHByw7NwcmlvIHRpbWUnOjp0ZXh0LAogICAgJzEyJzo6dGV4dCwgbjo6dGV4dCwgbiA9IDEyOwoKICBzZXQgbG9jYWwgcm9sZSBhdXRoZW50aWNhdGVkOyBwZXJmb3JtIHNldF9jb25maWcoJ3JlcXVlc3Quand0LmNsYWltcycsIGp3dF9qYW5kZXIsIHRydWUpOwogIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSB2b2x1bnRhcmlvcyB2IHdoZXJlIHYuZXF1aXBlX2lkID0gdl9taWRpYTsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGVzY29wYWRvJzo6dGV4dCwgJ07Dg08gdsOqIG8gdGltZSBkYSBNw61kaWEnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gdm9sdW50YXJpb3MgdiB3aGVyZSB2LmVxdWlwZV9pZCA9IHZfc2VydmljbzsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGVzY29wYWRvJzo6dGV4dCwgJ07Dg08gdsOqIGEgRGlhY29uaWEnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gZXF1aXBlczsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGVzY29wYWRvJzo6dGV4dCwgJ2VueGVyZ2EgMSBtaW5pc3TDqXJpbyBzw7MnOjp0ZXh0LAogICAgJzEnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMTsKCiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gZXNjYWxhY29lcyB4CiAgICBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkID0geC5mdW5jYW9faWQgd2hlcmUgZi5lcXVpcGVfaWQgPD4gdl9sb3V2b3I7CiAgcmVzZXQgcm9sZTsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdvcmdhbml6YWRvciBlc2NvcGFkbyc6OnRleHQsICdOw4NPIHbDqiBlc2NhbGHDp8OjbyBhbGhlaWEnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gaGFiaWxpZGFkZXMgaAogICAgam9pbiBmdW5jb2VzIGYgb24gZi5pZCA9IGguZnVuY2FvX2lkIHdoZXJlIGYuZXF1aXBlX2lkIDw+IHZfbG91dm9yOwogIHJlc2V0IHJvbGU7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnb3JnYW5pemFkb3IgZXNjb3BhZG8nOjp0ZXh0LCAnTsODTyB2w6ogaGFiaWxpZGFkZSBhbGhlaWEnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgLS0gRlVSTyAxIERBIEFVRElUT1JJQSBERSAyNi8wOCDigJQgcGluX2hhc2ggdGVtIHF1ZSBlc3RhciBmb3JhIGRvIGFsY2FuY2UKICAtLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICBiZWdpbgogICAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfamFuZGVyLCB0cnVlKTsKICAgIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSAoc2VsZWN0IHBpbl9oYXNoIGZyb20gdm9sdW50YXJpb3MgbGltaXQgMSkgejsKICAgIHJlc2V0IHJvbGU7IG9rIDo9IGZhbHNlOyBlcnJvIDo9ICdsZXUgJyB8fCBuIHx8ICcgbGluaGEocyknOwogIGV4Y2VwdGlvbiB3aGVuIGluc3VmZmljaWVudF9wcml2aWxlZ2UgdGhlbgogICAgcmVzZXQgcm9sZTsgb2sgOj0gdHJ1ZTsgZXJybyA6PSAncGVybWlzc2lvbiBkZW5pZWQnOwogIGVuZDsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdzZWdyZWRvJzo6dGV4dCwgJ3Bpbl9oYXNoIE5FR0FETyBhbyBvcmdhbml6YWRvcic6OnRleHQsCiAgICAncGVybWlzc2lvbiBkZW5pZWQnOjp0ZXh0LCBlcnJvLCBvazsKCiAgLyogbyB0b2tlbiBjb250aW51YSBsZWfDrXZlbCBERSBQUk9Qw5NTSVRPOiBtb250YXJMaW5rcygpIHVzYSAvZXUvPHRva2VuPiBwYXJhCiAgICAgbWFuZGFyIG8gbGluayBkZSBxdWVtIGVzcXVlY2V1IG8gUElOLiBTZSB1bSBkaWEgaXNzbyBtdWRhciwgZXN0ZSBjYXNvCiAgICAgY29tZcOnYSBhIGZhbGhhciBlIG9icmlnYSBhIGRlY2lzw6NvIGEgc2VyIGNvbnNjaWVudGUuICovCiAgYmVnaW4KICAgIHNldCBsb2NhbCByb2xlIGF1dGhlbnRpY2F0ZWQ7IHBlcmZvcm0gc2V0X2NvbmZpZygncmVxdWVzdC5qd3QuY2xhaW1zJywgand0X2phbmRlciwgdHJ1ZSk7CiAgICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gKHNlbGVjdCB0b2tlbiBmcm9tIHZvbHVudGFyaW9zIGxpbWl0IDEpIHo7CiAgICByZXNldCByb2xlOyBvayA6PSB0cnVlOyBlcnJvIDo9ICdsZWfDrXZlbCc7CiAgZXhjZXB0aW9uIHdoZW4gaW5zdWZmaWNpZW50X3ByaXZpbGVnZSB0aGVuCiAgICByZXNldCByb2xlOyBvayA6PSBmYWxzZTsgZXJybyA6PSAncGVybWlzc2lvbiBkZW5pZWQnOwogIGVuZDsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdzZWdyZWRvJzo6dGV4dCwgJ3Rva2VuIGxlZ8OtdmVsIChyaXNjbyBhY2VpdG8pJzo6dGV4dCwKICAgICdsZWfDrXZlbCc6OnRleHQsIGVycm8sIG9rOwoKICAtLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAtLSBGVVJPIDIgREEgQVVESVRPUklBIOKAlCBhcGFnYXIgY3VsdG8gw6kgc8OzIGRvIG9yZ2FuaXphZG9yIGdsb2JhbAogIC0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSBwZ19wb2xpY3kgcG9sIGpvaW4gcGdfY2xhc3MgYyBvbiBjLm9pZCA9IHBvbC5wb2xyZWxpZAogICB3aGVyZSBjLnJlbG5hbWUgPSAnY3VsdG9zJyBhbmQgcG9sLnBvbGNtZCA9ICdkJwogICAgIGFuZCBwZ19nZXRfZXhwcihwb2wucG9scXVhbCwgcG9sLnBvbHJlbGlkKSBpbGlrZSAnJWxpZGVyYV90dWRvJSc7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnZGVzdHJ1dGl2byc6OnRleHQsICdhcGFnYXIgY3VsdG8gZXhpZ2UgcGFwZWwgZ2xvYmFsJzo6dGV4dCwKICAgICcxIHBvbGljeSc6OnRleHQsIG4gfHwgJyBwb2xpY3knLCBuID0gMTsKCiAgc2VsZWN0IGNvdW50KCopIGludG8gbiBmcm9tIHBnX3BvbGljeSBwb2wgam9pbiBwZ19jbGFzcyBjIG9uIGMub2lkID0gcG9sLnBvbHJlbGlkCiAgIHdoZXJlIGMucmVsbmFtZSA9ICdjdWx0b3MnIGFuZCBwb2wucG9sY21kID0gJyonOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ2Rlc3RydXRpdm8nOjp0ZXh0LCAnbmVuaHVtYSBwb2xpY3kgRk9SIEFMTCBlbSBjdWx0b3MnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgLS0gT1JHQU5JWkFET1IgR0xPQkFMIChBcnRodXIpIOKAlCB0ZW0gcXVlIHZlciB0dWRvCiAgLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfYXJ0aHVyLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gZXF1aXBlczsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGdsb2JhbCc6OnRleHQsICdlbnhlcmdhIHRvZG9zIG9zIG1pbmlzdMOpcmlvcyc6OnRleHQsCiAgICAnMyc6OnRleHQsIG46OnRleHQsIG4gPSAzOwoKICBzZXQgbG9jYWwgcm9sZSBhdXRoZW50aWNhdGVkOyBwZXJmb3JtIHNldF9jb25maWcoJ3JlcXVlc3Quand0LmNsYWltcycsIGp3dF9hcnRodXIsIHRydWUpOwogIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSB2b2x1bnRhcmlvcyB3aGVyZSBhdGl2bzsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ29yZ2FuaXphZG9yIGdsb2JhbCc6OnRleHQsICdlbnhlcmdhIHRvZG8gdm9sdW50w6FyaW8gYXRpdm8nOjp0ZXh0LAogICAgJzM1Jzo6dGV4dCwgbjo6dGV4dCwgbiA9IDM1OwoKICAtLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAtLSBFTUFJTCBRVUUgTsODTyBFU1TDgSBOQSBMSVNUQSDigJQgbsOjbyDDqSBvcmdhbml6YWRvciBkZSBuYWRhCiAgLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfesOpLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gdm9sdW50YXJpb3M7CiAgcmVzZXQgcm9sZTsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdlc3RyYW5obyBhdXRlbnRpY2Fkbyc6OnRleHQsICduw6NvIHbDqiB2b2x1bnTDoXJpbyBuZW5odW0nOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgc2V0IGxvY2FsIHJvbGUgYXV0aGVudGljYXRlZDsgcGVyZm9ybSBzZXRfY29uZmlnKCdyZXF1ZXN0Lmp3dC5jbGFpbXMnLCBqd3RfesOpLCB0cnVlKTsKICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gZXF1aXBlczsKICByZXNldCByb2xlOwogIHJldHVybiBxdWVyeSBzZWxlY3QgJ2VzdHJhbmhvIGF1dGVudGljYWRvJzo6dGV4dCwgJ27Do28gdsOqIG1pbmlzdMOpcmlvIG5lbmh1bSc6OnRleHQsCiAgICAnMCc6OnRleHQsIG46OnRleHQsIG4gPSAwOwoKICBzZXQgbG9jYWwgcm9sZSBhdXRoZW50aWNhdGVkOyBwZXJmb3JtIHNldF9jb25maWcoJ3JlcXVlc3Quand0LmNsYWltcycsIGp3dF96w6ksIHRydWUpOwogIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSBsaWRlcmVzOwogIHJlc2V0IHJvbGU7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnZXN0cmFuaG8gYXV0ZW50aWNhZG8nOjp0ZXh0LCAnbsOjbyB2w6ogYSBsaXN0YSBkZSBvcmdhbml6YWRvcmVzJzo6dGV4dCwKICAgICcwJzo6dGV4dCwgbjo6dGV4dCwgbiA9IDA7CgogIC0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogIC0tIEFOT04g4oCUIGEgcG9ydGEgcMO6YmxpY2EuIFPDsyBhcyBmdW7Dp8O1ZXMgU0VDVVJJVFkgREVGSU5FUiBwb2RlbSBmYWxhci4KICAtLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAvKiBkZXBvaXMgZGEgMTggbyBhbm9uIG5lbSBHUkFOVCB0ZW06IGEgcmVzcG9zdGEgY2VydGEgw6kgInBlcm1pc3Npb24gZGVuaWVkIiwKICAgICBxdWUgw6kgbWFpcyBmb3J0ZSBxdWUgIjAgbGluaGFzIiDigJQgYSB0YWJlbGEgbsOjbyBlc3TDoSB2YXppYSwgZXN0w6EgZmVjaGFkYS4gKi8KICBiZWdpbgogICAgc2V0IGxvY2FsIHJvbGUgYW5vbjsKICAgIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSB2b2x1bnRhcmlvczsKICAgIHJlc2V0IHJvbGU7IG9rIDo9IGZhbHNlOyBlcnJvIDo9ICdsZXUgJyB8fCBuIHx8ICcgbGluaGEocyknOwogIGV4Y2VwdGlvbiB3aGVuIGluc3VmZmljaWVudF9wcml2aWxlZ2UgdGhlbgogICAgcmVzZXQgcm9sZTsgb2sgOj0gdHJ1ZTsgZXJybyA6PSAncGVybWlzc2lvbiBkZW5pZWQnOwogIGVuZDsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdhbm9uJzo6dGV4dCwgJ3RhYmVsYSBkZSB2b2x1bnTDoXJpb3MgZmVjaGFkYSc6OnRleHQsCiAgICAncGVybWlzc2lvbiBkZW5pZWQnOjp0ZXh0LCBlcnJvLCBvazsKCiAgYmVnaW4KICAgIHNldCBsb2NhbCByb2xlIGFub247CiAgICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gZXNjYWxhY29lczsKICAgIHJlc2V0IHJvbGU7IG9rIDo9IChuID0gMCk7IGVycm8gOj0gbiB8fCAnIGxpbmhhKHMpJzsKICBleGNlcHRpb24gd2hlbiBpbnN1ZmZpY2llbnRfcHJpdmlsZWdlIHRoZW4KICAgIHJlc2V0IHJvbGU7IG9rIDo9IHRydWU7IGVycm8gOj0gJ3Blcm1pc3Npb24gZGVuaWVkJzsKICBlbmQ7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnYW5vbic6OnRleHQsICd0YWJlbGEgZGUgZXNjYWxhw6fDtWVzIGZlY2hhZGEnOjp0ZXh0LAogICAgJ25hZGEgdmlzw612ZWwnOjp0ZXh0LCBlcnJvLCBvazsKCiAgLyogbWFzIGEgbGlzdGEgcMO6YmxpY2EgZGEgZXF1aXBlIFRFTSBxdWUgZnVuY2lvbmFyLCBzZW7Do28gbmluZ3XDqW0gc2UgY2FkYXN0cmEgKi8KICBzZXQgbG9jYWwgcm9sZSBhbm9uOwogIHNlbGVjdCBjb3VudCgqKSBpbnRvIG4gZnJvbSBlcXVpcGVfcHVibGljYSgnbG91dm9yJyk7CiAgcmVzZXQgcm9sZTsKICByZXR1cm4gcXVlcnkgc2VsZWN0ICdhbm9uJzo6dGV4dCwgJ2xpc3RhIHDDumJsaWNhIGRvIExvdXZvciBhYnJlJzo6dGV4dCwKICAgICcxMic6OnRleHQsIG46OnRleHQsIG4gPSAxMjsKCiAgLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgLS0gUkxTIGxpZ2FkbyBlbSB0b2RhIHRhYmVsYTogcG9saWN5IHNlbSBSTFMgw6kgZGVjb3Jhw6fDo28KICAtLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICBzZWxlY3QgY291bnQoKikgaW50byBuIGZyb20gcGdfY2xhc3MgYyBqb2luIHBnX25hbWVzcGFjZSBucyBvbiBucy5vaWQgPSBjLnJlbG5hbWVzcGFjZQogICB3aGVyZSBucy5uc3BuYW1lID0gJ3B1YmxpYycgYW5kIGMucmVsa2luZCA9ICdyJyBhbmQgbm90IGMucmVscm93c2VjdXJpdHk7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnZXN0cnV0dXJhJzo6dGV4dCwgJ25lbmh1bWEgdGFiZWxhIHNlbSBSTFMnOjp0ZXh0LAogICAgJzAnOjp0ZXh0LCBuOjp0ZXh0LCBuID0gMDsKCiAgLyogRk9SIEFMTCBqdW50YSBsZWl0dXJhIGUgZXNjcml0YSBubyBtZXNtbyB0ZXN0ZS4gRW5xdWFudG8gZm9yZW0gbXVpdGFzLCBhCiAgICAgbWF0cml6IG7Do28gY29uc2VndWUgZXhwcmVzc2FyICJsw6ogYXF1aSwgZXNjcmV2ZSBhbGkiIOKAlCDDqSBvIHF1ZSB0cmF2YSBvCiAgICAgcGFwZWwgcG9yIG3Ds2R1bG8gZGEgRmFzZSAzLiBOw6NvIMOpIGZ1cm8gaG9qZTsgw6kgZMOtdmlkYSBtZWRpZGEuICovCiAgc2VsZWN0IGNvdW50KCopIGludG8gbiBmcm9tIHBnX3BvbGljeSB3aGVyZSBwb2xjbWQgPSAnKic7CiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCAnZXN0cnV0dXJhJzo6dGV4dCwgJ3BvbGljaWVzIEZPUiBBTEwgKGTDrXZpZGEgZGEgRmFzZSAzKSc6OnRleHQsCiAgICAnbWVkaW5kbyc6OnRleHQsIG46OnRleHQsIHRydWU7CmVuZCAkZm4kOwoKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiB0ZXN0YXJfcGVybWlzc29lcygpIGZyb20gcHVibGljLCBhbm9uLCBhdXRoZW50aWNhdGVkOwoKY29tbWVudCBvbiBmdW5jdGlvbiB0ZXN0YXJfcGVybWlzc29lcygpIGlzCiAgJ21hdHJpeiBkZSBwZXJtaXNzw6NvIHZpdmEuIHNlbGVjdCAqIGZyb20gdGVzdGFyX3Blcm1pc3NvZXMoKSDigJQgdG9kYSBsaW5oYSBjb20gcGFzc291PWZhbHNlIMOpIHVtIGZ1cm8uIFJvZGFyIGRlcG9pcyBkZSBRVUFMUVVFUiBtZXhpZGEgZW0gcG9saWN5Lic7CgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCnNlbGVjdCBncnVwbywgY2FzbywgZXNwZXJhZG8sIG9idGlkbywgcGFzc291IGZyb20gdGVzdGFyX3Blcm1pc3NvZXMoKTsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICBGVVJPIEFDSEFETyBQRUxPIFBSw5NQUklPIFRFU1RFLCBuYSBwcmltZWlyYSBleGVjdcOnw6NvICgyNi8wOCkKCiAgIGBlcV9saWRlcmVzX2xlcmAgZXN0YXZhIGFzc2ltOgoKICAgICAgIGxpZGVyYV90dWRvKCkgT1IgKGVxdWlwZV9pZCBJUyBOVUxMKSBPUiBsaWRlcmFfZXF1aXBlKGVxdWlwZV9pZCkKCiAgIE8gdGVybW8gZG8gbWVpbyBuw6NvIHRlbSBzdWplaXRvLiBgZXF1aXBlX2lkIElTIE5VTExgIMOpIHByb3ByaWVkYWRlIGRhIExJTkhBLAogICBuw6NvIGRlIHF1ZW0gY29uc3VsdGEg4oCUIGVudMOjbyB0b2RhIGxpbmhhIGRlIG9yZ2FuaXphZG9yIGdsb2JhbCBmaWNhdmEgdmlzw612ZWwKICAgcGFyYSBRVUFMUVVFUiBhdXRlbnRpY2Fkby4gRSBvIGNhZGFzdHJvIGRvIGFwcCDDqSBhYmVydG86IGJhc3RhdmEgY3JpYXIgY29udGEKICAgY29tIHVtIGVtYWlsIHF1YWxxdWVyIHBhcmEgbGVyIHF1ZW0gYWRtaW5pc3RyYSBvIHNpc3RlbWEgZSBxdWFsIG1pbmlzdMOpcmlvCiAgIGNhZGEgdW0gY29tYW5kYS4KCiAgIEEgaW50ZW7Dp8OjbyAoIm9yZ2FuaXphZG9yIGdsb2JhbCB2w6ogbGluaGEgZ2xvYmFsIikgasOhIGVzdMOhIG5vIHByaW1laXJvIHRlcm1vLgogICBPIGRvIG1laW8gZXJhIHPDsyBvIGJ1Zy4KCiAgIENvbmZlcmlkbyBkZXBvaXMgZGEgdHJvY2E6IEFydGh1ciAoZ2xvYmFsKSB2w6ogNCwgSmFuZGVyIChlc2NvcGFkbykgdsOqIDEsCiAgIGVzdHJhbmhvIHbDqiAwLiBBIHRlbGEgZGUgQWp1c3RlcyBjb250aW51YSBmdW5jaW9uYW5kbyBwYXJhIG9zIGRvaXMgcHJpbWVpcm9zLgotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KZHJvcCBwb2xpY3kgaWYgZXhpc3RzIGVxX2xpZGVyZXNfbGVyIG9uIGxpZGVyZXM7CmNyZWF0ZSBwb2xpY3kgZXFfbGlkZXJlc19sZXIgb24gbGlkZXJlcyBmb3Igc2VsZWN0IHRvIGF1dGhlbnRpY2F0ZWQKICB1c2luZyAobGlkZXJhX3R1ZG8oKSBvciBsaWRlcmFfZXF1aXBlKGVxdWlwZV9pZCkpOwo="}
+/* =============================================================================
+   19 — TESTE AUTOMATIZADO DA MATRIZ DE PERMISSÃO
+
+   POR QUE ISTO EXISTE: hoje o isolamento por ministério é conferido à mão, com
+   JWT simulado, uma vez, por mim. Foi assim que se descobriu que a policy de
+   `cultos` tinha ficado para trás na migração 13 — sobrou de 01 e ninguém viu
+   por semanas.
+
+   A arquitetura quer módulos novos (pessoas, eventos, comunicação, financeiro).
+   Cada módulo novo é policy nova. Sem um teste que rode, a matriz apodrece em
+   silêncio: nada quebra, nada avisa, e um dia o organizador de um ministério
+   está lendo o time de outro.
+
+   COMO USAR: `select * from testar_permissoes();`
+   Toda linha com passou = false é um furo. Zero linhas falsas = matriz íntegra.
+
+   Roda inteiro dentro da transação da própria consulta, só com SELECT, e
+   devolve o papel ao original no fim de cada caso. Não escreve nada.
+
+   É SECURITY INVOKER de propósito: o Postgres proíbe `set role` dentro de
+   SECURITY DEFINER, e trocar de papel é o que o teste faz. Só quem já é dono do
+   banco consegue rodar — que é exatamente quem deve.
+   ============================================================================= */
+
+create or replace function testar_permissoes()
+returns table (grupo text, caso text, esperado text, obtido text, passou boolean)
+language plpgsql security invoker set search_path = public as $fn$
+declare
+  v_louvor uuid; v_midia uuid; v_servico uuid;
+  n bigint; ok boolean; erro text;
+  jwt_jander constant text := '{"email":"jander.jpcris@gmail.com","role":"authenticated"}';
+  jwt_arthur constant text := '{"email":"arthurrangel427@gmail.com","role":"authenticated"}';
+  jwt_zé     constant text := '{"email":"ninguem@exemplo.invalido","role":"authenticated"}';
+
+begin
+  select id into v_louvor  from equipes where slug = 'louvor';
+  select id into v_midia   from equipes where slug = 'midia';
+  select id into v_servico from equipes where slug = 'servico';
+
+  -- =====================================================================
+  -- ORGANIZADOR PRESO A UM MINISTÉRIO (Jander → Louvor)
+  -- =====================================================================
+  set local role authenticated;
+  perform set_config('request.jwt.claims', jwt_jander, true);
+
+  select count(*) into n from voluntarios v where v.equipe_id = v_louvor;
+  reset role;
+  return query select 'organizador escopado'::text, 'vê o próprio time'::text,
+    '12'::text, n::text, n = 12;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+  select count(*) into n from voluntarios v where v.equipe_id = v_midia;
+  reset role;
+  return query select 'organizador escopado'::text, 'NÃO vê o time da Mídia'::text,
+    '0'::text, n::text, n = 0;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+  select count(*) into n from voluntarios v where v.equipe_id = v_servico;
+  reset role;
+  return query select 'organizador escopado'::text, 'NÃO vê a Diaconia'::text,
+    '0'::text, n::text, n = 0;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+  select count(*) into n from equipes;
+  reset role;
+  return query select 'organizador escopado'::text, 'enxerga 1 ministério só'::text,
+    '1'::text, n::text, n = 1;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+  select count(*) into n from escalacoes x
+    join funcoes f on f.id = x.funcao_id where f.equipe_id <> v_louvor;
+  reset role;
+  return query select 'organizador escopado'::text, 'NÃO vê escalação alheia'::text,
+    '0'::text, n::text, n = 0;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+  select count(*) into n from habilidades h
+    join funcoes f on f.id = h.funcao_id where f.equipe_id <> v_louvor;
+  reset role;
+  return query select 'organizador escopado'::text, 'NÃO vê habilidade alheia'::text,
+    '0'::text, n::text, n = 0;
+
+  -- =====================================================================
+  -- FURO 1 DA AUDITORIA DE 26/08 — pin_hash tem que estar fora do alcance
+  -- =====================================================================
+  begin
+    set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+    select count(*) into n from (select pin_hash from voluntarios limit 1) z;
+    reset role; ok := false; erro := 'leu ' || n || ' linha(s)';
+  exception when insufficient_privilege then
+    reset role; ok := true; erro := 'permission denied';
+  end;
+  return query select 'segredo'::text, 'pin_hash NEGADO ao organizador'::text,
+    'permission denied'::text, erro, ok;
+
+  /* o token continua legível DE PROPÓSITO: montarLinks() usa /eu/<token> para
+     mandar o link de quem esqueceu o PIN. Se um dia isso mudar, este caso
+     começa a falhar e obriga a decisão a ser consciente. */
+  begin
+    set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
+    select count(*) into n from (select token from voluntarios limit 1) z;
+    reset role; ok := true; erro := 'legível';
+  exception when insufficient_privilege then
+    reset role; ok := false; erro := 'permission denied';
+  end;
+  return query select 'segredo'::text, 'token legível (risco aceito)'::text,
+    'legível'::text, erro, ok;
+
+  -- =====================================================================
+  -- FURO 2 DA AUDITORIA — apagar culto é só do organizador global
+  -- =====================================================================
+  select count(*) into n from pg_policy pol join pg_class c on c.oid = pol.polrelid
+   where c.relname = 'cultos' and pol.polcmd = 'd'
+     and pg_get_expr(pol.polqual, pol.polrelid) ilike '%lidera_tudo%';
+  return query select 'destrutivo'::text, 'apagar culto exige papel global'::text,
+    '1 policy'::text, n || ' policy', n = 1;
+
+  select count(*) into n from pg_policy pol join pg_class c on c.oid = pol.polrelid
+   where c.relname = 'cultos' and pol.polcmd = '*';
+  return query select 'destrutivo'::text, 'nenhuma policy FOR ALL em cultos'::text,
+    '0'::text, n::text, n = 0;
+
+  -- =====================================================================
+  -- ORGANIZADOR GLOBAL (Arthur) — tem que ver tudo
+  -- =====================================================================
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_arthur, true);
+  select count(*) into n from equipes;
+  reset role;
+  return query select 'organizador global'::text, 'enxerga todos os ministérios'::text,
+    '3'::text, n::text, n = 3;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_arthur, true);
+  select count(*) into n from voluntarios where ativo;
+  reset role;
+  return query select 'organizador global'::text, 'enxerga todo voluntário ativo'::text,
+    '35'::text, n::text, n = 35;
+
+  -- =====================================================================
+  -- EMAIL QUE NÃO ESTÁ NA LISTA — não é organizador de nada
+  -- =====================================================================
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_zé, true);
+  select count(*) into n from voluntarios;
+  reset role;
+  return query select 'estranho autenticado'::text, 'não vê voluntário nenhum'::text,
+    '0'::text, n::text, n = 0;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_zé, true);
+  select count(*) into n from equipes;
+  reset role;
+  return query select 'estranho autenticado'::text, 'não vê ministério nenhum'::text,
+    '0'::text, n::text, n = 0;
+
+  set local role authenticated; perform set_config('request.jwt.claims', jwt_zé, true);
+  select count(*) into n from lideres;
+  reset role;
+  return query select 'estranho autenticado'::text, 'não vê a lista de organizadores'::text,
+    '0'::text, n::text, n = 0;
+
+  -- =====================================================================
+  -- ANON — a porta pública. Só as funções SECURITY DEFINER podem falar.
+  -- =====================================================================
+  /* depois da 18 o anon nem GRANT tem: a resposta certa é "permission denied",
+     que é mais forte que "0 linhas" — a tabela não está vazia, está fechada. */
+  begin
+    set local role anon;
+    select count(*) into n from voluntarios;
+    reset role; ok := false; erro := 'leu ' || n || ' linha(s)';
+  exception when insufficient_privilege then
+    reset role; ok := true; erro := 'permission denied';
+  end;
+  return query select 'anon'::text, 'tabela de voluntários fechada'::text,
+    'permission denied'::text, erro, ok;
+
+  begin
+    set local role anon;
+    select count(*) into n from escalacoes;
+    reset role; ok := (n = 0); erro := n || ' linha(s)';
+  exception when insufficient_privilege then
+    reset role; ok := true; erro := 'permission denied';
+  end;
+  return query select 'anon'::text, 'tabela de escalações fechada'::text,
+    'nada visível'::text, erro, ok;
+
+  /* mas a lista pública da equipe TEM que funcionar, senão ninguém se cadastra */
+  set local role anon;
+  select count(*) into n from equipe_publica('louvor');
+  reset role;
+  return query select 'anon'::text, 'lista pública do Louvor abre'::text,
+    '12'::text, n::text, n = 12;
+
+  -- =====================================================================
+  -- RLS ligado em toda tabela: policy sem RLS é decoração
+  -- =====================================================================
+  select count(*) into n from pg_class c join pg_namespace ns on ns.oid = c.relnamespace
+   where ns.nspname = 'public' and c.relkind = 'r' and not c.relrowsecurity;
+  return query select 'estrutura'::text, 'nenhuma tabela sem RLS'::text,
+    '0'::text, n::text, n = 0;
+
+  /* FOR ALL junta leitura e escrita no mesmo teste. Enquanto forem muitas, a
+     matriz não consegue expressar "lê aqui, escreve ali" — é o que trava o
+     papel por módulo da Fase 3. Não é furo hoje; é dívida medida. */
+  select count(*) into n from pg_policy where polcmd = '*';
+  return query select 'estrutura'::text, 'policies FOR ALL (dívida da Fase 3)'::text,
+    'medindo'::text, n::text, true;
+end $fn$;
+
+revoke all on function testar_permissoes() from public, anon, authenticated;
+
+comment on function testar_permissoes() is
+  'matriz de permissão viva. select * from testar_permissoes() — toda linha com passou=false é um furo. Rodar depois de QUALQUER mexida em policy.';
+
+----------------------------------------------------------------------------
+select grupo, caso, esperado, obtido, passou from testar_permissoes();
+
+/* ---------------------------------------------------------------------------
+   FURO ACHADO PELO PRÓPRIO TESTE, na primeira execução (26/08)
+
+   `eq_lideres_ler` estava assim:
+
+       lidera_tudo() OR (equipe_id IS NULL) OR lidera_equipe(equipe_id)
+
+   O termo do meio não tem sujeito. `equipe_id IS NULL` é propriedade da LINHA,
+   não de quem consulta — então toda linha de organizador global ficava visível
+   para QUALQUER autenticado. E o cadastro do app é aberto: bastava criar conta
+   com um email qualquer para ler quem administra o sistema e qual ministério
+   cada um comanda.
+
+   A intenção ("organizador global vê linha global") já está no primeiro termo.
+   O do meio era só o bug.
+
+   Conferido depois da troca: Arthur (global) vê 4, Jander (escopado) vê 1,
+   estranho vê 0. A tela de Ajustes continua funcionando para os dois primeiros.
+--------------------------------------------------------------------------- */
+drop policy if exists eq_lideres_ler on lideres;
+create policy eq_lideres_ler on lideres for select to authenticated
+  using (lidera_tudo() or lidera_equipe(equipe_id));

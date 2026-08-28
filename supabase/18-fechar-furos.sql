@@ -1,1 +1,147 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMTgg4oCUIEZBU0UgMDogZmVjaGFyIG9zIHRyw6pzIGZ1cm9zIGFjaGFkb3MgbmEgYXVkaXRvcmlhIGRlIDI2LzA4CgogICBOZW5odW0gZGVzdGVzIMOpIGhpcMOzdGVzZTogb3MgdHLDqnMgZm9yYW0gY29uZmlybWFkb3MgcG9yIGNvbnN1bHRhIGRpcmV0YSBhbwogICBiYW5jbyBkZSBwcm9kdcOnw6NvIGFudGVzIGRlIGVzY3JldmVyIGVzdGEgbWlncmHDp8Ojby4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gRlVSTyAxIOKAlCBvIG9yZ2FuaXphZG9yIGzDqiBvIGBwaW5faGFzaGAgZG8gdGltZSBpbnRlaXJvCi0tCi0tIGBlcV92b2x1bnRhcmlvc2Agw6kgRk9SIEFMTCwgZSBGT1IgQUxMIGluY2x1aSBTRUxFQ1QuIE8gb3JnYW5pemFkb3IgcmVjZWJpYSBhCi0tIGxpbmhhIGludGVpcmEsIGNvbSBgdG9rZW5gIEUgYHBpbl9oYXNoYC4gQ29tbyBvIFBJTiDDqSBzaGEyNTYocGluIHx8IHRva2VuKSwKLS0gdGVyIG8gaGFzaCBlIG8gc2FsIGp1bnRvcyDDqSB0ZXIgbyBQSU46IHPDo28gMTAuMDAwIHRlbnRhdGl2YXMsIG1pY3Jvc3NlZ3VuZG9zLgotLQotLSBJc3NvIHZhemEgdW0gc2VncmVkbyBxdWUgYSBQRVNTT0EgZXNjb2xoZXUgZSBwcm92YXZlbG1lbnRlIHJldXNhIGZvcmEgZGFxdWkuCi0tIMOJIGRlIG91dHJhIGNhdGVnb3JpYSBkbyBxdWUgbyBvcmdhbml6YWRvciBwb2RlciBhYnJpciBhIGVzY2FsYSBkZWxhLgotLQotLSBSTFMgbm8gUG9zdGdyZXMgbsOjbyBmaWx0cmEgY29sdW5hLiBRdWVtIGZpbHRyYSDDqSBvIEdSQU5UIHBvciBjb2x1bmEuCi0tCi0tIE8gYHRva2VuYCBGSUNBIGFjZXNzw612ZWwsIGUgaXNzbyDDqSBkZWNpc8OjbyBjb25zY2llbnRlOiBgbW9udGFyTGlua3MoKWAgZW0KLS0gbGliL2VuZ2luZS50cyBtb250YSBhIG1lbnNhZ2VtIGRlIFdoYXRzQXBwIGNvbSAvZXUvPHRva2VuPiwgcXVlIMOpIGNvbW8gbwotLSBvcmdhbml6YWRvciBtYW5kYSBvIGxpbmsgcGVzc29hbCBkZSBxdWVtIGVzcXVlY2V1IG8gUElOIOKAlCBleGF0YW1lbnRlIG8gcXVlCi0tIHJlc29sdmV1IG8gY2FzbyBkYSBMYW5hIGhvamUuIFRpcmFyIG8gdG9rZW4gc2VtIG1vdmVyIGVzc2EgZnVuw6fDo28gcGFyYSBvCi0tIHNlcnZpZG9yIHF1ZWJyYXJpYSBvIHJlY3Vyc28uIEZpY2EgcmVnaXN0cmFkbyBjb21vIHJpc2NvIGFjZWl0by4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKcmV2b2tlIHNlbGVjdCwgdXBkYXRlIG9uIHZvbHVudGFyaW9zIGZyb20gYXV0aGVudGljYXRlZDsKCmdyYW50IHNlbGVjdCAoaWQsIG5vbWUsIHRlbGVmb25lLCBhdGl2bywgbGltaXRlX21lcywgdG9rZW4sIGNyaWFkb19lbSwKICAgICAgICAgICAgICBlcXVpcGVfaWQsIGNvbmZlcmlkbywgZW1haWwpCiAgIG9uIHZvbHVudGFyaW9zIHRvIGF1dGhlbnRpY2F0ZWQ7CgpncmFudCB1cGRhdGUgKG5vbWUsIHRlbGVmb25lLCBhdGl2bywgbGltaXRlX21lcywgY29uZmVyaWRvLCBlbWFpbCkKICAgb24gdm9sdW50YXJpb3MgdG8gYXV0aGVudGljYXRlZDsKCi8qIGFub24gbnVuY2EgcHJlY2lzb3U6IHR1ZG8gcXVlIMOpIHDDumJsaWNvIHBhc3NhIHBvciBmdW7Dp8OjbyBTRUNVUklUWSBERUZJTkVSCiAgIChlcXVpcGVfcHVibGljYSwgZXF1aXBlX3RpbWUsIGluc2NyZXZlciwgZXVfKikuICovCnJldm9rZSBzZWxlY3QsIHVwZGF0ZSBvbiB2b2x1bnRhcmlvcyBmcm9tIGFub247Cgpjb21tZW50IG9uIGNvbHVtbiB2b2x1bnRhcmlvcy5waW5faGFzaCBpcwogICdzaGEyNTYocGluIHx8IHRva2VuKS4gRm9yYSBkbyBHUkFOVCBkZSBhdXRoZW50aWNhdGVkIGRlc2RlIGEgMTg6IGNvbSBvIHRva2VuIGp1bnRvLCBvIGhhc2ggZW50cmVnYSBvIFBJTi4nOwoKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gRlVSTyAyIOKAlCBxdWFscXVlciBvcmdhbml6YWRvciBhcGFnYSBjdWx0byBkZSBxdWFscXVlciBtaW5pc3TDqXJpbwotLQotLSBgY3VsdG9zYCDDqSBnbG9iYWwgZSB0aW5oYSBVTUEgcG9saWN5OiBgbGlkZXJfdHVkb19jdWx0b3NgLCBGT1IgQUxMLCBjb20KLS0gaXNfbGlkZXIoKSDigJQgIsOpIG9yZ2FuaXphZG9yIGRlIGFsZ3VtYSBjb2lzYSIuIFNvYnJvdSBkYSBtaWdyYcOnw6NvIDAxIGUgbsOjbyBmb2kKLS0gdHJvY2FkYSBxdWFuZG8gbyBlc2NvcG8gcG9yIG1pbmlzdMOpcmlvIGVudHJvdSBuYSAxMy4KLS0KLS0gUmVzdWx0YWRvOiBvIEphbmRlciwgcHJlc28gYW8gTG91dm9yIGVtIHRvZG8gbyByZXN0bywgcG9kaWEgYXBhZ2FyIG8gZG9taW5nbwotLSAzMC8wOCBlIGRlcnJ1YmFyIGVtIGNhc2NhdGEgYXMgOSBlc2NhbGHDp8O1ZXMgZGEgTcOtZGlhLgotLQotLSBPIGNhbGVuZMOhcmlvIMOpIGNvbXBhcnRpbGhhZG8gZGUgcHJvcMOzc2l0byDigJQgdG9kbyBtaW5pc3TDqXJpbyBzZXJ2ZSBub3MgbWVzbW9zCi0tIGRvbWluZ29zIOKAlCBlbnTDo28gbGVyLCBjcmlhciBlIGVkaXRhciBjb250aW51YSBsaWJlcmFkbyBwYXJhIHF1YWxxdWVyCi0tIG9yZ2FuaXphZG9yLiBPIHF1ZSBtdWRhIMOpIEFQQUdBUjogc8OzIHF1ZW0gZW54ZXJnYSB0b2RvcyBvcyBtaW5pc3TDqXJpb3MuCi0tIERlc3RydWnDp8OjbyBlbSBjYXNjYXRhIG7Do28gcG9kZSBjYWJlciBlbSBwYXBlbCBkZSBlc2NvcG8gw7puaWNvLgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Cgpkcm9wIHBvbGljeSBpZiBleGlzdHMgbGlkZXJfdHVkb19jdWx0b3Mgb24gY3VsdG9zOwoKY3JlYXRlIHBvbGljeSBjdWx0b3NfbGVyICAgIG9uIGN1bHRvcyBmb3Igc2VsZWN0IHRvIGF1dGhlbnRpY2F0ZWQgdXNpbmcgKHNvdV9saWRlcigpKTsKY3JlYXRlIHBvbGljeSBjdWx0b3NfY3JpYXIgIG9uIGN1bHRvcyBmb3IgaW5zZXJ0IHRvIGF1dGhlbnRpY2F0ZWQgd2l0aCBjaGVjayAoc291X2xpZGVyKCkpOwpjcmVhdGUgcG9saWN5IGN1bHRvc19lZGl0YXIgb24gY3VsdG9zIGZvciB1cGRhdGUgdG8gYXV0aGVudGljYXRlZAogIHVzaW5nIChzb3VfbGlkZXIoKSkgd2l0aCBjaGVjayAoc291X2xpZGVyKCkpOwpjcmVhdGUgcG9saWN5IGN1bHRvc19hcGFnYXIgb24gY3VsdG9zIGZvciBkZWxldGUgdG8gYXV0aGVudGljYXRlZCB1c2luZyAobGlkZXJhX3R1ZG8oKSk7CgoKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLSBGVVJPIDMg4oCUIGEgcHJvdGXDp8OjbyBkZSBkdXBsYSBlc2NhbGHDp8OjbyBlbnRyZSBtaW5pc3TDqXJpb3MgbsOjbyBleGlzdGUKLS0KLS0gRXUgYWZpcm1laSBkdWFzIHZlemVzIGhvamUgcXVlIGVsYSBleGlzdGlhLiBOw6NvIGV4aXN0ZTogZm9pIHJlbW92aWRhIGVtIDA2LzA4Ci0tIHBvcnF1ZSBhYm9ydGF2YSBvIHNhdmUgZG8gc2VndW5kbyBtaW5pc3TDqXJpbyBkZW50cm8gZG8gY3Jvbi4KLS0gYGZuX2NvbmZsaXRvX3NpbXVsdGFuZW9gIGNhc2EgcG9yIHZvbHVudGFyaW9faWQsIGUgYSBtZXNtYSBwZXNzb2EgZW0gZG9pcwotLSBtaW5pc3TDqXJpb3Mgc8OjbyBET0lTIHJlZ2lzdHJvcy4gSnVsaWEgQmFsZGV6IGUgRmlsaXBlIE9saXZlaXJhIEJlcm5hcmRvIGVzdMOjbwotLSBuYSBNw61kaWEgZSBubyBMb3V2b3IgY29tIG8gbWVzbW8gdGVsZWZvbmUsIGUgbmFkYSBvcyBpbXBlZGUgZGUgY2FpciBuYXMgZHVhcwotLSBlc2NhbGFzIG5vIG1lc21vIGRvbWluZ28uCi0tCi0tIE7Do28gdm9sdG8gY29tbyBnYXRpbGhvOiBnYXRpbGhvIHF1ZSBhYm9ydGEgZm9pIG8gbW90aXZvIGRhIHJlbW/Dp8OjbywgZQotLSBkZXJydWJhciBvIGNyb24gZG8gbcOqcyBpbnRlaXJvIMOpIHBpb3IgcXVlIGEgZHVwbGEgZXNjYWxhw6fDo28uCi0tIFZvbHRhIGNvbW8gQ09OU1VMVEE6IG8gb3JnYW5pemFkb3IgdsOqIG8gY29uZmxpdG8gZSBkZWNpZGUuIEJsb3F1ZWFyIMOpIGRvCi0tIGh1bWFubzsgZW54ZXJnYXIgw6kgZG8gc2lzdGVtYS4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gY29uZmxpdG9zX2VudHJlX21pbmlzdGVyaW9zKHBfZGUgZGF0ZSBkZWZhdWx0IGN1cnJlbnRfZGF0ZSkKcmV0dXJucyB0YWJsZSAoCiAgZGF0YSBkYXRlLCB0ZWxlZm9uZSB0ZXh0LCBwZXNzb2EgdGV4dCwKICBtaW5pc3RlcmlvcyB0ZXh0LCBwb3N0b3MgdGV4dAopCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJAogIHNlbGVjdCBjLmRhdGEsCiAgICAgICAgIHRlbF9ub3JtKHYudGVsZWZvbmUpIGFzIHRlbGVmb25lLAogICAgICAgICBtaW4odi5ub21lKSBhcyBwZXNzb2EsCiAgICAgICAgIHN0cmluZ19hZ2coZGlzdGluY3QgZS5ub21lLCAnICsgJyBvcmRlciBieSBlLm5vbWUpIGFzIG1pbmlzdGVyaW9zLAogICAgICAgICBzdHJpbmdfYWdnKGUubm9tZSB8fCAnOiAnIHx8IGYubm9tZSwgJyB8ICcgb3JkZXIgYnkgZS5ub21lLCBmLm5vbWUpIGFzIHBvc3RvcwogICAgZnJvbSBlc2NhbGFjb2VzIHgKICAgIGpvaW4gY3VsdG9zICAgICAgYyBvbiBjLmlkID0geC5jdWx0b19pZAogICAgam9pbiB2b2x1bnRhcmlvcyB2IG9uIHYuaWQgPSB4LnZvbHVudGFyaW9faWQKICAgIGpvaW4gZnVuY29lcyAgICAgZiBvbiBmLmlkID0geC5mdW5jYW9faWQKICAgIGpvaW4gZXF1aXBlcyAgICAgZSBvbiBlLmlkID0gZi5lcXVpcGVfaWQKICAgd2hlcmUgYy5kYXRhID49IHBfZGUKICAgICBhbmQgY29hbGVzY2UobGVuZ3RoKHRlbF9ub3JtKHYudGVsZWZvbmUpKSwgMCkgPj0gMTAKICAgICBhbmQgeC5zdGF0dXMgPD4gJ3JlY3VzYWRvJwogICBncm91cCBieSBjLmRhdGEsIHRlbF9ub3JtKHYudGVsZWZvbmUpCiAgaGF2aW5nIGNvdW50KGRpc3RpbmN0IGYuZXF1aXBlX2lkKSA+IDEKICAgb3JkZXIgYnkgYy5kYXRhLCAzOwokZm4kOwoKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBjb25mbGl0b3NfZW50cmVfbWluaXN0ZXJpb3MoZGF0ZSkgZnJvbSBwdWJsaWMsIGFub247CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gY29uZmxpdG9zX2VudHJlX21pbmlzdGVyaW9zKGRhdGUpIHRvIGF1dGhlbnRpY2F0ZWQ7Cgpjb21tZW50IG9uIGZ1bmN0aW9uIGNvbmZsaXRvc19lbnRyZV9taW5pc3RlcmlvcyhkYXRlKSBpcwogICdxdWVtIGVzdMOhIGVzY2FsYWRvIGVtIE1BSVMgREUgVU0gbWluaXN0w6lyaW8gbm8gbWVzbW8gZGlhLCBjYXNhZG8gcG9yIHRlbGVmb25lLiBOw6NvIGJsb3F1ZWlhIG5hZGE6IG1vc3RyYS4gTyBnYXRpbGhvIHF1ZSBibG9xdWVhdmEgZm9pIHJlbW92aWRvIGVtIDA2LzA4IHBvciBkZXJydWJhciBvIGNyb24uJzsKCgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIENPUlJFw4fDg08gREUgUk9UQSDigJQgbyB0aXBvIGBldmVudG9gIHF1ZSBldSBpbnZlbnRlaSBob2plIG7Do28gcG9kZSBleGlzdGlyCi0tCi0tIE1hcnF1ZWkgYXMgMTEgZnVuw6fDtWVzIGRvIExvdXZvciBjb21vIHbDoWxpZGFzIHBhcmEgJ2V2ZW50bycsIHBlbnNhbmRvIG5hCi0tIGNhbnRhdGEgZSBubyBDb3JhbC4gTWFzIGBjdWx0b3MudGlwb2Agw6kgQ09MVU5BIEdFUkFEQToKLS0gICAgIGNhc2Ugd2hlbiBleHRyYWN0KGRvdyBmcm9tIGRhdGEpID0gNiB0aGVuICdmb2xsb3cnIGVsc2UgJ2RvbWluZ28nIGVuZAotLSBTw7MgZXhpc3RlbSBkb2lzIHRpcG9zIHBvc3PDrXZlaXMuIE5lbmh1bSBjdWx0byBqYW1haXMgdGVyw6EgdGlwbyAnZXZlbnRvJywKLS0gZW50w6NvIGVzc2UgdmFsb3Igbm8gYXJyYXkgw6kgbGl4byBxdWUgbnVuY2EgY2FzYSDigJQgZSBwaW9yLCBkw6EgYSBpbXByZXNzw6NvIGRlCi0tIHF1ZSBvIENvcmFsIGVzdMOhIGNvbnRlbXBsYWRvIHF1YW5kbyBuw6NvIGVzdMOhLgotLQotLSBUaXJvIGFnb3JhLiBFdmVudG9zIHZvbHRhbSBxdWFuZG8gbyBjYWxlbmTDoXJpbyBzYWlyIGRvIGPDs2RpZ28gKEZhc2UgNCkuCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCnVwZGF0ZSBmdW5jb2VzCiAgIHNldCB0aXBvcyA9IGFycmF5X3JlbW92ZSh0aXBvcywgJ2V2ZW50bycpCiB3aGVyZSBlcXVpcGVfaWQgPSAoc2VsZWN0IGlkIGZyb20gZXF1aXBlcyB3aGVyZSBzbHVnID0gJ2xvdXZvcicpCiAgIGFuZCAnZXZlbnRvJyA9IGFueSh0aXBvcyk7CgoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotLSBDT05GRVLDik5DSUEKc2VsZWN0CiAgKHNlbGVjdCBjb3VudCgqKSBmcm9tIGluZm9ybWF0aW9uX3NjaGVtYS5jb2x1bW5fcHJpdmlsZWdlcwogICAgd2hlcmUgdGFibGVfbmFtZT0ndm9sdW50YXJpb3MnIGFuZCBncmFudGVlPSdhdXRoZW50aWNhdGVkJwogICAgICBhbmQgY29sdW1uX25hbWU9J3Bpbl9oYXNoJyBhbmQgcHJpdmlsZWdlX3R5cGU9J1NFTEVDVCcpICAgICAgYXMgcGluX2hhc2hfYWluZGFfbGVnaXZlbCwKICAoc2VsZWN0IGNvdW50KCopIGZyb20gcGdfcG9saWN5IHBvbCBqb2luIHBnX2NsYXNzIGMgb24gYy5vaWQ9cG9sLnBvbHJlbGlkCiAgICB3aGVyZSBjLnJlbG5hbWU9J2N1bHRvcycpICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYXMgcG9saWNpZXNfZW1fY3VsdG9zLAogIChzZWxlY3QgY291bnQoKikgZnJvbSBwZ19wb2xpY3kgcG9sIGpvaW4gcGdfY2xhc3MgYyBvbiBjLm9pZD1wb2wucG9scmVsaWQKICAgIHdoZXJlIGMucmVsbmFtZT0nY3VsdG9zJyBhbmQgcG9sLnBvbGNtZD0nZCcKICAgICAgYW5kIHBnX2dldF9leHByKHBvbC5wb2xxdWFsLHBvbC5wb2xyZWxpZCkgaWxpa2UgJyVsaWRlcmFfdHVkbyUnKSBhcyBhcGFnYXJfc29fZ2xvYmFsLAogIChzZWxlY3QgY291bnQoKikgZnJvbSBmdW5jb2VzIHdoZXJlICdldmVudG8nID0gYW55KHRpcG9zKSkgICAgICAgIGFzIGFpbmRhX3RlbV90aXBvX2V2ZW50bywKICAoc2VsZWN0IGNvdW50KCopIGZyb20gY29uZmxpdG9zX2VudHJlX21pbmlzdGVyaW9zKCkpICAgICAgICAgICAgICBhcyBjb25mbGl0b3NfaG9qZTsK"}
+/* =============================================================================
+   18 — FASE 0: fechar os três furos achados na auditoria de 26/08
+
+   Nenhum destes é hipótese: os três foram confirmados por consulta direta ao
+   banco de produção antes de escrever esta migração.
+   ============================================================================= */
+
+-- =========================================================================
+-- FURO 1 — o organizador lê o `pin_hash` do time inteiro
+--
+-- `eq_voluntarios` é FOR ALL, e FOR ALL inclui SELECT. O organizador recebia a
+-- linha inteira, com `token` E `pin_hash`. Como o PIN é sha256(pin || token),
+-- ter o hash e o sal juntos é ter o PIN: são 10.000 tentativas, microssegundos.
+--
+-- Isso vaza um segredo que a PESSOA escolheu e provavelmente reusa fora daqui.
+-- É de outra categoria do que o organizador poder abrir a escala dela.
+--
+-- RLS no Postgres não filtra coluna. Quem filtra é o GRANT por coluna.
+--
+-- O `token` FICA acessível, e isso é decisão consciente: `montarLinks()` em
+-- lib/engine.ts monta a mensagem de WhatsApp com /eu/<token>, que é como o
+-- organizador manda o link pessoal de quem esqueceu o PIN — exatamente o que
+-- resolveu o caso da Lana hoje. Tirar o token sem mover essa função para o
+-- servidor quebraria o recurso. Fica registrado como risco aceito.
+-- =========================================================================
+
+revoke select, update on voluntarios from authenticated;
+
+grant select (id, nome, telefone, ativo, limite_mes, token, criado_em,
+              equipe_id, conferido, email)
+   on voluntarios to authenticated;
+
+grant update (nome, telefone, ativo, limite_mes, conferido, email)
+   on voluntarios to authenticated;
+
+/* anon nunca precisou: tudo que é público passa por função SECURITY DEFINER
+   (equipe_publica, equipe_time, inscrever, eu_*). */
+revoke select, update on voluntarios from anon;
+
+comment on column voluntarios.pin_hash is
+  'sha256(pin || token). Fora do GRANT de authenticated desde a 18: com o token junto, o hash entrega o PIN.';
+
+
+-- =========================================================================
+-- FURO 2 — qualquer organizador apaga culto de qualquer ministério
+--
+-- `cultos` é global e tinha UMA policy: `lider_tudo_cultos`, FOR ALL, com
+-- is_lider() — "é organizador de alguma coisa". Sobrou da migração 01 e não foi
+-- trocada quando o escopo por ministério entrou na 13.
+--
+-- Resultado: o Jander, preso ao Louvor em todo o resto, podia apagar o domingo
+-- 30/08 e derrubar em cascata as 9 escalações da Mídia.
+--
+-- O calendário é compartilhado de propósito — todo ministério serve nos mesmos
+-- domingos — então ler, criar e editar continua liberado para qualquer
+-- organizador. O que muda é APAGAR: só quem enxerga todos os ministérios.
+-- Destruição em cascata não pode caber em papel de escopo único.
+-- =========================================================================
+
+drop policy if exists lider_tudo_cultos on cultos;
+
+create policy cultos_ler    on cultos for select to authenticated using (sou_lider());
+create policy cultos_criar  on cultos for insert to authenticated with check (sou_lider());
+create policy cultos_editar on cultos for update to authenticated
+  using (sou_lider()) with check (sou_lider());
+create policy cultos_apagar on cultos for delete to authenticated using (lidera_tudo());
+
+
+-- =========================================================================
+-- FURO 3 — a proteção de dupla escalação entre ministérios não existe
+--
+-- Eu afirmei duas vezes hoje que ela existia. Não existe: foi removida em 06/08
+-- porque abortava o save do segundo ministério dentro do cron.
+-- `fn_conflito_simultaneo` casa por voluntario_id, e a mesma pessoa em dois
+-- ministérios são DOIS registros. Julia Baldez e Filipe Oliveira Bernardo estão
+-- na Mídia e no Louvor com o mesmo telefone, e nada os impede de cair nas duas
+-- escalas no mesmo domingo.
+--
+-- Não volto como gatilho: gatilho que aborta foi o motivo da remoção, e
+-- derrubar o cron do mês inteiro é pior que a dupla escalação.
+-- Volta como CONSULTA: o organizador vê o conflito e decide. Bloquear é do
+-- humano; enxergar é do sistema.
+-- =========================================================================
+
+create or replace function conflitos_entre_ministerios(p_de date default current_date)
+returns table (
+  data date, telefone text, pessoa text,
+  ministerios text, postos text
+)
+language sql security definer stable set search_path = public as $fn$
+  select c.data,
+         tel_norm(v.telefone) as telefone,
+         min(v.nome) as pessoa,
+         string_agg(distinct e.nome, ' + ' order by e.nome) as ministerios,
+         string_agg(e.nome || ': ' || f.nome, ' | ' order by e.nome, f.nome) as postos
+    from escalacoes x
+    join cultos      c on c.id = x.culto_id
+    join voluntarios v on v.id = x.voluntario_id
+    join funcoes     f on f.id = x.funcao_id
+    join equipes     e on e.id = f.equipe_id
+   where c.data >= p_de
+     and coalesce(length(tel_norm(v.telefone)), 0) >= 10
+     and x.status <> 'recusado'
+   group by c.data, tel_norm(v.telefone)
+  having count(distinct f.equipe_id) > 1
+   order by c.data, 3;
+$fn$;
+
+revoke all on function conflitos_entre_ministerios(date) from public, anon;
+grant execute on function conflitos_entre_ministerios(date) to authenticated;
+
+comment on function conflitos_entre_ministerios(date) is
+  'quem está escalado em MAIS DE UM ministério no mesmo dia, casado por telefone. Não bloqueia nada: mostra. O gatilho que bloqueava foi removido em 06/08 por derrubar o cron.';
+
+
+-- =========================================================================
+-- CORREÇÃO DE ROTA — o tipo `evento` que eu inventei hoje não pode existir
+--
+-- Marquei as 11 funções do Louvor como válidas para 'evento', pensando na
+-- cantata e no Coral. Mas `cultos.tipo` é COLUNA GERADA:
+--     case when extract(dow from data) = 6 then 'follow' else 'domingo' end
+-- Só existem dois tipos possíveis. Nenhum culto jamais terá tipo 'evento',
+-- então esse valor no array é lixo que nunca casa — e pior, dá a impressão de
+-- que o Coral está contemplado quando não está.
+--
+-- Tiro agora. Eventos voltam quando o calendário sair do código (Fase 4).
+-- =========================================================================
+
+update funcoes
+   set tipos = array_remove(tipos, 'evento')
+ where equipe_id = (select id from equipes where slug = 'louvor')
+   and 'evento' = any(tipos);
+
+
+----------------------------------------------------------------------------
+-- CONFERÊNCIA
+select
+  (select count(*) from information_schema.column_privileges
+    where table_name='voluntarios' and grantee='authenticated'
+      and column_name='pin_hash' and privilege_type='SELECT')      as pin_hash_ainda_legivel,
+  (select count(*) from pg_policy pol join pg_class c on c.oid=pol.polrelid
+    where c.relname='cultos')                                       as policies_em_cultos,
+  (select count(*) from pg_policy pol join pg_class c on c.oid=pol.polrelid
+    where c.relname='cultos' and pol.polcmd='d'
+      and pg_get_expr(pol.polqual,pol.polrelid) ilike '%lidera_tudo%') as apagar_so_global,
+  (select count(*) from funcoes where 'evento' = any(tipos))        as ainda_tem_tipo_evento,
+  (select count(*) from conflitos_entre_ministerios())              as conflitos_hoje;

@@ -1,1 +1,109 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMzUg4oCUIEEgVklTw4NPIFFVRSBGQUxUQVZBOiBPIERPTUlOR08gREEgSUdSRUpBIElOVEVJUkEKCiAgIE8gcGFpbmVsIGRvIGzDrWRlciByZXNwb25kZSBtdWl0byBiZW0gdW1hIHBlcmd1bnRhOiAibyBxdWUgcHJlY2lzYSBkZSBtaW0KICAgTkVTVEEgw6FyZWEiLiBTw7MgcXVlIHRyw6pzIGRvcyBxdWF0cm8gb3JnYW5pemFkb3JlcyBzw6NvIGFkbWluIGRhIGlncmVqYQogICBpbnRlaXJhLCBlIHBhcmEgc2FiZXIgc2UgbyBkb21pbmdvIGVzdMOhIGNvYmVydG8gZWxlcyBwcmVjaXNhbSB0cm9jYXIgZGUKICAgZXF1aXBlIGNpbmNvIHZlemVzIGUgc29tYXIgZGUgY2FiZcOnYS4gQSBwZXJndW50YSAiYSBpZ3JlamEgZXN0w6EgZGUgcMOpIG5vCiAgIGRvbWluZ28/IiBuw6NvIHRpbmhhIG9uZGUgc2VyIGZlaXRhLgoKICAgYHZpc2FvX2dlcmFsKClgIHJlc3BvbmRlIHBvciB0b2RhcyBhcyBlcXVpcGVzIHF1ZSBvIGNoYW1hZG9yIG9yZ2FuaXphLCBkZQogICB1bWEgdmV6LiBQYXJhIG8gbMOtZGVyIGRlIHVtYSDDoXJlYSBzw7MsIGRldm9sdmUgdW1hIGxpbmhhIGUgYSB0ZWxhIG5lbSBtb3N0cmEKICAgbyBibG9jbzogcXVlbSBvcmdhbml6YSB1bWEgY29pc2EgbsOjbyBwcmVjaXNhIGRlIHBhaW5lbCBkZSBjaW5jby4KCiAgIFBPUiBRVUUgTk8gQkFOQ08gRSBOw4NPIE5PIE5BVkVHQURPUjogbW9udGFyIGlzc28gbm8gZnJvbnQgZXhpZ2lyaWEgY2FycmVnYXIKICAgbyBlc3RhZG8gaW50ZWlybyBkZSBjYWRhIGVxdWlwZSwgdW1hIHBvciB1bWEsIHPDsyBwYXJhIGNvbnRhci4gQ2luY28gdmlhZ2VucwogICBlIG8gbW90b3Igcm9kYW5kbyBjaW5jbyB2ZXplcyBwYXJhIHByb2R1emlyIGNpbmNvIG7Dum1lcm9zLiBBcXVpIMOpIHVtYQogICBjb25zdWx0YS4KCiAgIFNFR1VSQU7Dh0E6IFNFQ1VSSVRZIERFRklORVIgY29tIGEgZ3VhcmRhIGBsaWRlcmFfZXF1aXBlKGUuaWQpYCBERU5UUk8gZG8KICAgd2hlcmUuIENhZGEgbGluaGEgw6kgZmlsdHJhZGEgcGVsbyBtZXNtbyBwcmVkaWNhZG8gcXVlIGEgUkxTIHVzYXJpYSwgZW50w6NvCiAgIHF1ZW0gb3JnYW5pemEgc8OzIG8gTG91dm9yIHJlY2ViZSBzw7MgbyBMb3V2b3IsIGUgcXVlbSBuw6NvIG9yZ2FuaXphIG5hZGEKICAgcmVjZWJlIHplcm8gbGluaGFzIGVtIHZleiBkZSBlcnJvLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiB2aXNhb19nZXJhbCgpCnJldHVybnMgdGFibGUgKAogIHNsdWcgdGV4dCwgZXF1aXBlIHRleHQsIG9yZGVtIGludCwKICBwcm94aW1hX2RhdGEgZGF0ZSwgdGlwbyB0ZXh0LAogIHBvc3RvcyBpbnQsIHByZWVuY2hpZG9zIGludCwgY29uZmlybWFkb3MgaW50LAogIHZhZ2FzIGludCwgZnVyb3MgaW50LCByZWN1c2Fkb3MgaW50LCBwZW5kZW50ZXMgaW50LAogIGNhbmRpZGF0dXJhc19ub3ZhcyBpbnQKKQpsYW5ndWFnZSBzcWwgc2VjdXJpdHkgZGVmaW5lciBzdGFibGUgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKICB3aXRoIG1pbmhhcyBhcyAoCiAgICBzZWxlY3QgZS5pZCwgZS5zbHVnLCBlLm5vbWUsIGNvYWxlc2NlKGUub3JkZW0sIDk5KSBhcyBvcmRlbQogICAgICBmcm9tIGVxdWlwZXMgZQogICAgIHdoZXJlIGxpZGVyYV9lcXVpcGUoZS5pZCkgICAgICAgICAgLS0gYSBndWFyZGE6IG1lc21hIHJlZ3JhIGRhIFJMUwogICksCiAgLyogbyBwcsOzeGltbyBjdWx0byBkZSBjYWRhIGVxdWlwZS4gTsOjbyDDqSAibyBwcsOzeGltbyBkb21pbmdvIjogbyBGb2xsb3cgw6kgbm8KICAgICBzw6FiYWRvIGUgYWxndW1hcyDDoXJlYXMgbsOjbyBlbnRyYW0gbmVsZSwgZW50w6NvIGEgZGF0YSBjZXJ0YSDDqSBhIGRvIHByw7N4aW1vCiAgICAgY3VsdG8gZW0gcXVlIEVTVEEgZXF1aXBlIHRlbSBwb3N0byBhdGl2by4gKi8KICBwcm94IGFzICgKICAgIHNlbGVjdCBtLmlkLAogICAgICAgICAgIChzZWxlY3QgYy5kYXRhIGZyb20gY3VsdG9zIGMKICAgICAgICAgICAgIHdoZXJlIGMuZGF0YSA+PSBjdXJyZW50X2RhdGUKICAgICAgICAgICAgICAgYW5kIGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBmdW5jb2VzIGYKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHdoZXJlIGYuZXF1aXBlX2lkID0gbS5pZCBhbmQgZi5hdGl2YQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhbmQgKGYudGlwb3MgaXMgbnVsbCBvciBhcnJheV9sZW5ndGgoZi50aXBvcywxKSBpcyBudWxsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgb3IgKGNhc2Ugd2hlbiBleHRyYWN0KGRvdyBmcm9tIGMuZGF0YSkgPSA2CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdGhlbiAnZm9sbG93JyBlbHNlICdkb21pbmdvJyBlbmQpID0gYW55KGYudGlwb3MpKSkKICAgICAgICAgICAgIG9yZGVyIGJ5IGMuZGF0YSBsaW1pdCAxKSBhcyBkYXRhCiAgICAgIGZyb20gbWluaGFzIG0KICApCiAgc2VsZWN0IG0uc2x1ZywgbS5ub21lLCBtLm9yZGVtLAogICAgICAgICBwLmRhdGEsCiAgICAgICAgIChjYXNlIHdoZW4gcC5kYXRhIGlzIG51bGwgdGhlbiBudWxsCiAgICAgICAgICAgICAgIHdoZW4gZXh0cmFjdChkb3cgZnJvbSBwLmRhdGEpID0gNiB0aGVuICdmb2xsb3cnIGVsc2UgJ2RvbWluZ28nIGVuZCk6OnRleHQsCiAgICAgICAgIChzZWxlY3QgY291bnQoKik6OmludCBmcm9tIGZ1bmNvZXMgZgogICAgICAgICAgIHdoZXJlIGYuZXF1aXBlX2lkID0gbS5pZCBhbmQgZi5hdGl2YSkgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGFzIHBvc3RvcywKICAgICAgICAgY29hbGVzY2UoeC5wcmVlbmNoaWRvcywgMCk6OmludCwKICAgICAgICAgY29hbGVzY2UoeC5jb25maXJtYWRvcywgMCk6OmludCwKICAgICAgICAgLyogdmFnYSA9IHBvc3RvIGF0aXZvIHNlbSBuaW5ndcOpbS4gw4kgbyBuw7ptZXJvIHF1ZSBkZWNpZGUgc2UgbyBjdWx0bwogICAgICAgICAgICBhY29udGVjZTsgdHVkbyBvIG1haXMgw6kgYWNhYmFtZW50by4KCiAgICAgICAgICAgIE5VTE8gcXVhbmRvIG7Do28gaMOhIHByw7N4aW1vIGN1bHRvIG1hcmNhZG8sIGUgaXNzbyBpbXBvcnRhOiBzZW0gZXN0YQogICAgICAgICAgICBkaXN0aW7Dp8OjbyBhIMOhcmVhIGFwYXJlY2lhIGNvbSAiMSB2YWdhIiBxdWFuZG8gbmEgdmVyZGFkZSBuw6NvIGjDoQogICAgICAgICAgICBjdWx0byBuZW5odW0gcGFyYSBwcmVlbmNoZXIuIFplcm8gdmFnYXMgZSBuZW5odW0gY3VsdG8gc8OjbyBlc3RhZG9zCiAgICAgICAgICAgIGRpZmVyZW50ZXMgZSBhIHRlbGEgcHJlY2lzYSBkaXplciBjb2lzYXMgZGlmZXJlbnRlcy4gKi8KICAgICAgICAgKGNhc2Ugd2hlbiBwLmRhdGEgaXMgbnVsbCB0aGVuIG51bGwKICAgICAgICAgICAgICAgZWxzZSBncmVhdGVzdCgoc2VsZWN0IGNvdW50KCopOjppbnQgZnJvbSBmdW5jb2VzIGYKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHdoZXJlIGYuZXF1aXBlX2lkID0gbS5pZCBhbmQgZi5hdGl2YSkKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAtIGNvYWxlc2NlKHgucHJlZW5jaGlkb3MsMCksIDApIGVuZCk6OmludCBhcyB2YWdhcywKICAgICAgICAgY29hbGVzY2UoeC5mdXJvcywgMCk6OmludCwKICAgICAgICAgY29hbGVzY2UoeC5yZWN1c2Fkb3MsIDApOjppbnQsCiAgICAgICAgIGNvYWxlc2NlKHgucGVuZGVudGVzLCAwKTo6aW50LAogICAgICAgICAoc2VsZWN0IGNvdW50KCopOjppbnQgZnJvbSBjYW5kaWRhdHVyYXMgYwogICAgICAgICAgIHdoZXJlIGMuZXF1aXBlX2lkID0gbS5pZCBhbmQgYy5zdGF0dXMgPSAnZW52aWFkYScpICAgICAgICAgICAgICAgICAgIGFzIGNhbmRpZGF0dXJhc19ub3ZhcwogICAgZnJvbSBtaW5oYXMgbQogICAgbGVmdCBqb2luIHByb3ggcCBvbiBwLmlkID0gbS5pZAogICAgbGVmdCBqb2luIGxhdGVyYWwgKAogICAgICBzZWxlY3QgY291bnQoKikgZmlsdGVyICh3aGVyZSBlLnZvbHVudGFyaW9faWQgaXMgbm90IG51bGwpICAgICAgICAgICAgICBhcyBwcmVlbmNoaWRvcywKICAgICAgICAgICAgIGNvdW50KCopIGZpbHRlciAod2hlcmUgZS5zdGF0dXMgPSAnY29uZmlybWFkbycpICAgICAgICAgICAgICAgICAgYXMgY29uZmlybWFkb3MsCiAgICAgICAgICAgICBjb3VudCgqKSBmaWx0ZXIgKHdoZXJlIGUuc3RhdHVzID0gJ2Z1cm91JykgICAgICAgICAgICAgICAgICAgICAgIGFzIGZ1cm9zLAogICAgICAgICAgICAgY291bnQoKikgZmlsdGVyICh3aGVyZSBlLnN0YXR1cyA9ICdyZWN1c2FkbycpICAgICAgICAgICAgICAgICAgICBhcyByZWN1c2Fkb3MsCiAgICAgICAgICAgICBjb3VudCgqKSBmaWx0ZXIgKHdoZXJlIGNvYWxlc2NlKGUuc3RhdHVzOjp0ZXh0LCdwZW5kZW50ZScpID0gJ3BlbmRlbnRlJykgYXMgcGVuZGVudGVzCiAgICAgICAgZnJvbSBlc2NhbGFjb2VzIGUKICAgICAgICBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkID0gZS5mdW5jYW9faWQKICAgICAgICBqb2luIGN1bHRvcyAgYyBvbiBjLmlkID0gZS5jdWx0b19pZAogICAgICAgd2hlcmUgZi5lcXVpcGVfaWQgPSBtLmlkIGFuZCBjLmRhdGEgPSBwLmRhdGEKICAgICkgeCBvbiB0cnVlCiAgIG9yZGVyIGJ5IG0ub3JkZW0sIG0ubm9tZTsKJGZuJDsKCnJldm9rZSBhbGwgb24gZnVuY3Rpb24gdmlzYW9fZ2VyYWwoKSBmcm9tIHB1YmxpYywgYW5vbjsKZ3JhbnQgZXhlY3V0ZSBvbiBmdW5jdGlvbiB2aXNhb19nZXJhbCgpIHRvIGF1dGhlbnRpY2F0ZWQ7CmNvbW1lbnQgb24gZnVuY3Rpb24gdmlzYW9fZ2VyYWwoKSBpcwogICdlc3RhZG8gZG8gcHLDs3hpbW8gY3VsdG8gZGUgY2FkYSBlcXVpcGUgcXVlIG8gY2hhbWFkb3Igb3JnYW5pemEsIG51bWEgY29uc3VsdGEgc8OzLiBGaWx0cmFkYSBwb3IgbGlkZXJhX2VxdWlwZSgpIGRlbnRybyBkbyB3aGVyZTogcXVlbSBvcmdhbml6YSB1bWEgw6FyZWEgcmVjZWJlIHVtYSBsaW5oYS4nOwoKCi8qID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgIENPTkZFUsOKTkNJQQogICAgIHNlbGVjdCAqIGZyb20gdmlzYW9fZ2VyYWwoKTsgICAgICAgICAgICAgICAgICAgICAgIC0tIGNvbW8gYWRtaW46IDUgbGluaGFzCiAgICAgLS0gY29tbyBsw61kZXIgZGUgdW1hIMOhcmVhIHPDszogMSBsaW5oYQogICAgIHNldCByZXF1ZXN0Lmp3dC5jbGFpbXMgPSAneyJlbWFpbCI6IjxsaWRlciBkZSB1bWEgYXJlYT4ifSc7CiAgICAgc2VsZWN0IGNvdW50KCopIGZyb20gdmlzYW9fZ2VyYWwoKTsKCiAgIFJPTExCQUNLCiAgICAgZHJvcCBmdW5jdGlvbiB2aXNhb19nZXJhbCgpOwogICAgIE5hZGEgZGVwZW5kZSBkZWxhIGFsw6ltIGRvIGJsb2NvIG5vdm8gZG8gcGFpbmVsLCBxdWUgc29tZSBqdW50byBzZW0gZXJyby4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8K"}
+/* =============================================================================
+   35 — A VISÃO QUE FALTAVA: O DOMINGO DA IGREJA INTEIRA
+
+   O painel do líder responde muito bem uma pergunta: "o que precisa de mim
+   NESTA área". Só que três dos quatro organizadores são admin da igreja
+   inteira, e para saber se o domingo está coberto eles precisam trocar de
+   equipe cinco vezes e somar de cabeça. A pergunta "a igreja está de pé no
+   domingo?" não tinha onde ser feita.
+
+   `visao_geral()` responde por todas as equipes que o chamador organiza, de
+   uma vez. Para o líder de uma área só, devolve uma linha e a tela nem mostra
+   o bloco: quem organiza uma coisa não precisa de painel de cinco.
+
+   POR QUE NO BANCO E NÃO NO NAVEGADOR: montar isso no front exigiria carregar
+   o estado inteiro de cada equipe, uma por uma, só para contar. Cinco viagens
+   e o motor rodando cinco vezes para produzir cinco números. Aqui é uma
+   consulta.
+
+   SEGURANÇA: SECURITY DEFINER com a guarda `lidera_equipe(e.id)` DENTRO do
+   where. Cada linha é filtrada pelo mesmo predicado que a RLS usaria, então
+   quem organiza só o Louvor recebe só o Louvor, e quem não organiza nada
+   recebe zero linhas em vez de erro.
+   ============================================================================= */
+create or replace function visao_geral()
+returns table (
+  slug text, equipe text, ordem int,
+  proxima_data date, tipo text,
+  postos int, preenchidos int, confirmados int,
+  vagas int, furos int, recusados int, pendentes int,
+  candidaturas_novas int
+)
+language sql security definer stable set search_path = public as $fn$
+  with minhas as (
+    select e.id, e.slug, e.nome, coalesce(e.ordem, 99) as ordem
+      from equipes e
+     where lidera_equipe(e.id)          -- a guarda: mesma regra da RLS
+  ),
+  /* o próximo culto de cada equipe. Não é "o próximo domingo": o Follow é no
+     sábado e algumas áreas não entram nele, então a data certa é a do próximo
+     culto em que ESTA equipe tem posto ativo. */
+  prox as (
+    select m.id,
+           (select c.data from cultos c
+             where c.data >= current_date
+               and exists (select 1 from funcoes f
+                            where f.equipe_id = m.id and f.ativa
+                              and (f.tipos is null or array_length(f.tipos,1) is null
+                                   or (case when extract(dow from c.data) = 6
+                                            then 'follow' else 'domingo' end) = any(f.tipos)))
+             order by c.data limit 1) as data
+      from minhas m
+  )
+  select m.slug, m.nome, m.ordem,
+         p.data,
+         (case when p.data is null then null
+               when extract(dow from p.data) = 6 then 'follow' else 'domingo' end)::text,
+         (select count(*)::int from funcoes f
+           where f.equipe_id = m.id and f.ativa)                                as postos,
+         coalesce(x.preenchidos, 0)::int,
+         coalesce(x.confirmados, 0)::int,
+         /* vaga = posto ativo sem ninguém. É o número que decide se o culto
+            acontece; tudo o mais é acabamento.
+
+            NULO quando não há próximo culto marcado, e isso importa: sem esta
+            distinção a área aparecia com "1 vaga" quando na verdade não há
+            culto nenhum para preencher. Zero vagas e nenhum culto são estados
+            diferentes e a tela precisa dizer coisas diferentes. */
+         (case when p.data is null then null
+               else greatest((select count(*)::int from funcoes f
+                               where f.equipe_id = m.id and f.ativa)
+                             - coalesce(x.preenchidos,0), 0) end)::int as vagas,
+         coalesce(x.furos, 0)::int,
+         coalesce(x.recusados, 0)::int,
+         coalesce(x.pendentes, 0)::int,
+         (select count(*)::int from candidaturas c
+           where c.equipe_id = m.id and c.status = 'enviada')                   as candidaturas_novas
+    from minhas m
+    left join prox p on p.id = m.id
+    left join lateral (
+      select count(*) filter (where e.voluntario_id is not null)              as preenchidos,
+             count(*) filter (where e.status = 'confirmado')                  as confirmados,
+             count(*) filter (where e.status = 'furou')                       as furos,
+             count(*) filter (where e.status = 'recusado')                    as recusados,
+             count(*) filter (where coalesce(e.status::text,'pendente') = 'pendente') as pendentes
+        from escalacoes e
+        join funcoes f on f.id = e.funcao_id
+        join cultos  c on c.id = e.culto_id
+       where f.equipe_id = m.id and c.data = p.data
+    ) x on true
+   order by m.ordem, m.nome;
+$fn$;
+
+revoke all on function visao_geral() from public, anon;
+grant execute on function visao_geral() to authenticated;
+comment on function visao_geral() is
+  'estado do próximo culto de cada equipe que o chamador organiza, numa consulta só. Filtrada por lidera_equipe() dentro do where: quem organiza uma área recebe uma linha.';
+
+
+/* =============================================================================
+   CONFERÊNCIA
+     select * from visao_geral();                       -- como admin: 5 linhas
+     -- como líder de uma área só: 1 linha
+     set request.jwt.claims = '{"email":"<lider de uma area>"}';
+     select count(*) from visao_geral();
+
+   ROLLBACK
+     drop function visao_geral();
+     Nada depende dela além do bloco novo do painel, que some junto sem erro.
+   ============================================================================= */

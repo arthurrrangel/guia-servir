@@ -1,1 +1,36 @@
-{"data":"LyogRW5kZXJlw6dvIGUgY2hhdmUgcMO6YmxpY2EgZG8gcHJvamV0bywgc2VtICd1c2UgY2xpZW50Jy4KCiAgIEV4aXN0ZSBzZXBhcmFkbyBkZSBsaWIvc3VwYWJhc2UudHMgcG9yIHVtIG1vdGl2byBwcsOhdGljbzogb3MgbGF5b3V0cyBxdWUKICAgZ2VyYW0gbyA8dGl0bGU+IGUgbyBjYXJkIGRlIHByw6l2aWEgZG8gV2hhdHNBcHAgc8OjbyBTRVJWRVIgY29tcG9uZW50cywgZSBuw6NvCiAgIHBvZGVtIGltcG9ydGFyIHVtIG3Ds2R1bG8gbWFyY2FkbyAndXNlIGNsaWVudCcuCgogICBFIG8gdmFsb3IgcGFkcsOjbyBpbXBvcnRhOiBhcyB2YXJpw6F2ZWlzIE5FWFRfUFVCTElDXyogbsOjbyBlc3TDo28gZGVmaW5pZGFzIG5vCiAgIHByb2pldG8gZGEgVmVyY2VsLiBPIGNsaWVudGUgc2VtcHJlIHRldmUgZXNzZSBmYWxsYmFjazsgb3MgbGF5b3V0cyBub3ZvcwogICBuw6NvIHRpbmhhbSwgZSBwb3IgaXNzbyBvIHTDrXR1bG8gZG8gbGluayBkbyBMb3V2b3Igdm9sdGF2YSBnZW7DqXJpY28gZW0gdmV6IGRlCiAgICJTZXJ2aXIgwrcgTG91dm9yIiDigJQgZXhhdGFtZW50ZSBvIHByb2JsZW1hIHF1ZSBlbGVzIGV4aXN0aWFtIHBhcmEgcmVzb2x2ZXIuCgogICBBIGNoYXZlIGFub24gw6kgcMO6YmxpY2EgcG9yIGRlc2lnbjogZWxhIHPDsyBkaXogUVVBTCBwcm9qZXRvIMOpLiBRdWVtIGRlY2lkZSBvCiAgIHF1ZSBjYWRhIHNlc3PDo28gZW54ZXJnYSDDqSBvIFJMUyBkZW50cm8gZG8gYmFuY28uICovCgpleHBvcnQgY29uc3QgU1VQQV9VUkwgPQogIHByb2Nlc3MuZW52Lk5FWFRfUFVCTElDX1NVUEFCQVNFX1VSTCB8fCAnaHR0cHM6Ly9xanRjYWlqaGdsZHlwdWR6eWFmei5zdXBhYmFzZS5jbyc7CgpleHBvcnQgY29uc3QgU1VQQV9LRVkgPQogIHByb2Nlc3MuZW52Lk5FWFRfUFVCTElDX1NVUEFCQVNFX0FOT05fS0VZIHx8CiAgJ2V5SmhiR2NpT2lKSVV6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpwYzNNaU9pSnpkWEJoWW1GelpTSXNJbkpsWmlJNkluRnFkR05oYVdwb1oyeGtlWEIxWkhwNVlXWjZJaXdpY205c1pTSTZJbUZ1YjI0aUxDSnBZWFFpT2pFM09EVTVNemt6TXpjc0ltVjRjQ0k2TWpFd01UVXhOVE16TjMwLjlTSERxZURNa2lOQ3I1cEpkRm9RTU84N0VjS1JndXNhQXlDTTEwb2pKS1UnOwoKLyoqIENoYW1hIHVtYSBSUEMgcMO6YmxpY2EgZG8gbGFkbyBkbyBzZXJ2aWRvciwgcGFyYSBnZXJhciBtZXRhZGF0YS4gKi8KZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHJwY1B1YmxpY2E8VCA9IGFueT4oCiAgZm46IHN0cmluZywgY29ycG86IFJlY29yZDxzdHJpbmcsIHVua25vd24+ID0ge30sIHNlZ3VuZG9zID0gMzYwMCwKKTogUHJvbWlzZTxUIHwgbnVsbD4gewogIHRyeSB7CiAgICBjb25zdCByID0gYXdhaXQgZmV0Y2goYCR7U1VQQV9VUkx9L3Jlc3QvdjEvcnBjLyR7Zm59YCwgewogICAgICBtZXRob2Q6ICdQT1NUJywKICAgICAgaGVhZGVyczogeyBhcGlrZXk6IFNVUEFfS0VZLCBBdXRob3JpemF0aW9uOiBgQmVhcmVyICR7U1VQQV9LRVl9YCwgJ0NvbnRlbnQtVHlwZSc6ICdhcHBsaWNhdGlvbi9qc29uJyB9LAogICAgICBib2R5OiBKU09OLnN0cmluZ2lmeShjb3JwbyksCiAgICAgIG5leHQ6IHsgcmV2YWxpZGF0ZTogc2VndW5kb3MgfSwKICAgIH0pOwogICAgaWYgKCFyLm9rKSByZXR1cm4gbnVsbDsKICAgIHJldHVybiAoYXdhaXQgci5qc29uKCkpIGFzIFQ7CiAgfSBjYXRjaCB7IHJldHVybiBudWxsOyB9Cn0K"}
+/* Endereço e chave pública do projeto, sem 'use client'.
+
+   Existe separado de lib/supabase.ts por um motivo prático: os layouts que
+   geram o <title> e o card de prévia do WhatsApp são SERVER components, e não
+   podem importar um módulo marcado 'use client'.
+
+   E o valor padrão importa: as variáveis NEXT_PUBLIC_* não estão definidas no
+   projeto da Vercel. O cliente sempre teve esse fallback; os layouts novos
+   não tinham, e por isso o título do link do Louvor voltava genérico em vez de
+   "Servir · Louvor" — exatamente o problema que eles existiam para resolver.
+
+   A chave anon é pública por design: ela só diz QUAL projeto é. Quem decide o
+   que cada sessão enxerga é o RLS dentro do banco. */
+
+export const SUPA_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://qjtcaijhgldypudzyafz.supabase.co';
+
+export const SUPA_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGNhaWpoZ2xkeXB1ZHp5YWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MzkzMzcsImV4cCI6MjEwMTUxNTMzN30.9SHDqeDMkiNCr5pJdFoQMO87EcKRgusaAyCM10ojJKU';
+
+/** Chama uma RPC pública do lado do servidor, para gerar metadata. */
+export async function rpcPublica<T = any>(
+  fn: string, corpo: Record<string, unknown> = {}, segundos = 3600,
+): Promise<T | null> {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(corpo),
+      next: { revalidate: segundos },
+    });
+    if (!r.ok) return null;
+    return (await r.json()) as T;
+  } catch { return null; }
+}

@@ -1,1 +1,151 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMDUg4oCUIE1FTEhPUklBUyAoYXBsaWNhZG8gZW0gcHJvZHXDp8OjbyBlbSAyMDI2LTA4LTA2KQoKICAgMS4gUGxhbnTDo28gY3VyaW5nYTogc8OzIHF1ZW0gY29icmUgMisgZnVuw6fDtWVzIHNlbSB0cmVpbm8gKGZlaXRvIG5vIG1vdG9yKS4KICAgMi4gTWFyY2EgZGUgIjHCqiB2ZXoiIHBvciBkb21pbmdvOiBlc2NhbGFjb2VzLnByaW1laXJhX3ZleiDihpIgaW5zdHJ1w6fDo28gbm8gbGluay4KICAgMy4gRGlzcG9uaWJpbGlkYWRlIGV4cGzDrWNpdGE6IHZvbHVudMOhcmlvIHJlc3BvbmRlIHBvc3NvL27Do28gcG9zc28gcG9yIGRvbWluZ28uCiAgIElkZW1wb3RlbnRlLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwoKLyogLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gMi4gbWFyY2EgZGUgMcKqIHZleiBubyBzbG90ICovCmFsdGVyIHRhYmxlIGVzY2FsYWNvZXMgYWRkIGNvbHVtbiBpZiBub3QgZXhpc3RzIHByaW1laXJhX3ZleiBib29sZWFuIG5vdCBudWxsIGRlZmF1bHQgZmFsc2U7CgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBzYWx2YXJfZGlhKAogIHBfZXF1aXBlIHV1aWQsIHBfZGF0YSBkYXRlLCBwX29icyB0ZXh0LCBwX3Nsb3RzIGpzb25iLCBwX3BsYW50YW8gdXVpZFtdCikgcmV0dXJucyB1dWlkCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgaW52b2tlciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfY3VsdG8gdXVpZDsgciByZWNvcmQ7CmJlZ2luCiAgaWYgcF9lcXVpcGUgaXMgbnVsbCB0aGVuIHJhaXNlIGV4Y2VwdGlvbiAnc2FsdmFyX2RpYSBzZW0gbWluaXN0ZXJpbyc7IGVuZCBpZjsKCiAgaW5zZXJ0IGludG8gY3VsdG9zIChkYXRhKSB2YWx1ZXMgKHBfZGF0YSkKICAgIG9uIGNvbmZsaWN0IChkYXRhKSBkbyB1cGRhdGUgc2V0IGRhdGEgPSBleGNsdWRlZC5kYXRhCiAgICByZXR1cm5pbmcgaWQgaW50byB2X2N1bHRvOwogIGlmIHZfY3VsdG8gaXMgbnVsbCB0aGVuIHNlbGVjdCBpZCBpbnRvIHZfY3VsdG8gZnJvbSBjdWx0b3Mgd2hlcmUgZGF0YSA9IHBfZGF0YTsgZW5kIGlmOwoKICBpbnNlcnQgaW50byBjdWx0b19vYnMgKGN1bHRvX2lkLCBlcXVpcGVfaWQsIG9icykKICAgIHZhbHVlcyAodl9jdWx0bywgcF9lcXVpcGUsIGNvYWxlc2NlKHBfb2JzLCAnJykpCiAgb24gY29uZmxpY3QgKGN1bHRvX2lkLCBlcXVpcGVfaWQpIGRvIHVwZGF0ZSBzZXQgb2JzID0gZXhjbHVkZWQub2JzOwoKICBmb3IgciBpbgogICAgc2VsZWN0ICh4IC0+PiAnZnVuY2FvX2lkJyk6OnV1aWQgZmlkLAogICAgICAgICAgICh4IC0+PiAndm9sdW50YXJpb19pZCcpOjp1dWlkIHZpZCwKICAgICAgICAgICBjb2FsZXNjZSh4IC0+PiAnc3RhdHVzJywgJ3BlbmRlbnRlJyk6OnN0YXR1c19lc2NhbGEgc3QsCiAgICAgICAgICAgY29hbGVzY2UoKHggLT4+ICdmaXhvJyk6OmJvb2xlYW4sIGZhbHNlKSBmeCwKICAgICAgICAgICBjb2FsZXNjZSgoeCAtPj4gJ3ByaW1laXJhX3ZleicpOjpib29sZWFuLCBmYWxzZSkgcHYKICAgICAgZnJvbSBqc29uYl9hcnJheV9lbGVtZW50cyhjb2FsZXNjZShwX3Nsb3RzLCAnW10nOjpqc29uYikpIHgKICBsb29wCiAgICBpZiBub3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIGZ1bmNvZXMgd2hlcmUgaWQgPSByLmZpZCBhbmQgZXF1aXBlX2lkID0gcF9lcXVpcGUpIHRoZW4KICAgICAgcmFpc2UgZXhjZXB0aW9uICdmdW5jYW8gZGUgb3V0cm8gbWluaXN0ZXJpbyc7IGVuZCBpZjsKICAgIGlmIG5vdCBleGlzdHMgKHNlbGVjdCAxIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgaWQgPSByLnZpZCBhbmQgZXF1aXBlX2lkID0gcF9lcXVpcGUpIHRoZW4KICAgICAgcmFpc2UgZXhjZXB0aW9uICd2b2x1bnRhcmlvIGRlIG91dHJvIG1pbmlzdGVyaW8nOyBlbmQgaWY7CgogICAgaW5zZXJ0IGludG8gZXNjYWxhY29lcyAoY3VsdG9faWQsIGZ1bmNhb19pZCwgdm9sdW50YXJpb19pZCwgc3RhdHVzLCBmaXhvLCBwcmltZWlyYV92ZXopCiAgICAgIHZhbHVlcyAodl9jdWx0bywgci5maWQsIHIudmlkLCByLnN0LCByLmZ4LCByLnB2KQogICAgb24gY29uZmxpY3QgKGN1bHRvX2lkLCBmdW5jYW9faWQpIGRvIHVwZGF0ZQogICAgICBzZXQgdm9sdW50YXJpb19pZCA9IGV4Y2x1ZGVkLnZvbHVudGFyaW9faWQsCiAgICAgICAgICBmaXhvICAgICAgICAgID0gZXhjbHVkZWQuZml4bywKICAgICAgICAgIHByaW1laXJhX3ZleiAgPSBleGNsdWRlZC5wcmltZWlyYV92ZXosCiAgICAgICAgICBzdGF0dXMgICAgICAgID0gY2FzZSB3aGVuIGVzY2FsYWNvZXMudm9sdW50YXJpb19pZCBpcyBkaXN0aW5jdCBmcm9tIGV4Y2x1ZGVkLnZvbHVudGFyaW9faWQKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRoZW4gZXhjbHVkZWQuc3RhdHVzIGVsc2UgZXNjYWxhY29lcy5zdGF0dXMgZW5kLAogICAgICAgICAgcmVzcG9uZGlkb19lbSA9IGNhc2Ugd2hlbiBlc2NhbGFjb2VzLnZvbHVudGFyaW9faWQgaXMgZGlzdGluY3QgZnJvbSBleGNsdWRlZC52b2x1bnRhcmlvX2lkCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB0aGVuIG51bGwgZWxzZSBlc2NhbGFjb2VzLnJlc3BvbmRpZG9fZW0gZW5kOwogIGVuZCBsb29wOwoKICBkZWxldGUgZnJvbSBlc2NhbGFjb2VzIGUgdXNpbmcgZnVuY29lcyBmCiAgIHdoZXJlIGYuaWQgPSBlLmZ1bmNhb19pZCBhbmQgZS5jdWx0b19pZCA9IHZfY3VsdG8gYW5kIGYuZXF1aXBlX2lkID0gcF9lcXVpcGUKICAgICBhbmQgbm90IGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBqc29uYl9hcnJheV9lbGVtZW50cyhjb2FsZXNjZShwX3Nsb3RzLCdbXSc6Ompzb25iKSkgeAogICAgICAgICAgICAgICAgICAgICAgd2hlcmUgKHggLT4+ICdmdW5jYW9faWQnKTo6dXVpZCA9IGUuZnVuY2FvX2lkKTsKCiAgZGVsZXRlIGZyb20gcGxhbnRvZXMgcCB1c2luZyB2b2x1bnRhcmlvcyB2CiAgIHdoZXJlIHYuaWQgPSBwLnZvbHVudGFyaW9faWQgYW5kIHAuY3VsdG9faWQgPSB2X2N1bHRvIGFuZCB2LmVxdWlwZV9pZCA9IHBfZXF1aXBlCiAgICAgYW5kIG5vdCAocC52b2x1bnRhcmlvX2lkID0gYW55IChjb2FsZXNjZShwX3BsYW50YW8sICd7fSc6OnV1aWRbXSkpKTsKCiAgaW5zZXJ0IGludG8gcGxhbnRvZXMgKGN1bHRvX2lkLCB2b2x1bnRhcmlvX2lkKQogIHNlbGVjdCB2X2N1bHRvLCB2LmlkIGZyb20gdm9sdW50YXJpb3MgdgogICB3aGVyZSB2LmlkID0gYW55IChjb2FsZXNjZShwX3BsYW50YW8sICd7fSc6OnV1aWRbXSkpIGFuZCB2LmVxdWlwZV9pZCA9IHBfZXF1aXBlCiAgb24gY29uZmxpY3QgZG8gbm90aGluZzsKCiAgcmV0dXJuIHZfY3VsdG87CmVuZCAkZm4kOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIHNhbHZhcl9kaWEodXVpZCxkYXRlLHRleHQsanNvbmIsdXVpZFtdKSBmcm9tIHB1YmxpYywgYW5vbjsKZ3JhbnQgZXhlY3V0ZSBvbiBmdW5jdGlvbiBzYWx2YXJfZGlhKHV1aWQsZGF0ZSx0ZXh0LGpzb25iLHV1aWRbXSkgdG8gYXV0aGVudGljYXRlZDsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIDMuIGRpc3BvbmliaWxpZGFkZSBleHBsw61jaXRhICovCmNyZWF0ZSB0YWJsZSBpZiBub3QgZXhpc3RzIGRpc3BvbmliaWxpZGFkZSAoCiAgdm9sdW50YXJpb19pZCB1dWlkIG5vdCBudWxsIHJlZmVyZW5jZXMgdm9sdW50YXJpb3MoaWQpIG9uIGRlbGV0ZSBjYXNjYWRlLAogIGRhdGEgZGF0ZSBub3QgbnVsbCwKICBwb2RlIGJvb2xlYW4gbm90IG51bGwsCiAgcmVzcG9uZGlkb19lbSB0aW1lc3RhbXB0eiBub3QgbnVsbCBkZWZhdWx0IG5vdygpLAogIHByaW1hcnkga2V5ICh2b2x1bnRhcmlvX2lkLCBkYXRhKQopOwphbHRlciB0YWJsZSBkaXNwb25pYmlsaWRhZGUgZW5hYmxlIHJvdyBsZXZlbCBzZWN1cml0eTsKZHJvcCBwb2xpY3kgaWYgZXhpc3RzIHBfZGlzcF9saWRlciBvbiBkaXNwb25pYmlsaWRhZGU7CmNyZWF0ZSBwb2xpY3kgcF9kaXNwX2xpZGVyIG9uIGRpc3BvbmliaWxpZGFkZSBmb3Igc2VsZWN0IHRvIGF1dGhlbnRpY2F0ZWQgdXNpbmcgKGlzX2xpZGVyKCkpOwpyZXZva2UgYWxsIG9uIHRhYmxlIGRpc3BvbmliaWxpZGFkZSBmcm9tIGFub24sIHB1YmxpYzsKCi0tIGdhcmFudGUgZGVkdXBlIGRvIGxhZG8gZGFzIGluZGlzcG9uaWJpbGlkYWRlcyAodXNhZG8gbm8gb24gY29uZmxpY3QgYWJhaXhvKQpjcmVhdGUgdW5pcXVlIGluZGV4IGlmIG5vdCBleGlzdHMgdXhfaW5kaXNwX3ZvbF9kYXRhIG9uIGluZGlzcG9uaWJpbGlkYWRlcyh2b2x1bnRhcmlvX2lkLCBkYXRhKTsKCi8qIG8gdm9sdW50w6FyaW8gcmVzcG9uZGUgcG9zc28vbsOjbyBwb3Nzby4gJ25hbycgdGFtYsOpbSB2aXJhIGluZGlzcG9uaWJpbGlkYWRlCiAgIChvIG1vdG9yIGzDqiBlc3NhIHRhYmVsYSk7ICdwb3NzbycgcmVtb3ZlIGEgaW5kaXNwb25pYmlsaWRhZGUuICovCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIGV1X2Rpc3BvbmliaWxpZGFkZShwX3Rva2VuIHRleHQsIHBfZGF0YSBkYXRlLCBwX3Jlc3Bvc3RhIHRleHQpCnJldHVybnMgdm9pZApsYW5ndWFnZSBwbHBnc3FsIHNlY3VyaXR5IGRlZmluZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKZGVjbGFyZSB2X2lkIHV1aWQ7CmJlZ2luCiAgc2VsZWN0IGlkIGludG8gdl9pZCBmcm9tIHZvbHVudGFyaW9zIHdoZXJlIHRva2VuID0gcF90b2tlbiBhbmQgYXRpdm87CiAgaWYgdl9pZCBpcyBudWxsIHRoZW4gcmFpc2UgZXhjZXB0aW9uICdMaW5rIGludmFsaWRvJzsgZW5kIGlmOwoKICBpZiBwX3Jlc3Bvc3RhID0gJ3Bvc3NvJyB0aGVuCiAgICBpbnNlcnQgaW50byBkaXNwb25pYmlsaWRhZGUgKHZvbHVudGFyaW9faWQsIGRhdGEsIHBvZGUpIHZhbHVlcyAodl9pZCwgcF9kYXRhLCB0cnVlKQogICAgICBvbiBjb25mbGljdCAodm9sdW50YXJpb19pZCwgZGF0YSkgZG8gdXBkYXRlIHNldCBwb2RlID0gdHJ1ZSwgcmVzcG9uZGlkb19lbSA9IG5vdygpOwogICAgZGVsZXRlIGZyb20gaW5kaXNwb25pYmlsaWRhZGVzIHdoZXJlIHZvbHVudGFyaW9faWQgPSB2X2lkIGFuZCBkYXRhID0gcF9kYXRhOwogIGVsc2lmIHBfcmVzcG9zdGEgPSAnbmFvJyB0aGVuCiAgICBpbnNlcnQgaW50byBkaXNwb25pYmlsaWRhZGUgKHZvbHVudGFyaW9faWQsIGRhdGEsIHBvZGUpIHZhbHVlcyAodl9pZCwgcF9kYXRhLCBmYWxzZSkKICAgICAgb24gY29uZmxpY3QgKHZvbHVudGFyaW9faWQsIGRhdGEpIGRvIHVwZGF0ZSBzZXQgcG9kZSA9IGZhbHNlLCByZXNwb25kaWRvX2VtID0gbm93KCk7CiAgICBpbnNlcnQgaW50byBpbmRpc3BvbmliaWxpZGFkZXMgKHZvbHVudGFyaW9faWQsIGRhdGEpIHZhbHVlcyAodl9pZCwgcF9kYXRhKQogICAgICBvbiBjb25mbGljdCAodm9sdW50YXJpb19pZCwgZGF0YSkgZG8gbm90aGluZzsKICBlbHNlCiAgICBkZWxldGUgZnJvbSBkaXNwb25pYmlsaWRhZGUgd2hlcmUgdm9sdW50YXJpb19pZCA9IHZfaWQgYW5kIGRhdGEgPSBwX2RhdGE7CiAgICBkZWxldGUgZnJvbSBpbmRpc3BvbmliaWxpZGFkZXMgd2hlcmUgdm9sdW50YXJpb19pZCA9IHZfaWQgYW5kIGRhdGEgPSBwX2RhdGE7CiAgZW5kIGlmOwplbmQgJGZuJDsKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBldV9kaXNwb25pYmlsaWRhZGUodGV4dCwgZGF0ZSwgdGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXVfZGlzcG9uaWJpbGlkYWRlKHRleHQsIGRhdGUsIHRleHQpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBldV9kYWRvczogKyBwcmltZWlyYV92ZXogcG9yIGl0ZW0sICsgZGlzcG9uaXZlbCAqLwpkcm9wIGZ1bmN0aW9uIGlmIGV4aXN0cyBldV9kYWRvcyh0ZXh0KTsKY3JlYXRlIGZ1bmN0aW9uIGV1X2RhZG9zKHBfdG9rZW4gdGV4dCkKIHJldHVybnMgdGFibGUobm9tZSB0ZXh0LCBlcXVpcGUgdGV4dCwgZXNjYWxhcyBqc29uYiwgaW5kaXNwb25pdmVsIGpzb25iLCBkaXNwb25pdmVsIGpzb25iKQogbGFuZ3VhZ2UgcGxwZ3NxbCBzZWN1cml0eSBkZWZpbmVyIHNldCBzZWFyY2hfcGF0aCB0byAncHVibGljJwphcyAkZnVuY3Rpb24kCmRlY2xhcmUgdl9pZCB1dWlkOyB2X25vbWUgdGV4dDsgdl9lcSB1dWlkOyB2X2Vxbm9tZSB0ZXh0OwpiZWdpbgogIHNlbGVjdCB2LmlkLCB2Lm5vbWUsIHYuZXF1aXBlX2lkIGludG8gdl9pZCwgdl9ub21lLCB2X2VxCiAgICBmcm9tIHZvbHVudGFyaW9zIHYgd2hlcmUgdi50b2tlbiA9IHBfdG9rZW4gYW5kIHYuYXRpdm87CiAgaWYgdl9pZCBpcyBudWxsIHRoZW4gcmFpc2UgZXhjZXB0aW9uICdMaW5rIGludmFsaWRvJzsgZW5kIGlmOwogIHNlbGVjdCBlLm5vbWUgaW50byB2X2Vxbm9tZSBmcm9tIGVxdWlwZXMgZSB3aGVyZSBlLmlkID0gdl9lcTsKCiAgcmV0dXJuIHF1ZXJ5IHNlbGVjdCB2X25vbWUsIGNvYWxlc2NlKHZfZXFub21lLCdFc2NhbGEnKSwKICAgIGNvYWxlc2NlKChzZWxlY3QganNvbmJfYWdnKHggb3JkZXIgYnkgeC0+PidkYXRhJykgZnJvbSAoCiAgICAgICAgc2VsZWN0IGpzb25iX2J1aWxkX29iamVjdCgnY3VsdG9faWQnLGMuaWQsJ2RhdGEnLGMuZGF0YSwnZnVuY2FvJyxmLm5vbWUsJ3N0YXR1cycsZS5zdGF0dXMsCiAgICAgICAgICAgICAgICAgJ3ByaW1laXJhX3ZleicsZS5wcmltZWlyYV92ZXosCiAgICAgICAgICAgICAgICAgJ29icycsKHNlbGVjdCBvLm9icyBmcm9tIGN1bHRvX29icyBvIHdoZXJlIG8uY3VsdG9faWQ9Yy5pZCBhbmQgby5lcXVpcGVfaWQ9dl9lcSksCiAgICAgICAgICAgICAgICAgJ3BsYW50YW8nLGZhbHNlKSBhcyB4CiAgICAgICAgICBmcm9tIGVzY2FsYWNvZXMgZSBqb2luIGN1bHRvcyBjIG9uIGMuaWQ9ZS5jdWx0b19pZCBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkPWUuZnVuY2FvX2lkCiAgICAgICAgIHdoZXJlIGUudm9sdW50YXJpb19pZCA9IHZfaWQgYW5kIGMuZGF0YSA+PSBjdXJyZW50X2RhdGUgLSAxCiAgICAgICAgdW5pb24gYWxsCiAgICAgICAgc2VsZWN0IGpzb25iX2J1aWxkX29iamVjdCgnY3VsdG9faWQnLGMuaWQsJ2RhdGEnLGMuZGF0YSwnZnVuY2FvJywnUExBTlRBTycsJ3N0YXR1cycsJ3BlbmRlbnRlJywKICAgICAgICAgICAgICAgICAncHJpbWVpcmFfdmV6JyxmYWxzZSwKICAgICAgICAgICAgICAgICAnb2JzJywoc2VsZWN0IG8ub2JzIGZyb20gY3VsdG9fb2JzIG8gd2hlcmUgby5jdWx0b19pZD1jLmlkIGFuZCBvLmVxdWlwZV9pZD12X2VxKSwKICAgICAgICAgICAgICAgICAncGxhbnRhbycsdHJ1ZSkKICAgICAgICAgIGZyb20gcGxhbnRvZXMgcCBqb2luIGN1bHRvcyBjIG9uIGMuaWQ9cC5jdWx0b19pZAogICAgICAgICB3aGVyZSBwLnZvbHVudGFyaW9faWQgPSB2X2lkIGFuZCBjLmRhdGEgPj0gY3VycmVudF9kYXRlIC0gMSkgdCksICdbXSc6Ompzb25iKSwKICAgIGNvYWxlc2NlKChzZWxlY3QganNvbmJfYWdnKGkuZGF0YSBvcmRlciBieSBpLmRhdGEpIGZyb20gaW5kaXNwb25pYmlsaWRhZGVzIGkKICAgICAgICAgICAgICAgd2hlcmUgaS52b2x1bnRhcmlvX2lkID0gdl9pZCBhbmQgaS5kYXRhID49IGN1cnJlbnRfZGF0ZSksICdbXSc6Ompzb25iKSwKICAgIGNvYWxlc2NlKChzZWxlY3QganNvbmJfYWdnKGQuZGF0YSBvcmRlciBieSBkLmRhdGEpIGZyb20gZGlzcG9uaWJpbGlkYWRlIGQKICAgICAgICAgICAgICAgd2hlcmUgZC52b2x1bnRhcmlvX2lkID0gdl9pZCBhbmQgZC5wb2RlID0gdHJ1ZSBhbmQgZC5kYXRhID49IGN1cnJlbnRfZGF0ZSksICdbXSc6Ompzb25iKTsKZW5kICRmdW5jdGlvbiQ7CnJldm9rZSBhbGwgb24gZnVuY3Rpb24gZXVfZGFkb3ModGV4dCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXVfZGFkb3ModGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsK"}
+/* =============================================================================
+   05 — MELHORIAS (aplicado em produção em 2026-08-06)
+
+   1. Plantão curinga: só quem cobre 2+ funções sem treino (feito no motor).
+   2. Marca de "1ª vez" por domingo: escalacoes.primeira_vez → instrução no link.
+   3. Disponibilidade explícita: voluntário responde posso/não posso por domingo.
+   Idempotente.
+   ============================================================================= */
+
+/* -------------------------------------------------- 2. marca de 1ª vez no slot */
+alter table escalacoes add column if not exists primeira_vez boolean not null default false;
+
+create or replace function salvar_dia(
+  p_equipe uuid, p_data date, p_obs text, p_slots jsonb, p_plantao uuid[]
+) returns uuid
+language plpgsql security invoker set search_path = public as $fn$
+declare v_culto uuid; r record;
+begin
+  if p_equipe is null then raise exception 'salvar_dia sem ministerio'; end if;
+
+  insert into cultos (data) values (p_data)
+    on conflict (data) do update set data = excluded.data
+    returning id into v_culto;
+  if v_culto is null then select id into v_culto from cultos where data = p_data; end if;
+
+  insert into culto_obs (culto_id, equipe_id, obs)
+    values (v_culto, p_equipe, coalesce(p_obs, ''))
+  on conflict (culto_id, equipe_id) do update set obs = excluded.obs;
+
+  for r in
+    select (x ->> 'funcao_id')::uuid fid,
+           (x ->> 'voluntario_id')::uuid vid,
+           coalesce(x ->> 'status', 'pendente')::status_escala st,
+           coalesce((x ->> 'fixo')::boolean, false) fx,
+           coalesce((x ->> 'primeira_vez')::boolean, false) pv
+      from jsonb_array_elements(coalesce(p_slots, '[]'::jsonb)) x
+  loop
+    if not exists (select 1 from funcoes where id = r.fid and equipe_id = p_equipe) then
+      raise exception 'funcao de outro ministerio'; end if;
+    if not exists (select 1 from voluntarios where id = r.vid and equipe_id = p_equipe) then
+      raise exception 'voluntario de outro ministerio'; end if;
+
+    insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
+      values (v_culto, r.fid, r.vid, r.st, r.fx, r.pv)
+    on conflict (culto_id, funcao_id) do update
+      set voluntario_id = excluded.voluntario_id,
+          fixo          = excluded.fixo,
+          primeira_vez  = excluded.primeira_vez,
+          status        = case when escalacoes.voluntario_id is distinct from excluded.voluntario_id
+                               then excluded.status else escalacoes.status end,
+          respondido_em = case when escalacoes.voluntario_id is distinct from excluded.voluntario_id
+                               then null else escalacoes.respondido_em end;
+  end loop;
+
+  delete from escalacoes e using funcoes f
+   where f.id = e.funcao_id and e.culto_id = v_culto and f.equipe_id = p_equipe
+     and not exists (select 1 from jsonb_array_elements(coalesce(p_slots,'[]'::jsonb)) x
+                      where (x ->> 'funcao_id')::uuid = e.funcao_id);
+
+  delete from plantoes p using voluntarios v
+   where v.id = p.voluntario_id and p.culto_id = v_culto and v.equipe_id = p_equipe
+     and not (p.voluntario_id = any (coalesce(p_plantao, '{}'::uuid[])));
+
+  insert into plantoes (culto_id, voluntario_id)
+  select v_culto, v.id from voluntarios v
+   where v.id = any (coalesce(p_plantao, '{}'::uuid[])) and v.equipe_id = p_equipe
+  on conflict do nothing;
+
+  return v_culto;
+end $fn$;
+revoke all on function salvar_dia(uuid,date,text,jsonb,uuid[]) from public, anon;
+grant execute on function salvar_dia(uuid,date,text,jsonb,uuid[]) to authenticated;
+
+/* -------------------------------------------- 3. disponibilidade explícita */
+create table if not exists disponibilidade (
+  voluntario_id uuid not null references voluntarios(id) on delete cascade,
+  data date not null,
+  pode boolean not null,
+  respondido_em timestamptz not null default now(),
+  primary key (voluntario_id, data)
+);
+alter table disponibilidade enable row level security;
+drop policy if exists p_disp_lider on disponibilidade;
+create policy p_disp_lider on disponibilidade for select to authenticated using (is_lider());
+revoke all on table disponibilidade from anon, public;
+
+-- garante dedupe do lado das indisponibilidades (usado no on conflict abaixo)
+create unique index if not exists ux_indisp_vol_data on indisponibilidades(voluntario_id, data);
+
+/* o voluntário responde posso/não posso. 'nao' também vira indisponibilidade
+   (o motor lê essa tabela); 'posso' remove a indisponibilidade. */
+create or replace function eu_disponibilidade(p_token text, p_data date, p_resposta text)
+returns void
+language plpgsql security definer set search_path = public as $fn$
+declare v_id uuid;
+begin
+  select id into v_id from voluntarios where token = p_token and ativo;
+  if v_id is null then raise exception 'Link invalido'; end if;
+
+  if p_resposta = 'posso' then
+    insert into disponibilidade (voluntario_id, data, pode) values (v_id, p_data, true)
+      on conflict (voluntario_id, data) do update set pode = true, respondido_em = now();
+    delete from indisponibilidades where voluntario_id = v_id and data = p_data;
+  elsif p_resposta = 'nao' then
+    insert into disponibilidade (voluntario_id, data, pode) values (v_id, p_data, false)
+      on conflict (voluntario_id, data) do update set pode = false, respondido_em = now();
+    insert into indisponibilidades (voluntario_id, data) values (v_id, p_data)
+      on conflict (voluntario_id, data) do nothing;
+  else
+    delete from disponibilidade where voluntario_id = v_id and data = p_data;
+    delete from indisponibilidades where voluntario_id = v_id and data = p_data;
+  end if;
+end $fn$;
+revoke all on function eu_disponibilidade(text, date, text) from public;
+grant execute on function eu_disponibilidade(text, date, text) to anon, authenticated;
+
+/* -------------------------------- eu_dados: + primeira_vez por item, + disponivel */
+drop function if exists eu_dados(text);
+create function eu_dados(p_token text)
+ returns table(nome text, equipe text, escalas jsonb, indisponivel jsonb, disponivel jsonb)
+ language plpgsql security definer set search_path to 'public'
+as $function$
+declare v_id uuid; v_nome text; v_eq uuid; v_eqnome text;
+begin
+  select v.id, v.nome, v.equipe_id into v_id, v_nome, v_eq
+    from voluntarios v where v.token = p_token and v.ativo;
+  if v_id is null then raise exception 'Link invalido'; end if;
+  select e.nome into v_eqnome from equipes e where e.id = v_eq;
+
+  return query select v_nome, coalesce(v_eqnome,'Escala'),
+    coalesce((select jsonb_agg(x order by x->>'data') from (
+        select jsonb_build_object('culto_id',c.id,'data',c.data,'funcao',f.nome,'status',e.status,
+                 'primeira_vez',e.primeira_vez,
+                 'obs',(select o.obs from culto_obs o where o.culto_id=c.id and o.equipe_id=v_eq),
+                 'plantao',false) as x
+          from escalacoes e join cultos c on c.id=e.culto_id join funcoes f on f.id=e.funcao_id
+         where e.voluntario_id = v_id and c.data >= current_date - 1
+        union all
+        select jsonb_build_object('culto_id',c.id,'data',c.data,'funcao','PLANTAO','status','pendente',
+                 'primeira_vez',false,
+                 'obs',(select o.obs from culto_obs o where o.culto_id=c.id and o.equipe_id=v_eq),
+                 'plantao',true)
+          from plantoes p join cultos c on c.id=p.culto_id
+         where p.voluntario_id = v_id and c.data >= current_date - 1) t), '[]'::jsonb),
+    coalesce((select jsonb_agg(i.data order by i.data) from indisponibilidades i
+               where i.voluntario_id = v_id and i.data >= current_date), '[]'::jsonb),
+    coalesce((select jsonb_agg(d.data order by d.data) from disponibilidade d
+               where d.voluntario_id = v_id and d.pode = true and d.data >= current_date), '[]'::jsonb);
+end $function$;
+revoke all on function eu_dados(text) from public;
+grant execute on function eu_dados(text) to anon, authenticated;

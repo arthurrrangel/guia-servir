@@ -1,1 +1,90 @@
-{"data":"J3VzZSBjbGllbnQnOwovKiBQZcOnYXMgdmlzdWFpcyBjb21wYXJ0aWxoYWRhczogYXZhdGFyLCBtZWRpZG9yLCBhbmVsIGRlIHByb2dyZXNzbywgYXZpc29zLiAqLwppbXBvcnQgeyBJY0FsZXJ0YSwgSWNDaGVjaywgSWNJbmZvLCBJY1ggfSBmcm9tICcuL0ljb25lcyc7CgovKiBhdmF0YXIgY29tIGluaWNpYWlzIGUgY29yIGVzdMOhdmVsIHBvciBub21lICovCmV4cG9ydCBmdW5jdGlvbiBBdmF0YXIoeyBub21lLCBncmFuZGUgfTogeyBub21lPzogc3RyaW5nIHwgbnVsbDsgZ3JhbmRlPzogYm9vbGVhbiB9KSB7CiAgaWYgKCFub21lKSByZXR1cm4gPHNwYW4gY2xhc3NOYW1lPXtgYXZhdGFyIHZhemlvICR7Z3JhbmRlID8gJ2cnIDogJyd9YH0+Pzwvc3Bhbj47CiAgY29uc3QgcGFydGVzID0gbm9tZS50cmltKCkuc3BsaXQoL1xzKy8pOwogIGNvbnN0IGluaSA9IChwYXJ0ZXNbMF1bMF0gKyAocGFydGVzWzFdPy5bMF0gfHwgJycpKS50b1VwcGVyQ2FzZSgpOwogIGxldCBoID0gMDsKICBmb3IgKGNvbnN0IGMgb2Ygbm9tZSkgaCA9IChoICogMzEgKyBjLmNoYXJDb2RlQXQoMCkpID4+PiAwOwogIHJldHVybiA8c3BhbiBjbGFzc05hbWU9e2BhdmF0YXIgYXYtJHtoICUgOH0gJHtncmFuZGUgPyAnZycgOiAnJ31gfT57aW5pfTwvc3Bhbj47Cn0KCi8qIG1lZGlkb3I6IGZpbGwgY2FycmVnYSBhIHNldmVyaWRhZGU7IHRyaWxobyDDqSBwYXNzbyBjbGFybyBkYSBNRVNNQSByYW1wYSAqLwpleHBvcnQgZnVuY3Rpb24gTWVkaWRvcih7IHZhbG9yLCB0b3RhbCwgZ3JhdSB9OiB7IHZhbG9yOiBudW1iZXI7IHRvdGFsOiBudW1iZXI7IGdyYXU6ICdvaycgfCAnd2FybicgfCAnYmFkJyB9KSB7CiAgY29uc3QgcGN0ID0gdG90YWwgPiAwID8gTWF0aC5taW4oMTAwLCBNYXRoLnJvdW5kKCh2YWxvciAvIHRvdGFsKSAqIDEwMCkpIDogMDsKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9e2BtZWRpZG9yICR7Z3JhdX1gfSByb2xlPSJpbWciIGFyaWEtbGFiZWw9e2Ake3ZhbG9yfSBkZSAke3RvdGFsfWB9PgogICAgICA8ZGl2IGNsYXNzTmFtZT0iZmlsbCIgc3R5bGU9e3sgd2lkdGg6IGAke3BjdH0lYCB9fSAvPgogICAgPC9kaXY+CiAgKTsKfQoKLyogYW5lbCBkZSBwcm9ncmVzc28gZG8gaGVybyAoY29uZmlybWHDp8O1ZXMgZG8gZG9taW5nbykgKi8KZXhwb3J0IGZ1bmN0aW9uIEFuZWwoeyB2YWxvciwgdG90YWwsIGNvciB9OiB7IHZhbG9yOiBudW1iZXI7IHRvdGFsOiBudW1iZXI7IGNvcjogc3RyaW5nIH0pIHsKICBjb25zdCBSID0gMzYsIEMgPSAyICogTWF0aC5QSSAqIFI7CiAgY29uc3QgZnJhYyA9IHRvdGFsID4gMCA/IHZhbG9yIC8gdG90YWwgOiAwOwogIHJldHVybiAoCiAgICA8ZGl2IGNsYXNzTmFtZT0iYW5lbCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPXtgJHt2YWxvcn0gZGUgJHt0b3RhbH0gY29uZmlybWFkb3NgfT4KICAgICAgPHN2ZyB2aWV3Qm94PSIwIDAgODggODgiPgogICAgICAgIDxjaXJjbGUgY2xhc3NOYW1lPSJmdW5kbyIgY3g9IjQ0IiBjeT0iNDQiIHI9e1J9IGZpbGw9Im5vbmUiIHN0cm9rZVdpZHRoPSI4IiAvPgogICAgICAgIDxjaXJjbGUgY2xhc3NOYW1lPSJ2YWxvciIgY3g9IjQ0IiBjeT0iNDQiIHI9e1J9IGZpbGw9Im5vbmUiIHN0cm9rZVdpZHRoPSI4IgogICAgICAgICAgc3Ryb2tlPXtjb3J9IHN0cm9rZUxpbmVjYXA9InJvdW5kIgogICAgICAgICAgc3Ryb2tlRGFzaGFycmF5PXtDfSBzdHJva2VEYXNob2Zmc2V0PXtDICogKDEgLSBmcmFjKX0gLz4KICAgICAgPC9zdmc+CiAgICAgIHsvKiBzw7MgbyBuw7ptZXJvIGRlbnRybyBkbyBhbmVsOiAiY29uZmlybWFkb3MiIHBvciBleHRlbnNvIG7Do28gY2FiZSBubwogICAgICAgICAgbWlvbG8gZSBlbmNvc3RhdmEgbm8gdHJhw6dvLiBPIHNlbnRpZG8gZmljYSBubyBhcmlhLWxhYmVsIGUgbmEgbGVnZW5kYQogICAgICAgICAgZGUgZm9yYS4gKi99CiAgICAgIDxkaXYgY2xhc3NOYW1lPSJhbmVsLXRleHRvIj48ZGl2IGNsYXNzTmFtZT0ibiI+e3ZhbG9yfS97dG90YWx9PC9kaXY+PC9kaXY+CiAgICA8L2Rpdj4KICApOwp9CgovKiBhdmlzbyBjb20gw61jb25lIGNvcnJlc3BvbmRlbnRlIGFvIHRvbSAoc3RhdHVzIG51bmNhIMOpIHPDsyBjb3IpICovCmV4cG9ydCBmdW5jdGlvbiBBdmlzbyh7IHRvbSwgY2hpbGRyZW4gfTogeyB0b206ICdlcnJvJyB8ICdhdGVuY2FvJyB8ICdpbmZvJyB8ICdib20nOyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlIH0pIHsKICBjb25zdCBJYyA9IHRvbSA9PT0gJ2JvbScgPyBJY0NoZWNrIDogdG9tID09PSAnZXJybycgPyBJY1ggOiB0b20gPT09ICdhdGVuY2FvJyA/IEljQWxlcnRhIDogSWNJbmZvOwogIHJldHVybiA8ZGl2IGNsYXNzTmFtZT17YGF2aXNvICR7dG9tfWB9PjxJYyAvPjxkaXY+e2NoaWxkcmVufTwvZGl2PjwvZGl2PjsKfQoKZXhwb3J0IGZ1bmN0aW9uIEVzcXVlbGV0bygpIHsKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9ImVzcXVlbGV0byI+CiAgICAgIDxkaXYgY2xhc3NOYW1lPSJvc3NvIiBzdHlsZT17eyBoZWlnaHQ6IDE0OCwgbWFyZ2luQm90dG9tOiAxNCwgYm9yZGVyUmFkaXVzOiAyMCB9fSAvPgogICAgICA8ZGl2IGNsYXNzTmFtZT0ib3NzbyIgc3R5bGU9e3sgaGVpZ2h0OiA2NCwgbWFyZ2luQm90dG9tOiAxMCB9fSAvPgogICAgICA8ZGl2IGNsYXNzTmFtZT0ib3NzbyIgc3R5bGU9e3sgaGVpZ2h0OiA2NCwgbWFyZ2luQm90dG9tOiAxMCB9fSAvPgogICAgICA8ZGl2IGNsYXNzTmFtZT0ib3NzbyIgc3R5bGU9e3sgaGVpZ2h0OiA2NCwgd2lkdGg6ICc3MCUnIH19IC8+CiAgICA8L2Rpdj4KICApOwp9CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICBPIFNFTEVDVCBRVUUgTsODTyBTRVFVRVNUUkEgQSBMSU5IQQoKICAgVW0gPHNlbGVjdD4gbmF0aXZvIG1vc3RyYSwgZmVjaGFkbywgbyB0ZXh0byBpbnRlaXJvIGRhIG9ww6fDo28gZXNjb2xoaWRhLiBBcwogICBvcMOnw7VlcyBhcXVpIHByZWNpc2FtIGRlIGNvbnRleHRvIHBhcmEgYSBFU0NPTEhBICgicG9kZSDCtyBHaW92YW5hIFJvc2FsZW0gwrcKICAgdGl0dWxhciDCtyAyIGVzY2FsYXMvNjBkIiksIGUgZXJhIGlzc28gcXVlIGFwYXJlY2lhIGNvcnRhZG8gZW0gMzkwcHgsIHZpcmFuZG8KICAgIkdpb3ZhbmEgUm9zYWxlbSDCtyB0aXR1bGEuLi4iLiBRdWVtIGzDqiBhIGVzY2FsYSBxdWVyIG8gbm9tZTsgcXVlbSBlc2NvbGhlCiAgIHF1ZXIgbyBjb250ZXh0by4gU8OjbyBkb2lzIG1vbWVudG9zLgoKICAgQXF1aSBvIHRleHRvIHZpc8OtdmVsIMOpIG1ldSBlIG8gPHNlbGVjdD4gZmljYSBwb3IgY2ltYSwgdHJhbnNwYXJlbnRlLAogICBvY3VwYW5kbyBhIGxpbmhhIGludGVpcmEuIFRvcXVlLCB0ZWNsYWRvIGUgbGVpdG9yIGRlIHRlbGEgY29udGludWFtIHNlbmRvIG9zCiAgIG5hdGl2b3Mg4oCUIG8gc2VsZXRvciBuw6NvIGZvaSByZWltcGxlbWVudGFkbywgc8OzIGZpY291IGludmlzw612ZWwuIE8gZm9jbyDDqQogICBkZXNlbmhhZG8gbm8gaW52w7NsdWNyby4KLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KZXhwb3J0IGZ1bmN0aW9uIEVzY29saGEoeyB2YWxvciwgcm90dWxvLCBtb3N0cmEsIHZhemlvLCBkZXNhYmlsaXRhZG8sIGFvTXVkYXIsIGNsYXNzZSwgY2hpbGRyZW4gfTogewogIHZhbG9yOiBzdHJpbmc7IHJvdHVsbzogc3RyaW5nOyBtb3N0cmE6IHN0cmluZzsgdmF6aW8/OiBib29sZWFuOwogIGRlc2FiaWxpdGFkbz86IGJvb2xlYW47IGFvTXVkYXI6ICh2OiBzdHJpbmcpID0+IHZvaWQ7IGNsYXNzZT86IHN0cmluZzsKICBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlOwp9KSB7CiAgcmV0dXJuICgKICAgIDxzcGFuIGNsYXNzTmFtZT17YGVzYy1zZWwgJHtjbGFzc2UgfHwgJyd9ICR7dmF6aW8gPyAndmF6aW8nIDogJyd9ICR7ZGVzYWJpbGl0YWRvID8gJ29mZicgOiAnJ31gfT4KICAgICAgPHNwYW4gY2xhc3NOYW1lPSJlc2Mtc2VsLXR4dCIgYXJpYS1oaWRkZW49InRydWUiPnttb3N0cmF9PC9zcGFuPgogICAgICA8c2VsZWN0IHZhbHVlPXt2YWxvcn0gZGlzYWJsZWQ9e2Rlc2FiaWxpdGFkb30gYXJpYS1sYWJlbD17cm90dWxvfQogICAgICAgIG9uQ2hhbmdlPXtlID0+IGFvTXVkYXIoZS50YXJnZXQudmFsdWUpfT4KICAgICAgICB7Y2hpbGRyZW59CiAgICAgIDwvc2VsZWN0PgogICAgPC9zcGFuPgogICk7Cn0K"}
+'use client';
+/* Peças visuais compartilhadas: avatar, medidor, anel de progresso, avisos. */
+import { IcAlerta, IcCheck, IcInfo, IcX } from './Icones';
+
+/* avatar com iniciais e cor estável por nome */
+export function Avatar({ nome, grande }: { nome?: string | null; grande?: boolean }) {
+  if (!nome) return <span className={`avatar vazio ${grande ? 'g' : ''}`}>?</span>;
+  const partes = nome.trim().split(/\s+/);
+  const ini = (partes[0][0] + (partes[1]?.[0] || '')).toUpperCase();
+  let h = 0;
+  for (const c of nome) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return <span className={`avatar av-${h % 8} ${grande ? 'g' : ''}`}>{ini}</span>;
+}
+
+/* medidor: fill carrega a severidade; trilho é passo claro da MESMA rampa */
+export function Medidor({ valor, total, grau }: { valor: number; total: number; grau: 'ok' | 'warn' | 'bad' }) {
+  const pct = total > 0 ? Math.min(100, Math.round((valor / total) * 100)) : 0;
+  return (
+    <div className={`medidor ${grau}`} role="img" aria-label={`${valor} de ${total}`}>
+      <div className="fill" style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+/* anel de progresso do hero (confirmações do domingo) */
+export function Anel({ valor, total, cor }: { valor: number; total: number; cor: string }) {
+  const R = 36, C = 2 * Math.PI * R;
+  const frac = total > 0 ? valor / total : 0;
+  return (
+    <div className="anel" role="img" aria-label={`${valor} de ${total} confirmados`}>
+      <svg viewBox="0 0 88 88">
+        <circle className="fundo" cx="44" cy="44" r={R} fill="none" strokeWidth="8" />
+        <circle className="valor" cx="44" cy="44" r={R} fill="none" strokeWidth="8"
+          stroke={cor} strokeLinecap="round"
+          strokeDasharray={C} strokeDashoffset={C * (1 - frac)} />
+      </svg>
+      {/* só o número dentro do anel: "confirmados" por extenso não cabe no
+          miolo e encostava no traço. O sentido fica no aria-label e na legenda
+          de fora. */}
+      <div className="anel-texto"><div className="n">{valor}/{total}</div></div>
+    </div>
+  );
+}
+
+/* aviso com ícone correspondente ao tom (status nunca é só cor) */
+export function Aviso({ tom, children }: { tom: 'erro' | 'atencao' | 'info' | 'bom'; children: React.ReactNode }) {
+  const Ic = tom === 'bom' ? IcCheck : tom === 'erro' ? IcX : tom === 'atencao' ? IcAlerta : IcInfo;
+  return <div className={`aviso ${tom}`}><Ic /><div>{children}</div></div>;
+}
+
+export function Esqueleto() {
+  return (
+    <div className="esqueleto">
+      <div className="osso" style={{ height: 148, marginBottom: 14, borderRadius: 20 }} />
+      <div className="osso" style={{ height: 64, marginBottom: 10 }} />
+      <div className="osso" style={{ height: 64, marginBottom: 10 }} />
+      <div className="osso" style={{ height: 64, width: '70%' }} />
+    </div>
+  );
+}
+
+/* -----------------------------------------------------------------------------
+   O SELECT QUE NÃO SEQUESTRA A LINHA
+
+   Um <select> nativo mostra, fechado, o texto inteiro da opção escolhida. As
+   opções aqui precisam de contexto para a ESCOLHA ("pode · Giovana Rosalem ·
+   titular · 2 escalas/60d"), e era isso que aparecia cortado em 390px, virando
+   "Giovana Rosalem · titula...". Quem lê a escala quer o nome; quem escolhe
+   quer o contexto. São dois momentos.
+
+   Aqui o texto visível é meu e o <select> fica por cima, transparente,
+   ocupando a linha inteira. Toque, teclado e leitor de tela continuam sendo os
+   nativos — o seletor não foi reimplementado, só ficou invisível. O foco é
+   desenhado no invólucro.
+----------------------------------------------------------------------------- */
+export function Escolha({ valor, rotulo, mostra, vazio, desabilitado, aoMudar, classe, children }: {
+  valor: string; rotulo: string; mostra: string; vazio?: boolean;
+  desabilitado?: boolean; aoMudar: (v: string) => void; classe?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className={`esc-sel ${classe || ''} ${vazio ? 'vazio' : ''} ${desabilitado ? 'off' : ''}`}>
+      <span className="esc-sel-txt" aria-hidden="true">{mostra}</span>
+      <select value={valor} disabled={desabilitado} aria-label={rotulo}
+        onChange={e => aoMudar(e.target.value)}>
+        {children}
+      </select>
+    </span>
+  );
+}

@@ -1,1 +1,213 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMjAg4oCUIEEgUE9SVEEgREUgRU5UUkFEQQoKICAgQSBjYW1wYW5oYSBkZSBjYWRhc3RybyBkbyBMb3V2b3IgZSBkYSBEaWFjb25pYSB2YWkgam9nYXIgZGV6ZW5hcyBkZSBwZXNzb2FzCiAgIG5vdmFzIGVtIC9lcXVpcGUvPHNsdWc+LiBBbnRlcyBkZSBtYW5kYXIgZ2VudGUgcG9yIGVzc2EgcG9ydGEsIGVsYSBwcmVjaXNhCiAgIHBhcmFyIGRlIG1lbnRpciBlIHByZWNpc2EgcmVzcGVpdGFyIGEgcmVncmEgcXVlIGNhZGEgbWluaXN0w6lyaW8gasOhIHRlbS4KCiAgIFRyw6pzIGNvaXNhcywgbmVzdGEgb3JkZW0gZGUgZ3JhdmlkYWRlOgoKICAgMS4gT3MgY8OzZGlnb3MgZGUgZXJybyBkbyBgaW5zY3JldmVyYCBuw6NvIGJhdGVtIGNvbSBvcyBxdWUgYSB0ZWxhIGNvbmhlY2UuCiAgICAgIFF1ZW0gZGlnaXRhIHVtIHRlbGVmb25lIGrDoSBjYWRhc3RyYWRvIHJlY2ViZSBob2plICJOw6NvIGNvbnNlZ3VpIGVudHJhciwKICAgICAgZmFsZSBjb20gcXVlbSBvcmdhbml6YSIgZW0gdmV6IGRlICJhY2hlIHNldSBub21lIG5hIGxpc3RhIi4gQSB0ZWxhIHNhYmUKICAgICAgZXNjcmV2ZXIgYSBtZW5zYWdlbSBjZXJ0YSBkZXNkZSBhIDA2OyBhIGZ1bsOnw6NvIMOpIHF1ZSBwYXJvdSBkZSBmYWxhciBhCiAgICAgIG1lc21hIGzDrW5ndWEgcXVhbmRvIGEgMTAgYSByZWVzY3JldmV1LgoKICAgMi4gQSAxMCB0YW1iw6ltIHBlcmRldSB0csOqcyB2YWxpZGHDp8O1ZXMgcXVlIGEgMDYgdGluaGE6IHNvYnJlbm9tZSBvYnJpZ2F0w7NyaW8sCiAgICAgIHRldG8gZGUgdGFtYW5obyBkbyB0ZWxlZm9uZSBlIGZvcm1hdG8gZGUgZS1tYWlsLiBWb2x0YW0uCgogICAzLiBPIExvdXZvciBKw4EgVEVNIHByw6ktcmVxdWlzaXRvcyBlc2NyaXRvcywgbmEgZGVzY3Jpw6fDo28gZG8gcHLDs3ByaW8gZ3J1cG8sCiAgICAgIGRlc2RlIGFudGVzIGRlc3RlIHNpc3RlbWEgZXhpc3RpcjoKICAgICAgICAgwrcgc2VyIG1lbWJybyBkYSBHVUlBIENIVVJDSAogICAgICAgICDCtyBwYXNzYXIgcG9yIHVtYSByZXVuacOjbyBjb20gdW0gZG9zIGzDrWRlcmVzIGRlIFBHCiAgICAgICAgIMK3IHNlciBtZW1icm8gZnJlcXVlbnRlIG5hcyBwcm9ncmFtYcOnw7VlcyBvcmRpbsOhcmlhcwogICAgICAgICDCtyB2aWRhIGNyaXN0w6MgY29tIGJvYSByZXB1dGHDp8OjbwogICAgICAgICDCtyB2aWRhIGRlIG9yYcOnw6NvIGF0aXZhIGUgcHLDoXRpY2EgZGEgcGFsYXZyYQogICAgICAgICDCtyBkaXNwb25pYmlsaWRhZGUgcGFyYSBvcyBlbnNhaW9zCiAgICAgIENhZGFzdHJvIHF1ZSBlbnRyYSB2YWxlbmRvIHBhc3NhIHBvciBjaW1hIGRlIHVtIHBvcnTDo28gcXVlIGEgbGlkZXJhbsOnYQogICAgICBsZXZhbnRvdS4gTsOjbyDDqSBvIHNpc3RlbWEgcXVlIGRlY2lkZSBpc3NvIOKAlCDDqSBvIG1pbmlzdMOpcmlvLCBlIGVsZSBqw6EKICAgICAgZGVjaWRpdS4gRW50cmEgYGVxdWlwZXMuZXhpZ2VfYXByb3ZhY2FvYC4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gMS4gTyBQT1JUw4NPIFBPUiBNSU5JU1TDiVJJTwotLQotLSBEZXNsaWdhZG8gcG9yIHBhZHLDo28gZGUgcHJvcMOzc2l0bzogTcOtZGlhIGUgRGlhY29uaWEgbsOjbyB0w6ptIHByw6ktcmVxdWlzaXRvCi0tIGVzY3JpdG8sIGUgdHJhdmFyIHF1ZW0gc2Ugb2ZlcmVjZSBwYXJhIGNhcnJlZ2FyIGNhYm8gw6kgYXRyaXRvIHNlbSBnYW5oby4KLS0gTGlnYWRvIG9uZGUgYSBsaWRlcmFuw6dhIGrDoSBwZWRlIGNvbnZlcnNhIGFudGVzLgotLQotLSBRdWFuZG8gbGlnYWRvLCBhIHBlc3NvYSBlbnRyYSBjb20gYXRpdm8gPSBmYWxzZS4gQ29uc2VxdcOqbmNpYXMsIHRvZGFzIGrDoQotLSBzdXBvcnRhZGFzIHBlbG8gcXVlIGV4aXN0ZToKLS0gICDCtyBvIG1vdG9yIG7Do28gZXNjYWxhIChjYW5kaWRhdG9zKCkgZmlsdHJhIGF0aXZvKQotLSAgIMK3IGEgbGlzdGEgcMO6YmxpY2EgbsOjbyBtb3N0cmEgKGVxdWlwZV9wdWJsaWNhIGUgZXF1aXBlX3RpbWUgZmlsdHJhbSBhdGl2bykKLS0gICDCtyBvIG9yZ2FuaXphZG9yIFbDiiBuYSBhYmEgVGltZSAoY2FycmVnYXJFc3RhZG8gbsOjbyBmaWx0cmEgYXRpdm8pCi0tICAgwrcgYSBjaGVjYWdlbSBkZSB0ZWxlZm9uZSBkdXBsaWNhZG8gY29udGludWEgcGVnYW5kbyAobsOjbyBmaWx0cmEgYXRpdm8pCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCmFsdGVyIHRhYmxlIGVxdWlwZXMKICBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgZXhpZ2VfYXByb3ZhY2FvIGJvb2xlYW4gbm90IG51bGwgZGVmYXVsdCBmYWxzZTsKCmNvbW1lbnQgb24gY29sdW1uIGVxdWlwZXMuZXhpZ2VfYXByb3ZhY2FvIGlzCiAgJ3RydWUgPSBxdWVtIHNlIGNhZGFzdHJhIGVudHJhIGNvbSBhdGl2bz1mYWxzZSBlIGVzcGVyYSBhIGxpZGVyYW7Dp2EuIExpZ2FkbyBvbmRlIG8gbWluaXN0w6lyaW8gasOhIHRlbSBwcsOpLXJlcXVpc2l0byBkZSBlbnRyYWRhIChMb3V2b3IpLiBEZXNsaWdhZG8gw6kgbyBwYWRyw6NvLic7CgoKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLSAyLiBgaW5zY3JldmVyYCB2MwotLQotLSBDb250cmF0byBkZSBlcnJvLCBhZ29yYSBpZ3VhbCBhbyBxdWUgYXBwL2VxdWlwZS9bc2x1Z10vcGFnZS50c3ggasOhIGVzY3JldmU6Ci0tICAgRVFVSVBFX0lOVkFMSURBIMK3IE5PTUVfSU5DT01QTEVUTyDCtyBURUxFRk9ORV9JTlZBTElETyDCtyBFTUFJTF9JTlZBTElETwotLSAgIEpBX0NBREFTVFJBRE8gwrcgU0VNX0FSRUEgwrcgTVVJVE9TX0NBREFTVFJPUwotLQotLSBSZXRvcm5vIGRlIHN1Y2Vzc28sIGR1YXMgZm9ybWFzOgotLSAgIGVudHJhZGEgZGlyZXRhICAgLT4geyBvazp0cnVlLCB0b2tlbiwgbm9tZSB9Ci0tICAgY29tIGFwcm92YcOnw6NvICAgIC0+IHsgb2s6dHJ1ZSwgcGVuZGVudGU6dHJ1ZSwgbm9tZSwgZXF1aXBlIH0gICAoc2VtIHRva2VuKQotLSBPIGBwZW5kZW50ZWAgZXhpc3RlIHBhcmEgYSB0ZWxhIHNhYmVyIHF1ZSBOw4NPIGRldmUgcmVkaXJlY2lvbmFyIHBhcmEKLS0gL2V1Lzx0b2tlbj46IGEgcGVzc29hIGFpbmRhIG7Do28gdGVtIHDDoWdpbmEsIHRlbSB1bSBwcsOzeGltbyBwYXNzby4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gaW5zY3JldmVyKAogIHBfc2x1ZyB0ZXh0LCBwX25vbWUgdGV4dCwgcF90ZWwgdGV4dCwgcF9lbWFpbCB0ZXh0LCBwX2Z1bmNvZXMganNvbmIKKSByZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlCiAgdl9lcSB1dWlkOyB2X2VxX25vbWUgdGV4dDsgdl9nYXRlIGJvb2xlYW47CiAgdl9ub21lIHRleHQ7IHZfdGVsIHRleHQ7IHZfbWFpbCB0ZXh0OwogIHZfaWQgdXVpZDsgdl90b2tlbiB0ZXh0OyB2X24gaW50OwpiZWdpbgogIHNlbGVjdCBlLmlkLCBlLm5vbWUsIGUuZXhpZ2VfYXByb3ZhY2FvIGludG8gdl9lcSwgdl9lcV9ub21lLCB2X2dhdGUKICAgIGZyb20gZXF1aXBlcyBlIHdoZXJlIGUuc2x1ZyA9IHBfc2x1ZzsKICBpZiB2X2VxIGlzIG51bGwgdGhlbgogICAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnRVFVSVBFX0lOVkFMSURBJyk7CiAgZW5kIGlmOwoKICB2X25vbWUgOj0gYnRyaW0oY29hbGVzY2UocF9ub21lLCAnJykpOwogIHZfdGVsICA6PSB0ZWxfbm9ybShjb2FsZXNjZShwX3RlbCwgJycpKTsKICB2X21haWwgOj0gbnVsbGlmKGJ0cmltKGxvd2VyKGNvYWxlc2NlKHBfZW1haWwsICcnKSkpLCAnJyk7CgogIC8qIHNvYnJlbm9tZTogc2VtIGVsZSwgZHVhcyBNYXJpYXMgbmEgbGlzdGEgcMO6YmxpY2Egc8OjbyBpbmRpc3Rpbmd1w612ZWlzLCBlIGEKICAgICBsaXN0YSBww7pibGljYSDDqSBjb21vIGEgcGVzc29hIHNlIGFjaGEgcGFyYSBlbnRyYXIgY29tIG8gUElOLiAqLwogIGlmIGxlbmd0aCh2X25vbWUpIDwgMyBvciBwb3NpdGlvbignICcgaW4gdl9ub21lKSA9IDAgdGhlbgogICAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTk9NRV9JTkNPTVBMRVRPJyk7CiAgZW5kIGlmOwoKICAvKiAxMCBhIDEzIGTDrWdpdG9zOiBEREQgKyBuw7ptZXJvLCBjb20gb3Ugc2VtIDU1IG5hIGZyZW50ZS4gQWNpbWEgZGlzc28gw6kKICAgICBkZWRvIGVzY29ycmVnYW5kbywgZSBvIHRlbGVmb25lIMOpIG8gcXVlIGNhc2EgYSBwZXNzb2EgZW50cmUgbWluaXN0w6lyaW9zLiAqLwogIGlmIGNvYWxlc2NlKGxlbmd0aCh2X3RlbCksIDApIDwgMTAgb3IgbGVuZ3RoKHZfdGVsKSA+IDEzIHRoZW4KICAgIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ1RFTEVGT05FX0lOVkFMSURPJyk7CiAgZW5kIGlmOwoKICBpZiB2X21haWwgaXMgbm90IG51bGwgYW5kIHZfbWFpbCAhfiAnXlteQFs6c3BhY2U6XV0rQFteQFs6c3BhY2U6XV0rXC5bYS16XXsyLH0kJyB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdFTUFJTF9JTlZBTElETycpOwogIGVuZCBpZjsKCiAgLyogY2FzYSBwb3IgdGVsZWZvbmUgbm9ybWFsaXphZG8sIGUgTsODTyBkZXZvbHZlIG8gdG9rZW4gZGUgcXVlbSBqw6EgZXhpc3RlOgogICAgIHNlbsOjbyBiYXN0YXZhIGRpZ2l0YXIgbyBuw7ptZXJvIGRlIG91dHJhIHBlc3NvYSBwYXJhIGFicmlyIGEgcMOhZ2luYSBkZWxhLiAqLwogIGlmIGV4aXN0cyAoCiAgICBzZWxlY3QgMSBmcm9tIHZvbHVudGFyaW9zIHYKICAgICB3aGVyZSB2LmVxdWlwZV9pZCA9IHZfZXEgYW5kIHRlbF9ub3JtKHYudGVsZWZvbmUpID0gdl90ZWwKICApIHRoZW4KICAgIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ0pBX0NBREFTVFJBRE8nKTsKICBlbmQgaWY7CgogIGlmIG5vdCBleGlzdHMgKAogICAgc2VsZWN0IDEgZnJvbSBqc29uYl9lYWNoX3RleHQoY29hbGVzY2UocF9mdW5jb2VzLCAne30nOjpqc29uYikpIHgKICAgICB3aGVyZSB4LnZhbHVlIGluICgndGl0dWxhcicsICdyZXNlcnZhJywgJ3RyZWlubycpCiAgKSB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdTRU1fQVJFQScpOwogIGVuZCBpZjsKCiAgc2VsZWN0IGNvdW50KCopIGludG8gdl9uIGZyb20gdm9sdW50YXJpb3MgdgogICB3aGVyZSB2LmVxdWlwZV9pZCA9IHZfZXEgYW5kIHYuY3JpYWRvX2VtID4gbm93KCkgLSBpbnRlcnZhbCAnMSBob3VyJzsKICBpZiB2X24gPj0gNDAgdGhlbgogICAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTVVJVE9TX0NBREFTVFJPUycpOwogIGVuZCBpZjsKCiAgaW5zZXJ0IGludG8gdm9sdW50YXJpb3MgKGVxdWlwZV9pZCwgbm9tZSwgdGVsZWZvbmUsIGVtYWlsLCBjb25mZXJpZG8sIGF0aXZvKQogICAgICAgdmFsdWVzICh2X2VxLCB2X25vbWUsIHZfdGVsLCB2X21haWwsIGZhbHNlLCBub3Qgdl9nYXRlKQogICAgcmV0dXJuaW5nIGlkLCB0b2tlbiBpbnRvIHZfaWQsIHZfdG9rZW47CgogIC8qIGNvbmZpcm1hZG8gPSBmYWxzZSBzZW1wcmU6IG8gbsOtdmVsIMOpIG8gcXVlIGEgUEVTU09BIGRpc3NlLCBlIG8gbW90b3IgbMOqCiAgICAgdGl0dWxhciBuw6NvIGNvbmZlcmlkbyBjb21vIHJlc2VydmEgYXTDqSBvIGzDrWRlciBvbGhhci4gKi8KICBpbnNlcnQgaW50byBoYWJpbGlkYWRlcyAodm9sdW50YXJpb19pZCwgZnVuY2FvX2lkLCBuaXZlbCwgY29uZmlybWFkbykKICBzZWxlY3Qgdl9pZCwgZi5pZCwgeC52YWx1ZTo6bml2ZWxfaGFiaWxpZGFkZSwgZmFsc2UKICAgIGZyb20ganNvbmJfZWFjaF90ZXh0KHBfZnVuY29lcykgeAogICAgam9pbiBmdW5jb2VzIGYgb24gZi5lcXVpcGVfaWQgPSB2X2VxIGFuZCBmLm5vbWUgPSB4LmtleSBhbmQgZi5hdGl2YQogICB3aGVyZSB4LnZhbHVlIGluICgndGl0dWxhcicsICdyZXNlcnZhJywgJ3RyZWlubycpCiAgICAgIG9uIGNvbmZsaWN0ICh2b2x1bnRhcmlvX2lkLCBmdW5jYW9faWQpIGRvIG5vdGhpbmc7CgogIGlmIHZfZ2F0ZSB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIHRydWUsICdwZW5kZW50ZScsIHRydWUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdub21lJywgdl9ub21lLCAnZXF1aXBlJywgdl9lcV9ub21lKTsKICBlbmQgaWY7CiAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCB0cnVlLCAndG9rZW4nLCB2X3Rva2VuLCAnbm9tZScsIHZfbm9tZSk7CmVuZCAkZm4kOwoKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBpbnNjcmV2ZXIodGV4dCwgdGV4dCwgdGV4dCwgdGV4dCwganNvbmIpIGZyb20gcHVibGljOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGluc2NyZXZlcih0ZXh0LCB0ZXh0LCB0ZXh0LCB0ZXh0LCBqc29uYikgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCmNvbW1lbnQgb24gZnVuY3Rpb24gaW5zY3JldmVyKHRleHQsIHRleHQsIHRleHQsIHRleHQsIGpzb25iKSBpcwogICdhdXRvLWNhZGFzdHJvIHDDumJsaWNvLiBDw7NkaWdvcyBkZSBlcnJvIGlndWFpcyBhb3MgZGUgdGV4dG9Eb0Vycm8oKSBuYSB0ZWxhLiBDb20gZXF1aXBlcy5leGlnZV9hcHJvdmFjYW8sIGRldm9sdmUgcGVuZGVudGU9dHJ1ZSBlIE7Dg08gZGV2b2x2ZSB0b2tlbi4nOwoKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gMy4gT1MgOSBQT1NUT1MgREEgTcONRElBIEVTVEFWQU0gU0VNIFVNQSBMSU5IQSBERSBURVhUTwotLQotLSBBIHRlbGEgZGUgY2FkYXN0cm8gbW9zdHJhIGEgZGVzY3Jpw6fDo28gZGUgY2FkYSBwb3N0byBwYXJhIGEgcGVzc29hIGRlY2lkaXIKLS0gbyBxdWUgbWFyY2FyLiBObyBtaW5pc3TDqXJpbyBxdWUgbWFpcyB1c2EgbyBzaXN0ZW1hLCBlbGEgbW9zdHJhdmEgc8OzIG8gbm9tZS4KLS0KLS0gUkFTQ1VOSE8g4oCUIGVzY3JpdG8gcG9yIG1pbSBhIHBhcnRpciBkbyBub21lIGRvIHBvc3RvLCBuw6NvIGRvIGZ1bmNpb25hbWVudG8KLS0gcmVhbCBkYSBlcXVpcGUuIERpeiBvIENPTVBST01JU1NPIChxdWFuZG8gw6ksIG8gY3VsdG8gaW50ZWlybyBvdSBuw6NvKSwgcXVlIMOpCi0tIG8gcXVlIGEgcGVzc29hIHByZWNpc2EgcGFyYSBkZWNpZGlyLCBlIGV2aXRhIGludmVudGFyIHByb2Nlc3NvIGludGVybm8uCi0tIE8gSm/Do28gVml0b3IgdGVtIHF1ZSBjb3JyaWdpciBvIHF1ZSBlc3RpdmVyIGVycmFkby4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKdXBkYXRlIGZ1bmNvZXMgZiBzZXQgZGVzY3JpY2FvID0gdi50eHQKICBmcm9tICh2YWx1ZXMKICAgICgnUFJPSkXDh8ODTycsCiAgICAgJ1Bhc3NhIGEgbGV0cmEgZG8gbG91dm9yIGUgb3Mgc2xpZGVzIGRhIHByZWdhw6fDo28gbm8gdGVsw6NvLCBhY29tcGFuaGFuZG8gbyBjdWx0byBpbnRlaXJvLicpLAogICAgKCdJTFVNSU5Bw4fDg08nLAogICAgICdDb21hbmRhIGEgbWVzYSBkZSBsdXogZHVyYW50ZSB0b2RvIG8gY3VsdG8sIHNlZ3VpbmRvIG9zIG1vbWVudG9zIGRhIHByb2dyYW1hw6fDo28uJyksCiAgICAoJ0VEScOHw4NPJywKICAgICAnRWRpdGEgbyBtYXRlcmlhbCBkZXBvaXMgZG8gY3VsdG8sIGR1cmFudGUgYSBzZW1hbmEuIMOJIG8gw7puaWNvIHBvc3RvIHF1ZSBuw6NvIGV4aWdlIGVzdGFyIHByZXNlbnRlIG5vIGRvbWluZ28uJyksCiAgICAoJ0ZPVE8nLAogICAgICdGb3RvZ3JhZmEgbyBjdWx0byBlIGVudHJlZ2EgYXMgZm90b3MgcGFyYSBhcyByZWRlcy4nKSwKICAgICgnRklMTUFHRU0nLAogICAgICdHcmF2YSBjb20gYSBjw6JtZXJhIG5hIG3Do28sIGFuZGFuZG8gcGVsbyBzYWzDo28uIMOJIGRpZmVyZW50ZSBkYXMgY8OibWVyYXMgZml4YXMgZGEgdHJhbnNtaXNzw6NvLicpLAogICAgKCdIRUFEJywKICAgICAnQ29vcmRlbmEgYSBlcXVpcGUgZGEgbcOtZGlhIG5vIGRvbWluZ286IGNvbmZlcmUgcXVlbSBjaGVnb3UsIGNvYnJlIG8gcXVlIGZhbHRhIGUgcmVzb2x2ZSBwcm9ibGVtYSBuYSBob3JhLiBDaGVnYSBhbnRlcyBkZSB0b2RvIG11bmRvLicpLAogICAgKCdUUkFOU01JU1PDg08gKENPUlRFICsgUFRaKScsCiAgICAgJ0ZheiBvIGNvcnRlIGFvIHZpdm8gZW50cmUgYXMgY8OibWVyYXMgZSBjb21hbmRhIGFzIFBUWi4gw4kgcXVlbSBkZWNpZGUgbyBxdWUgcXVlbSBhc3Npc3RlIGRlIGNhc2EgdsOqLicpLAogICAgKCdDw4JNRVJBIDEnLAogICAgICdDw6JtZXJhIGZpeGEsIHBvc2nDp8OjbyBwcmluY2lwYWwuIEZpY2Egbm8gcG9zdG8gbyBjdWx0byBpbnRlaXJvLicpLAogICAgKCdDw4JNRVJBIDInLAogICAgICdDw6JtZXJhIGZpeGEsIHNlZ3VuZGEgcG9zacOnw6NvLiBGaWNhIG5vIHBvc3RvIG8gY3VsdG8gaW50ZWlyby4nKQogICkgYXMgdihub21lLCB0eHQpCiB3aGVyZSBmLm5vbWUgPSB2Lm5vbWUKICAgYW5kIGYuZXF1aXBlX2lkID0gKHNlbGVjdCBpZCBmcm9tIGVxdWlwZXMgd2hlcmUgc2x1ZyA9ICdtaWRpYScpOwoKCi0tID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0gNC4gTElHQSBPIFBPUlTDg08gTk8gTE9VVk9SCi0tCi0tIFPDsyBubyBMb3V2b3IsIGUgc8OzIHBvcnF1ZSBhIHJlZ3JhIGrDoSBleGlzdGlhIGVzY3JpdGEuIFBhcmEgZGVzbGlnYXI6Ci0tICAgdXBkYXRlIGVxdWlwZXMgc2V0IGV4aWdlX2Fwcm92YWNhbyA9IGZhbHNlIHdoZXJlIHNsdWcgPSAnbG91dm9yJzsKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQoKdXBkYXRlIGVxdWlwZXMgc2V0IGV4aWdlX2Fwcm92YWNhbyA9IHRydWUgIHdoZXJlIHNsdWcgPSAnbG91dm9yJzsKdXBkYXRlIGVxdWlwZXMgc2V0IGV4aWdlX2Fwcm92YWNhbyA9IGZhbHNlIHdoZXJlIHNsdWcgaW4gKCdtaWRpYScsICdzZXJ2aWNvJyk7CgovKiBvIGF2aXNvIHF1ZSBhIHBlc3NvYSBsw6ogQU5URVMgZGUgcHJlZW5jaGVyLCBwYXJhIG8gImFndWFyZGUiIG7Do28gc2VyCiAgIHN1cnByZXNhIG5vIGZpbSBkbyBmb3JtdWzDoXJpbyAqLwp1cGRhdGUgZXF1aXBlcyBzZXQgYXZpc29fY2FkYXN0cm8gPQogICdPIExvdXZvciB0ZW0gcHLDqS1yZXF1aXNpdG9zOiBzZXIgbWVtYnJvIGRhIEdVSUEgQ0hVUkNILCB0ZXIgcGFzc2FkbyBwb3IgdW1hIHJldW5pw6NvIGNvbSB1bSBsw61kZXIgZGUgUEcsIHNlciBmcmVxdWVudGUgbmFzIHByb2dyYW1hw6fDtWVzIGUgdGVyIGRpc3BvbmliaWxpZGFkZSBwYXJhIG9zIGVuc2Fpb3MuIFByZWVuY2hhIGFxdWkgZSBhIGxpZGVyYW7Dp2EgZmFsYSBjb20gdm9jw6ouJwogd2hlcmUgc2x1ZyA9ICdsb3V2b3InIGFuZCBjb2FsZXNjZShhdmlzb19jYWRhc3RybywgJycpID0gJyc7CgoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotLSBDT05GRVLDik5DSUEKc2VsZWN0CiAgKHNlbGVjdCBjb3VudCgqKSBmcm9tIGZ1bmNvZXMgZiBqb2luIGVxdWlwZXMgZSBvbiBlLmlkID0gZi5lcXVpcGVfaWQKICAgIHdoZXJlIGUuc2x1ZyA9ICdtaWRpYScgYW5kIGYuYXRpdmEgYW5kIGNvYWxlc2NlKGYuZGVzY3JpY2FvLCcnKSA8PiAnJykgIGFzIG1pZGlhX2NvbV90ZXh0bywKICAoc2VsZWN0IGNvdW50KCopIGZyb20gZXF1aXBlcyB3aGVyZSBleGlnZV9hcHJvdmFjYW8pICAgICAgICAgICAgICAgICAgICAgICBhcyBtaW5pc3Rlcmlvc19jb21fcG9ydGFvLAogIChzZWxlY3Qgc3RyaW5nX2FnZyhzbHVnLCAnLCAnIG9yZGVyIGJ5IHNsdWcpIGZyb20gZXF1aXBlcyB3aGVyZSBleGlnZV9hcHJvdmFjYW8pIGFzIHF1YWlzLAogIChzZWxlY3QgY291bnQoKikgZnJvbSB2b2x1bnRhcmlvcyB3aGVyZSBub3QgYXRpdm8pICAgICAgICAgICAgICAgICAgICAgICAgIGFzIGluYXRpdm9zX2hvamU7Cg=="}
+/* =============================================================================
+   20 — A PORTA DE ENTRADA
+
+   A campanha de cadastro do Louvor e da Diaconia vai jogar dezenas de pessoas
+   novas em /equipe/<slug>. Antes de mandar gente por essa porta, ela precisa
+   parar de mentir e precisa respeitar a regra que cada ministério já tem.
+
+   Três coisas, nesta ordem de gravidade:
+
+   1. Os códigos de erro do `inscrever` não batem com os que a tela conhece.
+      Quem digita um telefone já cadastrado recebe hoje "Não consegui entrar,
+      fale com quem organiza" em vez de "ache seu nome na lista". A tela sabe
+      escrever a mensagem certa desde a 06; a função é que parou de falar a
+      mesma língua quando a 10 a reescreveu.
+
+   2. A 10 também perdeu três validações que a 06 tinha: sobrenome obrigatório,
+      teto de tamanho do telefone e formato de e-mail. Voltam.
+
+   3. O Louvor JÁ TEM pré-requisitos escritos, na descrição do próprio grupo,
+      desde antes deste sistema existir:
+         · ser membro da GUIA CHURCH
+         · passar por uma reunião com um dos líderes de PG
+         · ser membro frequente nas programações ordinárias
+         · vida cristã com boa reputação
+         · vida de oração ativa e prática da palavra
+         · disponibilidade para os ensaios
+      Cadastro que entra valendo passa por cima de um portão que a liderança
+      levantou. Não é o sistema que decide isso — é o ministério, e ele já
+      decidiu. Entra `equipes.exige_aprovacao`.
+   ============================================================================= */
+
+-- =========================================================================
+-- 1. O PORTÃO POR MINISTÉRIO
+--
+-- Desligado por padrão de propósito: Mídia e Diaconia não têm pré-requisito
+-- escrito, e travar quem se oferece para carregar cabo é atrito sem ganho.
+-- Ligado onde a liderança já pede conversa antes.
+--
+-- Quando ligado, a pessoa entra com ativo = false. Consequências, todas já
+-- suportadas pelo que existe:
+--   · o motor não escala (candidatos() filtra ativo)
+--   · a lista pública não mostra (equipe_publica e equipe_time filtram ativo)
+--   · o organizador VÊ na aba Time (carregarEstado não filtra ativo)
+--   · a checagem de telefone duplicado continua pegando (não filtra ativo)
+-- =========================================================================
+
+alter table equipes
+  add column if not exists exige_aprovacao boolean not null default false;
+
+comment on column equipes.exige_aprovacao is
+  'true = quem se cadastra entra com ativo=false e espera a liderança. Ligado onde o ministério já tem pré-requisito de entrada (Louvor). Desligado é o padrão.';
+
+
+-- =========================================================================
+-- 2. `inscrever` v3
+--
+-- Contrato de erro, agora igual ao que app/equipe/[slug]/page.tsx já escreve:
+--   EQUIPE_INVALIDA · NOME_INCOMPLETO · TELEFONE_INVALIDO · EMAIL_INVALIDO
+--   JA_CADASTRADO · SEM_AREA · MUITOS_CADASTROS
+--
+-- Retorno de sucesso, duas formas:
+--   entrada direta   -> { ok:true, token, nome }
+--   com aprovação    -> { ok:true, pendente:true, nome, equipe }   (sem token)
+-- O `pendente` existe para a tela saber que NÃO deve redirecionar para
+-- /eu/<token>: a pessoa ainda não tem página, tem um próximo passo.
+-- =========================================================================
+
+create or replace function inscrever(
+  p_slug text, p_nome text, p_tel text, p_email text, p_funcoes jsonb
+) returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare
+  v_eq uuid; v_eq_nome text; v_gate boolean;
+  v_nome text; v_tel text; v_mail text;
+  v_id uuid; v_token text; v_n int;
+begin
+  select e.id, e.nome, e.exige_aprovacao into v_eq, v_eq_nome, v_gate
+    from equipes e where e.slug = p_slug;
+  if v_eq is null then
+    return jsonb_build_object('ok', false, 'erro', 'EQUIPE_INVALIDA');
+  end if;
+
+  v_nome := btrim(coalesce(p_nome, ''));
+  v_tel  := tel_norm(coalesce(p_tel, ''));
+  v_mail := nullif(btrim(lower(coalesce(p_email, ''))), '');
+
+  /* sobrenome: sem ele, duas Marias na lista pública são indistinguíveis, e a
+     lista pública é como a pessoa se acha para entrar com o PIN. */
+  if length(v_nome) < 3 or position(' ' in v_nome) = 0 then
+    return jsonb_build_object('ok', false, 'erro', 'NOME_INCOMPLETO');
+  end if;
+
+  /* 10 a 13 dígitos: DDD + número, com ou sem 55 na frente. Acima disso é
+     dedo escorregando, e o telefone é o que casa a pessoa entre ministérios. */
+  if coalesce(length(v_tel), 0) < 10 or length(v_tel) > 13 then
+    return jsonb_build_object('ok', false, 'erro', 'TELEFONE_INVALIDO');
+  end if;
+
+  if v_mail is not null and v_mail !~ '^[^@[:space:]]+@[^@[:space:]]+\.[a-z]{2,}$' then
+    return jsonb_build_object('ok', false, 'erro', 'EMAIL_INVALIDO');
+  end if;
+
+  /* casa por telefone normalizado, e NÃO devolve o token de quem já existe:
+     senão bastava digitar o número de outra pessoa para abrir a página dela. */
+  if exists (
+    select 1 from voluntarios v
+     where v.equipe_id = v_eq and tel_norm(v.telefone) = v_tel
+  ) then
+    return jsonb_build_object('ok', false, 'erro', 'JA_CADASTRADO');
+  end if;
+
+  if not exists (
+    select 1 from jsonb_each_text(coalesce(p_funcoes, '{}'::jsonb)) x
+     where x.value in ('titular', 'reserva', 'treino')
+  ) then
+    return jsonb_build_object('ok', false, 'erro', 'SEM_AREA');
+  end if;
+
+  select count(*) into v_n from voluntarios v
+   where v.equipe_id = v_eq and v.criado_em > now() - interval '1 hour';
+  if v_n >= 40 then
+    return jsonb_build_object('ok', false, 'erro', 'MUITOS_CADASTROS');
+  end if;
+
+  insert into voluntarios (equipe_id, nome, telefone, email, conferido, ativo)
+       values (v_eq, v_nome, v_tel, v_mail, false, not v_gate)
+    returning id, token into v_id, v_token;
+
+  /* confirmado = false sempre: o nível é o que a PESSOA disse, e o motor lê
+     titular não conferido como reserva até o líder olhar. */
+  insert into habilidades (voluntario_id, funcao_id, nivel, confirmado)
+  select v_id, f.id, x.value::nivel_habilidade, false
+    from jsonb_each_text(p_funcoes) x
+    join funcoes f on f.equipe_id = v_eq and f.nome = x.key and f.ativa
+   where x.value in ('titular', 'reserva', 'treino')
+      on conflict (voluntario_id, funcao_id) do nothing;
+
+  if v_gate then
+    return jsonb_build_object('ok', true, 'pendente', true,
+                              'nome', v_nome, 'equipe', v_eq_nome);
+  end if;
+  return jsonb_build_object('ok', true, 'token', v_token, 'nome', v_nome);
+end $fn$;
+
+revoke all on function inscrever(text, text, text, text, jsonb) from public;
+grant execute on function inscrever(text, text, text, text, jsonb) to anon, authenticated;
+
+comment on function inscrever(text, text, text, text, jsonb) is
+  'auto-cadastro público. Códigos de erro iguais aos de textoDoErro() na tela. Com equipes.exige_aprovacao, devolve pendente=true e NÃO devolve token.';
+
+
+-- =========================================================================
+-- 3. OS 9 POSTOS DA MÍDIA ESTAVAM SEM UMA LINHA DE TEXTO
+--
+-- A tela de cadastro mostra a descrição de cada posto para a pessoa decidir
+-- o que marcar. No ministério que mais usa o sistema, ela mostrava só o nome.
+--
+-- RASCUNHO — escrito por mim a partir do nome do posto, não do funcionamento
+-- real da equipe. Diz o COMPROMISSO (quando é, o culto inteiro ou não), que é
+-- o que a pessoa precisa para decidir, e evita inventar processo interno.
+-- O João Vitor tem que corrigir o que estiver errado.
+-- =========================================================================
+
+update funcoes f set descricao = v.txt
+  from (values
+    ('PROJEÇÃO',
+     'Passa a letra do louvor e os slides da pregação no telão, acompanhando o culto inteiro.'),
+    ('ILUMINAÇÃO',
+     'Comanda a mesa de luz durante todo o culto, seguindo os momentos da programação.'),
+    ('EDIÇÃO',
+     'Edita o material depois do culto, durante a semana. É o único posto que não exige estar presente no domingo.'),
+    ('FOTO',
+     'Fotografa o culto e entrega as fotos para as redes.'),
+    ('FILMAGEM',
+     'Grava com a câmera na mão, andando pelo salão. É diferente das câmeras fixas da transmissão.'),
+    ('HEAD',
+     'Coordena a equipe da mídia no domingo: confere quem chegou, cobre o que falta e resolve problema na hora. Chega antes de todo mundo.'),
+    ('TRANSMISSÃO (CORTE + PTZ)',
+     'Faz o corte ao vivo entre as câmeras e comanda as PTZ. É quem decide o que quem assiste de casa vê.'),
+    ('CÂMERA 1',
+     'Câmera fixa, posição principal. Fica no posto o culto inteiro.'),
+    ('CÂMERA 2',
+     'Câmera fixa, segunda posição. Fica no posto o culto inteiro.')
+  ) as v(nome, txt)
+ where f.nome = v.nome
+   and f.equipe_id = (select id from equipes where slug = 'midia');
+
+
+-- =========================================================================
+-- 4. LIGA O PORTÃO NO LOUVOR
+--
+-- Só no Louvor, e só porque a regra já existia escrita. Para desligar:
+--   update equipes set exige_aprovacao = false where slug = 'louvor';
+-- =========================================================================
+
+update equipes set exige_aprovacao = true  where slug = 'louvor';
+update equipes set exige_aprovacao = false where slug in ('midia', 'servico');
+
+/* o aviso que a pessoa lê ANTES de preencher, para o "aguarde" não ser
+   surpresa no fim do formulário */
+update equipes set aviso_cadastro =
+  'O Louvor tem pré-requisitos: ser membro da GUIA CHURCH, ter passado por uma reunião com um líder de PG, ser frequente nas programações e ter disponibilidade para os ensaios. Preencha aqui e a liderança fala com você.'
+ where slug = 'louvor' and coalesce(aviso_cadastro, '') = '';
+
+
+----------------------------------------------------------------------------
+-- CONFERÊNCIA
+select
+  (select count(*) from funcoes f join equipes e on e.id = f.equipe_id
+    where e.slug = 'midia' and f.ativa and coalesce(f.descricao,'') <> '')  as midia_com_texto,
+  (select count(*) from equipes where exige_aprovacao)                       as ministerios_com_portao,
+  (select string_agg(slug, ', ' order by slug) from equipes where exige_aprovacao) as quais,
+  (select count(*) from voluntarios where not ativo)                         as inativos_hoje;

@@ -1,1 +1,114 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMjUg4oCUICJETyBNw41ESUEiLCAiRE8gRElBQ09OSUEiCgogICBBY2hhZG8gbm8gdGVzdGUgZG8gZmx1eG8gY29tcGxldG8gZW0gcHJvZHXDp8OjbzogbyB0ZXh0byBkbyBzaXN0ZW1hIG1vbnRhCiAgICJBIGxpZGVyYW7Dp2EgZG8gIiB8fCBub21lIGRvIG1pbmlzdMOpcmlvLCBlIHNhaSAiYSBsaWRlcmFuw6dhIGRvIERpYWNvbmlhIiwKICAgImVudHJlIG5vIHRpbWUgZG8gTcOtZGlhIi4gRXJyYWRvIGVtIGRvaXMgZG9zIHRyw6pzIG1pbmlzdMOpcmlvcy4KCiAgIENvbmNvcmTDom5jaWEgbsOjbyDDqSBkZXRhbGhlIGRlIGFjYWJhbWVudG8gcXVhbmRvIG8gc2lzdGVtYSDDqSBhIHByaW1laXJhIGNvaXNhCiAgIHF1ZSBhIGlncmVqYSB2w6ouIEUgbsOjbyBkw6EgcGFyYSBhZGl2aW5oYXIgcG9yIHJlZ3JhOiAibyBMb3V2b3IiIGUgImEgTcOtZGlhIgogICBuw6NvIHNlZ3VlbSB0ZXJtaW5hw6fDo28gbmVuaHVtYSBjb25macOhdmVsIGVtIHBvcnR1Z3XDqnMuCgogICBFbnTDo28gbyBhcnRpZ28gdmlyYSBkYWRvLCBjb21vIG8gbm9tZSBqw6Egw6kuCiAgID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09ICovCgphbHRlciB0YWJsZSBlcXVpcGVzIGFkZCBjb2x1bW4gaWYgbm90IGV4aXN0cyBhcnRpZ28gdGV4dCBub3QgbnVsbCBkZWZhdWx0ICdvJwogIGNoZWNrIChhcnRpZ28gaW4gKCdvJywnYScpKTsKCmNvbW1lbnQgb24gY29sdW1uIGVxdWlwZXMuYXJ0aWdvIGlzCiAgJ2FydGlnbyBkZWZpbmlkbyBkbyBub21lIGRvIG1pbmlzdGVyaW86IG8gTG91dm9yLCBhIE1pZGlhLCBhIERpYWNvbmlhLiBWaXJhIGRhZG8gcG9ycXVlIG5hbyBoYSByZWdyYSBkZSB0ZXJtaW5hY2FvIGNvbmZpYXZlbCBlbSBwb3J0dWd1ZXMuJzsKCnVwZGF0ZSBlcXVpcGVzIHNldCBhcnRpZ28gPSAnYScgd2hlcmUgc2x1ZyBpbiAoJ21pZGlhJywnc2VydmljbycpOwp1cGRhdGUgZXF1aXBlcyBzZXQgYXJ0aWdvID0gJ28nIHdoZXJlIHNsdWcgPSAnbG91dm9yJzsKCi8qIGNhbmRpZGF0dXJhX3N0YXR1cyB2b2x0YSBhIG1vbnRhciBhcyBmcmFzZXMsIGFnb3JhIGNvbSBvIGFydGlnbyBjZXJ0byAqLwpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBjYW5kaWRhdHVyYV9zdGF0dXMocF90b2tlbiB0ZXh0KQpyZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzdGFibGUgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKZGVjbGFyZQogIGMgcmVjb3JkOyB2X2Z1bmNvZXMgdGV4dFtdOyB2X3Bhc3NvIHRleHQ7IHZfdGl0dWxvIHRleHQ7IHZfdGV4dG8gdGV4dDsgdl9ldGFwYSBpbnQ7CiAgYSB0ZXh0OyAgICAtLSAibyIgb3UgImEiCiAgZCB0ZXh0OyAgICAtLSAiZG8iIG91ICJkYSIKYmVnaW4KICBzZWxlY3QgY2EuKiwgZS5ub21lIGFzIGVxdWlwZV9ub21lLCBlLnNsdWcgYXMgZXF1aXBlX3NsdWcsIGUuYXJ0aWdvLAogICAgICAgICBlLnJlc3BvbnNhdmVsX25vbWUsIGUucmVzcG9uc2F2ZWxfd2hhdHNhcHAsIHAubm9tZSBhcyBwZXNzb2Ffbm9tZQogICAgaW50byBjCiAgICBmcm9tIGNhbmRpZGF0dXJhcyBjYQogICAgam9pbiBlcXVpcGVzIGUgb24gZS5pZCA9IGNhLmVxdWlwZV9pZAogICAgam9pbiBwZXNzb2FzIHAgb24gcC5pZCA9IGNhLnBlc3NvYV9pZAogICB3aGVyZSBjYS50b2tlbiA9IHBfdG9rZW47CiAgaWYgbm90IGZvdW5kIHRoZW4gcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgnb2snLCBmYWxzZSwgJ2Vycm8nLCAnTElOS19JTlZBTElETycpOyBlbmQgaWY7CgogIGEgOj0gY29hbGVzY2UoYy5hcnRpZ28sICdvJyk7CiAgZCA6PSBjYXNlIHdoZW4gYSA9ICdhJyB0aGVuICdkYScgZWxzZSAnZG8nIGVuZDsKCiAgc2VsZWN0IGFycmF5X2FnZyhmLm5vbWUgb3JkZXIgYnkgZi5vcmRlbSkgaW50byB2X2Z1bmNvZXMKICAgIGZyb20gY2FuZGlkYXR1cmFfZnVuY29lcyBjZiBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkID0gY2YuZnVuY2FvX2lkCiAgIHdoZXJlIGNmLmNhbmRpZGF0dXJhX2lkID0gYy5pZDsKCiAgY2FzZSBjLnN0YXR1cwogICAgd2hlbiAnZW52aWFkYScgdGhlbgogICAgICB2X2V0YXBhIDo9IDE7IHZfdGl0dWxvIDo9ICdSZWNlYmVtb3Mgc2V1IGNhZGFzdHJvJzsKICAgICAgdl90ZXh0byA6PSAnQSBsaWRlcmFuw6dhICcgfHwgZCB8fCAnICcgfHwgYy5lcXVpcGVfbm9tZSB8fCAnIGrDoSBlc3TDoSBjb20gbyBzZXUgbm9tZS4nOwogICAgICB2X3Bhc3NvIDo9ICdDaGFtZSBubyBXaGF0c0FwcCBwYXJhIHNlIGFwcmVzZW50YXIuIElzc28gYWNlbGVyYSB0dWRvLic7CiAgICB3aGVuICdlbV9hbmFsaXNlJyB0aGVuCiAgICAgIHZfZXRhcGEgOj0gMjsgdl90aXR1bG8gOj0gJ0VzdGFtb3Mgb2xoYW5kbyBvIHNldSBjYWRhc3Rybyc7CiAgICAgIHZfdGV4dG8gOj0gJ0FsZ3XDqW0gZGEgbGlkZXJhbsOnYSBlc3TDoSB2ZW5kbyBvbmRlIHZvY8OqIHNlIGVuY2FpeGEgbWVsaG9yLic7CiAgICAgIHZfcGFzc28gOj0gJ1NlIHB1ZGVyLCBjaGFtZSBubyBXaGF0c0FwcCBlIHNlIGFwcmVzZW50ZS4nOwogICAgd2hlbiAnY29udmVyc2EnIHRoZW4KICAgICAgdl9ldGFwYSA6PSAzOyB2X3RpdHVsbyA6PSAnQSBsaWRlcmFuw6dhIHF1ZXIgZmFsYXIgY29tIHZvY8OqJzsKICAgICAgdl90ZXh0byA6PSAnQW50ZXMgZGUgdGUgZW5jYWl4YXIsICcgfHwgYSB8fCAnICcgfHwgYy5lcXVpcGVfbm9tZSB8fCAnIGNvbnZlcnNhIGNvbSBjYWRhIHBlc3NvYS4nOwogICAgICB2X3Bhc3NvIDo9ICdDaGFtZSBubyBXaGF0c0FwcCBwYXJhIG1hcmNhciBlc3NhIGNvbnZlcnNhLic7CiAgICB3aGVuICdlbnRyZXZpc3RhJyB0aGVuCiAgICAgIHZfZXRhcGEgOj0gMzsgdl90aXR1bG8gOj0gJ0NvbnZlcnNhIG1hcmNhZGEnOwogICAgICB2X3RleHRvIDo9ICdGYWx0YSBzw7MgbyBlbmNvbnRybyBjb20gYSBsaWRlcmFuw6dhLic7CiAgICAgIHZfcGFzc28gOj0gJ0NvbmZpcm1lIG8gaG9yw6FyaW8gbm8gV2hhdHNBcHAuJzsKICAgIHdoZW4gJ2Fwcm92YWRhJyB0aGVuCiAgICAgIHZfZXRhcGEgOj0gNDsgdl90aXR1bG8gOj0gJ1ZvY8OqIGZheiBwYXJ0ZSBkbyB0aW1lJzsKICAgICAgdl90ZXh0byA6PSAnQmVtLXZpbmRvICcgfHwgKGNhc2Ugd2hlbiBhID0gJ2EnIHRoZW4gJ8OgJyBlbHNlICdhbycgZW5kKSB8fCAnICcgfHwgYy5lcXVpcGVfbm9tZSB8fCAnLic7CiAgICAgIHZfcGFzc28gOj0gJ0EgbGlkZXJhbsOnYSB2YWkgdGUgbWFuZGFyIG8gc2V1IGxpbmsgcGVzc29hbCwgb25kZSBmaWNhIGEgc3VhIGVzY2FsYS4nOwogICAgd2hlbiAnaW50ZWdyYW5kbycgdGhlbgogICAgICB2X2V0YXBhIDo9IDU7IHZfdGl0dWxvIDo9ICdJbnRlZ3Jhw6fDo28gZW0gYW5kYW1lbnRvJzsKICAgICAgdl90ZXh0byA6PSAnVm9jw6ogasOhIGVzdMOhIG5vIHRpbWUgZSBlc3TDoSBjb25oZWNlbmRvIGNvbW8gdHVkbyBmdW5jaW9uYS4nOwogICAgICB2X3Bhc3NvIDo9ICdTaWdhIG9zIHByaW1laXJvcyBwYXNzb3MgY29tIHF1ZW0gdGUgYWNvbXBhbmhhLic7CiAgICB3aGVuICdhdGl2YScgdGhlbgogICAgICB2X2V0YXBhIDo9IDY7IHZfdGl0dWxvIDo9ICdWb2PDqiBlc3TDoSBzZXJ2aW5kbyc7CiAgICAgIHZfdGV4dG8gOj0gJ1N1YSBlc2NhbGEgYXBhcmVjZSBuYSBzdWEgcMOhZ2luYSBwZXNzb2FsLic7CiAgICAgIHZfcGFzc28gOj0gJ1Jlc3BvbmRhIHN1YSBkaXNwb25pYmlsaWRhZGUgdG9kbyBtw6pzIOKAlCDDqSBvIHF1ZSBtb250YSBhIGVzY2FsYS4nOwogICAgZWxzZQogICAgICB2X2V0YXBhIDo9IDA7IHZfdGl0dWxvIDo9ICdTZXUgY2FkYXN0cm8gZXN0w6EgZW5jZXJyYWRvIHBvciBlbnF1YW50byc7CiAgICAgIHZfdGV4dG8gOj0gJ0lzc28gbsOjbyBxdWVyIGRpemVyIHF1ZSBuw6NvIGhhamEgbHVnYXIgcGFyYSB2b2PDqi4gw4BzIHZlemVzIMOpIMOpcG9jYSwgJwogICAgICAgICAgICAgICB8fCAnw6BzIHZlemVzIMOpIG91dHJhIMOhcmVhIHF1ZSBjb21iaW5hIG1haXMuJzsKICAgICAgdl9wYXNzbyA6PSAnQ2hhbWUgYSBsaWRlcmFuw6dhIG5vIFdoYXRzQXBwIHBhcmEgY29udmVyc2FyLCBvdSB2ZWphIGFzIG91dHJhcyDDoXJlYXMuJzsKICBlbmQgY2FzZTsKCiAgcmV0dXJuIGpzb25iX2J1aWxkX29iamVjdCgKICAgICdvaycsIHRydWUsICdzdGF0dXMnLCBjLnN0YXR1czo6dGV4dCwgJ2V0YXBhJywgdl9ldGFwYSwKICAgICd0aXR1bG8nLCB2X3RpdHVsbywgJ3RleHRvJywgdl90ZXh0bywgJ3Byb3hpbW9fcGFzc28nLCB2X3Bhc3NvLAogICAgJ25vbWUnLCBjLnBlc3NvYV9ub21lLCAnZXF1aXBlJywgYy5lcXVpcGVfbm9tZSwgJ2VxdWlwZV9zbHVnJywgYy5lcXVpcGVfc2x1ZywKICAgICdhcnRpZ28nLCBhLAogICAgJ2Z1bmNvZXMnLCBjb2FsZXNjZSh2X2Z1bmNvZXMsICd7fScpLAogICAgJ3Jlc3BvbnNhdmVsJywgYy5yZXNwb25zYXZlbF9ub21lLCAnd2hhdHNhcHAnLCBjLnJlc3BvbnNhdmVsX3doYXRzYXBwLAogICAgJ2NyaWFkb19lbScsIGMuY3JpYWRvX2VtKTsKZW5kICRmbiQ7CgpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGNhbmRpZGF0dXJhX3N0YXR1cyh0ZXh0KSBmcm9tIHB1YmxpYzsKZ3JhbnQgZXhlY3V0ZSBvbiBmdW5jdGlvbiBjYW5kaWRhdHVyYV9zdGF0dXModGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCi8qIGEgbGlzdGEgcMO6YmxpY2EgbGV2YSBvIGFydGlnbyBqdW50bywgcGFyYSBhcyB0ZWxhcyBjb25jb3JkYXJlbSBzZW0gYWRpdmluaGFyLgogICBEUk9QIGFudGVzIGRvIENSRUFURTogYWNyZXNjZW50YXIgY29sdW5hIGFvIHJldG9ybm8gZGUgdW1hIGZ1bsOnw6NvIHF1ZSBkZXZvbHZlCiAgIFRBQkxFIG11ZGEgbyB0aXBvIGRlIHJldG9ybm8sIGUgbyBQb3N0Z3JlcyByZWN1c2EgbyBgY3JlYXRlIG9yIHJlcGxhY2VgLiAqLwpkcm9wIGZ1bmN0aW9uIGlmIGV4aXN0cyBtaW5pc3Rlcmlvc19wdWJsaWNvcygpOwpjcmVhdGUgZnVuY3Rpb24gbWluaXN0ZXJpb3NfcHVibGljb3MoKQpyZXR1cm5zIHRhYmxlIChzbHVnIHRleHQsIG5vbWUgdGV4dCwgZGVzY3JpY2FvIHRleHQsIGNvbnZpdGUgdGV4dCwKICAgICAgICAgICAgICAgcG9zdG9zIGludCwgYWJlcnRvIGJvb2xlYW4sIGFydGlnbyB0ZXh0KQpsYW5ndWFnZSBzcWwgc2VjdXJpdHkgZGVmaW5lciBzdGFibGUgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKICBzZWxlY3QgZS5zbHVnLCBlLm5vbWUsIGUuZGVzY3JpY2FvLCBlLmNvbnZpdGUsCiAgICAgICAgIChzZWxlY3QgY291bnQoKik6OmludCBmcm9tIGZ1bmNvZXMgZiB3aGVyZSBmLmVxdWlwZV9pZCA9IGUuaWQgYW5kIGYuYXRpdmEpLAogICAgICAgICBub3QgZS5leGlnZV9hcHJvdmFjYW8sIGNvYWxlc2NlKGUuYXJ0aWdvLCdvJykKICAgIGZyb20gZXF1aXBlcyBlCiAgIHdoZXJlIGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBmdW5jb2VzIGYgd2hlcmUgZi5lcXVpcGVfaWQgPSBlLmlkIGFuZCBmLmF0aXZhKQogICBvcmRlciBieSBlLm9yZGVtLCBlLm5vbWU7CiRmbiQ7CnJldm9rZSBhbGwgb24gZnVuY3Rpb24gbWluaXN0ZXJpb3NfcHVibGljb3MoKSBmcm9tIHB1YmxpYzsKZ3JhbnQgZXhlY3V0ZSBvbiBmdW5jdGlvbiBtaW5pc3Rlcmlvc19wdWJsaWNvcygpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7Cg=="}
+/* =============================================================================
+   25 — "DO MÍDIA", "DO DIACONIA"
+
+   Achado no teste do fluxo completo em produção: o texto do sistema monta
+   "A liderança do " || nome do ministério, e sai "a liderança do Diaconia",
+   "entre no time do Mídia". Errado em dois dos três ministérios.
+
+   Concordância não é detalhe de acabamento quando o sistema é a primeira coisa
+   que a igreja vê. E não dá para adivinhar por regra: "o Louvor" e "a Mídia"
+   não seguem terminação nenhuma confiável em português.
+
+   Então o artigo vira dado, como o nome já é.
+   ============================================================================= */
+
+alter table equipes add column if not exists artigo text not null default 'o'
+  check (artigo in ('o','a'));
+
+comment on column equipes.artigo is
+  'artigo definido do nome do ministerio: o Louvor, a Midia, a Diaconia. Vira dado porque nao ha regra de terminacao confiavel em portugues.';
+
+update equipes set artigo = 'a' where slug in ('midia','servico');
+update equipes set artigo = 'o' where slug = 'louvor';
+
+/* candidatura_status volta a montar as frases, agora com o artigo certo */
+create or replace function candidatura_status(p_token text)
+returns jsonb
+language plpgsql security definer stable set search_path = public as $fn$
+declare
+  c record; v_funcoes text[]; v_passo text; v_titulo text; v_texto text; v_etapa int;
+  a text;    -- "o" ou "a"
+  d text;    -- "do" ou "da"
+begin
+  select ca.*, e.nome as equipe_nome, e.slug as equipe_slug, e.artigo,
+         e.responsavel_nome, e.responsavel_whatsapp, p.nome as pessoa_nome
+    into c
+    from candidaturas ca
+    join equipes e on e.id = ca.equipe_id
+    join pessoas p on p.id = ca.pessoa_id
+   where ca.token = p_token;
+  if not found then return jsonb_build_object('ok', false, 'erro', 'LINK_INVALIDO'); end if;
+
+  a := coalesce(c.artigo, 'o');
+  d := case when a = 'a' then 'da' else 'do' end;
+
+  select array_agg(f.nome order by f.ordem) into v_funcoes
+    from candidatura_funcoes cf join funcoes f on f.id = cf.funcao_id
+   where cf.candidatura_id = c.id;
+
+  case c.status
+    when 'enviada' then
+      v_etapa := 1; v_titulo := 'Recebemos seu cadastro';
+      v_texto := 'A liderança ' || d || ' ' || c.equipe_nome || ' já está com o seu nome.';
+      v_passo := 'Chame no WhatsApp para se apresentar. Isso acelera tudo.';
+    when 'em_analise' then
+      v_etapa := 2; v_titulo := 'Estamos olhando o seu cadastro';
+      v_texto := 'Alguém da liderança está vendo onde você se encaixa melhor.';
+      v_passo := 'Se puder, chame no WhatsApp e se apresente.';
+    when 'conversa' then
+      v_etapa := 3; v_titulo := 'A liderança quer falar com você';
+      v_texto := 'Antes de te encaixar, ' || a || ' ' || c.equipe_nome || ' conversa com cada pessoa.';
+      v_passo := 'Chame no WhatsApp para marcar essa conversa.';
+    when 'entrevista' then
+      v_etapa := 3; v_titulo := 'Conversa marcada';
+      v_texto := 'Falta só o encontro com a liderança.';
+      v_passo := 'Confirme o horário no WhatsApp.';
+    when 'aprovada' then
+      v_etapa := 4; v_titulo := 'Você faz parte do time';
+      v_texto := 'Bem-vindo ' || (case when a = 'a' then 'à' else 'ao' end) || ' ' || c.equipe_nome || '.';
+      v_passo := 'A liderança vai te mandar o seu link pessoal, onde fica a sua escala.';
+    when 'integrando' then
+      v_etapa := 5; v_titulo := 'Integração em andamento';
+      v_texto := 'Você já está no time e está conhecendo como tudo funciona.';
+      v_passo := 'Siga os primeiros passos com quem te acompanha.';
+    when 'ativa' then
+      v_etapa := 6; v_titulo := 'Você está servindo';
+      v_texto := 'Sua escala aparece na sua página pessoal.';
+      v_passo := 'Responda sua disponibilidade todo mês — é o que monta a escala.';
+    else
+      v_etapa := 0; v_titulo := 'Seu cadastro está encerrado por enquanto';
+      v_texto := 'Isso não quer dizer que não haja lugar para você. Às vezes é época, '
+               || 'às vezes é outra área que combina mais.';
+      v_passo := 'Chame a liderança no WhatsApp para conversar, ou veja as outras áreas.';
+  end case;
+
+  return jsonb_build_object(
+    'ok', true, 'status', c.status::text, 'etapa', v_etapa,
+    'titulo', v_titulo, 'texto', v_texto, 'proximo_passo', v_passo,
+    'nome', c.pessoa_nome, 'equipe', c.equipe_nome, 'equipe_slug', c.equipe_slug,
+    'artigo', a,
+    'funcoes', coalesce(v_funcoes, '{}'),
+    'responsavel', c.responsavel_nome, 'whatsapp', c.responsavel_whatsapp,
+    'criado_em', c.criado_em);
+end $fn$;
+
+revoke all on function candidatura_status(text) from public;
+grant execute on function candidatura_status(text) to anon, authenticated;
+
+/* a lista pública leva o artigo junto, para as telas concordarem sem adivinhar.
+   DROP antes do CREATE: acrescentar coluna ao retorno de uma função que devolve
+   TABLE muda o tipo de retorno, e o Postgres recusa o `create or replace`. */
+drop function if exists ministerios_publicos();
+create function ministerios_publicos()
+returns table (slug text, nome text, descricao text, convite text,
+               postos int, aberto boolean, artigo text)
+language sql security definer stable set search_path = public as $fn$
+  select e.slug, e.nome, e.descricao, e.convite,
+         (select count(*)::int from funcoes f where f.equipe_id = e.id and f.ativa),
+         not e.exige_aprovacao, coalesce(e.artigo,'o')
+    from equipes e
+   where exists (select 1 from funcoes f where f.equipe_id = e.id and f.ativa)
+   order by e.ordem, e.nome;
+$fn$;
+revoke all on function ministerios_publicos() from public;
+grant execute on function ministerios_publicos() to anon, authenticated;

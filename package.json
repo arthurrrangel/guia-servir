@@ -1,1 +1,27 @@
-{"data":"ewogICJuYW1lIjogImVzY2FsYS1taWRpYSIsCiAgInZlcnNpb24iOiAiMS4wLjAiLAogICJwcml2YXRlIjogdHJ1ZSwKICAic2NyaXB0cyI6IHsKICAgICJkZXYiOiAibmV4dCBkZXYiLAogICAgImJ1aWxkIjogIm5leHQgYnVpbGQiLAogICAgInN0YXJ0IjogIm5leHQgc3RhcnQiLAogICAgInRlc3QiOiAibm9kZSBzY3JpcHRzL2VuZ2luZS50ZXN0Lm1qcyIKICB9LAogICJkZXBlbmRlbmNpZXMiOiB7CiAgICAiQHN1cGFiYXNlL3N1cGFiYXNlLWpzIjogIjIuNDguMSIsCiAgICAibmV4dCI6ICIxNS41LjIyIiwKICAgICJyZWFjdCI6ICIxOS4wLjAiLAogICAgInJlYWN0LWRvbSI6ICIxOS4wLjAiCiAgfSwKICAiZGV2RGVwZW5kZW5jaWVzIjogewogICAgIkBlc2xpbnQvanMiOiAiXjkuMzkuNSIsCiAgICAiQHR5cGVzL25vZGUiOiAiMjIuMTAuNyIsCiAgICAiQHR5cGVzL3JlYWN0IjogIjE5LjAuNyIsCiAgICAiQHR5cGVzL3JlYWN0LWRvbSI6ICIxOS4wLjMiLAogICAgImVzbGludCI6ICJeOS4zOS41IiwKICAgICJlc2xpbnQtcGx1Z2luLXJlYWN0LWhvb2tzIjogIl41LjIuMCIsCiAgICAidHlwZXNjcmlwdCI6ICI1LjcuMyIsCiAgICAidHlwZXNjcmlwdC1lc2xpbnQiOiAiXjguNjguMCIKICB9Cn0="}
+{
+  "name": "escala-midia",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "node scripts/engine.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.48.1",
+    "next": "15.5.22",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@types/react-dom": "19.0.3",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "typescript": "5.7.3",
+    "typescript-eslint": "^8.68.0"
+  }
+}

@@ -1,1 +1,18 @@
-{"data":"aW1wb3J0IHsgcmVkaXJlY3QgfSBmcm9tICduZXh0L25hdmlnYXRpb24nOwoKLyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgL21pbmlzdGVyaW9zL1tzbHVnXSDigJQgRU5ERVJFw4dPIEFOVElHTwoKICAgRXN0YSBlcmEgYSBww6FnaW5hIGRhIMOhcmVhLiBFbGEgdmlyb3UgL3NlcnZpci9bc2x1Z10sIHBvcnF1ZSBxdWVtIGNsaWNhIGVtCiAgICJzZXJ2aXIiIGVzcGVyYSBhIMOhcmVhIGUgbsOjbyBvIGZvcm11bMOhcmlvLCBlIG9zIG5vbWVzIGNvbnRhdmFtIGEgaGlzdMOzcmlhCiAgIGFvIGNvbnRyw6FyaW8uCgogICBPIGVuZGVyZcOnbyBhbnRpZ28gbsOjbyBwb2RlIG1vcnJlcjogZWxlIGrDoSBmb2kgY29sYWRvIGVtIGdydXBvIGRlIFdoYXRzQXBwLAogICBlIGxpbmsgZGUgaWdyZWphIGNpcmN1bGEgcG9yIG1lc2VzLiBSZWRpcmVjaW9uYW1lbnRvIHBlcm1hbmVudGUsIGZlaXRvIG5vCiAgIHNlcnZpZG9yLCBzZW0gdGVsYSBpbnRlcm1lZGnDoXJpYS4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCmV4cG9ydCBkZWZhdWx0IGFzeW5jIGZ1bmN0aW9uIEFudGlnbyh7IHBhcmFtcyB9OiB7IHBhcmFtczogUHJvbWlzZTx7IHNsdWc6IHN0cmluZyB9PiB9KSB7CiAgY29uc3QgeyBzbHVnIH0gPSBhd2FpdCBwYXJhbXM7CiAgcmVkaXJlY3QoYC9zZXJ2aXIvJHtzbHVnfWApOwp9Cg=="}
+import { redirect } from 'next/navigation';
+
+/* =============================================================================
+   /ministerios/[slug] — ENDEREÇO ANTIGO
+
+   Esta era a página da área. Ela virou /servir/[slug], porque quem clica em
+   "servir" espera a área e não o formulário, e os nomes contavam a história
+   ao contrário.
+
+   O endereço antigo não pode morrer: ele já foi colado em grupo de WhatsApp,
+   e link de igreja circula por meses. Redirecionamento permanente, feito no
+   servidor, sem tela intermediária.
+   ============================================================================= */
+
+export default async function Antigo({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  redirect(`/servir/${slug}`);
+}

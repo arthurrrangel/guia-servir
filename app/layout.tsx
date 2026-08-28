@@ -1,1 +1,80 @@
-{"data":"aW1wb3J0ICcuL2dsb2JhbHMuY3NzJzsKaW1wb3J0IHR5cGUgeyBNZXRhZGF0YSwgVmlld3BvcnQgfSBmcm9tICduZXh0JzsKaW1wb3J0IGxvY2FsRm9udCBmcm9tICduZXh0L2ZvbnQvbG9jYWwnOwppbXBvcnQgTWVkaWRhcyBmcm9tICdAL2NvbXBvbmVudHMvTWVkaWRhcyc7CgovKiBBIGxvZ28gw6kgdW1hIGdyb3Rlc2NhIGdlb23DqXRyaWNhIGRlIHRyYWNraW5nIGxhcmdvLiBJbnRlciDDqSBhIG1haXMgcHLDs3hpbWEKICAgZGlzc28sIGUgbyBhcnF1aXZvIG1vcmEgTk8gUkVQT1NJVMOTUklPLgogICBBbnRlcyBlcmEgYG5leHQvZm9udC9nb29nbGVgLCBxdWUgYmFpeGEgbyAud29mZjIgZGUgZm9udHMuZ3N0YXRpYy5jb20gbmEKICAgaG9yYSBkbyBidWlsZC4gRnVuY2lvbm91IGRlemVuYXMgZGUgdmV6ZXMgZSB1bSBkaWEgbyBidWlsZCBkYSBWZXJjZWwgbsOjbwogICBhbGNhbsOnb3UgbyBnc3RhdGljOiAiRmFpbGVkIHRvIGZldGNoIGZvbnQgZmlsZSIsIGJ1aWxkIHF1ZWJyYWRvLCBkZXBsb3kKICAgcGVyZGlkbywgZSBuYWRhIGEgdmVyIGNvbSBvIGPDs2RpZ28uIFB1YmxpY2FyIG7Do28gcG9kZSBkZXBlbmRlciBkZSBhIHJlZGUKICAgZGUgdW0gdGVyY2Vpcm8gZXN0YXIgYm9hIG5hcXVlbGUgbWludXRvLgogICBVbSBhcnF1aXZvIHZhcmnDoXZlbCAocGVzbyAxMDAgYSA5MDApIGNvYnJlIHRvZG9zIG9zIHBlc29zIHF1ZSB1c28gZSBhaW5kYQogICBwZXNhIG1lbm9zIHF1ZSBhcyBzZWlzIGluc3TDom5jaWFzIGVzdMOhdGljYXMgcXVlIG8gZ29vZ2xlLWZvbnQgYmFpeGF2YS4gKi8KY29uc3QgaW50ZXIgPSBsb2NhbEZvbnQoewogIHNyYzogJy4vZm9udGVzL2ludGVyLWxhdGluLXdnaHQtbm9ybWFsLndvZmYyJywKICB3ZWlnaHQ6ICcxMDAgOTAwJywKICBzdHlsZTogJ25vcm1hbCcsCiAgZGlzcGxheTogJ3N3YXAnLAogIHZhcmlhYmxlOiAnLS1mb250ZS1pbnRlcicsCn0pOwoKLyogQSBMRVRSQSBEQSBDQVNBIOKAlCBSYWxld2F5LgoKICAgTsOjbyDDqSBlc2NvbGhhIGVzdMOpdGljYSBtaW5oYTogw6kgYSB0aXBvZ3JhZmlhIGRvIHNpdGUgcXVlIG8gQXJ0aHVyIGFwb250b3UKICAgY29tbyByZWZlcsOqbmNpYSAoaWdyZWphbWFuYW5jaWFpcy5jb20uYnIpLCBtZWRpZGEgbmEgcMOhZ2luYSBkZWxlcyDigJQgUmFsZXdheQogICA0MDAsIGNvcnBvIDE3cHgsIHTDrXR1bG8gMjZweCBlbSBjYWl4YSBhbHRhIGNvbSB0cmFja2luZyBsYXJnby4gRWxlIHBlZGl1CiAgICJhIG1lc21hIHBlZ2FkYSIsIGUgcGVnYWRhIGRlIHNpdGUgw6kgODAlIHRpcG9ncmFmaWEgZSBlc3Bhw6dvLgoKICAgRWxhIHRhbWLDqW0gbsOjbyBicmlnYSBjb20gYSBHVUk+OiBhIGxvZ28gasOhIMOpIHVtYSBnZW9tw6l0cmljYSBkZSBjYWl4YSBhbHRhCiAgIGNvbSB0cmFja2luZyBsYXJnbywgcXVlIMOpIGV4YXRhbWVudGUgbyBxdWUgYSBSYWxld2F5IGZheiBlbSBkaXNwbGF5LgoKICAgTWVzbW8gbW90aXZvIGRhIEludGVyIHBhcmEgbW9yYXIgbm8gcmVwb3NpdMOzcmlvOiBidWlsZCBuw6NvIHBvZGUgZGVwZW5kZXIgZGUKICAgbyBnc3RhdGljIGVzdGFyIGRlIHDDqSBubyBtaW51dG8gZG8gZGVwbG95LiBBcnF1aXZvIHZhcmnDoXZlbCwgMjAwIGEgNzAwLAogICBzw7MgbyBzdWJzZXQgbGF0aW4g4oCUIDQ4IGtCIHBhcmEgdG9kb3Mgb3MgcGVzb3MuICovCmNvbnN0IHJhbGV3YXkgPSBsb2NhbEZvbnQoewogIHNyYzogJy4vZm9udGVzL3JhbGV3YXktbGF0aW4td2dodC1ub3JtYWwud29mZjInLAogIHdlaWdodDogJzIwMCA3MDAnLAogIHN0eWxlOiAnbm9ybWFsJywKICBkaXNwbGF5OiAnc3dhcCcsCiAgdmFyaWFibGU6ICctLWZvbnRlLXJhbGV3YXknLAp9KTsKCi8qIE8gdMOtdHVsbyBlcmEgJ0VzY2FsYSBkZSBNw61kaWEnIGUgdmFsaWEgcGFyYSBvIHNpdGUgaW50ZWlybzogYSBhYmEgZG8gTG91dm9yCiAgIGRpemlhIE3DrWRpYSwgYSBkYSBEaWFjb25pYSBkaXppYSBNw61kaWEsIGUgbyBsaW5rIHF1ZSBhIHBlc3NvYSByZWNlYmUgbm8KICAgV2hhdHNBcHAgbW9zdHJhdmEgbyBub21lIGRvIG1pbmlzdMOpcmlvIGVycmFkby4gQXF1aSBmaWNhIG8gbm9tZSBkbyBwcm9kdXRvOwogICBjYWRhIHRlbGEgcXVlIHNhYmUgZGUgcXVhbCBtaW5pc3TDqXJpbyDDqSBhanVzdGEgbyBwcsOzcHJpbyB0w610dWxvLiAqLwpleHBvcnQgY29uc3QgbWV0YWRhdGE6IE1ldGFkYXRhID0gewogIG1ldGFkYXRhQmFzZTogbmV3IFVSTCgnaHR0cHM6Ly9ndWlhc2VydmlyLmNvbScpLAogIHRpdGxlOiB7IGRlZmF1bHQ6ICdHVUlBIENodXJjaCDCtyBDdWx0aXZhbmRvIHVtYSBub3ZhIGN1bHR1cmEnLCB0ZW1wbGF0ZTogJyVzIMK3IEdVSUEgQ2h1cmNoJyB9LAogIGRlc2NyaXB0aW9uOgogICAgJ0RvbWluZ28gw6BzIDEwaCBuYSBSdWEgUGVkcmEgZGUgSXRhw7puYSwgNTM0LCBCYXJyYSBkYSBUaWp1Y2EuIFZlbmhhIHZpc2l0YXIsIG91IGVudHJlIHBhcmEgdW1hIGRhcyDDoXJlYXMgZGUgdm9sdW50w6FyaW9zIGRhIEdVSUEgQ2h1cmNoLicsCiAgYXBwbGVXZWJBcHA6IHsgY2FwYWJsZTogdHJ1ZSwgdGl0bGU6ICdHVUlBJywgc3RhdHVzQmFyU3R5bGU6ICdibGFjay10cmFuc2x1Y2VudCcgfSwKICAvKiBvIGNhcmQgcXVlIGFwYXJlY2UgcXVhbmRvIGFsZ3XDqW0gY29sYSBvIGxpbmsgbnVtIGdydXBvIGRlIFdoYXRzQXBwLiBBCiAgICAgaW1hZ2VtIFBSRUNJU0Egc2VyIGFic29sdXRhIChtZXRhZGF0YUJhc2UgcmVzb2x2ZSBpc3NvKTogY29tIGNhbWluaG8KICAgICByZWxhdGl2bywgdG9kbyBsaW5rIGNvbXBhcnRpbGhhZG8gc2FpIHNlbSBmb3RvLiAqLwogIG9wZW5HcmFwaDogewogICAgdGl0bGU6ICdHVUlBIENodXJjaCDCtyBDdWx0aXZhbmRvIHVtYSBub3ZhIGN1bHR1cmEnLAogICAgZGVzY3JpcHRpb246ICdEb21pbmdvIMOgcyAxMGgsIEJhcnJhIGRhIFRpanVjYS4gQ29tZWNlIHBvciBhcXVpLCB2aXNpdGUgdW0gY3VsdG8gb3UgZW50cmUgcGFyYSB1bWEgZGFzIMOhcmVhcyBkZSB2b2x1bnTDoXJpb3MuJywKICAgIHVybDogJ2h0dHBzOi8vZ3VpYXNlcnZpci5jb20nLCB0eXBlOiAnd2Vic2l0ZScsIGxvY2FsZTogJ3B0X0JSJywgc2l0ZU5hbWU6ICdHVUlBIENodXJjaCcsCiAgICBpbWFnZXM6IFt7IHVybDogJy9vZy5qcGcnLCB3aWR0aDogMTIwMCwgaGVpZ2h0OiA2MzAsIGFsdDogJ0dVSUEgQ2h1cmNoLCBCYXJyYSBkYSBUaWp1Y2EnIH1dLAogIH0sCiAgdHdpdHRlcjogeyBjYXJkOiAnc3VtbWFyeV9sYXJnZV9pbWFnZScsIHRpdGxlOiAnR1VJQSBDaHVyY2ggwrcgQ3VsdGl2YW5kbyB1bWEgbm92YSBjdWx0dXJhJywgaW1hZ2VzOiBbJy9vZy5qcGcnXSB9LAp9OwovKiBjb2xvclNjaGVtZSBmaXhvIGVtIGxpZ2h0OiBhIG1haW9yaWEgZG9zIGNlbHVsYXJlcyBkbyB0aW1lIGVzdMOhIG5vIG1vZG8KICAgZXNjdXJvIGRvIHNpc3RlbWEsIGUgc2VtIGlzc28gbyBuYXZlZ2Fkb3IgcmVlc2NyZXZlIGNhbXBvIGUgc2VsZWN0IHBvcgogICBjb250YSBwcsOzcHJpYSBlbSBjaW1hIGRlIHVtIGxheW91dCBkZXNlbmhhZG8gcGFyYSBwYXBlbCBjbGFyby4gKi8KZXhwb3J0IGNvbnN0IHZpZXdwb3J0OiBWaWV3cG9ydCA9IHsKICB3aWR0aDogJ2RldmljZS13aWR0aCcsIGluaXRpYWxTY2FsZTogMSwgdGhlbWVDb2xvcjogJyMwNzA3MDgnLAogIGNvbG9yU2NoZW1lOiAnbGlnaHQnLCB2aWV3cG9ydEZpdDogJ2NvdmVyJywKfTsKCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIFJvb3RMYXlvdXQoeyBjaGlsZHJlbiB9OiB7IGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGUgfSkgewogIHJldHVybiAoCiAgICA8aHRtbCBsYW5nPSJwdC1CUiIgY2xhc3NOYW1lPXtgJHtpbnRlci52YXJpYWJsZX0gJHtyYWxld2F5LnZhcmlhYmxlfWB9PgogICAgICA8Ym9keT48TWVkaWRhcyAvPntjaGlsZHJlbn08L2JvZHk+CiAgICA8L2h0bWw+CiAgKTsKfQoK"}
+import './globals.css';
+import type { Metadata, Viewport } from 'next';
+import localFont from 'next/font/local';
+import Medidas from '@/components/Medidas';
+
+/* A logo é uma grotesca geométrica de tracking largo. Inter é a mais próxima
+   disso, e o arquivo mora NO REPOSITÓRIO.
+   Antes era `next/font/google`, que baixa o .woff2 de fonts.gstatic.com na
+   hora do build. Funcionou dezenas de vezes e um dia o build da Vercel não
+   alcançou o gstatic: "Failed to fetch font file", build quebrado, deploy
+   perdido, e nada a ver com o código. Publicar não pode depender de a rede
+   de um terceiro estar boa naquele minuto.
+   Um arquivo variável (peso 100 a 900) cobre todos os pesos que uso e ainda
+   pesa menos que as seis instâncias estáticas que o google-font baixava. */
+const inter = localFont({
+  src: './fontes/inter-latin-wght-normal.woff2',
+  weight: '100 900',
+  style: 'normal',
+  display: 'swap',
+  variable: '--fonte-inter',
+});
+
+/* A LETRA DA CASA — Raleway.
+
+   Não é escolha estética minha: é a tipografia do site que o Arthur apontou
+   como referência (igrejamananciais.com.br), medida na página deles — Raleway
+   400, corpo 17px, título 26px em caixa alta com tracking largo. Ele pediu
+   "a mesma pegada", e pegada de site é 80% tipografia e espaço.
+
+   Ela também não briga com a GUI>: a logo já é uma geométrica de caixa alta
+   com tracking largo, que é exatamente o que a Raleway faz em display.
+
+   Mesmo motivo da Inter para morar no repositório: build não pode depender de
+   o gstatic estar de pé no minuto do deploy. Arquivo variável, 200 a 700,
+   só o subset latin — 48 kB para todos os pesos. */
+const raleway = localFont({
+  src: './fontes/raleway-latin-wght-normal.woff2',
+  weight: '200 700',
+  style: 'normal',
+  display: 'swap',
+  variable: '--fonte-raleway',
+});
+
+/* O título era 'Escala de Mídia' e valia para o site inteiro: a aba do Louvor
+   dizia Mídia, a da Diaconia dizia Mídia, e o link que a pessoa recebe no
+   WhatsApp mostrava o nome do ministério errado. Aqui fica o nome do produto;
+   cada tela que sabe de qual ministério é ajusta o próprio título. */
+export const metadata: Metadata = {
+  metadataBase: new URL('https://guiaservir.com'),
+  title: { default: 'GUIA Church · Cultivando uma nova cultura', template: '%s · GUIA Church' },
+  description:
+    'Domingo às 10h na Rua Pedra de Itaúna, 534, Barra da Tijuca. Venha visitar, ou entre para uma das áreas de voluntários da GUIA Church.',
+  appleWebApp: { capable: true, title: 'GUIA', statusBarStyle: 'black-translucent' },
+  /* o card que aparece quando alguém cola o link num grupo de WhatsApp. A
+     imagem PRECISA ser absoluta (metadataBase resolve isso): com caminho
+     relativo, todo link compartilhado sai sem foto. */
+  openGraph: {
+    title: 'GUIA Church · Cultivando uma nova cultura',
+    description: 'Domingo às 10h, Barra da Tijuca. Comece por aqui, visite um culto ou entre para uma das áreas de voluntários.',
+    url: 'https://guiaservir.com', type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
+    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
+  },
+  twitter: { card: 'summary_large_image', title: 'GUIA Church · Cultivando uma nova cultura', images: ['/og.jpg'] },
+};
+/* colorScheme fixo em light: a maioria dos celulares do time está no modo
+   escuro do sistema, e sem isso o navegador reescreve campo e select por
+   conta própria em cima de um layout desenhado para papel claro. */
+export const viewport: Viewport = {
+  width: 'device-width', initialScale: 1, themeColor: '#070708',
+  colorScheme: 'light', viewportFit: 'cover',
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="pt-BR" className={`${inter.variable} ${raleway.variable}`}>
+      <body><Medidas />{children}</body>
+    </html>
+  );
+}
+

@@ -1,1 +1,382 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VDYWxsYmFjaywgdXNlRWZmZWN0LCB1c2VTdGF0ZSB9IGZyb20gJ3JlYWN0JzsKaW1wb3J0IExpbmsgZnJvbSAnbmV4dC9saW5rJzsKaW1wb3J0IFNoZWxsLCB7IHVzZUFwcCB9IGZyb20gJ0AvY29tcG9uZW50cy9TaGVsbCc7CmltcG9ydCB7IEF2aXNvIH0gZnJvbSAnQC9jb21wb25lbnRzL1VpJzsKaW1wb3J0IHsgbXNnQ29udml0ZSwgdm9sIH0gZnJvbSAnQC9saWIvZW5naW5lJzsKaW1wb3J0IHsKICBBQkVSVEFTLCBOT19USU1FLCBPX1FVRV9GQVpFUiwgQ2FuZGlkYXR1cmEsIFBhc3NvLCBSZXNwb3N0YSwgUk9UVUxPX1NUQVRVUywgU3RhdHVzQ2FuZCwKICBkZWNpZGlyLCBoaXN0b3JpY29EZSwgbGlzdGFyQ2FuZGlkYXR1cmFzLCBsaW5rV2hhdHNBcHAsIHJlc3Bvc3Rhc0RlLCB0ZWxlZm9uZUxlZ2l2ZWwsCn0gZnJvbSAnQC9saWIvY2FuZGlkYXR1cmFzJzsKCi8qID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgIFFVRU0gUVVFUiBFTlRSQVIg4oCUIE8gTEFETyBETyBMw41ERVIgREEgSk9STkFEQSBERSBFTlRSQURBCgogICBFc3RhIHRlbGEgw6kgYSBvdXRyYSBtZXRhZGUgZGUgL2NhbmRpZGF0dXJhL1t0b2tlbl0uIEzDoSBhIHBlc3NvYSBwcmVjaXNhCiAgIHNhYmVyIGVtIHF1ZSBldGFwYSBlc3TDoTsgYXF1aSBvIGzDrWRlciBwcmVjaXNhIHNhYmVyIG8gcXVlIGZhemVyLiBGb3JhbQogICByZWVzY3JpdGFzIGp1bnRhcywgZSDDqSBwb3IgaXNzbyBxdWUgdHLDqnMgZGVmZWl0b3MgYXBhcmVjZXJhbTogZWxlcyBzw7MKICAgZXhpc3RpYW0gbmEgY29zdHVyYSBlbnRyZSBhcyBkdWFzLgoKICAgMS4gT1MgRE9JUyBMQURPUyBNQU5EQVZBTSBPIE9VVFJPIExJR0FSCiAgICAgIE5vIGVzdGFkbyBgY29udmVyc2FgLCBhIHRlbGEgZGEgcGVzc29hIGRpemlhICJjaGFtZSBKYW5kZXIgbm8gV2hhdHNBcHAKICAgICAgcGFyYSBtYXJjYXIiIGUgZXN0YSBmaWxhIG1hcmNhdmEgYSBtZXNtYSBjYW5kaWRhdHVyYSBjb21vICJjaGFtYXIgcGFyYQogICAgICBjb252ZXJzYXIiLiBDYWRhIHVtIGVzcGVyYXZhIG8gb3V0cm8sIGUgbyByZXN1bHRhZG8gZGUgZHVhcyBwZXNzb2FzCiAgICAgIGVzcGVyYW5kbyDDqSBzaWzDqm5jaW8uIFF1ZW0gbGlnYSDDqSBhIGxpZGVyYW7Dp2E6IHF1ZW0gc2Ugb2ZlcmVjZXUgasOhIGZlegogICAgICBhIHBhcnRlIGRlbGEuIEEgbWlncmHDp8OjbyAzNiBhY2VydG91IG8gdGV4dG8gZG8gb3V0cm8gbGFkby4KCiAgIDIuIE8gRVNUQURPIE7Dg08gU0VHVUlBIE8gUVVFIE8gTMONREVSIEZBWklBCiAgICAgIENoYW1hciBubyBXaGF0c0FwcCBlIHJlZ2lzdHJhciAiZXN0b3UgY29udmVyc2FuZG8iIGVyYW0gZG9pcyBjbGlxdWVzLCBlCiAgICAgIG8gc2VndW5kbyBuaW5ndcOpbSBkw6EuIEEgY2FuZGlkYXR1cmEgZmljYXZhIGBlbnZpYWRhYCBwYXJhIHNlbXByZSBlIGEKICAgICAgcGVzc29hIGNvbnRpbnVhdmEgbGVuZG8gInJlY2ViZW1vcyBzZXUgY2FkYXN0cm8iIHRyw6pzIGRpYXMgZGVwb2lzIGRhCiAgICAgIGNvbnZlcnNhIHRlciBhY29udGVjaWRvLiBBZ29yYSDDqSBvIG1lc21vIHRvcXVlOiBhYnJpciBvIFdoYXRzQXBwIG1vdmUgYQogICAgICBjYW5kaWRhdHVyYSwgcG9ycXVlIG8gbMOtZGVyIG7Do28gZGV2ZXJpYSB0ZXIgcXVlIGNvbnRhciBhbyBzaXN0ZW1hIHVtYQogICAgICBjb2lzYSBxdWUgbyBzaXN0ZW1hIGFjYWJvdSBkZSB2ZXIuCgogICAzLiBRVUFUUk8gQk9Uw5VFUyBETyBNRVNNTyBUQU1BTkhPCiAgICAgICJRdWVybyBjb252ZXJzYXIiLCAiQXByb3ZhciIsICJKw6EgZXN0w6Egc2VydmluZG8iIGUgIkVuY2VycmFyIiBhcGFyZWNpYW0KICAgICAgbGFkbyBhIGxhZG8sIGlndWFpcy4gRXNjb2xoZXIgZW50cmUgcXVhdHJvIMOpIHRyYWJhbGhvLCBlIHF1ZW0gb3JnYW5pemEKICAgICAgYWJyZSBpc3NvIG5vIGNlbHVsYXIgZW50cmUgdW0gY3VsdG8gZSBvdXRyby4gQWdvcmEgaMOhIHVtYSBhw6fDo28gc8OzbGlkYQogICAgICBwb3IgbGluaGEg4oCUIGEgZG8gbW9tZW50byDigJQgZSBhcyBvdXRyYXMgdmlyYW0gdGV4dG8sIGRlcG9pcyBkYSBmcmFzZQogICAgICAiZGVwb2lzIGRlIGZhbGFyIGNvbSBlbGEiLgoKICAgTyBRVUUgRk9JIFBSRVNFUlZBRE86IGEgZmlsYSBjb250aW51YSBzZW5kbyB1bWEgdGVsYSBzw7MsIGNvbSBvIGRldGFsaGUKICAgYWJyaW5kbyBkZW50cm8gZGEgbGluaGEgKHNhaXIgZGEgbGlzdGEgcGFyYSBkZWNpZGlyIGUgdm9sdGFyIHBlcmRlbmRvIGEKICAgcG9zacOnw6NvIMOpIGF0cml0byBwdXJvIG5vIGNlbHVsYXIpLCBlIGEgb3JkZW0gY29udGludWEgc2VuZG8gcG9yIGVzcGVyYSwgbsOjbwogICBwb3IgZGF0YSBkZSBjaGVnYWRhLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gUGFnaW5hKCkgeyByZXR1cm4gPFNoZWxsPjxGaWxhIC8+PC9TaGVsbD47IH0KCmNvbnN0IHNvMiA9IChuOiBudW1iZXIpID0+IFN0cmluZyhuKS5wYWRTdGFydCgyLCAnMCcpOwpjb25zdCBkaWEgPSAoaXNvOiBzdHJpbmcpID0+IHsKICBjb25zdCBkID0gbmV3IERhdGUoaXNvKTsKICByZXR1cm4gYCR7c28yKGQuZ2V0RGF0ZSgpKX0vJHtzbzIoZC5nZXRNb250aCgpICsgMSl9YDsKfTsKY29uc3QgZGlhc0F0cmFzID0gKGlzbzogc3RyaW5nKSA9PgogIE1hdGgubWF4KDAsIE1hdGguZmxvb3IoKERhdGUubm93KCkgLSBuZXcgRGF0ZShpc28pLmdldFRpbWUoKSkgLyA4NjQwMDAwMCkpOwpjb25zdCBlc3BlcmEgPSAobjogbnVtYmVyKSA9PiBuID09PSAwID8gJ2NoZWdvdSBob2plJyA6IG4gPT09IDEgPyAnaMOhIDEgZGlhJyA6IGBow6EgJHtufSBkaWFzYDsKY29uc3QgcHJpbWVpcm8gPSAobjogc3RyaW5nKSA9PiAobiB8fCAnJykudHJpbSgpLnNwbGl0KC9ccysvKVswXSB8fCAnJzsKCmZ1bmN0aW9uIEZpbGEoKSB7CiAgY29uc3QgeyBlcXVpcGUsIGF2aXNvLCByZWNhcnJlZ2FyIH0gPSB1c2VBcHAoKTsKICBjb25zdCBbbGlzdGEsIHNldExpc3RhXSA9IHVzZVN0YXRlPENhbmRpZGF0dXJhW10+KFtdKTsKICBjb25zdCBbY2FycmVnYW5kbywgc2V0Q2FycmVnYW5kb10gPSB1c2VTdGF0ZSh0cnVlKTsKICBjb25zdCBbZXJybywgc2V0RXJyb10gPSB1c2VTdGF0ZSgnJyk7CiAgY29uc3QgW2FiZXJ0YSwgc2V0QWJlcnRhXSA9IHVzZVN0YXRlKCcnKTsKICBjb25zdCBbdmVyRW5jZXJyYWRhcywgc2V0VmVyRW5jZXJyYWRhc10gPSB1c2VTdGF0ZShmYWxzZSk7CgogIGNvbnN0IGNhcnJlZ2FyID0gdXNlQ2FsbGJhY2soYXN5bmMgKCkgPT4gewogICAgaWYgKCFlcXVpcGU/LmlkKSByZXR1cm47CiAgICBzZXRDYXJyZWdhbmRvKHRydWUpOwogICAgdHJ5IHsgc2V0TGlzdGEoYXdhaXQgbGlzdGFyQ2FuZGlkYXR1cmFzKGVxdWlwZS5pZCkpOyBzZXRFcnJvKCcnKTsgfQogICAgY2F0Y2ggKGU6IGFueSkgeyBzZXRFcnJvKGU/Lm1lc3NhZ2UgfHwgJ27Do28gY29uc2VndWkgY2FycmVnYXInKTsgfQogICAgZmluYWxseSB7IHNldENhcnJlZ2FuZG8oZmFsc2UpOyB9CiAgfSwgW2VxdWlwZT8uaWRdKTsKCiAgdXNlRWZmZWN0KCgpID0+IHsgdm9pZCBjYXJyZWdhcigpOyB9LCBbY2FycmVnYXJdKTsKCiAgLyogcXVlbSBlc3BlcmEgZGVjaXPDo28gcHJpbWVpcm8sIGUgZGVudHJvIGRpc3NvIGEgbWFpcyBhbnRpZ2EgbmEgZnJlbnRlOgogICAgIHF1ZW0gZXN0w6EgZXNwZXJhbmRvIGjDoSBtYWlzIHRlbXBvIMOpIHF1ZW0gY29ycmUgbWFpcyByaXNjbyBkZSBkZXNpc3Rpci4gKi8KICBjb25zdCBwb3JFc3BlcmEgPSAoYTogQ2FuZGlkYXR1cmEsIGI6IENhbmRpZGF0dXJhKSA9PiBhLmNyaWFkb19lbS5sb2NhbGVDb21wYXJlKGIuY3JpYWRvX2VtKTsKICBjb25zdCBhYmVydGFzID0gbGlzdGEuZmlsdGVyKGMgPT4gQUJFUlRBUy5pbmNsdWRlcyhjLnN0YXR1cykpLnNvcnQocG9yRXNwZXJhKTsKICBjb25zdCBub1RpbWUgPSBsaXN0YS5maWx0ZXIoYyA9PiBOT19USU1FLmluY2x1ZGVzKGMuc3RhdHVzKSkKICAgIC5zb3J0KChhLCBiKSA9PiBiLmF0dWFsaXphZG9fZW0ubG9jYWxlQ29tcGFyZShhLmF0dWFsaXphZG9fZW0pKTsKICBjb25zdCBmZWNoYWRhcyA9IGxpc3RhLmZpbHRlcihjID0+ICFBQkVSVEFTLmluY2x1ZGVzKGMuc3RhdHVzKSAmJiAhTk9fVElNRS5pbmNsdWRlcyhjLnN0YXR1cykpCiAgICAuc29ydCgoYSwgYikgPT4gYi5hdHVhbGl6YWRvX2VtLmxvY2FsZUNvbXBhcmUoYS5hdHVhbGl6YWRvX2VtKSk7CgogIGNvbnN0IG1haXNBbnRpZ2EgPSBhYmVydGFzLmxlbmd0aCA/IGRpYXNBdHJhcyhhYmVydGFzWzBdLmNyaWFkb19lbSkgOiAwOwogIC8qIGEgZmFpeGEgaW52ZXJ0ZSBxdWFuZG8gYWxndcOpbSBqw6EgZXN0w6EgZXNwZXJhbmRvIGjDoSB0csOqcyBkaWFzLiBOw6NvIMOpCiAgICAgZW5mZWl0ZTogw6kgbyDDum5pY28gbsO6bWVybyBkZXN0YSB0ZWxhIHF1ZSBlc3RyYWdhIGEgam9ybmFkYSBkZSB2ZXJkYWRlLiAqLwogIGNvbnN0IHVyZ2UgPSBtYWlzQW50aWdhID49IDM7CgogIGNvbnN0IHByb3BzID0gewogICAgZXF1aXBlTm9tZTogZXF1aXBlPy5ub21lIHx8ICcnLAogICAgYWJyaXI6IChpZDogc3RyaW5nKSA9PiBzZXRBYmVydGEoYSA9PiBhID09PSBpZCA/ICcnIDogaWQpLAogICAgbXVkb3U6IGFzeW5jIChtOiBzdHJpbmcpID0+IHsgYXZpc28obSk7IGF3YWl0IGNhcnJlZ2FyKCk7IGF3YWl0IHJlY2FycmVnYXIoKTsgfSwKICB9OwoKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9ImxpZCI+CiAgICAgIDxkaXYgY2xhc3NOYW1lPXtgbGlkLWZhaXhhICR7dXJnZSA/ICdmb2dvJyA6ICcnfWB9PgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJsaWQtZmFpeGEtaW4iPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpZC1mYWl4YS10eHQiPgogICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9InJvdCI+UXVlbSBxdWVyIGVudHJhcjwvc3Bhbj4KICAgICAgICAgICAgPGgxPgogICAgICAgICAgICAgIHthYmVydGFzLmxlbmd0aCA9PT0gMCA/ICdOaW5ndcOpbSBlc3BlcmFuZG8gcmVzcG9zdGEnCiAgICAgICAgICAgICAgICA6IGFiZXJ0YXMubGVuZ3RoID09PSAxID8gJzEgcGVzc29hIGVzcGVyYW5kbyB2b2PDqicKICAgICAgICAgICAgICAgIDogYCR7YWJlcnRhcy5sZW5ndGh9IHBlc3NvYXMgZXNwZXJhbmRvIHZvY8OqYH0KICAgICAgICAgICAgPC9oMT4KICAgICAgICAgICAgPHAgY2xhc3NOYW1lPSJsaWQtZmFpeGEtc3ViIj4KICAgICAgICAgICAgICB7YWJlcnRhcy5sZW5ndGggPT09IDAKICAgICAgICAgICAgICAgID8gJ1F1ZW0gc2UgY2FkYXN0cmFyIHBlbG8gc2l0ZSBhcGFyZWNlIGFxdWkgbmEgaG9yYSwgZSB2b2PDqiByZWNlYmUgYSBwZXNzb2EgcG9yIGFxdWkgbWVzbW8uJwogICAgICAgICAgICAgICAgOiBtYWlzQW50aWdhID09PSAwCiAgICAgICAgICAgICAgICAgID8gJ0NoZWdvdSBob2plLiBSZXNwb25kZXIgbm8gbWVzbW8gZGlhIMOpIG8gcXVlIGZheiBhIHBlc3NvYSBhcGFyZWNlciBubyBkb21pbmdvLicKICAgICAgICAgICAgICAgICAgOiBgQSBtYWlzIGFudGlnYSBlc3TDoSBlc3BlcmFuZG8gJHtlc3BlcmEobWFpc0FudGlnYSkucmVwbGFjZSgnaMOhICcsICdow6EgJyl9LiBRdWVtIHNlIG9mZXJlY2UgZSBuw6NvIHJlY2ViZSByZXNwb3N0YSBzb21lLCBlIG7Do28gdm9sdGEuYH0KICAgICAgICAgICAgPC9wPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICB7LyogTyBQTEFDQVIgTsODTyBSRVBFVEUgTyBUw41UVUxPLiBPIG7Dum1lcm8gZGUgcGVzc29hcyBqw6EgZXN0w6Egbm8gaDE7CiAgICAgICAgICAgICAgbyBxdWUgZmFsdGEgw6kgbyBuw7ptZXJvIHF1ZSBtZWRlIGEgZmFsaGEsIHF1ZSDDqSBow6EgcXVhbnRvIHRlbXBvIGEKICAgICAgICAgICAgICBwcmltZWlyYSBkZWxhcyBlc3TDoSBlc3BlcmFuZG8uICovfQogICAgICAgICAge2FiZXJ0YXMubGVuZ3RoID4gMCAmJiAoCiAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJsaWQtcGxhY2FyIj4KICAgICAgICAgICAgICB7bWFpc0FudGlnYSA9PT0gMCA/IDxiPmhvamU8L2I+IDogPGI+e21haXNBbnRpZ2F9PGk+ZDwvaT48L2I+fQogICAgICAgICAgICAgIDxzcGFuPnttYWlzQW50aWdhID09PSAwID8gJ2NoZWdvdSBhIHByaW1laXJhJyA6ICdlc3BlcmFuZG8gYSBtYWlzIGFudGlnYSd9PC9zcGFuPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICl9CiAgICAgICAgPC9kaXY+CiAgICAgIDwvZGl2PgoKICAgICAge2Vycm8gJiYgPGRpdiBzdHlsZT17eyBtYXJnaW5Ub3A6ICd2YXIoLS1lNSknIH19PjxBdmlzbyB0b209ImVycm8iPntlcnJvfTwvQXZpc28+PC9kaXY+fQogICAgICB7Y2FycmVnYW5kbyAmJiA8cCBjbGFzc05hbWU9ImRpbSIgc3R5bGU9e3sgbWFyZ2luVG9wOiAndmFyKC0tZTYpJyB9fT5jYXJyZWdhbmRv4oCmPC9wPn0KCiAgICAgIHshY2FycmVnYW5kbyAmJiBhYmVydGFzLmxlbmd0aCA+IDAgJiYgKAogICAgICAgIDxzZWN0aW9uIGNsYXNzTmFtZT0ibGlkLXNlY2FvIj4KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJsaWQtc2VjYW8tY2FiIj4KICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJyb3QiPkVzcGVyYW5kbyB2b2PDqjwvc3Bhbj4KICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJsaWQtc2VjYW8tbm90YSI+QSBtYWlzIGFudGlnYSBuYSBmcmVudGU8L3NwYW4+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIHthYmVydGFzLm1hcChjID0+ICgKICAgICAgICAgICAgPExpbmhhIGtleT17Yy5pZH0gYz17Y30gYWJlcnRhPXthYmVydGEgPT09IGMuaWR9IHsuLi5wcm9wc30gLz4KICAgICAgICAgICkpfQogICAgICAgIDwvc2VjdGlvbj4KICAgICAgKX0KCiAgICAgIHshY2FycmVnYW5kbyAmJiBub1RpbWUubGVuZ3RoID4gMCAmJiAoCiAgICAgICAgPHNlY3Rpb24gY2xhc3NOYW1lPSJsaWQtc2VjYW8iPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpZC1zZWNhby1jYWIiPgogICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9InJvdCI+SsOhIGVudHJhcmFtIG5vIHRpbWU8L3NwYW4+CiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLXNlY2FvLW5vdGEiPgogICAgICAgICAgICAgIHtub1RpbWUubGVuZ3RoID09PSAxID8gJzEgcGVzc29hJyA6IGAke25vVGltZS5sZW5ndGh9IHBlc3NvYXNgfQogICAgICAgICAgICA8L3NwYW4+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIHtub1RpbWUubWFwKGMgPT4gKAogICAgICAgICAgICA8TGluaGEga2V5PXtjLmlkfSBjPXtjfSBhYmVydGE9e2FiZXJ0YSA9PT0gYy5pZH0gey4uLnByb3BzfSAvPgogICAgICAgICAgKSl9CiAgICAgICAgPC9zZWN0aW9uPgogICAgICApfQoKICAgICAgeyFjYXJyZWdhbmRvICYmIGxpc3RhLmxlbmd0aCA9PT0gMCAmJiAoCiAgICAgICAgPHNlY3Rpb24gY2xhc3NOYW1lPSJsaWQtc2VjYW8iPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpZC1zZWNhby1jYWIiPjxzcGFuIGNsYXNzTmFtZT0icm90Ij5Db21vIGNoZWdhIGdlbnRlIGFxdWk8L3NwYW4+PC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGlkLWFsZXJ0YSI+CiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWFsZXJ0YS1uIj4xPC9zcGFuPgogICAgICAgICAgICA8c3Bhbj4KICAgICAgICAgICAgICBNYW5kZSBvIGxpbmsgZGEgw6FyZWEgbm8gZ3J1cG8gZG8gV2hhdHNBcHA6eycgJ30KICAgICAgICAgICAgICA8Y29kZSBzdHlsZT17eyBvdmVyZmxvd1dyYXA6ICdhbnl3aGVyZScgfX0+Z3VpYXNlcnZpci5jb20vc2VydmlyPC9jb2RlPgogICAgICAgICAgICA8L3NwYW4+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJsaWQtYWxlcnRhIj4KICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJsaWQtYWxlcnRhLW4iPjI8L3NwYW4+CiAgICAgICAgICAgIDxzcGFuPlF1ZW0gc2UgY2FkYXN0cmFyIGFwYXJlY2UgbmVzdGEgdGVsYSBuYSBob3JhLCBjb20gYXMgZnVuw6fDtWVzIHF1ZSBtYXJjb3UuPC9zcGFuPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGlkLWFsZXJ0YSI+CiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWFsZXJ0YS1uIj4zPC9zcGFuPgogICAgICAgICAgICA8c3Bhbj5Wb2PDqiBjaGFtYSBubyBXaGF0c0FwcCwgY29udmVyc2EgZSBhcHJvdmEuIE8gcmVzdG8gbyBzaXN0ZW1hIGZhei48L3NwYW4+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICA8L3NlY3Rpb24+CiAgICAgICl9CgogICAgICB7IWNhcnJlZ2FuZG8gJiYgZmVjaGFkYXMubGVuZ3RoID4gMCAmJiAoCiAgICAgICAgPHNlY3Rpb24gY2xhc3NOYW1lPSJsaWQtc2VjYW8iPgogICAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpZC1zZWNhby1jYWIiPgogICAgICAgICAgICA8c3BhbiBjbGFzc05hbWU9InJvdCI+RW5jZXJyYWRhczwvc3Bhbj4KICAgICAgICAgICAgPGJ1dHRvbiBjbGFzc05hbWU9ImxpZC1idC10eHQiIG9uQ2xpY2s9eygpID0+IHNldFZlckVuY2VycmFkYXModiA9PiAhdil9PgogICAgICAgICAgICAgIHt2ZXJFbmNlcnJhZGFzID8gJ2VzY29uZGVyJyA6IGB2ZXIgJHtmZWNoYWRhcy5sZW5ndGh9YH0KICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIHt2ZXJFbmNlcnJhZGFzICYmIGZlY2hhZGFzLm1hcChjID0+ICgKICAgICAgICAgICAgPExpbmhhIGtleT17Yy5pZH0gYz17Y30gYWJlcnRhPXthYmVydGEgPT09IGMuaWR9IHsuLi5wcm9wc30gLz4KICAgICAgICAgICkpfQogICAgICAgIDwvc2VjdGlvbj4KICAgICAgKX0KICAgIDwvZGl2PgogICk7Cn0KCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHVtYSBwZXNzb2EgKi8KZnVuY3Rpb24gTGluaGEoeyBjLCBhYmVydGEsIGFicmlyLCBlcXVpcGVOb21lLCBtdWRvdSB9OiB7CiAgYzogQ2FuZGlkYXR1cmE7IGFiZXJ0YTogYm9vbGVhbjsgYWJyaXI6IChpZDogc3RyaW5nKSA9PiB2b2lkOwogIGVxdWlwZU5vbWU6IHN0cmluZzsgbXVkb3U6IChtOiBzdHJpbmcpID0+IFByb21pc2U8dm9pZD47Cn0pIHsKICBjb25zdCB7IFMsIGJhc2UgfSA9IHVzZUFwcCgpOwogIGNvbnN0IFtyZXNwLCBzZXRSZXNwXSA9IHVzZVN0YXRlPFJlc3Bvc3RhW10+KFtdKTsKICBjb25zdCBbaGlzdCwgc2V0SGlzdF0gPSB1c2VTdGF0ZTxQYXNzb1tdPihbXSk7CiAgY29uc3QgW25vdGEsIHNldE5vdGFdID0gdXNlU3RhdGUoJycpOwogIGNvbnN0IFtvY3VwYWRvLCBzZXRPY3VwYWRvXSA9IHVzZVN0YXRlKGZhbHNlKTsKICBjb25zdCBbZXJybywgc2V0RXJyb10gPSB1c2VTdGF0ZSgnJyk7CgogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBpZiAoIWFiZXJ0YSkgcmV0dXJuOwogICAgbGV0IHZpdm8gPSB0cnVlOwogICAgdm9pZCAoYXN5bmMgKCkgPT4gewogICAgICB0cnkgewogICAgICAgIGNvbnN0IFtyLCBoXSA9IGF3YWl0IFByb21pc2UuYWxsKFtyZXNwb3N0YXNEZShjLmlkKSwgaGlzdG9yaWNvRGUoYy5pZCldKTsKICAgICAgICBpZiAodml2bykgeyBzZXRSZXNwKHIpOyBzZXRIaXN0KGgpOyB9CiAgICAgIH0gY2F0Y2ggeyAvKiBkZXRhbGhlIMOpIGNvbXBsZW1lbnRvOiBzZSBmYWxoYXIsIGEgZGVjaXPDo28gY29udGludWEgcG9zc8OtdmVsICovIH0KICAgIH0pKCk7CiAgICByZXR1cm4gKCkgPT4geyB2aXZvID0gZmFsc2U7IH07CiAgfSwgW2FiZXJ0YSwgYy5pZF0pOwoKICBjb25zdCBub21lID0gYy5wZXNzb2FzPy5ub21lPy50cmltKCkgfHwgJ1NlbSBub21lJzsKICBjb25zdCB0ZWwgPSBjLnBlc3NvYXM/LnRlbGVmb25lIHx8ICcnOwogIGNvbnN0IGZ1bmNvZXMgPSAoYy5jYW5kaWRhdHVyYV9mdW5jb2VzIHx8IFtdKS5tYXAoeCA9PiB4LmZ1bmNvZXM/Lm5vbWUpLmZpbHRlcihCb29sZWFuKSBhcyBzdHJpbmdbXTsKICBjb25zdCBkaWFzID0gZGlhc0F0cmFzKGMuY3JpYWRvX2VtKTsKICBjb25zdCBmID0gT19RVUVfRkFaRVJbYy5zdGF0dXNdOwoKICBhc3luYyBmdW5jdGlvbiBhZ2lyKHN0YXR1czogU3RhdHVzQ2FuZCwgdGV4dG86IHN0cmluZykgewogICAgaWYgKG9jdXBhZG8pIHJldHVybjsKICAgIHNldE9jdXBhZG8odHJ1ZSk7IHNldEVycm8oJycpOwogICAgdHJ5IHsgYXdhaXQgZGVjaWRpcihjLmlkLCBzdGF0dXMsIG5vdGEudHJpbSgpIHx8IHVuZGVmaW5lZCk7IGF3YWl0IG11ZG91KHRleHRvKTsgfQogICAgY2F0Y2ggKGU6IGFueSkgeyBzZXRFcnJvKGU/Lm1lc3NhZ2UgfHwgJ27Do28gY29uc2VndWknKTsgfQogICAgZmluYWxseSB7IHNldE9jdXBhZG8oZmFsc2UpOyB9CiAgfQoKICAvKiBDSEFNQVIgRSBNQVJDQVIgU8ODTyBPIE1FU01PIFRPUVVFLiBPIDxhPiBuYXZlZ2EgZGUgZm9ybWEgc8OtbmNyb25hIChzZW7Do28gbwogICAgIG5hdmVnYWRvciBibG9xdWVpYSBhIGFiYSk7IGEgbXVkYW7Dp2EgZGUgZXN0YWRvIHNhaSBhdHLDoXMsIHNlbSB0cmF2YXIuICovCiAgY29uc3QgY2hhbWFuZG8gPSBjLnN0YXR1cyA9PT0gJ2VudmlhZGEnIHx8IGMuc3RhdHVzID09PSAnZW1fYW5hbGlzZSc7CiAgY29uc3QgemFwQ29udGF0byA9IHRlbCA/IGxpbmtXaGF0c0FwcCh0ZWwsCiAgICBgT2kgJHtwcmltZWlybyhub21lKX0hIEFxdWkgw6kgZGEgJHtlcXVpcGVOb21lfSBkYSBHVUlBLiBWaSBzZXUgY2FkYXN0cm8gcGFyYSBzZXJ2aXIgY29tIGEgZ2VudGUuIFBvc3NvIHRlIGZhemVyIHVtYXMgcGVyZ3VudGFzP2ApIDogJyc7CiAgZnVuY3Rpb24gYW9DaGFtYXIoKSB7CiAgICBpZiAoIWNoYW1hbmRvKSByZXR1cm47CiAgICB2b2lkIGRlY2lkaXIoYy5pZCwgJ2NvbnZlcnNhJykudGhlbigoKSA9PiBtdWRvdSgnbWFyY2FkbyBjb21vIGVtIGNvbnZlcnNhJykpLmNhdGNoKCgpID0+IHt9KTsKICB9CgogIC8qIGFwcm92YWRhOiBvIGxpbmsgcGVzc29hbCBqw6EgZXN0w6Egbm8gYmFuY28gZSBhIHBlc3NvYSBqw6EgbyByZWNlYmUgc296aW5oYQogICAgIG5hIHRlbGEgZGVsYS4gQXF1aSBlbGUgdmlyYSBtZW5zYWdlbSBwcm9udGEsIHBvcnF1ZSBuYSBwcsOhdGljYSDDqSBwZWxvCiAgICAgV2hhdHNBcHAgcXVlIGVsYSB2YWkgdmVyLiBEb2lzIGNhbWluaG9zLCBuZW5odW0gZGVwZW5kZW5kbyBkZSBtZW3Ds3JpYS4gKi8KICBjb25zdCB2ID0gYy52b2x1bnRhcmlvX2lkID8gdm9sKFMsIGMudm9sdW50YXJpb19pZCkgOiBudWxsOwogIGNvbnN0IHphcExpbmsgPSB2Py50b2tlbiAmJiB0ZWwKICAgID8gbGlua1doYXRzQXBwKHRlbCwgbXNnQ29udml0ZShTLCBjLnZvbHVudGFyaW9faWQhLCBiYXNlKSkgOiAnJzsKCiAgcmV0dXJuICgKICAgIDxkZXRhaWxzIGNsYXNzTmFtZT17YGxpZC1jYW5kICR7Zi50b219YH0gb3Blbj17YWJlcnRhfT4KICAgICAgPHN1bW1hcnkgb25DbGljaz17ZSA9PiB7IGUucHJldmVudERlZmF1bHQoKTsgYWJyaXIoYy5pZCk7IH19PgogICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLW1hcmNhIiBhcmlhLWhpZGRlbj0idHJ1ZSIgLz4KICAgICAgICA8c3Bhbj4KICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWNhbmQtbm9tZSI+e25vbWV9PC9zcGFuPgogICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJsaWQtY2FuZC1zdWIiPgogICAgICAgICAgICB7ZnVuY29lcy5sZW5ndGggPyBmdW5jb2VzLmpvaW4oJyDCtyAnKSA6ICdzZW0gZnVuw6fDo28gbWFyY2FkYSd9CiAgICAgICAgICA8L3NwYW4+CiAgICAgICAgPC9zcGFuPgogICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWNhbmQtZXN0Ij4KICAgICAgICAgIHtmLnJvdH0KICAgICAgICAgIHtBQkVSVEFTLmluY2x1ZGVzKGMuc3RhdHVzKSAmJiA8c3BhbiBjbGFzc05hbWU9ImxpZC1jYW5kLWVzcCI+e2VzcGVyYShkaWFzKX08L3NwYW4+fQogICAgICAgIDwvc3Bhbj4KICAgICAgPC9zdW1tYXJ5PgoKICAgICAgPGRpdiBjbGFzc05hbWU9ImxpZC1jYW5kLWNvcnBvIj4KICAgICAgICB7ZXJybyAmJiA8QXZpc28gdG9tPSJlcnJvIj57ZXJyb308L0F2aXNvPn0KCiAgICAgICAgey8qIEEgSU5TVFJVw4fDg08uIFByaW1laXJhIGNvaXNhIGRlbnRybyBkYSBsaW5oYSBhYmVydGEsIHBvcnF1ZSDDqSBhCiAgICAgICAgICAgIMO6bmljYSBxdWUgbyBsw61kZXIgcHJlY2lzYSBsZXIgcGFyYSBhZ2lyLiAqL30KICAgICAgICA8cCBjbGFzc05hbWU9ImxpZC1jYW5kLWZhemVyIj57Zi50eHR9PC9wPgoKICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGlkLWNhbmQtYnRucyI+CiAgICAgICAgICB7Zi5jaGFtYSAmJiB6YXBDb250YXRvICYmICgKICAgICAgICAgICAgPGEgY2xhc3NOYW1lPSJsaWQtYnQiIGhyZWY9e3phcENvbnRhdG99IHRhcmdldD0iX2JsYW5rIiByZWw9Im5vcmVmZXJyZXIiIG9uQ2xpY2s9e2FvQ2hhbWFyfT4KICAgICAgICAgICAgICBDaGFtYXIge3ByaW1laXJvKG5vbWUpfSBubyBXaGF0c0FwcAogICAgICAgICAgICA8L2E+CiAgICAgICAgICApfQogICAgICAgICAge2YuY2hhbWEgJiYgIXphcENvbnRhdG8gJiYgKAogICAgICAgICAgICA8c3BhbiBzdHlsZT17eyBmb250U2l6ZTogMTUsIGNvbG9yOiAndmFyKC0tYmFkKScgfX0+CiAgICAgICAgICAgICAgU2VtIFdoYXRzQXBwIGNhZGFzdHJhZG8uIEZhbGUgY29tIHF1ZW0gaW5kaWNvdSBlc3NhIHBlc3NvYS4KICAgICAgICAgICAgPC9zcGFuPgogICAgICAgICAgKX0KICAgICAgICAgIHtjLnN0YXR1cyA9PT0gJ2Fwcm92YWRhJyAmJiB6YXBMaW5rICYmICgKICAgICAgICAgICAgPGEgY2xhc3NOYW1lPSJsaWQtYnQiIGhyZWY9e3phcExpbmt9IHRhcmdldD0iX2JsYW5rIiByZWw9Im5vcmVmZXJyZXIiPgogICAgICAgICAgICAgIE1hbmRhciBvIGxpbmsgZGUge3ByaW1laXJvKG5vbWUpfQogICAgICAgICAgICA8L2E+CiAgICAgICAgICApfQogICAgICAgICAge2Muc3RhdHVzID09PSAnZW50cmV2aXN0YScgJiYgemFwQ29udGF0byAmJiAoCiAgICAgICAgICAgIDxhIGNsYXNzTmFtZT0ibGlkLWJ0LXR4dCIgaHJlZj17emFwQ29udGF0b30gdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9yZWZlcnJlciI+CiAgICAgICAgICAgICAgQWJyaXIgbyBXaGF0c0FwcAogICAgICAgICAgICA8L2E+CiAgICAgICAgICApfQogICAgICAgIDwvZGl2PgoKICAgICAgICB7LyogQVMgREVDSVPDlUVTLiBEZXBvaXMgZGEgY29udmVyc2EsIG51bmNhIGFudGVzIGRlbGE6IMOpIGVzc2EgYSBvcmRlbQogICAgICAgICAgICBkbyBtdW5kbyByZWFsLCBlIGEgdGVsYSBwYXNzYSBhIHRlciBhIG1lc21hLiAqL30KICAgICAgICB7IU5PX1RJTUUuaW5jbHVkZXMoYy5zdGF0dXMpICYmICgKICAgICAgICAgIDw+CiAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWNhbmQtbWluaSI+RGVwb2lzIGRlIGZhbGFyIGNvbSB7cHJpbWVpcm8obm9tZSl9PC9zcGFuPgogICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGlkLWNhbmQtYnRucyIgc3R5bGU9e3sgbWFyZ2luVG9wOiAxNiB9fT4KICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT0ibGlkLWJ0LXR4dCIgZGlzYWJsZWQ9e29jdXBhZG99CiAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBhZ2lyKCdhcHJvdmFkYScsIGAke3ByaW1laXJvKG5vbWUpfSBlbnRyb3Ugbm8gdGltZWApfT4KICAgICAgICAgICAgICAgIHtvY3VwYWRvID8gJ3NhbHZhbmRv4oCmJyA6ICdBcHJvdmFyIGUgY3JpYXIgbm8gdGltZSd9CiAgICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICAgICAge2Muc3RhdHVzICE9PSAncmVjdXNhZGEnICYmICgKICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJsaWQtYnQtdHh0IGxpZC1jYW5kLXBlcmlnbyIgZGlzYWJsZWQ9e29jdXBhZG99CiAgICAgICAgICAgICAgICAgIG9uQ2xpY2s9eygpID0+IGFnaXIoJ3JlY3VzYWRhJywgJ2NhbmRpZGF0dXJhIGVuY2VycmFkYScpfT4KICAgICAgICAgICAgICAgICAgRW5jZXJyYXIgcG9yIGVucXVhbnRvCiAgICAgICAgICAgICAgICA8L2J1dHRvbj4KICAgICAgICAgICAgICApfQogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgICAgPHAgY2xhc3NOYW1lPSJkaW0gcGVxIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDEyLCBtYXhXaWR0aDogJzUyY2gnIH19PgogICAgICAgICAgICAgIEFwcm92YXIgY3JpYSBhIHBlc3NvYSBubyB0aW1lIG5hIGhvcmEsIGNvbSBhcyBmdW7Dp8O1ZXMgbWFyY2FkYXMgY29tb3snICd9CiAgICAgICAgICAgICAgPHN0cm9uZz5hIGNvbmZlcmlyPC9zdHJvbmc+LiBFbmNlcnJhciBuw6NvIMOpIHVtIG7Do28gZGVmaW5pdGl2bzogYSB0ZWxhIGRlbGEKICAgICAgICAgICAgICBkaXogaXNzbyBlIG9mZXJlY2UgYXMgb3V0cmFzIMOhcmVhcy4KICAgICAgICAgICAgPC9wPgogICAgICAgICAgPC8+CiAgICAgICAgKX0KICAgICAgICB7Yy5zdGF0dXMgPT09ICdhcHJvdmFkYScgJiYgKAogICAgICAgICAgPD4KICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJsaWQtY2FuZC1taW5pIj5RdWFuZG8gdmlyIGEgcGVzc29hIHNlcnZpbmRvPC9zcGFuPgogICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGlkLWNhbmQtYnRucyIgc3R5bGU9e3sgbWFyZ2luVG9wOiAxNiB9fT4KICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT0ibGlkLWJ0LXR4dCIgZGlzYWJsZWQ9e29jdXBhZG99CiAgICAgICAgICAgICAgICBvbkNsaWNrPXsoKSA9PiBhZ2lyKCdhdGl2YScsICdtYXJjYWRvIGNvbW8gc2VydmluZG8nKX0+CiAgICAgICAgICAgICAgICBNYXJjYXIgY29tbyBzZXJ2aW5kbwogICAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgICAgIDxMaW5rIGNsYXNzTmFtZT0ibGlkLWJ0LXR4dCIgaHJlZj0iL3RpbWUiPkNvbmZlcmlyIG8gbsOtdmVsIG5hIGFiYSBUaW1lPC9MaW5rPgogICAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDwvPgogICAgICAgICl9CgogICAgICAgIHsvKiBPIFFVRSBFTEEgTUFORE9VICovfQogICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ibGlkLWNhbmQtbWluaSI+TyBxdWUge3ByaW1laXJvKG5vbWUpfSBtYW5kb3U8L3NwYW4+CiAgICAgICAgPGRsIGNsYXNzTmFtZT0ibGlkLWNhbmQtZGwiPgogICAgICAgICAgPGR0PkNoZWdvdTwvZHQ+PGRkPntkaWEoYy5jcmlhZG9fZW0pfSDCtyB7ZXNwZXJhKGRpYXMpfTwvZGQ+CiAgICAgICAgICA8ZHQ+V2hhdHNBcHA8L2R0PjxkZD57dGVsZWZvbmVMZWdpdmVsKHRlbCkgfHwgJ27Do28gaW5mb3Jtb3UnfTwvZGQ+CiAgICAgICAgICB7Yy5wZXNzb2FzPy5lbWFpbCAmJiA8PjxkdD5FLW1haWw8L2R0PjxkZD57Yy5wZXNzb2FzLmVtYWlsfTwvZGQ+PC8+fQogICAgICAgICAgPGR0PlF1ZXIgZmF6ZXI8L2R0PgogICAgICAgICAgPGRkPntmdW5jb2VzLmxlbmd0aCA/IGZ1bmNvZXMuam9pbignLCAnKSA6ICduw6NvIG1hcmNvdSBuZW5odW1hIGZ1bsOnw6NvJ308L2RkPgogICAgICAgICAge3Jlc3AubWFwKHIgPT4gKAogICAgICAgICAgICA8c3BhbiBrZXk9e3IucGVyZ3VudGF9IHN0eWxlPXt7IGRpc3BsYXk6ICdjb250ZW50cycgfX0+CiAgICAgICAgICAgICAgPGR0PntyLnBlcmd1bnRhfTwvZHQ+PGRkPntyLnJlc3Bvc3RhLnNwbGl0KCd8Jykuam9pbignLCAnKX08L2RkPgogICAgICAgICAgICA8L3NwYW4+CiAgICAgICAgICApKX0KICAgICAgICA8L2RsPgoKICAgICAgICB7LyogQU5PVEHDh8ODTyAqL30KICAgICAgICA8c3BhbiBjbGFzc05hbWU9ImxpZC1jYW5kLW1pbmkiPkFub3Rhw6fDo28gZGEgbGlkZXJhbsOnYTwvc3Bhbj4KICAgICAgICA8dGV4dGFyZWEgcm93cz17Mn0gdmFsdWU9e25vdGF9IGNsYXNzTmFtZT0ibGlkLWNhbmQtbm90YSIKICAgICAgICAgIHBsYWNlaG9sZGVyPSJvIHF1ZSBmaWNvdSBjb21iaW5hZG8sIG8gcXVlIGZhbHRh4oCmIgogICAgICAgICAgYXJpYS1sYWJlbD17YEFub3Rhw6fDo28gc29icmUgJHtub21lfSwgc8OzIGEgbGlkZXJhbsOnYSB2w6pgfQogICAgICAgICAgb25DaGFuZ2U9e2UgPT4gc2V0Tm90YShlLnRhcmdldC52YWx1ZSl9IC8+CiAgICAgICAgPHAgY2xhc3NOYW1lPSJkaW0gcGVxIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDYgfX0+CiAgICAgICAgICBTw7MgYSBsaWRlcmFuw6dhIHbDqi4gRmljYSBqdW50byBkYSBwcsOzeGltYSBkZWNpc8OjbyBxdWUgdm9jw6ogdG9tYXIgYXF1aS4KICAgICAgICA8L3A+CiAgICAgICAge2Mubm90YV9pbnRlcm5hICYmICgKICAgICAgICAgIDxwIGNsYXNzTmFtZT0iZGltIHBlcSIgc3R5bGU9e3sgbWFyZ2luVG9wOiA4IH19PkrDoSBhbm90YWRvOiB7Yy5ub3RhX2ludGVybmF9PC9wPgogICAgICAgICl9CgogICAgICAgIHtoaXN0Lmxlbmd0aCA+IDAgJiYgKAogICAgICAgICAgPD4KICAgICAgICAgICAgPHNwYW4gY2xhc3NOYW1lPSJsaWQtY2FuZC1taW5pIj5IaXN0w7NyaWNvPC9zcGFuPgogICAgICAgICAgICA8dWwgY2xhc3NOYW1lPSJsaWQtY2FuZC1oaXN0Ij4KICAgICAgICAgICAgICB7aGlzdC5tYXAoKGgsIGkpID0+ICgKICAgICAgICAgICAgICAgIDxsaSBrZXk9e2l9PgogICAgICAgICAgICAgICAgICA8c3Bhbj57ZGlhKGgucXVhbmRvKX08L3NwYW4+CiAgICAgICAgICAgICAgICAgIDxzcGFuPgogICAgICAgICAgICAgICAgICAgIDxiPntST1RVTE9fU1RBVFVTW2gucGFyYSBhcyBTdGF0dXNDYW5kXSB8fCBoLnBhcmF9PC9iPgogICAgICAgICAgICAgICAgICAgIHtoLnBvciAmJiBoLnBvciAhPT0gJ3Npc3RlbWEnID8gYCwgJHtoLnBvcn1gIDogJyd9CiAgICAgICAgICAgICAgICAgICAge2gubm90YSA/IGAgKCR7aC5ub3RhfSlgIDogJyd9CiAgICAgICAgICAgICAgICAgIDwvc3Bhbj4KICAgICAgICAgICAgICAgIDwvbGk+CiAgICAgICAgICAgICAgKSl9CiAgICAgICAgICAgIDwvdWw+CiAgICAgICAgICA8Lz4KICAgICAgICApfQogICAgICA8L2Rpdj4KICAgIDwvZGV0YWlscz4KICApOwp9Cg=="}
+'use client';
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import Shell, { useApp } from '@/components/Shell';
+import { Aviso } from '@/components/Ui';
+import { msgConvite, vol } from '@/lib/engine';
+import {
+  ABERTAS, NO_TIME, O_QUE_FAZER, Candidatura, Passo, Resposta, ROTULO_STATUS, StatusCand,
+  decidir, historicoDe, listarCandidaturas, linkWhatsApp, respostasDe, telefoneLegivel,
+} from '@/lib/candidaturas';
+
+/* =============================================================================
+   QUEM QUER ENTRAR — O LADO DO LÍDER DA JORNADA DE ENTRADA
+
+   Esta tela é a outra metade de /candidatura/[token]. Lá a pessoa precisa
+   saber em que etapa está; aqui o líder precisa saber o que fazer. Foram
+   reescritas juntas, e é por isso que três defeitos apareceram: eles só
+   existiam na costura entre as duas.
+
+   1. OS DOIS LADOS MANDAVAM O OUTRO LIGAR
+      No estado `conversa`, a tela da pessoa dizia "chame Jander no WhatsApp
+      para marcar" e esta fila marcava a mesma candidatura como "chamar para
+      conversar". Cada um esperava o outro, e o resultado de duas pessoas
+      esperando é silêncio. Quem liga é a liderança: quem se ofereceu já fez
+      a parte dela. A migração 36 acertou o texto do outro lado.
+
+   2. O ESTADO NÃO SEGUIA O QUE O LÍDER FAZIA
+      Chamar no WhatsApp e registrar "estou conversando" eram dois cliques, e
+      o segundo ninguém dá. A candidatura ficava `enviada` para sempre e a
+      pessoa continuava lendo "recebemos seu cadastro" três dias depois da
+      conversa ter acontecido. Agora é o mesmo toque: abrir o WhatsApp move a
+      candidatura, porque o líder não deveria ter que contar ao sistema uma
+      coisa que o sistema acabou de ver.
+
+   3. QUATRO BOTÕES DO MESMO TAMANHO
+      "Quero conversar", "Aprovar", "Já está servindo" e "Encerrar" apareciam
+      lado a lado, iguais. Escolher entre quatro é trabalho, e quem organiza
+      abre isso no celular entre um culto e outro. Agora há uma ação sólida
+      por linha — a do momento — e as outras viram texto, depois da frase
+      "depois de falar com ela".
+
+   O QUE FOI PRESERVADO: a fila continua sendo uma tela só, com o detalhe
+   abrindo dentro da linha (sair da lista para decidir e voltar perdendo a
+   posição é atrito puro no celular), e a ordem continua sendo por espera, não
+   por data de chegada.
+   ============================================================================= */
+
+export default function Pagina() { return <Shell><Fila /></Shell>; }
+
+const so2 = (n: number) => String(n).padStart(2, '0');
+const dia = (iso: string) => {
+  const d = new Date(iso);
+  return `${so2(d.getDate())}/${so2(d.getMonth() + 1)}`;
+};
+const diasAtras = (iso: string) =>
+  Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
+const espera = (n: number) => n === 0 ? 'chegou hoje' : n === 1 ? 'há 1 dia' : `há ${n} dias`;
+const primeiro = (n: string) => (n || '').trim().split(/\s+/)[0] || '';
+
+function Fila() {
+  const { equipe, aviso, recarregar } = useApp();
+  const [lista, setLista] = useState<Candidatura[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState('');
+  const [aberta, setAberta] = useState('');
+  const [verEncerradas, setVerEncerradas] = useState(false);
+
+  const carregar = useCallback(async () => {
+    if (!equipe?.id) return;
+    setCarregando(true);
+    try { setLista(await listarCandidaturas(equipe.id)); setErro(''); }
+    catch (e: any) { setErro(e?.message || 'não consegui carregar'); }
+    finally { setCarregando(false); }
+  }, [equipe?.id]);
+
+  useEffect(() => { void carregar(); }, [carregar]);
+
+  /* quem espera decisão primeiro, e dentro disso a mais antiga na frente:
+     quem está esperando há mais tempo é quem corre mais risco de desistir. */
+  const porEspera = (a: Candidatura, b: Candidatura) => a.criado_em.localeCompare(b.criado_em);
+  const abertas = lista.filter(c => ABERTAS.includes(c.status)).sort(porEspera);
+  const noTime = lista.filter(c => NO_TIME.includes(c.status))
+    .sort((a, b) => b.atualizado_em.localeCompare(a.atualizado_em));
+  const fechadas = lista.filter(c => !ABERTAS.includes(c.status) && !NO_TIME.includes(c.status))
+    .sort((a, b) => b.atualizado_em.localeCompare(a.atualizado_em));
+
+  const maisAntiga = abertas.length ? diasAtras(abertas[0].criado_em) : 0;
+  /* a faixa inverte quando alguém já está esperando há três dias. Não é
+     enfeite: é o único número desta tela que estraga a jornada de verdade. */
+  const urge = maisAntiga >= 3;
+
+  const props = {
+    equipeNome: equipe?.nome || '',
+    abrir: (id: string) => setAberta(a => a === id ? '' : id),
+    mudou: async (m: string) => { aviso(m); await carregar(); await recarregar(); },
+  };
+
+  return (
+    <div className="lid">
+      <div className={`lid-faixa ${urge ? 'fogo' : ''}`}>
+        <div className="lid-faixa-in">
+          <div className="lid-faixa-txt">
+            <span className="rot">Quem quer entrar</span>
+            <h1>
+              {abertas.length === 0 ? 'Ninguém esperando resposta'
+                : abertas.length === 1 ? '1 pessoa esperando você'
+                : `${abertas.length} pessoas esperando você`}
+            </h1>
+            <p className="lid-faixa-sub">
+              {abertas.length === 0
+                ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
+                : maisAntiga === 0
+                  ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
+                  : `A mais antiga está esperando ${espera(maisAntiga).replace('há ', 'há ')}. Quem se oferece e não recebe resposta some, e não volta.`}
+            </p>
+          </div>
+          {/* O PLACAR NÃO REPETE O TÍTULO. O número de pessoas já está no h1;
+              o que falta é o número que mede a falha, que é há quanto tempo a
+              primeira delas está esperando. */}
+          {abertas.length > 0 && (
+            <div className="lid-placar">
+              {maisAntiga === 0 ? <b>hoje</b> : <b>{maisAntiga}<i>d</i></b>}
+              <span>{maisAntiga === 0 ? 'chegou a primeira' : 'esperando a mais antiga'}</span>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {erro && <div style={{ marginTop: 'var(--e5)' }}><Aviso tom="erro">{erro}</Aviso></div>}
+      {carregando && <p className="dim" style={{ marginTop: 'var(--e6)' }}>carregando…</p>}
+
+      {!carregando && abertas.length > 0 && (
+        <section className="lid-secao">
+          <div className="lid-secao-cab">
+            <span className="rot">Esperando você</span>
+            <span className="lid-secao-nota">A mais antiga na frente</span>
+          </div>
+          {abertas.map(c => (
+            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
+          ))}
+        </section>
+      )}
+
+      {!carregando && noTime.length > 0 && (
+        <section className="lid-secao">
+          <div className="lid-secao-cab">
+            <span className="rot">Já entraram no time</span>
+            <span className="lid-secao-nota">
+              {noTime.length === 1 ? '1 pessoa' : `${noTime.length} pessoas`}
+            </span>
+          </div>
+          {noTime.map(c => (
+            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
+          ))}
+        </section>
+      )}
+
+      {!carregando && lista.length === 0 && (
+        <section className="lid-secao">
+          <div className="lid-secao-cab"><span className="rot">Como chega gente aqui</span></div>
+          <div className="lid-alerta">
+            <span className="lid-alerta-n">1</span>
+            <span>
+              Mande o link da área no grupo do WhatsApp:{' '}
+              <code style={{ overflowWrap: 'anywhere' }}>guiaservir.com/servir</code>
+            </span>
+          </div>
+          <div className="lid-alerta">
+            <span className="lid-alerta-n">2</span>
+            <span>Quem se cadastrar aparece nesta tela na hora, com as funções que marcou.</span>
+          </div>
+          <div className="lid-alerta">
+            <span className="lid-alerta-n">3</span>
+            <span>Você chama no WhatsApp, conversa e aprova. O resto o sistema faz.</span>
+          </div>
+        </section>
+      )}
+
+      {!carregando && fechadas.length > 0 && (
+        <section className="lid-secao">
+          <div className="lid-secao-cab">
+            <span className="rot">Encerradas</span>
+            <button className="lid-bt-txt" onClick={() => setVerEncerradas(v => !v)}>
+              {verEncerradas ? 'esconder' : `ver ${fechadas.length}`}
+            </button>
+          </div>
+          {verEncerradas && fechadas.map(c => (
+            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
+          ))}
+        </section>
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------- uma pessoa */
+function Linha({ c, aberta, abrir, equipeNome, mudou }: {
+  c: Candidatura; aberta: boolean; abrir: (id: string) => void;
+  equipeNome: string; mudou: (m: string) => Promise<void>;
+}) {
+  const { S, base } = useApp();
+  const [resp, setResp] = useState<Resposta[]>([]);
+  const [hist, setHist] = useState<Passo[]>([]);
+  const [nota, setNota] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+  const [erro, setErro] = useState('');
+
+  useEffect(() => {
+    if (!aberta) return;
+    let vivo = true;
+    void (async () => {
+      try {
+        const [r, h] = await Promise.all([respostasDe(c.id), historicoDe(c.id)]);
+        if (vivo) { setResp(r); setHist(h); }
+      } catch { /* detalhe é complemento: se falhar, a decisão continua possível */ }
+    })();
+    return () => { vivo = false; };
+  }, [aberta, c.id]);
+
+  const nome = c.pessoas?.nome?.trim() || 'Sem nome';
+  const tel = c.pessoas?.telefone || '';
+  const funcoes = (c.candidatura_funcoes || []).map(x => x.funcoes?.nome).filter(Boolean) as string[];
+  const dias = diasAtras(c.criado_em);
+  const f = O_QUE_FAZER[c.status];
+
+  async function agir(status: StatusCand, texto: string) {
+    if (ocupado) return;
+    setOcupado(true); setErro('');
+    try { await decidir(c.id, status, nota.trim() || undefined); await mudou(texto); }
+    catch (e: any) { setErro(e?.message || 'não consegui'); }
+    finally { setOcupado(false); }
+  }
+
+  /* CHAMAR E MARCAR SÃO O MESMO TOQUE. O <a> navega de forma síncrona (senão o
+     navegador bloqueia a aba); a mudança de estado sai atrás, sem travar. */
+  const chamando = c.status === 'enviada' || c.status === 'em_analise';
+  const zapContato = tel ? linkWhatsApp(tel,
+    `Oi ${primeiro(nome)}! Aqui é da ${equipeNome} da GUIA. Vi seu cadastro para servir com a gente. Posso te fazer umas perguntas?`) : '';
+  function aoChamar() {
+    if (!chamando) return;
+    void decidir(c.id, 'conversa').then(() => mudou('marcado como em conversa')).catch(() => {});
+  }
+
+  /* aprovada: o link pessoal já está no banco e a pessoa já o recebe sozinha
+     na tela dela. Aqui ele vira mensagem pronta, porque na prática é pelo
+     WhatsApp que ela vai ver. Dois caminhos, nenhum dependendo de memória. */
+  const v = c.voluntario_id ? vol(S, c.voluntario_id) : null;
+  const zapLink = v?.token && tel
+    ? linkWhatsApp(tel, msgConvite(S, c.voluntario_id!, base)) : '';
+
+  return (
+    <details className={`lid-cand ${f.tom}`} open={aberta}>
+      <summary onClick={e => { e.preventDefault(); abrir(c.id); }}>
+        <span className="lid-marca" aria-hidden="true" />
+        <span>
+          <span className="lid-cand-nome">{nome}</span>
+          <span className="lid-cand-sub">
+            {funcoes.length ? funcoes.join(' · ') : 'sem função marcada'}
+          </span>
+        </span>
+        <span className="lid-cand-est">
+          {f.rot}
+          {ABERTAS.includes(c.status) && <span className="lid-cand-esp">{espera(dias)}</span>}
+        </span>
+      </summary>
+
+      <div className="lid-cand-corpo">
+        {erro && <Aviso tom="erro">{erro}</Aviso>}
+
+        {/* A INSTRUÇÃO. Primeira coisa dentro da linha aberta, porque é a
+            única que o líder precisa ler para agir. */}
+        <p className="lid-cand-fazer">{f.txt}</p>
+
+        <div className="lid-cand-btns">
+          {f.chama && zapContato && (
+            <a className="lid-bt" href={zapContato} target="_blank" rel="noreferrer" onClick={aoChamar}>
+              Chamar {primeiro(nome)} no WhatsApp
+            </a>
+          )}
+          {f.chama && !zapContato && (
+            <span style={{ fontSize: 15, color: 'var(--bad)' }}>
+              Sem WhatsApp cadastrado. Fale com quem indicou essa pessoa.
+            </span>
+          )}
+          {c.status === 'aprovada' && zapLink && (
+            <a className="lid-bt" href={zapLink} target="_blank" rel="noreferrer">
+              Mandar o link de {primeiro(nome)}
+            </a>
+          )}
+          {c.status === 'entrevista' && zapContato && (
+            <a className="lid-bt-txt" href={zapContato} target="_blank" rel="noreferrer">
+              Abrir o WhatsApp
+            </a>
+          )}
+        </div>
+
+        {/* AS DECISÕES. Depois da conversa, nunca antes dela: é essa a ordem
+            do mundo real, e a tela passa a ter a mesma. */}
+        {!NO_TIME.includes(c.status) && (
+          <>
+            <span className="lid-cand-mini">Depois de falar com {primeiro(nome)}</span>
+            <div className="lid-cand-btns" style={{ marginTop: 16 }}>
+              <button className="lid-bt-txt" disabled={ocupado}
+                onClick={() => agir('aprovada', `${primeiro(nome)} entrou no time`)}>
+                {ocupado ? 'salvando…' : 'Aprovar e criar no time'}
+              </button>
+              {c.status !== 'recusada' && (
+                <button className="lid-bt-txt lid-cand-perigo" disabled={ocupado}
+                  onClick={() => agir('recusada', 'candidatura encerrada')}>
+                  Encerrar por enquanto
+                </button>
+              )}
+            </div>
+            <p className="dim peq" style={{ marginTop: 12, maxWidth: '52ch' }}>
+              Aprovar cria a pessoa no time na hora, com as funções marcadas como{' '}
+              <strong>a conferir</strong>. Encerrar não é um não definitivo: a tela dela
+              diz isso e oferece as outras áreas.
+            </p>
+          </>
+        )}
+        {c.status === 'aprovada' && (
+          <>
+            <span className="lid-cand-mini">Quando vir a pessoa servindo</span>
+            <div className="lid-cand-btns" style={{ marginTop: 16 }}>
+              <button className="lid-bt-txt" disabled={ocupado}
+                onClick={() => agir('ativa', 'marcado como servindo')}>
+                Marcar como servindo
+              </button>
+              <Link className="lid-bt-txt" href="/time">Conferir o nível na aba Time</Link>
+            </div>
+          </>
+        )}
+
+        {/* O QUE ELA MANDOU */}
+        <span className="lid-cand-mini">O que {primeiro(nome)} mandou</span>
+        <dl className="lid-cand-dl">
+          <dt>Chegou</dt><dd>{dia(c.criado_em)} · {espera(dias)}</dd>
+          <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>
+          {c.pessoas?.email && <><dt>E-mail</dt><dd>{c.pessoas.email}</dd></>}
+          <dt>Quer fazer</dt>
+          <dd>{funcoes.length ? funcoes.join(', ') : 'não marcou nenhuma função'}</dd>
+          {resp.map(r => (
+            <span key={r.pergunta} style={{ display: 'contents' }}>
+              <dt>{r.pergunta}</dt><dd>{r.resposta.split('|').join(', ')}</dd>
+            </span>
+          ))}
+        </dl>
+
+        {/* ANOTAÇÃO */}
+        <span className="lid-cand-mini">Anotação da liderança</span>
+        <textarea rows={2} value={nota} className="lid-cand-nota"
+          placeholder="o que ficou combinado, o que falta…"
+          aria-label={`Anotação sobre ${nome}, só a liderança vê`}
+          onChange={e => setNota(e.target.value)} />
+        <p className="dim peq" style={{ marginTop: 6 }}>
+          Só a liderança vê. Fica junto da próxima decisão que você tomar aqui.
+        </p>
+        {c.nota_interna && (
+          <p className="dim peq" style={{ marginTop: 8 }}>Já anotado: {c.nota_interna}</p>
+        )}
+
+        {hist.length > 0 && (
+          <>
+            <span className="lid-cand-mini">Histórico</span>
+            <ul className="lid-cand-hist">
+              {hist.map((h, i) => (
+                <li key={i}>
+                  <span>{dia(h.quando)}</span>
+                  <span>
+                    <b>{ROTULO_STATUS[h.para as StatusCand] || h.para}</b>
+                    {h.por && h.por !== 'sistema' ? `, ${h.por}` : ''}
+                    {h.nota ? ` (${h.nota})` : ''}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </details>
+  );
+}

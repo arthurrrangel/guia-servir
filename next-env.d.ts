@@ -1,1 +1,6 @@
-{"data":"Ly8vIDxyZWZlcmVuY2UgdHlwZXM9Im5leHQiIC8+Ci8vLyA8cmVmZXJlbmNlIHR5cGVzPSJuZXh0L2ltYWdlLXR5cGVzL2dsb2JhbCIgLz4KLy8vIDxyZWZlcmVuY2UgcGF0aD0iLi8ubmV4dC90eXBlcy9yb3V0ZXMuZC50cyIgLz4KCi8vIE5PVEU6IFRoaXMgZmlsZSBzaG91bGQgbm90IGJlIGVkaXRlZAovLyBzZWUgaHR0cHM6Ly9uZXh0anMub3JnL2RvY3MvYXBwL2FwaS1yZWZlcmVuY2UvY29uZmlnL3R5cGVzY3JpcHQgZm9yIG1vcmUgaW5mb3JtYXRpb24uCg=="}
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
+/// <reference path="./.next/types/routes.d.ts" />
+
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/api-reference/config/typescript for more information.

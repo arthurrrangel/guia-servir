@@ -1,1 +1,329 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVN0YXRlLCBjcmVhdGVDb250ZXh0LCB1c2VDb250ZXh0LCB1c2VDYWxsYmFjaywgdXNlUmVmIH0gZnJvbSAncmVhY3QnOwppbXBvcnQgeyB1c2VQYXRobmFtZSwgdXNlUm91dGVyIH0gZnJvbSAnbmV4dC9uYXZpZ2F0aW9uJzsKaW1wb3J0IExpbmsgZnJvbSAnbmV4dC9saW5rJzsKaW1wb3J0IHsgc2IsIGxlckNyZWRlbmNpYWlzLCBncmF2YXJDcmVkZW5jaWFpcyB9IGZyb20gJ0AvbGliL3N1cGFiYXNlJzsKaW1wb3J0IHsgY2FycmVnYXJFc3RhZG8gfSBmcm9tICdAL2xpYi9kYic7CmltcG9ydCB7IEVxdWlwZSwgbGlzdGFyRXF1aXBlcywgc291TGlkZXIgfSBmcm9tICdAL2xpYi9lcXVpcGVzJzsKaW1wb3J0IHsgRXN0YWRvLCBlc3RhZG9WYXppbyB9IGZyb20gJ0AvbGliL2VuZ2luZSc7CmltcG9ydCB7IEljQWp1c3RlcywgSWNDYWxlbmRhcmlvLCBJY1BhaW5lbCwgSWNTYWlyLCBJY1NldGEsIEljVGltZSB9IGZyb20gJy4vSWNvbmVzJzsKaW1wb3J0IHsgTG9nbyB9IGZyb20gJy4vTWFyY2EnOwppbXBvcnQgeyBFc3F1ZWxldG8gfSBmcm9tICcuL1VpJzsKCnR5cGUgQ3R4ID0gewogIFM6IEVzdGFkbzsgcmVjYXJyZWdhcjogKCkgPT4gUHJvbWlzZTxFc3RhZG8gfCBudWxsPjsKICBhdmlzbzogKHQ6IHN0cmluZykgPT4gdm9pZDsgYmFzZTogc3RyaW5nOwogIGVxdWlwZTogRXF1aXBlIHwgbnVsbDsgZXF1aXBlczogRXF1aXBlW107IHRyb2NhckVxdWlwZTogKGlkOiBzdHJpbmcsIGxpc3RhPzogRXF1aXBlW10pID0+IHZvaWQ7CiAgcmVjYXJyZWdhckVxdWlwZXM6ICgpID0+IFByb21pc2U8RXF1aXBlW10+Owp9Owpjb25zdCBDID0gY3JlYXRlQ29udGV4dDxDdHg+KG51bGwgYXMgYW55KTsKZXhwb3J0IGNvbnN0IHVzZUFwcCA9ICgpID0+IHVzZUNvbnRleHQoQyk7Cgpjb25zdCBBQkFTID0gWwogIHsgaHJlZjogJy9wYWluZWwnLCByb3R1bG86ICdQYWluZWwnLCBJYzogSWNQYWluZWwgfSwKICB7IGhyZWY6ICcvcGFpbmVsL2NhbmRpZGF0dXJhcycsIHJvdHVsbzogJ0VudHJhZGFzJywgSWM6IEljVGltZSB9LAogIHsgaHJlZjogJy9lc2NhbGEnLCByb3R1bG86ICdFc2NhbGEnLCBJYzogSWNDYWxlbmRhcmlvIH0sCiAgeyBocmVmOiAnL3RpbWUnLCByb3R1bG86ICdUaW1lJywgSWM6IEljVGltZSB9LAogIHsgaHJlZjogJy9hanVzdGVzJywgcm90dWxvOiAnQWp1c3RlcycsIEljOiBJY0FqdXN0ZXMgfSwKXTsKY29uc3QgS19FUVVJUEUgPSAnZXNjYWxhLmVxdWlwZSc7CgovKiBPIEzDjURFUiBRVUUgVEFNQsOJTSBTRVJWRS4KICAgRG9pcyBkb3MgcXVhdHJvIG9yZ2FuaXphZG9yZXMgZGEgR1VJQSBzZXJ2ZW0gbnVtYSDDoXJlYSBhbMOpbSBkZSBvcmdhbml6YXIuCiAgIEF0w6kgYXF1aSBlbGVzIGVudHJhdmFtIHBvciBlLW1haWwgbm8gcGFpbmVsIGUgcG9yIHVtIGxpbmsgY29tIHRva2VuIG5vCiAgIHByw7NwcmlvIGVzcGHDp28sIGNvbW8gc2UgZm9zc2VtIGR1YXMgcGVzc29hcy4gYG1ldV9saW5rKClgIGRldm9sdmUgb3MKICAgdsOtbmN1bG9zIGRlIHF1ZW0gZXN0w6EgbG9nYWRvLCBlIHPDsyBvcyBkZWxhOiBzZXNzw6NvIGF1dGVudGljYWRhIMOpIHByb3ZhIGRlCiAgIGlkZW50aWRhZGUgbWFpcyBmb3J0ZSBxdWUgdW0gdG9rZW4gZW0gVVJMLCBlbnTDo28gZWxhIHBvZGUgcGVkaXIgbyBwcsOzcHJpbwogICBsaW5rLiBWZXIgbyDCpzYgZGEgbWlncmHDp8OjbyAzMy4gKi8KdHlwZSBNZXVWaW5jdWxvID0geyBzbHVnOiBzdHJpbmc7IGVxdWlwZTogc3RyaW5nOyB0b2tlbjogc3RyaW5nIH07CgpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBTaGVsbCh7IGNoaWxkcmVuIH06IHsgY2hpbGRyZW46IFJlYWN0LlJlYWN0Tm9kZSB9KSB7CiAgY29uc3QgW2Zhc2UsIHNldEZhc2VdID0gdXNlU3RhdGU8J2NhcnJlZ2FuZG8nIHwgJ3NlbS1jb25leGFvJyB8ICdzZW0tbG9naW4nIHwgJ3NlbS1hY2Vzc28nIHwgJ3NlbS1lcXVpcGUnIHwgJ3Byb250byc+KCdjYXJyZWdhbmRvJyk7CiAgY29uc3QgW1MsIHNldFNdID0gdXNlU3RhdGU8RXN0YWRvPihlc3RhZG9WYXppbygpKTsKICBjb25zdCBbZXF1aXBlcywgc2V0RXF1aXBlc10gPSB1c2VTdGF0ZTxFcXVpcGVbXT4oW10pOwogIGNvbnN0IFtlcXVpcGVJZCwgc2V0RXF1aXBlSWRdID0gdXNlU3RhdGU8c3RyaW5nPignJyk7CiAgY29uc3QgW21zZywgc2V0TXNnXSA9IHVzZVN0YXRlKCcnKTsKICBjb25zdCBbYmFzZSwgc2V0QmFzZV0gPSB1c2VTdGF0ZSgnJyk7CiAgY29uc3QgW21lbnVBYmVydG8sIHNldE1lbnVBYmVydG9dID0gdXNlU3RhdGUoZmFsc2UpOwogIGNvbnN0IGNhbWluaG8gPSB1c2VQYXRobmFtZSgpOwogIGNvbnN0IHJvdXRlciA9IHVzZVJvdXRlcigpOwogIGNvbnN0IGJ0blNlbGV0b3IgPSB1c2VSZWY8SFRNTEJ1dHRvbkVsZW1lbnQ+KG51bGwpOwogIGNvbnN0IGZlY2hhck1lbnUgPSB1c2VDYWxsYmFjaygoKSA9PiB7IHNldE1lbnVBYmVydG8oZmFsc2UpOyBidG5TZWxldG9yLmN1cnJlbnQ/LmZvY3VzKCk7IH0sIFtdKTsKICBjb25zdCBpZEF0aXZvID0gdXNlUmVmKCcnKTsKICBjb25zdCBub21lQXRpdm8gPSB1c2VSZWYoJycpOwogIGNvbnN0IHNlcSA9IHVzZVJlZigwKTsgICAgICAgICAgLy8gZGVzY2FydGEgcmVzcG9zdGEgZm9yYSBkZSBvcmRlbSBkYSBNRVNNQSBlcXVpcGUKICBjb25zdCBbbWV1cywgc2V0TWV1c10gPSB1c2VTdGF0ZTxNZXVWaW5jdWxvW10+KFtdKTsKCiAgY29uc3QgYXZpc28gPSB1c2VDYWxsYmFjaygodDogc3RyaW5nKSA9PiB7IHNldE1zZyh0KTsgc2V0VGltZW91dCgoKSA9PiBzZXRNc2coJycpLCAyMjAwKTsgfSwgW10pOwoKICAvKiBJTVBPUlRBTlRFOiBlbnRyZSBvIGF3YWl0IGUgbyBzZXRTLCBvIGzDrWRlciBwb2RlIHRlciB0cm9jYWRvIGRlIG1pbmlzdMOpcmlvLgogICAgIFNlbSByZXZhbGlkYXIsIG8gZXN0YWRvIGRhIGVxdWlwZSBBIGNhw61hIGRlbnRybyBkYSBlcXVpcGUgQiDigJQgZSBvIHByw7N4aW1vCiAgICAgImFkaWNpb25hciBwZXNzb2EiIGdyYXZhdmEgZW0gQiB1c2FuZG8gb3MgaWRzIGRlIGZ1bsOnw7VlcyBkZSBBLiAqLwogIGNvbnN0IHJlY2FycmVnYXIgPSB1c2VDYWxsYmFjayhhc3luYyAoKSA9PiB7CiAgICBjb25zdCBpZCA9IGlkQXRpdm8uY3VycmVudDsKICAgIGlmICghaWQpIHJldHVybiBudWxsOwogICAgY29uc3QgbWV1ID0gKytzZXEuY3VycmVudDsKICAgIHRyeSB7CiAgICAgIGNvbnN0IGVzdCA9IGF3YWl0IGNhcnJlZ2FyRXN0YWRvKGlkLCBub21lQXRpdm8uY3VycmVudCk7CiAgICAgIGlmIChpZEF0aXZvLmN1cnJlbnQgIT09IGlkIHx8IHNlcS5jdXJyZW50ICE9PSBtZXUpIHJldHVybiBudWxsOyAgIC8vIGNoZWdvdSB0YXJkZTogaWdub3JhCiAgICAgIHNldFMoZXN0KTsKICAgICAgcmV0dXJuIGVzdDsKICAgIH0gY2F0Y2ggKGU6IGFueSkgewogICAgICBpZiAoaWRBdGl2by5jdXJyZW50ICE9PSBpZCkgcmV0dXJuIG51bGw7CiAgICAgIGlmIChTdHJpbmcoZT8ubWVzc2FnZSB8fCBlKS5pbmNsdWRlcygnSldUJykgfHwgZT8uY29kZSA9PT0gJ1BHUlNUMzAxJykgc2V0RmFzZSgnc2VtLWxvZ2luJyk7CiAgICAgIGVsc2UgYXZpc28oJ0Vycm8gYW8gY2FycmVnYXI6ICcgKyAoZT8ubWVzc2FnZSB8fCBlKSk7CiAgICAgIHJldHVybiBudWxsOwogICAgfQogIH0sIFthdmlzb10pOwoKICBjb25zdCByZWNhcnJlZ2FyRXF1aXBlcyA9IHVzZUNhbGxiYWNrKGFzeW5jICgpID0+IHsKICAgIGNvbnN0IGxpc3RhID0gYXdhaXQgbGlzdGFyRXF1aXBlcygpOwogICAgc2V0RXF1aXBlcyhsaXN0YSk7CiAgICByZXR1cm4gbGlzdGE7CiAgfSwgW10pOwoKICAvKiBUcm9jYXIgZGUgbWluaXN0w6lyaW8gc8OzIGNvbmNsdWkgc2UgbyBjYXJyZWdhbWVudG8gZGV1IGNlcnRvLiBBbnRlcywgdW1hCiAgICAgZmFsaGEgZGUgcmVkZSBkZWl4YXZhIGEgdGVsYSBkaXplbmRvICJMb3V2b3IiIGNvbSBvcyBkYWRvcyBkYSBNw61kaWEuICovCiAgY29uc3QgdHJvY2FyRXF1aXBlID0gdXNlQ2FsbGJhY2soKGlkOiBzdHJpbmcsIGxpc3RhPzogRXF1aXBlW10pID0+IHsKICAgIGNvbnN0IGFudGVzSWQgPSBpZEF0aXZvLmN1cnJlbnQsIGFudGVzTm9tZSA9IG5vbWVBdGl2by5jdXJyZW50OwogICAgY29uc3QgZm9udGUgPSBsaXN0YSB8fCBlcXVpcGVzOwogICAgaWRBdGl2by5jdXJyZW50ID0gaWQ7CiAgICBub21lQXRpdm8uY3VycmVudCA9IGZvbnRlLmZpbmQoZSA9PiBlLmlkID09PSBpZCk/Lm5vbWUgfHwgJyc7CiAgICBzZXRFcXVpcGVJZChpZCk7IHNldE1lbnVBYmVydG8oZmFsc2UpOwogICAgdHJ5IHsgbG9jYWxTdG9yYWdlLnNldEl0ZW0oS19FUVVJUEUsIGlkKTsgfSBjYXRjaCB7fQogICAgc2V0RmFzZSgnY2FycmVnYW5kbycpOwogICAgdm9pZCByZWNhcnJlZ2FyKCkudGhlbihlc3QgPT4gewogICAgICBpZiAoZXN0KSB7IHNldEZhc2UoJ3Byb250bycpOyByZXR1cm47IH0KICAgICAgaWYgKGlkQXRpdm8uY3VycmVudCAhPT0gaWQpIHJldHVybjsgICAgICAgICAgICAgICAgIC8vIG91dHJhIHRyb2NhIGFzc3VtaXUKICAgICAgaWRBdGl2by5jdXJyZW50ID0gYW50ZXNJZDsgbm9tZUF0aXZvLmN1cnJlbnQgPSBhbnRlc05vbWU7CiAgICAgIHNldEVxdWlwZUlkKGFudGVzSWQpOwogICAgICB0cnkgeyBpZiAoYW50ZXNJZCkgbG9jYWxTdG9yYWdlLnNldEl0ZW0oS19FUVVJUEUsIGFudGVzSWQpOyB9IGNhdGNoIHt9CiAgICAgIHNldEZhc2UoYW50ZXNJZCA/ICdwcm9udG8nIDogJ3NlbS1lcXVpcGUnKTsKICAgICAgYXZpc28oJ07Do28gY29uc2VndWkgYWJyaXIgZXNzZSBtaW5pc3TDqXJpby4gVGVudGUgZGUgbm92by4nKTsKICAgIH0pOwogIH0sIFtyZWNhcnJlZ2FyLCBlcXVpcGVzLCBhdmlzb10pOwoKICB1c2VFZmZlY3QoKCkgPT4gewogICAgc2V0QmFzZSh3aW5kb3cubG9jYXRpb24ub3JpZ2luKTsKICAgIC8qIEhhcm5lc3MgZGUgZGVzaWduLiBPIGltcG9ydCDDqSBESU7Dgk1JQ08gZGUgcHJvcMOzc2l0bzogY29tIGltcG9ydCBlc3TDoXRpY28KICAgICAgIG8gd2VicGFjayBuw6NvIGNvbnNlZ3VpYSBwcm92YXIgcXVlIG8gbcOzZHVsbyBlcmEgaW5hbGNhbsOnw6F2ZWwgZSBvcyBub21lcwogICAgICAgZGUgZml4dHVyZSAoIk1hbHUgQ2FmZmFybyIpIGFjYWJhcmFtIGRlbnRybyBkbyBidW5kbGUgZGUgcHJvZHXDp8Ojby4gRGVudHJvCiAgICAgICBkZSB1bSByYW1vIHF1ZSBvIE5PREVfRU5WIHplcmEgZW0gYnVpbGQsIG8gaW1wb3J0IGRpbsOibWljbyBzb21lIGludGVpcm8uICovCiAgICBpZiAocHJvY2Vzcy5lbnYuTk9ERV9FTlYgPT09ICdkZXZlbG9wbWVudCcKICAgICAgICAmJiBuZXcgVVJMU2VhcmNoUGFyYW1zKHdpbmRvdy5sb2NhdGlvbi5zZWFyY2gpLmhhcygnZGVtbycpKSB7CiAgICAgIHZvaWQgaW1wb3J0KCdAL2xpYi9kZW1vJykudGhlbigoeyBlc3RhZG9EZW1vIH0pID0+IHsKICAgICAgICBpZEF0aXZvLmN1cnJlbnQgPSAnZGVtbyc7IG5vbWVBdGl2by5jdXJyZW50ID0gJ03DrWRpYSc7CiAgICAgICAgc2V0RXF1aXBlcyhbeyBpZDogJ2RlbW8nLCBub21lOiAnTcOtZGlhJywgc2x1ZzogJ21pZGlhJywgd2hhdHNhcHBfZ3J1cG86IG51bGwsIG9yZGVtOiAxIH0gYXMgYW55XSk7CiAgICAgICAgc2V0RXF1aXBlSWQoJ2RlbW8nKTsKICAgICAgICBzZXRTKGVzdGFkb0RlbW8oKSk7IHNldEZhc2UoJ3Byb250bycpOwogICAgICB9KTsKICAgICAgcmV0dXJuOwogICAgfQogICAgY29uc3QgYyA9IGxlckNyZWRlbmNpYWlzKCk7CiAgICBpZiAoIWMpIHsgc2V0RmFzZSgnc2VtLWNvbmV4YW8nKTsgcmV0dXJuOyB9CiAgICBjb25zdCBzID0gc2IoKTsKICAgIGlmICghcykgeyBzZXRGYXNlKCdzZW0tY29uZXhhbycpOyByZXR1cm47IH0KICAgIGxldCB2aXZvID0gdHJ1ZTsKICAgIGNvbnN0IGVudHJhciA9ICh0ZW1TZXNzYW86IGJvb2xlYW4pID0+IHsKICAgICAgaWYgKCF2aXZvKSByZXR1cm47CiAgICAgIGlmICghdGVtU2Vzc2FvKSB7IHNldEZhc2UoJ3NlbS1sb2dpbicpOyByZXR1cm47IH0KICAgICAgc2V0VGltZW91dChhc3luYyAoKSA9PiB7CiAgICAgICAgaWYgKCF2aXZvKSByZXR1cm47CiAgICAgICAgdHJ5IHsKICAgICAgICAgIGNvbnN0IGxpZGVyID0gYXdhaXQgc291TGlkZXIoKTsKICAgICAgICAgIGlmICghdml2bykgcmV0dXJuOwogICAgICAgICAgaWYgKCFsaWRlcikgeyBzZXRGYXNlKCdzZW0tYWNlc3NvJyk7IHJldHVybjsgfQogICAgICAgICAgY29uc3QgbGlzdGEgPSBhd2FpdCByZWNhcnJlZ2FyRXF1aXBlcygpOwogICAgICAgICAgaWYgKCF2aXZvKSByZXR1cm47CiAgICAgICAgICBpZiAoIWxpc3RhLmxlbmd0aCkgeyBzZXRGYXNlKCdzZW0tZXF1aXBlJyk7IHJldHVybjsgfQogICAgICAgICAgbGV0IGFsdm8gPSAnJzsKICAgICAgICAgIHRyeSB7IGFsdm8gPSBsb2NhbFN0b3JhZ2UuZ2V0SXRlbShLX0VRVUlQRSkgfHwgJyc7IH0gY2F0Y2gge30KICAgICAgICAgIGlmICghbGlzdGEuc29tZShlID0+IGUuaWQgPT09IGFsdm8pKSBhbHZvID0gbGlzdGFbMF0uaWQ7CiAgICAgICAgICBpZEF0aXZvLmN1cnJlbnQgPSBhbHZvOwogICAgICAgICAgbm9tZUF0aXZvLmN1cnJlbnQgPSBsaXN0YS5maW5kKGUgPT4gZS5pZCA9PT0gYWx2byk/Lm5vbWUgfHwgJyc7CiAgICAgICAgICBzZXRFcXVpcGVJZChhbHZvKTsKICAgICAgICAgIGF3YWl0IHJlY2FycmVnYXIoKTsKICAgICAgICAgIGlmICh2aXZvKSBzZXRGYXNlKCdwcm9udG8nKTsKICAgICAgICAgIC8qIG9zIHbDrW5jdWxvcyBkYSBwcsOzcHJpYSBwZXNzb2EuIEZhbGhhIGFxdWkgbsOjbyBhdHJhcGFsaGEgbmFkYTogw6kKICAgICAgICAgICAgIHVtIGF0YWxobyBhIG1haXMsIG7Do28gdW0gcmVxdWlzaXRvIGRhIHRlbGEuIE8gZXJybyB2ZW0gbm8gb2JqZXRvCiAgICAgICAgICAgICBkZSByZXNwb3N0YSBkbyBzdXBhYmFzZS1qcywgbsOjbyBjb21vIHJlamVpw6fDo28sIGVudMOjbyBuw6NvIGjDoQogICAgICAgICAgICAgLmNhdGNoIGEgYWNyZXNjZW50YXI6IGJhc3RhIG7Do28gY29uZmlhciBubyBkYXRhLiAqLwogICAgICAgICAgY29uc3QgeyBkYXRhOiBtZXVzRGFkb3MgfSA9IGF3YWl0IHMucnBjKCdtZXVfbGluaycpOwogICAgICAgICAgaWYgKHZpdm8gJiYgKG1ldXNEYWRvcyBhcyBhbnkpPy5vaykgewogICAgICAgICAgICBzZXRNZXVzKCgobWV1c0RhZG9zIGFzIGFueSkubGlua3MgfHwgW10pIGFzIE1ldVZpbmN1bG9bXSk7CiAgICAgICAgICB9CiAgICAgICAgfSBjYXRjaCAoZTogYW55KSB7CiAgICAgICAgICBpZiAoU3RyaW5nKGU/Lm1lc3NhZ2UgfHwgZSkuaW5jbHVkZXMoJ0pXVCcpKSBzZXRGYXNlKCdzZW0tbG9naW4nKTsKICAgICAgICAgIGVsc2UgaWYgKHZpdm8pIGF2aXNvKCdFcnJvOiAnICsgKGU/Lm1lc3NhZ2UgfHwgZSkpOwogICAgICAgIH0KICAgICAgfSwgMCk7CiAgICB9OwogICAgLyogbyAuY2F0Y2ggbsOjbyDDqSBkZWNvcmHDp8Ojbzogc2VtIGVsZSwgdW1hIGZhbGhhIGRlIHJlZGUgYXF1aSBkZWl4YXZhCiAgICAgICBgZW50cmFyYCBzZW0gc2VyIGNoYW1hZG8gbnVuY2EgZSBvIGFwcCBwYXJhZG8gbm8gZXN0YWRvIGluaWNpYWwsIHNlbQogICAgICAgZXJybyBlIHNlbSB0ZWxhIGRlIGxvZ2luLiBGYWxoYXIgZGVjaWRpbmRvICJuw6NvIHRlbSBzZXNzw6NvIiBsZXZhIGEKICAgICAgIHBlc3NvYSBwYXJhIG8gbG9naW4sIHF1ZSDDqSBhIHNhw61kYSBjZXJ0YS4gKi8KICAgIHMuYXV0aC5nZXRTZXNzaW9uKCkKICAgICAgLnRoZW4oKHsgZGF0YSB9KSA9PiBlbnRyYXIoISFkYXRhLnNlc3Npb24pKQogICAgICAuY2F0Y2goKCkgPT4gZW50cmFyKGZhbHNlKSk7CiAgICBjb25zdCB7IGRhdGE6IHN1YiB9ID0gcy5hdXRoLm9uQXV0aFN0YXRlQ2hhbmdlKChfZSwgc2VzcykgPT4gZW50cmFyKCEhc2VzcykpOwogICAgcmV0dXJuICgpID0+IHsgdml2byA9IGZhbHNlOyBzdWIuc3Vic2NyaXB0aW9uLnVuc3Vic2NyaWJlKCk7IH07CiAgfSwgW3JlY2FycmVnYXIsIHJlY2FycmVnYXJFcXVpcGVzLCBhdmlzb10pOwoKICAvKiBFc2MgZmVjaGEgbyBtZW51IGUgZGV2b2x2ZSBvIGZvY28gYW8gYm90w6NvIOKAlCBzZW0gaXNzbywgcXVlbSBuYXZlZ2EgcG9yCiAgICAgdGVjbGFkbyBhYnJlIGEgbGlzdGEgZGUgbWluaXN0w6lyaW9zIGUgbsOjbyB0ZW0gY29tbyBzYWlyIGRlbGEuICovCiAgdXNlRWZmZWN0KCgpID0+IHsKICAgIGlmICghbWVudUFiZXJ0bykgcmV0dXJuOwogICAgY29uc3Qgb25LZXkgPSAoZXY6IEtleWJvYXJkRXZlbnQpID0+IHsgaWYgKGV2LmtleSA9PT0gJ0VzY2FwZScpIGZlY2hhck1lbnUoKTsgfTsKICAgIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdrZXlkb3duJywgb25LZXkpOwogICAgcmV0dXJuICgpID0+IHdpbmRvdy5yZW1vdmVFdmVudExpc3RlbmVyKCdrZXlkb3duJywgb25LZXkpOwogIH0sIFttZW51QWJlcnRvXSk7CgogIGlmIChmYXNlID09PSAnY2FycmVnYW5kbycpIHJldHVybiA8RXNxdWVsZXRvIC8+OwogIGlmIChmYXNlID09PSAnc2VtLWNvbmV4YW8nKSByZXR1cm4gPENvbmV4YW8gYW9TYWx2YXI9eygpID0+IGxvY2F0aW9uLnJlbG9hZCgpfSAvPjsKICBpZiAoZmFzZSA9PT0gJ3NlbS1sb2dpbicpIHsgaWYgKGNhbWluaG8gIT09ICcvZW50cmFyJykgcm91dGVyLnJlcGxhY2UoJy9lbnRyYXInKTsgcmV0dXJuIDxFc3F1ZWxldG8gLz47IH0KICBpZiAoZmFzZSA9PT0gJ3NlbS1hY2Vzc28nKSByZXR1cm4gKAogICAgPG1haW4gc3R5bGU9e3sgbWF4V2lkdGg6IDQ2MCwgcGFkZGluZ1RvcDogODAgfX0gY2xhc3NOYW1lPSJjZW50cm8iPgogICAgICA8aDE+RXN0ZSBlbWFpbCBuw6NvIHRlbSBhY2Vzc288L2gxPgogICAgICA8cCBjbGFzc05hbWU9ImRpbSIgc3R5bGU9e3sgbWFyZ2luOiAnMTBweCAwIDIwcHgnIH19PgogICAgICAgIFZvY8OqIGVudHJvdSwgbWFzIGVzdGUgZW1haWwgbsOjbyBlc3TDoSBuYSBsaXN0YSBkZSBvcmdhbml6YWRvcmVzLiBQZcOnYSBwYXJhIHF1ZW0gYWRtaW5pc3RyYSBsaWJlcmFyIHNldSBlbWFpbC4KICAgICAgPC9wPgogICAgICA8YnV0dG9uIGNsYXNzTmFtZT0icHJpIiBvbkNsaWNrPXthc3luYyAoKSA9PiB7IGF3YWl0IHNiKCkhLmF1dGguc2lnbk91dCgpOyBsb2NhdGlvbi5ocmVmID0gJy9lbnRyYXInOyB9fT5TYWlyIGUgdHJvY2FyIGRlIGNvbnRhPC9idXR0b24+CiAgICA8L21haW4+CiAgKTsKICBpZiAoZmFzZSA9PT0gJ3NlbS1lcXVpcGUnKSByZXR1cm4gPFByaW1laXJhRXF1aXBlIGFvQ3JpYXI9e2FzeW5jIChpZCkgPT4geyBjb25zdCBsID0gYXdhaXQgcmVjYXJyZWdhckVxdWlwZXMoKTsgdHJvY2FyRXF1aXBlKGlkLCBsKTsgfX0gLz47CgogIGNvbnN0IGVxdWlwZSA9IGVxdWlwZXMuZmluZChlID0+IGUuaWQgPT09IGVxdWlwZUlkKSB8fCBudWxsOwogIGNvbnN0IG5hdkl0ZW5zID0gQUJBUy5tYXAoYSA9PiAoeyAuLi5hLCBvbjogY2FtaW5obyA9PT0gYS5ocmVmIH0pKTsKCiAgcmV0dXJuICgKICAgIDxDLlByb3ZpZGVyIHZhbHVlPXt7IFMsIHJlY2FycmVnYXIsIGF2aXNvLCBiYXNlLCBlcXVpcGUsIGVxdWlwZXMsIHRyb2NhckVxdWlwZSwgcmVjYXJyZWdhckVxdWlwZXMgfX0+CiAgICAgIDxoZWFkZXIgY2xhc3NOYW1lPSJ0b3BvIj4KICAgICAgICA8ZGl2IGNsYXNzTmFtZT0idG9wby1pbiI+CiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibWFyY2EiPgogICAgICAgICAgICB7LyogYSBtYXJjYSBkYSBpZ3JlamEsIGEgbWVzbWEgZG8gc2l0ZSBww7pibGljbyDigJQgbsOjbyB1bSDDrWNvbmUgw6AKICAgICAgICAgICAgICAgIHBhcnRlLiBPIHNlbGV0b3IgZGUgZXF1aXBlIGNvbnRpbnVhIHBlbmR1cmFkbyBuZWxhLiAqL30KICAgICAgICAgICAgPExvZ28gY2xhc3NOYW1lPSJsb2dvIiAvPgogICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibWFyY2Etbm9tZSI+CiAgICAgICAgICAgICAgPGJ1dHRvbiByZWY9e2J0blNlbGV0b3J9IGNsYXNzTmFtZT0ic2VsZXRvci1lcXVpcGUiIG9uQ2xpY2s9eygpID0+IHNldE1lbnVBYmVydG8odiA9PiAhdil9CiAgICAgICAgICAgICAgICBhcmlhLWV4cGFuZGVkPXttZW51QWJlcnRvfSBhcmlhLWhhc3BvcHVwPSJtZW51Ij4KICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzTmFtZT0ic2VsZXRvci1ub21lIj57ZXF1aXBlPy5ub21lIHx8ICdFcXVpcGUnfTwvc3Bhbj4KICAgICAgICAgICAgICAgIDxzcGFuIGFyaWEtaGlkZGVuPsK3PC9zcGFuPgogICAgICAgICAgICAgICAgPHNwYW4+eygoKSA9PiB7IGNvbnN0IG4gPSBTLnZvbHVudGFyaW9zLmZpbHRlcih2ID0+IHYuYXRpdm8pLmxlbmd0aDsgcmV0dXJuIGAke259YDsgfSkoKX08L3NwYW4+CiAgICAgICAgICAgICAgICA8SWNTZXRhIC8+CiAgICAgICAgICAgICAgPC9idXR0b24+CiAgICAgICAgICAgIDwvZGl2PgogICAgICAgICAgICB7bWVudUFiZXJ0byAmJiAoCiAgICAgICAgICAgICAgPD4KICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJtZW51LWZ1bmRvIiBvbkNsaWNrPXtmZWNoYXJNZW51fSAvPgogICAgICAgICAgICAgICAgPGRpdiBjbGFzc05hbWU9Im1lbnUtZXF1aXBlcyIgcm9sZT0ibWVudSI+CiAgICAgICAgICAgICAgICAgIHsvKiBNRVNNQSBQRVNTT0EsIE1FU01PIFBST0RVVE8uCiAgICAgICAgICAgICAgICAgICAgICBRdWVtIG9yZ2FuaXphIGUgdGFtYsOpbSBzZXJ2ZSBlbmNvbnRyYXZhIG8gcHLDs3ByaW8gZXNwYcOnbwogICAgICAgICAgICAgICAgICAgICAgc8OzIHNlIHRpdmVzc2UgZ3VhcmRhZG8gbyBsaW5rIGRvIFdoYXRzQXBwLiBBZ29yYSBlbGUgZXN0w6EKICAgICAgICAgICAgICAgICAgICAgIG9uZGUgYSBwZXNzb2EgasOhIGVzdMOhLCBkZW50cm8gZG8gbWVzbW8gbWVudS4gKi99CiAgICAgICAgICAgICAgICAgIHttZXVzLmxlbmd0aCA+IDAgJiYgKAogICAgICAgICAgICAgICAgICAgIDw+CiAgICAgICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ib3ZlcmxpbmUiIHN0eWxlPXt7IHBhZGRpbmc6ICc0cHggMTJweCA4cHgnIH19Pk9uZGUgZXUgc2lydm88L2Rpdj4KICAgICAgICAgICAgICAgICAgICAgIHttZXVzLm1hcCh2ID0+ICgKICAgICAgICAgICAgICAgICAgICAgICAgPGEga2V5PXt2LnNsdWd9IHJvbGU9Im1lbnVpdGVtIiBjbGFzc05hbWU9Im1lbnUtaXRlbSIgaHJlZj17YC9ldS8ke3YudG9rZW59YH0+CiAgICAgICAgICAgICAgICAgICAgICAgICAge3YuZXF1aXBlfSDCtyBtZXUgZXNwYcOnbwogICAgICAgICAgICAgICAgICAgICAgICA8L2E+CiAgICAgICAgICAgICAgICAgICAgICApKX0KICAgICAgICAgICAgICAgICAgICAgIDxkaXYgY2xhc3NOYW1lPSJtZW51LXJpc2NvIiAvPgogICAgICAgICAgICAgICAgICAgIDwvPgogICAgICAgICAgICAgICAgICApfQogICAgICAgICAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ib3ZlcmxpbmUiIHN0eWxlPXt7IHBhZGRpbmc6ICc0cHggMTJweCA4cHgnIH19Pk1pbmlzdMOpcmlvczwvZGl2PgogICAgICAgICAgICAgICAgICB7ZXF1aXBlcy5tYXAoZSA9PiAoCiAgICAgICAgICAgICAgICAgICAgPGJ1dHRvbiBrZXk9e2UuaWR9IHJvbGU9Im1lbnVpdGVtIiBjbGFzc05hbWU9e2BtZW51LWl0ZW0gJHtlLmlkID09PSBlcXVpcGVJZCA/ICdvbicgOiAnJ31gfSBvbkNsaWNrPXsoKSA9PiB0cm9jYXJFcXVpcGUoZS5pZCl9PgogICAgICAgICAgICAgICAgICAgICAge2Uubm9tZX17ZS5pZCA9PT0gZXF1aXBlSWQgJiYgJyDinJMnfQogICAgICAgICAgICAgICAgICAgIDwvYnV0dG9uPgogICAgICAgICAgICAgICAgICApKX0KICAgICAgICAgICAgICAgICAgPExpbmsgaHJlZj0iL2FqdXN0ZXMjZXF1aXBlcyIgcm9sZT0ibWVudWl0ZW0iIGNsYXNzTmFtZT0ibWVudS1pdGVtIGFkZCIgb25DbGljaz17ZmVjaGFyTWVudX0+KyBub3ZvIG1pbmlzdMOpcmlvPC9MaW5rPgogICAgICAgICAgICAgICAgPC9kaXY+CiAgICAgICAgICAgICAgPC8+CiAgICAgICAgICAgICl9CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJtaW5pIGZhbnRhc21hIiBvbkNsaWNrPXthc3luYyAoKSA9PiB7IGF3YWl0IHNiKCkhLmF1dGguc2lnbk91dCgpOyBsb2NhdGlvbi5ocmVmID0gJy9lbnRyYXInOyB9fT4KICAgICAgICAgICAgPEljU2FpciAvPiBzYWlyCiAgICAgICAgICA8L2J1dHRvbj4KICAgICAgICA8L2Rpdj4KICAgICAgICA8bmF2IGNsYXNzTmFtZT0iYWJhcyIgYXJpYS1sYWJlbD0iU2XDp8O1ZXMiPgogICAgICAgICAge25hdkl0ZW5zLm1hcChhID0+ICgKICAgICAgICAgICAgPExpbmsga2V5PXthLmhyZWZ9IGhyZWY9e2EuaHJlZn0gY2xhc3NOYW1lPXthLm9uID8gJ29uJyA6ICcnfSBhcmlhLWN1cnJlbnQ9e2Eub24gPyAncGFnZScgOiB1bmRlZmluZWR9PgogICAgICAgICAgICAgIDxhLkljIC8+IHthLnJvdHVsb30KICAgICAgICAgICAgPC9MaW5rPgogICAgICAgICAgKSl9CiAgICAgICAgPC9uYXY+CiAgICAgIDwvaGVhZGVyPgogICAgICA8bWFpbj57Y2hpbGRyZW59PC9tYWluPgogICAgICA8bmF2IGNsYXNzTmFtZT0iYmFycmEtZnVuZG8iIGFyaWEtbGFiZWw9IlNlw6fDtWVzIj4KICAgICAgICB7bmF2SXRlbnMubWFwKGEgPT4gKAogICAgICAgICAgPExpbmsga2V5PXthLmhyZWZ9IGhyZWY9e2EuaHJlZn0gY2xhc3NOYW1lPXthLm9uID8gJ29uJyA6ICcnfSBhcmlhLWN1cnJlbnQ9e2Eub24gPyAncGFnZScgOiB1bmRlZmluZWR9PgogICAgICAgICAgICA8YS5JYyAvPiB7YS5yb3R1bG99CiAgICAgICAgICA8L0xpbms+CiAgICAgICAgKSl9CiAgICAgIDwvbmF2PgogICAgICB7bXNnICYmIDxkaXYgY2xhc3NOYW1lPSJ0b2FzdCIgcm9sZT0ic3RhdHVzIj57bXNnfTwvZGl2Pn0KICAgIDwvQy5Qcm92aWRlcj4KICApOwp9CgpmdW5jdGlvbiBQcmltZWlyYUVxdWlwZSh7IGFvQ3JpYXIgfTogeyBhb0NyaWFyOiAoaWQ6IHN0cmluZykgPT4gdm9pZCB9KSB7CiAgY29uc3QgW25vbWUsIHNldE5vbWVdID0gdXNlU3RhdGUoJycpOwogIGNvbnN0IFtvY3VwYWRvLCBzZXRPY3VwYWRvXSA9IHVzZVN0YXRlKGZhbHNlKTsKICByZXR1cm4gKAogICAgPG1haW4gc3R5bGU9e3sgbWF4V2lkdGg6IDQ2MCwgcGFkZGluZ1RvcDogNzAgfX0+CiAgICAgIDxoMT5DcmllIHNldSBwcmltZWlybyBtaW5pc3TDqXJpbzwvaDE+CiAgICAgIDxwIGNsYXNzTmFtZT0iZGltIiBzdHlsZT17eyBtYXJnaW46ICc4cHggMCAxOHB4JyB9fT4KICAgICAgICBDYWRhIG1pbmlzdMOpcmlvIChNw61kaWEsIExvdXZvciwgUmVjZXDDp8Ojb+KApikgdGVtIHNldSBwcsOzcHJpbyB0aW1lLCBmdW7Dp8O1ZXMgZSBlc2NhbGEuIFZvY8OqIHBvZGUgYWRpY2lvbmFyIHF1YW50b3MgcXVpc2VyLgogICAgICA8L3A+CiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIj4KICAgICAgICA8bGFiZWw+Tm9tZSBkbyBtaW5pc3TDqXJpbzwvbGFiZWw+CiAgICAgICAgPGlucHV0IHZhbHVlPXtub21lfSBvbkNoYW5nZT17ZSA9PiBzZXROb21lKGUudGFyZ2V0LnZhbHVlKX0gcGxhY2Vob2xkZXI9ImV4OiBMb3V2b3IiIGF1dG9Gb2N1cyAvPgogICAgICAgIDxkaXYgc3R5bGU9e3sgaGVpZ2h0OiAxNCB9fSAvPgogICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJwcmkgZ3JhbmRlIiBkaXNhYmxlZD17b2N1cGFkbyB8fCAhbm9tZS50cmltKCl9IG9uQ2xpY2s9e2FzeW5jICgpID0+IHsKICAgICAgICAgIHNldE9jdXBhZG8odHJ1ZSk7CiAgICAgICAgICB0cnkgeyBjb25zdCB7IGNyaWFyRXF1aXBlIH0gPSBhd2FpdCBpbXBvcnQoJ0AvbGliL2VxdWlwZXMnKTsgY29uc3QgZXEgPSBhd2FpdCBjcmlhckVxdWlwZShub21lLnRyaW0oKSk7IGFvQ3JpYXIoZXEuaWQpOyB9CiAgICAgICAgICBjYXRjaCAoZTogYW55KSB7IGFsZXJ0KCdFcnJvOiAnICsgZS5tZXNzYWdlKTsgc2V0T2N1cGFkbyhmYWxzZSk7IH0KICAgICAgICB9fT5DcmlhciBtaW5pc3TDqXJpbzwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgIDwvbWFpbj4KICApOwp9CgpleHBvcnQgZnVuY3Rpb24gQ29uZXhhbyh7IGFvU2FsdmFyIH06IHsgYW9TYWx2YXI6ICgpID0+IHZvaWQgfSkgewogIGNvbnN0IFt1cmwsIHNldFVybF0gPSB1c2VTdGF0ZSgnJyk7CiAgY29uc3QgW2tleSwgc2V0S2V5XSA9IHVzZVN0YXRlKCcnKTsKICByZXR1cm4gKAogICAgPG1haW4gc3R5bGU9e3sgbWF4V2lkdGg6IDU0MCwgcGFkZGluZ1RvcDogNjAgfX0+CiAgICAgIDxoMT5Db25lY3RhciBhbyBiYW5jbzwvaDE+CiAgICAgIDxwIGNsYXNzTmFtZT0iZGltIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDggfX0+CiAgICAgICAgQ29sZSBvIGVuZGVyZcOnbyBlIGEgY2hhdmUgcMO6YmxpY2EgZG8gc2V1IHByb2pldG8gU3VwYWJhc2UuIEZpY2Egc2Fsdm8gbmVzdGUgYXBhcmVsaG8uCiAgICAgIDwvcD4KICAgICAgPGRpdiBjbGFzc05hbWU9ImNhcmQiPgogICAgICAgIDxsYWJlbD5VUkwgZG8gcHJvamV0bzwvbGFiZWw+CiAgICAgICAgPGlucHV0IHZhbHVlPXt1cmx9IG9uQ2hhbmdlPXtlID0+IHNldFVybChlLnRhcmdldC52YWx1ZSl9IHBsYWNlaG9sZGVyPSJodHRwczovL3h4eHguc3VwYWJhc2UuY28iIC8+CiAgICAgICAgPGRpdiBzdHlsZT17eyBoZWlnaHQ6IDEyIH19IC8+CiAgICAgICAgPGxhYmVsPkNoYXZlIGFub24gKHB1YmxpYyk8L2xhYmVsPgogICAgICAgIDxpbnB1dCB2YWx1ZT17a2V5fSBvbkNoYW5nZT17ZSA9PiBzZXRLZXkoZS50YXJnZXQudmFsdWUpfSBwbGFjZWhvbGRlcj0iZXlKaGJHY2lPaS4uLiIgLz4KICAgICAgICA8ZGl2IHN0eWxlPXt7IGhlaWdodDogMTQgfX0gLz4KICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT0icHJpIGdyYW5kZSIgZGlzYWJsZWQ9eyF1cmwgfHwgIWtleX0KICAgICAgICAgIG9uQ2xpY2s9eygpID0+IHsgZ3JhdmFyQ3JlZGVuY2lhaXMoeyB1cmw6IHVybC50cmltKCkucmVwbGFjZSgvXC8kLywgJycpLCBrZXk6IGtleS50cmltKCkgfSk7IGFvU2FsdmFyKCk7IH19PgogICAgICAgICAgQ29uZWN0YXIKICAgICAgICA8L2J1dHRvbj4KICAgICAgPC9kaXY+CiAgICA8L21haW4+CiAgKTsKfQoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGNvcGlhcih0eHQ6IHN0cmluZywgYXZpc286ICh0OiBzdHJpbmcpID0+IHZvaWQsIHJvdHVsbyA9ICdDb3BpYWRvLiDDiSBzw7MgY29sYXIgbm8gV2hhdHNBcHAuJykgewogIHRyeSB7IGF3YWl0IG5hdmlnYXRvci5jbGlwYm9hcmQud3JpdGVUZXh0KHR4dCk7IGF2aXNvKHJvdHVsbyk7IHJldHVybjsgfSBjYXRjaCB7fQogIHRyeSB7CiAgICBjb25zdCB0YSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoJ3RleHRhcmVhJyk7CiAgICB0YS52YWx1ZSA9IHR4dDsgdGEucmVhZE9ubHkgPSB0cnVlOwogICAgdGEuc3R5bGUucG9zaXRpb24gPSAnZml4ZWQnOyB0YS5zdHlsZS5sZWZ0ID0gJy05OTk5cHgnOyB0YS5zdHlsZS50b3AgPSAnMCc7CiAgICBkb2N1bWVudC5ib2R5LmFwcGVuZENoaWxkKHRhKTsgdGEuc2VsZWN0KCk7CiAgICBjb25zdCBkZXVDZXJ0byA9IGRvY3VtZW50LmV4ZWNDb21tYW5kKCdjb3B5Jyk7CiAgICB0YS5yZW1vdmUoKTsKICAgIGF2aXNvKGRldUNlcnRvID8gcm90dWxvIDogJ07Do28gY29uc2VndWkgY29waWFyLiBVc2UgIlZlciBhIG1lbnNhZ2VtIiBlIGNvcGllIG1hbnVhbG1lbnRlLicpOwogIH0gY2F0Y2ggeyBhdmlzbygnTsOjbyBjb25zZWd1aSBjb3BpYXIuIFVzZSAiVmVyIGEgbWVuc2FnZW0iIGUgY29waWUgbWFudWFsbWVudGUuJyk7IH0KfQo="}
+'use client';
+import { useEffect, useState, createContext, useContext, useCallback, useRef } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { sb, lerCredenciais, gravarCredenciais } from '@/lib/supabase';
+import { carregarEstado } from '@/lib/db';
+import { Equipe, listarEquipes, souLider } from '@/lib/equipes';
+import { Estado, estadoVazio } from '@/lib/engine';
+import { IcAjustes, IcCalendario, IcPainel, IcSair, IcSeta, IcTime } from './Icones';
+import { Logo } from './Marca';
+import { Esqueleto } from './Ui';
+
+type Ctx = {
+  S: Estado; recarregar: () => Promise<Estado | null>;
+  aviso: (t: string) => void; base: string;
+  equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => void;
+  recarregarEquipes: () => Promise<Equipe[]>;
+};
+const C = createContext<Ctx>(null as any);
+export const useApp = () => useContext(C);
+
+const ABAS = [
+  { href: '/painel', rotulo: 'Painel', Ic: IcPainel },
+  { href: '/painel/candidaturas', rotulo: 'Entradas', Ic: IcTime },
+  { href: '/escala', rotulo: 'Escala', Ic: IcCalendario },
+  { href: '/time', rotulo: 'Time', Ic: IcTime },
+  { href: '/ajustes', rotulo: 'Ajustes', Ic: IcAjustes },
+];
+const K_EQUIPE = 'escala.equipe';
+
+/* O LÍDER QUE TAMBÉM SERVE.
+   Dois dos quatro organizadores da GUIA servem numa área além de organizar.
+   Até aqui eles entravam por e-mail no painel e por um link com token no
+   próprio espaço, como se fossem duas pessoas. `meu_link()` devolve os
+   vínculos de quem está logado, e só os dela: sessão autenticada é prova de
+   identidade mais forte que um token em URL, então ela pode pedir o próprio
+   link. Ver o §6 da migração 33. */
+type MeuVinculo = { slug: string; equipe: string; token: string };
+
+export default function Shell({ children }: { children: React.ReactNode }) {
+  const [fase, setFase] = useState<'carregando' | 'sem-conexao' | 'sem-login' | 'sem-acesso' | 'sem-equipe' | 'pronto'>('carregando');
+  const [S, setS] = useState<Estado>(estadoVazio());
+  const [equipes, setEquipes] = useState<Equipe[]>([]);
+  const [equipeId, setEquipeId] = useState<string>('');
+  const [msg, setMsg] = useState('');
+  const [base, setBase] = useState('');
+  const [menuAberto, setMenuAberto] = useState(false);
+  const caminho = usePathname();
+  const router = useRouter();
+  const btnSeletor = useRef<HTMLButtonElement>(null);
+  const fecharMenu = useCallback(() => { setMenuAberto(false); btnSeletor.current?.focus(); }, []);
+  const idAtivo = useRef('');
+  const nomeAtivo = useRef('');
+  const seq = useRef(0);          // descarta resposta fora de ordem da MESMA equipe
+  const [meus, setMeus] = useState<MeuVinculo[]>([]);
+
+  const aviso = useCallback((t: string) => { setMsg(t); setTimeout(() => setMsg(''), 2200); }, []);
+
+  /* IMPORTANTE: entre o await e o setS, o líder pode ter trocado de ministério.
+     Sem revalidar, o estado da equipe A caía dentro da equipe B — e o próximo
+     "adicionar pessoa" gravava em B usando os ids de funções de A. */
+  const recarregar = useCallback(async () => {
+    const id = idAtivo.current;
+    if (!id) return null;
+    const meu = ++seq.current;
+    try {
+      const est = await carregarEstado(id, nomeAtivo.current);
+      if (idAtivo.current !== id || seq.current !== meu) return null;   // chegou tarde: ignora
+      setS(est);
+      return est;
+    } catch (e: any) {
+      if (idAtivo.current !== id) return null;
+      if (String(e?.message || e).includes('JWT') || e?.code === 'PGRST301') setFase('sem-login');
+      else aviso('Erro ao carregar: ' + (e?.message || e));
+      return null;
+    }
+  }, [aviso]);
+
+  const recarregarEquipes = useCallback(async () => {
+    const lista = await listarEquipes();
+    setEquipes(lista);
+    return lista;
+  }, []);
+
+  /* Trocar de ministério só conclui se o carregamento deu certo. Antes, uma
+     falha de rede deixava a tela dizendo "Louvor" com os dados da Mídia. */
+  const trocarEquipe = useCallback((id: string, lista?: Equipe[]) => {
+    const antesId = idAtivo.current, antesNome = nomeAtivo.current;
+    const fonte = lista || equipes;
+    idAtivo.current = id;
+    nomeAtivo.current = fonte.find(e => e.id === id)?.nome || '';
+    setEquipeId(id); setMenuAberto(false);
+    try { localStorage.setItem(K_EQUIPE, id); } catch {}
+    setFase('carregando');
+    void recarregar().then(est => {
+      if (est) { setFase('pronto'); return; }
+      if (idAtivo.current !== id) return;                 // outra troca assumiu
+      idAtivo.current = antesId; nomeAtivo.current = antesNome;
+      setEquipeId(antesId);
+      try { if (antesId) localStorage.setItem(K_EQUIPE, antesId); } catch {}
+      setFase(antesId ? 'pronto' : 'sem-equipe');
+      aviso('Não consegui abrir esse ministério. Tente de novo.');
+    });
+  }, [recarregar, equipes, aviso]);
+
+  useEffect(() => {
+    setBase(window.location.origin);
+    /* Harness de design. O import é DINÂMICO de propósito: com import estático
+       o webpack não conseguia provar que o módulo era inalcançável e os nomes
+       de fixture ("Malu Caffaro") acabaram dentro do bundle de produção. Dentro
+       de um ramo que o NODE_ENV zera em build, o import dinâmico some inteiro. */
+    if (process.env.NODE_ENV === 'development'
+        && new URLSearchParams(window.location.search).has('demo')) {
+      void import('@/lib/demo').then(({ estadoDemo }) => {
+        idAtivo.current = 'demo'; nomeAtivo.current = 'Mídia';
+        setEquipes([{ id: 'demo', nome: 'Mídia', slug: 'midia', whatsapp_grupo: null, ordem: 1 } as any]);
+        setEquipeId('demo');
+        setS(estadoDemo()); setFase('pronto');
+      });
+      return;
+    }
+    const c = lerCredenciais();
+    if (!c) { setFase('sem-conexao'); return; }
+    const s = sb();
+    if (!s) { setFase('sem-conexao'); return; }
+    let vivo = true;
+    const entrar = (temSessao: boolean) => {
+      if (!vivo) return;
+      if (!temSessao) { setFase('sem-login'); return; }
+      setTimeout(async () => {
+        if (!vivo) return;
+        try {
+          const lider = await souLider();
+          if (!vivo) return;
+          if (!lider) { setFase('sem-acesso'); return; }
+          const lista = await recarregarEquipes();
+          if (!vivo) return;
+          if (!lista.length) { setFase('sem-equipe'); return; }
+          let alvo = '';
+          try { alvo = localStorage.getItem(K_EQUIPE) || ''; } catch {}
+          if (!lista.some(e => e.id === alvo)) alvo = lista[0].id;
+          idAtivo.current = alvo;
+          nomeAtivo.current = lista.find(e => e.id === alvo)?.nome || '';
+          setEquipeId(alvo);
+          await recarregar();
+          if (vivo) setFase('pronto');
+          /* os vínculos da própria pessoa. Falha aqui não atrapalha nada: é
+             um atalho a mais, não um requisito da tela. O erro vem no objeto
+             de resposta do supabase-js, não como rejeição, então não há
+             .catch a acrescentar: basta não confiar no data. */
+          const { data: meusDados } = await s.rpc('meu_link');
+          if (vivo && (meusDados as any)?.ok) {
+            setMeus(((meusDados as any).links || []) as MeuVinculo[]);
+          }
+        } catch (e: any) {
+          if (String(e?.message || e).includes('JWT')) setFase('sem-login');
+          else if (vivo) aviso('Erro: ' + (e?.message || e));
+        }
+      }, 0);
+    };
+    /* o .catch não é decoração: sem ele, uma falha de rede aqui deixava
+       `entrar` sem ser chamado nunca e o app parado no estado inicial, sem
+       erro e sem tela de login. Falhar decidindo "não tem sessão" leva a
+       pessoa para o login, que é a saída certa. */
+    s.auth.getSession()
+      .then(({ data }) => entrar(!!data.session))
+      .catch(() => entrar(false));
+    const { data: sub } = s.auth.onAuthStateChange((_e, sess) => entrar(!!sess));
+    return () => { vivo = false; sub.subscription.unsubscribe(); };
+  }, [recarregar, recarregarEquipes, aviso]);
+
+  /* Esc fecha o menu e devolve o foco ao botão — sem isso, quem navega por
+     teclado abre a lista de ministérios e não tem como sair dela. */
+  useEffect(() => {
+    if (!menuAberto) return;
+    const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') fecharMenu(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuAberto]);
+
+  if (fase === 'carregando') return <Esqueleto />;
+  if (fase === 'sem-conexao') return <Conexao aoSalvar={() => location.reload()} />;
+  if (fase === 'sem-login') { if (caminho !== '/entrar') router.replace('/entrar'); return <Esqueleto />; }
+  if (fase === 'sem-acesso') return (
+    <main style={{ maxWidth: 460, paddingTop: 80 }} className="centro">
+      <h1>Este email não tem acesso</h1>
+      <p className="dim" style={{ margin: '10px 0 20px' }}>
+        Você entrou, mas este email não está na lista de organizadores. Peça para quem administra liberar seu email.
+      </p>
+      <button className="pri" onClick={async () => { await sb()!.auth.signOut(); location.href = '/entrar'; }}>Sair e trocar de conta</button>
+    </main>
+  );
+  if (fase === 'sem-equipe') return <PrimeiraEquipe aoCriar={async (id) => { const l = await recarregarEquipes(); trocarEquipe(id, l); }} />;
+
+  const equipe = equipes.find(e => e.id === equipeId) || null;
+  const navItens = ABAS.map(a => ({ ...a, on: caminho === a.href }));
+
+  return (
+    <C.Provider value={{ S, recarregar, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
+      <header className="topo">
+        <div className="topo-in">
+          <div className="marca">
+            {/* a marca da igreja, a mesma do site público — não um ícone à
+                parte. O seletor de equipe continua pendurado nela. */}
+            <Logo className="logo" />
+            <div className="marca-nome">
+              <button ref={btnSeletor} className="seletor-equipe" onClick={() => setMenuAberto(v => !v)}
+                aria-expanded={menuAberto} aria-haspopup="menu">
+                <span className="seletor-nome">{equipe?.nome || 'Equipe'}</span>
+                <span aria-hidden>·</span>
+                <span>{(() => { const n = S.voluntarios.filter(v => v.ativo).length; return `${n}`; })()}</span>
+                <IcSeta />
+              </button>
+            </div>
+            {menuAberto && (
+              <>
+                <div className="menu-fundo" onClick={fecharMenu} />
+                <div className="menu-equipes" role="menu">
+                  {/* MESMA PESSOA, MESMO PRODUTO.
+                      Quem organiza e também serve encontrava o próprio espaço
+                      só se tivesse guardado o link do WhatsApp. Agora ele está
+                      onde a pessoa já está, dentro do mesmo menu. */}
+                  {meus.length > 0 && (
+                    <>
+                      <div className="overline" style={{ padding: '4px 12px 8px' }}>Onde eu sirvo</div>
+                      {meus.map(v => (
+                        <a key={v.slug} role="menuitem" className="menu-item" href={`/eu/${v.token}`}>
+                          {v.equipe} · meu espaço
+                        </a>
+                      ))}
+                      <div className="menu-risco" />
+                    </>
+                  )}
+                  <div className="overline" style={{ padding: '4px 12px 8px' }}>Ministérios</div>
+                  {equipes.map(e => (
+                    <button key={e.id} role="menuitem" className={`menu-item ${e.id === equipeId ? 'on' : ''}`} onClick={() => trocarEquipe(e.id)}>
+                      {e.nome}{e.id === equipeId && ' ✓'}
+                    </button>
+                  ))}
+                  <Link href="/ajustes#equipes" role="menuitem" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
+                </div>
+              </>
+            )}
+          </div>
+          <button className="mini fantasma" onClick={async () => { await sb()!.auth.signOut(); location.href = '/entrar'; }}>
+            <IcSair /> sair
+          </button>
+        </div>
+        <nav className="abas" aria-label="Seções">
+          {navItens.map(a => (
+            <Link key={a.href} href={a.href} className={a.on ? 'on' : ''} aria-current={a.on ? 'page' : undefined}>
+              <a.Ic /> {a.rotulo}
+            </Link>
+          ))}
+        </nav>
+      </header>
+      <main>{children}</main>
+      <nav className="barra-fundo" aria-label="Seções">
+        {navItens.map(a => (
+          <Link key={a.href} href={a.href} className={a.on ? 'on' : ''} aria-current={a.on ? 'page' : undefined}>
+            <a.Ic /> {a.rotulo}
+          </Link>
+        ))}
+      </nav>
+      {msg && <div className="toast" role="status">{msg}</div>}
+    </C.Provider>
+  );
+}
+
+function PrimeiraEquipe({ aoCriar }: { aoCriar: (id: string) => void }) {
+  const [nome, setNome] = useState('');
+  const [ocupado, setOcupado] = useState(false);
+  return (
+    <main style={{ maxWidth: 460, paddingTop: 70 }}>
+      <h1>Crie seu primeiro ministério</h1>
+      <p className="dim" style={{ margin: '8px 0 18px' }}>
+        Cada ministério (Mídia, Louvor, Recepção…) tem seu próprio time, funções e escala. Você pode adicionar quantos quiser.
+      </p>
+      <div className="card">
+        <label>Nome do ministério</label>
+        <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
+        <div style={{ height: 14 }} />
+        <button className="pri grande" disabled={ocupado || !nome.trim()} onClick={async () => {
+          setOcupado(true);
+          try { const { criarEquipe } = await import('@/lib/equipes'); const eq = await criarEquipe(nome.trim()); aoCriar(eq.id); }
+          catch (e: any) { alert('Erro: ' + e.message); setOcupado(false); }
+        }}>Criar ministério</button>
+      </div>
+    </main>
+  );
+}
+
+export function Conexao({ aoSalvar }: { aoSalvar: () => void }) {
+  const [url, setUrl] = useState('');
+  const [key, setKey] = useState('');
+  return (
+    <main style={{ maxWidth: 540, paddingTop: 60 }}>
+      <h1>Conectar ao banco</h1>
+      <p className="dim" style={{ marginTop: 8 }}>
+        Cole o endereço e a chave pública do seu projeto Supabase. Fica salvo neste aparelho.
+      </p>
+      <div className="card">
+        <label>URL do projeto</label>
+        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" />
+        <div style={{ height: 12 }} />
+        <label>Chave anon (public)</label>
+        <input value={key} onChange={e => setKey(e.target.value)} placeholder="eyJhbGciOi..." />
+        <div style={{ height: 14 }} />
+        <button className="pri grande" disabled={!url || !key}
+          onClick={() => { gravarCredenciais({ url: url.trim().replace(/\/$/, ''), key: key.trim() }); aoSalvar(); }}>
+          Conectar
+        </button>
+      </div>
+    </main>
+  );
+}
+
+export async function copiar(txt: string, aviso: (t: string) => void, rotulo = 'Copiado. É só colar no WhatsApp.') {
+  try { await navigator.clipboard.writeText(txt); aviso(rotulo); return; } catch {}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.readOnly = true;
+    ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+    document.body.appendChild(ta); ta.select();
+    const deuCerto = document.execCommand('copy');
+    ta.remove();
+    aviso(deuCerto ? rotulo : 'Não consegui copiar. Use "Ver a mensagem" e copie manualmente.');
+  } catch { aviso('Não consegui copiar. Use "Ver a mensagem" e copie manualmente.'); }
+}

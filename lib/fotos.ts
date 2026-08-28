@@ -1,1 +1,56 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgQSBGT1RPIERFIENBREEgw4FSRUEKCiAgIE1vcmEgYXF1aSwgZSBuw6NvIGRlbnRybyBkZSBjYWRhIHRlbGEsIHBvcnF1ZSB0csOqcyB0ZWxhcyBtb3N0cmFtIGEgbWVzbWEKICAgw6FyZWEgZSBhIGZvdG8gdGVtIHF1ZSBzZXIgYSBtZXNtYSBuYXMgdHLDqnM6IGEgaG9tZSwgYSBww6FnaW5hIGRvIG1pbmlzdMOpcmlvCiAgIGUgbyBhY29tcGFuaGFtZW50byBkYSBjYW5kaWRhdHVyYS4gU2UgY2FkYSB1bWEgZXNjb2xoZXNzZSBhIHN1YSwgYSBwZXNzb2EKICAgdmVyaWEgdW1hIGZvdG8gZGlmZXJlbnRlIGEgY2FkYSBjbGlxdWUgZG8gbWVzbW8gY2FtaW5oby4KCiAgIMOJIHVtIG1hcGEgcG9yIHNsdWcsIG7Do28gdW1hIGNvbHVuYSBubyBiYW5jbywgcG9ycXVlIGhvamUgbyBhcnF1aXZvIG1vcmEgbm8KICAgcmVwb3NpdMOzcmlvLiBRdWFuZG8gbyBsw61kZXIgcHVkZXIgdHJvY2FyIGEgZm90byBkYSBwcsOzcHJpYSDDoXJlYSBwZWxvIHBhaW5lbAogICAowqcyMyksIGlzdG8gdmlyYSBgZXF1aXBlcy5mb3RvYCBlIGVzdGUgYXJxdWl2byBzw7MgZ3VhcmRhIG8gcGFkcsOjby4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KY29uc3QgRk9UTzogUmVjb3JkPHN0cmluZywgc3RyaW5nPiA9IHsKICAvKiBhIGZvdG8gZGEgTcOtZGlhIMOpIGEgbWVzYSwgbsOjbyBvIHBhbGNvLiBRdWVtIGVudHJhIG5hIMOhcmVhIHZhaSBvcGVyYXIKICAgICBzd2l0Y2hlciwgY8OibWVyYSBlIHByb2plw6fDo287IGEgZm90byBkbyBwYWxjbyBtb3N0cmF2YSBvIHJlc3VsdGFkbyBkbwogICAgIHRyYWJhbGhvIGRlIG91dHJhIGVxdWlwZS4gRXN0YSBtb3N0cmEgbyB0cmFiYWxobyBlbSBzaSwgZSBvIGVzY3VybyBkZWxhCiAgICAgYWluZGEgZGVpeGEgbyB0ZXh0byBicmFuY28gZG8gaGVyw7NpIGNvbSBmb2xnYSAobHVtaW7Dom5jaWEgbcOpZGlhIDM1KS4gKi8KICBtaWRpYTogJy9mb3Rvcy9taWRpYS53ZWJwJywKICBsb3V2b3I6ICcvZm90b3MvZXF1aXBlLndlYnAnLCAgICAvLyBhIGJhbmRhIG5vIGRvbWluZ28KICAvKiBraWRzLTIgZSBuw6NvIGtpZHMtMSBkZSBwcm9ww7NzaXRvOiBhIHByaW1laXJhIMOpIHVtIHJldHJhdG8gZGUgcm9zdG8KICAgICBpbnRlaXJvIGRlIHVtYSBjcmlhbsOnYSwgZSBlc3NhIGZvdG8gaWEgdmlyYXIgYSBpbWFnZW0gZGUgY2FwYSBkYSDDoXJlYSBudW0KICAgICBzaXRlIHDDumJsaWNvLiBFc3RhIG1vc3RyYSBhIGF0aXZpZGFkZSwgY29tIGFzIGNyaWFuw6dhcyBkZSBjYWJlw6dhIGJhaXhhCiAgICAgZGVzZW5oYW5kby4gU2UgYSBpZ3JlamEgdGl2ZXIgYXV0b3JpemHDp8OjbyBkZSBpbWFnZW0gYXNzaW5hZGEgZG9zIHBhaXMsCiAgICAgZMOhIHBhcmEgdHJvY2FyOyBlbnF1YW50byBuw6NvIHRpdmVyLCBhIGVzY29saGEgw6kgYSBtZW5vcyBpZGVudGlmaWPDoXZlbC4gKi8KICBraWRzOiAnL2ZvdG9zL2tpZHMtMi53ZWJwJywKICBzZXJ2aWNvOiAnL2ZvdG9zL3JlY2VwY2FvLndlYnAnLCAvLyBxdWVtIHJlY2ViZSBuYSBwb3J0YQogIC8qIEFURU7Dh8ODTzogbyBvcmlnaW5hbCBkZXN0YSBjaGVnb3UgY29tIDI3OHgyOTcgcHgsIGUgbyBoZXLDs2kgZGEgw6FyZWEgw6kKICAgICBmdWxsLWJsZWVkLiBFc3TDoSBhbXBsaWFkYSBwYXJhIDEyMDAgZSBvIHbDqXUgZGUgNjIlIHByZXRvIGRvIGhlcsOzaSBlc2NvbmRlCiAgICAgYm9hIHBhcnRlIGRhIG1vbGV6YSwgbWFzIGVtIHRlbGEgZ3JhbmRlIGVsYSBhbW9sZWNlLiBUcm9jYXIgYXNzaW0gcXVlIG8KICAgICBhcnF1aXZvIG9yaWdpbmFsIGFwYXJlY2VyLiAqLwogIGxpdnJhcmlhOiAnL2ZvdG9zL2xpdnJhcmlhLndlYnAnLAp9OwoKLyogYSBpZ3JlamEgY2hlaWEgc2VydmUgcGFyYSBxdWFscXVlciDDoXJlYSBxdWUgYWluZGEgbsOjbyB0ZW5oYSBmb3RvIHByw7NwcmlhICovCmV4cG9ydCBjb25zdCBmb3RvRGFBcmVhID0gKHNsdWc/OiBzdHJpbmcgfCBudWxsKSA9PgogIChzbHVnICYmIEZPVE9bc2x1Z10pIHx8ICcvZm90b3MvY29uZ3JlZ2FjYW8ud2VicCc7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSBPIEZPQ08KCiAgIE8gaGVyw7NpIGRhIMOhcmVhIMOpIGZ1bGwtYmxlZWQ6IHF1YXNlIHF1YWRyYWRvIG5vIGNlbHVsYXIsIG11aXRvIGxhcmdvIG5vCiAgIG1vbml0b3IuIE8gbWVzbW8gYXJxdWl2byDDqSBjb3J0YWRvIGRlIGRvaXMgamVpdG9zIGRpZmVyZW50ZXMsIGUgdW0gcG9udG8KICAgZm9jYWwgc8OzLCBmaXhvIG5vIENTUyAoNTAlIDQ1JSksIGFjZXJ0YSB1bWEgZm90byBlIGVycmEgb3V0cmEuCgogICBNZWRpdS1zZSBpc3NvIG5hIExpdnJhcmlhOiBjb20gNDUlIG8gY29ydGUgZGUgMTQ0MHB4IGpvZ2F2YSBmb3JhIGEgbcOjbyBlIG8KICAgbWFyY2EtdGV4dG8gKHF1ZSDDqSBvIGFzc3VudG8pIGUgZGVpeGF2YSBubyBjZW50cm8gZGEgdGVsYSBvIHTDrXR1bG8gZGEgY2FwYQogICBkbyBsaXZybywgZGUgY2FiZcOnYSBwYXJhIGJhaXhvLCBjb21vIG8gZWxlbWVudG8gbWFpcyBsZWfDrXZlbCBkYSBww6FnaW5hLgogICBTdWJpbmRvIG8gZm9jbywgbyBjb3J0ZSBsYXJnbyBwYXNzYSBhIGd1YXJkYXIgYSBtw6NvIGUgbyBjb3J0ZSBlc3RyZWl0byBkbwogICBjZWx1bGFyIGNvbnRpbnVhIGlndWFsLgoKICAgRmljYSBhcXVpLCBlIG7Do28gbm8gQ1NTLCBwb3JxdWUgZm9jbyDDqSBwcm9wcmllZGFkZSBkYSBGT1RPLCBuw6NvIGRhIHRlbGEuICovCmNvbnN0IEZPQ086IFJlY29yZDxzdHJpbmcsIHN0cmluZz4gPSB7CiAgbGl2cmFyaWE6ICc1MCUgMjAlJywgICAvLyBhIG3Do28gZSBvIG1hcmNhLXRleHRvLCBuw6NvIGEgY2FwYSBpbnZlcnRpZGEKfTsKCmV4cG9ydCBjb25zdCBmb2NvRGFBcmVhID0gKHNsdWc/OiBzdHJpbmcgfCBudWxsKSA9PgogIChzbHVnICYmIEZPQ09bc2x1Z10pIHx8ICc1MCUgNDUlJzsK"}
+/* =============================================================================
+   A FOTO DE CADA ÁREA
+
+   Mora aqui, e não dentro de cada tela, porque três telas mostram a mesma
+   área e a foto tem que ser a mesma nas três: a home, a página do ministério
+   e o acompanhamento da candidatura. Se cada uma escolhesse a sua, a pessoa
+   veria uma foto diferente a cada clique do mesmo caminho.
+
+   É um mapa por slug, não uma coluna no banco, porque hoje o arquivo mora no
+   repositório. Quando o líder puder trocar a foto da própria área pelo painel
+   (§23), isto vira `equipes.foto` e este arquivo só guarda o padrão.
+   ============================================================================= */
+const FOTO: Record<string, string> = {
+  /* a foto da Mídia é a mesa, não o palco. Quem entra na área vai operar
+     switcher, câmera e projeção; a foto do palco mostrava o resultado do
+     trabalho de outra equipe. Esta mostra o trabalho em si, e o escuro dela
+     ainda deixa o texto branco do herói com folga (luminância média 35). */
+  midia: '/fotos/midia.webp',
+  louvor: '/fotos/equipe.webp',    // a banda no domingo
+  /* kids-2 e não kids-1 de propósito: a primeira é um retrato de rosto
+     inteiro de uma criança, e essa foto ia virar a imagem de capa da área num
+     site público. Esta mostra a atividade, com as crianças de cabeça baixa
+     desenhando. Se a igreja tiver autorização de imagem assinada dos pais,
+     dá para trocar; enquanto não tiver, a escolha é a menos identificável. */
+  kids: '/fotos/kids-2.webp',
+  servico: '/fotos/recepcao.webp', // quem recebe na porta
+  /* ATENÇÃO: o original desta chegou com 278x297 px, e o herói da área é
+     full-bleed. Está ampliada para 1200 e o véu de 62% preto do herói esconde
+     boa parte da moleza, mas em tela grande ela amolece. Trocar assim que o
+     arquivo original aparecer. */
+  livraria: '/fotos/livraria.webp',
+};
+
+/* a igreja cheia serve para qualquer área que ainda não tenha foto própria */
+export const fotoDaArea = (slug?: string | null) =>
+  (slug && FOTO[slug]) || '/fotos/congregacao.webp';
+
+/* -------------------------------------------------------------- O FOCO
+
+   O herói da área é full-bleed: quase quadrado no celular, muito largo no
+   monitor. O mesmo arquivo é cortado de dois jeitos diferentes, e um ponto
+   focal só, fixo no CSS (50% 45%), acerta uma foto e erra outra.
+
+   Mediu-se isso na Livraria: com 45% o corte de 1440px jogava fora a mão e o
+   marca-texto (que é o assunto) e deixava no centro da tela o título da capa
+   do livro, de cabeça para baixo, como o elemento mais legível da página.
+   Subindo o foco, o corte largo passa a guardar a mão e o corte estreito do
+   celular continua igual.
+
+   Fica aqui, e não no CSS, porque foco é propriedade da FOTO, não da tela. */
+const FOCO: Record<string, string> = {
+  livraria: '50% 20%',   // a mão e o marca-texto, não a capa invertida
+};
+
+export const focoDaArea = (slug?: string | null) =>
+  (slug && FOCO[slug]) || '50% 45%';

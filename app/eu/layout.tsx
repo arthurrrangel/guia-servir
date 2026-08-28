@@ -1,1 +1,10 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YSB9IGZyb20gJ25leHQnOwoKZXhwb3J0IGNvbnN0IG1ldGFkYXRhOiBNZXRhZGF0YSA9IHsKICB0aXRsZTogJ8OBcmVhIGRvIHZvbHVudMOhcmlvJywKICBkZXNjcmlwdGlvbjogJ1N1YSBlc2NhbGEsIHNldXMgZGlhcyBlIHNldSBsw61kZXIuIEFjZXNzZSBvIHNldSBlc3Bhw6dvLicsCn07CgpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBMYXlvdXQoeyBjaGlsZHJlbiB9OiB7IGNoaWxkcmVuOiBSZWFjdC5SZWFjdE5vZGUgfSkgewogIHJldHVybiA8PntjaGlsZHJlbn08Lz47Cn0K"}
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Área do voluntário',
+  description: 'Sua escala, seus dias e seu líder. Acesse o seu espaço.',
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

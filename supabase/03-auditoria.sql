@@ -1,1 +1,260 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMDMg4oCUIENPUlJFw4fDlUVTIERBIEFVRElUT1JJQSAoYXBsaWNhZG8gZW0gcHJvZHXDp8OjbyBlbSAyMDI2LTA4LTA2KQoKICAgQ2FkYSBibG9jbyBleGlzdGUgcG9yIGNhdXNhIGRlIHVtIGNlbsOhcmlvIGNvbmNyZXRvIHF1ZSBxdWVicmF2YSBvIGFwcC4KICAgSWRlbXBvdGVudGU6IHBvZGUgcm9kYXIgZGUgbm92by4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgIDEuIHNhbHZhcl9kaWE6IGVzY29wbyBwb3IgbWluaXN0w6lyaW8gKyB1cHNlcnQgcG9yIHNsb3QuCgogICBPIGN1bHRvIMOpIFVNQSBsaW5oYSBwYXJhIGEgaWdyZWphIGludGVpcmEgKGN1bHRvcy5kYXRhIMOpIMO6bmljbykuIEEgdmVyc8OjbwogICBhbnRpZ2EgZmF6aWEgYGRlbGV0ZSBmcm9tIGVzY2FsYWNvZXMgd2hlcmUgY3VsdG9faWQgPSB2X2N1bHRvYCBzZW0gZmlsdHJvOgogICBxdWFscXVlciBhw6fDo28gY29tdW0gZG8gbMOtZGVyIGRhIE3DrWRpYSAoc29ydGVhciwgdHJvY2FyLCB0cmF2YXIsIHNhbHZhciBvCiAgIHJlY2FkbykgYXBhZ2F2YSBhIGVzY2FsYSBpbnRlaXJhIGRvIExvdXZvciBuYXF1ZWxlIGRvbWluZ28uCgogICBFIG8gZGVsZXRlK3JlaW5zZXJ0IGFwYWdhdmEgYSByZXNwb3N0YSBxdWUgbyB2b2x1bnTDoXJpbyB0aW5oYSBhY2FiYWRvIGRlCiAgIGRhcjogw6BzIDIwaDAxIGEgQW5hIGNvbmZpcm1hOyDDoHMgMjBoMDUgbyBsw61kZXIgc2FsdmEgbyByZWNhZG8gY29tIG8gZXN0YWRvCiAgIGRlIDE5aDQwIGVtIG3Do29zIGUgYSBjb25maXJtYcOnw6NvIGRhIEFuYSB2aXJhICJuw6NvIHJlc3BvbmRldSIuCiAgIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tICovCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIHNhbHZhcl9kaWEoCiAgcF9lcXVpcGUgdXVpZCwgcF9kYXRhIGRhdGUsIHBfb2JzIHRleHQsIHBfc2xvdHMganNvbmIsIHBfcGxhbnRhbyB1dWlkW10KKSByZXR1cm5zIHV1aWQKbGFuZ3VhZ2UgcGxwZ3NxbCBzZWN1cml0eSBpbnZva2VyIHNldCBzZWFyY2hfcGF0aCA9IHB1YmxpYyBhcyAkZm4kCmRlY2xhcmUgdl9jdWx0byB1dWlkOyByIHJlY29yZDsKYmVnaW4KICBpZiBwX2VxdWlwZSBpcyBudWxsIHRoZW4gcmFpc2UgZXhjZXB0aW9uICdzYWx2YXJfZGlhIHNlbSBtaW5pc3RlcmlvJzsgZW5kIGlmOwoKICBpbnNlcnQgaW50byBjdWx0b3MgKGRhdGEpIHZhbHVlcyAocF9kYXRhKQogICAgb24gY29uZmxpY3QgKGRhdGEpIGRvIHVwZGF0ZSBzZXQgZGF0YSA9IGV4Y2x1ZGVkLmRhdGEKICAgIHJldHVybmluZyBpZCBpbnRvIHZfY3VsdG87CiAgaWYgdl9jdWx0byBpcyBudWxsIHRoZW4gc2VsZWN0IGlkIGludG8gdl9jdWx0byBmcm9tIGN1bHRvcyB3aGVyZSBkYXRhID0gcF9kYXRhOyBlbmQgaWY7CgogIGluc2VydCBpbnRvIGN1bHRvX29icyAoY3VsdG9faWQsIGVxdWlwZV9pZCwgb2JzKQogICAgdmFsdWVzICh2X2N1bHRvLCBwX2VxdWlwZSwgY29hbGVzY2UocF9vYnMsICcnKSkKICBvbiBjb25mbGljdCAoY3VsdG9faWQsIGVxdWlwZV9pZCkgZG8gdXBkYXRlIHNldCBvYnMgPSBleGNsdWRlZC5vYnM7CgogIGZvciByIGluCiAgICBzZWxlY3QgKHggLT4+ICdmdW5jYW9faWQnKTo6dXVpZCBmaWQsCiAgICAgICAgICAgKHggLT4+ICd2b2x1bnRhcmlvX2lkJyk6OnV1aWQgdmlkLAogICAgICAgICAgIGNvYWxlc2NlKHggLT4+ICdzdGF0dXMnLCAncGVuZGVudGUnKTo6c3RhdHVzX2VzY2FsYSBzdCwKICAgICAgICAgICBjb2FsZXNjZSgoeCAtPj4gJ2ZpeG8nKTo6Ym9vbGVhbiwgZmFsc2UpIGZ4CiAgICAgIGZyb20ganNvbmJfYXJyYXlfZWxlbWVudHMoY29hbGVzY2UocF9zbG90cywgJ1tdJzo6anNvbmIpKSB4CiAgbG9vcAogICAgaWYgbm90IGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBmdW5jb2VzIHdoZXJlIGlkID0gci5maWQgYW5kIGVxdWlwZV9pZCA9IHBfZXF1aXBlKSB0aGVuCiAgICAgIHJhaXNlIGV4Y2VwdGlvbiAnZnVuY2FvIGRlIG91dHJvIG1pbmlzdGVyaW8nOyBlbmQgaWY7CiAgICBpZiBub3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIHZvbHVudGFyaW9zIHdoZXJlIGlkID0gci52aWQgYW5kIGVxdWlwZV9pZCA9IHBfZXF1aXBlKSB0aGVuCiAgICAgIHJhaXNlIGV4Y2VwdGlvbiAndm9sdW50YXJpbyBkZSBvdXRybyBtaW5pc3RlcmlvJzsgZW5kIGlmOwoKICAgIGluc2VydCBpbnRvIGVzY2FsYWNvZXMgKGN1bHRvX2lkLCBmdW5jYW9faWQsIHZvbHVudGFyaW9faWQsIHN0YXR1cywgZml4bykKICAgICAgdmFsdWVzICh2X2N1bHRvLCByLmZpZCwgci52aWQsIHIuc3QsIHIuZngpCiAgICBvbiBjb25mbGljdCAoY3VsdG9faWQsIGZ1bmNhb19pZCkgZG8gdXBkYXRlCiAgICAgIHNldCB2b2x1bnRhcmlvX2lkID0gZXhjbHVkZWQudm9sdW50YXJpb19pZCwKICAgICAgICAgIGZpeG8gICAgICAgICAgPSBleGNsdWRlZC5maXhvLAogICAgICAgICAgLS0gdHJvY2FyIGEgcGVzc29hIHplcmEgYSByZXNwb3N0YTsgbWFudGVyIGEgbWVzbWEgcHJlc2VydmEKICAgICAgICAgIHN0YXR1cyAgICAgICAgPSBjYXNlIHdoZW4gZXNjYWxhY29lcy52b2x1bnRhcmlvX2lkIGlzIGRpc3RpbmN0IGZyb20gZXhjbHVkZWQudm9sdW50YXJpb19pZAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgdGhlbiBleGNsdWRlZC5zdGF0dXMgZWxzZSBlc2NhbGFjb2VzLnN0YXR1cyBlbmQsCiAgICAgICAgICByZXNwb25kaWRvX2VtID0gY2FzZSB3aGVuIGVzY2FsYWNvZXMudm9sdW50YXJpb19pZCBpcyBkaXN0aW5jdCBmcm9tIGV4Y2x1ZGVkLnZvbHVudGFyaW9faWQKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHRoZW4gbnVsbCBlbHNlIGVzY2FsYWNvZXMucmVzcG9uZGlkb19lbSBlbmQ7CiAgZW5kIGxvb3A7CgogIGRlbGV0ZSBmcm9tIGVzY2FsYWNvZXMgZSB1c2luZyBmdW5jb2VzIGYKICAgd2hlcmUgZi5pZCA9IGUuZnVuY2FvX2lkIGFuZCBlLmN1bHRvX2lkID0gdl9jdWx0byBhbmQgZi5lcXVpcGVfaWQgPSBwX2VxdWlwZQogICAgIGFuZCBub3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIGpzb25iX2FycmF5X2VsZW1lbnRzKGNvYWxlc2NlKHBfc2xvdHMsJ1tdJzo6anNvbmIpKSB4CiAgICAgICAgICAgICAgICAgICAgICB3aGVyZSAoeCAtPj4gJ2Z1bmNhb19pZCcpOjp1dWlkID0gZS5mdW5jYW9faWQpOwoKICBkZWxldGUgZnJvbSBwbGFudG9lcyBwIHVzaW5nIHZvbHVudGFyaW9zIHYKICAgd2hlcmUgdi5pZCA9IHAudm9sdW50YXJpb19pZCBhbmQgcC5jdWx0b19pZCA9IHZfY3VsdG8gYW5kIHYuZXF1aXBlX2lkID0gcF9lcXVpcGUKICAgICBhbmQgbm90IChwLnZvbHVudGFyaW9faWQgPSBhbnkgKGNvYWxlc2NlKHBfcGxhbnRhbywgJ3t9Jzo6dXVpZFtdKSkpOwoKICBpbnNlcnQgaW50byBwbGFudG9lcyAoY3VsdG9faWQsIHZvbHVudGFyaW9faWQpCiAgc2VsZWN0IHZfY3VsdG8sIHYuaWQgZnJvbSB2b2x1bnRhcmlvcyB2CiAgIHdoZXJlIHYuaWQgPSBhbnkgKGNvYWxlc2NlKHBfcGxhbnRhbywgJ3t9Jzo6dXVpZFtdKSkgYW5kIHYuZXF1aXBlX2lkID0gcF9lcXVpcGUKICBvbiBjb25mbGljdCBkbyBub3RoaW5nOwoKICByZXR1cm4gdl9jdWx0bzsKZW5kICRmbiQ7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICAyLiBlcXVpcGVfZW50cmFyOiBkZXZvbHZlIE9CSkVUTyBlbSB2ZXogZGUgZXN0b3VyYXIuCgogICBDb20gYHJhaXNlIGV4Y2VwdGlvbmAsIG8gcHLDs3ByaW8gSU5TRVJUIG5vIGNvbnRhZG9yIGRlIHRlbnRhdGl2YXMgZXJhCiAgIGRlc2ZlaXRvIGp1bnRvIOKAlCBvIGZyZWlvIGRlIGZvcsOnYSBicnV0YSBudW5jYSBjb250YXZhIG5hZGEsIGUgNCBkw61naXRvcwogICBzw6NvIHPDsyAxMCBtaWwgY29tYmluYcOnw7Vlcy4gQWzDqW0gZGlzc28sIGTDrWdpdG9zIGVycmFkb3Mgdm9sdGF2YW0gY29tbwogICBgbnVsbGAgY29tIEhUVFAgMjAwOiBvIGFwcCBtYW5kYXZhIG8gdm9sdW50w6FyaW8gcGFyYSAvZXUvbnVsbC4KICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KY3JlYXRlIHRhYmxlIGlmIG5vdCBleGlzdHMgZW50cmFyX3RlbnRhdGl2YXMgKAogIHZvbHVudGFyaW9faWQgdXVpZCBub3QgbnVsbCByZWZlcmVuY2VzIHZvbHVudGFyaW9zKGlkKSBvbiBkZWxldGUgY2FzY2FkZSwKICBkaWEgIGRhdGUgbm90IG51bGwgZGVmYXVsdCBjdXJyZW50X2RhdGUsCiAgbiAgICBpbnQgIG5vdCBudWxsIGRlZmF1bHQgMCwKICBwcmltYXJ5IGtleSAodm9sdW50YXJpb19pZCwgZGlhKQopOwphbHRlciB0YWJsZSBlbnRyYXJfdGVudGF0aXZhcyBlbmFibGUgcm93IGxldmVsIHNlY3VyaXR5OyAgIC0tIHNlbSBwb2xpY3k6IG5pbmd1w6ltIGzDqgpyZXZva2UgYWxsIG9uIHRhYmxlIGVudHJhcl90ZW50YXRpdmFzIGZyb20gYW5vbiwgcHVibGljOwoKZHJvcCBmdW5jdGlvbiBpZiBleGlzdHMgZXF1aXBlX2VudHJhcih0ZXh0LCB1dWlkLCB0ZXh0KTsKY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZXF1aXBlX2VudHJhcihwX3NsdWcgdGV4dCwgcF92b2x1bnRhcmlvIHV1aWQsIHBfdWx0NCB0ZXh0KQpyZXR1cm5zIGpzb25iCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfdGVsIHRleHQ7IHZfdG9rIHRleHQ7IHZfbiBpbnQ7IHZfbWF4IGNvbnN0YW50IGludCA6PSA4OwpiZWdpbgogIHNlbGVjdCBudWxsaWYodGVsX25vcm0odi50ZWxlZm9uZSksJycpLCB2LnRva2VuIGludG8gdl90ZWwsIHZfdG9rCiAgICBmcm9tIHZvbHVudGFyaW9zIHYgam9pbiBlcXVpcGVzIGUgb24gZS5pZCA9IHYuZXF1aXBlX2lkCiAgIHdoZXJlIHYuaWQgPSBwX3ZvbHVudGFyaW8gYW5kIGUuc2x1ZyA9IHBfc2x1ZyBhbmQgdi5hdGl2bzsKCiAgaWYgdl90b2sgaXMgbnVsbCB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ0xJTktfSU5WQUxJRE8nKTsgZW5kIGlmOwogIC0tIHNlbSBXaGF0c0FwcCBuw6NvIGjDoSBjb21vIHByb3ZhciBxdWVtIMOpOiBvIGxpbmsgZG8gZ3J1cG8gw6kgcMO6YmxpY28gcGFyYSBvIGdydXBvCiAgaWYgdl90ZWwgaXMgbnVsbCBvciBsZW5ndGgodl90ZWwpIDwgNCB0aGVuCiAgICByZXR1cm4ganNvbmJfYnVpbGRfb2JqZWN0KCdvaycsIGZhbHNlLCAnZXJybycsICdTRU1fVEVMRUZPTkUnKTsKICBlbmQgaWY7CgogIGluc2VydCBpbnRvIGVudHJhcl90ZW50YXRpdmFzICh2b2x1bnRhcmlvX2lkKSB2YWx1ZXMgKHBfdm9sdW50YXJpbykKICBvbiBjb25mbGljdCAodm9sdW50YXJpb19pZCwgZGlhKSBkbyB1cGRhdGUgc2V0IG4gPSBlbnRyYXJfdGVudGF0aXZhcy5uICsgMQogIHJldHVybmluZyBuIGludG8gdl9uOwoKICBpZiB2X24gPiB2X21heCB0aGVuIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ01VSVRBU19URU5UQVRJVkFTJyk7IGVuZCBpZjsKCiAgaWYgcmlnaHQodl90ZWwsIDQpIDw+IHRlbF9ub3JtKGNvYWxlc2NlKHBfdWx0NCwnJykpIHRoZW4KICAgIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgZmFsc2UsICdlcnJvJywgJ0RJR0lUT1NfTkFPX0NPTkZFUkVNJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ3Jlc3RhbScsIGdyZWF0ZXN0KHZfbWF4IC0gdl9uLCAwKSk7CiAgZW5kIGlmOwoKICBkZWxldGUgZnJvbSBlbnRyYXJfdGVudGF0aXZhcyB3aGVyZSB2b2x1bnRhcmlvX2lkID0gcF92b2x1bnRhcmlvOwogIHJldHVybiBqc29uYl9idWlsZF9vYmplY3QoJ29rJywgdHJ1ZSwgJ3Rva2VuJywgdl90b2spOwplbmQgJGZuJDsKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBlcXVpcGVfZW50cmFyKHRleHQsIHV1aWQsIHRleHQpIGZyb20gcHVibGljOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGVxdWlwZV9lbnRyYXIodGV4dCwgdXVpZCwgdGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgIDMuIEdhdGlsaG9zOiBpZ25vcmFyIG8gcHLDs3ByaW8gc2xvdCBubyB1cHNlcnQsIGUgY2FzYXIgYSBtZXNtYSBQRVNTT0EKICAgICAgY2FkYXN0cmFkYSBlbSBkb2lzIG1pbmlzdMOpcmlvcyAobGluaGFzIGRpZmVyZW50ZXMsIG1lc21vIHRlbGVmb25lKS4KCiAgIFNlbSBvIGBlLmZ1bmNhb19pZCA8PiBuZXcuZnVuY2FvX2lkYCwgbyBPTiBDT05GTElDVCBETyBVUERBVEUgZGlzcGFyYXZhIG8KICAgZ2F0aWxobyBjb250cmEgYSBsaW5oYSBxdWUgZWxlIG1lc21vIGlhIHN1YnN0aXR1aXI6IHRvZG8gc2F2ZSBxdWVicmF2YSBjb20KICAgIkZ1bGFubyBqw6EgZXN0w6EgZW0gWCBuZXN0ZSBkb21pbmdvIi4KICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZm5fY29uZmxpdG9fc2ltdWx0YW5lbygpIHJldHVybnMgdHJpZ2dlcgpsYW5ndWFnZSBwbHBnc3FsIHNlY3VyaXR5IGRlZmluZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKZGVjbGFyZSB2X3RlbCB0ZXh0OyB2X25vbWUgdGV4dDsgdl9vdXRyYSB0ZXh0OwpiZWdpbgogIGlmIG5vdCBleGlzdHMgKHNlbGVjdCAxIGZyb20gZnVuY29lcyB3aGVyZSBpZCA9IG5ldy5mdW5jYW9faWQgYW5kIHNpbXVsdGFuZWEpIHRoZW4KICAgIHJldHVybiBuZXc7CiAgZW5kIGlmOwogIHNlbGVjdCBudWxsaWYodGVsX25vcm0odGVsZWZvbmUpLCcnKSwgbm9tZSBpbnRvIHZfdGVsLCB2X25vbWUKICAgIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgaWQgPSBuZXcudm9sdW50YXJpb19pZDsKCiAgc2VsZWN0IGYubm9tZSBpbnRvIHZfb3V0cmEKICAgIGZyb20gZXNjYWxhY29lcyBlCiAgICBqb2luIGZ1bmNvZXMgZiBvbiBmLmlkID0gZS5mdW5jYW9faWQgYW5kIGYuc2ltdWx0YW5lYQogICAgam9pbiB2b2x1bnRhcmlvcyB2IG9uIHYuaWQgPSBlLnZvbHVudGFyaW9faWQKICAgd2hlcmUgZS5jdWx0b19pZCA9IG5ldy5jdWx0b19pZAogICAgIGFuZCBlLmZ1bmNhb19pZCA8PiBuZXcuZnVuY2FvX2lkCiAgICAgYW5kICggZS52b2x1bnRhcmlvX2lkID0gbmV3LnZvbHVudGFyaW9faWQKICAgICAgICBvciAodl90ZWwgaXMgbm90IG51bGwgYW5kIG51bGxpZih0ZWxfbm9ybSh2LnRlbGVmb25lKSwnJykgPSB2X3RlbCkgKQogICBsaW1pdCAxOwoKICBpZiB2X291dHJhIGlzIG5vdCBudWxsIHRoZW4KICAgIHJhaXNlIGV4Y2VwdGlvbiAnJSBqYSBlc3RhIGVtICUgbmVzdGUgZG9taW5nby4nLCB2X25vbWUsIHZfb3V0cmE7CiAgZW5kIGlmOwogIHJldHVybiBuZXc7CmVuZCAkZm4kOwoKY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZm5faW5kaXNwb25pdmVsKCkgcmV0dXJucyB0cmlnZ2VyCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfZGF0YSBkYXRlOyB2X3RlbCB0ZXh0OyB2X25vbWUgdGV4dDsgdl9ibG9xIGludDsKYmVnaW4KICAtLSBzw7MgdmFsaWRhIHF1YW5kbyBhIFBFU1NPQSBvdSBvIERJQSBtdWRhbTogZWRpdGFyIG8gcmVjYWRvIGRvIGRvbWluZ28KICAtLSBuw6NvIHBvZGUgY29uZ2VsYXIgYSBsaW5oYSBpbnRlaXJhCiAgaWYgdGdfb3AgPSAnVVBEQVRFJwogICAgIGFuZCBuZXcudm9sdW50YXJpb19pZCBpcyBub3QgZGlzdGluY3QgZnJvbSBvbGQudm9sdW50YXJpb19pZAogICAgIGFuZCBuZXcuY3VsdG9faWQgICAgICBpcyBub3QgZGlzdGluY3QgZnJvbSBvbGQuY3VsdG9faWQgdGhlbgogICAgcmV0dXJuIG5ldzsKICBlbmQgaWY7CgogIHNlbGVjdCBkYXRhIGludG8gdl9kYXRhIGZyb20gY3VsdG9zIHdoZXJlIGlkID0gbmV3LmN1bHRvX2lkOwogIHNlbGVjdCBudWxsaWYodGVsX25vcm0odGVsZWZvbmUpLCcnKSwgbm9tZSBpbnRvIHZfdGVsLCB2X25vbWUKICAgIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgaWQgPSBuZXcudm9sdW50YXJpb19pZDsKCiAgc2VsZWN0IGNvdW50KCopIGludG8gdl9ibG9xCiAgICBmcm9tIGluZGlzcG9uaWJpbGlkYWRlcyBpCiAgICBqb2luIHZvbHVudGFyaW9zIHYgb24gdi5pZCA9IGkudm9sdW50YXJpb19pZAogICB3aGVyZSBpLmRhdGEgPSB2X2RhdGEKICAgICBhbmQgKCBpLnZvbHVudGFyaW9faWQgPSBuZXcudm9sdW50YXJpb19pZAogICAgICAgIG9yICh2X3RlbCBpcyBub3QgbnVsbCBhbmQgbnVsbGlmKHRlbF9ub3JtKHYudGVsZWZvbmUpLCcnKSA9IHZfdGVsKSApOwoKICBpZiB2X2Jsb3EgPiAwIHRoZW4gcmFpc2UgZXhjZXB0aW9uICclIGF2aXNvdSBxdWUgbmFvIHBvZGUgbmVzdGUgZG9taW5nby4nLCB2X25vbWU7IGVuZCBpZjsKICByZXR1cm4gbmV3OwplbmQgJGZuJDsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSA0LiBhbGxvd2xpc3Qgw6AgcHJvdmEgZGUgdmF6aW8gKi8KLS0gdW1hIMO6bmljYSBsaW5oYSBjb20gZW1haWwgJycgZmF6aWEgaXNfbGlkZXIoKSBkZXZvbHZlciB0cnVlIHBhcmEgcXVhbHF1ZXIKLS0gdXN1w6FyaW8gYXV0ZW50aWNhZG8sIGUgbyBjYWRhc3RybyDDqSBhYmVydG8KZGVsZXRlIGZyb20gbGlkZXJlcyB3aGVyZSBwb3NpdGlvbignQCcgaW4gY29hbGVzY2UoZW1haWwsICcnKSkgPCAyOwphbHRlciB0YWJsZSBsaWRlcmVzIGRyb3AgY29uc3RyYWludCBpZiBleGlzdHMgbGlkZXJfZW1haWxfdmFsaWRvOwphbHRlciB0YWJsZSBsaWRlcmVzIGFkZCAgY29uc3RyYWludCBsaWRlcl9lbWFpbF92YWxpZG8gY2hlY2sgKHBvc2l0aW9uKCdAJyBpbiBlbWFpbCkgPiAxKTsKCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIGlzX2xpZGVyKCkgcmV0dXJucyBib29sZWFuCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJCQKICBzZWxlY3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIGxpZGVyZXMKICAgIHdoZXJlIGVtYWlsIDw+ICcnIGFuZCBsb3dlcihlbWFpbCkgPSBsb3dlcihudWxsaWYoYXV0aC5qd3QoKSAtPj4gJ2VtYWlsJywgJycpKSk7CiQkOwoKLyogLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSA1LiDDrW5kaWNlcyBkbyBwYWRyw6NvIGRlIGFjZXNzbyBtdWx0aS1taW5pc3TDqXJpbyAqLwpjcmVhdGUgaW5kZXggaWYgbm90IGV4aXN0cyBpeF9lc2NfZnVuY2FvICBvbiBlc2NhbGFjb2VzKGZ1bmNhb19pZCk7CmNyZWF0ZSBpbmRleCBpZiBub3QgZXhpc3RzIGl4X3BsYW50X3ZvbCAgIG9uIHBsYW50b2VzKHZvbHVudGFyaW9faWQpOwpjcmVhdGUgaW5kZXggaWYgbm90IGV4aXN0cyBpeF92b2xfZXF1aXBlICBvbiB2b2x1bnRhcmlvcyhlcXVpcGVfaWQpOwpjcmVhdGUgaW5kZXggaWYgbm90IGV4aXN0cyBpeF9mdW5jX2VxdWlwZSBvbiBmdW5jb2VzKGVxdWlwZV9pZCk7CmNyZWF0ZSBpbmRleCBpZiBub3QgZXhpc3RzIGl4X2luZGlzcF92b2wgIG9uIGluZGlzcG9uaWJpbGlkYWRlcyh2b2x1bnRhcmlvX2lkKTsKCi8qIC0tLS0tLS0tLS0gNi4gdGFiZWxhcyBub3ZhcyBuw6NvIHBvZGVtIG5hc2NlciBhYmVydGFzIHBhcmEgYW5vbiAocGFkcsOjbyBkbyBTdXBhYmFzZSkgKi8KcmV2b2tlIGFsbCBvbiB0YWJsZSBjdWx0b19vYnMsIGVudHJhcl90ZW50YXRpdmFzLCBlcXVpcGVzLCBsaWRlcmVzIGZyb20gYW5vbiwgcHVibGljOwpncmFudCBzZWxlY3QsIGluc2VydCwgdXBkYXRlLCBkZWxldGUgb24gdGFibGUgY3VsdG9fb2JzIHRvIGF1dGhlbnRpY2F0ZWQ7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogICA3LiBSZWNhZG8gZG8gZG9taW5nbyBQT1IgTUlOSVNUw4lSSU8uCgogICBgY3VsdG9zLm9ic2AgZXJhIGdsb2JhbDogbyBsw61kZXIgZG8gTG91dm9yIGVzY3JldmlhICJlbnNhaW8gMTZoLCB0cmF6ZXIKICAgcGFydGl0dXJhIiBlIG9zIHZvbHVudMOhcmlvcyBkYSBNw41ESUEgbGlhbSBlc3NlIGF2aXNvIGNvbGFkbyBuYSBlc2NhbGHDp8OjbwogICBkZWxlczsgZGVwb2lzIG8gbMOtZGVyIGRhIE3DrWRpYSBlc2NyZXZpYSBwb3IgY2ltYSBlIG8gcmVjYWRvIGRvIExvdXZvciBzdW1pYS4KICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KY3JlYXRlIHRhYmxlIGlmIG5vdCBleGlzdHMgY3VsdG9fb2JzICgKICBjdWx0b19pZCAgdXVpZCBub3QgbnVsbCByZWZlcmVuY2VzIGN1bHRvcyhpZCkgIG9uIGRlbGV0ZSBjYXNjYWRlLAogIGVxdWlwZV9pZCB1dWlkIG5vdCBudWxsIHJlZmVyZW5jZXMgZXF1aXBlcyhpZCkgb24gZGVsZXRlIGNhc2NhZGUsCiAgb2JzICAgICAgIHRleHQgbm90IG51bGwgZGVmYXVsdCAnJywKICBwcmltYXJ5IGtleSAoY3VsdG9faWQsIGVxdWlwZV9pZCkKKTsKYWx0ZXIgdGFibGUgY3VsdG9fb2JzIGVuYWJsZSByb3cgbGV2ZWwgc2VjdXJpdHk7CmRyb3AgcG9saWN5IGlmIGV4aXN0cyBwX2N1bHRvX29icyBvbiBjdWx0b19vYnM7CmNyZWF0ZSBwb2xpY3kgcF9jdWx0b19vYnMgb24gY3VsdG9fb2JzIGZvciBhbGwgdG8gYXV0aGVudGljYXRlZAogIHVzaW5nIChpc19saWRlcigpKSB3aXRoIGNoZWNrIChpc19saWRlcigpKTsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgIDguIGVxdWlwZV9wdWJsaWNhOiBub21lIGRvIG1pbmlzdMOpcmlvIG1lc21vIHNlbSBuaW5ndcOpbSBjYWRhc3RyYWRvLgoKICAgQ29tIElOTkVSIEpPSU4sIHVtIG1pbmlzdMOpcmlvIHJlY8OpbS1jcmlhZG8gZGV2b2x2aWEgemVybyBsaW5oYXMgZSBhIHRlbGEKICAgZGl6aWEgIkxpbmsgaW52w6FsaWRvIiDigJQgZXhhdGFtZW50ZSBubyBmbHV4byByZWNvbWVuZGFkbywgZW0gcXVlIG8gbMOtZGVyCiAgIGZpeGEgbyBsaW5rIG5vIGdydXBvIEFOVEVTIGRlIGNhZGFzdHJhciBvIHRpbWUuIE8gTEVGVCBKT0lOIGRldm9sdmUgdW1hCiAgIGxpbmhhIGNvbSB2b2x1bnRhcmlvX2lkIG51bG8sIHF1ZSBvIGFwcCB0cmF0YSBjb21vICJuaW5ndcOpbSBhaW5kYSIuCgogICBgcHJlY2lzYV9saW5rYCA9IGEgcGVzc29hIG7Do28gdGVtIFdoYXRzQXBwIGNhZGFzdHJhZG8sIGVudMOjbyBuw6NvIGTDoSBwYXJhCiAgIHByb3ZhciBxdWUgw6kgZWxhOyBvIGFwcCBtb3N0cmEgInBlw6dhIG8gbGluayBhbyBsw61kZXIiIGVtIHZleiBkZSBkZWl4YXIKICAgcXVhbHF1ZXIgdW0gZG8gZ3J1cG8gYWJyaXIgYSBww6FnaW5hIHBlc3NvYWwgZGVsYS4KICAgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0gKi8KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZXF1aXBlX3B1YmxpY2EocF9zbHVnIHRleHQpCnJldHVybnMgdGFibGUgKGVxdWlwZSB0ZXh0LCB2b2x1bnRhcmlvX2lkIHV1aWQsIHByaW1laXJvX25vbWUgdGV4dCwgcHJlY2lzYV9saW5rIGJvb2xlYW4pCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJCQKICBzZWxlY3QgZS5ub21lLCB2LmlkLCBzcGxpdF9wYXJ0KHYubm9tZSwgJyAnLCAxKSwKICAgICAgICAgY29hbGVzY2UobGVuZ3RoKG51bGxpZih0ZWxfbm9ybSh2LnRlbGVmb25lKSwgJycpKSwgMCkgPCA0CiAgICBmcm9tIGVxdWlwZXMgZQogICAgbGVmdCBqb2luIHZvbHVudGFyaW9zIHYgb24gdi5lcXVpcGVfaWQgPSBlLmlkIGFuZCB2LmF0aXZvCiAgIHdoZXJlIGUuc2x1ZyA9IHBfc2x1ZwogICBvcmRlciBieSB2Lm5vbWU7CiQkOwpyZXZva2UgYWxsIG9uIGZ1bmN0aW9uIGVxdWlwZV9wdWJsaWNhKHRleHQpIGZyb20gcHVibGljOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGVxdWlwZV9wdWJsaWNhKHRleHQpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7CgovKiAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIDkuIGzDrWRlcmVzIGF1dG9yaXphZG9zICovCmluc2VydCBpbnRvIGxpZGVyZXMgKGVtYWlsKSB2YWx1ZXMKICAoJ2FydGh1cnJhbmdlbDQyN0BnbWFpbC5jb20nKSwKICAoJ290ZXJvLmZhYnJpY2lvQGdtYWlsLmNvbScpCm9uIGNvbmZsaWN0IChlbWFpbCkgZG8gbm90aGluZzsK"}
+/* =============================================================================
+   03 — CORREÇÕES DA AUDITORIA (aplicado em produção em 2026-08-06)
+
+   Cada bloco existe por causa de um cenário concreto que quebrava o app.
+   Idempotente: pode rodar de novo.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   1. salvar_dia: escopo por ministério + upsert por slot.
+
+   O culto é UMA linha para a igreja inteira (cultos.data é único). A versão
+   antiga fazia `delete from escalacoes where culto_id = v_culto` sem filtro:
+   qualquer ação comum do líder da Mídia (sortear, trocar, travar, salvar o
+   recado) apagava a escala inteira do Louvor naquele domingo.
+
+   E o delete+reinsert apagava a resposta que o voluntário tinha acabado de
+   dar: às 20h01 a Ana confirma; às 20h05 o líder salva o recado com o estado
+   de 19h40 em mãos e a confirmação da Ana vira "não respondeu".
+   ----------------------------------------------------------------------------- */
+create or replace function salvar_dia(
+  p_equipe uuid, p_data date, p_obs text, p_slots jsonb, p_plantao uuid[]
+) returns uuid
+language plpgsql security invoker set search_path = public as $fn$
+declare v_culto uuid; r record;
+begin
+  if p_equipe is null then raise exception 'salvar_dia sem ministerio'; end if;
+
+  insert into cultos (data) values (p_data)
+    on conflict (data) do update set data = excluded.data
+    returning id into v_culto;
+  if v_culto is null then select id into v_culto from cultos where data = p_data; end if;
+
+  insert into culto_obs (culto_id, equipe_id, obs)
+    values (v_culto, p_equipe, coalesce(p_obs, ''))
+  on conflict (culto_id, equipe_id) do update set obs = excluded.obs;
+
+  for r in
+    select (x ->> 'funcao_id')::uuid fid,
+           (x ->> 'voluntario_id')::uuid vid,
+           coalesce(x ->> 'status', 'pendente')::status_escala st,
+           coalesce((x ->> 'fixo')::boolean, false) fx
+      from jsonb_array_elements(coalesce(p_slots, '[]'::jsonb)) x
+  loop
+    if not exists (select 1 from funcoes where id = r.fid and equipe_id = p_equipe) then
+      raise exception 'funcao de outro ministerio'; end if;
+    if not exists (select 1 from voluntarios where id = r.vid and equipe_id = p_equipe) then
+      raise exception 'voluntario de outro ministerio'; end if;
+
+    insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo)
+      values (v_culto, r.fid, r.vid, r.st, r.fx)
+    on conflict (culto_id, funcao_id) do update
+      set voluntario_id = excluded.voluntario_id,
+          fixo          = excluded.fixo,
+          -- trocar a pessoa zera a resposta; manter a mesma preserva
+          status        = case when escalacoes.voluntario_id is distinct from excluded.voluntario_id
+                               then excluded.status else escalacoes.status end,
+          respondido_em = case when escalacoes.voluntario_id is distinct from excluded.voluntario_id
+                               then null else escalacoes.respondido_em end;
+  end loop;
+
+  delete from escalacoes e using funcoes f
+   where f.id = e.funcao_id and e.culto_id = v_culto and f.equipe_id = p_equipe
+     and not exists (select 1 from jsonb_array_elements(coalesce(p_slots,'[]'::jsonb)) x
+                      where (x ->> 'funcao_id')::uuid = e.funcao_id);
+
+  delete from plantoes p using voluntarios v
+   where v.id = p.voluntario_id and p.culto_id = v_culto and v.equipe_id = p_equipe
+     and not (p.voluntario_id = any (coalesce(p_plantao, '{}'::uuid[])));
+
+  insert into plantoes (culto_id, voluntario_id)
+  select v_culto, v.id from voluntarios v
+   where v.id = any (coalesce(p_plantao, '{}'::uuid[])) and v.equipe_id = p_equipe
+  on conflict do nothing;
+
+  return v_culto;
+end $fn$;
+
+/* -----------------------------------------------------------------------------
+   2. equipe_entrar: devolve OBJETO em vez de estourar.
+
+   Com `raise exception`, o próprio INSERT no contador de tentativas era
+   desfeito junto — o freio de força bruta nunca contava nada, e 4 dígitos
+   são só 10 mil combinações. Além disso, dígitos errados voltavam como
+   `null` com HTTP 200: o app mandava o voluntário para /eu/null.
+   ----------------------------------------------------------------------------- */
+create table if not exists entrar_tentativas (
+  voluntario_id uuid not null references voluntarios(id) on delete cascade,
+  dia  date not null default current_date,
+  n    int  not null default 0,
+  primary key (voluntario_id, dia)
+);
+alter table entrar_tentativas enable row level security;   -- sem policy: ninguém lê
+revoke all on table entrar_tentativas from anon, public;
+
+drop function if exists equipe_entrar(text, uuid, text);
+create or replace function equipe_entrar(p_slug text, p_voluntario uuid, p_ult4 text)
+returns jsonb
+language plpgsql security definer set search_path = public as $fn$
+declare v_tel text; v_tok text; v_n int; v_max constant int := 8;
+begin
+  select nullif(tel_norm(v.telefone),''), v.token into v_tel, v_tok
+    from voluntarios v join equipes e on e.id = v.equipe_id
+   where v.id = p_voluntario and e.slug = p_slug and v.ativo;
+
+  if v_tok is null then return jsonb_build_object('ok', false, 'erro', 'LINK_INVALIDO'); end if;
+  -- sem WhatsApp não há como provar quem é: o link do grupo é público para o grupo
+  if v_tel is null or length(v_tel) < 4 then
+    return jsonb_build_object('ok', false, 'erro', 'SEM_TELEFONE');
+  end if;
+
+  insert into entrar_tentativas (voluntario_id) values (p_voluntario)
+  on conflict (voluntario_id, dia) do update set n = entrar_tentativas.n + 1
+  returning n into v_n;
+
+  if v_n > v_max then return jsonb_build_object('ok', false, 'erro', 'MUITAS_TENTATIVAS'); end if;
+
+  if right(v_tel, 4) <> tel_norm(coalesce(p_ult4,'')) then
+    return jsonb_build_object('ok', false, 'erro', 'DIGITOS_NAO_CONFEREM',
+                              'restam', greatest(v_max - v_n, 0));
+  end if;
+
+  delete from entrar_tentativas where voluntario_id = p_voluntario;
+  return jsonb_build_object('ok', true, 'token', v_tok);
+end $fn$;
+revoke all on function equipe_entrar(text, uuid, text) from public;
+grant execute on function equipe_entrar(text, uuid, text) to anon, authenticated;
+
+/* -----------------------------------------------------------------------------
+   3. Gatilhos: ignorar o próprio slot no upsert, e casar a mesma PESSOA
+      cadastrada em dois ministérios (linhas diferentes, mesmo telefone).
+
+   Sem o `e.funcao_id <> new.funcao_id`, o ON CONFLICT DO UPDATE disparava o
+   gatilho contra a linha que ele mesmo ia substituir: todo save quebrava com
+   "Fulano já está em X neste domingo".
+   ----------------------------------------------------------------------------- */
+create or replace function fn_conflito_simultaneo() returns trigger
+language plpgsql security definer set search_path = public as $fn$
+declare v_tel text; v_nome text; v_outra text;
+begin
+  if not exists (select 1 from funcoes where id = new.funcao_id and simultanea) then
+    return new;
+  end if;
+  select nullif(tel_norm(telefone),''), nome into v_tel, v_nome
+    from voluntarios where id = new.voluntario_id;
+
+  select f.nome into v_outra
+    from escalacoes e
+    join funcoes f on f.id = e.funcao_id and f.simultanea
+    join voluntarios v on v.id = e.voluntario_id
+   where e.culto_id = new.culto_id
+     and e.funcao_id <> new.funcao_id
+     and ( e.voluntario_id = new.voluntario_id
+        or (v_tel is not null and nullif(tel_norm(v.telefone),'') = v_tel) )
+   limit 1;
+
+  if v_outra is not null then
+    raise exception '% ja esta em % neste domingo.', v_nome, v_outra;
+  end if;
+  return new;
+end $fn$;
+
+create or replace function fn_indisponivel() returns trigger
+language plpgsql security definer set search_path = public as $fn$
+declare v_data date; v_tel text; v_nome text; v_bloq int;
+begin
+  -- só valida quando a PESSOA ou o DIA mudam: editar o recado do domingo
+  -- não pode congelar a linha inteira
+  if tg_op = 'UPDATE'
+     and new.voluntario_id is not distinct from old.voluntario_id
+     and new.culto_id      is not distinct from old.culto_id then
+    return new;
+  end if;
+
+  select data into v_data from cultos where id = new.culto_id;
+  select nullif(tel_norm(telefone),''), nome into v_tel, v_nome
+    from voluntarios where id = new.voluntario_id;
+
+  select count(*) into v_bloq
+    from indisponibilidades i
+    join voluntarios v on v.id = i.voluntario_id
+   where i.data = v_data
+     and ( i.voluntario_id = new.voluntario_id
+        or (v_tel is not null and nullif(tel_norm(v.telefone),'') = v_tel) );
+
+  if v_bloq > 0 then raise exception '% avisou que nao pode neste domingo.', v_nome; end if;
+  return new;
+end $fn$;
+
+/* --------------------------------------------- 4. allowlist à prova de vazio */
+-- uma única linha com email '' fazia is_lider() devolver true para qualquer
+-- usuário autenticado, e o cadastro é aberto
+delete from lideres where position('@' in coalesce(email, '')) < 2;
+alter table lideres drop constraint if exists lider_email_valido;
+alter table lideres add  constraint lider_email_valido check (position('@' in email) > 1);
+
+create or replace function is_lider() returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from lideres
+    where email <> '' and lower(email) = lower(nullif(auth.jwt() ->> 'email', '')));
+$$;
+
+/* ------------------------- 5. índices do padrão de acesso multi-ministério */
+create index if not exists ix_esc_funcao  on escalacoes(funcao_id);
+create index if not exists ix_plant_vol   on plantoes(voluntario_id);
+create index if not exists ix_vol_equipe  on voluntarios(equipe_id);
+create index if not exists ix_func_equipe on funcoes(equipe_id);
+create index if not exists ix_indisp_vol  on indisponibilidades(voluntario_id);
+
+/* ---------- 6. tabelas novas não podem nascer abertas para anon (padrão do Supabase) */
+revoke all on table culto_obs, entrar_tentativas, equipes, lideres from anon, public;
+grant select, insert, update, delete on table culto_obs to authenticated;
+
+/* -----------------------------------------------------------------------------
+   7. Recado do domingo POR MINISTÉRIO.
+
+   `cultos.obs` era global: o líder do Louvor escrevia "ensaio 16h, trazer
+   partitura" e os voluntários da MÍDIA liam esse aviso colado na escalação
+   deles; depois o líder da Mídia escrevia por cima e o recado do Louvor sumia.
+   ----------------------------------------------------------------------------- */
+create table if not exists culto_obs (
+  culto_id  uuid not null references cultos(id)  on delete cascade,
+  equipe_id uuid not null references equipes(id) on delete cascade,
+  obs       text not null default '',
+  primary key (culto_id, equipe_id)
+);
+alter table culto_obs enable row level security;
+drop policy if exists p_culto_obs on culto_obs;
+create policy p_culto_obs on culto_obs for all to authenticated
+  using (is_lider()) with check (is_lider());
+
+/* -----------------------------------------------------------------------------
+   8. equipe_publica: nome do ministério mesmo sem ninguém cadastrado.
+
+   Com INNER JOIN, um ministério recém-criado devolvia zero linhas e a tela
+   dizia "Link inválido" — exatamente no fluxo recomendado, em que o líder
+   fixa o link no grupo ANTES de cadastrar o time. O LEFT JOIN devolve uma
+   linha com voluntario_id nulo, que o app trata como "ninguém ainda".
+
+   `precisa_link` = a pessoa não tem WhatsApp cadastrado, então não dá para
+   provar que é ela; o app mostra "peça o link ao líder" em vez de deixar
+   qualquer um do grupo abrir a página pessoal dela.
+   ----------------------------------------------------------------------------- */
+create or replace function equipe_publica(p_slug text)
+returns table (equipe text, voluntario_id uuid, primeiro_nome text, precisa_link boolean)
+language sql security definer stable set search_path = public as $$
+  select e.nome, v.id, split_part(v.nome, ' ', 1),
+         coalesce(length(nullif(tel_norm(v.telefone), '')), 0) < 4
+    from equipes e
+    left join voluntarios v on v.equipe_id = e.id and v.ativo
+   where e.slug = p_slug
+   order by v.nome;
+$$;
+revoke all on function equipe_publica(text) from public;
+grant execute on function equipe_publica(text) to anon, authenticated;
+
+/* ------------------------------------------------- 9. líderes autorizados */
+insert into lideres (email) values
+  ('arthurrangel427@gmail.com'),
+  ('otero.fabricio@gmail.com')
+on conflict (email) do nothing;

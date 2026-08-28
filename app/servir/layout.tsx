@@ -1,1 +1,18 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YSB9IGZyb20gJ25leHQnOwoKLyogTyB0w610dWxvIGRhIGFiYSBlIG8gY2FyZCBkbyBXaGF0c0FwcCBkZXN0YSB0ZWxhOiBzZW0gaXNzbyBlbGEgaGVyZGF2YSBvCiAgIHTDrXR1bG8gZGEgaG9tZSwgZSB1bSBsaW5rIGRlICJxdWVybyBzZXJ2aXIiIGNvbGFkbyBudW0gZ3J1cG8gYXBhcmVjaWEgY29tbwogICBzZSBmb3NzZSBhIHDDoWdpbmEgaW5pY2lhbCBkYSBpZ3JlamEuICovCmV4cG9ydCBjb25zdCBtZXRhZGF0YTogTWV0YWRhdGEgPSB7CiAgdGl0bGU6ICdTZXJ2aXInLAogIGRlc2NyaXB0aW9uOiAnRXNjb2xoYSB1bWEgw6FyZWEgcGFyYSB2ZXIgbyBxdWUgZWxhIGZheiwgcXVhaXMgZnVuw6fDtWVzIGV4aXN0ZW0gZSBjb21vIGVudHJhciBwYXJhIGEgZXF1aXBlLicsCiAgb3BlbkdyYXBoOiB7CiAgICB0aXRsZTogJ1NlcnZpciDCtyBHVUlBIENodXJjaCcsCiAgICBkZXNjcmlwdGlvbjogJ1RvZG8gdHJhYmFsaG8gY29udGEuIEVuY29udHJlIHVtYSDDoXJlYSBvbmRlIHZvY8OqIHBvZGUgY29udHJpYnVpci4nLAogICAgdHlwZTogJ3dlYnNpdGUnLCBsb2NhbGU6ICdwdF9CUicsCiAgfSwKfTsKCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIExheW91dCh7IGNoaWxkcmVuIH06IHsgY2hpbGRyZW46IFJlYWN0LlJlYWN0Tm9kZSB9KSB7CiAgcmV0dXJuIDw+e2NoaWxkcmVufTwvPjsKfQo="}
+import type { Metadata } from 'next';
+
+/* O título da aba e o card do WhatsApp desta tela: sem isso ela herdava o
+   título da home, e um link de "quero servir" colado num grupo aparecia como
+   se fosse a página inicial da igreja. */
+export const metadata: Metadata = {
+  title: 'Servir',
+  description: 'Escolha uma área para ver o que ela faz, quais funções existem e como entrar para a equipe.',
+  openGraph: {
+    title: 'Servir · GUIA Church',
+    description: 'Todo trabalho conta. Encontre uma área onde você pode contribuir.',
+    type: 'website', locale: 'pt_BR',
+  },
+};
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

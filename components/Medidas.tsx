@@ -1,1 +1,33 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyB1c2VFZmZlY3QgfSBmcm9tICdyZWFjdCc7CgovKiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICAtLWJhcnJhOiBhIGxhcmd1cmEgZGEgYmFycmEgZGUgcm9sYWdlbQoKICAgUXVlbSBvY3VwYSBhIGxhcmd1cmEgaW50ZWlyYSBkYSBqYW5lbGEgdXNhIDEwMHZ3LCBlIDEwMHZ3IElOQ0xVSSBhIGJhcnJhIGRlCiAgIHJvbGFnZW0uIFNlbSBkZXNjb250YXIsIGNhZGEgZmFpeGEgZmljYSBhbGd1bnMgcGl4ZWxzIG1haXMgbGFyZ2EgcXVlIGEKICAgamFuZWxhIGUgYSBww6FnaW5hIGFuZGEgZGUgbGFkbyDigJQgcG91Y28sIG1hcyBhbmRhLCBlIG5vIGNlbHVsYXIgdmlyYSB1bQogICB0cmFuY28gYSBjYWRhIHJvbGFnZW0uCgogICBJc3RvIGrDoSBmb2kgdW0gPHNjcmlwdD4gaW5saW5lIG5vIDxoZWFkPiwgcXVlIHJvZGF2YSBhbnRlcyBkYSBwaW50dXJhIGUgZXJhCiAgIG1lbGhvciBwb3IgaXNzby4gU8OzIHF1ZSBlbGUgZXNjcmV2aWEgc3R5bGU9Ii0tYmFycmE6MTVweCIgbm8gPGh0bWw+LCBvCiAgIHNlcnZpZG9yIG7Do28gdGluaGEgZXNjcml0byBuYWRhLCBlIG8gUmVhY3QgcmVjbGFtYXZhIGRlIGhpZHJhdGHDp8OjbyBlbSB0b2RhCiAgIGNhcmdhLiBVbSBhdmlzbyBkZSBoaWRyYXRhw6fDo28gbsOjbyDDqSBjb3Ntw6l0aWNvOiBxdWFuZG8gbyBSZWFjdCBkZXNpc3RlIGRlCiAgIGNhc2FyIGEgw6Fydm9yZSwgZWxlIHBvZGUgcmVtb250YXIgcGVkYcOnb3MgZSBwZXJkZXIgZXN0YWRvLgoKICAgRW50w6NvIG8gcHJlw6dvIG11ZG91IGRlIGxhZG86IHVtIHF1YWRybyBjb20gLS1iYXJyYSBlbSAwIChvIHBhZHLDo28gZG8gQ1NTKSwKICAgZSBuZW5odW1hIGRpdmVyZ8OqbmNpYS4gTmEgaG9tZSBpc3NvIG5lbSBhcGFyZWNlIOKAlCBsw6EgYXMgZmFpeGFzIHPDo28gZmlsaGFzCiAgIGRpcmV0YXMgZGEgcmFpeiBlIG7Do28gdXNhbSAxMDB2dy4gU8OzIG8gaGVyw7NpIGRhcyB0ZWxhcyBpbnRlcm5hcyBkZXBlbmRlLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBNZWRpZGFzKCkgewogIHVzZUVmZmVjdCgoKSA9PiB7CiAgICBjb25zdCBtZWRpciA9ICgpID0+CiAgICAgIGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5zdHlsZS5zZXRQcm9wZXJ0eSgKICAgICAgICAnLS1iYXJyYScsICh3aW5kb3cuaW5uZXJXaWR0aCAtIGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5jbGllbnRXaWR0aCkgKyAncHgnLAogICAgICApOwogICAgbWVkaXIoKTsKICAgIHdpbmRvdy5hZGRFdmVudExpc3RlbmVyKCdyZXNpemUnLCBtZWRpciwgeyBwYXNzaXZlOiB0cnVlIH0pOwogICAgcmV0dXJuICgpID0+IHdpbmRvdy5yZW1vdmVFdmVudExpc3RlbmVyKCdyZXNpemUnLCBtZWRpcik7CiAgfSwgW10pOwogIHJldHVybiBudWxsOwp9Cg=="}
+'use client';
+import { useEffect } from 'react';
+
+/* =============================================================================
+   --barra: a largura da barra de rolagem
+
+   Quem ocupa a largura inteira da janela usa 100vw, e 100vw INCLUI a barra de
+   rolagem. Sem descontar, cada faixa fica alguns pixels mais larga que a
+   janela e a página anda de lado — pouco, mas anda, e no celular vira um
+   tranco a cada rolagem.
+
+   Isto já foi um <script> inline no <head>, que rodava antes da pintura e era
+   melhor por isso. Só que ele escrevia style="--barra:15px" no <html>, o
+   servidor não tinha escrito nada, e o React reclamava de hidratação em toda
+   carga. Um aviso de hidratação não é cosmético: quando o React desiste de
+   casar a árvore, ele pode remontar pedaços e perder estado.
+
+   Então o preço mudou de lado: um quadro com --barra em 0 (o padrão do CSS),
+   e nenhuma divergência. Na home isso nem aparece — lá as faixas são filhas
+   diretas da raiz e não usam 100vw. Só o herói das telas internas depende.
+   ============================================================================= */
+export default function Medidas() {
+  useEffect(() => {
+    const medir = () =>
+      document.documentElement.style.setProperty(
+        '--barra', (window.innerWidth - document.documentElement.clientWidth) + 'px',
+      );
+    medir();
+    window.addEventListener('resize', medir, { passive: true });
+    return () => window.removeEventListener('resize', medir);
+  }, []);
+  return null;
+}

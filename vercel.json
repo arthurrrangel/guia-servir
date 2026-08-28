@@ -1,1 +1,5 @@
-{"data":"ewogICJjcm9ucyI6IFsKICAgIHsgInBhdGgiOiAiL2FwaS9jcm9uIiwgInNjaGVkdWxlIjogIjAgMTIgKiAqICoiIH0KICBdCn0K"}
+{
+  "crons": [
+    { "path": "/api/cron", "schedule": "0 12 * * *" }
+  ]
+}

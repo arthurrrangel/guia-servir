@@ -1,1 +1,43 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YSB9IGZyb20gJ25leHQnOwppbXBvcnQgeyBycGNQdWJsaWNhIH0gZnJvbSAnQC9saWIvcHVibGljbyc7CgovKiA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQogICBPIFTDjVRVTE8gUVVFIE8gV0hBVFNBUFAgTMOKCgogICBBIHDDoWdpbmEgw6kgJ3VzZSBjbGllbnQnLCBlbnTDo28gbyBgZG9jdW1lbnQudGl0bGVgIHF1ZSBlbGEgYWp1c3RhIHPDsyBleGlzdGUKICAgREVQT0lTIHF1ZSBvIG5hdmVnYWRvciBleGVjdXRhIG8gSmF2YVNjcmlwdC4gQSBwcsOpdmlhIGRvIGxpbmsgbm8gV2hhdHNBcHAKICAgbsOjbyBleGVjdXRhIG5hZGE6IGVsYSBsw6ogbyBIVE1MIHF1ZSBvIHNlcnZpZG9yIGRldm9sdmV1LiBTZW0gZXN0ZSBsYXlvdXQsIG8KICAgbGluayBkbyBMb3V2b3IgYXBhcmVjaWEgbm8gZ3J1cG8gY29tIG8gdMOtdHVsbyBkZSBvdXRybyBtaW5pc3TDqXJpby4KCiAgIFNlcnZlciBjb21wb25lbnQgZGUgcHJvcMOzc2l0bzogYnVzY2EgbyBub21lIG5vIHNlcnZpZG9yIGUgZGV2b2x2ZSBvIDx0aXRsZT4KICAgZSBvIGNhcmQgZGUgcHLDqXZpYSBqw6EgcHJvbnRvcyBubyBIVE1MLiBTZSBhIGJ1c2NhIGZhbGhhciwgY2FpIG5vIGdlbsOpcmljbyDigJQKICAgbm9tZSBlcnJhZG8gw6kgcGlvciBxdWUgbm9tZSBhdXNlbnRlLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwoKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIGdlbmVyYXRlTWV0YWRhdGEoCiAgeyBwYXJhbXMgfTogeyBwYXJhbXM6IFByb21pc2U8eyBzbHVnOiBzdHJpbmcgfT4gfQopOiBQcm9taXNlPE1ldGFkYXRhPiB7CiAgY29uc3QgeyBzbHVnIH0gPSBhd2FpdCBwYXJhbXM7CiAgY29uc3QgbGluaGFzID0gYXdhaXQgcnBjUHVibGljYTxhbnlbXT4oJ2VxdWlwZV9wdWJsaWNhJywgeyBwX3NsdWc6IHNsdWcgfSk7CiAgY29uc3Qgbm9tZSA9IEFycmF5LmlzQXJyYXkobGluaGFzKSAmJiBsaW5oYXNbMF0/LmVxdWlwZSA/IFN0cmluZyhsaW5oYXNbMF0uZXF1aXBlKSA6IG51bGw7CgogIC8qICJkbyBNw61kaWEiIGUgImRvIERpYWNvbmlhIiBzYcOtYW0gZXJyYWRvczogbyBhcnRpZ28gw6kgZGFkbywgbsOjbyByZWdyYSDigJQKICAgICAibyBMb3V2b3IiIGUgImEgTcOtZGlhIiBuw6NvIHNlZ3VlbSB0ZXJtaW5hw6fDo28gbmVuaHVtYSBjb25macOhdmVsLiAqLwogIGNvbnN0IGxpc3RhID0gYXdhaXQgcnBjUHVibGljYTx7IHNsdWc6IHN0cmluZzsgYXJ0aWdvOiBzdHJpbmcgfVtdPignbWluaXN0ZXJpb3NfcHVibGljb3MnKTsKICBjb25zdCBhcnRpZ28gPSAoQXJyYXkuaXNBcnJheShsaXN0YSkgPyBsaXN0YSA6IFtdKS5maW5kKG0gPT4gbS5zbHVnID09PSBzbHVnKT8uYXJ0aWdvIHx8ICdvJzsKICBjb25zdCBkb0RhID0gYXJ0aWdvID09PSAnYScgPyAnZGEnIDogJ2RvJzsKCiAgY29uc3QgdGl0dWxvID0gbm9tZSA/IGBTZXJ2aXIgwrcgJHtub21lfWAgOiAnU2VydmlyJzsKICBjb25zdCBkZXNjID0gbm9tZQogICAgPyBgRW50cmUgbm8gdGltZSAke2RvRGF9ICR7bm9tZX0gb3UgYWJyYSBhIHN1YSBlc2NhbGEuIExldmEgbWVub3MgZGUgdW0gbWludXRvLmAKICAgIDogJ0VudHJlIG5vIHRpbWUgb3UgYWJyYSBhIHN1YSBlc2NhbGEuJzsKICByZXR1cm4gewogICAgdGl0bGU6IHRpdHVsbywKICAgIGRlc2NyaXB0aW9uOiBkZXNjLAogICAgb3BlbkdyYXBoOiB7IHRpdGxlOiBgJHt0aXR1bG99IMK3IEdVSUEgU2VydmlyYCwgZGVzY3JpcHRpb246IGRlc2MsIHR5cGU6ICd3ZWJzaXRlJywgbG9jYWxlOiAncHRfQlInIH0sCiAgfTsKfQoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gTGF5b3V0KHsgY2hpbGRyZW4gfTogeyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlIH0pIHsKICByZXR1cm4gPD57Y2hpbGRyZW59PC8+Owp9Cg=="}
+import type { Metadata } from 'next';
+import { rpcPublica } from '@/lib/publico';
+
+/* =============================================================================
+   O TÍTULO QUE O WHATSAPP LÊ
+
+   A página é 'use client', então o `document.title` que ela ajusta só existe
+   DEPOIS que o navegador executa o JavaScript. A prévia do link no WhatsApp
+   não executa nada: ela lê o HTML que o servidor devolveu. Sem este layout, o
+   link do Louvor aparecia no grupo com o título de outro ministério.
+
+   Server component de propósito: busca o nome no servidor e devolve o <title>
+   e o card de prévia já prontos no HTML. Se a busca falhar, cai no genérico —
+   nome errado é pior que nome ausente.
+   ============================================================================= */
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const linhas = await rpcPublica<any[]>('equipe_publica', { p_slug: slug });
+  const nome = Array.isArray(linhas) && linhas[0]?.equipe ? String(linhas[0].equipe) : null;
+
+  /* "do Mídia" e "do Diaconia" saíam errados: o artigo é dado, não regra —
+     "o Louvor" e "a Mídia" não seguem terminação nenhuma confiável. */
+  const lista = await rpcPublica<{ slug: string; artigo: string }[]>('ministerios_publicos');
+  const artigo = (Array.isArray(lista) ? lista : []).find(m => m.slug === slug)?.artigo || 'o';
+  const doDa = artigo === 'a' ? 'da' : 'do';
+
+  const titulo = nome ? `Servir · ${nome}` : 'Servir';
+  const desc = nome
+    ? `Entre no time ${doDa} ${nome} ou abra a sua escala. Leva menos de um minuto.`
+    : 'Entre no time ou abra a sua escala.';
+  return {
+    title: titulo,
+    description: desc,
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
+  };
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

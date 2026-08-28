@@ -1,1 +1,126 @@
-{"data":"LyogUG9udGUgcHVyYSBlbnRyZSBhcyBsaW5oYXMgZG8gYmFuY28gZSBvIEVzdGFkbyBkbyBtb3Rvci4KICAgU0VNICd1c2UgY2xpZW50Jzogcm9kYSBubyBuYXZlZ2Fkb3IgKGRiLnRzKSBlIG5vIHNlcnZpZG9yIChjcm9uKS4gKi8KaW1wb3J0IHsgQ09ORklHX1BBRFJBTywgRXN0YWRvLCBOaXZlbCwgU3RhdHVzLCBlc3RhZG9WYXppbywgZ2FyYW50aXJEaWEgfSBmcm9tICcuL2VuZ2luZSc7CgpleHBvcnQgdHlwZSBMaW5oYXNEb0JhbmNvID0gewogIGZ1bmNvZXM6IGFueVtdOyB2b2x1bnRhcmlvczogYW55W107IGhhYmlsaWRhZGVzOiBhbnlbXTsgaW5kaXNwb25pYmlsaWRhZGVzOiBhbnlbXTsKICBjdWx0b3M6IGFueVtdOyBlc2NhbGFjb2VzOiBhbnlbXTsgcGxhbnRvZXM6IGFueVtdOyBjb25maWc6IGFueSB8IG51bGw7CiAgLyogcmVjYWRvIGRvIGRvbWluZ28gUE9SIEVRVUlQRSAoY3VsdG9fb2JzKS4gU2VtIGlzc28sIG8gcmVjYWRvIGRlIHVtCiAgICAgbWluaXN0w6lyaW8gYXBhcmVjaWEgbm8gYXZpc28gZG8gb3V0cm8gZSB1bSBzb2JyZXNjcmV2aWEgbyBkbyBvdXRyby4gKi8KICByZWNhZG9zPzogYW55W107CiAgLyogcmVzcG9zdGFzIGRlICJwb3NzbyIgcG9yIGRvbWluZ28gKHRhYmVsYSBkaXNwb25pYmlsaWRhZGUpICovCiAgZGlzcG9uaWJpbGlkYWRlcz86IGFueVtdOwogIGVxdWlwZT86IHN0cmluZzsKfTsKCmV4cG9ydCBmdW5jdGlvbiBtb250YXJFc3RhZG8obDogTGluaGFzRG9CYW5jbyk6IEVzdGFkbyB7CiAgY29uc3QgUyA9IGVzdGFkb1ZhemlvKCk7CiAgLyogbMOtZGVyIGRlIHZlcmRhZGUgc2VtcHJlIGzDqiBhIGxpbmhhIGRlIGNvbmZpZzsgcXVlbSBsb2dvdSBzZW0gZXN0YXIgbmEKICAgICBhbGxvd2xpc3QgcmVjZWJlIG51bGwgKFJMUykg4oCUIG8gU2hlbGwgdXNhIGlzc28gcGFyYSBtb3N0cmFyICJzZW0gYWNlc3NvIiAqLwogIChTIGFzIGFueSkudGVtQWNlc3NvID0gISFsLmNvbmZpZzsKICBTLmVxdWlwZSA9IGwuZXF1aXBlIHx8ICcnOwogIFMuY29uZmlnID0geyAuLi5DT05GSUdfUEFEUkFPLCAuLi4obC5jb25maWc/LmRhZG9zIHx8IHt9KSB9OwogIFMuZnVuY29lcyA9IChsLmZ1bmNvZXMgfHwgW10pLm1hcChmID0+ICh7CiAgICBpZDogZi5pZCwgbm9tZTogZi5ub21lLCBzaW11bHRhbmVhOiBmLnNpbXVsdGFuZWEsIG9yZGVtOiBmLm9yZGVtLCBhdGl2YTogZi5hdGl2YSwKICAgIC8qIGVtIHF1ZSB0aXBvIGRlIGN1bHRvIGVzdGEgw6FyZWEgZXhpc3RlLiBMaW5oYSBhbnRpZ2EgKHNlbSBhIGNvbHVuYSkgdmFsZQogICAgICAgcGFyYSBvcyBkb2lzOiBzw7MgcXVlbSBmb2kgbWFyY2FkbyBleHBsaWNpdGFtZW50ZSBmaWNhIGRlIGZvcmEgZG8gRm9sbG93LiAqLwogICAgdGlwb3M6IEFycmF5LmlzQXJyYXkoZi50aXBvcykgJiYgZi50aXBvcy5sZW5ndGggPyBmLnRpcG9zIDogWydkb21pbmdvJywgJ2ZvbGxvdyddLAogICAgLyogcG9zdG8gcXVlIHByZWVuY2hlIG8gcmVsYXTDs3JpbyBkbyBkaWEgKGzDrWRlciBlc2NhbGFkbyBkbyBTZXJ2acOnbykgKi8KICAgIHJlbGF0YTogISFmLnJlbGF0YSwKICB9KSk7CgogIGNvbnN0IG5vbWVGdW5jYW8gPSBuZXcgTWFwPHN0cmluZywgc3RyaW5nPigobC5mdW5jb2VzIHx8IFtdKS5tYXAoZiA9PiBbZi5pZCwgZi5ub21lXSkpOwogIGNvbnN0IGhhYlBvclZvbCA9IG5ldyBNYXA8c3RyaW5nLCBSZWNvcmQ8c3RyaW5nLCBOaXZlbD4+KCk7CiAgLyogbsOtdmVsIGRlY2xhcmFkbyBubyBhdXRvLWNhZGFzdHJvIHggbsOtdmVsIHF1ZSBhbGd1w6ltIGRvIHRpbWUgY29uZmVyaXUuCiAgICAgTGluaGEgYW50aWdhIChzZW0gYSBjb2x1bmEpIHZhbGUgY29tbyBjb25mZXJpZGE6IGZvaSBvIGzDrWRlciBxdWUgY3Jpb3UuICovCiAgY29uc3Qgb2tQb3JWb2wgPSBuZXcgTWFwPHN0cmluZywgUmVjb3JkPHN0cmluZywgYm9vbGVhbj4+KCk7CiAgZm9yIChjb25zdCBoIG9mIGwuaGFiaWxpZGFkZXMgfHwgW10pIHsKICAgIGNvbnN0IGZuID0gbm9tZUZ1bmNhby5nZXQoaC5mdW5jYW9faWQpOwogICAgaWYgKCFmbikgY29udGludWU7CiAgICBjb25zdCBtID0gaGFiUG9yVm9sLmdldChoLnZvbHVudGFyaW9faWQpIHx8IHt9OwogICAgbVtmbl0gPSBoLm5pdmVsOyBoYWJQb3JWb2wuc2V0KGgudm9sdW50YXJpb19pZCwgbSk7CiAgICBjb25zdCBjID0gb2tQb3JWb2wuZ2V0KGgudm9sdW50YXJpb19pZCkgfHwge307CiAgICBjW2ZuXSA9IGguY29uZmlybWFkbyAhPT0gZmFsc2U7IG9rUG9yVm9sLnNldChoLnZvbHVudGFyaW9faWQsIGMpOwogIH0KICBjb25zdCBpbmRpc1BvclZvbCA9IG5ldyBNYXA8c3RyaW5nLCBzdHJpbmdbXT4oKTsKICBmb3IgKGNvbnN0IGkgb2YgbC5pbmRpc3BvbmliaWxpZGFkZXMgfHwgW10pIHsKICAgIGNvbnN0IGFyciA9IGluZGlzUG9yVm9sLmdldChpLnZvbHVudGFyaW9faWQpIHx8IFtdOwogICAgYXJyLnB1c2goaS5kYXRhKTsgaW5kaXNQb3JWb2wuc2V0KGkudm9sdW50YXJpb19pZCwgYXJyKTsKICB9CiAgLyogcXVlbSByZXNwb25kZXUgInBvc3NvIi4gU8OzIGNvbnRhIHBvZGU9dHJ1ZTogdW0gcG9kZT1mYWxzZSBqw6Egdmlyb3UKICAgICBpbmRpc3BvbmliaWxpZGFkZSBsw6Egbm8gZXVfZGlzcG9uaWJpbGlkYWRlLCBlbnTDo28gbsOjbyBjb250YSBkdWFzIHZlemVzLiAqLwogIGNvbnN0IGRpc3BQb3JWb2wgPSBuZXcgTWFwPHN0cmluZywgc3RyaW5nW10+KCk7CiAgZm9yIChjb25zdCBkIG9mIGwuZGlzcG9uaWJpbGlkYWRlcyB8fCBbXSkgewogICAgaWYgKGQucG9kZSA9PT0gZmFsc2UpIGNvbnRpbnVlOwogICAgY29uc3QgYXJyID0gZGlzcFBvclZvbC5nZXQoZC52b2x1bnRhcmlvX2lkKSB8fCBbXTsKICAgIGFyci5wdXNoKGQuZGF0YSk7IGRpc3BQb3JWb2wuc2V0KGQudm9sdW50YXJpb19pZCwgYXJyKTsKICB9CiAgUy52b2x1bnRhcmlvcyA9IChsLnZvbHVudGFyaW9zIHx8IFtdKS5tYXAodiA9PiAoewogICAgaWQ6IHYuaWQsIG5vbWU6IHYubm9tZSwgdGVsOiB2LnRlbGVmb25lIHx8ICcnLCBhdGl2bzogdi5hdGl2bywKICAgIGxpbWl0ZU1lczogdi5saW1pdGVfbWVzLCB0b2tlbjogdi50b2tlbiwKICAgIC8qIGNvbHVuYSBub3ZhOiBjYWRhc3Ryb3MgYW50aWdvcyB2w6ptIHNlbSBlbGEgZSB2YWxlbSBjb21vIGNvbmZlcmlkb3MgKi8KICAgIGNvbmZlcmlkbzogdi5jb25mZXJpZG8gIT09IGZhbHNlLAogICAgZnVuY29lczogaGFiUG9yVm9sLmdldCh2LmlkKSB8fCB7fSwgY29uZmlybWFkYXM6IG9rUG9yVm9sLmdldCh2LmlkKSB8fCB7fSwKICAgIGluZGlzcG9uaXZlbDogaW5kaXNQb3JWb2wuZ2V0KHYuaWQpIHx8IFtdLAogICAgZGlzcG9uaXZlbDogZGlzcFBvclZvbC5nZXQodi5pZCkgfHwgW10sCiAgfSkpOwoKICAvKiBPIGN1bHRvIChvIGRvbWluZ28pIMOpIGNvbXBhcnRpbGhhZG8gcGVsYSBpZ3JlamEgaW50ZWlyYTsgbyBxdWUgw6kgREVTVEEKICAgICBlcXVpcGUgc8OjbyBhcyBlc2NhbGHDp8O1ZXMsIG9zIHBsYW50w7VlcyBlIG8gcmVjYWRvLiBNYXRlcmlhbGl6YXIgdW0gZGlhIHPDswogICAgIHBvcnF1ZSBvdXRybyBtaW5pc3TDqXJpbyBtb250b3UgbmVsZSBmYXppYSBvIGFwcCBtb3N0cmFyICI3IGZ1bsOnw7VlcyBzZW0KICAgICBuaW5ndcOpbSIgZSBzdW1pciBjb20gbyBib3TDo28gIk1vbnRhciBhIGVzY2FsYSBkZXN0ZSBtw6pzIi4gKi8KICBjb25zdCBkYXRhRG9DdWx0byA9IG5ldyBNYXA8c3RyaW5nLCBzdHJpbmc+KChsLmN1bHRvcyB8fCBbXSkubWFwKGMgPT4gW2MuaWQsIGMuZGF0YV0pKTsKICBjb25zdCBpZERvQ3VsdG8gPSBuZXcgTWFwPHN0cmluZywgc3RyaW5nPigobC5jdWx0b3MgfHwgW10pLm1hcChjID0+IFtjLmRhdGEsIGMuaWRdKSk7CiAgY29uc3QgYWJyaXIgPSAoZGF0YTogc3RyaW5nKSA9PiB7CiAgICBjb25zdCBkID0gZ2FyYW50aXJEaWEoUywgZGF0YSk7CiAgICBjb25zdCBpZCA9IGlkRG9DdWx0by5nZXQoZGF0YSk7CiAgICBpZiAoaWQpIGQuY3VsdG9JZCA9IGlkOwogICAgcmV0dXJuIGQ7CiAgfTsKICBmb3IgKGNvbnN0IGUgb2YgbC5lc2NhbGFjb2VzIHx8IFtdKSB7CiAgICBjb25zdCBkYXRhID0gZGF0YURvQ3VsdG8uZ2V0KGUuY3VsdG9faWQpOyBjb25zdCBmbiA9IG5vbWVGdW5jYW8uZ2V0KGUuZnVuY2FvX2lkKTsKICAgIGlmICghZGF0YSB8fCAhZm4pIGNvbnRpbnVlOwogICAgYWJyaXIoZGF0YSkuc2xvdHNbZm5dID0geyB2aWQ6IGUudm9sdW50YXJpb19pZCwgc3RhdHVzOiBlLnN0YXR1cyBhcyBTdGF0dXMsIGZpeG86IGUuZml4bywKICAgICAgcHJpbWVpcmFWZXo6ICEhZS5wcmltZWlyYV92ZXosIHJlc3BvbmRpZG9FbTogZS5yZXNwb25kaWRvX2VtIHx8IG51bGwsCiAgICAgIGVzY2FsYWRvRW06IGUuZXNjYWxhZG9fZW0gfHwgbnVsbCB9OwogIH0KICBmb3IgKGNvbnN0IHAgb2YgbC5wbGFudG9lcyB8fCBbXSkgewogICAgY29uc3QgZGF0YSA9IGRhdGFEb0N1bHRvLmdldChwLmN1bHRvX2lkKTsKICAgIGlmIChkYXRhKSBhYnJpcihkYXRhKS5wbGFudGFvLnB1c2gocC52b2x1bnRhcmlvX2lkKTsKICB9CiAgZm9yIChjb25zdCByIG9mIGwucmVjYWRvcyB8fCBbXSkgewogICAgY29uc3QgZGF0YSA9IGRhdGFEb0N1bHRvLmdldChyLmN1bHRvX2lkKTsKICAgIGlmICghZGF0YSkgY29udGludWU7CiAgICBpZiAoKHIub2JzIHx8ICcnKS50cmltKCkpIGFicmlyKGRhdGEpLm9icyA9IHIub2JzOwogICAgLyogcmVsYXTDs3JpbyBkbyBmaW0gZG8gY3VsdG86IG1vcmEgbmEgbWVzbWEgbGluaGEgZG8gcmVjYWRvICovCiAgICBpZiAoci5yZWxhdG9yaW8gfHwgci5wcm9ibGVtYXMpIHsKICAgICAgY29uc3QgZCA9IGFicmlyKGRhdGEpOwogICAgICBkLnJlbGF0b3JpbyA9IHIucmVsYXRvcmlvIHx8ICcnOwogICAgICBkLnByb2JsZW1hcyA9IHIucHJvYmxlbWFzIHx8ICcnOwogICAgICBkLnJlbGF0YWRvRW0gPSByLnJlbGF0YWRvX2VtIHx8IG51bGw7CiAgICAgIGQucmVsYXRhZG9Qb3IgPSByLnJlbGF0YWRvX3BvciB8fCBudWxsOwogICAgfQogIH0KICByZXR1cm4gUzsKfQoKLyoqIFBhcsOibWV0cm9zIHByb250b3MgcGFyYSBhIFJQQyB0cmFuc2FjaW9uYWwgc2FsdmFyX2RpYS4KICogIHBfZXF1aXBlIMOpIG9icmlnYXTDs3Jpbzogc2VtIGVsZSBvIGJhbmNvIGFwYWdhdmEgYSBlc2NhbGEgZG9zIE9VVFJPUwogKiAgbWluaXN0w6lyaW9zIG5vIG1lc21vIGRvbWluZ28gKG8gY3VsdG8gw6kgdW1hIGxpbmhhIHPDsyBwYXJhIGEgaWdyZWphIHRvZGEpLiAqLwpleHBvcnQgZnVuY3Rpb24gcGFyYVNhbHZhckRpYShTOiBFc3RhZG8sIGRhdGE6IHN0cmluZywgZXF1aXBlSWQ6IHN0cmluZykgewogIGNvbnN0IGRpYSA9IFMuZXNjYWxhc1tkYXRhXTsKICBpZiAoIWRpYSkgcmV0dXJuIG51bGw7CiAgaWYgKCFlcXVpcGVJZCkgdGhyb3cgbmV3IEVycm9yKCdzYWx2YXJEaWEgc2VtIG1pbmlzdMOpcmlvJyk7CiAgY29uc3QgaWRGdW5jYW8gPSBuZXcgTWFwKFMuZnVuY29lcy5tYXAoZiA9PiBbZi5ub21lLCBmLmlkIV0pKTsKICBjb25zdCBtZXVzID0gbmV3IFNldChTLnZvbHVudGFyaW9zLm1hcCh2ID0+IHYuaWQpKTsKICBjb25zdCBzbG90cyA9IE9iamVjdC5lbnRyaWVzKGRpYS5zbG90cykKICAgIC5maWx0ZXIoKFtmbiwgc2xdKSA9PiBzbD8udmlkICYmIGlkRnVuY2FvLmdldChmbikgJiYgbWV1cy5oYXMoc2wudmlkISkpCiAgICAubWFwKChbZm4sIHNsXSkgPT4gKHsKICAgICAgZnVuY2FvX2lkOiBpZEZ1bmNhby5nZXQoZm4pLCB2b2x1bnRhcmlvX2lkOiBzbC52aWQsCiAgICAgIHN0YXR1czogc2wuc3RhdHVzIHx8ICdwZW5kZW50ZScsIGZpeG86ICEhc2wuZml4bywgcHJpbWVpcmFfdmV6OiAhIXNsLnByaW1laXJhVmV6LAogICAgfSkpOwogIHJldHVybiB7CiAgICBwX2VxdWlwZTogZXF1aXBlSWQsIHBfZGF0YTogZGF0YSwgcF9vYnM6IGRpYS5vYnMgfHwgJycsIHBfc2xvdHM6IHNsb3RzLAogICAgcF9wbGFudGFvOiAoZGlhLnBsYW50YW8gfHwgW10pLmZpbHRlcih2ID0+IG1ldXMuaGFzKHYpKSwKICB9Owp9Cg=="}
+/* Ponte pura entre as linhas do banco e o Estado do motor.
+   SEM 'use client': roda no navegador (db.ts) e no servidor (cron). */
+import { CONFIG_PADRAO, Estado, Nivel, Status, estadoVazio, garantirDia } from './engine';
+
+export type LinhasDoBanco = {
+  funcoes: any[]; voluntarios: any[]; habilidades: any[]; indisponibilidades: any[];
+  cultos: any[]; escalacoes: any[]; plantoes: any[]; config: any | null;
+  /* recado do domingo POR EQUIPE (culto_obs). Sem isso, o recado de um
+     ministério aparecia no aviso do outro e um sobrescrevia o do outro. */
+  recados?: any[];
+  /* respostas de "posso" por domingo (tabela disponibilidade) */
+  disponibilidades?: any[];
+  equipe?: string;
+};
+
+export function montarEstado(l: LinhasDoBanco): Estado {
+  const S = estadoVazio();
+  /* líder de verdade sempre lê a linha de config; quem logou sem estar na
+     allowlist recebe null (RLS) — o Shell usa isso para mostrar "sem acesso" */
+  (S as any).temAcesso = !!l.config;
+  S.equipe = l.equipe || '';
+  S.config = { ...CONFIG_PADRAO, ...(l.config?.dados || {}) };
+  S.funcoes = (l.funcoes || []).map(f => ({
+    id: f.id, nome: f.nome, simultanea: f.simultanea, ordem: f.ordem, ativa: f.ativa,
+    /* em que tipo de culto esta área existe. Linha antiga (sem a coluna) vale
+       para os dois: só quem foi marcado explicitamente fica de fora do Follow. */
+    tipos: Array.isArray(f.tipos) && f.tipos.length ? f.tipos : ['domingo', 'follow'],
+    /* posto que preenche o relatório do dia (líder escalado do Serviço) */
+    relata: !!f.relata,
+  }));
+
+  const nomeFuncao = new Map<string, string>((l.funcoes || []).map(f => [f.id, f.nome]));
+  const habPorVol = new Map<string, Record<string, Nivel>>();
+  /* nível declarado no auto-cadastro x nível que alguém do time conferiu.
+     Linha antiga (sem a coluna) vale como conferida: foi o líder que criou. */
+  const okPorVol = new Map<string, Record<string, boolean>>();
+  for (const h of l.habilidades || []) {
+    const fn = nomeFuncao.get(h.funcao_id);
+    if (!fn) continue;
+    const m = habPorVol.get(h.voluntario_id) || {};
+    m[fn] = h.nivel; habPorVol.set(h.voluntario_id, m);
+    const c = okPorVol.get(h.voluntario_id) || {};
+    c[fn] = h.confirmado !== false; okPorVol.set(h.voluntario_id, c);
+  }
+  const indisPorVol = new Map<string, string[]>();
+  for (const i of l.indisponibilidades || []) {
+    const arr = indisPorVol.get(i.voluntario_id) || [];
+    arr.push(i.data); indisPorVol.set(i.voluntario_id, arr);
+  }
+  /* quem respondeu "posso". Só conta pode=true: um pode=false já virou
+     indisponibilidade lá no eu_disponibilidade, então não conta duas vezes. */
+  const dispPorVol = new Map<string, string[]>();
+  for (const d of l.disponibilidades || []) {
+    if (d.pode === false) continue;
+    const arr = dispPorVol.get(d.voluntario_id) || [];
+    arr.push(d.data); dispPorVol.set(d.voluntario_id, arr);
+  }
+  S.voluntarios = (l.voluntarios || []).map(v => ({
+    id: v.id, nome: v.nome, tel: v.telefone || '', ativo: v.ativo,
+    limiteMes: v.limite_mes, token: v.token,
+    /* coluna nova: cadastros antigos vêm sem ela e valem como conferidos */
+    conferido: v.conferido !== false,
+    funcoes: habPorVol.get(v.id) || {}, confirmadas: okPorVol.get(v.id) || {},
+    indisponivel: indisPorVol.get(v.id) || [],
+    disponivel: dispPorVol.get(v.id) || [],
+  }));
+
+  /* O culto (o domingo) é compartilhado pela igreja inteira; o que é DESTA
+     equipe são as escalações, os plantões e o recado. Materializar um dia só
+     porque outro ministério montou nele fazia o app mostrar "7 funções sem
+     ninguém" e sumir com o botão "Montar a escala deste mês". */
+  const dataDoCulto = new Map<string, string>((l.cultos || []).map(c => [c.id, c.data]));
+  const idDoCulto = new Map<string, string>((l.cultos || []).map(c => [c.data, c.id]));
+  const abrir = (data: string) => {
+    const d = garantirDia(S, data);
+    const id = idDoCulto.get(data);
+    if (id) d.cultoId = id;
+    return d;
+  };
+  for (const e of l.escalacoes || []) {
+    const data = dataDoCulto.get(e.culto_id); const fn = nomeFuncao.get(e.funcao_id);
+    if (!data || !fn) continue;
+    abrir(data).slots[fn] = { vid: e.voluntario_id, status: e.status as Status, fixo: e.fixo,
+      primeiraVez: !!e.primeira_vez, respondidoEm: e.respondido_em || null,
+      escaladoEm: e.escalado_em || null };
+  }
+  for (const p of l.plantoes || []) {
+    const data = dataDoCulto.get(p.culto_id);
+    if (data) abrir(data).plantao.push(p.voluntario_id);
+  }
+  for (const r of l.recados || []) {
+    const data = dataDoCulto.get(r.culto_id);
+    if (!data) continue;
+    if ((r.obs || '').trim()) abrir(data).obs = r.obs;
+    /* relatório do fim do culto: mora na mesma linha do recado */
+    if (r.relatorio || r.problemas) {
+      const d = abrir(data);
+      d.relatorio = r.relatorio || '';
+      d.problemas = r.problemas || '';
+      d.relatadoEm = r.relatado_em || null;
+      d.relatadoPor = r.relatado_por || null;
+    }
+  }
+  return S;
+}
+
+/** Parâmetros prontos para a RPC transacional salvar_dia.
+ *  p_equipe é obrigatório: sem ele o banco apagava a escala dos OUTROS
+ *  ministérios no mesmo domingo (o culto é uma linha só para a igreja toda). */
+export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
+  const dia = S.escalas[data];
+  if (!dia) return null;
+  if (!equipeId) throw new Error('salvarDia sem ministério');
+  const idFuncao = new Map(S.funcoes.map(f => [f.nome, f.id!]));
+  const meus = new Set(S.voluntarios.map(v => v.id));
+  const slots = Object.entries(dia.slots)
+    .filter(([fn, sl]) => sl?.vid && idFuncao.get(fn) && meus.has(sl.vid!))
+    .map(([fn, sl]) => ({
+      funcao_id: idFuncao.get(fn), voluntario_id: sl.vid,
+      status: sl.status || 'pendente', fixo: !!sl.fixo, primeira_vez: !!sl.primeiraVez,
+    }));
+  return {
+    p_equipe: equipeId, p_data: data, p_obs: dia.obs || '', p_slots: slots,
+    p_plantao: (dia.plantao || []).filter(v => meus.has(v)),
+  };
+}

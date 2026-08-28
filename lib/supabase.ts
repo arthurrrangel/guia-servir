@@ -1,1 +1,78 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyBjcmVhdGVDbGllbnQsIFN1cGFiYXNlQ2xpZW50IH0gZnJvbSAnQHN1cGFiYXNlL3N1cGFiYXNlLWpzJzsKCi8qIEEgY2hhdmUgImFub24iIMOpIHDDumJsaWNhIHBvciBkZXNpZ246IGVsYSBzw7MgZGl6IFFVQUwgcHJvamV0byDDqS4gUXVlbSBkZWNpZGUgbwogICBxdWUgY2FkYSBwZXNzb2EgcG9kZSB2ZXIgw6kgbyBSTFMgZGVudHJvIGRvIGJhbmNvLCBxdWUgasOhIGVzdMOhIGZlY2hhZG86CiAgIG5lbmh1bWEgdGFiZWxhIMOpIGxlZ8OtdmVsIHNlbSBsb2dpbiBkZSBsw61kZXIgYXV0b3JpemFkby4gKi8KY29uc3QgUEFEUkFPID0gewogIHVybDogJ2h0dHBzOi8vcWp0Y2FpamhnbGR5cHVkenlhZnouc3VwYWJhc2UuY28nLAogIGtleTogJ2V5SmhiR2NpT2lKSVV6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpwYzNNaU9pSnpkWEJoWW1GelpTSXNJbkpsWmlJNkluRnFkR05oYVdwb1oyeGtlWEIxWkhwNVlXWjZJaXdpY205c1pTSTZJbUZ1YjI0aUxDSnBZWFFpT2pFM09EVTVNemt6TXpjc0ltVjRjQ0k2TWpFd01UVXhOVE16TjMwLjlTSERxZURNa2lOQ3I1cEpkRm9RTU84N0VjS1JndXNhQXlDTTEwb2pKS1UnLAp9Owpjb25zdCBLID0gJ2VzY2FsYS5jcmVkZW5jaWFpcyc7CgpleHBvcnQgdHlwZSBDcmVkZW5jaWFpcyA9IHsgdXJsOiBzdHJpbmc7IGtleTogc3RyaW5nIH07CgpleHBvcnQgZnVuY3Rpb24gbGVyQ3JlZGVuY2lhaXMoKTogQ3JlZGVuY2lhaXMgfCBudWxsIHsKICBpZiAodHlwZW9mIHdpbmRvdyAhPT0gJ3VuZGVmaW5lZCcpIHsKICAgIHRyeSB7CiAgICAgIGNvbnN0IHJhdyA9IGxvY2FsU3RvcmFnZS5nZXRJdGVtKEspOwogICAgICBpZiAocmF3KSB7IGNvbnN0IGMgPSBKU09OLnBhcnNlKHJhdyk7IGlmIChjPy51cmwgJiYgYz8ua2V5KSByZXR1cm4gYzsgfQogICAgfSBjYXRjaCB7fQogIH0KICBjb25zdCB1cmwgPSBwcm9jZXNzLmVudi5ORVhUX1BVQkxJQ19TVVBBQkFTRV9VUkwgfHwgUEFEUkFPLnVybDsKICBjb25zdCBrZXkgPSBwcm9jZXNzLmVudi5ORVhUX1BVQkxJQ19TVVBBQkFTRV9BTk9OX0tFWSB8fCBQQURSQU8ua2V5OwogIHJldHVybiB1cmwgJiYga2V5ID8geyB1cmwsIGtleSB9IDogbnVsbDsKfQoKZXhwb3J0IGZ1bmN0aW9uIGdyYXZhckNyZWRlbmNpYWlzKGM6IENyZWRlbmNpYWlzKSB7CiAgbG9jYWxTdG9yYWdlLnNldEl0ZW0oSywgSlNPTi5zdHJpbmdpZnkoYykpOwogIGNsaWVudGUgPSBudWxsOwp9CgovKiBMb2NrIGRlIHNlc3PDo28gcXVlIE5VTkNBIGZpY2EgZXNwZXJhbmRvLgogICBPIG5hdmlnYXRvci5sb2NrcyBwYWRyw6NvIGRvIHN1cGFiYXNlLWpzIGVzcGVyYSBwYXJhIHNlbXByZSBzZSBvdXRyYSBhYmEKICAgKHBvciBleGVtcGxvLCB1bWEgYWJhIGFudGlnYSB0cmF2YWRhKSBlc3RpdmVyIHNlZ3VyYW5kbyBvIGxvY2sg4oCUIGUgbyBhcHAKICAgaW50ZWlybyBjb25nZWxhIG5vIGVzcXVlbGV0by4gQXF1aTogdGVudGEgcGVnYXIgbyBsb2NrIHNlIGVzdGl2ZXIgbGl2cmU7CiAgIHNlIG7Do28gZXN0aXZlciwgcm9kYSBtZXNtbyBhc3NpbS4gTyBwaW9yIGNhc28gdmlyYSB1bWEgZXNjcml0YSBjb25jb3JyZW50ZQogICBkZSB0b2tlbiBlbnRyZSBhYmFzIChpbm9mZW5zaXZvIGFxdWkpLCBlbSB2ZXogZGUgdW0gYXBwIG1vcnRvLiAqLwphc3luYyBmdW5jdGlvbiBsb2NrU2VtRXNwZXJhPFI+KG5vbWU6IHN0cmluZywgX3RpbWVvdXQ6IG51bWJlciwgZm46ICgpID0+IFByb21pc2U8Uj4pOiBQcm9taXNlPFI+IHsKICBpZiAodHlwZW9mIG5hdmlnYXRvciAhPT0gJ3VuZGVmaW5lZCcgJiYgbmF2aWdhdG9yLmxvY2tzPy5yZXF1ZXN0KSB7CiAgICBsZXQgcm9kb3UgPSBmYWxzZTsgbGV0IHZhbG9yOiBSOyBsZXQgZXJybzogdW5rbm93bjsKICAgIHRyeSB7CiAgICAgIGF3YWl0IG5hdmlnYXRvci5sb2Nrcy5yZXF1ZXN0KG5vbWUsIHsgaWZBdmFpbGFibGU6IHRydWUgfSwgYXN5bmMgKCkgPT4gewogICAgICAgIHJvZG91ID0gdHJ1ZTsKICAgICAgICB0cnkgeyB2YWxvciA9IGF3YWl0IGZuKCk7IH0gY2F0Y2ggKGUpIHsgZXJybyA9IGU7IH0KICAgICAgfSk7CiAgICB9IGNhdGNoIHsgLyogYSBBUEkgZG8gbG9jayBmYWxob3UgQU5URVMgZGUgcm9kYXIgZm4g4oCUIGNhaSBubyBmYWxsYmFjayAqLyB9CiAgICBpZiAocm9kb3UpIHsgICAgICAgICAgICAgICAgICAgICAgIC8vIGZuIHJvZG91IGV4YXRhbWVudGUgdW1hIHZlegogICAgICBpZiAoZXJybyAhPT0gdW5kZWZpbmVkKSB0aHJvdyBlcnJvOyAgLy8gZXJybyByZWFsIGRlIGZuIHByb3BhZ2EsIG51bmNhIMOpIGVuZ29saWRvCiAgICAgIHJldHVybiB2YWxvciE7CiAgICB9CiAgfQogIHJldHVybiBhd2FpdCBmbigpOwp9CgpsZXQgY2xpZW50ZTogU3VwYWJhc2VDbGllbnQgfCBudWxsID0gbnVsbDsKLyoqIENsaWVudGUgZG8gTMONREVSOiBzZXNzw6NvIHBlcnNpc3RpZGEsIGxvY2sgcXVlIG7Do28gYmxvcXVlaWEuICovCmV4cG9ydCBmdW5jdGlvbiBzYigpOiBTdXBhYmFzZUNsaWVudCB8IG51bGwgewogIGlmIChjbGllbnRlKSByZXR1cm4gY2xpZW50ZTsKICBjb25zdCBjID0gbGVyQ3JlZGVuY2lhaXMoKTsKICBpZiAoIWMpIHJldHVybiBudWxsOwogIGNsaWVudGUgPSBjcmVhdGVDbGllbnQoYy51cmwsIGMua2V5LCB7CiAgICBhdXRoOiB7IHBlcnNpc3RTZXNzaW9uOiB0cnVlLCBhdXRvUmVmcmVzaFRva2VuOiB0cnVlLCBsb2NrOiBsb2NrU2VtRXNwZXJhIH0sCiAgfSk7CiAgcmV0dXJuIGNsaWVudGU7Cn0KCmxldCBjbGllbnRlUHVibGljbzogU3VwYWJhc2VDbGllbnQgfCBudWxsID0gbnVsbDsKLyoqIENsaWVudGUgZGEgcMOhZ2luYSBkbyBWT0xVTlTDgVJJTzogc2VtIHNlc3PDo28sIHNlbSBzdG9yYWdlLCBzZW0gbG9jay4KICAgIEEgYXV0b3JpemHDp8OjbyBhbGkgw6kgbyB0b2tlbiBuYSBVUkwsIHZhbGlkYWRvIHBlbG8gYmFuY28uICovCmV4cG9ydCBmdW5jdGlvbiBzYlB1YmxpY28oKTogU3VwYWJhc2VDbGllbnQgfCBudWxsIHsKICBpZiAoY2xpZW50ZVB1YmxpY28pIHJldHVybiBjbGllbnRlUHVibGljbzsKICBjb25zdCBjID0gbGVyQ3JlZGVuY2lhaXMoKTsKICBpZiAoIWMpIHJldHVybiBudWxsOwogIGNsaWVudGVQdWJsaWNvID0gY3JlYXRlQ2xpZW50KGMudXJsLCBjLmtleSwgewogICAgYXV0aDogeyBwZXJzaXN0U2Vzc2lvbjogZmFsc2UsIGF1dG9SZWZyZXNoVG9rZW46IGZhbHNlLCBkZXRlY3RTZXNzaW9uSW5Vcmw6IGZhbHNlIH0sCiAgfSk7CiAgcmV0dXJuIGNsaWVudGVQdWJsaWNvOwp9Cg=="}
+'use client';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+/* A chave "anon" é pública por design: ela só diz QUAL projeto é. Quem decide o
+   que cada pessoa pode ver é o RLS dentro do banco, que já está fechado:
+   nenhuma tabela é legível sem login de líder autorizado. */
+const PADRAO = {
+  url: 'https://qjtcaijhgldypudzyafz.supabase.co',
+  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGNhaWpoZ2xkeXB1ZHp5YWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MzkzMzcsImV4cCI6MjEwMTUxNTMzN30.9SHDqeDMkiNCr5pJdFoQMO87EcKRgusaAyCM10ojJKU',
+};
+const K = 'escala.credenciais';
+
+export type Credenciais = { url: string; key: string };
+
+export function lerCredenciais(): Credenciais | null {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem(K);
+      if (raw) { const c = JSON.parse(raw); if (c?.url && c?.key) return c; }
+    } catch {}
+  }
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || PADRAO.url;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || PADRAO.key;
+  return url && key ? { url, key } : null;
+}
+
+export function gravarCredenciais(c: Credenciais) {
+  localStorage.setItem(K, JSON.stringify(c));
+  cliente = null;
+}
+
+/* Lock de sessão que NUNCA fica esperando.
+   O navigator.locks padrão do supabase-js espera para sempre se outra aba
+   (por exemplo, uma aba antiga travada) estiver segurando o lock — e o app
+   inteiro congela no esqueleto. Aqui: tenta pegar o lock se estiver livre;
+   se não estiver, roda mesmo assim. O pior caso vira uma escrita concorrente
+   de token entre abas (inofensivo aqui), em vez de um app morto. */
+async function lockSemEspera<R>(nome: string, _timeout: number, fn: () => Promise<R>): Promise<R> {
+  if (typeof navigator !== 'undefined' && navigator.locks?.request) {
+    let rodou = false; let valor: R; let erro: unknown;
+    try {
+      await navigator.locks.request(nome, { ifAvailable: true }, async () => {
+        rodou = true;
+        try { valor = await fn(); } catch (e) { erro = e; }
+      });
+    } catch { /* a API do lock falhou ANTES de rodar fn — cai no fallback */ }
+    if (rodou) {                       // fn rodou exatamente uma vez
+      if (erro !== undefined) throw erro;  // erro real de fn propaga, nunca é engolido
+      return valor!;
+    }
+  }
+  return await fn();
+}
+
+let cliente: SupabaseClient | null = null;
+/** Cliente do LÍDER: sessão persistida, lock que não bloqueia. */
+export function sb(): SupabaseClient | null {
+  if (cliente) return cliente;
+  const c = lerCredenciais();
+  if (!c) return null;
+  cliente = createClient(c.url, c.key, {
+    auth: { persistSession: true, autoRefreshToken: true, lock: lockSemEspera },
+  });
+  return cliente;
+}
+
+let clientePublico: SupabaseClient | null = null;
+/** Cliente da página do VOLUNTÁRIO: sem sessão, sem storage, sem lock.
+    A autorização ali é o token na URL, validado pelo banco. */
+export function sbPublico(): SupabaseClient | null {
+  if (clientePublico) return clientePublico;
+  const c = lerCredenciais();
+  if (!c) return null;
+  clientePublico = createClient(c.url, c.key, {
+    auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+  });
+  return clientePublico;
+}

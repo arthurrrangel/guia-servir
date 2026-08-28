@@ -1,1 +1,101 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgUEFTU08gMSBERSAyIOKAlCBDT05GRVJJUiBBTlRFUyBERSBBUExJQ0FSCgogICBFc3RlIGFycXVpdm8gTsODTyBFU0NSRVZFIE5BREEuIFPDsyBsw6ogZSByZXNwb25kZSBzZSBvIGJhbmNvIGVzdMOhIG5vIGVzdGFkbwogICBxdWUgYXMgbWlncmHDp8O1ZXMgMzEgZSAzMiBlc3BlcmFtIGVuY29udHJhci4KCiAgIENPTU8gVVNBUgogICAgIFBhaW5lbCBkbyBTdXBhYmFzZSDihpIgU1FMIEVkaXRvciDihpIgY29sYXIgdHVkbyDihpIgUnVuLgogICAgIEVsZSBkZXZvbHZlIFVNQSB0YWJlbGEgY29tIHVtYSBsaW5oYSBwb3IgY2hlY2FnZW0gZSB1bWEgY29sdW5hIGBzaXR1YWNhb2AuCiAgICAgU2UgdG9kYXMgZGlzc2VyZW0gT0ssIHBvZGUgYXBsaWNhciBvIHBhc3NvIDIuCiAgICAgU2UgYWxndW1hIGRpc3NlciBBVEVOQ0FPLCBtZSBtYW5kZSBvIHJlc3VsdGFkbyBhbnRlcyBkZSBhcGxpY2FyLgoKICAgUG9yIHF1ZSBleGlzdGU6IGBjcmVhdGUgdW5pcXVlIGluZGV4YCBlc3RvdXJhIHNlIGrDoSBob3V2ZXIgZHVwbGljYXRhLCBlCiAgIG1pZ3Jhw6fDo28gcXVlIGVzdG91cmEgbm8gbWVpbyBkZWl4YSBvIGJhbmNvIHBlbGEgbWV0YWRlLiDDiSBtYWlzIGJhcmF0bwogICBkZXNjb2JyaXIgYWdvcmEsIHNlbSBlc2NyZXZlciBuYWRhLCBkbyBxdWUgbm8gbWVpbyBkYSB0cmFuc2HDp8Ojby4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCndpdGgKCi8qIDEuIG8gYmxvcXVlYWRvcjogYSBwb2xpY3kgZGUgSU5TRVJUIHF1ZSBmYWx0YSBlbSBoaXN0b3JpY29fY2FuZGlkYXR1cmEuCiAgICAgIFNlIGrDoSBleGlzdGlyIChhbGd1w6ltIHBvZGUgdGVyIGNyaWFkbyBhIG3Do28pLCBvIHBhc3NvIDIgw6kgaWRlbXBvdGVudGUuICovCnBvbGljeV9oaXN0b3JpY28gYXMgKAogIHNlbGVjdCAncG9saWN5IGRlIElOU0VSVCBlbSBoaXN0b3JpY29fY2FuZGlkYXR1cmEnIGFzIGNoZWNhZ2VtLAogICAgICAgICBjYXNlIHdoZW4gY291bnQoKikgPSAwIHRoZW4gJ0ZBTFRBIChlc3BlcmFkbyBhbnRlcyBkZSBhcGxpY2FyKScKICAgICAgICAgICAgICBlbHNlICdKQSBFWElTVEUsIG8gcGFzc28gMiByZWNyaWEgc2VtIHByb2JsZW1hJyBlbmQgYXMgc2l0dWFjYW8sCiAgICAgICAgIGNvdW50KCopOjp0ZXh0IGFzIGRldGFsaGUKICAgIGZyb20gcGdfcG9saWNpZXMKICAgd2hlcmUgc2NoZW1hbmFtZSA9ICdwdWJsaWMnIGFuZCB0YWJsZW5hbWUgPSAnaGlzdG9yaWNvX2NhbmRpZGF0dXJhJyBhbmQgY21kID0gJ0lOU0VSVCcKKSwKCi8qIDIuIGR1cGxpY2F0YSBxdWUgaW1wZWRpcmlhIGEgdW5pcXVlIGRlIHZvbHVudGFyaW9zKGVxdWlwZV9pZCwgdGVsZWZvbmUpICovCmR1cF92b2x1bnRhcmlvcyBhcyAoCiAgc2VsZWN0ICdkdXBsaWNhdGEgZGUgdGVsZWZvbmUgZGVudHJvIGRhIG1lc21hIGVxdWlwZScgYXMgY2hlY2FnZW0sCiAgICAgICAgIGNhc2Ugd2hlbiBjb3VudCgqKSA9IDAgdGhlbiAnT0ssIG5lbmh1bWEnCiAgICAgICAgICAgICAgZWxzZSAnQVRFTkNBTzogJyB8fCBjb3VudCgqKSB8fCAnIHBhcihlcykgZHVwbGljYWRvKHMpLiBBIHVuaXF1ZSBOQU8gc2VyYSBjcmlhZGEuJyBlbmQgYXMgc2l0dWFjYW8sCiAgICAgICAgIGNvYWxlc2NlKHN0cmluZ19hZ2coZXF1aXBlX2lkOjp0ZXh0IHx8ICcgLyAnIHx8IHRlbCB8fCAnICgnIHx8IG4gfHwgJyBsaW5oYXMpJywgJyDCtyAnKSwgJy0nKSBhcyBkZXRhbGhlCiAgICBmcm9tIChzZWxlY3QgZXF1aXBlX2lkLCB0ZWxfbm9ybSh0ZWxlZm9uZSkgYXMgdGVsLCBjb3VudCgqKSBuCiAgICAgICAgICAgIGZyb20gdm9sdW50YXJpb3MKICAgICAgICAgICB3aGVyZSBjb2FsZXNjZShsZW5ndGgodGVsX25vcm0odGVsZWZvbmUpKSwwKSA+PSAxMAogICAgICAgICAgIGdyb3VwIGJ5IDEsMiBoYXZpbmcgY291bnQoKikgPiAxKSBkCiksCgovKiAzLiBkdXBsaWNhdGEgcXVlIGltcGVkaXJpYSBhIHVuaXF1ZSBkZSBlcXVpcGVzLnNsdWcgKi8KZHVwX3NsdWcgYXMgKAogIHNlbGVjdCAnZHVwbGljYXRhIGRlIHNsdWcgZW0gZXF1aXBlcycgYXMgY2hlY2FnZW0sCiAgICAgICAgIGNhc2Ugd2hlbiBjb3VudCgqKSA9IDAgdGhlbiAnT0ssIG5lbmh1bWEnCiAgICAgICAgICAgICAgZWxzZSAnQVRFTkNBTzogJyB8fCBjb3VudCgqKSB8fCAnIHNsdWcocykgcmVwZXRpZG8ocyknIGVuZCBhcyBzaXR1YWNhbywKICAgICAgICAgY29hbGVzY2Uoc3RyaW5nX2FnZyhzbHVnIHx8ICcgKCcgfHwgbiB8fCAnKScsICcgwrcgJyksICctJykgYXMgZGV0YWxoZQogICAgZnJvbSAoc2VsZWN0IHNsdWcsIGNvdW50KCopIG4gZnJvbSBlcXVpcGVzIGdyb3VwIGJ5IDEgaGF2aW5nIGNvdW50KCopID4gMSkgZAopLAoKLyogNC4gcXVhbnRvcyB2w61uY3Vsb3MgZXN0w6NvIHNlbSBpZGVudGlkYWRlLiBPIHBhc3NvIDIgY29uc2VydGEgZXN0ZXMuICovCnZpbmN1bG9zX29yZmFvcyBhcyAoCiAgc2VsZWN0ICd2aW5jdWxvcyBzZW0gcGVzc29hX2lkIChhIG1pZ3JhY2FvIDMyIGxpZ2EgdG9kb3MpJyBhcyBjaGVjYWdlbSwKICAgICAgICAgY2FzZSB3aGVuIGNvdW50KCopID0gMCB0aGVuICdPSywgbmVuaHVtJwogICAgICAgICAgICAgIGVsc2UgY291bnQoKikgfHwgJyB2aW5jdWxvKHMpIHNlcmFvIGxpZ2Fkb3MgYSB1bWEgcGVzc29hJyBlbmQgYXMgc2l0dWFjYW8sCiAgICAgICAgIGNvYWxlc2NlKHN0cmluZ19hZ2coZGlzdGluY3Qgbm9tZSwgJywgJyksICctJykgYXMgZGV0YWxoZQogICAgZnJvbSB2b2x1bnRhcmlvcwogICB3aGVyZSBwZXNzb2FfaWQgaXMgbnVsbCBhbmQgY29hbGVzY2UobGVuZ3RoKHRlbF9ub3JtKHRlbGVmb25lKSksMCkgPj0gMTAKKSwKCi8qIDUuIHRlbF9ub3JtIHByZWNpc2Egc2VyIElNTVVUQUJMRSBwYXJhIGVudHJhciBudW0gaW5kaWNlICovCnRlbF9pbXV0YXZlbCBhcyAoCiAgc2VsZWN0ICd0ZWxfbm9ybSgpIGUgSU1NVVRBQkxFIChhIHVuaXF1ZSBkZXBlbmRlIGRpc3NvKScgYXMgY2hlY2FnZW0sCiAgICAgICAgIGNhc2Ugd2hlbiBib29sX29yKHAucHJvdm9sYXRpbGUgPSAnaScpIHRoZW4gJ09LLCBpbW11dGFibGUnCiAgICAgICAgICAgICAgZWxzZSAnQVRFTkNBTzogbmFvIGUgaW1tdXRhYmxlLCBhIHVuaXF1ZSBkZSB0ZWxlZm9uZSBmYWxoYXJpYScgZW5kIGFzIHNpdHVhY2FvLAogICAgICAgICBjb2FsZXNjZShzdHJpbmdfYWdnKHAucHJvdm9sYXRpbGUsICcsJyksICdmdW5jYW8gbmFvIGVuY29udHJhZGEnKSBhcyBkZXRhbGhlCiAgICBmcm9tIHBnX3Byb2MgcCBqb2luIHBnX25hbWVzcGFjZSBuIG9uIG4ub2lkID0gcC5wcm9uYW1lc3BhY2UKICAgd2hlcmUgbi5uc3BuYW1lID0gJ3B1YmxpYycgYW5kIHAucHJvbmFtZSA9ICd0ZWxfbm9ybScKKSwKCi8qIDYuIGFzIGR1YXMgZnVuw6fDtWVzIHF1ZSBhIG1pZ3Jhw6fDo28gMzEgZmVjaGEgYWluZGEgZXhpc3RlbT8gKi8KZnVuY29lc19hYmVydGFzIGFzICgKICBzZWxlY3QgJ2Z1bmNvZXMgcXVlIGEgMzEgZmVjaGEgKGVxdWlwZV9lbnRyYXIsIGNvbmZsaXRvc19lbnRyZV9taW5pc3RlcmlvcyknIGFzIGNoZWNhZ2VtLAogICAgICAgICBjYXNlIHdoZW4gY291bnQoKikgPSAwIHRoZW4gJ2phIG5hbyBleGlzdGVtLCBuYWRhIGEgZmVjaGFyJwogICAgICAgICAgICAgIGVsc2UgY291bnQoKikgfHwgJyBwcmVzZW50ZShzKSwgYSAzMSB2YWkgdHJhdGFyJyBlbmQgYXMgc2l0dWFjYW8sCiAgICAgICAgIGNvYWxlc2NlKHN0cmluZ19hZ2cocC5wcm9uYW1lLCAnLCAnKSwgJy0nKSBhcyBkZXRhbGhlCiAgICBmcm9tIHBnX3Byb2MgcCBqb2luIHBnX25hbWVzcGFjZSBuIG9uIG4ub2lkID0gcC5wcm9uYW1lc3BhY2UKICAgd2hlcmUgbi5uc3BuYW1lID0gJ3B1YmxpYycgYW5kIHAucHJvbmFtZSBpbiAoJ2VxdWlwZV9lbnRyYXInLCdjb25mbGl0b3NfZW50cmVfbWluaXN0ZXJpb3MnKQopLAoKLyogNy4gcmV0cmF0byBkbyBxdWUgZXhpc3RlIGhvamUsIHBhcmEgY29tcGFyYXIgZGVwb2lzIGRlIGFwbGljYXIgKi8KcmV0cmF0byBhcyAoCiAgc2VsZWN0ICdyZXRyYXRvIGRlIGhvamUgKGd1YXJkZSBwYXJhIGNvbXBhcmFyIGRlcG9pcyknIGFzIGNoZWNhZ2VtLAogICAgICAgICAncGVzc29hcz0nIHx8IChzZWxlY3QgY291bnQoKikgZnJvbSBwZXNzb2FzKQogICAgICB8fCAnIHZvbHVudGFyaW9zPScgfHwgKHNlbGVjdCBjb3VudCgqKSBmcm9tIHZvbHVudGFyaW9zKQogICAgICB8fCAnIGNhbmRpZGF0dXJhcz0nIHx8IChzZWxlY3QgY291bnQoKikgZnJvbSBjYW5kaWRhdHVyYXMpCiAgICAgIHx8ICcgZXF1aXBlcz0nIHx8IChzZWxlY3QgY291bnQoKikgZnJvbSBlcXVpcGVzKQogICAgICB8fCAnIGxpZGVyZXM9JyB8fCAoc2VsZWN0IGNvdW50KCopIGZyb20gbGlkZXJlcykgYXMgc2l0dWFjYW8sCiAgICAgICAgICdwb2xpY2llcz0nIHx8IChzZWxlY3QgY291bnQoKikgZnJvbSBwZ19wb2xpY2llcyB3aGVyZSBzY2hlbWFuYW1lPSdwdWJsaWMnKQogICAgICB8fCAnIGZ1bmNvZXM9JyB8fCAoc2VsZWN0IGNvdW50KCopIGZyb20gcGdfcHJvYyBwIGpvaW4gcGdfbmFtZXNwYWNlIG4gb24gbi5vaWQ9cC5wcm9uYW1lc3BhY2UKICAgICAgICAgICAgICAgICAgICAgICAgICB3aGVyZSBuLm5zcG5hbWU9J3B1YmxpYycpIGFzIGRldGFsaGUKKQoKc2VsZWN0ICogZnJvbSBwb2xpY3lfaGlzdG9yaWNvCnVuaW9uIGFsbCBzZWxlY3QgKiBmcm9tIGR1cF92b2x1bnRhcmlvcwp1bmlvbiBhbGwgc2VsZWN0ICogZnJvbSBkdXBfc2x1Zwp1bmlvbiBhbGwgc2VsZWN0ICogZnJvbSB2aW5jdWxvc19vcmZhb3MKdW5pb24gYWxsIHNlbGVjdCAqIGZyb20gdGVsX2ltdXRhdmVsCnVuaW9uIGFsbCBzZWxlY3QgKiBmcm9tIGZ1bmNvZXNfYWJlcnRhcwp1bmlvbiBhbGwgc2VsZWN0ICogZnJvbSByZXRyYXRvOwo="}
+/* =============================================================================
+   PASSO 1 DE 2 — CONFERIR ANTES DE APLICAR
+
+   Este arquivo NÃO ESCREVE NADA. Só lê e responde se o banco está no estado
+   que as migrações 31 e 32 esperam encontrar.
+
+   COMO USAR
+     Painel do Supabase → SQL Editor → colar tudo → Run.
+     Ele devolve UMA tabela com uma linha por checagem e uma coluna `situacao`.
+     Se todas disserem OK, pode aplicar o passo 2.
+     Se alguma disser ATENCAO, me mande o resultado antes de aplicar.
+
+   Por que existe: `create unique index` estoura se já houver duplicata, e
+   migração que estoura no meio deixa o banco pela metade. É mais barato
+   descobrir agora, sem escrever nada, do que no meio da transação.
+   ============================================================================= */
+
+with
+
+/* 1. o bloqueador: a policy de INSERT que falta em historico_candidatura.
+      Se já existir (alguém pode ter criado a mão), o passo 2 é idempotente. */
+policy_historico as (
+  select 'policy de INSERT em historico_candidatura' as checagem,
+         case when count(*) = 0 then 'FALTA (esperado antes de aplicar)'
+              else 'JA EXISTE, o passo 2 recria sem problema' end as situacao,
+         count(*)::text as detalhe
+    from pg_policies
+   where schemaname = 'public' and tablename = 'historico_candidatura' and cmd = 'INSERT'
+),
+
+/* 2. duplicata que impediria a unique de voluntarios(equipe_id, telefone) */
+dup_voluntarios as (
+  select 'duplicata de telefone dentro da mesma equipe' as checagem,
+         case when count(*) = 0 then 'OK, nenhuma'
+              else 'ATENCAO: ' || count(*) || ' par(es) duplicado(s). A unique NAO sera criada.' end as situacao,
+         coalesce(string_agg(equipe_id::text || ' / ' || tel || ' (' || n || ' linhas)', ' · '), '-') as detalhe
+    from (select equipe_id, tel_norm(telefone) as tel, count(*) n
+            from voluntarios
+           where coalesce(length(tel_norm(telefone)),0) >= 10
+           group by 1,2 having count(*) > 1) d
+),
+
+/* 3. duplicata que impediria a unique de equipes.slug */
+dup_slug as (
+  select 'duplicata de slug em equipes' as checagem,
+         case when count(*) = 0 then 'OK, nenhuma'
+              else 'ATENCAO: ' || count(*) || ' slug(s) repetido(s)' end as situacao,
+         coalesce(string_agg(slug || ' (' || n || ')', ' · '), '-') as detalhe
+    from (select slug, count(*) n from equipes group by 1 having count(*) > 1) d
+),
+
+/* 4. quantos vínculos estão sem identidade. O passo 2 conserta estes. */
+vinculos_orfaos as (
+  select 'vinculos sem pessoa_id (a migracao 32 liga todos)' as checagem,
+         case when count(*) = 0 then 'OK, nenhum'
+              else count(*) || ' vinculo(s) serao ligados a uma pessoa' end as situacao,
+         coalesce(string_agg(distinct nome, ', '), '-') as detalhe
+    from voluntarios
+   where pessoa_id is null and coalesce(length(tel_norm(telefone)),0) >= 10
+),
+
+/* 5. tel_norm precisa ser IMMUTABLE para entrar num indice */
+tel_imutavel as (
+  select 'tel_norm() e IMMUTABLE (a unique depende disso)' as checagem,
+         case when bool_or(p.provolatile = 'i') then 'OK, immutable'
+              else 'ATENCAO: nao e immutable, a unique de telefone falharia' end as situacao,
+         coalesce(string_agg(p.provolatile, ','), 'funcao nao encontrada') as detalhe
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = 'tel_norm'
+),
+
+/* 6. as duas funções que a migração 31 fecha ainda existem? */
+funcoes_abertas as (
+  select 'funcoes que a 31 fecha (equipe_entrar, conflitos_entre_ministerios)' as checagem,
+         case when count(*) = 0 then 'ja nao existem, nada a fechar'
+              else count(*) || ' presente(s), a 31 vai tratar' end as situacao,
+         coalesce(string_agg(p.proname, ', '), '-') as detalhe
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname in ('equipe_entrar','conflitos_entre_ministerios')
+),
+
+/* 7. retrato do que existe hoje, para comparar depois de aplicar */
+retrato as (
+  select 'retrato de hoje (guarde para comparar depois)' as checagem,
+         'pessoas=' || (select count(*) from pessoas)
+      || ' voluntarios=' || (select count(*) from voluntarios)
+      || ' candidaturas=' || (select count(*) from candidaturas)
+      || ' equipes=' || (select count(*) from equipes)
+      || ' lideres=' || (select count(*) from lideres) as situacao,
+         'policies=' || (select count(*) from pg_policies where schemaname='public')
+      || ' funcoes=' || (select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                          where n.nspname='public') as detalhe
+)
+
+select * from policy_historico
+union all select * from dup_voluntarios
+union all select * from dup_slug
+union all select * from vinculos_orfaos
+union all select * from tel_imutavel
+union all select * from funcoes_abertas
+union all select * from retrato;

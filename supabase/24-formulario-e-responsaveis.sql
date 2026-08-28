@@ -1,1 +1,66 @@
-{"data":"LS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLSAyNCDigJQgTyBGT1JNVUzDgVJJTyBERSBDQURBIMOBUkVBLCBFIFFVRU0gUkVTUE9OREUgUE9SIEVMQQotLQotLSBQZXJndW50YXMgY3VydGFzIGRlIHByb3DDs3NpdG8uIEEgwqc4IHBlZGUgcXVlc3Rpb27DoXJpbyBpbnRlbGlnZW50ZSwgZQotLSBpbnRlbGlnZW50ZSBhcXVpIHF1ZXIgZGl6ZXIgUE9VQ0FTIHBlcmd1bnRhcyBjZXJ0YXM6IHF1ZW0gZXN0w6EgcHJlZW5jaGVuZG8KLS0gcGVsbyBjZWx1bGFyLCBlbSBww6ksIGRlcG9pcyBkbyBjdWx0bywgYWJhbmRvbmEgdW0gZm9ybXVsw6FyaW8gbG9uZ28uCi0tCi0tIGVxdWlwZV9pZCBudWxvID0gcGVyZ3VudGEgZGUgdG9kb3Mgb3MgbWluaXN0w6lyaW9zLgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CgpkZWxldGUgZnJvbSBwZXJndW50YXMgd2hlcmUgYXRpdmE7ICAgLS0gaWRlbXBvdGVudGU6IHJlZXNjcmV2ZSBvIGNvbmp1bnRvCgotLSAtLS0tIGRlIHRvZG9zCmluc2VydCBpbnRvIHBlcmd1bnRhcyAoZXF1aXBlX2lkLCBvcmRlbSwgdGV4dG8sIGFqdWRhLCB0aXBvLCBvcGNvZXMsIG9icmlnYXRvcmlhKSB2YWx1ZXMKICAobnVsbCwgMTAsICdWb2PDqiBqw6Egc2VydmUgZW0gYWxndW1hIG91dHJhIMOhcmVhIGRhIGlncmVqYT8nLCBudWxsLCAnc2ltX25hbycsICd7fScsIGZhbHNlKSwKICAobnVsbCwgMjAsICdDb20gcXVlIGZyZXF1w6puY2lhIHZvY8OqIGNvbnNlZ3VlIHNlcnZpcj8nLCAnRMOhIHBhcmEgbXVkYXIgZGVwb2lzIOKAlCBpc3NvIMOpIHPDsyBwYXJhIGEgbGlkZXJhbsOnYSBzZSBvcmdhbml6YXIuJywKICAgJ2VzY29saGEnLCAneyJUb2RvIGRvbWluZ28iLCJEb2lzIGRvbWluZ29zIHBvciBtw6pzIiwiVW0gZG9taW5nbyBwb3IgbcOqcyIsIlPDsyBxdWFuZG8gcHJlY2lzYXJlbSJ9JywgdHJ1ZSk7CgotLSAtLS0tIE3DrWRpYQppbnNlcnQgaW50byBwZXJndW50YXMgKGVxdWlwZV9pZCwgb3JkZW0sIHRleHRvLCBhanVkYSwgdGlwbywgb3Bjb2VzLCBvYnJpZ2F0b3JpYSkKc2VsZWN0IGUuaWQsIG8sIHQsIGEsIHRwOjp0aXBvX3Blcmd1bnRhLCBvcCwgb2IgZnJvbSBlcXVpcGVzIGUsICh2YWx1ZXMKICAoMTEwLCAnVm9jw6ogasOhIG1leGV1IGNvbSBjw6JtZXJhLCBmb3RvLCBlZGnDp8OjbyBvdSBwcm9qZcOnw6NvPycsICdWYWxlIHF1YWxxdWVyIGV4cGVyacOqbmNpYSwgaW5jbHVzaXZlIGZvcmEgZGEgaWdyZWphLicsICdzaW1fbmFvJywgJ3t9Jzo6dGV4dFtdLCB0cnVlKSwKICAoMTIwLCAnQ29udGUgcmFwaWRhbWVudGUgbyBxdWUgdm9jw6ogasOhIGZleicsICdVbWEgb3UgZHVhcyBsaW5oYXMuIFNlIG51bmNhIGZleiBuYWRhLCBlc2NyZXZhICJudW5jYSBmaXoiIOKAlCB0ZW0gZ2VudGUgcGFyYSBlbnNpbmFyLicsICd0ZXh0b19sb25nbycsICd7fSc6OnRleHRbXSwgZmFsc2UpLAogICgxMzAsICdWb2PDqiB0ZW0gZXF1aXBhbWVudG8gcHLDs3ByaW8/JywgbnVsbCwgJ2VzY29saGEnLCAneyJDw6JtZXJhIiwiTm90ZWJvb2siLCJPcyBkb2lzIiwiTmVuaHVtIn0nOjp0ZXh0W10sIGZhbHNlKQopIGFzIHYobyx0LGEsdHAsb3Asb2IpIHdoZXJlIGUuc2x1ZyA9ICdtaWRpYSc7CgotLSAtLS0tIExvdXZvcgppbnNlcnQgaW50byBwZXJndW50YXMgKGVxdWlwZV9pZCwgb3JkZW0sIHRleHRvLCBhanVkYSwgdGlwbywgb3Bjb2VzLCBvYnJpZ2F0b3JpYSkKc2VsZWN0IGUuaWQsIG8sIHQsIGEsIHRwOjp0aXBvX3Blcmd1bnRhLCBvcCwgb2IgZnJvbSBlcXVpcGVzIGUsICh2YWx1ZXMKICAoMTEwLCAnTyBxdWUgdm9jw6ogZmF6PycsIG51bGwsICdtdWx0aXBsYScsICd7IkNhbnRvIiwiVmlvbMOjbyIsIkd1aXRhcnJhIiwiQ29udHJhYmFpeG8iLCJCYXRlcmlhIiwiVGVjbGFkbyIsIlNvbSIsIlBhbGNvIGUgY2Fib3MifSc6OnRleHRbXSwgdHJ1ZSksCiAgKDEyMCwgJ0jDoSBxdWFudG8gdGVtcG8/JywgbnVsbCwgJ2VzY29saGEnLCAneyJFc3RvdSBjb21lw6dhbmRvIiwiMSBhIDMgYW5vcyIsIk1haXMgZGUgMyBhbm9zIn0nOjp0ZXh0W10sIHRydWUpLAogICgxMzAsICdWb2PDqiBjb25zZWd1ZSB2aXIgYW9zIGVuc2Fpb3MgZGUgc8OhYmFkbz8nLCAnTyBlbnNhaW8gw6kgbWFpcyBjZWRvIHF1ZSBvIEZvbGxvdy4nLCAnc2ltX25hbycsICd7fSc6OnRleHRbXSwgdHJ1ZSksCiAgKDE0MCwgJ0rDoSBzZXJ2aXUgbm8gbG91dm9yIGRlIG91dHJhIGlncmVqYT8nLCBudWxsLCAndGV4dG8nLCAne30nOjp0ZXh0W10sIGZhbHNlKQopIGFzIHYobyx0LGEsdHAsb3Asb2IpIHdoZXJlIGUuc2x1ZyA9ICdsb3V2b3InOwoKLS0gLS0tLSBEaWFjb25pYQppbnNlcnQgaW50byBwZXJndW50YXMgKGVxdWlwZV9pZCwgb3JkZW0sIHRleHRvLCBhanVkYSwgdGlwbywgb3Bjb2VzLCBvYnJpZ2F0b3JpYSkKc2VsZWN0IGUuaWQsIG8sIHQsIGEsIHRwOjp0aXBvX3Blcmd1bnRhLCBvcCwgb2IgZnJvbSBlcXVpcGVzIGUsICh2YWx1ZXMKICAoMTEwLCAnVm9jw6ogc2Ugc2VudGUgYmVtIHJlY2ViZW5kbyBlIGNvbnZlcnNhbmRvIGNvbSBxdWVtIGNoZWdhPycsIG51bGwsICdzaW1fbmFvJywgJ3t9Jzo6dGV4dFtdLCB0cnVlKSwKICAoMTIwLCAnVGVtIGFsZ3VtYSBsaW1pdGHDp8OjbyBwYXJhIGZpY2FyIGVtIHDDqSBwb3IgYmFzdGFudGUgdGVtcG8/JywgJ1Blcmd1bnRhIHByw6F0aWNhLCBwYXJhIHRlIGVuY2FpeGFyIG5vIHBvc3RvIGNlcnRvLicsICdzaW1fbmFvJywgJ3t9Jzo6dGV4dFtdLCBmYWxzZSksCiAgKDEzMCwgJ0FsZ3VtYSBjb2lzYSBxdWUgYSBsaWRlcmFuw6dhIHByZWNpc2Ugc2FiZXI/JywgbnVsbCwgJ3RleHRvX2xvbmdvJywgJ3t9Jzo6dGV4dFtdLCBmYWxzZSkKKSBhcyB2KG8sdCxhLHRwLG9wLG9iKSB3aGVyZSBlLnNsdWcgPSAnc2Vydmljbyc7CgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIFFVRU0gUkVTUE9OREUgUE9SIENBREEgw4FSRUEgICjCpzExLCDCpzI3KQotLSBPIG7Dum1lcm8gc2FpIGRvIGNhZGFzdHJvIGRlIHF1ZW0gasOhIGxpZGVyYSwgZSBuw6NvIGRlIGxpdGVyYWwgbm8gY8OzZGlnby4KLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQp1cGRhdGUgZXF1aXBlcyBlIHNldCByZXNwb25zYXZlbF9ub21lID0gJ0phbmRlcicsCiAgICAgICByZXNwb25zYXZlbF93aGF0c2FwcCA9IChzZWxlY3QgdGVsX25vcm0odi50ZWxlZm9uZSkgZnJvbSB2b2x1bnRhcmlvcyB2CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgd2hlcmUgdi5lcXVpcGVfaWQgPSBlLmlkIGFuZCB2Lm5vbWUgaWxpa2UgJ2phbmRlciUnIGxpbWl0IDEpCiB3aGVyZSBlLnNsdWcgPSAnbG91dm9yJzsKCnVwZGF0ZSBlcXVpcGVzIGUgc2V0IHJlc3BvbnNhdmVsX25vbWUgPSAnSm/Do28gVml0b3InLAogICAgICAgcmVzcG9uc2F2ZWxfd2hhdHNhcHAgPSAoc2VsZWN0IHRlbF9ub3JtKHYudGVsZWZvbmUpIGZyb20gdm9sdW50YXJpb3MgdgogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHdoZXJlIHYuZXF1aXBlX2lkID0gZS5pZCBhbmQgKHYubm9tZSBpbGlrZSAnam/Do28gdmklJyBvciB2Lm5vbWUgaWxpa2UgJ2pvYW8gdmklJykgbGltaXQgMSkKIHdoZXJlIGUuc2x1ZyA9ICdtaWRpYSc7CgotLSA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tIFBSSU1FSVJPUyBQQVNTT1MgREEgSU5URUdSQcOHw4NPICAowqcyMCkKLS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQpkZWxldGUgZnJvbSBvbmJvYXJkaW5nX2V0YXBhczsKaW5zZXJ0IGludG8gb25ib2FyZGluZ19ldGFwYXMgKGVxdWlwZV9pZCwgb3JkZW0sIHRpdHVsbywgZGVzY3JpY2FvKSB2YWx1ZXMKICAobnVsbCwgMTAsICdDb25oZWNlciBxdWVtIGxpZGVyYScsICdVbWEgY29udmVyc2EsIG5lbSBxdWUgc2VqYSBubyBXaGF0c0FwcC4nKSwKICAobnVsbCwgMjAsICdFbnRyYXIgbm8gZ3J1cG8gZGEgw6FyZWEnLCAnw4kgcG9yIGzDoSBxdWUgc2FpIGEgZXNjYWxhIGUgbyBhdmlzbyBkYSBzZW1hbmEuJyksCiAgKG51bGwsIDMwLCAnVmVyIGFsZ3XDqW0gZmF6ZW5kbycsICdVbSBkb21pbmdvIGFjb21wYW5oYW5kbywgYW50ZXMgZGUgYXNzdW1pciBzb3ppbmhvLicpLAogIChudWxsLCA0MCwgJ1ByaW1laXJvIHNlcnZpw6dvJywgJ0NoZWdhIG1haXMgY2VkbyBuZXN0ZSBkaWEuIFNlbXByZSB0ZW0gYWxndcOpbSBqdW50by4nKTsK"}
+-- =========================================================================
+-- 24 — O FORMULÁRIO DE CADA ÁREA, E QUEM RESPONDE POR ELA
+--
+-- Perguntas curtas de propósito. A §8 pede questionário inteligente, e
+-- inteligente aqui quer dizer POUCAS perguntas certas: quem está preenchendo
+-- pelo celular, em pé, depois do culto, abandona um formulário longo.
+--
+-- equipe_id nulo = pergunta de todos os ministérios.
+-- =========================================================================
+
+delete from perguntas where ativa;   -- idempotente: reescreve o conjunto
+
+-- ---- de todos
+insert into perguntas (equipe_id, ordem, texto, ajuda, tipo, opcoes, obrigatoria) values
+  (null, 10, 'Você já serve em alguma outra área da igreja?', null, 'sim_nao', '{}', false),
+  (null, 20, 'Com que frequência você consegue servir?', 'Dá para mudar depois — isso é só para a liderança se organizar.',
+   'escolha', '{"Todo domingo","Dois domingos por mês","Um domingo por mês","Só quando precisarem"}', true);
+
+-- ---- Mídia
+insert into perguntas (equipe_id, ordem, texto, ajuda, tipo, opcoes, obrigatoria)
+select e.id, o, t, a, tp::tipo_pergunta, op, ob from equipes e, (values
+  (110, 'Você já mexeu com câmera, foto, edição ou projeção?', 'Vale qualquer experiência, inclusive fora da igreja.', 'sim_nao', '{}'::text[], true),
+  (120, 'Conte rapidamente o que você já fez', 'Uma ou duas linhas. Se nunca fez nada, escreva "nunca fiz" — tem gente para ensinar.', 'texto_longo', '{}'::text[], false),
+  (130, 'Você tem equipamento próprio?', null, 'escolha', '{"Câmera","Notebook","Os dois","Nenhum"}'::text[], false)
+) as v(o,t,a,tp,op,ob) where e.slug = 'midia';
+
+-- ---- Louvor
+insert into perguntas (equipe_id, ordem, texto, ajuda, tipo, opcoes, obrigatoria)
+select e.id, o, t, a, tp::tipo_pergunta, op, ob from equipes e, (values
+  (110, 'O que você faz?', null, 'multipla', '{"Canto","Violão","Guitarra","Contrabaixo","Bateria","Teclado","Som","Palco e cabos"}'::text[], true),
+  (120, 'Há quanto tempo?', null, 'escolha', '{"Estou começando","1 a 3 anos","Mais de 3 anos"}'::text[], true),
+  (130, 'Você consegue vir aos ensaios de sábado?', 'O ensaio é mais cedo que o Follow.', 'sim_nao', '{}'::text[], true),
+  (140, 'Já serviu no louvor de outra igreja?', null, 'texto', '{}'::text[], false)
+) as v(o,t,a,tp,op,ob) where e.slug = 'louvor';
+
+-- ---- Diaconia
+insert into perguntas (equipe_id, ordem, texto, ajuda, tipo, opcoes, obrigatoria)
+select e.id, o, t, a, tp::tipo_pergunta, op, ob from equipes e, (values
+  (110, 'Você se sente bem recebendo e conversando com quem chega?', null, 'sim_nao', '{}'::text[], true),
+  (120, 'Tem alguma limitação para ficar em pé por bastante tempo?', 'Pergunta prática, para te encaixar no posto certo.', 'sim_nao', '{}'::text[], false),
+  (130, 'Alguma coisa que a liderança precise saber?', null, 'texto_longo', '{}'::text[], false)
+) as v(o,t,a,tp,op,ob) where e.slug = 'servico';
+
+-- =========================================================================
+-- QUEM RESPONDE POR CADA ÁREA  (§11, §27)
+-- O número sai do cadastro de quem já lidera, e não de literal no código.
+-- =========================================================================
+update equipes e set responsavel_nome = 'Jander',
+       responsavel_whatsapp = (select tel_norm(v.telefone) from voluntarios v
+                                where v.equipe_id = e.id and v.nome ilike 'jander%' limit 1)
+ where e.slug = 'louvor';
+
+update equipes e set responsavel_nome = 'João Vitor',
+       responsavel_whatsapp = (select tel_norm(v.telefone) from voluntarios v
+                                where v.equipe_id = e.id and (v.nome ilike 'joão vi%' or v.nome ilike 'joao vi%') limit 1)
+ where e.slug = 'midia';
+
+-- =========================================================================
+-- PRIMEIROS PASSOS DA INTEGRAÇÃO  (§20)
+-- =========================================================================
+delete from onboarding_etapas;
+insert into onboarding_etapas (equipe_id, ordem, titulo, descricao) values
+  (null, 10, 'Conhecer quem lidera', 'Uma conversa, nem que seja no WhatsApp.'),
+  (null, 20, 'Entrar no grupo da área', 'É por lá que sai a escala e o aviso da semana.'),
+  (null, 30, 'Ver alguém fazendo', 'Um domingo acompanhando, antes de assumir sozinho.'),
+  (null, 40, 'Primeiro serviço', 'Chega mais cedo neste dia. Sempre tem alguém junto.');

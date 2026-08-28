@@ -1,1 +1,175 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgeyBzYiB9IGZyb20gJy4vc3VwYWJhc2UnOwoKLyogQ29udmVyc2EgY29tIG8gYmFuY28gbm8gbGFkbyBkbyBMw41ERVIuIFRvZGEgbGVpdHVyYSBhcXVpIHBhc3NhIHBlbGEgUkxTIHF1ZQogICBhIG1pZ3Jhw6fDo28gMjIgZXNjcmV2ZXU6IG8gb3JnYW5pemFkb3IgZXNjb3BhZG8gcmVjZWJlIHPDsyBvIG1pbmlzdMOpcmlvIGRlbGUKICAgc2VtIHF1ZSBlc3RhIGNhbWFkYSBwcmVjaXNlIGZpbHRyYXIgbmFkYSDigJQgZSDDqSBkZSBwcm9ww7NzaXRvLCBwb3JxdWUgZmlsdHJvCiAgIG5vIGNsaWVudGUgw6kgZmlsdHJvIHF1ZSB1bSBkaWEgYWxndcOpbSBlc3F1ZWNlLiAqLwoKZXhwb3J0IHR5cGUgU3RhdHVzQ2FuZCA9CiAgfCAnZW52aWFkYScgfCAnZW1fYW5hbGlzZScgfCAnY29udmVyc2EnIHwgJ2VudHJldmlzdGEnCiAgfCAnYXByb3ZhZGEnIHwgJ3JlY3VzYWRhJyB8ICdpbnRlZ3JhbmRvJyB8ICdhdGl2YScgfCAnaW5hdGl2YSc7CgovKiBPIE5PTUUgRE8gRVNUQURPLCBlIHPDsyBvIG5vbWUuIFVzYWRvIG5vIGhpc3TDs3JpY28sIG9uZGUgYSBwZXJndW50YSDDqSAibyBxdWUKICAgYWNvbnRlY2V1IiwgbsOjbyAibyBxdWUgZmF6ZXIiLiBFcmEgYXF1aSBxdWUgbW9yYXZhIGEgaW5zdHJ1w6fDo28gKCJjaGFtYXIgcGFyYQogICBjb252ZXJzYXIiKSBlIHBvciBpc3NvIG8gaGlzdMOzcmljbyBmaWNhdmEgZGFuZG8gb3JkZW5zIHNvYnJlIG8gcGFzc2Fkby4gTyBxdWUKICAgZmF6ZXIgYWdvcmEgbW9yYSBlbSBPX1FVRV9GQVpFUiwgbG9nbyBhYmFpeG8uICovCmV4cG9ydCBjb25zdCBST1RVTE9fU1RBVFVTOiBSZWNvcmQ8U3RhdHVzQ2FuZCwgc3RyaW5nPiA9IHsKICBlbnZpYWRhOiAnY2FkYXN0cm8gZW52aWFkbycsIGVtX2FuYWxpc2U6ICdlbSBhbsOhbGlzZScsIGNvbnZlcnNhOiAnZW0gY29udmVyc2EnLAogIGVudHJldmlzdGE6ICdjb252ZXJzYSBtYXJjYWRhJywgYXByb3ZhZGE6ICdhcHJvdmFkYScsIHJlY3VzYWRhOiAnZW5jZXJyYWRhJywKICBpbnRlZ3JhbmRvOiAnaW50ZWdyYW5kbycsIGF0aXZhOiAnc2VydmluZG8nLCBpbmF0aXZhOiAnaW5hdGl2YScsCn07Ci8qIGFzIHF1ZSBleGlnZW0gYcOnw6NvIGRvIGzDrWRlciBhcGFyZWNlbSBwcmltZWlybyBuYSBmaWxhICovCmV4cG9ydCBjb25zdCBBQkVSVEFTOiBTdGF0dXNDYW5kW10gPSBbJ2VudmlhZGEnLCAnZW1fYW5hbGlzZScsICdjb252ZXJzYScsICdlbnRyZXZpc3RhJ107CmV4cG9ydCBjb25zdCBOT19USU1FOiBTdGF0dXNDYW5kW10gPSBbJ2Fwcm92YWRhJywgJ2ludGVncmFuZG8nLCAnYXRpdmEnXTsKCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgIE8gUVVFIE8gTMONREVSIFBSRUNJU0EgRkFaRVIKCiAgIFJPVFVMT19TVEFUVVMgZGl6IGVtIHF1ZSBlc3RhZG8gYSBjYW5kaWRhdHVyYSBlc3TDoS4gSXNzbyDDqSB2b2NhYnVsw6FyaW8gZGUKICAgYmFuY28gZGUgZGFkb3MsIGUgbyBsw61kZXIgbsOjbyBhYnJlIGEgZmlsYSBwYXJhIGNvbnN1bHRhciB1bSBlbnVtOiBlbGUgYWJyZQogICBwYXJhIHNhYmVyIG8gcXVlIGZhemVyLiBFc3RhcyBkdWFzIGNvaXNhcyBzw6NvIGRpZmVyZW50ZXMgZSBhZ29yYSBtb3JhbSBlbQogICBsdWdhcmVzIGRpZmVyZW50ZXMuCgogICBgY2hhbWFgIG1hcmNhIGFzIHNpdHVhw6fDtWVzIGVtIHF1ZSBhIGJvbGEgZXN0w6EgY29tIGEgbGlkZXJhbsOnYS4gRWxhcyBzw6NvCiAgIG1haW9yaWEgZGUgcHJvcMOzc2l0bzogcXVlbSBzZSBvZmVyZWNldSBqw6EgZmV6IGEgcGFydGUgZGVsYSwgZSBvIHBhZHLDo28gZG8KICAgc2lzdGVtYSDDqSBhIGlncmVqYSBpciBhdHLDoXMgZGEgcGVzc29hLCBudW5jYSBvIGNvbnRyw6FyaW8uCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tICovCmV4cG9ydCB0eXBlIE9RdWVGYXplciA9IHsKICByb3Q6IHN0cmluZzsgICAgICAvLyBvIHLDs3R1bG8gY3VydG8gZGEgbGluaGEgZmVjaGFkYTogdW1hIGluc3RydcOnw6NvLCBuw6NvIHVtIGVzdGFkbwogIHR4dDogc3RyaW5nOyAgICAgIC8vIGEgZnJhc2UgaW50ZWlyYSwgZGVudHJvIGRhIGxpbmhhIGFiZXJ0YQogIHRvbTogJycgfCAnb2snIHwgJ3BlbmQnIHwgJ3J1aW0nOwogIGNoYW1hOiBib29sZWFuOyAgIC8vIGEgYcOnw6NvIGRvIG1vbWVudG8gw6kgbGlnYXIgcGFyYSBhIHBlc3NvYQp9OwoKZXhwb3J0IGNvbnN0IE9fUVVFX0ZBWkVSOiBSZWNvcmQ8U3RhdHVzQ2FuZCwgT1F1ZUZhemVyPiA9IHsKICBlbnZpYWRhOiB7CiAgICByb3Q6ICdjaGFtZSBubyBXaGF0c0FwcCcsIHRvbTogJ3J1aW0nLCBjaGFtYTogdHJ1ZSwKICAgIHR4dDogJ05pbmd1w6ltIGZhbG91IGNvbSBlc3NhIHBlc3NvYSBhaW5kYS4gQ2hhbWUgbm8gV2hhdHNBcHAsIHNlIGFwcmVzZW50ZSBlICcKICAgICAgICsgJ3Blcmd1bnRlIHBvciBxdWUgZWxhIHF1ZXIgc2VydmlyLiBEZXBvaXMgZGUgZmFsYXIsIGFwcm92ZSBvdSBlbmNlcnJlIGFxdWkuJywKICB9LAogIGVtX2FuYWxpc2U6IHsKICAgIHJvdDogJ2NoYW1lIG5vIFdoYXRzQXBwJywgdG9tOiAncnVpbScsIGNoYW1hOiB0cnVlLAogICAgdHh0OiAnVm9jw6ogbWFyY291IHBhcmEgb2xoYXIgY29tIGNhbG1hLCBlIGVsYSBlc3TDoSBlc3BlcmFuZG8uIENoYW1lIG5vIFdoYXRzQXBwICcKICAgICAgICsgJ2UgY29udmVyc2UuIERlcG9pcyBkZSBmYWxhciwgYXByb3ZlIG91IGVuY2VycmUgYXF1aS4nLAogIH0sCiAgY29udmVyc2E6IHsKICAgIHJvdDogJ3ZvY8OqIGRpc3NlIHF1ZSBpYSBjaGFtYXInLCB0b206ICdydWltJywgY2hhbWE6IHRydWUsCiAgICB0eHQ6ICdBIHBlc3NvYSBqw6Egdml1IG5hIHRlbGEgZGVsYSBxdWUgYSBsaWRlcmFuw6dhIHF1ZXIgY29udmVyc2FyLiBBZ29yYSBlbGEgJwogICAgICAgKyAnZXN0w6EgZXNwZXJhbmRvIG8gc2V1IFdoYXRzQXBwLiBRdWFudG8gbWFpcyB0ZW1wbyBwYXNzYSwgbWFpcyBwYXJlY2UgcXVlIG5pbmd1w6ltIHZpdS4nLAogIH0sCiAgZW50cmV2aXN0YTogewogICAgcm90OiAnY29udmVyc2EgbWFyY2FkYScsIHRvbTogJ3BlbmQnLCBjaGFtYTogZmFsc2UsCiAgICB0eHQ6ICdBIGNvbnZlcnNhIGVzdMOhIG1hcmNhZGEuIERlcG9pcyBxdWUgZWxhIGFjb250ZWNlciwgdm9sdGUgYXF1aSBlIGFwcm92ZSAnCiAgICAgICArICdvdSBlbmNlcnJlLiBFbnF1YW50byBmaWNhciBhc3NpbSwgYSBwZXNzb2EgY29udGludWEgc2VtIHJlc3Bvc3RhLicsCiAgfSwKICBhcHJvdmFkYTogewogICAgcm90OiAnasOhIGVzdMOhIG5vIHRpbWUnLCB0b206ICdvaycsIGNoYW1hOiBmYWxzZSwKICAgIHR4dDogJ0VsYSBqw6EgZW50cm91IG5vIHRpbWUgZSBqw6EgcmVjZWJldSBvIGxpbmsgcGVzc29hbCBuYSB0ZWxhIGRlbGEuIEFzIGZ1bsOnw7VlcyAnCiAgICAgICArICdlbnRyYXJhbSBjb21vIGEgY29uZmVyaXI6IGNvbmZpcm1lIG8gbsOtdmVsIG5hIGFiYSBUaW1lIHF1YW5kbyB2aXIgYSBwZXNzb2Egc2VydmluZG8uJywKICB9LAogIGludGVncmFuZG86IHsKICAgIHJvdDogJ2ludGVncmFuZG8nLCB0b206ICdvaycsIGNoYW1hOiBmYWxzZSwKICAgIHR4dDogJ0VzdMOhIGNvbmhlY2VuZG8gY29tbyB0dWRvIGZ1bmNpb25hLiBOYWRhIMOpIG9icmlnYXTDs3JpbyBkZSBzdWEgcGFydGUgYWdvcmEuJywKICB9LAogIGF0aXZhOiB7CiAgICByb3Q6ICdzZXJ2aW5kbycsIHRvbTogJ29rJywgY2hhbWE6IGZhbHNlLAogICAgdHh0OiAnSsOhIGVzdMOhIG5hIGVzY2FsYSBub3JtYWxtZW50ZS4gRXN0YSBsaW5oYSBmaWNhIHPDsyBjb21vIGhpc3TDs3JpY28uJywKICB9LAogIHJlY3VzYWRhOiB7CiAgICByb3Q6ICdlbmNlcnJhZGEnLCB0b206ICcnLCBjaGFtYTogZmFsc2UsCiAgICB0eHQ6ICdFbmNlcnJhZGEgcG9yIGVucXVhbnRvLiBBIHBlc3NvYSB2w6ogcXVlIG7Do28gw6kgdW0gbsOjbyBkZWZpbml0aXZvIGUgcmVjZWJlICcKICAgICAgICsgJ2FzIG91dHJhcyDDoXJlYXMgY29tbyBvcMOnw6NvLiBEw6EgcGFyYSByZWFicmlyIGFwcm92YW5kbyBhcXVpLicsCiAgfSwKICBpbmF0aXZhOiB7CiAgICByb3Q6ICdpbmF0aXZhJywgdG9tOiAnJywgY2hhbWE6IGZhbHNlLAogICAgdHh0OiAnRm9yYSBkbyB0aW1lIHBvciBlbnF1YW50by4nLAogIH0sCn07CgpleHBvcnQgdHlwZSBDYW5kaWRhdHVyYSA9IHsKICBpZDogc3RyaW5nOyBzdGF0dXM6IFN0YXR1c0NhbmQ7IGNyaWFkb19lbTogc3RyaW5nOyBhdHVhbGl6YWRvX2VtOiBzdHJpbmc7CiAgb2JzZXJ2YWNhbzogc3RyaW5nIHwgbnVsbDsgbm90YV9pbnRlcm5hOiBzdHJpbmcgfCBudWxsOwogIGRlY2lkaWRvX3Bvcjogc3RyaW5nIHwgbnVsbDsgZGVjaWRpZG9fZW06IHN0cmluZyB8IG51bGw7CiAgdm9sdW50YXJpb19pZDogc3RyaW5nIHwgbnVsbDsKICBwZXNzb2FzOiB7IGlkOiBzdHJpbmc7IG5vbWU6IHN0cmluZzsgdGVsZWZvbmU6IHN0cmluZzsgZW1haWw6IHN0cmluZyB8IG51bGwgfSB8IG51bGw7CiAgY2FuZGlkYXR1cmFfZnVuY29lczogeyBmdW5jb2VzOiB7IG5vbWU6IHN0cmluZyB9IHwgbnVsbCB9W107Cn07CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gbGlzdGFyQ2FuZGlkYXR1cmFzKGVxdWlwZUlkOiBzdHJpbmcpOiBQcm9taXNlPENhbmRpZGF0dXJhW10+IHsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzYigpIQogICAgLmZyb20oJ2NhbmRpZGF0dXJhcycpCiAgICAuc2VsZWN0KGBpZCxzdGF0dXMsY3JpYWRvX2VtLGF0dWFsaXphZG9fZW0sb2JzZXJ2YWNhbyxub3RhX2ludGVybmEsZGVjaWRpZG9fcG9yLGRlY2lkaWRvX2VtLHZvbHVudGFyaW9faWQsCiAgICAgICAgICAgICBwZXNzb2FzKGlkLG5vbWUsdGVsZWZvbmUsZW1haWwpLAogICAgICAgICAgICAgY2FuZGlkYXR1cmFfZnVuY29lcyhmdW5jb2VzKG5vbWUpKWApCiAgICAuZXEoJ2VxdWlwZV9pZCcsIGVxdWlwZUlkKQogICAgLm9yZGVyKCdjcmlhZG9fZW0nLCB7IGFzY2VuZGluZzogZmFsc2UgfSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKICByZXR1cm4gKGRhdGEgfHwgW10pIGFzIHVua25vd24gYXMgQ2FuZGlkYXR1cmFbXTsKfQoKZXhwb3J0IHR5cGUgUmVzcG9zdGEgPSB7IHBlcmd1bnRhOiBzdHJpbmc7IHJlc3Bvc3RhOiBzdHJpbmcgfTsKZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHJlc3Bvc3Rhc0RlKGNhbmRJZDogc3RyaW5nKTogUHJvbWlzZTxSZXNwb3N0YVtdPiB7CiAgY29uc3QgeyBkYXRhLCBlcnJvciB9ID0gYXdhaXQgc2IoKSEKICAgIC5mcm9tKCdjYW5kaWRhdHVyYV9yZXNwb3N0YXMnKQogICAgLnNlbGVjdCgncmVzcG9zdGEscGVyZ3VudGFzKHRleHRvLG9yZGVtKScpCiAgICAuZXEoJ2NhbmRpZGF0dXJhX2lkJywgY2FuZElkKTsKICBpZiAoZXJyb3IpIHRocm93IGVycm9yOwogIHJldHVybiAoKGRhdGEgfHwgW10pIGFzIGFueVtdKQogICAgLm1hcChyID0+ICh7IHBlcmd1bnRhOiByLnBlcmd1bnRhcz8udGV4dG8gfHwgJ1Blcmd1bnRhJywgcmVzcG9zdGE6IHIucmVzcG9zdGEsIG9yZGVtOiByLnBlcmd1bnRhcz8ub3JkZW0gPz8gMCB9KSkKICAgIC5zb3J0KChhLCBiKSA9PiBhLm9yZGVtIC0gYi5vcmRlbSkKICAgIC5tYXAoKHsgcGVyZ3VudGEsIHJlc3Bvc3RhIH0pID0+ICh7IHBlcmd1bnRhLCByZXNwb3N0YSB9KSk7Cn0KCmV4cG9ydCB0eXBlIFBhc3NvID0geyBkZTogc3RyaW5nIHwgbnVsbDsgcGFyYTogc3RyaW5nOyBxdWFuZG86IHN0cmluZzsgcG9yOiBzdHJpbmcgfCBudWxsOyBub3RhOiBzdHJpbmcgfCBudWxsIH07CmV4cG9ydCBhc3luYyBmdW5jdGlvbiBoaXN0b3JpY29EZShjYW5kSWQ6IHN0cmluZyk6IFByb21pc2U8UGFzc29bXT4gewogIGNvbnN0IHsgZGF0YSwgZXJyb3IgfSA9IGF3YWl0IHNiKCkhCiAgICAuZnJvbSgnaGlzdG9yaWNvX2NhbmRpZGF0dXJhJykKICAgIC5zZWxlY3QoJ2RlLHBhcmEscXVhbmRvLHBvcixub3RhJykKICAgIC5lcSgnY2FuZGlkYXR1cmFfaWQnLCBjYW5kSWQpCiAgICAub3JkZXIoJ3F1YW5kbycpOwogIGlmIChlcnJvcikgdGhyb3cgZXJyb3I7CiAgcmV0dXJuIChkYXRhIHx8IFtdKSBhcyBQYXNzb1tdOwp9CgovKiBBIGRlY2lzw6NvIE7Dg08gw6kgdW0gdXBkYXRlIGRpcmV0bzogcGFzc2EgcGVsYSBmdW7Dp8OjbywgcXVlIG5hIGFwcm92YcOnw6NvIGNyaWEgbwogICB2b2x1bnTDoXJpbywgbGlnYSBhIGNhbmRpZGF0dXJhIGEgZWxlLCBnZXJhIGFzIGhhYmlsaWRhZGVzIGUgZ3JhdmEgbyBoaXN0w7NyaWNvCiAgIG5hIG1lc21hIHRyYW5zYcOnw6NvLiBVbSB1cGRhdGUgc29sdG8gYXF1aSBkZWl4YXJpYSBjYW5kaWRhdHVyYSBhcHJvdmFkYSBzZW0KICAgdm9sdW50w6FyaW8gbmVuaHVtIOKAlCBlIG5pbmd1w6ltIHBlcmNlYmVyaWEgYXTDqSBhIGVzY2FsYSBkbyBtw6pzLiAqLwpleHBvcnQgYXN5bmMgZnVuY3Rpb24gZGVjaWRpcihpZDogc3RyaW5nLCBzdGF0dXM6IFN0YXR1c0NhbmQsIG5vdGE/OiBzdHJpbmcpIHsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzYigpIS5ycGMoJ2RlY2lkaXJfY2FuZGlkYXR1cmEnLCB7CiAgICBwX2lkOiBpZCwgcF9zdGF0dXM6IHN0YXR1cywgcF9ub3RhOiBub3RhID8/IG51bGwsCiAgfSk7CiAgaWYgKGVycm9yKSB0aHJvdyBlcnJvcjsKICBjb25zdCByID0gZGF0YSBhcyBhbnk7CiAgaWYgKCFyPy5vaykgdGhyb3cgbmV3IEVycm9yKHI/LmVycm8gfHwgJ27Do28gY29uc2VndWkgbXVkYXIgbyBzdGF0dXMnKTsKICByZXR1cm4gcjsKfQoKZXhwb3J0IHR5cGUgUGFpbmVsID0gewogIHZvbHVudGFyaW9zOiBudW1iZXI7IGZ1bmNvZXM6IG51bWJlcjsgY2FuZGlkYXR1cmFzX25vdmFzOiBudW1iZXI7CiAgYWd1YXJkYW5kb19jb252ZXJzYTogbnVtYmVyOyBzZW1fY29uZmVyaXI6IG51bWJlcjsgc2VtX2Rpc3BvbmliaWxpZGFkZTogbnVtYmVyOwogIHZhZ2FzX3BlbmRlbnRlczogbnVtYmVyOyBmdW5jb2VzX3NlbV9nZW50ZTogbnVtYmVyOwp9OwpleHBvcnQgYXN5bmMgZnVuY3Rpb24gcGFpbmVsRG9NaW5pc3RlcmlvKGVxdWlwZUlkOiBzdHJpbmcpOiBQcm9taXNlPFBhaW5lbCB8IG51bGw+IHsKICBjb25zdCB7IGRhdGEsIGVycm9yIH0gPSBhd2FpdCBzYigpIS5ycGMoJ3BhaW5lbF9taW5pc3RlcmlvJywgeyBwX2VxdWlwZTogZXF1aXBlSWQgfSk7CiAgaWYgKGVycm9yKSByZXR1cm4gbnVsbDsKICByZXR1cm4gZGF0YSBhcyBQYWluZWw7Cn0KCi8qIE8gbsO6bWVybyBjb21vIGFzIHBlc3NvYXMgZXNjcmV2ZW0sIG7Do28gY29tbyBvIGJhbmNvIGd1YXJkYS4gVW0gdGVsZWZvbmUgZW0KICAgZMOtZ2l0b3MgY29ycmlkb3Mgb2JyaWdhIHF1ZW0gbMOqIGEgY29udGFyIG9zIG7Dum1lcm9zIHBhcmEgc2FiZXIgc2Ugw6kgbyBjZXJ0bywKICAgZSDDqSBqdXN0YW1lbnRlIGEgbGluaGEgcXVlIG8gbMOtZGVyIGNvbmZlcmUgYW50ZXMgZGUgbGlnYXIuICovCmV4cG9ydCBmdW5jdGlvbiB0ZWxlZm9uZUxlZ2l2ZWwodD86IHN0cmluZyB8IG51bGwpIHsKICBjb25zdCBuID0gKHQgfHwgJycpLnJlcGxhY2UoL1xEL2csICcnKS5yZXBsYWNlKC9eNTUoPz1cZHsxMCwxMX0kKS8sICcnKTsKICBpZiAobi5sZW5ndGggPT09IDExKSByZXR1cm4gYCgke24uc2xpY2UoMCwgMil9KSAke24uc2xpY2UoMiwgNyl9LSR7bi5zbGljZSg3KX1gOwogIGlmIChuLmxlbmd0aCA9PT0gMTApIHJldHVybiBgKCR7bi5zbGljZSgwLCAyKX0pICR7bi5zbGljZSgyLCA2KX0tJHtuLnNsaWNlKDYpfWA7CiAgcmV0dXJuIHQgfHwgJyc7Cn0KCi8qIHdhLm1lIGEgcGFydGlyIGRvIG7Dum1lcm8gZ3VhcmRhZG8sIG51bmNhIGRlIGxpdGVyYWwgbmEgdGVsYSAowqcyNykgKi8KZXhwb3J0IGZ1bmN0aW9uIGxpbmtXaGF0c0FwcCh0ZWxlZm9uZTogc3RyaW5nLCB0ZXh0bzogc3RyaW5nKSB7CiAgY29uc3QgbiA9ICh0ZWxlZm9uZSB8fCAnJykucmVwbGFjZSgvXEQvZywgJycpOwogIGNvbnN0IGNvbTU1ID0gbi5sZW5ndGggPD0gMTEgPyAnNTUnICsgbiA6IG47CiAgcmV0dXJuIGBodHRwczovL3dhLm1lLyR7Y29tNTV9P3RleHQ9JHtlbmNvZGVVUklDb21wb25lbnQodGV4dG8pfWA7Cn0K"}
+'use client';
+import { sb } from './supabase';
+
+/* Conversa com o banco no lado do LÍDER. Toda leitura aqui passa pela RLS que
+   a migração 22 escreveu: o organizador escopado recebe só o ministério dele
+   sem que esta camada precise filtrar nada — e é de propósito, porque filtro
+   no cliente é filtro que um dia alguém esquece. */
+
+export type StatusCand =
+  | 'enviada' | 'em_analise' | 'conversa' | 'entrevista'
+  | 'aprovada' | 'recusada' | 'integrando' | 'ativa' | 'inativa';
+
+/* O NOME DO ESTADO, e só o nome. Usado no histórico, onde a pergunta é "o que
+   aconteceu", não "o que fazer". Era aqui que morava a instrução ("chamar para
+   conversar") e por isso o histórico ficava dando ordens sobre o passado. O que
+   fazer agora mora em O_QUE_FAZER, logo abaixo. */
+export const ROTULO_STATUS: Record<StatusCand, string> = {
+  enviada: 'cadastro enviado', em_analise: 'em análise', conversa: 'em conversa',
+  entrevista: 'conversa marcada', aprovada: 'aprovada', recusada: 'encerrada',
+  integrando: 'integrando', ativa: 'servindo', inativa: 'inativa',
+};
+/* as que exigem ação do líder aparecem primeiro na fila */
+export const ABERTAS: StatusCand[] = ['enviada', 'em_analise', 'conversa', 'entrevista'];
+export const NO_TIME: StatusCand[] = ['aprovada', 'integrando', 'ativa'];
+
+/* -----------------------------------------------------------------------------
+   O QUE O LÍDER PRECISA FAZER
+
+   ROTULO_STATUS diz em que estado a candidatura está. Isso é vocabulário de
+   banco de dados, e o líder não abre a fila para consultar um enum: ele abre
+   para saber o que fazer. Estas duas coisas são diferentes e agora moram em
+   lugares diferentes.
+
+   `chama` marca as situações em que a bola está com a liderança. Elas são
+   maioria de propósito: quem se ofereceu já fez a parte dela, e o padrão do
+   sistema é a igreja ir atrás da pessoa, nunca o contrário.
+----------------------------------------------------------------------------- */
+export type OQueFazer = {
+  rot: string;      // o rótulo curto da linha fechada: uma instrução, não um estado
+  txt: string;      // a frase inteira, dentro da linha aberta
+  tom: '' | 'ok' | 'pend' | 'ruim';
+  chama: boolean;   // a ação do momento é ligar para a pessoa
+};
+
+export const O_QUE_FAZER: Record<StatusCand, OQueFazer> = {
+  enviada: {
+    rot: 'chame no WhatsApp', tom: 'ruim', chama: true,
+    txt: 'Ninguém falou com essa pessoa ainda. Chame no WhatsApp, se apresente e '
+       + 'pergunte por que ela quer servir. Depois de falar, aprove ou encerre aqui.',
+  },
+  em_analise: {
+    rot: 'chame no WhatsApp', tom: 'ruim', chama: true,
+    txt: 'Você marcou para olhar com calma, e ela está esperando. Chame no WhatsApp '
+       + 'e converse. Depois de falar, aprove ou encerre aqui.',
+  },
+  conversa: {
+    rot: 'você disse que ia chamar', tom: 'ruim', chama: true,
+    txt: 'A pessoa já viu na tela dela que a liderança quer conversar. Agora ela '
+       + 'está esperando o seu WhatsApp. Quanto mais tempo passa, mais parece que ninguém viu.',
+  },
+  entrevista: {
+    rot: 'conversa marcada', tom: 'pend', chama: false,
+    txt: 'A conversa está marcada. Depois que ela acontecer, volte aqui e aprove '
+       + 'ou encerre. Enquanto ficar assim, a pessoa continua sem resposta.',
+  },
+  aprovada: {
+    rot: 'já está no time', tom: 'ok', chama: false,
+    txt: 'Ela já entrou no time e já recebeu o link pessoal na tela dela. As funções '
+       + 'entraram como a conferir: confirme o nível na aba Time quando vir a pessoa servindo.',
+  },
+  integrando: {
+    rot: 'integrando', tom: 'ok', chama: false,
+    txt: 'Está conhecendo como tudo funciona. Nada é obrigatório de sua parte agora.',
+  },
+  ativa: {
+    rot: 'servindo', tom: 'ok', chama: false,
+    txt: 'Já está na escala normalmente. Esta linha fica só como histórico.',
+  },
+  recusada: {
+    rot: 'encerrada', tom: '', chama: false,
+    txt: 'Encerrada por enquanto. A pessoa vê que não é um não definitivo e recebe '
+       + 'as outras áreas como opção. Dá para reabrir aprovando aqui.',
+  },
+  inativa: {
+    rot: 'inativa', tom: '', chama: false,
+    txt: 'Fora do time por enquanto.',
+  },
+};
+
+export type Candidatura = {
+  id: string; status: StatusCand; criado_em: string; atualizado_em: string;
+  observacao: string | null; nota_interna: string | null;
+  decidido_por: string | null; decidido_em: string | null;
+  voluntario_id: string | null;
+  pessoas: { id: string; nome: string; telefone: string; email: string | null } | null;
+  candidatura_funcoes: { funcoes: { nome: string } | null }[];
+};
+
+export async function listarCandidaturas(equipeId: string): Promise<Candidatura[]> {
+  const { data, error } = await sb()!
+    .from('candidaturas')
+    .select(`id,status,criado_em,atualizado_em,observacao,nota_interna,decidido_por,decidido_em,voluntario_id,
+             pessoas(id,nome,telefone,email),
+             candidatura_funcoes(funcoes(nome))`)
+    .eq('equipe_id', equipeId)
+    .order('criado_em', { ascending: false });
+  if (error) throw error;
+  return (data || []) as unknown as Candidatura[];
+}
+
+export type Resposta = { pergunta: string; resposta: string };
+export async function respostasDe(candId: string): Promise<Resposta[]> {
+  const { data, error } = await sb()!
+    .from('candidatura_respostas')
+    .select('resposta,perguntas(texto,ordem)')
+    .eq('candidatura_id', candId);
+  if (error) throw error;
+  return ((data || []) as any[])
+    .map(r => ({ pergunta: r.perguntas?.texto || 'Pergunta', resposta: r.resposta, ordem: r.perguntas?.ordem ?? 0 }))
+    .sort((a, b) => a.ordem - b.ordem)
+    .map(({ pergunta, resposta }) => ({ pergunta, resposta }));
+}
+
+export type Passo = { de: string | null; para: string; quando: string; por: string | null; nota: string | null };
+export async function historicoDe(candId: string): Promise<Passo[]> {
+  const { data, error } = await sb()!
+    .from('historico_candidatura')
+    .select('de,para,quando,por,nota')
+    .eq('candidatura_id', candId)
+    .order('quando');
+  if (error) throw error;
+  return (data || []) as Passo[];
+}
+
+/* A decisão NÃO é um update direto: passa pela função, que na aprovação cria o
+   voluntário, liga a candidatura a ele, gera as habilidades e grava o histórico
+   na mesma transação. Um update solto aqui deixaria candidatura aprovada sem
+   voluntário nenhum — e ninguém perceberia até a escala do mês. */
+export async function decidir(id: string, status: StatusCand, nota?: string) {
+  const { data, error } = await sb()!.rpc('decidir_candidatura', {
+    p_id: id, p_status: status, p_nota: nota ?? null,
+  });
+  if (error) throw error;
+  const r = data as any;
+  if (!r?.ok) throw new Error(r?.erro || 'não consegui mudar o status');
+  return r;
+}
+
+export type Painel = {
+  voluntarios: number; funcoes: number; candidaturas_novas: number;
+  aguardando_conversa: number; sem_conferir: number; sem_disponibilidade: number;
+  vagas_pendentes: number; funcoes_sem_gente: number;
+};
+export async function painelDoMinisterio(equipeId: string): Promise<Painel | null> {
+  const { data, error } = await sb()!.rpc('painel_ministerio', { p_equipe: equipeId });
+  if (error) return null;
+  return data as Painel;
+}
+
+/* O número como as pessoas escrevem, não como o banco guarda. Um telefone em
+   dígitos corridos obriga quem lê a contar os números para saber se é o certo,
+   e é justamente a linha que o líder confere antes de ligar. */
+export function telefoneLegivel(t?: string | null) {
+  const n = (t || '').replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '');
+  if (n.length === 11) return `(${n.slice(0, 2)}) ${n.slice(2, 7)}-${n.slice(7)}`;
+  if (n.length === 10) return `(${n.slice(0, 2)}) ${n.slice(2, 6)}-${n.slice(6)}`;
+  return t || '';
+}
+
+/* wa.me a partir do número guardado, nunca de literal na tela (§27) */
+export function linkWhatsApp(telefone: string, texto: string) {
+  const n = (telefone || '').replace(/\D/g, '');
+  const com55 = n.length <= 11 ? '55' + n : n;
+  return `https://wa.me/${com55}?text=${encodeURIComponent(texto)}`;
+}

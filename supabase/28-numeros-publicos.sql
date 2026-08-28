@@ -1,1 +1,36 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMjgg4oCUIE9TIE7Dmk1FUk9TIERBIFBPUlRBIFDDmkJMSUNBCgogICBBIGxhbmRpbmcgZGl6aWEgImVzY29saGEgdW1hIMOhcmVhIiBlIG1haXMgbmFkYS4gTmVuaHVtIG1vdGl2byBwYXJhIGFjcmVkaXRhciwKICAgbmVuaHVtYSBwcm92YSBkZSBxdWUgZXhpc3RlIGdlbnRlIGRvIG91dHJvIGxhZG8uCgogICBOw7ptZXJvIGludmVudGFkbyBudW1hIGxhbmRpbmcgw6kgbyBkZWZlaXRvIGNsw6Fzc2ljbyDigJQgZSBudW1hIGlncmVqYSDDqSBwaW9yLAogICBwb3JxdWUgcXVlbSBsw6ogY29uaGVjZSBhcyBwZXNzb2FzIGUgc2FiZSBjb250YXIuIEVudMOjbyBuYWRhIGFxdWkgw6kgcmVkb25kbwogICBuZW0gZXNjcml0byDDoCBtw6NvOiBzYWkgZG8gYmFuY28sIG5hIGhvcmEsIGUgc2UgY2FpciwgY2FpIG5hIHRlbGEuCgogICBDYWNoZWFkbyBwb3IgaG9yYSBubyBzZXJ2aWRvcjogYSBwcsOpdmlhIGRvIGxpbmsgbm8gV2hhdHNBcHAgYmF0ZSB2w6FyaWFzCiAgIHZlemVzIG5vIG1lc21vIGVuZGVyZcOnbywgZSBpc3NvIG7Do28gcG9kZSB2aXJhciBjYXJnYSBubyBiYW5jby4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIG51bWVyb3NfcHVibGljb3MoKQpyZXR1cm5zIGpzb25iCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJAogIHNlbGVjdCBqc29uYl9idWlsZF9vYmplY3QoCiAgICAncGVzc29hcycsICAgICAoc2VsZWN0IGNvdW50KCopIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgYXRpdm8pLAogICAgJ21pbmlzdGVyaW9zJywgKHNlbGVjdCBjb3VudCgqKSBmcm9tIGVxdWlwZXMgZQogICAgICAgICAgICAgICAgICAgICB3aGVyZSBleGlzdHMgKHNlbGVjdCAxIGZyb20gZnVuY29lcyBmIHdoZXJlIGYuZXF1aXBlX2lkID0gZS5pZCBhbmQgZi5hdGl2YSkpLAogICAgJ3Bvc3RvcycsICAgICAgKHNlbGVjdCBjb3VudCgqKSBmcm9tIGZ1bmNvZXMgd2hlcmUgYXRpdmEpLAogICAgLyogZG9taW5nb3MgZSBGb2xsb3dzIGRvcyBwcsOzeGltb3MgOTAgZGlhczogw6kgbyBjb21wcm9taXNzbyByZWFsIHF1ZSBhCiAgICAgICBwZXNzb2EgZXN0w6EgcGVzYW5kbyBhbyBkZWNpZGlyIHNlIGVudHJhICovCiAgICAnY3VsdG9zX25vX21lcycsIChzZWxlY3QgY291bnQoKikgZnJvbSBjdWx0b3MKICAgICAgICAgICAgICAgICAgICAgICB3aGVyZSBkYXRhID49IGRhdGVfdHJ1bmMoJ21vbnRoJywgY3VycmVudF9kYXRlKQogICAgICAgICAgICAgICAgICAgICAgICAgYW5kIGRhdGEgPCAgZGF0ZV90cnVuYygnbW9udGgnLCBjdXJyZW50X2RhdGUpICsgaW50ZXJ2YWwgJzEgbW9udGgnKSwKICAgICdyZXNwb3N0YXMnLCAgIChzZWxlY3QgY291bnQoKikgZnJvbSBkaXNwb25pYmlsaWRhZGUgd2hlcmUgZGF0YSA+PSBjdXJyZW50X2RhdGUgLSA2MCkKICApOwokZm4kOwoKcmV2b2tlIGFsbCBvbiBmdW5jdGlvbiBudW1lcm9zX3B1YmxpY29zKCkgZnJvbSBwdWJsaWM7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gbnVtZXJvc19wdWJsaWNvcygpIHRvIGFub24sIGF1dGhlbnRpY2F0ZWQ7Cgpjb21tZW50IG9uIGZ1bmN0aW9uIG51bWVyb3NfcHVibGljb3MoKSBpcwogICdjb250YWdlbnMgZGEgcG9ydGEgcHVibGljYS4gU2FlbSBkbyBiYW5jbyBuYSBob3JhIOKAlCBudW1lcm8gZXNjcml0byBhIG1hbyBudW1hIGlncmVqYSBlIG8gZGVmZWl0byBjbGFzc2ljbywgcG9ycXVlIHF1ZW0gbGUgY29uaGVjZSBhcyBwZXNzb2FzIGUgc2FiZSBjb250YXIuJzsK"}
+/* =============================================================================
+   28 — OS NÚMEROS DA PORTA PÚBLICA
+
+   A landing dizia "escolha uma área" e mais nada. Nenhum motivo para acreditar,
+   nenhuma prova de que existe gente do outro lado.
+
+   Número inventado numa landing é o defeito clássico — e numa igreja é pior,
+   porque quem lê conhece as pessoas e sabe contar. Então nada aqui é redondo
+   nem escrito à mão: sai do banco, na hora, e se cair, cai na tela.
+
+   Cacheado por hora no servidor: a prévia do link no WhatsApp bate várias
+   vezes no mesmo endereço, e isso não pode virar carga no banco.
+   ============================================================================= */
+
+create or replace function numeros_publicos()
+returns jsonb
+language sql security definer stable set search_path = public as $fn$
+  select jsonb_build_object(
+    'pessoas',     (select count(*) from voluntarios where ativo),
+    'ministerios', (select count(*) from equipes e
+                     where exists (select 1 from funcoes f where f.equipe_id = e.id and f.ativa)),
+    'postos',      (select count(*) from funcoes where ativa),
+    /* domingos e Follows dos próximos 90 dias: é o compromisso real que a
+       pessoa está pesando ao decidir se entra */
+    'cultos_no_mes', (select count(*) from cultos
+                       where data >= date_trunc('month', current_date)
+                         and data <  date_trunc('month', current_date) + interval '1 month'),
+    'respostas',   (select count(*) from disponibilidade where data >= current_date - 60)
+  );
+$fn$;
+
+revoke all on function numeros_publicos() from public;
+grant execute on function numeros_publicos() to anon, authenticated;
+
+comment on function numeros_publicos() is
+  'contagens da porta publica. Saem do banco na hora — numero escrito a mao numa igreja e o defeito classico, porque quem le conhece as pessoas e sabe contar.';

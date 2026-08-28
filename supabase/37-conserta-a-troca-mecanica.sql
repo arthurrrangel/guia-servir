@@ -1,1 +1,89 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMzcg4oCUIENPTlNFUlRBIE8gUVVFIEEgVFJPQ0EgTUVDw4JOSUNBIFFVRUJST1UKCiAgIEEgbWlncmHDp8OjbyAzNiB0aXJvdSBvIHRyYXZlc3PDo28gbG9uZ28gZG8gdGV4dG8gcXVlIHZlbSBkbyBiYW5jbyBjb20KICAgYHJlcGxhY2UoeCwgJyDigJQgJywgJy4gJylgLiBBIHJlZ3JhIHJvZG91LCBvIHRyYXZlc3PDo28gc3VtaXUsIGUgbyByZXN1bHRhZG8KICAgZmljb3UgYXNzaW0gZW0gY2luY28gw6FyZWFzOgoKICAgICAgICJEw6EgcGFyYSBtdWRhciBkZXBvaXMuIGlzc28gw6kgc8OzIHBhcmEgYSBsaWRlcmFuw6dhIHNlIG9yZ2FuaXphci4iCiAgICAgICAiU2UgbnVuY2EgZmV6IG5hZGEsIGVzY3JldmEgJ251bmNhIGZpeicuIHRlbSBnZW50ZSBwYXJhIGVuc2luYXIuIgoKICAgUG9udG8gZmluYWwgc2VndWlkbyBkZSBtaW7DunNjdWxhLiBBIG1pZ3Jhw6fDo28gcGFzc291IGVtIHRvZGFzIGFzIGNvbmZlcsOqbmNpYXMKICAgcXVlIGV1IGVzY3JldmkgcGFyYSBlbGEg4oCUICJ0cmF2ZXNzw7VlcyByZXN0YW50ZXM6IDAiIOKAlCBwb3JxdWUgZXUgdGluaGEKICAgY29uZmVyaWRvIGEgYXVzw6puY2lhIGRvIGNhcmFjdGVyZSBlcnJhZG8gZSBuw6NvIGEgcHJlc2Vuw6dhIGRvIHRleHRvIGNlcnRvLgoKICAgTyB0cmF2ZXNzw6NvIGxvbmdvIGVtIHBvcnR1Z3XDqnMgcXVhc2UgbnVuY2EgdmlyYSBwb250bzogZWxlIGVtZW5kYSBkdWFzCiAgIHBhcnRlcyBkYSBtZXNtYSBmcmFzZS4gUXVlbSBlbWVuZGEgw6kgbyBkb2lzLXBvbnRvcy4KCiAgIEEgQVNTSU5BVFVSQSBETyBFU1RSQUdPIMOpICIuICIgc2VndWlkbyBkZSBsZXRyYSBtaW7DunNjdWxhLCBxdWUgbsOjbyBhY29udGVjZQogICBlbSBwb3J0dWd1w6pzIGVzY3JpdG8uIFBvciBpc3NvIGTDoSBwYXJhIGNvbnNlcnRhciBzZW0gbGlzdGEgZGUgaWRzOiBvIHBhZHLDo28KICAgc8OzIGV4aXN0ZSBvbmRlIGEgMzYgcGFzc291LiBPIGByZXR1cm5pbmdgIG1vc3RyYSBjYWRhIGxpbmhhIGFsdGVyYWRhLCBwYXJhIGEKICAgY29uZmVyw6puY2lhIHNlciBvIHRleHRvIG5vdm8gZSBuw6NvIGEgY29udGFnZW0gZGUgdW0gY2FyYWN0ZXJlLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwoKd2l0aCBhbnRlcyBhcyAoCiAgc2VsZWN0IGlkLCBhanVkYSBhcyB2ZWxobyBmcm9tIHBlcmd1bnRhcyB3aGVyZSBhanVkYSB+ICdcLiBbWzpsb3dlcjpdXScKKSwgbXVkb3UgYXMgKAogIHVwZGF0ZSBwZXJndW50YXMgcAogICAgIHNldCBhanVkYSA9IHJlZ2V4cF9yZXBsYWNlKHAuYWp1ZGEsICdcLiAoW1s6bG93ZXI6XV0pJywgJzogXDEnLCAnZycpCiAgICBmcm9tIGFudGVzIGEgd2hlcmUgYS5pZCA9IHAuaWQKICByZXR1cm5pbmcgcC5pZCwgJ3Blcmd1bnRhcy5hanVkYScgYXMgb25kZSwgYS52ZWxobywgcC5hanVkYSBhcyBub3ZvCikgc2VsZWN0ICogZnJvbSBtdWRvdTsKCndpdGggYW50ZXMgYXMgKAogIHNlbGVjdCBpZCwgdGV4dG8gYXMgdmVsaG8gZnJvbSBwZXJndW50YXMgd2hlcmUgdGV4dG8gfiAnXC4gW1s6bG93ZXI6XV0nCiksIG11ZG91IGFzICgKICB1cGRhdGUgcGVyZ3VudGFzIHAKICAgICBzZXQgdGV4dG8gPSByZWdleHBfcmVwbGFjZShwLnRleHRvLCAnXC4gKFtbOmxvd2VyOl1dKScsICc6IFwxJywgJ2cnKQogICAgZnJvbSBhbnRlcyBhIHdoZXJlIGEuaWQgPSBwLmlkCiAgcmV0dXJuaW5nIHAuaWQsICdwZXJndW50YXMudGV4dG8nIGFzIG9uZGUsIGEudmVsaG8sIHAudGV4dG8gYXMgbm92bwopIHNlbGVjdCAqIGZyb20gbXVkb3U7Cgp3aXRoIGFudGVzIGFzICgKICBzZWxlY3QgaWQsIGNvbnZpdGUgYXMgdmVsaG8gZnJvbSBlcXVpcGVzIHdoZXJlIGNvbnZpdGUgfiAnXC4gW1s6bG93ZXI6XV0nCiksIG11ZG91IGFzICgKICB1cGRhdGUgZXF1aXBlcyBlCiAgICAgc2V0IGNvbnZpdGUgPSByZWdleHBfcmVwbGFjZShlLmNvbnZpdGUsICdcLiAoW1s6bG93ZXI6XV0pJywgJzogXDEnLCAnZycpCiAgICBmcm9tIGFudGVzIGEgd2hlcmUgYS5pZCA9IGUuaWQKICByZXR1cm5pbmcgZS5pZCwgJ2VxdWlwZXMuY29udml0ZScgYXMgb25kZSwgYS52ZWxobywgZS5jb252aXRlIGFzIG5vdm8KKSBzZWxlY3QgKiBmcm9tIG11ZG91OwoKd2l0aCBhbnRlcyBhcyAoCiAgc2VsZWN0IGlkLCBkZXNjcmljYW8gYXMgdmVsaG8gZnJvbSBlcXVpcGVzIHdoZXJlIGRlc2NyaWNhbyB+ICdcLiBbWzpsb3dlcjpdXScKKSwgbXVkb3UgYXMgKAogIHVwZGF0ZSBlcXVpcGVzIGUKICAgICBzZXQgZGVzY3JpY2FvID0gcmVnZXhwX3JlcGxhY2UoZS5kZXNjcmljYW8sICdcLiAoW1s6bG93ZXI6XV0pJywgJzogXDEnLCAnZycpCiAgICBmcm9tIGFudGVzIGEgd2hlcmUgYS5pZCA9IGUuaWQKICByZXR1cm5pbmcgZS5pZCwgJ2VxdWlwZXMuZGVzY3JpY2FvJyBhcyBvbmRlLCBhLnZlbGhvLCBlLmRlc2NyaWNhbyBhcyBub3ZvCikgc2VsZWN0ICogZnJvbSBtdWRvdTsKCndpdGggYW50ZXMgYXMgKAogIHNlbGVjdCBpZCwgZGVzY3JpY2FvIGFzIHZlbGhvIGZyb20gZnVuY29lcyB3aGVyZSBkZXNjcmljYW8gfiAnXC4gW1s6bG93ZXI6XV0nCiksIG11ZG91IGFzICgKICB1cGRhdGUgZnVuY29lcyBmCiAgICAgc2V0IGRlc2NyaWNhbyA9IHJlZ2V4cF9yZXBsYWNlKGYuZGVzY3JpY2FvLCAnXC4gKFtbOmxvd2VyOl1dKScsICc6IFwxJywgJ2cnKQogICAgZnJvbSBhbnRlcyBhIHdoZXJlIGEuaWQgPSBmLmlkCiAgcmV0dXJuaW5nIGYuaWQsICdmdW5jb2VzLmRlc2NyaWNhbycgYXMgb25kZSwgYS52ZWxobywgZi5kZXNjcmljYW8gYXMgbm92bwopIHNlbGVjdCAqIGZyb20gbXVkb3U7Cgp3aXRoIGFudGVzIGFzICgKICBzZWxlY3QgaWQsIGRlc2NyaWNhb19mYW1pbGlhIGFzIHZlbGhvIGZyb20gZnVuY29lcyB3aGVyZSBkZXNjcmljYW9fZmFtaWxpYSB+ICdcLiBbWzpsb3dlcjpdXScKKSwgbXVkb3UgYXMgKAogIHVwZGF0ZSBmdW5jb2VzIGYKICAgICBzZXQgZGVzY3JpY2FvX2ZhbWlsaWEgPSByZWdleHBfcmVwbGFjZShmLmRlc2NyaWNhb19mYW1pbGlhLCAnXC4gKFtbOmxvd2VyOl1dKScsICc6IFwxJywgJ2cnKQogICAgZnJvbSBhbnRlcyBhIHdoZXJlIGEuaWQgPSBmLmlkCiAgcmV0dXJuaW5nIGYuaWQsICdmdW5jb2VzLmRlc2NyaWNhb19mYW1pbGlhJyBhcyBvbmRlLCBhLnZlbGhvLCBmLmRlc2NyaWNhb19mYW1pbGlhIGFzIG5vdm8KKSBzZWxlY3QgKiBmcm9tIG11ZG91OwoKLyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgQ09ORkVSw4pOQ0lBOiBvIHRleHRvLCBuw6NvIG8gY2FyYWN0ZXJlLgoKICAgICBzZWxlY3QgdGV4dG8sIGFqdWRhIGZyb20gcGVyZ3VudGFzIHdoZXJlIGFqdWRhIGlzIG5vdCBudWxsIG9yZGVyIGJ5IG9yZGVtOwoKICAgICAtLSBlIGEgYXNzaW5hdHVyYSBkbyBlc3RyYWdvLCBxdWUgcHJlY2lzYSBzZXIgemVybzoKICAgICBzZWxlY3QgY291bnQoKikgZnJvbSBwZXJndW50YXMgd2hlcmUgYWp1ZGEgfiAnXC4gW1s6bG93ZXI6XV0nIG9yIHRleHRvIH4gJ1wuIFtbOmxvd2VyOl1dJzsKCiAgIFJPTExCQUNLCiAgICAgTsOjbyBow6EuIE8gZXN0YWRvIGFudGVyaW9yIMOpIGdyYW1hdGljYWxtZW50ZSBlcnJhZG87IHZvbHRhciBuw6NvIMOpIHVtYQogICAgIG9ww6fDo28gcXVlIGFsZ3XDqW0gcXVlaXJhLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwo="}
+/* =============================================================================
+   37 — CONSERTA O QUE A TROCA MECÂNICA QUEBROU
+
+   A migração 36 tirou o travessão longo do texto que vem do banco com
+   `replace(x, ' — ', '. ')`. A regra rodou, o travessão sumiu, e o resultado
+   ficou assim em cinco áreas:
+
+       "Dá para mudar depois. isso é só para a liderança se organizar."
+       "Se nunca fez nada, escreva 'nunca fiz'. tem gente para ensinar."
+
+   Ponto final seguido de minúscula. A migração passou em todas as conferências
+   que eu escrevi para ela — "travessões restantes: 0" — porque eu tinha
+   conferido a ausência do caractere errado e não a presença do texto certo.
+
+   O travessão longo em português quase nunca vira ponto: ele emenda duas
+   partes da mesma frase. Quem emenda é o dois-pontos.
+
+   A ASSINATURA DO ESTRAGO é ". " seguido de letra minúscula, que não acontece
+   em português escrito. Por isso dá para consertar sem lista de ids: o padrão
+   só existe onde a 36 passou. O `returning` mostra cada linha alterada, para a
+   conferência ser o texto novo e não a contagem de um caractere.
+   ============================================================================= */
+
+with antes as (
+  select id, ajuda as velho from perguntas where ajuda ~ '\. [[:lower:]]'
+), mudou as (
+  update perguntas p
+     set ajuda = regexp_replace(p.ajuda, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = p.id
+  returning p.id, 'perguntas.ajuda' as onde, a.velho, p.ajuda as novo
+) select * from mudou;
+
+with antes as (
+  select id, texto as velho from perguntas where texto ~ '\. [[:lower:]]'
+), mudou as (
+  update perguntas p
+     set texto = regexp_replace(p.texto, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = p.id
+  returning p.id, 'perguntas.texto' as onde, a.velho, p.texto as novo
+) select * from mudou;
+
+with antes as (
+  select id, convite as velho from equipes where convite ~ '\. [[:lower:]]'
+), mudou as (
+  update equipes e
+     set convite = regexp_replace(e.convite, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = e.id
+  returning e.id, 'equipes.convite' as onde, a.velho, e.convite as novo
+) select * from mudou;
+
+with antes as (
+  select id, descricao as velho from equipes where descricao ~ '\. [[:lower:]]'
+), mudou as (
+  update equipes e
+     set descricao = regexp_replace(e.descricao, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = e.id
+  returning e.id, 'equipes.descricao' as onde, a.velho, e.descricao as novo
+) select * from mudou;
+
+with antes as (
+  select id, descricao as velho from funcoes where descricao ~ '\. [[:lower:]]'
+), mudou as (
+  update funcoes f
+     set descricao = regexp_replace(f.descricao, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = f.id
+  returning f.id, 'funcoes.descricao' as onde, a.velho, f.descricao as novo
+) select * from mudou;
+
+with antes as (
+  select id, descricao_familia as velho from funcoes where descricao_familia ~ '\. [[:lower:]]'
+), mudou as (
+  update funcoes f
+     set descricao_familia = regexp_replace(f.descricao_familia, '\. ([[:lower:]])', ': \1', 'g')
+    from antes a where a.id = f.id
+  returning f.id, 'funcoes.descricao_familia' as onde, a.velho, f.descricao_familia as novo
+) select * from mudou;
+
+/* =============================================================================
+   CONFERÊNCIA: o texto, não o caractere.
+
+     select texto, ajuda from perguntas where ajuda is not null order by ordem;
+
+     -- e a assinatura do estrago, que precisa ser zero:
+     select count(*) from perguntas where ajuda ~ '\. [[:lower:]]' or texto ~ '\. [[:lower:]]';
+
+   ROLLBACK
+     Não há. O estado anterior é gramaticalmente errado; voltar não é uma
+     opção que alguém queira.
+   ============================================================================= */

@@ -1,1 +1,59 @@
-{"data":"LS0gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gQ1VMVE8gRE8gRk9MTE9XID09PT09PT0KLS0gQXTDqSBhcXVpIG8gc2lzdGVtYSBpbnRlaXJvIGFzc3VtaWEgImN1bHRvID0gZG9taW5nbyIuIE8gRm9sbG93IGFjb250ZWNlIG5vCi0tIFPDgUJBRE8sIGVtIHRvZG8gc8OhYmFkbyBkbyBtw6pzIE1FTk9TIG8gcHJpbWVpcm8sIGUgbsOjbyB0ZW0gSEVBRCBuZW0KLS0gdHJhbnNtaXNzw6NvIOKAlCBzw7MgYXMgb3V0cmFzIMOhcmVhcy4KLS0KLS0gQSByZWdyYSBkbyBkaWEgbW9yYSBlbSBET0lTIGx1Z2FyZXMgKGJhbmNvIGUgbW90b3IpIGRlIHByb3DDs3NpdG86IG8gYmFuY28KLS0gw6kgcXVlbSBpbXBlZGUgZGFkbyBlcnJhZG8gZW50cmFyLCBvIG1vdG9yIMOpIHF1ZW0gbW9udGEgYSBlc2NhbGEuIE9zIGRvaXMKLS0gdXNhbSBhIG1lc21hIGRlZmluacOnw6NvIHBhcmEgbnVuY2EgZGlzY29yZGFyZW0uCi0tCi0tIFJvZGFyIHBvciBwYXJ0ZXM6IGNhZGEgYmxvY28gc2VwYXJhZG8gcG9yIC0tLS0gw6kgdW1hIHRyYW5zYcOnw6NvLgoKLS0gMSkgbyB0aXBvIGRvIGN1bHRvIHNhaSBkYSBwcsOzcHJpYSBkYXRhLiBDb2x1bmEgZ2VyYWRhID0gaW1wb3Nzw612ZWwgZ3JhdmFyCi0tICAgIHVtIGN1bHRvIGRlIHPDoWJhZG8gbWFyY2FkbyBjb21vIGRvbWluZ28uCmFsdGVyIHRhYmxlIGN1bHRvcyBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgdGlwbyB0ZXh0CiAgZ2VuZXJhdGVkIGFsd2F5cyBhcyAoY2FzZSB3aGVuIGV4dHJhY3QoZG93IGZyb20gZGF0YSkgPSA2IHRoZW4gJ2ZvbGxvdycgZWxzZSAnZG9taW5nbycgZW5kKSBzdG9yZWQ7CgotLSAyKSBlbSBxdWUgdGlwbyBkZSBjdWx0byBjYWRhIMOhcmVhIGV4aXN0ZS4gRGVmYXVsdCBjb2JyZSBvcyBkb2lzLCBlbnTDo28KLS0gICAgbmVuaHVtYSBmdW7Dp8OjbyBhbnRpZ2EgbXVkYSBkZSBjb21wb3J0YW1lbnRvIHNvemluaGEuCmFsdGVyIHRhYmxlIGZ1bmNvZXMgYWRkIGNvbHVtbiBpZiBub3QgZXhpc3RzIHRpcG9zIHRleHRbXSBub3QgbnVsbAogIGRlZmF1bHQgYXJyYXlbJ2RvbWluZ28nLCdmb2xsb3cnXTsKCi0tIDMpIG8gRm9sbG93IHRlbSBTw5MgNSDDoXJlYXM6IFBST0pFw4fDg08sIElMVU1JTkHDh8ODTywgRURJw4fDg08sIEZPVE8gZSBGSUxNQUdFTS4KLS0gICAgRm9yYSBIRUFEIGUgZm9yYSB0dWRvIHF1ZSDDqSB0cmFuc21pc3PDo28g4oCUIGNvcnRlLCBQVFogZSBhcyBkdWFzIGPDom1lcmFzCi0tICAgIChzZW0gdHJhbnNtaXNzw6NvLCBjw6JtZXJhIG7Do28gdGVtIHBhcmEgb25kZSBtYW5kYXIgaW1hZ2VtKS4KdXBkYXRlIGZ1bmNvZXMgc2V0IHRpcG9zID0gYXJyYXlbJ2RvbWluZ28nXQogd2hlcmUgbm9tZSBpbiAoJ0hFQUQnLCAnVFJBTlNNSVNTw4NPIChDT1JURSArIFBUWiknLCAnVFJBTlNNSVNTw4NPJywgJ0PDgk1FUkEgMScsICdDw4JNRVJBIDInKTsKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCi0tIDQpIGEgbGlzdGEgcMO6YmxpY2EgZGUgw6FyZWFzIHBvciBlcXVpcGUgcGFzc2EgYSBkaXplciBlbSBxdWUgY3VsdG8gY2FkYSB1bWEKLS0gICAgZXhpc3RlIChhIHRlbGEgZG8gdGltZSBzZXBhcmEgcG9yIMOhcmVhIGUgcHJlY2lzYSBzYWJlciBkaXNzbykuCi0tICAgIERST1AgYW50ZXM6IG11ZGFyIG8gcmV0b3JubyBkZSB1bWEgZnVuw6fDo28gZXhpZ2UgcmVjcmlhci4KZHJvcCBmdW5jdGlvbiBpZiBleGlzdHMgZXF1aXBlX2Z1bmNvZXModGV4dCk7CmNyZWF0ZSBmdW5jdGlvbiBlcXVpcGVfZnVuY29lcyhwX3NsdWcgdGV4dCkKcmV0dXJucyB0YWJsZSAobm9tZSB0ZXh0LCBvcmRlbSBpbnQsIHRpcG9zIHRleHRbXSkKbGFuZ3VhZ2Ugc3FsIHNlY3VyaXR5IGRlZmluZXIgc3RhYmxlIHNldCBzZWFyY2hfcGF0aCA9IHB1YmxpYyBhcyAkJAogIHNlbGVjdCBmLm5vbWUsIGYub3JkZW0sIGYudGlwb3MKICAgIGZyb20gZnVuY29lcyBmIGpvaW4gZXF1aXBlcyBlIG9uIGUuaWQgPSBmLmVxdWlwZV9pZAogICB3aGVyZSBlLnNsdWcgPSBwX3NsdWcgYW5kIGYuYXRpdmEKICAgb3JkZXIgYnkgZi5vcmRlbTsKJCQ7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXF1aXBlX2Z1bmNvZXModGV4dCkgdG8gYW5vbiwgYXV0aGVudGljYXRlZDsKCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCi0tIDUpIGEgbGlzdGEgZGUgZGlhcyBxdWUgbyB2b2x1bnTDoXJpbyByZXNwb25kZSBubyBsaW5rIHBlc3NvYWwuCi0tICAgIEFudGVzIHPDsyB0cmF6aWEgZG9taW5nbzsgYWdvcmEgdHJheiB0YW1iw6ltIG9zIHPDoWJhZG9zIGRvIEZvbGxvdy4KLS0gICAgIm1lbm9zIG8gcHJpbWVpcm8gc8OhYmFkbyBkbyBtw6pzIiA9IGRpYSBkbyBtw6pzIG1haW9yIHF1ZSA3IChvIHByaW1laXJvCi0tICAgIHPDoWJhZG8gc2VtcHJlIGNhaSBlbnRyZSBvcyBkaWFzIDEgZSA3KS4KLS0gICAgTyBub21lIGRhIGZ1bsOnw6NvIGZpY2EgY29tbyBlc3TDoSBkZSBwcm9ww7NzaXRvOiB0cm9jYXIgcXVlYnJhcmlhIG8gYXBwCi0tICAgIHB1YmxpY2FkbyBzZW0gZ2FuaG8gbmVuaHVtLgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBldV9wcm94aW1vc19kb21pbmdvcygpCnJldHVybnMgdGFibGUgKGRhdGEgZGF0ZSkKbGFuZ3VhZ2Ugc3FsIHNlY3VyaXR5IGRlZmluZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICQkCiAgc2VsZWN0IGQ6OmRhdGUgZnJvbSBnZW5lcmF0ZV9zZXJpZXMoY3VycmVudF9kYXRlLCBjdXJyZW50X2RhdGUgKyA2MCwgJzEgZGF5JykgZAogICB3aGVyZSBleHRyYWN0KGRvdyBmcm9tIGQpID0gMAogICAgICBvciAoZXh0cmFjdChkb3cgZnJvbSBkKSA9IDYgYW5kIGV4dHJhY3QoZGF5IGZyb20gZCkgPiA3KTsKJCQ7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gZXVfcHJveGltb3NfZG9taW5nb3MoKSB0byBhbm9uLCBhdXRoZW50aWNhdGVkOwo="}
+-- ================================================== CULTO DO FOLLOW =======
+-- Até aqui o sistema inteiro assumia "culto = domingo". O Follow acontece no
+-- SÁBADO, em todo sábado do mês MENOS o primeiro, e não tem HEAD nem
+-- transmissão — só as outras áreas.
+--
+-- A regra do dia mora em DOIS lugares (banco e motor) de propósito: o banco
+-- é quem impede dado errado entrar, o motor é quem monta a escala. Os dois
+-- usam a mesma definição para nunca discordarem.
+--
+-- Rodar por partes: cada bloco separado por ---- é uma transação.
+
+-- 1) o tipo do culto sai da própria data. Coluna gerada = impossível gravar
+--    um culto de sábado marcado como domingo.
+alter table cultos add column if not exists tipo text
+  generated always as (case when extract(dow from data) = 6 then 'follow' else 'domingo' end) stored;
+
+-- 2) em que tipo de culto cada área existe. Default cobre os dois, então
+--    nenhuma função antiga muda de comportamento sozinha.
+alter table funcoes add column if not exists tipos text[] not null
+  default array['domingo','follow'];
+
+-- 3) o Follow tem SÓ 5 áreas: PROJEÇÃO, ILUMINAÇÃO, EDIÇÃO, FOTO e FILMAGEM.
+--    Fora HEAD e fora tudo que é transmissão — corte, PTZ e as duas câmeras
+--    (sem transmissão, câmera não tem para onde mandar imagem).
+update funcoes set tipos = array['domingo']
+ where nome in ('HEAD', 'TRANSMISSÃO (CORTE + PTZ)', 'TRANSMISSÃO', 'CÂMERA 1', 'CÂMERA 2');
+
+----------------------------------------------------------------------------
+
+-- 4) a lista pública de áreas por equipe passa a dizer em que culto cada uma
+--    existe (a tela do time separa por área e precisa saber disso).
+--    DROP antes: mudar o retorno de uma função exige recriar.
+drop function if exists equipe_funcoes(text);
+create function equipe_funcoes(p_slug text)
+returns table (nome text, ordem int, tipos text[])
+language sql security definer stable set search_path = public as $$
+  select f.nome, f.ordem, f.tipos
+    from funcoes f join equipes e on e.id = f.equipe_id
+   where e.slug = p_slug and f.ativa
+   order by f.ordem;
+$$;
+grant execute on function equipe_funcoes(text) to anon, authenticated;
+
+----------------------------------------------------------------------------
+
+-- 5) a lista de dias que o voluntário responde no link pessoal.
+--    Antes só trazia domingo; agora traz também os sábados do Follow.
+--    "menos o primeiro sábado do mês" = dia do mês maior que 7 (o primeiro
+--    sábado sempre cai entre os dias 1 e 7).
+--    O nome da função fica como está de propósito: trocar quebraria o app
+--    publicado sem ganho nenhum.
+create or replace function eu_proximos_domingos()
+returns table (data date)
+language sql security definer set search_path = public as $$
+  select d::date from generate_series(current_date, current_date + 60, '1 day') d
+   where extract(dow from d) = 0
+      or (extract(dow from d) = 6 and extract(day from d) > 7);
+$$;
+grant execute on function eu_proximos_domingos() to anon, authenticated;

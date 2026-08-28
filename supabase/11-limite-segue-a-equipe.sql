@@ -1,1 +1,31 @@
-{"data":"LS0gPT09PT09PT09PT09PT09PT09IExJTUlURSBERSBFU0NBTEFTOiBVTSBCT1TDg08gU8OTLCBFIFFVRSBGVU5DSU9ORSA9PT09PT09PQotLSBTaW50b21hOiBhIGVzY2FsYSBkZSBhZ29zdG8gbsOjbyBmZWNoYXZhIGRlIGplaXRvIG5lbmh1bS4gMTkgcGVzc29hcyBhdGl2YXMsCi0tIHRvZGFzIGNvbSBsaW1pdGVfbWVzID0gMiwgZMOhIHRldG8gZGUgMzggZXNjYWxhcyBubyBtw6pzOyBvIHF1ZSByZXN0YXZhIGRlCi0tIGFnb3N0byBwZWRpYSA0MiBwb3Npw6fDtWVzLiBFcmEgaW1wb3Nzw612ZWwgcG9yIGFyaXRtw6l0aWNhLCBuw6NvIHBvciBzb3J0ZWlvLgotLQotLSBFIG8gcGlvcjogbyBjYW1wbyAiTcOheGltbyBkZSBlc2NhbGFzIHBvciBwZXNzb2EgcG9yIG3DqnMiIGVtIEFqdXN0ZXMgbsOjbwotLSByZXNvbHZpYS4gTyBtb3RvciBsw6ogYHYubGltaXRlTWVzIHx8IGNvbmZpZy5saW1pdGVQYWRyYW9gLCBlIGNvbW8gVE9EQSBsaW5oYQotLSBkZSB2b2x1bnRhcmlvIHRpbmhhIDIgZ3JhdmFkbywgbyBwYWRyw6NvIGRhIGVxdWlwZSBudW5jYSBlcmEgY29uc3VsdGFkby4gTwotLSBsw61kZXIgcG9kaWEgbWV4ZXIgbm8gYm90w6NvIG8gZGlhIGludGVpcm8gc2VtIGVmZWl0byBuZW5odW0uCi0tCi0tIENvcnJlw6fDo286IGxpbWl0ZV9tZXMgcGFzc2EgYSBhY2VpdGFyIG51bG8sIGUgbnVsbyBxdWVyIGRpemVyICJzZWd1ZSBhCi0tIGVxdWlwZSIuIEFzc2ltIGV4aXN0ZSB1bSBib3TDo28gc8OzLCBlIGVsZSBtYW5kYSBkZSB2ZXJkYWRlLiBPIGxpbWl0ZSBwb3IKLS0gcGVzc29hIGNvbnRpbnVhIGV4aXN0aW5kbyBwYXJhIG8gY2FzbyByZWFsIGRlIGRhciB1bSB0ZXRvIGRpZmVyZW50ZSBhCi0tIGFsZ3XDqW0gZXNwZWPDrWZpY28uCgotLSAxKSB0ZXRvIGRhIGVxdWlwZTogNC4gw4kgVEVUTywgbsOjbyBtZXRhLiBPIHNvcnRlaW8gY29udGludWEgZXNjb2xoZW5kbyBxdWVtCi0tICAgIHNlcnZpdSBtZW5vcywgZW50w6NvIG5pbmd1w6ltIGNoZWdhIGVtIDQgc2VtIG5lY2Vzc2lkYWRlLgp1cGRhdGUgY29uZmlnIHNldCBkYWRvcyA9IGpzb25iX3NldChkYWRvcywgJ3tsaW1pdGVQYWRyYW99JywgJzQnOjpqc29uYik7CgotLSAyKSBvIGNhbXBvIHBvciBwZXNzb2EgdmlyYSBvcGNpb25hbAphbHRlciB0YWJsZSB2b2x1bnRhcmlvcyBhbHRlciBjb2x1bW4gbGltaXRlX21lcyBkcm9wIGRlZmF1bHQ7CmFsdGVyIHRhYmxlIHZvbHVudGFyaW9zIGFsdGVyIGNvbHVtbiBsaW1pdGVfbWVzIGRyb3Agbm90IG51bGw7CnVwZGF0ZSB2b2x1bnRhcmlvcyBzZXQgbGltaXRlX21lcyA9IG51bGw7Cgpjb21tZW50IG9uIGNvbHVtbiB2b2x1bnRhcmlvcy5saW1pdGVfbWVzIGlzCiAgJ251bGwgPSBzZWd1ZSBjb25maWcubGltaXRlUGFkcmFvIGRhIGVxdWlwZS4gU8OzIHByZWVuY2hhIHBhcmEgZGFyIHVtIHRldG8gZGlmZXJlbnRlIGEgVU1BIHBlc3NvYS4nOwoKLS0gY29uZmVyw6puY2lhCnNlbGVjdCAoc2VsZWN0IGRhZG9zLT4+J2xpbWl0ZVBhZHJhbycgZnJvbSBjb25maWcpIGFzIHBhZHJhb19kYV9lcXVpcGUsCiAgICAgICAoc2VsZWN0IGNvdW50KCopIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgbGltaXRlX21lcyBpcyBub3QgbnVsbCkgYXMgY29tX3RldG9fcHJvcHJpbywKICAgICAgIChzZWxlY3QgY291bnQoKikgZnJvbSB2b2x1bnRhcmlvcyB3aGVyZSBhdGl2bykgYXMgYXRpdm9zOwo="}
+-- ================== LIMITE DE ESCALAS: UM BOTÃO SÓ, E QUE FUNCIONE ========
+-- Sintoma: a escala de agosto não fechava de jeito nenhum. 19 pessoas ativas,
+-- todas com limite_mes = 2, dá teto de 38 escalas no mês; o que restava de
+-- agosto pedia 42 posições. Era impossível por aritmética, não por sorteio.
+--
+-- E o pior: o campo "Máximo de escalas por pessoa por mês" em Ajustes não
+-- resolvia. O motor lê `v.limiteMes || config.limitePadrao`, e como TODA linha
+-- de voluntario tinha 2 gravado, o padrão da equipe nunca era consultado. O
+-- líder podia mexer no botão o dia inteiro sem efeito nenhum.
+--
+-- Correção: limite_mes passa a aceitar nulo, e nulo quer dizer "segue a
+-- equipe". Assim existe um botão só, e ele manda de verdade. O limite por
+-- pessoa continua existindo para o caso real de dar um teto diferente a
+-- alguém específico.
+
+-- 1) teto da equipe: 4. É TETO, não meta. O sorteio continua escolhendo quem
+--    serviu menos, então ninguém chega em 4 sem necessidade.
+update config set dados = jsonb_set(dados, '{limitePadrao}', '4'::jsonb);
+
+-- 2) o campo por pessoa vira opcional
+alter table voluntarios alter column limite_mes drop default;
+alter table voluntarios alter column limite_mes drop not null;
+update voluntarios set limite_mes = null;
+
+comment on column voluntarios.limite_mes is
+  'null = segue config.limitePadrao da equipe. Só preencha para dar um teto diferente a UMA pessoa.';
+
+-- conferência
+select (select dados->>'limitePadrao' from config) as padrao_da_equipe,
+       (select count(*) from voluntarios where limite_mes is not null) as com_teto_proprio,
+       (select count(*) from voluntarios where ativo) as ativos;

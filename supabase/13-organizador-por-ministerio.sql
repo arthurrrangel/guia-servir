@@ -1,1 +1,107 @@
-{"data":"LS0gPT09PT09PT09PT09IE9SR0FOSVpBRE9SIERFIEVTQ0FMQSBQT1IgTUlOSVNUw4lSSU8gKGFjZXNzbyBzZXBhcmFkbykgPT09PT09PQotLSBTaW50b21hOiBgbGlkZXJlc2AgZXJhIHVtYSBsaXN0YSBkZSBlLW1haWxzLCBzZW0gbWluaXN0w6lyaW8gbmVuaHVtLCBlCi0tIGlzX2xpZGVyKCkgZGV2b2x2aWEgdHJ1ZSBvdSBmYWxzZSBwYXJhIG8gYXBwIGludGVpcm8uIFJlc3VsdGFkbzogcXVlbQotLSBvcmdhbml6YSBhIE3DrWRpYSBhYnJpYSBvIGFwcCBlIHZpYSwgZWRpdGF2YSBlIHNvcnRlYXZhIG8gU2VydmnDp28gZG8gQ3VsdG8KLS0gdGFtYsOpbSwgZSB2aWNlLXZlcnNhLiBDb20gdW0gbWluaXN0w6lyaW8gc8OzIGlzc28gbsOjbyBpbmNvbW9kYXZhLiBDb20gZG9pcywKLS0gY2FkYSBvcmdhbml6YWRvciBtZXhlIG5hIGNhc2EgZG8gb3V0cm8uCi0tCi0tIENvcnJlw6fDo286IGEgbGluaGEgZGUgbMOtZGVyIHBhc3NhIGEgYXBvbnRhciBwYXJhIHVtIG1pbmlzdMOpcmlvLgotLSAgIGVxdWlwZV9pZCA9IE5VTEwgIC0+IGVueGVyZ2EgZSBvcmdhbml6YSBUVURPIChxdWVtIGN1aWRhIGRvIGFwcCkKLS0gICBlcXVpcGVfaWQgPSBYICAgICAtPiBlbnhlcmdhIGUgb3JnYW5pemEgc8OzIG8gbWluaXN0w6lyaW8gWAotLQotLSBRdWVtIGrDoSBlc3RhdmEgY2FkYXN0cmFkbyBmaWNhIGNvbSBOVUxMLCBvdSBzZWphLCBuaW5ndcOpbSBwZXJkZSBhY2Vzc28gYW8KLS0gYXBsaWNhciBlc3RhIG1pZ3Jhw6fDo28uIEEgc2VwYXJhw6fDo28gY29tZcOnYSBxdWFuZG8gYWxndcOpbSBmb3IgYXBvbnRhZG8gcGFyYSB1bQotLSBtaW5pc3TDqXJpbyBlc3BlY8OtZmljby4gSXNzbyDDqSBkZSBwcm9ww7NzaXRvOiBtaWdyYcOnw6NvIGRlIHBlcm1pc3PDo28gcXVlIHRyYW5jYQotLSBvIGRvbm8gcGFyYSBmb3JhIGRvIHByw7NwcmlvIHNpc3RlbWEgw6kgcGlvciBxdWUgbyBwcm9ibGVtYSBxdWUgcmVzb2x2ZS4KCi0tIDEpIGEgY29sdW5hLCBlIGEgcG9zc2liaWxpZGFkZSBkZSBhIG1lc21hIHBlc3NvYSBvcmdhbml6YXIgZG9pcyBtaW5pc3TDqXJpb3MKYWx0ZXIgdGFibGUgbGlkZXJlcyBhZGQgY29sdW1uIGlmIG5vdCBleGlzdHMgZXF1aXBlX2lkIHV1aWQgcmVmZXJlbmNlcyBlcXVpcGVzKGlkKSBvbiBkZWxldGUgY2FzY2FkZTsKYWx0ZXIgdGFibGUgbGlkZXJlcyBkcm9wIGNvbnN0cmFpbnQgaWYgZXhpc3RzIGxpZGVyZXNfcGtleTsKZHJvcCBpbmRleCBpZiBleGlzdHMgbGlkZXJlc19lbWFpbF9lcXVpcGU7CmNyZWF0ZSB1bmlxdWUgaW5kZXggbGlkZXJlc19lbWFpbF9lcXVpcGUgb24gbGlkZXJlcyAoZW1haWwsIGNvYWxlc2NlKGVxdWlwZV9pZCwgJzAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMCc6OnV1aWQpKTsKY29tbWVudCBvbiBjb2x1bW4gbGlkZXJlcy5lcXVpcGVfaWQgaXMKICAnbnVsbCA9IG9yZ2FuaXphIHRvZG9zIG9zIG1pbmlzdMOpcmlvcy4gUHJlZW5jaGlkbyA9IHPDsyBhcXVlbGUuJzsKCi0tIDIpIGFzIGR1YXMgcGVyZ3VudGFzIHF1ZSBhcyBwb2zDrXRpY2FzIHBhc3NhbSBhIGZhemVyCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIGxpZGVyYV90dWRvKCkgcmV0dXJucyBib29sZWFuCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJCQKICBzZWxlY3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIGxpZGVyZXMKICAgICB3aGVyZSBlbWFpbCA8PiAnJyBhbmQgbG93ZXIoZW1haWwpID0gbG93ZXIobnVsbGlmKGF1dGguand0KCkgLT4+ICdlbWFpbCcsICcnKSkKICAgICAgIGFuZCBlcXVpcGVfaWQgaXMgbnVsbCk7CiQkOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIGxpZGVyYV90dWRvKCkgdG8gYXV0aGVudGljYXRlZCwgYW5vbjsKCmNyZWF0ZSBvciByZXBsYWNlIGZ1bmN0aW9uIGxpZGVyYV9lcXVpcGUocF9lcXVpcGUgdXVpZCkgcmV0dXJucyBib29sZWFuCmxhbmd1YWdlIHNxbCBzZWN1cml0eSBkZWZpbmVyIHN0YWJsZSBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJCQKICBzZWxlY3QgZXhpc3RzIChzZWxlY3QgMSBmcm9tIGxpZGVyZXMKICAgICB3aGVyZSBlbWFpbCA8PiAnJyBhbmQgbG93ZXIoZW1haWwpID0gbG93ZXIobnVsbGlmKGF1dGguand0KCkgLT4+ICdlbWFpbCcsICcnKSkKICAgICAgIGFuZCAoZXF1aXBlX2lkIGlzIG51bGwgb3IgZXF1aXBlX2lkID0gcF9lcXVpcGUpKTsKJCQ7CmdyYW50IGV4ZWN1dGUgb24gZnVuY3Rpb24gbGlkZXJhX2VxdWlwZSh1dWlkKSB0byBhdXRoZW50aWNhdGVkLCBhbm9uOwoKLS0gMykgcG9sw610aWNhcyBwb3IgbWluaXN0w6lyaW8uCi0tICAgIGBjdWx0b3NgIGZpY2EgZm9yYSBkZSBwcm9ww7NzaXRvOiBhIGxpbmhhIGRvIGRvbWluZ28gw6kgZGEgaWdyZWphIGludGVpcmEsCi0tICAgIG9zIGRvaXMgbWluaXN0w6lyaW9zIHByZWNpc2FtIGRlbGEgcGFyYSBtb250YXIgYSBwcsOzcHJpYSBlc2NhbGEsIGUgZWxhIG7Do28KLS0gICAgZ3VhcmRhIG5hZGEgZGUgbmluZ3XDqW0gYWzDqW0gZGEgZGF0YS4KZG8gJCQKZGVjbGFyZSB0IHRleHQ7CmJlZ2luCiAgLS0gdGFiZWxhcyBxdWUgdMOqbSBlcXVpcGVfaWQgbmEgcHLDs3ByaWEgbGluaGEKICBmb3JlYWNoIHQgaW4gYXJyYXkgYXJyYXlbJ2Z1bmNvZXMnLCd2b2x1bnRhcmlvcycsJ2NvbmZpZycsJ2N1bHRvX29icyddIGxvb3AKICAgIGV4ZWN1dGUgZm9ybWF0KCdkcm9wIHBvbGljeSBpZiBleGlzdHMgbGlkZXJfdHVkb18lMSRzIG9uICUxJEknLCB0KTsKICAgIGV4ZWN1dGUgZm9ybWF0KCdkcm9wIHBvbGljeSBpZiBleGlzdHMgcF8lMSRzIG9uICUxJEknLCB0KTsKICAgIGV4ZWN1dGUgZm9ybWF0KCdkcm9wIHBvbGljeSBpZiBleGlzdHMgZXFfJTEkcyBvbiAlMSRJJywgdCk7CiAgICBleGVjdXRlIGZvcm1hdCgkZiRjcmVhdGUgcG9saWN5IGVxXyUxJHMgb24gJTEkSSBmb3IgYWxsIHRvIGF1dGhlbnRpY2F0ZWQKICAgICAgICAgICAgICAgICAgICAgdXNpbmcgKGxpZGVyYV9lcXVpcGUoZXF1aXBlX2lkKSkgd2l0aCBjaGVjayAobGlkZXJhX2VxdWlwZShlcXVpcGVfaWQpKSRmJCwgdCk7CiAgZW5kIGxvb3A7CgogIC0tIHRhYmVsYXMgcXVlIGNoZWdhbSBubyBtaW5pc3TDqXJpbyBwZWxvIHZvbHVudMOhcmlvCiAgZm9yZWFjaCB0IGluIGFycmF5IGFycmF5WydoYWJpbGlkYWRlcycsJ2luZGlzcG9uaWJpbGlkYWRlcycsJ3BsYW50b2VzJywnZGlzcG9uaWJpbGlkYWRlJ10gbG9vcAogICAgZXhlY3V0ZSBmb3JtYXQoJ2Ryb3AgcG9saWN5IGlmIGV4aXN0cyBsaWRlcl90dWRvXyUxJHMgb24gJTEkSScsIHQpOwogICAgZXhlY3V0ZSBmb3JtYXQoJ2Ryb3AgcG9saWN5IGlmIGV4aXN0cyBwX2Rpc3BfbGlkZXIgb24gJTEkSScsIHQpOwogICAgZXhlY3V0ZSBmb3JtYXQoJ2Ryb3AgcG9saWN5IGlmIGV4aXN0cyBlcV8lMSRzIG9uICUxJEknLCB0KTsKICAgIGV4ZWN1dGUgZm9ybWF0KCRmJGNyZWF0ZSBwb2xpY3kgZXFfJTEkcyBvbiAlMSRJIGZvciBhbGwgdG8gYXV0aGVudGljYXRlZAogICAgICB1c2luZyAoZXhpc3RzIChzZWxlY3QgMSBmcm9tIHZvbHVudGFyaW9zIHYgd2hlcmUgdi5pZCA9IHZvbHVudGFyaW9faWQgYW5kIGxpZGVyYV9lcXVpcGUodi5lcXVpcGVfaWQpKSkKICAgICAgd2l0aCBjaGVjayAoZXhpc3RzIChzZWxlY3QgMSBmcm9tIHZvbHVudGFyaW9zIHYgd2hlcmUgdi5pZCA9IHZvbHVudGFyaW9faWQgYW5kIGxpZGVyYV9lcXVpcGUodi5lcXVpcGVfaWQpKSkkZiQsIHQpOwogIGVuZCBsb29wOwplbmQgJCQ7CgotLSBlc2NhbGHDp8OjbyBjaGVnYSBubyBtaW5pc3TDqXJpbyBwZWxhIGZ1bsOnw6NvCmRyb3AgcG9saWN5IGlmIGV4aXN0cyBsaWRlcl90dWRvX2VzY2FsYWNvZXMgb24gZXNjYWxhY29lczsKZHJvcCBwb2xpY3kgaWYgZXhpc3RzIGVxX2VzY2FsYWNvZXMgb24gZXNjYWxhY29lczsKY3JlYXRlIHBvbGljeSBlcV9lc2NhbGFjb2VzIG9uIGVzY2FsYWNvZXMgZm9yIGFsbCB0byBhdXRoZW50aWNhdGVkCiAgdXNpbmcgKGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBmdW5jb2VzIGYgd2hlcmUgZi5pZCA9IGZ1bmNhb19pZCBhbmQgbGlkZXJhX2VxdWlwZShmLmVxdWlwZV9pZCkpKQogIHdpdGggY2hlY2sgKGV4aXN0cyAoc2VsZWN0IDEgZnJvbSBmdW5jb2VzIGYgd2hlcmUgZi5pZCA9IGZ1bmNhb19pZCBhbmQgbGlkZXJhX2VxdWlwZShmLmVxdWlwZV9pZCkpKTsKCi0tIG8gc2VsZXRvciBkbyB0b3BvIHBhc3NhIGEgbGlzdGFyIHPDsyBvIHF1ZSBhIHBlc3NvYSBvcmdhbml6YQpkcm9wIHBvbGljeSBpZiBleGlzdHMgbGlkZXJfdHVkb19lcXVpcGVzIG9uIGVxdWlwZXM7CmRyb3AgcG9saWN5IGlmIGV4aXN0cyBlcV9lcXVpcGVzIG9uIGVxdWlwZXM7CmNyZWF0ZSBwb2xpY3kgZXFfZXF1aXBlc19sZXIgb24gZXF1aXBlcyBmb3Igc2VsZWN0IHRvIGF1dGhlbnRpY2F0ZWQgdXNpbmcgKGxpZGVyYV9lcXVpcGUoaWQpKTsKY3JlYXRlIHBvbGljeSBlcV9lcXVpcGVzX21leGVyIG9uIGVxdWlwZXMgZm9yIGFsbCB0byBhdXRoZW50aWNhdGVkCiAgdXNpbmcgKGxpZGVyYV90dWRvKCkpIHdpdGggY2hlY2sgKGxpZGVyYV90dWRvKCkpOwoKLS0gcXVlbSBkw6EgZSB0aXJhIGFjZXNzbyDDqSBzw7MgcXVlbSBvcmdhbml6YSB0dWRvLiBMZXIsIHF1YWxxdWVyIG9yZ2FuaXphZG9yIGzDqgotLSAocGFyYSBzYWJlciBxdWVtIG1haXMgbWV4ZSBubyBtaW5pc3TDqXJpbyBkZWxlKS4KZHJvcCBwb2xpY3kgaWYgZXhpc3RzIGxpZGVyX3R1ZG9fbGlkZXJlcyBvbiBsaWRlcmVzOwpkcm9wIHBvbGljeSBpZiBleGlzdHMgZXFfbGlkZXJlcyBvbiBsaWRlcmVzOwpjcmVhdGUgcG9saWN5IGVxX2xpZGVyZXNfbGVyIG9uIGxpZGVyZXMgZm9yIHNlbGVjdCB0byBhdXRoZW50aWNhdGVkCiAgdXNpbmcgKGxpZGVyYV90dWRvKCkgb3IgZXF1aXBlX2lkIGlzIG51bGwgb3IgbGlkZXJhX2VxdWlwZShlcXVpcGVfaWQpKTsKY3JlYXRlIHBvbGljeSBlcV9saWRlcmVzX21leGVyIG9uIGxpZGVyZXMgZm9yIGFsbCB0byBhdXRoZW50aWNhdGVkCiAgdXNpbmcgKGxpZGVyYV90dWRvKCkpIHdpdGggY2hlY2sgKGxpZGVyYV90dWRvKCkpOwoKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQotLSBzb3VfbGlkZXIoKSBjb250aW51YSByZXNwb25kZW5kbyAiZXN0YSBwZXNzb2EgZW50cmEgbm8gYXBwPyIsIHF1ZSDDqSBvIHF1ZSBvCi0tIFNoZWxsIHBlcmd1bnRhIG5hIHBvcnRhLiBPIHF1ZSBtdWRvdSDDqSBvIHF1ZSBlbGEgRU5YRVJHQSBkZXBvaXMgZGUgZW50cmFyLgpjcmVhdGUgb3IgcmVwbGFjZSBmdW5jdGlvbiBzb3VfbGlkZXIoKSByZXR1cm5zIGJvb2xlYW4KbGFuZ3VhZ2Ugc3FsIHNlY3VyaXR5IGRlZmluZXIgc3RhYmxlIHNldCBzZWFyY2hfcGF0aCA9IHB1YmxpYyBhcyAkJAogIHNlbGVjdCBleGlzdHMgKHNlbGVjdCAxIGZyb20gbGlkZXJlcwogICAgIHdoZXJlIGVtYWlsIDw+ICcnIGFuZCBsb3dlcihlbWFpbCkgPSBsb3dlcihudWxsaWYoYXV0aC5qd3QoKSAtPj4gJ2VtYWlsJywgJycpKSk7CiQkOwpncmFudCBleGVjdXRlIG9uIGZ1bmN0aW9uIHNvdV9saWRlcigpIHRvIGF1dGhlbnRpY2F0ZWQsIGFub247CgotLSBjb25mZXLDqm5jaWEKc2VsZWN0IGwuZW1haWwsCiAgICAgICBjb2FsZXNjZShlLm5vbWUsICdUVURPJykgYXMgb3JnYW5pemEsCiAgICAgICAoc2VsZWN0IGNvdW50KCopIGZyb20gZXF1aXBlcykgYXMgbWluaXN0ZXJpb3MKICBmcm9tIGxpZGVyZXMgbCBsZWZ0IGpvaW4gZXF1aXBlcyBlIG9uIGUuaWQgPSBsLmVxdWlwZV9pZAogb3JkZXIgYnkgbC5lbWFpbDsK"}
+-- ============ ORGANIZADOR DE ESCALA POR MINISTÉRIO (acesso separado) =======
+-- Sintoma: `lideres` era uma lista de e-mails, sem ministério nenhum, e
+-- is_lider() devolvia true ou false para o app inteiro. Resultado: quem
+-- organiza a Mídia abria o app e via, editava e sorteava o Serviço do Culto
+-- também, e vice-versa. Com um ministério só isso não incomodava. Com dois,
+-- cada organizador mexe na casa do outro.
+--
+-- Correção: a linha de líder passa a apontar para um ministério.
+--   equipe_id = NULL  -> enxerga e organiza TUDO (quem cuida do app)
+--   equipe_id = X     -> enxerga e organiza só o ministério X
+--
+-- Quem já estava cadastrado fica com NULL, ou seja, ninguém perde acesso ao
+-- aplicar esta migração. A separação começa quando alguém for apontado para um
+-- ministério específico. Isso é de propósito: migração de permissão que tranca
+-- o dono para fora do próprio sistema é pior que o problema que resolve.
+
+-- 1) a coluna, e a possibilidade de a mesma pessoa organizar dois ministérios
+alter table lideres add column if not exists equipe_id uuid references equipes(id) on delete cascade;
+alter table lideres drop constraint if exists lideres_pkey;
+drop index if exists lideres_email_equipe;
+create unique index lideres_email_equipe on lideres (email, coalesce(equipe_id, '00000000-0000-0000-0000-000000000000'::uuid));
+comment on column lideres.equipe_id is
+  'null = organiza todos os ministérios. Preenchido = só aquele.';
+
+-- 2) as duas perguntas que as políticas passam a fazer
+create or replace function lidera_tudo() returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from lideres
+     where email <> '' and lower(email) = lower(nullif(auth.jwt() ->> 'email', ''))
+       and equipe_id is null);
+$$;
+grant execute on function lidera_tudo() to authenticated, anon;
+
+create or replace function lidera_equipe(p_equipe uuid) returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from lideres
+     where email <> '' and lower(email) = lower(nullif(auth.jwt() ->> 'email', ''))
+       and (equipe_id is null or equipe_id = p_equipe));
+$$;
+grant execute on function lidera_equipe(uuid) to authenticated, anon;
+
+-- 3) políticas por ministério.
+--    `cultos` fica fora de propósito: a linha do domingo é da igreja inteira,
+--    os dois ministérios precisam dela para montar a própria escala, e ela não
+--    guarda nada de ninguém além da data.
+do $$
+declare t text;
+begin
+  -- tabelas que têm equipe_id na própria linha
+  foreach t in array array['funcoes','voluntarios','config','culto_obs'] loop
+    execute format('drop policy if exists lider_tudo_%1$s on %1$I', t);
+    execute format('drop policy if exists p_%1$s on %1$I', t);
+    execute format('drop policy if exists eq_%1$s on %1$I', t);
+    execute format($f$create policy eq_%1$s on %1$I for all to authenticated
+                     using (lidera_equipe(equipe_id)) with check (lidera_equipe(equipe_id))$f$, t);
+  end loop;
+
+  -- tabelas que chegam no ministério pelo voluntário
+  foreach t in array array['habilidades','indisponibilidades','plantoes','disponibilidade'] loop
+    execute format('drop policy if exists lider_tudo_%1$s on %1$I', t);
+    execute format('drop policy if exists p_disp_lider on %1$I', t);
+    execute format('drop policy if exists eq_%1$s on %1$I', t);
+    execute format($f$create policy eq_%1$s on %1$I for all to authenticated
+      using (exists (select 1 from voluntarios v where v.id = voluntario_id and lidera_equipe(v.equipe_id)))
+      with check (exists (select 1 from voluntarios v where v.id = voluntario_id and lidera_equipe(v.equipe_id)))$f$, t);
+  end loop;
+end $$;
+
+-- escalação chega no ministério pela função
+drop policy if exists lider_tudo_escalacoes on escalacoes;
+drop policy if exists eq_escalacoes on escalacoes;
+create policy eq_escalacoes on escalacoes for all to authenticated
+  using (exists (select 1 from funcoes f where f.id = funcao_id and lidera_equipe(f.equipe_id)))
+  with check (exists (select 1 from funcoes f where f.id = funcao_id and lidera_equipe(f.equipe_id)));
+
+-- o seletor do topo passa a listar só o que a pessoa organiza
+drop policy if exists lider_tudo_equipes on equipes;
+drop policy if exists eq_equipes on equipes;
+create policy eq_equipes_ler on equipes for select to authenticated using (lidera_equipe(id));
+create policy eq_equipes_mexer on equipes for all to authenticated
+  using (lidera_tudo()) with check (lidera_tudo());
+
+-- quem dá e tira acesso é só quem organiza tudo. Ler, qualquer organizador lê
+-- (para saber quem mais mexe no ministério dele).
+drop policy if exists lider_tudo_lideres on lideres;
+drop policy if exists eq_lideres on lideres;
+create policy eq_lideres_ler on lideres for select to authenticated
+  using (lidera_tudo() or equipe_id is null or lidera_equipe(equipe_id));
+create policy eq_lideres_mexer on lideres for all to authenticated
+  using (lidera_tudo()) with check (lidera_tudo());
+
+----------------------------------------------------------------------------
+-- sou_lider() continua respondendo "esta pessoa entra no app?", que é o que o
+-- Shell pergunta na porta. O que mudou é o que ela ENXERGA depois de entrar.
+create or replace function sou_lider() returns boolean
+language sql security definer stable set search_path = public as $$
+  select exists (select 1 from lideres
+     where email <> '' and lower(email) = lower(nullif(auth.jwt() ->> 'email', '')));
+$$;
+grant execute on function sou_lider() to authenticated, anon;
+
+-- conferência
+select l.email,
+       coalesce(e.nome, 'TUDO') as organiza,
+       (select count(*) from equipes) as ministerios
+  from lideres l left join equipes e on e.id = l.equipe_id
+ order by l.email;

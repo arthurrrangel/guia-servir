@@ -1,1 +1,302 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgU2hlbGwsIHsgdXNlQXBwLCBjb3BpYXIgfSBmcm9tICdAL2NvbXBvbmVudHMvU2hlbGwnOwppbXBvcnQgeyB1c2VFZmZlY3QsIHVzZVJlZiwgdXNlU3RhdGUgfSBmcm9tICdyZWFjdCc7CmltcG9ydCB7CiAgYWRkTGlkZXIsIGxpc3RhckxpZGVyZXMsIHJlbW92ZXJGdW5jYW8sIHJlbW92ZXJMaWRlciwgc2FsdmFyQ29uZmlnLCBzYWx2YXJGdW5jb2VzLAogIHNvdU9yZ2FuaXphZG9yR2VyYWwsIHR5cGUgTGluaGFMaWRlciwKfSBmcm9tICdAL2xpYi9kYic7CmltcG9ydCB7IGF0dWFsaXphckVxdWlwZSwgY3JpYXJFcXVpcGUsIHJlbW92ZXJFcXVpcGUgfSBmcm9tICdAL2xpYi9lcXVpcGVzJzsKaW1wb3J0IHsgZnVuY29lc0F0aXZhcyB9IGZyb20gJ0AvbGliL2VuZ2luZSc7CgpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBQYWdpbmEoKSB7IHJldHVybiA8U2hlbGw+PEFqdXN0ZXMgLz48L1NoZWxsPjsgfQoKZnVuY3Rpb24gQWp1c3RlcygpIHsKICBjb25zdCB7IFMsIHJlY2FycmVnYXIsIGF2aXNvLCBiYXNlLCBlcXVpcGUsIGVxdWlwZXMsIHJlY2FycmVnYXJFcXVpcGVzLCB0cm9jYXJFcXVpcGUgfSA9IHVzZUFwcCgpOwogIGNvbnN0IFtub3ZhRXF1aXBlLCBzZXROb3ZhRXF1aXBlXSA9IHVzZVN0YXRlKCcnKTsKICBjb25zdCBbbm92YSwgc2V0Tm92YV0gPSB1c2VTdGF0ZSgnJyk7CiAgY29uc3QgW2xpZGVyZXMsIHNldExpZGVyZXNdID0gdXNlU3RhdGU8TGluaGFMaWRlcltdPihbXSk7CiAgY29uc3QgW25vdm9MaWRlciwgc2V0Tm92b0xpZGVyXSA9IHVzZVN0YXRlKCcnKTsKICAvKiBudWxsID0gInRvZG9zIG9zIG1pbmlzdMOpcmlvcyIgKi8KICBjb25zdCBbZXF1aXBlRG9MaWRlciwgc2V0RXF1aXBlRG9MaWRlcl0gPSB1c2VTdGF0ZTxzdHJpbmc+KCcnKTsKICBjb25zdCBbZ2VyYWwsIHNldEdlcmFsXSA9IHVzZVN0YXRlKGZhbHNlKTsKICBjb25zdCBbZ3JhdmFuZG8sIHNldEdyYXZhbmRvXSA9IHVzZVN0YXRlKGZhbHNlKTsKICB1c2VFZmZlY3QoKCkgPT4geyBsaXN0YXJMaWRlcmVzKCkudGhlbihzZXRMaWRlcmVzKS5jYXRjaCgoKSA9PiB7fSk7IH0sIFtdKTsKICB1c2VFZmZlY3QoKCkgPT4geyBzb3VPcmdhbml6YWRvckdlcmFsKCkudGhlbihzZXRHZXJhbCkuY2F0Y2goKCkgPT4ge30pOyB9LCBbXSk7CiAgYXN5bmMgZnVuY3Rpb24gcmVjYXJyZWdhckxpZGVyZXMoKSB7IHRyeSB7IHNldExpZGVyZXMoYXdhaXQgbGlzdGFyTGlkZXJlcygpKTsgfSBjYXRjaCB7fSB9CgogIC8qIGR1YXMgZWRpw6fDtWVzIGVtIHNlcXXDqm5jaWEgbsOjbyBwb2RlbSBzZSBhdHJvcGVsYXI6IG8gcmVmIGFjdW11bGEKICAgICBhcyBtdWRhbsOnYXMgasOhIHBlZGlkYXMsIG1lc21vIGFudGVzIGRvIHJlY2FycmVnYXIgdm9sdGFyICovCiAgY29uc3QgY2ZnUmVmID0gdXNlUmVmKHsgLi4uUy5jb25maWcgfSk7CiAgdXNlRWZmZWN0KCgpID0+IHsgY2ZnUmVmLmN1cnJlbnQgPSB7IC4uLlMuY29uZmlnIH07IH0sIFtTLmNvbmZpZ10pOwogIGFzeW5jIGZ1bmN0aW9uIGNmZyhjaGF2ZTogc3RyaW5nLCB2YWxvcjogYW55KSB7CiAgICBjZmdSZWYuY3VycmVudCA9IHsgLi4uY2ZnUmVmLmN1cnJlbnQsIFtjaGF2ZV06IHZhbG9yIH07CiAgICB0cnkgeyBhd2FpdCBzYWx2YXJDb25maWcoZXF1aXBlIS5pZCwgY2ZnUmVmLmN1cnJlbnQpOyBhd2FpdCByZWNhcnJlZ2FyKCk7IGF2aXNvKCdTYWx2bycpOyB9CiAgICBjYXRjaCAoZTogYW55KSB7IGF2aXNvKCdOw6NvIHNhbHZvdTogJyArIGUubWVzc2FnZSk7IGF3YWl0IHJlY2FycmVnYXIoKTsgfQogIH0KICBhc3luYyBmdW5jdGlvbiBmbihpZDogc3RyaW5nLCBjYW1wb3M6IGFueSkgewogICAgY29uc3QgZiA9IFMuZnVuY29lcy5maW5kKHggPT4geC5pZCA9PT0gaWQpITsKICAgIHRyeSB7IGF3YWl0IHNhbHZhckZ1bmNvZXMoZXF1aXBlIS5pZCwgW3sgLi4uZiwgLi4uY2FtcG9zIH1dKTsgYXdhaXQgcmVjYXJyZWdhcigpOyB9CiAgICBjYXRjaCAoZTogYW55KSB7IGF2aXNvKCdlcnJvOiAnICsgZS5tZXNzYWdlKTsgfQogIH0KICBhc3luYyBmdW5jdGlvbiBhZGRGbigpIHsKICAgIGNvbnN0IG5vbWUgPSBub3ZhLnRyaW0oKS50b1VwcGVyQ2FzZSgpOwogICAgaWYgKCFub21lIHx8IGdyYXZhbmRvKSByZXR1cm47CiAgICBpZiAoUy5mdW5jb2VzLnNvbWUoZiA9PiBmLm5vbWUudG9VcHBlckNhc2UoKSA9PT0gbm9tZSkpIHsgYXZpc28oJ0rDoSBleGlzdGUgdW1hIGZ1bsOnw6NvIGNvbSBlc3NlIG5vbWUnKTsgcmV0dXJuOyB9CiAgICBzZXRHcmF2YW5kbyh0cnVlKTsKICAgIHRyeSB7CiAgICAgIGF3YWl0IHNhbHZhckZ1bmNvZXMoZXF1aXBlIS5pZCwgW3sgbm9tZSwgc2ltdWx0YW5lYTogdHJ1ZSwgb3JkZW06IFMuZnVuY29lcy5sZW5ndGggKyAxLCBhdGl2YTogdHJ1ZSB9XSk7CiAgICAgIHNldE5vdmEoJycpOyBhd2FpdCByZWNhcnJlZ2FyKCk7IGF2aXNvKCdGdW7Dp8OjbyBjcmlhZGEnKTsKICAgIH0gY2F0Y2ggKGU6IGFueSkgeyBhdmlzbygnTsOjbyBzYWx2b3U6ICcgKyBlLm1lc3NhZ2UpOyB9CiAgICBzZXRHcmF2YW5kbyhmYWxzZSk7CiAgfQogIGFzeW5jIGZ1bmN0aW9uIGRlbEZuKGlkOiBzdHJpbmcsIG5vbWU6IHN0cmluZykgewogICAgaWYgKCFjb25maXJtKGBBcGFnYXIgJHtub21lfT8gU29tZSBkYXMgZXNjYWxhcyBhbnRpZ2FzIHRhbWLDqW0uYCkpIHJldHVybjsKICAgIHRyeSB7IGF3YWl0IHJlbW92ZXJGdW5jYW8oaWQpOyBhd2FpdCByZWNhcnJlZ2FyKCk7IGF2aXNvKCdBcGFnYWRhJyk7IH0KICAgIGNhdGNoIChlOiBhbnkpIHsgYXZpc28oJ2Vycm86ICcgKyBlLm1lc3NhZ2UpOyB9CiAgfQoKICBjb25zdCBsaW5rR3J1cG8gPSBlcXVpcGUgPyBgJHtiYXNlfS9lcXVpcGUvJHtlcXVpcGUuc2x1Z31gIDogJyc7CiAgY29uc3Qga2l0ID0gZXF1aXBlCiAgICA/IGDwn5OMICpFU0NBTEEsICR7ZXF1aXBlLm5vbWUudG9VcHBlckNhc2UoKX0qXG5gCiAgICArIGBfQ29tZWNlIHBvciBhcXVpLiBMZXZhIDEgbWludXRvIGUgw6kgdW1hIHZleiBzw7MuX1xuXG5gCiAgICArIGDwn5GJICR7bGlua0dydXBvfVxuXG5gCiAgICArIGAqUEFTU08gQSBQQVNTTypcbmAKICAgICsgYDHvuI/ig6MgQWJyYSBvIGxpbmsgYWNpbWFcbmAKICAgICsgYDLvuI/ig6MgVG9xdWUgbm8gc2V1IG5vbWUgbmEgbGlzdGFcbmAKICAgICsgYDPvuI/ig6MgRGlnaXRlIG9zIDQgw7psdGltb3MgbsO6bWVyb3MgZG8gc2V1IFdoYXRzQXBwXG5gCiAgICArIGA077iP4oOjIFNhbHZlIGEgcMOhZ2luYSBub3MgZmF2b3JpdG9zIGRvIGNlbHVsYXJcblxuYAogICAgKyBgKkRFUE9JUywgw4kgU8OTIElTU08qXG5gCiAgICArIGDinIUgKkZvaSBlc2NhbGFkbz8qIFRvcXVlIGVtICJDb25maXJtbyIgb3UgZW0gIk7Do28gcG9zc28iXG5gCiAgICArIGDwn5OFICpBbnRlcyBkYSBlc2NhbGEgZG8gbcOqcz8qIE1hcnF1ZSBvcyBkb21pbmdvcyBlbSBxdWUgdm9jw6ogasOhIHNhYmUgcXVlIG7Do28gdmFpIGRhclxuXG5gCiAgICArIGBfTsOjbyBhY2hvdSBzZXUgbm9tZSBuYSBsaXN0YT8gTWUgY2hhbWEgbm8gcHJpdmFkbyBxdWUgZXUgdGUgY2FkYXN0cm8uX2AKICAgIDogJyc7CgogIHJldHVybiAoCiAgICA8PgogICAgICA8aDE+QWp1c3RlczwvaDE+CiAgICAgIDxwIGNsYXNzTmFtZT0iZGltIHBlcXVlbm8iIHN0eWxlPXt7IG1hcmdpblRvcDogNCwgbWFyZ2luQm90dG9tOiAxNiB9fT4KICAgICAgICBWb2PDqiBlc3TDoSBlbSA8c3Ryb25nPntlcXVpcGU/Lm5vbWV9PC9zdHJvbmc+LiBBcyBjb25maWd1cmHDp8O1ZXMgYWJhaXhvIHZhbGVtIHPDsyBwYXJhIGVzdGUgbWluaXN0w6lyaW8uCiAgICAgIDwvcD4KCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIiBpZD0iZ3J1cG8iPgogICAgICAgIDxoMz5HcnVwbyBkZXN0ZSBtaW5pc3TDqXJpbyBubyBXaGF0c0FwcDwvaDM+CiAgICAgICAgPHAgY2xhc3NOYW1lPSJkaW0gcGVxdWVubyIgc3R5bGU9e3sgbWFyZ2luVG9wOiAtNCB9fT4KICAgICAgICAgIDxzdHJvbmc+TyBxdWUgZmF6ZXI6PC9zdHJvbmc+IGNvcGllIGEgbWVuc2FnZW0gYWJhaXhvLCBjb2xlIG5vIGdydXBvIGRvIG1pbmlzdMOpcmlvIGUKICAgICAgICAgIDxzdHJvbmc+IGZpeGU8L3N0cm9uZz4gZWxhIGzDoS4gQSBwYXJ0aXIgZGHDrSBjYWRhIHBlc3NvYSBlbnRyYSBzb3ppbmhhIHBlbG8gbGluaywgYWNoYSBvIHByw7NwcmlvCiAgICAgICAgICBub21lIGUgY29uZmlybWEsIHZvY8OqIG7Do28gbWFuZGEgbGluayBubyBwcml2YWRvIGRlIG5pbmd1w6ltLgogICAgICAgIDwvcD4KICAgICAgICA8bGFiZWw+TGluayBkZSBjb252aXRlIGRvIGdydXBvIChvcGNpb25hbCwgc8OzIHBhcmEgdm9jw6ogZ3VhcmRhcik8L2xhYmVsPgogICAgICAgIDxpbnB1dCBrZXk9e2VxdWlwZT8ud2hhdHNhcHBfZ3J1cG8gfHwgJyd9IGRlZmF1bHRWYWx1ZT17ZXF1aXBlPy53aGF0c2FwcF9ncnVwbyB8fCAnJ30KICAgICAgICAgIHBsYWNlaG9sZGVyPSJodHRwczovL2NoYXQud2hhdHNhcHAuY29tLy4uLiIKICAgICAgICAgIG9uQmx1cj17YXN5bmMgZSA9PiB7CiAgICAgICAgICAgIGNvbnN0IHYgPSBlLnRhcmdldC52YWx1ZS50cmltKCk7CiAgICAgICAgICAgIGlmICh2ICE9PSAoZXF1aXBlPy53aGF0c2FwcF9ncnVwbyB8fCAnJykpIHsKICAgICAgICAgICAgICB0cnkgeyBhd2FpdCBhdHVhbGl6YXJFcXVpcGUoZXF1aXBlIS5pZCwgeyB3aGF0c2FwcF9ncnVwbzogdiB8fCBudWxsIH0pOyBhd2FpdCByZWNhcnJlZ2FyRXF1aXBlcygpOyBhdmlzbygnU2Fsdm8nKTsgfQogICAgICAgICAgICAgIGNhdGNoIChlcnI6IGFueSkgeyBhdmlzbygnTsOjbyBzYWx2b3U6ICcgKyBlcnIubWVzc2FnZSk7IH0KICAgICAgICAgICAgfQogICAgICAgICAgfX0gLz4KICAgICAgICA8ZGl2IHN0eWxlPXt7IGhlaWdodDogMTQgfX0gLz4KICAgICAgICA8bGFiZWw+TWVuc2FnZW0gcGFyYSBmaXhhciBubyBncnVwbyAocHLDqXZpYSk8L2xhYmVsPgogICAgICAgIDxkaXYgY2xhc3NOYW1lPSJtc2ctcHJldmlldyI+e2tpdH08L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGluaGEiIHN0eWxlPXt7IG1hcmdpblRvcDogMTAgfX0+CiAgICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT0icHJpIiBvbkNsaWNrPXsoKSA9PiBjb3BpYXIoa2l0LCBhdmlzbywgJ0NvcGlhZG8uIENvbGUgZSBmaXhlIG5vIGdydXBvIGRhIGVxdWlwZS4nKX0+Q29waWFyIG1lbnNhZ2VtIGRvIGdydXBvPC9idXR0b24+CiAgICAgICAgICA8YSBjbGFzc05hbWU9ImJ0biIgaHJlZj17bGlua0dydXBvfSB0YXJnZXQ9Il9ibGFuayIgcmVsPSJub29wZW5lciI+YWJyaXIgYSBww6FnaW5hIGRhIGVxdWlwZTwvYT4KICAgICAgICA8L2Rpdj4KICAgICAgPC9kaXY+CgogICAgICA8ZGl2IGNsYXNzTmFtZT0iY2FyZCI+CiAgICAgICAgPGgzPlJlZ3JhcyBkbyByb2TDrXppbzwvaDM+CiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImdyYWRlIj4KICAgICAgICAgIDxkaXY+CiAgICAgICAgICAgIDxsYWJlbD5Nw6F4aW1vIGRlIGVzY2FsYXMgcG9yIHBlc3NvYSBwb3IgbcOqczwvbGFiZWw+CiAgICAgICAgICAgIDxzZWxlY3Qga2V5PXtTLmNvbmZpZy5saW1pdGVQYWRyYW99IGFyaWEtbGFiZWw9Ik3DoXhpbW8gZGUgZXNjYWxhcyBwb3IgcGVzc29hIHBvciBtw6pzIiBkZWZhdWx0VmFsdWU9e1MuY29uZmlnLmxpbWl0ZVBhZHJhb30gb25DaGFuZ2U9e2UgPT4gY2ZnKCdsaW1pdGVQYWRyYW8nLCArZS50YXJnZXQudmFsdWUpfT4KICAgICAgICAgICAgICB7WzEsIDIsIDMsIDQsIDVdLm1hcChuID0+IDxvcHRpb24ga2V5PXtufSB2YWx1ZT17bn0+e259IHBvciBtw6pzPC9vcHRpb24+KX0KICAgICAgICAgICAgPC9zZWxlY3Q+CiAgICAgICAgICA8L2Rpdj4KICAgICAgICAgIDxkaXY+CiAgICAgICAgICAgIDxsYWJlbD5QbGFudG9uaXN0YXMgcG9yIGRvbWluZ288L2xhYmVsPgogICAgICAgICAgICA8c2VsZWN0IGtleT17Uy5jb25maWcucGxhbnRhb1F0ZH0gYXJpYS1sYWJlbD0iUGxhbnRvbmlzdGFzIHBvciBkb21pbmdvIiBkZWZhdWx0VmFsdWU9e1MuY29uZmlnLnBsYW50YW9RdGR9IG9uQ2hhbmdlPXtlID0+IGNmZygncGxhbnRhb1F0ZCcsICtlLnRhcmdldC52YWx1ZSl9PgogICAgICAgICAgICAgIHtbMCwgMSwgMiwgM10ubWFwKG4gPT4gPG9wdGlvbiBrZXk9e259IHZhbHVlPXtufT57bn08L29wdGlvbj4pfQogICAgICAgICAgICA8L3NlbGVjdD4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdj4KICAgICAgICAgICAgPGxhYmVsPlByYXpvIHBhcmEgY29uZmlybWFyPC9sYWJlbD4KICAgICAgICAgICAgPGlucHV0IGtleT17Uy5jb25maWcucHJhem9Db25maXJtYWNhb30gYXJpYS1sYWJlbD0iUHJhem8gcGFyYSBjb25maXJtYXIiIGRlZmF1bHRWYWx1ZT17Uy5jb25maWcucHJhem9Db25maXJtYWNhb30gb25CbHVyPXtlID0+IGNmZygncHJhem9Db25maXJtYWNhbycsIGUudGFyZ2V0LnZhbHVlKX0gLz4KICAgICAgICAgIDwvZGl2PgogICAgICAgICAgPGRpdj4KICAgICAgICAgICAgPGxhYmVsPkVxdWlsaWJyYXIgYSBjYXJnYSBvbGhhbmRvPC9sYWJlbD4KICAgICAgICAgICAgPHNlbGVjdCBrZXk9e1MuY29uZmlnLmphbmVsYUNhcmdhfSBhcmlhLWxhYmVsPSJFcXVpbGlicmFyIGEgY2FyZ2Egb2xoYW5kbyIgZGVmYXVsdFZhbHVlPXtTLmNvbmZpZy5qYW5lbGFDYXJnYX0gb25DaGFuZ2U9e2UgPT4gY2ZnKCdqYW5lbGFDYXJnYScsICtlLnRhcmdldC52YWx1ZSl9PgogICAgICAgICAgICAgIHtbMzAsIDYwLCA5MCwgMTIwLCAxODBdLm1hcChuID0+IDxvcHRpb24ga2V5PXtufSB2YWx1ZT17bn0+w7psdGltb3Mge259IGRpYXM8L29wdGlvbj4pfQogICAgICAgICAgICA8L3NlbGVjdD4KICAgICAgICAgIDwvZGl2PgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIj4KICAgICAgICA8aDM+TWVuc2FnZW0gZG8gZ3J1cG88L2gzPgogICAgICAgIDxsYWJlbD5Db21vIHZvY8OqIGNvbWXDp2EgbyBhdmlzbzwvbGFiZWw+CiAgICAgICAgPGlucHV0IGtleT17Uy5jb25maWcuc2F1ZGFjYW99IGFyaWEtbGFiZWw9IkNvbW8gdm9jw6ogY29tZcOnYSBvIGF2aXNvIiBkZWZhdWx0VmFsdWU9e1MuY29uZmlnLnNhdWRhY2FvfSBvbkJsdXI9e2UgPT4gY2ZnKCdzYXVkYWNhbycsIGUudGFyZ2V0LnZhbHVlKX0gLz4KICAgICAgICA8ZGl2IHN0eWxlPXt7IGhlaWdodDogMTQgfX0gLz4KICAgICAgICA8bGFiZWw+Q29tbyB2b2PDqiB0ZXJtaW5hICh7J3tQUkFaT30nfSB2aXJhIG8gcHJhem8gYWNpbWEpPC9sYWJlbD4KICAgICAgICA8dGV4dGFyZWEga2V5PXtTLmNvbmZpZy5yb2RhcGV9IGFyaWEtbGFiZWw9IkNvbW8gdm9jw6ogdGVybWluYSBvIGF2aXNvIiBkZWZhdWx0VmFsdWU9e1MuY29uZmlnLnJvZGFwZX0gcm93cz17M30gb25CbHVyPXtlID0+IGNmZygncm9kYXBlJywgZS50YXJnZXQudmFsdWUpfSAvPgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIj4KICAgICAgICA8aDM+RnVuw6fDtWVzPC9oMz4KICAgICAgICA8cCBjbGFzc05hbWU9ImRpbSBwZXF1ZW5vIiBzdHlsZT17eyBtYXJnaW5Ub3A6IC00IH19PgogICAgICAgICAgPHN0cm9uZz5EdXJhbnRlIG8gY3VsdG88L3N0cm9uZz4gaW1wZWRlIGEgbWVzbWEgcGVzc29hIGRlIHBlZ2FyIGR1YXMgYW8gbWVzbW8gdGVtcG8uCiAgICAgICAgICA8c3Ryb25nPiBEZXBvaXMgZG8gY3VsdG88L3N0cm9uZz4gKGNvbW8gZWRpw6fDo28pIHBvZGUgYWN1bXVsYXIuCiAgICAgICAgPC9wPgogICAgICAgIDx0YWJsZT4KICAgICAgICAgIDx0Ym9keT4KICAgICAgICAgICAge1MuZnVuY29lcy5tYXAoZiA9PiAoCiAgICAgICAgICAgICAgPHRyIGtleT17Zi5pZH0+CiAgICAgICAgICAgICAgICA8dGQgc3R5bGU9e3sgd2lkdGg6ICc0MCUnIH19PgogICAgICAgICAgICAgICAgICA8aW5wdXQga2V5PXtmLm5vbWV9IGRlZmF1bHRWYWx1ZT17Zi5ub21lfSBhcmlhLWxhYmVsPSJub21lIGRhIGZ1bsOnw6NvIgogICAgICAgICAgICAgICAgICAgIG9uQmx1cj17ZSA9PiBlLnRhcmdldC52YWx1ZSAhPT0gZi5ub21lICYmIGZuKGYuaWQhLCB7IG5vbWU6IGUudGFyZ2V0LnZhbHVlLnRvVXBwZXJDYXNlKCkgfSl9IC8+CiAgICAgICAgICAgICAgICA8L3RkPgogICAgICAgICAgICAgICAgPHRkPgogICAgICAgICAgICAgICAgICA8c2VsZWN0IGRlZmF1bHRWYWx1ZT17Zi5zaW11bHRhbmVhID8gJzEnIDogJzAnfSBhcmlhLWxhYmVsPSJxdWFuZG8gYWNvbnRlY2UiCiAgICAgICAgICAgICAgICAgICAgb25DaGFuZ2U9e2UgPT4gZm4oZi5pZCEsIHsgc2ltdWx0YW5lYTogZS50YXJnZXQudmFsdWUgPT09ICcxJyB9KX0+CiAgICAgICAgICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMSI+ZHVyYW50ZSBvIGN1bHRvPC9vcHRpb24+CiAgICAgICAgICAgICAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMCI+ZGVwb2lzIGRvIGN1bHRvPC9vcHRpb24+CiAgICAgICAgICAgICAgICAgIDwvc2VsZWN0PgogICAgICAgICAgICAgICAgPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBzdHlsZT17eyB3aWR0aDogOTIgfX0+CiAgICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJtaW5pIiBvbkNsaWNrPXsoKSA9PiBmbihmLmlkISwgeyBhdGl2YTogIWYuYXRpdmEgfSl9PntmLmF0aXZhID8gJ2F0aXZhJyA6ICdvY3VsdGEnfTwvYnV0dG9uPgogICAgICAgICAgICAgICAgPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBzdHlsZT17eyB3aWR0aDogNDQgfX0+CiAgICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJtaW5pIHBlcmlnbyIgYXJpYS1sYWJlbD17YGFwYWdhciAke2Yubm9tZX1gfSBvbkNsaWNrPXsoKSA9PiBkZWxGbihmLmlkISwgZi5ub21lKX0+w5c8L2J1dHRvbj4KICAgICAgICAgICAgICAgIDwvdGQ+CiAgICAgICAgICAgICAgPC90cj4KICAgICAgICAgICAgKSl9CiAgICAgICAgICA8L3Rib2R5PgogICAgICAgIDwvdGFibGU+CiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpbmhhIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDE0IH19PgogICAgICAgICAgPGlucHV0IHZhbHVlPXtub3ZhfSBvbkNoYW5nZT17ZSA9PiBzZXROb3ZhKGUudGFyZ2V0LnZhbHVlKX0gcGxhY2Vob2xkZXI9Im5vdmEgZnVuw6fDo28gKGV4OiBTT00pIiBzdHlsZT17eyBtYXhXaWR0aDogMjQwIH19IC8+CiAgICAgICAgICA8YnV0dG9uIGRpc2FibGVkPXtncmF2YW5kbyB8fCAhbm92YS50cmltKCl9IG9uQ2xpY2s9e2FkZEZufT5DcmlhciBmdW7Dp8OjbzwvYnV0dG9uPgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIj4KICAgICAgICA8aDM+UXVlbSBvcmdhbml6YSBhIGVzY2FsYTwvaDM+CiAgICAgICAgPHAgY2xhc3NOYW1lPSJkaW0gcGVxdWVubyIgc3R5bGU9e3sgbWFyZ2luVG9wOiAtNCB9fT4KICAgICAgICAgIFPDsyBlc3RlcyBlbWFpbHMgYWJyZW0gYSDDoXJlYSBkbyBvcmdhbml6YWRvci4gQ2FkYSB1bSBlbnhlcmdhIGFwZW5hcyBvIG1pbmlzdMOpcmlvIHF1ZQogICAgICAgICAgb3JnYW5pemE6IHF1ZW0gY3VpZGEgZGEgTcOtZGlhIG7Do28gdsOqIG8gU2VydmnDp28gZG8gQ3VsdG8sIGUgdmljZS12ZXJzYS4KICAgICAgICAgIFF1ZW0gZXN0w6EgY29tbyA8c3Ryb25nPnRvZG9zPC9zdHJvbmc+IGVueGVyZ2EgdHVkbyBlIMOpIHF1ZW0gZMOhIGUgdGlyYSBhY2Vzc28uCiAgICAgICAgICBWb2x1bnTDoXJpbyBuw6NvIHByZWNpc2EgZXN0YXIgYXF1aSwgZWxlIHVzYSBvIGxpbmsgcGVzc29hbC4KICAgICAgICA8L3A+CiAgICAgICAgPHRhYmxlPgogICAgICAgICAgPHRib2R5PgogICAgICAgICAgICB7bGlkZXJlcy5tYXAobCA9PiAoCiAgICAgICAgICAgICAgPHRyIGtleT17bC5lbWFpbCArIChsLmVxdWlwZV9pZCB8fCAndHVkbycpfT4KICAgICAgICAgICAgICAgIDx0ZCBjbGFzc05hbWU9ImZvcnRlIj57bC5lbWFpbH08L3RkPgogICAgICAgICAgICAgICAgPHRkIGNsYXNzTmFtZT0iZGltIHBlcXVlbm8iPgogICAgICAgICAgICAgICAgICB7bC5lcXVpcGVfaWQKICAgICAgICAgICAgICAgICAgICA/IChlcXVpcGVzLmZpbmQocSA9PiBxLmlkID09PSBsLmVxdWlwZV9pZCk/Lm5vbWUgfHwgJ21pbmlzdMOpcmlvIHJlbW92aWRvJykKICAgICAgICAgICAgICAgICAgICA6ICd0b2RvcyBvcyBtaW5pc3TDqXJpb3MnfQogICAgICAgICAgICAgICAgPC90ZD4KICAgICAgICAgICAgICAgIDx0ZCBzdHlsZT17eyB3aWR0aDogMTAwLCB0ZXh0QWxpZ246ICdyaWdodCcgfX0+CiAgICAgICAgICAgICAgICAgIDxidXR0b24gY2xhc3NOYW1lPSJtaW5pIHBlcmlnbyIgZGlzYWJsZWQ9eyFnZXJhbCB8fCBsaWRlcmVzLmxlbmd0aCA8IDJ9CiAgICAgICAgICAgICAgICAgICAgb25DbGljaz17YXN5bmMgKCkgPT4gewogICAgICAgICAgICAgICAgICAgICAgaWYgKCFjb25maXJtKGBUaXJhciBvIGFjZXNzbyBkZSAke2wuZW1haWx9P2ApKSByZXR1cm47CiAgICAgICAgICAgICAgICAgICAgICB0cnkgeyBhd2FpdCByZW1vdmVyTGlkZXIobC5lbWFpbCwgbC5lcXVpcGVfaWQpOyBhd2FpdCByZWNhcnJlZ2FyTGlkZXJlcygpOyBhdmlzbygnUmVtb3ZpZG8nKTsgfQogICAgICAgICAgICAgICAgICAgICAgY2F0Y2ggKGVycjogYW55KSB7IGF2aXNvKCdlcnJvOiAnICsgZXJyLm1lc3NhZ2UpOyB9CiAgICAgICAgICAgICAgICAgICAgfX0+cmVtb3ZlcjwvYnV0dG9uPgogICAgICAgICAgICAgICAgPC90ZD4KICAgICAgICAgICAgICA8L3RyPgogICAgICAgICAgICApKX0KICAgICAgICAgIDwvdGJvZHk+CiAgICAgICAgPC90YWJsZT4KICAgICAgICB7Z2VyYWwgPyAoCiAgICAgICAgICA8ZGl2IGNsYXNzTmFtZT0ibGluaGEiIHN0eWxlPXt7IG1hcmdpblRvcDogMTQgfX0+CiAgICAgICAgICAgIDxpbnB1dCB2YWx1ZT17bm92b0xpZGVyfSBvbkNoYW5nZT17ZSA9PiBzZXROb3ZvTGlkZXIoZS50YXJnZXQudmFsdWUpfSB0eXBlPSJlbWFpbCIKICAgICAgICAgICAgICBwbGFjZWhvbGRlcj0iZW1haWwgZG8gb3JnYW5pemFkb3IiIHN0eWxlPXt7IG1heFdpZHRoOiAyNjAgfX0gLz4KICAgICAgICAgICAgPHNlbGVjdCBhcmlhLWxhYmVsPSJRdWFsIG1pbmlzdMOpcmlvIGVzc2EgcGVzc29hIG9yZ2FuaXphIiB2YWx1ZT17ZXF1aXBlRG9MaWRlcn0KICAgICAgICAgICAgICBvbkNoYW5nZT17ZSA9PiBzZXRFcXVpcGVEb0xpZGVyKGUudGFyZ2V0LnZhbHVlKX0gc3R5bGU9e3sgbWF4V2lkdGg6IDIyMCB9fT4KICAgICAgICAgICAgICA8b3B0aW9uIHZhbHVlPSIiPnRvZG9zIG9zIG1pbmlzdMOpcmlvczwvb3B0aW9uPgogICAgICAgICAgICAgIHtlcXVpcGVzLm1hcChxID0+IDxvcHRpb24ga2V5PXtxLmlkfSB2YWx1ZT17cS5pZH0+c8OzIHtxLm5vbWV9PC9vcHRpb24+KX0KICAgICAgICAgICAgPC9zZWxlY3Q+CiAgICAgICAgICAgIDxidXR0b24gZGlzYWJsZWQ9eyFub3ZvTGlkZXIuaW5jbHVkZXMoJ0AnKSB8fCBncmF2YW5kb30gb25DbGljaz17YXN5bmMgKCkgPT4gewogICAgICAgICAgICAgIHNldEdyYXZhbmRvKHRydWUpOwogICAgICAgICAgICAgIHRyeSB7CiAgICAgICAgICAgICAgICBhd2FpdCBhZGRMaWRlcihub3ZvTGlkZXIsIGVxdWlwZURvTGlkZXIgfHwgbnVsbCk7CiAgICAgICAgICAgICAgICBzZXROb3ZvTGlkZXIoJycpOyBhd2FpdCByZWNhcnJlZ2FyTGlkZXJlcygpOyBhdmlzbygnQWNlc3NvIGxpYmVyYWRvJyk7CiAgICAgICAgICAgICAgfSBjYXRjaCAoZXJyOiBhbnkpIHsgYXZpc28oJ07Do28gc2Fsdm91OiAnICsgZXJyLm1lc3NhZ2UpOyB9CiAgICAgICAgICAgICAgc2V0R3JhdmFuZG8oZmFsc2UpOwogICAgICAgICAgICB9fT5MaWJlcmFyIGFjZXNzbzwvYnV0dG9uPgogICAgICAgICAgPC9kaXY+CiAgICAgICAgKSA6ICgKICAgICAgICAgIDxwIGNsYXNzTmFtZT0iZGltIHBlcXVlbm8iIHN0eWxlPXt7IG1hcmdpblRvcDogMTIgfX0+CiAgICAgICAgICAgIFPDsyBxdWVtIG9yZ2FuaXphIHRvZG9zIG9zIG1pbmlzdMOpcmlvcyBwb2RlIGxpYmVyYXIgb3UgdGlyYXIgYWNlc3NvLgogICAgICAgICAgPC9wPgogICAgICAgICl9CiAgICAgIDwvZGl2PgoKICAgICAgPGRpdiBjbGFzc05hbWU9ImNhcmQiIGlkPSJlcXVpcGVzIj4KICAgICAgICA8aDM+TWluaXN0w6lyaW9zPC9oMz4KICAgICAgICA8cCBjbGFzc05hbWU9ImRpbSBwZXF1ZW5vIiBzdHlsZT17eyBtYXJnaW5Ub3A6IC00IH19PgogICAgICAgICAgQ2FkYSBtaW5pc3TDqXJpbyB0ZW0gdGltZSwgZnVuw6fDtWVzIGUgZXNjYWxhIHByw7Nwcmlvcy4gQSBlc2NhbGEgYXV0b23DoXRpY2EgZG8gZGlhIDI2IG1vbnRhIHRvZG9zLgogICAgICAgIDwvcD4KICAgICAgICA8dGFibGU+CiAgICAgICAgICA8dGJvZHk+CiAgICAgICAgICAgIHtlcXVpcGVzLm1hcChlID0+ICgKICAgICAgICAgICAgICA8dHIga2V5PXtlLmlkfT4KICAgICAgICAgICAgICAgIDx0ZD4KICAgICAgICAgICAgICAgICAgPGlucHV0IGtleT17ZS5ub21lfSBkZWZhdWx0VmFsdWU9e2Uubm9tZX0gYXJpYS1sYWJlbD0ibm9tZSBkbyBtaW5pc3TDqXJpbyIKICAgICAgICAgICAgICAgICAgICBvbkJsdXI9e2FzeW5jIGV2ID0+IHsKICAgICAgICAgICAgICAgICAgICAgIGNvbnN0IHYgPSBldi50YXJnZXQudmFsdWUudHJpbSgpOwogICAgICAgICAgICAgICAgICAgICAgaWYgKHYgJiYgdiAhPT0gZS5ub21lKSB7IHRyeSB7IGF3YWl0IGF0dWFsaXphckVxdWlwZShlLmlkLCB7IG5vbWU6IHYgfSk7IGF3YWl0IHJlY2FycmVnYXJFcXVpcGVzKCk7IGF2aXNvKCdTYWx2bycpOyB9IGNhdGNoIChlcnI6IGFueSkgeyBhdmlzbygnTsOjbyBzYWx2b3U6ICcgKyBlcnIubWVzc2FnZSk7IH0gfQogICAgICAgICAgICAgICAgICAgIH19IC8+CiAgICAgICAgICAgICAgICA8L3RkPgogICAgICAgICAgICAgICAgPHRkIHN0eWxlPXt7IHdpZHRoOiA5MiB9fT4KICAgICAgICAgICAgICAgICAge2UuaWQgPT09IGVxdWlwZT8uaWQgPyA8c3BhbiBjbGFzc05hbWU9InBpbGwgb2siPjxzcGFuIGNsYXNzTmFtZT0icG9udG8gb2siIC8+YXR1YWw8L3NwYW4+CiAgICAgICAgICAgICAgICAgICAgOiA8YnV0dG9uIGNsYXNzTmFtZT0ibWluaSIgb25DbGljaz17KCkgPT4gdHJvY2FyRXF1aXBlKGUuaWQpfT5hYnJpcjwvYnV0dG9uPn0KICAgICAgICAgICAgICAgIDwvdGQ+CiAgICAgICAgICAgICAgICA8dGQgc3R5bGU9e3sgd2lkdGg6IDQ0IH19PgogICAgICAgICAgICAgICAgICA8YnV0dG9uIGNsYXNzTmFtZT0ibWluaSBwZXJpZ28iIGFyaWEtbGFiZWw9e2BhcGFnYXIgJHtlLm5vbWV9YH0gZGlzYWJsZWQ9e2VxdWlwZXMubGVuZ3RoIDwgMn0KICAgICAgICAgICAgICAgICAgICBvbkNsaWNrPXthc3luYyAoKSA9PiB7CiAgICAgICAgICAgICAgICAgICAgICBpZiAoIWNvbmZpcm0oYEFwYWdhciBvIG1pbmlzdMOpcmlvICR7ZS5ub21lfT8gVG9kbyBvIHRpbWUsIGZ1bsOnw7VlcyBlIGVzY2FsYXMgZGVsZSBzb21lbS4gTsOjbyBkw6EgcGFyYSBkZXNmYXplci5gKSkgcmV0dXJuOwogICAgICAgICAgICAgICAgICAgICAgdHJ5IHsKICAgICAgICAgICAgICAgICAgICAgICAgYXdhaXQgcmVtb3ZlckVxdWlwZShlLmlkKTsKICAgICAgICAgICAgICAgICAgICAgICAgY29uc3QgbGlzdGEgPSBhd2FpdCByZWNhcnJlZ2FyRXF1aXBlcygpOwogICAgICAgICAgICAgICAgICAgICAgICBpZiAoZS5pZCA9PT0gZXF1aXBlPy5pZCkgewogICAgICAgICAgICAgICAgICAgICAgICAgIGlmIChsaXN0YVswXSkgdHJvY2FyRXF1aXBlKGxpc3RhWzBdLmlkLCBsaXN0YSk7CiAgICAgICAgICAgICAgICAgICAgICAgICAgZWxzZSB7IHRyeSB7IGxvY2FsU3RvcmFnZS5yZW1vdmVJdGVtKCdlc2NhbGEuZXF1aXBlJyk7IH0gY2F0Y2gge30gbG9jYXRpb24ucmVsb2FkKCk7IHJldHVybjsgfQogICAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICAgIGF2aXNvKCdBcGFnYWRvJyk7CiAgICAgICAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICAgICAgICBjYXRjaCAoZXJyOiBhbnkpIHsgYXZpc28oJ07Do28gZGV1OiAnICsgZXJyLm1lc3NhZ2UpOyB9CiAgICAgICAgICAgICAgICAgICAgfX0+w5c8L2J1dHRvbj4KICAgICAgICAgICAgICAgIDwvdGQ+CiAgICAgICAgICAgICAgPC90cj4KICAgICAgICAgICAgKSl9CiAgICAgICAgICA8L3Rib2R5PgogICAgICAgIDwvdGFibGU+CiAgICAgICAgPGRpdiBjbGFzc05hbWU9ImxpbmhhIiBzdHlsZT17eyBtYXJnaW5Ub3A6IDEyIH19PgogICAgICAgICAgPGlucHV0IHZhbHVlPXtub3ZhRXF1aXBlfSBvbkNoYW5nZT17ZSA9PiBzZXROb3ZhRXF1aXBlKGUudGFyZ2V0LnZhbHVlKX0gcGxhY2Vob2xkZXI9Im5vdm8gbWluaXN0w6lyaW8gKGV4OiBMb3V2b3IpIiBzdHlsZT17eyBtYXhXaWR0aDogMjYwIH19IC8+CiAgICAgICAgICA8YnV0dG9uIGRpc2FibGVkPXtncmF2YW5kbyB8fCAhbm92YUVxdWlwZS50cmltKCl9IG9uQ2xpY2s9e2FzeW5jICgpID0+IHsKICAgICAgICAgICAgc2V0R3JhdmFuZG8odHJ1ZSk7CiAgICAgICAgICAgIHRyeSB7IGNvbnN0IGVxID0gYXdhaXQgY3JpYXJFcXVpcGUobm92YUVxdWlwZS50cmltKCkpOyBzZXROb3ZhRXF1aXBlKCcnKTsgY29uc3QgbCA9IGF3YWl0IHJlY2FycmVnYXJFcXVpcGVzKCk7IHRyb2NhckVxdWlwZShlcS5pZCwgbCk7IGF2aXNvKCdNaW5pc3TDqXJpbyBjcmlhZG8sIGFnb3JhIGNyaWUgYXMgZnVuw6fDtWVzIGUgY2FkYXN0cmUgbyB0aW1lJyk7IH0KICAgICAgICAgICAgY2F0Y2ggKGVycjogYW55KSB7IGF2aXNvKCdOw6NvIGRldTogJyArIGVyci5tZXNzYWdlKTsgfQogICAgICAgICAgICBzZXRHcmF2YW5kbyhmYWxzZSk7CiAgICAgICAgICB9fT5DcmlhciBtaW5pc3TDqXJpbzwvYnV0dG9uPgogICAgICAgIDwvZGl2PgogICAgICA8L2Rpdj4KCiAgICAgIDxkaXYgY2xhc3NOYW1lPSJjYXJkIj4KICAgICAgICA8aDM+QXMgNSByZWdyYXMgcXVlIGZhemVtIGlzc28gZnVuY2lvbmFyPC9oMz4KICAgICAgICA8b2wgc3R5bGU9e3sgbWFyZ2luOiAwLCBwYWRkaW5nTGVmdDogMjAsIGxpbmVIZWlnaHQ6IDEuOCB9fT4KICAgICAgICAgIDxsaT48c3Ryb25nPlF1ZW0gbsOjbyBwb2RlLCBhY2hhIG8gc3Vic3RpdHV0by48L3N0cm9uZz4gVm9jw6ogbsOjbyBjYcOnYSBzdWJzdGl0dXRvLjwvbGk+CiAgICAgICAgICA8bGk+PHN0cm9uZz5Db25maXJtYcOnw6NvIMOpIGF0aXZhLjwvc3Ryb25nPiBWZXIgYSBtZW5zYWdlbSBuw6NvIMOpIGNvbmZpcm1hci48L2xpPgogICAgICAgICAgPGxpPjxzdHJvbmc+TmluZ3XDqW0gZW0gZHVhcyBmdW7Dp8O1ZXMgYW8gbWVzbW8gdGVtcG8uPC9zdHJvbmc+IE8gc2lzdGVtYSBibG9xdWVpYS48L2xpPgogICAgICAgICAgPGxpPjxzdHJvbmc+QnVyYWNvIHZhaSBwdWJsaWNhZG8uPC9zdHJvbmc+IFZhZ2EgZXNjb25kaWRhIHZpcmEgZnVybyBubyBkb21pbmdvLjwvbGk+CiAgICAgICAgICA8bGk+PHN0cm9uZz5Ub2RhIGZ1bsOnw6NvIHByZWNpc2EgZGUgMyBwZXNzb2FzLjwvc3Ryb25nPiBNZW5vcyBxdWUgaXNzbyDDqSBkZXBlbmTDqm5jaWEuPC9saT4KICAgICAgICA8L29sPgogICAgICA8L2Rpdj4KCiAgICAgIDxwIGNsYXNzTmFtZT0iZGltIHBlcXVlbm8gY2VudHJvIj57ZnVuY29lc0F0aXZhcyhTKS5sZW5ndGh9IGZ1bsOnw7VlcyBhdGl2YXMgwrcge1Mudm9sdW50YXJpb3MubGVuZ3RofSBwZXNzb2FzIGNhZGFzdHJhZGFzPC9wPgogICAgPC8+CiAgKTsKfQoK"}
+'use client';
+import Shell, { useApp, copiar } from '@/components/Shell';
+import { useEffect, useRef, useState } from 'react';
+import {
+  addLider, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
+  souOrganizadorGeral, type LinhaLider,
+} from '@/lib/db';
+import { atualizarEquipe, criarEquipe, removerEquipe } from '@/lib/equipes';
+import { funcoesAtivas } from '@/lib/engine';
+
+export default function Pagina() { return <Shell><Ajustes /></Shell>; }
+
+function Ajustes() {
+  const { S, recarregar, aviso, base, equipe, equipes, recarregarEquipes, trocarEquipe } = useApp();
+  const [novaEquipe, setNovaEquipe] = useState('');
+  const [nova, setNova] = useState('');
+  const [lideres, setLideres] = useState<LinhaLider[]>([]);
+  const [novoLider, setNovoLider] = useState('');
+  /* null = "todos os ministérios" */
+  const [equipeDoLider, setEquipeDoLider] = useState<string>('');
+  const [geral, setGeral] = useState(false);
+  const [gravando, setGravando] = useState(false);
+  useEffect(() => { listarLideres().then(setLideres).catch(() => {}); }, []);
+  useEffect(() => { souOrganizadorGeral().then(setGeral).catch(() => {}); }, []);
+  async function recarregarLideres() { try { setLideres(await listarLideres()); } catch {} }
+
+  /* duas edições em sequência não podem se atropelar: o ref acumula
+     as mudanças já pedidas, mesmo antes do recarregar voltar */
+  const cfgRef = useRef({ ...S.config });
+  useEffect(() => { cfgRef.current = { ...S.config }; }, [S.config]);
+  async function cfg(chave: string, valor: any) {
+    cfgRef.current = { ...cfgRef.current, [chave]: valor };
+    try { await salvarConfig(equipe!.id, cfgRef.current); await recarregar(); aviso('Salvo'); }
+    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+  }
+  async function fn(id: string, campos: any) {
+    const f = S.funcoes.find(x => x.id === id)!;
+    try { await salvarFuncoes(equipe!.id, [{ ...f, ...campos }]); await recarregar(); }
+    catch (e: any) { aviso('erro: ' + e.message); }
+  }
+  async function addFn() {
+    const nome = nova.trim().toUpperCase();
+    if (!nome || gravando) return;
+    if (S.funcoes.some(f => f.nome.toUpperCase() === nome)) { aviso('Já existe uma função com esse nome'); return; }
+    setGravando(true);
+    try {
+      await salvarFuncoes(equipe!.id, [{ nome, simultanea: true, ordem: S.funcoes.length + 1, ativa: true }]);
+      setNova(''); await recarregar(); aviso('Função criada');
+    } catch (e: any) { aviso('Não salvou: ' + e.message); }
+    setGravando(false);
+  }
+  async function delFn(id: string, nome: string) {
+    if (!confirm(`Apagar ${nome}? Some das escalas antigas também.`)) return;
+    try { await removerFuncao(id); await recarregar(); aviso('Apagada'); }
+    catch (e: any) { aviso('erro: ' + e.message); }
+  }
+
+  const linkGrupo = equipe ? `${base}/equipe/${equipe.slug}` : '';
+  const kit = equipe
+    ? `📌 *ESCALA, ${equipe.nome.toUpperCase()}*\n`
+    + `_Comece por aqui. Leva 1 minuto e é uma vez só._\n\n`
+    + `👉 ${linkGrupo}\n\n`
+    + `*PASSO A PASSO*\n`
+    + `1️⃣ Abra o link acima\n`
+    + `2️⃣ Toque no seu nome na lista\n`
+    + `3️⃣ Digite os 4 últimos números do seu WhatsApp\n`
+    + `4️⃣ Salve a página nos favoritos do celular\n\n`
+    + `*DEPOIS, É SÓ ISSO*\n`
+    + `✅ *Foi escalado?* Toque em "Confirmo" ou em "Não posso"\n`
+    + `📅 *Antes da escala do mês?* Marque os domingos em que você já sabe que não vai dar\n\n`
+    + `_Não achou seu nome na lista? Me chama no privado que eu te cadastro._`
+    : '';
+
+  return (
+    <>
+      <h1>Ajustes</h1>
+      <p className="dim pequeno" style={{ marginTop: 4, marginBottom: 16 }}>
+        Você está em <strong>{equipe?.nome}</strong>. As configurações abaixo valem só para este ministério.
+      </p>
+
+      <div className="card" id="grupo">
+        <h3>Grupo deste ministério no WhatsApp</h3>
+        <p className="dim pequeno" style={{ marginTop: -4 }}>
+          <strong>O que fazer:</strong> copie a mensagem abaixo, cole no grupo do ministério e
+          <strong> fixe</strong> ela lá. A partir daí cada pessoa entra sozinha pelo link, acha o próprio
+          nome e confirma, você não manda link no privado de ninguém.
+        </p>
+        <label>Link de convite do grupo (opcional, só para você guardar)</label>
+        <input key={equipe?.whatsapp_grupo || ''} defaultValue={equipe?.whatsapp_grupo || ''}
+          placeholder="https://chat.whatsapp.com/..."
+          onBlur={async e => {
+            const v = e.target.value.trim();
+            if (v !== (equipe?.whatsapp_grupo || '')) {
+              try { await atualizarEquipe(equipe!.id, { whatsapp_grupo: v || null }); await recarregarEquipes(); aviso('Salvo'); }
+              catch (err: any) { aviso('Não salvou: ' + err.message); }
+            }
+          }} />
+        <div style={{ height: 14 }} />
+        <label>Mensagem para fixar no grupo (prévia)</label>
+        <div className="msg-preview">{kit}</div>
+        <div className="linha" style={{ marginTop: 10 }}>
+          <button className="pri" onClick={() => copiar(kit, aviso, 'Copiado. Cole e fixe no grupo da equipe.')}>Copiar mensagem do grupo</button>
+          <a className="btn" href={linkGrupo} target="_blank" rel="noopener">abrir a página da equipe</a>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3>Regras do rodízio</h3>
+        <div className="grade">
+          <div>
+            <label>Máximo de escalas por pessoa por mês</label>
+            <select key={S.config.limitePadrao} aria-label="Máximo de escalas por pessoa por mês" defaultValue={S.config.limitePadrao} onChange={e => cfg('limitePadrao', +e.target.value)}>
+              {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Plantonistas por domingo</label>
+            <select key={S.config.plantaoQtd} aria-label="Plantonistas por domingo" defaultValue={S.config.plantaoQtd} onChange={e => cfg('plantaoQtd', +e.target.value)}>
+              {[0, 1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
+            </select>
+          </div>
+          <div>
+            <label>Prazo para confirmar</label>
+            <input key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar" defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
+          </div>
+          <div>
+            <label>Equilibrar a carga olhando</label>
+            <select key={S.config.janelaCarga} aria-label="Equilibrar a carga olhando" defaultValue={S.config.janelaCarga} onChange={e => cfg('janelaCarga', +e.target.value)}>
+              {[30, 60, 90, 120, 180].map(n => <option key={n} value={n}>últimos {n} dias</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3>Mensagem do grupo</h3>
+        <label>Como você começa o aviso</label>
+        <input key={S.config.saudacao} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
+        <div style={{ height: 14 }} />
+        <label>Como você termina ({'{PRAZO}'} vira o prazo acima)</label>
+        <textarea key={S.config.rodape} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
+      </div>
+
+      <div className="card">
+        <h3>Funções</h3>
+        <p className="dim pequeno" style={{ marginTop: -4 }}>
+          <strong>Durante o culto</strong> impede a mesma pessoa de pegar duas ao mesmo tempo.
+          <strong> Depois do culto</strong> (como edição) pode acumular.
+        </p>
+        <table>
+          <tbody>
+            {S.funcoes.map(f => (
+              <tr key={f.id}>
+                <td style={{ width: '40%' }}>
+                  <input key={f.nome} defaultValue={f.nome} aria-label="nome da função"
+                    onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
+                </td>
+                <td>
+                  <select defaultValue={f.simultanea ? '1' : '0'} aria-label="quando acontece"
+                    onChange={e => fn(f.id!, { simultanea: e.target.value === '1' })}>
+                    <option value="1">durante o culto</option>
+                    <option value="0">depois do culto</option>
+                  </select>
+                </td>
+                <td style={{ width: 92 }}>
+                  <button className="mini" onClick={() => fn(f.id!, { ativa: !f.ativa })}>{f.ativa ? 'ativa' : 'oculta'}</button>
+                </td>
+                <td style={{ width: 44 }}>
+                  <button className="mini perigo" aria-label={`apagar ${f.nome}`} onClick={() => delFn(f.id!, f.nome)}>×</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="linha" style={{ marginTop: 14 }}>
+          <input value={nova} onChange={e => setNova(e.target.value)} placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
+          <button disabled={gravando || !nova.trim()} onClick={addFn}>Criar função</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3>Quem organiza a escala</h3>
+        <p className="dim pequeno" style={{ marginTop: -4 }}>
+          Só estes emails abrem a área do organizador. Cada um enxerga apenas o ministério que
+          organiza: quem cuida da Mídia não vê o Serviço do Culto, e vice-versa.
+          Quem está como <strong>todos</strong> enxerga tudo e é quem dá e tira acesso.
+          Voluntário não precisa estar aqui, ele usa o link pessoal.
+        </p>
+        <table>
+          <tbody>
+            {lideres.map(l => (
+              <tr key={l.email + (l.equipe_id || 'tudo')}>
+                <td className="forte">{l.email}</td>
+                <td className="dim pequeno">
+                  {l.equipe_id
+                    ? (equipes.find(q => q.id === l.equipe_id)?.nome || 'ministério removido')
+                    : 'todos os ministérios'}
+                </td>
+                <td style={{ width: 100, textAlign: 'right' }}>
+                  <button className="mini perigo" disabled={!geral || lideres.length < 2}
+                    onClick={async () => {
+                      if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
+                      try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
+                      catch (err: any) { aviso('erro: ' + err.message); }
+                    }}>remover</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {geral ? (
+          <div className="linha" style={{ marginTop: 14 }}>
+            <input value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
+              placeholder="email do organizador" style={{ maxWidth: 260 }} />
+            <select aria-label="Qual ministério essa pessoa organiza" value={equipeDoLider}
+              onChange={e => setEquipeDoLider(e.target.value)} style={{ maxWidth: 220 }}>
+              <option value="">todos os ministérios</option>
+              {equipes.map(q => <option key={q.id} value={q.id}>só {q.nome}</option>)}
+            </select>
+            <button disabled={!novoLider.includes('@') || gravando} onClick={async () => {
+              setGravando(true);
+              try {
+                await addLider(novoLider, equipeDoLider || null);
+                setNovoLider(''); await recarregarLideres(); aviso('Acesso liberado');
+              } catch (err: any) { aviso('Não salvou: ' + err.message); }
+              setGravando(false);
+            }}>Liberar acesso</button>
+          </div>
+        ) : (
+          <p className="dim pequeno" style={{ marginTop: 12 }}>
+            Só quem organiza todos os ministérios pode liberar ou tirar acesso.
+          </p>
+        )}
+      </div>
+
+      <div className="card" id="equipes">
+        <h3>Ministérios</h3>
+        <p className="dim pequeno" style={{ marginTop: -4 }}>
+          Cada ministério tem time, funções e escala próprios. A escala automática do dia 26 monta todos.
+        </p>
+        <table>
+          <tbody>
+            {equipes.map(e => (
+              <tr key={e.id}>
+                <td>
+                  <input key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
+                    onBlur={async ev => {
+                      const v = ev.target.value.trim();
+                      if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err: any) { aviso('Não salvou: ' + err.message); } }
+                    }} />
+                </td>
+                <td style={{ width: 92 }}>
+                  {e.id === equipe?.id ? <span className="pill ok"><span className="ponto ok" />atual</span>
+                    : <button className="mini" onClick={() => trocarEquipe(e.id)}>abrir</button>}
+                </td>
+                <td style={{ width: 44 }}>
+                  <button className="mini perigo" aria-label={`apagar ${e.nome}`} disabled={equipes.length < 2}
+                    onClick={async () => {
+                      if (!confirm(`Apagar o ministério ${e.nome}? Todo o time, funções e escalas dele somem. Não dá para desfazer.`)) return;
+                      try {
+                        await removerEquipe(e.id);
+                        const lista = await recarregarEquipes();
+                        if (e.id === equipe?.id) {
+                          if (lista[0]) trocarEquipe(lista[0].id, lista);
+                          else { try { localStorage.removeItem('escala.equipe'); } catch {} location.reload(); return; }
+                        }
+                        aviso('Apagado');
+                      }
+                      catch (err: any) { aviso('Não deu: ' + err.message); }
+                    }}>×</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="linha" style={{ marginTop: 12 }}>
+          <input value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
+          <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
+            setGravando(true);
+            try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado, agora crie as funções e cadastre o time'); }
+            catch (err: any) { aviso('Não deu: ' + err.message); }
+            setGravando(false);
+          }}>Criar ministério</button>
+        </div>
+      </div>
+
+      <div className="card">
+        <h3>As 5 regras que fazem isso funcionar</h3>
+        <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
+          <li><strong>Quem não pode, acha o substituto.</strong> Você não caça substituto.</li>
+          <li><strong>Confirmação é ativa.</strong> Ver a mensagem não é confirmar.</li>
+          <li><strong>Ninguém em duas funções ao mesmo tempo.</strong> O sistema bloqueia.</li>
+          <li><strong>Buraco vai publicado.</strong> Vaga escondida vira furo no domingo.</li>
+          <li><strong>Toda função precisa de 3 pessoas.</strong> Menos que isso é dependência.</li>
+        </ol>
+      </div>
+
+      <p className="dim pequeno centro">{funcoesAtivas(S).length} funções ativas · {S.voluntarios.length} pessoas cadastradas</p>
+    </>
+  );
+}
+

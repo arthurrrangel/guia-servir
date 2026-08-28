@@ -1,1 +1,27 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YSB9IGZyb20gJ25leHQnOwppbXBvcnQgeyBycGNQdWJsaWNhIH0gZnJvbSAnQC9saWIvcHVibGljbyc7CgovKiBPIHdpemFyZCDDqSBvIGxpbmsgcXVlIG1haXMgdmFpIGNpcmN1bGFyIG5vIGdydXBvLiBBIHByw6l2aWEgcHJlY2lzYSBkaXplciBvCiAgIG5vbWUgZGEgw6FyZWEgZSB1bSBjb252aXRlIOKAlCBuw6NvICJHVUlBIFNlcnZpciIgZ2Vuw6lyaWNvLiAqLwoKdHlwZSBNaW4gPSB7IHNsdWc6IHN0cmluZzsgbm9tZTogc3RyaW5nOyBjb252aXRlOiBzdHJpbmcgfCBudWxsIH07CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gZ2VuZXJhdGVNZXRhZGF0YSgKICB7IHBhcmFtcyB9OiB7IHBhcmFtczogUHJvbWlzZTx7IHNsdWc6IHN0cmluZyB9PiB9Cik6IFByb21pc2U8TWV0YWRhdGE+IHsKICBjb25zdCB7IHNsdWcgfSA9IGF3YWl0IHBhcmFtczsKICBjb25zdCBsaXN0YSA9IGF3YWl0IHJwY1B1YmxpY2E8TWluW10+KCdtaW5pc3Rlcmlvc19wdWJsaWNvcycpOwogIGNvbnN0IG0gPSAoQXJyYXkuaXNBcnJheShsaXN0YSkgPyBsaXN0YSA6IFtdKS5maW5kKHggPT4geC5zbHVnID09PSBzbHVnKSB8fCBudWxsOwoKICBjb25zdCB0aXR1bG8gPSBtID8gYFF1ZXJvIHNlcnZpciDCtyAke20ubm9tZX1gIDogJ1F1ZXJvIHNlcnZpcic7CiAgY29uc3QgZGVzYyA9IG0/LmNvbnZpdGUgfHwgJ0Zhw6dhIHNldSBjYWRhc3RybyBwYXJhIHNlcnZpciBuYSBpZ3JlamEgR1VJQS4gTGV2YSBtZW5vcyBkZSB1bSBtaW51dG8uJzsKICByZXR1cm4gewogICAgdGl0bGU6IHRpdHVsbywKICAgIGRlc2NyaXB0aW9uOiBkZXNjLAogICAgb3BlbkdyYXBoOiB7IHRpdGxlOiBgJHt0aXR1bG99IMK3IEdVSUEgU2VydmlyYCwgZGVzY3JpcHRpb246IGRlc2MsIHR5cGU6ICd3ZWJzaXRlJywgbG9jYWxlOiAncHRfQlInIH0sCiAgfTsKfQoKZXhwb3J0IGRlZmF1bHQgZnVuY3Rpb24gTGF5b3V0KHsgY2hpbGRyZW4gfTogeyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlIH0pIHsKICByZXR1cm4gPD57Y2hpbGRyZW59PC8+Owp9Cg=="}
+import type { Metadata } from 'next';
+import { rpcPublica } from '@/lib/publico';
+
+/* O wizard é o link que mais vai circular no grupo. A prévia precisa dizer o
+   nome da área e um convite — não "GUIA Servir" genérico. */
+
+type Min = { slug: string; nome: string; convite: string | null };
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const lista = await rpcPublica<Min[]>('ministerios_publicos');
+  const m = (Array.isArray(lista) ? lista : []).find(x => x.slug === slug) || null;
+
+  const titulo = m ? `Quero servir · ${m.nome}` : 'Quero servir';
+  const desc = m?.convite || 'Faça seu cadastro para servir na igreja GUIA. Leva menos de um minuto.';
+  return {
+    title: titulo,
+    description: desc,
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
+  };
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

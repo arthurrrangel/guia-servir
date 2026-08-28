@@ -1,1 +1,84 @@
-{"data":"J3VzZSBjbGllbnQnOwppbXBvcnQgTGluayBmcm9tICduZXh0L2xpbmsnOwppbXBvcnQgeyBMb2dvIH0gZnJvbSAnLi9NYXJjYSc7CmltcG9ydCB7IEljU2V0YSB9IGZyb20gJy4vSWNvbmVzJzsKCi8qID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgIE8gQ0FTQ08gREFTIFRFTEFTIElOVEVSTkFTCgogICBUb2RhIHRlbGEgcXVlIG7Do28gw6kgYSBob21lIHVzYSBlc3RlIGNhc2NvOiBiYXJyYSBmaXhhIGNvbSBhIG1hcmNhIMOgCiAgIGVzcXVlcmRhIGUgVU1BIHNhw61kYSDDoCBkaXJlaXRhLiBVbWEgc8OzLiBCYXJyYSBkZSB0ZWxhIGludGVybmEgY29tIG1lbnUKICAgY29tcGxldG8gZmF6IGEgcGVzc29hIHNhaXIgZG8gZmx1eG8gcXVlIGVsYSBtZXNtYSBjb21lw6dvdS4KCiAgIEV4aXN0ZSBwb3JxdWUgYW50ZXMgY2FkYSB0ZWxhIG1vbnRhdmEgbyBwcsOzcHJpbyB0b3BvLCBlIGRhdmEgcGFyYSB2ZXI6CiAgIHRyw6pzIGFjYWJhbWVudG9zIHBhcmEgbyBtZXNtbyBjYWJlw6dhbGhvLgogICA9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwoKZXhwb3J0IGZ1bmN0aW9uIFRlbGEoeyB2b2x0YSwgdm9sdGFSb3QgPSAnVm9sdGFyJywgY2hpbGRyZW4sIGVzY3VyYSB9OgogIHsgdm9sdGE/OiBzdHJpbmc7IHZvbHRhUm90Pzogc3RyaW5nOyBjaGlsZHJlbjogUmVhY3QuUmVhY3ROb2RlOyBlc2N1cmE/OiBib29sZWFuIH0pIHsKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9eyd0ZWxhJyArIChlc2N1cmEgPyAnIHRlbGEtZXNjdXJhJyA6ICcnKX0+CiAgICAgIDxoZWFkZXIgY2xhc3NOYW1lPSJ0ZWxhLXRvcG8iPgogICAgICAgIDxMaW5rIGhyZWY9Ii8iIGNsYXNzTmFtZT0ibWFyY2EtbGluayIgYXJpYS1sYWJlbD0iR1VJQSBDaHVyY2giPjxMb2dvIGNsYXNzTmFtZT0ibG9nbyIgLz48L0xpbms+CiAgICAgICAge3ZvbHRhICYmIDxMaW5rIGhyZWY9e3ZvbHRhfSBjbGFzc05hbWU9InRlbGEtdm9sdGEiPjxJY1NldGEgLz57dm9sdGFSb3R9PC9MaW5rPn0KICAgICAgPC9oZWFkZXI+CiAgICAgIHtjaGlsZHJlbn0KICAgIDwvZGl2PgogICk7Cn0KCi8qIMOtbmRpY2UsIHTDrXR1bG8sIHVtYSBsaW5oYSBkZSBhcG9pby4gU2VtcHJlIG5lc3NhIG9yZGVtLCBudW5jYSBtYWlzIHF1ZSBpc3NvLiAqLwpleHBvcnQgZnVuY3Rpb24gQ2FiZWNhKHsgcm90LCB0aXR1bG8sIGFwb2lvLCBtZW5vciB9OgogIHsgcm90Pzogc3RyaW5nOyB0aXR1bG86IHN0cmluZzsgYXBvaW8/OiBzdHJpbmc7IG1lbm9yPzogYm9vbGVhbiB9KSB7CiAgcmV0dXJuICgKICAgIDxkaXYgY2xhc3NOYW1lPSJjYWJlY2EiPgogICAgICB7cm90ICYmIDxzcGFuIGNsYXNzTmFtZT0icm90Ij57cm90fTwvc3Bhbj59CiAgICAgIDxoMSBjbGFzc05hbWU9e21lbm9yID8gJ21lbm9yJyA6IHVuZGVmaW5lZH0+e3RpdHVsb308L2gxPgogICAgICB7YXBvaW8gJiYgPHA+e2Fwb2lvfTwvcD59CiAgICA8L2Rpdj4KICApOwp9CgovKiBvcyB0csOqcyBlc3RhZG9zIHF1ZSB0b2RvIGZsdXhvIHRlbSwgZSBxdWUgcXVhc2UgdG9kbyBzaXRlIGVzcXVlY2UgZGUgdGVyICovCmV4cG9ydCBmdW5jdGlvbiBDYXJyZWdhbmRvKHsgbyA9ICdDYXJyZWdhbmRvJyB9OiB7IG8/OiBzdHJpbmcgfSkgewogIHJldHVybiAoCiAgICA8ZGl2IGNsYXNzTmFtZT0iZXN0YWRvLXRlbGEiIHJvbGU9InN0YXR1cyIgYXJpYS1saXZlPSJwb2xpdGUiPgogICAgICA8c3BhbiBjbGFzc05hbWU9InB1bHNvIiBhcmlhLWhpZGRlbj0idHJ1ZSIgLz4KICAgICAgPHA+e299PC9wPgogICAgPC9kaXY+CiAgKTsKfQoKZXhwb3J0IGZ1bmN0aW9uIFZhemlvKHsgdGl0dWxvLCB0ZXh0bywgYWNhbyB9OgogIHsgdGl0dWxvOiBzdHJpbmc7IHRleHRvOiBzdHJpbmc7IGFjYW8/OiB7IGhyZWY6IHN0cmluZzsgcm90OiBzdHJpbmcgfSB9KSB7CiAgcmV0dXJuICgKICAgIDxkaXYgY2xhc3NOYW1lPSJlc3RhZG8tdGVsYSI+CiAgICAgIDxzcGFuIGNsYXNzTmFtZT0icm90Ij57dGl0dWxvfTwvc3Bhbj4KICAgICAgPHA+e3RleHRvfTwvcD4KICAgICAge2FjYW8gJiYgPExpbmsgaHJlZj17YWNhby5ocmVmfSBjbGFzc05hbWU9ImFjYW8iPnthY2FvLnJvdH08L0xpbms+fQogICAgPC9kaXY+CiAgKTsKfQoKLyogbyBjYXJ0w6NvIGRlIHF1ZW0gdmFpIGZhbGFyIGNvbSBhIHBlc3NvYS4gTm9tZSwgcGFwZWwgZSBvIGNhbmFsIHJlYWwuICovCmV4cG9ydCBmdW5jdGlvbiBQZXNzb2EoeyBub21lLCBwYXBlbCwgemFwLCB0ZXh0byB9OgogIHsgbm9tZTogc3RyaW5nOyBwYXBlbDogc3RyaW5nOyB6YXA/OiBzdHJpbmcgfCBudWxsOyB0ZXh0bz86IHN0cmluZyB9KSB7CiAgY29uc3QgaW5pID0gbm9tZS50cmltKCkuc3BsaXQoL1xzKy8pLnNsaWNlKDAsIDIpLm1hcChwID0+IHBbMF0pLmpvaW4oJycpLnRvVXBwZXJDYXNlKCk7CiAgY29uc3QgbnVtZXJvID0gemFwID8gKHphcC5sZW5ndGggPD0gMTEgPyAnNTUnICsgemFwIDogemFwKSA6IG51bGw7CiAgY29uc3QgbGluayA9IG51bWVybyA/IGBodHRwczovL3dhLm1lLyR7bnVtZXJvfSR7dGV4dG8gPyAnP3RleHQ9JyArIGVuY29kZVVSSUNvbXBvbmVudCh0ZXh0bykgOiAnJ31gIDogbnVsbDsKICByZXR1cm4gKAogICAgPGRpdiBjbGFzc05hbWU9InBlc3NvYSI+CiAgICAgIDxzcGFuIGNsYXNzTmFtZT0icGVzc29hLWluaSIgYXJpYS1oaWRkZW49InRydWUiPntpbml9PC9zcGFuPgogICAgICA8c3BhbiBjbGFzc05hbWU9InBlc3NvYS10eHQiPgogICAgICAgIDxiPntub21lfTwvYj4KICAgICAgICA8c3Bhbj57cGFwZWx9PC9zcGFuPgogICAgICA8L3NwYW4+CiAgICAgIHtsaW5rICYmICgKICAgICAgICA8YSBjbGFzc05hbWU9ImFjYW8iIGhyZWY9e2xpbmt9IHRhcmdldD0iX2JsYW5rIiByZWw9Im5vcmVmZXJyZXIiCiAgICAgICAgICAgc3R5bGU9e3sgZm9udFNpemU6IDEwLjUsIHBhZGRpbmc6ICcxMnB4IDE4cHgnIH19PgogICAgICAgICAgV2hhdHNBcHAKICAgICAgICA8L2E+CiAgICAgICl9CiAgICA8L2Rpdj4KICApOwp9Cg=="}
+'use client';
+import Link from 'next/link';
+import { Logo } from './Marca';
+import { IcSeta } from './Icones';
+
+/* =============================================================================
+   O CASCO DAS TELAS INTERNAS
+
+   Toda tela que não é a home usa este casco: barra fixa com a marca à
+   esquerda e UMA saída à direita. Uma só. Barra de tela interna com menu
+   completo faz a pessoa sair do fluxo que ela mesma começou.
+
+   Existe porque antes cada tela montava o próprio topo, e dava para ver:
+   três acabamentos para o mesmo cabeçalho.
+   ============================================================================= */
+
+export function Tela({ volta, voltaRot = 'Voltar', children, escura }:
+  { volta?: string; voltaRot?: string; children: React.ReactNode; escura?: boolean }) {
+  return (
+    <div className={'tela' + (escura ? ' tela-escura' : '')}>
+      <header className="tela-topo">
+        <Link href="/" className="marca-link" aria-label="GUIA Church"><Logo className="logo" /></Link>
+        {volta && <Link href={volta} className="tela-volta"><IcSeta />{voltaRot}</Link>}
+      </header>
+      {children}
+    </div>
+  );
+}
+
+/* índice, título, uma linha de apoio. Sempre nessa ordem, nunca mais que isso. */
+export function Cabeca({ rot, titulo, apoio, menor }:
+  { rot?: string; titulo: string; apoio?: string; menor?: boolean }) {
+  return (
+    <div className="cabeca">
+      {rot && <span className="rot">{rot}</span>}
+      <h1 className={menor ? 'menor' : undefined}>{titulo}</h1>
+      {apoio && <p>{apoio}</p>}
+    </div>
+  );
+}
+
+/* os três estados que todo fluxo tem, e que quase todo site esquece de ter */
+export function Carregando({ o = 'Carregando' }: { o?: string }) {
+  return (
+    <div className="estado-tela" role="status" aria-live="polite">
+      <span className="pulso" aria-hidden="true" />
+      <p>{o}</p>
+    </div>
+  );
+}
+
+export function Vazio({ titulo, texto, acao }:
+  { titulo: string; texto: string; acao?: { href: string; rot: string } }) {
+  return (
+    <div className="estado-tela">
+      <span className="rot">{titulo}</span>
+      <p>{texto}</p>
+      {acao && <Link href={acao.href} className="acao">{acao.rot}</Link>}
+    </div>
+  );
+}
+
+/* o cartão de quem vai falar com a pessoa. Nome, papel e o canal real. */
+export function Pessoa({ nome, papel, zap, texto }:
+  { nome: string; papel: string; zap?: string | null; texto?: string }) {
+  const ini = nome.trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+  const numero = zap ? (zap.length <= 11 ? '55' + zap : zap) : null;
+  const link = numero ? `https://wa.me/${numero}${texto ? '?text=' + encodeURIComponent(texto) : ''}` : null;
+  return (
+    <div className="pessoa">
+      <span className="pessoa-ini" aria-hidden="true">{ini}</span>
+      <span className="pessoa-txt">
+        <b>{nome}</b>
+        <span>{papel}</span>
+      </span>
+      {link && (
+        <a className="acao" href={link} target="_blank" rel="noreferrer"
+           style={{ fontSize: 10.5, padding: '12px 18px' }}>
+          WhatsApp
+        </a>
+      )}
+    </div>
+  );
+}

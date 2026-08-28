@@ -1,1 +1,17 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YVJvdXRlIH0gZnJvbSAnbmV4dCc7CgpleHBvcnQgZGVmYXVsdCBmdW5jdGlvbiBtYW5pZmVzdCgpOiBNZXRhZGF0YVJvdXRlLk1hbmlmZXN0IHsKICByZXR1cm4gewogICAgbmFtZTogJ0dVSUEgU2VydmlyJywKICAgIHNob3J0X25hbWU6ICdHVUlBIFNlcnZpcicsCiAgICBkZXNjcmlwdGlvbjogJ09uZGUgYSBpZ3JlamEgR1VJQSBvcmdhbml6YSBxdWVtIHNlcnZlOiBjYWRhc3RybywgZXNjYWxhIGUgY29uZmlybWHDp8Ojby4nLAogICAgc3RhcnRfdXJsOiAnLycsCiAgICBkaXNwbGF5OiAnc3RhbmRhbG9uZScsCiAgICBiYWNrZ3JvdW5kX2NvbG9yOiAnI2YxZjFmMycsCiAgICB0aGVtZV9jb2xvcjogJyNmMWYxZjMnLAogICAgaWNvbnM6IFsKICAgICAgeyBzcmM6ICcvaWNvbmUtMTkyLnBuZycsIHNpemVzOiAnMTkyeDE5MicsIHR5cGU6ICdpbWFnZS9wbmcnIH0sCiAgICAgIHsgc3JjOiAnL2ljb25lLTUxMi5wbmcnLCBzaXplczogJzUxMng1MTInLCB0eXBlOiAnaW1hZ2UvcG5nJywgcHVycG9zZTogJ2FueScgfSwKICAgIF0sCiAgfTsKfQo="}
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'GUIA Servir',
+    short_name: 'GUIA Servir',
+    description: 'Onde a igreja GUIA organiza quem serve: cadastro, escala e confirmação.',
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#f1f1f3',
+    theme_color: '#f1f1f3',
+    icons: [
+      { src: '/icone-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/icone-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    ],
+  };
+}

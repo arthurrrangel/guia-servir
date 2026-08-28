@@ -1,1 +1,144 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09CiAgIEhBUk5FU1MgREUgREVTSUdOIOKAlCBzw7MgZXhpc3RlIGVtIGRlc2Vudm9sdmltZW50by4KCiAgIEFicmUgdG9kYXMgYXMgdGVsYXMgZGUgbMOtZGVyIGNvbSBkYWRvcyByZWFsaXN0YXMgc2VtIHByZWNpc2FyIGRlIHNlc3PDo28gZG8KICAgU3VwYWJhc2UuIMOJIG8gcXVlIHBlcm1pdGUgaXRlcmFyIG5vIHZpc3VhbCBsb2NhbG1lbnRlIGVtIHZleiBkZSBwdWJsaWNhciBhCiAgIGNhZGEgYWp1c3RlLiBPIFNoZWxsIHPDsyBvbGhhIHBhcmEgaXN0byBxdWFuZG8gTk9ERV9FTlYgPT09ICdkZXZlbG9wbWVudCcsCiAgIGVudMOjbyBlbSBwcm9kdcOnw6NvIG8gYmxvY28gaW50ZWlybyB2aXJhIGPDs2RpZ28gbW9ydG8gZSBzb21lIG5vIGJ1aWxkLgoKICAgT3MgZGFkb3MgaW1pdGFtIG8gdGltZSByZWFsICgxNyBwZXNzb2FzLCA5IMOhcmVhcywgbsOtdmVpcyBkZWNsYXJhZG9zIGUgbsOjbwogICBjb25mZXJpZG9zKSBwb3JxdWUgZGVuc2lkYWRlIGZhbHNhIGVzY29uZGUgcHJvYmxlbWEgZGUgbGF5b3V0OiB1bWEgdGVsYQogICBsaW5kYSBjb20gMyBwZXNzb2FzIGNvc3R1bWEgcXVlYnJhciBjb20gMTcuCiAgID09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PSAqLwppbXBvcnQgeyBFc3RhZG8sIE5pdmVsLCBlc3RhZG9WYXppbywgZ2FyYW50aXJEaWEsIGN1bHRvc0RvTWVzLCBob2plSVNPLCBmdW5jb2VzRG9EaWEsIHRpcG9Eb0RpYSB9IGZyb20gJy4vZW5naW5lJzsKCmNvbnN0IEYgPSAobm9tZTogc3RyaW5nLCBvcmRlbTogbnVtYmVyLCBzaW11bHRhbmVhID0gdHJ1ZSwgdGlwb3MgPSBbJ2RvbWluZ28nLCAnZm9sbG93J10pID0+CiAgKHsgaWQ6ICdmJyArIG9yZGVtLCBub21lLCBvcmRlbSwgc2ltdWx0YW5lYSwgYXRpdmE6IHRydWUsIHRpcG9zOiB0aXBvcyBhcyBhbnkgfSk7Cgpjb25zdCBQID0gKAogIG5vbWU6IHN0cmluZywgZnVuY29lczogUmVjb3JkPHN0cmluZywgTml2ZWw+LCBjb25mZXJpZG8gPSBmYWxzZSwgdGVsID0gJzIxOTk5OTkwMDAwJywKKSA9PiAoewogIGlkOiAndicgKyBub21lLnRvTG93ZXJDYXNlKCkucmVwbGFjZSgvXFcvZywgJycpLCBub21lLCB0ZWwsIGF0aXZvOiB0cnVlLCBsaW1pdGVNZXM6IDQsCiAgdG9rZW46ICd0b2snICsgbm9tZS50b0xvd2VyQ2FzZSgpLnJlcGxhY2UoL1xXL2csICcnKSwKICBmdW5jb2VzLCBjb25mZXJpZG8sCiAgY29uZmlybWFkYXM6IE9iamVjdC5mcm9tRW50cmllcyhPYmplY3Qua2V5cyhmdW5jb2VzKS5tYXAoZiA9PiBbZiwgY29uZmVyaWRvXSkpLAogIGluZGlzcG9uaXZlbDogW10gYXMgc3RyaW5nW10sIGRpc3Bvbml2ZWw6IFtdIGFzIHN0cmluZ1tdLAp9KTsKCmV4cG9ydCBmdW5jdGlvbiBlc3RhZG9EZW1vKCk6IEVzdGFkbyB7CiAgY29uc3QgUyA9IGVzdGFkb1ZhemlvKCk7CiAgKFMgYXMgYW55KS50ZW1BY2Vzc28gPSB0cnVlOwogIFMuZXF1aXBlID0gJ03DrWRpYSc7CiAgUy5mdW5jb2VzID0gWwogICAgRignUFJPSkXDh8ODTycsIDEpLCBGKCdJTFVNSU5Bw4fDg08nLCAyKSwgRignRURJw4fDg08nLCAzLCBmYWxzZSksIEYoJ0ZPVE8nLCA0KSwgRignRklMTUFHRU0nLCA1KSwKICAgIEYoJ0hFQUQnLCA2LCB0cnVlLCBbJ2RvbWluZ28nXSksCiAgICBGKCdUUkFOU01JU1PDg08gKENPUlRFICsgUFRaKScsIDcsIHRydWUsIFsnZG9taW5nbyddKSwKICAgIEYoJ0PDgk1FUkEgMScsIDgsIHRydWUsIFsnZG9taW5nbyddKSwKICAgIEYoJ0PDgk1FUkEgMicsIDksIHRydWUsIFsnZG9taW5nbyddKSwKICBdOwogIFMudm9sdW50YXJpb3MgPSBbCiAgICBQKCdBcnRodXIgUmFuZ2VsJywgeyAnUFJPSkXDh8ODTyc6ICd0aXR1bGFyJyB9LCB0cnVlKSwKICAgIFAoJ0FtYW5kYSBSaWJlaXJvIGRlIFNvdXphJywgeyAnUFJPSkXDh8ODTyc6ICd0aXR1bGFyJywgJ0lMVU1JTkHDh8ODTyc6ICd0aXR1bGFyJyB9KSwKICAgIFAoJ0dpb3ZhbmEgUm9zYWxlbScsIHsgJ1BST0pFw4fDg08nOiAndGl0dWxhcicsICdJTFVNSU5Bw4fDg08nOiAndGl0dWxhcicsICdGT1RPJzogJ3RpdHVsYXInLCAnSEVBRCc6ICd0aXR1bGFyJywgJ1RSQU5TTUlTU8ODTyAoQ09SVEUgKyBQVFopJzogJ3RpdHVsYXInLCAnQ8OCTUVSQSAxJzogJ3RpdHVsYXInLCAnQ8OCTUVSQSAyJzogJ3RpdHVsYXInIH0pLAogICAgUCgnV2lsbGlhbSBTaWx2YScsIHsgJ1BST0pFw4fDg08nOiAndGl0dWxhcicsICdJTFVNSU5Bw4fDg08nOiAndGl0dWxhcicsICdUUkFOU01JU1PDg08gKENPUlRFICsgUFRaKSc6ICd0aXR1bGFyJyB9KSwKICAgIFAoJ0VkdWFyZG8gUm9kcmlndWVzJywgeyAnSUxVTUlOQcOHw4NPJzogJ3RpdHVsYXInLCAnQ8OCTUVSQSAxJzogJ3Jlc2VydmEnLCAnQ8OCTUVSQSAyJzogJ3Jlc2VydmEnLCAnVFJBTlNNSVNTw4NPIChDT1JURSArIFBUWiknOiAndHJlaW5vJyB9KSwKICAgIFAoJ01hdGV1cyBEb3VyYWRvJywgeyAnSUxVTUlOQcOHw4NPJzogJ3RpdHVsYXInLCAnVFJBTlNNSVNTw4NPIChDT1JURSArIFBUWiknOiAndHJlaW5vJywgJ0PDgk1FUkEgMSc6ICd0cmVpbm8nLCAnQ8OCTUVSQSAyJzogJ3RyZWlubycgfSksCiAgICBQKCdKb8OjbyBWaWN0b3InLCB7ICdFREnDh8ODTyc6ICd0aXR1bGFyJywgJ0ZPVE8nOiAndGl0dWxhcicsICdGSUxNQUdFTSc6ICd0aXR1bGFyJywgJ0hFQUQnOiAndGl0dWxhcicgfSksCiAgICBQKCdLYXlsYW5lIEJyaXRvJywgeyAnRURJw4fDg08nOiAndGl0dWxhcicsICdGT1RPJzogJ3RpdHVsYXInIH0sIHRydWUpLAogICAgUCgnTWFyaWEgRWR1YXJkYScsIHsgJ0VEScOHw4NPJzogJ3RpdHVsYXInLCAnRklMTUFHRU0nOiAndGl0dWxhcicsICdGT1RPJzogJ3RyZWlubycgfSwgdHJ1ZSksCiAgICBQKCdNaWxlbmEgU2FsZXMnLCB7ICdGT1RPJzogJ3RpdHVsYXInIH0sIHRydWUpLAogICAgUCgnRmVybmFuZGEgQWxlbmNhcicsIHsgJ0ZJTE1BR0VNJzogJ3RpdHVsYXInIH0sIHRydWUpLAogICAgUCgnTmFkaWEgTWFkZWlyYScsIHsgJ0ZJTE1BR0VNJzogJ3RpdHVsYXInLCAnQ8OCTUVSQSAxJzogJ3RyZWlubycsICdDw4JNRVJBIDInOiAndHJlaW5vJyB9KSwKICAgIFAoJ05hdGFuIEdvbWVzIFBvbnRlcycsIHsgJ0ZPVE8nOiAndHJlaW5vJywgJ0ZJTE1BR0VNJzogJ3RyZWlubycgfSksCiAgICBQKCdTaW1vbmUgQWxlbmNhcicsIHsgJ0hFQUQnOiAndGl0dWxhcicgfSwgdHJ1ZSksCiAgICBQKCdKdWxpYSBCYWxkZXonLCB7ICdUUkFOU01JU1PDg08gKENPUlRFICsgUFRaKSc6ICd0aXR1bGFyJyB9LCB0cnVlKSwKICAgIFAoJ0xhbmEgQmFsZGV6JywgeyAnVFJBTlNNSVNTw4NPIChDT1JURSArIFBUWiknOiAndHJlaW5vJyB9KSwKICAgIFAoJ01hbHUgQ2FmZmFybycsIHsgJ0ZPVE8nOiAncmVzZXJ2YScsICdGSUxNQUdFTSc6ICdyZXNlcnZhJyB9KSwKICBdOwoKICAvKiBVbSBtw6pzIG1vbnRhZG8gZGUgdmVyZGFkZTogZXNjYWxhIGNoZWlhLCBhbGd1bnMgY29uZmlybWFkb3MsIHVtIHJlY3VzYWRvIGUKICAgICB1bSBmdXJvLiBTZW0gaXNzbyBldSBkZXNlbmhhcmlhIHPDsyBvIGVzdGFkbyBmZWxpei4gKi8KICBjb25zdCBob2plID0gaG9qZUlTTygpOwogIGNvbnN0IFthbm8sIG1lc10gPSBbK2hvamUuc2xpY2UoMCwgNCksICtob2plLnNsaWNlKDUsIDcpXTsKICBjb25zdCBkaWFzID0gY3VsdG9zRG9NZXMoYW5vLCBtZXMpOwogIC8qIE8gREVNTyBOw4NPIFBPREUgTUVOVElSLiBFbGUgdXNhdmEgdW0gY2ljbG8gw7puaWNvIGRlIHN0YXR1cyBwYXJhIG8gbcOqcwogICAgIGludGVpcm8sIGUgY29tIGlzc28gdW0gZG9taW5nbyBxdWUgYWluZGEgdmFpIGFjb250ZWNlciBuYXNjaWEgY29tIGFsZ3XDqW0KICAgICBtYXJjYWRvIGNvbW8gRlVST1UuIEV1IGRlc2VuaGVpIGEgdGVsYSBvbGhhbmRvIHBhcmEgZXNzZSBkYWRvIGUgcXVhc2UKICAgICB0cmF0ZWkgImZ1cm8gbm8gZnV0dXJvIiBjb21vIHVtIGNhc28gYSBzdXBvcnRhci4gUGFzc2FkbyBlIGZ1dHVybyB0w6ptCiAgICAgZXN0YWRvcyBkaWZlcmVudGVzIHBvcnF1ZSBzw6NvIGNvaXNhcyBkaWZlcmVudGVzLiAqLwogIGNvbnN0IHBhc3NhZGFzID0gWydjb25maXJtYWRvJywgJ2NvbmZpcm1hZG8nLCAnY29uZmlybWFkbycsICdmdXJvdScsICdjb25maXJtYWRvJywgJ3JlY3VzYWRvJ10gYXMgY29uc3Q7CiAgY29uc3QgZnV0dXJhcyA9IFsncGVuZGVudGUnLCAncGVuZGVudGUnLCAnY29uZmlybWFkbycsICdwZW5kZW50ZScsICdyZWN1c2FkbycsICdwZW5kZW50ZScsICdjb25maXJtYWRvJ10gYXMgY29uc3Q7CiAgbGV0IG4gPSAwOwogIGZvciAoY29uc3QgZCBvZiBkaWFzKSB7CiAgICBjb25zdCBkaWEgPSBnYXJhbnRpckRpYShTLCBkKTsKICAgIGRpYS5jdWx0b0lkID0gJ2MnICsgZDsKICAgIGNvbnN0IGNpY2xvID0gZCA8IGhvamUgPyBwYXNzYWRhcyA6IGZ1dHVyYXM7CiAgICBmb3IgKGNvbnN0IGYgb2YgZnVuY29lc0RvRGlhKFMsIGQpKSB7CiAgICAgIGNvbnN0IGFwdG9zID0gUy52b2x1bnRhcmlvcy5maWx0ZXIodiA9PiBbJ3RpdHVsYXInLCAncmVzZXJ2YSddLmluY2x1ZGVzKHYuZnVuY29lc1tmLm5vbWVdKSk7CiAgICAgIGlmICghYXB0b3MubGVuZ3RoKSBjb250aW51ZTsKICAgICAgY29uc3QgdiA9IGFwdG9zW24gJSBhcHRvcy5sZW5ndGhdOwogICAgICBkaWEuc2xvdHNbZi5ub21lXSA9IHsKICAgICAgICB2aWQ6IHYuaWQsIHN0YXR1czogY2ljbG9bbiAlIGNpY2xvLmxlbmd0aF0sIGZpeG86IG4gJSAxMSA9PT0gMCwKICAgICAgICBwcmltZWlyYVZlejogbiAlIDEzID09PSAwLAogICAgICAgIHJlc3BvbmRpZG9FbTogbmV3IERhdGUoRGF0ZS5wYXJzZShkICsgJ1QxMjowMDowMFonKSAtIDMgKiA4NjQwMDAwMCkudG9JU09TdHJpbmcoKSwKICAgICAgICAvKiBtZXRhZGUgZW50cm91IGp1bnRvIGNvbSBvIG3DqnMsIG1ldGFkZSBlbnRyb3Ugbm9zIMO6bHRpbW9zIGRpYXM6CiAgICAgICAgICAgw6kgYXNzaW0gcXVlIGEgZXNjYWxhIHJlYWwgbXVkYSBkZXBvaXMgZGUgcHVibGljYWRhICovCiAgICAgICAgZXNjYWxhZG9FbTogbmV3IERhdGUoRGF0ZS5ub3coKSAtIChuICUgNCA9PT0gMCA/IDIgOiAyNikgKiA4NjQwMDAwMCkudG9JU09TdHJpbmcoKSwKICAgICAgfTsKICAgICAgbisrOwogICAgfQogICAgZGlhLnBsYW50YW8gPSBbUy52b2x1bnRhcmlvc1sobiArIDMpICUgUy52b2x1bnRhcmlvcy5sZW5ndGhdLmlkXTsKICAgIGlmIChkID09PSBkaWFzWzBdKSBkaWEub2JzID0gJ0NoZWdhciAxOGgsIHRlbSBiYXRpc21vIGFudGVzIGRvIGN1bHRvLic7CiAgfQogIC8qIHJlc3Bvc3RhcyBkZSBkaXNwb25pYmlsaWRhZGUsIHBhcmEgbyBwYWluZWwgZG8gZGlhIG7Do28gZmljYXIgdmF6aW8gKi8KICBTLnZvbHVudGFyaW9zLmZvckVhY2goKHYsIGkpID0+IHsKICAgIGlmIChpICUgMyA9PT0gMCkgdi5kaXNwb25pdmVsID0gZGlhcy5zbGljZSgwLCAzKTsKICAgIGlmIChpICUgNSA9PT0gMCkgdi5pbmRpc3Bvbml2ZWwgPSBbZGlhc1sxXV07CiAgfSk7CiAgcmV0dXJuIFM7Cn0KCmV4cG9ydCBjb25zdCBkZW1vTGlnYWRvID0gKCkgPT4KICBwcm9jZXNzLmVudi5OT0RFX0VOViA9PT0gJ2RldmVsb3BtZW50JwogICYmIHR5cGVvZiB3aW5kb3cgIT09ICd1bmRlZmluZWQnCiAgJiYgbmV3IFVSTFNlYXJjaFBhcmFtcyh3aW5kb3cubG9jYXRpb24uc2VhcmNoKS5oYXMoJ2RlbW8nKTsKCi8qIEZpeHR1cmUgZGEgcMOhZ2luYSBkbyB2b2x1bnTDoXJpby4gTWVzbWEgZm9ybWEgcXVlIG8gZXVfZGFkb3MgZGV2b2x2ZS4gKi8KZXhwb3J0IGZ1bmN0aW9uIGV1RGVtbygpIHsKICBjb25zdCBob2plID0gaG9qZUlTTygpOwogIGNvbnN0IFthbm8sIG1lc10gPSBbK2hvamUuc2xpY2UoMCwgNCksICtob2plLnNsaWNlKDUsIDcpXTsKICBjb25zdCBkaWFzID0gY3VsdG9zRG9NZXMoYW5vLCBtZXMpLmZpbHRlcihkID0+IGQgPj0gaG9qZSk7CiAgY29uc3QgcHJveCA9IGRpYXMubGVuZ3RoID8gZGlhcyA6IGN1bHRvc0RvTWVzKGFubywgbWVzID09PSAxMiA/IDEgOiBtZXMgKyAxKTsKICAvKiDDumx0aW1vIGN1bHRvIHF1ZSBqw6EgYWNvbnRlY2V1IG5lc3RlIG3DqnMgKi8KICBjb25zdCBqYUZvcmFtID0gY3VsdG9zRG9NZXMoYW5vLCBtZXMpLmZpbHRlcihkID0+IGQgPCBob2plKTsKICBjb25zdCBwYXNzYWRvID0gamFGb3JhbVtqYUZvcmFtLmxlbmd0aCAtIDFdIHx8ICcnOwogIC8qIEhFQUQgZSBDw4JNRVJBIHPDsyBleGlzdGVtIG5vIGRvbWluZ28uIEEgcHJpbWVpcmEgdmVyc8OjbyBkZXN0YSBmaXh0dXJlCiAgICAgZXNjYWxhdmEgSEVBRCBudW0gc8OhYmFkbyBlIGEgdGVsYSBtb3N0cmF2YSwgc2VtIGVycm8gbmVuaHVtLCB1bSBlc3RhZG8KICAgICBxdWUgbyBtb3RvciBudW5jYSBwcm9kdXouIEhhcm5lc3MgcXVlIG1lbnRlIMOpIHBpb3IgcXVlIGhhcm5lc3MgbmVuaHVtOgogICAgIGV1IHBhc3NvIGEgcmV2aXNhciB1bWEgdGVsYSBxdWUgbsOjbyBleGlzdGUuICovCiAgY29uc3QgZG9UaXBvID0gKGk6IG51bWJlciwgZG9Eb21pbmdvOiBzdHJpbmcsIGRvRm9sbG93OiBzdHJpbmcpID0+CiAgICB0aXBvRG9EaWEocHJveFtpXSB8fCBwcm94WzBdKSA9PT0gJ2RvbWluZ28nID8gZG9Eb21pbmdvIDogZG9Gb2xsb3c7CiAgcmV0dXJuIHsKICAgIG5vbWU6ICdHaW92YW5hIFJvc2FsZW0nLAogICAgZXF1aXBlOiAnTcOtZGlhJywKICAgIGVzY2FsYXM6IFsKICAgICAgeyBjdWx0b19pZDogJ2MxJywgZGF0YTogcHJveFswXSwgZnVuY2FvOiAnUFJPSkXDh8ODTycsIHN0YXR1czogJ3BlbmRlbnRlJywgcHJpbWVpcmFfdmV6OiBmYWxzZSwgcGxhbnRhbzogZmFsc2UgfSwKICAgICAgeyBjdWx0b19pZDogJ2MxJywgZGF0YTogcHJveFswXSwgZnVuY2FvOiBkb1RpcG8oMCwgJ0PDgk1FUkEgMScsICdGSUxNQUdFTScpLCBzdGF0dXM6ICdwZW5kZW50ZScsIHByaW1laXJhX3ZlejogdHJ1ZSwgcGxhbnRhbzogZmFsc2UgfSwKICAgICAgeyBjdWx0b19pZDogJ2MyJywgZGF0YTogcHJveFsxXSB8fCBwcm94WzBdLCBmdW5jYW86ICdGT1RPJywgc3RhdHVzOiAnY29uZmlybWFkbycsIHByaW1laXJhX3ZlejogZmFsc2UsIHBsYW50YW86IGZhbHNlIH0sCiAgICAgIHsgY3VsdG9faWQ6ICdjMycsIGRhdGE6IHByb3hbMl0gfHwgcHJveFswXSwgZnVuY2FvOiBkb1RpcG8oMiwgJ0hFQUQnLCAnSUxVTUlOQcOHw4NPJyksIHN0YXR1czogJ3JlY3VzYWRvJywgcHJpbWVpcmFfdmV6OiBmYWxzZSwgcGxhbnRhbzogZmFsc2UgfSwKICAgICAgeyBjdWx0b19pZDogJ2M0JywgZGF0YTogcHJveFszXSB8fCBwcm94WzBdLCBmdW5jYW86ICcnLCBzdGF0dXM6ICcnLCBwcmltZWlyYV92ZXo6IGZhbHNlLCBwbGFudGFvOiB0cnVlIH0sCiAgICAgIC8qIHBvc3RvIGRlIGzDrWRlciBkbyBkaWEgbnVtIGN1bHRvIHF1ZSBKw4EgcGFzc291OiDDqSBhIMO6bmljYSBjb21iaW5hw6fDo28gZW0KICAgICAgICAgcXVlIG8gZm9ybXVsw6FyaW8gZGUgcmVsYXTDs3JpbyBhcGFyZWNlLiBTZW0gZXN0YSBsaW5oYSBvIGNvbXBvbmVudGUKICAgICAgICAgbnVuY2EgcmVuZGVyaXphdmEgbm8gaGFybmVzcyBlIGV1IGVzdGFyaWEgcmV2aXNhbmRvIHVtYSB0ZWxhIHF1ZSBuw6NvCiAgICAgICAgIGV4aXN0ZSAoZm9pIG8gcXVlIGFjb250ZWNldSBjb20gbyBIRUFEIGVzY2FsYWRvIG51bSBzw6FiYWRvKS4gKi8KICAgICAgLi4uKHBhc3NhZG8gPyBbewogICAgICAgIGN1bHRvX2lkOiAnYzknLCBkYXRhOiBwYXNzYWRvLCBmdW5jYW86ICdMw41ERVIgMScsIHN0YXR1czogJ2NvbmZpcm1hZG8nLAogICAgICAgIHByaW1laXJhX3ZlejogZmFsc2UsIHBsYW50YW86IGZhbHNlLAogICAgICAgIHJlbGF0YTogdHJ1ZSwgcmVsYXRvcmlvOiAnJywgcHJvYmxlbWFzOiAnJywKICAgICAgfV0gOiBbXSksCiAgICBdLAogICAgaW5kaXNwb25pdmVsOiBbcHJveFs0XSB8fCAnJ10uZmlsdGVyKEJvb2xlYW4pLAogICAgZGlzcG9uaXZlbDogW3Byb3hbMV0gfHwgJyddLmZpbHRlcihCb29sZWFuKSwKICAgIGRpYXM6IGN1bHRvc0RvTWVzKGFubywgbWVzKS5jb25jYXQoY3VsdG9zRG9NZXMoYW5vLCBtZXMgPT09IDEyID8gMSA6IG1lcyArIDEpKS5maWx0ZXIoZCA9PiBkID49IGhvamUpLnNsaWNlKDAsIDEyKSwKICB9Owp9Cg=="}
+/* ===========================================================================
+   HARNESS DE DESIGN — só existe em desenvolvimento.
+
+   Abre todas as telas de líder com dados realistas sem precisar de sessão do
+   Supabase. É o que permite iterar no visual localmente em vez de publicar a
+   cada ajuste. O Shell só olha para isto quando NODE_ENV === 'development',
+   então em produção o bloco inteiro vira código morto e some no build.
+
+   Os dados imitam o time real (17 pessoas, 9 áreas, níveis declarados e não
+   conferidos) porque densidade falsa esconde problema de layout: uma tela
+   linda com 3 pessoas costuma quebrar com 17.
+   =========================================================================== */
+import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, hojeISO, funcoesDoDia, tipoDoDia } from './engine';
+
+const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow']) =>
+  ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any });
+
+const P = (
+  nome: string, funcoes: Record<string, Nivel>, conferido = false, tel = '21999990000',
+) => ({
+  id: 'v' + nome.toLowerCase().replace(/\W/g, ''), nome, tel, ativo: true, limiteMes: 4,
+  token: 'tok' + nome.toLowerCase().replace(/\W/g, ''),
+  funcoes, conferido,
+  confirmadas: Object.fromEntries(Object.keys(funcoes).map(f => [f, conferido])),
+  indisponivel: [] as string[], disponivel: [] as string[],
+});
+
+export function estadoDemo(): Estado {
+  const S = estadoVazio();
+  (S as any).temAcesso = true;
+  S.equipe = 'Mídia';
+  S.funcoes = [
+    F('PROJEÇÃO', 1), F('ILUMINAÇÃO', 2), F('EDIÇÃO', 3, false), F('FOTO', 4), F('FILMAGEM', 5),
+    F('HEAD', 6, true, ['domingo']),
+    F('TRANSMISSÃO (CORTE + PTZ)', 7, true, ['domingo']),
+    F('CÂMERA 1', 8, true, ['domingo']),
+    F('CÂMERA 2', 9, true, ['domingo']),
+  ];
+  S.voluntarios = [
+    P('Arthur Rangel', { 'PROJEÇÃO': 'titular' }, true),
+    P('Amanda Ribeiro de Souza', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular' }),
+    P('Giovana Rosalem', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'FOTO': 'titular', 'HEAD': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'titular', 'CÂMERA 1': 'titular', 'CÂMERA 2': 'titular' }),
+    P('William Silva', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'titular' }),
+    P('Eduardo Rodrigues', { 'ILUMINAÇÃO': 'titular', 'CÂMERA 1': 'reserva', 'CÂMERA 2': 'reserva', 'TRANSMISSÃO (CORTE + PTZ)': 'treino' }),
+    P('Mateus Dourado', { 'ILUMINAÇÃO': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'treino', 'CÂMERA 1': 'treino', 'CÂMERA 2': 'treino' }),
+    P('João Victor', { 'EDIÇÃO': 'titular', 'FOTO': 'titular', 'FILMAGEM': 'titular', 'HEAD': 'titular' }),
+    P('Kaylane Brito', { 'EDIÇÃO': 'titular', 'FOTO': 'titular' }, true),
+    P('Maria Eduarda', { 'EDIÇÃO': 'titular', 'FILMAGEM': 'titular', 'FOTO': 'treino' }, true),
+    P('Milena Sales', { 'FOTO': 'titular' }, true),
+    P('Fernanda Alencar', { 'FILMAGEM': 'titular' }, true),
+    P('Nadia Madeira', { 'FILMAGEM': 'titular', 'CÂMERA 1': 'treino', 'CÂMERA 2': 'treino' }),
+    P('Natan Gomes Pontes', { 'FOTO': 'treino', 'FILMAGEM': 'treino' }),
+    P('Simone Alencar', { 'HEAD': 'titular' }, true),
+    P('Julia Baldez', { 'TRANSMISSÃO (CORTE + PTZ)': 'titular' }, true),
+    P('Lana Baldez', { 'TRANSMISSÃO (CORTE + PTZ)': 'treino' }),
+    P('Malu Caffaro', { 'FOTO': 'reserva', 'FILMAGEM': 'reserva' }),
+  ];
+
+  /* Um mês montado de verdade: escala cheia, alguns confirmados, um recusado e
+     um furo. Sem isso eu desenharia só o estado feliz. */
+  const hoje = hojeISO();
+  const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
+  const dias = cultosDoMes(ano, mes);
+  /* O DEMO NÃO PODE MENTIR. Ele usava um ciclo único de status para o mês
+     inteiro, e com isso um domingo que ainda vai acontecer nascia com alguém
+     marcado como FUROU. Eu desenhei a tela olhando para esse dado e quase
+     tratei "furo no futuro" como um caso a suportar. Passado e futuro têm
+     estados diferentes porque são coisas diferentes. */
+  const passadas = ['confirmado', 'confirmado', 'confirmado', 'furou', 'confirmado', 'recusado'] as const;
+  const futuras = ['pendente', 'pendente', 'confirmado', 'pendente', 'recusado', 'pendente', 'confirmado'] as const;
+  let n = 0;
+  for (const d of dias) {
+    const dia = garantirDia(S, d);
+    dia.cultoId = 'c' + d;
+    const ciclo = d < hoje ? passadas : futuras;
+    for (const f of funcoesDoDia(S, d)) {
+      const aptos = S.voluntarios.filter(v => ['titular', 'reserva'].includes(v.funcoes[f.nome]));
+      if (!aptos.length) continue;
+      const v = aptos[n % aptos.length];
+      dia.slots[f.nome] = {
+        vid: v.id, status: ciclo[n % ciclo.length], fixo: n % 11 === 0,
+        primeiraVez: n % 13 === 0,
+        respondidoEm: new Date(Date.parse(d + 'T12:00:00Z') - 3 * 86400000).toISOString(),
+        /* metade entrou junto com o mês, metade entrou nos últimos dias:
+           é assim que a escala real muda depois de publicada */
+        escaladoEm: new Date(Date.now() - (n % 4 === 0 ? 2 : 26) * 86400000).toISOString(),
+      };
+      n++;
+    }
+    dia.plantao = [S.voluntarios[(n + 3) % S.voluntarios.length].id];
+    if (d === dias[0]) dia.obs = 'Chegar 18h, tem batismo antes do culto.';
+  }
+  /* respostas de disponibilidade, para o painel do dia não ficar vazio */
+  S.voluntarios.forEach((v, i) => {
+    if (i % 3 === 0) v.disponivel = dias.slice(0, 3);
+    if (i % 5 === 0) v.indisponivel = [dias[1]];
+  });
+  return S;
+}
+
+export const demoLigado = () =>
+  process.env.NODE_ENV === 'development'
+  && typeof window !== 'undefined'
+  && new URLSearchParams(window.location.search).has('demo');
+
+/* Fixture da página do voluntário. Mesma forma que o eu_dados devolve. */
+export function euDemo() {
+  const hoje = hojeISO();
+  const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
+  const dias = cultosDoMes(ano, mes).filter(d => d >= hoje);
+  const prox = dias.length ? dias : cultosDoMes(ano, mes === 12 ? 1 : mes + 1);
+  /* último culto que já aconteceu neste mês */
+  const jaForam = cultosDoMes(ano, mes).filter(d => d < hoje);
+  const passado = jaForam[jaForam.length - 1] || '';
+  /* HEAD e CÂMERA só existem no domingo. A primeira versão desta fixture
+     escalava HEAD num sábado e a tela mostrava, sem erro nenhum, um estado
+     que o motor nunca produz. Harness que mente é pior que harness nenhum:
+     eu passo a revisar uma tela que não existe. */
+  const doTipo = (i: number, doDomingo: string, doFollow: string) =>
+    tipoDoDia(prox[i] || prox[0]) === 'domingo' ? doDomingo : doFollow;
+  return {
+    nome: 'Giovana Rosalem',
+    equipe: 'Mídia',
+    escalas: [
+      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: 'pendente', primeira_vez: false, plantao: false },
+      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: 'pendente', primeira_vez: true, plantao: false },
+      { culto_id: 'c2', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false },
+      { culto_id: 'c3', data: prox[2] || prox[0], funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), status: 'recusado', primeira_vez: false, plantao: false },
+      { culto_id: 'c4', data: prox[3] || prox[0], funcao: '', status: '', primeira_vez: false, plantao: true },
+      /* posto de líder do dia num culto que JÁ passou: é a única combinação em
+         que o formulário de relatório aparece. Sem esta linha o componente
+         nunca renderizava no harness e eu estaria revisando uma tela que não
+         existe (foi o que aconteceu com o HEAD escalado num sábado). */
+      ...(passado ? [{
+        culto_id: 'c9', data: passado, funcao: 'LÍDER 1', status: 'confirmado',
+        primeira_vez: false, plantao: false,
+        relata: true, relatorio: '', problemas: '',
+      }] : []),
+    ],
+    indisponivel: [prox[4] || ''].filter(Boolean),
+    disponivel: [prox[1] || ''].filter(Boolean),
+    dias: cultosDoMes(ano, mes).concat(cultosDoMes(ano, mes === 12 ? 1 : mes + 1)).filter(d => d >= hoje).slice(0, 12),
+  };
+}

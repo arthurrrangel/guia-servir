@@ -1,1 +1,31 @@
-{"data":"aW1wb3J0IHR5cGUgeyBNZXRhZGF0YSB9IGZyb20gJ25leHQnOwppbXBvcnQgeyBycGNQdWJsaWNhIH0gZnJvbSAnQC9saWIvcHVibGljbyc7CgovKiBBIHByw6l2aWEgZG8gbGluayBubyBXaGF0c0FwcCBsw6ogbyBIVE1MIGRvIHNlcnZpZG9yLCBlIGEgcMOhZ2luYSDDqSBjbGllbnQKICAgY29tcG9uZW50OiBzZW0gZXN0ZSBsYXlvdXQgbyBjYXJkIHNhaSBjb20gbyB0w610dWxvIGdlbsOpcmljbyBkbyBzaXRlLiBBCiAgIGRlc2NyacOnw6NvIGRhIMOhcmVhLCBxdWUgasOhIGVzdMOhIG5vIGJhbmNvLCB2aXJhIG8gdGV4dG8gZG8gY2FyZCwgZW50w6NvIG8gbGluawogICBjb21wYXJ0aWxoYWRvIG5vIGdydXBvIGrDoSBleHBsaWNhIG8gcXVlIGEgw6FyZWEgZmF6IGFudGVzIGRlIGFsZ3XDqW0gdG9jYXIuCgogICBFc3RlIMOpIG8gbGluayBxdWUgbWFpcyBjaXJjdWxhLiBWYWxlIG8gc2VydmVyIGNvbXBvbmVudC4gKi8KCnR5cGUgTWluID0geyBzbHVnOiBzdHJpbmc7IG5vbWU6IHN0cmluZzsgZGVzY3JpY2FvOiBzdHJpbmcgfCBudWxsIH07CgpleHBvcnQgYXN5bmMgZnVuY3Rpb24gZ2VuZXJhdGVNZXRhZGF0YSgKICB7IHBhcmFtcyB9OiB7IHBhcmFtczogUHJvbWlzZTx7IHNsdWc6IHN0cmluZyB9PiB9Cik6IFByb21pc2U8TWV0YWRhdGE+IHsKICBjb25zdCB7IHNsdWcgfSA9IGF3YWl0IHBhcmFtczsKICBjb25zdCBsaXN0YSA9IGF3YWl0IHJwY1B1YmxpY2E8TWluW10+KCdtaW5pc3Rlcmlvc19wdWJsaWNvcycpOwogIGNvbnN0IG0gPSAoQXJyYXkuaXNBcnJheShsaXN0YSkgPyBsaXN0YSA6IFtdKS5maW5kKHggPT4geC5zbHVnID09PSBzbHVnKSB8fCBudWxsOwoKICBjb25zdCB0aXR1bG8gPSBtPy5ub21lIHx8ICfDgXJlYXMnOwogIGNvbnN0IGRlc2MgPSBtPy5kZXNjcmljYW8gfHwgJ0Nvbmhlw6dhIGFzIMOhcmVhcyBvbmRlIHZvY8OqIHBvZGUgc2VydmlyIG5hIEdVSUEgQ2h1cmNoLic7CiAgcmV0dXJuIHsKICAgIHRpdGxlOiB0aXR1bG8sCiAgICBkZXNjcmlwdGlvbjogZGVzYywKICAgIG9wZW5HcmFwaDogeyB0aXRsZTogYCR7dGl0dWxvfSDCtyBHVUlBIFNlcnZpcmAsIGRlc2NyaXB0aW9uOiBkZXNjLCB0eXBlOiAnd2Vic2l0ZScsIGxvY2FsZTogJ3B0X0JSJyB9LAogIH07Cn0KCmV4cG9ydCBkZWZhdWx0IGZ1bmN0aW9uIExheW91dCh7IGNoaWxkcmVuIH06IHsgY2hpbGRyZW46IFJlYWN0LlJlYWN0Tm9kZSB9KSB7CiAgcmV0dXJuIDw+e2NoaWxkcmVufTwvPjsKfQo="}
+import type { Metadata } from 'next';
+import { rpcPublica } from '@/lib/publico';
+
+/* A prévia do link no WhatsApp lê o HTML do servidor, e a página é client
+   component: sem este layout o card sai com o título genérico do site. A
+   descrição da área, que já está no banco, vira o texto do card, então o link
+   compartilhado no grupo já explica o que a área faz antes de alguém tocar.
+
+   Este é o link que mais circula. Vale o server component. */
+
+type Min = { slug: string; nome: string; descricao: string | null };
+
+export async function generateMetadata(
+  { params }: { params: Promise<{ slug: string }> }
+): Promise<Metadata> {
+  const { slug } = await params;
+  const lista = await rpcPublica<Min[]>('ministerios_publicos');
+  const m = (Array.isArray(lista) ? lista : []).find(x => x.slug === slug) || null;
+
+  const titulo = m?.nome || 'Áreas';
+  const desc = m?.descricao || 'Conheça as áreas onde você pode servir na GUIA Church.';
+  return {
+    title: titulo,
+    description: desc,
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
+  };
+}
+
+export default function Layout({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
+}

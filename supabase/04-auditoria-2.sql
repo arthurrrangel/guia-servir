@@ -1,1 +1,77 @@
-{"data":"LyogPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KICAgMDQg4oCUIDLCqiBBVURJVE9SSUEgKGFwbGljYWRvIGVtIHByb2R1w6fDo28gZW0gMjAyNi0wOC0wNikKCiAgIFVtYSBjb3JyZcOnw6NvIENSw41USUNBIGUgYSByZXZlcnPDo28gZGUgdW0gZXhhZ2VybyBkYSAxwqogYXVkaXRvcmlhLgogICBJZGVtcG90ZW50ZS4KICAgPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0gKi8KCi8qIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiAgIENSw41USUNBIOKAlCByZS1zb3J0ZWFyL21vdmVyIHBlc3NvYXMgZW50cmUgZnVuw6fDtWVzIHNpbXVsdMOibmVhcyBhYm9ydGF2YSBvIHNhdmUuCgogICBgc2FsdmFyX2RpYWAgZ3JhdmEgc2xvdCBhIHNsb3QgKHVwc2VydCkuIE8gZ2F0aWxobyBkZSBjb25mbGl0byBlcmEKICAgQkVGT1JFIC4uLiBGT1IgRUFDSCBST1csIGVudMOjbyBhdmFsaWF2YSBvIGVzdGFkbyBJTlRFUk1FREnDgVJJTyBkbyB1cHNlcnQ6CiAgIGFvIGdyYXZhciBQUk9KRcOHw4NPPUJydW5vLCBJTFVNSU5Bw4fDg089QnJ1bm8gKGxpbmhhIGFudGlnYSkgYWluZGEgZXhpc3RpYSBubwogICBiYW5jbyDihpIgIkJydW5vIGrDoSBlc3TDoSBlbSBJTFVNSU5Bw4fDg08iIOKGkiB0b2RvIHJlLXNvcnRlaW8gcXVlIHRyb2NhIGdlbnRlIGVudHJlCiAgIGZ1bsOnw7VlcyBzaW11bHTDom5lYXMgZmFsaGF2YS4gUHJvdmFkbyBlbSBwcm9kdcOnw6NvIChTV0FQIGUgTU9WRS1wLy12YXppbykuCgogICBDb3JyZcOnw6NvOiBnYXRpbGhvIHZpcmEgQ09OU1RSQUlOVCBUUklHR0VSIERFRkVSSURPIOKAlCBhdmFsaWEgc8OzIG8gZXN0YWRvIEZJTkFMCiAgIGRhIHRyYW5zYcOnw6NvLCBvbmRlIGEgZXNjYWxhIMOpIHbDoWxpZGEuIEEgZHVwbGEtbWFyY2HDp8OjbyBnZW51w61uYSAobWVzbWEgcGVzc29hCiAgIGVtIGR1YXMgc2ltdWx0w6JuZWFzIG5vIGZpbSBkYSB0cmFuc2HDp8OjbykgY29udGludWEgYmFycmFkYS4KCiAgIFJldmVyc8OjbzogYSAxwqogYXVkaXRvcmlhIGZleiBvcyBnYXRpbGhvcyBjYXNhcmVtIGEgbWVzbWEgcGVzc29hIGVudHJlCiAgIG1pbmlzdMOpcmlvcyBwb3IgdGVsZWZvbmUuIElzc28gcHJvdGVnaWEgdW0gY2FzbyBoaXBvdMOpdGljbyAobXVsdGktbWluaXN0w6lyaW8KICAgY29tIGdlbnRlIGNvbXBhcnRpbGhhZGEpIGUgUVVFQlJBVkEgbyB1c28gcmVhbCAoYWJvcnRhdmEgbyBzYXZlIGRvIDLCugogICBtaW5pc3TDqXJpbyBpbnRlaXJvIG5vIGNyb24pLiBWb2x0YSBhIGNoZWNhciBzw7MgREVOVFJPIGRvIG1pbmlzdMOpcmlvCiAgIChwb3Igdm9sdW50YXJpb19pZCkuIENvbmZsaXRvIGVudHJlIG1pbmlzdMOpcmlvcywgc2UgZSBxdWFuZG8gZXhpc3RpciwgZGV2ZQogICBzZXIgdW0gQVZJU08gbm8gYXBwLCBuw6NvIHVtIGVycm8gcXVlIGFib3J0YSBhIHRyYW5zYcOnw6NvLgogICAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLSAqLwoKY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZm5fY29uZmxpdG9fc2ltdWx0YW5lbygpIHJldHVybnMgdHJpZ2dlcgpsYW5ndWFnZSBwbHBnc3FsIHNlY3VyaXR5IGRlZmluZXIgc2V0IHNlYXJjaF9wYXRoID0gcHVibGljIGFzICRmbiQKZGVjbGFyZSB2X25vbWUgdGV4dDsgdl9vdXRyYSB0ZXh0OwpiZWdpbgogIGlmIG5vdCBleGlzdHMgKHNlbGVjdCAxIGZyb20gZnVuY29lcyB3aGVyZSBpZCA9IG5ldy5mdW5jYW9faWQgYW5kIHNpbXVsdGFuZWEpIHRoZW4KICAgIHJldHVybiBuZXc7CiAgZW5kIGlmOwogIHNlbGVjdCBub21lIGludG8gdl9ub21lIGZyb20gdm9sdW50YXJpb3Mgd2hlcmUgaWQgPSBuZXcudm9sdW50YXJpb19pZDsKICBzZWxlY3QgZi5ub21lIGludG8gdl9vdXRyYQogICAgZnJvbSBlc2NhbGFjb2VzIGUKICAgIGpvaW4gZnVuY29lcyBmIG9uIGYuaWQgPSBlLmZ1bmNhb19pZCBhbmQgZi5zaW11bHRhbmVhCiAgIHdoZXJlIGUuY3VsdG9faWQgPSBuZXcuY3VsdG9faWQKICAgICBhbmQgZS5mdW5jYW9faWQgPD4gbmV3LmZ1bmNhb19pZAogICAgIGFuZCBlLnZvbHVudGFyaW9faWQgPSBuZXcudm9sdW50YXJpb19pZCAgICAgIC0tIHPDsyBkZW50cm8gZG8gbWluaXN0w6lyaW8KICAgbGltaXQgMTsKICBpZiB2X291dHJhIGlzIG5vdCBudWxsIHRoZW4KICAgIHJhaXNlIGV4Y2VwdGlvbiAnJSBqYSBlc3RhIGVtICUgYW8gbWVzbW8gdGVtcG8gbmVzdGUgZG9taW5nby4nLCB2X25vbWUsIHZfb3V0cmE7CiAgZW5kIGlmOwogIHJldHVybiBuZXc7CmVuZCAkZm4kOwoKZHJvcCB0cmlnZ2VyIGlmIGV4aXN0cyB0Z19jb25mbGl0byBvbiBlc2NhbGFjb2VzOwpjcmVhdGUgY29uc3RyYWludCB0cmlnZ2VyIHRnX2NvbmZsaXRvCiAgYWZ0ZXIgaW5zZXJ0IG9yIHVwZGF0ZSBvbiBlc2NhbGFjb2VzCiAgZGVmZXJyYWJsZSBpbml0aWFsbHkgZGVmZXJyZWQgICAgICAgICAgLS0gYXZhbGlhIG5vIEZJTSBkYSB0cmFuc2HDp8OjbywgbsOjbyBwb3IgbGluaGEKICBmb3IgZWFjaCByb3cgZXhlY3V0ZSBmdW5jdGlvbiBmbl9jb25mbGl0b19zaW11bHRhbmVvKCk7CgovKiBpbmRpc3BvbmliaWxpZGFkZTogdGFtYsOpbSBzw7MgcG9yIHZvbHVudGFyaW9faWQgKHNlbSBjYXNhciB0ZWxlZm9uZSBlbnRyZQogICBtaW5pc3TDqXJpb3MpLiBNYW50w6ltIG8gZ3VhcmQgZGUgVVBEQVRFIChlZGl0YXIgc3RhdHVzL3JlY2FkbyBuw6NvIHJlLWNoZWNhKS4gKi8KY3JlYXRlIG9yIHJlcGxhY2UgZnVuY3Rpb24gZm5faW5kaXNwb25pdmVsKCkgcmV0dXJucyB0cmlnZ2VyCmxhbmd1YWdlIHBscGdzcWwgc2VjdXJpdHkgZGVmaW5lciBzZXQgc2VhcmNoX3BhdGggPSBwdWJsaWMgYXMgJGZuJApkZWNsYXJlIHZfZGF0YSBkYXRlOyB2X25vbWUgdGV4dDsgdl9ibG9xIGludDsKYmVnaW4KICBpZiB0Z19vcCA9ICdVUERBVEUnCiAgICAgYW5kIG5ldy52b2x1bnRhcmlvX2lkIGlzIG5vdCBkaXN0aW5jdCBmcm9tIG9sZC52b2x1bnRhcmlvX2lkCiAgICAgYW5kIG5ldy5jdWx0b19pZCAgICAgIGlzIG5vdCBkaXN0aW5jdCBmcm9tIG9sZC5jdWx0b19pZCB0aGVuCiAgICByZXR1cm4gbmV3OwogIGVuZCBpZjsKICBzZWxlY3QgZGF0YSBpbnRvIHZfZGF0YSBmcm9tIGN1bHRvcyB3aGVyZSBpZCA9IG5ldy5jdWx0b19pZDsKICBzZWxlY3Qgbm9tZSBpbnRvIHZfbm9tZSBmcm9tIHZvbHVudGFyaW9zIHdoZXJlIGlkID0gbmV3LnZvbHVudGFyaW9faWQ7CiAgc2VsZWN0IGNvdW50KCopIGludG8gdl9ibG9xIGZyb20gaW5kaXNwb25pYmlsaWRhZGVzCiAgIHdoZXJlIGRhdGEgPSB2X2RhdGEgYW5kIHZvbHVudGFyaW9faWQgPSBuZXcudm9sdW50YXJpb19pZDsKICBpZiB2X2Jsb3EgPiAwIHRoZW4gcmFpc2UgZXhjZXB0aW9uICclIGF2aXNvdSBxdWUgbmFvIHBvZGUgbmVzdGUgZG9taW5nby4nLCB2X25vbWU7IGVuZCBpZjsKICByZXR1cm4gbmV3OwplbmQgJGZuJDsKCi8qIGhhcmRlbmluZzogc2FsdmFyX2RpYSDDqSBzw7MgZGUgbMOtZGVyIGF1dGVudGljYWRvLCBudW5jYSBkZSBhbm9uICovCnJldm9rZSBhbGwgb24gZnVuY3Rpb24gc2FsdmFyX2RpYSh1dWlkLCBkYXRlLCB0ZXh0LCBqc29uYiwgdXVpZFtdKSBmcm9tIHB1YmxpYywgYW5vbjsKZ3JhbnQgZXhlY3V0ZSBvbiBmdW5jdGlvbiBzYWx2YXJfZGlhKHV1aWQsIGRhdGUsIHRleHQsIGpzb25iLCB1dWlkW10pIHRvIGF1dGhlbnRpY2F0ZWQ7Cg=="}
+/* =============================================================================
+   04 — 2ª AUDITORIA (aplicado em produção em 2026-08-06)
+
+   Uma correção CRÍTICA e a reversão de um exagero da 1ª auditoria.
+   Idempotente.
+   ============================================================================= */
+
+/* -----------------------------------------------------------------------------
+   CRÍTICA — re-sortear/mover pessoas entre funções simultâneas abortava o save.
+
+   `salvar_dia` grava slot a slot (upsert). O gatilho de conflito era
+   BEFORE ... FOR EACH ROW, então avaliava o estado INTERMEDIÁRIO do upsert:
+   ao gravar PROJEÇÃO=Bruno, ILUMINAÇÃO=Bruno (linha antiga) ainda existia no
+   banco → "Bruno já está em ILUMINAÇÃO" → todo re-sorteio que troca gente entre
+   funções simultâneas falhava. Provado em produção (SWAP e MOVE-p/-vazio).
+
+   Correção: gatilho vira CONSTRAINT TRIGGER DEFERIDO — avalia só o estado FINAL
+   da transação, onde a escala é válida. A dupla-marcação genuína (mesma pessoa
+   em duas simultâneas no fim da transação) continua barrada.
+
+   Reversão: a 1ª auditoria fez os gatilhos casarem a mesma pessoa entre
+   ministérios por telefone. Isso protegia um caso hipotético (multi-ministério
+   com gente compartilhada) e QUEBRAVA o uso real (abortava o save do 2º
+   ministério inteiro no cron). Volta a checar só DENTRO do ministério
+   (por voluntario_id). Conflito entre ministérios, se e quando existir, deve
+   ser um AVISO no app, não um erro que aborta a transação.
+   ----------------------------------------------------------------------------- */
+
+create or replace function fn_conflito_simultaneo() returns trigger
+language plpgsql security definer set search_path = public as $fn$
+declare v_nome text; v_outra text;
+begin
+  if not exists (select 1 from funcoes where id = new.funcao_id and simultanea) then
+    return new;
+  end if;
+  select nome into v_nome from voluntarios where id = new.voluntario_id;
+  select f.nome into v_outra
+    from escalacoes e
+    join funcoes f on f.id = e.funcao_id and f.simultanea
+   where e.culto_id = new.culto_id
+     and e.funcao_id <> new.funcao_id
+     and e.voluntario_id = new.voluntario_id      -- só dentro do ministério
+   limit 1;
+  if v_outra is not null then
+    raise exception '% ja esta em % ao mesmo tempo neste domingo.', v_nome, v_outra;
+  end if;
+  return new;
+end $fn$;
+
+drop trigger if exists tg_conflito on escalacoes;
+create constraint trigger tg_conflito
+  after insert or update on escalacoes
+  deferrable initially deferred          -- avalia no FIM da transação, não por linha
+  for each row execute function fn_conflito_simultaneo();
+
+/* indisponibilidade: também só por voluntario_id (sem casar telefone entre
+   ministérios). Mantém o guard de UPDATE (editar status/recado não re-checa). */
+create or replace function fn_indisponivel() returns trigger
+language plpgsql security definer set search_path = public as $fn$
+declare v_data date; v_nome text; v_bloq int;
+begin
+  if tg_op = 'UPDATE'
+     and new.voluntario_id is not distinct from old.voluntario_id
+     and new.culto_id      is not distinct from old.culto_id then
+    return new;
+  end if;
+  select data into v_data from cultos where id = new.culto_id;
+  select nome into v_nome from voluntarios where id = new.voluntario_id;
+  select count(*) into v_bloq from indisponibilidades
+   where data = v_data and voluntario_id = new.voluntario_id;
+  if v_bloq > 0 then raise exception '% avisou que nao pode neste domingo.', v_nome; end if;
+  return new;
+end $fn$;
+
+/* hardening: salvar_dia é só de líder autenticado, nunca de anon */
+revoke all on function salvar_dia(uuid, date, text, jsonb, uuid[]) from public, anon;
+grant execute on function salvar_dia(uuid, date, text, jsonb, uuid[]) to authenticated;
