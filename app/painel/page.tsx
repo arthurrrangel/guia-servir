@@ -7,6 +7,7 @@ import { Painel as NumPainel, painelDoMinisterio } from '@/lib/candidaturas';
 import { AreaVisao, visaoGeral } from '@/lib/equipes';
 import { IcSino, IcSeta, IcCopiar } from '@/components/Icones';
 import { Escolha } from '@/components/Ui';
+import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
   problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia,
@@ -222,7 +223,7 @@ function Painel() {
     if (!f?.id || !dia?.cultoId) return;
     setSalvando(funcao); setOtimista({ f: funcao, st: status });
     try { await mudarStatus(dia.cultoId, f.id, status); await recarregar(); }
-    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
     setSalvando(''); setOtimista(null);
   }
 

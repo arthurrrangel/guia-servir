@@ -121,8 +121,16 @@ export default function Area() {
         {/* --- onde você pode servir --- */}
         <div style={{ textAlign: 'center' }}>
           <span className="rot">Onde você pode servir</span>
+          {/* A TELA MANDAVA FAZER UMA COISA QUE ELA NÃO OFERECE.
+              Dizia "Marque uma ou mais" numa lista de leitura: os itens têm
+              cursor:default e não recebem clique. Quem chega pela primeira vez
+              lê a instrução, tenta tocar, nada acontece, e a conclusão possível
+              é que o site está quebrado. A marcação existe — só que no passo 2
+              do cadastro, que é a tela seguinte. Agora esta lista diz o que ela
+              é, e diz onde a escolha acontece. */}
           <p className="area-intro" style={{ margin: '20px auto 0', fontSize: 'var(--t-corpo)', lineHeight: 1.72, color: 'var(--cinza)' }}>
-            Marque uma ou mais. Dá para marcar função que você ainda não sabe fazer.
+            Estas são as funções da área. Você escolhe as suas no cadastro — e dá para
+            escolher função que você ainda não sabe fazer, tem gente para ensinar.
           </p>
         </div>
 

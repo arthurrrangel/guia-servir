@@ -8,6 +8,7 @@ import {
 } from '@/lib/db';
 import { atualizarEquipe, criarEquipe, removerEquipe } from '@/lib/equipes';
 import { funcoesAtivas } from '@/lib/engine';
+import { aviseHumano } from '@/lib/erros';
 
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
@@ -32,12 +33,12 @@ function Ajustes() {
   async function cfg(chave: string, valor: any) {
     cfgRef.current = { ...cfgRef.current, [chave]: valor };
     try { await salvarConfig(equipe!.id, cfgRef.current); await recarregar(); aviso('Salvo'); }
-    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
   }
   async function fn(id: string, campos: any) {
     const f = S.funcoes.find(x => x.id === id)!;
     try { await salvarFuncoes(equipe!.id, [{ ...f, ...campos }]); await recarregar(); }
-    catch (e: any) { aviso('erro: ' + e.message); }
+    catch (e) { aviso(aviseHumano(e)); }
   }
   async function addFn() {
     const nome = nova.trim().toUpperCase();
@@ -47,13 +48,13 @@ function Ajustes() {
     try {
       await salvarFuncoes(equipe!.id, [{ nome, simultanea: true, ordem: S.funcoes.length + 1, ativa: true }]);
       setNova(''); await recarregar(); aviso('Função criada');
-    } catch (e: any) { aviso('Não salvou: ' + e.message); }
+    } catch (e) { aviso(aviseHumano(e, 'salvar')); }
     setGravando(false);
   }
   async function delFn(id: string, nome: string) {
     if (!confirm(`Apagar ${nome}? Some das escalas antigas também.`)) return;
     try { await removerFuncao(id); await recarregar(); aviso('Apagada'); }
-    catch (e: any) { aviso('erro: ' + e.message); }
+    catch (e) { aviso(aviseHumano(e)); }
   }
 
   const linkGrupo = equipe ? `${base}/equipe/${equipe.slug}` : '';
@@ -107,7 +108,7 @@ function Ajustes() {
             const v = e.target.value.trim();
             if (v !== (equipe?.whatsapp_grupo || '')) {
               try { await atualizarEquipe(equipe!.id, { whatsapp_grupo: v || null }); await recarregarEquipes(); aviso('Salvo'); }
-              catch (err: any) { aviso('Não salvou: ' + err.message); }
+              catch (err) { aviso(aviseHumano(err, 'salvar')); }
             }
           }} />
         <div style={{ height: 14 }} />
@@ -227,7 +228,7 @@ function Ajustes() {
                   onClick={async () => {
                     if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
                     try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
-                    catch (err: any) { aviso('erro: ' + err.message); }
+                    catch (err) { aviso(aviseHumano(err)); }
                   }}>tirar acesso</button>
               </div>
             </div>
@@ -248,7 +249,7 @@ function Ajustes() {
               try {
                 await addLider(novoLider, equipeDoLider || null);
                 setNovoLider(''); await recarregarLideres(); aviso('Acesso liberado');
-              } catch (err: any) { aviso('Não salvou: ' + err.message); }
+              } catch (err) { aviso(aviseHumano(err, 'salvar')); }
               setGravando(false);
             }}>Liberar acesso</button>
           </div>
@@ -272,7 +273,7 @@ function Ajustes() {
               <input enterKeyHint="done" className="ajt-nome" key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
                 onBlur={async ev => {
                   const v = ev.target.value.trim();
-                  if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err: any) { aviso('Não salvou: ' + err.message); } }
+                  if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err) { aviso(aviseHumano(err, 'salvar')); } }
                 }} />
               <span className="ajt-sub">{e.id === equipe?.id ? 'aberto agora' : ''}</span>
               <div className="ajt-acoes">
@@ -290,7 +291,7 @@ function Ajustes() {
                       }
                       aviso('Apagado');
                     }
-                    catch (err: any) { aviso('Não deu: ' + err.message); }
+                    catch (err) { aviso(aviseHumano(err)); }
                   }}>apagar</button>
               </div>
             </div>
@@ -301,7 +302,7 @@ function Ajustes() {
           <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
             setGravando(true);
             try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado, agora crie as funções e cadastre o time'); }
-            catch (err: any) { aviso('Não deu: ' + err.message); }
+            catch (err) { aviso(aviseHumano(err)); }
             setGravando(false);
           }}>Criar ministério</button>
         </div>

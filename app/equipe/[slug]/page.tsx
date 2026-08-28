@@ -622,6 +622,17 @@ export default function EntradaEquipe() {
                 : marcadas === 1 ? '1 posto marcado.' : `${marcadas} postos marcados.`}
             </p>
 
+            {/* mesma regra do cadastro: botão que não pode ser apertado diz
+                o que falta, senão a pessoa acha que o site travou */}
+            {!ocupado && (!fNome.trim() || !fTel.trim() || !marcadas) && (
+              <p className="postos-falta" role="status">
+                {'Falta ' + [
+                  !fNome.trim() && 'seu nome',
+                  !fTel.trim() && 'seu WhatsApp',
+                  !marcadas && 'marcar onde você serve',
+                ].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.'}
+              </p>
+            )}
             <button className="pri" style={{ marginTop: 20, width: '100%' }}
               disabled={ocupado || !fNome.trim() || !fTel.trim() || !marcadas} onClick={inscrever}>
               {ocupado ? 'entrando…' : 'Entrar no time'}

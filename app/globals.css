@@ -3523,3 +3523,48 @@ html{ scroll-padding-top:88px }
 .area-conf[open] .giro{ transform:rotate(90deg) }
 /* a primeira linha de dentro não repete o fio que o cabeçalho já desenhou */
 .area-conf > .conf-linha:first-of-type{ border-top:0 }
+
+/* --- 11. O QUE FALTA PARA O BOTÃO ACENDER -------------------------------
+   Botão cinza é uma recusa sem motivo. A frase entra no rodapé fixo, ocupando
+   a linha inteira acima dos botões — é o único lugar onde a pessoa já está
+   olhando quando aperta e não acontece nada. role="status" faz o leitor de
+   tela anunciar sem roubar o foco de quem está digitando. */
+.wiz-pe{ flex-wrap:wrap }
+.wiz-falta{
+  flex:1 0 100%; order:-1; margin-bottom:var(--e2);
+  font-size:var(--t-apoio); line-height:1.45; color:var(--bad);
+}
+/* mesma frase de "o que falta", fora do rodapé fixo do cadastro */
+.postos-falta{
+  margin:var(--e3) 0 0; font-size:var(--t-apoio); line-height:1.45; color:var(--bad);
+}
+/* A frase que diz o que o botão vai fazer, antes de ele ser apertado.
+
+   Escrevi `.lid-faixa .esc-oquefaz{ color:rgba(255,255,255,.66) }` supondo
+   que a faixa fosse escura. Ela é escura só na variante `.fogo` — no resto
+   do produto é papel branco. Resultado: a frase saiu branca sobre branco e
+   ficou invisível, deixando um vão de 200px no lugar dela. Não apareceu em
+   nenhuma medição porque o texto ESTAVA lá, com tamanho e posição certos.
+   Só apareceu quando eu olhei a tela. É a diferença entre medir e ver. */
+.esc-oquefaz{
+  margin:var(--e3) 0 0; max-width:56ch;
+  font-size:var(--t-apoio); line-height:1.6; color:var(--cinza);
+}
+.lid-faixa.fogo .esc-oquefaz{ color:rgba(255,255,255,.72) }
+.vol-pede-depois{
+  margin:0 0 var(--e4); max-width:52ch;
+  font-size:var(--t-apoio); line-height:1.55; color:var(--cinza);
+}
+
+/* --- 12. O RODAPÉ DEBAIXO DA CTA FLUTUANTE ------------------------------
+   Rolando a home até o fim no celular, o último link do rodapé ("Sou da
+   organização") parava 6px ABAIXO do topo da barra flutuante de "Quero
+   servir" — ou seja, atrás dela, e não havia mais para onde rolar. O link
+   existia, tinha 44px, e era inalcançável.
+
+   A barra tem 12px de folga em baixo e ~55px de altura; o rodapé passa a
+   reservar isso, mais a área segura do iPhone. Só no celular: acima de
+   920px a barra não existe. */
+@media(max-width:919px){
+  .casa-pe{ padding-bottom:calc(var(--e7) + 78px + env(safe-area-inset-bottom)) }
+}

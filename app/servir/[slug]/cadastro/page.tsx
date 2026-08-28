@@ -119,6 +119,30 @@ export default function Servir() {
     return true;
   })();
 
+  /* BOTÃO CINZA NÃO É RESPOSTA.
+     "Continuar" nascia desligado e a tela não dizia por quê. A pessoa escreve
+     o primeiro nome, aperta, não acontece nada, aperta de novo, e conclui que
+     o site está quebrado — quando faltava o sobrenome. Um botão que não pode
+     ser apertado tem a obrigação de dizer o que está faltando, com a mesma
+     clareza com que diria "pronto". */
+  const oQueFalta = (() => {
+    if (podeAvancar) return '';
+    if (passo === 0) {
+      const faltas = [];
+      if (!nome.trim()) faltas.push('seu nome');
+      else if (!nome.trim().includes(' ')) faltas.push('seu sobrenome');
+      if (soTel(tel).length < 10) faltas.push(soTel(tel).length ? 'o WhatsApp completo, com DDD' : 'seu WhatsApp com DDD');
+      return 'Falta ' + faltas.join(' e ') + '.';
+    }
+    if (passo === 1) return 'Marque pelo menos uma coisa que você quer fazer.';
+    if (passo === 2) {
+      const n = perguntas.filter(q => q.obrigatoria && (resp[q.id] || '').trim() === '').length;
+      return n === 1 ? 'Falta responder uma pergunta marcada com *.'
+        : `Faltam responder ${n} perguntas marcadas com *.`;
+    }
+    return '';
+  })();
+
   const enviar = useCallback(async () => {
     if (ocupado) return;
     setOcupado(true); setErro('');
@@ -335,18 +359,31 @@ export default function Servir() {
                 </span>
               ))}
             </dl>
-            {!min!.aberto && (
-              <div className="aviso" style={{ marginTop: 14 }}>
-                Esta área conversa com cada pessoa antes de escalar. Você envia agora e a
-                liderança fala com você.
-              </div>
-            )}
+            {/* A ÚLTIMA TELA ANTES DE APERTAR ERA A MAIS MUDA.
+                O aviso do que acontece depois só aparecia para ministério que
+                conversa antes; nas outras áreas a pessoa apertava "Enviar meu
+                cadastro" sem nenhuma frase por perto dizendo o que ela estava
+                acionando. A garantia existia — "nada aqui vira escala sem a
+                liderança falar com você" — mas lá no topo da página, três
+                rolagens acima, no celular. Garantia que a pessoa não está
+                lendo no instante em que decide não é garantia. */}
+            <div className="aviso" style={{ marginTop: 14 }}>
+              {min!.aberto
+                ? <>Ao enviar, a liderança {min!.artigo === 'a' ? 'da' : 'do'} {min!.nome} recebe
+                    seu cadastro e chama você no WhatsApp. Você <strong>não</strong> entra na escala
+                    agora: primeiro alguém fala com você. Na tela seguinte abre um link para você
+                    acompanhar — guarde ele.</>
+                : <>Esta área conversa com cada pessoa antes de escalar. Ao enviar, a liderança
+                    recebe seu cadastro e chama você no WhatsApp para essa conversa. Na tela
+                    seguinte abre um link para você acompanhar — guarde ele.</>}
+            </div>
           </>
         )}
       </section>
 
       {/* rodapé fixo: no celular o botão não pode sumir atrás do teclado */}
       <div className="wiz-pe">
+        {!!oQueFalta && <span className="wiz-falta" role="status">{oQueFalta}</span>}
         {passo > 0 && (
           <button type="button" className="btn claro" disabled={ocupado}
             onClick={() => { setPasso(p => p - 1); setErro(''); window.scrollTo(0, 0); }}>

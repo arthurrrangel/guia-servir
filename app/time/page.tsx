@@ -6,6 +6,7 @@ import {
 } from '@/lib/db';
 import { Aviso, Medidor } from '@/components/Ui';
 import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
+import { aviseHumano } from '@/lib/erros';
 import {
   Nivel, confirmada, declaracoesSuspeitas, filaDeConferencia, funcoesAtivas,
   msgConvite, saudeDoTime,
@@ -56,7 +57,7 @@ function Time() {
       await criarVoluntario(equipe!.id, nome.trim(), tel.trim(), S.config.limitePadrao, novas);
       setNome(''); setTel(''); setNovas({});
       await recarregar(); aviso(`${nome.trim().split(' ')[0]} entrou no time`);
-    } catch (e: any) { aviso('erro: ' + e.message); }
+    } catch (e) { aviso(aviseHumano(e)); }
     setOcupado(false);
   }
 
@@ -67,7 +68,7 @@ function Time() {
     const atual = S.voluntarios.find(v => v.id === vid)?.funcoes[funcao] || null;
     const prox = CICLO[(CICLO.indexOf(atual as any) + 1) % CICLO.length];
     try { await definirHabilidade(vid, mapa.get(funcao)!, prox); await recarregar(); }
-    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
     setChipSalvando('');
   }
   const teclaAtiva = (fn: () => void) => (e: React.KeyboardEvent) => {
@@ -76,20 +77,20 @@ function Time() {
 
   async function mudar(vid: string, campos: any) {
     try { await atualizarVoluntario(vid, campos); await recarregar(); }
-    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
   }
 
   async function remover(vid: string, nome: string) {
     if (!confirm(`Remover ${nome}? O histórico dele some junto.`)) return;
     try { await removerVoluntario(vid); await recarregar(); aviso('Removido'); }
-    catch (e: any) { aviso('erro: ' + e.message); }
+    catch (e) { aviso(aviseHumano(e)); }
   }
 
   /* quem se cadastrou sozinho já entra valendo; isto só tira o destaque
      depois que o líder olhou o nível que a pessoa declarou. */
   async function conferir(vid: string, nome: string) {
     try { await conferirVoluntario(vid); await recarregar(); aviso(`${nome.split(' ')[0]} conferido`); }
-    catch (e: any) { aviso('erro: ' + e.message); }
+    catch (e) { aviso(aviseHumano(e)); }
   }
 
   /* o líder confere UMA área por vez: é assim que ele consegue julgar, porque
@@ -99,7 +100,7 @@ function Time() {
     if (chipSalvando) return;
     setChipSalvando(chave);
     try { await definirHabilidade(vid, mapa.get(funcao)!, nivel); await recarregar(); }
-    catch (e: any) { aviso('Não salvou: ' + e.message); await recarregar(); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
     setChipSalvando('');
   }
 

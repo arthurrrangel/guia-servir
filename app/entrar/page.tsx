@@ -5,6 +5,7 @@ import { sb, lerCredenciais } from '@/lib/supabase';
 import { Conexao } from '@/components/Shell';
 import { Logo } from '@/components/Marca';
 import { Aviso } from '@/components/Ui';
+import { aviseHumano } from '@/lib/erros';
 
 export default function Entrar() {
   const [pronto, setPronto] = useState(false);
@@ -12,7 +13,13 @@ export default function Entrar() {
   const [modo, setModo] = useState<'link' | 'senha'>('link');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  /* O tom do aviso era decidido por `msg.startsWith('Erro')`. Isso parou de
+     funcionar no instante em que as mensagens deixaram de começar com a
+     palavra "Erro" — e o modo de falhar era silencioso e ao contrário: um
+     login recusado apareceria com o ✓ verde de sucesso. Quem manda a
+     mensagem agora manda o tom junto. */
   const [msg, setMsg] = useState('');
+  const [tom, setTom] = useState<'erro' | 'bom'>('bom');
   const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
@@ -35,14 +42,16 @@ export default function Entrar() {
       email: email.trim(), options: { emailRedirectTo: window.location.origin },
     });
     setCarregando(false);
-    setMsg(error ? 'Erro: ' + error.message : 'Pronto. Abra seu email e clique no link para entrar.');
+    setTom(error ? 'erro' : 'bom');
+    setMsg(error ? aviseHumano(error, 'enviar o link')
+      : 'Pronto. Abra seu email e clique no link para entrar. O link vale por uma hora e serve uma vez só.');
   }
 
   async function porSenha(e: React.FormEvent) {
     e.preventDefault(); setCarregando(true); setMsg('');
     const { error } = await sb()!.auth.signInWithPassword({ email: email.trim(), password: senha });
     setCarregando(false);
-    if (error) setMsg('Erro: ' + error.message); else location.href = '/painel';
+    if (error) { setTom('erro'); setMsg(aviseHumano(error, 'entrar')); } else location.href = '/painel';
   }
 
   return (
@@ -92,7 +101,7 @@ export default function Entrar() {
           {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : 'Entrar'}
         </button>
       </form>
-      {msg && <div style={{ marginTop: 18 }}><Aviso tom={msg.startsWith('Erro') ? 'erro' : 'bom'}>{msg}</Aviso></div>}
+      {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
       <button className="lid-bt-txt entrada-troca" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
         {modo === 'link' ? 'prefiro entrar com senha' : 'prefiro receber um link no email'}
       </button>

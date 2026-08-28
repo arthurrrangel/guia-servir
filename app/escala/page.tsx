@@ -3,6 +3,7 @@ import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
 import { mudarStatus, salvarDia, salvarDias } from '@/lib/db';
 import { Aviso, Escolha } from '@/components/Ui';
+import { aviseHumano } from '@/lib/erros';
 import {
   candidatos, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
@@ -70,7 +71,7 @@ function Escala() {
   async function falhou(e: any, snap: ReturnType<typeof retrato>) {
     const est = await recarregar();
     if (!est) for (const [d, dia] of snap) { if (dia) S.escalas[d] = dia; else delete S.escalas[d]; }
-    aviso('Não salvou: ' + (e?.message || e));
+    aviso(aviseHumano(e, 'salvar'));
   }
 
   const [ano, setAno] = useState(+hoje.slice(0, 4));
@@ -257,6 +258,22 @@ function Escala() {
                 Pedir a disponibilidade
               </button>
             </div>
+            {/* O BOTÃO QUE REESCREVE O MÊS NÃO DIZIA O QUE IA FAZER.
+                O motor é cuidadoso — quem confirmou e quem foi travado são
+                intocáveis, quem recusou não volta a ser sorteado. Só que essa
+                garantia estava no comentário do engine, não na tela. O líder
+                com pressa lê "Montar o mês inteiro" e a pergunta honesta dele
+                é "isso apaga o que a Malu já confirmou?". Sem resposta, ou ele
+                não aperta, ou aperta com medo. As duas são caras.
+
+                Isto não é aviso de perigo: é o contrário. É a frase que
+                transforma um botão assustador num botão seguro. */}
+            <p className="esc-oquefaz">
+              Montar e sortear preenchem só o que está vazio: <strong>quem já confirmou e quem
+              você travou não se mexe</strong>, e quem avisou que não pode não volta no sorteio.
+              Os botões de pedir, copiar e cobrar deixam um texto pronto para você colar no
+              grupo — <strong>nada é enviado daqui</strong>.
+            </p>
           </div>
           {placar && (
             <div className="lid-placar">

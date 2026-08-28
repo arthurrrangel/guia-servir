@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Shell, { useApp } from '@/components/Shell';
 import { Aviso } from '@/components/Ui';
 import { msgConvite, vol } from '@/lib/engine';
+import { aviseHumano } from '@/lib/erros';
 import {
   ABERTAS, NO_TIME, O_QUE_FAZER, Candidatura, Passo, Resposta, ROTULO_STATUS, StatusCand,
   decidir, historicoDe, listarCandidaturas, linkWhatsApp, respostasDe, telefoneLegivel,
@@ -69,7 +70,7 @@ function Fila() {
     if (!equipe?.id) return;
     setCarregando(true);
     try { setLista(await listarCandidaturas(equipe.id)); setErro(''); }
-    catch (e: any) { setErro(e?.message || 'não consegui carregar'); }
+    catch (e) { setErro(aviseHumano(e, 'carregar quem está esperando')); }
     finally { setCarregando(false); }
   }, [equipe?.id]);
 
@@ -101,18 +102,32 @@ function Fila() {
         <div className="lid-faixa-in">
           <div className="lid-faixa-txt">
             <span className="rot">Quem quer entrar</span>
+            {/* LISTA VAZIA NÃO É A MESMA COISA QUE LISTA QUE NÃO CARREGOU.
+                Com a internet caindo, esta tela dizia, em letra grande e com
+                toda a confiança, "Ninguém esperando resposta" — e logo abaixo
+                aparecia o aviso de falha, que ninguém lê depois de já ter lido
+                o título. O líder fecha o app convencido de que não tem gente
+                esperando, quando pode ter cinco. Uma tela só afirma o que ela
+                sabe: se não conseguiu ler a lista, ela diz isso. */}
             <h1>
-              {abertas.length === 0 ? 'Ninguém esperando resposta'
-                : abertas.length === 1 ? '1 pessoa esperando você'
-                : `${abertas.length} pessoas esperando você`}
+              {erro ? 'Não consegui carregar quem está esperando'
+                : abertas.length === 0 ? 'Ninguém esperando resposta'
+                  : abertas.length === 1 ? '1 pessoa esperando você'
+                    : `${abertas.length} pessoas esperando você`}
             </h1>
             <p className="lid-faixa-sub">
-              {abertas.length === 0
-                ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
-                : maisAntiga === 0
-                  ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
-                  : `A mais antiga está esperando ${espera(maisAntiga).replace('há ', 'há ')}. Quem se oferece e não recebe resposta some, e não volta.`}
+              {erro ? erro
+                : abertas.length === 0
+                  ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
+                  : maisAntiga === 0
+                    ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
+                    : `A mais antiga está esperando ${espera(maisAntiga).replace('há ', 'há ')}. Quem se oferece e não recebe resposta some, e não volta.`}
             </p>
+            {erro && (
+              <div className="lid-faixa-acoes">
+                <button className="lid-bt" onClick={() => { setErro(''); void carregar(); }}>Tentar de novo</button>
+              </div>
+            )}
           </div>
           {/* O PLACAR NÃO REPETE O TÍTULO. O número de pessoas já está no h1;
               o que falta é o número que mede a falha, que é há quanto tempo a
@@ -126,7 +141,8 @@ function Fila() {
         </div>
       </div>
 
-      {erro && <div style={{ marginTop: 'var(--e5)' }}><Aviso tom="erro">{erro}</Aviso></div>}
+      {/* o erro já é o subtítulo da faixa agora; repetir aqui embaixo era a
+          mesma frase duas vezes na mesma tela */}
       {carregando && <p className="dim" style={{ marginTop: 'var(--e6)' }}>carregando…</p>}
 
       {!carregando && abertas.length > 0 && (
@@ -155,7 +171,11 @@ function Fila() {
         </section>
       )}
 
-      {!carregando && lista.length === 0 && (
+      {/* "como chega gente aqui" responde a pergunta de quem tem a lista
+          vazia. Quem não conseguiu LER a lista tem outra pergunta, e ver o
+          passo a passo de chegada ali reforça a leitura errada de que não
+          tem ninguém. */}
+      {!carregando && !erro && lista.length === 0 && (
         <section className="lid-secao">
           <div className="lid-secao-cab"><span className="rot">Como chega gente aqui</span></div>
           <div className="lid-alerta">
@@ -227,7 +247,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
     if (ocupado) return;
     setOcupado(true); setErro('');
     try { await decidir(c.id, status, nota.trim() || undefined); await mudou(texto); }
-    catch (e: any) { setErro(e?.message || 'não consegui'); }
+    catch (e) { setErro(aviseHumano(e, 'registrar essa decisão')); }
     finally { setOcupado(false); }
   }
 

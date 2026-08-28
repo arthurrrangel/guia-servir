@@ -8,6 +8,7 @@ import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
 import { quemSou, outrasAreas, organiza, type Identidade } from '@/lib/identidade';
+import { aviseHumano } from '@/lib/erros';
 
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
@@ -57,7 +58,7 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
     const { error } = await sb()!.rpc('eu_relatorio', {
       p_token: token, p_culto_id: item.culto_id, p_texto: texto, p_problemas: probs,
     });
-    if (error) setErro('Não consegui salvar: ' + error.message);
+    if (error) setErro(aviseHumano(error, 'salvar'));
     else { setOk(true); aoSalvar(); setTimeout(() => setOk(false), 3000); }
     setSalvando(false);
   }
@@ -79,6 +80,12 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
       <textarea id={'prob' + item.culto_id} rows={2} value={probs}
         onChange={e => setProbs(e.target.value)}
         placeholder="Banheiro masculino sem papel. Bebedouro vazando." />
+      {!salvando && !texto.trim() && !probs.trim() && (
+        <p className="postos-falta" role="status">
+          Escreva pelo menos um dos dois campos. Se o dia foi tranquilo, escrever isso
+          já ajuda quem lidera no próximo.
+        </p>
+      )}
       <div className="linha" style={{ marginTop: 12 }}>
         <button className="pri" disabled={salvando || (!texto.trim() && !probs.trim())} onClick={salvar}>
           {salvando ? 'Salvando...' : jaTinha ? 'Atualizar relatório' : 'Enviar relatório'}
@@ -185,7 +192,7 @@ export default function Eu() {
   async function responder(cultoId: string, status: 'confirmado' | 'recusado', data?: string) {
     setOcupado(cultoId); setErro('');
     const { error } = await sb()!.rpc('eu_responder', { p_token: token, p_culto_id: cultoId, p_status: status });
-    if (error) { setErro('Não consegui salvar: ' + error.message); setOcupado(''); return; }
+    if (error) { setErro(aviseHumano(error, 'salvar')); setOcupado(''); return; }
     /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia a
        pessoa não avisar por fora, achando que já estava resolvido. */
     setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
@@ -203,7 +210,7 @@ export default function Eu() {
   async function responderDisp(d: string, resposta: 'posso' | 'nao') {
     setOcupado(d); setErro('');
     const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: resposta });
-    if (error) setErro('Não consegui salvar: ' + error.message);
+    if (error) setErro(aviseHumano(error, 'salvar'));
     else await carregar(false);
     setOcupado('');
   }
@@ -213,7 +220,7 @@ export default function Eu() {
     setOcupado('todos'); setErro('');
     for (const d of faltando) {
       const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' });
-      if (error) { setErro('Não consegui salvar tudo: ' + error.message); break; }
+      if (error) { setErro(aviseHumano(error, 'salvar tudo')); break; }
     }
     await carregar(false);
     setOcupado('');
@@ -366,6 +373,20 @@ export default function Eu() {
                 Dizer quando eu posso
               </a>
             </div>
+          )}
+
+          {/* DIZER "NÃO POSSO" É A DECISÃO MAIS DIFÍCIL DESTA TELA, e era a
+              única sem nenhuma frase por perto. Quem não sabe o que acontece
+              depois imagina o pior — que a área vai ficar sem ninguém, e que a
+              culpa vai ser dele. Aí a pessoa não responde, que é o pior
+              resultado possível para todo mundo: a liderança descobre no
+              domingo. Uma linha, uma vez, acima da lista: repetir por item
+              seria a mesma frase três vezes na mesma tela. */}
+          {!!pendentes.length && (
+            <p className="vol-pede-depois">
+              Avisando que não pode, quem organiza remaneja com tempo — é para isso que
+              serve o aviso. Dá para mudar de ideia enquanto o dia não chega.
+            </p>
           )}
 
           {pendentes.map(i => (

@@ -6,9 +6,10 @@ import { sb, lerCredenciais, gravarCredenciais } from '@/lib/supabase';
 import { carregarEstado } from '@/lib/db';
 import { Equipe, listarEquipes, souLider } from '@/lib/equipes';
 import { Estado, estadoVazio } from '@/lib/engine';
+import { aviseHumano } from '@/lib/erros';
 import { IcAjustes, IcCalendario, IcPainel, IcSair, IcSeta, IcTime } from './Icones';
 import { Logo } from './Marca';
-import { Esqueleto } from './Ui';
+import { Aviso, Esqueleto } from './Ui';
 
 type Ctx = {
   S: Estado; recarregar: () => Promise<Estado | null>;
@@ -71,7 +72,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     } catch (e: any) {
       if (idAtivo.current !== id) return null;
       if (String(e?.message || e).includes('JWT') || e?.code === 'PGRST301') setFase('sem-login');
-      else aviso('Erro ao carregar: ' + (e?.message || e));
+      else aviso(aviseHumano(e, 'carregar esta tela'));
       return null;
     }
   }, [aviso]);
@@ -154,7 +155,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           }
         } catch (e: any) {
           if (String(e?.message || e).includes('JWT')) setFase('sem-login');
-          else if (vivo) aviso('Erro: ' + (e?.message || e));
+          else if (vivo) aviso(aviseHumano(e));
         }
       }, 0);
     };
@@ -270,6 +271,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 function PrimeiraEquipe({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [nome, setNome] = useState('');
   const [ocupado, setOcupado] = useState(false);
+  /* Esta tela usava alert() do navegador para dar a notícia de que não deu
+     certo. Modal do sistema operacional é o oposto do que a pessoa precisa
+     num erro: ela cobre a tela, não diz o que fazer, e só oferece "OK" —
+     que é justamente a palavra errada. O aviso agora fica na página, do
+     lado do botão que falhou, e o texto vem em português. */
+  const [erro, setErro] = useState('');
   return (
     <main style={{ maxWidth: 460, paddingTop: 70 }}>
       <h1>Crie seu primeiro ministério</h1>
@@ -281,10 +288,11 @@ function PrimeiraEquipe({ aoCriar }: { aoCriar: (id: string) => void }) {
         <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
         <div style={{ height: 14 }} />
         <button className="pri grande" disabled={ocupado || !nome.trim()} onClick={async () => {
-          setOcupado(true);
+          setOcupado(true); setErro('');
           try { const { criarEquipe } = await import('@/lib/equipes'); const eq = await criarEquipe(nome.trim()); aoCriar(eq.id); }
-          catch (e: any) { alert('Erro: ' + e.message); setOcupado(false); }
+          catch (e) { setErro(aviseHumano(e, 'criar o ministério')); setOcupado(false); }
         }}>Criar ministério</button>
+        {erro && <div style={{ marginTop: 14 }}><Aviso tom="erro">{erro}</Aviso></div>}
       </div>
     </main>
   );
