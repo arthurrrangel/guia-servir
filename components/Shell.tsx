@@ -13,6 +13,13 @@ import { Aviso, Esqueleto } from './Ui';
 
 type Ctx = {
   S: Estado; recarregar: () => Promise<Estado | null>;
+  /* PINTA A MUDANÇA NA HORA — otimização de percepção (fase 18).
+     As ações do líder mutam o Estado em memória e só então gravam. Antes, a
+     tela só refletia a mudança quando `recarregar()` voltava do servidor: um
+     clique em "confirmou" ficava ~1s parado antes do ✓ aparecer. `pinta()`
+     troca a referência do Estado e renderiza o que a ação já calculou —
+     instantâneo. A gravação segue por baixo; se falhar, o snapshot reverte. */
+  pinta: () => void;
   aviso: (t: string) => void; base: string;
   equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => void;
   recarregarEquipes: () => Promise<Equipe[]>;
@@ -38,11 +45,34 @@ const K_EQUIPE = 'escala.equipe';
    link. Ver o §6 da migração 33. */
 type MeuVinculo = { slug: string; equipe: string; token: string };
 
+/* ============================================================================
+   CACHE ENTRE NAVEGAÇÕES — velocidade percebida (fase 18)
+
+   Cada tela do líder (/painel, /escala, /time…) montava o Shell do zero, e o
+   Shell mora DENTRO de cada página, não num layout compartilhado. Resultado:
+   toda troca de aba desmontava tudo e refazia o cold start inteiro — sessão,
+   lista de equipes, estado completo (~4 idas ao banco) — mostrando o esqueleto
+   de novo, toda vez. Medido: a barra do topo remontava e o esqueleto voltava a
+   cada clique de aba.
+
+   Estas variáveis vivem no MÓDULO, não no componente: sobrevivem à remontagem
+   durante a navegação SPA (só um reload de página inteira as zera). Na volta a
+   uma aba, o Shell nasce já com o último estado daquela equipe e pinta na hora;
+   a revalidação (recarregar) segue por baixo e atualiza sem piscar. É o padrão
+   stale-while-revalidate: mostra o que tem, confirma com o servidor depois.
+
+   Não substitui a persistência real: o localStorage guarda a equipe ativa entre
+   reloads; isto guarda o ESTADO entre abas na mesma sessão de navegador. */
+const _cacheEstado = new Map<string, Estado>();
+let _cacheEquipes: Equipe[] = [];
+let _cacheAtiva = '';
+
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const [fase, setFase] = useState<'carregando' | 'sem-conexao' | 'sem-login' | 'sem-acesso' | 'sem-equipe' | 'pronto'>('carregando');
-  const [S, setS] = useState<Estado>(estadoVazio());
-  const [equipes, setEquipes] = useState<Equipe[]>([]);
-  const [equipeId, setEquipeId] = useState<string>('');
+  const [fase, setFase] = useState<'carregando' | 'sem-conexao' | 'sem-login' | 'sem-acesso' | 'sem-equipe' | 'pronto'>(
+    _cacheAtiva && _cacheEstado.has(_cacheAtiva) ? 'pronto' : 'carregando');
+  const [S, setS] = useState<Estado>(() => _cacheEstado.get(_cacheAtiva) || estadoVazio());
+  const [equipes, setEquipes] = useState<Equipe[]>(_cacheEquipes);
+  const [equipeId, setEquipeId] = useState<string>(_cacheAtiva);
   const [msg, setMsg] = useState('');
   const [base, setBase] = useState('');
   const [menuAberto, setMenuAberto] = useState(false);
@@ -50,12 +80,17 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const btnSeletor = useRef<HTMLButtonElement>(null);
   const fecharMenu = useCallback(() => { setMenuAberto(false); btnSeletor.current?.focus(); }, []);
-  const idAtivo = useRef('');
-  const nomeAtivo = useRef('');
+  /* refs nascem alinhadas ao cache: se voltamos a uma aba com estado guardado,
+     `recarregar()` já sabe qual equipe revalidar sem esperar o efeito. */
+  const idAtivo = useRef(_cacheAtiva);
+  const nomeAtivo = useRef(_cacheEquipes.find(e => e.id === _cacheAtiva)?.nome || '');
   const seq = useRef(0);          // descarta resposta fora de ordem da MESMA equipe
   const [meus, setMeus] = useState<MeuVinculo[]>([]);
 
   const aviso = useCallback((t: string) => { setMsg(t); setTimeout(() => setMsg(''), 2200); }, []);
+  /* nova referência do mesmo Estado: força o React a repintar com o que a ação
+     acabou de mudar em memória, sem esperar o servidor. */
+  const pinta = useCallback(() => setS(s => ({ ...s })), []);
 
   /* IMPORTANTE: entre o await e o setS, o líder pode ter trocado de ministério.
      Sem revalidar, o estado da equipe A caía dentro da equipe B — e o próximo
@@ -68,6 +103,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       const est = await carregarEstado(id, nomeAtivo.current);
       if (idAtivo.current !== id || seq.current !== meu) return null;   // chegou tarde: ignora
       setS(est);
+      _cacheEstado.set(id, est);   // guarda para a próxima volta a esta aba
       return est;
     } catch (e: any) {
       if (idAtivo.current !== id) return null;
@@ -80,6 +116,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const recarregarEquipes = useCallback(async () => {
     const lista = await listarEquipes();
     setEquipes(lista);
+    _cacheEquipes = lista;
     return lista;
   }, []);
 
@@ -88,11 +125,15 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const trocarEquipe = useCallback((id: string, lista?: Equipe[]) => {
     const antesId = idAtivo.current, antesNome = nomeAtivo.current;
     const fonte = lista || equipes;
-    idAtivo.current = id;
+    idAtivo.current = id; _cacheAtiva = id;
     nomeAtivo.current = fonte.find(e => e.id === id)?.nome || '';
     setEquipeId(id); setMenuAberto(false);
     try { localStorage.setItem(K_EQUIPE, id); } catch {}
-    setFase('carregando');
+    /* se este ministério já foi aberto nesta sessão, pinta o estado guardado na
+       hora e revalida por baixo — trocar de equipe também fica instantâneo na
+       segunda visita. Só a primeira vez mostra o esqueleto. */
+    const guardado = _cacheEstado.get(id);
+    if (guardado) { setS(guardado); setFase('pronto'); } else setFase('carregando');
     /* O .catch NÃO É ZELO — sem ele isto trava a tela. `setFase('carregando')`
        já rodou; se `recarregar()` REJEITAR (a internet caiu no meio da troca,
        e aí o fetch lança em vez de devolver {error}), nada mais mexe na fase e
@@ -101,7 +142,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        para o ministério de antes e diz o que houve. */
     const voltarAtras = () => {
       if (idAtivo.current !== id) return;                 // outra troca assumiu
-      idAtivo.current = antesId; nomeAtivo.current = antesNome;
+      idAtivo.current = antesId; _cacheAtiva = antesId; nomeAtivo.current = antesNome;
       setEquipeId(antesId);
       try { if (antesId) localStorage.setItem(K_EQUIPE, antesId); } catch {}
       setFase(antesId ? 'pronto' : 'sem-equipe');
@@ -121,10 +162,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     if (process.env.NODE_ENV === 'development'
         && new URLSearchParams(window.location.search).has('demo')) {
       void import('@/lib/demo').then(({ estadoDemo }) => {
-        idAtivo.current = 'demo'; nomeAtivo.current = 'Mídia';
-        setEquipes([{ id: 'demo', nome: 'Mídia', slug: 'midia', whatsapp_grupo: null, ordem: 1 } as any]);
+        idAtivo.current = 'demo'; _cacheAtiva = 'demo'; nomeAtivo.current = 'Mídia';
+        const eqs = [{ id: 'demo', nome: 'Mídia', slug: 'midia', whatsapp_grupo: null, ordem: 1 } as any];
+        const est = estadoDemo();
+        setEquipes(eqs); _cacheEquipes = eqs;
         setEquipeId('demo');
-        setS(estadoDemo()); setFase('pronto');
+        setS(est); _cacheEstado.set('demo', est); setFase('pronto');
       });
       return;
     }
@@ -139,16 +182,24 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       setTimeout(async () => {
         if (!vivo) return;
         try {
-          const lider = await souLider();
-          if (!vivo) return;
-          if (!lider) { setFase('sem-acesso'); return; }
+          /* PERFORMANCE (fase 18): uma volta ao banco a menos no cold start.
+             listarEquipes já vem filtrado por RLS — só devolve o que a pessoa
+             lidera. Lista não-vazia ⇒ é líder, e o souLider() (uma ida inteira
+             ao banco, no caminho de TODO login normal) fica de fora. Só o caso
+             vazio, que é raro, ainda precisa dele — para separar "sem acesso"
+             de "líder sem nenhuma equipe". */
           const lista = await recarregarEquipes();
           if (!vivo) return;
-          if (!lista.length) { setFase('sem-equipe'); return; }
+          if (!lista.length) {
+            const lider = await souLider().catch(() => false);
+            if (!vivo) return;
+            setFase(lider ? 'sem-equipe' : 'sem-acesso');
+            return;
+          }
           let alvo = '';
           try { alvo = localStorage.getItem(K_EQUIPE) || ''; } catch {}
           if (!lista.some(e => e.id === alvo)) alvo = lista[0].id;
-          idAtivo.current = alvo;
+          idAtivo.current = alvo; _cacheAtiva = alvo;
           nomeAtivo.current = lista.find(e => e.id === alvo)?.nome || '';
           setEquipeId(alvo);
           await recarregar();
@@ -206,7 +257,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const navItens = ABAS.map(a => ({ ...a, on: caminho === a.href }));
 
   return (
-    <C.Provider value={{ S, recarregar, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
+    <C.Provider value={{ S, recarregar, pinta, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
       <header className="topo">
         <div className="topo-in">
           <div className="marca">

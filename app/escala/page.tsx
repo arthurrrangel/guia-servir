@@ -59,7 +59,7 @@ const nomeDia = (d: string) => (ehFollow(d) ? 'Follow, sábado' : 'domingo');
 export default function Pagina() { return <Shell><Escala /></Shell>; }
 
 function Escala() {
-  const { S, recarregar, aviso, base, equipe } = useApp();
+  const { S, recarregar, pinta, aviso, base, equipe } = useApp();
   const hoje = hojeISO();
   const semFuncoes = funcoesAtivas(S).length === 0;
 
@@ -113,7 +113,7 @@ function Escala() {
     const snap = retrato(futuros);
     try {
       const r = gerarMes(S, ano, mes, hoje);
-      await salvarDias(S, futuros, equipe!.id);
+      pinta(); await salvarDias(S, futuros, equipe!.id);
       await recarregar();
       const v = r.reduce((a, x) => a + x.vagas.length, 0);
       aviso(v ? `Pronto, mas faltou gente em ${v} ${v === 1 ? 'função' : 'funções'}` : 'Mês montado, sem buracos');
@@ -128,7 +128,7 @@ function Escala() {
     const snap = retrato([d]);
     try {
       const r = gerarDia(S, d);
-      await salvarDia(S, d, equipe!.id); await recarregar();
+      pinta(); await salvarDia(S, d, equipe!.id); await recarregar();
       aviso(r.vagas.length ? `Faltou gente em ${r.vagas.join(', ')}` : 'Dia montado');
     } catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
@@ -150,7 +150,7 @@ function Escala() {
       const dia = garantirDia(S, d);
       if (!vid) delete dia.slots[funcao];
       else dia.slots[funcao] = { vid, status: 'pendente', fixo: true };
-      await salvarDia(S, d, equipe!.id); await recarregar();
+      pinta(); await salvarDia(S, d, equipe!.id); await recarregar();
     } catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -163,6 +163,8 @@ function Escala() {
     if (!dia?.cultoId || !f?.id) return;
     setOcupado(true);
     const snap = retrato([d]);
+    /* pinta o novo status na hora; a gravacao segue por baixo */
+    if (dia.slots?.[funcao]) { dia.slots[funcao].status = st; pinta(); }
     try { await mudarStatus(dia.cultoId, f.id, st); await recarregar(); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
@@ -174,7 +176,7 @@ function Escala() {
     setOcupado(true);
     const snap = retrato([d]);
     dia.slots[funcao].fixo = !dia.slots[funcao].fixo;
-    try { await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.fixo ? 'Travado: o sorteio não mexe' : 'Destravado'); }
+    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.fixo ? 'Travado: o sorteio não mexe' : 'Destravado'); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -188,7 +190,7 @@ function Escala() {
     setOcupado(true);
     const snap = retrato([d]);
     sl.primeiraVez = !sl.primeiraVez;
-    try { await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.primeiraVez ? 'Marcado como 1ª vez: a pessoa vai chegar mais cedo' : 'Tirada a marca de 1ª vez'); }
+    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.primeiraVez ? 'Marcado como 1ª vez: a pessoa vai chegar mais cedo' : 'Tirada a marca de 1ª vez'); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -198,7 +200,7 @@ function Escala() {
     setOcupado(true);
     const snap = retrato([d]);
     garantirDia(S, d).obs = txt;
-    try { await salvarDia(S, d, equipe!.id); await recarregar(); aviso('Recado salvo'); }
+    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso('Recado salvo'); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -208,7 +210,7 @@ function Escala() {
     const snap = retrato([d]);
     const dia = garantirDia(S, d);
     dia.plantao = sugerirPlantao(S, d, Math.max(1, S.config.plantaoQtd));
-    try { await salvarDia(S, d, equipe!.id); await recarregar(); }
+    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
