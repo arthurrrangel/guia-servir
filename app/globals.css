@@ -567,6 +567,12 @@ select option{background:#fff;color:var(--ink)}
      inteira ("Julia Baldez · entra se alguém furar"), não cabia ao lado do
      avatar e quebrava para baixo dele. Com base 0 o texto quebra por dentro. */
   .slot .cresce{flex:1 1 0;min-width:0}
+  /* o pill de saúde ("ninguém conferido: só o que se declara") é nowrap e
+     tem ~309px: num iPhone SE de 320px ele estourava a direita e a última
+     palavra era cortada. Aqui ele pode quebrar em duas linhas e nunca passa
+     da largura da linha. Os pills curtos ("ok") não têm o que quebrar, então
+     nada muda para eles nem nas telas mais largas. */
+  .slot .pill{white-space:normal;max-width:100%;align-items:flex-start}
 }
 
 
