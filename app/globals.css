@@ -111,8 +111,9 @@
 
   /* UMA CURVA SÓ, E CURTA. Movimento nesta identidade é confirmação de que a
      interface respondeu, não espetáculo: 140ms com saída rápida. */
-  --t:140ms cubic-bezier(.22,.61,.36,1);
-  --t-lento:520ms cubic-bezier(.22,.61,.36,1);   /* revelação ao rolar */
+  --ease:cubic-bezier(.22,.61,.36,1);            /* a assinatura de movimento: uma curva só no produto inteiro */
+  --t:140ms var(--ease);                         /* interação — hover, pressão, troca de estado */
+  --t-lento:520ms var(--ease);                   /* revelação ao rolar */
   --largura:1180px;
   --fonte:var(--fonte-inter),-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
@@ -308,7 +309,7 @@ button,.btn{
   padding:var(--e3) var(--e5);cursor:pointer;display:inline-flex;align-items:center;
   gap:var(--e2);justify-content:center;min-height:var(--toque);
   max-width:100%;text-align:center;
-  transition:background var(--t),border-color var(--t),transform var(--t),opacity var(--t);
+  transition:background var(--t),border-color var(--t),color var(--t),transform var(--t),opacity var(--t);
 }
 button:hover,
 button:active,
@@ -462,7 +463,9 @@ select option{background:#fff;color:var(--ink)}
 
 /* ------------------------------------------------------------ medidores --- */
 .medidor{height:5px;border-radius:0;background:var(--linha2);overflow:hidden}
-.medidor .fill{height:100%;border-radius:0;transition:width 400ms var(--t)}
+/* var(--ease), não var(--t): var(--t) carrega os 140ms e viravam DELAY aqui —
+   a barra esperava 140ms para começar a encher. Só a curva, com os 400ms. */
+.medidor .fill{height:100%;border-radius:0;transition:width 400ms var(--ease)}
 .medidor.ok .fill{background:var(--ok)}
 .medidor.warn .fill{background:var(--warn)}
 .medidor.bad .fill{background:var(--bad)}
@@ -816,6 +819,10 @@ select option{background:#fff;color:var(--ink)}
   display:flex;align-items:center;justify-content:space-between;gap:var(--e2);width:100%;
   text-align:left;padding:var(--e3) var(--e3);border-radius:var(--r-sm);background:transparent;
   border:0;min-height:44px;font-size:var(--t-apoio);
+  /* os itens <a> (meu espaço, novo ministério) não herdam a transição de
+     button: sem isto o realce de hover e o da equipe ativa (aria-current)
+     entram secos, enquanto os itens <button> ao lado deslizam. */
+  transition:background var(--t),color var(--t);
 }
 .menu-item:hover,
 .menu-item:active{background:var(--card2)}
