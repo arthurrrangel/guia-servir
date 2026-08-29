@@ -58,7 +58,10 @@ function Igreja() {
   const [areas, setAreas] = useState<AreaVisao[] | null>(null);
   useEffect(() => {
     let vivo = true;
-    void visaoGeral().then(r => { if (vivo) setAreas(r); });
+    /* sem .catch, uma rede que cai deixa `areas` em null para sempre e esta
+       seção some sem dizer nada. Lista vazia é o mesmo desenho (a seção não
+       aparece), mas agora é uma decisão e não uma promessa órfã. */
+    void visaoGeral().then(r => { if (vivo) setAreas(r); }).catch(() => { if (vivo) setAreas([]); });
     return () => { vivo = false; };
   }, []);
 
@@ -114,7 +117,7 @@ function Pendencias() {
   useEffect(() => {
     let vivo = true;
     if (!equipe?.id) return;
-    void painelDoMinisterio(equipe.id).then(r => { if (vivo) setP(r); });
+    void painelDoMinisterio(equipe.id).then(r => { if (vivo) setP(r); }).catch(() => {});
     return () => { vivo = false; };
   }, [equipe?.id]);
   if (!p) return null;

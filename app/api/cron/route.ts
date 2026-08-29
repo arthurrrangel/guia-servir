@@ -105,12 +105,27 @@ const linkZap = (tel?: string, texto?: string) => {
 const proxMes = (iso: string) => { const [a, m] = iso.split('-').map(Number); return m === 12 ? { ano: a + 1, mes: 1 } : { ano: a, mes: m + 1 }; };
 
 /* ------------------------------------------------------------- rota --- */
+/* O SEGREDO SAIU DA URL.
+   Antes esta rota também aceitava `?secret=<CRON_SECRET>`, comentado como
+   "atalho de teste". O atalho estava em produção, e o que ele abre é a única
+   coisa do sistema que roda com SUPABASE_SERVICE_ROLE — a chave que passa por
+   cima de toda política de RLS.
+
+   Query string não é lugar de credencial. Ela fica gravada no log de requisição
+   da Vercel (visível no painel), no histórico do navegador, na barra de
+   endereço, e vai junto no cabeçalho Referer de qualquer link clicado a partir
+   dali. Um segredo que já apareceu numa URL deve ser considerado conhecido.
+
+   O Vercel Cron manda `Authorization: Bearer`, então nada muda para o robô.
+   Para testar à mão:
+     curl -H "Authorization: Bearer $CRON_SECRET" https://guiaservir.com/api/cron?forcar=coleta
+
+   Se este segredo já foi usado em URL alguma vez, gire o CRON_SECRET na Vercel. */
 export async function GET(req: Request) {
   const segredo = process.env.CRON_SECRET;
   const auth = req.headers.get('authorization');
   const url = new URL(req.url);
-  const forcarBearer = url.searchParams.get('secret'); // Vercel Cron manda header; ?secret= é atalho de teste
-  if (!segredo || (auth !== `Bearer ${segredo}` && forcarBearer !== segredo)) {
+  if (!segredo || auth !== `Bearer ${segredo}`) {
     return Response.json({ erro: 'não autorizado' }, { status: 401 });
   }
   const s = servico();

@@ -229,7 +229,17 @@ function Ajustes() {
                   : 'todos os ministérios'}
               </span>
               <div className="ajt-acoes">
+                {/* UM BOTÃO APAGADO SEM MOTIVO É UM BECO.
+                    `disabled` tinha duas causas — não ser organizador geral, e
+                    ser o último acesso da lista — e nenhuma delas aparecia na
+                    tela. O organizador geral via "tirar acesso" morto no único
+                    líder que restava e não tinha como saber por quê. O title
+                    diz a razão de cada caso; a trava do último acesso continua,
+                    porque tirar o último é se trancar do lado de fora. */}
                 <button className="lid-bt-txt perigo" disabled={!geral || lideres.length < 2}
+                  title={!geral ? 'Só quem organiza todos os ministérios pode tirar acesso'
+                    : lideres.length < 2 ? 'Este é o único acesso. Libere outro antes de tirar este, ou ninguém entra.'
+                    : undefined}
                   onClick={async () => {
                     if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
                     try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }

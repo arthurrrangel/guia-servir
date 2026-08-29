@@ -157,10 +157,18 @@ export default function Eu() {
     setDomingos(((dom.data || []) as any[]).map(d => (typeof d === 'string' ? d : d.data)));
     /* identidade única: uma chamada, e a tela passa a saber tudo que a
        pessoa é. Sem await para não segurar a escala, que é o que ela veio ver. */
-    void quemSou(token).then(i => { if (i?.ok) setEu(i); });
-    sb()!.rpc('eu_espaco', { p_token: token }).then(({ data: e }) => {
-      if ((e as any)?.ok) setEspaco(e);
-    });
+    void quemSou(token).then(i => { if (i?.ok) setEu(i); }).catch(() => {});
+    /* as duas chamadas acima são extras: a escala, que é o que a pessoa veio
+       ver, já carregou. Se elas falharem a tela continua útil — mas a rejeição
+       precisa ter dono, senão vira ruído de console e, em alguns navegadores,
+       um erro global. */
+    /* .then(ok, erro) e não .then().catch(): o retorno do supabase-js é um
+       PromiseLike, um "thenable" — tem .then e NÃO tem .catch. A forma de dois
+       argumentos existe no PromiseLike e faz a mesma coisa aqui. */
+    sb()!.rpc('eu_espaco', { p_token: token }).then(
+      ({ data: e }) => { if ((e as any)?.ok) setEspaco(e); },
+      () => {},
+    );
     setFase('ok');
   }, [token]);
 

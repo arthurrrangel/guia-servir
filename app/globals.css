@@ -2744,6 +2744,23 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 .lid-linha:last-child{ border-bottom:0 }
 .lid-marca{ position:absolute; left:calc(-1 * var(--e3)); top:0; bottom:0;
   width:3px; background:transparent }
+
+/* A MARCA PRECISA DE UM PAI POSICIONADO, E DOIS PAIS NÃO ERAM.
+   29/08/2026. `.lid-linha` e `.marcada` declaram position:relative logo acima.
+   O `<summary>` de cada culto na /escala e o `.lid-area` do /painel não
+   declaravam — e um filho absoluto sem pai posicionado não fica um pouco fora
+   do lugar: ele sobe procurando o próximo ancestral posicionado e se estica
+   até lá. Com top:0;bottom:0, uma marca de 3px por 82px de altura virava uma
+   barra dourada de 3px por 1.909px descendo a página inteira, ao lado de todo
+   o conteúdo, em toda largura de tela.
+
+   Estava no ar. Nenhuma medição pegou: o harness de celular reportou
+   "ESTOURA .lid-marca" e eu li como falso positivo. Quem pegou foi a foto.
+
+   A correção não é `position:relative` nos dois lugares — é a regra que torna
+   o erro impossível: quem tem uma marca como filha ganha o contexto. Assim o
+   próximo lugar que usar `.lid-marca` já nasce certo. */
+:has(> .lid-marca){ position:relative }
 .lid-linha.ok   > .lid-marca{ background:var(--ok) }
 .lid-linha.pend > .lid-marca{ background:var(--warn) }
 .lid-linha.ruim > .lid-marca{ background:var(--bad) }
@@ -2877,8 +2894,20 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .lid-faixa{
   margin-left:calc(50% - 50vw + var(--barra,0px)/2);
   margin-right:calc(50% - 50vw + var(--barra,0px)/2);
-  padding-left:max(var(--e5), calc(50vw - 568px));
-  padding-right:max(var(--e5), calc(50vw - 568px));
+  /* DUAS BORDAS ESQUERDAS NA MESMA PÁGINA — 29/08/2026.
+     A margem tira a faixa da coluna com uma conta (50% - 50vw); o padding a
+     devolvia com OUTRA (50vw - 568px). Duas contas para a mesma borda nunca
+     dão o mesmo número: medido em 360, 390, 430, 600, 720, 768, 834, 900,
+     1024, 1136, 1180, 1280, 1440 e 1920, o texto da faixa começava de 12 a 20
+     pixels À ESQUERDA do texto logo abaixo dela. Em toda largura de tela real,
+     em todas as telas do líder. "Agosto 2026" e "Follow, sábado 29/08" nunca
+     estiveram na mesma vertical.
+
+     Agora o padding é a NEGAÇÃO EXATA da margem — o que a margem puxa para
+     fora, o padding traz de volta, pela mesma conta e com o mesmo --barra.
+     Não tem constante para calibrar e não tem como divergir de novo. */
+  padding-left:max(var(--e5), calc(50vw - 50% - var(--barra,0px)/2));
+  padding-right:max(var(--e5), calc(50vw - 50% - var(--barra,0px)/2));
 }
 /* o vão depois da faixa somava 84px aos 40 dela: buraco, não respiro */
 .lid-faixa + .lid-secao{ margin-top:var(--e7) }
@@ -3701,3 +3730,130 @@ html{ scroll-padding-top:88px }
    vira um espaço fantasma DEPOIS do glifo, e a seta fica fora do centro do
    próprio alvo — 3,8px num alvo de 44px é visível. Glifo não é palavra. */
 .esc-seta{ letter-spacing:normal; text-transform:none }
+
+/* ==========================================================================
+   14 · A MEDIDA DA LINHA
+   Revisão em todas as dimensões — 29/08/2026
+
+   Medido em 1280, 1920, 2560 e 3440: quatro blocos de texto do lado do líder
+   passavam de 74 caracteres por linha, chegando a 127. Acima disso o olho erra
+   o retorno: termina a linha e não acha o começo da seguinte. Não é gosto, é
+   fisiologia — a razão de jornal ter coluna estreita e não uma página inteira.
+
+   A regra não é "tudo estreito". É: PROSA tem medida, LISTA não precisa.
+   Um parágrafo se lê linha por linha; uma lista de nomes se varre. São dois
+   gestos diferentes e por isso dois limites diferentes.
+   ========================================================================== */
+
+/* --- ATENÇÃO: `ch` NÃO É "UM CARACTERE" ---------------------------------
+   A primeira versão desta seção capou em 66ch achando que dava 66 caracteres
+   por linha. Medido depois com o texto real: 94. A unidade `ch` do CSS é a
+   largura do glifo ZERO, e "0" é muito mais gordo que a média de uma frase em
+   minúsculas — nas fontes daqui a razão medida é 1,42. Ou seja: todo `Nch`
+   deste arquivo entrega ~1,4N caracteres de verdade.
+
+   Então o alvo de ~72 caracteres reais vira 50ch, e não 72ch. O token existe
+   para isso não voltar a ser adivinhado linha a linha. */
+:root{
+  --prosa:50ch;      /* ~72 caracteres reais — parágrafo */
+  --prosa-lg:68ch;   /* ~96 reais — lista que se varre, não se lê */
+  --prosa-zap:38ch;  /* ~54 reais — prévia de mensagem de WhatsApp */
+}
+
+/* .aviso é a caixa de recado de TODO o sistema — sucesso, erro, atenção,
+   informação, em toda tela. Uma regra aqui conserta todas de uma vez.
+   O ícone e o vão entram na conta e por isso somam à medida do texto. */
+.aviso{ max-width:calc(var(--prosa) + 17px + var(--e3) + var(--e4) * 2) }
+
+/* a nota abaixo do campo de recado da escala: era 127ch em 2560 */
+.esc-recado-nota{ max-width:var(--prosa) }
+
+/* .dim.pequeno é a explicação de uso do lado do líder — a frase que diz o que
+   aquela seção faz. Sem medida nenhuma, chegava a 166 caracteres por linha em
+   2560px: o pior número do produto inteiro, justamente no texto que existe
+   para ser lido por quem ainda não entendeu a tela. */
+.lid .dim.pequeno,.lid-secao > p,.bloco-extra-corpo > p:first-child{ max-width:var(--prosa) }
+
+/* --- lista de nomes: mais larga, mas não infinita ------------------------ */
+
+/* "podem / não podem / não responderam" é um rol separado por vírgula. Varrer
+   uma lista larga é mais rápido que rolar uma coluna alta, então o limite aqui
+   é generoso — só existe para a linha não virar uma faixa de ponta a ponta. */
+.esc-disp-corpo p{ max-width:var(--prosa-lg) }
+
+/* --- a mensagem de WhatsApp: largura de celular, porque é onde ela vive --- */
+
+/* .msg-preview mostra o texto que o líder vai colar no grupo, e o textarea é
+   onde ele escreve. Ambos estavam com 106–126ch. Mostrar a 120 caracteres uma
+   mensagem que vai quebrar a 40 no celular de quem lê é uma prévia que mente.
+   O líder vê o parágrafo que o voluntário vai ver, e percebe sozinho quando a
+   mensagem ficou longa demais. */
+.msg-preview,.msg,.lid-msg,.lid-secao textarea{ max-width:var(--prosa-zap) }
+
+/* ==========================================================================
+   15 · O DESFILADEIRO
+   Revisão em todas as dimensões — 29/08/2026
+
+   Na /escala, cada linha é `1fr auto`: o nome à esquerda, o estado à direita,
+   e o vão entre eles come tudo que sobra. Medido em 1440: "William Silva" na
+   coluna 1 termina em 390px, "CONFIRMOU" começa em 1165px. São 775px de nada
+   dentro de uma linha de 1040px — três quartos da linha é buraco. Em 2560 são
+   830px. O olho não conecta um nome a um estado separados por meia tela; ele
+   perde a linha no meio e volta para conferir.
+
+   O /painel não tem esse problema, e a comparação diz por quê: lá o conteúdo
+   se divide em duas colunas (`.lid-duas`), então cada linha tem ~500px e o
+   estado fica perto do nome. Não é que o /painel seja mais estreito — é que
+   ele usa a largura para pôr MAIS COISA na tela, não para afastar duas coisas
+   que precisam ser lidas juntas.
+
+   Então a /escala aprende a mesma regra. A lista de postos e o cabeçalho do
+   dia param de crescer em 78ch; a seção continua tomando a coluna inteira, e
+   o fio de baixo continua atravessando — o que muda é onde o estado para.
+
+   Isso NÃO se aplica à faixa do topo: lá o placar à direita é um elemento de
+   composição, não o par de uma frase. Um número grande no canto é cartaz. */
+/* A PRIMEIRA VERSÃO DISTO CAPOU CADA LINHA SEPARADAMENTE, e o resultado foi
+   pior que o problema: cinco bordas direitas diferentes na mesma tela — o
+   cabeçalho parava em 1207, os postos em 1225, o fio do "ver nomes" seguia
+   até 1445, o campo de recado em 1057. Trocar um buraco por cinco desalinhos
+   não é conserto. O corte é UM, no bloco do dia inteiro: tudo lá dentro herda
+   a mesma borda direita e o fio de baixo acompanha. */
+:root{ --lista:64ch }
+.esc-dia{ max-width:var(--lista) }
+
+/* 64ch, e não 78: o valor veio de medir o conteúdo, não de escolher um número
+   bonito. Clonando cada linha com `width:max-content`, a coluna da esquerda
+   mais larga de toda a /escala pede 266px e a da direita 140px — 406px de
+   conteúdo real em 16 linhas. 78ch dava 836px, o dobro do necessário, e o que
+   sobrava virava buraco entre o nome e o estado. 64ch (~563px) deixa 157px de
+   folga: o suficiente para a coluna de estados parecer uma decisão, pouco o
+   bastante para o olho segurar a linha inteira sem voltar. */
+
+/* ==========================================================================
+   16 · A PORTA DA FRENTE EM TELA GRANDE
+   Revisão em todas as dimensões — 29/08/2026
+
+   Em 2560×1587, o formulário de entrada ocupava 305×390 pixels no alto e
+   deixava 1.100px de branco embaixo. Horizontalmente já estava centrado; o
+   que faltava era o eixo vertical, e sem ele a tela lê como se tivesse
+   carregado pela metade.
+
+   Esta é a única tela do produto onde centralizar na vertical é a resposta
+   certa e não um truque: há UMA coisa na página, ela não rola, e não existe
+   conteúdo abaixo esperando ser descoberto. Em qualquer outra tela isso
+   esconderia informação; aqui não há o que esconder.
+
+   `min-height` com svh e o padding de segurança: em celular com o teclado
+   aberto a área visível encolhe, e um `center` rígido empurraria o botão para
+   fora. Com `justify-content:center` + `padding` o conteúdo cede em vez de
+   sumir, e o `margin:auto 0` do miolo dá o mesmo resultado quando sobra
+   espaço e some quando falta. */
+.lid.entrada{
+  min-height:100svh;
+  display:flex; flex-direction:column; justify-content:center;
+  padding-top:var(--e7); padding-bottom:var(--e7);
+}
+@media(min-width:720px) and (min-height:620px){
+  .lid.entrada{ padding-top:var(--e8); padding-bottom:var(--e8) }
+}

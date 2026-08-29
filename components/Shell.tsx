@@ -93,15 +93,23 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     setEquipeId(id); setMenuAberto(false);
     try { localStorage.setItem(K_EQUIPE, id); } catch {}
     setFase('carregando');
-    void recarregar().then(est => {
-      if (est) { setFase('pronto'); return; }
+    /* O .catch NÃO É ZELO — sem ele isto trava a tela. `setFase('carregando')`
+       já rodou; se `recarregar()` REJEITAR (a internet caiu no meio da troca,
+       e aí o fetch lança em vez de devolver {error}), nada mais mexe na fase e
+       o líder fica olhando o carregando para sempre, sem mensagem e sem saída.
+       Voltar era o único gesto. Falha e recusa terminam no mesmo lugar: volta
+       para o ministério de antes e diz o que houve. */
+    const voltarAtras = () => {
       if (idAtivo.current !== id) return;                 // outra troca assumiu
       idAtivo.current = antesId; nomeAtivo.current = antesNome;
       setEquipeId(antesId);
       try { if (antesId) localStorage.setItem(K_EQUIPE, antesId); } catch {}
       setFase(antesId ? 'pronto' : 'sem-equipe');
       aviso('Não consegui abrir esse ministério. Tente de novo.');
-    });
+    };
+    void recarregar()
+      .then(est => { if (est) setFase('pronto'); else voltarAtras(); })
+      .catch(voltarAtras);
   }, [recarregar, equipes, aviso]);
 
   useEffect(() => {
@@ -165,6 +173,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        pessoa para o login, que é a saída certa. */
     s.auth.getSession()
       .then(({ data }) => entrar(!!data.session))
+      .catch(() => entrar(false))
       .catch(() => entrar(false));
     const { data: sub } = s.auth.onAuthStateChange((_e, sess) => entrar(!!sess));
     return () => { vivo = false; sub.subscription.unsubscribe(); };
