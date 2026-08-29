@@ -123,7 +123,7 @@ function Pendencias() {
     p.aguardando_conversa && { grave: false, n: p.aguardando_conversa,
       txt: 'esperando a conversa com a liderança', href: '/painel/candidaturas' },
     p.sem_conferir && { grave: false, n: p.sem_conferir,
-      txt: 'com nível declarado e ainda não conferido', href: '/time' },
+      txt: 'com nível declarado e ainda não conferido', href: '/time/conferir' },
     p.sem_disponibilidade && { grave: false, n: p.sem_disponibilidade,
       txt: 'sem responder a disponibilidade do mês', href: '/time' },
     p.funcoes_sem_gente && { grave: true, n: p.funcoes_sem_gente,

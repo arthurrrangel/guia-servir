@@ -1,5 +1,6 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
+import Link from 'next/link';
 import { useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
@@ -8,7 +9,7 @@ import { Aviso, Medidor } from '@/components/Ui';
 import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import {
-  Nivel, confirmada, declaracoesSuspeitas, filaDeConferencia, funcoesAtivas,
+  Nivel, confirmada, filaDeConferencia, funcoesAtivas,
   msgConvite, saudeDoTime,
 } from '@/lib/engine';
 
@@ -17,9 +18,6 @@ export default function Pagina() { return <Shell><Time /></Shell>; }
 const CICLO: (Nivel | null)[] = [null, 'titular', 'reserva', 'treino'];
 const CLASSE: Record<string, string> = { titular: 't', reserva: 'r', treino: 'e' };
 const CURTO: Record<string, string> = { titular: 'faz sozinho', reserva: 'ajuda quando falta', treino: 'aprendendo' };
-/* mesmas palavras dos botões, para a linha de texto e o controle não usarem
-   vocabulário diferente para a mesma coisa */
-const MINI: Record<string, string> = { titular: 'sozinho', reserva: 'ajuda', treino: 'aprende' };
 /* Sigla de 4 letras do chip de área. Pegar só a primeira palavra funcionava na
    Mídia (PROJEÇÃO, FOTO), mas no Serviço do Culto todos os postos numerados
    colapsavam: LÍDER 1 e LÍDER 2 viravam "LÍDE", os quatro setores viravam
@@ -30,14 +28,6 @@ function marca(nome: string) {
   const fim = p.length > 1 ? p[p.length - 1] : '';
   return fim && fim.length <= 2 ? p[0].slice(0, 3) + fim : p[0].slice(0, 4);
 }
-/* rótulos curtos: a linha acima já explica o que a pessoa declarou, então os
-   quatro botões cabem numa fileira só e a conferência vira um toque por área. */
-const OPCOES: { nivel: Nivel | null; rotulo: string }[] = [
-  { nivel: 'titular', rotulo: 'sozinho' },
-  { nivel: 'reserva', rotulo: 'ajuda' },
-  { nivel: 'treino', rotulo: 'aprende' },
-  { nivel: null, rotulo: 'não faz' },
-];
 
 function Time() {
   const { S, recarregar, aviso, base, equipe } = useApp();
@@ -93,18 +83,6 @@ function Time() {
     catch (e) { aviso(aviseHumano(e)); }
   }
 
-  /* o líder confere UMA área por vez: é assim que ele consegue julgar, porque
-     ele conhece a área, não os 9 chips de uma pessoa de uma vez só. */
-  async function conferirNivel(vid: string, funcao: string, nivel: Nivel | null) {
-    const chave = vid + '|' + funcao;
-    if (chipSalvando) return;
-    setChipSalvando(chave);
-    try { await definirHabilidade(vid, mapa.get(funcao)!, nivel); await recarregar(); }
-    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
-    setChipSalvando('');
-  }
-
-  const suspeitas = declaracoesSuspeitas(S);
   const fila = filaDeConferencia(S);
   /* CONTAGEM, não lista. Já escrevi `pendentes.length` aqui embaixo uma vez e a
      seção inteira sumiu em silêncio: número não tem length. */
@@ -143,84 +121,33 @@ function Time() {
         <Aviso tom="info">Sem saber quem sabe fazer o quê, não existe rodízio. Comece pelas pessoas que serviram no último domingo.</Aviso>
       )}
 
+      {/* A FILA DE CONFERÊNCIA SAIU DAQUI — arquitetura de informação, 29/08/2026.
+
+          Esta página carregava 1.509 elementos contra 277 do /painel: era três
+          a cinco vezes a mais pesada do produto, e a diferença estava toda numa
+          fila que existe só enquanto tem fila. TIME é o nome de uma coisa
+          permanente — quem são as pessoas — e quem ocupava o topo era um
+          mutirão que some quando acaba.
+
+          A fila virou endereço próprio, do mesmo jeito que as candidaturas já
+          são: as duas são caixa de entrada gerada pelo mesmo cadastro, e só uma
+          tinha página. Fica aqui a convocação, porque nível não conferido piora
+          a escala de verdade — não é detalhe que possa sumir de vista. */}
       {pendentes > 0 && (
-        <section className="lid-secao conferencia">
-          <div className="lid-secao-cab">
-            <span className="rot">Conferir nível</span>
-            <span className="lid-secao-nota">{pendentes} para conferir</span>
-          </div>
-          <p className="dim pequeno" style={{ marginTop: 6 }}>
-            Estas pessoas se cadastraram sozinhas e escolheram o próprio nível. Enquanto ninguém confere,
-            um <strong>faz sozinho</strong> declarado <strong>vale como ajuda quando falta</strong>: a pessoa entra
-            na escala normal, mas o sorteio não deixa a área de pé só nela. Vá área por área, é rápido.
-          </p>
-
-          {!!suspeitas.length && (
-            <details className="bloco-extra" style={{ margin: '14px 0 4px' }}>
-              <summary>
-                <span className="pill warn peq"><span className="ponto warn" />{suspeitas.length}</span>
-                <span className="cresce">{suspeitas.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}</span>
-                <IcSeta className="giro" />
-              </summary>
-              <div className="bloco-extra-corpo" style={{ paddingTop: 12 }}>
-                {suspeitas.map((sp, i) => (
-                  <Aviso key={i} tom={sp.motivo === 'pilar_unico' ? 'erro' : 'atencao'}>{sp.texto}</Aviso>
-                ))}
-              </div>
-            </details>
-          )}
-
-          {/* UMA ÁREA ABERTA POR VEZ.
-              Medido no celular: esta fila sozinha tinha 4.882px — 5,8 telas,
-              55% de uma página de 10,5 telas, com 32 linhas iguais em nove
-              blocos, todos abertos ao mesmo tempo. Rolar cinco telas de itens
-              iguais não é ler, é procurar o fim.
-
-              O detalhe que decidiu: a lista de PESSOAS, logo abaixo, já vem
-              fechada em <details>. Ou seja, a tela colapsava o que se navega
-              e deixava aberto o que se executa — exatamente ao contrário. O
-              texto acima ainda por cima diz "vá área por área, é rápido", que
-              é o que um bloco por vez permite e nove blocos abertos impedem.
-
-              Não muda o que o líder decide nem onde: mesma fila, mesmas
-              opções, mesmo toque. Muda quanto dela pesa na mão de uma vez.
-              A contagem vai no cabeçalho para ninguém precisar abrir para
-              saber se tem alguém ali dentro. */}
-          {fila.map((bl, i) => (
-            <details className="area-conf" key={bl.funcao} open={i === 0}>
-              <summary>
-                <span className="overline">{bl.funcao}</span>
-                <span className="area-conf-n">{bl.pendentes.length}</span>
-                <IcSeta className="giro" />
-              </summary>
-              {bl.pendentes.map(p => (
-                <div className="conf-linha" key={p.id}>
-                  <div className="cresce">
-                    <div className="forte">{p.nome.split(' ').slice(0, 2).join(' ')}</div>
-                    <div className="dim pequeno">
-                      {/* curto de propósito: a regra inteira está no parágrafo
-                          de cima. Repetir "valendo como ajuda quando falta até
-                          você conferir" em 32 linhas seguidas não informa, só
-                          faz a lista parecer o dobro do tamanho. */}
-                      disse <strong>{MINI[p.declarou]}</strong>
-                      {p.declarou !== p.efetivo && <> · vale <strong>{MINI[p.efetivo]}</strong></>}
-                    </div>
-                  </div>
-                  <div className="conf-btns" role="group" aria-label={`Nível de ${p.nome} em ${bl.funcao}`}>
-                    {OPCOES.map(o => (
-                      <button key={o.rotulo}
-                        className={`seg ${o.nivel === p.declarou ? 'on' : ''} ${o.nivel === null ? 'nao' : ''}`}
-                        disabled={!!chipSalvando}
-                        onClick={() => conferirNivel(p.id, bl.funcao, o.nivel)}>
-                        {o.rotulo}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </details>
-          ))}
-        </section>
+        <div className="lid-alerta ruim" style={{ marginTop: 'var(--e5)' }}>
+          <span className="lid-alerta-n">{pendentes}</span>
+          <span>
+            <Link href="/time/conferir">
+              {pendentes === 1
+                ? 'pessoa esperando você conferir o nível'
+                : 'níveis esperando sua conferência'}
+            </Link>
+            <span className="dim pequeno" style={{ display: 'block', marginTop: 4 }}>
+              Enquanto não confere, quem disse <strong>faz sozinho</strong> vale
+              como <strong>ajuda quando falta</strong> e o sorteio não deixa a área só nessa pessoa.
+            </span>
+          </span>
+        </div>
       )}
 
       {ordenados.map(v => {

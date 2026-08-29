@@ -64,6 +64,22 @@ export default function Servir() {
           <cite>GUIA Church</cite>
         </blockquote>
 
+        {/* PORTA LATERAL, NUNCA PORTÃO — jornada "quero servir", 29/08/2026.
+
+            Esta página mostra cinco portas e pede uma escolha. Para quem já
+            sabe que é bom de câmera, isso basta e a lista está logo abaixo,
+            intacta. Para quem só quer ajudar, escolher entre cinco nomes de
+            time é escolher no escuro: o que cada área realmente faz só aparece
+            depois de entrar nela.
+
+            A saída é UMA LINHA antes da lista, e não um questionário no meio do
+            caminho. Guia que atrapalha quem já decidiu tira mais gente do que
+            traz — por isso ela não empurra, não bloqueia e não esconde nada. */}
+        <p className="servir-atalho">
+          Não sabe qual é a sua? <Link href="/servir/onde-me-encaixo">Veja o que se faz em cada área</Link> —
+          o trabalho de verdade, não o nome do time.
+        </p>
+
         {fase === 'carregando' && <Carregando o="Carregando as áreas" />}
         {fase === 'rede' && (
           <Vazio

@@ -3870,3 +3870,172 @@ html{ scroll-padding-top:88px }
 @media(min-width:720px) and (min-height:620px){
   .lid.entrada{ padding-top:var(--e8); padding-bottom:var(--e8) }
 }
+
+/* ==========================================================================
+   16 · HOME DE SEIS SEÇÕES — 29/08/2026
+
+   Doze blocos viraram seis. O que sustenta o corte não é gosto: `.faixa` paga
+   84px em cima e 84px embaixo no celular, então cada seção custava ~168px de
+   padding antes da primeira palavra. O que sobrou aqui são as três peças que
+   as fusões precisaram.
+   ========================================================================== */
+
+/* A VIRADA DE ASSUNTO DENTRO DE UMA SEÇÃO.
+   Quando duas seções que respondiam à mesma pergunta viram uma, os assuntos
+   internos ainda precisam respirar — mas com o espaço de um parágrafo largo,
+   não com o de uma faixa inteira. 100px separa capítulo de capítulo dentro do
+   mesmo assunto; 168px separava assunto de assunto, e era esse o desperdício. */
+.casa-vira{ margin-top:100px }
+@media(min-width:900px){ .casa-vira{ margin-top:130px } }
+
+/* OS QUATRO PASSOS EM UMA TIRA.
+   Eram quatro cartões numerados com numeral de display, 985px no celular, e
+   repetiam na íntegra o que a página da área já explica depois da escolha.
+   Aqui a promessa é só "são quatro tempos e é rápido": o chevron da marca
+   separa os passos, e a linha inteira cabe em duas alturas de texto. */
+.casa-tira{
+  list-style:none; margin:56px auto 0; padding:0; max-width:1060px;
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap:var(--e3) 0; text-align:left;
+}
+.casa-tira li{
+  display:flex; align-items:baseline; gap:var(--e2);
+  font-family:var(--fonte-display); font-weight:var(--p-rot);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+  padding:0 var(--e5);
+}
+/* o separador é o chevron, que é o único ornamento do sistema. Não vai no
+   último item, e some quando a tira quebra em coluna no celular. */
+.casa-tira li + li::before{
+  content:"›"; margin-left:calc(-1 * var(--e5) + var(--e1)); margin-right:var(--e4);
+  font-weight:var(--p-corpo); letter-spacing:0; opacity:.4;
+}
+@media(max-width:719px){
+  .casa-tira{ flex-direction:column; align-items:flex-start; max-width:30ch; gap:var(--e4) 0 }
+  .casa-tira li{ padding:0 }
+  .casa-tira li + li::before{ content:none }
+}
+.casa-tira b{
+  font-weight:var(--p-leve); font-size:var(--t-ui); letter-spacing:.1em; opacity:.42;
+  font-variant-numeric:tabular-nums;
+}
+.casa-tira-nota{
+  margin:var(--e5) auto 0; max-width:52ch; text-align:center;
+  font-size:var(--t-apoio); line-height:1.65; color:var(--cinza);
+}
+.casa-escuro .casa-tira-nota{ color:var(--cinza-cl) }
+
+/* O ENDEREÇO AO LADO DA FACHADA.
+   A seção "Onde fica" tinha a foto em 3:2 na largura inteira (≈547px no
+   desktop) para uma informação de três linhas — e era a quarta vez que o
+   endereço aparecia na página. A foto fica porque chegar num lugar que você
+   reconhece é menos assustador, mas em 380px, ao lado do que interessa. */
+.casa-local{ display:grid; gap:var(--e6); margin-top:64px; align-items:center; text-align:left }
+@media(min-width:820px){
+  .casa-local{ grid-template-columns:minmax(0,380px) 1fr; gap:var(--e7) }
+}
+.casa-local-foto{ overflow:hidden; aspect-ratio:4/3 }
+.casa-local-foto img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  /* MESMO TRATAMENTO DAS OUTRAS FOTOS. A fachada era a única imagem do site
+     sem dessaturação: céu azul e palmeira verde em cima de um sistema que é
+     monocromático por lei. As áreas e o herói já usam este filtro. */
+  filter:saturate(.6) contrast(1.03);
+}
+.casa-local .casa-dados{ margin:0; max-width:none; text-align:left; gap:var(--e5) }
+@media(min-width:720px){ .casa-local .casa-dados{ grid-template-columns:1fr } }
+
+/* a linha de quem já serve, no fecho. Era uma seção de 381px repetindo dois
+   links que já estão na barra e no rodapé. */
+.casa-fecho-ja{
+  margin:var(--e6) auto 0; max-width:52ch;
+  font-size:var(--t-apoio); line-height:1.7; color:rgba(255,255,255,.62);
+}
+.casa-fecho-ja a{ color:#fff; border-bottom:1px solid rgba(255,255,255,.4) }
+.casa-fecho-ja a:hover,
+.casa-fecho-ja a:active{ border-bottom-color:#fff }
+
+/* ==========================================================================
+   17 · ONDE EU ME ENCAIXO — o degrau que faltava na jornada (29/08/2026)
+
+   A lista de áreas é organizada pelo organograma da igreja; quem chega de fora
+   pensa em TAREFA. Esta página vira o eixo e mostra o trabalho — por isso o
+   nome da função tem mais peso visual aqui do que tem na página da área, onde
+   ele é item de escolha e não isca de reconhecimento.
+   ========================================================================== */
+
+.onde-cab-lista{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:var(--e3) var(--e5); flex-wrap:wrap;
+  margin:var(--e8) 0 var(--e2); padding-bottom:var(--e4);
+  border-bottom:1px solid var(--noite);
+}
+.onde-nota{ font-size:var(--t-apoio); color:var(--cinza) }
+
+.onde-area{ padding:var(--e7) 0; border-bottom:1px solid var(--linha) }
+.onde-topo{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:var(--e4) var(--e6); flex-wrap:wrap;
+}
+.onde-nome{
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
+  font-size:var(--d-bloco); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--ink); text-decoration:none;
+}
+.onde-nome:hover,
+.onde-nome:active{ text-decoration:underline; text-underline-offset:4px }
+.onde-desc{ margin:var(--e3) 0 0; max-width:var(--prosa); font-size:var(--t-ui); line-height:1.65; color:var(--cinza) }
+.onde-ir{
+  flex:0 0 auto;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+  display:inline-flex; align-items:center; gap:var(--e2);
+  border-bottom:1px solid var(--linha3); padding-bottom:var(--e1);
+}
+.onde-ir:hover,
+.onde-ir:active{ border-bottom-color:currentColor }
+
+/* O TRABALHO, QUE É O QUE A PESSOA RECONHECE.
+   Duas colunas a partir de 720px: é lista que se varre, não texto que se lê. */
+.onde-fns{ display:grid; gap:var(--e5) var(--e6); margin-top:var(--e6) }
+@media(min-width:720px){ .onde-fns{ grid-template-columns:repeat(2,1fr) } }
+@media(min-width:1100px){ .onde-fns{ grid-template-columns:repeat(3,1fr) } }
+.onde-fn b{
+  display:block; font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase; color:var(--ink);
+}
+.onde-fn p{
+  margin:var(--e2) 0 0; font-size:var(--t-apoio); line-height:1.6; color:var(--cinza);
+  max-width:38ch;
+}
+.onde-fechada{
+  margin:var(--e5) 0 0; font-size:var(--t-apoio); line-height:1.6; color:var(--mudo);
+  border-left:1px solid var(--linha2); padding-left:var(--e4); max-width:var(--prosa);
+}
+
+.onde-fecho{ margin-top:var(--e8); text-align:center }
+.onde-fecho p{
+  margin:0 auto var(--e6); max-width:52ch;
+  font-size:var(--t-ui); line-height:1.7; color:var(--cinza);
+}
+
+/* a porta lateral em /servir: uma linha, antes da lista, sem competir com ela */
+.servir-atalho{
+  margin:0 auto var(--e7); max-width:56ch; text-align:center;
+  font-size:var(--t-ui); line-height:1.7; color:var(--cinza);
+}
+.servir-atalho a{ color:var(--ink); border-bottom:1px solid var(--linha3) }
+.servir-atalho a:hover,
+.servir-atalho a:active{ border-bottom-color:currentColor }
+
+/* AS TRÊS TRAVAS SÃO TRÊS, E A GRADE DA CASA É DE DUAS COLUNAS.
+   `.casa-perguntas` foi desenhada para as QUATRO perguntas da home, onde 2×2
+   fecha certinho. Com três itens a mesma grade deixa uma célula vazia do lado
+   do último — e buraco no meio de uma grade lê como coisa que faltou carregar.
+   Três colunas quando cabe, uma quando não cabe. Nunca duas. */
+@media(min-width:900px){
+  .onde-travas{ grid-template-columns:repeat(3,1fr); column-gap:var(--e6); max-width:none }
+}
+@media(min-width:720px) and (max-width:899px){
+  .onde-travas{ grid-template-columns:1fr; max-width:var(--prosa-lg) }
+}

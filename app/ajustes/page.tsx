@@ -1,20 +1,20 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
+import Link from 'next/link';
 import { Escolha } from '@/components/Ui';
 import { useEffect, useRef, useState } from 'react';
 import {
   addLider, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
   souOrganizadorGeral, type LinhaLider,
 } from '@/lib/db';
-import { atualizarEquipe, criarEquipe, removerEquipe } from '@/lib/equipes';
+import { atualizarEquipe } from '@/lib/equipes';
 import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
 function Ajustes() {
-  const { S, recarregar, aviso, base, equipe, equipes, recarregarEquipes, trocarEquipe } = useApp();
-  const [novaEquipe, setNovaEquipe] = useState('');
+  const { S, recarregar, aviso, base, equipe, equipes, recarregarEquipes } = useApp();
   const [nova, setNova] = useState('');
   const [lideres, setLideres] = useState<LinhaLider[]>([]);
   const [novoLider, setNovoLider] = useState('');
@@ -275,51 +275,23 @@ function Ajustes() {
         )}
       </section>
 
-      <section className="lid-secao" id="equipes">
+      {/* MINISTÉRIOS SAIU DAQUI — arquitetura de informação, 29/08/2026.
+          O cabeçalho desta página promete "tudo aqui vale só para este
+          ministério", e logo abaixo morava o botão que APAGA outro ministério
+          inteiro, com time, funções e escalas. A promessa era falsa a 4.300px
+          de distância dela mesma. O que alcança a casa inteira mudou de
+          endereço; aqui fica só o link. */}
+      <section className="lid-secao">
         <div className="lid-secao-cab">
-          <span className="rot">Ministérios</span>
+          <span className="rot">Outros ministérios</span>
+          <span className="lid-secao-nota">Fora do alcance desta página</span>
         </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
-          Cada ministério tem time, funções e escala próprios. A escala automática do dia 26 monta todos.
+          Criar, renomear ou apagar ministério mexe na casa inteira e por isso mora
+          em outro lugar.
         </p>
-        <div className="ajt-lista">
-          {equipes.map(e => (
-            <div className="ajt-item" key={e.id}>
-              <input enterKeyHint="done" className="ajt-nome" key={e.nome} defaultValue={e.nome} aria-label="nome do ministério"
-                onBlur={async ev => {
-                  const v = ev.target.value.trim();
-                  if (v && v !== e.nome) { try { await atualizarEquipe(e.id, { nome: v }); await recarregarEquipes(); aviso('Salvo'); } catch (err) { aviso(aviseHumano(err, 'salvar')); } }
-                }} />
-              <span className="ajt-sub">{e.id === equipe?.id ? 'aberto agora' : ''}</span>
-              <div className="ajt-acoes">
-                {e.id !== equipe?.id &&
-                  <button className="lid-bt-txt" onClick={() => trocarEquipe(e.id)}>abrir</button>}
-                <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`} disabled={equipes.length < 2}
-                  onClick={async () => {
-                    if (!confirm(`Apagar o ministério ${e.nome}? Todo o time, funções e escalas dele somem. Não dá para desfazer.`)) return;
-                    try {
-                      await removerEquipe(e.id);
-                      const lista = await recarregarEquipes();
-                      if (e.id === equipe?.id) {
-                        if (lista[0]) trocarEquipe(lista[0].id, lista);
-                        else { try { localStorage.removeItem('escala.equipe'); } catch {} location.reload(); return; }
-                      }
-                      aviso('Apagado');
-                    }
-                    catch (err) { aviso(aviseHumano(err)); }
-                  }}>apagar</button>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div className="linha" style={{ marginTop: 12 }}>
-          <input enterKeyHint="done" value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
-          <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
-            setGravando(true);
-            try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado'); }
-            catch (err) { aviso(aviseHumano(err)); }
-            setGravando(false);
-          }}>Criar ministério</button>
+        <div style={{ marginTop: 14 }}>
+          <Link className="lid-bt-txt" href="/ajustes/ministerios">Abrir os ministérios da igreja</Link>
         </div>
       </section>
 

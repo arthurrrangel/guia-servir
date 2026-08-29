@@ -299,7 +299,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                       {e.nome}{e.id === equipeId && ' ✓'}
                     </button>
                   ))}
-                  <Link href="/ajustes#equipes" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
+                  <Link href="/ajustes/ministerios" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
                 </div>
               </>
             )}
