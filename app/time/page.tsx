@@ -8,6 +8,7 @@ import {
 import { Aviso, Medidor } from '@/components/Ui';
 import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
+import { confirmar } from '@/lib/confirmar';
 import {
   Nivel, confirmada, filaDeConferencia, funcoesAtivas,
   msgConvite, saudeDoTime,
@@ -71,7 +72,11 @@ function Time() {
   }
 
   async function remover(vid: string, nome: string) {
-    if (!confirm(`Remover ${nome}? O histórico dele some junto.`)) return;
+    if (!await confirmar({
+      titulo: `Remover ${nome} do time?`,
+      texto: 'O histórico de escalas dele some junto.',
+      acao: 'Remover', perigo: true,
+    })) return;
     try { await removerVoluntario(vid); await recarregar(); aviso('Removido'); }
     catch (e) { aviso(aviseHumano(e)); }
   }

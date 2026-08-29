@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { atualizarEquipe, criarEquipe, removerEquipe } from '@/lib/equipes';
 import { aviseHumano } from '@/lib/erros';
 import { Aviso } from '@/components/Ui';
+import { confirmar } from '@/lib/confirmar';
 
 /* =============================================================================
    /ajustes/ministerios — O QUE VALE PARA A CASA INTEIRA
@@ -47,7 +48,11 @@ function Ministerios() {
   }
 
   async function apagar(id: string, nome: string) {
-    if (!confirm(`Apagar o ministério ${nome}? Todo o time, funções e escalas dele somem. Não dá para desfazer.`)) return;
+    if (!await confirmar({
+      titulo: `Apagar o ministério ${nome}?`,
+      texto: 'Todo o time, as funções e as escalas dele somem junto.',
+      acao: 'Apagar o ministério', perigo: true,
+    })) return;
     try {
       await removerEquipe(id);
       const lista = await recarregarEquipes();

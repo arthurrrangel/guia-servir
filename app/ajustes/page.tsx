@@ -11,6 +11,7 @@ import {
 import { atualizarEquipe } from '@/lib/equipes';
 import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
+import { confirmar } from '@/lib/confirmar';
 
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
@@ -53,7 +54,11 @@ function Ajustes() {
     setGravando(false);
   }
   async function delFn(id: string, nome: string) {
-    if (!confirm(`Apagar ${nome}? Some das escalas antigas também.`)) return;
+    if (!await confirmar({
+      titulo: `Apagar a função ${nome}?`,
+      texto: 'Ela some das escalas antigas também.',
+      acao: 'Apagar', perigo: true,
+    })) return;
     try { await removerFuncao(id); await recarregar(); aviso('Apagada'); }
     catch (e) { aviso(aviseHumano(e)); }
   }
@@ -258,7 +263,9 @@ function Ajustes() {
                     : lideres.length < 2 ? 'Este é o único acesso. Libere outro antes de tirar este, ou ninguém entra.'
                     : undefined}
                   onClick={async () => {
-                    if (!confirm(`Tirar o acesso de ${l.email}?`)) return;
+                    if (!await confirmar({
+                      titulo: `Tirar o acesso de ${l.email}?`, acao: 'Tirar acesso',
+                    })) return;
                     try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
                     catch (err) { aviso(aviseHumano(err)); }
                   }}>tirar acesso</button>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { mudarStatus, salvarDia, salvarDias } from '@/lib/db';
 import { Aviso, Escolha } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
+import { confirmar } from '@/lib/confirmar';
 import {
   candidatos, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
@@ -106,9 +107,15 @@ function Escala() {
   async function gerarTudo() {
     if (semFuncoes) { aviso('Este ministério ainda não tem funções. Crie em Ajustes.'); return; }
     if (!futuros.length) { aviso('Esse mês já passou inteiro'); return; }
-    if (!confirm(futuros.length === 1
-      ? `Isso remonta o único culto de ${MESES[mes - 1]} que ainda não passou. Quem você travou e quem já confirmou não mudam. Seguir?`
-      : `Isso remonta os ${futuros.length} cultos de ${MESES[mes - 1]} que ainda não passaram (domingos e sábados do Follow). Quem você travou e quem já confirmou não mudam. Seguir?`)) return;
+    if (!await confirmar({
+      titulo: futuros.length === 1
+        ? `Remontar o único culto de ${MESES[mes - 1]} que ainda não passou?`
+        : `Remontar os ${futuros.length} cultos de ${MESES[mes - 1]} que ainda não passaram?`,
+      texto: futuros.length === 1
+        ? 'Quem você travou e quem já confirmou não mudam.'
+        : 'Domingos e sábados do Follow. Quem você travou e quem já confirmou não mudam.',
+      acao: 'Remontar',
+    })) return;
     setOcupado(true);
     const snap = retrato(futuros);
     try {
@@ -123,7 +130,11 @@ function Escala() {
 
   async function gerarUm(d: string) {
     if (semFuncoes) { aviso('Este ministério ainda não tem funções. Crie em Ajustes.'); return; }
-    if (d < hoje && !confirm('Esse culto já passou. Sortear de novo apaga quem furou nele. Seguir mesmo assim?')) return;
+    if (d < hoje && !await confirmar({
+      titulo: 'Esse culto já passou. Sortear de novo?',
+      texto: 'Sortear de novo apaga quem furou nele.',
+      acao: 'Sortear mesmo assim', perigo: true,
+    })) return;
     setOcupado(true);
     const snap = retrato([d]);
     try {
@@ -142,7 +153,9 @@ function Escala() {
       const oQue = atual.status === 'confirmado' ? `${nome} já CONFIRMOU esse dia`
         : atual.status === 'furou' ? `${nome} está marcado como FUROU (isso conta no histórico)`
         : `${nome} avisou que não pode`;
-      if (!confirm(`${oQue}. Trocar apaga essa resposta. Seguir?`)) return;
+      if (!await confirmar({
+        titulo: `${oQue}.`, texto: 'Trocar apaga essa resposta.', acao: 'Trocar',
+      })) return;
     }
     setOcupado(true);
     const snap = retrato([d]);

@@ -172,15 +172,47 @@ a{color:inherit;text-decoration:none}
 /* ------------------------------------------------------------ tipografia --- */
 h1{font-size:var(--d-secao);margin:0;letter-spacing:-.03em;font-weight:var(--p-negrito);line-height:1.15}
 h2{font-size:var(--d-lead);margin:0;letter-spacing:-.02em;font-weight:var(--p-forte);line-height:1.15}
-/* rótulo de seção: é a tipografia da logo. Chevron no lugar de bolinha. */
+/* O RÓTULO — TRÊS VIRARAM UM (fase 9, 29/08/2026)
+   ---------------------------------------------------------------------------
+   A peça mais usada do sistema existia em três versões, escritas em dias
+   diferentes, fazendo exatamente o mesmo trabalho: dizer o nome de um pedaço
+   da tela em caixa alta pequena.
+
+       .rot       65 usos   peso 500   tracking var(--tr)
+       .overline  10 usos   peso 650   tracking .14em
+       h3          3 usos   peso 650   tracking .15em   + chevron
+
+   As três convivem na MESMA tela: /eu tem as três, /time tem as três,
+   /equipe tem duas. Rodei as três lado a lado antes de mexer: o tracking
+   (1,80px contra 1,68px) ninguém enxerga; o PESO enxerga — 500 contra 650 em
+   caixa alta de 12px é a diferença entre um rótulo e um negrito.
+
+   Alguém poderia dizer que o peso era hierarquia de propósito. Não era, e o
+   uso prova: .overline (650, o mais forte) rotula o nome de uma função DENTRO
+   de um card em /time, enquanto .rot (500, o mais fraco) rotula seções
+   inteiras em /eu. Está ao contrário de qualquer hierarquia — é data de
+   escrita, não decisão.
+
+   Fica UM: peso var(--p-rot) — o token chama-se "rot" porque foi feito para
+   isto — e tracking var(--tr). O `h3` continua com o chevron: é a única das
+   três que é HEADING de verdade (aria-level, âncora de leitor de tela), e o
+   chevron é o que marca essa diferença sem inventar cor nem tamanho.
+
+   E havia uma QUARTA diferença, a maior de todas e a que eu quase deixei
+   passar: .rot é Raleway (var(--fonte-display)) e as outras duas herdavam
+   Inter do body. Duas famílias tipográficas para o mesmo rótulo. A regra da
+   identidade é de uma linha — rótulo é a voz da marca, texto de interface é
+   Inter — e .rot era a única que a cumpria. */
 h3{
-  font-size:var(--t-rot);margin:0 0 var(--e4);text-transform:uppercase;letter-spacing:.15em;
-  color:var(--mudo);font-weight:var(--p-negrito);display:flex;align-items:center;gap:var(--e2);
+  font-family:var(--fonte-display);
+  font-size:var(--t-rot);margin:0 0 var(--e4);text-transform:uppercase;letter-spacing:var(--tr);
+  color:var(--mudo);font-weight:var(--p-rot);display:flex;align-items:center;gap:var(--e2);
 }
 h3::before{content:"›";color:var(--mudo);font-size:var(--t-ui);line-height:1;font-weight:var(--p-corpo);transform:translateY(-1px)}
 .overline{
-  font-size:var(--t-rot);text-transform:uppercase;letter-spacing:.14em;
-  color:var(--mudo);font-weight:var(--p-negrito);display:block;
+  font-family:var(--fonte-display);
+  font-size:var(--t-rot);text-transform:uppercase;letter-spacing:var(--tr);
+  color:var(--mudo);font-weight:var(--p-rot);display:block;
 }
 .forte{font-weight:var(--p-forte);letter-spacing:-.012em}
 .dim{color:var(--ink2)}
@@ -240,7 +272,7 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 .abas a:hover,
 .abas a:active{color:var(--ink2)}
 .abas a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--ink)}
-.abas svg{width:16px;height:16px;opacity:.85}
+.abas svg{width:var(--i);height:var(--i);opacity:.85}
 @media(max-width:719px){ .abas{display:none} }
 
 /* barra de baixo: no celular a navegação fica onde o polegar alcança.
@@ -258,7 +290,7 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
   font-size:var(--t-rot);font-weight:var(--p-negrito);letter-spacing:.03em;text-transform:uppercase;
   color:var(--mudo);transition:color var(--t),background var(--t);
 }
-.barra-fundo a svg{width:19px;height:19px}
+.barra-fundo a svg{width:var(--i-max);height:var(--i-max)}
 .barra-fundo a:active{opacity:.6}
 .barra-fundo a{position:relative}
 .barra-fundo a[aria-current="page"]{color:var(--ink)}
@@ -317,7 +349,7 @@ button:active,
 .btn:active{background:var(--card3);border-color:var(--linha3)}
 button:active,.btn:active{transform:scale(.985)}
 button:disabled{opacity:.38;cursor:not-allowed;transform:none}
-button svg,.btn svg{width:16px;height:16px;flex:none}
+button svg,.btn svg{width:var(--i);height:var(--i);flex:none}
 
 /* a única ação primária da tela: branco sólido, contraste máximo */
 button.pri,.btn.pri{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:var(--p-forte)}
@@ -364,7 +396,7 @@ button.perigo:focus-visible{
 .lid-bt-txt.perigo:focus-visible{ color:var(--bad) }
 /* "mini" a 14px, contra 12px do botão normal: o pequeno era o maior. */
 button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:var(--t-min);min-height:var(--toque);border-radius:var(--r-pill)}
-button.mini svg,.btn.mini svg{width:14px;height:14px}
+button.mini svg,.btn.mini svg{width:var(--i-min);height:var(--i-min)}
 
 
 
@@ -443,7 +475,7 @@ select option{background:#fff;color:var(--ink)}
   font-size:var(--t-apoio);line-height:1.55;border:1px solid var(--linha2);background:var(--card2);
   color:var(--ink2);
 }
-.aviso svg{width:17px;height:17px;flex:none;margin-top:var(--e1)}
+.aviso svg{width:var(--i);height:var(--i);flex:none;margin-top:var(--e1)}
 .aviso strong{color:var(--ink);font-weight:var(--p-forte)}
 .aviso.erro{background:var(--bad-bg);border-color:var(--bad-ln);color:#8f2419}
 .aviso.erro svg{color:var(--bad)}
@@ -691,7 +723,7 @@ select option{background:#fff;color:var(--ink)}
   display:flex;gap:var(--e2);align-items:center;padding:var(--e3) var(--e3);border-radius:var(--r-sm);
   font-size:var(--t-apoio);border:1px solid var(--linha2);background:var(--card2);
 }
-.escalacao .resultado svg{width:17px;height:17px;flex:none}
+.escalacao .resultado svg{width:var(--i);height:var(--i);flex:none}
 .escalacao .resultado.bom{background:var(--ok-bg);border-color:var(--ok-ln);color:var(--ok)}
 .escalacao .resultado.bom svg{color:var(--ok)}
 .escalacao .resultado.atencao{background:var(--warn-bg);border-color:var(--warn-ln);color:var(--warn)}
@@ -729,7 +761,7 @@ select option{background:#fff;color:var(--ink)}
 }
 .pick-nome:hover,
 .pick-nome:active{background:var(--card2);border-color:var(--linha3)}
-.pick-nome svg{width:16px;height:16px;color:var(--mudo);margin-left:auto;flex:none}
+.pick-nome svg{width:var(--i);height:var(--i);color:var(--mudo);margin-left:auto;flex:none}
 .campo-pin{
   display:flex;gap:var(--e2);justify-content:center;margin:var(--e4) 0;
 }
@@ -834,9 +866,16 @@ select option{background:#fff;color:var(--ink)}
   background:var(--preto);color:#fff;padding:var(--e3) var(--e5);border-radius:var(--r-pill);
   font-size:var(--t-apoio);font-weight:var(--p-rot);
   display:flex;align-items:center;gap:var(--e2);max-width:calc(100vw - 32px);
-  animation:sobe 240ms var(--t);
+  /* var(--ease), NÃO var(--t) — o mesmo defeito que já tinha sido achado e
+     corrigido no `.medidor .fill` (linha ~500) e que continuou vivo aqui.
+     `--t` vale "140ms var(--ease)"; dentro do atalho `animation`, o segundo
+     valor de tempo é DELAY. Ou seja: `animation:sobe 240ms var(--t)` mandava
+     o toast esperar 140ms parado antes de começar a subir. O toast é a única
+     confirmação de que a ação deu certo — atrasar justo ele é o inverso do
+     que a regra de movimento deste sistema diz que movimento serve. */
+  animation:sobe 240ms var(--ease);
 }
-.toast svg{width:16px;height:16px}
+.toast svg{width:var(--i);height:var(--i)}
 @keyframes sobe{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
 
 .msg-preview,.msg{
@@ -881,7 +920,7 @@ select option{background:#fff;color:var(--ink)}
   padding:0 var(--e3);transition:border-color var(--t);
 }
 .busca-nome:focus-within{border-color:var(--ink)}
-.busca-nome svg{width:17px;height:17px;color:var(--mudo);flex:none}
+.busca-nome svg{width:var(--i);height:var(--i);color:var(--mudo);flex:none}
 .busca-nome input{
   border:0;background:transparent;padding:var(--e3) 0;min-height:50px;font-size:var(--t-ui);
 }
@@ -914,7 +953,7 @@ select option{background:#fff;color:var(--ink)}
 .marca-nivel.so-dito{border-style:dashed;opacity:.6}
 .pessoa-meta{display:flex;align-items:center;gap:var(--e2);flex:none}
 .pessoa-meta .num{font-variant-numeric:tabular-nums}
-.pessoa-meta .giro{width:15px;height:15px;color:var(--mudo);transition:transform var(--t)}
+.pessoa-meta .giro{width:var(--i);height:var(--i);color:var(--mudo);transition:transform var(--t)}
 .pessoa[open] .pessoa-meta .giro{transform:rotate(90deg)}
 .pessoa-corpo{padding:var(--e1) var(--e3) var(--e4);border-top:1px solid var(--linha)}
 .pessoa-corpo > .entre{padding-top:var(--e3)}
@@ -933,7 +972,7 @@ select option{background:#fff;color:var(--ink)}
   list-style:none;font-size:var(--t-apoio);font-weight:var(--p-rot);min-height:56px;
 }
 .bloco-extra > summary::-webkit-details-marker{display:none}
-.bloco-extra .giro{width:15px;height:15px;color:var(--mudo);transition:transform var(--t);flex:none}
+.bloco-extra .giro{width:var(--i);height:var(--i);color:var(--mudo);transition:transform var(--t);flex:none}
 .bloco-extra[open] .giro{transform:rotate(90deg)}
 .bloco-extra-corpo{padding:0 var(--e4) var(--e4);border-top:1px solid var(--linha)}
 .bloco-extra-corpo > .card,.bloco-extra-corpo > .legenda{
@@ -1349,7 +1388,7 @@ html,body{overflow-x:clip}
   transition:background var(--t),color var(--t),border-color var(--t),opacity var(--t);
   white-space:nowrap;
 }
-.acao svg{width:12px;height:12px;flex:none;transition:transform var(--t)}
+.acao svg{width:var(--i-min);height:var(--i-min);flex:none;transition:transform var(--t)}
 .acao:hover svg,
 .acao:active svg{transform:translateX(4px)}
 .acao:focus-visible{outline-offset:3px}
@@ -1413,7 +1452,7 @@ html,body{overflow-x:clip}
   padding:var(--e3) var(--e5);border:1px solid currentColor;
   transition:background var(--t),color var(--t),opacity var(--t);
 }
-.bt-barra svg{width:11px;height:11px}
+.bt-barra svg{width:var(--i-min);height:var(--i-min)}
 .bt-barra:hover,
 .bt-barra:active{background:currentColor}
 .bt-barra:hover *,
@@ -2045,9 +2084,28 @@ body:has(.porta) { background:var(--papel) }
 
   --tr:.15em;
 
-  /* MEDIDA DE LEITURA. A auditoria achou linhas de 81 caracteres: o olho
-     perde o começo da linha seguinte acima de ~70. */
-  --medida:62ch;
+  /* MEDIDA DE LEITURA — DUAS VIRARAM UMA (fase 9, 29/08/2026)
+     Havia duas leis de medida no arquivo, escritas em dias diferentes, sem
+     saber uma da outra: `--medida:62ch` aqui e `--prosa:50ch` na seção 14.
+     Medi antes de mexer: dos 5 elementos que usam --medida na Home, NENHUM
+     encosta em 62ch — o grid corta em 27ch muito antes. Ou seja, o segundo
+     valor nunca chegou a virar pixel. O defeito não era o que a tela mostra,
+     era o vocabulário: quem for escrever a próxima regra tem duas respostas
+     para a mesma pergunta e escolhe no chute. Uma só, e é a da seção 14. */
+  --medida:var(--prosa);
+
+  /* A ESCALA DE ÍCONE — SEIS TAMANHOS PARA TRÊS INTENÇÕES (fase 9)
+     Estavam em uso 11, 12, 14, 16, 17 e 19px. Ninguém enxerga 16 contra 17;
+     o problema é que não havia de onde escolher, então cada ícone novo
+     nascia de um chute. São três tamanhos, e cada um tem um porquê:
+
+       --i-min  acompanha texto de rótulo (11–12px): a seta do .acao, o
+                chevron do atalho, a volta. Ornamento, subordinado à palavra.
+       --i      acompanha texto de interface (15,5–17px): botão, aba, aviso,
+                busca, toast. É o tamanho do ícone que a pessoa vai tocar.
+       --i-max  só a barra de navegação, onde o ícone é o alvo e não a
+                legenda dele. */
+  --i-min:12px; --i:16px; --i-max:19px;
 
   /* ALVO DE TOQUE. 56 alvos abaixo de 40px no celular. */
   --toque:44px;
@@ -2085,7 +2143,7 @@ body:has(.porta) { background:var(--papel) }
 }
 .tela-volta:hover,
 .tela-volta:active{color:var(--ink)}
-.tela-volta svg{width:11px;height:11px;transform:rotate(180deg)}
+.tela-volta svg{width:var(--i-min);height:var(--i-min);transform:rotate(180deg)}
 
 /* ==========================================================================
    CABEÇA DE TELA — índice, título, uma linha de apoio. Sempre nessa ordem.
@@ -2240,7 +2298,7 @@ body:has(.porta) { background:var(--papel) }
   font-size:var(--t-rot);letter-spacing:.16em;text-transform:uppercase;
 }
 .atalho span{font-size:var(--t-apoio);color:var(--cinza)}
-.atalho svg{width:12px;height:12px;color:var(--mudo);flex:none}
+.atalho svg{width:var(--i-min);height:var(--i-min);color:var(--mudo);flex:none}
 
 
 /* ==========================================================================
@@ -2889,7 +2947,7 @@ body:has(.lid) .seletor-equipe{
 }
 body:has(.lid) .seletor-equipe:hover,
 body:has(.lid) .seletor-equipe:active{ color:var(--noite) }
-body:has(.lid) .seletor-equipe svg{ width:11px; height:11px; opacity:.6 }
+body:has(.lid) .seletor-equipe svg{ width:var(--i-min); height:var(--i-min); opacity:.6 }
 
 /* sair na mesma voz das abas. O seletor é largo de propósito: a barra já
    mudou de marcação uma vez e um seletor estreito quebraria de novo. */
@@ -3611,7 +3669,12 @@ html{ scroll-padding-top:88px }
    Um passo de tamanho e um passo a menos de tracking. */
 @media(max-width:719px){
   :root{ --t-rot:13px }
-  label,.rot,.chapeu{ letter-spacing:.07em }
+  /* .overline e h3 entraram aqui na fase 9. Este ajuste foi escrito quando
+     .rot era o único rótulo que se enxergava, e ficou faltando nos outros
+     dois — o que fazia o defeito ser MAIOR no celular que no desktop: .rot
+     ia a .07em e os outros dois continuavam em .15em, o dobro, na mesma
+     tela. /eu, que tem os três, é uma página de telefone. */
+  label,.rot,.chapeu,.overline,h3{ letter-spacing:.07em }
 }
 
 /* --- 9. OS ÚLTIMOS TRÊS VIZINHOS A MENOS DE 8px -------------------------
@@ -3654,7 +3717,7 @@ html{ scroll-padding-top:88px }
   font-size:var(--t-rot); letter-spacing:var(--tr); color:var(--cinza);
 }
 .area-conf .giro{
-  flex:none; width:15px; height:15px; color:var(--mudo);
+  flex:none; width:var(--i); height:var(--i); color:var(--mudo);
   transition:transform var(--t);
 }
 .area-conf[open] .giro{ transform:rotate(90deg) }
@@ -4065,7 +4128,7 @@ html{ scroll-padding-top:88px }
 .lid-dobra > summary::-webkit-details-marker{ display:none }
 .lid-dobra > summary::marker{ content:'' }
 .lid-dobra > summary .giro{
-  width:15px; height:15px; color:var(--marca-cinza,var(--cinza)); flex:none;
+  width:var(--i); height:var(--i); color:var(--marca-cinza,var(--cinza)); flex:none;
   transition:transform var(--t); align-self:center;
 }
 .lid-dobra[open] > summary .giro{ transform:rotate(90deg) }
@@ -4074,3 +4137,77 @@ html{ scroll-padding-top:88px }
 .lid-dobra > summary:focus-visible{ outline-offset:3px }
 /* o que vem depois do summary respira como se a seção estivesse aberta sempre */
 .lid-dobra > summary + *{ margin-top:var(--e5) }
+
+/* ==========================================================================
+   19 · A CAIXA DE DECISÃO — fase 9, 29/08/2026
+   --------------------------------------------------------------------------
+   Substitui os sete `confirm()` do navegador. O porquê está inteiro em
+   lib/confirmar.ts; aqui está só o desenho, e ele não inventa nada: caixa
+   sem canto e sem sombra, rótulo em Raleway, corpo em Inter, botões que já
+   existem (.btn e .btn.pri). Nenhum valor novo — todos vêm do :root.
+
+   A única cor da caixa é a de estado, e só quando `perigo`: é o caso em que
+   a informação "isto não volta" É o estado da ação. Cor por decoração aqui
+   seria exatamente o que a direção proíbe.
+   ========================================================================== */
+.dlg{
+  padding:0;border:0;background:transparent;color:var(--ink);
+  max-width:min(460px,calc(100vw - var(--e6)));width:100%;
+}
+.dlg::backdrop{
+  background:rgba(7,7,8,.62);
+  animation:dlg-fundo 140ms var(--ease);
+}
+@keyframes dlg-fundo{from{opacity:0}to{opacity:1}}
+
+.dlg-corpo{
+  background:var(--card);border:1px solid var(--linha2);border-radius:0;
+  padding:var(--e6);display:block;
+  animation:dlg-entra 140ms var(--ease);
+}
+@keyframes dlg-entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.dlg-rot{ margin-bottom:var(--e3) }
+.dlg.perigo .dlg-rot{ color:var(--bad) }
+
+.dlg-titulo{
+  font-family:var(--fonte-display);font-weight:var(--p-forte);
+  font-size:var(--t-corpo);line-height:1.3;letter-spacing:-.012em;
+  margin:0;max-width:var(--prosa);
+}
+.dlg-texto{
+  margin:var(--e3) 0 0;color:var(--ink2);
+  font-size:var(--t-ui);line-height:1.6;max-width:var(--prosa);
+}
+/* a frase que a caixa do navegador não conseguia destacar de dentro do
+   próprio parágrafo. Aqui ela é a linha de estado da ação. */
+.dlg-sem-volta{
+  margin:var(--e4) 0 0;padding:var(--e3) var(--e4);
+  background:var(--bad-bg);border:1px solid var(--bad-ln);color:var(--bad);
+  font-size:var(--t-rot);font-weight:var(--p-rot);line-height:1.5;
+}
+
+.dlg-btns{
+  display:flex;gap:var(--e3);margin-top:var(--e6);justify-content:flex-end;
+}
+.dlg-btns .btn{ min-height:var(--toque) }
+.dlg.perigo .dlg-btns .btn.pri{
+  background:var(--bad);border-color:var(--bad);color:#fff;
+}
+.dlg.perigo .dlg-btns .btn.pri:hover,
+.dlg.perigo .dlg-btns .btn.pri:active{ opacity:.88 }
+
+/* NO CELULAR OS DOIS BOTÕES EMPILHAM — e CANCELAR fica embaixo.
+   Dois motivos, nessa ordem:
+   1. Lado a lado em 360px eles ficariam com ~150px cada e a 8px um do outro:
+      é a mesma família de defeito que a auditoria de toque já tinha achado em
+      /ajustes, e aqui uma das duas opções apaga um ministério inteiro.
+   2. `column-reverse` inverte a ordem visual de propósito. Embaixo é onde o
+      polegar descansa, ou seja é o botão fácil — e o botão fácil tem que ser
+      o que NÃO faz nada. A ação destrutiva sobe: continua a um toque, mas
+      exige mover a mão. Quem toca sem ler acerta em cancelar. */
+@media(max-width:479px){
+  .dlg-corpo{ padding:var(--e5) }
+  .dlg-btns{ flex-direction:column-reverse;gap:var(--e2) }
+  .dlg-btns .btn{ width:100%;justify-content:center }
+}
