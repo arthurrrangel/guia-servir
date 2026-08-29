@@ -209,7 +209,7 @@ export default function Casa() {
           ))}
         </nav>
         <div className="casa-barra-fim">
-          <Link href="/eu" className="bt-barra discreto">Área do voluntário</Link>
+          <Link href="/eu" className="bt-barra discreto">Espaço do voluntário</Link>
           <Link href="/servir" className="bt-barra">
             <span className="so-largo">Quero&nbsp;</span>servir
           </Link>
@@ -557,7 +557,7 @@ export default function Casa() {
           <Logo className="logo" />
           <span>{ENDERECO}</span>
           <a href={IG} target="_blank" rel="noreferrer">@guiachurch</a>
-          <Link href="/eu">Área do voluntário</Link>
+          <Link href="/eu">Espaço do voluntário</Link>
           <Link href="/entrar">Sou da organização</Link>
         </div>
       </footer>

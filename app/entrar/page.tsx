@@ -72,7 +72,7 @@ export default function Entrar() {
         <Link href="/" className="marca-link" aria-label="Voltar para o site da GUIA Church">
           <Logo className="logo entrada-logo" />
         </Link>
-        <span className="rot">Área do organizador</span>
+        <span className="rot">Espaço do organizador</span>
         <h1 className="entrada-titulo">Entrar</h1>
         <p className="entrada-sub">
           Voluntário não entra por aqui: ele usa o link pessoal que você manda.

@@ -326,12 +326,12 @@ export default function EntradaEquipe() {
 
   if (fase === 'carregando') return (
     <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
-      <span className="overline">Escala</span><div className="eu-titulo">carregando…</div>
+      <span className="overline">Escala</span><h1 className="eu-titulo">carregando…</h1>
     </div></div></div>
   );
   if (fase === 'rede') return (
     <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
-      <span className="overline">Escala</span><div className="eu-titulo">Sem conexão</div>
+      <span className="overline">Escala</span><h1 className="eu-titulo">Sem conexão</h1>
       <p className="eu-sub">Não consegui carregar agora. O link continua valendo, tente de novo.</p>
       <button className="claro" style={{ marginTop: 14 }} onClick={() => { setFase('carregando'); void carregar(); }}>
         Tentar de novo
@@ -340,7 +340,7 @@ export default function EntradaEquipe() {
   );
   if (fase === 'erro') return (
     <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
-      <span className="overline">Escala</span><div className="eu-titulo">Link inválido</div>
+      <span className="overline">Escala</span><h1 className="eu-titulo">Link inválido</h1>
       <p className="eu-sub">Peça o link certo para quem organiza a escala do ministério.</p>
     </div></div></div>
   );
@@ -360,7 +360,7 @@ export default function EntradaEquipe() {
     <div className="eu-fundo">
       <div className="eu-topo"><div className="eu-topo-in">
         <span className="overline">{equipe}</span>
-        <div className="eu-titulo">{titulo}</div>
+        <h1 className="eu-titulo">{titulo}</h1>
         <p className="eu-sub">{sub}</p>
       </div></div>
 

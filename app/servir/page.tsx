@@ -82,7 +82,14 @@ export default function Servir() {
                   <span className="casa-area-nome">{m.nome}</span>
                   {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
                   <span className="casa-area-selo">
-                    {m.postos} {m.postos === 1 ? 'função' : 'funções'}
+                    {/* CONTAVA POSTO E ESCREVIA "FUNÇÃO".
+                        O campo é `postos`, e a tela seguinte agrupa posto em
+                        família: a Mídia dizia "9 funções" aqui e listava 7
+                        itens lá. Quem contou, contou errado por causa da
+                        gente. As duas palavras existem e querem dizer coisas
+                        diferentes: FUNÇÃO é o tipo de trabalho (CÂMERA),
+                        POSTO é uma posição dele na escala (CÂMERA 1). */}
+                    {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
                     {!m.aberto && ' · conversa antes'}
                   </span>
                 </Link>

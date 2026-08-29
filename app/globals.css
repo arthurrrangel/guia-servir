@@ -43,6 +43,13 @@
   --ink:#0c0c0e;
   --ink2:rgba(12,12,14,.70);
   --mudo:rgba(12,12,14,.66);   /* 6.1:1 no branco, medido. Em .56 dava 4.48 e reprovava. */
+  /* --ink4 NÃO É COR DE TEXTO. Ela dá 2,27:1 no branco, e estava pintando o
+     chapéu (.rot) que nomeia TODA tela do produto — a palavra que responde
+     "onde estou", em 12px de caixa alta com tracking largo, que já é a coisa
+     mais difícil de ler que existe. O token vizinho tem o contraste medido no
+     comentário; este nunca teve. Agora ela serve só para marca: ponto de
+     estado, chevron, seta, e o preenchimento do botão desligado, onde o baixo
+     contraste é justamente o recado. Palavra usa --mudo. */
   --ink4:rgba(12,12,14,.34);
 
   /* ---- estado. No claro a cor precisa ESCURECER para continuar legível:
@@ -137,6 +144,10 @@ body{
    em cima de cada toque: exatamente a forma que este sistema passou o dia
    inteiro tirando da tela. O highlight sai; o retorno entra em :active,
    colado em cada :hover que já existia. */
+/* <strong> e <b> vinham do navegador em 700, e num lugar em 900: três pesos
+   para dizer a mesma coisa dentro de uma frase. Negrito é um peso só. */
+strong,b{ font-weight:var(--p-negrito) }
+
 *{-webkit-tap-highlight-color:transparent}
 
 /* touch-action:manipulation desliga o duplo-toque-para-ampliar em cima de
@@ -158,19 +169,19 @@ a{color:inherit;text-decoration:none}
 ::selection{background:rgba(12,12,14,.14)}
 
 /* ------------------------------------------------------------ tipografia --- */
-h1{font-size:var(--d-secao);margin:0;letter-spacing:-.03em;font-weight:650;line-height:1.15}
-h2{font-size:var(--d-lead);margin:0;letter-spacing:-.02em;font-weight:620;line-height:1.15}
+h1{font-size:var(--d-secao);margin:0;letter-spacing:-.03em;font-weight:var(--p-negrito);line-height:1.15}
+h2{font-size:var(--d-lead);margin:0;letter-spacing:-.02em;font-weight:var(--p-forte);line-height:1.15}
 /* rótulo de seção: é a tipografia da logo. Chevron no lugar de bolinha. */
 h3{
   font-size:var(--t-rot);margin:0 0 var(--e4);text-transform:uppercase;letter-spacing:.15em;
-  color:var(--mudo);font-weight:650;display:flex;align-items:center;gap:var(--e2);
+  color:var(--mudo);font-weight:var(--p-negrito);display:flex;align-items:center;gap:var(--e2);
 }
-h3::before{content:"›";color:var(--ink4);font-size:var(--t-ui);line-height:1;font-weight:400;transform:translateY(-1px)}
+h3::before{content:"›";color:var(--mudo);font-size:var(--t-ui);line-height:1;font-weight:var(--p-corpo);transform:translateY(-1px)}
 .overline{
   font-size:var(--t-rot);text-transform:uppercase;letter-spacing:.14em;
-  color:var(--mudo);font-weight:650;display:block;
+  color:var(--mudo);font-weight:var(--p-negrito);display:block;
 }
-.forte{font-weight:600;letter-spacing:-.012em}
+.forte{font-weight:var(--p-forte);letter-spacing:-.012em}
 .dim{color:var(--ink2)}
 .pequeno{font-size:var(--t-apoio);line-height:1.55}
 .peq{font-size:var(--t-rot)}
@@ -203,11 +214,11 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 
 
 .marca-nome{
-  font-weight:700;font-size:var(--t-apoio);line-height:1.15;min-width:0;
+  font-weight:var(--p-negrito);font-size:var(--t-apoio);line-height:1.15;min-width:0;
   letter-spacing:.26em;text-transform:uppercase;
 }
 .marca-nome small{
-  display:block;font-weight:520;font-size:var(--t-rot);color:var(--mudo);
+  display:block;font-weight:var(--p-rot);font-size:var(--t-rot);color:var(--mudo);
   letter-spacing:.1em;text-transform:uppercase;margin-top:var(--e1);
 }
 .marca-nome .seletor-equipe{margin-top:var(--e1);letter-spacing:.08em}
@@ -221,7 +232,7 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 @media(min-width:900px){ .abas{padding:0 var(--e5)} }
 .abas a{
   display:flex;align-items:center;gap:var(--e2);padding:var(--e3) var(--e4) var(--e3);font-size:var(--t-ui);
-  color:var(--mudo);border-bottom:1.5px solid transparent;font-weight:530;
+  color:var(--mudo);border-bottom:1.5px solid transparent;font-weight:var(--p-rot);
   transition:color var(--t),border-color var(--t);white-space:nowrap;
   letter-spacing:-.005em;
 }
@@ -243,7 +254,7 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 .barra-fundo a{
   flex:1;min-width:0;min-height:54px;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:var(--e1);border-radius:0;
-  font-size:var(--t-rot);font-weight:650;letter-spacing:.03em;text-transform:uppercase;
+  font-size:var(--t-rot);font-weight:var(--p-negrito);letter-spacing:.03em;text-transform:uppercase;
   color:var(--mudo);transition:color var(--t),background var(--t);
 }
 .barra-fundo a svg{width:19px;height:19px}
@@ -272,8 +283,26 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 .linha{display:flex;align-items:center;gap:var(--e2);flex-wrap:wrap}
 
 /* --------------------------------------------------------------- botões --- */
+/* A VOZ DO BOTÃO.
+   A medição achou VINTE E SETE aparências de botão em catorze telas, e em
+   duas tipografias. A passada de identidade converteu os botões da casca do
+   líder (.lid-bt) para a voz da marca — display, caixa alta, tracking largo —
+   e esta regra base, que pega todo o resto do produto, continuou dizendo
+   `font:inherit` e `letter-spacing:-.008em`. Ou seja: metade dos botões
+   falava Raleway e a outra metade Inter, dependendo de qual tela.
+
+   A regra, agora, cabe numa frase:
+
+       COMANDO FALA NA VOZ DA MARCA. ESCOLHA FALA NA VOZ DO CONTEÚDO.
+
+   Apertar "COPIAR A ESCALA" é dar uma ordem, e ordem é curta e é da marca.
+   Ler "Dois por mês" e marcar é responder uma pergunta — isso é conteúdo, e
+   conteúdo continua em Inter, em caixa normal, logo abaixo. As exceções
+   estão listadas no bloco seguinte, e cada uma é uma escolha, não um
+   comando. */
 button,.btn{
-  font:inherit;font-weight:570;font-size:var(--t-ui);letter-spacing:-.008em;
+  font-family:var(--fonte-display);font-weight:var(--p-forte);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
   border-radius:var(--r-pill);border:1px solid var(--linha2);
   background:transparent;color:var(--ink);
   padding:var(--e3) var(--e5);cursor:pointer;display:inline-flex;align-items:center;
@@ -290,7 +319,7 @@ button:disabled{opacity:.38;cursor:not-allowed;transform:none}
 button svg,.btn svg{width:16px;height:16px;flex:none}
 
 /* a única ação primária da tela: branco sólido, contraste máximo */
-button.pri,.btn.pri{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:620}
+button.pri,.btn.pri{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:var(--p-forte)}
 button.pri:hover,
 button.pri:active,
 .btn.pri:hover,
@@ -298,7 +327,7 @@ button.pri:active,
 /* "Confirmo" é o sim do voluntário: preenchimento sólido e texto escuro, mesma
    gramática do .pri. Era verde escuro com texto branco, 3.38:1 — reprovava no
    AA justamente no botão mais importante da tela dele. Agora dá 9:1. */
-button.verde,.btn.verde{background:var(--ok);border-color:transparent;color:#fff;font-weight:640}
+button.verde,.btn.verde{background:var(--ok);border-color:transparent;color:#fff;font-weight:var(--p-forte)}
 button.verde:hover,
 button.verde:active,
 .btn.verde:hover,
@@ -332,7 +361,8 @@ button.perigo:focus-visible{
 .lid-bt-txt.perigo:hover,
 .lid-bt-txt.perigo:active,
 .lid-bt-txt.perigo:focus-visible{ color:var(--bad) }
-button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:var(--t-apoio);min-height:var(--toque);border-radius:var(--r-pill)}
+/* "mini" a 14px, contra 12px do botão normal: o pequeno era o maior. */
+button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:var(--t-min);min-height:var(--toque);border-radius:var(--r-pill)}
 button.mini svg,.btn.mini svg{width:14px;height:14px}
 
 
@@ -343,7 +373,7 @@ button.mini svg,.btn.mini svg{width:14px;height:14px}
 /* --------------------------------------------------------------- campos --- */
 label{
   display:block;font-size:var(--t-rot);text-transform:uppercase;letter-spacing:.12em;
-  color:var(--mudo);font-weight:650;margin-bottom:var(--e2);
+  color:var(--mudo);font-weight:var(--p-negrito);margin-bottom:var(--e2);
 }
 input,select,textarea{
   font:inherit;font-size:var(--t-corpo);width:100%;background:transparent;color:var(--ink);
@@ -374,7 +404,7 @@ select option{background:#fff;color:var(--ink)}
 /* -------------------------------------------------------------- pílulas --- */
 .pill{
   display:inline-flex;align-items:center;gap:var(--e2);padding:var(--e1) var(--e3);border-radius:var(--r-pill);
-  font-size:var(--t-rot);font-weight:550;background:var(--card2);color:var(--ink2);
+  font-size:var(--t-rot);font-weight:var(--p-rot);background:var(--card2);color:var(--ink2);
   border:1px solid var(--linha);white-space:nowrap;letter-spacing:-.005em;
 }
 .pill.quebra{white-space:normal;text-align:left}
@@ -389,7 +419,7 @@ select option{background:#fff;color:var(--ink)}
 .chip{
   display:inline-flex;align-items:center;gap:var(--e2);padding:var(--e2) var(--e3);border-radius:var(--r-pill);
   min-height:var(--toque);
-  font-size:var(--t-rot);font-weight:550;cursor:pointer;user-select:none;
+  font-size:var(--t-rot);font-weight:var(--p-rot);cursor:pointer;user-select:none;
   border:1px solid var(--linha2);background:var(--card2);color:var(--ink2);
   transition:background var(--t),border-color var(--t),color var(--t);letter-spacing:-.005em;
 }
@@ -413,7 +443,7 @@ select option{background:#fff;color:var(--ink)}
   color:var(--ink2);
 }
 .aviso svg{width:17px;height:17px;flex:none;margin-top:var(--e1)}
-.aviso strong{color:var(--ink);font-weight:600}
+.aviso strong{color:var(--ink);font-weight:var(--p-forte)}
 .aviso.erro{background:var(--bad-bg);border-color:var(--bad-ln);color:#8f2419}
 .aviso.erro svg{color:var(--bad)}
 .aviso.atencao{background:var(--warn-bg);border-color:var(--warn-ln);color:#6d4604}
@@ -441,7 +471,7 @@ select option{background:#fff;color:var(--ink)}
 .anel svg{width:100%;height:100%;transform:rotate(-90deg)}
 .anel .fundo{stroke:rgba(255,255,255,.12)}
 .anel-texto{position:absolute;inset:0;display:grid;place-content:center;text-align:center;line-height:1.15}
-.anel-texto .n{font-size:var(--d-bloco);font-weight:650;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.anel-texto .n{font-size:var(--d-bloco);font-weight:var(--p-negrito);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
 .anel-texto .l{display:none}
 
 /* ----------------------------------------------------------------- hero --- */
@@ -461,11 +491,11 @@ select option{background:#fff;color:var(--ink)}
 
 
 
-.hero h1{font-size:var(--d-secao);letter-spacing:-.032em;font-weight:640}
+.hero h1{font-size:var(--d-secao);letter-spacing:-.032em;font-weight:var(--p-forte)}
 
 
 /* botão "claro" é o nome antigo da ação principal; mantém funcionando */
-.claro,.btn.claro{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:620}
+.claro,.btn.claro{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:var(--p-forte)}
 .claro:hover,
 .claro:active,
 .btn.claro:hover,
@@ -613,7 +643,16 @@ select option{background:#fff;color:var(--ink)}
 .eu-topo-in{
   max-width:620px;margin:0 auto;padding:var(--e5) var(--e5) var(--e6);position:relative;z-index:1;
 }
-.eu-titulo{font-size:var(--d-secao);font-weight:640;letter-spacing:-.03em;margin-top:var(--e2);line-height:1.15}
+/* A ÚNICA TELA DO PRODUTO COM OUTRA VOZ NO TÍTULO.
+   Medi o maior texto das catorze telas: treze são Raleway 200. Esta era
+   Inter 600 — a mesma faixa preta da tela do voluntário, com um título que
+   parecia vir de outro produto. E não era nem um heading: era um <div>, o
+   que também deixava a tela sem título para quem usa leitor de tela. */
+.eu-titulo{
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
+  font-size:var(--d-faixa); letter-spacing:-.01em;
+  margin-top:var(--e2); line-height:1.15; text-wrap:balance;
+}
 .eu-sub{color:var(--ink2);margin:var(--e3) 0 0;font-size:var(--t-ui);line-height:1.65}
 .eu{max-width:620px;margin:0 auto;padding:var(--e5) var(--e5) 120px}
 .eu-lbl{margin-bottom:var(--e2)}
@@ -653,7 +692,7 @@ select option{background:#fff;color:var(--ink)}
    card do voluntário é sempre 2 colunas, inclusive no celular. */
 .escalacao .dupla{grid-template-columns:1fr 1fr;gap:var(--e2)}
 .escalacao .dupla button,.escalacao .dupla .btn{
-  width:100%;min-height:56px;font-size:var(--t-ui);font-weight:600;
+  width:100%;min-height:56px;font-size:var(--t-ui);font-weight:var(--p-forte);
 }
 .escalacao .linha button,.escalacao .linha .btn{min-height:48px}
 
@@ -672,12 +711,12 @@ select option{background:#fff;color:var(--ink)}
 .area-titulo .area-n{margin-left:auto}
 /* quantas pessoas já estão na área. Estava em --ink4 (2.1:1) na tela pública
    de cadastro, que é a única tela que o time inteiro abre. */
-.area-n{font-size:var(--t-rot);color:var(--mudo);font-weight:600;letter-spacing:.06em}
+.area-n{font-size:var(--t-rot);color:var(--mudo);font-weight:var(--p-forte);letter-spacing:.06em}
 .pick-nome{
   display:flex;align-items:center;gap:var(--e3);width:100%;text-align:left;
   padding:var(--e3) var(--e4);border-radius:var(--r-sm);margin-bottom:var(--e2);
   background:var(--card);border:1px solid var(--linha);min-height:56px;
-  font-size:var(--t-ui);font-weight:530;letter-spacing:-.01em;
+  font-size:var(--t-ui);font-weight:var(--p-rot);letter-spacing:-.01em;
 }
 .pick-nome:hover,
 .pick-nome:active{background:var(--card2);border-color:var(--linha3)}
@@ -707,7 +746,7 @@ select option{background:#fff;color:var(--ink)}
 .posto-grupo{display:flex;flex-direction:column;gap:var(--e2)}
 .posto-fam{
   font-size:var(--t-rot);text-transform:uppercase;letter-spacing:.14em;
-  color:var(--mudo);font-weight:650;padding:0 var(--e1);
+  color:var(--mudo);font-weight:var(--p-negrito);padding:0 var(--e1);
   display:flex;align-items:center;gap:var(--e2);
 }
 .posto-linha{display:flex;flex-wrap:wrap;gap:var(--e2)}
@@ -715,17 +754,17 @@ select option{background:#fff;color:var(--ink)}
   justify-content:flex-start;align-items:flex-start;text-align:left;gap:var(--e3);
   min-height:48px;padding:var(--e3) var(--e4) var(--e3) var(--e3);
   background:var(--card);border:1px solid var(--linha);border-radius:var(--r-sm);
-  font-weight:560;font-size:var(--t-ui);
+  font-weight:var(--p-rot);font-size:var(--t-ui);
 }
 .posto-op.largo{flex:1 1 100%}
-.posto-op.on{background:var(--card2);border-color:var(--linha3);font-weight:640}
+.posto-op.on{background:var(--card2);border-color:var(--linha3);font-weight:var(--p-forte)}
 .posto-marca{
   width:24px;height:24px;flex:none;border-radius:0;display:grid;place-items:center;
   border:1px solid var(--linha2);color:var(--mudo);font-size:var(--t-apoio);line-height:1;
 }
 .posto-op.on .posto-marca{background:var(--preto);border-color:var(--preto);color:#fff}
 .posto-tag{
-  font-style:normal;font-size:var(--t-rot);color:var(--mudo);font-weight:550;
+  font-style:normal;font-size:var(--t-rot);color:var(--mudo);font-weight:var(--p-rot);
   text-transform:none;letter-spacing:0;
   border:1px solid var(--linha);border-radius:var(--r-pill);padding:var(--e1) var(--e2);white-space:nowrap;
 }
@@ -748,7 +787,7 @@ select option{background:#fff;color:var(--ink)}
    texto de leitura e não de legenda espremida */
 .posto-desc{
   display:block;margin-top:var(--e1);font-size:var(--t-apoio);line-height:1.35;
-  color:var(--mudo);font-weight:400;letter-spacing:0;
+  color:var(--mudo);font-weight:var(--p-corpo);letter-spacing:0;
 }
 .posto-op.on .posto-desc{color:var(--ink2)}
 .postos-conta{margin:var(--e3) var(--e1) 0}
@@ -761,7 +800,7 @@ select option{background:#fff;color:var(--ink)}
 }
 .seletor-equipe:hover,
 .seletor-equipe:active{background:transparent;color:var(--ink2)}
-.seletor-nome{font-weight:600}
+.seletor-nome{font-weight:var(--p-forte)}
 .menu-fundo{position:fixed;inset:0;z-index:50;background:rgba(12,12,14,.32)}
 .menu-equipes{
   position:absolute;top:62px;left:18px;min-width:250px;z-index:51;padding:var(--e2);
@@ -774,13 +813,13 @@ select option{background:#fff;color:var(--ink)}
 }
 .menu-item:hover,
 .menu-item:active{background:var(--card2)}
-.menu-item[aria-current="true"]{background:var(--card3);font-weight:600}
+.menu-item[aria-current="true"]{background:var(--card3);font-weight:var(--p-forte)}
 
 /* ------------------------------------------------------------- diversos --- */
 .toast{
   position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:80;
   background:var(--preto);color:#fff;padding:var(--e3) var(--e5);border-radius:var(--r-pill);
-  font-size:var(--t-apoio);font-weight:560;
+  font-size:var(--t-apoio);font-weight:var(--p-rot);
   display:flex;align-items:center;gap:var(--e2);max-width:calc(100vw - 32px);
   animation:sobe 240ms var(--t);
 }
@@ -850,11 +889,11 @@ select option{background:#fff;color:var(--ink)}
   list-style:none;min-height:64px;
 }
 .pessoa > summary::-webkit-details-marker{display:none}
-.pessoa-nome{display:block;font-weight:600;font-size:var(--t-ui);letter-spacing:-.012em;line-height:1.35}
+.pessoa-nome{display:block;font-weight:var(--p-forte);font-size:var(--t-ui);letter-spacing:-.012em;line-height:1.35}
 .pessoa-areas{display:flex;flex-wrap:wrap;gap:var(--e1);margin-top:var(--e1)}
 /* micro-marca de área: 4 letras + a cor do nível. Cabe 9 numa linha de celular. */
 .marca-nivel{
-  font-style:normal;font-size:var(--t-min);font-weight:650;letter-spacing:.06em;
+  font-style:normal;font-size:var(--t-min);font-weight:var(--p-negrito);letter-spacing:.06em;
   padding:var(--e1) var(--e1);border-radius:0;text-transform:uppercase;
   border:1px solid currentColor;opacity:.85;
 }
@@ -878,7 +917,7 @@ select option{background:#fff;color:var(--ink)}
 }
 .bloco-extra > summary{
   display:flex;align-items:center;gap:var(--e2);padding:var(--e4) var(--e4);cursor:pointer;
-  list-style:none;font-size:var(--t-apoio);font-weight:550;min-height:56px;
+  list-style:none;font-size:var(--t-apoio);font-weight:var(--p-rot);min-height:56px;
 }
 .bloco-extra > summary::-webkit-details-marker{display:none}
 .bloco-extra .giro{width:15px;height:15px;color:var(--mudo);transition:transform var(--t);flex:none}
@@ -892,7 +931,7 @@ select option{background:#fff;color:var(--ink)}
 .conf-btns{display:flex;gap:0;flex:none;border:1px solid var(--linha2);border-radius:0;overflow:hidden}
 .conf-btns .seg{
   border:0;border-radius:0;background:transparent;color:var(--ink2);
-  padding:var(--e2) var(--e3);min-height:var(--toque);font-size:var(--t-rot);font-weight:550;
+  padding:var(--e2) var(--e3);min-height:var(--toque);font-size:var(--t-rot);font-weight:var(--p-rot);
   border-right:1px solid var(--linha);white-space:nowrap;
   /* transparente em todas: a marcada troca a cor, e nenhuma muda de altura */
   border-bottom:2px solid transparent;
@@ -906,7 +945,7 @@ select option{background:#fff;color:var(--ink)}
    O olho ia para o que a pessoa DECLAROU em vez de ir para o que o líder tem
    que decidir. Marca com peso e um fio embaixo: continua inequívoco de perto,
    e para de gritar de longe. */
-.conf-btns .seg.on{color:var(--ink);font-weight:680;border-bottom-color:var(--preto)}
+.conf-btns .seg.on{color:var(--ink);font-weight:var(--p-negrito);border-bottom-color:var(--preto)}
 .conf-btns .seg.nao{color:var(--mudo)}
 .conf-btns .seg.nao:hover,
 .conf-btns .seg.nao:active{color:var(--bad);background:var(--bad-bg)}
@@ -933,7 +972,7 @@ details > summary::marker{content:""}
 
 
 .wordmark{
-  font-size:var(--d-secao);font-weight:700;letter-spacing:.34em;
+  font-size:var(--d-secao);font-weight:var(--p-negrito);letter-spacing:.34em;
   text-transform:uppercase;line-height:1;text-indent:.34em;
 }
 
@@ -968,7 +1007,7 @@ details > summary::marker{content:""}
 @media(min-width:760px){ .porta-hero{padding:62px var(--e7) var(--e7)} }
 .porta-hero h1{
   margin:var(--e2) 0 0;font-size:var(--d-heroi);line-height:1;
-  letter-spacing:-.035em;font-weight:680;text-wrap:balance;
+  letter-spacing:-.035em;font-weight:var(--p-negrito);text-wrap:balance;
 }
 .porta-hero-sub{
   margin:var(--e4) 0 0;max-width:46ch;font-size:var(--t-corpo);line-height:1.65;
@@ -1030,35 +1069,51 @@ details > summary::marker{content:""}
 }
 .wiz-passos li{
   flex:1;display:flex;flex-direction:column;align-items:center;gap:var(--e1);
-  font-size:var(--t-rot);color:var(--ink4);text-align:center;min-width:0;
+  font-size:var(--t-rot);color:var(--mudo);text-align:center;min-width:0;
   border-top:2px solid var(--linha);padding-top:var(--e2);
 }
-.wiz-passos li.feito{border-top-color:var(--ink4);color:var(--mudo)}
+.wiz-passos li.feito{border-top-color:var(--mudo);color:var(--mudo)}
 .wiz-passos li.agora{border-top-color:var(--preto);color:var(--ink)}
 .wiz-bola{
   width:24px;height:24px;border-radius:50%;display:grid;place-items:center;
-  font-size:var(--t-rot);font-weight:680;background:var(--card2);color:var(--mudo);
+  font-size:var(--t-rot);font-weight:var(--p-negrito);background:var(--card2);color:var(--mudo);
   font-variant-numeric:tabular-nums;
 }
 .wiz-passos li.agora .wiz-bola{background:var(--preto);color:#fff}
 .wiz-passos li.feito .wiz-bola{background:var(--ink4);color:#fff}
 .wiz-rot{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 
+/* O CADASTRO FICOU DE FORA DA PASSADA DE IDENTIDADE.
+   É a tela onde o voluntário passa mais tempo — quatro passos, três campos e
+   um punhado de perguntas — e era a única falando a língua antiga: título em
+   Inter pesada (a única <h2> do produto inteiro, e do tamanho de um <h1>),
+   rótulo em Inter de 15,5px em caixa normal, e campo com FUNDO CINZA sobre
+   papel branco.
+
+   Esse fundo cinza é o contrário da regra do resto do produto: campo é
+   transparente com um fio, e só vira branco quando mora em cima de superfície
+   cinza (é o que a tela de relatório e o recado da escala fazem). Aqui era
+   cinza sobre branco — o campo aparecia como uma caixa apagada, não como um
+   lugar onde se escreve. */
 .wiz-corpo h2{
-  margin:0 0 var(--e1);font-size:var(--d-secao);line-height:1.15;
-  letter-spacing:-.028em;font-weight:660;text-wrap:balance;
+  margin:0 0 var(--e1);font-family:var(--fonte-display);font-weight:var(--p-leve);
+  font-size:var(--d-faixa);line-height:1.15;letter-spacing:-.01em;text-wrap:balance;
 }
 .wiz-corpo label{
-  display:block;margin:var(--e5) 0 var(--e2);font-weight:600;font-size:var(--t-ui);letter-spacing:-.005em;
+  display:block;margin:var(--e5) 0 var(--e2);
+  font-family:var(--fonte-display);font-weight:var(--p-forte);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
+  color:var(--mudo);
 }
 .wiz-corpo input,.wiz-corpo textarea{
-  width:100%;font:16px/1.5 var(--fonte);color:var(--ink);
-  background:var(--card3);border:1px solid var(--linha2);border-radius:var(--r-sm);
+  width:100%;font:var(--t-corpo)/1.5 var(--fonte);color:var(--ink);
+  background:transparent;border:1px solid var(--linha2);border-radius:0;
   padding:var(--e3) var(--e3);transition:border-color var(--t),background var(--t);
 }
 .wiz-corpo textarea{resize:vertical;min-height:88px}
+/* o foco pinta o fio, não o fundo — mesma regra do resto do produto */
 .wiz-corpo input:focus,.wiz-corpo textarea:focus{
-  outline:none;border-color:var(--preto);background:var(--card);
+  outline:none;border-color:var(--ink);background:transparent;
 }
 .wiz-obr{color:var(--bad)}
 .wiz-q{padding:var(--e1) 0 var(--e2);border-bottom:1px solid var(--linha)}
@@ -1079,17 +1134,17 @@ details > summary::marker{content:""}
 .wiz-op-marca{
   width:24px;height:24px;flex:none;border-radius:0;margin-top:var(--e1);
   border:1.5px solid var(--linha2);display:grid;place-items:center;
-  font-size:var(--t-rot);font-weight:700;color:#fff;background:transparent;
+  font-size:var(--t-rot);font-weight:var(--p-negrito);color:#fff;background:transparent;
   transition:background var(--t),border-color var(--t);
 }
 .wiz-op.on .wiz-op-marca{background:var(--preto);border-color:var(--preto)}
-.wiz-op-nome{display:block;font-weight:620;font-size:var(--t-ui);letter-spacing:-.012em}
+.wiz-op-nome{display:block;font-weight:var(--p-forte);font-size:var(--t-ui);letter-spacing:-.012em}
 .wiz-op-desc{display:block;margin-top:var(--e1);font-size:var(--t-apoio);line-height:1.55;color:var(--ink2)}
 
 /* --- chips de resposta --- */
 .wiz-chips{display:flex;flex-wrap:wrap;gap:var(--e2);margin-top:var(--e1)}
 .wiz-chip{
-  font:inherit;font-size:var(--t-apoio);font-weight:530;cursor:pointer;
+  font:inherit;font-size:var(--t-apoio);font-weight:var(--p-rot);cursor:pointer;
   padding:var(--e3) var(--e4);min-height:44px;border-radius:var(--r-pill);
   background:var(--card);border:1.5px solid var(--linha2);color:var(--ink2);
   transition:border-color var(--t),background var(--t),color var(--t);
@@ -1105,7 +1160,7 @@ details > summary::marker{content:""}
   background:var(--card);border:1px solid var(--linha);border-radius:var(--r);padding:var(--e4);
 }
 .wiz-resumo dt{font-size:var(--t-rot);color:var(--mudo);letter-spacing:.02em;align-self:baseline}
-.wiz-resumo dd{margin:0;font-size:var(--t-ui);font-weight:520;overflow-wrap:anywhere}
+.wiz-resumo dd{margin:0;font-size:var(--t-ui);font-weight:var(--p-rot);overflow-wrap:anywhere}
 
 /* --- rodapé fixo --- */
 .wiz-pe{
@@ -1114,7 +1169,7 @@ details > summary::marker{content:""}
   padding:14px 18px calc(14px + env(safe-area-inset-bottom));
   background:var(--papel);border-top:1px solid var(--linha);
 }
-.wiz-pe .btn{min-height:52px;font-size:var(--t-ui)}
+.wiz-pe .btn{min-height:52px;font-size:var(--t-rot)}
 .wiz-pe .cresce{flex:1}
 @media(min-width:760px){
   .wiz-pe{max-width:var(--largura);margin:0 auto;border-radius:var(--r) var(--r) 0 0}
@@ -1243,21 +1298,21 @@ html,body{overflow-x:clip}
 
 /* ---- título + chapéu: a assinatura da referência ---------------------- */
 .tit{
-  font-family:var(--fonte-display);font-weight:300;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-secao);line-height:1.35;
   letter-spacing:.14em;text-transform:uppercase;
   margin:0;text-wrap:balance;
 }
 .chapeu{
   display:block;margin:var(--e3) 0 0;
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  color:var(--ink4);
+  color:var(--mudo);
 }
 .claro .chapeu,.casa-escuro .chapeu{color:rgba(255,255,255,.50)}
 .corpo{
   margin:var(--e6) auto 0;max-width:var(--medida);
-  font-size:var(--t-corpo);line-height:1.65;color:var(--cinza);font-weight:400;
+  font-size:var(--t-corpo);line-height:1.65;color:var(--cinza);font-weight:var(--p-corpo);
 }
 .casa-escuro .corpo{color:var(--cinza-cl)}
 
@@ -1274,7 +1329,7 @@ html,body{overflow-x:clip}
    filete de 1px, caixa alta, tracking largo. Uma preenchida por faixa. */
 .acao{
   display:inline-flex;align-items:center;justify-content:center;gap:var(--e3);
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-forte);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
   padding:var(--e4) var(--e6);border-radius:0;text-decoration:none;cursor:pointer;
   border:1px solid currentColor;background:transparent;color:var(--ink);
@@ -1330,7 +1385,7 @@ html,body{overflow-x:clip}
 @media(min-width:920px){ .casa-nav{display:flex} }
 .casa-nav a{
   color:inherit;text-decoration:none;opacity:.72;
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
   padding:var(--e1) 0;transition:opacity var(--t);
 }
@@ -1340,7 +1395,7 @@ html,body{overflow-x:clip}
 @media(max-width:919px){ .casa-barra{grid-template-columns:auto 1fr} .casa-barra-fim{grid-column:2} }
 .bt-barra{
   display:inline-flex;align-items:center;gap:var(--e2);white-space:nowrap;color:inherit;
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;text-decoration:none;
   padding:var(--e3) var(--e5);border:1px solid currentColor;
   transition:background var(--t),color var(--t),opacity var(--t);
@@ -1381,7 +1436,7 @@ html,body{overflow-x:clip}
 }
 .casa-heroi-in{position:relative;padding:120px var(--e5) 40px;max-width:880px}
 .casa-heroi h1{
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-heroi);line-height:1.15;
   letter-spacing:.16em;text-transform:uppercase;margin:0;text-wrap:balance;
 }
@@ -1397,11 +1452,11 @@ html,body{overflow-x:clip}
   gap:var(--e2) var(--e7);
 }
 .casa-regua span{
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
   color:rgba(255,255,255,.66);
 }
-.casa-regua span b{font-weight:600;color:#fff}
+.casa-regua span b{font-weight:var(--p-forte);color:#fff}
 
 /* ==========================================================================
    NÚMEROS — quatro colunas, tipo pequeno, sem caixa
@@ -1412,13 +1467,13 @@ html,body{overflow-x:clip}
 }
 @media(min-width:820px){ .casa-numeros{grid-template-columns:repeat(4,1fr)} }
 .casa-numeros b{
-  display:block;font-family:var(--fonte-display);font-weight:200;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-faixa);line-height:1;letter-spacing:.04em;
 }
 .casa-numeros span{
-  display:block;margin-top:var(--e3);font-family:var(--fonte-display);font-weight:500;
+  display:block;margin-top:var(--e3);font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  color:var(--ink4);line-height:1.55;
+  color:var(--mudo);line-height:1.55;
 }
 .casa-escuro .casa-numeros span{color:rgba(255,255,255,.48)}
 
@@ -1426,13 +1481,13 @@ html,body{overflow-x:clip}
    HORÁRIO — o cartaz do domingo
    ========================================================================== */
 .casa-hora{
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-heroi);line-height:1.15;letter-spacing:.12em;
   text-transform:uppercase;margin:0;
 }
 .casa-hora small{
   display:block;margin-top:var(--e5);font-size:var(--t-rot);letter-spacing:var(--tr);
-  font-weight:500;color:var(--ink4);
+  font-weight:var(--p-rot);color:var(--mudo);
 }
 .casa-escuro .casa-hora small{color:rgba(255,255,255,.5)}
 
@@ -1443,7 +1498,7 @@ html,body{overflow-x:clip}
 .casa-perguntas > div{padding:var(--e6) 0;border-top:1px solid var(--linha)}
 .casa-escuro .casa-perguntas > div{border-top-color:rgba(255,255,255,.14)}
 .casa-perguntas dt{
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;margin:0 0 var(--e3);
 }
 .casa-perguntas dd{
@@ -1498,7 +1553,7 @@ html,body{overflow-x:clip}
 .casa-area:active::after{background:linear-gradient(180deg,rgba(7,7,8,.34) 0%,rgba(7,7,8,.52) 50%,rgba(7,7,8,.84) 100%)}
 .casa-area:focus-visible{outline-color:#fff;outline-offset:-3px}
 .casa-area-nome{
-  font-family:var(--fonte-display);font-weight:300;color:#fff;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);color:#fff;
   font-size:var(--d-bloco);letter-spacing:var(--tr);text-transform:uppercase;
 }
 .casa-area-desc{
@@ -1506,7 +1561,7 @@ html,body{overflow-x:clip}
   font-size:var(--t-apoio);line-height:1.65;
 }
 .casa-area-selo{
-  display:block;margin-top:var(--e5);font-family:var(--fonte-display);font-weight:500;
+  display:block;margin-top:var(--e5);font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:rgba(255,255,255,.55);
 }
 
@@ -1534,11 +1589,11 @@ html,body{overflow-x:clip}
 }
 @media(min-width:900px){ .casa-passos{grid-template-columns:repeat(4,1fr);gap:var(--e6)} }
 .casa-passos b{
-  display:block;font-family:var(--fonte-display);font-weight:200;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-secao);line-height:1;letter-spacing:.12em;opacity:.42;margin-bottom:var(--e4);
 }
 .casa-passos strong{
-  display:block;font-family:var(--fonte-display);font-weight:500;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;margin-bottom:var(--e3);
 }
 .casa-passos p{margin:0 auto;max-width:30ch;font-size:var(--t-apoio);line-height:1.65;color:var(--cinza)}
@@ -1555,9 +1610,9 @@ html,body{overflow-x:clip}
 }
 @media(min-width:720px){ .casa-dados{grid-template-columns:repeat(3,1fr)} }
 .casa-dados dt{
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  color:var(--ink4);margin-bottom:var(--e3);
+  color:var(--mudo);margin-bottom:var(--e3);
 }
 .casa-escuro .casa-dados dt{color:rgba(255,255,255,.46)}
 .casa-dados dd{margin:0;font-size:var(--t-ui);line-height:1.65;color:var(--cinza)}
@@ -1577,7 +1632,7 @@ html,body{overflow-x:clip}
 .casa-pe-in{
   max-width:1120px;margin:0 auto;padding:0 var(--e5);
   display:flex;flex-wrap:wrap;gap:var(--e4) var(--e6);align-items:center;justify-content:center;
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
 }
 .casa-pe a{color:rgba(255,255,255,.7);text-decoration:none}
@@ -1612,7 +1667,7 @@ html,body{overflow-x:clip}
 .porta-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(7,7,8,.62)}
 .porta-hero-in{position:relative;padding:110px var(--e5) var(--e7);max-width:800px;margin:0 auto}
 .porta-hero h1{
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-faixa);line-height:1.15;letter-spacing:.16em;
   text-transform:uppercase;margin:0;text-wrap:balance;
 }
@@ -1669,8 +1724,8 @@ html,body{overflow-x:clip}
 .indice{
   display:flex;align-items:center;justify-content:center;gap:var(--e4);
   margin:0 auto var(--e6);max-width:340px;
-  font-family:var(--fonte-display);font-weight:500;
-  font-size:var(--t-rot);letter-spacing:var(--tr);color:var(--ink4);
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
+  font-size:var(--t-rot);letter-spacing:var(--tr);color:var(--mudo);
 }
 .casa-escuro .indice,.casa-foto .indice{color:rgba(255,255,255,.42)}
 .indice::before,.indice::after{
@@ -1732,15 +1787,15 @@ html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important}
 .menu.aberto li{opacity:1;transform:none}
 .menu a{
   display:block;padding:var(--e4) 0;color:#fff;text-decoration:none;
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-faixa);letter-spacing:.14em;text-transform:uppercase;
 }
 .menu .menu-pe{
   margin-top:var(--e7);display:grid;gap:var(--e3);
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:rgba(255,255,255,.55);
 }
-.menu .menu-pe a{font-size:var(--t-rot);font-weight:500;letter-spacing:var(--tr);padding:0;color:rgba(255,255,255,.75)}
+.menu .menu-pe a{font-size:var(--t-rot);font-weight:var(--p-rot);letter-spacing:var(--tr);padding:0;color:rgba(255,255,255,.75)}
 
 /* --- a barra sabe onde você está ---------------------------------------- */
 .casa-nav a{position:relative}
@@ -1778,7 +1833,7 @@ html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important}
 
 /* o chevron como marcador de lista e divisor */
 .chev-div{
-  display:flex;justify-content:center;gap:var(--e3);margin:0 auto var(--e6);color:var(--ink4);
+  display:flex;justify-content:center;gap:var(--e3);margin:0 auto var(--e6);color:var(--mudo);
 }
 .casa-escuro .chev-div,.casa-foto .chev-div{color:rgba(255,255,255,.34)}
 .chev-div{font-size:var(--t-min);line-height:1}
@@ -1831,12 +1886,12 @@ body:has(.porta) { background:var(--papel) }
 }
 .casa-escuro .sigla > div{border-color:rgba(255,255,255,.14)}
 .sigla b{
-  display:block;font-family:var(--fonte-display);font-weight:200;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-heroi);line-height:1;letter-spacing:.1em;
 }
 .sigla span{
-  display:block;margin-top:var(--e4);font-family:var(--fonte-display);font-weight:500;
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--ink4);
+  display:block;margin-top:var(--e4);font-family:var(--fonte-display);font-weight:var(--p-rot);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--mudo);
 }
 .casa-escuro .sigla span{color:rgba(255,255,255,.5)}
 /* a quarta coluna é o chevron: o A que virou avanço na logo.
@@ -1853,14 +1908,14 @@ body:has(.porta) { background:var(--papel) }
 /* --- o versículo: bloco citado, tipo maior, sem aspas decorativas ------- */
 .versiculo{
   max-width:60ch;margin:60px auto 0;
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-bloco);line-height:1.65;letter-spacing:.02em;
 }
 .versiculo i{font-style:normal;opacity:.55}
 .versiculo cite{
   display:block;margin-top:var(--e5);font-style:normal;
-  font-family:var(--fonte-display);font-weight:500;
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--ink4);
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--mudo);
 }
 .casa-escuro .versiculo cite{color:rgba(255,255,255,.5)}
 
@@ -1870,7 +1925,7 @@ body:has(.porta) { background:var(--papel) }
 }
 @media(min-width:760px){ .pilares{grid-template-columns:repeat(3,1fr);gap:44px} }
 .pilares b{
-  display:block;font-family:var(--fonte-display);font-weight:300;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-lead);letter-spacing:var(--tr);text-transform:uppercase;
 }
 .pilares p{margin:16px auto 0;max-width:32ch;font-size:var(--t-ui);line-height:1.65;color:var(--cinza)}
@@ -1952,6 +2007,20 @@ body:has(.porta) { background:var(--papel) }
   --t-ui:15.5px;     /* interface: botão, item de lista, nome numa linha */
   --t-corpo:17px;    /* leitura — e o nome da própria coisa */
 
+  /* PESO. A medição achou QUINZE pesos diferentes em uso, e dezesseis
+     declarados: 520, 530, 550, 560, 570, 600, 620, 640, 660, 680, 700…
+     A diferença entre 620 e 640 ninguém enxerga; o que se enxerga é que o
+     mesmo tipo de peça pesa diferente em cada tela. Isso não é escolha,
+     é acúmulo — cada valor foi inventado no lugar onde foi precisar.
+
+     Cinco pesos, cada um com um trabalho. Se um peça novo não couber em
+     nenhum destes, o problema é a peça, não a escala. */
+  --p-leve:200;      /* display grande: título, hero */
+  --p-corpo:400;     /* leitura */
+  --p-rot:500;       /* rótulo, aba, item de lista */
+  --p-forte:600;     /* rótulo forte, botão, chapéu */
+  --p-negrito:650;   /* o <strong> dentro de uma frase */
+
   /* Display. Cinco curvas para 33 que existiam, cada uma inventada no
      lugar onde foi precisar. O passo entre elas é grande de propósito:
      título só é título se o salto for visível sem comparar lado a lado. */
@@ -1973,9 +2042,9 @@ body:has(.porta) { background:var(--papel) }
 
 /* --- rótulo: a menor peça do sistema, e a mais usada ------------------- */
 .rot{
-  display:block;font-family:var(--fonte-display);font-weight:500;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  color:var(--ink4);
+  color:var(--mudo);
 }
 .casa-escuro .rot,.casa-foto .rot,.tela-escura .rot{color:rgba(255,255,255,.48)}
 
@@ -1998,7 +2067,7 @@ body:has(.porta) { background:var(--papel) }
 .tela-topo .logo{height:15px}
 .tela-volta{
   display:inline-flex;align-items:center;gap:var(--e2);color:var(--mudo);text-decoration:none;
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
 }
 .tela-volta:hover,
@@ -2011,7 +2080,7 @@ body:has(.porta) { background:var(--papel) }
 .cabeca{max-width:720px;margin:0 auto var(--e8);text-align:center}
 .cabeca .rot{margin-bottom:var(--e5)}
 .cabeca h1{
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-faixa);line-height:1.15;letter-spacing:.16em;
   text-transform:uppercase;margin:0;text-wrap:balance;
 }
@@ -2052,13 +2121,13 @@ body:has(.porta) { background:var(--papel) }
 .escolha.on{background:var(--papel2)}
 .escolha-txt{flex:1;min-width:0}
 .escolha-nome{
-  display:block;font-family:var(--fonte-display);font-weight:500;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:.16em;text-transform:uppercase;
 }
 .escolha-desc{margin:var(--e2) 0 0;font-size:var(--t-ui);line-height:1.65;color:var(--cinza)}
 .escolha-fim{
-  flex:none;align-self:center;font-family:var(--fonte-display);font-weight:500;
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--ink4);
+  flex:none;align-self:center;font-family:var(--fonte-display);font-weight:var(--p-rot);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:var(--mudo);
 }
 
 
@@ -2085,9 +2154,9 @@ body:has(.porta) { background:var(--papel) }
 .estados li.agora .estados-bola{border-color:var(--ink);border-width:2px}
 .tela-escura .estados li.agora .estados-bola{border-color:#fff;border-width:2px}
 .estados-txt b{
-  display:block;font-family:var(--fonte-display);font-weight:500;
+  display:block;font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:.16em;text-transform:uppercase;
-  color:var(--ink4);
+  color:var(--mudo);
 }
 .tela-escura .estados-txt b{color:rgba(255,255,255,.5)}
 .estados li.agora .estados-txt b,.estados li.feito .estados-txt b{color:var(--ink)}
@@ -2109,11 +2178,11 @@ body:has(.porta) { background:var(--papel) }
 .pessoa-ini{
   flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
   background:var(--noite);color:#fff;
-  font-family:var(--fonte-display);font-weight:500;font-size:var(--t-ui);letter-spacing:.06em;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);font-size:var(--t-ui);letter-spacing:.06em;
 }
 .tela-escura .pessoa-ini{background:#fff;color:var(--noite)}
 .pessoa-txt{flex:1;min-width:0}
-.pessoa-txt b{display:block;font-size:var(--t-ui);font-weight:600;letter-spacing:-.01em}
+.pessoa-txt b{display:block;font-size:var(--t-ui);font-weight:var(--p-forte);letter-spacing:-.01em}
 .pessoa-txt span{display:block;margin-top:var(--e1);font-size:var(--t-apoio);color:var(--cinza)}
 .tela-escura .pessoa-txt span{color:var(--cinza-cl)}
 
@@ -2154,11 +2223,11 @@ body:has(.porta) { background:var(--papel) }
 .atalho:active{padding-left:var(--e2)}
 .atalho[aria-disabled="true"]{opacity:.42;pointer-events:none}
 .atalho b{
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:.16em;text-transform:uppercase;
 }
 .atalho span{font-size:var(--t-apoio);color:var(--cinza)}
-.atalho svg{width:12px;height:12px;color:var(--ink4);flex:none}
+.atalho svg{width:12px;height:12px;color:var(--mudo);flex:none}
 
 
 /* ==========================================================================
@@ -2179,13 +2248,13 @@ body:has(.porta) { background:var(--papel) }
 }
 .casa-escuro .alvo > div{border-top-color:rgba(255,255,255,.14)}
 .alvo b{
-  font-family:var(--fonte-display);font-weight:400;
+  font-family:var(--fonte-display);font-weight:var(--p-corpo);
   font-size:var(--d-lead);letter-spacing:.06em;
-  color:var(--ink4);text-decoration:line-through;text-decoration-thickness:1px;
+  color:var(--mudo);text-decoration:line-through;text-decoration-thickness:1px;
 }
 .casa-escuro .alvo b{color:rgba(255,255,255,.38)}
 .alvo span{
-  font-family:var(--fonte-display);font-weight:400;
+  font-family:var(--fonte-display);font-weight:var(--p-corpo);
   font-size:var(--d-lead);letter-spacing:.06em;line-height:1.35;
 }
 
@@ -2273,11 +2342,16 @@ body:has(.porta) { background:var(--papel) }
 .menu a:focus-visible,.casa-pe a:focus-visible{outline-color:#fff}
 
 
-.btn,.btn.claro{
-  font-family:var(--fonte-display);font-weight:500;
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  border-radius:0;
-}
+/* Aqui morava uma SEGUNDA regra `.btn` repetindo a tipografia do botão com
+   peso 500. Ela nasceu na passada de identidade, quando a regra base ainda
+   falava Inter: era o remendo que trazia os `.btn` para a voz da marca. Com
+   a base convertida, ela deixou de acrescentar e passou só a contradizer —
+   e o resultado era um "voltar" de peso 500 no meio de botões 600, sem
+   nenhuma regra visível explicando por quê. Levei três medições para achar,
+   porque o seletor não era `button,.btn` e o meu grep procurava por esse.
+   Duas regras para a mesma peça é como a inconsistência entra sem ninguém
+   decidir nada. */
+.btn{ border-radius:0 }
 
 /* --- MEDIDA DE LEITURA: linhas de 81ch ---------------------------------
    Acima de ~70 caracteres o olho perde o começo da linha seguinte. Vale para
@@ -2337,14 +2411,14 @@ body:has(.porta) { background:var(--papel) }
    um. A migalha mostra o caminho inteiro e deixa pular direto. */
 .migalha{
   display:flex;align-items:center;flex-wrap:wrap;gap:0 var(--e2);
-  font-family:var(--fonte-display);font-weight:500;
+  font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  color:var(--ink4);
+  color:var(--mudo);
 }
 .migalha a{color:inherit;text-decoration:none;padding:var(--e1) 0;min-height:32px;display:inline-flex;align-items:center}
 .migalha a:hover,
 .migalha a:active{color:var(--ink)}
-.migalha b{font-weight:500;color:var(--ink)}
+.migalha b{font-weight:var(--p-rot);color:var(--ink)}
 .migalha span{opacity:.5}
 .migalha.claro{color:rgba(255,255,255,.55)}
 .migalha.claro a:hover,
@@ -2352,9 +2426,16 @@ body:has(.porta) { background:var(--papel) }
 .migalha.claro b{color:#fff}
 
 /* --- cabeça do cadastro ------------------------------------------------- */
-.wiz-cabeca{padding:var(--e5) 0 var(--e1);text-align:left}
+/* O TÍTULO DA TELA MORAVA ATRÁS DO CABEÇALHO FIXO.
+   `.wiz-cabeca` reservava 20px no topo; o cabeçalho fixo tem 75px. O h1
+   "Cadastro na Mídia" ficava em y=36, ou seja inteiro por baixo da barra —
+   presente no DOM, lido por leitor de tela, e invisível para quem enxerga.
+   Foi por isso que ele nunca apareceu em nenhum print desta tela. As outras
+   telas públicas reservam 96px em `.tela-corpo`; esta reserva o mesmo. */
+.wiz-cabeca{padding:96px 0 var(--e1);text-align:left}
+@media(min-width:900px){ .wiz-cabeca{padding-top:128px} }
 .wiz-cabeca h1{
-  font-family:var(--fonte-display);font-weight:200;
+  font-family:var(--fonte-display);font-weight:var(--p-leve);
   font-size:var(--d-secao);line-height:1.15;letter-spacing:.12em;
   text-transform:uppercase;margin:var(--e4) 0 0;
 }
@@ -2368,7 +2449,7 @@ body:has(.porta) { background:var(--papel) }
 .entrada-marca{ margin-bottom:var(--e7); padding-bottom:var(--e6); border-bottom:1px solid var(--noite) }
 .entrada-logo{ height:18px; margin:0 0 var(--e6) }
 .entrada-titulo{
-  font-family:var(--fonte-display); font-weight:200;
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-secao); line-height:1.15; letter-spacing:-.01em; margin:var(--e1) 0 0;
 }
 .entrada-sub{ margin:var(--e3) 0 0; font-size:var(--t-ui); line-height:1.65; color:var(--cinza) }
@@ -2488,7 +2569,7 @@ button:disabled:active,
 /* o rodapé da tela: contagem discreta, na voz dos rótulos */
 .lid-pe{
   margin:var(--e8) 0 0; text-align:center;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 
@@ -2507,7 +2588,7 @@ button:disabled:active,
 .lid-faixa-in{ max-width:1136px; margin:0 auto; display:flex; gap:var(--e6); align-items:flex-start; flex-wrap:wrap }
 .lid-faixa-txt{ flex:1 1 460px; min-width:0 }
 .lid-faixa h1{
-  font-family:var(--fonte-display); font-weight:200;
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
   margin:var(--e3) 0 0; text-wrap:balance;
 }
@@ -2518,11 +2599,11 @@ button:disabled:active,
    com aparência de dado. */
 .lid-placar{ flex:0 0 auto; text-align:right; font-variant-numeric:tabular-nums }
 .lid-placar b{
-  display:block; font-family:var(--fonte-display); font-weight:200;
+  display:block; font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-heroi); line-height:1; letter-spacing:-.02em;
 }
 .lid-placar span{
-  display:block; margin-top:var(--e2); font-family:var(--fonte-display); font-weight:600;
+  display:block; margin-top:var(--e2); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .lid-faixa.fogo .lid-placar span{ color:rgba(255,255,255,.55) }
@@ -2530,7 +2611,7 @@ button:disabled:active,
 /* --------------------------------------------------------------- os botões */
 .lid-bt{
   display:inline-flex; align-items:center; gap:var(--e2);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
   text-decoration:none; border:1px solid var(--noite); border-radius:0;
   background:var(--noite); color:#fff; padding:var(--e4) var(--e5); cursor:pointer;
@@ -2540,7 +2621,7 @@ button:disabled:active,
 .lid-bt:active{ opacity:.84 }
 .lid-faixa.fogo .lid-bt{ background:#fff; color:var(--noite); border-color:#fff }
 .lid-bt-txt{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
   background:none; border:0; padding:0 0 var(--e1); cursor:pointer;
   color:inherit; border-bottom:1px solid currentColor; opacity:.72;
@@ -2612,7 +2693,7 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 .ajt-nome:focus{ border:0; outline:2px solid currentColor; outline-offset:3px }
 
 .ajt-sub{
-  grid-column:1; font-family:var(--fonte-display); font-weight:600;
+  grid-column:1; font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza);
 }
@@ -2667,7 +2748,7 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 .lid-linha.pend > .lid-marca{ background:var(--warn) }
 .lid-linha.ruim > .lid-marca{ background:var(--bad) }
 .lid-fn{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); display:block;
 }
@@ -2691,11 +2772,11 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 .lid-area:active .lid-area-nome{ text-decoration:underline; text-underline-offset:3px }
 .lid-area-nome{ font-size:var(--t-corpo); color:var(--ink) }
 .lid-area-sub{
-  margin-top:var(--e1); font-family:var(--fonte-display); font-weight:600;
+  margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .lid-area-est{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   white-space:nowrap; font-variant-numeric:tabular-nums;
 }
@@ -2714,9 +2795,10 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 }
 .lid-alerta:last-child{ border-bottom:0 }
 .lid-alerta-n{
-  font-family:var(--fonte-display); font-weight:600; font-size:var(--t-ui);
+  font-family:var(--fonte-display); font-weight:var(--p-forte); font-size:var(--t-ui);
   min-width:26px; font-variant-numeric:tabular-nums; color:var(--ink);
 }
+.lid-alerta-n.sinal{ min-width:0 }
 .lid-alerta a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--linha); }
 .lid-alerta a:hover,
 .lid-alerta a:active{ border-bottom-color:var(--noite) }
@@ -2760,7 +2842,7 @@ body:has(.lid) .abas{
   max-width:1136px; margin:0 auto; padding:0; border:0; gap:0;
 }
 body:has(.lid) .abas a{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   padding:var(--e4) 0 var(--e3); margin-right:var(--e6); color:var(--cinza);
   border-bottom:2px solid transparent; background:none;
@@ -2771,7 +2853,7 @@ body:has(.lid) .abas a.on{ color:var(--noite); border-bottom-color:var(--noite);
 body:has(.lid) .abas a svg{ display:none }
 
 body:has(.lid) .seletor-equipe{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   background:none; border:0; padding:0; color:var(--cinza); gap:var(--e2);
 }
@@ -2784,7 +2866,7 @@ body:has(.lid) .seletor-equipe svg{ width:11px; height:11px; opacity:.6 }
 body:has(.lid) .topo-in > *:last-child a,
 body:has(.lid) .topo-in > *:last-child button,
 body:has(.lid) .bt-barra{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); background:none; border:0;
 }
@@ -2804,7 +2886,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 
 /* o placar: o total na mesma linha do número, não flutuando acima do rótulo */
 .lid-placar b{ display:flex; align-items:baseline; gap:var(--e1); justify-content:flex-end }
-.lid-placar b i{ font-style:normal; font-size:.42em; opacity:.42; font-weight:400 }
+.lid-placar b i{ font-style:normal; font-size:.42em; opacity:.42; font-weight:var(--p-corpo) }
 @media(max-width:640px){ .lid-placar b{ justify-content:flex-start } }
 
 
@@ -2846,7 +2928,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-barra .logo{ height:15px; width:auto; color:var(--noite) }
 .vol-quem{
   display:inline-flex; align-items:center; min-height:var(--toque);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); text-decoration:none;
 }
@@ -2863,7 +2945,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-chamada.age .rot{ color:rgba(255,255,255,.55) }
 .vol-chamada.age .vol-sub{ color:rgba(255,255,255,.72) }
 .vol-chamada h1{
-  font-family:var(--fonte-display); font-weight:200;
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
   margin:var(--e3) 0 0; text-wrap:balance;
 }
@@ -2875,7 +2957,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-pede{ padding:var(--e5) 0; border-bottom:1px solid rgba(255,255,255,.16) }
 .vol-pede:last-of-type{ border-bottom:0; padding-bottom:0 }
 .vol-pede-fn{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
 }
 .vol-pede-dia{ margin-top:var(--e1); font-size:var(--t-corpo); color:rgba(255,255,255,.74) }
@@ -2883,7 +2965,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-bt{
   flex:1 1 auto; min-width:150px; min-height:var(--toque);
   display:inline-flex; align-items:center; justify-content:center; gap:var(--e2);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
   border-radius:0; padding:var(--e4) var(--e5); cursor:pointer; text-decoration:none;
   background:#fff; color:var(--noite); border:1px solid #fff;
@@ -2908,32 +2990,45 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 /* a próxima escala: a data é o assunto, então é ela que fica grande */
 .vol-prox{ padding:var(--e5) 0 var(--e1) }
 .vol-prox-fn{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .vol-prox-dia{
-  font-family:var(--fonte-display); font-weight:200;
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-secao); line-height:1.15; margin-top:var(--e2); letter-spacing:-.01em;
 }
 .vol-prox-est{ margin-top:var(--e3); font-size:var(--t-ui); color:var(--cinza) }
 
 /* uma linha por dia. Sem card: fio separa. */
+/* A LINHA ENTREGAVA TRÊS FILHOS PARA UMA GRADE DE DUAS COLUNAS.
+   `.vol-marca` é a marca de estado: um fio de 3px na margem, igual ao resto
+   do produto. Aqui ela era filha direta de uma grade `1fr auto`, então caía
+   na coluna de 1fr e virava um RETÂNGULO de 148px de largura por 98 de
+   altura, vermelho ou verde, ao lado do nome da pessoa. Não era sutil: era
+   a maior mancha de cor da tela do voluntário.
+
+   Esta linha ficou de fora quando as onze bordas esquerdas do produto viraram
+   uma marca absoluta na margem. Agora usa a mesma. */
 .vol-linha{
+  position:relative;
   display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 var(--e4); align-items:center;
   padding:var(--e4) 0; border-bottom:1px solid var(--linha2); text-decoration:none; color:inherit;
 }
 .vol-linha:last-child{ border-bottom:0 }
-.vol-marca{ align-self:stretch; background:transparent }
+.vol-marca{
+  position:absolute; left:calc(-1 * var(--e3)); top:0; bottom:0;
+  width:3px; background:transparent;
+}
 .vol-linha.ok .vol-marca{ background:var(--ok) }
 .vol-linha.pend .vol-marca{ background:var(--warn) }
 .vol-linha.ruim .vol-marca{ background:var(--bad) }
 .vol-linha-dia{ font-size:var(--t-corpo) }
 .vol-linha-fn{
-  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:600;
+  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .vol-linha-est{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); white-space:nowrap;
 }
@@ -2951,7 +3046,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-dia-nome{ font-size:var(--t-ui); min-width:0 }
 .vol-dia-btns{ display:flex; gap:var(--e1); flex:0 0 auto }
 .vol-dia-bt{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   border:1px solid var(--linha); background:transparent; color:var(--cinza);
   border-radius:0; padding:var(--e2) var(--e3); cursor:pointer; min-height:var(--toque);
@@ -2970,13 +3065,13 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-eq-linha{ display:flex; justify-content:space-between; gap:var(--e4); padding:var(--e3) 0; border-bottom:1px solid var(--linha2) }
 .vol-eq-linha:last-of-type{ border-bottom:0 }
 .vol-eq-rot{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .vol-eq-val{ font-size:var(--t-ui); text-align:right }
 .vol-zap{
   display:inline-flex; align-items:center; gap:var(--e2); margin-top:var(--e4); min-height:var(--toque);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--noite); text-decoration:none; border-bottom:1px solid var(--noite); padding-bottom:var(--e1);
 }
@@ -2985,7 +3080,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-flash{
   position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
   background:var(--noite); color:#fff; padding:var(--e3) var(--e5); z-index:60;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   max-width:calc(100vw - 40px);
 }
@@ -3026,11 +3121,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 
 .lid-cand-nome{ font-size:var(--t-corpo); line-height:1.35; color:var(--ink); display:block }
 .lid-cand-sub{
-  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:600;
+  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .lid-cand-est{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   text-align:right; white-space:nowrap;
 }
@@ -3038,7 +3133,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .lid-cand.pend .lid-cand-est{ color:var(--warn) }
 .lid-cand.ok   .lid-cand-est{ color:var(--cinza) }
 .lid-cand-esp{
-  display:block; margin-top:var(--e1); font-family:var(--fonte); font-weight:400;
+  display:block; margin-top:var(--e1); font-family:var(--fonte); font-weight:var(--p-corpo);
   font-size:var(--t-rot); letter-spacing:0; text-transform:none; color:var(--cinza);
   font-variant-numeric:tabular-nums;
 }
@@ -3065,7 +3160,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   margin:0; padding-top:var(--e1);
 }
 .lid-cand-dl dt{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); padding:var(--e3) 0; border-bottom:1px solid var(--linha2);
   align-self:stretch; display:flex; align-items:center;
@@ -3093,11 +3188,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   display:flex; gap:var(--e3); font-size:var(--t-apoio); line-height:1.65; color:var(--cinza);
   padding:var(--e1) 0; font-variant-numeric:tabular-nums;
 }
-.lid-cand-hist b{ font-weight:600; color:var(--ink); font-variant-numeric:normal }
+.lid-cand-hist b{ font-weight:var(--p-forte); color:var(--ink); font-variant-numeric:normal }
 
 .lid-cand-mini{
   display:block; margin-top:var(--e5); padding-bottom:var(--e2);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); border-bottom:1px solid var(--linha);
 }
@@ -3116,7 +3211,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 /* --------------------------------------------------------------- o mês */
 .esc-mes{ display:flex; align-items:center; gap:var(--e1); margin-top:var(--e1) }
 .esc-mes h1{
-  font-family:var(--fonte-display); font-weight:200;
+  font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
   margin:var(--e3) 0 0; text-transform:capitalize;
 }
@@ -3149,11 +3244,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-dia.ruim > summary .lid-marca{ background:var(--bad) }
 .esc-dia-nome{ display:block; font-size:var(--d-lead); line-height:1.35 }
 .esc-dia-sub{
-  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:600;
+  display:block; margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .esc-dia-est{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   text-align:right; white-space:nowrap; color:var(--cinza);
 }
@@ -3181,7 +3276,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-prob-ir{
   position:relative; display:inline-block; margin-left:var(--e2); padding:var(--e4) 0 var(--e4);
   color:var(--ink); line-height:1;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   text-decoration:none;
 }
@@ -3194,7 +3289,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 
 .esc-nota{ margin:var(--e4) 0 0; font-size:var(--t-ui); line-height:1.65; color:var(--cinza); max-width:56ch }
 .esc-mini{
-  display:block; font-family:var(--fonte-display); font-weight:600;
+  display:block; font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 
@@ -3203,7 +3298,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-disp > summary{
   display:flex; gap:var(--e5); align-items:baseline; flex-wrap:wrap;
   padding:var(--e3) 0; cursor:pointer; list-style:none;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .esc-disp > summary::-webkit-details-marker{ display:none }
@@ -3230,7 +3325,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   display:block; margin:var(--e2) 0 0; font-size:var(--t-apoio); line-height:1.65; color:var(--cinza);
   /* o <label> global é caixa alta com letter-spacing: serve para rótulo, não
      para frase. Esta é uma frase e precisa desfazer a herança. */
-  text-transform:none; letter-spacing:0; font-weight:400;
+  text-transform:none; letter-spacing:0; font-weight:var(--p-corpo);
 }
 
 /* -------------------------------------------------------------- os postos
@@ -3248,7 +3343,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-posto.ruim > .lid-marca{ background:var(--bad) }
 .esc-posto-in{ min-width:0 }
 .esc-fn{
-  display:block; font-family:var(--fonte-display); font-weight:600;
+  display:block; font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 /* -------------------------------------------------- texto com seletor nativo
@@ -3283,7 +3378,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-tag{
   position:relative; background:none; border:0; border-radius:0; min-height:0;
   display:inline-block; padding:var(--e4) 0 var(--e4); line-height:1; cursor:pointer;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza);
 }
@@ -3301,7 +3396,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-tag-nota{ font-size:var(--t-rot); color:var(--cinza) }
 .esc-sit{ justify-self:end; max-width:14ch }
 .esc-sit .esc-sel-txt{
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   text-align:right; color:var(--cinza);
 }
@@ -3342,7 +3437,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
       as escalações anteriores à migração 38 não mostram nada. */
 .vol-novo{
   display:inline-block; margin-left:var(--e2); padding:var(--e1) var(--e2);
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--noite); background:#fff; vertical-align:middle;
 }
@@ -3352,7 +3447,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-acao{
   position:relative; display:inline-block; margin-top:var(--e1); padding:var(--e4) 0 var(--e4);
   background:none; border:0; border-radius:0; min-height:0; line-height:1;
-  font-family:var(--fonte-display); font-weight:600;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); cursor:pointer;
 }
@@ -3513,7 +3608,7 @@ html{ scroll-padding-top:88px }
 .area-conf > summary:focus-visible{ outline-offset:3px }
 .area-conf .overline{ margin-bottom:0; flex:1; min-width:0 }
 .area-conf-n{
-  flex:none; font-family:var(--fonte-display); font-weight:600;
+  flex:none; font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); color:var(--cinza);
 }
 .area-conf .giro{
@@ -3551,9 +3646,13 @@ html{ scroll-padding-top:88px }
   font-size:var(--t-apoio); line-height:1.6; color:var(--cinza);
 }
 .lid-faixa.fogo .esc-oquefaz{ color:rgba(255,255,255,.72) }
+/* Esta frase mora na faixa PRETA da tela do voluntário, e eu escrevi ela em
+   var(--cinza) — cinza médio sobre preto dá 3,1:1, abaixo do mínimo de
+   leitura. Todos os vizinhos dela nessa faixa usam branco a 72%. Mesmo erro
+   do branco-sobre-branco da escala, do outro lado. */
 .vol-pede-depois{
   margin:0 0 var(--e4); max-width:52ch;
-  font-size:var(--t-apoio); line-height:1.55; color:var(--cinza);
+  font-size:var(--t-apoio); line-height:1.55; color:rgba(255,255,255,.72);
 }
 
 /* --- 12. O RODAPÉ DEBAIXO DA CTA FLUTUANTE ------------------------------
@@ -3568,3 +3667,37 @@ html{ scroll-padding-top:88px }
 @media(max-width:919px){
   .casa-pe{ padding-bottom:calc(var(--e7) + 78px + env(safe-area-inset-bottom)) }
 }
+
+/* --- 13. O QUE NÃO É COMANDO ---------------------------------------------
+   Estes controles são <button> por serem clicáveis, mas o que a pessoa faz
+   neles é escolher, não mandar. Eles carregam nome de função, frase de
+   descrição e resposta de pergunta — texto que se lê. Em caixa alta com
+   tracking de marca, "Passa a letra e os slides durante o culto" viraria um
+   letreiro. Voltam para a voz do conteúdo.
+
+   A lista devolve a VOZ — família, caixa, tracking — e nada mais. Na primeira
+   versão ela impunha `font-size` junto, e isso quebrou duas coisas de uma vez:
+   a pílula de estado do /time cresceu de 12 para 15,5px e passou a estourar a
+   linha, e o <select> invisível da escala perdeu o piso de 16px e voltou a
+   fazer o iPhone dar zoom na página inteira. Cada peça já sabe o tamanho
+   dela; o que estava errado era só o sotaque. */
+.wiz-op,.posto-op,.escolha,.wiz-chip,.pill,.msg-preview,
+.ajt-nome,.busca-nome input{
+  font-family:var(--fonte); font-weight:var(--p-rot);
+  letter-spacing:normal; text-transform:none;
+}
+.wiz-op-nome,.posto-op-nome{ font-weight:var(--p-forte) }
+
+/* Escolha CURTA — uma ou duas palavras, sem descrição — usa a mesma gramática
+   do "posso / não" da tela do voluntário, que já era display em caixa alta.
+   Eram duas gramáticas para o mesmo gesto em telas vizinhas. */
+.conf-btns .seg,.chip{
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+}
+.conf-btns .seg.on{ font-weight:var(--p-forte) }
+
+/* A seta de mês herdava caixa alta e tracking de marca. Em "‹" o tracking
+   vira um espaço fantasma DEPOIS do glifo, e a seta fica fora do centro do
+   próprio alvo — 3,8px num alvo de 44px é visível. Glifo não é palavra. */
+.esc-seta{ letter-spacing:normal; text-transform:none }

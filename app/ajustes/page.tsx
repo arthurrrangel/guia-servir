@@ -140,7 +140,12 @@ function Ajustes() {
           </div>
           <div>
             <label>Prazo para confirmar</label>
-            <input enterKeyHint="done" key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar" defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
+            {/* campo de texto livre sem nenhuma pista do formato esperado: o
+                valor entra literalmente na frase "Confirma no seu link até
+                ___?" que vai para o WhatsApp. O exemplo mostra a forma. */}
+            <input enterKeyHint="done" key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar"
+              placeholder="ex: quinta-feira"
+              defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
           </div>
           <div>
             <label>Equilibrar a carga olhando</label>
@@ -209,7 +214,7 @@ function Ajustes() {
           <span className="rot">Quem organiza</span>
         </div>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
-          Só estes emails abrem a área do organizador. Cada um enxerga apenas o ministério que
+          Só estes emails abrem o espaço do organizador. Cada um enxerga apenas o ministério que
           organiza: quem cuida da Mídia não vê o Serviço do Culto, e vice-versa.
           Quem está como <strong>todos</strong> enxerga tudo e é quem dá e tira acesso.
           Voluntário não precisa estar aqui, ele usa o link pessoal.
@@ -301,7 +306,7 @@ function Ajustes() {
           <input enterKeyHint="done" value={novaEquipe} onChange={e => setNovaEquipe(e.target.value)} placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
           <button disabled={gravando || !novaEquipe.trim()} onClick={async () => {
             setGravando(true);
-            try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado, agora crie as funções e cadastre o time'); }
+            try { const eq = await criarEquipe(novaEquipe.trim()); setNovaEquipe(''); const l = await recarregarEquipes(); trocarEquipe(eq.id, l); aviso('Ministério criado'); }
             catch (err) { aviso(aviseHumano(err)); }
             setGravando(false);
           }}>Criar ministério</button>

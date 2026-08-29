@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Área do voluntário',
+  title: 'Espaço do voluntário',
   description: 'Sua escala, seus dias e seu líder. Acesse o seu espaço.',
 };
 

@@ -311,7 +311,11 @@ function Painel() {
           <div className="lid-secao-cab"><span className="rot">Conferir antes de publicar</span></div>
           {probs.map((p, i) => (
             <div key={i} className={`lid-alerta ${p.grau === 'erro' ? 'ruim' : ''}`}>
-              <span className="lid-alerta-n" aria-hidden="true">{p.grau === 'erro' ? '!' : '·'}</span>
+              {/* a coluna de 26px de `.lid-alerta-n` existe para NÚMERO alinhar com
+                  número (tabular-nums). Aqui o conteúdo é um sinal de um
+                  caractere, e ele ficava encostado à esquerda de uma caixa
+                  larga: 38px de vão entre o "!" e a frase que ele qualifica. */}
+              <span className="lid-alerta-n sinal" aria-hidden="true">{p.grau === 'erro' ? '!' : '·'}</span>
               <span>{p.texto}</span>
             </div>
           ))}

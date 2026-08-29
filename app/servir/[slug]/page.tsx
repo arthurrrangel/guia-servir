@@ -143,7 +143,9 @@ export default function Area() {
                   {g.texto || 'A liderança explica no primeiro contato.'}
                 </p>
               </span>
-              {g.vagas > 1 && <span className="escolha-fim">{g.vagas} vagas</span>}
+              {/* "vaga" é posto VAZIO. Aqui o número é quantas posições a
+                  função tem, cheias ou não — então a palavra é posto. */}
+              {g.vagas > 1 && <span className="escolha-fim">{g.vagas} postos</span>}
             </div>
           ))}
         </div>
