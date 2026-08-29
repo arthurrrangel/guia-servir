@@ -299,8 +299,8 @@ function Time() {
 
             <div className="linha" style={{ marginTop: 14 }}>
               <div style={{ width: 190 }}>
-                <label>WhatsApp</label>
-                <input key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
+                <label htmlFor={'tel-' + v.id}>WhatsApp</label>
+                <input id={'tel-' + v.id} key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
                   type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
                   onBlur={e => { if (e.target.value.trim() !== (v.tel || '')) void mudar(v.id, { telefone: e.target.value.trim() || null }); }} />
               </div>
@@ -376,13 +376,13 @@ function Time() {
         É isso que o sorteio usa. Quem está <em>aprendendo</em> nunca cai sozinho na escala.
       </div>
       <div className="card">
-        <h3>Adicionar pessoa</h3>
+        <h3 aria-level={2}>Adicionar pessoa</h3>
         <div className="grade">
-          <div><label>Nome</label>
-            <input value={nome} onChange={e => setNome(e.target.value)} placeholder="como aparece no grupo do WhatsApp"
+          <div><label htmlFor="add-nome">Nome</label>
+            <input id="add-nome" value={nome} onChange={e => setNome(e.target.value)} placeholder="como aparece no grupo do WhatsApp"
               autoCapitalize="words" autoComplete="name" enterKeyHint="next" /></div>
-          <div><label>WhatsApp, sem ele a pessoa não entra pelo link do grupo</label>
-            <input value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
+          <div><label htmlFor="add-tel">WhatsApp, sem ele a pessoa não entra pelo link do grupo</label>
+            <input id="add-tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
               type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done" /></div>
         </div>
         <div style={{ marginTop: 14 }}>

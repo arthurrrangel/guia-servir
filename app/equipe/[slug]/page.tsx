@@ -358,13 +358,13 @@ export default function EntradaEquipe() {
 
   return (
     <div className="eu-fundo">
-      <div className="eu-topo"><div className="eu-topo-in">
+      <div className="eu-topo" role="banner"><div className="eu-topo-in">
         <span className="overline">{equipe}</span>
         <h1 className="eu-titulo">{titulo}</h1>
         <p className="eu-sub">{sub}</p>
       </div></div>
 
-      <div className="eu">
+      <div className="eu" role="main">
         {erro && <Aviso tom="erro">{erro}</Aviso>}
 
         {/* Ministério com pré-requisito. A pessoa terminou o cadastro e a única
@@ -434,7 +434,7 @@ export default function EntradaEquipe() {
                 .filter(a => a.gente.length)
                 .map(({ area, gente }) => (
                   <div className="area-bloco" key={area}>
-                    <h3 className="area-titulo">{area} <span className="area-n">{gente.length}</span></h3>
+                    <h3 className="area-titulo" aria-level={2}>{area} <span className="area-n">{gente.length}</span></h3>
                     {gente.map(p => (
                       <button key={area + p.voluntario_id} className="pick-nome" disabled={ocupado}
                         onClick={() => escolher(p)}>
@@ -460,8 +460,8 @@ export default function EntradaEquipe() {
 
         {fase === 'pin' && (
           <div className="escalacao">
-            <label>Seu PIN</label>
-            <input enterKeyHint="done" ref={refPin} value={pin} inputMode="numeric" autoComplete="one-time-code"
+            <label htmlFor="eq-pin">Seu PIN</label>
+            <input id="eq-pin" enterKeyHint="done" ref={refPin} value={pin} inputMode="numeric" autoComplete="one-time-code"
               className="campo-pin" placeholder="••••" disabled={ocupado}
               onChange={e => { const v = so4(e.target.value); setPin(v); if (v.length === 4) setTimeout(() => entrarComPin(v), 10); }} />
             <button className="pri" style={{ marginTop: 14, width: '100%' }}
@@ -487,12 +487,12 @@ export default function EntradaEquipe() {
                 Peça o link pessoal no privado a quem organiza a escala.
               </Aviso>
             )}
-            <label>Os 4 últimos números do seu WhatsApp</label>
-            <input enterKeyHint="done" value={dig} inputMode="numeric" className="campo-pin" placeholder="••••"
+            <label htmlFor="eq-dig">Os 4 últimos números do seu WhatsApp</label>
+            <input id="eq-dig" enterKeyHint="done" value={dig} inputMode="numeric" className="campo-pin" placeholder="••••"
               disabled={ocupado || !alvo?.tem_tel} onChange={e => setDig(so4(e.target.value))} />
 
-            <label style={{ marginTop: 16, display: 'block' }}>Agora crie um PIN de 4 números</label>
-            <input enterKeyHint="done" value={pinNovo} inputMode="numeric" className="campo-pin" placeholder="••••"
+            <label htmlFor="eq-pinnovo" style={{ marginTop: 16, display: 'block' }}>Agora crie um PIN de 4 números</label>
+            <input id="eq-pinnovo" enterKeyHint="done" value={pinNovo} inputMode="numeric" className="campo-pin" placeholder="••••"
               disabled={ocupado || !alvo?.tem_tel} onChange={e => setPinNovo(so4(e.target.value))} />
             <p className="dim pequeno" style={{ margin: '8px 0 0' }}>
               É esse PIN que você vai usar daqui pra frente. Não use os mesmos 4 números do telefone,
@@ -512,20 +512,20 @@ export default function EntradaEquipe() {
 
         {fase === 'cadastro' && (
           <div className="escalacao">
-            <label>Seu nome completo</label>
-            <input value={fNome} disabled={ocupado} placeholder="nome e sobrenome"
+            <label htmlFor="eq-nome">Seu nome completo</label>
+            <input id="eq-nome" value={fNome} disabled={ocupado} placeholder="nome e sobrenome"
               autoComplete="name" autoCapitalize="words" enterKeyHint="next"
               onChange={e => setFNome(e.target.value)} />
 
-            <label style={{ marginTop: 14, display: 'block' }}>Seu WhatsApp (com DDD)</label>
-            <input value={fTel} disabled={ocupado} placeholder="11999998888" type="tel" inputMode="tel"
+            <label htmlFor="eq-tel" style={{ marginTop: 14, display: 'block' }}>Seu WhatsApp (com DDD)</label>
+            <input id="eq-tel" value={fTel} disabled={ocupado} placeholder="11999998888" type="tel" inputMode="tel"
               autoComplete="tel" enterKeyHint="next" onChange={e => setFTel(e.target.value)} />
             <p className="dim pequeno" style={{ margin: '6px 0 0' }}>
               É por ele que você confirma que é você, e é onde a organização te chama.
             </p>
 
-            <label style={{ marginTop: 14, display: 'block' }}>E-mail <span className="dim">(opcional)</span></label>
-            <input value={fEmail} disabled={ocupado} placeholder="seu@email.com" type="email" inputMode="email"
+            <label htmlFor="eq-email" style={{ marginTop: 14, display: 'block' }}>E-mail <span className="dim">(opcional)</span></label>
+            <input id="eq-email" value={fEmail} disabled={ocupado} placeholder="seu@email.com" type="email" inputMode="email"
               autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onChange={e => setFEmail(e.target.value)} />
 

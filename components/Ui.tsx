@@ -42,7 +42,12 @@ export function Anel({ valor, total, cor }: { valor: number; total: number; cor:
 /* aviso com ícone correspondente ao tom (status nunca é só cor) */
 export function Aviso({ tom, children }: { tom: 'erro' | 'atencao' | 'info' | 'bom'; children: React.ReactNode }) {
   const Ic = tom === 'bom' ? IcCheck : tom === 'erro' ? IcX : tom === 'atencao' ? IcAlerta : IcInfo;
-  return <div className={`aviso ${tom}`}><Ic /><div>{children}</div></div>;
+  /* quando um aviso surge depois de uma ação (erro ao salvar, PIN errado,
+     "pronto"), o leitor de tela precisa anunciá-lo — senão a pessoa cega toca
+     e não sabe o que aconteceu. Erro interrompe (alert); o resto é gentil
+     (status). Avisos já presentes na carga não são reanunciados: live region
+     só dispara em mudança, então painéis fixos de info seguem silenciosos. */
+  return <div className={`aviso ${tom}`} role={tom === 'erro' ? 'alert' : 'status'}><Ic /><div>{children}</div></div>;
 }
 
 export function Esqueleto() {

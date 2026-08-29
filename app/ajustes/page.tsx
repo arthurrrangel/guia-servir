@@ -97,11 +97,11 @@ function Ajustes() {
           <strong> fixe</strong> ela lá. A partir daí cada pessoa entra sozinha pelo link, acha o próprio
           nome e confirma, você não manda link no privado de ninguém.
         </p>
-        <label>Link de convite do grupo (opcional, só para você guardar)</label>
+        <label htmlFor="ajt-grupo">Link de convite do grupo (opcional, só para você guardar)</label>
         {/* endereço, não frase: sem inputMode="url" o iPhone abre teclado de
             texto com corretor ligado e a primeira letra maiúscula — colar um
             link e ver "Https://" é o resultado. */}
-        <input enterKeyHint="done" key={equipe?.whatsapp_grupo || ''} defaultValue={equipe?.whatsapp_grupo || ''}
+        <input id="ajt-grupo" enterKeyHint="done" key={equipe?.whatsapp_grupo || ''} defaultValue={equipe?.whatsapp_grupo || ''}
           type="url" inputMode="url" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           placeholder="https://chat.whatsapp.com/..."
           onBlur={async e => {

@@ -266,7 +266,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <Logo className="logo" />
             <div className="marca-nome">
               <button ref={btnSeletor} className="seletor-equipe" onClick={() => setMenuAberto(v => !v)}
-                aria-expanded={menuAberto} aria-haspopup="menu">
+                aria-expanded={menuAberto} aria-controls="menu-equipes">
                 <span className="seletor-nome">{equipe?.nome || 'Equipe'}</span>
                 <span aria-hidden>·</span>
                 <span>{(() => { const n = S.voluntarios.filter(v => v.ativo).length; return `${n}`; })()}</span>
@@ -276,7 +276,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             {menuAberto && (
               <>
                 <div className="menu-fundo" onClick={fecharMenu} />
-                <div className="menu-equipes" role="menu">
+                <div className="menu-equipes" id="menu-equipes">
                   {/* MESMA PESSOA, MESMO PRODUTO.
                       Quem organiza e também serve encontrava o próprio espaço
                       só se tivesse guardado o link do WhatsApp. Agora ele está
@@ -285,7 +285,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                     <>
                       <div className="overline" style={{ padding: '4px 12px 8px' }}>Onde eu sirvo</div>
                       {meus.map(v => (
-                        <a key={v.slug} role="menuitem" className="menu-item" href={`/eu/${v.token}`}>
+                        <a key={v.slug} className="menu-item" href={`/eu/${v.token}`}>
                           {v.equipe} · meu espaço
                         </a>
                       ))}
@@ -294,11 +294,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
                   )}
                   <div className="overline" style={{ padding: '4px 12px 8px' }}>Ministérios</div>
                   {equipes.map(e => (
-                    <button key={e.id} role="menuitem" className={`menu-item ${e.id === equipeId ? 'on' : ''}`} onClick={() => trocarEquipe(e.id)}>
+                    <button key={e.id} className={`menu-item ${e.id === equipeId ? 'on' : ''}`}
+                      aria-current={e.id === equipeId ? 'true' : undefined} onClick={() => trocarEquipe(e.id)}>
                       {e.nome}{e.id === equipeId && ' ✓'}
                     </button>
                   ))}
-                  <Link href="/ajustes#equipes" role="menuitem" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
+                  <Link href="/ajustes#equipes" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
                 </div>
               </>
             )}
@@ -344,8 +345,8 @@ function PrimeiraEquipe({ aoCriar }: { aoCriar: (id: string) => void }) {
         Cada ministério (Mídia, Louvor, Recepção…) tem seu próprio time, funções e escala. Você pode adicionar quantos quiser.
       </p>
       <div className="card">
-        <label>Nome do ministério</label>
-        <input value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
+        <label htmlFor="nt-nome">Nome do ministério</label>
+        <input id="nt-nome" value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
         <div style={{ height: 14 }} />
         <button className="pri grande" disabled={ocupado || !nome.trim()} onClick={async () => {
           setOcupado(true); setErro('');
@@ -368,11 +369,11 @@ export function Conexao({ aoSalvar }: { aoSalvar: () => void }) {
         Cole o endereço e a chave pública do seu projeto Supabase. Fica salvo neste aparelho.
       </p>
       <div className="card">
-        <label>URL do projeto</label>
-        <input value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" />
+        <label htmlFor="cfg-url">URL do projeto</label>
+        <input id="cfg-url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" />
         <div style={{ height: 12 }} />
-        <label>Chave anon (public)</label>
-        <input value={key} onChange={e => setKey(e.target.value)} placeholder="eyJhbGciOi..." />
+        <label htmlFor="cfg-key">Chave anon (public)</label>
+        <input id="cfg-key" value={key} onChange={e => setKey(e.target.value)} placeholder="eyJhbGciOi..." />
         <div style={{ height: 14 }} />
         <button className="pri grande" disabled={!url || !key}
           onClick={() => { gravarCredenciais({ url: url.trim().replace(/\/$/, ''), key: key.trim() }); aoSalvar(); }}>

@@ -239,7 +239,7 @@ export default function Eu() {
      estado nenhum, nem no "link inválido" — que é justamente quando a pessoa
      mais precisa de um caminho para algum lugar. */
   const Barra = ({ perfil = false }: { perfil?: boolean }) => (
-    <div className="vol-barra">
+    <div className="vol-barra" role="banner">
       <div className="vol-barra-in">
         <Link href="/" aria-label="GUIA Church"><Logo className="logo" /></Link>
         {perfil
@@ -251,7 +251,7 @@ export default function Eu() {
 
   if (fase === 'carregando') return (
     <div className="vol"><Barra />
-      <div className="vol-in"><div className="vol-chamada">
+      <div className="vol-in" role="main"><div className="vol-chamada">
         <span className="rot">Espaço do voluntário</span>
         <h1>Carregando</h1>
       </div></div>
@@ -260,7 +260,7 @@ export default function Eu() {
 
   if (fase === 'rede') return (
     <div className="vol"><Barra />
-      <div className="vol-in"><div className="vol-chamada">
+      <div className="vol-in" role="main"><div className="vol-chamada">
         <span className="rot">Espaço do voluntário</span>
         <h1>Sem conexão agora</h1>
         <p className="vol-sub">Seu link continua valendo. Tente de novo quando o sinal voltar.</p>
@@ -274,7 +274,7 @@ export default function Eu() {
 
   if (fase === 'erro') return (
     <div className="vol"><Barra />
-      <div className="vol-in"><div className="vol-chamada">
+      <div className="vol-in" role="main"><div className="vol-chamada">
         <span className="rot">Espaço do voluntário</span>
         <h1>Esse link não vale</h1>
         <p className="vol-sub">
@@ -344,7 +344,7 @@ export default function Eu() {
   return (
     <div className="vol">
       <Barra perfil />
-      <div className="vol-in">
+      <div className="vol-in" role="main">
 
         {/* 1. O QUE PRECISO FAZER.
             Quando há confirmação pendente, ela toma a primeira dobra e o fundo
@@ -640,10 +640,10 @@ export default function Eu() {
           <TrocarPin token={token} />
         </div>
 
-        {!!erro && <p className="vol-nota" style={{ color: 'var(--bad)' }}>{erro}</p>}
+        {!!erro && <p className="vol-nota" role="status" style={{ color: 'var(--bad)' }}>{erro}</p>}
       </div>
 
-      {!!flash && <div className="vol-flash">{flash}</div>}
+      {!!flash && <div className="vol-flash" role="status">{flash}</div>}
     </div>
   );
 }
@@ -688,7 +688,7 @@ function TrocarPin({ token }: { token: string }) {
 
   return (
     <>
-      <h3 style={{ marginTop: 30 }}>Trocar meu PIN</h3>
+      <h3 aria-level={2} style={{ marginTop: 30 }}>Trocar meu PIN</h3>
       <p className="dim pequeno" style={{ marginTop: -6, marginBottom: 12 }}>
         O PIN é o que te deixa entrar pela lista da equipe quando você está sem este link.
         Esqueceu? Escolha um novo aqui, não precisa saber o antigo.
@@ -697,8 +697,8 @@ function TrocarPin({ token }: { token: string }) {
         <Aviso tom="bom">PIN trocado. É esse que você usa da próxima vez que entrar pela lista.</Aviso>
       ) : (
         <div className="escalacao">
-          <label>Novo PIN de 4 números</label>
-          <input enterKeyHint="done" value={pin} inputMode="numeric" className="campo-pin" placeholder="••••"
+          <label htmlFor="pin-novo">Novo PIN de 4 números</label>
+          <input id="pin-novo" enterKeyHint="done" value={pin} inputMode="numeric" className="campo-pin" placeholder="••••"
             disabled={salvando}
             onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setErro(''); }} />
           <p className="dim pequeno" style={{ margin: '8px 0 0' }}>

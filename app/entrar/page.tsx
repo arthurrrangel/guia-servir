@@ -80,21 +80,21 @@ export default function Entrar() {
       </div>
 
       <form onSubmit={modo === 'link' ? porLink : porSenha}>
-        <label>Seu email</label>
+        <label htmlFor="ent-email">Seu email</label>
         {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
             "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
             enterKeyHint troca o "return" do teclado por "ir" — a tecla que
             manda o formulário sem a pessoa ter que fechar o teclado e
             procurar o botão embaixo dele. */}
-        <input type="email" required autoComplete="email" value={email}
+        <input id="ent-email" type="email" required autoComplete="email" value={email}
           inputMode="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           enterKeyHint="go"
           onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
         {modo === 'senha' && (
           <>
             <div style={{ height: 12 }} />
-            <label>Sua senha</label>
-            <input type="password" required autoComplete="current-password" enterKeyHint="go" value={senha} onChange={e => setSenha(e.target.value)} />
+            <label htmlFor="ent-senha">Sua senha</label>
+            <input id="ent-senha" type="password" required autoComplete="current-password" enterKeyHint="go" value={senha} onChange={e => setSenha(e.target.value)} />
           </>
         )}
         <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
