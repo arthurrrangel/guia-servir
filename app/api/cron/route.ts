@@ -15,7 +15,7 @@ import {
   addDias, cultosAte, cultosDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
   tipoDoDia, vagasDe, nomeDe, MESES, Estado,
 } from '@/lib/engine';
-import { montarEstado, paraSalvarDia } from '@/lib/ponte';
+import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
 export const dynamic = 'force-dynamic';
 /* Domínio próprio desde 26/08. O antigo `escala-midia-iota.vercel.app` continua
@@ -42,35 +42,10 @@ function servico() {
 }
 
 async function estadoDaEquipe(s: any, equipe: any): Promise<Estado> {
-  const equipeId = equipe.id;
-  const desde = addDias(dataSP().iso, -200);   // histórico só o que a carga usa
-  const [funcoes, vols, cultos, cfg] = await Promise.all([
-    s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
-    /* colunas explícitas: a 18 tirou `pin_hash` do GRANT. O cron usa service
-       role e passaria por cima, mas `select *` aqui é uma armadilha esperando
-       o dia em que este código rodar com outra credencial. */
-    s.from('voluntarios')
-      .select('id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email')
-      .eq('equipe_id', equipeId).order('nome'),
-    s.from('cultos').select('id,data').gte('data', desde).order('data'),
-    s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
-  ]);
-  const funcaoIds = (funcoes.data || []).map((f: any) => f.id);
-  const volIds = (vols.data || []).map((v: any) => v.id);
-  const cultoIds = (cultos.data || []).map((c: any) => c.id);
-  const [habs, indis, escs, plants, recados] = await Promise.all([
-    volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : { data: [] },
-    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds) : { data: [] },
-    funcaoIds.length ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds) : { data: [] },
-    volIds.length ? s.from('plantoes').select('*').in('voluntario_id', volIds) : { data: [] },
-    cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : { data: [] },
-  ]);
-  return montarEstado({
-    funcoes: funcoes.data || [], voluntarios: vols.data || [], habilidades: (habs as any).data || [],
-    indisponibilidades: (indis as any).data || [], cultos: cultos.data || [],
-    escalacoes: (escs as any).data || [], plantoes: (plants as any).data || [],
-    recados: (recados as any).data || [], config: cfg.data || null, equipe: equipe.nome,
-  });
+  /* MESMA consulta que o navegador faz, pela mesma função. Antes eram duas
+     cópias e o cron buscava uma tabela a menos — ver `linhasDaEquipe`. */
+  const desde = addDias(dataSP().iso, DIAS_DE_HISTORICO);
+  return montarEstado(await linhasDaEquipe(s, equipe.id, desde, equipe.nome));
 }
 
 /* O cron roda com service role: o RLS não vale aqui, então o escopo por

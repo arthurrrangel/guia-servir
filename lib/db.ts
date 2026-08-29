@@ -1,7 +1,7 @@
 'use client';
 import { sb } from './supabase';
 import { addDias, Estado, hojeISO, Nivel, Status } from './engine';
-import { montarEstado, paraSalvarDia } from './ponte';
+import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 
 /* Ponte entre o banco e o objeto de estado que o motor entende.
    O motor nunca sabe que existe Supabase. */
@@ -9,46 +9,11 @@ import { montarEstado, paraSalvarDia } from './ponte';
 export async function carregarEstado(equipeId: string, nomeEquipe = ''): Promise<Estado> {
   const s = sb();
   if (!s) throw new Error('sem conexão');
-  /* Janela: o app só precisa do histórico recente (a carga olha no máximo
-     180 dias para trás) e do futuro. Sem isso, cada troca de ministério
-     puxava o histórico inteiro da igreja desde sempre. */
-  const desde = addDias(hojeISO(), -200);
-  const [funcoes, vols, cultos, cfg] = await Promise.all([
-    s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
-    /* colunas explícitas, não `*`: desde a migração 18 o `pin_hash` está fora
-       do GRANT de `authenticated`, e `select *` num GRANT por coluna estoura
-       com "permission denied for column" em vez de simplesmente omitir. */
-    s.from('voluntarios')
-      .select('id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email')
-      .eq('equipe_id', equipeId).order('nome'),
-    s.from('cultos').select('id,data').gte('data', desde).order('data'),
-    s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
-  ]);
-  const e1 = [funcoes, vols, cultos].find(r => r.error);
-  if (e1?.error) throw e1.error;
-
-  const funcaoIds = (funcoes.data || []).map(f => f.id);
-  const volIds = (vols.data || []).map(v => v.id);
-  const cultoIds = (cultos.data || []).map(c => c.id);
-  const vazio = Promise.resolve({ data: [] as any[] });
-  // fase 2: linhas dependentes, filtradas para a equipe (nada vaza de outra)
-  const [habs, indis, escs, plants, recados, disp] = await Promise.all([
-    volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : vazio,
-    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds) : vazio,
-    funcaoIds.length ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds) : vazio,
-    volIds.length ? s.from('plantoes').select('*').in('voluntario_id', volIds) : vazio,
-    cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
-    /* respostas de "posso": é o que o líder precisa ver para montar a escala.
-       Sem isto o voluntário respondia e ninguém enxergava. */
-    volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
-  ]);
-  return montarEstado({
-    funcoes: funcoes.data || [], voluntarios: vols.data || [], habilidades: (habs as any).data || [],
-    indisponibilidades: (indis as any).data || [], cultos: cultos.data || [],
-    escalacoes: (escs as any).data || [], plantoes: (plants as any).data || [],
-    recados: (recados as any).data || [], disponibilidades: (disp as any).data || [],
-    config: cfg?.data || null, equipe: nomeEquipe,
-  });
+  /* A consulta mora em ponte.ts, junto do cron. Ver o cabeçalho de
+     `linhasDaEquipe`: esta busca já existiu em duplicata e as duas cópias
+     divergiram em silêncio. */
+  const desde = addDias(hojeISO(), DIAS_DE_HISTORICO);
+  return montarEstado(await linhasDaEquipe(s, equipeId, desde, nomeEquipe));
 }
 
 /* -------------------------------------------------------------- escrita --- */
@@ -121,18 +86,6 @@ export async function definirHabilidade(vid: string, funcaoId: string, nivel: Ni
   const { error } = await sb()!.rpc('conferir_habilidade', {
     p_voluntario: vid, p_funcao: funcaoId, p_nivel: nivel,
   });
-  if (error) throw error;
-}
-
-/* NOTA: nenhuma tela chama isto ainda. É o caminho para o líder registrar que
-   alguém avisou por WhatsApp que não pode num domingo, e hoje esse aviso não
-   tem onde ser guardado. Fica aqui, correto, esperando a tela da fase 5.
-   Antes engolia o erro dos dois lados. */
-export async function definirIndisponibilidade(vid: string, data: string, marcar: boolean) {
-  const s = sb()!;
-  const { error } = marcar
-    ? await s.from('indisponibilidades').upsert({ voluntario_id: vid, data })
-    : await s.from('indisponibilidades').delete().eq('voluntario_id', vid).eq('data', data);
   if (error) throw error;
 }
 

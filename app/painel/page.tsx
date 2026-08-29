@@ -10,7 +10,7 @@ import { Escolha } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
-  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia,
+  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES,
 } from '@/lib/engine';
 
 /* =============================================================================
@@ -44,12 +44,6 @@ import {
 
 /* o vocabulário da situação mora aqui e na escala. Uma lista só, para as duas
    telas dizerem as mesmas palavras. */
-const SITUACOES: { v: Status; rot: string }[] = [
-  { v: 'pendente', rot: 'falta confirmar' },
-  { v: 'confirmado', rot: 'confirmou' },
-  { v: 'recusado', rot: 'não pode' },
-  { v: 'furou', rot: 'furou' },
-];
 
 export default function Pagina() { return <Shell><Painel /></Shell>; }
 

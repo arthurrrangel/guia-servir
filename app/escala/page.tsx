@@ -7,7 +7,7 @@ import { aviseHumano } from '@/lib/erros';
 import {
   candidatos, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
-  resumoDia, Status, sugerirPlantao, tipoDoDia,
+  resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
 } from '@/lib/engine';
 
 /* =============================================================================
@@ -308,7 +308,7 @@ function Escala() {
       {/* ---------------------------------------------------- o que ainda vem */}
       {futuros.map(d => (
         <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
-          {...{ S, hoje, ocupado, semFuncoes, aviso, base, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+          {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
       ))}
 
       {/* ------------------------------------------------------ o que passou
@@ -324,7 +324,7 @@ function Escala() {
           </div>
           {verPassado && passados.map(d => (
             <DiaCard key={d} d={d} aberto={false} passado
-              {...{ S, hoje, ocupado, semFuncoes, aviso, base, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+              {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
           ))}
         </section>
       )}
@@ -335,7 +335,49 @@ function Escala() {
 /* =========================================================================
    UM CULTO
    ========================================================================= */
-function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: any) {
+
+/* ============================================================================
+   AS PROPS DESTES TRÊS COMPONENTES ERAM `any` — auditoria 29/08/2026.
+
+   `DiaCard`, `Postos` e `Posto` são os três componentes mais complexos da tela
+   mais complexa do produto, e os três recebiam `{ ...treze coisas }: any`.
+   Com `any` no lugar do contrato, renomear uma prop não quebra a compilação —
+   quebra a tela, em produção, na mão do líder.
+
+   E já havia um sintoma: a chamada passa `hoje` e `base` para o `DiaCard`, que
+   nunca destrutura nem usa nenhum dos dois. Duas props sendo carregadas por
+   toda a árvore sem destino. Com o tipo declarado, o compilador aponta isso na
+   hora em vez de deixar passar por mais um ano.
+   ============================================================================ */
+type FnDoDia = ReturnType<typeof funcoesDoDia>[number];
+
+/* as ações que a tela empresta para os filhos. Todas assíncronas, todas
+   começando pela data — é a assinatura real das funções lá em cima. */
+type AcoesDoDia = {
+  ocupado: boolean;
+  semFuncoes: boolean;
+  aviso: (t: string) => void;
+  gerarUm: (d: string) => Promise<void>;
+  trocar: (d: string, funcao: string, vid: string) => Promise<void>;
+  situacao: (d: string, funcao: string, st: Status) => Promise<void>;
+  travar: (d: string, funcao: string) => Promise<void>;
+  marcarPrimeira: (d: string, funcao: string) => Promise<void>;
+  salvarObs: (d: string, txt: string) => Promise<void>;
+  novoPlantao: (d: string) => Promise<void>;
+};
+
+type PropsDiaCard = AcoesDoDia & {
+  d: string; aberto: boolean; passado: boolean; S: Estado;
+};
+type PropsCorpo = AcoesDoDia & {
+  d: string; passado: boolean; S: Estado; dia: any; doDia: FnDoDia[];
+  probs: ReturnType<typeof problemas>; preenchidos: number;
+};
+type PropsPosto = Pick<AcoesDoDia, 'ocupado' | 'trocar' | 'situacao' | 'travar' | 'marcarPrimeira'> & {
+  d: string; f: FnDoDia; S: Estado; dia: any;
+};
+
+function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsDiaCard) {
   const dia = S.escalas[d];
   const doDia = funcoesDoDia(S, d);
   const r = dia ? resumoDia(S, d) : null;
@@ -380,7 +422,7 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
 }
 
 function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFuncoes, aviso,
-  gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: any) {
+  gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsCorpo) {
   const cobranca = msgConfirmar(S, d);
 
   return (
@@ -476,14 +518,8 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
 const slugFn = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-const SITUACOES: { v: Status; rot: string }[] = [
-  { v: 'pendente', rot: 'falta confirmar' },
-  { v: 'confirmado', rot: 'confirmou' },
-  { v: 'recusado', rot: 'não pode' },
-  { v: 'furou', rot: 'furou' },
-];
 
-function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira }: any) {
+function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira }: PropsPosto) {
   const slot = dia?.slots?.[f.nome];
   const st: Status = (slot?.status || 'pendente') as Status;
   const lista = candidatos(S, f.nome, d, { excluirOcupados: false, ignorarLimite: true, incluirTreino: true });

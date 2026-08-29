@@ -17,7 +17,7 @@ export function montarEstado(l: LinhasDoBanco): Estado {
   const S = estadoVazio();
   /* líder de verdade sempre lê a linha de config; quem logou sem estar na
      allowlist recebe null (RLS) — o Shell usa isso para mostrar "sem acesso" */
-  (S as any).temAcesso = !!l.config;
+  S.temAcesso = !!l.config;
   S.equipe = l.equipe || '';
   S.config = { ...CONFIG_PADRAO, ...(l.config?.dados || {}) };
   S.funcoes = (l.funcoes || []).map(f => ({
@@ -122,5 +122,76 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
   return {
     p_equipe: equipeId, p_data: data, p_obs: dia.obs || '', p_slots: slots,
     p_plantao: (dia.plantao || []).filter(v => meus.has(v)),
+  };
+}
+
+/* ============================================================================
+   BUSCAR AS LINHAS — uma vez só, para os dois que precisam
+   Auditoria técnica, 29/08/2026.
+
+   Esta consulta existia DUAS VEZES, palavra por palavra: em `lib/db.ts`
+   (navegador, chave anônima, RLS valendo) e em `app/api/cron/route.ts`
+   (servidor, service role, RLS desligado). Cliente diferente é motivo legítimo
+   para dois caminhos; a CONSULTA ser diferente não é.
+
+   E as duas já tinham divergido. O cron buscava CINCO tabelas dependentes; o
+   navegador, SEIS — faltava `disponibilidade`, a tabela onde o voluntário
+   responde "posso" a cada domingo. Hoje isso é inofensivo, porque o sorteio só
+   lê `indisponivel` (o "não posso"); no dia em que alguém usar o "posso" para
+   ordenar candidatos, o botão do líder passa a honrar a resposta e o robô das
+   3h do dia 26 não — e ninguém está olhando quando ele roda.
+
+   O jeito de essa divergência não voltar não é conferir de novo: é existir uma
+   função só. O cliente entra por parâmetro; a lista de colunas, a janela de
+   histórico e o conjunto de tabelas moram aqui.
+   ============================================================================ */
+
+/* Colunas explícitas, nunca `*`: desde a migração 18 o `pin_hash` está fora do
+   GRANT de `authenticated`, e `select *` num GRANT por coluna estoura com
+   "permission denied for column" em vez de simplesmente omitir a coluna.
+   O cron passaria por cima (service role), mas escrever `*` lá é uma armadilha
+   esperando o dia em que aquele código rodar com outra credencial. */
+const COLUNAS_VOLUNTARIO =
+  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email';
+
+/* A carga olha no máximo 180 dias para trás. Sem a janela, cada troca de
+   ministério puxava o histórico inteiro da igreja desde sempre. */
+export const DIAS_DE_HISTORICO = -200;
+
+export async function linhasDaEquipe(
+  s: any, equipeId: string, desde: string, nomeEquipe = '',
+): Promise<LinhasDoBanco> {
+  const vazio = { data: [] as any[] };
+  const [funcoes, vols, cultos, cfg] = await Promise.all([
+    s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
+    s.from('voluntarios').select(COLUNAS_VOLUNTARIO).eq('equipe_id', equipeId).order('nome'),
+    s.from('cultos').select('id,data').gte('data', desde).order('data'),
+    s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
+  ]);
+  /* config pode vir nula por RLS (quem logou sem estar na allowlist) — isso é
+     informação, não falha. As outras três, se falharem, a tela não tem o que
+     mostrar e o erro precisa subir. */
+  const ruim = [funcoes, vols, cultos].find((r: any) => r?.error);
+  if (ruim?.error) throw ruim.error;
+
+  const funcaoIds = (funcoes.data || []).map((f: any) => f.id);
+  const volIds = (vols.data || []).map((v: any) => v.id);
+  const cultoIds = (cultos.data || []).map((c: any) => c.id);
+
+  const [habs, indis, escs, plants, recados, disp] = await Promise.all([
+    volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : vazio,
+    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds) : vazio,
+    funcaoIds.length ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds) : vazio,
+    volIds.length ? s.from('plantoes').select('*').in('voluntario_id', volIds) : vazio,
+    cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
+    volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
+  ]);
+
+  return {
+    funcoes: funcoes.data || [], voluntarios: vols.data || [],
+    habilidades: habs.data || [], indisponibilidades: indis.data || [],
+    cultos: cultos.data || [], escalacoes: escs.data || [], plantoes: plants.data || [],
+    recados: recados.data || [], disponibilidades: disp.data || [],
+    config: cfg?.data || null, equipe: nomeEquipe,
   };
 }

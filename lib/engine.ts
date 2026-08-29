@@ -6,6 +6,19 @@
 export type Nivel = 'titular' | 'reserva' | 'treino';
 export type Status = 'pendente' | 'confirmado' | 'recusado' | 'furou';
 
+/* AS QUATRO PALAVRAS DO ESTADO — uma fonte só.
+   Auditoria técnica, 29/08/2026. Esta lista existia idêntica em
+   app/escala/page.tsx e app/painel/page.tsx. Duas cópias do vocabulário do
+   produto: nada impedia a escala dizer "falta confirmar" e o painel dizer
+   outra coisa para o mesmo estado. Vocabulário é domínio, e domínio mora
+   aqui — não na tela que por acaso precisou dele primeiro. */
+export const SITUACOES: { v: Status; rot: string }[] = [
+  { v: 'pendente', rot: 'falta confirmar' },
+  { v: 'confirmado', rot: 'confirmou' },
+  { v: 'recusado', rot: 'não pode' },
+  { v: 'furou', rot: 'furou' },
+];
+
 /* Tipos de culto que a igreja tem hoje. O Follow é no sábado e não usa
    todas as áreas — por isso a função guarda em quais cultos ela entra. */
 export type TipoCulto = 'domingo' | 'follow';
@@ -152,6 +165,16 @@ export type Config = {
   horasTardio: number;
 };
 export type Estado = {
+  /* CAMPO FANTASMA, AGORA DECLARADO — auditoria 29/08/2026.
+     `ponte.ts` e `demo.ts` escreviam isto com `(S as any).temAcesso = ...`:
+     um campo que existe em execução e não existe no tipo. Quem lê `Estado`
+     não sabia que ele estava lá, e o compilador não avisaria se alguém
+     escrevesse `temacesso` minúsculo em vez de `temAcesso`.
+     Hoje NINGUÉM lê este campo — o Shell decide "sem acesso" por `souLider()`.
+     Fica declarado, e não apagado, porque o custo de declarar é zero e apagar
+     um campo que a ponte preenche é o tipo de limpeza que quebra na semana
+     seguinte. Se em três meses continuar sem leitor, aí sim ele sai. */
+  temAcesso?: boolean;
   funcoes: Funcao[]; voluntarios: Voluntario[];
   escalas: Record<string, Dia>; config: Config;
   /* nome do ministério dono deste estado — usado nos textos que o voluntário lê */

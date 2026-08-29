@@ -27,7 +27,7 @@ const P = (
 
 export function estadoDemo(): Estado {
   const S = estadoVazio();
-  (S as any).temAcesso = true;
+  S.temAcesso = true;
   S.equipe = 'Mídia';
   S.funcoes = [
     F('PROJEÇÃO', 1), F('ILUMINAÇÃO', 2), F('EDIÇÃO', 3, false), F('FOTO', 4), F('FILMAGEM', 5),
