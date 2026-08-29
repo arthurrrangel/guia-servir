@@ -2,6 +2,7 @@
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { Escolha } from '@/components/Ui';
+import { IcSeta } from '@/components/Icones';
 import { useEffect, useRef, useState } from 'react';
 import {
   addLider, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
@@ -87,11 +88,22 @@ function Ajustes() {
         </div></div>
       </div>
 
-      <section className="lid-secao" id="grupo">
-        <div className="lid-secao-cab">
+      {/* DOBRADA QUANDO JÁ CUMPRIU O PAPEL — fase 8.
+          Esta seção tem 783px e existe para uma ação única: copiar a mensagem
+          e fixar no grupo. Se o time JÁ TEM GENTE, a mensagem já foi colada —
+          foi por ela que as pessoas entraram. Continuar servindo 783px de
+          instrução de primeiro dia para quem está no terceiro mês é a
+          definição de gaveta de tralha.
+          O sinal é comportamental, não uma marcação que alguém precisa lembrar
+          de fazer: gente no time prova que o link circulou. */}
+      <details className="lid-secao lid-dobra" id="grupo" open={!S.voluntarios.length}>
+        <summary className="lid-secao-cab">
           <span className="rot">O grupo no WhatsApp</span>
-          <span className="lid-secao-nota">Cole uma vez e fixe</span>
-        </div>
+          <span className="lid-secao-nota">
+            {S.voluntarios.length ? 'Já em uso · abrir para copiar de novo' : 'Cole uma vez e fixe'}
+          </span>
+          <IcSeta className="giro" />
+        </summary>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           <strong>O que fazer:</strong> copie a mensagem abaixo, cole no grupo do ministério e
           <strong> fixe</strong> ela lá. A partir daí cada pessoa entra sozinha pelo link, acha o próprio
@@ -118,7 +130,7 @@ function Ajustes() {
           <button className="pri" onClick={() => copiar(kit, aviso, 'Copiado. Cole e fixe no grupo da equipe.')}>Copiar mensagem do grupo</button>
           <a className="btn" href={linkGrupo} target="_blank" rel="noopener">abrir a página da equipe</a>
         </div>
-      </section>
+      </details>
 
       <section className="lid-secao">
         <div className="lid-secao-cab">
@@ -209,10 +221,15 @@ function Ajustes() {
         </div>
       </section>
 
-      <section className="lid-secao">
-        <div className="lid-secao-cab">
+      {/* DOBRADA POR CADÊNCIA — fase 8. Liberar e tirar acesso acontece quando
+          alguém entra ou sai da liderança: duas ou três vezes por ano. Seção
+          rara aberta por padrão empurra para baixo a que se usa toda semana. */}
+      <details className="lid-secao lid-dobra">
+        <summary className="lid-secao-cab">
           <span className="rot">Quem organiza</span>
-        </div>
+          <span className="lid-secao-nota">{lideres.length} com acesso</span>
+          <IcSeta className="giro" />
+        </summary>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
           Só estes emails abrem o espaço do organizador. Cada um enxerga apenas o ministério que
           organiza: quem cuida da Mídia não vê o Serviço do Culto, e vice-versa.
@@ -273,7 +290,7 @@ function Ajustes() {
             Só quem organiza todos os ministérios pode liberar ou tirar acesso.
           </p>
         )}
-      </section>
+      </details>
 
       {/* MINISTÉRIOS SAIU DAQUI — arquitetura de informação, 29/08/2026.
           O cabeçalho desta página promete "tudo aqui vale só para este
@@ -295,18 +312,13 @@ function Ajustes() {
         </div>
       </section>
 
-      <section className="lid-secao">
-        <div className="lid-secao-cab">
-          <span className="rot">As cinco regras</span>
-        </div>
-        <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8 }}>
-          <li><strong>Quem não pode, acha o substituto.</strong> Você não caça substituto.</li>
-          <li><strong>Confirmação é ativa.</strong> Ver a mensagem não é confirmar.</li>
-          <li><strong>Ninguém em duas funções ao mesmo tempo.</strong> O sistema bloqueia.</li>
-          <li><strong>Buraco vai publicado.</strong> Vaga escondida vira furo no domingo.</li>
-          <li><strong>Toda função precisa de 3 pessoas.</strong> Menos que isso é dependência.</li>
-        </ol>
-      </section>
+      {/* AS CINCO REGRAS SAÍRAM DAQUI — fase 8, 29/08/2026.
+          Não eram um ajuste: não se configura nada nelas. É o contrato de como
+          a escala funciona, e duas delas são promessa AO líder ("você não caça
+          substituto", "o sistema bloqueia"). Documentação guardada na gaveta de
+          configuração é documentação que ninguém acha — e quem mais precisa
+          delas é justamente quem nunca vai abrir esta página. Foram para o
+          /painel: fechadas para quem já roda a escala, abertas na primeira vez. */}
 
       <p className="lid-pe">{funcoesAtivas(S).length} funções ativas · {S.voluntarios.length} pessoas cadastradas</p>
     </div>

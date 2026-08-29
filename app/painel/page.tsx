@@ -149,6 +149,45 @@ function Pendencias() {
   );
 }
 
+/* ---------------------------------------------------------------------------
+   AS CINCO REGRAS — a doutrina de operação, que estava no porão da gaveta.
+
+   Elas moravam no fim do /ajustes: sétima seção da página mais alta do líder
+   (6,2 telas), abaixo de "Quem organiza". Duas coisas erradas nisso.
+
+   1. NÃO SÃO UM AJUSTE. Não se configura nada aqui — é o contrato de como a
+      escala funciona. Documentação guardada na gaveta de configuração é
+      documentação que ninguém acha.
+   2. QUEM MAIS PRECISA DELAS É QUEM NUNCA VAI ABRIR AQUELA PÁGINA. O líder novo
+      está no painel tentando entender o produto, não em Ajustes.
+
+   E duas delas não são regra de sistema, são PROMESSA AO LÍDER: "você não caça
+   substituto" e "o sistema bloqueia" dizem o que ele NÃO precisa fazer. Isso é
+   a primeira coisa que alguém com medo de assumir uma escala precisa ler.
+
+   Aqui: fechada por padrão para quem já roda a escala, aberta na primeira vez.
+   Disponível sempre, no caminho de ninguém.
+--------------------------------------------------------------------------- */
+function CincoRegras({ aberta = false }: { aberta?: boolean }) {
+  return (
+    <details className="bloco-extra" open={aberta} style={{ marginTop: 'var(--e7)' }}>
+      <summary>
+        <span className="cresce">As cinco regras da escala</span>
+        <IcSeta className="giro" />
+      </summary>
+      <div className="bloco-extra-corpo" style={{ paddingTop: 12 }}>
+        <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8, maxWidth: 'var(--prosa)' }}>
+          <li><strong>Quem não pode, acha o substituto.</strong> Você não caça substituto.</li>
+          <li><strong>Confirmação é ativa.</strong> Ver a mensagem não é confirmar.</li>
+          <li><strong>Ninguém em duas funções ao mesmo tempo.</strong> O sistema bloqueia.</li>
+          <li><strong>Buraco vai publicado.</strong> Vaga escondida vira furo no domingo.</li>
+          <li><strong>Toda função precisa de 3 pessoas.</strong> Menos que isso é dependência.</li>
+        </ol>
+      </div>
+    </details>
+  );
+}
+
 function Painel() {
   const { S, recarregar, aviso, base } = useApp();
   const [salvando, setSalvando] = useState('');
@@ -204,6 +243,9 @@ function Painel() {
             </div>
           ))}
         </section>
+        {/* na primeira vez ela abre: é agora que estas cinco linhas valem mais
+            do que qualquer botão desta tela. */}
+        <CincoRegras aberta />
       </div>
     );
   }
@@ -437,6 +479,7 @@ function Painel() {
           </section>
 
           <Pendencias />
+          <CincoRegras />
         </div>
       </div>
     </div>

@@ -4039,3 +4039,38 @@ html{ scroll-padding-top:88px }
 @media(min-width:720px) and (max-width:899px){
   .onde-travas{ grid-template-columns:1fr; max-width:var(--prosa-lg) }
 }
+
+/* ==========================================================================
+   18 · SEÇÃO DOBRADA — /ajustes por cadência (fase 8, 29/08/2026)
+
+   /ajustes tinha 6,2 telas: a página mais alta do líder. Não porque tem coisa
+   demais, mas porque servia tudo aberto ao mesmo tempo — instrução de primeiro
+   dia (783px de "cole a mensagem no grupo") ao lado de manutenção semanal
+   (Funções, 1.797px) e de administração rara (Quem organiza).
+
+   A correção não é tirar nada: é servir por CADÊNCIA. O que se faz uma vez, e o
+   que se faz duas vezes por ano, chegam fechados. O que se usa toda semana
+   continua aberto.
+
+   É o mesmo `<details>` que a conferência e os blocos extras já usam — nenhum
+   vocabulário novo entra na tela por causa disto. O cabeçalho vira o summary e
+   ganha o chevron da casa; o resto da seção não sabe que mudou.
+   ========================================================================== */
+
+.lid-dobra{ margin-top:var(--e8) }
+.lid-dobra > summary{
+  cursor:pointer; list-style:none;
+  /* o cabeçalho dobrado é o mesmo .lid-secao-cab: mesma linha, mesmo fio. */
+}
+.lid-dobra > summary::-webkit-details-marker{ display:none }
+.lid-dobra > summary::marker{ content:'' }
+.lid-dobra > summary .giro{
+  width:15px; height:15px; color:var(--marca-cinza,var(--cinza)); flex:none;
+  transition:transform var(--t); align-self:center;
+}
+.lid-dobra[open] > summary .giro{ transform:rotate(90deg) }
+.lid-dobra > summary:hover .rot,
+.lid-dobra > summary:active .rot{ color:var(--ink) }
+.lid-dobra > summary:focus-visible{ outline-offset:3px }
+/* o que vem depois do summary respira como se a seção estivesse aberta sempre */
+.lid-dobra > summary + *{ margin-top:var(--e5) }
