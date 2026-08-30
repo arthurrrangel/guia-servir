@@ -372,10 +372,10 @@ export default function Servir() {
                 ? <>Ao enviar, a liderança {min!.artigo === 'a' ? 'da' : 'do'} {min!.nome} recebe
                     seu cadastro e chama você no WhatsApp. Você <strong>não</strong> entra na escala
                     agora: primeiro alguém fala com você. Na tela seguinte abre um link para você
-                    acompanhar — guarde ele.</>
+                    acompanhar. Guarde esse link.</>
                 : <>Esta área conversa com cada pessoa antes de escalar. Ao enviar, a liderança
                     recebe seu cadastro e chama você no WhatsApp para essa conversa. Na tela
-                    seguinte abre um link para você acompanhar — guarde ele.</>}
+                    seguinte abre um link para você acompanhar. Guarde esse link.</>}
             </div>
           </>
         )}

@@ -288,7 +288,7 @@ function Escala() {
               Montar e sortear preenchem só o que está vazio: <strong>quem já confirmou e quem
               você travou não se mexe</strong>, e quem avisou que não pode não volta no sorteio.
               Os botões de pedir, copiar e cobrar deixam um texto pronto para você colar no
-              grupo — <strong>nada é enviado daqui</strong>.
+              grupo. <strong>Nada é enviado daqui.</strong>
             </p>
           </div>
           {placar && (

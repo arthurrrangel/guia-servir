@@ -2102,11 +2102,30 @@ body:has(.porta) { background:var(--papel) }
   /* Display. Cinco curvas para 33 que existiam, cada uma inventada no
      lugar onde foi precisar. O passo entre elas é grande de propósito:
      título só é título se o salto for visível sem comparar lado a lado. */
-  --d-lead:clamp(17px,2.2vw,21px);   /* a linha de apoio embaixo do título */
-  --d-bloco:clamp(21px,3vw,26px);    /* título de bloco */
-  --d-secao:clamp(25px,4.4vw,34px);  /* título de seção */
-  --d-faixa:clamp(30px,5.4vw,44px);  /* título de faixa inteira */
+  --d-lead:clamp(19px,2.2vw,21px);   /* a linha de apoio embaixo do título */
+  --d-bloco:clamp(22px,3vw,26px);    /* título de bloco */
+  --d-secao:clamp(26px,4.4vw,34px);  /* título de seção */
+  --d-faixa:clamp(32px,5.4vw,44px);  /* título de faixa inteira */
   --d-heroi:clamp(44px,7vw,78px);    /* o momento de cartaz, uma vez por tela */
+
+  /* A ESCADA DE DISPLAY, REFEITA NO PISO — direção de arte, 30/08/2026.
+     A escala foi desenhada olhando o desktop, onde ela funciona (17 → 21 → 26
+     → 34 → 44 → 78, razões de 1,24 a 1,31). No CELULAR, que é onde quase todo
+     mundo usa isto, os clamps caíam todos no piso e a escada desmoronava:
+
+         corpo 17 · lead 17 · bloco 21 · seção 25 · faixa 30 · herói 44
+
+     `--d-lead` valia EXATAMENTE o corpo. O subtítulo e o parágrafo tinham o
+     mesmo tamanho, e a única coisa separando os dois era o peso. Não é
+     hierarquia, é coincidência.
+
+     Pisos novos, com razão crescente — 1,12 · 1,16 · 1,18 · 1,23 · 1,38:
+
+         corpo 17 · lead 19 · bloco 22 · seção 26 · faixa 32 · herói 44
+
+     Uma armadilha no caminho, que eu caí nela e voltei: subir `--d-secao` para
+     28 resolvia o problema de baixo e criava outro em cima, colando seção (28)
+     em faixa (30). Escada não se conserta degrau por degrau. */
 
   --tr:.15em;
 

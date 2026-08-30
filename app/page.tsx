@@ -540,7 +540,7 @@ export default function Casa() {
             <a href="#domingo" className="acao">Ver o domingo</a>
           </div>
           <p className="casa-fecho-ja">
-            Já serve com a gente? <Link href="/eu">Abra o seu espaço</Link> — sua escala, seus dias e seu líder.
+            Já serve com a gente? <Link href="/eu">Abra o seu espaço</Link>. Sua escala, seus dias, seu líder.
           </p>
         </div>
       </section>

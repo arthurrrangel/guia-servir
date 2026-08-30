@@ -76,8 +76,8 @@ export default function Servir() {
             caminho. Guia que atrapalha quem já decidiu tira mais gente do que
             traz — por isso ela não empurra, não bloqueia e não esconde nada. */}
         <p className="servir-atalho">
-          Não sabe qual é a sua? <Link href="/servir/onde-me-encaixo">Veja o que se faz em cada área</Link> —
-          o trabalho de verdade, não o nome do time.
+          Não sabe qual é a sua? <Link href="/servir/onde-me-encaixo">Veja o que se faz em cada área</Link>.
+          O trabalho de verdade, não o nome do time.
         </p>
 
         {fase === 'carregando' && <Carregando o="Carregando as áreas" />}

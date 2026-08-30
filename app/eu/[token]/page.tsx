@@ -13,7 +13,7 @@ import { aviseHumano } from '@/lib/erros';
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
   plantao: boolean; primeira_vez?: boolean;
-  /* quando esta hessoa entrou nesta vaga (migração 38). Null nas escalações
+  /* quando esta pessoa entrou nesta vaga (migração 38). Null nas escalações
      anteriores à migração: null é "não sei", nunca "é antigo". */
   escalado_em?: string | null;
   /* posto de líder do dia: quem está aqui escreve o relatório no fim do culto */
@@ -23,11 +23,11 @@ type Item = {
    telefone. Ver supabase/40-quem-serve-com-voce.sql para o porquê. */
 type Junto = { nome: string; funcao: string; eu: boolean; status: string };
 
-/* quem pode cobrir a vaga que a hessoa acabou de deixar */
+/* quem pode cobrir a vaga que a pessoa acabou de deixar */
 type Cobre = { nome: string; telefone: string; nivel: string; disse_que_pode: boolean };
 
 /* sábado é o culto do Follow. Escrever "domingo" num sábado é o tipo de erro
-   que faz a hessoa aparecer no dia errado. */
+   que faz a pessoa aparecer no dia errado. */
 const ehSabado = (s: string) => new Date(s + 'T12:00:00Z').getUTCDay() === 6;
 const hojeISO = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
   .toISOString().slice(0, 10);
@@ -47,8 +47,8 @@ const diaLongo = (s: string) => {
 
 
 /* O relatório é do LÍDER ESCALADO, não do líder do app: quem viveu o culto é
-   quem sabe como foi. Por isso ele aparece aqui, no link hessoal, no celular
-   da hessoa, e só depois que o culto começou. Pedir antes do dia é como o
+   quem sabe como foi. Por isso ele aparece aqui, no link pessoal, no celular
+   da pessoa, e só depois que o culto começou. Pedir antes do dia é como o
    formulário morre. */
 function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSalvar: () => void }) {
   const [texto, setTexto] = useState(item.relatorio || '');
@@ -86,7 +86,7 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
         placeholder="Banheiro masculino sem papel. Bebedouro vazando." />
       {!salvando && !texto.trim() && !probs.trim() && (
         <p className="postos-falta" role="status">
-          Escreva helo menos um dos dois campos. Se o dia foi tranquilo, escrever isso
+          Escreva pelo menos um dos dois campos. Se o dia foi tranquilo, escrever isso
           já ajuda quem lidera no próximo.
         </p>
       )}
@@ -121,8 +121,8 @@ export default function Eu() {
   const [ocupado, setOcupado] = useState('');
   const [flash, setFlash] = useState('');
   const [erro, setErro] = useState('');
-  /* quem é a hessoa na igreja inteira, não só neste vínculo. É o que permite
-     dizer "você também serve na Mídia" para quem chegou helo link do Louvor. */
+  /* quem é a pessoa na igreja inteira, não só neste vínculo. É o que permite
+     dizer "você também serve na Mídia" para quem chegou pelo link do Louvor. */
   const [eu, setEu] = useState<Identidade | null>(null);
 
   /* inicial=true: primeira carga, pode mostrar tela cheia de erro/rede.
@@ -165,7 +165,7 @@ export default function Eu() {
     /* identidade única: uma chamada, e a tela passa a saber tudo que a
        pessoa é. Sem await para não segurar a escala, que é o que ela veio ver. */
     void quemSou(token).then(i => { if (i?.ok) setEu(i); }).catch(() => {});
-    /* as duas chamadas acima são extras: a escala, que é o que a hessoa veio
+    /* as duas chamadas acima são extras: a escala, que é o que a pessoa veio
        ver, já carregou. Se elas falharem a tela continua útil — mas a rejeição
        precisa ter dono, senão vira ruído de console e, em alguns navegadores,
        um erro global. */
@@ -201,8 +201,8 @@ export default function Eu() {
   /* QUEM SERVE COM VOCÊ NO PRÓXIMO DIA — fase 7.
 
      Busca depois da primeira pintura, e de propósito: a tela não pode esperar
-     por isto para dizer à hessoa o que ela precisa fazer. Se a função ainda não
-     existir no banco (o SQL é uma migração à harte), o erro é engolido e a
+     por isto para dizer à pessoa o que ela precisa fazer. Se a função ainda não
+     existir no banco (o SQL é uma migração à parte), o erro é engolido e a
      seção simplesmente não aparece — nenhuma tela quebra por causa de um
      complemento. */
   useEffect(() => {
@@ -268,7 +268,7 @@ export default function Eu() {
 
   /* ------------------------------------------------------------ os estados
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em
-     estado nenhum, nem no "link inválido" — que é justamente quando a hessoa
+     estado nenhum, nem no "link inválido" — que é justamente quando a pessoa
      mais precisa de um caminho para algum lugar. */
   const Barra = ({ perfil = false }: { perfil?: boolean }) => (
     <div className="vol-barra" role="banner">
@@ -310,7 +310,7 @@ export default function Eu() {
         <span className="rot">Espaço do voluntário</span>
         <h1>Esse link não vale</h1>
         <p className="vol-sub">
-          Links hessoais são únicos e podem ter vindo cortados helo WhatsApp.
+          Links pessoais são únicos e podem ter vindo cortados pelo WhatsApp.
           Dá para achar o seu de novo escolhendo seu nome na lista da sua área.
         </p>
         <div className="vol-btns" style={{ maxWidth: 380 }}>
@@ -323,7 +323,7 @@ export default function Eu() {
   );
 
   /* ------------------------------------------------------------- os fatos
-     Calculados uma vez e usados na ordem em que a hessoa pergunta. */
+     Calculados uma vez e usados na ordem em que a pessoa pergunta. */
   const hoje = hojeISO();
   const primeiro = (nome || '').split(' ')[0];
   const agenda = itens.filter(i => !i.plantao);
@@ -335,7 +335,7 @@ export default function Eu() {
   const futuras = ordenada.filter(i => i.data >= hoje);
   const proxima = futuras.find(i => (i.status || 'pendente') !== 'recusado') || null;
   /* "depois disso" não repete o que já está no bloco preto lá em cima: a
-     hessoa acabou de ver aquelas duas linhas e decidir sobre elas. */
+     pessoa acabou de ver aquelas duas linhas e decidir sobre elas. */
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
   const restantes = futuras.filter(i =>
     !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
@@ -358,11 +358,11 @@ export default function Eu() {
 
   /* "CONSULTAR ALTERAÇÕES" NÃO ERA UMA TELA FALTANDO: ERA UM DADO QUE NÃO
      EXISTIA. A escala do mês sai no dia 26; na sexta alguém fura e a liderança
-     hõe outra hessoa. Essa hessoa abria o link e via uma linha idêntica às que
+     põe outra pessoa. Essa pessoa abria o link e via uma linha idêntica às que
      estavam lá desde o dia 26. Se já tinha olhado naquela semana, não olhava de
      novo; e se olhasse, não tinha como saber que aquilo era novo.
 
-     A migração 38 passou a guardar quando cada hessoa entrou em cada vaga.
+     A migração 38 passou a guardar quando cada pessoa entrou em cada vaga.
      Aqui isso vira uma palavra. Só até uma semana: depois disso não é mais
      novidade, é a escala. E nulo (as 92 linhas anteriores à migração) não
      mostra nada — não sei quando entrou não é a mesma coisa que é antigo. */
@@ -418,14 +418,14 @@ export default function Eu() {
           {/* DIZER "NÃO POSSO" É A DECISÃO MAIS DIFÍCIL DESTA TELA, e era a
               única sem nenhuma frase por perto. Quem não sabe o que acontece
               depois imagina o pior — que a área vai ficar sem ninguém, e que a
-              culpa vai ser dele. Aí a hessoa não responde, que é o pior
+              culpa vai ser dele. Aí a pessoa não responde, que é o pior
               resultado possível para todo mundo: a liderança descobre no
               domingo. Uma linha, uma vez, acima da lista: repetir por item
               seria a mesma frase três vezes na mesma tela. */}
           {!!pendentes.length && (
             <p className="vol-pede-depois">
-              Avisando que não pode, quem organiza remaneja com tempo — é para isso que
-              serve o aviso. Dá para mudar de ideia enquanto o dia não chega.
+              Avisando que não pode, quem organiza remaneja com tempo. Dá para mudar de
+              ideia enquanto o dia não chega.
             </p>
           )}
 
@@ -439,7 +439,7 @@ export default function Eu() {
               {/* O RECADO DO DIA CHEGA AQUI. Ele existe no banco desde sempre
                   (três dias já têm um escrito) e ia só para a mensagem do
                   WhatsApp: a liderança escrevia "chegar 18h, tem batismo" para
-                  estas hessoas, e a tela delas não mostrava. */}
+                  estas pessoas, e a tela delas não mostrava. */}
               {i.obs && <p className="vol-pede-obs">{i.obs}</p>}
               {i.primeira_vez && (
                 <p className="vol-pede-obs">
@@ -461,7 +461,7 @@ export default function Eu() {
           ))}
         </div>
 
-        {/* quem ajuda a fechar o buraco que a hessoa abriu em cima da hora */}
+        {/* quem ajuda a fechar o buraco que a pessoa abriu em cima da hora */}
         {Object.entries(cobrem).map(([cid, lista]) => !!lista.length && (
           <section className="vol-secao" key={cid}>
             <div className="vol-secao-cab">
@@ -490,10 +490,10 @@ export default function Eu() {
         ))}
 
         {/* 2. QUANDO EU SIRVO. A data é o assunto, então é ela que fica grande. */}
-        {/* só quando a hróxima NÃO é uma das que estão pendentes lá em cima:
-            repetir o item que a hessoa está olhando, com um "confirme logo
+        {/* só quando a próxima NÃO é uma das que estão pendentes lá em cima:
+            repetir o item que a pessoa está olhando, com um "confirme logo
             acima", é dizer duas vezes a mesma coisa e empurrar o resto para
-            baixo. Se a hróxima já está no bloco preto, a pergunta "quando eu
+            baixo. Se a próxima já está no bloco preto, a pergunta "quando eu
             sirvo" já foi respondida. */}
         {proxima && !jaMostrados.has(proxima.culto_id + proxima.funcao) && (
           <section className="vol-secao">
@@ -512,7 +512,7 @@ export default function Eu() {
 
         {/* 3. COM QUEM EU SIRVO — fase 7.
 
-            Esta tela era um calendário. Dizia muito bem QUANDO a hessoa serve,
+            Esta tela era um calendário. Dizia muito bem QUANDO a pessoa serve,
             O QUE ela faz e COMO avisar que não pode; sobre QUEM, dizia uma
             coisa só — o nome do líder. Numa igreja cuja home afirma que "a
             igreja não é o prédio, é a quantidade de gente que decidiu chegar
@@ -522,14 +522,14 @@ export default function Eu() {
             "alguém vai te receber", sem nunca dizer quem. Para quem está com
             medo, "alguém" é pior que ninguém — aqui os nomes aparecem.
 
-            Nome e função, sem telefone: a hessoa não precisa ligar para
+            Nome e função, sem telefone: a pessoa não precisa ligar para
             ninguém, precisa saber com quem vai trabalhar. */}
         {juntos.length > 1 && (
           <section className="vol-secao">
             <div className="vol-secao-cab">
               <span className="rot">Quem serve com você</span>
               <span className="vol-secao-nota">
-                {juntos.length - 1 === 1 ? 'mais 1 hessoa' : `mais ${juntos.length - 1} hessoas`}
+                {juntos.length - 1 === 1 ? 'mais 1 pessoa' : `mais ${juntos.length - 1} pessoas`}
               </span>
             </div>
             {/* SEM CLASSE DE ESTADO NESTAS LINHAS. A primeira versão marcava
@@ -537,7 +537,7 @@ export default function Eu() {
                 neste sistema quer dizer CONFIRMADO, não "este é você". Cor é
                 estado; usar cor de estado como enfeite de identidade é
                 exatamente o que a direção visual proíbe. Quem é você já está
-                dito pela palavra "Você" e helo primeiro lugar na lista. */}
+                dito pela palavra "Você" e pelo primeiro lugar na lista. */}
             {juntos.map(j => (
               <div className="vol-linha" key={j.nome + j.funcao}>
                 <span className="vol-marca" aria-hidden="true" />
@@ -545,7 +545,7 @@ export default function Eu() {
                   <span className="vol-linha-dia">{j.eu ? 'Você' : j.nome}</span>
                   <span className="vol-linha-fn">{j.funcao}</span>
                 </span>
-                {/* quem ainda não respondeu não é problema DESTA hessoa: o
+                {/* quem ainda não respondeu não é problema DESTA pessoa: o
                     estado aparece sem cobrança, e só quando não é ela. */}
                 {!j.eu && j.status === 'pendente' && (
                   <span className="vol-linha-est">ainda confirmando</span>

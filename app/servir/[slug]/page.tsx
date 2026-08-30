@@ -129,7 +129,7 @@ export default function Area() {
               do cadastro, que é a tela seguinte. Agora esta lista diz o que ela
               é, e diz onde a escolha acontece. */}
           <p className="area-intro" style={{ margin: '20px auto 0', fontSize: 'var(--t-corpo)', lineHeight: 1.72, color: 'var(--cinza)' }}>
-            Estas são as funções da área. Você escolhe as suas no cadastro — e dá para
+            Estas são as funções da área. Você escolhe as suas no cadastro, e dá para
             escolher função que você ainda não sabe fazer, tem gente para ensinar.
           </p>
         </div>

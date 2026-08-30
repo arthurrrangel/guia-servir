@@ -106,7 +106,7 @@ export default function OndeMeEncaixo() {
         <Cabeca
           rot="Onde eu me encaixo"
           titulo="Não sei onde me encaixo"
-          apoio="É a resposta mais comum, e não atrapalha nada. Abaixo está o que se faz de verdade em cada área — não o nome do time, o trabalho."
+          apoio="É a resposta mais comum, e não atrapalha nada. Abaixo está o que se faz de verdade em cada área. Não o nome do time, o trabalho."
         />
 
         {/* AS TRÊS TRAVAS, RESPONDIDAS ANTES DA LISTA.
@@ -132,7 +132,7 @@ export default function OndeMeEncaixo() {
             <dt>E se eu escolher errado?</dt>
             <dd>
               Escolher aqui não te compromete com nada. Depois do cadastro vem uma conversa
-              com a liderança da área, e é nela que se decide onde você encaixa melhor —
+              com a liderança da área, e é nela que se decide onde você encaixa melhor,
               inclusive se for em outra área.
             </dd>
           </div>

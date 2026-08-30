@@ -1,5 +1,5 @@
 /* =============================================================================
-   40 · QUEM SERVE COM VOCÊ — a hessoa que faltava no espaço do voluntário
+   40 · QUEM SERVE COM VOCÊ — a pessoa que faltava no espaço do voluntário
    FASE 7, 29/08/2026
 
    O DIAGNÓSTICO: /eu era um calendário, não um time.
@@ -7,20 +7,20 @@
    A tela do voluntário responde muito bem QUANDO ele serve, O QUE ele faz e
    COMO avisar que não pode. Sobre QUEM, ela dizia uma coisa só: o nome do
    líder. Numa igreja cuja própria home afirma que "a igreja não é o prédio, é
-   a quantidade de gente que decidiu chegar mais cedo", a página da hessoa que
+   a quantidade de gente que decidiu chegar mais cedo", a página da pessoa que
    chega mais cedo não tinha gente nenhuma.
 
    E havia uma promessa solta: quando é a primeira vez numa função, a tela diz
    "chegue 30 minutos mais cedo, alguém vai te receber" — e nunca diz quem é
    esse alguém. Para quem está com medo, "alguém" é pior que ninguém.
 
-   O QUE ESTA FUNÇÃO FAZ: dado um culto em que a hessoa ESTÁ escalada, devolve
+   O QUE ESTA FUNÇÃO FAZ: dado um culto em que a pessoa ESTÁ escalada, devolve
    quem mais está escalado naquele culto, na mesma área. Nome e função. Nada
    mais.
 
    TRÊS LIMITES DE PROPÓSITO
    1. SEM TELEFONE. Contato de terceiro só aparece em `eu_quem_cobre`, onde a
-      hessoa precisa ligar para alguém para fechar um buraco que ela mesma
+      pessoa precisa ligar para alguém para fechar um buraco que ela mesma
       abriu. Aqui ela só precisa saber com quem vai trabalhar — o telefone não
       acrescenta nada e expõe todo mundo.
    2. SÓ A PRÓPRIA ÁREA (`f.equipe_id = v_eq`). Quem serve na Mídia não passa a
@@ -42,7 +42,7 @@ begin
     from voluntarios v where v.token = p_token and v.ativo;
   if v_id is null then raise exception 'Link invalido'; end if;
 
-  /* a trava do item 3: só responde sobre um culto em que a hessoa está de pé.
+  /* a trava do item 3: só responde sobre um culto em que a pessoa está de pé.
      'recusado' não conta — quem desmarcou não é mais do time daquele dia. */
   if not exists (
     select 1 from escalacoes e join funcoes f on f.id = e.funcao_id
@@ -65,6 +65,6 @@ begin
 end $function$;
 
 /* mesma disciplina das outras eu_*: fecha para todos e abre só para anon,
-   que é quem chega helo link pessoal sem login. */
+   que é quem chega pelo link pessoal sem login. */
 revoke execute on function eu_quem_serve(text, uuid) from public;
 grant  execute on function eu_quem_serve(text, uuid) to anon;

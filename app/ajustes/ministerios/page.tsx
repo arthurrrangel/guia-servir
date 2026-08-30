@@ -98,7 +98,7 @@ function Ministerios() {
       <div style={{ marginTop: 'var(--e5)' }}>
         <Aviso tom="atencao">
           Apagar um ministério leva junto <strong>o time, as funções e todas as escalas</strong> dele,
-          e não dá para desfazer. Para só parar de usar um, tire as funções dele em Ajustes — os
+          e não dá para desfazer. Para só parar de usar um, tire as funções dele em Ajustes. Os
           dados continuam lá.
         </Aviso>
       </div>
