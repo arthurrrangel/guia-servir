@@ -2123,15 +2123,25 @@ body:has(.porta) { background:var(--papel) }
    TELA — o casco de toda página que não é a home
    ========================================================================== */
 .tela{min-height:100svh;display:flex;flex-direction:column;background:var(--papel)}
-.tela-corpo{flex:1;width:100%;max-width:1120px;margin:0 auto;padding:96px var(--e5) 96px}
-@media(min-width:900px){ .tela-corpo{padding:128px var(--e5) 120px} }
+/* A RESERVA TINHA QUATRO VALORES E NENHUM NOME — revisão de espaçamento.
+   Medi 34 espaçamentos fora da escala nas telas públicas, e o grupo mais
+   teimoso era sempre o mesmo: 96, 120, 128, 130. Não eram descuido — são a
+   folga que a tela interna reserva para o topo fixo e para o rodapé não
+   encostar no polegar. O problema é que a mesma decisão foi tomada quatro
+   vezes, em quatro arquivos de comentário diferentes, com quatro números.
+   A escala de espaço vai de 84 (--e8) a 136 (--e9): esta folga cai no meio
+   do buraco, e por isso virava chute. Agora é um valor com nome. */
+:root{ --reserva:96px }
+@media(min-width:900px){ :root{ --reserva:120px } }
+.tela-corpo{flex:1;width:100%;max-width:1120px;margin:0 auto;padding:var(--reserva) var(--e5) var(--reserva)}
+@media(min-width:900px){ .tela-corpo{padding:128px var(--e5) var(--reserva)} }
 .tela-estreita{max-width:760px}
 
 /* topo de tela interna: marca à esquerda, uma saída à direita. Nada mais. */
 .tela-topo{
   position:fixed;top:0;left:0;right:0;z-index:60;
   display:flex;align-items:center;justify-content:space-between;gap:var(--e4);
-  padding:15px max(20px,calc(50vw - 560px));
+  padding:var(--e4) max(20px,calc(50vw - 560px));
   background:var(--papel);color:var(--ink);
   border-bottom:1px solid var(--linha);
 }
@@ -2463,6 +2473,11 @@ body:has(.porta) { background:var(--papel) }
   .casa-col.larga{max-width:1320px}
   .tela-corpo{max-width:1320px}
   .casa-pe-in,.casa-numeros-in{max-width:1320px}
+  /* .tela-estreita é a página que se LÊ (a área, o cadastro): 760px é medida
+     de leitura, não falta de espaço. Sem esta linha, a regra de cima acima
+     jogava a coluna para 1320px justo na tela onde sobra largura, e o texto
+     passava a boiar. Tela grande dá mais ar em volta, não mais linha. */
+  .tela-corpo.tela-estreita{max-width:760px}
 }
 
 /* --- CELULAR PEQUENO: 320px --------------------------------------------
@@ -2635,7 +2650,10 @@ button:disabled:active,
      . um only botão sólido por tela. O resto é texto sublinhado.
    ============================================================================ */
 
-.lid{ max-width:1180px; margin:0 auto; padding:0 var(--e5) var(--e8); }
+/* var(--largura), não 1180 fixo: a partir de 2200px as telas públicas vão
+   para 1320 e o app do líder ficava congelado, sozinho, mais estreito que o
+   site — dois produtos na mesma marca. */
+.lid{ max-width:var(--largura); margin:0 auto; padding:0 var(--e5) var(--e8); }
 
 /* o rodapé da tela: contagem discreta, na voz dos rótulos */
 .lid-pe{
@@ -3593,7 +3611,15 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    toque de .esc-tag e .vol-acao, que estavam parados em 43px. O mesmo
    conserto resolve as duas coisas. */
 @media(max-width:719px){
-  :root{ --t-apoio:15px; --t-min:12px }
+  /* O DEGRAU QUE O CELULAR APAGOU — revisão tipográfica.
+     `--t-apoio` sobe para 15px aqui de propósito: 14px é pequeno demais numa
+     legenda de telefone. Só que `--t-ui` vale 15.5px — ou seja, no celular a
+     "nota de segunda linha" e o "nome de item de lista" ficavam a MEIO PIXEL
+     um do outro. Dois tokens que declaram hierarquia e, na tela onde quase
+     todo mundo usa o produto, não têm degrau nenhum. O apoio fica em 15 e a
+     interface sobe para 16: um passo inteiro, e 16px é o tamanho a partir do
+     qual o Safari para de dar zoom sozinho num campo. */
+  :root{ --t-apoio:15px; --t-ui:16px; --t-min:12px }
 }
 
 /* --- 3. HOVER QUE GRUDA -------------------------------------------------
@@ -4045,6 +4071,15 @@ html{ scroll-padding-top:88px }
   font-size:var(--d-bloco); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--ink); text-decoration:none;
 }
+/* ALVO DE TOQUE — medido em 390px: 25px de altura no nome da área e 26px em
+   "Ver e entrar". São as duas únicas ações desta página, e a lei do próprio
+   produto é --toque:44px. A área de toque cresce por fora, com um retângulo
+   invisível centrado no texto: o desenho não engorda, o dedo acerta. */
+.onde-nome{ position:relative }
+.onde-nome::after{
+  content:""; position:absolute; left:0; right:0; top:50%;
+  transform:translateY(-50%); height:var(--toque);
+}
 .onde-nome:hover,
 .onde-nome:active{ text-decoration:underline; text-underline-offset:4px }
 .onde-desc{ margin:var(--e3) 0 0; max-width:var(--prosa); font-size:var(--t-ui); line-height:1.65; color:var(--cinza) }
@@ -4054,6 +4089,7 @@ html{ scroll-padding-top:88px }
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
   display:inline-flex; align-items:center; gap:var(--e2);
   border-bottom:1px solid var(--linha3); padding-bottom:var(--e1);
+  min-height:var(--toque);
 }
 .onde-ir:hover,
 .onde-ir:active{ border-bottom-color:currentColor }
