@@ -82,6 +82,31 @@ export default function Casa() {
   const raiz = useRef<HTMLDivElement>(null);
   const fio = useRef<HTMLDivElement>(null);
 
+  /* O LINK DE ACESSO DO ORGANIZADOR CAÍA AQUI E MORRIA.
+
+     O email volta para o endereço do site com o token no fragmento
+     (#access_token=…). Só que a home fala com o banco pelo cliente PÚBLICO,
+     que nasce com detectSessionInUrl:false e persistSession:false de
+     propósito: a página do voluntário não pode guardar sessão de ninguém.
+     Resultado: o token chegava numa tela programada para não olhar para ele.
+     A pessoa clicava no link do email, via a home, e concluía que o login
+     estava quebrado. Estava.
+
+     Fragmento não sobe para o servidor, então não existe redirecionamento de
+     borda que resolva: quem tem que reencaminhar é o navegador, aqui.
+
+     Isto é uma rede de segurança, não o caminho principal. O caminho é o
+     emailRedirectTo apontando para /entrar. Esta rede existe porque, se o
+     endereço /entrar não estiver na lista de Redirect URLs do Supabase, o
+     Supabase descarta o destino pedido e joga tudo no Site URL, que é esta
+     página — e aí a única saída é esta. */
+  useEffect(() => {
+    const h = window.location.hash;
+    if (/[#&](access_token|error_code|error_description)=/.test(h)) {
+      window.location.replace('/entrar' + h);
+    }
+  }, []);
+
   useEffect(() => {
     let vivo = true;
     void (async () => {
