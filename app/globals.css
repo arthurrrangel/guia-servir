@@ -942,15 +942,41 @@ select option{background:#fff;color:var(--ink)}
 }
 .pessoa > summary::-webkit-details-marker{display:none}
 .pessoa-nome{display:block;font-weight:var(--p-forte);font-size:var(--t-ui);letter-spacing:-.012em;line-height:1.35}
-.pessoa-areas{display:flex;flex-wrap:wrap;gap:var(--e1);margin-top:var(--e1)}
-/* micro-marca de área: 4 letras + a cor do nível. Cabe 9 numa linha de celular. */
+.pessoa-areas{display:flex;flex-wrap:wrap;gap:var(--e1) var(--e2);margin-top:var(--e2)}
+/* micro-marca de área: 4 letras + a cor do nível. Cabe 9 numa linha de celular.
+
+   O QUE A TELA PEDIA ESTAVA INVISÍVEL DENTRO DA PRÓPRIA PEÇA — revisão visual,
+   30/08/2026.
+
+   /time é a tela mais pesada do produto por uma margem larga: 797 elementos
+   visíveis contra 238 do segundo colocado, cinco telas de rolagem no celular.
+   A causa é esta marca, repetida uma vez por função de cada pessoa.
+
+   O primeiro instinto foi esconder: mostrar três e um "+4". Errado. A marca
+   não é enfeite, ela carrega DUAS informações que o líder precisa — a cor diz
+   o nível (titular / reserva / em treino) e o traço diz se aquilo foi
+   CONFERIDO ou se é só o que a pessoa declarou sobre si mesma.
+
+   O defeito real é outro, e é de hierarquia: a marca conferida vinha a
+   opacidade .85 com caixa sólida, e a só-dita a .6 com caixa tracejada. Ou
+   seja, o que está resolvido aparecia MAIS forte do que o que espera decisão —
+   numa tela cujo próprio título diz "32 níveis esperando sua conferência".
+   A página gritava um número e escondia os itens dele.
+
+   Inverte. O que está conferido perde a caixa: vira palavra colorida, porque
+   fato resolvido não precisa de moldura, só de ser legível — e o nível
+   continua na cor. O que é só dito mantém a caixa tracejada e volta à força
+   total. Nada foi escondido; some a parede de ~185 molduras e sobra a
+   distinção que a tela existe para resolver. */
 .marca-nivel{
   font-style:normal;font-size:var(--t-min);font-weight:var(--p-negrito);letter-spacing:.06em;
-  padding:var(--e1) var(--e1);border-radius:0;text-transform:uppercase;
-  border:1px solid currentColor;opacity:.85;
+  padding:var(--e1) 0;border-radius:0;text-transform:uppercase;
+  border:1px solid transparent;opacity:.9;
 }
 .marca-nivel.t{color:var(--ok)} .marca-nivel.r{color:var(--info)} .marca-nivel.e{color:var(--warn)}
-.marca-nivel.so-dito{border-style:dashed;opacity:.6}
+.marca-nivel.so-dito{
+  border-color:currentColor;border-style:dashed;opacity:1;padding:var(--e1);
+}
 .pessoa-meta{display:flex;align-items:center;gap:var(--e2);flex:none}
 .pessoa-meta .num{font-variant-numeric:tabular-nums}
 .pessoa-meta .giro{width:var(--i);height:var(--i);color:var(--mudo);transition:transform var(--t)}
