@@ -91,7 +91,7 @@ export default function Servir() {
 
         {fase === 'pronto' && (
           <>
-            <div className="grade">
+            <div className="grade entra">
               {mins.map(m => (
                 <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area">
                   <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />

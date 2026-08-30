@@ -50,6 +50,15 @@ export function Aviso({ tom, children }: { tom: 'erro' | 'atencao' | 'info' | 'b
   return <div className={`aviso ${tom}`} role={tom === 'erro' ? 'alert' : 'status'}><Ic /><div>{children}</div></div>;
 }
 
+/* O FIO DE TRABALHO — fase 10.
+   Enquanto uma ação grava, os botões ficam `disabled` e ganham a cara de
+   "você não pode". Este fio, no topo da tela, diz a outra coisa: "estou
+   fazendo". É o mesmo traço deslizante do `.pulso`, na geometria da
+   `.progresso` — nada novo, só usado onde faltava. */
+export function Trabalhando() {
+  return <div className="trabalhando" role="status" aria-label="Salvando" />;
+}
+
 export function Esqueleto() {
   return (
     <div className="esqueleto">

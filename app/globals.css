@@ -4211,3 +4211,66 @@ html{ scroll-padding-top:88px }
   .dlg-btns{ flex-direction:column-reverse;gap:var(--e2) }
   .dlg-btns .btn{ width:100%;justify-content:center }
 }
+
+/* ==========================================================================
+   20 · MOVIMENTO COM PROPÓSITO — fase 10, 30/08/2026
+   --------------------------------------------------------------------------
+   MEDI ANTES DE ANIMAR, e a maior parte do briefing já estava atendida:
+
+   · TRANSIÇÃO ENTRE PÁGINAS — não entra. Medido num build de produção: a URL
+     muda em 40–80ms e o indicador de carga aparece no MESMO quadro. Uma
+     animação de transição só somaria latência a uma coisa que já é imediata.
+     Movimento que atrasa a resposta é o oposto de precisão.
+   · HOVER — já estava feito: 92 regras `:hover` contra 91 `:active`. Cada
+     retorno visual do mouse tem o gêmeo do dedo.
+   · INDICADOR DE ABA DESLIZANTE — não entra. A pessoa já sabe em qual aba
+     tocou; o sublinhado aparecendo na hora é MAIS preciso que um que desliza
+     até lá. Custa JS e não informa nada.
+
+   Sobraram dois buracos de verdade, e os dois são de FALTA de movimento, não
+   de excesso.
+   ========================================================================== */
+
+/* --- A. A CHEGADA DO CONTEÚDO ------------------------------------------
+   Medido em /servir: a lista aparece aos 212ms com `opacity:1` e
+   `animation:none`. Um pulo seco, do nada para tudo pronto. Vale para toda
+   lista do produto: o conteúdo chega da rede e materializa sem avisar.
+
+   A entrada é do CONTÊINER, não item por item. Cascata de itens entrando um
+   a um é bonita no primeiro segundo e cansativa no vigésimo — e é a
+   assinatura de interface gerada por máquina que este produto não quer. Um
+   bloco que sobe 6px e assenta diz "chegou" e sai da frente.
+
+   TERCEIRA DURAÇÃO, E COM NOME. O sistema tinha duas: 140ms (interação, a
+   resposta ao toque) e 520ms (revelação ao rolar). Chegada de conteúdo não é
+   nenhuma das duas — é mais lenta que um toque porque não foi o dedo que
+   causou, e muito mais rápida que uma revelação porque a pessoa está
+   esperando. Fica 220ms, na mesma curva de sempre. */
+:root{ --t-chega:220ms var(--ease) }
+@keyframes chega{ from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.entra{ animation:chega var(--t-chega) both }
+
+/* --- B. O BOTÃO QUE TRABALHA PARECE QUEBRADO ----------------------------
+   16 lugares fazem `disabled={ocupado}` enquanto gravam. E `button:disabled`
+   pinta cinza com `cursor:not-allowed` — exatamente a mesma aparência de um
+   botão bloqueado por falta de permissão. Ou seja: durante a gravação a tela
+   diz "você não pode", quando o que está acontecendo é "estou fazendo".
+
+   Não inventei componente: é o MESMO fio deslizante do `.pulso` (o indicador
+   de carga que já existe) na MESMA geometria da `.progresso` (2px, topo,
+   fixa). O vocabulário de "o sistema está trabalhando" já existia no produto
+   — faltava usá-lo no momento em que ele mais importa, que é quando algo
+   está sendo gravado no banco. */
+.trabalhando{
+  position:fixed; top:0; left:0; right:0; height:2px; z-index:75;
+  background:var(--linha2); overflow:hidden; pointer-events:none;
+}
+.trabalhando::after{
+  content:""; position:absolute; inset:0; background:var(--ink);
+  animation:desliza 1.15s ease-in-out infinite;
+}
+@media(prefers-reduced-motion:reduce){
+  /* o global já mata a animação; sem ela o fio ficaria invisível, então ele
+     vira uma barra parada — continua dizendo "trabalhando", sem movimento. */
+  .trabalhando::after{ animation:none; opacity:.55 }
+}

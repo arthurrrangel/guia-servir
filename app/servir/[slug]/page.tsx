@@ -117,7 +117,7 @@ export default function Area() {
         </div>
       </section>
 
-      <main className="tela-corpo tela-estreita" style={{ paddingTop: 'var(--e7)' }}>
+      <main className="tela-corpo tela-estreita entra" style={{ paddingTop: 'var(--e7)' }}>
         {/* --- onde você pode servir --- */}
         <div style={{ textAlign: 'center' }}>
           <span className="rot">Onde você pode servir</span>

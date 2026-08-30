@@ -1,7 +1,7 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
-import { Escolha } from '@/components/Ui';
+import { Escolha, Trabalhando } from '@/components/Ui';
 import { IcSeta } from '@/components/Icones';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -85,6 +85,7 @@ function Ajustes() {
      Aqui a tela passa para a língua do resto: nada mudou de função. */
   return (
     <div className="lid">
+      {gravando && <Trabalhando />}
       <div className="lid-faixa">
         <div className="lid-faixa-in"><div className="lid-faixa-txt">
           <span className="rot">Ajustes</span>

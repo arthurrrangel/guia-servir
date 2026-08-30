@@ -376,7 +376,7 @@ export default function Eu() {
   return (
     <div className="vol">
       <Barra perfil />
-      <div className="vol-in" role="main">
+      <div className="vol-in entra" role="main">
 
         {/* 1. O QUE PRECISO FAZER.
             Quando há confirmação pendente, ela toma a primeira dobra e o fundo

@@ -2,7 +2,7 @@
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
 import { mudarStatus, salvarDia, salvarDias } from '@/lib/db';
-import { Aviso, Escolha } from '@/components/Ui';
+import { Aviso, Escolha, Trabalhando } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
@@ -248,6 +248,7 @@ function Escala() {
 
   return (
     <div className="lid">
+      {ocupado && <Trabalhando />}
       {/* ---------------------------------------------------------- a faixa */}
       <div className={`lid-faixa ${urge ? 'fogo' : ''}`}>
         <div className="lid-faixa-in">

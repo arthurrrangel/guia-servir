@@ -148,7 +148,7 @@ export default function OndeMeEncaixo() {
         )}
 
         {fase === 'pronto' && (
-          <>
+          <div className="entra">
             <div className="onde-cab-lista">
               <span className="rot">O que se faz em cada área</span>
               <span className="onde-nota">Toque na área para ver tudo sobre ela</span>
@@ -194,7 +194,7 @@ export default function OndeMeEncaixo() {
               </p>
               <Link href="/servir" className="acao">Ver as áreas lado a lado <IcSeta /></Link>
             </div>
-          </>
+          </div>
         )}
       </main>
     </Tela>

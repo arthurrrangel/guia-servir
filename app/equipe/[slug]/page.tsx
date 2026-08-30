@@ -364,7 +364,7 @@ export default function EntradaEquipe() {
         <p className="eu-sub">{sub}</p>
       </div></div>
 
-      <div className="eu" role="main">
+      <div className="eu entra" role="main">
         {erro && <Aviso tom="erro">{erro}</Aviso>}
 
         {/* Ministério com pré-requisito. A pessoa terminou o cadastro e a única

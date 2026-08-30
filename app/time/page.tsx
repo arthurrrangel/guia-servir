@@ -5,7 +5,7 @@ import { useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
 } from '@/lib/db';
-import { Aviso, Medidor } from '@/components/Ui';
+import { Aviso, Medidor, Trabalhando } from '@/components/Ui';
 import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
@@ -107,6 +107,7 @@ function Time() {
   const ativos = S.voluntarios.filter(v => v.ativo).length;
   return (
     <div className="lid">
+      {ocupado && <Trabalhando />}
       <div className="lid-faixa">
         <div className="lid-faixa-in"><div className="lid-faixa-txt">
           <span className="rot">Time</span>
