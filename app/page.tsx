@@ -1,10 +1,12 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Logo, Chevron } from '@/components/Marca';
 import { fotoDaArea } from '@/lib/fotos';
+import { Schema } from '@/components/Texto';
+import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 
 /* =============================================================================
    A HOME
@@ -40,14 +42,27 @@ const MAPA = 'https://www.google.com/maps/search/?api=1&query=' +
   encodeURIComponent('GUIA Church, Rua Pedra de Itaúna, 534, Barra da Tijuca, Rio de Janeiro, RJ, 22793-390');
 const IG = 'https://instagram.com/guiachurch';
 
-/* quatro itens. Menu de igreja com quinze links é catálogo, não navegação. */
-/* Eram quatro. "Onde fica" saiu junto com a seção — o endereço mora dentro
-   de O DOMINGO agora. Menu de igreja com quinze links é catálogo, não
-   navegação; com três, cada item é um capítulo de verdade. */
-const SECOES = [
-  { id: 'domingo', rot: 'Domingo' },
-  { id: 'igreja', rot: 'Conheça' },
-  { id: 'areas', rot: 'Sirva' },
+/* As seções internas da home continuam com os mesmos ids — #domingo, #igreja
+   e #areas seguem sendo endereços válidos, e os links dentro do conteúdo os
+   usam. O que sumiu foi a lista SECOES e o marcador de capítulo ativo: eles
+   existiam só para pintar o item do menu que estava na tela, e o menu não é
+   mais de âncora. Código que não pinta mais nada não fica de lembrança.
+
+/* O MENU DEIXOU DE SER ÂNCORA (03/09/2026).
+
+   Enquanto a home era a única página pública, um menu de âncoras era a
+   navegação certa: os capítulos estavam todos ali embaixo. Agora Cultos,
+   Como chegar, Conheça e Pequena Guia são páginas de verdade, e um menu que
+   rola a home enquanto o resto do site tem outro menu não é navegação — são
+   dois sites com o mesmo cabeçalho.
+
+   Mesma lista de components/Site.tsx, na mesma ordem, de propósito: quem
+   aprendeu o menu numa página não reaprende na outra. */
+const PAGINAS = [
+  { href: '/cultos', rot: 'Cultos' },
+  { href: '/como-chegar', rot: 'Como chegar' },
+  { href: '/sobre', rot: 'Conheça' },
+  { href: '/pequena-guia', rot: 'Pequena Guia' },
 ];
 
 /* o título monta palavra por palavra. Fica em componente porque a quebra em
@@ -77,7 +92,6 @@ export default function Casa() {
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
   const [menu, setMenu] = useState(false);
   const [solida, setSolida] = useState(false);
-  const [ativa, setAtiva] = useState('');
   const [passou, setPassou] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
   const fio = useRef<HTMLDivElement>(null);
@@ -187,12 +201,6 @@ export default function Casa() {
       setPassou(y > h * 0.9);
       const total = document.documentElement.scrollHeight - h;
       if (fio.current) fio.current.style.setProperty('--p', String(total > 0 ? Math.min(1, y / total) : 0));
-      let atual = '';
-      for (const s of SECOES) {
-        const el = document.getElementById(s.id);
-        if (el && el.getBoundingClientRect().top <= h * 0.42) atual = s.id;
-      }
-      setAtiva(atual);
       if (!parado) {
         document.querySelectorAll<HTMLElement>('.casa-foto').forEach(f => {
           const r = f.getBoundingClientRect();
@@ -216,13 +224,41 @@ export default function Casa() {
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', esc); };
   }, [menu]);
 
-  const irPara = useCallback((id: string) => {
-    setMenu(false);
-    requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' }));
-  }, []);
-
   return (
     <div ref={raiz}>
+      {/* A ENTIDADE. É aqui que o custo do nome do domínio é pago.
+          O endereço diz "guiaservir"; o que o Google lê como identidade é
+          este bloco — name, endereço, horário e os perfis oficiais. Domínio
+          não é entidade: `name` + NAP idêntico ao Google Empresa é. Por isso
+          nada aqui é escrito à mão: sai de lib/igreja.ts, a mesma fonte de
+          /como-chegar e do rodapé. Um endereço divergente entre páginas é o
+          erro de SEO local mais comum e o mais caro. */}
+      <Schema dados={{
+        '@context': 'https://schema.org',
+        '@graph': [
+          {
+            '@type': 'WebSite', '@id': `${SITE}/#site`,
+            url: SITE, name: IGREJA.nome, inLanguage: 'pt-BR',
+            publisher: { '@id': `${SITE}/#igreja` },
+          },
+          {
+            '@type': 'Church', '@id': `${SITE}/#igreja`,
+            name: IGREJA.nome, slogan: IGREJA.frase, url: SITE,
+            image: `${SITE}/og.jpg`, hasMap: MAPA_SCHEMA,
+            sameAs: [IGREJA.instagram, ...(IGREJA.youtube ? [IGREJA.youtube] : [])],
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: IGREJA.rua,
+              addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`,
+              addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR',
+            },
+            openingHoursSpecification: [{
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: 'https://schema.org/Sunday', opens: '10:00', closes: '11:30',
+            }],
+          },
+        ],
+      }} />
       <div className="progresso" ref={fio} style={{ color: solida ? 'var(--noite)' : '#fff' }} aria-hidden="true" />
 
       {/* ------------------------------------------------------------ barra */}
@@ -231,12 +267,12 @@ export default function Casa() {
           <Logo className="logo" />
         </Link>
         <nav className="casa-nav">
-          {SECOES.map(s => (
-            <a key={s.id} href={`#${s.id}`} aria-current={ativa === s.id ? 'true' : undefined}>{s.rot}</a>
+          {PAGINAS.map(p => (
+            <Link key={p.href} href={p.href}>{p.rot}</Link>
           ))}
         </nav>
         <div className="casa-barra-fim">
-          <Link href="/eu" className="bt-barra discreto">Espaço do voluntário</Link>
+          <Link href="/acessar" className="bt-barra discreto">Acesso às equipes</Link>
           <Link href="/servir" className="bt-barra">
             <span className="so-largo">Quero&nbsp;</span>servir
           </Link>
@@ -252,19 +288,19 @@ export default function Casa() {
         <div>
           <Logo className="logo" />
           <ul style={{ marginTop: 34 }}>
-            {SECOES.map((s, i) => (
-              <li key={s.id} style={{ ['--i' as string]: i }}>
-                <a href={`#${s.id}`} onClick={e => { e.preventDefault(); irPara(s.id); }}>{s.rot}</a>
+            {PAGINAS.map((p, i) => (
+              <li key={p.href} style={{ ['--i' as string]: i }}>
+                <Link href={p.href} onClick={() => setMenu(false)}>{p.rot}</Link>
               </li>
             ))}
-            <li style={{ ['--i' as string]: SECOES.length }}>
-              <Link href="/eu" onClick={() => setMenu(false)}>Meu espaço</Link>
+            <li style={{ ['--i' as string]: PAGINAS.length }}>
+              <Link href="/servir" onClick={() => setMenu(false)}>Servir</Link>
             </li>
           </ul>
           <div className="menu-pe">
             <a href={IG} target="_blank" rel="noreferrer">@guiachurch</a>
             <span>Rua Pedra de Itaúna, 534 · Barra da Tijuca</span>
-            <Link href="/entrar" onClick={() => setMenu(false)}>Sou da organização</Link>
+            <Link href="/acessar" onClick={() => setMenu(false)}>Acesso às equipes</Link>
           </div>
         </div>
       </div>
@@ -395,6 +431,19 @@ export default function Casa() {
               </div>
             </dl>
           </div>
+
+          {/* A SEÇÃO VIROU RESUMO, E ISSO É DE PROPÓSITO (03/09/2026).
+              Antes ela era o único lugar do site que falava do domingo, então
+              carregava tudo. Agora /cultos responde o que esperar e
+              /como-chegar responde a logística, cada uma com o próprio H1 e o
+              próprio schema. A home continua com as quatro travas — quem só
+              rola a home não perde nada — e ganha a saída para quem quer mais.
+              Sem essas duas linhas, as páginas novas nasceriam órfãs: link
+              interno é o que o Google usa para achar e para hierarquizar. */}
+          <div className="acoes" style={{ marginTop: 8 }}>
+            <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
+            <Link href="/como-chegar" className="acao">Como chegar</Link>
+          </div>
         </div>
       </section>
 
@@ -484,6 +533,10 @@ export default function Casa() {
               igreja deixa de ser um lugar onde as pessoas chegam e passa a ser um
               povo que vive, serve e avança junto.
             </p>
+            <div className="acoes">
+              <Link href="/sobre" className="acao">Conhecer a GUIA <IcSeta /></Link>
+              <Link href="/pequena-guia" className="acao">Encontrar uma Pequena Guia</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -576,8 +629,15 @@ export default function Casa() {
           <Logo className="logo" />
           <span>{ENDERECO}</span>
           <a href={IG} target="_blank" rel="noreferrer">@guiachurch</a>
-          <Link href="/eu">Espaço do voluntário</Link>
-          <Link href="/entrar">Sou da organização</Link>
+          <Link href="/cultos">Cultos</Link>
+          <Link href="/como-chegar">Como chegar</Link>
+          <Link href="/sobre">Conheça</Link>
+          <Link href="/pequena-guia">Pequena Guia</Link>
+          <Link href="/servir">Servir</Link>
+          <Link href="/acessar">Acesso às equipes</Link>
+          {/* a política precisa ser alcançável de qualquer página, e não só de
+              dentro do formulário que a exige. É requisito da LGPD, não estilo. */}
+          <Link href="/privacidade">Privacidade</Link>
         </div>
       </footer>
 

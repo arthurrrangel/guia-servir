@@ -1,2 +1,10 @@
 .vercel
 .env*
+
+# artefatos de build e dependências. Estavam fora do .gitignore e apareciam
+# como não rastreados em todo `git status` — um dia alguém commita 40 mil
+# arquivos de node_modules por engano. Nenhum deles pertence ao repositório.
+node_modules
+.next
+.next-*
+tsconfig.tsbuildinfo

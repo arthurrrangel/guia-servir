@@ -4355,3 +4355,20 @@ html{ scroll-padding-top:88px }
      vira uma barra parada — continua dizendo "trabalhando", sem movimento. */
   .trabalhando::after{ animation:none; opacity:.55 }
 }
+
+/* ==========================================================================
+   /como-chegar — A FACHADA É O CONTEÚDO, NÃO A ILUSTRAÇÃO
+
+   `.casa-local` nasceu para a home, onde a fachada acompanha o endereço numa
+   coluna de 380px: ali ela ilustra. Nesta página ela é a informação — é o que
+   faz a pessoa reconhecer o lugar e não passar direto, e uma miniatura não
+   cumpre esse papel no desktop.
+
+   Modificador em vez de mudança na regra base, de propósito: a home continua
+   exatamente como está.
+   ========================================================================== */
+.casa-local.chegada{ align-items:start }
+@media(min-width:820px){
+  .casa-local.chegada{ grid-template-columns:minmax(0,1fr) minmax(0,320px) }
+}
+.casa-local.chegada .casa-local-foto{ aspect-ratio:3/2 }
