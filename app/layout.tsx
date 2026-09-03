@@ -1,70 +1,43 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import Medidas from '@/components/Medidas';
 
-/* A logo é uma grotesca geométrica de tracking largo. Inter é a mais próxima
-   disso, e o arquivo mora NO REPOSITÓRIO.
-   Antes era `next/font/google`, que baixa o .woff2 de fonts.gstatic.com na
-   hora do build. Funcionou dezenas de vezes e um dia o build da Vercel não
-   alcançou o gstatic: "Failed to fetch font file", build quebrado, deploy
-   perdido, e nada a ver com o código. Publicar não pode depender de a rede
-   de um terceiro estar boa naquele minuto.
-   Um arquivo variável (peso 100 a 900) cobre todos os pesos que uso e ainda
-   pesa menos que as seis instâncias estáticas que o google-font baixava. */
-const inter = localFont({
-  src: './fontes/inter-latin-wght-normal.woff2',
-  weight: '100 900',
-  style: 'normal',
-  display: 'swap',
-  variable: '--fonte-inter',
-});
+/* =============================================================================
+   TIPOGRAFIA — as fontes do manual, e só elas
 
-/* A LETRA EDITORIAL — Instrument Serif Italic.
+   O manual da marca (Apresentação GuiaChurch.pdf, 01/09/2026) define duas
+   famílias: PP Neue Montreal (Bold e Book) e PP Editorial New (Ultralight
+   Italic). O Arthur foi explícito: nada de substituta. Então a pilha de
+   fontes do CSS tem a marca em primeiro lugar e, atrás dela, só o que o
+   sistema operacional da pessoa já tem — nenhuma outra família é carregada.
 
-   O manual da marca (Apresentação GuiaChurch.pdf, 01/09/2026) define DUAS
-   famílias: PP Neue Montreal Bold/Book para o grotesco, e PP Editorial New
-   Ultralight Italic para o editorial. As duas são da Pangram Pangram e são
-   COMERCIAIS.
+   POR QUE OS ARQUIVOS NÃO ESTÃO NESTE REPOSITÓRIO, e não é escolha minha:
+   as duas são da Pangram Pangram, licenciadas, e o EULA deles proíbe
+   textualmente pôr a fonte em "public internet file transfer or storing
+   channel". Este repositório é público. Os .woff2 entram no BUILD, baixados
+   de uma origem privada por scripts/fontes.mjs, e são servidos pelo próprio
+   guiaservir.com — que é o que a Web License cobre.
 
-   Por que elas não estão aqui, e a decisão não é minha para reverter: este
-   repositório é PÚBLICO no GitHub. Subir um .woff2 licenciado nele não é
-   "usar a fonte", é REDISTRIBUIR — e licença de desktop, que é a que um
-   designer normalmente tem para montar uma apresentação, não cobre nem uso
-   web nem redistribuição. Comprar a licença web resolve; até lá, publicar o
-   arquivo criaria uma exposição real, num endereço que qualquer um clona.
+   Antes havia aqui dois `next/font/local` (Inter e, por um dia, Instrument
+   Serif). Saíram: `next/font/local` exige que o arquivo exista no build, e
+   arquivo licenciado não pode existir no repositório. No lugar, um bloco
+   <style> com os @font-face que o script gerou — inline, sem requisição a
+   mais — e os preloads de cada arquivo que de fato está presente.
+   ============================================================================= */
+const PASTA_FONTES = join(process.cwd(), 'public', 'fontes');
 
-   O que está aqui no lugar, e por que estas duas:
-
-   · Grotesco → INTER, que já morava no repositório. A PP Neue Montreal é um
-     neo-grotesco neutro e apertado; a Inter é da mesma escola e é a
-     substituta mais próxima que existe em licença aberta. A Raleway, que
-     ocupava este posto até hoje, é uma GEOMÉTRICA — família diferente, gesto
-     diferente. Ela veio de um site de referência, não da marca. Agora existe
-     manual, e o manual ganha.
-
-   · Editorial → INSTRUMENT SERIF ITALIC (SIL OFL, livre para redistribuir).
-     É a mais próxima da PP Editorial New Ultralight Italic em licença
-     aberta: mesma lógica de serifa alta em contraste, mesmo desenho fino e
-     inclinado, mesmo uso — frase de respiro, não texto corrido.
-
-   PARA TROCAR PELAS VERDADEIRAS: com a licença web comprada, é pôr os dois
-   .woff2 em app/fontes/ e mudar o `src` de dois `localFont` aqui. Nenhuma
-   regra de CSS muda — tudo consome --fonte, --fonte-display e
-   --fonte-editorial, nunca o nome da família.
-
-   O nome da variável do arquivo termina em -arq de propósito: o CSS monta a
-   pilha completa (com os fallbacks do sistema) num token de mesmo nome sem o
-   sufixo. Sem isso as duas declarações caem no mesmo elemento <html>, com a
-   mesma especificidade, e quem vence passa a ser a ordem do arquivo. */
-const editorial = localFont({
-  src: [
-    { path: './fontes/instrument-serif-latin-italic.woff2', style: 'italic', weight: '400' },
-    { path: './fontes/instrument-serif-latin-normal.woff2', style: 'normal', weight: '400' },
-  ],
-  display: 'swap',
-  variable: '--fonte-editorial-arq',
-});
+function fontesDaMarca(): { css: string; arquivos: string[] } {
+  try {
+    const css = readFileSync(join(PASTA_FONTES, 'marca.css'), 'utf8');
+    const m = JSON.parse(readFileSync(join(PASTA_FONTES, 'manifest.json'), 'utf8'));
+    return { css, arquivos: Array.isArray(m.fontes) ? m.fontes : [] };
+  } catch {
+    /* sem prebuild (por exemplo `next dev` sem rodar o script): fallback */
+    return { css: '', arquivos: [] };
+  }
+}
 
 /* O título era 'Escala de Mídia' e valia para o site inteiro: a aba do Louvor
    dizia Mídia, a da Diaconia dizia Mídia, e o link que a pessoa recebe no
@@ -96,8 +69,17 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const fontes = fontesDaMarca();
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${editorial.variable}`}>
+    <html lang="pt-BR">
+      <head>
+        {/* preload só do que existe: um preload de arquivo ausente é um 404
+            na abertura de toda página */}
+        {fontes.arquivos.map(a => (
+          <link key={a} rel="preload" href={`/fontes/${a}`} as="font" type="font/woff2" crossOrigin="anonymous" />
+        ))}
+        {fontes.css && <style dangerouslySetInnerHTML={{ __html: fontes.css }} />}
+      </head>
       <body><Medidas />{children}</body>
     </html>
   );

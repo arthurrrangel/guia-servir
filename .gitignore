@@ -8,3 +8,15 @@ node_modules
 .next
 .next-*
 tsconfig.tsbuildinfo
+
+# AS FONTES DA MARCA SÃO LICENCIADAS E ESTE REPOSITÓRIO É PÚBLICO.
+# O EULA da Pangram Pangram proíbe pô-las em "public internet storing
+# channel". Elas entram no build por scripts/fontes.mjs, de uma origem
+# privada, e nunca por commit. Se um dia aparecerem em `git status`, é
+# erro — não adicione.
+public/fontes/*.woff2
+public/fontes/*.woff
+public/fontes/*.otf
+public/fontes/*.ttf
+public/fontes/marca.css
+public/fontes/manifest.json
