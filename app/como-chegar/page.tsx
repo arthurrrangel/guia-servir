@@ -4,6 +4,8 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, ENDERECO_LINHA, MAPA, ROTA_WAZE, SITE } from '@/lib/igreja';
+import { Vagas } from '@/components/Vaga';
+import { FOTOS } from '@/lib/imagens';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
@@ -137,9 +139,12 @@ export default function ComoChegar() {
             </dd>
           </div>
         </dl>
+        <div className="casa-col larga">
+          <Vagas fotos={[FOTOS.entrada, FOTOS.estacionamento]} quantas="duas" />
+        </div>
       </section>
 
-      <section className="faixa casa-papel">
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <Tit>Antes de vir, se quiser</Tit>
           <p className="corpo">

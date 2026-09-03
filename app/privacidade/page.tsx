@@ -97,7 +97,7 @@ export default function Privacidade() {
       </section>
 
       {/* ------------------------------------------------------- o link pessoal */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <p className="indice">02</p>
           <Tit>O seu link pessoal é um dado, e é tratado como tal</Tit>

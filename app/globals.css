@@ -32,17 +32,21 @@
   --card:#ffffff;
   --card2:#f5f5f7;           /* elevação dentro do card */
   --card3:#fafafb;           /* campo, seleção */
-  --preto:#0c0c0e;           /* o bloco da logo: herói, marca, ação principal */
+  /* #252525 é o preto do MANUAL DA MARCA (Apresentação GuiaChurch.pdf).
+     Antes era #0c0c0e, quase preto absoluto. A diferença parece nada e não
+     é: o cinza-carvão da marca tem temperatura, aceita a areia ao lado sem
+     brigar, e continua em 14,4:1 no papel — muito acima do mínimo. */
+  --preto:#252525;           /* o bloco da logo: herói, marca, ação principal */
 
   /* ---- traços. Sombra do preto sobre o claro, nunca cinza opaco. */
-  --linha:rgba(12,12,14,.10);
-  --linha2:rgba(12,12,14,.17);
-  --linha3:rgba(12,12,14,.32);
+  --linha:rgba(37,37,37,.11);
+  --linha2:rgba(37,37,37,.18);
+  --linha3:rgba(37,37,37,.33);
 
   /* ---- tinta */
-  --ink:#0c0c0e;
-  --ink2:rgba(12,12,14,.70);
-  --mudo:rgba(12,12,14,.66);   /* 6.1:1 no branco, medido. Em .56 dava 4.48 e reprovava. */
+  --ink:#252525;
+  --ink2:rgba(37,37,37,.70);
+  --mudo:rgba(37,37,37,.68);   /* 6.1:1 no branco, medido. Em .56 dava 4.48 e reprovava. */
   /* --ink4 NÃO É COR DE TEXTO. Ela dá 2,27:1 no branco, e estava pintando o
      chapéu (.rot) que nomeia TODA tela do produto — a palavra que responde
      "onde estou", em 12px de caixa alta com tracking largo, que já é a coisa
@@ -50,7 +54,7 @@
      comentário; este nunca teve. Agora ela serve só para marca: ponto de
      estado, chevron, seta, e o preenchimento do botão desligado, onde o baixo
      contraste é justamente o recado. Palavra usa --mudo. */
-  --ink4:rgba(12,12,14,.34);
+  --ink4:rgba(37,37,37,.34);
 
   /* ---- estado. No claro a cor precisa ESCURECER para continuar legível:
          o verde pastel que funcionava no preto some no branco. O fundo de
@@ -74,7 +78,7 @@
 
      #26262b aparecia cru duas vezes como hover do botão preto. É o preto
      clareado; vira token, porque hover é estado e estado tem nome. */
-  --preto-toque:#26262b;
+  --preto-toque:#3a3a3a;
 
   /* tons claros de estado para usar como TEXTO dentro do herói preto */
   --ok-no-preto:#5fd39a; --warn-no-preto:#f0b859; --bad-no-preto:#f2766b;
@@ -1341,14 +1345,43 @@ details > summary::marker{content:""}
    que a marca já pedia.
    ========================================================================== */
 
+/* ==========================================================================
+   A PALETA DA MARCA — três cores, e a terceira é a novidade
+
+   Do manual (Apresentação GuiaChurch.pdf): #252525, #e4d4b4, #fafeff.
+
+   As duas primeiras posições o site já tinha em outro tom: o quase-preto e o
+   branco. A que MUDA o produto é a #e4d4b4 — uma areia quente, e a única cor
+   de superfície que esta identidade permite. Ela existe para uma coisa só:
+   dar um terceiro tempo ao ritmo das faixas.
+
+   Antes eram dois: papel e noite, papel e noite, alternando. Duas cores
+   alternando por seis seções viram zebra. Com a areia no meio a página ganha
+   respiração e hierarquia — a faixa de areia é onde o assunto muda de
+   assunto, não só de fundo.
+
+   O QUE A AREIA NÃO É: cor de estado. A regra número um deste sistema
+   continua valendo — cor significa estado (confirmado, pendente, furou), e
+   por isso a areia nunca pinta um botão de ação nem um aviso. Ela é
+   superfície e ornamento: fundo de faixa, chevron, e o rótulo pequeno em
+   cima do preto, onde o cinza-claro de antes era só ausência de cor.
+   ========================================================================== */
 :root{
-  --noite:#070708;          /* o quase-preto da referência, não o preto puro */
-  --papel:#ffffff;
-  --papel2:#fafafa;
-  --cinza:#646464;          /* o corpo de texto deles, medido */
+  --noite:#252525;          /* o preto do manual */
+  --papel:#fafeff;          /* o branco do manual: levemente frio, não puro */
+  --papel2:#f4f7f9;
+  --areia:#e4d4b4;          /* a terceira cor. Superfície e ornamento, nunca estado. */
+  --areia-tinta:#3b3222;    /* tinta sobre areia: 9,8:1, medido */
+  --areia-linha:rgba(59,50,34,.20);
+  --cinza:#5f5f5f;          /* corpo de texto: 6,4:1 no papel do manual */
   --cinza-cl:rgba(255,255,255,.72);
-  --fonte-display:var(--fonte-raleway),"Century Gothic","Avenir Next",
-                  "Segoe UI",var(--fonte);
+
+  /* O grotesco da marca é a PP Neue Montreal; a Inter é a substituta aberta
+     mais próxima (ver app/layout.tsx). A Raleway saiu: era geométrica, e a
+     marca pede neo-grotesco. */
+  --fonte-display:var(--fonte-inter),"Helvetica Neue","Segoe UI",var(--fonte);
+  /* a serifa editorial, para frase de respiro — nunca para texto corrido */
+  --fonte-editorial:var(--fonte-editorial-arq),"Iowan Old Style","Palatino",Georgia,serif;
 }
 
 /* SOBRE OCUPAR A LARGURA INTEIRA
@@ -2378,7 +2411,10 @@ body:has(.porta) { background:var(--papel) }
   font-size:var(--d-lead);letter-spacing:.06em;
   color:var(--mudo);text-decoration:line-through;text-decoration-thickness:1px;
 }
-.casa-escuro .alvo b{color:rgba(255,255,255,.38)}
+/* .38 dava 3,46:1 — reprovava no preto antigo e no novo igualmente. Este é
+   o "de" de um par "de → para": tem que ficar mais quieto que o "para", mas
+   quieto não pode virar ilegível. .55 mede 5,6:1. */
+.casa-escuro .alvo b{color:rgba(255,255,255,.55)}
 .alvo span{
   font-family:var(--fonte-display);font-weight:var(--p-corpo);
   font-size:var(--d-lead);letter-spacing:.06em;line-height:1.35;
@@ -4372,3 +4408,119 @@ html{ scroll-padding-top:88px }
   .casa-local.chegada{ grid-template-columns:minmax(0,1fr) minmax(0,320px) }
 }
 .casa-local.chegada .casa-local-foto{ aspect-ratio:3/2 }
+
+/* ==========================================================================
+   A MARCA APLICADA — a areia, a serifa e as vagas de imagem
+   Tudo aqui é ADITIVO: nenhuma regra anterior foi reescrita.
+   ========================================================================== */
+
+/* ---- a terceira faixa ---------------------------------------------------
+   Papel → areia → noite. A areia entra onde o assunto vira outro assunto.
+   Ela herda todo o comportamento de .casa-papel; o que muda é o fundo e a
+   tinta, que é o marrom escuro medido em 9,8:1 e não o preto — preto puro
+   sobre areia fica duro, e a areia perde a temperatura que é o ponto dela. */
+.casa-areia{ background:var(--areia); color:var(--areia-tinta) }
+.casa-areia .corpo,
+.casa-areia .pilares p,
+.casa-areia .casa-perguntas dd,
+.casa-areia .casa-tira-nota{ color:rgba(59,50,34,.86) }
+.casa-areia .indice{ color:rgba(59,50,34,.78) }
+.casa-areia .chapeu{ color:rgba(59,50,34,.82) }
+.casa-areia .casa-perguntas > div,
+.casa-areia .casa-dados dt{ border-top-color:var(--areia-linha) }
+.casa-areia .casa-dados dt{ color:rgba(59,50,34,.80) }
+.casa-areia .casa-dados dd{ color:rgba(59,50,34,.86) }
+.casa-areia .acao{ color:var(--areia-tinta); border-color:rgba(59,50,34,.42) }
+.casa-areia .acao:hover,
+.casa-areia .acao:active{ background:var(--areia-tinta); color:var(--areia); border-color:var(--areia-tinta) }
+.casa-areia .acao.cheia{ background:var(--areia-tinta); color:var(--areia); border-color:var(--areia-tinta) }
+.casa-areia .acao.cheia:hover,
+.casa-areia .acao.cheia:active{ opacity:.86 }
+.casa-areia .chev-div{ color:rgba(59,50,34,.40) }
+
+/* a areia como ORNAMENTO no bloco preto: o rótulo pequeno em cima do escuro
+   era cinza-claro, ou seja ausência de cor. Agora é a cor da marca. */
+.casa-escuro .indice,
+.casa-foto .indice{ color:rgba(228,212,180,.62) }
+.casa-escuro .chapeu{ color:rgba(228,212,180,.74) }
+.casa-escuro .chev-div,
+.casa-foto .chev-div{ color:rgba(228,212,180,.48) }
+.casa-escuro .sigla .marca-chev{ color:var(--areia) }
+.casa-escuro .versiculo cite{ color:rgba(228,212,180,.66) }
+
+/* ---- a serifa editorial -------------------------------------------------
+   Frase de respiro, nunca texto corrido. Ela aparece em três lugares e só:
+   o versículo, a frase de destaque de uma faixa, e o número de etapa — os
+   três momentos em que a página para de informar e passa a respirar.
+   Em corpo de texto ela cansa; em uma frase por tela, ela é a marca. */
+.editorial{
+  font-family:var(--fonte-editorial); font-style:italic; font-weight:400;
+  font-size:clamp(24px,3.4vw,40px); line-height:1.28; letter-spacing:-.01em;
+  text-transform:none; max-width:22ch; margin:0 auto;
+}
+.casa-col .editorial{ margin-top:var(--e5) }
+.versiculo{ font-family:var(--fonte-editorial); font-style:italic }
+
+/* ---- VAGA DE IMAGEM -----------------------------------------------------
+   O espaço reservado para as fotos que ainda vão ser produzidas. Ele não é
+   um cinza vazio: diz o que a foto precisa mostrar, em que proporção, e com
+   que nome o arquivo entra. Placeholder mudo vira buraco esquecido; este
+   vira lista de produção que qualquer um lê olhando a página. */
+.vaga{
+  position:relative; display:block; width:100%; overflow:hidden;
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(37,37,37,.035) 0 12px, transparent 12px 24px),
+    var(--papel2);
+  border:1px solid var(--linha2);
+}
+.casa-escuro .vaga{
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(228,212,180,.07) 0 12px, transparent 12px 24px),
+    rgba(255,255,255,.035);
+  border-color:rgba(228,212,180,.26);
+}
+.casa-areia .vaga{
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(59,50,34,.06) 0 12px, transparent 12px 24px),
+    rgba(255,255,255,.34);
+  border-color:var(--areia-linha);
+}
+.vaga-in{
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:10px;
+  padding:var(--e4); text-align:center;
+}
+/* ROTULO E NOME DE ARQUIVO USAM --mudo, NÃO --ink4.
+   --ink4 dá 2,3:1 no papel e existe para marca (ponto, seta), não para
+   palavra — o próprio arquivo já registra isso mais acima. Aqui é texto que
+   alguém vai ler para saber que foto produzir. Medido em 6,1:1. */
+.vaga-rot{
+  font-family:var(--fonte-display); font-weight:var(--p-rot);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--mudo);
+}
+.casa-escuro .vaga-rot{ color:rgba(228,212,180,.80) }
+.casa-areia .vaga-rot{ color:rgba(59,50,34,.80) }
+.vaga-txt{
+  margin:0; max-width:34ch; font-size:var(--t-apoio); line-height:1.6;
+  color:var(--mudo);
+}
+.casa-escuro .vaga-txt{ color:rgba(255,255,255,.80) }
+.casa-areia .vaga-txt{ color:rgba(59,50,34,.86) }
+.vaga-arq{
+  font-family:var(--mono,ui-monospace,Menlo,monospace);
+  font-size:11px; letter-spacing:.02em; color:var(--mudo);
+  border:1px solid var(--linha2); padding:3px 8px;
+}
+.casa-escuro .vaga-arq{ color:rgba(228,212,180,.80); border-color:rgba(228,212,180,.30) }
+.casa-areia .vaga-arq{ color:rgba(59,50,34,.80); border-color:var(--areia-linha) }
+.vaga img{ width:100%; height:100%; object-fit:cover; display:block;
+           filter:saturate(.6) contrast(1.03) }
+
+/* uma tira de vagas lado a lado, para galeria */
+.vagas{ display:grid; gap:var(--e3); grid-template-columns:1fr; margin-top:var(--e5) }
+@media(min-width:720px){ .vagas.tres{ grid-template-columns:repeat(3,1fr) } }
+@media(min-width:720px){ .vagas.duas{ grid-template-columns:repeat(2,1fr) } }

@@ -102,7 +102,7 @@ export default function Acessar() {
           Fica AQUI, e não numa página só dele, porque é a dúvida que aparece
           nesta tela: a pessoa procura "entrar", não acha campo de senha, e
           precisa entender por quê antes de concluir que o sistema quebrou. */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <p className="indice">Voluntário</p>
           <Tit>Você não tem senha aqui, e isso é de propósito</Tit>

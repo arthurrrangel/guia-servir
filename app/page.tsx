@@ -550,7 +550,10 @@ export default function Casa() {
         <div className="casa-col">
           <p className="indice">03 · Servir</p>
           <Tit>A igreja não é o prédio</Tit>
-          <p className="corpo">
+          {/* a frase-tese do produto, na serifa editorial do manual. É o único
+              lugar da home onde a página para de informar e respira. */}
+          <p className="editorial">São pessoas que chegaram mais cedo.</p>
+          <p className="corpo" style={{ marginTop: 32 }}>
             É a quantidade de gente que decidiu chegar mais cedo para que o domingo
             de outra pessoa funcionasse. São cinco equipes, uma para cada tipo de gente.
           </p>

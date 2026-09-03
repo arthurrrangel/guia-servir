@@ -20,25 +20,50 @@ const inter = localFont({
   variable: '--fonte-inter',
 });
 
-/* A LETRA DA CASA — Raleway.
+/* A LETRA EDITORIAL — Instrument Serif Italic.
 
-   Não é escolha estética minha: é a tipografia do site que o Arthur apontou
-   como referência (igrejamananciais.com.br), medida na página deles — Raleway
-   400, corpo 17px, título 26px em caixa alta com tracking largo. Ele pediu
-   "a mesma pegada", e pegada de site é 80% tipografia e espaço.
+   O manual da marca (Apresentação GuiaChurch.pdf, 01/09/2026) define DUAS
+   famílias: PP Neue Montreal Bold/Book para o grotesco, e PP Editorial New
+   Ultralight Italic para o editorial. As duas são da Pangram Pangram e são
+   COMERCIAIS.
 
-   Ela também não briga com a GUI>: a logo já é uma geométrica de caixa alta
-   com tracking largo, que é exatamente o que a Raleway faz em display.
+   Por que elas não estão aqui, e a decisão não é minha para reverter: este
+   repositório é PÚBLICO no GitHub. Subir um .woff2 licenciado nele não é
+   "usar a fonte", é REDISTRIBUIR — e licença de desktop, que é a que um
+   designer normalmente tem para montar uma apresentação, não cobre nem uso
+   web nem redistribuição. Comprar a licença web resolve; até lá, publicar o
+   arquivo criaria uma exposição real, num endereço que qualquer um clona.
 
-   Mesmo motivo da Inter para morar no repositório: build não pode depender de
-   o gstatic estar de pé no minuto do deploy. Arquivo variável, 200 a 700,
-   só o subset latin — 48 kB para todos os pesos. */
-const raleway = localFont({
-  src: './fontes/raleway-latin-wght-normal.woff2',
-  weight: '200 700',
-  style: 'normal',
+   O que está aqui no lugar, e por que estas duas:
+
+   · Grotesco → INTER, que já morava no repositório. A PP Neue Montreal é um
+     neo-grotesco neutro e apertado; a Inter é da mesma escola e é a
+     substituta mais próxima que existe em licença aberta. A Raleway, que
+     ocupava este posto até hoje, é uma GEOMÉTRICA — família diferente, gesto
+     diferente. Ela veio de um site de referência, não da marca. Agora existe
+     manual, e o manual ganha.
+
+   · Editorial → INSTRUMENT SERIF ITALIC (SIL OFL, livre para redistribuir).
+     É a mais próxima da PP Editorial New Ultralight Italic em licença
+     aberta: mesma lógica de serifa alta em contraste, mesmo desenho fino e
+     inclinado, mesmo uso — frase de respiro, não texto corrido.
+
+   PARA TROCAR PELAS VERDADEIRAS: com a licença web comprada, é pôr os dois
+   .woff2 em app/fontes/ e mudar o `src` de dois `localFont` aqui. Nenhuma
+   regra de CSS muda — tudo consome --fonte, --fonte-display e
+   --fonte-editorial, nunca o nome da família.
+
+   O nome da variável do arquivo termina em -arq de propósito: o CSS monta a
+   pilha completa (com os fallbacks do sistema) num token de mesmo nome sem o
+   sufixo. Sem isso as duas declarações caem no mesmo elemento <html>, com a
+   mesma especificidade, e quem vence passa a ser a ordem do arquivo. */
+const editorial = localFont({
+  src: [
+    { path: './fontes/instrument-serif-latin-italic.woff2', style: 'italic', weight: '400' },
+    { path: './fontes/instrument-serif-latin-normal.woff2', style: 'normal', weight: '400' },
+  ],
   display: 'swap',
-  variable: '--fonte-raleway',
+  variable: '--fonte-editorial-arq',
 });
 
 /* O título era 'Escala de Mídia' e valia para o site inteiro: a aba do Louvor
@@ -66,13 +91,13 @@ export const metadata: Metadata = {
    escuro do sistema, e sem isso o navegador reescreve campo e select por
    conta própria em cima de um layout desenhado para papel claro. */
 export const viewport: Viewport = {
-  width: 'device-width', initialScale: 1, themeColor: '#070708',
+  width: 'device-width', initialScale: 1, themeColor: '#252525',
   colorScheme: 'light', viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${raleway.variable}`}>
+    <html lang="pt-BR" className={`${inter.variable} ${editorial.variable}`}>
       <body><Medidas />{children}</body>
     </html>
   );

@@ -4,6 +4,8 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, ENDERECO_LINHA, SITE } from '@/lib/igreja';
+import { Vaga, Vagas } from '@/components/Vaga';
+import { FOTOS } from '@/lib/imagens';
 
 /* =============================================================================
    /cultos — A PÁGINA QUE TIRA ALGUÉM DE CASA
@@ -119,6 +121,9 @@ export default function Cultos() {
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
           </div>
         </div>
+        <div className="casa-col larga" style={{ marginTop: 64 }}>
+          <Vaga foto={FOTOS.cultoAmplo} />
+        </div>
       </section>
 
       {/* ---------------------------------------------------- como é um domingo */}
@@ -142,17 +147,22 @@ export default function Cultos() {
             Chegue a hora que der. Quem chega depois entra pela porta lateral e
             senta onde quiser — ninguém é conduzido para a frente.
           </p>
+          <Vagas fotos={[FOTOS.cultoLouvor, FOTOS.cultoAcolhida]} quantas="duas" />
         </div>
       </section>
 
-      {/* --------------------------------------------------- as cinco perguntas */}
-      <section className="faixa casa-papel">
+      {/* --------------------------------------------------- as cinco perguntas
+          Na faixa de AREIA, e não no papel: é aqui que a página deixa de
+          informar e passa a acolher. A cor marca essa virada melhor do que
+          qualquer título faria. */}
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <p className="indice">Primeira vez</p>
           <Tit>As cinco perguntas de quem nunca foi</Tit>
-          <p className="corpo">
-            Nenhuma delas é sobre doutrina. São as cinco que realmente travam
-            alguém na porta de casa.
+          <p className="editorial">Nenhuma delas é sobre doutrina.</p>
+          <p className="corpo" style={{ marginTop: 32 }}>
+            São as cinco que realmente travam alguém na porta de casa — e a
+            última é a que ninguém fala em voz alta.
           </p>
         </div>
         <dl className="casa-perguntas">
@@ -189,6 +199,9 @@ export default function Cultos() {
           <div className="acoes">
             <Link href="/servir" className="acao">Servir no Kids <IcSeta /></Link>
           </div>
+        </div>
+        <div className="casa-col larga" style={{ marginTop: 56 }}>
+          <Vaga foto={FOTOS.kids} />
         </div>
       </section>
 

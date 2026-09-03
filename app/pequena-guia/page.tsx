@@ -4,6 +4,8 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
+import { Vaga } from '@/components/Vaga';
+import { FOTOS } from '@/lib/imagens';
 
 /* =============================================================================
    /pequena-guia — O GRUPO DA SEMANA
@@ -82,6 +84,9 @@ export default function PequenaGuia() {
             </a>
           </div>
         </div>
+        <div className="casa-col larga" style={{ marginTop: 64 }}>
+          <Vaga foto={FOTOS.pgEncontro} />
+        </div>
       </section>
 
       {/* --------------------------------------------------- como é um encontro */}
@@ -105,14 +110,18 @@ export default function PequenaGuia() {
             Cerca de uma hora. Você pode ir uma vez para ver como é — ninguém
             assina nada.
           </p>
+          <div style={{ maxWidth: 460, margin: '48px auto 0' }}>
+            <Vaga foto={FOTOS.pgRoda} />
+          </div>
         </div>
       </section>
 
       {/* ------------------------------------------------------------ perguntas */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <p className="indice">Antes de perguntar</p>
           <Tit>O que costuma travar</Tit>
+          <p className="editorial">Dá para ir, ouvir, e voltar para casa.</p>
         </div>
         <dl className="casa-perguntas">
           <div>

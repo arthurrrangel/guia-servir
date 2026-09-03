@@ -5,6 +5,8 @@ import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE } from '@/lib/igreja';
+import { Vaga } from '@/components/Vaga';
+import { FOTOS } from '@/lib/imagens';
 
 /* =============================================================================
    /sobre — QUERO CONHECER A GUIA CHURCH
@@ -80,6 +82,9 @@ export default function Sobre() {
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
           </div>
         </div>
+        <div className="casa-col larga" style={{ marginTop: 64 }}>
+          <Vaga foto={FOTOS.povo} />
+        </div>
       </section>
 
       {/* ---------------------------------------------------------- a sigla */}
@@ -124,10 +129,11 @@ export default function Sobre() {
       </section>
 
       {/* -------------------------------------------------------- os pilares */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-areia">
         <div className="casa-col">
           <p className="indice">Nossos pilares</p>
           <Tit>Relacionamento, generosidade e serviço</Tit>
+          <p className="editorial">Ninguém foi chamado para caminhar sozinho.</p>
         </div>
         <div className="casa-col larga">
           <div className="pilares">
@@ -168,6 +174,22 @@ export default function Sobre() {
             igreja deixa de ser um lugar onde as pessoas chegam e passa a ser um
             povo que vive, serve e avança junto.
           </p>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------------- liderança
+          A VAGA EXISTE, O BLOCO NÃO. A foto pode ser produzida desde já; o
+          que trava é o texto: "Pastor Presidente" (bio do Instagram) ou
+          "Evangelista" (regra fixa do canal) é decisão em aberto, e um título
+          publicado é mais caro de corrigir do que de esperar. Quando decidir,
+          o nome e o papel entram embaixo desta foto. */}
+      <section className="faixa casa-papel">
+        <div className="casa-col">
+          <p className="indice">Quem conduz</p>
+          <Tit>A liderança</Tit>
+        </div>
+        <div className="casa-col larga" style={{ marginTop: 48 }}>
+          <Vaga foto={FOTOS.lideranca} />
         </div>
       </section>
 

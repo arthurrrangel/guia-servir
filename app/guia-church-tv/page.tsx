@@ -4,6 +4,8 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE } from '@/lib/igreja';
+import { Vaga } from '@/components/Vaga';
+import { FOTOS } from '@/lib/imagens';
 
 /* =============================================================================
    /guia-church-tv — RETENÇÃO, NÃO AQUISIÇÃO
@@ -84,6 +86,9 @@ export default function TV() {
             )}
             <Link href="/cultos" className="acao">Ver o domingo ao vivo</Link>
           </div>
+        </div>
+        <div className="casa-col larga" style={{ marginTop: 64 }}>
+          <Vaga foto={FOTOS.tvPalavra} />
         </div>
       </section>
 
