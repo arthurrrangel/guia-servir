@@ -39,9 +39,9 @@ const PASSOS = [
 export const metadata: Metadata = {
   title: 'Cultos',
   description:
-    'Culto aos domingos, às 10h, na Barra da Tijuca. Noventa minutos, e termina em ponto. O que esperar antes de você sair de casa.',
+    'Culto aos domingos, às 10h, na Barra da Tijuca. O que esperar antes de você sair de casa.',
   alternates: { canonical: '/cultos' },
-  ...cartao({ titulo: 'Cultos', descricao: 'Domingo, 10h, Barra da Tijuca. Noventa minutos, e termina em ponto.', caminho: '/cultos', imagem: 'cultos' }),
+  ...cartao({ titulo: 'Cultos', descricao: 'Domingo, 10h, Barra da Tijuca. O que esperar antes de sair de casa.', caminho: '/cultos', imagem: 'cultos' }),
 };
 
 export default function Cultos() {
@@ -54,7 +54,7 @@ export default function Cultos() {
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Event',
         name: `Culto de domingo · ${IGREJA.nome}`, description: 'Culto público semanal, aberto a visitantes.',
-        eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Sunday', startTime: '10:00', duration: 'PT90M', scheduleTimezone: 'America/Sao_Paulo' },
+        eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Sunday', startTime: '10:00', scheduleTimezone: 'America/Sao_Paulo' },
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
         organizer: { '@type': 'Church', name: IGREJA.nome, url: SITE },
         location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
@@ -66,7 +66,7 @@ export default function Cultos() {
         <div className="g">
           <p className="g-rot">O domingo</p>
           <Tit as="h1" className="g-h1">Domingo, às 10h</Tit>
-          <p className="g-ed">Noventa minutos, e termina em ponto.</p>
+          <p className="g-ed">Na Barra da Tijuca. Chega a hora que der.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
             <Link href="/sobre" className="acao">Quem somos</Link>

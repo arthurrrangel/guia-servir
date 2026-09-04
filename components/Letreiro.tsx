@@ -22,7 +22,6 @@ const ITENS = [
   `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`,
   IGREJA.rua,
   IGREJA.bairro,
-  `${IGREJA.cultoDuracao} minutos, termina em ponto`,
   IGREJA.nome,
   IGREJA.frase,
 ];

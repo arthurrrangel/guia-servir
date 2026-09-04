@@ -265,7 +265,7 @@ export default function Casa() {
             },
             openingHoursSpecification: [{
               '@type': 'OpeningHoursSpecification',
-              dayOfWeek: 'https://schema.org/Sunday', opens: '10:00', closes: '11:30',
+              dayOfWeek: 'https://schema.org/Sunday', opens: '10:00', closes: '12:00',
             }],
           },
         ],
@@ -333,7 +333,7 @@ export default function Casa() {
         <div className="casa-regua">
           <span><b>Domingo, 10h</b></span>
           <span className="so-largo"><b>Rua Pedra de Itaúna, 534</b> · Barra da Tijuca</span>
-          <span><b>90 minutos</b> · termina em ponto</span>
+          <span><b>{IGREJA.instagramArroba}</b></span>
         </div>
       </section>
 

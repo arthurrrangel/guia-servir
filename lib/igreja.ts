@@ -29,7 +29,6 @@ export const IGREJA = {
      outra hora e chegou a circular. Uma fonte só evita a próxima divergência. */
   cultoDia: 'Domingo',
   cultoHora: '10h',
-  cultoDuracao: 90,
 
   instagram: 'https://instagram.com/guiachurch',
   instagramArroba: '@guiachurch',
