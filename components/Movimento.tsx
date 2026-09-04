@@ -28,6 +28,13 @@ const RAIZ_SEL = '[data-movimento]';
 export default function Movimento({ semRevelar = false }: { semRevelar?: boolean }) {
   useEffect(() => {
     const raiz = document.querySelector<HTMLElement>(RAIZ_SEL) ?? document.body;
+    /* O CSS de revelação por palavra sempre exigiu `html.js` para valer — e
+       ninguém nunca pôs a classe. Resultado: os títulos nunca montaram
+       palavra por palavra em lugar nenhum, e a regra de fallback (`html:not(.js)
+       .pal`, !important) vencia calada. Aqui a classe entra, e o desenho
+       original passa a acontecer. Sem JS a classe não entra e tudo nasce
+       visível, que é o contrato. */
+    document.documentElement.classList.add('js');
     const parado = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const fino = window.matchMedia('(pointer: fine)').matches;
     const desligar: Array<() => void> = [];

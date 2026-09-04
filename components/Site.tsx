@@ -100,20 +100,52 @@ export function Barra({ atual }: { atual?: string }) {
   );
 }
 
-/* O rodapé público. Ele é o único lugar do site onde /privacidade precisa
-   estar alcançável de qualquer página — a LGPD pede que a política seja
-   encontrável, não escondida atrás do formulário que a exige. */
+/* O RODAPÉ DE VERDADE. Um rodapé de uma linha é o fim de um panfleto; um
+   site de produto termina com a marca grande, os caminhos organizados e os
+   fatos — onde, quando, como falar. É a última coisa que a pessoa vê, e a
+   que ela lembra quando fecha. /privacidade continua alcançável de qualquer
+   página, como a LGPD pede. */
 export function Rodape() {
   return (
-    <footer className="casa-pe">
-      <div className="casa-pe-in">
-        <Logo className="logo" />
-        <span>{ENDERECO_LINHA}</span>
-        <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-        <Link href="/cultos">Cultos</Link>
-        <Link href="/servir">Servir</Link>
-        <Link href="/acessar">Acesso às equipes</Link>
-        <Link href="/privacidade">Privacidade</Link>
+    <footer className="g-pe rev">
+      <div className="g">
+        <div className="g-pe-marca" aria-label={IGREJA.nome}>
+          <Logo className="logo" />
+        </div>
+        <p className="g-ed g-pe-frase" style={{ color: 'var(--areia)', maxWidth: '22ch' }}>{IGREJA.frase}</p>
+
+        <div className="g-pe-cols">
+          <div>
+            <h4>Onde e quando</h4>
+            <span>{IGREJA.rua}</span>
+            <span>{IGREJA.bairro}, {IGREJA.cidade} · {IGREJA.cep}</span>
+            <span style={{ marginTop: 10, color: 'var(--areia)' }}>{IGREJA.cultoDia}, {IGREJA.cultoHora} · {IGREJA.cultoDuracao} minutos</span>
+          </div>
+          <div>
+            <h4>Visitar</h4>
+            <Link href="/cultos">Cultos</Link>
+            <Link href="/como-chegar">Como chegar</Link>
+            <Link href="/pequena-guia">Pequena Guia</Link>
+          </div>
+          <div>
+            <h4>A igreja</h4>
+            <Link href="/sobre">Quem somos</Link>
+            <Link href="/guia-church-tv">Guia Church TV</Link>
+            <Link href="/servir">Servir</Link>
+          </div>
+          <div>
+            <h4>Equipes</h4>
+            <Link href="/acessar">Acesso às equipes</Link>
+            <Link href="/eu">Espaço do voluntário</Link>
+            <Link href="/entrar">Organização</Link>
+          </div>
+        </div>
+
+        <div className="g-pe-linha">
+          <span>© {new Date().getFullYear()} {IGREJA.nome}</span>
+          <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
+          <Link href="/privacidade">Privacidade</Link>
+        </div>
       </div>
     </footer>
   );

@@ -3,52 +3,41 @@ import Link from 'next/link';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, ENDERECO_LINHA, SITE } from '@/lib/igreja';
-import { Vaga, Vagas } from '@/components/Vaga';
-import { FOTOS } from '@/lib/imagens';
 import { Letreiro } from '@/components/Letreiro';
+import { IGREJA, SITE } from '@/lib/igreja';
 
 /* =============================================================================
    /cultos — A PÁGINA QUE TIRA ALGUÉM DE CASA
 
-   Ela responde QUANDO e O QUE ESPERAR. O ONDE tem página própria
-   (/como-chegar) e o CTA daqui aponta para lá — separar não é organograma, é
-   intenção: quem quer saber como é ainda não decidiu ir; quem abre "como
-   chegar" já decidiu, e misturar as duas obriga a primeira a rolar por um
-   mapa que ela não pediu.
+   Responde QUANDO e O QUE ESPERAR. O ONDE tem página própria (/como-chegar).
 
-   AS CINCO PERGUNTAS SÃO O CONTEÚDO PRINCIPAL, não um rodapé de FAQ. Elas
-   travam quem nunca foi numa igreja, e se não forem respondidas aqui a pessoa
-   responde sozinha — a resposta que ela inventa é sempre a pior. É também o
-   único bloco do site com chance real de resultado rico no Google (FAQPage).
+   COMPOSIÇÃO, não pilha: herói dividido (texto à esquerda, retrato à direita
+   com o selo de areia), a ordem do culto como quatro fotos com numeral, as
+   cinco perguntas com a coluna esquerda fixa enquanto a lista rola, o Kids
+   com foto, e o fecho de ponta a ponta. Nenhuma seção é só texto.
 
-   AS QUATRO PRIMEIRAS SÃO PALAVRA POR PALAVRA AS DA HOME. Não foram
-   reescritas: são o texto que a igreja já usa, e página de igreja não é lugar
-   de prosa inventada. A quinta — duração — é a única acrescentada, e sai do
-   fato que a home já publica na régua do herói.
+   AS CINCO PERGUNTAS são palavra por palavra as da home + a de duração. Não
+   foram reescritas: são o texto que a igreja usa.
    ============================================================================= */
 
 const PERGUNTAS = [
-  {
-    q: 'Como eu me visto?',
-    r: 'Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.',
-  },
-  {
-    q: 'Vou ter que falar alguma coisa?',
-    r: 'Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.',
-  },
-  {
-    q: 'Quanto tempo dura?',
-    r: 'Noventa minutos, e termina em ponto. Você sabe a que horas vai sair antes de entrar.',
-  },
-  {
-    q: 'E o meu filho?',
-    r: 'Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.',
-  },
-  {
-    q: 'Onde eu deixo o carro?',
-    r: 'Tem equipe de estacionamento no domingo de manhã. Se vier de aplicativo, a porta é na Pedra de Itaúna, 534.',
-  },
+  { q: 'Como eu me visto?',
+    r: 'Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.' },
+  { q: 'Vou ter que falar alguma coisa?',
+    r: 'Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.' },
+  { q: 'Quanto tempo dura?',
+    r: 'Noventa minutos, e termina em ponto. Você sabe a que horas vai sair antes de entrar.' },
+  { q: 'E o meu filho?',
+    r: 'Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.' },
+  { q: 'Onde eu deixo o carro?',
+    r: 'Tem equipe de estacionamento no domingo de manhã. Se vier de aplicativo, a porta é na Pedra de Itaúna, 534.' },
+];
+
+const PASSOS = [
+  { n: '01', t: 'Acolhida na porta', d: 'Alguém te recebe antes de você achar a porta.', foto: 'recepcao.webp' },
+  { n: '02', t: 'Momento de louvor', d: 'Quem quiser canta. Quem não quiser, ouve.', foto: 'teclado.webp' },
+  { n: '03', t: 'A palavra', d: 'Uma mensagem, um assunto, nada de discurso longo.', foto: 'palavra.webp' },
+  { n: '04', t: 'Oração e saída', d: 'Termina em ponto. Café na saída para quem ficar.', foto: 'congregacao.webp' },
 ];
 
 export const metadata: Metadata = {
@@ -66,156 +55,147 @@ export const metadata: Metadata = {
 export default function Cultos() {
   return (
     <Site atual="/cultos">
-      {/* FAQPage é o único schema deste site com chance real de aparecer
-          expandido na busca. Ele só vale se as perguntas estiverem VISÍVEIS na
-          página — schema de conteúdo escondido é violação de diretriz, não
-          atalho. Por isso a lista é a mesma nos dois lugares. */}
       <Schema dados={{
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: PERGUNTAS.map(p => ({
-          '@type': 'Question',
-          name: p.q,
-          acceptedAnswer: { '@type': 'Answer', text: p.r },
-        })),
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
       }} />
       <Schema dados={{
-        '@context': 'https://schema.org',
-        '@type': 'Event',
-        name: `Culto de domingo · ${IGREJA.nome}`,
-        description: 'Culto público semanal, aberto a visitantes.',
-        eventSchedule: {
-          '@type': 'Schedule',
-          byDay: 'https://schema.org/Sunday',
-          startTime: '10:00',
-          duration: 'PT90M',
-          scheduleTimezone: 'America/Sao_Paulo',
-        },
-        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-        isAccessibleForFree: true,
+        '@context': 'https://schema.org', '@type': 'Event',
+        name: `Culto de domingo · ${IGREJA.nome}`, description: 'Culto público semanal, aberto a visitantes.',
+        eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Sunday', startTime: '10:00', duration: 'PT90M', scheduleTimezone: 'America/Sao_Paulo' },
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
         organizer: { '@type': 'Church', name: IGREJA.nome, url: SITE },
-        location: {
-          '@type': 'Place',
-          name: IGREJA.nome,
-          address: {
-            '@type': 'PostalAddress',
-            streetAddress: IGREJA.rua,
-            addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`,
-            addressRegion: IGREJA.uf,
-            postalCode: IGREJA.cep,
-            addressCountry: 'BR',
-          },
-        },
+        location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
       }} />
 
-      {/* ------------------------------------------------------------ abertura */}
-      <section className="faixa casa-papel rev">
-        <div className="casa-col">
-          <p className="indice">O domingo</p>
-          <Tit as="h1" className="tit">Culto aos domingos, às 10h, na Barra da Tijuca</Tit>
-          <span className="chapeu">Chega a hora que der · ninguém vai reparar</span>
-          <p className="casa-hora" style={{ marginTop: 56 }}>
-            Dom 10h
-            <small>Noventa minutos, e termina em ponto</small>
-          </p>
-          <div className="acoes">
-            <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
+      {/* ------------------------------------------------------------ herói */}
+      <section className="casa-papel rev">
+        <div className="g g-secao primeira">
+          <div className="g-grade meio">
+            <div className="g-c6">
+              <p className="g-rot">O domingo</p>
+              <Tit as="h1" className="g-h1">Culto aos domingos, às 10h</Tit>
+              <p className="g-ed">na Barra da Tijuca.</p>
+              <p className="g-corpo">
+                Noventa minutos, e termina em ponto. Chega a hora que der —
+                ninguém vai reparar, e tem alguém na porta para te receber.
+              </p>
+              <div className="g-acoes">
+                <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
+                <Link href="/sobre" className="acao">Conhecer a GUIA</Link>
+              </div>
+            </div>
+            <div className="g-c5 g-d8">
+              <div className="g-foto alta leva">
+                <img src="/fotos/equipe.webp" alt="Momento de louvor no culto de domingo da GUIA Church" fetchPriority="high" />
+                <div className="g-selo">Dom 10h<small>{IGREJA.cultoDuracao} minutos · termina em ponto</small></div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="casa-col larga" style={{ marginTop: 64 }}>
-          <Vaga foto={FOTOS.cultoAmplo} />
         </div>
       </section>
 
       <Letreiro escuro />
 
-      {/* ---------------------------------------------------- como é um domingo */}
-      <section className="faixa casa-escuro rev">
-        <div className="casa-col">
-          <p className="indice">Na prática</p>
-          <Tit>Como é um domingo aqui</Tit>
-          <p className="corpo">
-            Uma hora e meia, na mesma ordem toda semana. Saber o que vem a
-            seguir é metade do medo que some.
-          </p>
-        </div>
-        <div className="casa-col larga">
-          <ol className="casa-tira" aria-label="A ordem do culto">
-            <li><b>01</b> Acolhida na porta</li>
-            <li><b>02</b> Momento de louvor</li>
-            <li><b>03</b> A palavra</li>
-            <li><b>04</b> Oração e saída</li>
-          </ol>
-          <p className="casa-tira-nota">
-            Chegue a hora que der. Quem chega depois entra pela porta lateral e
-            senta onde quiser — ninguém é conduzido para a frente.
-          </p>
-          <Vagas fotos={[FOTOS.cultoLouvor, FOTOS.cultoAcolhida]} quantas="duas" />
-        </div>
-      </section>
-
-      {/* --------------------------------------------------- as cinco perguntas
-          Na faixa de AREIA, e não no papel: é aqui que a página deixa de
-          informar e passa a acolher. A cor marca essa virada melhor do que
-          qualquer título faria. */}
-      <section className="faixa casa-areia rev">
-        <div className="casa-col">
-          <p className="indice">Primeira vez</p>
-          <Tit>As cinco perguntas de quem nunca foi</Tit>
-          <p className="editorial">Nenhuma delas é sobre doutrina.</p>
-          <p className="corpo" style={{ marginTop: 32 }}>
-            São as cinco que realmente travam alguém na porta de casa — e a
-            última é a que ninguém fala em voz alta.
-          </p>
-        </div>
-        <dl className="casa-perguntas">
-          {PERGUNTAS.map(p => (
-            <div key={p.q}>
-              <dt>{p.q}</dt>
-              <dd>{p.r}</dd>
+      {/* ------------------------------------------------- a ordem do culto */}
+      <section className="casa-escuro rev">
+        <div className="g g-secao">
+          <div className="g-grade fim">
+            <div className="g-c7">
+              <p className="g-rot">Na prática</p>
+              <Tit className="g-h2">Como é um domingo aqui</Tit>
             </div>
-          ))}
-        </dl>
-        <div className="casa-col" style={{ marginTop: 8 }}>
-          <p className="corpo">
-            Ficou faltando alguma? Manda no {IGREJA.instagramArroba} — alguém
-            responde antes do domingo.
-          </p>
-          <div className="acoes">
-            <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao">
-              Perguntar no Instagram
-            </a>
+            <div className="g-c4 g-d9">
+              <p className="g-corpo">
+                Uma hora e meia, na mesma ordem toda semana. Saber o que vem a
+                seguir é metade do medo que some.
+              </p>
+            </div>
+          </div>
+          <div className="g-passos">
+            {PASSOS.map(p => (
+              <div key={p.n} className="g-passo">
+                <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
+                <span className="g-passo-n">{p.n}</span>
+                <span className="g-passo-t">{p.t}</span>
+                <span className="g-passo-d">{p.d}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ---------------------------------------------------------------- kids */}
-      <section className="faixa casa-escuro rev">
-        <div className="casa-col">
-          <p className="indice">Crianças</p>
-          <Tit>GUIA Kids</Tit>
-          <p className="corpo">
-            Sala e equipe próprias, dividido por faixa etária, com check-in na
-            entrada. A criança fica com a equipe do Kids durante o culto e é
-            entregue só a quem fez o check-in.
-          </p>
-          <div className="acoes">
-            <Link href="/servir" className="acao">Servir no Kids <IcSeta /></Link>
+      {/* ------------------------------------------------ as cinco perguntas */}
+      <section className="casa-areia rev">
+        <div className="g g-secao">
+          <div className="g-grade">
+            <div className="g-c4">
+              <div className="g-fixa">
+                <p className="g-rot">Primeira vez</p>
+                <Tit className="g-h2">As cinco perguntas de quem nunca foi</Tit>
+                <p className="g-ed">Nenhuma delas é sobre doutrina.</p>
+                <p className="g-corpo">
+                  São as cinco que realmente travam alguém na porta de casa — e a
+                  última é a que ninguém fala em voz alta.
+                </p>
+              </div>
+            </div>
+            <div className="g-c7 g-d6">
+              <ol className="g-perg">
+                {PERGUNTAS.map((p, i) => (
+                  <li key={p.q}>
+                    <span className="g-perg-n">0{i + 1}</span>
+                    <div>
+                      <h3 className="g-perg-q">{p.q}</h3>
+                      <p className="g-perg-r">{p.r}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+              <div className="g-acoes">
+                <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao">
+                  Ficou faltando alguma? Pergunta no Instagram
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="casa-col larga" style={{ marginTop: 56 }}>
-          <Vaga foto={FOTOS.kids} />
         </div>
       </section>
 
-      {/* --------------------------------------------------------------- fecho */}
-      <section className="faixa casa-papel rev">
-        <div className="casa-col">
-          <Tit>Te esperamos domingo</Tit>
-          <p className="corpo">{ENDERECO_LINHA}</p>
-          <div className="acoes">
+      {/* ------------------------------------------------------------- kids */}
+      <section className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="g-grade meio">
+            <div className="g-c7">
+              <div className="g-foto larga leva">
+                <img src="/fotos/kids-2.webp" alt="Crianças desenhando na sala do GUIA Kids" loading="lazy" decoding="async" />
+              </div>
+            </div>
+            <div className="g-c4 g-d9">
+              <p className="g-rot">Crianças</p>
+              <Tit className="g-h2">GUIA Kids</Tit>
+              <p className="g-corpo">
+                Sala e equipe próprias, dividido por faixa etária, com check-in
+                na entrada. A criança fica com a equipe do Kids durante o culto
+                e é entregue só a quem fez o check-in.
+              </p>
+              <div className="g-acoes">
+                <Link href="/servir" className="acao">Servir no Kids <IcSeta /></Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------------ fecho */}
+      <section className="g-cheio rev">
+        <img src="/fotos/palco.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Te esperamos</p>
+          <Tit className="g-h2">Domingo, 10h. A porta é a mesma para todo mundo.</Tit>
+          <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Traçar rota <IcSeta /></Link>
-            <Link href="/sobre" className="acao">Conhecer a GUIA</Link>
+            <Link href="/pequena-guia" className="acao">Ou começar pela semana</Link>
           </div>
         </div>
       </section>

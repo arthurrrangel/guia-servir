@@ -7,6 +7,7 @@ import { Logo, Chevron } from '@/components/Marca';
 import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
+import { Rodape } from '@/components/Site';
 import Contador from '@/components/Contador';
 import { Letreiro } from '@/components/Letreiro';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
@@ -40,10 +41,8 @@ type Numeros = {
   cultos_no_mes: number; respostas: number;
 };
 
-const ENDERECO = 'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro, RJ · 22793-390';
-const MAPA = 'https://www.google.com/maps/search/?api=1&query=' +
-  encodeURIComponent('GUIA Church, Rua Pedra de Itaúna, 534, Barra da Tijuca, Rio de Janeiro, RJ, 22793-390');
-const IG = 'https://instagram.com/guiachurch';
+/* endereço, mapa e @ saem de lib/igreja.ts — uma fonte só para o site inteiro */
+const IG = IGREJA.instagram;
 
 /* As seções internas da home continuam com os mesmos ids — #domingo, #igreja
    e #areas seguem sendo endereços válidos, e os links dentro do conteúdo os
@@ -311,15 +310,18 @@ export default function Casa() {
         </div>
       </div>
 
-      {/* ------------------------------------------------------------ herói */}
+      {/* ------------------------------------------------------------ herói
+          A foto respira (Ken Burns), o bloco recua com o scroll, e o título
+          agora fala na voz do manual: bold, caixa baixa, apertado. */}
       <section className="casa-heroi rev visto">
         <img className="casa-heroi-foto" src="/fotos/heroi.webp" alt="" fetchPriority="high" />
         <div className="casa-heroi-in">
+          <p className="g-rot" style={{ justifyContent: 'center', color: 'rgba(255,255,255,.62)' }}>GUIA Church · Barra da Tijuca</p>
           <Tit as="h1" className="">Existe um lugar para você</Tit>
-          <span className="chapeu">GUIA Church · Barra da Tijuca</span>
+          <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>Domingo, dez da manhã.</p>
           <p className="corpo">
-            Domingo, dez da manhã. Venha conhecer, ou entre para uma das equipes
-            que fazem o domingo acontecer.
+            Venha conhecer, ou entre para uma das equipes que fazem o domingo
+            acontecer.
           </p>
           <div className="acoes">
             <a href="#domingo" className="acao cheia">Quero conhecer</a>
@@ -335,242 +337,211 @@ export default function Casa() {
 
       <Letreiro />
 
-      {/* --------------------------------------------- prova: sai do banco */}
+      {/* --------------------------------------------- prova: sai do banco
+          A única prova concreta da página, em número grande. À esquerda, a
+          frase que dá sentido aos números; à direita, os números subindo. */}
       {num && (
-        <section className="faixa casa-escuro rev" aria-label="A igreja em números">
-          <div className="casa-numeros">
-            <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo hoje</span></div>
-            <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
-            <div><b><Contador n={num.postos} /></b><span>funções diferentes</span></div>
-            <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
+        <section className="casa-escuro rev" aria-label="A igreja em números">
+          <div className="g g-secao justa">
+            <div className="g-grade meio">
+              <div className="g-c4">
+                <p className="g-rot">Hoje</p>
+                <p className="g-ed" style={{ margin: 0 }}>Nenhuma delas começou sabendo.</p>
+              </div>
+              <div className="g-c8">
+                <div className="g-num">
+                  <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo hoje</span></div>
+                  <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
+                  <div><b><Contador n={num.postos} /></b><span>funções diferentes</span></div>
+                  <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
       )}
 
-      {/* =====================================================================
-          FASE 5 — SEIS SEÇÕES, CADA UMA COM UMA FUNÇÃO (29/08/2026)
-
-          A home tinha DOZE blocos e 9.709px no celular. O custo não era só o
-          conteúdo: `.faixa` paga 84px em cima e 84px embaixo, então cada seção
-          a mais custava ~168px de padding antes de escrever uma palavra. Oito
-          faixas eram 1.344px só de respiro entre assuntos.
-
-          O corte não foi por tamanho, foi por FUNÇÃO — o teste que o próprio
-          pedido trouxe. Quatro blocos não tinham uma:
-
-          · "A igreja não é o prédio" era atmosfera pura. Mas a FRASE é a tese
-            do produto inteiro, então ela não foi cortada: virou a abertura de
-            SERVIR, que é onde ela finalmente faz trabalho.
-          · "Nosso alvo" respondia a mesma pergunta que "A igreja" — propósito.
-            Duas seções, uma pergunta. Viraram uma, com TODAS as palavras.
-          · "Como começar" repetia, na íntegra, os quatro passos que a página da
-            área já explica — e explicava antes de a pessoa ter escolhido área,
-            que é a decisão de que eles dependem. Virou uma tira de uma linha:
-            mantém a promessa ("é rápido"), devolve 985px.
-          · "Onde fica" era a QUARTA vez que o endereço aparecia (régua do
-            herói, menu, rodapé). Foi para dentro de O DOMINGO, que é onde ele
-            é útil: quem pergunta como se vestir é quem precisa saber a porta.
-          · "Já serve?" duplicava dois links que já estão na barra e no rodapé.
-            Foi para o fecho.
-
-          NENHUMA PALAVRA DA IGREJA FOI REESCRITA OU CORTADA. Sigla, versículo,
-          pilares e alvo estão inteiros — o que mudou foi quantos recipientes
-          eles ocupam. Definição de identidade não é minha para editar.
-          ===================================================================== */}
-
       {/* ----------------------------------------------- 01 · O DOMINGO
-          FUNÇÃO: tirar o medo de quem nunca veio. Tudo que essa pessoa
-          precisa para decidir aparecer — a hora, as quatro travas, e a
-          porta — numa seção só. */}
-      <section id="domingo" className="faixa casa-papel rev">
-        <div className="casa-col">
-          <p className="indice">01 · O domingo</p>
-          <Tit>Chega a hora que der</Tit>
-          <span className="chapeu">Ninguém vai reparar</span>
-          <p className="casa-hora" style={{ marginTop: 56 }}>
-            Dom 10h
-            <small>Noventa minutos, e termina em ponto</small>
-          </p>
-        </div>
-
-        {/* as quatro perguntas que travam quem nunca foi numa igreja. Se elas
-            não forem respondidas aqui, a pessoa responde sozinha, e a resposta
-            que ela inventa é sempre a pior. */}
-        <dl className="casa-perguntas">
-          <div>
-            <dt>Como eu me visto?</dt>
-            <dd>Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.</dd>
-          </div>
-          <div>
-            <dt>Vou ter que falar alguma coisa?</dt>
-            <dd>Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.</dd>
-          </div>
-          <div>
-            <dt>E o meu filho?</dt>
-            <dd>Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.</dd>
-          </div>
-          <div>
-            <dt>Onde eu deixo o carro?</dt>
-            <dd>Tem equipe de estacionamento no domingo de manhã. Se vier de aplicativo, a porta é na Pedra de Itaúna, 534.</dd>
-          </div>
-        </dl>
-
-        {/* O ENDEREÇO ENTRA AQUI, e não numa seção só dele. A foto da fachada
-            continua porque ela tem função — chegar num lugar que você já
-            reconhece é menos assustador —, mas em 380px ao lado do endereço,
-            e não num bloco de 3:2 ocupando a largura inteira. */}
-        <div className="casa-col larga">
-          <div className="casa-local">
-            <div className="casa-local-foto corte">
-              <img src="/fotos/predio.webp" alt="Fachada da GUIA Church na Barra da Tijuca" loading="lazy" />
+          FUNÇÃO: tirar o medo de quem nunca veio. Texto à esquerda, foto com o
+          selo do horário à direita, as quatro travas embaixo, e a saída para
+          as páginas fundas. As quatro perguntas são as palavras da igreja. */}
+      <section id="domingo" className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="g-grade meio">
+            <div className="g-c5">
+              <p className="g-rot">01 · O domingo</p>
+              <Tit className="g-h2">Chega a hora que der</Tit>
+              <p className="g-ed">Ninguém vai reparar.</p>
+              <p className="g-corpo">
+                Noventa minutos, e termina em ponto. Tem gente de terno e gente
+                de chinelo na mesma fileira, e ninguém é chamado na frente.
+              </p>
+              <div className="g-acoes">
+                <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
+                <Link href="/como-chegar" className="acao">Como chegar</Link>
+              </div>
             </div>
-            <dl className="casa-dados">
-              <div>
-                <dt>Endereço</dt>
-                <dd>
-                  <a href={MAPA} target="_blank" rel="noreferrer">
-                    Rua Pedra de Itaúna, 534<br />Barra da Tijuca, Rio de Janeiro, RJ<br />22793-390
-                  </a>
-                </dd>
+            <div className="g-c6 g-d7">
+              <div className="g-foto larga leva">
+                <img src="/fotos/congregacao.webp" alt="Congregação reunida no culto de domingo" loading="lazy" decoding="async" />
+                <div className="g-selo">Dom 10h<small>Rua Pedra de Itaúna, 534</small></div>
               </div>
-              <div>
-                <dt>No Instagram</dt>
-                <dd><a href={IG} target="_blank" rel="noreferrer">@guiachurch</a></dd>
-              </div>
-            </dl>
+            </div>
           </div>
 
-          {/* A SEÇÃO VIROU RESUMO, E ISSO É DE PROPÓSITO (03/09/2026).
-              Antes ela era o único lugar do site que falava do domingo, então
-              carregava tudo. Agora /cultos responde o que esperar e
-              /como-chegar responde a logística, cada uma com o próprio H1 e o
-              próprio schema. A home continua com as quatro travas — quem só
-              rola a home não perde nada — e ganha a saída para quem quer mais.
-              Sem essas duas linhas, as páginas novas nasceriam órfãs: link
-              interno é o que o Google usa para achar e para hierarquizar. */}
-          <div className="acoes" style={{ marginTop: 8 }}>
-            <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
-            <Link href="/como-chegar" className="acao">Como chegar</Link>
+          <div className="g-grade" style={{ marginTop: 'clamp(48px,6vw,88px)' }}>
+            <div className="g-c10 g-d2">
+              <ol className="g-perg">
+                <li>
+                  <span className="g-perg-n">01</span>
+                  <div><h3 className="g-perg-q">Como eu me visto?</h3>
+                  <p className="g-perg-r">Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.</p></div>
+                </li>
+                <li>
+                  <span className="g-perg-n">02</span>
+                  <div><h3 className="g-perg-q">Vou ter que falar alguma coisa?</h3>
+                  <p className="g-perg-r">Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.</p></div>
+                </li>
+                <li>
+                  <span className="g-perg-n">03</span>
+                  <div><h3 className="g-perg-q">E o meu filho?</h3>
+                  <p className="g-perg-r">Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.</p></div>
+                </li>
+                <li>
+                  <span className="g-perg-n">04</span>
+                  <div><h3 className="g-perg-q">Onde eu deixo o carro?</h3>
+                  <p className="g-perg-r">Tem equipe de estacionamento no domingo de manhã. Se vier de aplicativo, a porta é na Pedra de Itaúna, 534.</p></div>
+                </li>
+              </ol>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ------------------------------------------------ 02 · QUEM É A GUIA
-          FUNÇÃO: apresentar e explicar o propósito — as duas eram seções
-          separadas respondendo à mesma pergunta.
+          TODO O TEXTO DESTA SEÇÃO É DA IGREJA, palavra por palavra. O que
+          mudou é o recipiente: a sigla vira quatro azulejos, o versículo vira
+          a frase grande em itálico, e os pilares e o alvo ganham a areia. */}
+      <section id="igreja" className="casa-escuro rev">
+        <div className="g g-secao">
+          <div className="g-grade fim">
+            <div className="g-c7">
+              <p className="g-rot">02 · A igreja</p>
+              <Tit className="g-h2">Somos GUIA</Tit>
+            </div>
+            <div className="g-c4 g-d9">
+              <p className="g-corpo">
+                GUIA é sigla, e é a razão de a marca ser <b style={{ fontWeight: 600, color: '#fff' }}>GUI&gt;</b>:
+                o chevron é o avanço. Ela vem do princípio de Gênesis 11:6.
+              </p>
+            </div>
+          </div>
 
-          TODO O TEXTO DESTA SEÇÃO É DA IGREJA. A primeira versão foi escrita
-          de cabeça e estava errada; a segunda era um resumo, que também não
-          serve. São as palavras que o Arthur mandou, cortadas no comprimento,
-          nunca reescritas. Página de igreja não é lugar de prosa inventada, e
-          definição de identidade muito menos. */}
-      <section id="igreja" className="faixa casa-escuro rev">
-        <div className="casa-col">
-          <p className="indice">02 · A igreja</p>
-          <Tit>Somos GUIA</Tit>
-          <span className="chapeu">Cultivando uma nova cultura</span>
-          <p className="corpo">
-            GUIA é sigla, e é a razão de a marca ser <b style={{ fontWeight: 500 }}>GUI&gt;</b>:
-            o chevron é o avanço. Ela vem do princípio de Gênesis 11:6.
-          </p>
+          <div className="g-tiles quatro">
+            <div className="g-tile">
+              <span className="g-tile-l">G</span>
+              <span><span className="g-tile-t">Grupo</span><span className="g-tile-d">Somos um povo. Não caminhamos isoladamente.</span></span>
+            </div>
+            <div className="g-tile">
+              <span className="g-tile-l">U</span>
+              <span><span className="g-tile-t">Unidos</span><span className="g-tile-d">Cada pessoa tem um papel na construção de algo maior do que si mesma.</span></span>
+            </div>
+            <div className="g-tile">
+              <span className="g-tile-l">I</span>
+              <span><span className="g-tile-t">Interagindo</span><span className="g-tile-d">Cultura se constrói por relacionamento, comunicação e participação.</span></span>
+            </div>
+            <div className="g-tile">
+              <span className="g-tile-l"><span className="marca-chev" aria-hidden="true"><Chevron /></span></span>
+              <span><span className="g-tile-t">Avançando</span><span className="g-tile-d">Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.</span></span>
+            </div>
+          </div>
+
+          <div className="g-grade" style={{ marginTop: 'clamp(56px,7vw,104px)' }}>
+            <div className="g-c9 g-d2">
+              <blockquote className="g-ed" style={{ margin: 0, fontSize: 'clamp(28px,4vw,58px)', maxWidth: '26ch' }}>
+                Eis que o povo é um, e todos têm uma mesma língua; e isto é o que
+                começam a fazer; e, agora, não haverá restrição para tudo o que
+                eles intentarem fazer.
+              </blockquote>
+              <p className="g-rot" style={{ marginTop: 28 }}>Gênesis 11:6</p>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <div className="casa-col larga">
-          <blockquote className="versiculo">
-            Eis que o povo é um, e todos têm uma mesma língua; e isto é o que
-            começam a fazer; e, agora, não haverá restrição para tudo o que eles
-            intentarem fazer.
-            <cite>Gênesis 11:6</cite>
-          </blockquote>
-
-          <div className="sigla" style={{ marginTop: 64 }}>
-            <div>
-              <b>G</b><span>Grupo</span>
-              <p>Somos um povo. Não caminhamos isoladamente.</p>
+      <section className="casa-areia rev">
+        <div className="g g-secao">
+          <div className="g-grade">
+            <div className="g-c4">
+              <div className="g-fixa">
+                <p className="g-rot">Nossos pilares</p>
+                <Tit className="g-h2">Relacionamento, generosidade e serviço</Tit>
+              </div>
             </div>
-            <div>
-              <b>U</b><span>Unidos</span>
-              <p>Cada pessoa tem um papel na construção de algo maior do que si mesma.</p>
-            </div>
-            <div>
-              <b>I</b><span>Interagindo</span>
-              <p>Cultura se constrói por relacionamento, comunicação e participação.</p>
-            </div>
-            <div>
-              <span className="marca-chev" aria-hidden="true"><Chevron /></span>
-              <span>Avançando</span>
-              <p>Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.</p>
+            <div className="g-c7 g-d6">
+              <ol className="g-perg">
+                <li><span className="g-perg-n">01</span><div><h3 className="g-perg-q">Relacionamento</h3>
+                  <p className="g-perg-r">Ninguém foi chamado para caminhar sozinho. Pertencer é parte fundamental da vida cristã.</p></div></li>
+                <li><span className="g-perg-n">02</span><div><h3 className="g-perg-q">Generosidade</h3>
+                  <p className="g-perg-r">Tudo o que temos vem de Deus. Somos generosos com o tempo, os recursos e os dons que Ele colocou em nossas mãos.</p></div></li>
+                <li><span className="g-perg-n">03</span><div><h3 className="g-perg-q">Serviço</h3>
+                  <p className="g-perg-r">Serviço é característica de liderança no Reino. Quem serve se torna protagonista e agente de mudança na sociedade.</p></div></li>
+              </ol>
             </div>
           </div>
 
-          <div className="casa-vira">
-            <p className="indice">Nossos pilares</p>
-            <Tit>Relacionamento, generosidade e serviço</Tit>
-            <div className="pilares">
-              <div>
-                <b>Relacionamento</b>
-                <p>Ninguém foi chamado para caminhar sozinho. Pertencer é parte fundamental da vida cristã.</p>
-              </div>
-              <div>
-                <b>Generosidade</b>
-                <p>Tudo o que temos vem de Deus. Somos generosos com o tempo, os recursos e os dons que Ele colocou em nossas mãos.</p>
-              </div>
-              <div>
-                <b>Serviço</b>
-                <p>Serviço é característica de liderança no Reino. Quem serve se torna protagonista e agente de mudança na sociedade.</p>
-              </div>
+          <div className="g-grade" style={{ marginTop: 'clamp(56px,7vw,96px)' }}>
+            <div className="g-c5">
+              <p className="g-rot">Nosso alvo</p>
+              <Tit className="g-h2">Plantar cada cristão no solo da responsabilidade do Reino</Tit>
+              <p className="g-corpo">
+                Que cada pessoa encontre seu lugar, compreenda sua responsabilidade e
+                desenvolva aquilo que Deus depositou na vida dela.
+              </p>
             </div>
-          </div>
-
-          {/* O ALVO era uma seção inteira e virou o fecho desta: ele responde a
-              mesma pergunta (propósito) e é a ponte natural para SERVIR. */}
-          <div className="casa-vira">
-            <p className="indice">Nosso alvo</p>
-            <Tit>Plantar cada cristão no solo da responsabilidade do Reino</Tit>
-            <p className="corpo">
-              Que cada pessoa encontre seu lugar, compreenda sua responsabilidade e
-              desenvolva aquilo que Deus depositou na vida dela.
-            </p>
-            <div className="alvo">
-              <div><b>Encher bancos</b><span>Formar pessoas comprometidas com o Reino</span></div>
-              <div><b>Espectadores</b><span>Participantes</span></div>
-              <div><b>Pessoas que recebam</b><span>Pessoas que sirvam, contribuam e frutifiquem</span></div>
-            </div>
-            <p className="corpo" style={{ marginTop: 56 }}>
-              Quando cada cristão entende seu lugar e assume sua responsabilidade, a
-              igreja deixa de ser um lugar onde as pessoas chegam e passa a ser um
-              povo que vive, serve e avança junto.
-            </p>
-            <div className="acoes">
-              <Link href="/sobre" className="acao">Conhecer a GUIA <IcSeta /></Link>
-              <Link href="/pequena-guia" className="acao">Encontrar uma Pequena Guia</Link>
+            <div className="g-c6 g-d7">
+              <ul className="g-vira" style={{ marginTop: 0 }}>
+                <li><span className="g-vira-de">Encher bancos</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Formar pessoas comprometidas com o Reino</span></li>
+                <li><span className="g-vira-de">Espectadores</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Participantes</span></li>
+                <li><span className="g-vira-de">Pessoas que recebam</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Pessoas que sirvam, contribuam e frutifiquem</span></li>
+              </ul>
+              <p className="g-corpo">
+                Quando cada cristão entende seu lugar e assume sua responsabilidade, a
+                igreja deixa de ser um lugar onde as pessoas chegam e passa a ser um
+                povo que vive, serve e avança junto.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ---------------------------------------------------- 03 · SERVIR
-          FUNÇÃO: apresentar as possibilidades e conduzir. Abre com a frase
-          que era uma seção de atmosfera e aqui vira tese, mostra as áreas, e
-          fecha com a jornada em uma linha — a explicação inteira dos quatro
-          passos vive na página da área, depois da escolha de que ela depende. */}
-      <section id="areas" className="faixa casa-papel rev">
-        <div className="casa-col">
-          <p className="indice">03 · Servir</p>
-          <Tit>A igreja não é o prédio</Tit>
-          {/* a frase-tese do produto, na serifa editorial do manual. É o único
-              lugar da home onde a página para de informar e respira. */}
-          <p className="editorial">São pessoas que chegaram mais cedo.</p>
-          <p className="corpo" style={{ marginTop: 32 }}>
-            É a quantidade de gente que decidiu chegar mais cedo para que o domingo
-            de outra pessoa funcionasse. São cinco equipes, uma para cada tipo de gente.
-          </p>
-        </div>
+          FUNÇÃO: apresentar as possibilidades e conduzir. A tese do produto
+          em itálico, as áreas com foto real saídas do banco, os quatro passos
+          numa linha. */}
+      <section id="areas" className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="g-grade fim">
+            <div className="g-c7">
+              <p className="g-rot">03 · Servir</p>
+              <Tit className="g-h2">A igreja não é o prédio</Tit>
+              <p className="g-ed">São pessoas que chegaram mais cedo.</p>
+            </div>
+            <div className="g-c4 g-d9">
+              <p className="g-corpo">
+                É a quantidade de gente que decidiu chegar mais cedo para que o
+                domingo de outra pessoa funcionasse. São cinco equipes, uma para
+                cada tipo de gente.
+              </p>
+              <div className="g-acoes">
+                <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+              </div>
+            </div>
+          </div>
 
-        <div className="casa-col larga" style={{ marginTop: 56 }}>
-          {fase === 'carregando' && <p className="corpo">Carregando as áreas</p>}
+          {fase === 'carregando' && <p className="g-corpo">Carregando as áreas</p>}
           {fase === 'rede' && (
-            <p className="corpo">
+            <p className="g-corpo">
               Não consegui carregar as áreas agora. Atualize a página, ou fale com
               quem te chamou para servir.
             </p>
@@ -589,12 +560,7 @@ export default function Casa() {
             ))}
           </div>
 
-          {/* OS QUATRO PASSOS EM UMA LINHA. Eram 985px de quatro cartões
-              numerados, repetindo o que /servir/[slug] já explica inteiro —
-              e explicando antes da escolha de área de que dependem. Aqui
-              sobra só o que a pessoa precisa saber ANTES de clicar: que são
-              quatro tempos e que o primeiro é curto. */}
-          <ol className="casa-tira" aria-label="Como começar">
+          <ol className="casa-tira" aria-label="Como começar" style={{ marginTop: 'clamp(40px,5vw,64px)' }}>
             <li><b>01</b> Escolha a área e se cadastre</li>
             <li><b>02</b> Converse com a liderança</li>
             <li><b>03</b> Entre no time</li>
@@ -603,57 +569,25 @@ export default function Casa() {
           <p className="casa-tira-nota">
             O cadastro leva menos de um minuto, e cada área explica o que faz antes de você decidir.
           </p>
-
-          <div className="acoes" style={{ marginTop: 52 }}>
-            <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
-          </div>
         </div>
       </section>
 
-      {/* --------------------------------------------------------- FECHO
-          FUNÇÃO: conduzir, e tirar o peso. Absorveu o bloco "Já serve com a
-          gente?", que eram 381px para repetir dois links que já existem na
-          barra do topo e no rodapé. */}
-      <section className="casa-foto rev">
-        <img src="/fotos/congregacao.webp" alt="" loading="lazy" />
-        <div className="casa-col">
-          <div className="chev-div" aria-hidden="true"><Chevron /><Chevron /><Chevron /></div>
-          <Tit>Sempre cabe mais um</Tit>
-          <p className="corpo">
-            {num
-              ? `Hoje são ${num.pessoas} pessoas servindo em ${num.ministerios} áreas. Nenhuma delas começou sabendo.`
-              : 'Ninguém aqui começou sabendo.'}
-          </p>
-          <div className="acoes">
+      {/* --------------------------------------------------------- FECHO */}
+      <section className="g-cheio rev">
+        <img src="/fotos/oferta.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Sempre cabe mais um</p>
+          <Tit className="g-h2">{num ? `Hoje são ${num.pessoas} pessoas servindo em ${num.ministerios} áreas.` : 'Ninguém aqui começou sabendo.'}</Tit>
+          {num && <p className="g-ed">Nenhuma delas começou sabendo.</p>}
+          <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
-            <a href="#domingo" className="acao">Ver o domingo</a>
+            <Link href="/eu" className="acao">Já sirvo · abrir meu espaço</Link>
           </div>
-          <p className="casa-fecho-ja">
-            Já serve com a gente? <Link href="/eu">Abra o seu espaço</Link>. Sua escala, seus dias, seu líder.
-          </p>
         </div>
       </section>
 
+      <Rodape />
 
-      <footer className="casa-pe">
-        <div className="casa-pe-in">
-          <Logo className="logo" />
-          <span>{ENDERECO}</span>
-          <a href={IG} target="_blank" rel="noreferrer">@guiachurch</a>
-          <Link href="/cultos">Cultos</Link>
-          <Link href="/como-chegar">Como chegar</Link>
-          <Link href="/sobre">Conheça</Link>
-          <Link href="/pequena-guia">Pequena Guia</Link>
-          <Link href="/servir">Servir</Link>
-          <Link href="/acessar">Acesso às equipes</Link>
-          {/* a política precisa ser alcançável de qualquer página, e não só de
-              dentro do formulário que a exige. É requisito da LGPD, não estilo. */}
-          <Link href="/privacidade">Privacidade</Link>
-        </div>
-      </footer>
-
-      {/* no celular a barra encolhe e o bloco de áreas fica a quatro telas do
-          herói. A ação não pode depender de a pessoa lembrar que ela existe. */}
       <div className={'cta-fixa' + (passou && !menu ? ' ver' : '')}>
         <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
       </div>

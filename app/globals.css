@@ -1858,10 +1858,10 @@ html,body{overflow-x:clip}
   transition:opacity var(--t-lento),transform var(--t-lento);
   transition-delay:calc(var(--i,0) * 62ms);
 }
-.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,
+.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,.js-rev .casa-heroi.visto h1 .pal,
 .js-rev .tit.visto .pal,.js-rev h1.visto .pal{opacity:1;transform:none}
 /* sem JS, ou com movimento reduzido, a palavra já nasce no lugar */
-html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important}
+html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important;filter:none!important}
 
 /* --- foto entra por corte, não por fade ---------------------------------
    O corte SÓ existe dentro de .js-rev, igual ao .rev. Sem essa trava ele
@@ -4579,7 +4579,7 @@ html{ scroll-behavior:smooth }
    palavra (span pequeno), nunca na seção inteira: filter sobre uma faixa com
    foto é o que faz Android médio engasgar. */
 .js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{ filter:blur(6px) }
-.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,
+.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,.js-rev .casa-heroi.visto h1 .pal,
 .js-rev .tit.visto .pal,.js-rev h1.visto .pal{ filter:blur(0) }
 .js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{
   transition:opacity var(--t-lento),transform var(--t-lento),filter var(--t-lento);
@@ -4730,3 +4730,281 @@ html{ scroll-behavior:smooth }
 /* ---- as vagas de imagem entram por corte, como as fotos ------------------- */
 .js-rev .vaga.corte{ clip-path:inset(0 0 100% 0); transition:clip-path var(--t-lento) }
 .js-rev .visto .vaga.corte{ clip-path:inset(0 0 0 0) }
+
+/* ==========================================================================
+   A VOZ DA MARCA — correção de identidade (04/09/2026)
+
+   O manual (Apresentação GuiaChurch.pdf) mostra a voz tipográfica da GUIA:
+   título em PP Neue Montreal BOLD, caixa baixa, apertado — "Fontes & Paleta
+   de cores", "Tudo pode mudar em um…" — com a PP Editorial New itálica como
+   contraponto e o rótulo pequeno em caixa alta ("guiachurch | sede").
+
+   O site vinha usando o oposto: título LEVE, caixa alta, tracking largo.
+   Isso não veio da marca — veio de um site de referência de outra igreja,
+   quando ainda não havia manual. Agora há. Título bold apertado em caixa
+   baixa é a identidade; caixa alta tracked fica onde o manual a põe: no
+   rótulo pequeno.
+
+   Efeito colateral bom: bold em caixa baixa é robusto na fonte de sistema
+   (Helvetica Bold, Roboto Bold), enquanto "light tracked" no sistema quase
+   sempre cai num peso que o aparelho não tem.
+   ========================================================================== */
+.tit,.casa-heroi h1{
+  font-weight:700; text-transform:none;
+  letter-spacing:-.03em; line-height:1.02;
+}
+.tit{ font-size:clamp(34px,4.8vw,66px) }
+.casa-heroi h1{ font-size:clamp(50px,8.6vw,124px); line-height:.96; letter-spacing:-.035em }
+.tit .pal,.casa-heroi h1 .pal{ transform:translateY(.28em) }
+.casa-hora{ font-weight:700; letter-spacing:-.04em; text-transform:none }
+.indice{ justify-content:flex-start; max-width:none; margin:0 0 var(--e5); gap:12px }
+.indice::before{ content:""; width:9px; height:9px; flex:none; background:var(--areia); opacity:1 }
+.indice::after{ display:none }
+.casa-col .indice{ justify-content:center }
+.chapeu{ margin-top:var(--e4) }
+
+/* ==========================================================================
+   O SISTEMA EDITORIAL — grade de 12, assimetria, foto em toda seção
+
+   Seis blocos centrados por página é wireframe, não site. Aqui: uma grade
+   de 12 colunas, texto de um lado e foto do outro, faixas de foto de ponta
+   a ponta, número grande, azulejo quadrado. Tudo reto, tudo sem canto, tudo
+   nas três cores. O que muda é a COMPOSIÇÃO.
+   ========================================================================== */
+.g{ max-width:1360px; margin:0 auto; padding-inline:clamp(20px,4vw,52px) }
+/* padding-block, e não o atalho: `.g` e `.g-secao` moram no mesmo div, e o
+   atalho zerava o padding lateral — no celular o texto encostava na borda. */
+.g-secao{ padding-block:clamp(64px,8.5vw,128px) }
+.g-secao.justa{ padding-block:clamp(44px,5.5vw,76px) }
+.g-secao.primeira{ padding-top:clamp(40px,6vw,88px) }
+.g-grade{ display:grid; grid-template-columns:repeat(12,1fr); gap:clamp(20px,3vw,44px); align-items:start }
+.g-grade.meio{ align-items:center }
+.g-grade.fim{ align-items:end }
+.g-grade > *{ grid-column:1/-1; min-width:0 }
+/* `grid-column:span N` é atalho que zera o start: junto com um g-dN o item
+   virava UMA coluna. Aqui o span vai no END e o início no START, separados,
+   e os dois convivem: g-c5 g-d8 = colunas 8 a 12. */
+@media(min-width:900px){
+  .g-grade > *{ grid-column:auto }
+  .g-c3{ grid-column-end:span 3 } .g-c4{ grid-column-end:span 4 } .g-c5{ grid-column-end:span 5 }
+  .g-c6{ grid-column-end:span 6 } .g-c7{ grid-column-end:span 7 } .g-c8{ grid-column-end:span 8 }
+  .g-c9{ grid-column-end:span 9 } .g-c10{ grid-column-end:span 10 }
+  .g-d2{ grid-column-start:2 } .g-d3{ grid-column-start:3 } .g-d5{ grid-column-start:5 } .g-d6{ grid-column-start:6 }
+  .g-d7{ grid-column-start:7 } .g-d8{ grid-column-start:8 } .g-d9{ grid-column-start:9 }
+  .g-inv{ order:-1 }
+  .g-fixa{ position:sticky; top:104px }
+}
+
+/* ---- a voz ---------------------------------------------------------------- */
+.g-rot{
+  display:flex; align-items:center; gap:12px; margin:0 0 var(--e5);
+  font-family:var(--fonte-display); font-weight:500; font-size:12px; line-height:1;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--mudo);
+}
+.g-rot::before{ content:""; width:9px; height:9px; background:var(--areia); flex:none }
+.casa-escuro .g-rot,.g-cheio .g-rot{ color:rgba(255,255,255,.58) }
+.casa-areia .g-rot{ color:rgba(59,50,34,.78) } .casa-areia .g-rot::before{ background:var(--areia-tinta) }
+.g-h1,.g-h2,.g-h3{ font-family:var(--fonte-display); font-weight:700; margin:0; text-wrap:balance; color:inherit }
+.g-h1{ font-size:clamp(46px,7.4vw,108px); line-height:.96; letter-spacing:-.036em }
+.g-h2{ font-size:clamp(34px,4.8vw,66px); line-height:1.0; letter-spacing:-.03em }
+.g-h3{ font-size:clamp(22px,2.4vw,30px); line-height:1.15; letter-spacing:-.02em }
+.g-ed{
+  display:block; font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
+  font-size:clamp(26px,3.6vw,52px); line-height:1.12; letter-spacing:-.012em; margin:.4em 0 0; color:inherit;
+}
+.g-h1 .g-ed,.g-h2 .g-ed{ font-size:.82em; margin-top:.08em; letter-spacing:-.02em }
+.casa-escuro .g-ed,.g-cheio .g-ed{ color:var(--areia) }
+.casa-papel .g-ed{ color:var(--areia-tinta) }
+.g-corpo{
+  font-size:clamp(17px,1.25vw,19px); line-height:1.6; color:var(--cinza);
+  max-width:54ch; margin:var(--e5) 0 0; text-wrap:pretty;
+}
+.g-corpo + .g-corpo{ margin-top:var(--e4) }
+.casa-escuro .g-corpo,.g-cheio .g-corpo{ color:rgba(255,255,255,.78) }
+.casa-areia .g-corpo{ color:rgba(59,50,34,.86) }
+.g-acoes{ display:flex; flex-wrap:wrap; gap:12px; margin-top:var(--e6) }
+.g-cheio .acao:not(.cheia){ color:#fff; border-color:rgba(255,255,255,.55) }
+.g-cheio .acao.cheia{ background:#fff; color:var(--noite); border-color:#fff }
+.g-cheio .acao:not(.cheia):hover{ background:#fff; color:var(--noite); border-color:#fff }
+
+/* ---- a foto ----------------------------------------------------------------
+   Quadro reto, foto tratada como todas as outras (saturação .62), grão por
+   cima. `.alta` é o retrato, `.larga` a paisagem, `.faixa` a fita. */
+.g-foto{ position:relative; overflow:hidden; background:var(--noite); isolation:isolate }
+.g-foto img{ width:100%; height:100%; object-fit:cover; display:block; filter:saturate(.62) contrast(1.04) }
+.g-foto.alta{ aspect-ratio:4/5 } .g-foto.larga{ aspect-ratio:16/10 }
+.g-foto.quad{ aspect-ratio:1 } .g-foto.fita{ aspect-ratio:21/9 } .g-foto.meia{ aspect-ratio:3/2 }
+.g-foto::after{
+  content:""; position:absolute; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:300px 300px;
+}
+.g-foto.leva img{ transition:transform 1.4s var(--ease) } .g-foto.leva:hover img{ transform:scale(1.04) }
+/* o selo de areia no canto da foto: a informação que não pode ser perdida */
+.g-selo{
+  position:absolute; left:0; bottom:0; z-index:2; background:var(--areia); color:var(--areia-tinta);
+  padding:clamp(16px,2vw,26px) clamp(20px,2.4vw,32px);
+  font-family:var(--fonte-display); font-weight:700; font-size:clamp(26px,3vw,44px);
+  line-height:1; letter-spacing:-.035em;
+}
+.g-selo small{
+  display:block; margin-top:10px; font-weight:500; font-size:11px; letter-spacing:.15em;
+  text-transform:uppercase; opacity:.72;
+}
+.g-selo.dir{ left:auto; right:0 }
+.g-selo.cima{ bottom:auto; top:0 }
+.g-selo.escuro{ background:var(--noite); color:#fff }
+
+/* ---- a faixa de foto de ponta a ponta --------------------------------------- */
+.g-cheio{
+  position:relative; min-height:clamp(440px,64vh,760px); display:flex; align-items:flex-end;
+  color:#fff; background:var(--noite); isolation:isolate; overflow:hidden;
+}
+.g-cheio.alta{ min-height:clamp(520px,84svh,880px) }
+.g-cheio > img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2;
+  filter:saturate(.6) contrast(1.04);
+}
+.g-cheio::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg,rgba(37,37,37,.30) 0%,rgba(37,37,37,.10) 35%,rgba(37,37,37,.86) 100%);
+}
+.g-cheio > .g{ position:relative; width:100%; padding-top:clamp(120px,18vh,180px); padding-bottom:clamp(36px,5vw,72px) }
+.g-cheio .g-h1,.g-cheio .g-h2{ max-width:16ch }
+.g-cheio.meio{ align-items:center }
+.g-cheio.meio > .g{ padding-top:clamp(100px,14vh,160px); padding-bottom:clamp(100px,14vh,160px) }
+
+/* ---- os passos: fotos com numeral ------------------------------------------ */
+.g-passos{ display:grid; grid-template-columns:repeat(2,1fr); gap:4px; margin-top:var(--e7) }
+@media(min-width:900px){ .g-passos{ grid-template-columns:repeat(4,1fr) } }
+.g-passo{
+  position:relative; aspect-ratio:3/4; overflow:hidden; background:var(--noite); color:#fff;
+  display:flex; flex-direction:column; justify-content:flex-end; padding:clamp(18px,2vw,28px); isolation:isolate;
+}
+.g-passo img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2;
+  filter:saturate(.55) contrast(1.05) brightness(.66); transition:transform 1.3s var(--ease);
+}
+.g-passo:hover img{ transform:scale(1.05) }
+.g-passo::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,transparent 30%,rgba(37,37,37,.85) 100%) }
+.g-passo-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(40px,4.6vw,66px); line-height:1; color:var(--areia) }
+.g-passo-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(17px,1.6vw,22px); letter-spacing:-.02em; margin-top:10px; line-height:1.15 }
+.g-passo-d{ font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.74); margin-top:6px; text-wrap:pretty }
+
+/* ---- perguntas numeradas ----------------------------------------------------- */
+.g-perg{ list-style:none; margin:0; padding:0; border-top:1px solid var(--linha2) }
+.casa-areia .g-perg{ border-top-color:rgba(59,50,34,.28) }
+.casa-escuro .g-perg{ border-top-color:rgba(255,255,255,.16) }
+.g-perg li{
+  display:grid; grid-template-columns:clamp(48px,6vw,80px) 1fr; gap:clamp(12px,2vw,28px);
+  padding:clamp(22px,2.6vw,34px) 0; border-bottom:1px solid var(--linha);
+}
+.casa-areia .g-perg li{ border-bottom-color:rgba(59,50,34,.18) }
+.casa-escuro .g-perg li{ border-bottom-color:rgba(255,255,255,.10) }
+.g-perg-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(28px,3vw,40px); line-height:1; color:var(--areia-tinta); opacity:.55; padding-top:2px }
+.casa-escuro .g-perg-n{ color:var(--areia); opacity:.8 }
+.g-perg-q{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.8vw,25px); letter-spacing:-.02em; margin:0; line-height:1.2 }
+.g-perg-r{ font-size:clamp(16px,1.2vw,17.5px); line-height:1.6; color:var(--cinza); margin:10px 0 0; max-width:60ch; text-wrap:pretty }
+.casa-areia .g-perg-r{ color:rgba(59,50,34,.86) } .casa-escuro .g-perg-r{ color:rgba(255,255,255,.76) }
+
+/* ---- azulejos: a sigla, as portas ------------------------------------------- */
+.g-tiles{ display:grid; grid-template-columns:repeat(2,1fr); gap:4px; margin-top:var(--e7) }
+@media(min-width:900px){ .g-tiles.quatro{ grid-template-columns:repeat(4,1fr) } .g-tiles.tres{ grid-template-columns:repeat(3,1fr) } }
+.g-tile{
+  position:relative; aspect-ratio:1; padding:clamp(18px,2.2vw,32px); display:flex; flex-direction:column; justify-content:space-between;
+  background:rgba(255,255,255,.035); border:1px solid rgba(255,255,255,.10); color:#fff; text-decoration:none;
+  overflow:hidden; isolation:isolate; transition:background var(--t),border-color var(--t);
+}
+.g-tile:hover{ background:rgba(228,212,180,.07); border-color:rgba(228,212,180,.35) }
+.g-tile img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-1; filter:saturate(.5) contrast(1.05) brightness(.42); transition:transform 1.3s var(--ease),filter .6s var(--ease) }
+.g-tile:hover img{ transform:scale(1.05); filter:saturate(.5) contrast(1.05) brightness(.5) }
+.g-tile-l{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(56px,8vw,128px); line-height:.86; letter-spacing:-.045em; color:var(--areia) }
+.g-tile-l .marca-chev{ display:inline-block; font-size:.86em; vertical-align:-.02em }
+.g-tile-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(18px,1.7vw,24px); letter-spacing:-.02em; line-height:1.15 }
+.g-tile-d{ font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.72); margin-top:8px; text-wrap:pretty }
+.g-tile-seta{ position:absolute; top:clamp(18px,2.2vw,32px); right:clamp(18px,2.2vw,32px); width:20px; height:20px; color:var(--areia); transition:transform var(--t) }
+.g-tile:hover .g-tile-seta{ transform:translate(3px,-3px) }
+.casa-papel .g-tile,.casa-areia .g-tile{ color:var(--ink); background:rgba(37,37,37,.03); border-color:var(--linha2) }
+.casa-papel .g-tile:hover,.casa-areia .g-tile:hover{ background:rgba(228,212,180,.28); border-color:var(--areia-tinta) }
+.casa-papel .g-tile-d,.casa-areia .g-tile-d{ color:var(--cinza) }
+.casa-papel .g-tile-l,.casa-areia .g-tile-l{ color:var(--areia-tinta) }
+
+/* ---- números grandes ---------------------------------------------------------- */
+.g-num{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(28px,4vw,48px) clamp(16px,2vw,32px) }
+@media(min-width:900px){ .g-num{ grid-template-columns:repeat(4,1fr) } }
+.g-num b{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(52px,6.8vw,112px); line-height:.94; letter-spacing:-.045em }
+.g-num span{ display:block; margin-top:12px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.58; line-height:1.4 }
+
+/* ---- de → para ------------------------------------------------------------- */
+.g-vira{ list-style:none; margin:var(--e6) 0 0; padding:0; border-top:1px solid var(--linha2) }
+.casa-escuro .g-vira{ border-top-color:rgba(255,255,255,.16) }
+.g-vira li{ display:grid; grid-template-columns:1fr auto 1fr; gap:clamp(12px,2vw,32px); align-items:center; padding:clamp(18px,2.2vw,28px) 0; border-bottom:1px solid var(--linha) }
+.casa-escuro .g-vira li{ border-bottom-color:rgba(255,255,255,.10) }
+.g-vira-de{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2.2vw,30px); color:var(--mudo); text-decoration:line-through; text-decoration-thickness:1px; text-decoration-color:rgba(37,37,37,.35) }
+.casa-escuro .g-vira-de{ color:rgba(255,255,255,.5); text-decoration-color:rgba(255,255,255,.3) }
+.g-vira-chev{ color:var(--areia); font-size:16px; display:inline-flex }
+.g-vira-para{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(18px,1.9vw,26px); letter-spacing:-.02em; line-height:1.2 }
+
+/* ---- o rodapé de verdade ---------------------------------------------------- */
+.g-pe{ background:var(--noite); color:#fff; position:relative; isolation:isolate; overflow:hidden }
+.g-pe > .g{ padding-top:clamp(64px,8vw,112px); padding-bottom:28px }
+.g-pe-marca{ display:block; width:min(100%,520px); height:auto; color:#fff }
+.g-pe-marca svg{ width:100%; height:auto }
+.g-pe-frase{ margin:var(--e5) 0 0 }
+.g-pe-cols{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(28px,4vw,48px) clamp(20px,3vw,40px); margin-top:clamp(48px,6vw,80px) }
+@media(min-width:900px){ .g-pe-cols{ grid-template-columns:1.6fr 1fr 1fr 1fr } }
+.g-pe h4{ margin:0 0 14px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:rgba(228,212,180,.7) }
+.g-pe-cols a,.g-pe-cols span{ display:block; color:rgba(255,255,255,.86); text-decoration:none; font-size:16.5px; line-height:1.45; padding:5px 0 }
+.g-pe-cols a:hover{ color:var(--areia) }
+.g-pe-linha{
+  margin-top:clamp(40px,6vw,72px); padding-top:22px; border-top:1px solid rgba(255,255,255,.12);
+  display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px 24px;
+  font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5);
+}
+.g-pe-linha a{ color:inherit; text-decoration:none } .g-pe-linha a:hover{ color:var(--areia) }
+.g-pe::before{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:300px 300px;
+}
+
+/* ---- as vagas passam a ser discretas: quadro fino, sem listra gritante ------ */
+.vaga{ background:var(--papel2) }
+.casa-escuro .vaga{ background:rgba(255,255,255,.04) }
+
+/* ---- o letreiro: sem a máscara que vazava o papel nas pontas do escuro ------- */
+.letreiro.escuro{ -webkit-mask-image:none; mask-image:none }
+
+/* ---- revelação dos elementos do sistema editorial --------------------------- */
+.js-rev .rev :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
+  opacity:0; transform:translateY(16px); transition:opacity var(--t-lento),transform var(--t-lento);
+}
+.js-rev .rev.visto :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
+  opacity:1; transform:none;
+}
+.js-rev .rev.visto .g-h3{ transition-delay:80ms }
+.js-rev .rev.visto .g-ed{ transition-delay:200ms }
+.js-rev .rev.visto .g-corpo{ transition-delay:280ms }
+.js-rev .rev.visto .g-acoes{ transition-delay:360ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(1){ transition-delay:120ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(2){ transition-delay:210ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(3){ transition-delay:300ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(4){ transition-delay:390ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(n+5){ transition-delay:480ms }
+.js-rev .rev .g-foto{ clip-path:inset(0 0 100% 0); transition:clip-path .9s var(--ease) }
+.js-rev .rev.visto .g-foto{ clip-path:inset(0 0 0 0); transition-delay:120ms }
+.js-rev .rev .g-cheio > img{ transform:scale(1.06); transition:transform 1.6s var(--ease) }
+.js-rev .rev.visto .g-cheio > img{ transform:scale(1) }
+.js-rev .g-h1 .pal,.js-rev .g-h2 .pal{ display:inline-block; opacity:0; transform:translateY(.28em); filter:blur(6px); transition:opacity var(--t-lento),transform var(--t-lento),filter var(--t-lento); transition-delay:calc(var(--i,0) * 55ms + 60ms) }
+.js-rev .visto .g-h1 .pal,.js-rev .visto .g-h2 .pal{ opacity:1; transform:none; filter:blur(0) }
+
+/* o h3 global é do app interno (caixa alta, chevron antes). Nas páginas
+   públicas o h3 é título de pergunta e de bloco: caixa baixa, sem sinal. */
+.g-perg-q,.g-h3,.g-tile-t{ text-transform:none; letter-spacing:-.02em; display:block; color:inherit; margin:0 }
+.g-perg-q::before,.g-h3::before,.g-tile-t::before{ content:none }
+/* a marca no rodapé, em tamanho de rodapé: o inline style do <Logo> fixa 1em */
+.g-pe-marca .logo{ height:auto !important; width:100% !important; max-width:520px }
+/* o chevron do "de → para" precisa ter cor de tinta onde o fundo é areia ou papel */
+.casa-areia .g-vira-chev,.casa-papel .g-vira-chev{ color:var(--areia-tinta) }
+/* o selo e a moldura de foto no sistema: o mesmo nome não pode colidir com o
+   `.topo` e o `.g` do app interno. `.g` é novo; conferido que não existia. */
