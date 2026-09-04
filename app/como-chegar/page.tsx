@@ -63,7 +63,7 @@ export default function ComoChegar() {
         }],
       }} />
 
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">Onde fica</p>
           <Tit as="h1" className="tit">Como chegar na GUIA Church</Tit>
@@ -109,7 +109,7 @@ export default function ComoChegar() {
       </section>
 
       {/* ------------------------------------------------------------ logística */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Chegando</p>
           <Tit>De carro, de aplicativo, a pé</Tit>
@@ -144,7 +144,7 @@ export default function ComoChegar() {
         </div>
       </section>
 
-      <section className="faixa casa-areia">
+      <section className="faixa casa-areia rev">
         <div className="casa-col">
           <Tit>Antes de vir, se quiser</Tit>
           <p className="corpo">

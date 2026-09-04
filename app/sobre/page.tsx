@@ -67,7 +67,7 @@ export default function Sobre() {
       }} />
 
       {/* --------------------------------------------- abertura, de quem chega */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">A igreja</p>
           <Tit as="h1" className="tit">Quem somos</Tit>
@@ -88,7 +88,7 @@ export default function Sobre() {
       </section>
 
       {/* ---------------------------------------------------------- a sigla */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">O nome</p>
           <Tit>Somos GUIA</Tit>
@@ -129,7 +129,7 @@ export default function Sobre() {
       </section>
 
       {/* -------------------------------------------------------- os pilares */}
-      <section className="faixa casa-areia">
+      <section className="faixa casa-areia rev">
         <div className="casa-col">
           <p className="indice">Nossos pilares</p>
           <Tit>Relacionamento, generosidade e serviço</Tit>
@@ -154,7 +154,7 @@ export default function Sobre() {
       </section>
 
       {/* ----------------------------------------------------------- o alvo */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Nosso alvo</p>
           <Tit>Plantar cada cristão no solo da responsabilidade do Reino</Tit>
@@ -183,7 +183,7 @@ export default function Sobre() {
           "Evangelista" (regra fixa do canal) é decisão em aberto, e um título
           publicado é mais caro de corrigir do que de esperar. Quando decidir,
           o nome e o papel entram embaixo desta foto. */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">Quem conduz</p>
           <Tit>A liderança</Tit>
@@ -194,7 +194,7 @@ export default function Sobre() {
       </section>
 
       {/* ------------------------------------------------- onde isso vira prática */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">Na prática</p>
           <Tit>Isso tem dois endereços na semana</Tit>

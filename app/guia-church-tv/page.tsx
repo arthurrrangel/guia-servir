@@ -64,7 +64,7 @@ export default function TV() {
         }} />
       )}
 
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Guia Church TV</p>
           <Tit as="h1" className="tit">A mensagem de domingo</Tit>
@@ -93,7 +93,7 @@ export default function TV() {
       </section>
 
       {!canal && (
-        <section className="faixa casa-papel">
+        <section className="faixa casa-papel rev">
           <div className="casa-col">
             <p className="indice">Onde assistir hoje</p>
             <Tit>Enquanto o canal se organiza</Tit>
@@ -113,7 +113,7 @@ export default function TV() {
         </section>
       )}
 
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <Tit>Ouviu alguma coisa que ficou</Tit>
           <p className="corpo">

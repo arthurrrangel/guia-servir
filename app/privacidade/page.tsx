@@ -42,7 +42,7 @@ const CONTATO = canalDeConversa('Oi! É sobre os meus dados no site da GUIA.');
 export default function Privacidade() {
   return (
     <Site>
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">LGPD</p>
           <Tit as="h1" className="tit">Privacidade</Tit>
@@ -56,7 +56,7 @@ export default function Privacidade() {
       </section>
 
       {/* --------------------------------------------------------- o que coleta */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">01</p>
           <Tit>O que é coletado, e só quando você digita</Tit>
@@ -97,7 +97,7 @@ export default function Privacidade() {
       </section>
 
       {/* ------------------------------------------------------- o link pessoal */}
-      <section className="faixa casa-areia">
+      <section className="faixa casa-areia rev">
         <div className="casa-col">
           <p className="indice">02</p>
           <Tit>O seu link pessoal é um dado, e é tratado como tal</Tit>
@@ -140,7 +140,7 @@ export default function Privacidade() {
       </section>
 
       {/* -------------------------------------------------------- quem acessa */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">03</p>
           <Tit>Quem tem acesso, e onde os dados ficam</Tit>
@@ -183,7 +183,7 @@ export default function Privacidade() {
       </section>
 
       {/* ------------------------------------------------------- seus direitos */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">04</p>
           <Tit>O que você pode pedir, e como</Tit>
@@ -206,7 +206,7 @@ export default function Privacidade() {
         </div>
       </section>
 
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Controladora</p>
           <Tit>Quem responde por isso</Tit>

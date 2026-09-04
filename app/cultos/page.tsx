@@ -6,6 +6,7 @@ import { IcSeta } from '@/components/Icones';
 import { IGREJA, ENDERECO_LINHA, SITE } from '@/lib/igreja';
 import { Vaga, Vagas } from '@/components/Vaga';
 import { FOTOS } from '@/lib/imagens';
+import { Letreiro } from '@/components/Letreiro';
 
 /* =============================================================================
    /cultos — A PÁGINA QUE TIRA ALGUÉM DE CASA
@@ -108,7 +109,7 @@ export default function Cultos() {
       }} />
 
       {/* ------------------------------------------------------------ abertura */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">O domingo</p>
           <Tit as="h1" className="tit">Culto aos domingos, às 10h, na Barra da Tijuca</Tit>
@@ -126,8 +127,10 @@ export default function Cultos() {
         </div>
       </section>
 
+      <Letreiro escuro />
+
       {/* ---------------------------------------------------- como é um domingo */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Na prática</p>
           <Tit>Como é um domingo aqui</Tit>
@@ -155,7 +158,7 @@ export default function Cultos() {
           Na faixa de AREIA, e não no papel: é aqui que a página deixa de
           informar e passa a acolher. A cor marca essa virada melhor do que
           qualquer título faria. */}
-      <section className="faixa casa-areia">
+      <section className="faixa casa-areia rev">
         <div className="casa-col">
           <p className="indice">Primeira vez</p>
           <Tit>As cinco perguntas de quem nunca foi</Tit>
@@ -187,7 +190,7 @@ export default function Cultos() {
       </section>
 
       {/* ---------------------------------------------------------------- kids */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Crianças</p>
           <Tit>GUIA Kids</Tit>
@@ -206,7 +209,7 @@ export default function Cultos() {
       </section>
 
       {/* --------------------------------------------------------------- fecho */}
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <Tit>Te esperamos domingo</Tit>
           <p className="corpo">{ENDERECO_LINHA}</p>

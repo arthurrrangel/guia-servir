@@ -68,7 +68,7 @@ export default function PequenaGuia() {
         },
       }} />
 
-      <section className="faixa casa-papel">
+      <section className="faixa casa-papel rev">
         <div className="casa-col">
           <p className="indice">Durante a semana</p>
           <Tit as="h1" className="tit">Grupos da GUIA Church na Barra da Tijuca</Tit>
@@ -90,7 +90,7 @@ export default function PequenaGuia() {
       </section>
 
       {/* --------------------------------------------------- como é um encontro */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Na prática</p>
           <Tit>Como é um encontro</Tit>
@@ -117,7 +117,7 @@ export default function PequenaGuia() {
       </section>
 
       {/* ------------------------------------------------------------ perguntas */}
-      <section className="faixa casa-areia">
+      <section className="faixa casa-areia rev">
         <div className="casa-col">
           <p className="indice">Antes de perguntar</p>
           <Tit>O que costuma travar</Tit>
@@ -148,7 +148,7 @@ export default function PequenaGuia() {
       </section>
 
       {/* -------------------------------------------------------- a conversa */}
-      <section className="faixa casa-escuro">
+      <section className="faixa casa-escuro rev">
         <div className="casa-col">
           <p className="indice">Achar o seu</p>
           <Tit>Diga onde você mora, a gente diz qual fica perto</Tit>

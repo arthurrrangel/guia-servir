@@ -4532,3 +4532,201 @@ html{ scroll-padding-top:88px }
 .vagas{ display:grid; gap:var(--e3); grid-template-columns:1fr; margin-top:var(--e5) }
 @media(min-width:720px){ .vagas.tres{ grid-template-columns:repeat(3,1fr) } }
 @media(min-width:720px){ .vagas.duas{ grid-template-columns:repeat(2,1fr) } }
+
+/* ==========================================================================
+   O NÍVEL — movimento, textura e resposta nas páginas públicas
+   (04/09/2026)
+
+   Tudo aqui obedece a uma frase: ACRESCENTA TEMPO E RESPOSTA, NUNCA FORMA.
+   Nenhuma regra abaixo põe canto, sombra, gradiente de cor ou vidro. O que
+   ela põe é ordem de entrada, reação ao ponteiro, textura de filme e uma
+   faixa que anda. A identidade GUI> continua quadrada, reta e monocromática
+   — só passa a se mover como um site de produto se move.
+
+   E tudo morre inteiro em prefers-reduced-motion. Nada disto é necessário
+   para ler.
+   ========================================================================== */
+
+/* ---- rolagem e quebra de texto ------------------------------------------ */
+html{ scroll-behavior:smooth }
+@media(prefers-reduced-motion:reduce){ html{ scroll-behavior:auto } }
+.tit,.casa-heroi h1,.cabeca h1{ text-wrap:balance }
+.corpo,.casa-perguntas dd,.casa-dados dd,.escolha-desc,.casa-tira-nota,.vaga-txt{ text-wrap:pretty }
+
+/* ---- pular para o conteúdo: acessibilidade É acabamento ------------------ */
+.pular{
+  position:fixed; top:-100px; left:16px; z-index:100;
+  padding:12px 18px; background:var(--noite); color:#fff;
+  font-family:var(--fonte-display); font-weight:var(--p-rot);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+  text-decoration:none; transition:top var(--t);
+}
+.pular:focus-visible{ top:16px; outline:2px solid var(--areia); outline-offset:2px }
+
+/* ---- a barra: vidro FUNCIONAL, não decorativo ----------------------------
+   Um desfoque atrás da barra é o único "glass" que entra, e entra porque tem
+   função: a barra fica fixa, o conteúdo passa por baixo, e sem o desfoque o
+   texto de trás compete com o menu. Vercel usa exatamente isto num sistema
+   tão reto quanto o nosso. */
+.casa-barra.opaco{
+  background:rgba(250,254,255,.78);
+  -webkit-backdrop-filter:saturate(1.4) blur(14px);
+  backdrop-filter:saturate(1.4) blur(14px);
+}
+
+/* ---- revelação: a palavra entra do desfoque, o bloco entra de baixo ------
+   A palavra ganha um blur de 6px que dissolve junto com a subida. Só na
+   palavra (span pequeno), nunca na seção inteira: filter sobre uma faixa com
+   foto é o que faz Android médio engasgar. */
+.js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{ filter:blur(6px) }
+.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,
+.js-rev .tit.visto .pal,.js-rev h1.visto .pal{ filter:blur(0) }
+.js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{
+  transition:opacity var(--t-lento),transform var(--t-lento),filter var(--t-lento);
+}
+/* os filhos de uma faixa entram em escada, sem precisar de --i no HTML */
+.js-rev .rev .indice,.js-rev .rev .chapeu,.js-rev .rev .corpo,.js-rev .rev .editorial,
+.js-rev .rev .acoes,.js-rev .rev .casa-hora,.js-rev .rev .casa-tira,.js-rev .rev .casa-tira-nota,
+.js-rev .rev .casa-perguntas > div,.js-rev .rev .casa-dados > div,.js-rev .rev .escolha,
+.js-rev .rev .vagas > *,.js-rev .rev .sigla > div,.js-rev .rev .pilares > div,.js-rev .rev .alvo > div{
+  opacity:0; transform:translateY(14px);
+  transition:opacity var(--t-lento),transform var(--t-lento);
+}
+.js-rev .rev.visto .indice,.js-rev .rev.visto .chapeu,.js-rev .rev.visto .corpo,.js-rev .rev.visto .editorial,
+.js-rev .rev.visto .acoes,.js-rev .rev.visto .casa-hora,.js-rev .rev.visto .casa-tira,.js-rev .rev.visto .casa-tira-nota,
+.js-rev .rev.visto .casa-perguntas > div,.js-rev .rev.visto .casa-dados > div,.js-rev .rev.visto .escolha,
+.js-rev .rev.visto .vagas > *,.js-rev .rev.visto .sigla > div,.js-rev .rev.visto .pilares > div,.js-rev .rev.visto .alvo > div{
+  opacity:1; transform:none;
+}
+.js-rev .rev.visto .indice{ transition-delay:40ms }
+.js-rev .rev.visto .chapeu{ transition-delay:180ms }
+.js-rev .rev.visto .editorial{ transition-delay:220ms }
+.js-rev .rev.visto .corpo{ transition-delay:260ms }
+.js-rev .rev.visto .casa-hora{ transition-delay:240ms }
+.js-rev .rev.visto .acoes{ transition-delay:340ms }
+.js-rev .rev.visto .casa-tira{ transition-delay:200ms }
+.js-rev .rev.visto .casa-tira-nota{ transition-delay:320ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(1){ transition-delay:120ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(2){ transition-delay:200ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(3){ transition-delay:280ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(4){ transition-delay:360ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(5){ transition-delay:440ms }
+.js-rev .rev.visto :is(.casa-perguntas,.casa-dados,.sigla,.pilares,.alvo,.vagas) > :nth-child(n+6){ transition-delay:520ms }
+.js-rev .rev.visto .escolha:nth-child(1){ transition-delay:120ms }
+.js-rev .rev.visto .escolha:nth-child(2){ transition-delay:220ms }
+.js-rev .rev.visto .escolha:nth-child(3){ transition-delay:320ms }
+.nao-anima .rev *,.nao-anima .rev{ opacity:1!important; transform:none!important; transition:none!important; filter:none!important }
+@media(prefers-reduced-motion:reduce){
+  .js-rev .rev *{ opacity:1!important; transform:none!important; transition:none!important; filter:none!important }
+}
+
+/* ---- o herói respira ------------------------------------------------------
+   A foto cresce 6% em 16 segundos, uma vez. É o efeito mais antigo do cinema
+   (Ken Burns) e o que faz uma foto parada parecer viva. Ninguém percebe que
+   aconteceu; todo mundo percebe quando não acontece. */
+@keyframes respira{ from{ transform:scale(1) } to{ transform:scale(1.06) } }
+.casa-heroi-foto{ animation:respira 16s var(--ease) forwards; will-change:transform }
+@media(prefers-reduced-motion:reduce){ .casa-heroi-foto{ animation:none } }
+
+/* ---- o herói recua conforme você rola ------------------------------------
+   Guiado pelo scroll, em CSS puro, sem um byte de JS: o bloco de texto sobe
+   e desaparece nos primeiros 70% da altura da janela, e a foto escurece.
+   Chrome, Edge e Safari 26 entendem; Firefox ignora o bloco inteiro e a
+   página fica exatamente como era. É a forma certa de usar uma coisa nova. */
+@supports (animation-timeline: scroll()){
+  @keyframes heroi-recua{ to{ opacity:0; transform:translateY(-36px) scale(.97) } }
+  @keyframes heroi-escurece{ to{ background-color:rgba(37,37,37,.82) } }
+  .casa-heroi-in,.casa-regua{
+    animation:heroi-recua linear both; animation-timeline:scroll(root); animation-range:0 70vh;
+  }
+  .casa-heroi::after{
+    animation:heroi-escurece linear both; animation-timeline:scroll(root); animation-range:0 90vh;
+  }
+  @media(prefers-reduced-motion:reduce){
+    .casa-heroi-in,.casa-regua,.casa-heroi::after{ animation:none }
+  }
+}
+
+/* ---- grão de filme no preto ------------------------------------------------
+   A logo tem granulação de filme — está na descrição da identidade, linha
+   um. O bloco preto do site era chapado. Uma textura de ruído a 4,5%, em
+   overlay, sem cor, faz o preto parecer material em vez de vazio. Estático:
+   custa uma imagem SVG de 300px repetida, e nada por quadro. */
+.casa-escuro,.casa-foto{ position:relative; isolation:isolate }
+.casa-escuro::before,.casa-foto::before,.casa-heroi::before{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  opacity:.045; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:300px 300px;
+}
+.casa-heroi::before{ z-index:-1; opacity:.06 }
+
+/* ---- o foco de luz que segue o ponteiro no preto ----------------------------
+   Cor de areia, 7% no centro, some em 60% do raio. Aparece só com o ponteiro
+   em cima (opacity via :hover) e só onde há ponteiro fino — o JS em
+   components/Movimento.tsx escreve --mx e --my; sem ele, fica no centro e
+   nunca acende. */
+.casa-escuro::after,.casa-foto::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:radial-gradient(640px circle at var(--mx,50%) var(--my,50%),rgba(228,212,180,.075),transparent 62%);
+  opacity:0; transition:opacity .5s var(--ease);
+}
+/* .casa-foto já tinha um ::after escurecendo a foto; o foco de luz entra
+   por cima dele sem apagá-lo */
+.casa-foto::after{
+  background:
+    radial-gradient(640px circle at var(--mx,50%) var(--my,50%),rgba(228,212,180,.075),transparent 62%),
+    rgba(7,7,8,.62);
+  opacity:1;
+}
+@media(pointer:fine){
+  .casa-escuro:hover::after{ opacity:1 }
+}
+@media(prefers-reduced-motion:reduce){ .casa-escuro::after{ display:none } }
+
+/* ---- o ímã e a pressão ---------------------------------------------------
+   --ix/--iy vêm do JS (só ponteiro fino). O botão se inclina em direção ao
+   ponteiro e volta com a mesma curva do sistema. A pressão (active) encolhe
+   1,5% — a confirmação tátil de que o clique foi. */
+.acao{ transform:translate(var(--ix,0),var(--iy,0)); transition:background var(--t),color var(--t),border-color var(--t),opacity var(--t),transform 220ms var(--ease) }
+.acao:active,.bt-barra:active,.escolha:active{ transform:scale(.985) }
+.escolha{ transition:background var(--t),transform var(--t) }
+.escolha:hover .escolha-fim{ transform:translateX(4px) }
+.escolha-fim{ transition:transform var(--t) }
+.casa-area:hover .casa-area-nome,.casa-area:active .casa-area-nome{ transform:translateY(-3px) }
+.casa-area-nome{ transition:transform var(--t-lento) }
+
+/* ---- o letreiro -------------------------------------------------------- */
+.letreiro{
+  overflow:hidden; white-space:nowrap; border-top:1px solid var(--linha); border-bottom:1px solid var(--linha);
+  background:var(--papel); color:var(--mudo);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+.letreiro.escuro{ background:var(--noite); color:rgba(228,212,180,.72); border-color:rgba(255,255,255,.10) }
+.letreiro-trilho{ display:inline-flex; width:max-content; animation:letreiro 52s linear infinite }
+.letreiro:hover .letreiro-trilho{ animation-play-state:paused }
+.letreiro-faixa{ display:inline-flex; align-items:center }
+.letreiro-item{
+  display:inline-flex; align-items:center; gap:var(--e5); padding:18px 0 18px var(--e5);
+  font-family:var(--fonte-display); font-weight:var(--p-rot);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+}
+.letreiro-chev{ display:inline-flex; font-size:10px; opacity:.55 }
+@keyframes letreiro{ to{ transform:translateX(-50%) } }
+@media(prefers-reduced-motion:reduce){
+  .letreiro-trilho{ animation:none }
+  .letreiro{ -webkit-mask-image:none; mask-image:none }
+}
+
+/* ---- as áreas em bento: a primeira ocupa duas colunas ----------------------
+   Grade suíça de quadrados com 4px de vão, e a primeira área maior. É o
+   "bento" dos sites de produto sem nenhum canto: o que muda é o ritmo, não a
+   forma. Só a partir de 820px — no celular é uma coluna, como sempre foi. */
+@media(min-width:820px){
+  .casa-areas > .casa-area:first-child{ grid-column:span 2 }
+}
+
+/* ---- as vagas de imagem entram por corte, como as fotos ------------------- */
+.js-rev .vaga.corte{ clip-path:inset(0 0 100% 0); transition:clip-path var(--t-lento) }
+.js-rev .visto .vaga.corte{ clip-path:inset(0 0 0 0) }

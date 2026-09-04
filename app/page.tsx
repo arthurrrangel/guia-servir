@@ -6,6 +6,9 @@ import { IcSeta } from '@/components/Icones';
 import { Logo, Chevron } from '@/components/Marca';
 import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
+import Movimento from '@/components/Movimento';
+import Contador from '@/components/Contador';
+import { Letreiro } from '@/components/Letreiro';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 
 /* =============================================================================
@@ -225,7 +228,10 @@ export default function Casa() {
   }, [menu]);
 
   return (
-    <div ref={raiz}>
+    <div ref={raiz} data-movimento>
+      {/* a home tem a própria revelação (com parallax); daqui só entram o
+          foco de luz no preto e o ímã do botão principal */}
+      <Movimento semRevelar />
       {/* A ENTIDADE. É aqui que o custo do nome do domínio é pago.
           O endereço diz "guiaservir"; o que o Google lê como identidade é
           este bloco — name, endereço, horário e os perfis oficiais. Domínio
@@ -327,14 +333,16 @@ export default function Casa() {
         </div>
       </section>
 
+      <Letreiro />
+
       {/* --------------------------------------------- prova: sai do banco */}
       {num && (
         <section className="faixa casa-escuro rev" aria-label="A igreja em números">
           <div className="casa-numeros">
-            <div><b>{num.pessoas}</b><span>pessoas servindo hoje</span></div>
-            <div><b>{num.ministerios}</b><span>áreas abertas</span></div>
-            <div><b>{num.postos}</b><span>funções diferentes</span></div>
-            <div><b>{num.cultos_no_mes}</b><span>encontros neste mês</span></div>
+            <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo hoje</span></div>
+            <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
+            <div><b><Contador n={num.postos} /></b><span>funções diferentes</span></div>
+            <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
           </div>
         </section>
       )}

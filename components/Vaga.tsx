@@ -26,7 +26,7 @@ export function Vaga({ foto, className = '' }: { foto: Foto; className?: string 
 
   return (
     <figure
-      className={`vaga ${className}`}
+      className={`vaga corte ${className}`}
       style={{ aspectRatio: foto.proporcao, margin: 0 }}
     >
       {pronta ? (

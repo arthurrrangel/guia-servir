@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from './Marca';
 import { IGREJA, ENDERECO_LINHA } from '@/lib/igreja';
+import Movimento from './Movimento';
 
 /* =============================================================================
    O CASCO DAS PÁGINAS PÚBLICAS
@@ -123,14 +124,18 @@ export function Rodape() {
    próprias faixas, e faixa precisa sangrar de ponta a ponta. */
 export function Site({ atual, children }: { atual?: string; children: React.ReactNode }) {
   return (
-    <>
+    <div data-movimento>
+      {/* o primeiro item focável da página. Quem navega por teclado pula a
+          barra inteira com um Tab e um Enter. Invisível até receber foco. */}
+      <a href="#conteudo" className="pular">Pular para o conteúdo</a>
+      <Movimento />
       <Barra atual={atual} />
       {/* a regra global de `main` é do app interno: largura travada em 1180 e
           padding lateral. Aqui as faixas precisam sangrar de ponta a ponta,
           então a regra é desfeita nesta instância — não no CSS, que continua
           valendo para todas as telas do sistema. */}
-      <main style={{ maxWidth: 'none', margin: 0, padding: '78px 0 0' }}>{children}</main>
+      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: '78px 0 0' }}>{children}</main>
       <Rodape />
-    </>
+    </div>
   );
 }
