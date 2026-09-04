@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
-import { Perguntas } from '@/components/Perguntas';
+import ProximoCulto from '@/components/ProximoCulto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE } from '@/lib/igreja';
 
@@ -20,13 +20,20 @@ import { IGREJA, SITE } from '@/lib/igreja';
    que cabe numa tela sem virar parede de texto.
    ============================================================================= */
 
+/* A FICHA DO DOMINGO: os fatos de quem nunca foi, em rótulo + valor + uma
+   linha. É a mesma informação das antigas "cinco perguntas", sem a prosa. */
 const PERGUNTAS = [
-  { q: 'Como eu me visto?',
-    r: 'Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.' },
-  { q: 'Vou ter que falar alguma coisa?',
-    r: 'Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.' },
-  { q: 'E o meu filho?',
-    r: 'Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.' },
+  { q: 'Como eu me visto?', r: 'Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.' },
+  { q: 'Vou ter que falar alguma coisa?', r: 'Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.' },
+  { q: 'E o meu filho?', r: 'Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.' },
+];
+const FICHA = [
+  { r: 'Quando', v: 'Domingo, 10h', d: 'Toda semana, no mesmo horário.' },
+  { r: 'Onde', v: IGREJA.rua, d: `${IGREJA.bairro}, ${IGREJA.cidade}.`, href: '/como-chegar' },
+  { r: 'Crianças', v: 'GUIA Kids', d: 'Sala e equipe próprias, por faixa etária. Check-in na entrada.' },
+  { r: 'Roupa', v: 'A que você já usa', d: 'Tem gente de terno e gente de chinelo na mesma fileira.' },
+  { r: 'Participação', v: 'Nenhuma obrigatória', d: 'Ficar sentado é uma resposta perfeitamente boa.' },
+  { r: 'Estacionamento', v: 'Com equipe', d: 'Chegue com dez minutos de folga se vier dirigindo.' },
 ];
 
 const PASSOS = [
@@ -64,9 +71,9 @@ export default function Cultos() {
       <section className="g-cheio alta centro rev">
         <img src="/fotos/equipe.webp" alt="Momento de louvor no culto de domingo da GUIA Church" fetchPriority="high" />
         <div className="g">
-          <p className="g-rot">O domingo</p>
-          <Tit as="h1" className="g-h1">Domingo, às 10h</Tit>
-          <p className="g-ed">Na Barra da Tijuca. Chega a hora que der.</p>
+          <p className="g-rot"><ProximoCulto /></p>
+          <Tit as="h1" className="g-h1">Culto de domingo</Tit>
+          <p className="g-ed">Às 10h, na Barra da Tijuca.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
             <Link href="/sobre" className="acao">Quem somos</Link>
@@ -75,7 +82,7 @@ export default function Cultos() {
       </section>
 
       {/* ------------------------------------------------- a ordem do culto */}
-      <section className="casa-escuro rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">Na prática</p>
@@ -94,16 +101,24 @@ export default function Cultos() {
         </div>
       </section>
 
-      {/* ------------------------------------------------ as três perguntas */}
+      {/* ------------------------------------------------- a ficha do domingo */}
       <section className="casa-areia rev">
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">Primeira vez</p>
-            <Tit className="g-h2">O que costuma travar</Tit>
-            <p className="g-ed">Nenhuma delas é sobre doutrina.</p>
+            <Tit className="g-h2">O que você precisa saber</Tit>
+            <p className="g-ed">Seis coisas, nenhuma sobre doutrina.</p>
           </div>
-          <div className="c-media c-bloco grande">
-            <Perguntas itens={PERGUNTAS} />
+          <div className="ficha c-bloco grande">
+            {FICHA.map(f => (
+              <div key={f.r}>
+                <p className="ficha-r">{f.r}</p>
+                {f.href
+                  ? <Link href={f.href} className="ficha-v">{f.v} <IcSeta /></Link>
+                  : <p className="ficha-v">{f.v}</p>}
+                <p className="ficha-d">{f.d}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
-import { Tit, Schema } from '@/components/Texto';
-import { Perguntas } from '@/components/Perguntas';
+import { Tit, Schema, Luz } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE } from '@/lib/igreja';
@@ -58,7 +57,7 @@ export default function Sobre() {
       </section>
 
       {/* -------------------------------------------------------------- a sigla */}
-      <section className="casa-escuro rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">O nome</p>
@@ -79,9 +78,7 @@ export default function Sobre() {
         <img src="/fotos/palavra.webp" alt="" loading="lazy" decoding="async" />
         <div className="g">
           <blockquote className="g-ed" style={{ margin: '0 auto', fontSize: 'clamp(26px,3.8vw,56px)', color: '#fff', maxWidth: '26ch' }}>
-            Eis que o povo é um, e todos têm uma mesma língua; e isto é o que
-            começam a fazer; e, agora, não haverá restrição para tudo o que
-            eles intentarem fazer.
+            <Luz>Eis que o povo é um, e todos têm uma mesma língua; e isto é o que começam a fazer; e, agora, não haverá restrição para tudo o que eles intentarem fazer.</Luz>
           </blockquote>
           <p className="g-rot" style={{ marginTop: 28, marginBottom: 0 }}>Gênesis 11:6</p>
         </div>
@@ -94,8 +91,14 @@ export default function Sobre() {
             <p className="g-rot">Nossos pilares</p>
             <Tit className="g-h2">Relacionamento, generosidade e serviço</Tit>
           </div>
-          <div className="c-media c-bloco grande">
-            <Perguntas itens={PILARES} />
+          <div className="cartoes c-bloco grande">
+            {PILARES.map((p, i) => (
+              <div key={p.q} className="cartao">
+                <span className="cartao-n">0{i + 1}</span>
+                <h3 className="cartao-t">{p.q}</h3>
+                <p className="cartao-d">{p.r}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

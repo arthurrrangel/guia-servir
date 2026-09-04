@@ -47,3 +47,18 @@ export function Schema({ dados }: { dados: Record<string, unknown> }) {
     />
   );
 }
+
+/* AS PALAVRAS QUE ACENDEM COM A ROLAGEM. Cada palavra é um span; o CSS
+   (.luz .pal) liga a opacidade à posição na tela com animation-timeline:
+   view() — sem JavaScript, e onde o navegador não sabe fazer isso as
+   palavras nascem acesas. É o versículo de /sobre. */
+export function Luz({ children, className = '' }: { children: string; className?: string }) {
+  const pals = children.split(' ');
+  return (
+    <span className={'luz ' + className}>
+      {pals.map((p, i) => (
+        <span key={i}><span className="lz">{p}</span>{i < pals.length - 1 ? ' ' : ''}</span>
+      ))}
+    </span>
+  );
+}

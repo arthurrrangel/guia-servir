@@ -11,6 +11,9 @@ import { Rodape } from '@/components/Site';
 import Contador from '@/components/Contador';
 import { Letreiro } from '@/components/Letreiro';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
+import ProximoCulto from '@/components/ProximoCulto';
+import Abertura from '@/components/Abertura';
+import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 
 /* =============================================================================
    A HOME
@@ -237,6 +240,7 @@ export default function Casa() {
       {/* a home tem a própria revelação (com parallax); daqui só entram o
           foco de luz no preto e o ímã do botão principal */}
       <Movimento semRevelar />
+      <Abertura />
       {/* A ENTIDADE. É aqui que o custo do nome do domínio é pago.
           O endereço diz "guiaservir"; o que o Google lê como identidade é
           este bloco — name, endereço, horário e os perfis oficiais. Domínio
@@ -324,7 +328,7 @@ export default function Casa() {
         <div className="casa-heroi-in">
           <p className="g-rot" style={{ justifyContent: 'center', color: 'rgba(255,255,255,.62)' }}>GUIA Church · Barra da Tijuca</p>
           <Tit as="h1" className="">Existe um lugar para você</Tit>
-          <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>Domingo, dez da manhã.</p>
+          <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>{IGREJA.frase}.</p>
           <div className="acoes">
             <Link href="/cultos" className="acao cheia">Quero conhecer</Link>
             <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
@@ -338,6 +342,28 @@ export default function Casa() {
       </section>
 
       <Letreiro />
+
+      {/* ------------------------------------------ os três fatos, estruturados
+          O que a pessoa procura num site de igreja em três segundos: quando é
+          o próximo culto (data de verdade, calculada no aparelho), onde fica,
+          e o que existe durante a semana. Cada um é uma porta. */}
+      <section className="fatos rev visto" aria-label="O essencial">
+        <Link href="/cultos" className="fato">
+          <span className="fato-r">Próximo culto</span>
+          <span className="fato-v"><ProximoCulto /><IcSeta /></span>
+          <span className="fato-d">Chega a hora que der. Tem alguém na porta.</span>
+        </Link>
+        <Link href="/como-chegar" className="fato">
+          <span className="fato-r">Onde</span>
+          <span className="fato-v">{IGREJA.rua}<IcSeta /></span>
+          <span className="fato-d">{IGREJA.bairro}, {IGREJA.cidade}. Estacionamento com equipe.</span>
+        </Link>
+        <Link href="/pequena-guia" className="fato">
+          <span className="fato-r">Durante a semana</span>
+          <span className="fato-v">{PEQUENAS_GUIAS.length} Pequenas Guias<IcSeta /></span>
+          <span className="fato-d">Grupos de terça a quinta, perto de onde você mora.</span>
+        </Link>
+      </section>
 
       {/* --------------------------------------------- prova: sai do banco
           A única prova concreta da página, em quatro números. */}
@@ -365,8 +391,8 @@ export default function Casa() {
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">01 · O domingo</p>
-            <Tit className="g-h2">Chega a hora que der</Tit>
-            <p className="g-ed">Ninguém vai reparar.</p>
+            <Tit className="g-h2">Como é o domingo</Tit>
+            <p className="g-ed">Louvor, palavra e acolhida.</p>
             <div className="g-acoes">
               <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
               <Link href="/como-chegar" className="acao">Como chegar</Link>

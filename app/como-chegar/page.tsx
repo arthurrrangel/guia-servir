@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
-import { Perguntas } from '@/components/Perguntas';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
 
@@ -19,13 +18,17 @@ import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
    navegador e sair de casa.
    ============================================================================= */
 
+/* TRÊS MODOS DE CHEGAR, em cartões iguais. A mesma informação das antigas
+   perguntas, organizada pelo jeito que a pessoa vem. */
+const MODOS = [
+  { n: '01', t: 'De carro', d: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga.' },
+  { n: '02', t: 'De aplicativo', d: `Destino: ${IGREJA.rua}, ${IGREJA.bairro}. O carro para em frente à porta.` },
+  { n: '03', t: 'Chegando', d: 'Tem equipe de acolhida na porta antes do horário. Pode dizer que é a primeira vez.' },
+];
 const PERGUNTAS = [
-  { q: 'Onde eu deixo o carro?',
-    r: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo.' },
-  { q: 'Vou de aplicativo. Qual é o destino?',
-    r: `${IGREJA.rua}, ${IGREJA.bairro}. A porta é na própria Pedra de Itaúna, e o carro para em frente.` },
-  { q: 'É a primeira vez. Como eu sei que cheguei?',
-    r: 'Pela fachada da foto, e por alguém na porta: tem equipe de acolhida antes do horário. Pode dizer que é a primeira vez.' },
+  { q: 'Onde eu deixo o carro?', r: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo.' },
+  { q: 'Vou de aplicativo. Qual é o destino?', r: `${IGREJA.rua}, ${IGREJA.bairro}. O carro para em frente à porta.` },
+  { q: 'É a primeira vez. Como eu sei que cheguei?', r: 'Pela fachada da foto, e por alguém na porta: tem equipe de acolhida antes do horário.' },
 ];
 
 export const metadata: Metadata = {
@@ -87,15 +90,21 @@ export default function ComoChegar() {
       </section>
 
       {/* ------------------------------------------------------------ chegando */}
-      <section className="casa-escuro rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">Chegando</p>
             <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
             <p className="g-ed">Tem alguém na porta.</p>
           </div>
-          <div className="c-media c-bloco grande">
-            <Perguntas itens={PERGUNTAS} />
+          <div className="cartoes c-bloco grande">
+            {MODOS.map(m => (
+              <div key={m.n} className="cartao">
+                <span className="cartao-n">{m.n}</span>
+                <h3 className="cartao-t">{m.t}</h3>
+                <p className="cartao-d">{m.d}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

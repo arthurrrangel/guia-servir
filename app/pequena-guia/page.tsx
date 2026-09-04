@@ -5,7 +5,8 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
-import { PEQUENAS_GUIAS, mapaDaPequenaGuia, MAPA_REGIAO } from '@/lib/pequenas-guias';
+import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
+import { Grupos } from '@/components/Grupos';
 
 /* =============================================================================
    /pequena-guia — O GRUPO DA SEMANA
@@ -72,34 +73,7 @@ export default function PequenaGuia() {
           </div>
 
           {PEQUENAS_GUIAS.length ? (
-            <div className="pgs centro fila">
-              {PEQUENAS_GUIAS.map(pg => {
-                const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
-                return (
-                  <article key={pg.nome} className="pg">
-                    <div className="pg-mapa">
-                      {pg.online
-                        ? <div className="pg-online" aria-hidden="true"><span>{pg.online}</span></div>
-                        : <>
-                            <iframe src={mapaDaPequenaGuia(pg)} title={`Mapa: ${pg.nome}, ${pg.bairro}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-                            <span className="pg-mira" aria-hidden="true" />
-                          </>}
-                    </div>
-                    <div className="pg-corpo">
-                      <p className="g-rot">{pg.bairro}</p>
-                      <span className="pg-nome">{pg.nome}</span>
-                      <span className="pg-quando">{pg.dia}, {pg.hora}</span>
-                      {(pg.lideres || pg.publico) && (
-                        <span className="pg-nota">{[pg.lideres, pg.publico].filter(Boolean).join(' · ')}</span>
-                      )}
-                      <div className="g-acoes">
-                        <a href={conv.href} target="_blank" rel="noreferrer" className="acao cheia">Quero ir nessa <IcSeta /></a>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <Grupos />
           ) : (
             <div className="pg-regiao">
               <iframe src={MAPA_REGIAO} title={`Mapa: ${IGREJA.bairro} e arredores`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />

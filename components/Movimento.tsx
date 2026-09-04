@@ -96,6 +96,56 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
 
     if (parado || !fino) return () => desligar.forEach(f => f());
 
+    /* ------------------------------------------- 1b. profundidade na rolagem
+       As fotos de ponta a ponta (.g-cheio) e os blocos de foto (.g-foto)
+       andam devagar contra a rolagem: uns 40px de curso, num rAF só. É o que
+       dá a sensação de camadas. Só com ponteiro fino: no toque o custo não
+       compensa. */
+    const fotos = Array.from(raiz.querySelectorAll<HTMLElement>('.g-cheio > img, .g-foto > img'));
+    let rolando = false;
+    const profundidade = () => {
+      rolando = false;
+      const h = window.innerHeight;
+      for (const img of fotos) {
+        const r = (img.parentElement as HTMLElement).getBoundingClientRect();
+        if (r.bottom < -100 || r.top > h + 100) continue;
+        const k = (r.top + r.height / 2 - h / 2) / h;
+        img.style.setProperty('--prof', (k * -40).toFixed(1) + 'px');
+      }
+    };
+    const aoRolarProf = () => { if (!rolando) { rolando = true; requestAnimationFrame(profundidade); } };
+    if (fotos.length) {
+      profundidade();
+      window.addEventListener('scroll', aoRolarProf, { passive: true });
+      desligar.push(() => window.removeEventListener('scroll', aoRolarProf));
+    }
+
+    /* ------------------------------------------------- 1c. o anel do cursor
+       Um anel fino cor de areia segue o ponteiro com um atraso curto e
+       cresce sobre links e botões. O cursor do sistema continua lá — o anel
+       é acompanhamento, não substituto. */
+    const anel = document.createElement('div');
+    anel.className = 'anel'; anel.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(anel);
+    let ax = -100, ay = -100, mx = -100, my = -100, vivo = true;
+    const segue = () => {
+      if (!vivo) return;
+      ax += (mx - ax) * 0.18; ay += (my - ay) * 0.18;
+      anel.style.transform = `translate(${ax.toFixed(1)}px,${ay.toFixed(1)}px)`;
+      requestAnimationFrame(segue);
+    };
+    const aoMoverAnel = (ev: MouseEvent) => {
+      mx = ev.clientX; my = ev.clientY;
+      const alvo = (ev.target as HTMLElement | null)?.closest('a,button,summary,[role=button]');
+      anel.classList.toggle('sobre', !!alvo);
+      anel.classList.add('ver');
+    };
+    const aoSair = () => anel.classList.remove('ver');
+    document.addEventListener('mousemove', aoMoverAnel, { passive: true });
+    document.addEventListener('mouseleave', aoSair);
+    requestAnimationFrame(segue);
+    desligar.push(() => { vivo = false; document.removeEventListener('mousemove', aoMoverAnel); document.removeEventListener('mouseleave', aoSair); anel.remove(); });
+
     /* --------------------------------------- 2. o foco de luz no bloco preto
        Um círculo de luz cor de areia que acompanha o ponteiro sobre as faixas
        escuras. É a microinteração mais reconhecível dos sites de produto
