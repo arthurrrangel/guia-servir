@@ -5339,3 +5339,26 @@ html{ scroll-behavior:smooth }
 .g-pe-fato{ max-width:none }
 section[id]{ scroll-margin-top:84px }
 @media(max-width:899px){ .g-tile{ justify-content:flex-start } }
+
+/* =============================================================================
+   04/09 — O LOGOTIPO OFICIAL: símbolo + GUI> + CHURCH
+   A marca agora é o lockup inteiro (proporção 3,25:1), não só o "GUI>"
+   (6:1). Na mesma altura de antes o CHURCH sumiria; então toda barra passa a
+   dar ao logotipo a altura que ele precisa. As barras já tinham essa altura
+   por causa dos botões: nada cresce.
+   ============================================================================= */
+.logo{ height:36px }
+@media(min-width:900px){ .logo{ height:40px } }
+.casa-barra .logo{ height:40px }
+@media(min-width:900px){ .casa-barra .logo{ height:44px } }
+.tela-topo .logo{ height:34px }
+.vol-barra .logo{ height:30px }
+.menu .logo{ height:46px }
+.marca .logo{ height:32px }
+.casa-pe .logo{ height:36px }
+.g-pe-marca .logo{ max-width:400px }
+.entrada-logo{ height:40px }
+/* o SVG do logotipo não traz mais height inline: quem manda é a altura acima */
+svg.logo{ width:auto }
+/* o pé do menu do celular alinha ao centro, como tudo no site */
+.menu .menu-pe{ justify-items:center; text-align:center }
