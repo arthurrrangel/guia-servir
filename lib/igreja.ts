@@ -63,6 +63,16 @@ export const MAPA =
     `${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}, ${IGREJA.uf}, ${IGREJA.cep}`,
   );
 
+/* O embed do Google Maps SEM chave de API: é a URL de "compartilhar → incorporar",
+   que o Google serve para qualquer domínio. Uma chave (Maps Embed API) daria
+   controle de estilo e cota, mas exigiria conta de faturamento — e o mapa
+   tratado por CSS chega no mesmo lugar sem isso. Se um dia houver chave, a
+   troca é só esta constante. */
+export const MAPA_EMBED =
+  'https://www.google.com/maps?q=' +
+  encodeURIComponent(`${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}`) +
+  '&z=16&hl=pt-BR&output=embed';
+
 export const ROTA_WAZE =
   'https://waze.com/ul?q=' + encodeURIComponent(`${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}`);
 

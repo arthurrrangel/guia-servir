@@ -123,7 +123,7 @@ export default function Privacidade() {
                 <li><span className="g-perg-n">b</span><div><h3 className="g-perg-q">Onde ficam</h3>
                   <p className="g-perg-r">Num banco de dados hospedado no Supabase, e o site é publicado pela Vercel. As duas empresas atuam como operadoras: processam por conta da igreja e não usam esses dados para nada próprio.</p></div></li>
                 <li><span className="g-perg-n">c</span><div><h3 className="g-perg-q">O que nunca acontece</h3>
-                  <p className="g-perg-r">Seus dados não são vendidos, não são cedidos para terceiros e não alimentam publicidade. Este site não usa cookie de rastreamento nem pixel de rede social.</p></div></li>
+                  <p className="g-perg-r">Seus dados não são vendidos, não são cedidos para terceiros e não alimentam publicidade. Este site não usa cookie de rastreamento nem pixel de rede social. A única exceção é o mapa da página <Link href="/como-chegar" style={{ color: 'inherit' }}>Como chegar</Link>, que é do Google: ao abri-la, o Google pode gravar cookies próprios, sob a política dele — e ele só carrega quando a página chega perto do mapa.</p></div></li>
                 <li><span className="g-perg-n">d</span><div><h3 className="g-perg-q">Por quanto tempo ficam</h3>
                   <p className="g-perg-r">Enquanto você fizer parte de uma equipe. Quando alguém deixa de servir, o cadastro é encerrado e o histórico de escalas é mantido apenas pelo tempo necessário à organização da igreja — e apagado a qualquer momento, se você pedir.</p></div></li>
               </ol>

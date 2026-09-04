@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, MAPA, ROTA_WAZE, SITE } from '@/lib/igreja';
+import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
@@ -52,27 +52,32 @@ export default function ComoChegar() {
         </div>
       </section>
 
-      {/* ------------------------------------------------ os fatos, em azulejo */}
-      <section className="casa-areia rev">
-        <div className="g g-secao justa">
-          <div className="g-grade">
-            <div className="g-c4">
-              <p className="g-rot">Endereço</p>
-              <p className="g-h3">{IGREJA.rua}</p>
-              <p className="g-corpo" style={{ marginTop: 8 }}>{IGREJA.bairro}, {IGREJA.cidade}, {IGREJA.uf}<br />{IGREJA.cep}</p>
-            </div>
-            <div className="g-c4">
-              <p className="g-rot">Culto</p>
-              <p className="g-h3">{IGREJA.cultoDia}, {IGREJA.cultoHora}</p>
-              <p className="g-corpo" style={{ marginTop: 8 }}>{IGREJA.cultoDuracao} minutos, e termina em ponto.<br />Chega a hora que der.</p>
-            </div>
-            <div className="g-c4">
-              <p className="g-rot">Falar antes</p>
-              <p className="g-h3">{IGREJA.instagramArroba}</p>
-              <p className="g-corpo" style={{ marginTop: 8 }}>
-                <a href={IGREJA.instagram} target="_blank" rel="noreferrer" style={{ color: 'inherit' }}>Manda uma mensagem</a> — alguém responde antes do domingo.
-              </p>
-            </div>
+      {/* ------------------------------------------------------ o mapa, inteiro
+          Google Maps de ponta a ponta, tratado para a paleta do site (ver
+          .mapa em globals.css). Carrega só quando chega perto da tela. O
+          cartão de areia é o que a pessoa precisa: endereço e as duas rotas. */}
+      <section className="mapa rev" aria-label="Mapa de como chegar">
+        <iframe
+          src={MAPA_EMBED}
+          title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`}
+          loading="lazy"
+          allowFullScreen={false}
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+        <div className="mapa-mira" aria-hidden="true"><i /></div>
+        <div className="mapa-hud" aria-hidden="true">
+          <span><b>{IGREJA.bairro}</b>{IGREJA.cidade} · {IGREJA.uf}</span>
+          <span><b>{IGREJA.cultoDia} · {IGREJA.cultoHora}</b>{IGREJA.cultoDuracao} min</span>
+        </div>
+        <div className="mapa-cartao">
+          <p className="g-rot">Onde fica</p>
+          <p className="g-h3">{IGREJA.rua}</p>
+          <p>{IGREJA.bairro}, {IGREJA.cidade}, {IGREJA.uf} · {IGREJA.cep}</p>
+          <p style={{ marginTop: 10 }}><b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b> · {IGREJA.cultoDuracao} minutos, e termina em ponto</p>
+          <div className="g-acoes">
+            <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Maps <IcSeta /></a>
+            <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="acao">Waze</a>
+            <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao">{IGREJA.instagramArroba}</a>
           </div>
         </div>
       </section>

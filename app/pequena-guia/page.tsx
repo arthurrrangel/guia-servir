@@ -6,6 +6,7 @@ import { IcSeta } from '@/components/Icones';
 import { Vaga } from '@/components/Vaga';
 import { FOTOS } from '@/lib/imagens';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
+import { PEQUENAS_GUIAS, mapaDaPequenaGuia, MAPA_REGIAO } from '@/lib/pequenas-guias';
 
 /* =============================================================================
    /pequena-guia — O GRUPO DA SEMANA
@@ -112,6 +113,64 @@ export default function PequenaGuia() {
               <Vaga foto={FOTOS.pgEncontro} />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* --------------------------------------------------- onde elas acontecem
+          Um mapa por grupo, no bairro (nunca na casa: ver lib/pequenas-guias).
+          Enquanto a lista estiver vazia, o mapa da região e o convite. */}
+      <section className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="g-grade fim">
+            <div className="g-c7">
+              <p className="g-rot">Onde elas acontecem</p>
+              <Tit className="g-h2">{PEQUENAS_GUIAS.length ? 'Uma perto de você' : 'Espalhadas pela Barra e arredores'}</Tit>
+            </div>
+            <div className="g-c4 g-d9">
+              <p className="g-corpo">
+                {PEQUENAS_GUIAS.length
+                  ? 'O mapa mostra o bairro de cada grupo. O endereço da casa a gente passa na conversa, para quem vai.'
+                  : 'Os grupos se encontram em casas, e o endereço é dito na conversa, para quem vai. Diga o seu bairro e a gente aponta o mais perto.'}
+              </p>
+            </div>
+          </div>
+
+          {PEQUENAS_GUIAS.length ? (
+            <div className="pgs">
+              {PEQUENAS_GUIAS.map(pg => {
+                const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
+                return (
+                  <article key={pg.nome} className="pg">
+                    <div className="pg-mapa">
+                      <iframe src={mapaDaPequenaGuia(pg)} title={`Mapa: ${pg.nome}, ${pg.bairro}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                      <span className="pg-mira" aria-hidden="true" />
+                    </div>
+                    <div className="pg-corpo">
+                      <p className="g-rot">{pg.bairro}</p>
+                      <span className="pg-nome">{pg.nome}</span>
+                      <span className="pg-quando">{pg.dia}, {pg.hora}</span>
+                      {pg.publico && <span className="pg-nota">{pg.publico}</span>}
+                      <div className="g-acoes">
+                        <a href={conv.href} target="_blank" rel="noreferrer" className="acao cheia">Quero ir nessa <IcSeta /></a>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="pg-regiao">
+              <iframe src={MAPA_REGIAO} title={`Mapa: ${IGREJA.bairro} e arredores`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+              <div className="mapa-cartao">
+                <p className="g-rot">Sua região</p>
+                <p className="g-h3">Diga o seu bairro</p>
+                <p>A gente responde com o grupo mais perto — e, se não houver, o seu bairro entra na lista dos próximos.</p>
+                <div className="g-acoes">
+                  <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">{CONVITE.rot} <IcSeta /></a>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

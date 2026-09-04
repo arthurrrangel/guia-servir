@@ -4650,14 +4650,20 @@ html{ scroll-behavior:smooth }
 /* ---- grão de filme no preto ------------------------------------------------
    A logo tem granulação de filme — está na descrição da identidade, linha
    um. O bloco preto do site era chapado. Uma textura de ruído a 4,5%, em
-   overlay, sem cor, faz o preto parecer material em vez de vazio. Estático:
-   custa uma imagem SVG de 300px repetida, e nada por quadro. */
+   overlay, sem cor, faz o preto parecer material em vez de vazio.
+
+   PNG, NÃO SVG. A primeira versão usava feTurbulence num SVG inline. O
+   Chrome rasteriza esse filtro a cada pintura, em retina a 4x a área — e
+   numa rolagem rápida ele desiste e mostra o quadro CINZA de "ainda não
+   pintei" (checkerboarding). Foi visto na produção, no Mac do Arthur: seção
+   inteira cinza chapado por um instante. Um PNG de 256px é decodificado uma
+   vez e repetido de graça. */
 .casa-escuro,.casa-foto{ position:relative; isolation:isolate }
 .casa-escuro::before,.casa-foto::before,.casa-heroi::before{
   content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
   opacity:.045; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:300px 300px;
+  background-image:url("/grao.png");
+  background-size:128px 128px;
 }
 .casa-heroi::before{ z-index:-1; opacity:.06 }
 
@@ -4836,8 +4842,8 @@ html{ scroll-behavior:smooth }
 .g-foto.quad{ aspect-ratio:1 } .g-foto.fita{ aspect-ratio:21/9 } .g-foto.meia{ aspect-ratio:3/2 }
 .g-foto::after{
   content:""; position:absolute; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:300px 300px;
+  background-image:url("/grao.png");
+  background-size:128px 128px;
 }
 .g-foto.leva img{ transition:transform 1.4s var(--ease) } .g-foto.leva:hover img{ transform:scale(1.04) }
 /* o selo de areia no canto da foto: a informação que não pode ser perdida */
@@ -4964,8 +4970,8 @@ html{ scroll-behavior:smooth }
 .g-pe-linha a{ color:inherit; text-decoration:none } .g-pe-linha a:hover{ color:var(--areia) }
 .g-pe::before{
   content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; opacity:.045; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:300px 300px;
+  background-image:url("/grao.png");
+  background-size:128px 128px;
 }
 
 /* ---- as vagas passam a ser discretas: quadro fino, sem listra gritante ------ */
@@ -4977,25 +4983,25 @@ html{ scroll-behavior:smooth }
 
 /* ---- revelação dos elementos do sistema editorial --------------------------- */
 .js-rev .rev :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
-  opacity:0; transform:translateY(16px); transition:opacity var(--t-lento),transform var(--t-lento);
+  opacity:0; transform:translateY(14px); transition:opacity .42s var(--ease),transform .42s var(--ease);
 }
 .js-rev .rev.visto :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
   opacity:1; transform:none;
 }
-.js-rev .rev.visto .g-h3{ transition-delay:80ms }
-.js-rev .rev.visto .g-ed{ transition-delay:200ms }
-.js-rev .rev.visto .g-corpo{ transition-delay:280ms }
-.js-rev .rev.visto .g-acoes{ transition-delay:360ms }
-.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(1){ transition-delay:120ms }
-.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(2){ transition-delay:210ms }
-.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(3){ transition-delay:300ms }
-.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(4){ transition-delay:390ms }
-.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(n+5){ transition-delay:480ms }
-.js-rev .rev .g-foto{ clip-path:inset(0 0 100% 0); transition:clip-path .9s var(--ease) }
-.js-rev .rev.visto .g-foto{ clip-path:inset(0 0 0 0); transition-delay:120ms }
+.js-rev .rev.visto .g-h3{ transition-delay:60ms }
+.js-rev .rev.visto .g-ed{ transition-delay:140ms }
+.js-rev .rev.visto .g-corpo{ transition-delay:200ms }
+.js-rev .rev.visto .g-acoes{ transition-delay:260ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(1){ transition-delay:80ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(2){ transition-delay:150ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(3){ transition-delay:220ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(4){ transition-delay:290ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(n+5){ transition-delay:360ms }
+.js-rev .rev .g-foto{ clip-path:inset(0 0 100% 0); transition:clip-path .7s var(--ease) }
+.js-rev .rev.visto .g-foto{ clip-path:inset(0 0 0 0); transition-delay:60ms }
 .js-rev .rev .g-cheio > img{ transform:scale(1.06); transition:transform 1.6s var(--ease) }
 .js-rev .rev.visto .g-cheio > img{ transform:scale(1) }
-.js-rev .g-h1 .pal,.js-rev .g-h2 .pal{ display:inline-block; opacity:0; transform:translateY(.28em); filter:blur(6px); transition:opacity var(--t-lento),transform var(--t-lento),filter var(--t-lento); transition-delay:calc(var(--i,0) * 55ms + 60ms) }
+.js-rev .g-h1 .pal,.js-rev .g-h2 .pal{ display:inline-block; opacity:0; transform:translateY(.28em); filter:blur(6px); transition:opacity var(--t-lento),transform var(--t-lento),filter var(--t-lento); transition-delay:calc(var(--i,0) * 45ms + 40ms) }
 .js-rev .visto .g-h1 .pal,.js-rev .visto .g-h2 .pal{ opacity:1; transform:none; filter:blur(0) }
 
 /* o h3 global é do app interno (caixa alta, chevron antes). Nas páginas
@@ -5008,3 +5014,110 @@ html{ scroll-behavior:smooth }
 .casa-areia .g-vira-chev,.casa-papel .g-vira-chev{ color:var(--areia-tinta) }
 /* o selo e a moldura de foto no sistema: o mesmo nome não pode colidir com o
    `.topo` e o `.g` do app interno. `.g` é novo; conferido que não existia. */
+
+/* ==========================================================================
+   O MAPA — Google Maps, na identidade
+
+   O embed do Google é claro, colorido e com a cara do Google. Aqui ele entra
+   de ponta a ponta, TRATADO: um filtro de CSS tira a cor e inverte, e o mapa
+   vira carvão com as ruas em areia-claro — a mesma paleta do site. Em cima
+   dele, o cartão de areia com o endereço e as duas rotas. Não é um mapa
+   dentro de uma caixa; é a página que virou mapa.
+
+   O iframe só carrega quando chega perto da tela (loading=lazy). Ele é o
+   único terceiro que o site inteiro carrega, e está declarado em
+   /privacidade.
+   ========================================================================== */
+.mapa{ position:relative; background:var(--noite); min-height:clamp(520px,78vh,860px); isolation:isolate; overflow:hidden }
+.mapa iframe{
+  position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
+  filter:grayscale(1) invert(.93) contrast(1.08) brightness(.86) sepia(.18);
+  transition:filter .6s var(--ease);
+}
+.mapa:hover iframe{ filter:grayscale(1) invert(.93) contrast(1.08) brightness(.94) sepia(.18) }
+/* a vinheta: prende o mapa ao preto das bordas, e o cartão lê por cima */
+.mapa::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(37,37,37,.86) 0%,rgba(37,37,37,.35) 34%,rgba(37,37,37,0) 60%),
+    linear-gradient(180deg,rgba(37,37,37,.55) 0%,rgba(37,37,37,0) 22%,rgba(37,37,37,0) 78%,rgba(37,37,37,.6) 100%);
+}
+/* a retícula: o toque de instrumento. Linhas finas a cada 96px, quase
+   invisíveis, e o cruzamento no centro. Só decoração, só CSS, some no toque. */
+.mapa::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none; opacity:.35;
+  background-image:
+    linear-gradient(rgba(228,212,180,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(228,212,180,.16) 1px,transparent 1px);
+  background-size:96px 96px; background-position:center;
+  -webkit-mask-image:radial-gradient(60% 60% at 50% 50%,#000 30%,transparent 100%);
+  mask-image:radial-gradient(60% 60% at 50% 50%,#000 30%,transparent 100%);
+}
+.mapa-cartao{
+  position:absolute; z-index:2; left:clamp(20px,4vw,52px); bottom:clamp(20px,4vw,52px);
+  width:min(440px,calc(100% - 2*clamp(20px,4vw,52px)));
+  background:var(--areia); color:var(--areia-tinta); padding:clamp(22px,2.6vw,34px);
+}
+.mapa-cartao .g-rot{ color:rgba(59,50,34,.78); margin-bottom:14px } .mapa-cartao .g-rot::before{ background:var(--areia-tinta) }
+.mapa-cartao .g-h3{ margin:0 }
+.mapa-cartao p{ margin:6px 0 0; font-size:15.5px; line-height:1.5; color:rgba(59,50,34,.86) }
+.mapa-cartao .g-acoes{ margin-top:18px; gap:10px }
+.mapa-cartao .acao{ color:var(--areia-tinta); border-color:rgba(59,50,34,.45) }
+.mapa-cartao .acao.cheia{ background:var(--areia-tinta); color:var(--areia); border-color:var(--areia-tinta) }
+.mapa-cartao .acao:not(.cheia):hover{ background:var(--areia-tinta); color:var(--areia); border-color:var(--areia-tinta) }
+/* o cruzamento no meio: onde o pino do Google cai */
+.mapa-mira{
+  position:absolute; z-index:1; left:50%; top:50%; width:44px; height:44px; transform:translate(-50%,-50%);
+  pointer-events:none; opacity:.9;
+}
+.mapa-mira::before,.mapa-mira::after{ content:""; position:absolute; background:var(--areia) }
+.mapa-mira::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%) }
+.mapa-mira::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-50%) }
+.mapa-mira i{ position:absolute; inset:14px; border:1px solid var(--areia); display:block }
+/* o rótulo de instrumento no canto: mono, pequeno, o que uma tela de bordo diria */
+.mapa-hud{
+  position:absolute; z-index:2; right:clamp(20px,4vw,52px); top:clamp(20px,4vw,52px);
+  display:grid; gap:6px; text-align:right;
+  font-family:var(--mono,ui-monospace,Menlo,monospace); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:rgba(228,212,180,.78);
+}
+.mapa-hud b{ display:block; font-weight:500; color:#fff }
+@media(max-width:720px){
+  .mapa{ min-height:auto }
+  .mapa iframe{ position:relative; height:52vh; min-height:360px }
+  .mapa-cartao{ position:relative; left:0; bottom:0; width:100%; margin:0 }
+  .mapa::before,.mapa::after,.mapa-mira,.mapa-hud{ display:none }
+}
+@media(prefers-reduced-motion:reduce){ .mapa iframe{ transition:none } }
+
+/* ---- os mapas das Pequenas Guias: um por grupo, em azulejo ------------------ */
+.pgs{ display:grid; grid-template-columns:1fr; gap:4px; margin-top:clamp(40px,5vw,64px) }
+@media(min-width:760px){ .pgs{ grid-template-columns:repeat(2,1fr) } }
+@media(min-width:1100px){ .pgs{ grid-template-columns:repeat(3,1fr) } }
+.pg{ position:relative; background:var(--noite); color:#fff; isolation:isolate; overflow:hidden; display:flex; flex-direction:column }
+.pg-mapa{ position:relative; aspect-ratio:4/3; background:var(--noite); overflow:hidden }
+.pg-mapa iframe{
+  position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
+  filter:grayscale(1) invert(.93) contrast(1.08) brightness(.82) sepia(.18); pointer-events:none;
+}
+.pg-mapa::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg,rgba(37,37,37,.35) 0%,rgba(37,37,37,0) 40%,rgba(37,37,37,.7) 100%);
+}
+.pg-mira{ position:absolute; left:50%; top:50%; width:36px; height:36px; transform:translate(-50%,-50%); pointer-events:none; z-index:1 }
+.pg-mira::before,.pg-mira::after{ content:""; position:absolute; background:var(--areia) }
+.pg-mira::before{ left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%) }
+.pg-mira::after{ top:50%; left:0; right:0; height:1px; transform:translateY(-50%) }
+.pg-corpo{ padding:clamp(18px,2.2vw,26px); display:flex; flex-direction:column; gap:6px; flex:1 }
+.pg-corpo .g-rot{ margin-bottom:6px; color:rgba(228,212,180,.78) }
+.pg-nome{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(20px,1.8vw,24px); letter-spacing:-.02em; line-height:1.15 }
+.pg-quando{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,1.9vw,26px); color:var(--areia); line-height:1.2 }
+.pg-nota{ font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.72) }
+.pg-corpo .acao{ align-self:flex-start; margin-top:auto; padding-top:0 }
+.pg-corpo .g-acoes{ margin-top:auto; padding-top:14px }
+/* a região inteira, quando ainda não há grupo cadastrado */
+.pg-regiao{ position:relative; aspect-ratio:16/8; min-height:360px; background:var(--noite); isolation:isolate; overflow:hidden; margin-top:clamp(40px,5vw,64px) }
+.pg-regiao iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) invert(.93) contrast(1.08) brightness(.82) sepia(.18) }
+.pg-regiao::after{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(37,37,37,.85) 0%,rgba(37,37,37,.2) 45%,rgba(37,37,37,0) 70%) }
+.pg-regiao .mapa-cartao{ z-index:2 }
+@media(max-width:720px){ .pg-regiao{ aspect-ratio:auto; min-height:auto } .pg-regiao iframe{ position:relative; height:44vh; min-height:300px } .pg-regiao::after{ display:none } .pg-regiao .mapa-cartao{ position:relative; left:0; bottom:0; width:100% } }

@@ -44,7 +44,12 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
        atraso por palavra. Quem aprendeu o ritmo numa página não reaprende
        na outra. A rede de segurança de 1,2s revela o que já deveria estar
        na tela e não está — porque conteúdo invisível é pior que conteúdo
-       sem animação, e nenhum efeito vale um bloco vazio. */
+       sem animação, e nenhum efeito vale um bloco vazio.
+
+       rootMargin POSITIVO: a seção começa a entrar 6% ANTES de aparecer.
+       Com margem negativa, quem rola rápido via a seção chegar vazia e o
+       conteúdo correr atrás — foi visto na produção. Agora ele já está
+       chegando quando a seção chega. */
     if (!semRevelar) {
       raiz.classList.add('js-rev');
       const revelaTudo = () =>
@@ -57,7 +62,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
           es => es.forEach(e => {
             if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); }
           }),
-          { rootMargin: '0px 0px -10% 0px' },
+          { rootMargin: '0px 0px 6% 0px' },
         );
         raiz.querySelectorAll('.rev:not(.visto)').forEach(e => obs.observe(e));
         const rede = setInterval(() => {
