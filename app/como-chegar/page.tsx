@@ -1,32 +1,39 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
+import { Perguntas } from '@/components/Perguntas';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
 
-   Quem abre esta página já decidiu ir. Ela abre com a FACHADA de ponta a
-   ponta — a foto que faz a pessoa reconhecer o lugar e não passar direto — e
-   o endereço em cima dela. Mapa e Waze são dois azulejos grandes, não dois
-   links. O resto é a logística de quem chega: carro, aplicativo, a pé.
+   Quem abre esta página já decidiu ir. Ela abre com a FACHADA — a foto que
+   faz a pessoa reconhecer o lugar — e o endereço em cima dela, centrado.
+   Depois o mapa inteiro, tratado para a paleta, com o cartão de endereço e
+   as duas rotas. Três perguntas de quem está chegando, e o fecho.
 
    O CTA leva para fora, e está certo: a conversão aqui é a pessoa fechar o
    navegador e sair de casa.
    ============================================================================= */
 
+const PERGUNTAS = [
+  { q: 'Onde eu deixo o carro?',
+    r: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo.' },
+  { q: 'Vou de aplicativo. Qual é o destino?',
+    r: `${IGREJA.rua}, ${IGREJA.bairro}. A porta é na própria Pedra de Itaúna, e o carro para em frente.` },
+  { q: 'É a primeira vez. Como eu sei que cheguei?',
+    r: 'Pela fachada da foto, e por alguém na porta: tem equipe de acolhida antes do horário. Pode dizer que é a primeira vez.' },
+];
+
 export const metadata: Metadata = {
   title: 'Como chegar',
   description:
-    `${IGREJA.nome} fica na ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}. Rota no Maps e no Waze, estacionamento, transporte e a fachada para você reconhecer a porta.`,
+    `${IGREJA.nome} fica na ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}. Rota no Maps e no Waze, estacionamento e a fachada para você reconhecer a porta.`,
   alternates: { canonical: '/como-chegar' },
-  openGraph: {
-    title: 'Como chegar · GUIA Church',
-    description: `${IGREJA.rua}, ${IGREJA.bairro}. Rota, estacionamento e a porta certa.`,
-    url: `${SITE}/como-chegar`, type: 'website', locale: 'pt_BR',
-  },
+  ...cartao({ titulo: 'Como chegar', descricao: `${IGREJA.rua}, ${IGREJA.bairro}. Rota, estacionamento e a porta certa.`, caminho: '/como-chegar', imagem: 'como-chegar' }),
 };
 
 export default function ComoChegar() {
@@ -37,9 +44,13 @@ export default function ComoChegar() {
         address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' },
         openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'https://schema.org/Sunday', opens: '10:00', closes: '11:30' }],
       }} />
+      <Schema dados={{
+        '@context': 'https://schema.org', '@type': 'FAQPage',
+        mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
+      }} />
 
       {/* ------------------------------------------------- a fachada, inteira */}
-      <section className="g-cheio alta rev">
+      <section className="g-cheio alta centro rev">
         <img src="/fotos/predio.webp" alt={`Fachada da ${IGREJA.nome} na ${IGREJA.rua}`} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Onde fica</p>
@@ -53,10 +64,9 @@ export default function ComoChegar() {
       </section>
 
       {/* ------------------------------------------------------ o mapa, inteiro
-          Google Maps de ponta a ponta, tratado para a paleta do site (ver
-          .mapa em globals.css). Carrega só quando chega perto da tela. O
-          cartão de areia é o que a pessoa precisa: endereço e as duas rotas. */}
-      <section className="mapa rev" aria-label="Mapa de como chegar">
+          Google Maps de ponta a ponta, tratado para a paleta (ver .mapa em
+          globals.css). Carrega só quando chega perto da tela. */}
+      <section className="mapa centro rev" aria-label="Mapa de como chegar">
         <iframe
           src={MAPA_EMBED}
           title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`}
@@ -65,19 +75,13 @@ export default function ComoChegar() {
           referrerPolicy="no-referrer-when-downgrade"
         />
         <div className="mapa-mira" aria-hidden="true"><i /></div>
-        <div className="mapa-hud" aria-hidden="true">
-          <span><b>{IGREJA.bairro}</b>{IGREJA.cidade} · {IGREJA.uf}</span>
-          <span><b>{IGREJA.cultoDia} · {IGREJA.cultoHora}</b>{IGREJA.cultoDuracao} min</span>
-        </div>
         <div className="mapa-cartao">
-          <p className="g-rot">Onde fica</p>
+          <p className="g-rot">{IGREJA.cultoDia}, {IGREJA.cultoHora}</p>
           <p className="g-h3">{IGREJA.rua}</p>
-          <p>{IGREJA.bairro}, {IGREJA.cidade}, {IGREJA.uf} · {IGREJA.cep}</p>
-          <p style={{ marginTop: 10 }}><b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b> · {IGREJA.cultoDuracao} minutos, e termina em ponto</p>
+          <p>{IGREJA.bairro}, {IGREJA.cidade} · {IGREJA.cep}</p>
           <div className="g-acoes">
             <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Maps <IcSeta /></a>
             <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="acao">Waze</a>
-            <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao">{IGREJA.instagramArroba}</a>
           </div>
         </div>
       </section>
@@ -85,61 +89,26 @@ export default function ComoChegar() {
       {/* ------------------------------------------------------------ chegando */}
       <section className="casa-escuro rev">
         <div className="g g-secao">
-          <div className="g-grade">
-            <div className="g-c5">
-              <div className="g-fixa">
-                <p className="g-rot">Chegando</p>
-                <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
-                <p className="g-ed">Tem alguém na porta.</p>
-                <div className="g-foto meia leva" style={{ marginTop: 'clamp(28px,4vw,48px)' }}>
-                  <img src="/fotos/recepcao.webp" alt="Equipe de acolhida recebendo na entrada" loading="lazy" decoding="async" />
-                </div>
-              </div>
-            </div>
-            <div className="g-c6 g-d7">
-              <ol className="g-perg">
-                <li>
-                  <span className="g-perg-n">01</span>
-                  <div><h3 className="g-perg-q">Onde eu deixo o carro?</h3>
-                  <p className="g-perg-r">Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo — é o tempo de manobrar sem pressa.</p></div>
-                </li>
-                <li>
-                  <span className="g-perg-n">02</span>
-                  <div><h3 className="g-perg-q">Vou de aplicativo. Qual é o destino?</h3>
-                  <p className="g-perg-r">{IGREJA.rua}, {IGREJA.bairro}. A porta é na própria Pedra de Itaúna — o carro para em frente.</p></div>
-                </li>
-                <li>
-                  <span className="g-perg-n">03</span>
-                  <div><h3 className="g-perg-q">É a primeira vez. Como eu sei que cheguei?</h3>
-                  <p className="g-perg-r">Pela fachada lá em cima, e por alguém na porta: tem equipe de acolhida antes do horário. Pode dizer que é a primeira vez — é a frase que eles mais ouvem.</p></div>
-                </li>
-              </ol>
-            </div>
+          <div className="c">
+            <p className="g-rot">Chegando</p>
+            <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
+            <p className="g-ed">Tem alguém na porta.</p>
+          </div>
+          <div className="c-media c-bloco grande">
+            <Perguntas itens={PERGUNTAS} />
           </div>
         </div>
       </section>
 
       {/* --------------------------------------------------------------- fecho */}
-      <section className="casa-papel rev">
-        <div className="g g-secao">
-          <div className="g-grade meio">
-            <div className="g-c6">
-              <p className="g-rot">Antes de vir, se quiser</p>
-              <Tit className="g-h2">O que esperar de um domingo</Tit>
-              <p className="g-corpo">
-                A página do domingo responde as cinco perguntas de quem nunca foi —
-                roupa, duração, crianças, e se você vai ser chamado na frente.
-              </p>
-              <div className="g-acoes">
-                <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-                <a href={MAPA} target="_blank" rel="noreferrer" className="acao">Traçar rota</a>
-              </div>
-            </div>
-            <div className="g-c5 g-d8">
-              <div className="g-foto alta leva">
-                <img src="/fotos/teclado.webp" alt="" loading="lazy" decoding="async" />
-              </div>
-            </div>
+      <section className="g-cheio centro fecho rev">
+        <img src="/fotos/recepcao.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Antes de vir</p>
+          <Tit className="g-h2">O que esperar de um domingo</Tit>
+          <div className="g-acoes">
+            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <a href={MAPA} target="_blank" rel="noreferrer" className="acao">Traçar rota</a>
           </div>
         </div>
       </section>

@@ -4939,7 +4939,9 @@ html{ scroll-behavior:smooth }
 .g-num{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(28px,4vw,48px) clamp(16px,2vw,32px) }
 @media(min-width:900px){ .g-num{ grid-template-columns:repeat(4,1fr) } }
 .g-num b{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(52px,6.8vw,112px); line-height:.94; letter-spacing:-.045em }
-.g-num span{ display:block; margin-top:12px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.58; line-height:1.4 }
+.g-num b + span{ display:block; margin-top:12px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.14em; text-transform:uppercase; opacity:.58; line-height:1.4 }
+/* o <span> do Contador vive DENTRO do <b>: herda o número, não vira rótulo */
+.g-num b span{ display:inline; margin:0; font:inherit; letter-spacing:inherit; text-transform:none; opacity:1 }
 
 /* ---- de → para ------------------------------------------------------------- */
 .g-vira{ list-style:none; margin:var(--e6) 0 0; padding:0; border-top:1px solid var(--linha2) }
@@ -5134,3 +5136,202 @@ html{ scroll-behavior:smooth }
   font-family:var(--mono,ui-monospace,Menlo,monospace); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
   color:var(--areia); border:1px solid rgba(228,212,180,.4); padding:10px 16px; background:rgba(37,37,37,.6);
 }
+
+/* =============================================================================
+   AUDITORIA 04/09 — a voz do manual chega aos azulejos das áreas
+   O nome da área (Creative, Louvor, GUIA Kids, Connect) ainda saía em caixa
+   alta leve e espaçada, a voz antiga. Título é bold, caixa baixa, apertado —
+   como todos os outros títulos do site. Vale na home e em /servir.
+   ============================================================================= */
+.casa-area-nome{ font-weight:700; text-transform:none; letter-spacing:-.025em; font-size:clamp(28px,2.6vw,38px); line-height:1.02 }
+.casa-area-desc{ color:rgba(255,255,255,.8) }
+/* a porta lateral do /servir, na grade editorial: uma linha, link sublinhado */
+.g-atalho{ margin-top:18px; color:var(--cinza) }
+.g-atalho a{ color:var(--ink); text-decoration:none; border-bottom:1px solid rgba(37,37,37,.35); transition:border-color var(--t) }
+.g-atalho a:hover,.g-atalho a:active{ border-bottom-color:currentColor }
+/* /servir: a grade das áreas fica colada no herói, sem a margem de 64px da home */
+.casa-areas.rente{ margin-top:0 }
+
+/* =============================================================================
+   AUDITORIA 04/09 — a voz do manual chega às telas do sistema
+   .cabeca h1 (Encontre seu lugar, Seu espaço, Painel…) ainda saía em caixa
+   alta leve e espaçada. Mesma identidade, mesma plataforma: bold, caixa
+   baixa, apertado — como todo título do site. O tamanho não muda.
+   ============================================================================= */
+.cabeca h1{ font-weight:700; text-transform:none; letter-spacing:-.03em; line-height:1.04 }
+.cabeca h1.menor{ letter-spacing:-.02em }
+
+/* =============================================================================
+   04/09 — CENTRO: a gramática nova das páginas públicas
+
+   O Arthur olhou o site e disse: poluído, cheio de texto, quer tudo
+   extremamente organizado, alinhado 100%, centralizado, sem defeitos, e no
+   celular tão minimalista quanto no desktop. A grade assimétrica de doze
+   colunas (texto à esquerda, coluna fixa, parágrafo lateral) lia como
+   desordem para ele. Sai.
+
+   No lugar, uma gramática só, igual em toda página e em toda largura:
+     seção = rótulo + título + UMA linha + até dois botões, tudo centrado,
+     e abaixo o conteúdo (fotos, azulejos, mapa, perguntas) em bloco
+     simétrico, também centrado. Nada de parágrafo explicativo. Nada de
+     conteúdo repetido entre páginas.
+   ============================================================================= */
+.c{ max-width:760px; margin-inline:auto; text-align:center }
+.c .g-rot{ justify-content:center }
+.c .g-h1,.c .g-h2,.c .g-h3,.c .g-ed,.c .g-corpo{ margin-inline:auto }
+.c .g-corpo{ max-width:46ch }
+.c .g-acoes{ justify-content:center }
+.c-larga{ max-width:1120px; margin-inline:auto }
+.c-media{ max-width:820px; margin-inline:auto }
+.c-bloco{ margin-top:clamp(36px,5vw,64px) }
+.c-bloco.grande{ margin-top:clamp(44px,6vw,80px) }
+.c .g-h1{ max-width:14ch }
+.c .g-h2{ max-width:18ch }
+
+/* o herói de toda página que não é a home: foto de ponta a ponta, centrado */
+.g-cheio.centro{ align-items:center; text-align:center }
+.g-cheio.centro > .g{ padding-top:clamp(120px,16vh,176px); padding-bottom:clamp(72px,12vh,140px) }
+.g-cheio.centro .g-rot{ justify-content:center }
+.g-cheio.centro .g-h1,.g-cheio.centro .g-h2,.g-cheio.centro .g-ed{ margin-inline:auto }
+.g-cheio.centro .g-h1{ max-width:12ch }
+.g-cheio.centro .g-h2{ max-width:16ch }
+.g-cheio.centro .g-acoes{ justify-content:center }
+.g-cheio.centro::before{ background:linear-gradient(180deg,rgba(37,37,37,.62) 0%,rgba(37,37,37,.38) 45%,rgba(37,37,37,.82) 100%) }
+/* o fecho: mais baixo que o herói, mesma composição */
+.g-cheio.centro.fecho{ min-height:clamp(400px,58vh,640px) }
+.g-cheio.centro.fecho > .g{ padding-top:clamp(80px,12vh,140px); padding-bottom:clamp(80px,12vh,140px) }
+
+/* ---- a foto como bloco centrado, sem selo lateral --------------------------- */
+.c-foto{ margin:clamp(36px,5vw,64px) auto 0; max-width:1120px }
+.c-foto .g-foto{ aspect-ratio:16/8 }
+@media(max-width:899px){ .c-foto .g-foto{ aspect-ratio:4/3 } }
+
+/* ---- perguntas: fechadas no celular, abertas no desktop ---------------------- */
+.qa{ list-style:none; margin:0; padding:0; border-top:1px solid var(--linha2); text-align:left }
+.casa-escuro .qa,.g-cheio .qa{ border-top-color:rgba(255,255,255,.14) }
+.casa-areia .qa{ border-top-color:rgba(59,50,34,.22) }
+.qa li{ border-bottom:1px solid var(--linha) }
+.casa-escuro .qa li{ border-bottom-color:rgba(255,255,255,.10) }
+.casa-areia .qa li{ border-bottom-color:rgba(59,50,34,.16) }
+.qa details{ display:block }
+.qa summary{
+  list-style:none; display:grid; grid-template-columns:52px 1fr 20px; align-items:center; gap:0 8px;
+  padding:clamp(18px,2.2vw,26px) 0; cursor:pointer; color:inherit;
+}
+.qa summary::-webkit-details-marker{ display:none }
+.qa summary::marker{ content:"" }
+.qa summary:focus-visible{ outline:2px solid var(--areia); outline-offset:4px }
+.qa-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(26px,2.6vw,36px); line-height:1; color:var(--areia-tinta); opacity:.55 }
+.casa-escuro .qa-n{ color:var(--areia); opacity:.8 }
+.qa-q{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(18px,1.7vw,24px); letter-spacing:-.02em; line-height:1.2; margin:0; text-transform:none; color:inherit }
+.qa-q::before{ content:none }
+.qa-mais{ position:relative; width:18px; height:18px; justify-self:end; opacity:.6 }
+.qa-mais::before,.qa-mais::after{ content:""; position:absolute; left:0; right:0; top:8px; height:2px; background:currentColor; transition:transform var(--t) }
+.qa-mais::after{ transform:rotate(90deg) }
+.qa details[open] .qa-mais::after{ transform:rotate(0) }
+.qa-r{ font-size:clamp(16px,1.15vw,17.5px); line-height:1.6; color:var(--cinza); margin:0 0 clamp(18px,2.2vw,26px) 60px; max-width:58ch; text-wrap:pretty }
+.casa-escuro .qa-r{ color:rgba(255,255,255,.76) }
+.casa-areia .qa-r{ color:rgba(59,50,34,.86) }
+@media(min-width:900px){
+  /* no desktop a lista nasce aberta e não se fecha: nada de toque, nada de sinal */
+  .qa summary{ pointer-events:none }
+  .qa-mais{ display:none }
+  .qa summary{ grid-template-columns:60px 1fr }
+}
+
+/* ---- azulejos: só a letra e a palavra na home; iguais, centrados ----------- */
+.g-tiles.centro .g-tile{ align-items:center; text-align:center; justify-content:center; gap:14px }
+.g-tiles.letras .g-tile{ aspect-ratio:auto; padding:clamp(24px,3vw,40px) clamp(14px,2vw,28px) }
+.g-tiles.letras .g-tile-l{ font-size:clamp(48px,6vw,96px) }
+@media(max-width:899px){
+  .g-tiles.letras{ grid-template-columns:repeat(4,1fr); gap:3px }
+  .g-tiles.letras .g-tile{ padding:18px 6px 16px }
+  .g-tiles.letras .g-tile-l{ font-size:40px }
+  .g-tiles.letras .g-tile-t{ font-size:12px; letter-spacing:0 }
+}
+/* o azulejo com descrição (só em /sobre): no celular, uma coluna e texto inteiro */
+@media(max-width:899px){
+  .g-tiles.quatro:not(.letras){ grid-template-columns:1fr 1fr }
+  .g-tile{ aspect-ratio:auto; min-height:0; gap:14px; padding:18px }
+  .g-tile-d{ font-size:13.5px; line-height:1.45 }
+  .g-tiles.tres{ grid-template-columns:1fr }
+  .g-tiles.tres .g-tile{ aspect-ratio:auto; min-height:200px }
+}
+
+/* ---- os passos do culto: título só; no celular, 2×2 sem texto -------------- */
+.g-passos.centro{ max-width:1120px; margin-inline:auto }
+@media(min-width:900px){ .g-passos.centro{ grid-template-columns:repeat(4,1fr) } .g-passos.centro .g-passo{ aspect-ratio:3/4 } }
+@media(max-width:899px){ .g-passo-d{ display:none } .g-passo{ aspect-ratio:1 } }
+
+/* ---- as áreas (home e /servir): mais baixas e sem descrição no celular ------ */
+.casa-areas.centro{ max-width:1120px; margin-inline:auto }
+@media(max-width:899px){
+  .casa-area{ min-height:0; aspect-ratio:16/9; padding:22px 18px }
+  .casa-area-desc{ display:none }
+  .casa-area-nome{ font-size:26px }
+  .casa-area-selo{ margin-top:8px }
+}
+@media(min-width:820px){ .casa-areas.centro > .casa-area:first-child{ grid-column:span 2 } }
+
+/* ---- os números: quatro em linha no desktop, centrados --------------------- */
+.g-num.centro{ text-align:center; max-width:1120px; margin-inline:auto }
+
+/* ---- rodapé compacto e centrado -------------------------------------------- */
+.g-pe.centro{ text-align:center }
+.g-pe.centro .g-pe-marca{ margin-inline:auto; width:min(100%,420px) }
+.g-pe.centro .g-pe-frase{ margin-inline:auto; max-width:22ch }
+.g-pe-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:10px 28px; margin-top:clamp(36px,5vw,56px) }
+.g-pe-links a{ color:rgba(255,255,255,.86); text-decoration:none; font-size:16px; line-height:1.4; padding:4px 0 }
+.g-pe-links a:hover{ color:var(--areia) }
+.g-pe-fato{ margin:clamp(28px,4vw,40px) auto 0; color:rgba(255,255,255,.62); font-size:15px; line-height:1.7; max-width:44ch }
+.g-pe-fato b{ color:var(--areia); font-weight:600 }
+.g-pe.centro .g-pe-linha{ justify-content:center; gap:8px 22px }
+@media(max-width:899px){
+  .g-pe-links{ display:grid; grid-template-columns:1fr 1fr; gap:6px 16px; max-width:360px; margin-inline:auto }
+  .g-pe-links a{ font-size:15px }
+}
+
+/* ---- o mapa de /como-chegar: sem HUD, cartão centrado embaixo -------------- */
+.mapa.centro .mapa-hud{ display:none }
+.mapa.centro .mapa-cartao{ left:50%; transform:translateX(-50%); text-align:center; bottom:clamp(20px,3vw,40px) }
+.mapa.centro .mapa-cartao .g-rot{ justify-content:center }
+.mapa.centro .mapa-cartao .g-acoes{ justify-content:center }
+@media(max-width:720px){ .mapa.centro .mapa-cartao{ left:0; transform:none; width:100% } }
+
+/* ---- as Pequenas Guias: cartão mais baixo no celular ------------------------ */
+.pgs.centro{ max-width:1120px; margin-inline:auto }
+@media(max-width:899px){ .pg-mapa{ aspect-ratio:16/8 } .pg-corpo{ padding:18px 18px 20px } }
+
+/* ---- celular: respiro menor, sem escada de atrasos, nada some na rolagem ---- */
+@media(max-width:899px){
+  .g-secao{ padding-block:52px }
+  .g-secao.justa{ padding-block:40px }
+  .g-secao.primeira{ padding-top:40px }
+  .g-cheio.centro > .g{ padding-top:120px; padding-bottom:64px }
+  .g-cheio.centro.fecho > .g{ padding-top:72px; padding-bottom:72px }
+  .g-h1{ font-size:clamp(40px,11.5vw,52px) }
+  .g-h2{ font-size:clamp(30px,8.4vw,40px) }
+  .g-ed{ font-size:clamp(22px,6.2vw,28px) }
+  .g-acoes{ gap:10px }
+  .g-acoes .acao{ width:100%; justify-content:center; max-width:360px; margin-inline:auto }
+  .c .g-acoes,.g-cheio.centro .g-acoes{ flex-direction:column; align-items:center }
+  .js-rev .rev.visto *{ transition-delay:0ms!important }
+  .js-rev .rev :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){ transition-duration:.3s; transform:translateY(8px) }
+  .g-foto.alta{ aspect-ratio:4/3 }
+  .g-num{ gap:28px 16px }
+  .g-num b{ font-size:clamp(44px,13vw,58px) }
+}
+/* ---- as Pequenas Guias no celular: fila que desliza, um cartão por tela ---- */
+.pgs-dica{ display:none }
+@media(max-width:759px){
+  .pgs.fila{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
+    margin-inline:calc(-1 * clamp(20px,4vw,52px)); padding-inline:clamp(20px,4vw,52px); scrollbar-width:none; margin-top:36px }
+  .pgs.fila::-webkit-scrollbar{ display:none }
+  .pgs.fila .pg{ flex:0 0 84%; scroll-snap-align:center }
+  .pgs-dica{ display:block; text-align:center; margin:16px 0 0; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mudo) }
+}
+.g-cheio.centro.fecho .g-h2{ max-width:22ch }
+.g-cheio.centro .g-h1{ max-width:16ch }
+.g-pe-fato{ max-width:none }
+section[id]{ scroll-margin-top:84px }
+@media(max-width:899px){ .g-tile{ justify-content:flex-start } }

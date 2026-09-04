@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from './Marca';
-import { IGREJA, ENDERECO_LINHA } from '@/lib/igreja';
+import { IGREJA } from '@/lib/igreja';
 import Movimento from './Movimento';
 
 /* =============================================================================
@@ -107,39 +107,27 @@ export function Barra({ atual }: { atual?: string }) {
    página, como a LGPD pede. */
 export function Rodape() {
   return (
-    <footer className="g-pe rev">
+    <footer className="g-pe centro rev">
       <div className="g">
         <div className="g-pe-marca" aria-label={IGREJA.nome}>
           <Logo className="logo" />
         </div>
-        <p className="g-ed g-pe-frase" style={{ color: 'var(--areia)', maxWidth: '22ch' }}>{IGREJA.frase}</p>
+        <p className="g-ed g-pe-frase" style={{ color: 'var(--areia)' }}>{IGREJA.frase}</p>
 
-        <div className="g-pe-cols">
-          <div>
-            <h4>Onde e quando</h4>
-            <span>{IGREJA.rua}</span>
-            <span>{IGREJA.bairro}, {IGREJA.cidade} · {IGREJA.cep}</span>
-            <span style={{ marginTop: 10, color: 'var(--areia)' }}>{IGREJA.cultoDia}, {IGREJA.cultoHora} · {IGREJA.cultoDuracao} minutos</span>
-          </div>
-          <div>
-            <h4>Visitar</h4>
-            <Link href="/cultos">Cultos</Link>
-            <Link href="/como-chegar">Como chegar</Link>
-            <Link href="/pequena-guia">Pequena Guia</Link>
-          </div>
-          <div>
-            <h4>A igreja</h4>
-            <Link href="/sobre">Quem somos</Link>
-            <Link href="/guia-church-tv">Guia Church TV</Link>
-            <Link href="/servir">Servir</Link>
-          </div>
-          <div>
-            <h4>Equipes</h4>
-            <Link href="/acessar">Acesso às equipes</Link>
-            <Link href="/eu">Espaço do voluntário</Link>
-            <Link href="/entrar">Organização</Link>
-          </div>
-        </div>
+        <nav className="g-pe-links" aria-label="Páginas">
+          <Link href="/cultos">Cultos</Link>
+          <Link href="/como-chegar">Como chegar</Link>
+          <Link href="/pequena-guia">Pequena Guia</Link>
+          <Link href="/sobre">Quem somos</Link>
+          <Link href="/servir">Servir</Link>
+          <Link href="/acessar">Acesso às equipes</Link>
+        </nav>
+
+        <p className="g-pe-fato">
+          <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b><br />
+          {IGREJA.rua}<br />
+          {IGREJA.bairro}, {IGREJA.cidade}
+        </p>
 
         <div className="g-pe-linha">
           <span>© {new Date().getFullYear()} {IGREJA.nome}</span>

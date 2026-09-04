@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cartao } from '@/lib/meta';
 import { rpcPublica } from '@/lib/publico';
 
 /* A prévia do link no WhatsApp lê o HTML do servidor, e a página é client
@@ -22,7 +23,7 @@ export async function generateMetadata(
   return {
     title: titulo,
     description: desc,
-    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
+    ...cartao({ titulo, descricao: desc, caminho: '/servir', imagem: 'servir' }),
   };
 }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cartao } from '@/lib/meta';
 import { rpcPublica } from '@/lib/publico';
 
 /* O wizard é o link que mais vai circular no grupo. A prévia precisa dizer o
@@ -18,7 +19,7 @@ export async function generateMetadata(
   return {
     title: titulo,
     description: desc,
-    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
+    ...cartao({ titulo, descricao: desc, caminho: '/servir', imagem: 'servir' }),
   };
 }
 

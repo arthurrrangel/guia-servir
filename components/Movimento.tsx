@@ -64,18 +64,33 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
           }),
           { rootMargin: '0px 0px 6% 0px' },
         );
-        raiz.querySelectorAll('.rev:not(.visto)').forEach(e => obs.observe(e));
-        const rede = setInterval(() => {
-          const limite = window.scrollY + window.innerHeight;
-          let sobrou = 0;
-          raiz.querySelectorAll<HTMLElement>('.rev:not(.visto)').forEach(e => {
-            if (e.getBoundingClientRect().top + window.scrollY < limite) {
-              e.style.transition = 'none'; e.classList.add('visto');
-            } else sobrou++;
-          });
-          if (!sobrou) clearInterval(rede);
-        }, 1200);
-        desligar.push(() => { obs.disconnect(); clearInterval(rede); });
+        const pendentes = Array.from(raiz.querySelectorAll<HTMLElement>('.rev:not(.visto)'));
+        pendentes.forEach(e => obs.observe(e));
+        /* A ROLAGEM TAMBÉM REVELA. O observador dispara quando a seção cruza
+           a tela, mas uma rolagem rápida pode saltar uma seção inteira entre
+           dois quadros — e ela ficava vazia até a rede de 1,2s. Agora todo
+           evento de rolagem (num rAF) revela o que já está na tela ou acima
+           dela: determinístico, barato, e o observador vira só o primeiro
+           gatilho. */
+        let pedindo = false;
+        const varre = () => {
+          pedindo = false;
+          const limite = window.innerHeight * 1.06;
+          for (let i = pendentes.length - 1; i >= 0; i--) {
+            const e = pendentes[i];
+            if (e.classList.contains('visto')) { pendentes.splice(i, 1); continue; }
+            const r = e.getBoundingClientRect();
+            if (r.top < limite) {
+              if (r.bottom < 0) e.style.transition = 'none';
+              e.classList.add('visto'); obs.unobserve(e); pendentes.splice(i, 1);
+            }
+          }
+          if (!pendentes.length) window.removeEventListener('scroll', aoRolar);
+        };
+        const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(varre); } };
+        window.addEventListener('scroll', aoRolar, { passive: true });
+        const rede = setTimeout(varre, 1200);
+        desligar.push(() => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); });
       }
     }
 

@@ -24,16 +24,12 @@ export const metadata: Metadata = {
 export default function NaoEncontrada() {
   return (
     <Site>
-      <section className="g-cheio alta rev">
+      <section className="g-cheio alta centro rev">
         <img src="/fotos/predio.webp" alt="" />
         <div className="g">
           <p className="g-rot">404</p>
           <Tit as="h1" className="g-h1">Esse endereço não existe</Tit>
           <p className="g-ed">Mas o domingo existe.</p>
-          <p className="g-corpo" style={{ maxWidth: '44ch' }}>
-            Pode ter sido um link antigo ou uma letra fora do lugar. O que você
-            procura provavelmente está a um clique daqui.
-          </p>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
             <Link href="/" className="acao">Ir para o início</Link>

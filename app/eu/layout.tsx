@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { cartao } from '@/lib/meta';
 
 /* =============================================================================
    O LAYOUT QUE PROTEGE O LINK PESSOAL
@@ -20,11 +21,7 @@ export const metadata: Metadata = {
   title: 'Espaço do voluntário',
   description: 'Sua escala, seus dias e seu líder. Acesse o seu espaço.',
   robots: { index: false, follow: false, nocache: true },
-  openGraph: {
-    title: 'Espaço do voluntário · GUIA Church',
-    description: 'Acesso pessoal. Não repasse este link.',
-    type: 'website', locale: 'pt_BR',
-  },
+  ...cartao({ titulo: 'Espaço do voluntário', descricao: 'Acesso pessoal. Não repasse este link.', caminho: '/eu' }),
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {

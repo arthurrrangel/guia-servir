@@ -94,7 +94,6 @@ export default function Casa() {
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
   const [menu, setMenu] = useState(false);
   const [solida, setSolida] = useState(false);
-  const [passou, setPassou] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
   const fio = useRef<HTMLDivElement>(null);
 
@@ -169,25 +168,33 @@ export default function Casa() {
       es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); } }),
       { rootMargin: '0px 0px 6% 0px' },
     );
-    r.querySelectorAll('.rev:not(.visto)').forEach(e => obs.observe(e));
+    const pendentes = Array.from(r.querySelectorAll<HTMLElement>('.rev:not(.visto)'));
+    pendentes.forEach(e => obs.observe(e));
 
-    /* A rede pega só o que a pessoa JÁ deveria estar vendo: bloco acima da
-       dobra que continua escondido é defeito, bloco abaixo dela é a animação
-       fazendo o trabalho dela. A primeira versão da rede revelava tudo, e aí
-       a página inteira acendia de uma vez no celular, o que é outro defeito.
-       Sem transição de propósito: se chegou aqui, alguma coisa falhou, e
-       animar a falha só chama atenção para ela. */
-    const rede = setInterval(() => {
-      const limite = window.scrollY + window.innerHeight;
-      let sobrou = 0;
-      r.querySelectorAll<HTMLElement>('.rev:not(.visto)').forEach(e => {
-        if (e.getBoundingClientRect().top + window.scrollY < limite) {
-          e.style.transition = 'none'; e.classList.add('visto');
-        } else sobrou++;
-      });
-      if (!sobrou) clearInterval(rede);
-    }, 1200);
-    return () => { obs.disconnect(); clearInterval(rede); };
+    /* A ROLAGEM TAMBÉM REVELA (igual ao Movimento das outras páginas): todo
+       evento de rolagem, num rAF, revela o que já está na tela ou acima dela.
+       Uma rolagem rápida saltava seções inteiras entre dois quadros do
+       observador e a faixa chegava vazia. A rede de 1,2s fica só para o caso
+       em que nada rolou. */
+    let pedindo = false;
+    const varre = () => {
+      pedindo = false;
+      const limite = window.innerHeight * 1.06;
+      for (let i = pendentes.length - 1; i >= 0; i--) {
+        const e = pendentes[i];
+        if (e.classList.contains('visto')) { pendentes.splice(i, 1); continue; }
+        const rect = e.getBoundingClientRect();
+        if (rect.top < limite) {
+          if (rect.bottom < 0) e.style.transition = 'none';
+          e.classList.add('visto'); obs.unobserve(e); pendentes.splice(i, 1);
+        }
+      }
+      if (!pendentes.length) window.removeEventListener('scroll', aoRolar);
+    };
+    const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(varre); } };
+    window.addEventListener('scroll', aoRolar, { passive: true });
+    const rede = setTimeout(varre, 1200);
+    return () => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); };
   }, [fase, num]);
 
   /* barra, fio de progresso, capítulo ativo e parallax num handler só, dentro
@@ -200,7 +207,6 @@ export default function Casa() {
       pedindo = false;
       const y = window.scrollY, h = window.innerHeight;
       setSolida(y > h * 0.78);
-      setPassou(y > h * 0.9);
       const total = document.documentElement.scrollHeight - h;
       if (fio.current) fio.current.style.setProperty('--p', String(total > 0 ? Math.min(1, y / total) : 0));
       if (!parado) {
@@ -311,20 +317,16 @@ export default function Casa() {
       </div>
 
       {/* ------------------------------------------------------------ herói
-          A foto respira (Ken Burns), o bloco recua com o scroll, e o título
-          agora fala na voz do manual: bold, caixa baixa, apertado. */}
+          Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
+          dois botões, a régua. Nada de parágrafo. */}
       <section className="casa-heroi rev visto">
         <img className="casa-heroi-foto" src="/fotos/heroi.webp" alt="" fetchPriority="high" />
         <div className="casa-heroi-in">
           <p className="g-rot" style={{ justifyContent: 'center', color: 'rgba(255,255,255,.62)' }}>GUIA Church · Barra da Tijuca</p>
           <Tit as="h1" className="">Existe um lugar para você</Tit>
           <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>Domingo, dez da manhã.</p>
-          <p className="corpo">
-            Venha conhecer, ou entre para uma das equipes que fazem o domingo
-            acontecer.
-          </p>
           <div className="acoes">
-            <a href="#domingo" className="acao cheia">Quero conhecer</a>
+            <Link href="/cultos" className="acao cheia">Quero conhecer</Link>
             <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
           </div>
         </div>
@@ -338,247 +340,114 @@ export default function Casa() {
       <Letreiro />
 
       {/* --------------------------------------------- prova: sai do banco
-          A única prova concreta da página, em número grande. À esquerda, a
-          frase que dá sentido aos números; à direita, os números subindo. */}
+          A única prova concreta da página, em quatro números. */}
       {num && (
         <section className="casa-escuro rev" aria-label="A igreja em números">
-          <div className="g g-secao justa">
-            <div className="g-grade meio">
-              <div className="g-c4">
-                <p className="g-rot">Hoje</p>
-                <p className="g-ed" style={{ margin: 0 }}>Nenhuma delas começou sabendo.</p>
-              </div>
-              <div className="g-c8">
-                <div className="g-num">
-                  <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo hoje</span></div>
-                  <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
-                  <div><b><Contador n={num.postos} /></b><span>funções diferentes</span></div>
-                  <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
-                </div>
-              </div>
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">Hoje</p>
+              <p className="g-ed" style={{ margin: 0 }}>Nenhuma delas começou sabendo.</p>
+            </div>
+            <div className="g-num centro c-bloco grande">
+              <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo</span></div>
+              <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
+              <div><b><Contador n={num.postos} /></b><span>postos na escala</span></div>
+              <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
             </div>
           </div>
         </section>
       )}
 
       {/* ----------------------------------------------- 01 · O DOMINGO
-          FUNÇÃO: tirar o medo de quem nunca veio. Texto à esquerda, foto com o
-          selo do horário à direita, as quatro travas embaixo, e a saída para
-          as páginas fundas. As quatro perguntas são as palavras da igreja. */}
+          Título, uma linha, dois botões, a foto. As perguntas de quem nunca
+          foi moram em /cultos — a home não repete. */}
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
-          <div className="g-grade meio">
-            <div className="g-c5">
-              <p className="g-rot">01 · O domingo</p>
-              <Tit className="g-h2">Chega a hora que der</Tit>
-              <p className="g-ed">Ninguém vai reparar.</p>
-              <p className="g-corpo">
-                Noventa minutos, e termina em ponto. Tem gente de terno e gente
-                de chinelo na mesma fileira, e ninguém é chamado na frente.
-              </p>
-              <div className="g-acoes">
-                <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
-                <Link href="/como-chegar" className="acao">Como chegar</Link>
-              </div>
-            </div>
-            <div className="g-c6 g-d7">
-              <div className="g-foto larga leva">
-                <img src="/fotos/congregacao.webp" alt="Congregação reunida no culto de domingo" loading="lazy" decoding="async" />
-                <div className="g-selo">Dom 10h<small>Rua Pedra de Itaúna, 534</small></div>
-              </div>
+          <div className="c">
+            <p className="g-rot">01 · O domingo</p>
+            <Tit className="g-h2">Chega a hora que der</Tit>
+            <p className="g-ed">Ninguém vai reparar.</p>
+            <div className="g-acoes">
+              <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
+              <Link href="/como-chegar" className="acao">Como chegar</Link>
             </div>
           </div>
-
-          <div className="g-grade" style={{ marginTop: 'clamp(48px,6vw,88px)' }}>
-            <div className="g-c10 g-d2">
-              <ol className="g-perg">
-                <li>
-                  <span className="g-perg-n">01</span>
-                  <div><h3 className="g-perg-q">Como eu me visto?</h3>
-                  <p className="g-perg-r">Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.</p></div>
-                </li>
-                <li>
-                  <span className="g-perg-n">02</span>
-                  <div><h3 className="g-perg-q">Vou ter que falar alguma coisa?</h3>
-                  <p className="g-perg-r">Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.</p></div>
-                </li>
-                <li>
-                  <span className="g-perg-n">03</span>
-                  <div><h3 className="g-perg-q">E o meu filho?</h3>
-                  <p className="g-perg-r">Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.</p></div>
-                </li>
-                <li>
-                  <span className="g-perg-n">04</span>
-                  <div><h3 className="g-perg-q">Onde eu deixo o carro?</h3>
-                  <p className="g-perg-r">Tem equipe de estacionamento no domingo de manhã. Se vier de aplicativo, a porta é na Pedra de Itaúna, 534.</p></div>
-                </li>
-              </ol>
+          <div className="c-foto">
+            <div className="g-foto leva">
+              <img src="/fotos/congregacao.webp" alt="Congregação reunida no culto de domingo" loading="lazy" decoding="async" />
             </div>
           </div>
         </div>
       </section>
 
       {/* ------------------------------------------------ 02 · QUEM É A GUIA
-          TODO O TEXTO DESTA SEÇÃO É DA IGREJA, palavra por palavra. O que
-          mudou é o recipiente: a sigla vira quatro azulejos, o versículo vira
-          a frase grande em itálico, e os pilares e o alvo ganham a areia. */}
+          A sigla em quatro azulejos iguais: a letra e a palavra. O resto
+          (versículo, pilares, alvo) mora em /sobre. */}
       <section id="igreja" className="casa-escuro rev">
         <div className="g g-secao">
-          <div className="g-grade fim">
-            <div className="g-c7">
-              <p className="g-rot">02 · A igreja</p>
-              <Tit className="g-h2">Somos GUIA</Tit>
-            </div>
-            <div className="g-c4 g-d9">
-              <p className="g-corpo">
-                GUIA é sigla, e é a razão de a marca ser <b style={{ fontWeight: 600, color: '#fff' }}>GUI&gt;</b>:
-                o chevron é o avanço. Ela vem do princípio de Gênesis 11:6.
-              </p>
-            </div>
+          <div className="c">
+            <p className="g-rot">02 · A igreja</p>
+            <Tit className="g-h2">Somos GUIA</Tit>
+            <p className="g-ed">Grupo Unido, Interagindo e Avançando.</p>
           </div>
-
-          <div className="g-tiles quatro">
-            <div className="g-tile">
-              <span className="g-tile-l">G</span>
-              <span><span className="g-tile-t">Grupo</span><span className="g-tile-d">Somos um povo. Não caminhamos isoladamente.</span></span>
-            </div>
-            <div className="g-tile">
-              <span className="g-tile-l">U</span>
-              <span><span className="g-tile-t">Unidos</span><span className="g-tile-d">Cada pessoa tem um papel na construção de algo maior do que si mesma.</span></span>
-            </div>
-            <div className="g-tile">
-              <span className="g-tile-l">I</span>
-              <span><span className="g-tile-t">Interagindo</span><span className="g-tile-d">Cultura se constrói por relacionamento, comunicação e participação.</span></span>
-            </div>
-            <div className="g-tile">
-              <span className="g-tile-l"><span className="marca-chev" aria-hidden="true"><Chevron /></span></span>
-              <span><span className="g-tile-t">Avançando</span><span className="g-tile-d">Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.</span></span>
-            </div>
+          <div className="g-tiles quatro letras centro c-larga">
+            <div className="g-tile"><span className="g-tile-l">G</span><span className="g-tile-t">Grupo</span></div>
+            <div className="g-tile"><span className="g-tile-l">U</span><span className="g-tile-t">Unidos</span></div>
+            <div className="g-tile"><span className="g-tile-l">I</span><span className="g-tile-t">Interagindo</span></div>
+            <div className="g-tile"><span className="g-tile-l"><span className="marca-chev" aria-hidden="true"><Chevron /></span></span><span className="g-tile-t">Avançando</span></div>
           </div>
-
-          <div className="g-grade" style={{ marginTop: 'clamp(56px,7vw,104px)' }}>
-            <div className="g-c9 g-d2">
-              <blockquote className="g-ed" style={{ margin: 0, fontSize: 'clamp(28px,4vw,58px)', maxWidth: '26ch' }}>
-                Eis que o povo é um, e todos têm uma mesma língua; e isto é o que
-                começam a fazer; e, agora, não haverá restrição para tudo o que
-                eles intentarem fazer.
-              </blockquote>
-              <p className="g-rot" style={{ marginTop: 28 }}>Gênesis 11:6</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="casa-areia rev">
-        <div className="g g-secao">
-          <div className="g-grade">
-            <div className="g-c4">
-              <div className="g-fixa">
-                <p className="g-rot">Nossos pilares</p>
-                <Tit className="g-h2">Relacionamento, generosidade e serviço</Tit>
-              </div>
-            </div>
-            <div className="g-c7 g-d6">
-              <ol className="g-perg">
-                <li><span className="g-perg-n">01</span><div><h3 className="g-perg-q">Relacionamento</h3>
-                  <p className="g-perg-r">Ninguém foi chamado para caminhar sozinho. Pertencer é parte fundamental da vida cristã.</p></div></li>
-                <li><span className="g-perg-n">02</span><div><h3 className="g-perg-q">Generosidade</h3>
-                  <p className="g-perg-r">Tudo o que temos vem de Deus. Somos generosos com o tempo, os recursos e os dons que Ele colocou em nossas mãos.</p></div></li>
-                <li><span className="g-perg-n">03</span><div><h3 className="g-perg-q">Serviço</h3>
-                  <p className="g-perg-r">Serviço é característica de liderança no Reino. Quem serve se torna protagonista e agente de mudança na sociedade.</p></div></li>
-              </ol>
-            </div>
-          </div>
-
-          <div className="g-grade" style={{ marginTop: 'clamp(56px,7vw,96px)' }}>
-            <div className="g-c5">
-              <p className="g-rot">Nosso alvo</p>
-              <Tit className="g-h2">Plantar cada cristão no solo da responsabilidade do Reino</Tit>
-              <p className="g-corpo">
-                Que cada pessoa encontre seu lugar, compreenda sua responsabilidade e
-                desenvolva aquilo que Deus depositou na vida dela.
-              </p>
-            </div>
-            <div className="g-c6 g-d7">
-              <ul className="g-vira" style={{ marginTop: 0 }}>
-                <li><span className="g-vira-de">Encher bancos</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Formar pessoas comprometidas com o Reino</span></li>
-                <li><span className="g-vira-de">Espectadores</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Participantes</span></li>
-                <li><span className="g-vira-de">Pessoas que recebam</span><span className="g-vira-chev"><Chevron /></span><span className="g-vira-para">Pessoas que sirvam, contribuam e frutifiquem</span></li>
-              </ul>
-              <p className="g-corpo">
-                Quando cada cristão entende seu lugar e assume sua responsabilidade, a
-                igreja deixa de ser um lugar onde as pessoas chegam e passa a ser um
-                povo que vive, serve e avança junto.
-              </p>
+          <div className="c">
+            <div className="g-acoes">
+              <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
             </div>
           </div>
         </div>
       </section>
 
       {/* ---------------------------------------------------- 03 · SERVIR
-          FUNÇÃO: apresentar as possibilidades e conduzir. A tese do produto
-          em itálico, as áreas com foto real saídas do banco, os quatro passos
-          numa linha. */}
+          Título, uma linha, um botão, e as áreas com foto real saídas do
+          banco. Os passos e a nota saíram: cada área explica o caminho. */}
       <section id="areas" className="casa-papel rev">
         <div className="g g-secao">
-          <div className="g-grade fim">
-            <div className="g-c7">
-              <p className="g-rot">03 · Servir</p>
-              <Tit className="g-h2">A igreja não é o prédio</Tit>
-              <p className="g-ed">São pessoas que chegaram mais cedo.</p>
-            </div>
-            <div className="g-c4 g-d9">
-              <p className="g-corpo">
-                É a quantidade de gente que decidiu chegar mais cedo para que o
-                domingo de outra pessoa funcionasse. São cinco equipes, uma para
-                cada tipo de gente.
-              </p>
-              <div className="g-acoes">
-                <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
-              </div>
-            </div>
+          <div className="c">
+            <p className="g-rot">03 · Servir</p>
+            <Tit className="g-h2">A igreja não é o prédio</Tit>
+            <p className="g-ed">São pessoas que chegaram mais cedo.</p>
           </div>
 
-          {fase === 'carregando' && <p className="g-corpo">Carregando as áreas</p>}
+          {fase === 'carregando' && <p className="g-corpo c" style={{ textAlign: 'center' }}>Carregando as áreas</p>}
           {fase === 'rede' && (
-            <p className="g-corpo">
-              Não consegui carregar as áreas agora. Atualize a página, ou fale com
-              quem te chamou para servir.
+            <p className="g-corpo c" style={{ textAlign: 'center' }}>
+              Não consegui carregar as áreas agora. Atualize a página.
             </p>
           )}
-          <div className="casa-areas">
+          <div className="casa-areas centro">
             {mins.map(m => (
               <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
                 <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
                 <span className="casa-area-nome">{m.nome}</span>
                 {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
                 <span className="casa-area-selo">
-                  {m.postos} {m.postos === 1 ? 'função' : 'funções'}
+                  {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
                   {!m.aberto && ' · conversa antes'}
                 </span>
               </Link>
             ))}
           </div>
-
-          <ol className="casa-tira" aria-label="Como começar" style={{ marginTop: 'clamp(40px,5vw,64px)' }}>
-            <li><b>01</b> Escolha a área e se cadastre</li>
-            <li><b>02</b> Converse com a liderança</li>
-            <li><b>03</b> Entre no time</li>
-            <li><b>04</b> Receba sua escala</li>
-          </ol>
-          <p className="casa-tira-nota">
-            O cadastro leva menos de um minuto, e cada área explica o que faz antes de você decidir.
-          </p>
+          <div className="c">
+            <div className="g-acoes">
+              <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* --------------------------------------------------------- FECHO */}
-      <section className="g-cheio rev">
+      <section className="g-cheio centro fecho rev">
         <img src="/fotos/oferta.webp" alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
           <Tit className="g-h2">{num ? `Hoje são ${num.pessoas} pessoas servindo em ${num.ministerios} áreas.` : 'Ninguém aqui começou sabendo.'}</Tit>
-          {num && <p className="g-ed">Nenhuma delas começou sabendo.</p>}
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
             <Link href="/eu" className="acao">Já sirvo · abrir meu espaço</Link>
@@ -588,9 +457,6 @@ export default function Casa() {
 
       <Rodape />
 
-      <div className={'cta-fixa' + (passou && !menu ? ' ver' : '')}>
-        <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
-      </div>
     </div>
   );
 }
