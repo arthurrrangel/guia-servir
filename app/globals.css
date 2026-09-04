@@ -5121,3 +5121,13 @@ html{ scroll-behavior:smooth }
 .pg-regiao::after{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(37,37,37,.85) 0%,rgba(37,37,37,.2) 45%,rgba(37,37,37,0) 70%) }
 .pg-regiao .mapa-cartao{ z-index:2 }
 @media(max-width:720px){ .pg-regiao{ aspect-ratio:auto; min-height:auto } .pg-regiao iframe{ position:relative; height:44vh; min-height:300px } .pg-regiao::after{ display:none } .pg-regiao .mapa-cartao{ position:relative; left:0; bottom:0; width:100% } }
+/* o grupo online: no lugar do mapa, o nome da plataforma numa retícula */
+.pg-online{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background-image:linear-gradient(rgba(228,212,180,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(228,212,180,.12) 1px,transparent 1px);
+  background-size:32px 32px; background-position:center;
+}
+.pg-online span{
+  font-family:var(--mono,ui-monospace,Menlo,monospace); font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--areia); border:1px solid rgba(228,212,180,.4); padding:10px 16px; background:rgba(37,37,37,.6);
+}

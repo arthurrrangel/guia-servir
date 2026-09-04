@@ -19,25 +19,53 @@ import { IGREJA } from './igreja';
    ============================================================================= */
 
 export type PequenaGuia = {
-  /** como o grupo é chamado: "PG do Recreio", "Casa da Ana" — o que a
-      igreja usa, sem sobrenome de ninguém */
+  /** como o grupo é chamado, sem sobrenome de ninguém */
   nome: string;
-  /** o bairro, exatamente como aparece no mapa */
+  /** o bairro, exatamente como aparece no mapa. Para grupo online, "Online". */
   bairro: string;
-  /** opcional: um ponto de referência PÚBLICO para o mapa cair mais perto
-      (uma praça, uma rua sem número, um shopping). Nunca a casa. */
+  /** opcional: um endereço PÚBLICO para o mapa cair mais perto — a igreja,
+      um prédio comercial, uma avenida sem número. Nunca a casa. */
   referencia?: string;
   dia: 'Segunda' | 'Terça' | 'Quarta' | 'Quinta' | 'Sexta' | 'Sábado';
   hora: string;
-  /** para quem é, em três palavras: "casais", "jovens", "aberto a todos" */
+  /** primeiro nome de quem lidera — é o rosto do grupo, e é público na igreja */
+  lideres?: string;
+  /** para quem é, em poucas palavras */
   publico?: string;
+  /** grupo que acontece por vídeo: sem mapa, com o nome da plataforma */
+  online?: string;
 };
 
+/* A LISTA (04/09/2026), enviada pelo Arthur. Do que veio, entra aqui só o
+   que pode ser público: nome, dia, hora, bairro, primeiro nome de quem
+   lidera. FICAM FORA, DE PROPÓSITO: o endereço das casas (com bloco e
+   apartamento) e os telefones pessoais — este repositório é público, e a
+   página é indexada. A planilha completa fica com a igreja. */
 export const PEQUENAS_GUIAS: PequenaGuia[] = [
-  /* exemplo do formato — apagar quando o primeiro grupo real entrar:
-  { nome: 'PG da Barra', bairro: 'Barra da Tijuca', referencia: 'Praça do Ó',
-    dia: 'Quarta', hora: '20h', publico: 'aberto a todos' },
-  */
+  { nome: 'Betel', bairro: 'Barra da Tijuca', referencia: `${IGREJA.nome}, ${IGREJA.rua}`,
+    dia: 'Quinta', hora: '20h', lideres: 'Wagner e Andréia', publico: 'na igreja' },
+  { nome: 'Elas', bairro: 'Barra da Tijuca', referencia: `${IGREJA.nome}, ${IGREJA.rua}`,
+    dia: 'Terça', hora: '17h30', lideres: 'Sonia Cristina', publico: 'mulheres · na igreja' },
+  { nome: 'Farol de Itaúna', bairro: 'Barra da Tijuca', referencia: 'Av. Prefeito Dulcídio Cardoso, Barra da Tijuca',
+    dia: 'Quinta', hora: '20h', lideres: 'Jonatas e Joice' },
+  { nome: 'Barraspace', bairro: 'Barra da Tijuca', referencia: 'Av. das Américas, 1155',
+    dia: 'Quarta', hora: '20h', lideres: 'Valério e Vanja' },
+  { nome: 'Shamah', bairro: 'Barra Olímpica',
+    dia: 'Quinta', hora: '20h', lideres: 'Alexandre e Janaína' },
+  { nome: 'Elohim', bairro: 'Recreio dos Bandeirantes',
+    dia: 'Quarta', hora: '20h', lideres: 'Egnaldo e Allyne' },
+  { nome: 'Bali', bairro: 'Recreio dos Bandeirantes',
+    dia: 'Quarta', hora: '20h', lideres: 'Hugo e Fernanda', publico: 'jovens · Follow' },
+  { nome: 'Seasons', bairro: 'Jacarepaguá',
+    dia: 'Quarta', hora: '20h', lideres: 'Thiago e Nádia', publico: 'jovens · Follow' },
+  { nome: 'Chosen', bairro: 'Marechal Hermes',
+    dia: 'Quinta', hora: '19h30', lideres: 'Cláudio e Greice' },
+  { nome: 'Sião', bairro: 'Cachambi',
+    dia: 'Quinta', hora: '19h', lideres: 'Emílio e Selma' },
+  { nome: 'Kairós', bairro: 'Online', online: 'Google Meet ou Zoom',
+    dia: 'Quarta', hora: '20h', lideres: 'Fagner e Joice' },
+  { nome: 'Online', bairro: 'Online', online: 'Discord',
+    dia: 'Quinta', hora: '20h', lideres: 'Will, Giovana e Lucas', publico: 'jovens · Follow' },
 ];
 
 /** A URL do embed (sem chave) centrada no bairro ou na referência. */

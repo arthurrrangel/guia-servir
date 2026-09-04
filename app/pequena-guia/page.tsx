@@ -129,7 +129,7 @@ export default function PequenaGuia() {
             <div className="g-c4 g-d9">
               <p className="g-corpo">
                 {PEQUENAS_GUIAS.length
-                  ? 'O mapa mostra o bairro de cada grupo. O endereço da casa a gente passa na conversa, para quem vai.'
+                  ? `${PEQUENAS_GUIAS.length} grupos, da Barra a Marechal Hermes, e dois por vídeo. O mapa mostra o bairro de cada um — o endereço da casa a gente passa na conversa, para quem vai.`
                   : 'Os grupos se encontram em casas, e o endereço é dito na conversa, para quem vai. Diga o seu bairro e a gente aponta o mais perto.'}
               </p>
             </div>
@@ -142,14 +142,20 @@ export default function PequenaGuia() {
                 return (
                   <article key={pg.nome} className="pg">
                     <div className="pg-mapa">
-                      <iframe src={mapaDaPequenaGuia(pg)} title={`Mapa: ${pg.nome}, ${pg.bairro}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
-                      <span className="pg-mira" aria-hidden="true" />
+                      {pg.online
+                        ? <div className="pg-online" aria-hidden="true"><span>{pg.online}</span></div>
+                        : <>
+                            <iframe src={mapaDaPequenaGuia(pg)} title={`Mapa: ${pg.nome}, ${pg.bairro}`} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                            <span className="pg-mira" aria-hidden="true" />
+                          </>}
                     </div>
                     <div className="pg-corpo">
                       <p className="g-rot">{pg.bairro}</p>
                       <span className="pg-nome">{pg.nome}</span>
                       <span className="pg-quando">{pg.dia}, {pg.hora}</span>
-                      {pg.publico && <span className="pg-nota">{pg.publico}</span>}
+                      {(pg.lideres || pg.publico) && (
+                        <span className="pg-nota">{[pg.lideres, pg.publico].filter(Boolean).join(' · ')}</span>
+                      )}
                       <div className="g-acoes">
                         <a href={conv.href} target="_blank" rel="noreferrer" className="acao cheia">Quero ir nessa <IcSeta /></a>
                       </div>
