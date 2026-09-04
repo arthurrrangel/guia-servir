@@ -5525,3 +5525,52 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @keyframes simbolo{ 0%{ opacity:0; transform:scale(.86) } 35%{ opacity:1; transform:scale(1) } 80%{ opacity:1 } 100%{ opacity:0; transform:scale(1.04) } }
 @keyframes cortina{ 0%,78%{ clip-path:inset(0 0 0 0) } 100%{ clip-path:inset(0 0 100% 0) } }
 @media(prefers-reduced-motion:reduce){ .abertura{ display:none } }
+
+/* =============================================================================
+   04/09 (madrugada) — A ANÁLISE: o que ainda não era absurdo
+   1. A foto do herói (telão azul com letra de música) brigava com o título.
+      Entra o palco largo com a marca no telão, escuro, com o centro
+      escurecido de propósito: o título manda, a foto é profundidade.
+   2. O tratamento das fotos era morno demais e chapado. Agora é cinema:
+      menos cor, mais contraste, pretos mais fundos.
+   3. A sigla era quatro azulejos. No desktop vira uma HISTÓRIA EM ROLAGEM:
+      a página trava, e G, U, I e > passam pela tela, uma letra de cada
+      vez, enquanto a pessoa rola (CSS scroll-driven; onde não há suporte,
+      os azulejos continuam).
+   4. A data real do próximo culto entra na régua do herói.
+   ============================================================================= */
+.g-foto img,.g-cheio > img,.g-passo img,.casa-area img,.casa-heroi-foto{
+  filter:saturate(.42) sepia(.2) contrast(1.18) brightness(.9);
+}
+.g-tile img{ filter:saturate(.42) sepia(.2) contrast(1.18) brightness(.38) }
+.g-tile:hover img{ filter:saturate(.42) sepia(.2) contrast(1.18) brightness(.46) }
+.casa-heroi-foto{ object-position:40% 50% }
+@media(min-width:760px){ .casa-heroi-foto{ object-position:30% 45% } }
+.casa-heroi::after{
+  background:
+    radial-gradient(60% 55% at 50% 58%,rgba(37,37,37,.62),transparent 72%),
+    linear-gradient(180deg,rgba(37,37,37,.55) 0%,rgba(37,37,37,.22) 40%,rgba(37,37,37,.92) 100%);
+}
+
+/* ---- a história em rolagem da sigla -------------------------------------- */
+.rolo{ display:none }
+@supports (animation-timeline: scroll()) {
+  @media (min-width:900px) and (prefers-reduced-motion:no-preference) {
+    .rolo{ display:block; height:340vh; view-timeline-name:--rolo; view-timeline-axis:block; position:relative }
+    .rolo-in{ position:sticky; top:0; height:100vh; overflow:hidden; display:flex; align-items:center }
+    .rolo-track{ display:flex; width:400vw; animation:rola linear both; animation-timeline:--rolo; animation-range:contain 0% contain 100%; will-change:transform }
+    .rolo-p{ width:100vw; flex:none; display:grid; place-items:center; text-align:center; padding:0 6vw }
+    .rolo-l{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(200px,42vh,460px); line-height:.86; letter-spacing:-.05em; color:var(--areia) }
+    .rolo-l .marca-chev{ display:inline-block; font-size:.86em; vertical-align:-.02em }
+    .rolo-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(34px,4.2vw,58px); letter-spacing:-.03em; line-height:1; margin:26px 0 0; color:#fff }
+    .rolo-d{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(22px,2.4vw,34px); color:rgba(255,255,255,.72); margin:14px auto 0; max-width:34ch }
+    .rolo-cab{ position:absolute; top:clamp(88px,12vh,128px); left:0; right:0; text-align:center; pointer-events:none }
+    .rolo-prog{ position:absolute; left:50%; bottom:clamp(36px,6vh,64px); transform:translateX(-50%); width:220px; height:1px; background:rgba(255,255,255,.18) }
+    .rolo-prog i{ position:absolute; left:0; top:-1px; height:3px; width:100%; background:var(--areia); transform-origin:left; animation:enche linear both; animation-timeline:--rolo; animation-range:contain 0% contain 100% }
+    .rolo-n{ position:absolute; left:50%; bottom:calc(clamp(36px,6vh,64px) + 16px); transform:translateX(-50%); font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:rgba(255,255,255,.55) }
+    .rolo-in::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:120px; background:linear-gradient(180deg,transparent,var(--noite)); pointer-events:none }
+    .sigla-azulejos{ display:none }
+  }
+}
+@keyframes rola{ to{ transform:translateX(-300vw) } }
+@keyframes enche{ from{ transform:scaleX(.02) } to{ transform:scaleX(1) } }

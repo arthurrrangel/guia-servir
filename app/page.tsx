@@ -47,6 +47,14 @@ type Numeros = {
 /* endereço, mapa e @ saem de lib/igreja.ts — uma fonte só para o site inteiro */
 const IG = IGREJA.instagram;
 
+/* a sigla, palavra por palavra como a igreja escreve */
+const SIGLA = [
+  { l: 'G', t: 'Grupo', d: 'Somos um povo. Não caminhamos isoladamente.' },
+  { l: 'U', t: 'Unidos', d: 'Cada pessoa tem um papel na construção de algo maior do que si mesma.' },
+  { l: 'I', t: 'Interagindo', d: 'Cultura se constrói por relacionamento, comunicação e participação.' },
+  { l: '>', t: 'Avançando', d: 'Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.' },
+];
+
 /* As seções internas da home continuam com os mesmos ids — #domingo, #igreja
    e #areas seguem sendo endereços válidos, e os links dentro do conteúdo os
    usam. O que sumiu foi a lista SECOES e o marcador de capítulo ativo: eles
@@ -324,7 +332,7 @@ export default function Casa() {
           Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
           dois botões, a régua. Nada de parágrafo. */}
       <section className="casa-heroi rev visto">
-        <img className="casa-heroi-foto" src="/fotos/heroi.webp" alt="" fetchPriority="high" />
+        <img className="casa-heroi-foto" src="/fotos/palco.webp" alt="" fetchPriority="high" />
         <div className="casa-heroi-in">
           <p className="g-rot" style={{ justifyContent: 'center', color: 'rgba(255,255,255,.62)' }}>GUIA Church · Barra da Tijuca</p>
           <Tit as="h1" className="">Existe um lugar para você</Tit>
@@ -335,7 +343,7 @@ export default function Casa() {
           </div>
         </div>
         <div className="casa-regua">
-          <span><b>Domingo, 10h</b></span>
+          <span><b><ProximoCulto /></b></span>
           <span className="so-largo"><b>Rua Pedra de Itaúna, 534</b> · Barra da Tijuca</span>
           <span><b>{IGREJA.instagramArroba}</b></span>
         </div>
@@ -407,24 +415,57 @@ export default function Casa() {
       </section>
 
       {/* ------------------------------------------------ 02 · QUEM É A GUIA
-          A sigla em quatro azulejos iguais: a letra e a palavra. O resto
-          (versículo, pilares, alvo) mora em /sobre. */}
-      <section id="igreja" className="casa-escuro rev">
-        <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">02 · A igreja</p>
-            <Tit className="g-h2">Somos GUIA</Tit>
-            <p className="g-ed">Grupo Unido, Interagindo e Avançando.</p>
+          No desktop, uma história em rolagem: a página trava e G, U, I e >
+          atravessam a tela, uma letra por vez, com a palavra e a frase da
+          igreja (CSS scroll-driven, ver .rolo). Onde não há suporte ou no
+          celular, os quatro azulejos. O texto é o da igreja, palavra por
+          palavra. */}
+      <section id="igreja" className="casa-escuro retic rev">
+        <div className="rolo">
+          <div className="rolo-in">
+            <div className="rolo-cab">
+              <p className="g-rot" style={{ justifyContent: 'center' }}>02 · A igreja</p>
+            </div>
+            <div className="rolo-track">
+              {SIGLA.map((l, i) => (
+                <div key={l.t} className="rolo-p">
+                  <div>
+                    <div className="rolo-l">{l.l === '>' ? <span className="marca-chev"><Chevron /></span> : l.l}</div>
+                    <p className="rolo-t">{l.t}</p>
+                    <p className="rolo-d">{l.d}</p>
+                    {i === SIGLA.length - 1 && (
+                      <div className="g-acoes" style={{ justifyContent: 'center' }}>
+                        <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <span className="rolo-n">Somos GUIA · quatro palavras</span>
+            <div className="rolo-prog"><i /></div>
           </div>
-          <div className="g-tiles quatro letras centro c-larga">
-            <div className="g-tile"><span className="g-tile-l">G</span><span className="g-tile-t">Grupo</span></div>
-            <div className="g-tile"><span className="g-tile-l">U</span><span className="g-tile-t">Unidos</span></div>
-            <div className="g-tile"><span className="g-tile-l">I</span><span className="g-tile-t">Interagindo</span></div>
-            <div className="g-tile"><span className="g-tile-l"><span className="marca-chev" aria-hidden="true"><Chevron /></span></span><span className="g-tile-t">Avançando</span></div>
-          </div>
-          <div className="c">
-            <div className="g-acoes">
-              <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+        </div>
+
+        <div className="sigla-azulejos">
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">02 · A igreja</p>
+              <Tit className="g-h2">Somos GUIA</Tit>
+              <p className="g-ed">Grupo Unido, Interagindo e Avançando.</p>
+            </div>
+            <div className="g-tiles quatro letras centro c-larga">
+              {SIGLA.map(l => (
+                <div key={l.t} className="g-tile">
+                  <span className="g-tile-l">{l.l === '>' ? <span className="marca-chev" aria-hidden="true"><Chevron /></span> : l.l}</span>
+                  <span className="g-tile-t">{l.t}</span>
+                </div>
+              ))}
+            </div>
+            <div className="c">
+              <div className="g-acoes">
+                <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+              </div>
             </div>
           </div>
         </div>
