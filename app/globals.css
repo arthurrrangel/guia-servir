@@ -5031,16 +5031,16 @@ html{ scroll-behavior:smooth }
 .mapa{ position:relative; background:var(--noite); min-height:clamp(520px,78vh,860px); isolation:isolate; overflow:hidden }
 .mapa iframe{
   position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
-  filter:grayscale(1) invert(.93) contrast(1.08) brightness(.86) sepia(.18);
+  filter:grayscale(1) invert(.9) contrast(1.15) brightness(1.08) sepia(.22);
   transition:filter .6s var(--ease);
 }
-.mapa:hover iframe{ filter:grayscale(1) invert(.93) contrast(1.08) brightness(.94) sepia(.18) }
+.mapa:hover iframe{ filter:grayscale(1) invert(.9) contrast(1.15) brightness(1.16) sepia(.22) }
 /* a vinheta: prende o mapa ao preto das bordas, e o cartão lê por cima */
 .mapa::before{
   content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
   background:
-    linear-gradient(90deg,rgba(37,37,37,.86) 0%,rgba(37,37,37,.35) 34%,rgba(37,37,37,0) 60%),
-    linear-gradient(180deg,rgba(37,37,37,.55) 0%,rgba(37,37,37,0) 22%,rgba(37,37,37,0) 78%,rgba(37,37,37,.6) 100%);
+    linear-gradient(90deg,rgba(37,37,37,.72) 0%,rgba(37,37,37,.2) 34%,rgba(37,37,37,0) 55%),
+    linear-gradient(180deg,rgba(37,37,37,.5) 0%,rgba(37,37,37,0) 20%,rgba(37,37,37,0) 80%,rgba(37,37,37,.55) 100%);
 }
 /* a retícula: o toque de instrumento. Linhas finas a cada 96px, quase
    invisíveis, e o cruzamento no centro. Só decoração, só CSS, some no toque. */
@@ -5098,7 +5098,7 @@ html{ scroll-behavior:smooth }
 .pg-mapa{ position:relative; aspect-ratio:4/3; background:var(--noite); overflow:hidden }
 .pg-mapa iframe{
   position:absolute; inset:0; width:100%; height:100%; border:0; display:block;
-  filter:grayscale(1) invert(.93) contrast(1.08) brightness(.82) sepia(.18); pointer-events:none;
+  filter:grayscale(1) invert(.9) contrast(1.15) brightness(1.04) sepia(.22); pointer-events:none;
 }
 .pg-mapa::after{
   content:""; position:absolute; inset:0; pointer-events:none;
@@ -5117,7 +5117,7 @@ html{ scroll-behavior:smooth }
 .pg-corpo .g-acoes{ margin-top:auto; padding-top:14px }
 /* a região inteira, quando ainda não há grupo cadastrado */
 .pg-regiao{ position:relative; aspect-ratio:16/8; min-height:360px; background:var(--noite); isolation:isolate; overflow:hidden; margin-top:clamp(40px,5vw,64px) }
-.pg-regiao iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) invert(.93) contrast(1.08) brightness(.82) sepia(.18) }
+.pg-regiao iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) invert(.9) contrast(1.15) brightness(1.06) sepia(.22) }
 .pg-regiao::after{ content:""; position:absolute; inset:0; pointer-events:none; background:linear-gradient(90deg,rgba(37,37,37,.85) 0%,rgba(37,37,37,.2) 45%,rgba(37,37,37,0) 70%) }
 .pg-regiao .mapa-cartao{ z-index:2 }
 @media(max-width:720px){ .pg-regiao{ aspect-ratio:auto; min-height:auto } .pg-regiao iframe{ position:relative; height:44vh; min-height:300px } .pg-regiao::after{ display:none } .pg-regiao .mapa-cartao{ position:relative; left:0; bottom:0; width:100% } }
