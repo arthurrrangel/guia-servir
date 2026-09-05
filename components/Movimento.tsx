@@ -62,7 +62,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
           es => es.forEach(e => {
             if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); }
           }),
-          { rootMargin: '0px 0px 6% 0px' },
+          { rootMargin: '0px 0px 25% 0px' },
         );
         const pendentes = Array.from(raiz.querySelectorAll<HTMLElement>('.rev:not(.visto)'));
         pendentes.forEach(e => obs.observe(e));
@@ -75,7 +75,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
         let pedindo = false;
         const varre = () => {
           pedindo = false;
-          const limite = window.innerHeight * 1.06;
+          const limite = window.innerHeight * 1.25;
           for (let i = pendentes.length - 1; i >= 0; i--) {
             const e = pendentes[i];
             if (e.classList.contains('visto')) { pendentes.splice(i, 1); continue; }

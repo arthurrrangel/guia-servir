@@ -34,8 +34,8 @@ import Movimento from './Movimento';
 const PAGINAS = [
   { href: '/cultos', rot: 'Cultos' },
   { href: '/como-chegar', rot: 'Como chegar' },
-  { href: '/sobre', rot: 'Conheça' },
   { href: '/pequena-guia', rot: 'Pequena Guia' },
+  { href: '/sobre', rot: 'Quem somos' },
 ];
 
 export function Barra({ atual }: { atual?: string }) {
@@ -86,7 +86,7 @@ export function Barra({ atual }: { atual?: string }) {
               </li>
             ))}
             <li style={{ ['--i' as string]: PAGINAS.length }}>
-              <Link href="/servir" onClick={() => setMenu(false)}>Servir</Link>
+              <Link href="/servir" onClick={() => setMenu(false)}>Quero servir</Link>
             </li>
           </ul>
           <div className="menu-pe">
@@ -115,11 +115,8 @@ export function Rodape() {
         <p className="g-ed g-pe-frase" style={{ color: 'var(--areia)' }}>{IGREJA.frase}</p>
 
         <nav className="g-pe-links" aria-label="Páginas">
-          <Link href="/cultos">Cultos</Link>
-          <Link href="/como-chegar">Como chegar</Link>
-          <Link href="/pequena-guia">Pequena Guia</Link>
-          <Link href="/sobre">Quem somos</Link>
-          <Link href="/servir">Servir</Link>
+          {PAGINAS.map(p => <Link key={p.href} href={p.href}>{p.rot}</Link>)}
+          <Link href="/servir">Quero servir</Link>
           <Link href="/acessar">Acesso às equipes</Link>
         </nav>
 

@@ -9,7 +9,6 @@ import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
 import { Rodape } from '@/components/Site';
 import Contador from '@/components/Contador';
-import { Letreiro } from '@/components/Letreiro';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
@@ -74,8 +73,8 @@ const SIGLA = [
 const PAGINAS = [
   { href: '/cultos', rot: 'Cultos' },
   { href: '/como-chegar', rot: 'Como chegar' },
-  { href: '/sobre', rot: 'Conheça' },
   { href: '/pequena-guia', rot: 'Pequena Guia' },
+  { href: '/sobre', rot: 'Quem somos' },
 ];
 
 /* o título monta palavra por palavra. Fica em componente porque a quebra em
@@ -177,7 +176,7 @@ export default function Casa() {
 
     const obs = new IntersectionObserver(
       es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); } }),
-      { rootMargin: '0px 0px 6% 0px' },
+      { rootMargin: '0px 0px 25% 0px' },
     );
     const pendentes = Array.from(r.querySelectorAll<HTMLElement>('.rev:not(.visto)'));
     pendentes.forEach(e => obs.observe(e));
@@ -190,7 +189,7 @@ export default function Casa() {
     let pedindo = false;
     const varre = () => {
       pedindo = false;
-      const limite = window.innerHeight * 1.06;
+      const limite = window.innerHeight * 1.25;
       for (let i = pendentes.length - 1; i >= 0; i--) {
         const e = pendentes[i];
         if (e.classList.contains('visto')) { pendentes.splice(i, 1); continue; }
@@ -317,7 +316,7 @@ export default function Casa() {
               </li>
             ))}
             <li style={{ ['--i' as string]: PAGINAS.length }}>
-              <Link href="/servir" onClick={() => setMenu(false)}>Servir</Link>
+              <Link href="/servir" onClick={() => setMenu(false)}>Quero servir</Link>
             </li>
           </ul>
           <div className="menu-pe">
@@ -342,14 +341,7 @@ export default function Casa() {
             <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
           </div>
         </div>
-        <div className="casa-regua">
-          <span><b><ProximoCulto /></b></span>
-          <span className="so-largo"><b>Rua Pedra de Itaúna, 534</b> · Barra da Tijuca</span>
-          <span><b>{IGREJA.instagramArroba}</b></span>
-        </div>
       </section>
-
-      <Letreiro />
 
       {/* ------------------------------------------ os três fatos, estruturados
           O que a pessoa procura num site de igreja em três segundos: quando é
@@ -379,8 +371,8 @@ export default function Casa() {
         <section className="casa-escuro rev" aria-label="A igreja em números">
           <div className="g g-secao">
             <div className="c">
-              <p className="g-rot">Hoje</p>
-              <p className="g-ed" style={{ margin: 0 }}>Nenhuma delas começou sabendo.</p>
+              <p className="g-rot">Hoje na GUIA</p>
+              <p className="g-ed" style={{ margin: 0 }}>Quem faz o domingo acontecer.</p>
             </div>
             <div className="g-num centro c-bloco grande">
               <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo</span></div>
@@ -398,7 +390,7 @@ export default function Casa() {
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
           <div className="c">
-            <p className="g-rot">01 · O domingo</p>
+            <p className="g-rot">O domingo</p>
             <Tit className="g-h2">Como é o domingo</Tit>
             <p className="g-ed">Louvor, palavra e acolhida.</p>
             <div className="g-acoes">
@@ -424,7 +416,7 @@ export default function Casa() {
         <div className="rolo">
           <div className="rolo-in">
             <div className="rolo-cab">
-              <p className="g-rot" style={{ justifyContent: 'center' }}>02 · A igreja</p>
+              <p className="g-rot" style={{ justifyContent: 'center' }}>A igreja</p>
             </div>
             <div className="rolo-track">
               {SIGLA.map((l, i) => (
@@ -450,7 +442,7 @@ export default function Casa() {
         <div className="sigla-azulejos">
           <div className="g g-secao">
             <div className="c">
-              <p className="g-rot">02 · A igreja</p>
+              <p className="g-rot">A igreja</p>
               <Tit className="g-h2">Somos GUIA</Tit>
               <p className="g-ed">Grupo Unido, Interagindo e Avançando.</p>
             </div>
@@ -477,7 +469,7 @@ export default function Casa() {
       <section id="areas" className="casa-papel rev">
         <div className="g g-secao">
           <div className="c">
-            <p className="g-rot">03 · Servir</p>
+            <p className="g-rot">Servir</p>
             <Tit className="g-h2">A igreja não é o prédio</Tit>
             <p className="g-ed">São pessoas que chegaram mais cedo.</p>
           </div>

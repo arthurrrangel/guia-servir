@@ -1765,7 +1765,12 @@ html,body{overflow-x:clip}
 
 /* revelação ao rolar: curta, e travada por .js-rev — se o efeito não rodar,
    nada fica escondido. O estado inicial de uma página pública é visível. */
-.js-rev .rev{opacity:0;transform:translateY(14px);transition:opacity var(--t-lento),transform var(--t-lento)}
+/* 05/09: A SEÇÃO INTEIRA NUNCA MAIS FICA INVISÍVEL. Esta regra escondia a
+   faixa toda (opacity 0 + 14px) até o observador marcar .visto, com 520ms
+   de transição. Quem rolava rápido via faixas cinzas vazias e blocos
+   "entrando no lugar" — era isso, não a rasterização. Agora só os FILHOS
+   revelam (curto, sem deslocamento grande); a faixa em si nasce pintada. */
+.js-rev .rev{opacity:1;transform:none;transition:none}
 .js-rev .rev.visto{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){ .js-rev .rev{opacity:1;transform:none;transition:none} }
 
@@ -4593,8 +4598,8 @@ html{ scroll-behavior:smooth }
 .js-rev .rev .acoes,.js-rev .rev .casa-hora,.js-rev .rev .casa-tira,.js-rev .rev .casa-tira-nota,
 .js-rev .rev .casa-perguntas > div,.js-rev .rev .casa-dados > div,.js-rev .rev .escolha,
 .js-rev .rev .vagas > *,.js-rev .rev .sigla > div,.js-rev .rev .pilares > div,.js-rev .rev .alvo > div{
-  opacity:0; transform:translateY(14px);
-  transition:opacity var(--t-lento),transform var(--t-lento);
+  opacity:0; transform:translateY(8px);
+  transition:opacity .36s var(--ease),transform .36s var(--ease);
 }
 .js-rev .rev.visto .indice,.js-rev .rev.visto .chapeu,.js-rev .rev.visto .corpo,.js-rev .rev.visto .editorial,
 .js-rev .rev.visto .acoes,.js-rev .rev.visto .casa-hora,.js-rev .rev.visto .casa-tira,.js-rev .rev.visto .casa-tira-nota,
@@ -4989,7 +4994,7 @@ html{ scroll-behavior:smooth }
 
 /* ---- revelação dos elementos do sistema editorial --------------------------- */
 .js-rev .rev :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
-  opacity:0; transform:translateY(14px); transition:opacity .42s var(--ease),transform .42s var(--ease);
+  opacity:0; transform:translateY(8px); transition:opacity .36s var(--ease),transform .36s var(--ease);
 }
 .js-rev .rev.visto :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div){
   opacity:1; transform:none;
@@ -5003,7 +5008,7 @@ html{ scroll-behavior:smooth }
 .js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(3){ transition-delay:220ms }
 .js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(4){ transition-delay:290ms }
 .js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(n+5){ transition-delay:360ms }
-.js-rev .rev .g-foto{ clip-path:inset(0 0 100% 0); transition:clip-path .7s var(--ease) }
+.js-rev .rev .g-foto{ clip-path:inset(0 0 100% 0); transition:clip-path .55s var(--ease) }
 .js-rev .rev.visto .g-foto{ clip-path:inset(0 0 0 0); transition-delay:60ms }
 .js-rev .rev .g-cheio > img{ transform:scale(1.06); transition:transform 1.6s var(--ease) }
 .js-rev .rev.visto .g-cheio > img{ transform:scale(1) }
@@ -5496,8 +5501,8 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 
 /* a entrada do herói: a foto abre de cima para baixo, o texto sobe */
 .js-rev .rev.g-cheio{ clip-path:inset(0 0 0 0) }
-.js-rev .rev.g-cheio > img{ clip-path:inset(0 0 100% 0); transition:clip-path 1.1s var(--ease),transform 1.6s var(--ease) }
-.js-rev .rev.visto.g-cheio > img{ clip-path:inset(0 0 0 0) }
+.js-rev .rev.g-cheio.alta > img{ clip-path:inset(0 0 100% 0); transition:clip-path 1.1s var(--ease),transform 1.6s var(--ease) }
+.js-rev .rev.visto.g-cheio.alta > img{ clip-path:inset(0 0 0 0) }
 
 /* as palavras que acendem com a rolagem (versículo) */
 .luz .lz{ display:inline-block }
@@ -5572,5 +5577,33 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
     .sigla-azulejos{ display:none }
   }
 }
-@keyframes rola{ to{ transform:translateX(-300vw) } }
+/* cada letra PARA no centro por um trecho da rolagem (16% de cada quarto) e
+   só então desliza para a próxima: quem para de rolar no meio vê uma letra
+   inteira, nunca meia letra cortada na borda. */
+@keyframes rola{
+  0%,16%{ transform:translateX(0) }
+  28%,44%{ transform:translateX(-100vw) }
+  56%,72%{ transform:translateX(-200vw) }
+  84%,100%{ transform:translateX(-300vw) }
+}
 @keyframes enche{ from{ transform:scaleX(.02) } to{ transform:scaleX(1) } }
+
+/* 05/09 — azulejos alinhados: letra, título e texto empilham do topo, então
+   os títulos ficam na mesma linha em todos os azulejos (antes o
+   space-between deixava cada título numa altura, conforme o tamanho do texto) */
+.g-tile{ justify-content:flex-start; gap:18px }
+.g-tile > span:last-child{ display:block }
+.g-tiles.letras .g-tile{ gap:12px }
+/* herói da home: o bloco de texto fica no centro de verdade (o padding de
+   120/40 empurrava tudo para baixo) */
+.casa-heroi-in{ padding:110px var(--e5) 96px }
+@media(max-width:759px){ .casa-heroi-in{ padding:96px var(--e5) 88px } .casa-heroi-foto{ object-position:50% 50% } }
+/* a letra do azulejo vive numa caixa de altura fixa: G, U, I e o chevron
+   ficam no mesmo lugar e os títulos embaixo caem na mesma linha */
+.g-tile-l{ display:flex; align-items:center; height:1em; line-height:1 }
+.g-tiles.centro .g-tile-l{ justify-content:center }
+.g-tile-l .marca-chev{ display:flex; align-items:center; height:.84em; font-size:1em; vertical-align:baseline }
+.g-tile-l .marca-chev svg{ height:100% !important; width:auto !important }
+/* os filhos do azulejo não encolhem: quando o texto é maior, o azulejo cresce
+   (a proporção quadrada é o mínimo), e a letra mantém a altura em todos */
+.g-tile > *{ flex:none }
