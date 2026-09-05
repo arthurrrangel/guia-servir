@@ -5748,3 +5748,18 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .cad .wiz-pe{ max-width:676px }
 .cad .wiz-falta{ color:var(--cinza) }
 .cad .wiz-resumo{ border-radius:0 }
+/* os azulejos de /sobre e de /acessar também centrados, como tudo o mais.
+   Os da sigla empilham do topo (as letras e os títulos ficam na mesma linha
+   em todos); os de foto (/acessar) guardam o número em cima e o título
+   embaixo, só que no eixo do centro. */
+.g-tiles.centro .g-tile{ justify-content:flex-start }
+.g-tiles.tres.centro .g-tile{ justify-content:space-between }
+.g-tiles.centro .g-tile-d{ margin-inline:auto; max-width:30ch }
+/* a descrição do azulejo era inline dentro de um bloco de 21px/1.6: as linhas
+   saíam com 34px de entrelinha e o texto de /sobre era cortado no fundo do
+   quadrado. Bloco com a própria entrelinha, e o azulejo com descrição cresce
+   com o texto em vez de cortá-lo. */
+.g-tile-d{ display:block }
+.g-tiles.centro:not(.letras) .g-tile{ aspect-ratio:auto; min-height:0; padding-bottom:clamp(26px,3vw,40px) }
+.g-tiles.tres.centro .g-tile{ aspect-ratio:1 }
+@media(max-width:899px){ .g-tiles.tres.centro .g-tile{ aspect-ratio:auto } }

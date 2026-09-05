@@ -64,7 +64,7 @@ export default function Sobre() {
             <Tit className="g-h2">Somos GUIA</Tit>
             <p className="g-ed">O chevron é o avanço.</p>
           </div>
-          <div className="g-tiles quatro c-larga c-bloco grande">
+          <div className="g-tiles quatro centro c-larga c-bloco grande">
             <div className="g-tile"><span className="g-tile-l">G</span><span><span className="g-tile-t">Grupo</span><span className="g-tile-d">Somos um povo. Não caminhamos isoladamente.</span></span></div>
             <div className="g-tile"><span className="g-tile-l">U</span><span><span className="g-tile-t">Unidos</span><span className="g-tile-d">Cada pessoa tem um papel na construção de algo maior do que si mesma.</span></span></div>
             <div className="g-tile"><span className="g-tile-l">I</span><span><span className="g-tile-t">Interagindo</span><span className="g-tile-d">Cultura se constrói por relacionamento, comunicação e participação.</span></span></div>

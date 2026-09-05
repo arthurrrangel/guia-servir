@@ -49,7 +49,7 @@ export default function Acessar() {
             <Tit as="h1" className="g-h1">Quem é você?</Tit>
             <p className="g-ed">Três caminhos. Nenhum pede cadastro.</p>
           </div>
-          <div className="g-tiles tres c-larga c-bloco grande">
+          <div className="g-tiles tres centro c-larga c-bloco grande">
             {PORTAS.map(p => (
               <Link key={p.href} href={p.href} className="g-tile">
                 <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
