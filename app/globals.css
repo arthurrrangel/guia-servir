@@ -3038,6 +3038,14 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
    direita — a 900px do título, no desktop. Ninguém liga uma coisa na outra a
    essa distância. Ordem explícita: título, seta, e só então a nota, empurrada
    para a direita pelo margin-left:auto. Sem tocar no JSX. */
+/* E UM RESPIRO DEPOIS DO CABEÇALHO, EM VEZ DE AJUSTE À MÃO EM CADA TELA.
+   Medido no /ajustes depois que o título virou 26px: a primeira seção tinha
+   folga de -4px (o parágrafo entrava DENTRO do fio do cabeçalho, por um
+   style={{marginTop:-4}} escrito à mão quando o título ainda era um rótulo de
+   12px) e as outras tinham folga ZERO — o fio da seção encostando na primeira
+   etiqueta de campo. Uma regra resolve as 20 seções e apaga a necessidade de
+   alguém lembrar de compensar na próxima. */
+.lid-secao-cab + *{ margin-top:var(--e5) }
 .lid-secao-cab{ justify-content:flex-start }
 .lid-secao-cab > .rot{ order:1 }
 .lid-secao-cab > .giro{ order:2 }
@@ -3173,9 +3181,12 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
    Só aparece para quem organiza mais de uma área. Quem cuida de uma coisa não
    precisa de painel de cinco. */
 .lid-igreja{ display:grid; gap:0; margin-top:var(--e5) }
+/* 2x2: [nome][estado] em cima, [data ocupando as duas colunas] embaixo.
+   baseline e não center porque o nome tem 17px e o estado 11px em caixa alta:
+   centralizar duas fontes de tamanhos diferentes desalinha as duas. */
 .lid-area{
   display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 var(--e4);
-  align-items:center; padding:var(--e4) 0; border-bottom:1px solid var(--linha2);
+  align-items:baseline; padding:var(--e4) 0; border-bottom:1px solid var(--linha2);
   text-decoration:none; color:inherit;
 }
 .lid-area:last-child{ border-bottom:0 }
@@ -3191,13 +3202,17 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
    Por que a varredura não pegou: este bloco só aparece para quem organiza mais
    de UMA área, e o harness de demo tem um ministério só. A tela nunca
    renderizou nos testes. Quem pegou foi a captura do Arthur. */
-.lid-area-nome{ display:block; font-size:var(--t-corpo); color:var(--ink) }
+.lid-area-nome{ grid-column:1; grid-row:1; font-size:var(--t-corpo); line-height:1.35; color:var(--ink) }
+/* 1/-1: as duas colunas. É esta linha que devolve à data a largura inteira e
+   acaba com a quebra órfã — o `display:block` de antes não bastava, porque o
+   problema não era o span ser inline, era a coluna ser estreita. */
 .lid-area-sub{
-  display:block;
+  grid-column:1 / -1; grid-row:2;
   margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .lid-area-est{
+  grid-column:2; grid-row:1; text-align:right;
   font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   white-space:nowrap; font-variant-numeric:tabular-nums;
@@ -3226,9 +3241,33 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
    flex:none diz o que se queria dizer — não cresce, não encolhe, ocupa o que
    o caractere ocupa. */
 .lid-alerta-n.sinal{ min-width:0; flex:none }
-.lid-alerta a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--linha); }
-.lid-alerta a:hover,
-.lid-alerta a:active{ border-bottom-color:var(--noite) }
+/* A LINHA INTEIRA É O ALVO, NÃO O PEDAÇO DE TEXTO SUBLINHADO.
+   05/09/2026. Estas linhas eram um <div> com um <a> de texto corrido dentro.
+   Medido: o <a> tinha 20px de altura no desktop. O WCAG 2.5.8 pede 24 em AA,
+   e o nosso próprio --toque pede 44 — a mesma régua que já vale para todo
+   botão do sistema. São cinco linhas na primeira tela do gestor e a mais
+   urgente delas ("pessoas querem entrar e esperam resposta") é a que ele mais
+   precisa acertar de primeira, no celular, sem mirar.
+
+   O alvo certo já estava ali: a própria linha tem 46px e leva o número junto,
+   que é onde a mão vai. Então a linha virou o link. O sublinhado continua só
+   no texto, senão o alvo maior custaria a leitura de onde se clica. */
+a.lid-alerta{
+  color:var(--ink); text-decoration:none; min-height:var(--toque);
+  transition:background var(--t);
+}
+/* text-decoration, NÃO border-bottom. Enquanto o link era um <a> inline dentro
+   da frase, a borda de baixo acompanhava o texto. Agora ele é item de um flex
+   e vira caixa de bloco: a borda passou a atravessar a linha inteira, parando
+   a 450px do fim da palavra, e só na última linha da frase quebrada. Sublinhado
+   de texto acompanha o texto em qualquer quebra e para onde a palavra para. */
+.lid-alerta-txt{
+  text-decoration:underline; text-decoration-color:var(--linha);
+  text-decoration-thickness:1px; text-underline-offset:3px;
+}
+a.lid-alerta:hover .lid-alerta-txt,
+a.lid-alerta:active .lid-alerta-txt,
+a.lid-alerta:focus-visible .lid-alerta-txt{ text-decoration-color:var(--noite) }
 .lid-alerta.ruim .lid-alerta-n{ color:var(--bad) }
 
 /* --------------------------------------------------------------- o resto */
@@ -3601,10 +3640,27 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-rot); letter-spacing:0; text-transform:none; color:var(--cinza);
   font-variant-numeric:tabular-nums;
 }
+/* NO CELULAR A INSTRUÇÃO DESCE, ELA NÃO DIVIDE A LINHA COM O NOME.
+   05/09/2026. O bloco antigo declarava UMA coluna e mandava a instrução para
+   `grid-column:2`. Coluna 2 não existia — e pedir uma coluna que não existe
+   não é erro em CSS Grid: o navegador CRIA a coluna, implícita e auto.
+
+   Medido em 390px: `grid-template-columns` computado dava "41.28px 272.72px".
+   A coluna implícita levou 273px dos 326px e a explícita `minmax(0,1fr)`
+   ficou com 41px. O nome ("Rafael Nogueira do…", 96px de texto) e a função
+   ("EDIÇÃO", 55px) cortavam dentro de uma caixa de 41px. `grid-template-rows`
+   dava UMA linha só: o `margin-top` e o `text-align:left` escritos logo abaixo
+   eram para um empilhamento que nunca aconteceu.
+
+   A correção é tirar `grid-column`, não somar uma coluna: com um filho por
+   linha e uma coluna declarada, o posicionamento automático já empilha. */
 @media(max-width:640px){
-  .lid-cand > summary{ grid-template-columns:minmax(0,1fr); gap:0 var(--e3) }
-  .lid-cand-est{ grid-column:2; text-align:left; margin-top:var(--e2); white-space:normal }
-  .lid-cand-esp{ display:inline; margin-left:var(--e2) }
+  .lid-cand > summary{ grid-template-columns:minmax(0,1fr); gap:0; align-items:start }
+  .lid-cand-est{ text-align:left; margin-top:var(--e2); white-space:normal }
+  /* vira inline aqui, e margem VERTICAL não vale em inline: o margin-top da
+     regra base ficaria escrito e morto. Margem lateral vale, e é ela que
+     separa "chame no WhatsApp" de "há 3 dias". */
+  .lid-cand-esp{ display:inline; margin-top:0; margin-left:var(--e2) }
 }
 
 /* o corpo alinha na coluna do nome: 3px de marca + 18px de gap */

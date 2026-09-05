@@ -129,7 +129,7 @@ function Ministerios() {
 
       <section className="lid-secao">
         <div className="lid-secao-cab"><span className="rot">Abrir um novo</span></div>
-        <p className="dim pequeno" style={{ marginTop: -4 }}>
+        <p className="dim pequeno">
           O ministério nasce vazio: depois dele vêm as funções e o time, nessa ordem.
         </p>
         <div className="linha" style={{ marginTop: 12 }}>

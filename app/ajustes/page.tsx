@@ -12,6 +12,7 @@ import { atualizarEquipe } from '@/lib/equipes';
 import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
+import { cont } from '@/lib/plural';
 
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
@@ -114,7 +115,7 @@ function Ajustes() {
             ação. Quem chega aqui quer saber O QUE FAZER, e a razão ("você não
             manda link no privado de ninguém") ele descobre sozinho no momento
             em que a primeira pessoa entra pelo link. Fica a ação. */}
-        <p className="dim pequeno" style={{ marginTop: -4 }}>
+        <p className="dim pequeno">
           Copie a mensagem, cole no grupo do ministério e <strong>fixe</strong>.
           Cada pessoa entra sozinha por ali.
         </p>
@@ -192,7 +193,7 @@ function Ajustes() {
         <div className="lid-secao-cab">
           <span className="rot">Funções</span>
         </div>
-        <p className="dim pequeno" style={{ marginTop: -4 }}>
+        <p className="dim pequeno">
           <strong>Durante o culto</strong> impede a mesma pessoa de pegar duas ao mesmo tempo.
           <strong> Depois do culto</strong> (como edição) pode acumular.
         </p>
@@ -225,7 +226,7 @@ function Ajustes() {
           ))}
         </div>
         <div className="linha" style={{ marginTop: 14 }}>
-          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)} placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
+          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)} aria-label="Nome da nova função" placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
           <button disabled={gravando || !nova.trim()} onClick={addFn}>Criar função</button>
         </div>
       </section>
@@ -239,7 +240,7 @@ function Ajustes() {
           <span className="lid-secao-nota">{lideres.length} com acesso</span>
           <IcSeta className="giro" />
         </summary>
-        <p className="dim pequeno" style={{ marginTop: -4 }}>
+        <p className="dim pequeno">
           Só estes emails abrem o espaço do organizador, e cada um vê apenas o
           ministério que organiza. Quem está como <strong>todos</strong> vê tudo
           e dá acesso aos outros. Voluntário não entra aqui: ele usa o link pessoal.
@@ -278,7 +279,12 @@ function Ajustes() {
         </div>
         {geral ? (
           <div className="linha" style={{ marginTop: 14 }}>
+            {/* aria-label, não só placeholder: placeholder some no instante em
+                que a pessoa começa a digitar, e some para sempre para quem usa
+                leitor de tela. Campo sem nome é campo que só quem construiu
+                entende. */}
             <input enterKeyHint="done" value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
+              aria-label="Email de quem vai organizar"
               inputMode="email" autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false}
               placeholder="email do organizador" style={{ maxWidth: 260 }} />
             <select aria-label="Qual ministério essa pessoa organiza" value={equipeDoLider}
@@ -313,7 +319,7 @@ function Ajustes() {
           <span className="rot">Outros ministérios</span>
           <span className="lid-secao-nota">Fora do alcance desta página</span>
         </div>
-        <p className="dim pequeno" style={{ marginTop: -4 }}>
+        <p className="dim pequeno">
           Criar, renomear ou apagar ministério mexe na casa inteira e por isso mora
           em outro lugar.
         </p>
@@ -330,7 +336,7 @@ function Ajustes() {
           delas é justamente quem nunca vai abrir esta página. Foram para o
           /painel: fechadas para quem já roda a escala, abertas na primeira vez. */}
 
-      <p className="lid-pe">{funcoesAtivas(S).length} funções ativas · {S.voluntarios.length} pessoas cadastradas</p>
+      <p className="lid-pe">{cont(funcoesAtivas(S).length, 'função ativa', 'funções ativas')} · {cont(S.voluntarios.length, 'pessoa cadastrada', 'pessoas cadastradas')}</p>
     </div>
   );
 }

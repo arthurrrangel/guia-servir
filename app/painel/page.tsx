@@ -12,6 +12,7 @@ import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
   problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES,
 } from '@/lib/engine';
+import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
    O PAINEL DE QUEM ORGANIZA
@@ -62,15 +63,30 @@ function Igreja() {
   /* uma área só não é visão geral: é a própria tela. */
   if (!areas || areas.length < 2) return null;
 
+  /* "1 NÃO PODE" SAÍA ÂMBAR AQUI E VERMELHO NO BLOCO DE BAIXO. 05/09/2026.
+     Mesmo fato, mesma tela, duas cores: esta função classificava recusa como
+     `pend`, e o "Depois disso" usa resumoDia(), que classifica recusa como
+     `critico`. Cor é a primeira coisa que se lê num painel; se ela discorda de
+     si mesma na mesma rolagem, o líder para de confiar na cor.
+
+     Quem estava errado era este lado, e a prova está no topo desta página: o
+     alerta mais alto do painel para uma recusa é "Alguém não pode no domingo
+     — re-sorteie ou troque antes de publicar", com botão de resolver agora.
+     Recusa abre buraco na escala. A regra agora é a mesma dos dois lados:
+     falta gente = vermelho, ninguém respondeu ainda = âmbar. */
   const leitura = (a: AreaVisao) => {
     if (a.vagas === null) return { cls: '', txt: 'sem culto marcado' };
     if (a.vagas > 0) return { cls: 'ruim', txt: `${a.vagas} sem ninguém` };
-    if (a.furos > 0) return { cls: 'ruim', txt: `${a.furos} furou` };
-    if (a.recusados > 0) return { cls: 'pend', txt: `${a.recusados} não pode` };
+    if (a.furos > 0) return { cls: 'ruim', txt: `${a.furos} ${pl(a.furos, 'furou', 'furaram')}` };
+    if (a.recusados > 0) return { cls: 'ruim', txt: `${a.recusados} ${pl(a.recusados, 'não pode', 'não podem')}` };
     if (a.pendentes > 0) return { cls: 'pend', txt: `${a.pendentes} sem responder` };
     return { cls: 'ok', txt: 'coberto' };
   };
-  const emFalta = areas.filter(a => a.vagas !== null && (a.vagas > 0 || a.furos > 0)).length;
+  /* a conta da nota do cabeçalho segue a mesma régua da cor: área vermelha é
+     área que precisa de gente. Antes ela contava vaga e furo mas ignorava
+     recusa, e o cabeçalho dizia "3 áreas" com quatro marcas vermelhas na
+     lista logo abaixo. */
+  const emFalta = areas.filter(a => leitura(a).cls === 'ruim').length;
 
   return (
     <section className="lid-secao">
@@ -85,15 +101,27 @@ function Igreja() {
           const l = leitura(a);
           return (
             <Link key={a.slug} href={`/servir/${a.slug}`} className={`lid-area ${l.cls}`}>
+              {/* O ESTADO FICA NA LINHA DO NOME, E A DATA GANHA A LARGURA TODA.
+                  05/09/2026. Antes o nome e a data moravam num <span> só, à
+                  esquerda, e o estado ocupava uma coluna `auto` com
+                  white-space:nowrap à direita. Num celular de 390px,
+                  "4 SEM RESPONDER" (uppercase com .15em de entreletra) come
+                  ~170px e sobra menos de 160 para "DOMINGO 06/09 · 9 DE 9",
+                  que precisa de ~200: a data quebrava e deixava um "9" órfão
+                  na segunda linha, com o estado boiando no meio de um bloco
+                  de duas linhas, alinhado a coisa nenhuma.
+                  Nada estourava e nada se sobrepunha, então a varredura deu
+                  zero — este é o defeito que só o olho pega.
+                  Agora são quatro células numa grade de 2x2: o estado sobe
+                  para a linha do NOME, que é o que ele qualifica, e a data
+                  passa a ocupar as duas colunas embaixo. Mesma altura. */}
               <span className="lid-marca" aria-hidden="true" />
-              <span>
-                <span className="lid-area-nome">{a.equipe}</span>
-                <span className="lid-area-sub">
-                  {a.proxima_data ? `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)} · ${a.preenchidos} de ${a.postos}` : `${a.postos} funções`}
-                  {a.candidaturas_novas > 0 && ` · ${a.candidaturas_novas} querem entrar`}
-                </span>
-              </span>
+              <span className="lid-area-nome">{a.equipe}</span>
               <span className="lid-area-est">{l.txt}</span>
+              <span className="lid-area-sub">
+                {a.proxima_data ? `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)} · ${a.preenchidos} de ${a.postos}` : cont(a.postos, 'função', 'funções')}
+                {a.candidaturas_novas > 0 && ` · ${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar`}
+              </span>
             </Link>
           );
         })}
@@ -116,18 +144,40 @@ function Pendencias() {
   }, [equipe?.id]);
   if (!p) return null;
 
+  /* CADA LINHA É UMA FRASE INTEIRA, E CONCORDA COM O NÚMERO. 05/09/2026.
+     Três das cinco linhas eram fragmentos sem sujeito — "esperando a conversa
+     com a liderança", "com nível declarado e ainda não conferido", "sem
+     responder a disponibilidade do mês". Quem lê tem que adivinhar do que se
+     está falando a partir do algarismo da coluna da esquerda. E a quinta saía
+     errada no singular: "1 funções sem ninguém que saiba fazer", que estava
+     no ar. Só a primeira tinha plural, e por isso só ela lia bem. */
+  const pl = (n: number, um: string, varios: string) => (n === 1 ? um : varios);
   const itens = [
     p.candidaturas_novas && { grave: true, n: p.candidaturas_novas,
-      txt: p.candidaturas_novas === 1 ? 'pessoa quer entrar e espera resposta' : 'pessoas querem entrar e esperam resposta',
+      txt: pl(p.candidaturas_novas,
+        'pessoa quer entrar e espera resposta',
+        'pessoas querem entrar e esperam resposta'),
       href: '/painel/candidaturas' },
     p.aguardando_conversa && { grave: false, n: p.aguardando_conversa,
-      txt: 'esperando a conversa com a liderança', href: '/painel/candidaturas' },
+      txt: pl(p.aguardando_conversa,
+        'pessoa esperando a conversa com a liderança',
+        'pessoas esperando a conversa com a liderança'),
+      href: '/painel/candidaturas' },
     p.sem_conferir && { grave: false, n: p.sem_conferir,
-      txt: 'com nível declarado e ainda não conferido', href: '/time/conferir' },
+      txt: pl(p.sem_conferir,
+        'pessoa com nível declarado que você ainda não conferiu',
+        'pessoas com nível declarado que você ainda não conferiu'),
+      href: '/time/conferir' },
     p.sem_disponibilidade && { grave: false, n: p.sem_disponibilidade,
-      txt: 'sem responder a disponibilidade do mês', href: '/time' },
+      txt: pl(p.sem_disponibilidade,
+        'pessoa não respondeu a disponibilidade do mês',
+        'pessoas não responderam a disponibilidade do mês'),
+      href: '/time' },
     p.funcoes_sem_gente && { grave: true, n: p.funcoes_sem_gente,
-      txt: 'funções sem ninguém que saiba fazer', href: '/ajustes' },
+      txt: pl(p.funcoes_sem_gente,
+        'função sem ninguém que saiba fazer',
+        'funções sem ninguém que saiba fazer'),
+      href: '/ajustes' },
   ].filter(Boolean) as { grave: boolean; n: number; txt: string; href: string }[];
 
   if (!itens.length) return null;
@@ -139,10 +189,10 @@ function Pendencias() {
       </div>
       <div>
         {itens.map((i, k) => (
-          <div key={k} className={`lid-alerta ${i.grave ? 'ruim' : ''}`}>
+          <Link key={k} href={i.href} className={`lid-alerta ${i.grave ? 'ruim' : ''}`}>
             <span className="lid-alerta-n">{i.n}</span>
-            <span><Link href={i.href}>{i.txt}</Link></span>
-          </div>
+            <span className="lid-alerta-txt">{i.txt}</span>
+          </Link>
         ))}
       </div>
     </section>
@@ -337,7 +387,7 @@ function Painel() {
           {r && (
             <div className="lid-placar">
               <b>{r.confirmados}<i>/{r.total}</i></b>
-              <span>confirmados</span>
+              <span>{pl(r.confirmados, 'confirmado', 'confirmados')}</span>
             </div>
           )}
         </div>
@@ -457,22 +507,35 @@ function Painel() {
         <div>
           <section>
             <div className="lid-secao-cab"><span className="rot">Depois disso</span></div>
+            {/* DUAS LÍNGUAS PARA A MESMA COISA, NA MESMA TELA. 05/09/2026.
+                Este bloco dizia "2/5" e o bloco da igreja, seis centímetros
+                acima, dizia "9 de 9". Um é fração, o outro é frase, e nem
+                sequer contavam a mesma coisa: "2/5" era confirmados sobre
+                preenchidos, "9 de 9" é preenchidos sobre postos. O líder que
+                lê os dois no mesmo scroll tem que descobrir isso sozinho.
+
+                Agora os dois blocos têm a mesma forma: o VEREDITO em cima, ao
+                lado do nome, com o mesmo vocabulário de leitura() ("sem
+                ninguém", "não pode", "sem responder", "coberto"); e os
+                NÚMEROS embaixo, na linha larga, sempre preenchidos de postos.
+                Nenhuma informação a menos, uma língua só. */}
             {seguintes.map(d => {
               const rr = S.escalas[d] ? resumoDia(S, d) : null;
               const cls = !rr ? '' : rr.situacao === 'ok' ? 'ok' : rr.situacao === 'atencao' ? 'pend' : 'ruim';
+              const est = !rr ? 'não montada'
+                : rr.vagas.length ? `${rr.vagas.length} sem ninguém`
+                : rr.furos ? `${rr.furos} ${pl(rr.furos, 'furou', 'furaram')}`
+                : rr.recusados ? `${rr.recusados} ${pl(rr.recusados, 'não pode', 'não podem')}`
+                : rr.pendentes ? `${rr.pendentes} sem responder`
+                : 'coberto';
               return (
                 <Link href={`/escala?m=${d.slice(0, 7)}#d${d}`} key={d} className={`lid-area ${cls}`}>
                   <span className="lid-marca" aria-hidden="true" />
-                  <span>
-                    <span className="lid-area-nome">
-                      {tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'domingo'} {fmtDia(d)}
-                    </span>
+                  <span className="lid-area-nome">
+                    {tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'domingo'} {fmtDia(d)}
                   </span>
-                  <span className="lid-area-est">
-                    {rr
-                      ? (rr.vagas.length ? `${rr.vagas.length} sem ninguém` : `${rr.confirmados}/${rr.preenchidos}`)
-                      : 'não montada'}
-                  </span>
+                  <span className="lid-area-est">{est}</span>
+                  {rr && <span className="lid-area-sub">{rr.preenchidos} de {rr.total}</span>}
                 </Link>
               );
             })}

@@ -10,6 +10,7 @@ import {
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
   resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
 } from '@/lib/engine';
+import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
    A ESCALA
@@ -241,7 +242,7 @@ function Escala() {
   const placar = contas.aMontar === futuros.length && futuros.length
     ? { n: futuros.length, un: '', rot: futuros.length === 1 ? 'culto a montar' : 'cultos a montar' }
     : contas.vagas ? { n: contas.vagas, un: '', rot: contas.vagas === 1 ? 'vaga sem ninguém' : 'vagas sem ninguém' }
-    : contas.pendentes ? { n: contas.pendentes, un: '', rot: 'ainda não confirmaram' }
+    : contas.pendentes ? { n: contas.pendentes, un: '', rot: pl(contas.pendentes, 'ainda não confirmou', 'ainda não confirmaram') }
     : futuros.length ? { n: 0, un: '', rot: 'tudo confirmado' }
     : null;
   const urge = contas.vagas > 0 || contas.furos > 0;
@@ -407,11 +408,11 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
   const resumo = !doDia.length ? { tom: '', txt: 'sem funções neste dia' }
     : passado
       ? r && r.furos ? { tom: 'ruim', txt: r.furos === 1 ? '1 pessoa furou' : `${r.furos} pessoas furaram` }
-        : r && r.confirmados ? { tom: '', txt: `${r.confirmados} de ${r.preenchidos} confirmaram` }
+        : r && r.confirmados ? { tom: '', txt: `${r.confirmados} de ${r.preenchidos} ${pl(r.confirmados, 'confirmou', 'confirmaram')}` }
         : { tom: '', txt: 'aconteceu' }
     : !dia || !preenchidos ? { tom: 'pend', txt: 'a montar' }
     : r && r.vagas.length ? { tom: 'ruim', txt: r.vagas.length === 1 ? '1 vaga sem ninguém' : `${r.vagas.length} vagas sem ninguém` }
-    : r && r.furos ? { tom: 'ruim', txt: `${r.furos} furou` }
+    : r && r.furos ? { tom: 'ruim', txt: `${r.furos} ${pl(r.furos, 'furou', 'furaram')}` }
     : semConfirmar ? { tom: 'pend', txt: semConfirmar === 1 ? '1 a confirmar' : `${semConfirmar} a confirmar` }
     : { tom: 'ok', txt: 'tudo confirmado' };
 
@@ -422,7 +423,7 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
         <span>
           <span className="esc-dia-nome">{nomeDia(d)}, {fmtDia(d)}</span>
           <span className="esc-dia-sub">
-            {passado ? 'já passou' : preenchidos ? `${preenchidos} de ${doDia.length} postos` : `${doDia.length} postos`}
+            {passado ? 'já passou' : preenchidos ? `${preenchidos} de ${cont(doDia.length, 'posto', 'postos')}` : cont(doDia.length, 'posto', 'postos')}
           </span>
         </span>
         <span className="esc-dia-est">{resumo.txt}</span>
@@ -614,7 +615,7 @@ function Disponibilidade({ d, S, aviso }: any) {
   return (
     <details className="esc-disp">
       <summary>
-        <span><b>{rp.posso.length}</b> podem</span>
+        <span><b>{rp.posso.length}</b> {pl(rp.posso.length, 'pode', 'podem')}</span>
         <span><b>{rp.nao.length}</b> não</span>
         <span className={rp.mudo.length ? 'falta' : ''}><b>{rp.mudo.length}</b> sem responder</span>
         <span className="esc-disp-ver">ver nomes</span>

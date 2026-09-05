@@ -9,6 +9,7 @@ import { IcCheck, IcSeta } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
 import { quemSou, outrasAreas, organiza, type Identidade } from '@/lib/identidade';
 import { aviseHumano } from '@/lib/erros';
+import { pl, cont } from '@/lib/plural';
 
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
@@ -616,7 +617,7 @@ export default function Eu() {
             </div>
             <p className="vol-nota" style={{ marginTop: 14 }}>
               {semResposta.length
-                ? `Faltam ${semResposta.length} ${semResposta.length === 1 ? 'dia' : 'dias'} para responder. É isso que garante seu lugar na escala.`
+                ? `${pl(semResposta.length, 'Falta', 'Faltam')} ${cont(semResposta.length, 'dia', 'dias')} para responder. É isso que garante seu lugar na escala.`
                 : 'Tudo respondido. Pode mudar quando quiser.'}
             </p>
             <div className="vol-disp" style={{ marginTop: 16 }}>

@@ -140,20 +140,20 @@ function Time() {
           tinha página. Fica aqui a convocação, porque nível não conferido piora
           a escala de verdade — não é detalhe que possa sumir de vista. */}
       {pendentes > 0 && (
-        <div className="lid-alerta ruim" style={{ marginTop: 'var(--e5)' }}>
+        <Link href="/time/conferir" className="lid-alerta ruim" style={{ marginTop: 'var(--e5)' }}>
           <span className="lid-alerta-n">{pendentes}</span>
           <span>
-            <Link href="/time/conferir">
+            <span className="lid-alerta-txt">
               {pendentes === 1
                 ? 'pessoa esperando você conferir o nível'
                 : 'níveis esperando sua conferência'}
-            </Link>
-            <span className="dim pequeno" style={{ display: 'block', marginTop: 4 }}>
+            </span>
+            <span className="dim pequeno" style={{ display: 'block', marginTop: 'var(--e1)' }}>
               Até você conferir, quem disse <strong>faz sozinho</strong> conta
               como <strong>ajuda quando falta</strong> no sorteio.
             </span>
           </span>
-        </div>
+        </Link>
       )}
 
       {/* DOIS GRUPOS, NÃO DEZESSETE ETIQUETAS.
@@ -268,9 +268,11 @@ function Time() {
               {!!v.indisponivel.length && (
                 <div className="cresce">
                   <label>Avisou que não pode</label>
-                  <div className="linha" style={{ gap: 6 }}>
+                  <div className="linha" style={{ gap: 'var(--e3)' }}>
                     {v.indisponivel.sort().map(d => (
-                      <span key={d} className="pill bad">{d.slice(8, 10)}/{d.slice(5, 7)}</span>
+                      /* data é informação, não controle: sem caixa, pela mesma
+                         lei do resto da tela (tem borda, se aperta). */
+                      <span key={d} className="marca-est bad">{d.slice(8, 10)}/{d.slice(5, 7)}</span>
                     ))}
                   </div>
                 </div>
@@ -320,11 +322,19 @@ function Time() {
         <div className="bloco-extra-corpo">
       <div className="legenda">
         <strong>Marque o que cada pessoa sabe fazer.</strong> Toque no nome da função para alternar o nível:
+        {/* A LEGENDA ERA QUATRO BOTÕES QUE NÃO FAZEM NADA.
+            Usava `.chip`, que é o controle de verdade logo acima: mesma borda,
+            mesmo fundo, mesmo padding — só que o de cima cicla o nível ao toque
+            e este não faz absolutamente nada. Quem tenta apertar aprende que
+            caixinha não é confiável, e passa a duvidar das de cima também.
+            Vira `.marca-nivel`, que é a marca colorida que a lista já usa em
+            cada linha. Assim a legenda ensina a MESMA língua que a tela fala,
+            em vez de imitar o botão. */}
         <div className="legenda-niveis">
-          <span className="chip t peq">faz sozinho</span>
-          <span className="chip r peq">ajuda quando falta</span>
-          <span className="chip e peq">aprendendo</span>
-          <span className="chip add peq">nada</span>
+          <i className="marca-nivel t">faz sozinho</i>
+          <i className="marca-nivel r">ajuda quando falta</i>
+          <i className="marca-nivel e">aprendendo</i>
+          <i className="marca-nivel">nada</i>
         </div>
         É isso que o sorteio usa. Quem está <em>aprendendo</em> nunca cai sozinho na escala.
       </div>

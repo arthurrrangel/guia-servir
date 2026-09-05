@@ -1,5 +1,6 @@
 'use client';
 import { sb } from './supabase';
+import { demoLigado } from './demo-ligado';
 
 /* Conversa com o banco no lado do LÍDER. Toda leitura aqui passa pela RLS que
    a migração 22 escreveu: o organizador escopado recebe só o ministério dele
@@ -97,6 +98,15 @@ export type Candidatura = {
 };
 
 export async function listarCandidaturas(equipeId: string): Promise<Candidatura[]> {
+  /* O HARNESS ALCANÇA ESTA TELA. 05/09/2026.
+     Medido: /painel/candidaturas renderizava 9 elementos e 30 palavras no demo
+     — só a mensagem "Não consegui carregar quem está esperando". Uma tela
+     inteira do gestor que a varredura nunca viu. É assim que defeito escapa:
+     não por falta de teste, por falta de ALCANCE do teste. */
+  if (process.env.NODE_ENV === 'development' && demoLigado()) {
+    const { candidaturasDemo } = await import('./demo');
+    return candidaturasDemo();
+  }
   const { data, error } = await sb()!
     .from('candidaturas')
     .select(`id,status,criado_em,atualizado_em,observacao,nota_interna,decidido_por,decidido_em,voluntario_id,
@@ -152,6 +162,17 @@ export type Painel = {
   vagas_pendentes: number; funcoes_sem_gente: number;
 };
 export async function painelDoMinisterio(equipeId: string): Promise<Painel | null> {
+  /* O HARNESS ALCANÇA O BLOCO "TAMBÉM ESPERA POR VOCÊ". 05/09/2026.
+     Esta função é a única fonte da seção de pendências do /painel, e ela
+     morria calada no demo: sem sessão, a RPC falha, o .catch do componente
+     engole, `p` fica null e a seção inteira não desenha. Cinco linhas de
+     alerta na tela inicial do gestor, com link, nunca passaram por medição
+     nenhuma. Não é falta de teste: é falta de ALCANCE do teste, terceira vez
+     no mesmo dia (visao_geral, candidaturas, e agora esta). */
+  if (process.env.NODE_ENV === 'development' && demoLigado()) {
+    const { painelDemo } = await import('./demo');
+    return painelDemo();
+  }
   const { data, error } = await sb()!.rpc('painel_ministerio', { p_equipe: equipeId });
   if (error) return null;
   return data as Painel;

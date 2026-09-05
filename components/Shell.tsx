@@ -161,9 +161,20 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        de um ramo que o NODE_ENV zera em build, o import dinâmico some inteiro. */
     if (process.env.NODE_ENV === 'development'
         && new URLSearchParams(window.location.search).has('demo')) {
-      void import('@/lib/demo').then(({ estadoDemo }) => {
+      void import('@/lib/demo').then(({ estadoDemo, equipesDemo }) => {
         idAtivo.current = 'demo'; _cacheAtiva = 'demo'; nomeAtivo.current = 'Mídia';
-        const eqs = [{ id: 'demo', nome: 'Mídia', slug: 'midia', whatsapp_grupo: null, ordem: 1 } as any];
+        /* CINCO MINISTÉRIOS, NÃO UM. 05/09/2026.
+           Este harness declarava uma equipe só, e por isso três telas nunca
+           desenhavam o caso real: /ajustes/ministerios com uma linha, o menu
+           do seletor com um item, e o bloco "O domingo da igreja" do /painel
+           sem desenhar nada (ele só existe para quem organiza mais de uma).
+           Foi por esse buraco que passou o defeito do nome colado — quem pegou
+           foi uma captura de tela do Arthur, não a varredura.
+
+           A ativa continua sendo a Mídia porque estadoDemo() é a Mídia. Trocar
+           de ministério no demo cai no carregamento real e falha: o harness
+           mede desenho, não navegação. */
+        const eqs = equipesDemo();
         const est = estadoDemo();
         setEquipes(eqs); _cacheEquipes = eqs;
         setEquipeId('demo');

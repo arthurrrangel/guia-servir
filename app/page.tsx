@@ -13,6 +13,7 @@ import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
+import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
    A HOME
@@ -375,10 +376,10 @@ export default function Casa() {
               <p className="g-ed" style={{ margin: 0 }}>Quem faz o domingo acontecer.</p>
             </div>
             <div className="g-num centro c-bloco grande">
-              <div><b><Contador n={num.pessoas} /></b><span>pessoas servindo</span></div>
-              <div><b><Contador n={num.ministerios} /></b><span>áreas abertas</span></div>
-              <div><b><Contador n={num.postos} /></b><span>postos na escala</span></div>
-              <div><b><Contador n={num.cultos_no_mes} /></b><span>encontros neste mês</span></div>
+              <div><b><Contador n={num.pessoas} /></b><span>{pl(num.pessoas, 'pessoa servindo', 'pessoas servindo')}</span></div>
+              <div><b><Contador n={num.ministerios} /></b><span>{pl(num.ministerios, 'área aberta', 'áreas abertas')}</span></div>
+              <div><b><Contador n={num.postos} /></b><span>{pl(num.postos, 'posto na escala', 'postos na escala')}</span></div>
+              <div><b><Contador n={num.cultos_no_mes} /></b><span>{pl(num.cultos_no_mes, 'encontro neste mês', 'encontros neste mês')}</span></div>
             </div>
           </div>
         </section>
@@ -506,7 +507,7 @@ export default function Casa() {
         <img src="/fotos/oferta.webp" alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
-          <Tit className="g-h2">{num ? `Hoje são ${num.pessoas} pessoas servindo em ${num.ministerios} áreas.` : 'Ninguém aqui começou sabendo.'}</Tit>
+          <Tit className="g-h2">{num ? `${pl(num.pessoas, 'Hoje é', 'Hoje são')} ${cont(num.pessoas, 'pessoa servindo', 'pessoas servindo')} em ${cont(num.ministerios, 'área', 'áreas')}.` : 'Ninguém aqui começou sabendo.'}</Tit>
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
             <Link href="/eu" className="acao">Já sirvo · abrir meu espaço</Link>

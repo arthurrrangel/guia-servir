@@ -1,5 +1,7 @@
 import { chromium } from 'playwright';
-const B='http://localhost:3000';
+/* a porta vem do ambiente: PORTA=3555 node scripts/... . Ela ja ficou
+   fixa em 3555 num commit e todo mundo que rodava em 3000 via tela vazia. */
+const B=`http://localhost:${process.env.PORTA||3000}`;
 const TELAS=[['/painel?demo=1','painel'],['/escala?demo=1','escala'],['/time?demo=1','time'],
 ['/time/conferir?demo=1','conferir'],['/ajustes?demo=1','ajustes'],['/ajustes/ministerios?demo=1','ministerios'],
 ['/painel/candidaturas?demo=1','candidaturas'],['/entrar','entrar'],['/eu/x?demo=1','voluntario']];

@@ -1,5 +1,6 @@
 'use client';
 import { sb } from './supabase';
+import { demoLigado } from './demo-ligado';
 
 export type Equipe = { id: string; nome: string; slug: string; whatsapp_grupo: string | null; ordem: number };
 
@@ -76,8 +77,13 @@ export async function visaoGeral(): Promise<AreaVisao[]> {
      colados ("MídiaDOMINGO 06/09 · 9 DE 9"). O defeito estava em produção e
      quem pegou foi uma captura de tela do Arthur.
      Teste que não alcança a tela não é teste dela. */
-  const { demoLigado } = await import('./demo');
-  if (demoLigado()) { const { visaoGeralDemo } = await import('./demo'); return visaoGeralDemo(); }
+  /* o `process.env.NODE_ENV === 'development' &&` na frente não é redundante
+     com demoLigado(): é ele que vira `false` no build e apaga o import junto.
+     Ver lib/demo-ligado.ts. */
+  if (process.env.NODE_ENV === 'development' && demoLigado()) {
+    const { visaoGeralDemo } = await import('./demo');
+    return visaoGeralDemo();
+  }
   const s = sb();
   if (!s) return [];
   const { data, error } = await s.rpc('visao_geral');

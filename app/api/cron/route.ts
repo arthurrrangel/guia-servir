@@ -1,3 +1,4 @@
+import { cont } from '@/lib/plural';
 /* =============================================================================
    AUTOMAÇÃO DO CICLO MENSAL — roda no servidor, para TODOS os ministérios.
 
@@ -169,7 +170,7 @@ export async function GET(req: Request) {
     for (const b of blocos) {
       envios.push({ equipe: b.nome,
         email: await enviar(paraEquipe(lideres, b.id),
-          `${b.nome} · escala de ${MESES[prox.mes - 1]} montada${b.vagas ? ` (${b.vagas} vaga sem gente)` : ''}`,
+          `${b.nome} · escala de ${MESES[prox.mes - 1]} montada${b.vagas ? ` (${cont(b.vagas, 'vaga', 'vagas')} sem gente)` : ''}`,
           `Revise no app (${SITE}) e cole no grupo:\n\n${b.texto}`) });
     }
     /* falha de um ministério NÃO pode sumir. O alerta vai para o organizador

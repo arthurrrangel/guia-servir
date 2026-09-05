@@ -98,10 +98,9 @@ export function estadoDemo(): Estado {
   return S;
 }
 
-export const demoLigado = () =>
-  process.env.NODE_ENV === 'development'
-  && typeof window !== 'undefined'
-  && new URLSearchParams(window.location.search).has('demo');
+/* mora em ./demo-ligado agora, para poder ser perguntado sem carregar este
+   arquivo. Reexportado só para quem já importava daqui. */
+export { demoLigado } from './demo-ligado';
 
 /* Fixture da página do voluntário. Mesma forma que o eu_dados devolve. */
 export function euDemo() {
@@ -168,4 +167,58 @@ export function visaoGeralDemo() {
     a('servico', 'Connect', 40, 16, 0, { candidaturas_novas: 6 }),
     a('livraria', 'Livraria', 50, 2, 2, { vagas: 0, recusados: 1 }),
   ];
+}
+
+/* Fixture de "quem quer entrar". Os quatro estados que a tela distingue —
+   esperando, aprovada, encerrada e uma com observação longa — porque com uma
+   candidatura só o harness desenha um caso e os outros três continuam
+   invisíveis. */
+export function candidaturasDemo() {
+  const dias = (n: number) => new Date(Date.now() - n * 86400000).toISOString();
+  const c = (
+    id: string, status: string, nome: string, tel: string, funcoes: string[],
+    criado: number, extra: Partial<{ observacao: string | null; decidido_em: string | null }> = {},
+  ) => ({
+    id, status: status as any, criado_em: dias(criado), atualizado_em: dias(criado),
+    observacao: null, nota_interna: null, decidido_por: null, decidido_em: null,
+    voluntario_id: status === 'aprovada' ? 'v' + id : null,
+    pessoas: { id: 'p' + id, nome, telefone: tel, email: null },
+    candidatura_funcoes: funcoes.map(f => ({ funcoes: { nome: f } })),
+    ...extra,
+  });
+  return [
+    c('c1', 'enviada', 'Beatriz Marques', '21999990001', ['PROJEÇÃO', 'FOTO'], 1),
+    c('c2', 'conversa', 'Rafael Nogueira do Nascimento', '21999990002', ['EDIÇÃO'], 3,
+      { observacao: 'Sirvo na mídia da igreja onde eu congregava antes, mexo com Premiere e um pouco de After. Só não posso no primeiro domingo do mês.' }),
+    c('c3', 'aprovada', 'Luana Prado', '21999990003', ['ILUMINAÇÃO'], 9, { decidido_em: dias(8) }),
+    c('c4', 'recusada', 'Thiago Alves', '21999990004', ['TRANSMISSÃO (CORTE + PTZ)'], 22, { decidido_em: dias(20) }),
+  ] as any;
+}
+
+/* Os ministérios da casa. Espelha visaoGeralDemo() de propósito: se a lista do
+   seletor e a visão da igreja discordarem, o harness desenha uma tela que o
+   produto nunca produz — e revisar tela que não existe é pior que não revisar.
+   A Mídia carrega o id 'demo' porque estadoDemo() é a Mídia. */
+export function equipesDemo() {
+  return [
+    { id: 'demo',       nome: 'Mídia',     slug: 'midia',    whatsapp_grupo: null, ordem: 10 },
+    { id: 'demo-louvor',nome: 'Louvor',    slug: 'louvor',   whatsapp_grupo: null, ordem: 20 },
+    { id: 'demo-kids',  nome: 'GUIA Kids', slug: 'kids',     whatsapp_grupo: null, ordem: 30 },
+    { id: 'demo-conn',  nome: 'Connect',   slug: 'servico',  whatsapp_grupo: null, ordem: 40 },
+    { id: 'demo-livr',  nome: 'Livraria',  slug: 'livraria', whatsapp_grupo: null, ordem: 50 },
+  ] as any[];
+}
+
+/* Os números do bloco de pendências do /painel. Todos os cinco itens vêm
+   diferentes de zero de propósito: a lista é `.filter(Boolean)` e um zero
+   apaga a linha. Com um item só, a varredura mede uma linha e as outras
+   quatro continuam invisíveis — inclusive a variante `grave`, que é a única
+   com marca vermelha. */
+export function painelDemo() {
+  return {
+    voluntarios: 17, funcoes: 11,
+    candidaturas_novas: 2, aguardando_conversa: 1,
+    sem_conferir: 3, sem_disponibilidade: 6,
+    vagas_pendentes: 4, funcoes_sem_gente: 1,
+  };
 }
