@@ -184,7 +184,10 @@ export default function Servir() {
   );
 
   return (
-    <div className="porta wiz">
+    /* `cad` é só a roupa (05/09/2026): a cabeça centrada, o título na mesma
+       letra das outras páginas públicas, a coluna do formulário estreita no
+       desktop. Os quatro passos, os campos e o envio são os mesmos. */
+    <div className="porta wiz cad">
       <header className="tela-topo">
         <Link href="/" className="marca-link" aria-label="GUIA Church">
           <Logo className="logo" />

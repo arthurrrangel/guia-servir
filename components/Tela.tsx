@@ -60,12 +60,19 @@ export function Vazio({ titulo, texto, acao }:
   );
 }
 
+/* o link de conversa a partir do número do banco: DDD + número vira 55 na
+   frente, e o texto entra pronto. Vive aqui para que a página da área e o
+   cartão de pessoa montem o mesmo link. */
+export const linkZap = (zap?: string | null, texto?: string) => {
+  const numero = zap ? (zap.length <= 11 ? '55' + zap : zap) : null;
+  return numero ? `https://wa.me/${numero}${texto ? '?text=' + encodeURIComponent(texto) : ''}` : null;
+};
+
 /* o cartão de quem vai falar com a pessoa. Nome, papel e o canal real. */
 export function Pessoa({ nome, papel, zap, texto }:
   { nome: string; papel: string; zap?: string | null; texto?: string }) {
   const ini = nome.trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
-  const numero = zap ? (zap.length <= 11 ? '55' + zap : zap) : null;
-  const link = numero ? `https://wa.me/${numero}${texto ? '?text=' + encodeURIComponent(texto) : ''}` : null;
+  const link = linkZap(zap, texto);
   return (
     <div className="pessoa">
       <span className="pessoa-ini" aria-hidden="true">{ini}</span>

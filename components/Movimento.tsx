@@ -90,7 +90,23 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
         const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(varre); } };
         window.addEventListener('scroll', aoRolar, { passive: true });
         const rede = setTimeout(varre, 1200);
-        desligar.push(() => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); });
+        /* FAIXA QUE NASCE DEPOIS TAMBÉM É REVELADA. As páginas que buscam
+           dados no cliente (/servir/[slug], /servir/onde-me-encaixo) montam
+           faixas inteiras depois que a resposta chega, e essas faixas não
+           existiam quando a lista acima foi feita: ficavam invisíveis para
+           sempre, porque ninguém as observava. Agora toda faixa `.rev` que
+           entra no documento é observada na hora; se já está na tela, o
+           observador dispara no mesmo quadro. */
+        const mut = new MutationObserver(() => {
+          let novas = false;
+          raiz.querySelectorAll<HTMLElement>('.rev:not(.visto)').forEach(e => {
+            if (pendentes.includes(e)) return;
+            pendentes.push(e); obs.observe(e); novas = true;
+          });
+          if (novas) window.addEventListener('scroll', aoRolar, { passive: true });
+        });
+        mut.observe(raiz, { childList: true, subtree: true });
+        desligar.push(() => { obs.disconnect(); mut.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); });
       }
     }
 
@@ -101,7 +117,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
        andam devagar contra a rolagem: uns 40px de curso, num rAF só. É o que
        dá a sensação de camadas. Só com ponteiro fino: no toque o custo não
        compensa. */
-    const fotos = Array.from(raiz.querySelectorAll<HTMLElement>('.g-cheio > img, .g-foto > img'));
+    let fotos = Array.from(raiz.querySelectorAll<HTMLElement>('.g-cheio > img, .g-foto > img'));
     let rolando = false;
     const profundidade = () => {
       rolando = false;
@@ -114,11 +130,9 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
       }
     };
     const aoRolarProf = () => { if (!rolando) { rolando = true; requestAnimationFrame(profundidade); } };
-    if (fotos.length) {
-      profundidade();
-      window.addEventListener('scroll', aoRolarProf, { passive: true });
-      desligar.push(() => window.removeEventListener('scroll', aoRolarProf));
-    }
+    profundidade();
+    window.addEventListener('scroll', aoRolarProf, { passive: true });
+    desligar.push(() => window.removeEventListener('scroll', aoRolarProf));
 
     /* ------------------------------------------------- 1c. o anel do cursor
        Um anel fino cor de areia segue o ponteiro com um atraso curto e
@@ -151,7 +165,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
        escuras. É a microinteração mais reconhecível dos sites de produto
        (Linear, Vercel) — e aqui ela é monocromática e da cor da marca, então
        entra sem trazer vocabulário de fora. O CSS desenha; o JS só diz onde. */
-    const escuros = Array.from(raiz.querySelectorAll<HTMLElement>('.casa-escuro, .casa-foto'));
+    let escuros = Array.from(raiz.querySelectorAll<HTMLElement>('.casa-escuro, .casa-foto'));
     let ultimo: MouseEvent | null = null;
     let pedindo = false;
     const pinta = () => {
@@ -168,10 +182,8 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
       ultimo = ev;
       if (!pedindo) { pedindo = true; requestAnimationFrame(pinta); }
     };
-    if (escuros.length) {
-      document.addEventListener('mousemove', aoMover, { passive: true });
-      desligar.push(() => document.removeEventListener('mousemove', aoMover));
-    }
+    document.addEventListener('mousemove', aoMover, { passive: true });
+    desligar.push(() => document.removeEventListener('mousemove', aoMover));
 
     /* ------------------------------------------------------ 3. o ímã do botão
        O botão principal se inclina 6px na direção do ponteiro quando ele
@@ -179,7 +191,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
        tem que ser sentido, não visto. Só nos `.acao.cheia` — a ação principal
        de cada faixa — para que ele diga "este é o botão", não "olha o que eu
        sei fazer". */
-    const imas = Array.from(raiz.querySelectorAll<HTMLElement>('.acao.cheia'));
+    let imas = Array.from(raiz.querySelectorAll<HTMLElement>('.acao.cheia'));
     const RAIO = 90, FORCA = 6;
     const aoImantar = (ev: MouseEvent) => {
       for (const b of imas) {
@@ -196,10 +208,20 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
         }
       }
     };
-    if (imas.length) {
-      document.addEventListener('mousemove', aoImantar, { passive: true });
-      desligar.push(() => document.removeEventListener('mousemove', aoImantar));
-    }
+    document.addEventListener('mousemove', aoImantar, { passive: true });
+    desligar.push(() => document.removeEventListener('mousemove', aoImantar));
+
+    /* o que nasce depois (as faixas das páginas que buscam dados no cliente)
+       entra nas três listas acima, senão foto nova não anda, faixa escura
+       nova não acende e botão novo não puxa */
+    const atualiza = new MutationObserver(() => {
+      fotos = Array.from(raiz.querySelectorAll<HTMLElement>('.g-cheio > img, .g-foto > img'));
+      escuros = Array.from(raiz.querySelectorAll<HTMLElement>('.casa-escuro, .casa-foto'));
+      imas = Array.from(raiz.querySelectorAll<HTMLElement>('.acao.cheia'));
+      aoRolarProf();
+    });
+    atualiza.observe(raiz, { childList: true, subtree: true });
+    desligar.push(() => atualiza.disconnect());
 
     return () => desligar.forEach(f => f());
   }, [semRevelar]);

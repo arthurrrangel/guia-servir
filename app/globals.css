@@ -5650,3 +5650,101 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
   to{ background:var(--papel); color:var(--ink); border-bottom-color:rgba(12,12,14,.09) }
 }
 @keyframes barra-scrim{ from{ opacity:1 } to{ opacity:0 } }
+
+/* =============================================================================
+   05/09 — A BARRA ENTRE 920 E 1200px COLIDIA
+   Com quatro links, "Acesso às equipes" e "Quero servir", a barra só cabe
+   com folga acima de ~1260px. Entre 920 e 1200 os links encostavam nos
+   botões, e até 1260 ficavam apertados. Regra: abaixo de 1260px a navegação
+   vai para o menu (hambúrguer),
+   e "Acesso às equipes" some da barra (continua no menu). Nada some do
+   site; só muda de lugar quando não cabe.
+   ============================================================================= */
+@media(max-width:1259px){
+  .casa-nav{ display:none }
+  .menu-bt{ display:inline-flex }
+  .casa-barra{ grid-template-columns:auto 1fr }
+  .casa-barra-fim{ grid-column:2 }
+  .casa-barra .bt-barra.discreto{ display:none }
+}
+
+/* =============================================================================
+   05/09 — O FUNIL NO CASCO PÚBLICO (/servir/[slug] e /servir/onde-me-encaixo)
+
+   Eram as duas últimas páginas que a pessoa alcançava pelo site e que ainda
+   vestiam o casco do sistema interno: outra barra, outro tipo, tudo à
+   esquerda. Agora usam a mesma gramática das outras páginas públicas. O que
+   entra aqui são só as peças que elas precisavam e as outras não tinham.
+   ============================================================================= */
+/* cartões soltos: quantidade variável (as funções de uma área), última
+   fileira centrada, nenhuma célula vazia mostrando o fundo da grade */
+.cartoes.livre{ display:flex; flex-wrap:wrap; justify-content:center; gap:1px; background:transparent; border:0; padding:1px }
+.cartoes.livre .cartao{ flex:0 0 100%; box-shadow:0 0 0 1px var(--linha) }
+@media(min-width:760px){ .cartoes.livre .cartao{ flex-basis:calc((100% - 2px)/3) } }
+.casa-escuro .cartoes.livre .cartao{ box-shadow:0 0 0 1px rgba(255,255,255,.10) }
+.casa-areia .cartoes.livre .cartao{ box-shadow:0 0 0 1px rgba(59,50,34,.18) }
+/* quatro cartões numa linha (os passos): 4 acima de 1100px, 2 no meio, 1 no celular */
+.cartoes.quatro{ list-style:none; padding:0; margin-bottom:0 }
+@media(min-width:760px){ .cartoes.quatro{ grid-template-columns:repeat(2,1fr) } }
+@media(min-width:1100px){ .cartoes.quatro{ grid-template-columns:repeat(4,1fr) } }
+/* o nome da função vem do banco em caixa alta: é rótulo, não título */
+.cartao-t.fn{ font-size:13px; letter-spacing:.14em; text-transform:uppercase; line-height:1.45 }
+.cartao-s{ margin-top:auto; padding-top:4px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mudo) }
+.casa-escuro .cartao-s{ color:rgba(255,255,255,.5) }
+/* ed menor: para frases que vêm do banco (descrição e convite da área) */
+.g-ed.menor{ font-size:clamp(20px,2.3vw,34px); line-height:1.2; max-width:36ch }
+.c .g-ed.menor,.g-cheio.centro .g-ed.menor{ margin-inline:auto }
+/* nota curta abaixo das ações */
+.g-nota{ margin:18px auto 0; max-width:44ch; font-size:14.5px; line-height:1.5; color:var(--mudo); text-wrap:pretty }
+.g-cheio .g-nota{ color:rgba(255,255,255,.62) }
+.qa .g-nota{ margin:14px 0 0 }
+/* quem responde: as iniciais, e o nome em tamanho de nome */
+.g-ini{ display:grid; place-items:center; width:64px; height:64px; margin:0 auto clamp(18px,2.4vw,26px); border-radius:50%; background:var(--areia-tinta); color:var(--areia); font-family:var(--fonte-display); font-weight:700; font-size:18px; letter-spacing:.06em }
+.g-h2.nome{ font-size:clamp(30px,3.8vw,52px) }
+/* carregando dentro do herói escuro */
+.g-cheio .estado-tela p{ color:rgba(255,255,255,.72) }
+.g-cheio .pulso{ background:rgba(255,255,255,.25) } .g-cheio .pulso::after{ background:var(--areia) }
+/* a lista de áreas em /servir/onde-me-encaixo: a mesma lista de perguntas,
+   com um corpo (descrição, funções em cartões, o caminho) no lugar da resposta */
+.qa-c{ margin:0 0 clamp(22px,2.6vw,32px) 60px }
+.qa-c .qa-r{ margin-left:0; margin-bottom:clamp(18px,2.2vw,26px) }
+.qa-c .g-acoes{ margin-top:clamp(18px,2.2vw,26px); justify-content:flex-start }
+@media(max-width:899px){ .qa-c{ margin-left:0 } }
+/* no celular, a página da área mostra só o nome de cada função, em duas
+   colunas: a descrição volta no cadastro, na hora de marcar. Os quatro passos
+   também vão em duas colunas. Oito cartões empilhados eram três telas. */
+@media(max-width:759px){
+  .cartoes.livre.resumo .cartao{ flex-basis:calc((100% - 1px)/2); padding:22px 12px 20px; gap:10px }
+  .cartoes.livre.resumo .cartao-d{ display:none }
+  .cartoes.livre.resumo .cartao-n{ font-size:30px }
+  .cartoes.quatro{ grid-template-columns:repeat(2,1fr) }
+  .cartoes.quatro .cartao{ padding:22px 14px 20px }
+}
+/* a lista de áreas em /servir/onde-me-encaixo no desktop: cada área é um
+   bloco centrado (número, nome, descrição, funções, caminho). No celular fica
+   a lista de linhas que dobra, igual à das perguntas. */
+@media(min-width:900px){
+  .qa-areas summary{ display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:clamp(34px,4vw,56px) 0 clamp(16px,2vw,24px) }
+  .qa-areas .qa-q{ font-size:clamp(28px,3vw,40px); letter-spacing:-.025em }
+  .qa-areas .qa-c{ margin:0 0 clamp(36px,4.5vw,64px); text-align:center }
+  .qa-areas .qa-c .qa-r{ margin:0 auto clamp(22px,2.6vw,32px); max-width:46ch }
+  .qa-areas .qa-c .g-acoes{ justify-content:center }
+  .qa-areas .qa-c .g-nota{ margin-inline:auto }
+}
+/* ---- o cadastro (/servir/[slug]/cadastro) na mesma língua das páginas
+   públicas: cabeça centrada, título em negrito apertado (era caixa alta
+   espaçada, a letra do sistema interno), apoio em itálico editorial, e a
+   coluna do formulário com 640px no desktop (um campo de 1140px de largura
+   é uma piscina, não um campo). O rodapé fixo acompanha a coluna. --------- */
+.cad .wiz-cabeca{ text-align:center; max-width:760px; margin-inline:auto }
+.cad .wiz-cabeca .migalha{ justify-content:center }
+.cad .wiz-cabeca h1{ font-weight:700; font-size:clamp(34px,4.8vw,60px); line-height:1.0; letter-spacing:-.03em; text-transform:none; margin-top:var(--e5); text-wrap:balance }
+.cad .wiz-cabeca-sub{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2.3vw,30px); line-height:1.2; color:var(--areia-tinta); max-width:36ch; margin:14px auto 0 }
+.cad .wiz-passos{ max-width:760px; margin:clamp(28px,3.6vw,44px) auto 0 }
+.cad .wiz-corpo{ max-width:640px; margin:clamp(36px,4.5vw,56px) auto 0 }
+.cad .wiz-corpo h2{ font-weight:700; font-size:clamp(24px,2.6vw,32px); letter-spacing:-.025em; line-height:1.1; text-align:center; margin-bottom:10px }
+.cad .wiz-corpo h2 + .dim{ text-align:center; margin:0 auto; max-width:46ch }
+.cad .wiz-corpo .wiz-opcoes{ text-align:left }
+.cad .wiz-pe{ max-width:676px }
+.cad .wiz-falta{ color:var(--cinza) }
+.cad .wiz-resumo{ border-radius:0 }

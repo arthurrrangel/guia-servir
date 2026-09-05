@@ -20,7 +20,10 @@ import { useEffect, useState } from 'react';
    cada resposta cabe numa frase. Menos informação, só a necessária.
    ============================================================================= */
 
-export type Pergunta = { q: string; r: string };
+/* `r` é a resposta em uma frase. `corpo` é para quando a resposta não é
+   texto (a lista de funções de uma área, em /servir/onde-me-encaixo): entra
+   no lugar do parágrafo, com a mesma dobra no celular. */
+export type Pergunta = { q: string; r?: string; corpo?: React.ReactNode };
 
 export function Perguntas({ itens, className = '' }: { itens: Pergunta[]; className?: string }) {
   const [largo, setLargo] = useState(false);
@@ -42,7 +45,7 @@ export function Perguntas({ itens, className = '' }: { itens: Pergunta[]; classN
               <h3 className="qa-q">{p.q}</h3>
               <span className="qa-mais" aria-hidden="true" />
             </summary>
-            <p className="qa-r">{p.r}</p>
+            {p.corpo ? <div className="qa-c">{p.corpo}</div> : <p className="qa-r">{p.r}</p>}
           </details>
         </li>
       ))}
