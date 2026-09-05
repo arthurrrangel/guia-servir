@@ -142,3 +142,30 @@ export function euDemo() {
     dias: cultosDoMes(ano, mes).concat(cultosDoMes(ano, mes === 12 ? 1 : mes + 1)).filter(d => d >= hoje).slice(0, 12),
   };
 }
+
+/* Fixture da visão da igreja. Cinco áreas, com os cinco estados que a leitura
+   do painel distingue (sem ninguém, sem responder, coberto, não pode, sem
+   culto) — senão o harness desenha um estado só e o resto continua invisível.
+   Os números vieram da produção do Arthur em 04/09, que é onde o defeito de
+   "nome colado na linha de baixo" apareceu. */
+export function visaoGeralDemo() {
+  const hoje = hojeISO();
+  const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
+  const prox = cultosDoMes(ano, mes).find(d => d >= hoje) || cultosDoMes(ano, mes)[0];
+  const a = (
+    slug: string, equipe: string, ordem: number, postos: number, preenchidos: number,
+    extra: Partial<{ vagas: number | null; furos: number; recusados: number; pendentes: number; candidaturas_novas: number; proxima_data: string | null }> = {},
+  ) => ({
+    slug, equipe, ordem, proxima_data: prox, tipo: 'domingo',
+    postos, preenchidos, confirmados: preenchidos,
+    vagas: postos - preenchidos, furos: 0, recusados: 0, pendentes: 0,
+    candidaturas_novas: 0, ...extra,
+  });
+  return [
+    a('midia', 'Mídia', 10, 9, 9, { vagas: 0, pendentes: 4 }),
+    a('louvor', 'Louvor', 20, 10, 0, { candidaturas_novas: 4 }),
+    a('kids', 'GUIA Kids', 30, 9, 0),
+    a('servico', 'Connect', 40, 16, 0, { candidaturas_novas: 6 }),
+    a('livraria', 'Livraria', 50, 2, 2, { vagas: 0, recusados: 1 }),
+  ];
+}

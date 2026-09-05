@@ -69,6 +69,15 @@ export type AreaVisao = {
 };
 
 export async function visaoGeral(): Promise<AreaVisao[]> {
+  /* O HARNESS PRECISA ALCANÇAR ESTA TELA. 05/09/2026.
+     Este bloco só desenha para quem organiza mais de UMA área, e o demo tinha
+     um ministério só — então a varredura Playwright nunca renderizou "O
+     domingo da igreja" e não viu que o nome da área e a linha de baixo saíam
+     colados ("MídiaDOMINGO 06/09 · 9 DE 9"). O defeito estava em produção e
+     quem pegou foi uma captura de tela do Arthur.
+     Teste que não alcança a tela não é teste dela. */
+  const { demoLigado } = await import('./demo');
+  if (demoLigado()) { const { visaoGeralDemo } = await import('./demo'); return visaoGeralDemo(); }
   const s = sb();
   if (!s) return [];
   const { data, error } = await s.rpc('visao_geral');

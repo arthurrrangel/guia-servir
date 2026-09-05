@@ -13,7 +13,7 @@ for(const [w,h,tag] of [[1280,900,'desk'],[390,844,'cel']]){
     try{await p.goto(B+rota,{waitUntil:'domcontentloaded',timeout:15000});}catch{}
     await p.waitForTimeout(2200);
     const r=await p.evaluate((vw)=>{
-      const cs=getComputedStyle, out={cortado:[],forado:[],toque:[]};
+      const cs=getComputedStyle, out={cortado:[],forado:[],toque:[],inline:[]};
       const raiz=document.querySelector('.sistema')||document.querySelector('.lid')||document.querySelector('.vol');
       if(!raiz) return {semRaiz:true};
       for(const e of raiz.querySelectorAll('*')){
@@ -29,11 +29,18 @@ for(const [w,h,tag] of [[1280,900,'desk'],[390,844,'cel']]){
         // alvo de toque pequeno
         if(/^(a|button|summary)$/i.test(e.tagName) && rc.height>0 && rc.height<40 && (e.textContent||'').trim())
           out.toque.push(String(e.className||e.tagName).slice(0,26)+' h='+Math.round(rc.height)+' :'+(e.textContent||'').trim().slice(0,16));
+        /* MARGEM VERTICAL EM ELEMENTO INLINE NAO TEM EFEITO. A regra existe no
+           arquivo, parece certa lendo o CSS, e nao faz nada na tela. Foi assim
+           que "MidiaDOMINGO 06/09 - 9 DE 9" ficou no ar: dois <span> irmaos sem
+           display:block, colados na mesma linha, com um margin-top que nunca
+           valeu. Sintoma provavel, nao gosto pessoal: e sempre um erro. */
+        if(s.display==='inline' && ((parseFloat(s.marginTop)||0) || (parseFloat(s.marginBottom)||0)))
+          out.inline.push(String(e.className||e.tagName).slice(0,26)+' inline+margin :'+(e.textContent||'').trim().slice(0,18));
       }
       for(const k in out) out[k]=[...new Set(out[k])].slice(0,4);
       return out;
     },w).catch(e=>({erro:String(e).slice(0,70)}));
-    const n=(r.cortado?.length||0)+(r.forado?.length||0)+(r.toque?.length||0);
+    const n=(r.cortado?.length||0)+(r.forado?.length||0)+(r.toque?.length||0)+(r.inline?.length||0);
     total+=n;
     if(n||r.erro||r.semRaiz) console.log(`[${tag}] ${nome}`, JSON.stringify(r));
     await p.close();

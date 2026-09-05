@@ -3158,8 +3158,13 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); display:block;
 }
-.lid-nome{ margin-top:var(--e1); font-size:var(--t-corpo); line-height:1.35; color:var(--ink) }
-.lid-vazio{ margin-top:var(--e1); font-size:var(--t-corpo); color:var(--bad) }
+/* display:block nos dois pelo mesmo motivo do .lid-area-nome: são <span>, e
+   margem vertical não vale em inline. Aqui não colava — o .lid-fn de cima já é
+   block e quebrava a linha — mas os 4px que a regra pedia entre a função e o
+   nome nunca existiram. Regra que parece certa lendo o CSS e não tem efeito na
+   tela é pior que regra ausente: ninguém vai procurar. */
+.lid-nome{ display:block; margin-top:var(--e1); font-size:var(--t-corpo); line-height:1.35; color:var(--ink) }
+.lid-vazio{ display:block; margin-top:var(--e1); font-size:var(--t-corpo); color:var(--bad) }
 
 
 
@@ -3176,8 +3181,19 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
 .lid-area:last-child{ border-bottom:0 }
 .lid-area:hover .lid-area-nome,
 .lid-area:active .lid-area-nome{ text-decoration:underline; text-underline-offset:3px }
-.lid-area-nome{ font-size:var(--t-corpo); color:var(--ink) }
+/* display:block NOS DOIS, E ISSO ERA UM DEFEITO NO AR.
+   Os dois são <span>, e <span> é inline. Sem display, o nome da área e a linha
+   de baixo caíam NA MESMA LINHA, colados sem espaço nenhum:
+   "MídiaDOMINGO 06/09 · 9 DE 9", "LouvorDOMINGO 06/09 · 0 DE 10". E o
+   margin-top:4px do .lid-area-sub não fazia nada, porque margem vertical não
+   se aplica a elemento inline — a regra existia, parecia certa lendo o CSS, e
+   nunca teve efeito.
+   Por que a varredura não pegou: este bloco só aparece para quem organiza mais
+   de UMA área, e o harness de demo tem um ministério só. A tela nunca
+   renderizou nos testes. Quem pegou foi a captura do Arthur. */
+.lid-area-nome{ display:block; font-size:var(--t-corpo); color:var(--ink) }
 .lid-area-sub{
+  display:block;
   margin-top:var(--e1); font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
@@ -3278,6 +3294,15 @@ body:has(.lid) .seletor-equipe{
   font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   background:none; border:0; padding:0 var(--tr) 0 0; color:var(--cinza); gap:var(--e2);
+  /* E margin-left:0. ESTE ERA O "LOGO COLADO NO NOME DO MINISTÉRIO".
+     A regra base do seletor tem `margin-left:-8px` para compensar os 8px de
+     padding dela mesma, e assim alinhar o TEXTO com a borda esquerda do
+     container. Aqui em cima o padding foi zerado (linha acima) e a margem
+     negativa ficou — compensando um padding que não existe mais. Medido:
+     .marca pede gap de 12px, o logotipo acaba em 124 e o seletor começa em
+     128. Quatro pixels entre um logotipo que termina em ">" e a palavra
+     "MÍDIA". Na captura lê como colisão, e é. */
+  margin-left:0;
   /* e flex:none porque este botão não deve encolher NUNCA: ele é o nome do
      ministério em que o líder está trabalhando. Com `flex:0 1 auto` (o padrão)
      mais o `min-width:0` herdado da .marca-nome, ele era o primeiro a ceder
