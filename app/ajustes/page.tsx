@@ -110,10 +110,13 @@ function Ajustes() {
           </span>
           <IcSeta className="giro" />
         </summary>
+        {/* 05/09 — a instrução tinha 132 caracteres de justificativa depois da
+            ação. Quem chega aqui quer saber O QUE FAZER, e a razão ("você não
+            manda link no privado de ninguém") ele descobre sozinho no momento
+            em que a primeira pessoa entra pelo link. Fica a ação. */}
         <p className="dim pequeno" style={{ marginTop: -4 }}>
-          <strong>O que fazer:</strong> copie a mensagem abaixo, cole no grupo do ministério e
-          <strong> fixe</strong> ela lá. A partir daí cada pessoa entra sozinha pelo link, acha o próprio
-          nome e confirma, você não manda link no privado de ninguém.
+          Copie a mensagem, cole no grupo do ministério e <strong>fixe</strong>.
+          Cada pessoa entra sozinha por ali.
         </p>
         <label htmlFor="ajt-grupo">Link de convite do grupo (opcional, só para você guardar)</label>
         {/* endereço, não frase: sem inputMode="url" o iPhone abre teclado de
@@ -237,10 +240,9 @@ function Ajustes() {
           <IcSeta className="giro" />
         </summary>
         <p className="dim pequeno" style={{ marginTop: -4 }}>
-          Só estes emails abrem o espaço do organizador. Cada um enxerga apenas o ministério que
-          organiza: quem cuida da Mídia não vê o Serviço do Culto, e vice-versa.
-          Quem está como <strong>todos</strong> enxerga tudo e é quem dá e tira acesso.
-          Voluntário não precisa estar aqui, ele usa o link pessoal.
+          Só estes emails abrem o espaço do organizador, e cada um vê apenas o
+          ministério que organiza. Quem está como <strong>todos</strong> vê tudo
+          e dá acesso aos outros. Voluntário não entra aqui: ele usa o link pessoal.
         </p>
         <div className="ajt-lista">
           {lideres.map(l => (

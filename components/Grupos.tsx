@@ -31,9 +31,11 @@ export function Grupos() {
   const teste = DIAS[ativo].teste;
   return (
     <>
-      <div className="chips" role="group" aria-label="Filtrar por dia">
+      {/* pg- porque `.chips`/`.chip` sem prefixo são o controle de nível do
+          /time, e este bloco vencia a cascata lá dentro. Ver globals.css. */}
+      <div className="pg-chips" role="group" aria-label="Filtrar por dia">
         {DIAS.map((d, i) => (
-          <button key={d.rot} type="button" className="chip" aria-pressed={i === ativo} onClick={() => setAtivo(i)}>
+          <button key={d.rot} type="button" className="pg-chip" aria-pressed={i === ativo} onClick={() => setAtivo(i)}>
             {d.rot}<small>{contagens[i]}</small>
           </button>
         ))}

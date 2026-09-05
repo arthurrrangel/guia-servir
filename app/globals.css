@@ -129,6 +129,83 @@
   --fonte:"PP Neue Montreal",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
 }
 
+/* ============================================================================
+   A TIPOGRAFIA DO SISTEMA — e por que ela é diferente da do site
+
+   MEDIDO EM PRODUÇÃO (05/09/2026): o CSS servido em guiaservir.com tinha ZERO
+   @font-face. Nenhum. `--fonte` pedia "PP Neue Montreal" e o navegador caía na
+   pilha do aparelho: Arial no Windows, San Francisco no Mac, Roboto no Android.
+   E `--fonte-display` era `var(--fonte)`, então título e corpo eram a MESMA
+   coisa — a área do gestor chamava `--fonte-display` em 18 lugares que não
+   faziam nada.
+
+   A causa: scripts/fontes.mjs baixa os .woff2 licenciados de uma origem privada
+   durante o build, lendo FONTES_ORIGEM e FONTES_TOKEN do painel da Vercel. As
+   duas variáveis nunca foram configuradas. O script foi escrito para NÃO
+   quebrar o build quando faltam (a decisão está certa: igreja sem site por
+   causa de tipografia é o custo errado) — então ele escreve um CSS vazio e o
+   defeito nunca aparece no build, só na tela.
+
+   Essa regra continua valendo PARA O SITE: ou a fonte da marca, ou a do
+   aparelho, nunca uma substituta. Site é marca.
+
+   Mas o sistema não é marca, é FERRAMENTA. Quem abre /escala às sete da manhã
+   de domingo precisa que a tela esteja igual à de ontem, no Windows da igreja e
+   no celular, sem depender de licença comprada nem de variável de ambiente. Por
+   isso a área do gestor tem tipografia PRÓPRIA, servida do próprio domínio,
+   com fonte aberta (SIL OFL, licença junto em public/tipos/):
+
+   · Inter    — corpo e interface. Desenhada para tela, altura-x alta, números
+                tabulares. É o que se lê numa escala.
+   · Raleway  — título e rótulo. É a que o produto usava antes de o manual
+                chegar, e devolve o CONTRASTE que se perdeu quando display e
+                corpo viraram a mesma família.
+
+   Variáveis (wght 100–900) em um arquivo cada: 48kB, e só baixa em tela de
+   gestor, porque nenhuma regra fora de .sistema pede essas famílias.
+   ========================================================================== */
+@font-face{
+  font-family:"Inter";
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  src:url(/tipos/inter.woff2) format("woff2");
+}
+@font-face{
+  font-family:"Raleway";
+  font-style:normal;
+  font-weight:100 900;
+  font-display:swap;
+  src:url(/tipos/raleway.woff2) format("woff2");
+}
+/* O casco inteiro do gestor: barra do topo, abas, conteúdo, barra de baixo.
+   Trocar só `--fonte` não bastava — `body` resolve `font:… var(--fonte)` lá em
+   cima, onde a variável ainda é a do site, e o filho herda o VALOR já
+   calculado, não a variável. Por isso o font-family explícito aqui. */
+/* Os quatro cascos do SISTEMA, e por que são estes quatro:
+     .sistema   o casco do gestor (Shell): topo, abas, conteúdo, barra de baixo
+     .lid       /entrar — não passa pelo Shell, e seria a única tela do fluxo
+                do gestor falando outra fonte
+     .vol       /eu/<token> — o espaço do voluntário: onde ele vê seus dias,
+                confirma presença e avisa que não pode
+     .eu-fundo  /equipe/<slug> — a lista onde a pessoa acha o próprio nome
+
+   Os dois últimos entram porque ferramenta é ferramenta dos dois lados. O
+   voluntário abre a dele no celular, no domingo de manhã, e não tem por que
+   ler uma fonte diferente da que o líder está vendo na mesma escala.
+
+   O que fica de fora, de propósito: tudo que é SITE — home, /sobre, /cultos,
+   /servir, /pequena-guia. Lá a regra continua sendo a do manual: ou a fonte da
+   marca, ou a do aparelho. Site é marca; sistema é trabalho. */
+.sistema,
+.lid,
+.vol,
+.eu-fundo{
+  --fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  --fonte-display:"Raleway",var(--fonte);
+  font-family:var(--fonte);
+}
+
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bg)}
 html,body{padding:0;margin:0}
@@ -461,6 +538,46 @@ select option{background:#fff;color:var(--ink)}
 .pill.bad{background:var(--bad-bg);color:var(--bad);border-color:var(--bad-ln)}
 .ponto{width:6px;height:6px;border-radius:50%;background:var(--ink4);flex:none}
 .ponto.ok{background:var(--ok)} .ponto.warn{background:var(--warn)} .ponto.bad{background:var(--bad)}
+
+/* ---------------------------------------------------------------------------
+   MARCA DE ESTADO — o que se lê, e nunca se aperta
+
+   `.pill` e `.chip` são construídos IGUAL: mesmo padding, mesma borda, mesmo
+   fundo, mesmas variantes de cor. Só que `.chip` tem role="button" e cicla o
+   nível da pessoa quando você toca, e `.pill` não faz absolutamente nada. No
+   /time os dois apareciam lado a lado, na mesma linha. A pessoa aprende que
+   caixinha com borda se aperta, tenta apertar a outra, nada acontece, e ela
+   passa a desconfiar de todas.
+
+   E o produto JÁ TINHA A RESPOSTA: a /escala mostra estado como texto colorido
+   sem caixa nenhuma — CONFIRMOU, FALTA CONFIRMAR, NÃO PODE. Era o /time que
+   falava outra língua.
+
+   A regra que sobra é de uma olhada só:
+       tem borda, se aperta.  não tem, se lê.
+
+   Mesma cor, mesma informação, zero moldura. E some a parede de caixinhas que
+   fazia a tela mais pesada do produto parecer um formulário. */
+.marca-est{
+  display:inline-flex;align-items:center;gap:var(--e1);
+  font-family:var(--fonte-display);
+  font-weight:var(--p-forte);
+  font-size:var(--t-min);
+  letter-spacing:var(--tr);
+  text-transform:uppercase;
+  color:var(--cinza);
+  /* SEM white-space:nowrap. A `.pill` que esta peça substitui tinha nowrap e
+     uma variante `.quebra` para os casos que não cabiam — duas classes para
+     uma decisão que o texto toma sozinho. Medido no celular: o estado de
+     cobertura ("só uma pessoa apta") saía de 44px a 421px numa tela de 390 e
+     o fim da frase ficava fora. Deixar quebrar resolve os dois casos: rótulo
+     curto nunca quebra porque não precisa; frase longa quebra e continua
+     inteira. */
+  text-wrap:pretty;
+}
+.marca-est.ok{color:var(--ok)}
+.marca-est.warn{color:var(--warn)}
+.marca-est.bad{color:var(--bad)}
 
 /* chips de habilidade: monocromático + um traço de cor à esquerda */
 .chips{display:flex;flex-wrap:wrap;gap:var(--e2)}
@@ -943,19 +1060,37 @@ select option{background:#fff;color:var(--ink)}
 .busca-nome button{flex:none}
 
 /* ------------------------------------------------- pessoa (aba Time) ------
-   Cada pessoa é uma linha; o cartão só abre quando o líder vai editar. */
-.pessoa{
-  background:var(--card);border:1px solid var(--linha);border-radius:var(--r);
-  margin-bottom:var(--e2);overflow:hidden;transition:border-color var(--t);
+   Cada pessoa é uma linha; o cartão só abre quando o líder vai editar.
+
+   O NOME DESTA CLASSE ERA `.pessoa`, E ISSO CUSTAVA 700 PIXELS DE ROLAGEM.
+
+   Existiam DUAS definições de `.pessoa` neste arquivo: esta, o acordeão do
+   /time, e a de components/Tela.tsx — o cartão público do responsável, lá
+   embaixo, com `display:flex; gap:20px; padding:20px 0`. A segunda vence a
+   cascata. Ou seja: o acordeão do líder recebia layout de flex e 40px de
+   padding vertical de um componente que não tem relação nenhuma com ele.
+   Medido: 17 linhas × 123px, das quais 40px eram herança acidental.
+
+   Nada disso se explica lendo o componente. Só lendo o arquivo inteiro e
+   percebendo que o mesmo nome aparece duas vezes. Prefixo `tm-` (Time) resolve
+   e documenta a que tela a peça pertence.
+
+   E aproveitando: o cartão vira LINHA. Um fio de 1px separa em vez de uma
+   moldura fechada por pessoa. Dezessete molduras empilhadas são dezessete
+   objetos; dezessete linhas são uma lista, que é o que a tela é. */
+.tm-pessoa{
+  border-bottom:1px solid var(--linha);
+  transition:background var(--t);
 }
-.pessoa:hover,
-.pessoa:active{border-color:var(--linha2)}
-.pessoa[open]{border-color:var(--linha2);background:var(--card2)}
-.pessoa > summary{
-  display:flex;align-items:center;gap:var(--e3);padding:var(--e3) var(--e3);cursor:pointer;
-  list-style:none;min-height:64px;
+.tm-pessoa:first-of-type{ border-top:1px solid var(--linha) }
+.tm-pessoa:hover,
+.tm-pessoa:active{background:var(--card2)}
+.tm-pessoa[open]{background:var(--card2)}
+.tm-pessoa > summary{
+  display:flex;align-items:center;gap:var(--e4);padding:var(--e3) var(--e2);cursor:pointer;
+  list-style:none;min-height:var(--toque);
 }
-.pessoa > summary::-webkit-details-marker{display:none}
+.tm-pessoa > summary::-webkit-details-marker{display:none}
 .pessoa-nome{display:block;font-weight:var(--p-forte);font-size:var(--t-ui);letter-spacing:-.012em;line-height:1.35}
 .pessoa-areas{display:flex;flex-wrap:wrap;gap:var(--e1) var(--e2);margin-top:var(--e2)}
 /* micro-marca de área: 4 letras + a cor do nível. Cabe 9 numa linha de celular.
@@ -989,18 +1124,26 @@ select option{background:#fff;color:var(--ink)}
   border:1px solid transparent;opacity:.9;
 }
 .marca-nivel.t{color:var(--ok)} .marca-nivel.r{color:var(--info)} .marca-nivel.e{color:var(--warn)}
+/* 05/09 — a moldura tracejada vira sublinhado pontilhado. A distinção que ela
+   carrega ("isto é só o que a pessoa declarou, ninguém conferiu ainda") é
+   inteira: continua visível, continua diferente do conferido. O que sai é a
+   CAIXA — e com ela ~185 retângulos que faziam a lista de gente parecer uma
+   planilha. Sublinhado pontilhado é a convenção que a web já usa há trinta
+   anos para "isto tem uma ressalva". */
 .marca-nivel.so-dito{
-  border-color:currentColor;border-style:dashed;opacity:1;padding:var(--e1);
+  border-color:transparent;opacity:1;padding:var(--e1) 0;
+  text-decoration:underline dotted currentColor;
+  text-underline-offset:3px;
 }
 .pessoa-meta{display:flex;align-items:center;gap:var(--e2);flex:none}
 .pessoa-meta .num{font-variant-numeric:tabular-nums}
 .pessoa-meta .giro{width:var(--i);height:var(--i);color:var(--mudo);transition:transform var(--t)}
-.pessoa[open] .pessoa-meta .giro{transform:rotate(90deg)}
-.pessoa-corpo{padding:var(--e1) var(--e3) var(--e4);border-top:1px solid var(--linha)}
+.tm-pessoa[open] .pessoa-meta .giro{transform:rotate(90deg)}
+.pessoa-corpo{padding:var(--e1) var(--e2) var(--e4);border-top:1px solid var(--linha)}
 .pessoa-corpo > .entre{padding-top:var(--e3)}
 @media(max-width:560px){
-  .pessoa-meta .pill{display:none}
-  .pessoa > summary{padding:var(--e3) var(--e3)}
+  .pessoa-meta .marca-est{display:none}
+  .tm-pessoa > summary{padding:var(--e3) var(--e1)}
 }
 
 /* bloco secundário que abre (cadastro manual, ajuda) */
@@ -2271,12 +2414,21 @@ body:has(.porta) { background:var(--papel) }
 
    Sem cartão: a foto É o cartão. Nome grande, uma linha de descrição, e o
    estado ("conversa antes") como rótulo, nunca como pílula colorida.
-   ========================================================================== */
-.grade{display:grid;gap:var(--e1)}
-@media(min-width:700px){ .grade{grid-template-columns:repeat(2,1fr)} }
-@media(min-width:1000px){ .grade{grid-template-columns:repeat(3,1fr)} }
 
-@media(min-width:700px){ }
+   05/09/2026 — REGRA MORTA REMOVIDA, E ELA ESTAVA QUEBRANDO OUTRA TELA.
+
+   Estas três linhas definiam `.grade` como grade de fotos: vão de 4px, duas
+   colunas a 700px e TRÊS a 1000px. Mas `.grade` também é o formulário do
+   gestor (lá em cima, vão de 12px, duas colunas), e esta definição vem depois
+   — vence. Resultado medido em /ajustes no desktop: quatro campos saíam
+   3 + 1 órfão, colados por 4px.
+
+   O detalhe que fecha o caso: procurei `grade` em TODO o JSX do produto. Os
+   únicos dois usos são app/ajustes/page.tsx:146 e app/time/page.tsx:313 — os
+   dois do gestor. Nenhuma página pública usa esta grade. Era CSS morto
+   estragando uma tela viva. Some, e o formulário volta ao desenho que ele
+   sempre declarou ter.
+   ========================================================================== */
 
 /* ==========================================================================
    ESCOLHA — a peça de "clique numa opção". Usada em função, em área, no
@@ -2753,6 +2905,18 @@ button:disabled:active,
    site — dois produtos na mesma marca. */
 .lid{ max-width:var(--largura); margin:0 auto; padding:0 var(--e5) var(--e8); }
 
+/* O LINK DE VOLTAR TINHA 13 PIXELS DE ALTURA.
+   O produto tem uma lei escrita mais abaixo — "alvo de toque: 44px em tudo que
+   se toca, o rótulo continua pequeno, o que cresce é a zona clicável" — e a
+   lista de seletores que a aplica não incluía o link dentro do .lid-pe. Medido
+   nas duas telas que têm um (/time/conferir e /ajustes/ministerios): 13px no
+   desktop, 14px no celular. É o último elemento da página, o que a pessoa
+   procura quando quer sair, e o dedo errava. */
+.lid-pe a{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:var(--toque);padding:0 var(--e2);
+}
+
 /* o rodapé da tela: contagem discreta, na voz dos rótulos */
 .lid-pe{
   margin:var(--e8) 0 0; text-align:center;
@@ -2839,8 +3003,46 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   padding-bottom:var(--e3); border-bottom:1px solid var(--noite);
 }
 @media(max-width:560px){ .lid-secao-cab .lid-secao-nota{ flex:1 0 100% } }
-.lid-secao-cab .rot{ color:var(--cinza) }
+
+/* ---------------------------------------------------------------------------
+   O DEGRAU QUE FALTAVA — título de seção
+
+   Medido nas sete telas do gestor: ZERO <h2>. A escada tinha dois degraus e
+   nada no meio — 44px de título de página e 12px de rótulo. E esse rótulo de
+   12px fazia quatro trabalhos diferentes:
+
+     nomeia a página   AJUSTES
+     nomeia a seção    FUNÇÕES
+     nomeia o item     PROJEÇÃO
+     nomeia o campo    MÁXIMO DE ESCALAS POR MÊS
+
+   Quatro níveis de significado, uma forma visual. Em /ajustes, "FUNÇÕES" tinha
+   exatamente o mesmo tamanho de "PROJEÇÃO", que mora dentro dela: o filho
+   parecia o pai. A escada --d-lead/--d-bloco/--d-secao/--d-faixa/--d-heroi já
+   existia no arquivo e NENHUM degrau do meio era usado em tela de gestor.
+
+   Uma regra, sete telas. E o texto no JSX sempre foi caixa de frase ("Regras do
+   rodízio", "O grupo no WhatsApp"): era o CSS que gritava em maiúscula. */
+.lid-secao-cab > .rot{
+  font-size:var(--d-bloco);
+  font-weight:var(--p-corpo);
+  text-transform:none;
+  letter-spacing:-.01em;
+  line-height:1.15;
+  color:var(--ink);
+}
 .lid-secao-nota{ font-size:var(--t-apoio); color:var(--cinza) }
+
+/* O CHEVRON ANDA COLADO NO TÍTULO QUE ELE COMANDA.
+   Com justify-content:space-between e três filhos, a seta ia parar na margem
+   direita — a 900px do título, no desktop. Ninguém liga uma coisa na outra a
+   essa distância. Ordem explícita: título, seta, e só então a nota, empurrada
+   para a direita pelo margin-left:auto. Sem tocar no JSX. */
+.lid-secao-cab{ justify-content:flex-start }
+.lid-secao-cab > .rot{ order:1 }
+.lid-secao-cab > .giro{ order:2 }
+.lid-secao-cab > .lid-secao-nota{ order:3; margin-left:auto }
+@media(max-width:560px){ .lid-secao-cab > .lid-secao-nota{ margin-left:0 } }
 
 /* --------------------------------------------------------------- as linhas
    Uma linha por posto. Sem avatar: o nome da função é a chave de leitura, não
@@ -3002,7 +3204,12 @@ a.lid-bt-txt{ text-decoration:none; display:inline-block }
   font-family:var(--fonte-display); font-weight:var(--p-forte); font-size:var(--t-ui);
   min-width:26px; font-variant-numeric:tabular-nums; color:var(--ink);
 }
-.lid-alerta-n.sinal{ min-width:0 }
+/* min-width:0 tirava a reserva de 26px que existe para número, mas também
+   autorizava o flex a espremer o item até o conteúdo não caber: medido, a
+   caixa ficava com 2px para um "!" de 5px, e o sinal saía cortado no meio.
+   flex:none diz o que se queria dizer — não cresce, não encolhe, ocupa o que
+   o caractere ocupa. */
+.lid-alerta-n.sinal{ min-width:0; flex:none }
 .lid-alerta a{ color:var(--ink); text-decoration:none; border-bottom:1px solid var(--linha); }
 .lid-alerta a:hover,
 .lid-alerta a:active{ border-bottom-color:var(--noite) }
@@ -3056,10 +3263,26 @@ body:has(.lid) .abas a.on{ color:var(--noite); border-bottom-color:var(--noite);
    chevron dele para continuar parecendo o que é, um menu. */
 body:has(.lid) .abas a svg{ display:none }
 
+/* O padding da direita compensa o espaço que letter-spacing põe DEPOIS da
+   última letra, e flex:none diz o que se queria dizer: o nome do ministério em
+   que o líder está trabalhando não encolhe.
+
+   HONESTIDADE SOBRE O QUE ISTO RESOLVEU: a varredura reportava scrollWidth 90
+   contra clientWidth 86 neste botão. Com as duas mudanças foi para 90 contra
+   87 — e não a zero. Conferi na captura: o texto aparece inteiro ("Mídia · 17"
+   mais o chevron), nada some, e o documento não rola na horizontal. Os 3px que
+   sobram são de como o Chrome soma scrollWidth num inline-flex com
+   letter-spacing, não texto escondido. Fica registrado para quem medir depois
+   não perseguir um defeito que não existe na tela. */
 body:has(.lid) .seletor-equipe{
   font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
-  background:none; border:0; padding:0; color:var(--cinza); gap:var(--e2);
+  background:none; border:0; padding:0 var(--tr) 0 0; color:var(--cinza); gap:var(--e2);
+  /* e flex:none porque este botão não deve encolher NUNCA: ele é o nome do
+     ministério em que o líder está trabalhando. Com `flex:0 1 auto` (o padrão)
+     mais o `min-width:0` herdado da .marca-nome, ele era o primeiro a ceder
+     espaço numa barra que tinha 1.180px sobrando. */
+  flex:none;
 }
 body:has(.lid) .seletor-equipe:hover,
 body:has(.lid) .seletor-equipe:active{ color:var(--noite) }
@@ -5442,20 +5665,43 @@ svg.logo{ width:auto }
 .casa-areia .cartao{ background:var(--areia) } .casa-areia .cartao:hover{ background:rgba(255,255,255,.18) }
 .casa-areia .cartao-t{ color:var(--areia-tinta) } .casa-areia .cartao-d{ color:rgba(59,50,34,.82) } .casa-areia .cartao-n{ color:var(--areia-tinta); opacity:.55 }
 
-/* ---- filtros por dia (Pequena Guia): pílulas retas, uma ativa ------------- */
-.chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:clamp(28px,4vw,40px) }
-.chip{
+/* ---- filtros por dia (Pequena Guia): pílulas retas, uma ativa -------------
+
+   A TERCEIRA COLISÃO DA MESMA DOENÇA — e a pior das três.
+
+   Estas regras se chamavam `.chips` e `.chip`. Sem prefixo. E `.chip` é o
+   controle PRINCIPAL do /time: o botão que o líder toca para trocar o nível de
+   uma pessoa entre "faz sozinho", "ajuda quando falta" e "aprendendo".
+
+   Como este bloco vem 5.000 linhas depois, ele vencia. Medido no /time:
+
+   · o chip do gestor perdia o fundo (`background:transparent`), a borda ia
+     para um rgba(37,37,37,.25) cravado à mão, o texto virava CAIXA ALTA com
+     tracking de .12em e o padding pulava de 8/12 para 12/18;
+   · `.chip[aria-pressed="true"]` pintava de PRETO um chip do gestor sempre que
+     ele tivesse esse atributo — estado que este arquivo nunca desenhou;
+   · e no celular (<=759px) a regra transformava a fila de habilidades em
+     ROLAGEM HORIZONTAL: `flex-wrap:nowrap`, `overflow-x:auto` e margem
+     negativa de 20px. Medido: 1.530px de conteúdo numa janela de 347px, ou
+     seja quatro telas e meia de arrasto lateral para ver as áreas de UMA
+     pessoa, dentro de um acordeão. Era a mesma peça que já existia empilhada
+     e legível no desktop.
+
+   O prefixo `pg-` põe cada coisa na sua página. A família já existia aqui
+   (.pgs, .pg), só estas duas tinham ficado sem sobrenome. */
+.pg-chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:clamp(28px,4vw,40px) }
+.pg-chip{
   font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.12em; text-transform:uppercase;
   padding:12px 18px; border:1px solid rgba(37,37,37,.25); background:transparent; color:var(--noite); cursor:pointer;
   transition:background var(--t),color var(--t),border-color var(--t);
 }
-.chip:hover{ border-color:var(--noite) }
-.chip[aria-pressed="true"]{ background:var(--noite); color:#fff; border-color:var(--noite) }
-.chip small{ opacity:.55; margin-left:6px; letter-spacing:.06em }
-.chips + .pgs{ margin-top:clamp(24px,3vw,36px) }
+.pg-chip:hover{ border-color:var(--noite) }
+.pg-chip[aria-pressed="true"]{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.pg-chip small{ opacity:.55; margin-left:6px; letter-spacing:.06em }
+.pg-chips + .pgs{ margin-top:clamp(24px,3vw,36px) }
 .pg{ transition:opacity .35s var(--ease),transform .35s var(--ease) }
 .pg.some{ display:none }
-@media(max-width:759px){ .chips{ justify-content:flex-start; overflow-x:auto; flex-wrap:nowrap; margin-inline:calc(-1 * clamp(20px,4vw,52px)); padding-inline:clamp(20px,4vw,52px); scrollbar-width:none } .chips::-webkit-scrollbar{ display:none } .chip{ flex:none } }
+@media(max-width:759px){ .pg-chips{ justify-content:flex-start; overflow-x:auto; flex-wrap:nowrap; margin-inline:calc(-1 * clamp(20px,4vw,52px)); padding-inline:clamp(20px,4vw,52px); scrollbar-width:none } .pg-chips::-webkit-scrollbar{ display:none } .pg-chip{ flex:none } }
 
 /* ---- a tira de fatos da home: três cartões logo abaixo do herói ----------- */
 .fatos{ display:grid; grid-template-columns:1fr; gap:1px; background:var(--linha); border-top:1px solid var(--linha); border-bottom:1px solid var(--linha) }

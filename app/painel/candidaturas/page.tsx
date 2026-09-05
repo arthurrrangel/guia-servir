@@ -333,8 +333,8 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
             </div>
             <p className="dim peq" style={{ marginTop: 12, maxWidth: '52ch' }}>
               Aprovar cria a pessoa no time na hora, com as funções marcadas como{' '}
-              <strong>a conferir</strong>. Encerrar não é um não definitivo: a tela dela
-              diz isso e oferece as outras áreas.
+              <strong>a conferir</strong>. Encerrar não é um não definitivo: a tela
+              dela oferece as outras áreas.
             </p>
           </>
         )}

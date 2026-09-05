@@ -285,10 +285,9 @@ function Escala() {
                 Isto não é aviso de perigo: é o contrário. É a frase que
                 transforma um botão assustador num botão seguro. */}
             <p className="esc-oquefaz">
-              Montar e sortear preenchem só o que está vazio: <strong>quem já confirmou e quem
-              você travou não se mexe</strong>, e quem avisou que não pode não volta no sorteio.
-              Os botões de pedir, copiar e cobrar deixam um texto pronto para você colar no
-              grupo. <strong>Nada é enviado daqui.</strong>
+              Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
+              e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
+              um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
             </p>
           </div>
           {placar && (
@@ -476,8 +475,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
 
       {!passado && doDia.length > 0 && preenchidos === 0 && (
         <p className="esc-nota">
-          Ninguém escalado ainda. <strong>Sortear</strong> preenche tudo de uma vez respeitando
-          quem avisou que não pode e quem já serviu recentemente.
+          Ninguém escalado ainda. <strong>Sortear</strong> preenche tudo de uma vez.
         </p>
       )}
 

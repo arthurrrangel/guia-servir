@@ -1,7 +1,7 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
 } from '@/lib/db';
@@ -124,7 +124,7 @@ function Time() {
         </div>
       </div>
       {!S.voluntarios.length && (
-        <Aviso tom="info">Sem saber quem sabe fazer o quê, não existe rodízio. Comece pelas pessoas que serviram no último domingo.</Aviso>
+        <Aviso tom="info">Comece pelas pessoas que serviram no último domingo.</Aviso>
       )}
 
       {/* A FILA DE CONFERÊNCIA SAIU DAQUI — arquitetura de informação, 29/08/2026.
@@ -149,25 +149,43 @@ function Time() {
                 : 'níveis esperando sua conferência'}
             </Link>
             <span className="dim pequeno" style={{ display: 'block', marginTop: 4 }}>
-              Enquanto não confere, quem disse <strong>faz sozinho</strong> vale
-              como <strong>ajuda quando falta</strong> e o sorteio não deixa a área só nessa pessoa.
+              Até você conferir, quem disse <strong>faz sozinho</strong> conta
+              como <strong>ajuda quando falta</strong> no sorteio.
             </span>
           </span>
         </div>
       )}
 
-      {ordenados.map(v => {
+      {/* DOIS GRUPOS, NÃO DEZESSETE ETIQUETAS.
+          A lista já vinha ordenada com os não conferidos primeiro, mas cada um
+          deles carregava a própria etiqueta "confira" — dez vezes a mesma
+          palavra, empilhada numa coluna. Etiqueta que se repete não informa
+          mais, informa menos: vira textura. O nome do grupo diz uma vez o que
+          a etiqueta dizia dez, e a contagem ao lado ("10 de 17") responde
+          sozinha a pergunta que traz o líder aqui. */}
+      {ordenados.map((v, i) => {
         const est = saude.pessoas.find(p => p.id === v.id)!;
         const novo = v.conferido === false;
+        const abreGrupo = i === 0 || (ordenados[i - 1].conferido === false) !== novo;
+        const noGrupo = ordenados.filter(x => (x.conferido === false) === novo).length;
         /* resumo em uma linha: as áreas da pessoa cabem em micro-chips e o
            cartão inteiro só abre quando o líder vai mexer. Antes cada pessoa
            ocupava mais de mil pixels e o Time tinha 39 mil de rolagem. */
         const areas = funcoes.filter(f => v.funcoes[f.nome]);
         return (
-          <details className={`pessoa ${novo ? 'card-novo' : ''}`} key={v.id} style={{ opacity: v.ativo ? 1 : .55 }}>
+          <Fragment key={v.id}>
+          {abreGrupo && (
+            <div className="lid-secao-cab" style={{ marginTop: i === 0 ? 'var(--e6)' : 'var(--e8)' }}>
+              <span className="rot">{novo ? 'Esperando sua conferência' : 'Time conferido'}</span>
+              <span className="lid-secao-nota">
+                {novo ? `${noGrupo} de ${ordenados.length}` : `${noGrupo} pessoa${noGrupo === 1 ? '' : 's'}`}
+              </span>
+            </div>
+          )}
+          <details className={`tm-pessoa ${novo ? 'card-novo' : ''}`} style={{ opacity: v.ativo ? 1 : .55 }}>
             <summary>
               <span className="cresce">
-                <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="pill peq" style={{ marginLeft: 8 }}>pausado</span>}</span>
+                <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="marca-est" style={{ marginLeft: 8 }}>pausado</span>}</span>
                 <span className="pessoa-areas">
                   {areas.length
                     ? areas.map(f => (
@@ -178,8 +196,9 @@ function Time() {
                 </span>
               </span>
               <span className="pessoa-meta">
-                {novo && <span className="pill warn peq">confira</span>}
-                {est.furos > 0 && <span className="pill bad peq">{est.furos} furo{est.furos > 1 ? 's' : ''}</span>}
+                {/* "confira" saiu daqui: agora quem diz isso é o título do grupo,
+                    uma vez. O furo continua por pessoa porque é por pessoa. */}
+                {est.furos > 0 && <span className="marca-est bad">{est.furos} furo{est.furos > 1 ? 's' : ''}</span>}
                 {/* limiteMes nulo = a pessoa segue o padrão da equipe. Sem
                     esse fallback a linha virava "1/" e o select ficava sem
                     opção marcada. */}
@@ -259,6 +278,7 @@ function Time() {
             </div>
             </div>
           </details>
+          </Fragment>
         );
       })}
 
@@ -276,7 +296,7 @@ function Time() {
                 <span className="dim pequeno num" style={{ width: 118, textAlign: 'right' }}>
                   {f.aptos} de 3 pessoa{f.aptos === 1 ? '' : 's'}
                 </span>
-                <span className={`pill ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`}>
+                <span className={`marca-est ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`}>
                   <span className={`ponto ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`} />{f.texto}
                 </span>
               </div>

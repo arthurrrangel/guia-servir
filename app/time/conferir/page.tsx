@@ -105,7 +105,7 @@ function Conferir() {
       {!!suspeitas.length && (
         <details className="bloco-extra" style={{ margin: '18px 0 4px' }}>
           <summary>
-            <span className="pill warn peq"><span className="ponto warn" />{suspeitas.length}</span>
+            <span className="marca-est warn"><span className="ponto warn" />{suspeitas.length}</span>
             <span className="cresce">{suspeitas.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}</span>
             <IcSeta className="giro" />
           </summary>

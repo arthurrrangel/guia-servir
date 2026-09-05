@@ -258,6 +258,12 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <C.Provider value={{ S, recarregar, pinta, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
+      {/* .sistema é o casco tipográfico do gestor. Precisa envolver TUDO —
+          topo, abas, conteúdo e barra de baixo — senão a barra fica numa fonte
+          e a tela em outra. É um <div> nu de propósito: sem transform, sem
+          filter, sem overflow, que são as três coisas que quebrariam o
+          position:sticky do .topo e o position:fixed da .barra-fundo. */}
+      <div className="sistema">
       <header className="topo">
         <div className="topo-in">
           <div className="marca">
@@ -325,6 +331,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         ))}
       </nav>
       {msg && <div className="toast" role="status">{msg}</div>}
+      </div>
     </C.Provider>
   );
 }
