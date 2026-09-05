@@ -284,7 +284,7 @@ export default function Casa() {
       <div className="progresso" ref={fio} style={{ color: solida ? 'var(--noite)' : '#fff' }} aria-hidden="true" />
 
       {/* ------------------------------------------------------------ barra */}
-      <header className={'casa-barra' + (solida ? ' opaco' : '')}>
+      <header className={'casa-barra inicio' + (solida ? ' opaco' : '')}>
         <Link href="/" className="marca-link" aria-label="GUIA Church">
           <Logo className="logo" />
         </Link>

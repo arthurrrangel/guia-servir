@@ -4580,7 +4580,7 @@ html{ scroll-behavior:smooth }
 .casa-barra.opaco{
   /* sem backdrop-filter: desfocar o que passa por baixo custa um quadro
      inteiro a cada rolagem. Barra quase opaca, mesma leitura, zero custo. */
-  background:rgba(250,254,255,.96);
+  background:var(--papel);
 }
 
 /* ---- revelação: a palavra entra do desfoque, o bloco entra de baixo ------
@@ -5607,3 +5607,46 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 /* os filhos do azulejo não encolhem: quando o texto é maior, o azulejo cresce
    (a proporção quadrada é o mínimo), e a letra mantém a altura em todos */
 .g-tile > *{ flex:none }
+
+/* =============================================================================
+   05/09 — REVELAÇÃO CURTA: nada fica invisível por mais de meio segundo
+   Depois de um salto de rolagem, a faixa já nasce pintada e os filhos
+   entram em ≤ 0,45 s no total (antes: até 0,9 s com escada de atrasos e
+   palavras a 520 ms). Com a antecipação de 25% da tela, quem rola normal
+   nunca vê a entrada; quem salta vê meio segundo, não um.
+   ============================================================================= */
+.js-rev .rev :is(.g-rot,.g-h3,.g-ed,.g-corpo,.g-acoes,.g-num > div,.g-passo,.g-perg > li,.g-tile,.g-vira > li,.g-pe-cols > div),
+.js-rev .rev .indice,.js-rev .rev .chapeu,.js-rev .rev .corpo,.js-rev .rev .editorial,
+.js-rev .rev .acoes,.js-rev .rev .casa-hora,.js-rev .rev .casa-tira,.js-rev .rev .casa-tira-nota{
+  transition-duration:.3s,.3s;
+}
+.js-rev .rev.visto .g-h3{ transition-delay:40ms }
+.js-rev .rev.visto .g-ed{ transition-delay:80ms }
+.js-rev .rev.visto .g-corpo{ transition-delay:110ms }
+.js-rev .rev.visto .g-acoes{ transition-delay:140ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(1){ transition-delay:40ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(2){ transition-delay:80ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(3){ transition-delay:120ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(4){ transition-delay:160ms }
+.js-rev .rev.visto :is(.g-num,.g-passos,.g-perg,.g-tiles,.g-vira,.g-pe-cols) > :nth-child(n+5){ transition-delay:200ms }
+.js-rev .rev.visto .indice{ transition-delay:20ms } .js-rev .rev.visto .chapeu{ transition-delay:80ms }
+.js-rev .rev.visto .editorial{ transition-delay:100ms } .js-rev .rev.visto .corpo{ transition-delay:120ms }
+.js-rev .rev.visto .casa-hora{ transition-delay:110ms } .js-rev .rev.visto .acoes{ transition-delay:150ms }
+.js-rev .rev.visto .casa-tira{ transition-delay:100ms } .js-rev .rev.visto .casa-tira-nota{ transition-delay:150ms }
+.js-rev .g-h1 .pal,.js-rev .g-h2 .pal{ transition-duration:.32s,.32s,.32s; transition-delay:calc(var(--i,0) * 22ms + 20ms) }
+.js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{ transition-duration:.36s,.36s,.36s }
+.js-rev .rev .g-foto{ transition-duration:.45s }
+
+/* ---- a barra da home escurece/clareia pela própria rolagem (sem esperar o JS)
+   Antes: classe .opaco trocada em React depois do evento de scroll — num
+   salto, a barra chegava branca sobre fundo branco por um instante. Agora a
+   cor e o fundo são dirigidos pela rolagem no compositor. */
+@supports (animation-timeline: scroll()) {
+  .casa-barra.inicio{ animation:barra-fica linear both; animation-timeline:scroll(root); animation-range:35vh 70vh; transition:none }
+  .casa-barra.inicio::before{ animation:barra-scrim linear both; animation-timeline:scroll(root); animation-range:35vh 70vh }
+}
+@keyframes barra-fica{
+  from{ background:rgba(250,254,255,0); color:#fff; border-bottom-color:transparent }
+  to{ background:var(--papel); color:var(--ink); border-bottom-color:rgba(12,12,14,.09) }
+}
+@keyframes barra-scrim{ from{ opacity:1 } to{ opacity:0 } }
