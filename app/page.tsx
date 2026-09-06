@@ -8,6 +8,7 @@ import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
 import { Rodape } from '@/components/Site';
+import { AreasCarregando } from '@/components/Tela';
 import Contador from '@/components/Contador';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
@@ -499,7 +500,7 @@ export default function Casa() {
             </div>
           </div>
 
-          {fase === 'carregando' && <p className="g-corpo c" style={{ textAlign: 'center' }}>Carregando as áreas</p>}
+          {fase === 'carregando' && <AreasCarregando />}
           {fase === 'rede' && (
             <p className="g-corpo c" style={{ textAlign: 'center' }}>
               Não consegui carregar as áreas agora. Atualize a página.

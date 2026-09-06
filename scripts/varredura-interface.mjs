@@ -2,13 +2,18 @@ import { chromium } from 'playwright';
 /* a porta vem do ambiente: PORTA=3555 node scripts/... . Ela ja ficou
    fixa em 3555 num commit e todo mundo que rodava em 3000 via tela vazia. */
 const B=`http://localhost:${process.env.PORTA||3000}`;
-const TELAS=[['/painel?demo=1','painel'],['/escala?demo=1','escala'],['/time?demo=1','time'],
+/* raiz cai para o body: assim a mesma varredura serve o sistema (.sistema/.lid/
+   .vol) e o site público, que não tem casca nenhuma. As rotas vêm do argumento
+   quando há um; sem argumento, varre o sistema como antes. */
+const PADRAO=[['/painel?demo=1','painel'],['/escala?demo=1','escala'],['/time?demo=1','time'],
 ['/time/conferir?demo=1','conferir'],['/ajustes?demo=1','ajustes'],['/ajustes/ministerios?demo=1','ministerios'],
 ['/painel/candidaturas?demo=1','candidaturas'],['/entrar','entrar'],['/eu/x?demo=1','voluntario']];
+const ARGS=process.argv.slice(2);
+const TELAS=ARGS.length?ARGS.map(a=>[a==='home'?'/':'/'+a, a]):PADRAO;
 
 const CHECK = () => {
   const cs=getComputedStyle, out={sobrepoe:[],contraste:[],morta:[],alvo:[],falsoBotao:[],semNome:[]};
-  const raiz=document.querySelector('.sistema')||document.querySelector('.lid')||document.querySelector('.vol');
+  const raiz=document.querySelector('.sistema')||document.querySelector('.lid')||document.querySelector('.vol')||document.body;
   if(!raiz) return {semRaiz:true};
   const nome=e=>String(e.className||e.tagName).trim().slice(0,26)||e.tagName;
   const vis=e=>{const s=cs(e),r=e.getBoundingClientRect();
@@ -25,7 +30,15 @@ const CHECK = () => {
     }
   }
 
-  /* 2. CONTRASTE. Texto folha contra o fundo pintado mais proximo. */
+  /* 2. CONTRASTE. Texto folha contra o fundo pintado mais proximo.
+
+     PONTO CEGO CONHECIDO, medido em 06/09/2026: quando o fundo e uma IMAGEM
+     e nao uma cor, esta funcao sobe a arvore procurando background-color, nao
+     acha nenhum pintado e acaba comparando o texto com ele mesmo — sai
+     1.00:1. Foi o que aconteceu com a barra do topo sobre a foto do heroi:
+     seis alarmes, e a amostragem de pixel na captura deu 9,4:1 a 10:1, muito
+     acima do 4,5 do AA. Alarme de contraste sobre elemento com foto atras
+     precisa ser conferido no pixel antes de virar conserto. */
   const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});
     return .2126*r+.7152*g+.0722*b};
   const rgb=s=>{const m=s.match(/\d+(\.\d+)?/g); return m?m.slice(0,3).map(Number):null};
@@ -87,7 +100,8 @@ const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
 let total=0;
 for(const [w,h,tag] of [[1280,900,'desk'],[390,844,'cel']]){
   const ctx=await b.newContext({viewport:{width:w,height:h}});
-  await ctx.route('**',r=>r.request().url().startsWith(B)?r.continue():r.abort());
+  const PASSA=[B,'https://qjtcaijhgldypudzyafz.supabase.co'];
+  await ctx.route('**',r=>PASSA.some(u=>r.request().url().startsWith(u))?r.continue():r.abort());
   for(const [rota,nome] of TELAS){
     const p=await ctx.newPage();
     try{await p.goto(B+rota,{waitUntil:'domcontentloaded',timeout:15000});}catch{}

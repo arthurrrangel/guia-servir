@@ -5,7 +5,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
-import { Carregando, Vazio } from '@/components/Tela';
+import { AreasCarregando, Vazio } from '@/components/Tela';
 import { fotoDaArea } from '@/lib/fotos';
 
 /* =============================================================================
@@ -80,7 +80,7 @@ export default function Servir() {
             <p className="g-ed">O cadastro leva um minuto.</p>
           </div>
           <div className="c-bloco grande">
-            {fase === 'carregando' && <Carregando o="Carregando as áreas" />}
+            {fase === 'carregando' && <AreasCarregando />}
             {fase === 'rede' && (
               <Vazio
                 titulo="Sem conexão agora"

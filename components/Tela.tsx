@@ -49,6 +49,43 @@ export function Carregando({ o = 'Carregando' }: { o?: string }) {
   );
 }
 
+/* =============================================================================
+   O ESQUELETO DAS ÁREAS
+
+   06/09/2026. A /servir existe para listar as áreas, e enquanto carregava ela
+   mostrava 500px de branco com a frase "Carregando as áreas" perdida no meio.
+   Numa conexão lenta esse vazio É a página: a primeira impressão do site é uma
+   tela em branco com uma legenda.
+
+   E quando os dados chegavam, a página pulava — o vazio de 500px virava uma
+   grade de 5 cartões de 420px, e tudo que estava abaixo descia de uma vez.
+
+   O esqueleto resolve as duas coisas com a mesma peça: ocupa exatamente a
+   forma que os cartões vão ocupar (inclusive o primeiro, que atravessa duas
+   colunas), então não há salto, e diz sem palavra nenhuma o que está vindo.
+
+   `aria-hidden` na grade e o aviso de verdade num `role=status` invisível:
+   quem usa leitor de tela ouve "Carregando as áreas", não cinco cartões
+   fantasma.
+============================================================================= */
+export function AreasCarregando({ n = 5 }: { n?: number }) {
+  return (
+    <>
+      <p className="so-leitor" role="status" aria-live="polite">Carregando as áreas</p>
+      <div className="casa-areas centro rente" aria-hidden="true">
+        {Array.from({ length: n }, (_, i) => (
+          <div key={i} className="casa-area esqueleto">
+            <span className="esq-l" style={{ width: i === 0 ? '38%' : '56%' }} />
+            <span className="esq-l fina" style={{ width: '84%' }} />
+            <span className="esq-l fina" style={{ width: i % 2 ? '62%' : '72%' }} />
+            <span className="esq-l selo" style={{ width: '30%' }} />
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
 export function Vazio({ titulo, texto, acao }:
   { titulo: string; texto: string; acao?: { href: string; rot: string } }) {
   return (

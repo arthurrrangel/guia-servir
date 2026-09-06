@@ -6140,7 +6140,10 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 /* abaixo de 900px a assimetria não cabe: a coluna de 4 fica com 90px e a ação
    quebra em três linhas. Empilha, e a ação volta a nascer embaixo do texto. */
 @media(max-width:899px){
-  .g-cab{ display:block }
+  /* `display:block` e não `grid`: empilhado não há colunas para distribuir.
+     E o `gap` sai junto — gap em contêiner de bloco é propriedade escrita e
+     morta, que é como uma folha de estilo passa a mentir sobre si mesma. */
+  .g-cab{ display:block; gap:0 }
   .g-cab > .g-acoes{ justify-content:flex-start; margin-top:var(--e6); padding-bottom:0 }
   .g-cab-txt .g-h2,.g-cab-txt .g-ed{ max-width:none }
 }
@@ -6307,3 +6310,103 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .casa-heroi .g-h1,.casa-heroi h1{ max-width:9.5ch; margin-inline:auto }
 /* o par de ações respira e assenta na mesma linha de base */
 .casa-heroi .acoes{ margin-top:clamp(30px,4vh,44px) }
+
+/* -----------------------------------------------------------------------------
+   NO CELULAR A TIRA DE FATOS EMPILHA, E AÍ O CENTRO VIRA INCOERÊNCIA
+   06/09/2026. Em três colunas, cada fato centrado no seu quadro é composição:
+   uma banda de três coisas equivalentes. Empilhados, viram três blocos
+   centrados em cima de uma seção alinhada à esquerda — o eixo da página muda
+   no meio da rolagem, e mudança de eixo sem motivo é o que faz uma página
+   parecer montada por partes.
+
+   O centro fica onde ele é decisão (as três colunas, no desktop) e sai onde
+   ele é resíduo do empilhamento.
+----------------------------------------------------------------------------- */
+@media(max-width:759px){
+  .fato{ text-align:left; align-items:flex-start }
+  .fato-r,.fato-v{ justify-content:flex-start }
+}
+
+/* -----------------------------------------------------------------------------
+   QUATRO AZULEJOS EM 390px SÃO QUATRO COLUNAS DE 94px
+   06/09/2026. A regra de celular mantinha `repeat(4,1fr)` até 899px. Num
+   iPhone comum cada azulejo fica com 94px, menos 12 de padding: 82px para
+   escrever "Interagindo" e "Avançando" — que não cabem e ficam encostando nas
+   bordas, com a letra reduzida a 40px para caber junto.
+
+   Quatro colunas é a forma da sigla, mas só enquanto houver largura. Abaixo de
+   560px vira 2x2: a sigla continua legível na ordem de leitura (G U / I >), a
+   palavra volta a caber inteira, e a letra pode dobrar de tamanho.
+----------------------------------------------------------------------------- */
+@media(max-width:559px){
+  .g-tiles.letras{ grid-template-columns:repeat(2,1fr) }
+  .g-tiles.letras .g-tile{ padding:26px 14px 22px }
+  .g-tiles.letras .g-tile-l{ font-size:66px }
+  .g-tiles.letras .g-tile-t{ font-size:14px }
+}
+
+/* o chevron é mais largo e mais alto que G, U e I: numa fila de quatro
+   azulejos ele quebra o ritmo da linha de letras. 0.86em não bastou. */
+.g-tile-l .marca-chev{ font-size:.72em }
+.rolo-l .marca-chev{ font-size:.74em }
+
+/* -----------------------------------------------------------------------------
+   DOIS OBJETOS IGUAIS, UM CLICA E O OUTRO NÃO
+   06/09/2026. Na /pequena-guia os filtros (`.pg-chip`) são retângulos com
+   borda de 1px, caixa alta pequena e entreletra — e o rótulo da plataforma do
+   grupo online (`.pg-online span`) era um retângulo com borda de 1px, caixa
+   alta pequena e entreletra. Mesma forma, e um responde ao toque e o outro é
+   `aria-hidden`. Quem tenta clicar em "DISCORD" e não acontece nada não conclui
+   "isto é um rótulo": conclui que o site está quebrado.
+
+   O rótulo perde a borda e ganha a retícula como moldura. Continua legível,
+   deixa de prometer o que não cumpre.
+----------------------------------------------------------------------------- */
+.pg-online span{
+  border:0; background:transparent; padding:0;
+  font-size:13px; letter-spacing:.18em; color:var(--areia);
+  text-shadow:0 1px 12px rgba(37,37,37,.85);
+}
+
+/* -----------------------------------------------------------------------------
+   O ESQUELETO DAS ÁREAS, e a classe de leitor de tela que faltava
+   06/09/2026. Ver o comentário longo em components/Tela.tsx: a /servir exibia
+   500px de branco enquanto carregava, e a chegada dos dados empurrava a página
+   inteira para baixo de uma vez.
+
+   O esqueleto tem exatamente a forma do cartão real — mesma altura mínima,
+   mesmo fundo, mesmo primeiro cartão atravessando duas colunas — para que a
+   troca do fantasma pelo real não mova um pixel.
+
+   O brilho que atravessa é lento de propósito (1,8s). Esqueleto que pisca
+   rápido lê como erro; lento lê como carregando.
+----------------------------------------------------------------------------- */
+.so-leitor{
+  position:absolute; width:1px; height:1px; margin:-1px; padding:0;
+  overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0;
+}
+/* `width:100%` NÃO É REDUNDANTE AQUI, é o que quebra uma circularidade.
+   Primeira versão: as barras tinham largura em %, o cartão é flex column e
+   media 40px — só o padding. A porcentagem da barra dependia da largura do
+   cartão, e a largura do cartão dependia do conteúdo, que eram as barras. O
+   navegador resolve isso com zero, e o esqueleto virou dois filetes pretos.
+   Com largura explícita, o cartão nasce do trilho da grade (416px) e as
+   barras têm contra o que calcular. */
+.casa-area.esqueleto{
+  width:100%; background:var(--noite); gap:14px;
+  justify-content:flex-end; align-items:stretch;
+  cursor:default; pointer-events:none;
+}
+.casa-area.esqueleto .esq-l{ margin-inline:auto }
+.esq-l{
+  display:block; height:22px; max-width:100%;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,.06) 0%, rgba(255,255,255,.13) 45%,
+    rgba(255,255,255,.06) 100%);
+  background-size:220% 100%;
+  animation:esq-brilha 1.8s ease-in-out infinite;
+}
+.esq-l.fina{ height:12px; background-color:rgba(255,255,255,.05) }
+.esq-l.selo{ height:11px; margin-top:8px }
+@keyframes esq-brilha{ 0%{background-position:120% 0} 100%{background-position:-120% 0} }
+@media(prefers-reduced-motion:reduce){ .esq-l{ animation:none } }
