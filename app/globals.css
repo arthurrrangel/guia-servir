@@ -6410,3 +6410,16 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .esq-l.selo{ height:11px; margin-top:8px }
 @keyframes esq-brilha{ 0%{background-position:120% 0} 100%{background-position:-120% 0} }
 @media(prefers-reduced-motion:reduce){ .esq-l{ animation:none } }
+
+/* o conteúdo respira depois do cabeçalho assimétrico. Sem isto, a ação — que
+   fica alinhada pela BASE do bloco de texto — encostava a 12px do topo da
+   grade de áreas, e um botão sólido a 12px de um cartão preto lê como erro de
+   montagem. `.c-foto` já trazia a própria margem; a grade de áreas não. */
+/* `+` pegava o <p class="so-leitor"> do esqueleto — absoluto, 1px, invisível —
+   e a margem morria nele. O irmão GERAL alcança o conteúdo de verdade
+   independente de quantos avisos de acessibilidade estejam no meio. */
+.g-cab ~ .casa-areas,
+.g-cab ~ .c-foto,
+.g-cab ~ .g-tiles,
+.g-cab ~ .cartoes,
+.g-cab ~ .g-passos{ margin-top:clamp(40px,5.5vw,72px) }
