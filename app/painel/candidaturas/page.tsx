@@ -358,7 +358,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
           <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>
           {c.pessoas?.email && <><dt>E-mail</dt><dd>{c.pessoas.email}</dd></>}
           <dt>Quer fazer</dt>
-          <dd>{funcoes.length ? funcoes.join(', ') : 'não marcou nenhuma função'}</dd>
+          <dd>{funcoes.length ? funcoes.join(' · ') : 'não marcou nenhuma função'}</dd>
           {resp.map(r => (
             <span key={r.pergunta} style={{ display: 'contents' }}>
               <dt>{r.pergunta}</dt><dd>{r.resposta.split('|').join(', ')}</dd>

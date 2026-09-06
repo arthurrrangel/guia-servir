@@ -222,7 +222,7 @@ export default function Candidatura() {
             </div>
             <div className="vol-eq-linha">
               <span className="vol-eq-rot">Onde quer servir</span>
-              <span className="vol-eq-val">{d.funcoes?.length ? d.funcoes.join(', ') : 'A definir na conversa'}</span>
+              <span className="vol-eq-val">{d.funcoes?.length ? d.funcoes.join(' · ') : 'A definir na conversa'}</span>
             </div>
             <div className="vol-eq-linha">
               <span className="vol-eq-rot">Seu nome</span>

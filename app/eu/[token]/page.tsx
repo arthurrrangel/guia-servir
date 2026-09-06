@@ -663,10 +663,22 @@ export default function Eu() {
                 <span className="vol-eq-val">{equipe}</span>
               </div>
             )}
+            {/* SEPARADOR ' · ', NÃO ', '. 06/09/2026.
+                Nome de função pode ter vírgula dentro: o Connect tem
+                "GABINETE, COZINHA E BANHEIROS". Com vírgula separando a lista,
+                a tela da Eliete mostrava
+
+                  RECEPÇÃO 1, GABINETE, COZINHA E BANHEIROS, SETOR A, SETOR B,
+                  VISITANTES 1
+
+                que qualquer um lê como SEIS funções. São cinco. Quem contou
+                errado foi a liderança, olhando essa tela — e a conta importa,
+                porque é por ela que se decide quem falta em que posto.
+                O resto do sistema já separava com ' · '. */}
             {!!espaco?.funcoes?.length && (
               <div className="vol-eq-linha">
                 <span className="vol-eq-rot">Você faz</span>
-                <span className="vol-eq-val">{espaco.funcoes.map((f: any) => f.funcao).join(', ')}</span>
+                <span className="vol-eq-val">{espaco.funcoes.map((f: any) => f.funcao).join(' · ')}</span>
               </div>
             )}
             {!!espaco?.responsavel && (
