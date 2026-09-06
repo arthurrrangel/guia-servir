@@ -66,7 +66,7 @@ export function Barra({ atual }: { atual?: string }) {
         <div className="casa-barra-fim">
           <Link href="/acessar" className="bt-barra discreto">Acesso às equipes</Link>
           <Link href="/servir" className="bt-barra">
-            <span className="so-largo">Quero&nbsp;</span>servir
+            <span className="so-largo">Quero</span>servir
           </Link>
           <button className="menu-bt" aria-expanded={menu}
                   aria-label={menu ? 'Fechar menu' : 'Abrir menu'}

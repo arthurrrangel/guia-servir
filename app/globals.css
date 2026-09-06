@@ -6090,3 +6090,220 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .g-tiles.centro:not(.letras) .g-tile{ aspect-ratio:auto; min-height:0; padding-bottom:clamp(26px,3vw,40px) }
 .g-tiles.tres.centro .g-tile{ aspect-ratio:1 }
 @media(max-width:899px){ .g-tiles.tres.centro .g-tile{ aspect-ratio:auto } }
+
+/* =============================================================================
+   FASE 20 · A CASA DEIXA DE TER UMA COMPOSIÇÃO SÓ
+   06/09/2026
+
+   O QUE ESTAVA ERRADO, MEDIDO E NÃO ACHADO.
+
+   O sistema visual aqui é bom: escala tipográfica própria, fotografia com um
+   tratamento só, faixa clara e faixa escura alternando, revelação por rolagem.
+   Nada disso é template. O que dava sensação de template era outra coisa, e
+   ela está no HTML, não no CSS: TODA seção da home era montada com a mesma
+   peça, `.c` — rótulo centrado, título centrado, linha itálica centrada, par
+   de botões centrado, máximo de 760px. Quatro vezes seguidas.
+
+   Uma composição repetida quatro vezes não lê como assinatura, lê como
+   gabarito. E o preço é de leitura, não de gosto: quando todas as seções têm
+   o mesmo peso e o mesmo eixo, nenhuma tem hierarquia sobre a outra, e a
+   página inteira vira um corredor.
+
+   Três correções, e nenhuma delas apaga o que já estava certo:
+
+   1. `.g-cab` — cabeçalho assimétrico. O texto ocupa 7 das 12 colunas à
+      esquerda; a ação vai para o fim da linha, alinhada pela base do bloco.
+      As faixas claras (o domingo, servir) passam a usá-lo. O herói, a sigla
+      e o fecho continuam centrados, porque ali o centro é a forma certa: são
+      as três telas em que a página fala em vez de listar.
+
+   2. `.g-link` — o secundário deixa de ser botão. Havia dois botões do mesmo
+      tamanho em quase toda seção, e escolher entre dois iguais é trabalho.
+      Agora um é sólido e o outro é palavra sublinhada: a hierarquia passa a
+      existir sem custar nem um pixel a mais.
+
+   3. A linha itálica para de disputar com o título. `.g-ed` tinha 52px contra
+      66px do `.g-h2` — 79% do título, perto demais para ser apoio. Ela ficava
+      do tamanho de uma segunda manchete e o olho não sabia qual ler primeiro.
+      Só o caso "itálica logo depois do h2" encolhe; o herói e o rodapé, que
+      usam a itálica como voz principal, ficam como estavam.
+============================================================================= */
+
+/* ---- 1. cabeçalho assimétrico -------------------------------------------- */
+.g-cab{
+  display:grid; grid-template-columns:repeat(12,1fr);
+  gap:clamp(20px,3vw,44px); align-items:end;
+}
+.g-cab-txt{ grid-column:1/9; min-width:0 }
+.g-cab-txt .g-h2,.g-cab-txt .g-ed{ max-width:18ch }
+.g-cab > .g-acoes{ grid-column:9/-1; justify-content:flex-end; margin-top:0; padding-bottom:.35em }
+/* abaixo de 900px a assimetria não cabe: a coluna de 4 fica com 90px e a ação
+   quebra em três linhas. Empilha, e a ação volta a nascer embaixo do texto. */
+@media(max-width:899px){
+  .g-cab{ display:block }
+  .g-cab > .g-acoes{ justify-content:flex-start; margin-top:var(--e6); padding-bottom:0 }
+  .g-cab-txt .g-h2,.g-cab-txt .g-ed{ max-width:none }
+}
+
+/* ---- 2. o secundário vira palavra ---------------------------------------- */
+.g-link{
+  display:inline-flex; align-items:center; min-height:var(--toque);
+  font-family:var(--fonte-display); font-weight:500; font-size:14px;
+  letter-spacing:.02em; color:var(--ink); text-decoration:none;
+  border-bottom:1px solid rgba(37,37,37,.3); padding-bottom:1px;
+  transition:border-color var(--t),color var(--t);
+}
+.g-link:hover,.g-link:focus-visible{ border-bottom-color:currentColor }
+.casa-escuro .g-link,.g-cheio .g-link{ color:#fff; border-bottom-color:rgba(255,255,255,.4) }
+.casa-areia .g-link{ color:var(--areia-tinta); border-bottom-color:rgba(59,50,34,.35) }
+/* dentro de .g-acoes ele fica na mesma linha de base do botão sólido, não
+   esticado à altura dele */
+.g-acoes .g-link{ align-self:center }
+
+/* ---- 3. a itálica apoia, não compete ------------------------------------- */
+.g-h2 + .g-ed{
+  font-size:clamp(20px,2.3vw,33px); line-height:1.28;
+  margin-top:.6em; letter-spacing:-.008em;
+}
+
+/* o vão do botão principal da barra. Ele existe como margem e não como espaço
+   duro dentro do trecho entreletrado — ver o comentário no page.tsx. Some
+   junto com a palavra "Quero" quando `.so-largo` é escondido, porque a margem
+   é dela. */
+.bt-barra .so-largo{ margin-right:.3em }
+
+/* -----------------------------------------------------------------------------
+   A SIGLA OCUPAVA 42% DA HOME, E A LETRA MANDAVA NA PALAVRA
+   06/09/2026, medido: a página tem 7.210px e `.rolo` tinha 340vh = 3.060px.
+   Quatro palavras custavam 3,4 telas de rolagem e quase metade do documento.
+   Quem entra para saber a que horas é o culto rola 3.000px de marca antes de
+   voltar a ver informação.
+
+   E dentro de cada tela a hierarquia estava invertida: a letra tinha 42vh
+   (378px numa tela de 900) e a palavra que dá sentido a ela, 58px. Seis vezes
+   e meia mais glifo do que significado, sendo que a letra sozinha não informa
+   nada — é a palavra que é o conteúdo.
+
+   Não apago a ideia: em movimento ela funciona e é o que a casa tem de mais
+   próprio. Corrijo as proporções.
+
+     altura   340vh -> 250vh   (85vh por letra -> 62vh: continua uma tela por
+                                palavra, sem o vazio entre elas)
+     letra    42vh  -> 27vh    (deixa de ser o assunto e vira a inicial)
+     palavra  58px  -> 72px    (passa a liderar, que é o que ela deveria)
+
+   A soma tira 810px da home sem tirar uma palavra do texto.
+----------------------------------------------------------------------------- */
+@supports (animation-timeline: scroll()) {
+  @media (min-width:900px) and (prefers-reduced-motion:no-preference) {
+    .rolo{ height:250vh }
+    .rolo-l{ font-size:clamp(132px,27vh,290px); line-height:.82 }
+    .rolo-t{ font-size:clamp(40px,5.2vw,72px); margin-top:clamp(18px,2.4vh,30px) }
+    .rolo-d{ font-size:clamp(19px,1.9vw,27px); margin-top:12px; max-width:30ch }
+    /* a barra de progresso era 1px de cinza a 18% num fundo quase preto:
+       existia no CSS e não na tela. Ela é o único sinal de quanto falta. */
+    .rolo-prog{ width:min(260px,26vw); height:2px; background:rgba(255,255,255,.14) }
+    .rolo-prog i{ top:0; height:2px }
+  }
+}
+
+/* -----------------------------------------------------------------------------
+   TRÊS BORDAS ESQUERDAS NA MESMA SEÇÃO
+   06/09/2026, medido em 1440px na faixa "O domingo":
+
+     .g          40 -> 1400   (o container)
+     .g-cab      92 -> 1348   (o título da seção)
+     .g-foto    160 -> 1280   (a foto da mesma seção)
+
+   O título da seção e a foto que ele apresenta começavam com 68px de
+   diferença. Não é sutileza: numa página que é só tipo, fio e fotografia, a
+   borda esquerda é a única régua que o olho tem, e ter duas já é não ter
+   nenhuma. Vinha de `.c-foto` e `.casa-areas.centro` trancarem 1120px e
+   centrarem dentro de um container de 1256 — uma medida herdada de quando o
+   cabeçalho era `.c`, com 760px centrados, e nada se alinhava com nada mesmo.
+
+   Uma medida por seção. A foto e a grade de áreas passam a ocupar a coluna
+   inteira, que além de alinhar é a decisão editorial melhor: fotografia de
+   medida cheia lê como revista, fotografia recuada 68px lê como slide.
+----------------------------------------------------------------------------- */
+.c-foto{ max-width:none }
+.casa-areas.centro{ max-width:none }
+
+/* a itálica de apoio não pode herdar a medida do título: "Louvor, palavra e
+   acolhida." cabia em uma linha e quebrava em duas, com "acolhida." órfã,
+   porque 18ch do h2 valia para ela também. O título é que precisa de medida
+   curta (ele tem 66px); a linha de apoio tem 33 e cabe muito mais. */
+.g-cab-txt .g-ed{ max-width:34ch }
+
+/* -----------------------------------------------------------------------------
+   A FOTOGRAFIA ESTAVA SENDO ESCURECIDA DUAS VEZES
+   06/09/2026. O tratamento era
+
+       saturate(.42) sepia(.2) contrast(1.18) brightness(.9)
+
+   e o material de origem é culto: ISO alto, luz de palco, sombra fechada. Em
+   cima disso o site tirava mais 10% de brilho e somava 18% de contraste — as
+   duas operações que matam sombra. O resultado é o que se vê na foto da
+   congregação: um retângulo preto com três rostos, e o branco da camisa
+   puxando para magenta, porque o contraste amplia justamente o desvio de cor
+   que a luz de palco deixou.
+
+   O contraste alto é um recurso de foto bem exposta. Em foto de baixa luz ele
+   é o erro clássico: parece "tratamento" e é perda de informação.
+
+   Inverte-se a lógica: levanta em vez de fechar, e desatura mais para o cast
+   morrer antes de ser amplificado.
+
+       antes   saturate(.42)  sepia(.20)  contrast(1.18)  brightness(.90)
+       agora   saturate(.34)  sepia(.16)  contrast(1.02)  brightness(1.10)
+
+   O sepia continua porque é ele que dá a unidade morna a fotos tiradas em
+   noites diferentes — é a assinatura, e ela fica.
+----------------------------------------------------------------------------- */
+.g-foto img,.g-cheio > img,.g-passo img,.casa-area img,.casa-heroi-foto{
+  filter:saturate(.34) sepia(.16) contrast(1.02) brightness(1.1);
+}
+/* os azulejos precisam ficar escuros mesmo: o texto vive em cima deles. Só
+   que agora escurecem a partir de uma base que enxerga, não de uma já morta. */
+.g-tile img{ filter:saturate(.34) sepia(.16) contrast(1.02) brightness(.44) }
+.g-tile:hover img{ filter:saturate(.34) sepia(.16) contrast(1.02) brightness(.54) }
+
+/* -----------------------------------------------------------------------------
+   O HERÓI: O TEXTO PASSAVA POR CIMA DE QUEM ESTÁ NA FOTO
+   06/09/2026. Com a fotografia devolvida (ver o bloco do tratamento acima), o
+   pastor voltou a aparecer — e o título centrado corta o rosto e o corpo dele.
+   Antes o defeito estava escondido porque a foto era um retângulo preto: não
+   havia colisão visível porque não havia foto visível.
+
+   Duas correções, e nenhuma delas move o texto do centro:
+
+   1. O enquadramento anda. `object-position` sai de 30% para 16%: a janela
+      mostra mais do lado esquerdo do arquivo e empurra o pastor para o terço
+      direito, fora da coluna do título.
+
+   2. O véu para de ser uniforme. A tela do palco é a área mais clara do
+      quadro e disputava com a manchete; agora existe um véu direcional que
+      fecha o lado direito e mantém o centro, onde o texto vive, mais limpo.
+----------------------------------------------------------------------------- */
+@media(min-width:760px){ .casa-heroi-foto{ object-position:16% 45% } }
+.casa-heroi::after{
+  background:
+    radial-gradient(58% 52% at 50% 56%,rgba(37,37,37,.58),transparent 74%),
+    linear-gradient(90deg,transparent 0%,transparent 52%,rgba(37,37,37,.42) 78%,rgba(37,37,37,.66) 100%),
+    linear-gradient(180deg,rgba(37,37,37,.58) 0%,rgba(37,37,37,.20) 38%,rgba(37,37,37,.94) 100%);
+}
+
+/* a palavra do herói é clara: ele vive sobre foto, não sobre papel */
+.g-link.claro{ color:#fff; border-bottom-color:rgba(255,255,255,.45) }
+.g-link.claro:hover,.g-link.claro:focus-visible{ border-bottom-color:#fff }
+.casa-heroi .acoes{ align-items:center; gap:clamp(20px,3vw,36px) }
+
+/* o enquadramento anda mais: com 16% a mão levantada do pregador ainda
+   encostava no "ç" de "você". 8% abre a coluna central inteira para o texto e
+   deixa o pregador com o terço direito só dele. */
+@media(min-width:760px){ .casa-heroi-foto{ object-position:8% 45% } }
+/* e a manchete ganha medida: sem ela, "para você" corria 735px e ia buscar o
+   assunto da foto do outro lado do quadro. */
+.casa-heroi .g-h1,.casa-heroi h1{ max-width:9.5ch; margin-inline:auto }
+/* o par de ações respira e assenta na mesma linha de base */
+.casa-heroi .acoes{ margin-top:clamp(30px,4vh,44px) }

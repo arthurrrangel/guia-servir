@@ -296,8 +296,15 @@ export default function Casa() {
         </nav>
         <div className="casa-barra-fim">
           <Link href="/acessar" className="bt-barra discreto">Acesso às equipes</Link>
+          {/* O ESPAÇO SAIU DE DENTRO DO TRECHO ENTRELETRADO. 06/09/2026.
+              Era `Quero&nbsp;` dentro do span, e o botão é caixa alta com
+              letter-spacing de 1.8px: o espaço duro leva a entreletra junto e
+              o vão entre QUERO e SERVIR saía com o dobro da largura do vão de
+              "ACESSO ÀS EQUIPES", ao lado. É o botão principal de todas as
+              páginas, e lia como erro de digitação. Agora o vão é margem, que
+              não herda entreletra e é medida em em. */}
           <Link href="/servir" className="bt-barra">
-            <span className="so-largo">Quero&nbsp;</span>servir
+            <span className="so-largo">Quero</span>servir
           </Link>
           <button className="menu-bt" aria-expanded={menu} aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
                   onClick={() => setMenu(v => !v)}>
@@ -337,9 +344,16 @@ export default function Casa() {
           <p className="g-rot" style={{ justifyContent: 'center', color: 'rgba(255,255,255,.62)' }}>GUIA Church · Barra da Tijuca</p>
           <Tit as="h1" className="">Existe um lugar para você</Tit>
           <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>{IGREJA.frase}.</p>
+          {/* UM PRIMÁRIO, UMA PALAVRA. 06/09/2026.
+              Eram dois botões do mesmo tamanho: um branco sólido e um
+              contornado. Sobre foto escura o contornado praticamente some, e
+              "Quero servir" já é um botão com borda na barra do topo — a
+              mesma ação aparecia três vezes na primeira tela. O sólido fica
+              com quem chega pela primeira vez; servir vira palavra, que é o
+              peso certo para a ação de quem já está dentro. */}
           <div className="acoes">
             <Link href="/cultos" className="acao cheia">Quero conhecer</Link>
-            <Link href="/servir" className="acao">Quero servir <IcSeta /></Link>
+            <Link href="/servir" className="g-link claro">Quero servir</Link>
           </div>
         </div>
       </section>
@@ -390,13 +404,18 @@ export default function Casa() {
           foi moram em /cultos — a home não repete. */}
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">O domingo</p>
-            <Tit className="g-h2">Como é o domingo</Tit>
-            <p className="g-ed">Louvor, palavra e acolhida.</p>
+          {/* assimétrico: o texto na esquerda, a ação no fim da linha. Ver
+              FASE 20 no globals — era aqui que a home repetia .c pela segunda
+              das quatro vezes. */}
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">O domingo</p>
+              <Tit className="g-h2">Como é o domingo</Tit>
+              <p className="g-ed">Louvor, palavra e acolhida.</p>
+            </div>
             <div className="g-acoes">
               <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
-              <Link href="/como-chegar" className="acao">Como chegar</Link>
+              <Link href="/como-chegar" className="g-link">Como chegar</Link>
             </div>
           </div>
           <div className="c-foto">
@@ -469,10 +488,15 @@ export default function Casa() {
           banco. Os passos e a nota saíram: cada área explica o caminho. */}
       <section id="areas" className="casa-papel rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Servir</p>
-            <Tit className="g-h2">A igreja não é o prédio</Tit>
-            <p className="g-ed">São pessoas que chegaram mais cedo.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Servir</p>
+              <Tit className="g-h2">A igreja não é o prédio</Tit>
+              <p className="g-ed">São pessoas que chegaram mais cedo.</p>
+            </div>
+            <div className="g-acoes">
+              <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+            </div>
           </div>
 
           {fase === 'carregando' && <p className="g-corpo c" style={{ textAlign: 'center' }}>Carregando as áreas</p>}
@@ -493,11 +517,6 @@ export default function Casa() {
                 </span>
               </Link>
             ))}
-          </div>
-          <div className="c">
-            <div className="g-acoes">
-              <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
-            </div>
           </div>
         </div>
       </section>
