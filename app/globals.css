@@ -6573,3 +6573,144 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .g-pe-onde:hover .g-pe-ver{ opacity:1 }
 /* o ícone empurrava a linha de base do bloco todo para baixo do endereço */
 .g-pe-ver{ align-self:baseline }
+
+/* =============================================================================
+   FASE 21 · O TIME VIRA FERRAMENTA
+   07/09/2026
+
+   A tela nasceu com 17 pessoas e nenhuma forma de encontrar alguém: só
+   rolagem. Mas a pergunta que traz o líder aqui não é "quem está no time" —
+   é "quem sabe fazer PROJEÇÃO" e "cadê a Amanda". As duas exigiam varrer a
+   página inteira lendo etiqueta por etiqueta.
+
+   É a classe de defeito que não aparece na demo e inviabiliza a tela quando o
+   produto dá certo: o Connect tem 16 postos, e um time de quarenta pessoas
+   numa lista sem busca é uma lista que ninguém usa.
+
+   A barra segue a lei da casa: sem cartão, sem sombra, sem canto redondo. Um
+   campo com fio embaixo e as funções como palavras que acendem.
+============================================================================= */
+.tm-achar{ margin-top:var(--e6) }
+.tm-busca{ position:relative; display:flex; align-items:center }
+.tm-busca input{
+  width:100%; min-height:var(--toque); padding:0 var(--e6) 0 0;
+  border:0; border-bottom:1px solid var(--linha); background:transparent;
+  font-family:var(--fonte); font-size:var(--t-corpo); color:var(--ink);
+  transition:border-color var(--t);
+}
+.tm-busca input::placeholder{ color:var(--mudo) }
+.tm-busca input:focus{ outline:none; border-bottom-color:var(--ink) }
+.tm-busca input::-webkit-search-cancel-button{ display:none }
+.tm-limpa{
+  position:absolute; right:0; top:50%; transform:translateY(-50%);
+  width:var(--toque); height:var(--toque); border:0; background:transparent;
+  color:var(--cinza); font-size:22px; line-height:1; cursor:pointer;
+}
+.tm-limpa:hover{ color:var(--ink) }
+
+/* as funções: palavra e contagem. A contagem é o dado que decide o clique —
+   filtrar por uma função que tem uma pessoa só é a informação, não o filtro. */
+.tm-funcoes{ display:flex; flex-wrap:wrap; gap:var(--e2); margin-top:var(--e4) }
+.tm-f{
+  display:inline-flex; align-items:center; gap:var(--e2);
+  /* 34px era o que eu tinha escrito, e a varredura pegou: é abaixo dos 44
+     do --toque, a mesma régua que vale para todo botão do sistema. Chip de
+     filtro se aperta no celular como qualquer outro alvo. */
+  min-height:var(--toque); padding:0 var(--e3); cursor:pointer;
+  border:1px solid var(--linha); background:transparent; color:var(--cinza);
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  transition:color var(--t), border-color var(--t), background var(--t);
+}
+.tm-f i{ font-style:normal; font-variant-numeric:tabular-nums; opacity:.55; letter-spacing:0 }
+.tm-f:hover{ color:var(--ink); border-color:var(--cinza) }
+.tm-f.on{ background:var(--noite); border-color:var(--noite); color:#fff }
+.tm-f.on i{ opacity:.7 }
+
+/* o resultado do filtro fala uma frase, não um número solto */
+.tm-achou{
+  display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:var(--e2) var(--e4); margin-top:var(--e5); padding-bottom:var(--e3);
+  border-bottom:1px solid var(--linha2);
+  font-size:var(--t-apoio); color:var(--cinza);
+}
+.tm-achou b{ color:var(--ink); font-weight:var(--p-forte) }
+.tm-zerar{
+  border:0; background:transparent; padding:0; cursor:pointer;
+  font-family:var(--fonte); font-size:var(--t-apoio); color:var(--ink);
+  border-bottom:1px solid rgba(37,37,37,.3); transition:border-color var(--t);
+}
+.tm-zerar:hover{ border-bottom-color:currentColor }
+@media(max-width:560px){
+  .tm-funcoes{ flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none;
+    margin-inline:calc(-1 * var(--e4)); padding-inline:var(--e4) }
+  .tm-funcoes::-webkit-scrollbar{ display:none }
+  .tm-f{ flex:none }
+}
+
+.tm-busca{ gap:var(--e3) }
+.tm-lupa{ width:16px; height:16px; color:var(--mudo); flex:none; transition:color var(--t) }
+.tm-busca:focus-within .tm-lupa{ color:var(--ink) }
+
+/* "ver o time todo" herdava caixa alta e entreletra de `button` e lia como
+   ação principal da tela, quando é só desfazer um filtro. */
+.tm-zerar{ text-transform:none; letter-spacing:0; font-weight:var(--p-corpo) }
+
+/* =============================================================================
+   O ÍNDICE DOS AJUSTES
+   07/09/2026. Página de 2.995px com seis assuntos e nenhuma navegação: achar
+   "funções" era rolar procurando um título. Índice grudado no topo, na mesma
+   língua do resto — palavra, fio, sem cartão.
+============================================================================= */
+.aj-indice{
+  position:sticky; top:0; z-index:5;
+  display:flex; gap:var(--e5); overflow-x:auto; scrollbar-width:none;
+  margin-top:var(--e5); padding:var(--e3) 0;
+  background:var(--papel); border-bottom:1px solid var(--linha);
+}
+.aj-indice::-webkit-scrollbar{ display:none }
+.aj-indice a{
+  flex:none; position:relative; display:inline-flex; align-items:center;
+  min-height:var(--toque); text-decoration:none; white-space:nowrap;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--mudo); transition:color var(--t);
+}
+.aj-indice a:hover{ color:var(--ink) }
+.aj-indice a.on{ color:var(--ink) }
+/* o fio do item ativo nasce da própria borda da barra, então ele lê como
+   posição na página e não como um sublinhado decorativo */
+.aj-indice a.on::after{
+  content:""; position:absolute; left:0; right:0; bottom:calc(-1 * var(--e3) - 1px);
+  height:2px; background:var(--noite);
+}
+/* a barra é grudenta: a seção não pode nascer embaixo dela ao pular */
+.lid [id]{ scroll-margin-top:64px }
+@media(max-width:560px){
+  .aj-indice{ margin-inline:calc(-1 * var(--e4)); padding-inline:var(--e4); gap:var(--e4) }
+}
+
+/* -----------------------------------------------------------------------------
+   QUEM ROLA PRECISA SABER QUE ROLA
+   07/09/2026. A sanidade acusou "fora da tela" nos filtros do Time e no índice
+   dos Ajustes, no celular. Os dois são carrosséis horizontais, e o conteúdo
+   além da borda É alcançável — mas essa é a metade fácil da pergunta. A outra
+   é: a pessoa sabe que pode arrastar? Sem sinal nenhum, um item cortado na
+   borda direita lê como bug de layout, e a pessoa não tenta.
+
+   A máscara desbota os últimos 28px. É o sinal mais barato que existe e o
+   único que não ocupa espaço: nada some, nada é acrescentado, o corte deixa
+   de parecer acidente.
+----------------------------------------------------------------------------- */
+@media(max-width:560px){
+  .tm-funcoes{
+    -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+    mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+  }
+}
+.aj-indice{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+  mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+}
+/* na largura em que tudo cabe, a máscara só apagaria o fim do último item */
+@media(min-width:900px){ .aj-indice{ -webkit-mask-image:none; mask-image:none } }

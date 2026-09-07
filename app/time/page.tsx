@@ -6,7 +6,7 @@ import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
 } from '@/lib/db';
 import { Aviso, Medidor, Trabalhando } from '@/components/Ui';
-import { IcCopiar, IcMais, IcSeta } from '@/components/Icones';
+import { IcBusca, IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
@@ -24,6 +24,16 @@ const CURTO: Record<string, string> = { titular: 'faz sozinho', reserva: 'ajuda 
    colapsavam: LÍDER 1 e LÍDER 2 viravam "LÍDE", os quatro setores viravam
    "SETO". Quando o último pedaço é curto (1 ou 2 caracteres), ele é justamente
    o que distingue, então entra na sigla. */
+/* O NOME DA FUNÇÃO NO FILTRO, SEM O PARÊNTESE.
+   "TRANSMISSÃO (CORTE + PTZ)" tem 25 caracteres e sozinha empurrava a fila de
+   filtros para uma segunda linha, quebrando a grade. O parêntese é detalhe
+   operacional que importa na escala e não na hora de filtrar — quem procura
+   quer a família, e a família é a palavra antes dele. */
+function curtoF(nome: string) {
+  const sem = nome.replace(/\s*\([^)]*\)\s*/g, ' ').trim();
+  return sem || nome;
+}
+
 function marca(nome: string) {
   const p = nome.trim().split(/\s+/);
   const fim = p.length > 1 ? p[p.length - 1] : '';
@@ -37,6 +47,15 @@ function Time() {
   const [novas, setNovas] = useState<Record<string, Nivel>>({});
   const [ocupado, setOcupado] = useState(false);
   const [chipSalvando, setChipSalvando] = useState('');
+  /* BUSCA E FILTRO — 07/09/2026.
+     A lista nasceu com 17 pessoas e sem nenhuma forma de encontrar alguém: só
+     rolagem e leitura. O Connect tem 16 postos, e a pergunta que o líder faz
+     nesta tela não é "quem está no time" — é "quem sabe fazer PROJEÇÃO" e
+     "cadê a Amanda". As duas exigiam varrer a página inteira lendo etiqueta
+     por etiqueta. É o defeito que não aparece com poucos e inviabiliza a tela
+     quando o time cresce, que é justamente o objetivo do produto. */
+  const [busca, setBusca] = useState('');
+  const [porFuncao, setPorFuncao] = useState('');
   const funcoes = funcoesAtivas(S);
   const mapa = new Map(S.funcoes.map(f => [f.nome, f.id!]));
   const saude = saudeDoTime(S);
@@ -94,9 +113,18 @@ function Time() {
   const pendentes = fila.reduce((a, x) => a + x.pendentes.length, 0);
 
   /* novos primeiro: é o que o líder precisa olhar assim que abre */
-  const ordenados = [...S.voluntarios].sort(
+  const todos = [...S.voluntarios].sort(
     (a, b) => Number(a.conferido !== false) - Number(b.conferido !== false)
   );
+  /* sem acento e sem caixa: quem procura "giovana" acha "Giovana", e quem
+     procura "rosalem" acha pelo sobrenome — busca que só casa o começo do
+     primeiro nome não serve para lista de gente. */
+  const chave = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const alvo = chave(busca.trim());
+  const ordenados = todos.filter(v =>
+    (!alvo || chave(v.nome).includes(alvo)) &&
+    (!porFuncao || !!v.funcoes[porFuncao]));
+  const filtrando = !!alvo || !!porFuncao;
 
   /* TIME FALAVA A LÍNGUA VELHA. Cartão cinza, avatar colorido, h1 em Inter
      pesada — a mesma marca em dois produtos diferentes, dependendo da aba.
@@ -163,6 +191,53 @@ function Time() {
           mais, informa menos: vira textura. O nome do grupo diz uma vez o que
           a etiqueta dizia dez, e a contagem ao lado ("10 de 17") responde
           sozinha a pergunta que traz o líder aqui. */}
+      {S.voluntarios.length > 5 && (
+        <div className="tm-achar">
+          <div className="tm-busca">
+            <label htmlFor="tm-q" className="so-leitor">Procurar pessoa pelo nome</label>
+            {/* a lupa não é enfeite: sem ela o campo é um fio com uma frase em
+                cinza, e fio com frase em cinza é rótulo, não caixa de digitar. */}
+            <IcBusca className="tm-lupa" />
+            <input id="tm-q" type="search" value={busca} placeholder="Procurar pelo nome"
+              autoComplete="off" enterKeyHint="search"
+              onChange={e => setBusca(e.target.value)} />
+            {!!busca && (
+              <button type="button" className="tm-limpa" onClick={() => setBusca('')}
+                aria-label="Limpar a busca">×</button>
+            )}
+          </div>
+          {/* as funções da equipe como filtro. Só aparecem quando há mais de
+              uma: com uma função só, filtrar por ela devolve a lista inteira. */}
+          {funcoes.length > 1 && (
+            <div className="tm-funcoes" role="group" aria-label="Filtrar por função">
+              {funcoes.map(f => (
+                <button key={f.nome} type="button"
+                  className={`tm-f ${porFuncao === f.nome ? 'on' : ''}`}
+                  aria-pressed={porFuncao === f.nome}
+                  onClick={() => setPorFuncao(porFuncao === f.nome ? '' : f.nome)}>
+                  {curtoF(f.nome)}
+                  <i>{S.voluntarios.filter(v => v.funcoes[f.nome]).length}</i>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {filtrando && (
+        <div className="tm-achou">
+          <span>
+            {ordenados.length === 0
+              ? 'Ninguém com esse filtro'
+              : `${ordenados.length} de ${todos.length}`}
+            {porFuncao && <> em <b>{porFuncao}</b></>}
+            {alvo && <> com <b>{busca.trim()}</b> no nome</>}
+          </span>
+          <button type="button" className="tm-zerar"
+            onClick={() => { setBusca(''); setPorFuncao(''); }}>Ver o time todo</button>
+        </div>
+      )}
+
       {ordenados.map((v, i) => {
         const est = saude.pessoas.find(p => p.id === v.id)!;
         const novo = v.conferido === false;

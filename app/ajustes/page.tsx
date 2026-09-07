@@ -14,9 +14,51 @@ import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import { cont } from '@/lib/plural';
 
+/* a ordem é a da página, não a alfabética: o índice é um mapa dela. */
+const SECOES = [
+  { id: 'grupo', rot: 'Grupo no WhatsApp' },
+  { id: 'regras', rot: 'Regras do rodízio' },
+  { id: 'aviso', rot: 'Texto do aviso' },
+  { id: 'funcoes', rot: 'Funções' },
+  { id: 'organiza', rot: 'Quem organiza' },
+  { id: 'ministerios', rot: 'Outros ministérios' },
+];
+
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
 function Ajustes() {
+  /* qual seção está na tela. IntersectionObserver e não `scroll`: o cálculo
+     de posição a cada pixel de rolagem é o jeito caro de responder uma
+     pergunta que o navegador já sabe responder de graça.
+     O recorte -45%/-50% faz a seção "ativa" ser a que cruza a faixa do meio
+     da tela, e não a que encosta no topo — senão o índice troca de item antes
+     de a pessoa estar lendo a seção nova. */
+  /* nasce na primeira: com a página no topo, nenhuma seção cruzou a faixa do
+     meio ainda, e um índice sem nenhum item aceso lê como quebrado. */
+  const [ondeEstou, setOndeEstou] = useState(SECOES[0].id);
+  useEffect(() => {
+    const alvos = SECOES.map(x => document.getElementById(x.id)).filter(Boolean) as HTMLElement[];
+    if (!alvos.length) return;
+    const obs = new IntersectionObserver(entradas => {
+      const vis = entradas.filter(e => e.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+      if (vis) setOndeEstou(vis.target.id);
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    alvos.forEach(a => obs.observe(a));
+    /* A ÚLTIMA SEÇÃO NUNCA ACENDIA. Ela é curta e fica no fim: com a página
+       rolada até o fim, a faixa do meio da tela ainda cai na seção anterior, e
+       o índice ficava marcando "Quem organiza" com "Outros ministérios" na
+       tela. No fim da rolagem não há dúvida sobre onde a pessoa está. */
+    const noFim = () => {
+      if (scrollY + innerHeight >= document.body.scrollHeight - 6) {
+        setOndeEstou(SECOES[SECOES.length - 1].id);
+      }
+    };
+    addEventListener('scroll', noFim, { passive: true });
+    noFim();
+    return () => { obs.disconnect(); removeEventListener('scroll', noFim); };
+  }, []);
+
   const { S, recarregar, aviso, base, equipe, equipes, recarregarEquipes } = useApp();
   const [nova, setNova] = useState('');
   const [lideres, setLideres] = useState<LinhaLider[]>([]);
@@ -95,6 +137,22 @@ function Ajustes() {
         </div></div>
       </div>
 
+      {/* O ÍNDICE — 07/09/2026.
+          Esta página tem 2.995px e seis assuntos que não se parecem: o grupo
+          do WhatsApp, as regras do sorteio, o texto do aviso, as funções, quem
+          organiza e os outros ministérios. Sem índice, achar "funções" é rolar
+          procurando um título — e quem chega aqui já sabe o que veio fazer.
+          Índice e não abas: aba esconde, e o líder que veio mexer nas funções
+          costuma sair mexendo também no aviso. Aqui tudo continua na página,
+          e ele chega em um toque. */}
+      <nav className="aj-indice" aria-label="Seções dos ajustes">
+        {SECOES.map(x => (
+          <a key={x.id} href={'#' + x.id}
+             className={ondeEstou === x.id ? 'on' : undefined}
+             aria-current={ondeEstou === x.id ? 'true' : undefined}>{x.rot}</a>
+        ))}
+      </nav>
+
       {/* DOBRADA QUANDO JÁ CUMPRIU O PAPEL — fase 8.
           Esta seção tem 783px e existe para uma ação única: copiar a mensagem
           e fixar no grupo. Se o time JÁ TEM GENTE, a mensagem já foi colada —
@@ -142,7 +200,7 @@ function Ajustes() {
         </div>
       </details>
 
-      <section className="lid-secao">
+      <section className="lid-secao" id="regras">
         <div className="lid-secao-cab">
           <span className="rot">Regras do rodízio</span>
           <span className="lid-secao-nota">Valem para o sorteio automático</span>
@@ -178,7 +236,7 @@ function Ajustes() {
         </div>
       </section>
 
-      <section className="lid-secao">
+      <section className="lid-secao" id="aviso">
         <div className="lid-secao-cab">
           <span className="rot">Texto do aviso mensal</span>
         </div>
@@ -189,7 +247,7 @@ function Ajustes() {
         <textarea key={S.config.rodape} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
       </section>
 
-      <section className="lid-secao">
+      <section className="lid-secao" id="funcoes">
         <div className="lid-secao-cab">
           <span className="rot">Funções</span>
         </div>
@@ -234,7 +292,7 @@ function Ajustes() {
       {/* DOBRADA POR CADÊNCIA — fase 8. Liberar e tirar acesso acontece quando
           alguém entra ou sai da liderança: duas ou três vezes por ano. Seção
           rara aberta por padrão empurra para baixo a que se usa toda semana. */}
-      <details className="lid-secao lid-dobra">
+      <details className="lid-secao lid-dobra" id="organiza">
         <summary className="lid-secao-cab">
           <span className="rot">Quem organiza</span>
           <span className="lid-secao-nota">{lideres.length} com acesso</span>
@@ -314,7 +372,7 @@ function Ajustes() {
           inteiro, com time, funções e escalas. A promessa era falsa a 4.300px
           de distância dela mesma. O que alcança a casa inteira mudou de
           endereço; aqui fica só o link. */}
-      <section className="lid-secao">
+      <section className="lid-secao" id="ministerios">
         <div className="lid-secao-cab">
           <span className="rot">Outros ministérios</span>
           <span className="lid-secao-nota">Fora do alcance desta página</span>

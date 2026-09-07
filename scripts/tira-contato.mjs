@@ -52,7 +52,8 @@ await ctx.route('**', r => {
 });
 for(const rota of ROTAS){
   const p=await ctx.newPage();
-  try{ await p.goto(B+(rota==='home'?'/':'/'+rota),{waitUntil:'domcontentloaded',timeout:25000}); }catch{}
+  const alvo = rota==='home' ? '/' : (rota.startsWith('/')?rota:'/'+rota);
+  try{ await p.goto(B+alvo,{waitUntil:'domcontentloaded',timeout:25000}); }catch{}
   await p.waitForTimeout(2200);
   /* ROLAGEM EM RITMO HUMANO, E ISSO NÃO É DETALHE. 07/09/2026.
      A primeira versão rolava 500px a cada 90ms. A tira da /sobre saiu com uma
@@ -65,7 +66,7 @@ for(const rota of ROTAS){
     for(let y=0;y<H;y+=300){ window.scrollTo(0,y); await new Promise(r=>setTimeout(r,420)); }
     window.scrollTo(0,0); await new Promise(r=>setTimeout(r,600)); });
   await p.waitForTimeout(1200);
-  const nome=rota.replace(/\//g,'_');
+  const nome=rota.replace(/[\/?=&]/g,'_');
   await p.screenshot({path:`/tmp/tc-${nome}.png`,fullPage:true});
   const h=await p.evaluate(()=>document.body.scrollHeight);
   console.log(`${nome.padEnd(26)} ${h}px`);
