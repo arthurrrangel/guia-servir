@@ -7721,3 +7721,26 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 @media(min-width:760px){ .lid-placar span{ margin-left:auto } }
 .esc-setas{ display:inline-flex; order:1; align-self:flex-end }
 .esc-mes .esc-setas .esc-seta{ align-self:auto }
+
+/* O MAPA CLARO, SEM CHAVE DE API. 07/09/2026, visto em produção com os
+   azulejos reais: o estilo padrão do OpenStreetMap é colorido e cheio
+   (verdes, triângulos de relevo, estradas em três cores) e briga com os pinos
+   e com a referência que o Arthur mandou — um mapa CLARO com pinos escuros.
+   O basemap claro do CARTO pedia chave (a marca d'água "API KEY REQUIRED"
+   apareceu só em produção). A saída sem chave e sem servidor de terceiros:
+   os azulejos do OSM continuam os mesmos, só o painel deles é dessaturado e
+   clareado por CSS. Só os azulejos: pinos, contador e controles ficam como
+   são. A atribuição continua, como a política do OSM pede. */
+.pg-mapao .leaflet-tile-pane{ filter:grayscale(1) brightness(1.08) contrast(.88) }
+/* os cantos de 2px do controle de zoom vinham de regras `:first-child` /
+   `:last-child` do Leaflet que empatavam com as nossas e venciam por ordem */
+.pg-mapao .leaflet-touch .leaflet-bar a:first-child,.pg-mapao .leaflet-touch .leaflet-bar a:last-child,
+.pg-mapao .leaflet-bar a:first-child,.pg-mapao .leaflet-bar a:last-child{ border-radius:0 }
+/* "prefiro entrar com senha" é filho de um flex-column (`.lid.entrada`) e
+   esticava até a largura da coluna: o sublinhado, agora visível, saía como um
+   fio de 390px sob uma frase de 170. Encolhe para o próprio texto. */
+.entrada-troca{ align-self:flex-start }
+/* no celular a linha pendente vira uma coluna só e o botão de texto, filho de
+   grid, esticava até 326px: com o sublinhado de repouso, um fio da largura da
+   linha sob duas palavras. O botão fica do tamanho do texto. */
+@media(max-width:640px){ .lid-linha > .lid-bt-txt{ justify-self:start; margin-top:var(--e1) } }
