@@ -268,14 +268,26 @@ export default function Eu() {
   /* os dias agrupados pelo mês a que pertencem, na ordem em que vêm. Cálculo
      de leitura, não de estado: nada aqui precisa de memo. */
   const porMes = (() => {
-    const g: { chave: string; rot: string; dias: string[] }[] = [];
+    const anoHoje = new Date().getUTCFullYear();
+    const g: { chave: string; rot: string; ano: string; dias: string[] }[] = [];
     for (const d of domingos) {
       const chave = d.slice(0, 7);
       const at = g.find(x => x.chave === chave);
-      if (at) at.dias.push(d);
-      else g.push({ chave, rot: `${MESES[+d.slice(5, 7) - 1]} de ${d.slice(0, 4)}`, dias: [d] });
+      if (at) { at.dias.push(d); continue; }
+      const nome = MESES[+d.slice(5, 7) - 1];
+      g.push({ chave, rot: nome[0].toUpperCase() + nome.slice(1), ano: d.slice(0, 4), dias: [d] });
     }
-    return g;
+    /* O ANO SÓ APARECE QUANDO INFORMA. Antes vinha colado em todo mês:
+       "setembro de 2026", "outubro de 2026", "novembro de 2026". Três vezes a
+       mesma informação, que por ser a mesma não distingue nenhum dos três — só
+       alonga a linha e empurra o nome do mês, que é o que a pessoa procura,
+       para longe da borda. Agora sai no primeiro grupo apenas se não for o ano
+       corrente, e depois só quando o ano vira, que é o único momento em que
+       "dezembro" e "janeiro" precisam ser desempatados. */
+    return g.map((m, i) => ({
+      ...m,
+      rot: (i === 0 ? +m.ano !== anoHoje : m.ano !== g[i - 1].ano) ? `${m.rot} de ${m.ano}` : m.rot,
+    }));
   })();
 
   async function possoNoMes(dias: string[]) {

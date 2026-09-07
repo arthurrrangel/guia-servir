@@ -6741,11 +6741,32 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .vol-mes + .vol-mes{ margin-top:var(--e7) }
 .vol-mes-cab{
   display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--e2) var(--e4);
-  padding-bottom:var(--e2); border-bottom:1px solid var(--linha);
+  padding-bottom:var(--e3); border-bottom:1px solid var(--linha);
 }
+/* O MÊS ERA O MENOR TEXTO DO PRÓPRIO BLOCO. 07/09/2026.
+   Escrevi este cabeçalho em `--t-min`: 11px, caixa alta, .15em de entreletra.
+   O token diz, na linha em que é definido, "rótulo mínimo. Raro, e nunca em
+   frase." — e "setembro de 2026" é uma frase, com preposição no meio. Caixa
+   alta com entreletra larga serve para uma ou duas palavras que a pessoa
+   reconhece pelo formato; numa frase ela obriga a ler letra por letra, e o
+   "DE" no meio passa a parecer sigla.
+
+   Pior que a escolha isolada era a hierarquia que ela produzia. Medido no
+   próprio bloco: o nome do mês em 11px, a nota ao lado em 12px, as linhas de
+   dia embaixo em 15,5px. O divisor da seção era 30% menor que o conteúdo que
+   ele divide e menor que a própria nota que o anota. Invertido nos dois
+   sentidos.
+
+   Vai para `--d-lead` (19-21px), que o sistema define como "a linha de apoio
+   embaixo do título" — que é exatamente o posto disto: dentro de "Quando você
+   pode", o mês é a régua. Caixa de frase e entreletra negativa seguem o
+   tratamento que o produto já dá a data usada como título em `.vol-prox-dia`:
+   quem separa por data lê a data inteira de uma vez, não soletra. O peso fica
+   em 400 de propósito — quem hierarquiza aqui é o tamanho, e 600 repetido em
+   três divisores seguidos vira barulho. */
 .vol-mes-nome{
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  font-family:var(--fonte-display); font-weight:var(--p-corpo);
+  font-size:var(--d-lead); letter-spacing:-.01em; line-height:1.1;
   color:var(--ink);
 }
 .vol-mes-nota{ font-size:var(--t-rot); color:var(--cinza) }

@@ -32,6 +32,17 @@ const PASSA=[B,'https://qjtcaijhgldypudzyafz.supabase.co'];
 const ARGS=process.argv.slice(2);
 const AUTOTESTE=ARGS[0]==='--autoteste';
 const ROTAS=AUTOTESTE?ARGS.slice(1):ARGS;
+/* SEM ROTAS, ELE MENTIA DUAS VEZES. 07/09/2026. Rodei `--autoteste` sem passar
+   página nenhuma: zero páginas visitadas, total 0, e o script imprimiu
+   "AUTOTESTE FALHOU: NAO confie no zero" — que é a mensagem de um verificador
+   cego, não a de um verificador sem trabalho. Gastei uma investigação inteira
+   procurando regressão no CHECK. Sem rotas ele também imprimiria um zero
+   tranquilizador no modo normal. As duas saídas eram falsas pelo mesmo motivo. */
+if(!ROTAS.length){
+  console.log('USO: node scripts/reguas.mjs [--autoteste] <rota> [rota...]   (ex.: home sobre servir)');
+  console.log('Nenhuma rota recebida — nada foi medido. Isto NAO e um zero.');
+  process.exit(2);
+}
 /* O DEFEITO CONHECIDO, PARA PROVAR QUE O TESTE O ENXERGA.
    Este arquivo já deu zero duas vezes numa página que eu estava vendo
    desalinhada com os próprios olhos. Um verificador que nunca acusa não é um
