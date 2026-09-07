@@ -653,9 +653,11 @@ export default function Eu() {
           <section className="vol-secao" id="quando-posso">
             <div className="vol-secao-cab">
               <span className="rot">Quando você pode</span>
+              {/* a mesma voz de "Posso no mês", 60px abaixo: era .vol-quem (a
+                  classe do link de navegação do topo) com estilo embutido
+                  desfazendo o <button> — a mesma ação em dois trajes. */}
               {!!semResposta.length && (
-                <button className="vol-quem" style={{ background: 'none', border: 0, cursor: 'pointer', padding: 0 }}
-                  disabled={ocupado === 'todos'} onClick={() => possoTodos()}>
+                <button className="vol-mes-todos" disabled={ocupado === 'todos'} onClick={() => possoTodos()}>
                   Posso em todos
                 </button>
               )}

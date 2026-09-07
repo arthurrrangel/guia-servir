@@ -276,7 +276,9 @@ export default function Servir() {
       </ol>
 
       <section className="wiz-corpo">
-        {erro && <div className="aviso bad" role="alert">{erro}</div>}
+        {/* `erro`, não `bad`: `.aviso.bad` nunca existiu no CSS, e o único
+            aviso de falha do funil saía no cinza de recado. */}
+        {erro && <div className="aviso erro" role="alert">{erro}</div>}
 
         {passo === 0 && (
           <>
@@ -424,15 +426,21 @@ export default function Servir() {
                 liderança falar com você" — mas lá no topo da página, três
                 rolagens acima, no celular. Garantia que a pessoa não está
                 lendo no instante em que decide não é garantia. */}
+            {/* Um <p> só dentro do .aviso. A caixa é flex (ícone + texto) e o
+                texto solto com <strong> e interpolações virava SEIS colunas:
+                "da" numa coluna de 17px, o "não" isolado numa de 27px, 163px
+                de altura. Medido pela auditoria de 07/09. */}
             <div className="aviso" style={{ marginTop: 14 }}>
-              {min!.aberto
-                ? <>Ao enviar, a liderança {min!.artigo === 'a' ? 'da' : 'do'} {min!.nome} recebe
-                    seu cadastro e chama você no WhatsApp. Você <strong>não</strong> entra na escala
-                    agora: primeiro alguém fala com você. Na tela seguinte abre um link para você
-                    acompanhar. Guarde esse link.</>
-                : <>Esta área conversa com cada pessoa antes de escalar. Ao enviar, a liderança
-                    recebe seu cadastro e chama você no WhatsApp para essa conversa. Na tela
-                    seguinte abre um link para você acompanhar. Guarde esse link.</>}
+              <p style={{ margin: 0 }}>
+                {min!.aberto
+                  ? <>Ao enviar, a liderança {min!.artigo === 'a' ? 'da' : 'do'} {min!.nome} recebe
+                      seu cadastro e chama você no WhatsApp. Você <strong>não</strong> entra na escala
+                      agora: primeiro alguém fala com você. Na tela seguinte abre um link para você
+                      acompanhar. Guarde esse link.</>
+                  : <>Esta área conversa com cada pessoa antes de escalar. Ao enviar, a liderança
+                      recebe seu cadastro e chama você no WhatsApp para essa conversa. Na tela
+                      seguinte abre um link para você acompanhar. Guarde esse link.</>}
+              </p>
             </div>
           </>
         )}
@@ -461,7 +469,10 @@ export default function Servir() {
           </button>
         ) : (
           <button type="button" className="btn pri cresce" disabled={ocupado} onClick={enviar}>
-            {ocupado ? 'enviando…' : 'Enviar meu cadastro'}
+            {/* "Enviar cadastro": com "meu", o rótulo em caixa alta e entreletra
+                quebrava em duas linhas a 390 e 360 e o botão ficava 4px mais
+                alto que o Voltar ao lado. O resumo acima já diz de quem é. */}
+            {ocupado ? 'enviando…' : 'Enviar cadastro'}
           </button>
         )}
       </div>

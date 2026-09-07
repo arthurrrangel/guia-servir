@@ -37,7 +37,11 @@ export const NO_TIME: StatusCand[] = ['aprovada', 'integrando', 'ativa'];
    sistema é a igreja ir atrás da pessoa, nunca o contrário.
 ----------------------------------------------------------------------------- */
 export type OQueFazer = {
-  rot: string;      // o rótulo curto da linha fechada: uma instrução, não um estado
+  rot: string;      // o rótulo curto da linha fechada: a situação, dita pelo que falta
+                    // ("esperando o seu contato"), nunca uma ordem. A auditoria de
+                    // 07/09 mediu "chame no WhatsApp" na cor de alarme, no
+                    // imperativo, nomeando um app — e não clicável: a frase
+                    // parecia o botão e não era. O botão mora na linha aberta.
   txt: string;      // a frase inteira, dentro da linha aberta
   tom: '' | 'ok' | 'pend' | 'ruim';
   chama: boolean;   // a ação do momento é ligar para a pessoa
@@ -45,12 +49,12 @@ export type OQueFazer = {
 
 export const O_QUE_FAZER: Record<StatusCand, OQueFazer> = {
   enviada: {
-    rot: 'chame no WhatsApp', tom: 'ruim', chama: true,
+    rot: 'esperando o seu contato', tom: 'ruim', chama: true,
     txt: 'Ninguém falou com essa pessoa ainda. Chame no WhatsApp, se apresente e '
        + 'pergunte por que ela quer servir. Depois de falar, aprove ou encerre aqui.',
   },
   em_analise: {
-    rot: 'chame no WhatsApp', tom: 'ruim', chama: true,
+    rot: 'esperando o seu contato', tom: 'ruim', chama: true,
     txt: 'Você marcou para olhar com calma, e ela está esperando. Chame no WhatsApp '
        + 'e converse. Depois de falar, aprove ou encerre aqui.',
   },

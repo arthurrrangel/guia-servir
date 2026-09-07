@@ -304,8 +304,10 @@ function Ajustes() {
             </details>
           ))}
         </div>
-        <div className="linha" style={{ marginTop: 14 }}>
-          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)} aria-label="Nome da nova função" placeholder="nova função (ex: SOM)" style={{ maxWidth: 240 }} />
+        {/* `.ajt-novo`, não `maxWidth:240` embutido: era um número solto (e
+            /ajustes/ministerios tinha OUTRO, 260) para o mesmo campo. */}
+        <div className="ajt-novo">
+          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)} aria-label="Nome da nova função" placeholder="nova função (ex: SOM)" />
           <button disabled={gravando || !nova.trim()} onClick={addFn}>Criar função</button>
         </div>
       </section>

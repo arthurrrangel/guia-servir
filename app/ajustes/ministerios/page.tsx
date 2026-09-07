@@ -138,10 +138,10 @@ function Ministerios() {
         <p className="dim pequeno">
           O ministério nasce vazio: depois dele vêm as funções e o time, nessa ordem.
         </p>
-        <div className="linha" style={{ marginTop: 12 }}>
+        <div className="ajt-novo">
           <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)}
             aria-label="nome do novo ministério"
-            placeholder="novo ministério (ex: Louvor)" style={{ maxWidth: 260 }} />
+            placeholder="novo ministério (ex: Louvor)" />
           <button disabled={gravando || !nova.trim()} onClick={() => void criar()}>Criar ministério</button>
         </div>
       </section>

@@ -7524,3 +7524,200 @@ button.pri:disabled:active,.btn.pri:disabled:active{
    também nas linhas editoriais, nas perguntas e nas legendas de número, que
    são curtas o bastante para o algoritmo equilibrar. */
 .g-ed,.fato-d,.qa-q,.g-num b + span,.rolo-d{ text-wrap:balance }
+
+/* =============================================================================
+   AS TELAS DO LÍDER, SEGUNDA AUDITORIA
+   07/09/2026, doze achados medidos por um auditor externo, aplicados aqui.
+
+   1. A FAIXA TERMINAVA 540px DEPOIS DA PÁGINA. Toda lista do líder mede
+      `--lista` (560px), mas o cabeçalho herdava a largura de `.lid` (1100) e
+      o placar — o número que É a resposta da tela — nascia em x=1171, 441px
+      à direita de onde termina qualquer linha de conteúdo. Cinco bordas
+      direitas na /escala. A faixa passa a ter a medida da lista; o placar cai
+      na mesma vertical em que já vive o estado de cada linha. Os dois `ch`
+      crus que sobraram do mesmo defeito (`.lid-faixa-sub` 56ch = 547px e
+      `.esc-ajuda` 64ch = 686px, "quase alinhados" com os 560 da lista) somem:
+      a coluna da grade já é a medida. E a coluna esquerda de `.lid-duas`, que
+      dava 617px, vira `--lista` também.
+   2. /time/conferir era a única lista fora da medida: linha de 1.100px, nome
+      terminando em x≈275 e o controle de nível começando em 943 — 680px de
+      branco entre a pessoa e o botão que a classifica, 32 vezes. E o controle
+      centrado no par de linhas, encostando na função e não no nome.
+   4. "9 sem responder" era etiqueta de 12px caixa alta na /escala e frase de
+      15px na /painel. A linha inteira de "quem pode neste dia" vira frase
+      (Inter, --t-apoio), com os números em tinta; "ver nomes" e "ir para
+      PROJEÇÃO" viram a voz do botão de texto. `.esc-mini` continua rótulo
+      (rotula um bloco: "Recado deste dia", "Podem"), no peso de rótulo.
+   5. `.marca-nivel` — o objeto de texto mais repetido da /time, 42 vezes —
+      era o único rótulo em Inter 650 com entreletra à mão. Voz de rótulo.
+      E o degrau de celular (.07em) alcança todo rótulo, não os cinco de agosto.
+   6. O seletor de ministério gritava "GUIA KIDS" onde a lista escreve "GUIA
+      Kids": herdava a voz de comando de <button>. Escolher onde trabalhar é
+      escolha, e escolha fala na voz do conteúdo. E nascia em x=18, que não é
+      a régua de nada.
+   7. `.esc-ajuda > summary` era o único botão de texto que ainda usava os três
+      sinais (caixa alta + entreletra + sublinhado fixo) — o menos importante
+      da pilha, o mais decorado.
+   8. `label` era o quarto rótulo do sistema: Inter 650 contra Raleway 500 dos
+      outros três, mesma cor e tamanho. Entra na voz da marca.
+   9. Dois `maxWidth` embutidos (240 e 260) para o mesmo campo "dar nome a uma
+      coisa nova" em duas telas: vira `.ajt-novo`, campo e botão na mesma
+      linha, largura da lista.
+   11. A busca da /time era o único controle sem o anel de foco do sistema:
+      `outline:none` matava o foco de teclado junto com o de mouse.
+   12. A prévia da mensagem do grupo dava 4,47:1 (cinza sobre 18% de tinta).
+      É uma citação, não apoio: tinta cheia.
+
+   E o botão de texto ganha um sublinhado de repouso. A versão de hoje cedo o
+   deixou só no hover — no telefone não existe hover, e o botão de texto e o
+   estado da linha ficaram idênticos (Inter, 15px, 600), separados só pela
+   cor. Um sinal fraco sempre visível, escurecendo no hover: o mesmo padrão
+   do `.g-link` do site.
+   ============================================================================= */
+@media(min-width:760px){ .faixa-cab{ max-width:var(--lista) } }
+.lid-faixa-sub{ max-width:none }
+.esc-ajuda{ max-width:none }
+@media(min-width:1000px){ .lid-duas{ grid-template-columns:minmax(0,var(--lista)) minmax(0,1fr) } }
+
+.area-conf{ max-width:var(--lista) }
+.conf-linha{ align-items:baseline }
+
+.esc-disp > summary{
+  font-family:var(--fonte); font-weight:var(--p-corpo);
+  font-size:var(--t-apoio); letter-spacing:0; text-transform:none; color:var(--cinza);
+  gap:var(--e4);
+}
+.esc-disp > summary b{ font-size:var(--t-apoio); font-weight:var(--p-forte) }
+.esc-disp > summary .falta{ color:var(--warn); font-weight:var(--p-forte) }
+.esc-disp > summary .falta b{ color:inherit }
+.esc-disp-ver,.esc-prob-ir{
+  font-family:var(--fonte); font-weight:var(--p-forte);
+  font-size:var(--t-apoio); letter-spacing:0; text-transform:none; color:var(--ink);
+}
+.esc-disp-ver{ border-bottom:0; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em; text-decoration-color:rgba(37,37,37,.3) }
+.esc-disp > summary:hover .esc-disp-ver{ text-decoration-color:currentColor }
+.esc-prob-ir::after{ border-bottom-color:rgba(37,37,37,.3) }
+.esc-prob-ir:hover::after,.esc-prob-ir:focus-visible::after{ border-bottom-color:currentColor }
+.esc-mini{ font-weight:var(--p-rot) }
+
+.marca-nivel{
+  font-family:var(--fonte-display); font-size:var(--t-min);
+  font-weight:var(--p-rot); letter-spacing:var(--tr);
+}
+@media(max-width:719px){
+  .tm-f,.ajt-rot,.marca-nivel,.esc-fn,.esc-tag,.esc-mini,.lid-placar span{ letter-spacing:.07em }
+}
+
+.menu-item{
+  font-family:var(--fonte); font-weight:var(--p-corpo);
+  font-size:var(--t-ui); letter-spacing:0; text-transform:none;
+}
+.menu-item[aria-current="true"]{ font-weight:var(--p-forte) }
+.menu-equipes{ left:var(--e5) }
+
+.esc-ajuda > summary{
+  font-family:var(--fonte); font-weight:var(--p-forte);
+  font-size:var(--t-apoio); letter-spacing:0; text-transform:none;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em;
+  text-decoration-color:rgba(37,37,37,.3);
+}
+.esc-ajuda > summary:hover,.esc-ajuda > summary:focus-visible{ text-decoration-color:currentColor }
+.lid-faixa.fogo .esc-ajuda > summary{ color:#fff; text-decoration-color:rgba(255,255,255,.4) }
+
+label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacing:var(--tr) }
+.ajt-rot{ font-weight:var(--p-rot) }
+
+.ajt-novo{ display:flex; gap:var(--e3); align-items:stretch; max-width:var(--lista); margin-top:var(--e4) }
+.ajt-novo input{ flex:1 1 auto; min-width:0 }
+.ajt-novo button{ flex:none }
+
+.tm-busca input:focus{ outline:none }
+.tm-busca input:focus-visible{ outline:2px solid currentColor; outline-offset:3px }
+
+.lid-msg{ color:var(--ink) }
+
+.lid-bt-txt::after{ opacity:.3 }
+.lid-bt-txt:hover::after,.lid-bt-txt:focus-visible::after{ opacity:1 }
+
+/* =============================================================================
+   A TELA DO VOLUNTÁRIO E O FUNIL DO CADASTRO, SEGUNDA AUDITORIA
+   07/09/2026, doze achados medidos por um auditor externo, aplicados aqui.
+
+   1. EM /eu O ESTADO DO DIA MUDAVA DE COLUNA A CADA LINHA. Cada `.vol-linha`
+      é uma grade própria com a coluna do estado em `auto`: "confirmado"
+      (84px) e "você não pode" (106px) nasciam a 23px uma da outra, empilhadas
+      — duas bordas na mesma coluna, o defeito que hoje saiu da /escala e do
+      /time. E `align-items:center` centrava o estado no bloco de três linhas:
+      na linha em que a data quebra, "você não pode" encostava na FUNÇÃO. A
+      coluna do estado vira fixa (8,5rem) e alinhada pela base da primeira
+      linha (7rem: "você não pode", o mais longo, mede 106px); o fio de
+      estado continua da altura toda.
+   2. "não vou mais poder" e "confirmado" eram idênticos no telefone: Inter,
+      15px, 600, só a cor diferente — o sublinhado do botão só acendia no
+      hover, que o telefone não tem. Sublinhado de repouso, fraco; escurece
+      no hover. Mesmo padrão do `.g-link` do site e do `.lid-bt-txt` do líder.
+   3. "Posso em todos" e "Posso no mês" eram a mesma ação em dois trajes
+      (Raleway 12 caixa alta cinza contra Inter 15 tinta sublinhado), a 60px
+      de distância. Uma classe só (ver o JSX).
+   4. O sublinhado de "Posso no mês" boiava 13px sob a palavra: border na
+      caixa de 44px. text-decoration com offset, como o `.g-link`.
+   6. No rodapé do site onze links tinham 33px de alvo e dois 17,6 — a lei da
+      casa é 44. O conserto de hoje cedo foi feito no rodapé antigo
+      (`.casa-dados`), que nenhuma página usa mais.
+   7. `.aviso` é flex para ícone + texto; texto solto vira colunas. Blindado:
+      sem <svg> filho, vira bloco.
+   9. `.wiz-corpo input:focus{outline:none}` matava o anel de teclado no
+      formulário mais longo do produto, desfazendo a regra certa de :513.
+   10. As perguntas do passo 3 eram frases inteiras em caixa alta com
+      entreletra de .15em (o degrau de celular não as alcançava por
+      especificidade): três das cinco em duas linhas. Pergunta é frase — a
+      prova está no passo 4, que mostra as MESMAS perguntas em caixa de frase.
+   11. O ✓ do passo concluído dava 2,08:1 (branco sobre --ink4): o passo já
+      feito era o menos legível dos três. Círculo vazado com o ✓ em tinta.
+   ============================================================================= */
+.vol-linha{ align-items:baseline; grid-template-columns:minmax(0,1fr) 7rem }
+.vol-linha-est{ text-align:right }
+.vol-linha .vol-marca{ align-self:stretch }
+@media(max-width:359px){ .vol-linha{ grid-template-columns:minmax(0,1fr) auto } }
+
+.vol-acao::after{ opacity:1; border-bottom-color:rgba(37,37,37,.3) }
+.vol-acao:hover::after,.vol-acao:active::after,.vol-acao:focus-visible::after{ opacity:1; border-bottom-color:currentColor }
+
+.vol-mes-todos{
+  display:inline-flex; align-items:center; min-height:var(--toque); border-bottom:0;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em;
+  text-decoration-color:rgba(37,37,37,.3); transition:text-decoration-color var(--t);
+}
+.vol-mes-todos:hover:not(:disabled),.vol-mes-todos:focus-visible{ text-decoration-color:currentColor }
+
+.g-pe-cols a,.g-pe-cols span{ display:flex; align-items:center; min-height:var(--toque); padding:0 }
+.g-pe-linha a{ display:inline-flex; align-items:center; min-height:var(--toque) }
+@media(max-width:759px){ .g-pe-cols nav a{ padding:0 } }
+
+.aviso:not(:has(> svg)){ display:block }
+.aviso p{ margin:0 }
+
+.wiz-corpo input:focus,.wiz-corpo textarea:focus{ outline:2px solid currentColor; outline-offset:3px }
+.wiz-corpo input:focus:not(:focus-visible),.wiz-corpo textarea:focus:not(:focus-visible){ outline:none }
+
+.wiz-corpo label{
+  font-family:var(--fonte); font-weight:var(--p-forte); font-size:var(--t-ui); line-height:1.4;
+  letter-spacing:0; text-transform:none; color:var(--ink);
+}
+
+.wiz-passos li.feito .wiz-bola{ background:transparent; color:var(--ink); box-shadow:inset 0 0 0 1px var(--linha3) }
+/* A AÇÃO DO CABEÇALHO DE SEÇÃO VINHA ANTES DO TÍTULO. 07/09/2026, visto na
+   captura da /painel: "Copiar todas · 2 sem responder". A ordem explícita
+   acima (título 1, seta 2, nota 3) deixou o botão de texto com order 0 — ou
+   seja, primeiro. Ação fecha a linha, à direita, como a nota. */
+.lid-secao-cab > .lid-bt-txt{ order:4; margin-left:auto }
+.lid-secao-cab > .lid-secao-nota + .lid-bt-txt{ margin-left:0 }
+/* A FAIXA NA MEDIDA DA LISTA APERTOU O TÍTULO DA /escala. 07/09/2026.
+   O placar "AINDA NÃO CONFIRMARAM" media 180px numa linha e deixava 348 para
+   o título: "Setembro 2026 ‹ ›" quebrava com uma seta em cada linha, e as
+   duas ações da faixa empilhavam. O rótulo do placar aceita duas linhas
+   (largura de 8rem) e as setas viram um par que só desce junto. */
+.lid-placar span{ max-width:8rem; text-wrap:balance }
+@media(min-width:760px){ .lid-placar span{ margin-left:auto } }
+.esc-setas{ display:inline-flex; order:1; align-self:flex-end }
+.esc-mes .esc-setas .esc-seta{ align-self:auto }

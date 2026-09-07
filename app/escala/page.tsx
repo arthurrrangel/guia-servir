@@ -261,9 +261,13 @@ function Escala() {
         urgente={urge}
         titulo={
           <span className="esc-mes">
-            <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
             <span className="esc-mes-nome">{MESES[mes - 1]} {ano}</span>
-            <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
+            {/* as duas setas num par indivisível: com a faixa na medida da
+                lista, "‹" ficava na linha do título e "›" descia sozinho. */}
+            <span className="esc-setas">
+              <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
+              <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
+            </span>
           </span>
         }
         placar={placar ? { n: placar.n, rot: placar.rot } : null}
@@ -534,14 +538,30 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
   return (
     <>
       {/* AS AÇÕES DO DIA. Copiar a escala é a que o líder usa toda semana, e
-          por isso é a sólida. Cobrar só aparece quando há quem cobrar. */}
+          por isso é a sólida — QUANDO HÁ ESCALA. Num dia vazio (todo mês novo
+          nasce assim) a sólida oferecia copiar uma escala que não existe e a
+          única ação que mudava algo, sortear, era a secundária 57px abaixo.
+          Auditoria de 07/09: hierarquia invertida no estado em que o líder
+          mais precisa de direção. No vazio, sortear é a sólida e copiar
+          espera, desligado. Cobrar só aparece quando há quem cobrar. */}
       <div className="esc-acoes">
-        <button className="lid-bt" onClick={() => copiar(msgEscala(S, d), aviso, 'Escala copiada. Cole no grupo.')}>
-          Copiar a escala
-        </button>
-        <button className="lid-bt-txt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
-          {preenchidos ? 'Sortear de novo' : 'Sortear este dia'}
-        </button>
+        {preenchidos ? (
+          <>
+            <button className="lid-bt" onClick={() => copiar(msgEscala(S, d), aviso, 'Escala copiada. Cole no grupo.')}>
+              Copiar a escala
+            </button>
+            <button className="lid-bt-txt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
+              Sortear de novo
+            </button>
+          </>
+        ) : (
+          <>
+            <button className="lid-bt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
+              Sortear este dia
+            </button>
+            <button className="lid-bt-txt" disabled>Copiar a escala</button>
+          </>
+        )}
         {!passado && !!cobranca && (
           <button className="lid-bt-txt" onClick={() => copiar(cobranca, aviso, 'Cobrança copiada. Cole no grupo.')}>
             Cobrar confirmação
