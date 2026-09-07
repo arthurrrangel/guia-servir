@@ -1409,12 +1409,45 @@ details > summary::marker{content:""}
 .wiz-chip:focus-visible{outline-offset:3px}
 
 /* --- resumo --- */
+/* O NOME SAIU UMA LETRA POR LINHA. 07/09/2026, relatado por gente tentando se
+   cadastrar de verdade — captura do celular da Eliete, cartão de conferência
+   com ~1000px de altura e "Eliete Rangel Silva Moreira" escrito na vertical,
+   uma letra em cada linha.
+
+   Três coisas fizeram isso juntas, e nenhuma delas é errada sozinha:
+
+   1. `grid-template-columns:auto 1fr`. A primeira coluna cresce até caber o
+      maior conteúdo dela.
+   2. Esta lista não tem só rótulos curtos. A última parte dela é
+      `<dt>{q.texto}</dt>`: a PERGUNTA da área, uma frase inteira. As colunas
+      da grade valem para todas as linhas, então a frase de uma pergunta lá
+      embaixo definiu a largura da coluna de "Nome" lá em cima.
+   3. `overflow-wrap:anywhere` no valor. Com a segunda coluna espremida a
+      poucos pixels, essa regra faz exatamente o que promete: quebra em
+      qualquer lugar. Sem ela o nome teria vazado para fora do cartão, o que
+      pelo menos SE VÊ. Com ela, virou uma coluna de letras.
+
+   Testei em Mídia e não reproduziu, porque as perguntas de lá são curtas. O
+   defeito precisava de pergunta longa e nome longo ao mesmo tempo, e o
+   Connect tem as duas.
+
+   A grade de duas colunas some. Rótulo em cima, valor embaixo, uma coluna só,
+   em qualquer largura: é o formato que não tem como quebrar, porque nenhuma
+   linha depende da largura de outra. `break-word` no lugar de `anywhere`
+   continua segurando e-mail comprido sem quebrar palavra que caberia. */
 .wiz-resumo{
-  display:grid;grid-template-columns:auto 1fr;gap:var(--e2) var(--e4);margin:var(--e4) 0 0;
+  display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:var(--e4) 0 0;
   background:var(--card);border:1px solid var(--linha);border-radius:var(--r);padding:var(--e4);
 }
-.wiz-resumo dt{font-size:var(--t-rot);color:var(--mudo);letter-spacing:.02em;align-self:baseline}
-.wiz-resumo dd{margin:0;font-size:var(--t-ui);font-weight:var(--p-rot);overflow-wrap:anywhere}
+.wiz-resumo dt{
+  font-size:var(--t-rot);color:var(--mudo);letter-spacing:.02em;
+  margin-top:var(--e4);min-width:0;
+}
+.wiz-resumo dt:first-of-type{margin-top:0}
+.wiz-resumo dd{
+  margin:3px 0 0;font-size:var(--t-ui);font-weight:var(--p-rot);
+  min-width:0;overflow-wrap:break-word;
+}
 
 /* --- rodapé fixo --- */
 .wiz-pe{
