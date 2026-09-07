@@ -6423,3 +6423,44 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .g-cab ~ .g-tiles,
 .g-cab ~ .cartoes,
 .g-cab ~ .g-passos{ margin-top:clamp(40px,5.5vw,72px) }
+
+/* -----------------------------------------------------------------------------
+   UMA RÉGUA POR SEÇÃO, AGORA EM TODAS AS PÁGINAS
+   07/09/2026. O cabeçalho assimétrico entrou em dez seções de sete páginas, e
+   levou junto o defeito que já tinha aparecido na home: o título nasce na
+   coluna (L92) e o conteúdo que ele apresenta continuava travado numa medida
+   centrada mais estreita (L160, ou L310 no caso de leitura). Medido em 1440px:
+   68px de diferença em oito seções, 218px na nona.
+
+   Enquanto o cabeçalho era centrado isso não se via — dois blocos centrados de
+   larguras diferentes dividem o EIXO, e o eixo era a régua. Com o cabeçalho à
+   esquerda a régua passa a ser a borda, e duas bordas ficam gritando.
+
+   A correção separa dois casos, porque eles não querem a mesma coisa:
+
+     GRADE (cartões, passos, ficha, pequenas guias) — ganha a coluna inteira.
+     Alinha e fica melhor: grade de largura cheia lê como página, grade recuada
+     lê como slide dentro da página.
+
+     LEITURA (.c-media, 820px) — só perde a centralização. A medida curta
+     existe para a linha de texto não passar de ~80 caracteres, e isso continua
+     valendo; o que ela não pode é começar 218px depois do título.
+----------------------------------------------------------------------------- */
+.g-cab ~ .cartoes,
+.g-cab ~ .g-passos,
+.g-cab ~ .ficha,
+.g-cab ~ .pgs,
+.g-cab ~ .g-tiles,
+.g-cab ~ .c-larga,
+.g-cab ~ .g-num{ max-width:none; margin-inline:0 }
+.g-cab ~ .c-media{ margin-inline:0 }
+
+/* o mapa que não carregou sai de cena e deixa a composição que já existe:
+   retícula, mira e o cartão de endereço. Ver o comentário em Movimento.tsx. */
+.mapa iframe.falhou{ opacity:0; pointer-events:none }
+.mapa iframe{ transition:opacity .4s var(--ease), filter .6s var(--ease) }
+/* e a faixa encolhe junto. Esconder o iframe sem mexer na altura trocava um
+   ícone de erro por 343px de escuro vazio antes do cartão — medido pela
+   varredura de vazios logo depois do primeiro conserto. Sem mapa, a seção
+   passa a valer o que o cartão e a mira valem. */
+.mapa:has(iframe.falhou){ min-height:clamp(300px,42vh,420px) }

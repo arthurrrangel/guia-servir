@@ -1,4 +1,20 @@
 import { chromium } from 'playwright';
+import { readFileSync, existsSync } from 'node:fs';
+/* RPCs servidas de /tmp/rpc — ver a nota longa em scripts/tira-contato.mjs:
+   o Chromium deste container não alcança o Supabase. */
+async function serveRpc(route){
+  const req=route.request(); const u=req.url();
+  const fn=u.split('/rpc/')[1]?.split('?')[0];
+  let slug=''; try{ slug=(JSON.parse(req.postData()||'{}').p_slug)||''; }catch{}
+  for(const nome of [slug?`${fn}__${slug}`:null, fn]){
+    if(!nome) continue; const f=`/tmp/rpc/${nome}.json`;
+    if(existsSync(f)) return route.fulfill({status:200,contentType:'application/json',
+      headers:{'access-control-allow-origin':'*'},body:readFileSync(f,'utf8')});
+  }
+  return route.fulfill({status:200,contentType:'application/json',
+    headers:{'access-control-allow-origin':'*'},body:'[]'});
+}
+
 /* =============================================================================
    AS RÉGUAS DA PÁGINA
 
@@ -13,7 +29,17 @@ import { chromium } from 'playwright';
 ============================================================================= */
 const B=`http://localhost:${process.env.PORTA||3000}`;
 const PASSA=[B,'https://qjtcaijhgldypudzyafz.supabase.co'];
-const ROTAS=process.argv.slice(2);
+const ARGS=process.argv.slice(2);
+const AUTOTESTE=ARGS[0]==='--autoteste';
+const ROTAS=AUTOTESTE?ARGS.slice(1):ARGS;
+/* O DEFEITO CONHECIDO, PARA PROVAR QUE O TESTE O ENXERGA.
+   Este arquivo já deu zero duas vezes numa página que eu estava vendo
+   desalinhada com os próprios olhos. Um verificador que nunca acusa não é um
+   verificador: é um carimbo. `--autoteste` injeta de volta a medida centrada
+   que causava L92 no título e L160 na grade; se o resultado não for MAIOR que
+   zero, o problema está aqui e não na página. */
+const CSS_DEFEITO=`.g-cab ~ .cartoes,.g-cab ~ .g-passos,.g-cab ~ .ficha,
+  .g-cab ~ .pgs,.g-cab ~ .c-larga{ max-width:1120px !important; margin-inline:auto !important }`;
 const CHECK=()=>{
   /* O INVARIANTE NÃO É A BORDA, É O EIXO. Primeira versão deste teste acusou
      42 seções e quase todas eram falso positivo: num bloco centrado, dois
@@ -43,16 +69,28 @@ const CHECK=()=>{
     const alturas=filhos.map(f=>f.getBoundingClientRect().top);
     const ladoALado=junta(alturas,6)<filhos.length;
     if(ladoALado) continue;
-    /* E AINDA FALTAVA UM CASO, que era justamente o original. Na faixa "O
-       domingo" o cabeçalho estava em L92 e a foto em L160, mas os DOIS
-       tinham centro 720: concordavam no eixo e discordavam na régua. Com
-       cabeçalho centrado isso não se vê; com cabeçalho alinhado à esquerda,
-       a régua é o que o olho usa, e duas réguas ficam gritando.
-       Então: seção que tem um bloco alinhado à esquerda exige que TODOS
-       compartilhem a esquerda — concordar no centro não basta. */
+    /* A BORDA DO CONTAINER É A DE CONTEÚDO, NÃO A EXTERNA — e era exatamente
+       aqui que este verificador estava cego. `.g` tem max-width 1360, margem
+       automática e padding-inline de 52px: em 1440 o retângulo dele começa em
+       40 e o CONTEÚDO em 92. Eu comparava o filho (92) com a borda externa
+       (40), a diferença dava 52, e o teste concluía "ninguém está colado na
+       esquerda, logo é uma seção centrada" — e seções centradas podem ter
+       esquerdas diferentes. Resultado: zero numa página que eu estava vendo
+       desalinhada. Duas vezes.
+       Com a borda de conteúdo, um filho em 92 é reconhecido como alinhado à
+       esquerda, e aí a régua passa a valer para todos os irmãos.
+       `--autoteste` injeta o defeito de volta e cobra que este bloco o veja. */
     const cont=alvo.getBoundingClientRect();
+    const ks=cs(alvo);
+    const bordaConteudo=Math.round(cont.left+parseFloat(ks.paddingLeft||'0'));
     const eixo=Math.round(cont.left+cont.width/2);
-    const temEsquerda=filhos.some((f,i)=>Math.abs(cx[i]-eixo)>3 || Math.abs(lx[i]-Math.round(cont.left))<=3);
+    /* E BLOCO DE LARGURA CHEIA COM text-align:center NÃO É BLOCO ALINHADO À
+       ESQUERDA. Sem esta condição o herói acusava: `g-rot`, `g-ed` e `g-acoes`
+       ocupam a coluna inteira (portanto encostam na borda) mas estão centrados
+       por text-align, e o `g-h1` ao lado tem medida curta — três esquerdas,
+       zero defeito. Quem manda é a intenção declarada no alinhamento. */
+    const aEsquerda=f=>{ const t=cs(f).textAlign; return t!=='center' && t!=='-webkit-center'; };
+    const temEsquerda=filhos.some((f,i)=>Math.abs(lx[i]-bordaConteudo)<=3 && aEsquerda(f));
     const discorda = temEsquerda ? junta(lx,3)>1 : (junta(cx,3)>1 && junta(lx,3)>1);
     if(discorda) out.push({sec:String(sec.className||sec.tagName).slice(0,26)||sec.tagName, filhos:desc});
   }
@@ -62,11 +100,14 @@ const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
 let total=0;
 for(const [w,h,tag] of [[1440,900,'desk'],[1024,800,'tablet']]){
   const ctx=await b.newContext({viewport:{width:w,height:h}});
-  await ctx.route('**',r=>PASSA.some(u=>r.request().url().startsWith(u))?r.continue():r.abort());
+  await ctx.route('**', r => { const u=r.request().url();
+      if(u.includes('/rest/v1/rpc/')) return serveRpc(r);
+      return u.startsWith(B) ? r.continue() : r.abort(); });
   for(const rota of ROTAS){
     const p=await ctx.newPage();
     try{await p.goto(B+(rota==='home'?'/':'/'+rota),{waitUntil:'domcontentloaded',timeout:25000});}catch{}
     await p.waitForTimeout(2600);
+    if(AUTOTESTE) { await p.addStyleTag({content:CSS_DEFEITO}); await p.waitForTimeout(400); }
     const r=await p.evaluate(CHECK).catch(e=>[{erro:String(e).slice(0,60)}]);
     if(r.length){ total+=r.length; console.log(`[${tag}] /${rota}`); for(const x of r) console.log('   ',JSON.stringify(x)); }
     await p.close();
@@ -74,6 +115,9 @@ for(const [w,h,tag] of [[1440,900,'desk'],[1024,800,'tablet']]){
   await ctx.close();
 }
 console.log('SECOES COM MAIS DE UMA REGUA:',total);
+if(AUTOTESTE){ console.log(total>0
+  ? 'AUTOTESTE OK: o verificador enxerga o defeito conhecido.'
+  : 'AUTOTESTE FALHOU: o defeito foi injetado e o verificador nao viu. NAO confie no zero.'); }
 /* LIMITE CONHECIDO, 06/09/2026: reintroduzi de propósito o defeito original
    (.c-foto travado em 1120px dentro de um container de 1256) e este teste NÃO
    acusou. Ou a regra ainda está permissiva, ou o CSS não tinha recompilado no

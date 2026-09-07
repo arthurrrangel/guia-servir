@@ -1,4 +1,18 @@
 import { chromium } from 'playwright';
+import { readFileSync, existsSync } from 'node:fs';
+/* RPCs de /tmp/rpc: o Chromium do container nao alcanca o Supabase. Ver a nota
+   longa em scripts/tira-contato.mjs — sem isto, as telas guiadas por dados
+   ficam em "Carregando" e a varredura mede a casca. */
+async function serveRpc(route){ const req=route.request(); const u=req.url();
+  const fn=u.split('/rpc/')[1]?.split('?')[0]; let slug='';
+  try{ slug=(JSON.parse(req.postData()||'{}').p_slug)||''; }catch{}
+  for(const n of [slug?`${fn}__${slug}`:null, fn]){ if(!n) continue;
+    const f=`/tmp/rpc/${n}.json`;
+    if(existsSync(f)) return route.fulfill({status:200,contentType:'application/json',
+      headers:{'access-control-allow-origin':'*'},body:readFileSync(f,'utf8')}); }
+  return route.fulfill({status:200,contentType:'application/json',
+    headers:{'access-control-allow-origin':'*'},body:'[]'}); }
+
 /* a porta vem do ambiente: PORTA=3555 node scripts/... . Ela ja ficou
    fixa em 3555 num commit e todo mundo que rodava em 3000 via tela vazia. */
 const B=`http://localhost:${process.env.PORTA||3000}`;
@@ -100,8 +114,9 @@ const b=await chromium.launch({executablePath:'/opt/pw-browsers/chromium'});
 let total=0;
 for(const [w,h,tag] of [[1280,900,'desk'],[390,844,'cel']]){
   const ctx=await b.newContext({viewport:{width:w,height:h}});
-  const PASSA=[B,'https://qjtcaijhgldypudzyafz.supabase.co'];
-  await ctx.route('**',r=>PASSA.some(u=>r.request().url().startsWith(u))?r.continue():r.abort());
+  await ctx.route('**', r => { const u=r.request().url();
+    if(u.includes('/rest/v1/rpc/')) return serveRpc(r);
+    return u.startsWith(B) ? r.continue() : r.abort(); });
   for(const [rota,nome] of TELAS){
     const p=await ctx.newPage();
     try{await p.goto(B+rota,{waitUntil:'domcontentloaded',timeout:15000});}catch{}

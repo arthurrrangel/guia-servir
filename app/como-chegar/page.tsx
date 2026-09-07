@@ -92,10 +92,12 @@ export default function ComoChegar() {
       {/* ------------------------------------------------------------ chegando */}
       <section className="casa-escuro retic rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Chegando</p>
-            <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
-            <p className="g-ed">Tem alguém na porta.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Chegando</p>
+              <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
+              <p className="g-ed">Tem alguém na porta.</p>
+            </div>
           </div>
           <div className="cartoes c-bloco grande">
             {MODOS.map(m => (

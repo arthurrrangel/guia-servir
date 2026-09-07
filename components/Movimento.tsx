@@ -223,6 +223,32 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
     atualiza.observe(raiz, { childList: true, subtree: true });
     desligar.push(() => atualiza.disconnect());
 
+    /* --------------------------------------- o mapa que não carrega
+       O mapa da /como-chegar é um <iframe> do Google. Quando ele falha — rede
+       ruim, bloqueador de rastreadores, e bloqueador é comum — o Chromium
+       desenha DENTRO dele o ícone de documento quebrado, e a página de maior
+       intenção do site passa a mostrar um retângulo escuro de 700px com um
+       ícone de erro no meio. Foi assim que ele apareceu na auditoria de
+       07/09/2026, e o que a captura mostrou é exatamente o que quem usa
+       bloqueador vê.
+
+       O quadro já se sustenta sem o mapa: tem retícula, mira e o cartão de
+       endereço com os dois botões. Então em vez de um erro, o iframe some e
+       fica a composição. Seis segundos porque `loading="lazy"` pode legitimar
+       uma carga tardia; passado isso, é falha.
+
+       Sem <iframe> na página o bloco inteiro não custa nada. */
+    const mapas = Array.from(raiz.querySelectorAll<HTMLIFrameElement>('.mapa iframe'));
+    if (mapas.length) {
+      for (const m of mapas) {
+        let vivoM = true;
+        const ok = () => { vivoM = false; m.classList.add('carregou'); };
+        m.addEventListener('load', ok, { once: true });
+        const t = setTimeout(() => { if (vivoM) m.classList.add('falhou'); }, 6000);
+        desligar.push(() => { clearTimeout(t); m.removeEventListener('load', ok); });
+      }
+    }
+
     return () => desligar.forEach(f => f());
   }, [semRevelar]);
 

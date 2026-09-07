@@ -150,15 +150,17 @@ export default function Area() {
       {/* ------------------------------------------------------- as funções */}
       <section className="casa-papel rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Onde você pode servir</p>
-            <Tit className="g-h2">{`O que se faz ${na} ${min.nome}`}</Tit>
-            <p className="g-ed">Você escolhe as suas no cadastro.</p>
-            {/* A TELA MANDAVA FAZER UMA COISA QUE ELA NÃO OFERECE. Dizia "Marque
-                uma ou mais" numa lista de leitura. A marcação existe, mas no
-                passo 2 do cadastro. Aqui a lista diz o que ela é, e onde a
-                escolha acontece. */}
-            <p className="g-corpo">Pode escolher o que você ainda não sabe fazer. Tem gente para ensinar.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Onde você pode servir</p>
+              <Tit className="g-h2">{`O que se faz ${na} ${min.nome}`}</Tit>
+              <p className="g-ed">Você escolhe as suas no cadastro.</p>
+              {/* A TELA MANDAVA FAZER UMA COISA QUE ELA NÃO OFERECE. Dizia "Marque
+                  uma ou mais" numa lista de leitura. A marcação existe, mas no
+                  passo 2 do cadastro. Aqui a lista diz o que ela é, e onde a
+                  escolha acontece. */}
+              <p className="g-corpo">Pode escolher o que você ainda não sabe fazer. Tem gente para ensinar.</p>
+            </div>
           </div>
           <div className="cartoes livre resumo c-bloco grande">
             {grupos.map(([fam, g], i) => (
@@ -178,10 +180,12 @@ export default function Area() {
       {/* ----------------------------------------------------- como funciona */}
       <section className="casa-escuro retic rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Como funciona</p>
-            <Tit className="g-h2">Do cadastro à escala</Tit>
-            <p className="g-ed">Quatro passos.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Como funciona</p>
+              <Tit className="g-h2">Do cadastro à escala</Tit>
+              <p className="g-ed">Quatro passos.</p>
+            </div>
           </div>
           <ol className="cartoes quatro c-bloco grande">
             {PASSOS.map((p, i) => (

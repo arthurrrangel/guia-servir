@@ -74,10 +74,12 @@ export default function Servir() {
       {/* ------------------------------------------------------------ as áreas */}
       <section id="areas" className="casa-papel rev" aria-label="As áreas">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">As áreas</p>
-            <Tit className="g-h2">Escolha uma e veja o que ela faz</Tit>
-            <p className="g-ed">O cadastro leva um minuto.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">As áreas</p>
+              <Tit className="g-h2">Escolha uma e veja o que ela faz</Tit>
+              <p className="g-ed">O cadastro leva um minuto.</p>
+            </div>
           </div>
           <div className="c-bloco grande">
             {fase === 'carregando' && <AreasCarregando />}

@@ -62,14 +62,16 @@ export default function PequenaGuia() {
       {/* --------------------------------------------------- onde elas acontecem */}
       <section className="casa-papel rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Onde elas acontecem</p>
-            <Tit className="g-h2">{PEQUENAS_GUIAS.length ? 'Uma perto de você' : 'Espalhadas pela Barra e arredores'}</Tit>
-            <p className="g-ed">
-              {PEQUENAS_GUIAS.length
-                ? `${presenciais} grupos na cidade${online ? `, ${online} por vídeo` : ''}.`
-                : 'Diga o seu bairro e a gente aponta o mais perto.'}
-            </p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Onde elas acontecem</p>
+              <Tit className="g-h2">{PEQUENAS_GUIAS.length ? 'Uma perto de você' : 'Espalhadas pela Barra e arredores'}</Tit>
+              <p className="g-ed">
+                {PEQUENAS_GUIAS.length
+                  ? `${presenciais} grupos na cidade${online ? `, ${online} por vídeo` : ''}.`
+                  : 'Diga o seu bairro e a gente aponta o mais perto.'}
+              </p>
+            </div>
           </div>
 
           {PEQUENAS_GUIAS.length ? (

@@ -84,10 +84,12 @@ export default function Cultos() {
       {/* ------------------------------------------------- a ordem do culto */}
       <section className="casa-escuro retic rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Na prática</p>
-            <Tit className="g-h2">Como é um domingo aqui</Tit>
-            <p className="g-ed">Na mesma ordem, toda semana.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Na prática</p>
+              <Tit className="g-h2">Como é um domingo aqui</Tit>
+              <p className="g-ed">Na mesma ordem, toda semana.</p>
+            </div>
           </div>
           <div className="g-passos centro c-bloco grande">
             {PASSOS.map(p => (
@@ -104,10 +106,12 @@ export default function Cultos() {
       {/* ------------------------------------------------- a ficha do domingo */}
       <section className="casa-areia rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Primeira vez</p>
-            <Tit className="g-h2">O que você precisa saber</Tit>
-            <p className="g-ed">Seis coisas, nenhuma sobre doutrina.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Primeira vez</p>
+              <Tit className="g-h2">O que você precisa saber</Tit>
+              <p className="g-ed">Seis coisas, nenhuma sobre doutrina.</p>
+            </div>
           </div>
           <div className="ficha c-bloco grande">
             {FICHA.map(f => (

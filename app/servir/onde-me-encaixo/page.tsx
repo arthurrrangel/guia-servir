@@ -175,10 +175,12 @@ export default function OndeMeEncaixo() {
       {/* ------------------------------------------------ o trabalho, por área */}
       <section id="areas" className="casa-papel rev" aria-label="O que se faz em cada área">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">O que se faz em cada área</p>
-            <Tit className="g-h2">O trabalho, não o nome do time</Tit>
-            <p className="g-ed">Com as palavras de quem lidera cada área.</p>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">O que se faz em cada área</p>
+              <Tit className="g-h2">O trabalho, não o nome do time</Tit>
+              <p className="g-ed">Com as palavras de quem lidera cada área.</p>
+            </div>
           </div>
           <div className="c-larga c-bloco grande">
             {fase === 'carregando' && <Carregando o="Carregando o que cada área faz" />}

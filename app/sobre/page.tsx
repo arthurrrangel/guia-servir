@@ -87,9 +87,11 @@ export default function Sobre() {
       {/* ------------------------------------------------------------ pilares */}
       <section className="casa-areia rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Nossos pilares</p>
-            <Tit className="g-h2">Relacionamento, generosidade e serviço</Tit>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Nossos pilares</p>
+              <Tit className="g-h2">Relacionamento, generosidade e serviço</Tit>
+            </div>
           </div>
           <div className="cartoes c-bloco grande">
             {PILARES.map((p, i) => (
@@ -106,9 +108,11 @@ export default function Sobre() {
       {/* --------------------------------------------------------------- o alvo */}
       <section className="casa-papel rev">
         <div className="g g-secao">
-          <div className="c">
-            <p className="g-rot">Nosso alvo</p>
-            <Tit className="g-h2">Plantar cada cristão no solo da responsabilidade do Reino</Tit>
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Nosso alvo</p>
+              <Tit className="g-h2">Plantar cada cristão no solo da responsabilidade do Reino</Tit>
+            </div>
           </div>
           <div className="c-media c-bloco">
             <ul className="g-vira">
