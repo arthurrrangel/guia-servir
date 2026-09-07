@@ -7744,3 +7744,10 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
    grid, esticava até 326px: com o sublinhado de repouso, um fio da largura da
    linha sob duas palavras. O botão fica do tamanho do texto. */
 @media(max-width:640px){ .lid-linha > .lid-bt-txt{ justify-self:start; margin-top:var(--e1) } }
+/* em 390 o campo de "novo ministério" ficava com 125px ao lado do botão de
+   190: "novo ministé". Abaixo de 480 o par empilha: campo inteiro, botão
+   embaixo, alinhado à esquerda. */
+@media(max-width:479px){
+  .ajt-novo{ flex-wrap:wrap }
+  .ajt-novo input{ flex:1 1 100% }
+}

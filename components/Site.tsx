@@ -199,8 +199,10 @@ export function Rodape() {
             das outras três. */}
         <Link href="/como-chegar" className="g-pe-onde">
           <span className="g-pe-quando">{IGREJA.cultoDia}, {IGREJA.cultoHora}</span>
+          {/* rua, bairro e cidade não quebram por dentro: em 390 saía
+              "Barra da Tijuca, Rio / de Janeiro". */}
           <span className="g-pe-rua">
-            {IGREJA.rua} · {IGREJA.bairro}, {IGREJA.cidade}
+            <span className="nao-quebra">{IGREJA.rua}</span> · <span className="nao-quebra">{IGREJA.bairro}</span>, <span className="nao-quebra">{IGREJA.cidade}</span>
           </span>
           <span className="g-pe-ver">Ver no mapa <IcSeta /></span>
         </Link>
