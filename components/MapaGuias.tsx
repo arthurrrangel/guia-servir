@@ -60,12 +60,24 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
         center: RIO, zoom: 11, scrollWheelZoom: false,
         zoomControl: true, attributionControl: true,
       });
-      /* Voyager: mapa claro, com parque verde e água azul. É o desenho da
-         referência que o Arthur mandou, e é o que deixa o pino escuro da
-         marca legível — num mapa escuro ele desaparece no fundo. */
-      l.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        subdomains: 'abcd', maxZoom: 19,
+      /* O CARTO PEDE CHAVE, E EU SÓ DESCOBRI EM PRODUÇÃO. 07/09/2026.
+         A primeira versão usava o basemap Voyager do CARTO, no entendimento de
+         que era livre com atribuição. Subiu, e o mapa apareceu com "API KEY
+         REQUIRED · carto.com/basemaps" escrito na diagonal, repetido por cima
+         de tudo. Pior que os doze mapas que ele substituiu.
+
+         Não dava para pegar antes daqui: o Chromium deste container não
+         carrega recurso externo dentro da página, então local o mapa nasce
+         cinza com ou sem chave. Por curl o tile vinha 200 e eu li 200 como
+         "funciona" — 200 era a marca d'água sendo entregue com sucesso.
+
+         Vai para o tile padrão do OpenStreetMap: sem chave, sem marca d'água,
+         política de uso compatível com um site de igreja (volume baixo,
+         atribuição visível). Mapa claro, parque verde e água azul, que é o que
+         deixa o pino escuro da marca legível. */
+      l.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
       }).addTo(m);
       m.zoomControl.setPosition('bottomright');
       mapa.current = m;
