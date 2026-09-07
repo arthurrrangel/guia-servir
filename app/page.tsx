@@ -14,6 +14,7 @@ import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
+import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -48,13 +49,7 @@ type Numeros = {
 /* endereço, mapa e @ saem de lib/igreja.ts — uma fonte só para o site inteiro */
 const IG = IGREJA.instagram;
 
-/* a sigla, palavra por palavra como a igreja escreve */
-const SIGLA = [
-  { l: 'G', t: 'Grupo', d: 'Somos um povo. Não caminhamos isoladamente.' },
-  { l: 'U', t: 'Unidos', d: 'Cada pessoa tem um papel na construção de algo maior do que si mesma.' },
-  { l: 'I', t: 'Interagindo', d: 'Cultura se constrói por relacionamento, comunicação e participação.' },
-  { l: '>', t: 'Avançando', d: 'Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.' },
-];
+/* a sigla mora em lib/igreja.ts — ver a nota lá sobre por que ela saiu daqui */
 
 /* As seções internas da home continuam com os mesmos ids — #domingo, #igreja
    e #areas seguem sendo endereços válidos, e os links dentro do conteúdo os
@@ -465,7 +460,7 @@ export default function Casa() {
             <div className="c">
               <p className="g-rot">A igreja</p>
               <Tit className="g-h2">Somos GUIA</Tit>
-              <p className="g-ed">Grupo Unido, Interagindo e Avançando.</p>
+              <p className="g-ed">{SIGLA_FRASE}.</p>
             </div>
             <div className="g-tiles quatro letras centro c-larga">
               {SIGLA.map(l => (

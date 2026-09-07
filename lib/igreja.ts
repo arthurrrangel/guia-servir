@@ -88,3 +88,38 @@ export function canalDeConversa(texto?: string): { href: string; rot: string } {
   }
   return { href: IGREJA.instagram, rot: `Falar no Instagram` };
 }
+
+/* =============================================================================
+   A SIGLA, EM UM LUGAR SÓ
+   07/09/2026. Esta lista estava escrita à mão em DOIS arquivos: o `SIGLA` da
+   home e os quatro azulejos da /sobre. Foi exatamente por isso que ela
+   divergiu: a frase da igreja diz "Grupo Unido, Interagindo e Avançando" e os
+   azulejos dos dois lugares diziam "Unidos" — plural, na mesma tela em que a
+   itálica logo acima escrevia o singular. O Arthur pegou.
+
+   Trocar a palavra nos dois conserta hoje. Tirar a duplicação conserta
+   sempre: com uma fonte só, o próximo ajuste de texto não tem como pegar
+   metade das telas.
+
+   `l` é a letra ('>' vira o chevron da marca na hora de desenhar), `t` a
+   palavra e `d` a linha que ela ganha onde há espaço para descrição.
+============================================================================= */
+export const SIGLA = [
+  { l: 'G', t: 'Grupo', d: 'Somos um povo. Não caminhamos isoladamente.' },
+  { l: 'U', t: 'Unido', d: 'Cada pessoa tem um papel na construção de algo maior do que si mesma.' },
+  { l: 'I', t: 'Interagindo', d: 'Cultura se constrói por relacionamento, comunicação e participação.' },
+  { l: '>', t: 'Avançando', d: 'Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.' },
+];
+
+/** A sigla escrita como frase.
+ *
+ *  ELA É LITERAL, E ISSO É DE PROPÓSITO. Minha primeira versão gerava a frase
+ *  a partir da lista com um join, e saiu "Grupo, Unido, Interagindo e
+ *  Avançando" — com vírgula onde não pode haver. A sigla não é uma enumeração
+ *  de quatro palavras: "Grupo Unido" é um sintagma, o adjetivo qualifica o
+ *  substantivo, e só depois dele a enumeração começa. Nenhuma regra genérica
+ *  de lista sabe disso.
+ *
+ *  Escrita à mão, mas AQUI, ao lado da lista: quem mudar uma vê a outra na
+ *  mesma tela. Era a distância entre os dois arquivos que deixava divergir. */
+export const SIGLA_FRASE = 'Grupo Unido, Interagindo e Avançando';

@@ -5,7 +5,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema, Luz } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
-import { IGREJA, SITE } from '@/lib/igreja';
+import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 
 /* =============================================================================
    /sobre — QUEM SOMOS
@@ -28,9 +28,9 @@ const PILARES = [
 export const metadata: Metadata = {
   title: 'Quem somos',
   description:
-    'GUIA é sigla: Grupo Unido, Interagindo e Avançando. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.',
+    `GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
-  ...cartao({ titulo: 'Quem somos', descricao: 'Grupo Unido, Interagindo e Avançando. Cultivando uma nova cultura, na Barra da Tijuca.', caminho: '/sobre', imagem: 'sobre' }),
+  ...cartao({ titulo: 'Quem somos', descricao: `${SIGLA_FRASE}. Cultivando uma nova cultura, na Barra da Tijuca.`, caminho: '/sobre', imagem: 'sobre' }),
 };
 
 export default function Sobre() {
@@ -64,11 +64,21 @@ export default function Sobre() {
             <Tit className="g-h2">Somos GUIA</Tit>
             <p className="g-ed">O chevron é o avanço.</p>
           </div>
+          {/* os quatro vêm de lib/igreja.ts, a mesma lista da home. Eram
+              escritos à mão aqui, e foi assim que "Unido" virou "Unidos" só
+              deste lado. */}
           <div className="g-tiles quatro centro c-larga c-bloco grande">
-            <div className="g-tile"><span className="g-tile-l">G</span><span><span className="g-tile-t">Grupo</span><span className="g-tile-d">Somos um povo. Não caminhamos isoladamente.</span></span></div>
-            <div className="g-tile"><span className="g-tile-l">U</span><span><span className="g-tile-t">Unidos</span><span className="g-tile-d">Cada pessoa tem um papel na construção de algo maior do que si mesma.</span></span></div>
-            <div className="g-tile"><span className="g-tile-l">I</span><span><span className="g-tile-t">Interagindo</span><span className="g-tile-d">Cultura se constrói por relacionamento, comunicação e participação.</span></span></div>
-            <div className="g-tile"><span className="g-tile-l"><span className="marca-chev" aria-hidden="true"><Chevron /></span></span><span><span className="g-tile-t">Avançando</span><span className="g-tile-d">Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.</span></span></div>
+            {SIGLA.map(x => (
+              <div className="g-tile" key={x.t}>
+                <span className="g-tile-l">
+                  {x.l === '>' ? <span className="marca-chev" aria-hidden="true"><Chevron /></span> : x.l}
+                </span>
+                <span>
+                  <span className="g-tile-t">{x.t}</span>
+                  <span className="g-tile-d">{x.d}</span>
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
