@@ -124,11 +124,14 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
       const icone = l.divIcon({
         className: 'pin-guia',
         html: `<span class="pin-guia-c"><svg viewBox="504.6 2.5 90 95" aria-hidden="true"><path d="M515.18 2.50 L602.58 48.68 L605.08 50.00 L602.58 51.32 L515.18 97.50 L515.18 76.10 L577.38 50.00 L515.18 23.90 Z"/></svg>${doPonto.length > 1 ? `<b class="pin-guia-n">${doPonto.length}</b>` : ''}</span>`,
-        iconSize: [34, 34], iconAnchor: [17, 17],
+        /* 44 é a área de toque; o círculo visível tem 34 e fica centrado
+           nela (ver .pin-guia no CSS). Pino de 34 era o único alvo do site
+           abaixo do mínimo. */
+        iconSize: [44, 44], iconAnchor: [22, 22],
       });
       const rotulo = doPonto.map(g => `${g.nome} · ${g.dia}, ${g.hora}`).join('<br>');
       const p = l.marker([lat, lon], { icon: icone, title: doPonto.map(g => g.nome).join(', ') }).addTo(m);
-      p.bindTooltip(rotulo, { direction: 'top', offset: [0, -14] });
+      p.bindTooltip(rotulo, { direction: 'top', offset: [0, -19] });
       p.on('click', () => aoEscolher?.(primeiro.nome));
       /* o mesmo pino responde por todos os grupos daquele ponto: assim o
          cartão de qualquer um deles acende o pino certo */

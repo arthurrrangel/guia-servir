@@ -5680,7 +5680,6 @@ html{ scroll-behavior:smooth }
 @media(max-width:720px){ .mapa.centro .mapa-cartao{ left:0; transform:none; width:100% } }
 
 /* ---- as Pequenas Guias: cartão mais baixo no celular ------------------------ */
-.pgs.centro{ max-width:1120px; margin-inline:auto }
 @media(max-width:899px){ .pg-mapa{ aspect-ratio:16/8 } .pg-corpo{ padding:18px 18px 20px } }
 
 /* ---- celular: respiro menor, sem escada de atrasos, nada some na rolagem ---- */
@@ -6217,16 +6216,23 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 }
 
 /* ---- 2. o secundário vira palavra ---------------------------------------- */
+/* O SUBLINHADO FICA DEBAIXO DA PALAVRA, NÃO DEBAIXO DA CAIXA. 07/09/2026.
+   A primeira versão sublinhava com `border-bottom` na caixa de 44px (a área
+   de toque): o texto fica centrado nela e o traço saía 15px abaixo da última
+   letra, medido — um risco solto boiando sob a palavra. `text-decoration` com
+   `text-underline-offset` sublinha o texto onde quer que ele esteja, e a caixa
+   de toque continua com 44. */
 .g-link{
   display:inline-flex; align-items:center; min-height:var(--toque);
   font-family:var(--fonte-display); font-weight:500; font-size:14px;
-  letter-spacing:.02em; color:var(--ink); text-decoration:none;
-  border-bottom:1px solid rgba(37,37,37,.3); padding-bottom:1px;
-  transition:border-color var(--t),color var(--t);
+  letter-spacing:.02em; color:var(--ink);
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em;
+  text-decoration-color:rgba(37,37,37,.3);
+  transition:text-decoration-color var(--t),color var(--t);
 }
-.g-link:hover,.g-link:focus-visible{ border-bottom-color:currentColor }
-.casa-escuro .g-link,.g-cheio .g-link{ color:#fff; border-bottom-color:rgba(255,255,255,.4) }
-.casa-areia .g-link{ color:var(--areia-tinta); border-bottom-color:rgba(59,50,34,.35) }
+.g-link:hover,.g-link:focus-visible{ text-decoration-color:currentColor }
+.casa-escuro .g-link,.g-cheio .g-link{ color:#fff; text-decoration-color:rgba(255,255,255,.4) }
+.casa-areia .g-link{ color:var(--areia-tinta); text-decoration-color:rgba(59,50,34,.35) }
 /* dentro de .g-acoes ele fica na mesma linha de base do botão sólido, não
    esticado à altura dele */
 .g-acoes .g-link{ align-self:center }
@@ -6365,8 +6371,8 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 }
 
 /* a palavra do herói é clara: ele vive sobre foto, não sobre papel */
-.g-link.claro{ color:#fff; border-bottom-color:rgba(255,255,255,.45) }
-.g-link.claro:hover,.g-link.claro:focus-visible{ border-bottom-color:#fff }
+.g-link.claro{ color:#fff; text-decoration-color:rgba(255,255,255,.45) }
+.g-link.claro:hover,.g-link.claro:focus-visible{ text-decoration-color:#fff }
 .casa-heroi .acoes{ align-items:center; gap:clamp(20px,3vw,36px) }
 
 /* o enquadramento anda mais: com 16% a mão levantada do pregador ainda
@@ -7187,14 +7193,16 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    tela em toda página do site — trocar buraco por rolagem não é ganho.
 
    Então o terceiro grupo ocupa a linha inteira e distribui os próprios links
-   na horizontal. A linha fica cheia, a altura não cresce, e o rodapé passa a
-   ter duas formas de lista em vez de um vazio. */
-@media(max-width:899px){
-  .g-pe-cols > *:last-child{ grid-column:1 / -1 }
-  .g-pe-cols > *:last-child h4{ margin-bottom:10px }
-  .g-pe-cols > *:last-child a{
-    display:inline-block; padding:5px 0; margin-right:var(--e5);
+   nas MESMAS duas colunas dos grupos de cima: "Onde me encaixo" nasce na
+   régua de "A igreja", não num terceiro eixo. (A primeira versão punha os
+   links em linha corrida e criava uma terceira régua a 123px; e valia até
+   899px, onde a grade já tem três colunas e o grupo cabia na terceira — lá o
+   spanning deixava a terceira coluna vazia.) */
+@media(max-width:759px){
+  .g-pe-cols > nav:last-child{
+    grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; column-gap:18px;
   }
+  .g-pe-cols > nav:last-child h4{ grid-column:1 / -1; margin-bottom:10px }
 }
 
 /* =============================================================================
@@ -7388,3 +7396,131 @@ a.lid-bt-txt{
   .g-cheio.alta{ min-height:clamp(420px,66svh,640px) }
   .g-cheio.centro.fecho{ min-height:clamp(300px,40vh,440px) }
 }
+
+/* =============================================================================
+   A BARRA DO SITE: UMA ALTURA, E O MENU QUE FECHA
+   07/09/2026. Três defeitos da mesma barra, achados pela auditoria do site.
+
+   1. O MENU NÃO FECHAVA NO CELULAR. `.menu` é fixo com z-index 65; a barra,
+      onde mora o botão que vira X, tem z-index 60. Aberta a cortina, o X
+      ficava por baixo dela. Sem Esc no celular, a única saída era tocar num
+      link e trocar de página. Enquanto o menu está aberto a barra sobe acima
+      da cortina, fica transparente e branca (o X e a marca sobre o escuro), e
+      os botões da barra somem: "Quero servir" já está na lista do menu.
+
+   2. UMA FAIXA DE PAPEL ENTRE A BARRA E O HERÓI. A barra media 71,8px em 390
+      e 70,2 em 1440 — altura que saía do conteúdo (botão de 46, marca de 44,
+      respiro de 12) — e o `main` das páginas internas começava em 78px fixos.
+      Sobre o herói escuro de /servir isso era um risco claro de 6 a 8px entre
+      a barra e a foto. A altura da barra vira um número só, `--barra-alt`, e
+      o `main` começa exatamente ali. A barra da home, que encolhia 8px ao
+      ficar opaca, passa a ter a mesma altura sempre: menos uma coisa se
+      mexendo durante a rolagem.
+
+   3. O MENU ESTOURAVA EM 360x740 E IGNORAVA A CALHA. `place-items:center` num
+      grid fixo centraliza o bloco, mas quando o bloco é mais alto que a tela
+      as duas pontas somem e nada rola. Vira flex com rolagem e margens auto:
+      centrado quando cabe, rolável quando não cabe, e com a mesma calha de
+      20px do resto do site. A marca que ficava dentro da cortina saiu: a da
+      barra continua visível por cima, no mesmo lugar de sempre.
+   ============================================================================= */
+:root{ --barra-alt:72px }
+.casa-barra,.casa-barra.opaco{ height:var(--barra-alt); padding-top:0; padding-bottom:0 }
+
+.casa-barra:has(.menu-bt[aria-expanded="true"]){
+  z-index:66; background:transparent; border-bottom-color:transparent; color:#fff;
+  animation:none; transition:none;
+}
+.casa-barra:has(.menu-bt[aria-expanded="true"])::before{ opacity:0; animation:none }
+.casa-barra:has(.menu-bt[aria-expanded="true"]) .bt-barra{ visibility:hidden }
+
+.menu{
+  display:flex; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding:calc(var(--barra-alt) + var(--e5)) var(--e5) var(--e6);
+}
+.menu > div{ margin:auto; width:100%; max-width:420px }
+.menu ul{ padding:0 }
+.menu .menu-pe span{ text-wrap:balance }
+.menu a[aria-current="true"]{ opacity:.55 }
+/* abrir mostra na hora (o foco só entra num link visível); fechar espera o
+   fade acabar antes de esconder. */
+.menu.aberto{ transition:opacity var(--t-lento), visibility 0s }
+/* item de menu em 32px herdava o entrelinha de texto corrido (1,6): 83px por
+   item, cinco itens em 415px. Entrelinha de título, 67px por item. */
+.menu a{ line-height:1.1 }
+@media(max-width:359px){ .menu a{ font-size:var(--d-secao) } }
+/* o botão do menu herdava o hover genérico de <button> (caixa clara): sobre a
+   cortina escura, virava um quadrado branco atrás do X. Feedback por opacidade,
+   como os links da barra. */
+.menu-bt:hover,.menu-bt:active{ background:transparent; border-color:transparent; opacity:.72 }
+.nao-quebra{ white-space:nowrap }
+
+/* =============================================================================
+   A FICHA DA PEQUENA GUIA TINHA TRÊS ALINHAMENTOS, E UM BOTÃO INVISÍVEL
+   07/09/2026, achados da auditoria do site.
+
+   O ALINHAMENTO. `.pgs.centro` queria dizer "bloco centrado na página"
+   (largura máxima, margens automáticas), mas `.centro` é também o utilitário
+   global `text-align:center`. Resultado: nome, horário e nota centrados; o
+   rótulo do bairro (flex) à esquerda; os botões (flex) à esquerda. Três eixos
+   num cartão de 400px. A classe sai do cartão e a ficha alinha à esquerda,
+   como o título da seção acima dela e como toda ficha do site. Os filtros de
+   dia, que eram os únicos centrados debaixo de um título à esquerda, vão
+   junto.
+
+   O BOTÃO. `.acao` nasce com `color:var(--ink)` e borda `currentColor`. Dentro
+   do cartão escuro, "Ir de Waze" e "Ver a região" eram tinta sobre tinta:
+   contraste 1,00:1, medido. Estavam no HTML e em lugar nenhum da tela — e o
+   Waze era o pedido do dia. Visível, o segundo botão não cabia ao lado do
+   primeiro (218 + 154px numa ficha de 364 úteis) e empilhava. Vira `.g-link`,
+   a palavra sublinhada que é o secundário em todo o site, branca no escuro.
+
+   O SALTO. Na fila do celular, a nota de um cartão cabe numa linha e a do
+   vizinho em duas, e o botão principal pula 22px de um cartão para o outro ao
+   deslizar. A nota reserva duas linhas na fila; o botão fica onde estava.
+   ============================================================================= */
+.pg-chips{ justify-content:flex-start }
+.pg .g-link{ color:#fff; text-decoration-color:rgba(255,255,255,.4) }
+.pg .g-link:hover,.pg .g-link:focus-visible{ text-decoration-color:#fff }
+@media(max-width:759px){ .pgs.fila .pg-nota{ min-height:2lh } }
+
+/* o controle de zoom vinha com o traje do Leaflet: cantos redondos, sombra,
+   30px. Aqui é quadrado, 44px, e a fonte da casa. O pino ganha área de toque
+   de 44 com o mesmo círculo de 34 dentro. */
+.pg-mapao .leaflet-bar{ border:1px solid var(--linha2); border-radius:0; box-shadow:none }
+.pg-mapao .leaflet-bar a,.pg-mapao .leaflet-touch .leaflet-bar a{
+  width:var(--toque); height:var(--toque); line-height:var(--toque); border-radius:0;
+  font-family:var(--fonte-display); font-weight:400; font-size:22px; color:var(--noite);
+  background:var(--papel); border-bottom-color:var(--linha2);
+}
+.pg-mapao .leaflet-bar a:hover,.pg-mapao .leaflet-bar a:focus{ background:var(--card2); color:var(--noite) }
+.pg-mapao .leaflet-bar a.leaflet-disabled{ color:var(--mudo); background:var(--papel) }
+.pin-guia{ display:grid; place-items:center }
+
+/* =============================================================================
+   O CADASTRO: UMA RÉGUA, UM VOLTAR QUE NÃO É O CONTINUAR, UM DESABILITADO LEGÍVEL
+   07/09/2026, achados da auditoria do site.
+
+   RÉGUAS. A tela tinha três margens à esquerda: a barra do topo a 20px, o
+   formulário (`.porta`) a 16 e o rodapé fixo (`.wiz-pe`) a 18. Três bordas a
+   2px uma da outra não se leem como três: leem-se como torto. Tudo a 20, a
+   calha de todas as páginas públicas.
+
+   DESABILITADO. `button:disabled` só baixava a opacidade para .38, e o hover
+   do `.pri` continuava valendo com o botão desabilitado — no celular o dedo
+   deixa o hover preso depois do toque. Preto a 38% com texto branco a 38%
+   sobre papel: 1,11:1, medido. O desabilitado passa a ter cor própria, sem
+   opacidade, e o hover não o alcança. */
+.porta.cad{ padding-inline:var(--e5) }
+.cad .wiz-pe{ padding-inline:var(--e5) }
+button.pri:disabled,.btn.pri:disabled,
+button.pri:disabled:hover,.btn.pri:disabled:hover,
+button.pri:disabled:active,.btn.pri:disabled:active{
+  background:var(--card2); color:var(--mudo); border-color:var(--linha2); opacity:1;
+}
+
+/* ÓRFÃS. Frases de duas linhas cuja segunda é uma palavra só — a última
+   palavra sozinha embaixo. `text-wrap:balance` já vale nos títulos; entra
+   também nas linhas editoriais, nas perguntas e nas legendas de número, que
+   são curtas o bastante para o algoritmo equilibrar. */
+.g-ed,.fato-d,.qa-q,.g-num b + span,.rolo-d{ text-wrap:balance }

@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from './Marca';
 import { IcSeta } from './Icones';
@@ -9,18 +9,14 @@ import Movimento from './Movimento';
 /* =============================================================================
    O CASCO DAS PÁGINAS PÚBLICAS
 
-   A home monta a própria barra, com transparência sobre o herói de tela cheia
-   e âncoras para as seções internas. Aquilo continua exatamente como está —
-   é o rosto do site e funciona.
-
-   As páginas novas precisam da MESMA barra, mas de outro jeito: elas não têm
-   herói de tela cheia, então a barra nasce sólida; e a navegação delas não é
-   por âncora, é por endereço. Copiar a barra da home para dentro de cada
-   página nova daria seis acabamentos para o mesmo cabeçalho — que é
-   exatamente o problema que o componente Tela resolveu para as telas internas.
+   A mesma barra em todas as páginas do site, home inclusive (desde 07/09 a
+   home também usa a `Barra` daqui, com `inicio`: transparente sobre a foto de
+   tela cheia, opaca depois da rolagem). Copiar a barra para dentro de cada
+   página daria seis acabamentos para o mesmo cabeçalho — que é exatamente o
+   problema que o componente Tela resolveu para as telas internas.
 
    Cliente por um motivo só: o menu do celular. Sem ele, `.casa-nav` some
-   abaixo de 920px e a pessoa fica sem navegação nenhuma na página. As páginas
+   abaixo de 1260px e a pessoa fica sem navegação nenhuma na página. As páginas
    que usam este casco continuam sendo componentes de servidor: o conteúdo
    entra por `children`, renderizado no servidor e passado por aqui.
 
@@ -39,21 +35,39 @@ const PAGINAS = [
   { href: '/sobre', rot: 'Quem somos' },
 ];
 
-export function Barra({ atual }: { atual?: string }) {
+/* A BARRA É UMA SÓ. 07/09/2026.
+   A home tinha a própria cópia desta barra e deste menu — 50 linhas iguais,
+   com a lista de páginas repetida e o endereço da igreja digitado à mão. Duas
+   cópias do mesmo menu são dois lugares para o mesmo defeito, e foi o que
+   aconteceu: o menu aberto não fechava em nenhuma das duas.
+
+   O DEFEITO: `.menu` é fixo, z-index 65; a barra, com o botão que vira X, é
+   z-index 60. Aberto o menu, o X ficava por baixo da cortina. Sem teclado
+   (celular), a única saída era tocar num link e trocar de página. Agora a
+   barra sobe acima da cortina enquanto o menu está aberto (vide CSS), tocar
+   fora do bloco de links também fecha, e o foco vai para o primeiro link ao
+   abrir e volta ao botão ao fechar — é um diálogo, e se comporta como um.
+
+   `inicio`: a barra da home nasce transparente sobre a foto e fica opaca pela
+   rolagem; fora da home é sempre opaca — barra transparente sobre papel
+   claro vira texto branco no branco. */
+export function Barra({ atual, inicio, solida = true }: { atual?: string; inicio?: boolean; solida?: boolean }) {
   const [menu, setMenu] = useState(false);
+  const bt = useRef<HTMLButtonElement>(null);
+  const cortina = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     document.body.style.overflow = menu ? 'hidden' : '';
     const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
     window.addEventListener('keydown', esc);
+    if (menu) cortina.current?.querySelector<HTMLElement>('a')?.focus();
+    else if (document.activeElement && cortina.current?.contains(document.activeElement)) bt.current?.focus();
     return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', esc); };
   }, [menu]);
 
-  /* sempre `opaco`: fora da home não existe foto de tela cheia atrás da barra,
-     e barra transparente sobre papel claro vira texto branco no branco. */
   return (
     <>
-      <header className="casa-barra opaco">
+      <header className={'casa-barra' + (inicio ? ' inicio' : '') + (solida ? ' opaco' : '')}>
         <Link href="/" className="marca-link" aria-label={IGREJA.nome}>
           <Logo className="logo" />
         </Link>
@@ -69,7 +83,7 @@ export function Barra({ atual }: { atual?: string }) {
           <Link href="/servir" className="bt-barra">
             <span className="so-largo">Quero</span>servir
           </Link>
-          <button className="menu-bt" aria-expanded={menu}
+          <button ref={bt} className="menu-bt" aria-expanded={menu} aria-controls="menu-site"
                   aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
                   onClick={() => setMenu(v => !v)}>
             <i /><i />
@@ -77,13 +91,15 @@ export function Barra({ atual }: { atual?: string }) {
         </div>
       </header>
 
-      <div className={'menu' + (menu ? ' aberto' : '')} role="dialog" aria-modal="true" aria-hidden={!menu}>
+      <div ref={cortina} id="menu-site" className={'menu' + (menu ? ' aberto' : '')}
+           role="dialog" aria-modal="true" aria-label="Menu" aria-hidden={!menu}
+           onClick={e => { if (e.target === e.currentTarget) setMenu(false); }}>
         <div>
-          <Logo className="logo" />
-          <ul style={{ marginTop: 34 }}>
+          <ul>
             {PAGINAS.map((p, i) => (
               <li key={p.href} style={{ ['--i' as string]: i }}>
-                <Link href={p.href} onClick={() => setMenu(false)}>{p.rot}</Link>
+                <Link href={p.href} aria-current={atual === p.href ? 'true' : undefined}
+                      onClick={() => setMenu(false)}>{p.rot}</Link>
               </li>
             ))}
             <li style={{ ['--i' as string]: PAGINAS.length }}>
@@ -92,7 +108,7 @@ export function Barra({ atual }: { atual?: string }) {
           </ul>
           <div className="menu-pe">
             <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-            <span>{IGREJA.rua} · {IGREJA.bairro}</span>
+            <span><span className="nao-quebra">{IGREJA.rua}</span> · {IGREJA.bairro}</span>
             <Link href="/acessar" onClick={() => setMenu(false)}>Acesso às equipes</Link>
           </div>
         </div>
@@ -236,7 +252,7 @@ export function Site({ atual, children }: { atual?: string; children: React.Reac
           padding lateral. Aqui as faixas precisam sangrar de ponta a ponta,
           então a regra é desfeita nesta instância — não no CSS, que continua
           valendo para todas as telas do sistema. */}
-      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: '78px 0 0' }}>{children}</main>
+      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 'var(--barra-alt) 0 0' }}>{children}</main>
       <Rodape />
     </div>
   );

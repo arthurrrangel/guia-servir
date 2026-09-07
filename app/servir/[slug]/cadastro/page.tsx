@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
@@ -170,7 +170,10 @@ export default function Servir() {
       if (!nome.trim()) faltas.push('seu nome');
       else if (!nome.trim().includes(' ')) faltas.push('seu sobrenome');
       if (soTel(tel).length < 10) faltas.push(soTel(tel).length ? 'o WhatsApp completo, com DDD' : 'seu WhatsApp com DDD');
-      if (!emailOk) faltas.push(email.trim() ? 'o e-mail completo' : 'seu e-mail');
+      /* U+2060 (word joiner) depois do hífen: "e-mail" não quebra em "e-" /
+         "mail" no rodapé estreito. Invisível, sem glifo — o hífen que não
+         quebra (U+2011) dependeria da fonte licenciada ter o caractere. */
+      if (!emailOk) faltas.push(email.trim() ? 'o e-\u2060mail completo' : 'seu e-\u2060mail');
       /* três faltas numa lista com "e" entre todas vira ladainha: "Falta seu
          nome e seu WhatsApp com DDD e seu e-mail". Vírgula nas primeiras, "e"
          só na última, que é como se escreve em português. */
@@ -204,7 +207,7 @@ export default function Servir() {
     const m: Record<string, string> = {
       NOME_INCOMPLETO: 'Escreva seu nome e sobrenome.',
       TELEFONE_INVALIDO: 'Confira o WhatsApp, com DDD, só números.',
-      EMAIL_INVALIDO: 'Confira o e-mail, ou deixe em branco.',
+      EMAIL_INVALIDO: 'Confira o e-\u2060mail, ou deixe em branco.',
       SEM_AREA: 'Escolha pelo menos uma coisa que você quer fazer.',
       JA_NO_TIME: 'Esse WhatsApp já está no time desta área. Abra a sua página pela lista da equipe.',
       MUITOS_CADASTROS: 'Muita gente se cadastrando agora. Tente de novo daqui a pouco.',
@@ -294,7 +297,7 @@ export default function Servir() {
               enterKeyHint="next"
               onChange={e => setTel(soTel(e.target.value))} />
             <p className="dim peq">É por aqui que a liderança fala com você.</p>
-            <label htmlFor="w-mail">E-mail</label>
+            <label htmlFor="w-mail">E-{"\u2060"}mail</label>
             <input id="w-mail" value={email} type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com"
               autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onChange={e => setEmail(e.target.value)} />
@@ -399,13 +402,18 @@ export default function Servir() {
             <dl className="wiz-resumo">
               <dt>Nome</dt><dd>{nome}</dd>
               <dt>WhatsApp</dt><dd>{tel}</dd>
-              {email && <><dt>E-mail</dt><dd>{email}</dd></>}
+              {email && <><dt>E-{"\u2060"}mail</dt><dd>{email}</dd></>}
               <dt>Área</dt><dd>{min!.nome}</dd>
               <dt>Quer fazer</dt><dd>{escolhidas.join(', ')}</dd>
+              {/* Fragment, não <span display:contents>: o span não é filho
+                  válido de <dl>, e cada <dt> dentro dele virava
+                  `first-of-type` do próprio span — a regra que zera a margem
+                  do primeiro item zerava a de TODOS os das perguntas, e o
+                  resumo perdia o respiro entre uma pergunta e outra. */}
               {perguntas.filter(q => (resp[q.id] || '').trim()).map(q => (
-                <span key={q.id} style={{ display: 'contents' }}>
+                <Fragment key={q.id}>
                   <dt>{q.texto}</dt><dd>{(resp[q.id] || '').split('|').join(', ')}</dd>
-                </span>
+                </Fragment>
               ))}
             </dl>
             {/* A ÚLTIMA TELA ANTES DE APERTAR ERA A MAIS MUDA.
@@ -437,8 +445,11 @@ export default function Servir() {
           diferença cobriam o último campo do passo. Ver a nota no globals. */}
       <div className="wiz-pe" ref={pe}>
         {!!oQueFalta && <span className="wiz-falta" role="status">{oQueFalta}</span>}
+        {/* `.btn` vazado, não `.claro`: `.claro` é o nome antigo do botão
+            principal e Voltar saía IDÊNTICO a Continuar — dois botões pretos,
+            e o de voltar era o maior. */}
         {passo > 0 && (
-          <button type="button" className="btn claro" disabled={ocupado}
+          <button type="button" className="btn" disabled={ocupado}
             onClick={() => { setPasso(p => p - 1); setErro(''); window.scrollTo(0, 0); }}>
             Voltar
           </button>

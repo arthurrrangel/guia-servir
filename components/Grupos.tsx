@@ -58,7 +58,7 @@ export function Grupos() {
       </div>
 
       <MapaGuias grupos={visiveis} focoNome={foco} aoEscolher={setFoco} />
-      <div className="pgs centro fila" aria-live="polite">
+      <div className="pgs fila" aria-live="polite">
         {PEQUENAS_GUIAS.map(pg => {
           const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
           const visivel = teste(pg);
@@ -80,11 +80,14 @@ export function Grupos() {
                   <a href={conv.href} target="_blank" rel="noreferrer" className="acao cheia">Quero ir nessa <IcSeta /></a>
                   {/* Waze só onde existe endereço público. Onde não existe, o
                       endereço sai na conversa, que é o botão de cima. */}
+                  {/* `.g-link`, não segundo botão: é a regra do site desde
+                      06/09 — um sólido, o secundário é palavra. Dois botões
+                      não cabiam numa linha de 416px e empilhavam. */}
                   {waze && (
-                    <a href={waze} target="_blank" rel="noreferrer" className="acao">Ir de Waze</a>
+                    <a href={waze} target="_blank" rel="noreferrer" className="g-link">Ir de Waze</a>
                   )}
                   {!waze && verNoMapa && (
-                    <a href={verNoMapa} target="_blank" rel="noreferrer" className="acao">Ver a região</a>
+                    <a href={verNoMapa} target="_blank" rel="noreferrer" className="g-link">Ver a região</a>
                   )}
                 </div>
               </div>

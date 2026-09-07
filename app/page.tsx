@@ -3,11 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
-import { Logo, Chevron } from '@/components/Marca';
+import { Chevron } from '@/components/Marca';
 import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
-import { Rodape } from '@/components/Site';
+import { Barra, Rodape } from '@/components/Site';
 import { AreasCarregando } from '@/components/Tela';
 import Contador from '@/components/Contador';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
@@ -47,7 +47,6 @@ type Numeros = {
 };
 
 /* endereço, mapa e @ saem de lib/igreja.ts — uma fonte só para o site inteiro */
-const IG = IGREJA.instagram;
 
 /* a sigla mora em lib/igreja.ts — ver a nota lá sobre por que ela saiu daqui */
 
@@ -57,22 +56,13 @@ const IG = IGREJA.instagram;
    existiam só para pintar o item do menu que estava na tela, e o menu não é
    mais de âncora. Código que não pinta mais nada não fica de lembrança.
 
-/* O MENU DEIXOU DE SER ÂNCORA (03/09/2026).
-
+/* O MENU DEIXOU DE SER ÂNCORA (03/09/2026) E DEPOIS DEIXOU DE SER CÓPIA (07/09).
    Enquanto a home era a única página pública, um menu de âncoras era a
-   navegação certa: os capítulos estavam todos ali embaixo. Agora Cultos,
-   Como chegar, Conheça e Pequena Guia são páginas de verdade, e um menu que
-   rola a home enquanto o resto do site tem outro menu não é navegação — são
-   dois sites com o mesmo cabeçalho.
-
-   Mesma lista de components/Site.tsx, na mesma ordem, de propósito: quem
-   aprendeu o menu numa página não reaprende na outra. */
-const PAGINAS = [
-  { href: '/cultos', rot: 'Cultos' },
-  { href: '/como-chegar', rot: 'Como chegar' },
-  { href: '/pequena-guia', rot: 'Pequena Guia' },
-  { href: '/sobre', rot: 'Quem somos' },
-];
+   navegação certa. Virando páginas de verdade, o menu passou a ser o mesmo do
+   resto do site — e por quatro dias foi uma CÓPIA dele, 50 linhas iguais aqui
+   e em components/Site.tsx. Agora é o mesmo componente: `Barra`, com
+   `inicio` (nasce transparente sobre a foto) e `solida` (fica opaca quando a
+   rolagem passa do herói). */
 
 /* o título monta palavra por palavra. Fica em componente porque a quebra em
    <span> tem que existir no HTML do servidor: se fosse feita no efeito, a
@@ -99,7 +89,6 @@ export default function Casa() {
   const [mins, setMins] = useState<Min[]>([]);
   const [num, setNum] = useState<Numeros | null>(null);
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
-  const [menu, setMenu] = useState(false);
   const [solida, setSolida] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
   const fio = useRef<HTMLDivElement>(null);
@@ -232,13 +221,6 @@ export default function Casa() {
     return () => { window.removeEventListener('scroll', aoRolar); window.removeEventListener('resize', aoRolar); };
   }, []);
 
-  useEffect(() => {
-    document.body.style.overflow = menu ? 'hidden' : '';
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenu(false); };
-    window.addEventListener('keydown', esc);
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', esc); };
-  }, [menu]);
-
   return (
     <div ref={raiz} data-movimento>
       {/* a home tem a própria revelação (com parallax); daqui só entram o
@@ -280,57 +262,13 @@ export default function Casa() {
       }} />
       <div className="progresso" ref={fio} style={{ color: solida ? 'var(--noite)' : '#fff' }} aria-hidden="true" />
 
-      {/* ------------------------------------------------------------ barra */}
-      <header className={'casa-barra inicio' + (solida ? ' opaco' : '')}>
-        <Link href="/" className="marca-link" aria-label="GUIA Church">
-          <Logo className="logo" />
-        </Link>
-        <nav className="casa-nav">
-          {PAGINAS.map(p => (
-            <Link key={p.href} href={p.href}>{p.rot}</Link>
-          ))}
-        </nav>
-        <div className="casa-barra-fim">
-          <Link href="/acessar" className="bt-barra discreto">Acesso às equipes</Link>
-          {/* O ESPAÇO SAIU DE DENTRO DO TRECHO ENTRELETRADO. 06/09/2026.
-              Era `Quero&nbsp;` dentro do span, e o botão é caixa alta com
-              letter-spacing de 1.8px: o espaço duro leva a entreletra junto e
-              o vão entre QUERO e SERVIR saía com o dobro da largura do vão de
-              "ACESSO ÀS EQUIPES", ao lado. É o botão principal de todas as
-              páginas, e lia como erro de digitação. Agora o vão é margem, que
-              não herda entreletra e é medida em em. */}
-          <Link href="/servir" className="bt-barra">
-            <span className="so-largo">Quero</span>servir
-          </Link>
-          <button className="menu-bt" aria-expanded={menu} aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
-                  onClick={() => setMenu(v => !v)}>
-            <i /><i />
-          </button>
-        </div>
-      </header>
+      {/* o mesmo atalho de teclado das outras páginas: a home era a única sem
+          <main> e sem "pular para o conteúdo" — e é a página em que mais se
+          chega por teclado, porque é a primeira. */}
+      <a href="#conteudo" className="pular">Pular para o conteúdo</a>
+      <Barra inicio solida={solida} />
 
-      {/* ------------------------------------------------- menu do celular */}
-      <div className={'menu' + (menu ? ' aberto' : '')} role="dialog" aria-modal="true" aria-hidden={!menu}>
-        <div>
-          <Logo className="logo" />
-          <ul style={{ marginTop: 34 }}>
-            {PAGINAS.map((p, i) => (
-              <li key={p.href} style={{ ['--i' as string]: i }}>
-                <Link href={p.href} onClick={() => setMenu(false)}>{p.rot}</Link>
-              </li>
-            ))}
-            <li style={{ ['--i' as string]: PAGINAS.length }}>
-              <Link href="/servir" onClick={() => setMenu(false)}>Quero servir</Link>
-            </li>
-          </ul>
-          <div className="menu-pe">
-            <a href={IG} target="_blank" rel="noreferrer">@guiachurch</a>
-            <span>Rua Pedra de Itaúna, 534 · Barra da Tijuca</span>
-            <Link href="/acessar" onClick={() => setMenu(false)}>Acesso às equipes</Link>
-          </div>
-        </div>
-      </div>
-
+      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 0 }}>
       {/* ------------------------------------------------------------ herói
           Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
           dois botões, a régua. Nada de parágrafo. */}
@@ -529,6 +467,7 @@ export default function Casa() {
           </div>
         </div>
       </section>
+      </main>
 
       <Rodape />
 

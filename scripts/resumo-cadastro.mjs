@@ -10,13 +10,13 @@
    VELHO=1 reinjeta o CSS antigo e o teste TEM que falhar: um verificador que
    nunca acusa é carimbo, não verificação.
 
-     node scripts/resumo-cadastro.mjs           -> tem que passar
-     VELHO=1 node scripts/resumo-cadastro.mjs   -> tem que falhar
+     PORTA=3700 node scripts/resumo-cadastro.mjs           -> tem que passar
+     PORTA=3700 VELHO=1 node scripts/resumo-cadastro.mjs   -> tem que falhar
 ============================================================================= */
 import { chromium } from 'playwright';
 const b = await chromium.launch({ executablePath:'/opt/pw-browsers/chromium' });
 const p = await b.newPage({ viewport:{width:390,height:844}, deviceScaleFactor:2 });
-await p.goto('http://localhost:3670/servir/midia/cadastro'+(process.env.VELHO?'#velho':''),{waitUntil:'domcontentloaded'});
+await p.goto(`http://localhost:${process.env.PORTA||3000}/servir/midia/cadastro`+(process.env.VELHO?'#velho':''),{waitUntil:'domcontentloaded'});
 await p.waitForTimeout(3000);
 // monta um resumo igual ao da tela 4, com a pergunta longa que o Connect tem
 const r = await p.evaluate(() => {
