@@ -1,4 +1,5 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Shell, { useApp } from '@/components/Shell';
@@ -98,48 +99,32 @@ function Fila() {
 
   return (
     <div className="lid">
-      <div className={`lid-faixa ${urge ? 'fogo' : ''}`}>
-        <div className="lid-faixa-in">
-          <div className="lid-faixa-txt">
-            <span className="rot">Quem quer entrar</span>
-            {/* LISTA VAZIA NÃO É A MESMA COISA QUE LISTA QUE NÃO CARREGOU.
-                Com a internet caindo, esta tela dizia, em letra grande e com
-                toda a confiança, "Ninguém esperando resposta" — e logo abaixo
-                aparecia o aviso de falha, que ninguém lê depois de já ter lido
-                o título. O líder fecha o app convencido de que não tem gente
-                esperando, quando pode ter cinco. Uma tela só afirma o que ela
-                sabe: se não conseguiu ler a lista, ela diz isso. */}
-            <h1>
-              {erro ? 'Não consegui carregar quem está esperando'
-                : abertas.length === 0 ? 'Ninguém esperando resposta'
-                  : abertas.length === 1 ? '1 pessoa esperando você'
-                    : `${abertas.length} pessoas esperando você`}
-            </h1>
-            <p className="lid-faixa-sub">
-              {erro ? erro
-                : abertas.length === 0
-                  ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
-                  : maisAntiga === 0
-                    ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
-                    : `A mais antiga está esperando ${espera(maisAntiga).replace('há ', 'há ')}. Quem se oferece e não recebe resposta some, e não volta.`}
-            </p>
-            {erro && (
-              <div className="lid-faixa-acoes">
-                <button className="lid-bt" onClick={() => { setErro(''); void carregar(); }}>Tentar de novo</button>
-              </div>
-            )}
-          </div>
-          {/* O PLACAR NÃO REPETE O TÍTULO. O número de pessoas já está no h1;
-              o que falta é o número que mede a falha, que é há quanto tempo a
-              primeira delas está esperando. */}
-          {abertas.length > 0 && (
-            <div className="lid-placar">
-              {maisAntiga === 0 ? <b>hoje</b> : <b>{maisAntiga}<i>d</i></b>}
-              <span>{maisAntiga === 0 ? 'chegou a primeira' : 'esperando a mais antiga'}</span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* LISTA VAZIA NÃO É A MESMA COISA QUE LISTA QUE NÃO CARREGOU.
+          Com a internet caindo, esta tela dizia, em letra grande e com toda a
+          confiança, "Ninguém esperando resposta" — e logo abaixo aparecia o
+          aviso de falha, que ninguém lê depois de já ter lido o título. Uma
+          tela só afirma o que ela sabe: se não conseguiu ler a lista, diz isso.
+
+          O PLACAR NÃO REPETE O TÍTULO. O número de pessoas já está no h1; o que
+          falta é o número que mede a falha: há quanto tempo a primeira delas
+          está esperando. */}
+      <Faixa
+        urgente={urge}
+        titulo={erro ? 'Não consegui carregar quem está esperando'
+          : abertas.length === 0 ? 'Ninguém esperando resposta'
+            : abertas.length === 1 ? '1 pessoa esperando você'
+              : `${abertas.length} pessoas esperando você`}
+        sub={erro ? erro
+          : abertas.length === 0
+            ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
+            : maisAntiga === 0
+              ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
+              : `A mais antiga está esperando ${espera(maisAntiga)}. Quem se oferece e não recebe resposta some, e não volta.`}
+        acao={erro ? <button className="lid-bt" onClick={() => { setErro(''); void carregar(); }}>Tentar de novo</button> : undefined}
+        placar={abertas.length > 0
+          ? { n: maisAntiga === 0 ? 'hoje' : <>{maisAntiga}<i>d</i></>, rot: maisAntiga === 0 ? 'chegou a primeira' : 'esperando a mais antiga' }
+          : null}
+      />
 
       {/* o erro já é o subtítulo da faixa agora; repetir aqui embaixo era a
           mesma frase duas vezes na mesma tela */}

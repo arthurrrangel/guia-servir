@@ -471,8 +471,7 @@ export default function Eu() {
               seria a mesma frase três vezes na mesma tela. */}
           {!!pendentes.length && (
             <p className="vol-pede-depois">
-              Avisando que não pode, quem organiza remaneja com tempo. Dá para mudar de
-              ideia enquanto o dia não chega.
+              Se não puder, avise: dá tempo de remanejar. Pode mudar de ideia até o dia.
             </p>
           )}
 

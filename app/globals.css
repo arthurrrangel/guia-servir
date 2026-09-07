@@ -3796,7 +3796,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    ============================================================================= */
 
 /* --------------------------------------------------------------- o mês */
-.esc-mes{ display:flex; align-items:center; gap:var(--e1); margin-top:var(--e1) }
+.esc-mes{ display:inline-flex; align-items:center; gap:var(--e1) }
+.esc-mes-nome{ text-transform:capitalize }
 .esc-mes h1{
   font-family:var(--fonte-display); font-weight:var(--p-leve);
   font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
@@ -6950,30 +6951,34 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .esc-dia > summary{ align-items:baseline }
 .esc-dia > summary > .lid-marca{ align-self:stretch }
 
-/* O CABEÇALHO DA ESCALA VIRA GRADE NO DESKTOP. Ver a nota em page.tsx: o
-   placar mudou de lugar no HTML para nascer ao lado do mês no celular. Aqui
-   ele volta para a direita quando existe largura, sem sair da coluna de texto
-   nem ser escrito duas vezes. As linhas são declaradas na mão porque o placar
-   precisa começar na linha do mês, não empilhar depois dele. */
+/* O CABEÇALHO DE TODA TELA DO LÍDER É UMA GRADE SÓ. 07/09/2026.
+   Nasceu na /escala e agora é de todas: `components/Faixa.tsx` emite a mesma
+   estrutura nas sete telas. No celular a ordem de leitura é título → número →
+   frase → ações, com o número colado no título porque ele é a resposta. No
+   desktop a grade devolve o número à direita, começando na linha do título,
+   sem escrever o elemento duas vezes. As linhas são declaradas na mão porque
+   o placar precisa nascer na linha do h1, não empilhar depois. */
+.faixa-cab > h1{ margin-top:0 }
 @media(min-width:760px){
-  .esc-cab{
+  .faixa-cab{
     display:grid; grid-template-columns:minmax(0,1fr) auto;
     column-gap:var(--e6); align-items:start;
   }
-  .esc-cab > .rot{ grid-column:1; grid-row:1 }
-  .esc-cab > .esc-mes{ grid-column:1; grid-row:2 }
-  .esc-cab > .lid-faixa-sub{ grid-column:1; grid-row:3 }
-  .esc-cab > .lid-faixa-acoes{ grid-column:1; grid-row:4 }
-  .esc-cab > .esc-ajuda{ grid-column:1; grid-row:5 }
-  /* começa na linha do mês e não estica: colado no topo da direita */
-  .esc-cab > .lid-placar{ grid-column:2; grid-row:1 / span 3; align-self:start }
+  .faixa-cab > h1{ grid-column:1; grid-row:1 }
+  .faixa-cab > .lid-faixa-sub{ grid-column:1; grid-row:2 }
+  .faixa-cab > .lid-faixa-acoes{ grid-column:1; grid-row:3 }
+  .faixa-cab > .esc-ajuda{ grid-column:1; grid-row:4 }
+  .faixa-cab > .lid-placar{ grid-column:2; grid-row:1 / span 3; align-self:start }
 }
-/* No celular ele é a resposta imediata do título, então encosta nele. O
-   `--d-heroi` de 44px continua sendo o tamanho: o número é o assunto. */
 @media(max-width:759px){
-  .esc-cab > .lid-placar{ text-align:left; margin-top:var(--e3) }
-  .esc-cab > .lid-faixa-sub{ margin-top:var(--e4) }
+  .faixa-cab > .lid-placar{ text-align:left; margin-top:var(--e3) }
+  .faixa-cab > .lid-faixa-sub{ margin-top:var(--e4) }
 }
+/* SEM A LEGENDA, A FAIXA ENCOLHE EM CIMA. O `rot` ocupava a primeira linha e
+   os 44px de padding do topo eram medidos com ele lá. Sem ele, o h1 encosta
+   no topo com folga demais; o padding desce um degrau. Medido nas sete telas
+   depois: 226-465px viraram uma faixa com a mesma anatomia em todas. */
+.lid-faixa{ padding-top:36px }
 
 /* O H1 DA PÁGINA ESTAVA 48px FORA DA RÉGUA. 07/09/2026.
    Medido em 390 e 1440: o rótulo "ESCALA", o subtítulo, o placar e todo o
@@ -6993,7 +6998,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    `flex-wrap` é a rede: se num idioma ou num mês de nome longo o par não
    couber ao lado, ele desce inteiro em vez de espremer o título. */
 .esc-mes{ flex-wrap:wrap; column-gap:0 }
-.esc-mes h1{ order:0 }
+.esc-mes .esc-mes-nome{ order:0 }
 .esc-mes .esc-seta{ order:1 }
 
 /* =============================================================================
@@ -7239,3 +7244,147 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
   font-family:var(--fonte-display); font-weight:600; font-size:10.5px; line-height:1;
 }
 .pin-guia-c{ position:relative }
+
+/* =============================================================================
+   FASE 25 · A LINHA QUE ABRE, EM TODA LISTA QUE EDITA
+   07/09/2026. /time e /escala já eram assim: fechada, a linha diz o essencial;
+   aberta, mostra os controles. A lista de funções do /ajustes era a exceção,
+   com 36 controles permanentes para 9 itens. Agora é a mesma anatomia. Ver a
+   nota em app/ajustes/page.tsx.
+============================================================================= */
+.ajt-item{ display:block; padding:0; gap:0 }
+.ajt-item > summary{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 var(--e4);
+  align-items:baseline; padding:var(--e4) 0; cursor:pointer; list-style:none;
+  min-height:var(--toque);
+}
+.ajt-item > summary::-webkit-details-marker{ display:none }
+.ajt-item > summary::marker{ content:'' }
+.ajt-item > summary:hover .ajt-nome{ text-decoration:underline; text-underline-offset:3px }
+.ajt-item.off > summary .ajt-nome{ text-decoration:line-through; text-decoration-color:rgba(37,37,37,.35) }
+.ajt-quando-rot{ font-size:var(--t-apoio); color:var(--cinza); white-space:nowrap }
+.ajt-corpo{
+  display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e4);
+  padding:0 0 var(--e5) var(--e4); border-top:1px solid var(--linha2);
+  padding-top:var(--e4);
+}
+@media(min-width:640px){ .ajt-corpo{ grid-template-columns:minmax(0,1fr) minmax(0,1fr) } .ajt-corpo .ajt-acoes{ grid-column:1 / -1 } }
+.ajt-campo{ display:grid; gap:var(--e2); min-width:0 }
+.ajt-rot{
+  font-family:var(--fonte-display); font-weight:var(--p-forte); font-size:var(--t-rot);
+  letter-spacing:var(--tr); text-transform:uppercase; color:var(--mudo);
+}
+.ajt-corpo input{ width:100%; min-height:var(--toque) }
+.ajt-corpo .ajt-acoes{ display:flex; gap:var(--e5); align-items:center; flex-wrap:wrap; margin:0; grid-row:auto }
+@media(max-width:520px){ .ajt-item > summary{ grid-template-columns:minmax(0,1fr) } .ajt-quando-rot{ white-space:normal } }
+
+/* =============================================================================
+   UM ESTILO PARA SEIS COISAS DIFERENTES
+   07/09/2026. Medido no celular: nome de função (PROJEÇÃO), estado que pede
+   atenção (4 SEM RESPONDER), informação de apoio (5 DE 5 POSTOS), data
+   (12/09), filtro (PROJEÇÃO 4) e a situação de um candidato ("você disse que
+   ia chamar") saíam TODOS em 12px, caixa alta, .15em de entreletra. Seis
+   papéis, um traje. Quando o rótulo, o número e o alerta são idênticos, nada
+   se destaca — e a cor sozinha não sustenta hierarquia para quem lê rápido.
+
+   A regra passa a ser por papel:
+     RÓTULO   o que categoriza (PROJEÇÃO, um filtro): caixa alta com entreletra.
+              É para isso que o estilo existe.
+     ESTADO   o que pede atenção ("4 sem responder"): caixa de frase, 14px,
+              peso forte, cor de estado. Lê como afirmação, não como etiqueta.
+     APOIO    o que só informa ("5 de 5 postos"): caixa de frase, 14px, peso
+              normal, cinza. Some quando não é procurado.
+
+   "Você disse que ia chamar" em caixa alta com entreletra era o `--t-min`
+   sendo usado em frase de novo, contra a nota do próprio token. */
+.lid-area-est,.esc-dia-est,.lid-cand-est,.marca-est{
+  text-transform:none; letter-spacing:0;
+  font-family:var(--fonte); font-size:var(--t-apoio); font-weight:var(--p-forte);
+}
+.lid-area-sub,.esc-dia-sub{
+  text-transform:none; letter-spacing:0;
+  font-family:var(--fonte); font-size:var(--t-apoio); font-weight:var(--p-corpo); color:var(--cinza);
+}
+
+/* =============================================================================
+   O BOTÃO DE TEXTO PARA DE GRITAR
+   07/09/2026. `.lid-bt` (sólido) e `.lid-bt-txt` (texto) usavam a MESMA voz:
+   caixa alta, entreletra de .15em, peso forte. O de texto ainda ganhava um
+   sublinhado. Dois botões lado a lado com a mesma tipografia não têm
+   hierarquia — o sólido é "o mais escuro", não "o principal". E numa tela com
+   cinco ações secundárias (a /escala tem Sortear, Cobrar, Ir para, Ver nomes,
+   Sugerir, todas no mesmo traje), o resultado era cinco etiquetas sublinhadas
+   competindo com o conteúdo.
+
+   Três sinais para uma coisa (caixa alta + entreletra + sublinhado) viram um:
+   o botão de texto fala em caixa de frase, peso médio, tinta cheia, sem
+   sublinhado. Ele continua sendo um botão pela cor e pelo cursor; o
+   sublinhado aparece no hover, que é quando a pessoa quer saber se aquilo
+   clica. O sólido continua em caixa alta e passa a ser o único a falar assim,
+   que é o que faz dele o principal. */
+.lid-bt-txt,
+a.lid-bt-txt{
+  font-family:var(--fonte); font-weight:var(--p-forte);
+  font-size:var(--t-apoio); letter-spacing:0; text-transform:none;
+  opacity:1; color:var(--ink);
+}
+.lid-bt-txt::after{ opacity:0; transition:opacity var(--t) }
+.lid-bt-txt:hover::after,
+.lid-bt-txt:focus-visible::after{ opacity:1 }
+.lid-bt-txt.perigo{ color:var(--bad) }
+.lid-faixa.fogo .lid-bt-txt{ color:#fff }
+.lid-bt-txt[disabled]{ opacity:.4 }
+
+/* O ÍNDICE GRUDENTO FICAVA ATRÁS DA NAVEGAÇÃO GRUDENTA. 07/09/2026.
+   `.aj-indice` e `.topo` são os dois `position:sticky; top:0`. O índice tem
+   z-index 5, a navegação 40. Rolando, os dois chegam ao topo ao mesmo tempo e
+   o índice desaparece atrás da barra — o único momento em que ele seria útil
+   é exatamente o momento em que não dá para vê-lo. Medido: em 390 a barra tem
+   65px, em 1440 tem 113 (com as abas). O índice passa a grudar logo abaixo
+   dela, e o `scroll-margin` das seções soma as duas alturas para o título não
+   nascer escondido atrás de nenhuma. */
+:root{ --topo-h:65px }
+@media(min-width:760px){ :root{ --topo-h:113px } }
+.aj-indice{ top:var(--topo-h) }
+.lid [id]{ scroll-margin-top:calc(var(--topo-h) + 70px) }
+
+/* A TELA DO VOLUNTÁRIO FALA NA MESMA VOZ DO RESTO. 07/09/2026.
+   O estado de cada dia ("confirmado", "você não pode") e a ação de texto ("não
+   vou mais poder", "consegui, posso sim") saíam em 11-12px, caixa alta,
+   entreletra larga, sublinhado — frases inteiras no traje de etiqueta, o
+   mesmo defeito consertado hoje no lado do líder. Estado vira afirmação em
+   caixa de frase com cor; ação de texto vira o mesmo botão quieto de todo o
+   sistema. E a nota de "o que acontece se eu disser não" desce um degrau: ela
+   é ajuda, não é o título, e estava com o mesmo peso da frase principal. */
+.vol-linha-est{
+  font-family:var(--fonte); font-size:var(--t-apoio); font-weight:var(--p-forte);
+  letter-spacing:0; text-transform:none;
+}
+.vol-acao{
+  font-family:var(--fonte); font-size:var(--t-apoio); font-weight:var(--p-forte);
+  letter-spacing:0; text-transform:none; color:var(--ink);
+}
+.vol-acao::after{ opacity:0; transition:opacity var(--t) }
+.vol-acao:hover::after,.vol-acao:focus-visible::after{ opacity:1 }
+.vol-pede-depois{ font-size:var(--t-apoio); line-height:1.6; opacity:.78 }
+
+/* =============================================================================
+   O SITE NO CELULAR: OS PAINÉIS DE FOTO PARAM DE CUSTAR UMA TELA CADA
+   07/09/2026. Medido em 390x844: home 6,5 telas, /sobre 5,7, /servir/midia 4,7,
+   /cultos 4,5. O que come isso são os `.g-cheio`: o alto tem min-height de
+   84svh (uma tela inteira do celular por painel) e o comum 64vh. O /sobre tem
+   três, 1.900px só de foto, e cada um deles carrega de 10 a 33 palavras.
+
+   No desktop o painel cheio é o recurso mais forte do site e fica. No celular
+   ele vira um gesto de polegar por painel, e o segundo já não impressiona: é
+   rolagem. Herói a 66svh (ainda domina a primeira tela, deixa a próxima seção
+   aparecer na borda, que é o que convida a rolar), os outros a 46vh, o fecho a
+   40vh. Medido depois: /sobre cai para ~4 telas sem perder foto nenhuma.
+
+   As mínimas em px caem junto: 520px de mínimo num aparelho de 667px de
+   altura era 78% da tela de qualquer jeito, e o clamp nunca chegava ao svh. */
+@media(max-width:759px){
+  .g-cheio{ min-height:clamp(320px,46vh,520px) }
+  .g-cheio.alta{ min-height:clamp(420px,66svh,640px) }
+  .g-cheio.centro.fecho{ min-height:clamp(300px,40vh,440px) }
+}

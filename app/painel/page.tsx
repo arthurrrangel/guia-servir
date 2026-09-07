@@ -1,4 +1,5 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -389,28 +390,31 @@ function Painel() {
     <div className="lid">
       {/* A FAIXA responde uma pergunta só: o que eu preciso fazer agora.
           Uma ação sólida, no máximo duas de texto ao lado. */}
-      <div className={`lid-faixa ${passo.urg}`}>
-        <div className="lid-faixa-in">
-          <div className="lid-faixa-txt">
-            <span className="rot">{passo.tag}</span>
-            <h1>{passo.titulo}</h1>
-            <p className="lid-faixa-sub">{passo.sub}</p>
-            <div className="lid-faixa-acoes">
-              {passo.acao.tipo === 'link' && <Link href={passo.acao.href} className="lid-bt">{passo.acao.label}</Link>}
-              {passo.acao.tipo === 'copiar' && <button className="lid-bt" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />{passo.acao.label}</button>}
-              {passo.acao.tipo === 'rolar' && <button className="lid-bt" onClick={() => rolarPara('cobrar')}><IcSino />{passo.acao.label}</button>}
-              {passo.sec && <button className="lid-bt-txt" onClick={passo.sec.on}>{passo.sec.label}</button>}
-              {dia && passo.acao.tipo !== 'copiar' && <Link href="/escala" className="lid-bt-txt">Abrir escala</Link>}
-            </div>
-          </div>
-          {r && (
-            <div className="lid-placar">
-              <b>{r.confirmados}<i>/{r.total}</i></b>
-              <span>{pl(r.confirmados, 'confirmado', 'confirmados')}</span>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* A LEGENDA ("Precisa de você", "Quase lá") SAIU. Era a terceira linha
+          de um cabeçalho que já tinha título e frase, e o que ela dizia o título
+          já dizia — "Alguém não pode no Follow" não precisa de "Precisa de
+          você" em cima para ser urgente; a faixa escura já é o urgente.
+          E as ações foram para no máximo duas: a que resolve, e uma de saída.
+          Quando existe uma segunda escolha ("Copiar assim mesmo"), ela é a de
+          texto e o "Abrir escala" fica para o corpo da página, que já leva lá
+          em cada linha. Três botões empilhados no celular eram o defeito
+          medido na /escala hoje de manhã. */}
+      <Faixa
+        urgente={passo.urg === 'fogo'}
+        titulo={passo.titulo}
+        sub={passo.sub}
+        placar={r ? { n: <>{r.confirmados}<i>/{r.total}</i></>, rot: pl(r.confirmados, 'confirmado', 'confirmados') } : null}
+        acao={
+          passo.acao.tipo === 'link' ? <Link href={passo.acao.href} className="lid-bt">{passo.acao.label}</Link>
+          : passo.acao.tipo === 'copiar' ? <button className="lid-bt" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />{passo.acao.label}</button>
+          : <button className="lid-bt" onClick={() => rolarPara('cobrar')}><IcSino />{passo.acao.label}</button>
+        }
+        extra={
+          passo.sec ? <button className="lid-bt-txt" onClick={passo.sec.on}>{passo.sec.label}</button>
+          : dia && passo.acao.tipo !== 'copiar' ? <Link href="/escala" className="lid-bt-txt">Abrir escala</Link>
+          : undefined
+        }
+      />
 
       <Igreja />
 

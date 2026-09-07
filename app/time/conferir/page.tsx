@@ -1,4 +1,6 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
+import { cont } from '@/lib/plural';
 import Shell, { useApp } from '@/components/Shell';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -69,27 +71,13 @@ function Conferir() {
 
   return (
     <div className="lid">
-      <div className="lid-faixa">
-        <div className="lid-faixa-in"><div className="lid-faixa-txt">
-          <span className="rot">Conferir nível</span>
-          <h1>{equipe?.nome}</h1>
-          <p className="lid-faixa-sub">
-            {pendentes
-              ? 'Estas pessoas se cadastraram sozinhas e escolheram o próprio nível. Vá área por área, é rápido.'
-              : 'Nada para conferir agora. Quando alguém novo se cadastrar, aparece aqui.'}
-          </p>
-          <div className="lid-faixa-acoes">
-            <Link className="lid-bt-txt" href="/time">Ver o time</Link>
-          </div>
-        </div>
-        {pendentes > 0 && (
-          <div className="lid-placar">
-            <b>{pendentes}</b>
-            <span>para conferir</span>
-          </div>
-        )}
-        </div>
-      </div>
+      <Faixa
+        titulo={pendentes ? `${cont(pendentes, 'nível', 'níveis')} para conferir` : 'Tudo conferido'}
+        sub={pendentes
+          ? 'Estas pessoas se cadastraram sozinhas e escolheram o próprio nível. Vá área por área, é rápido.'
+          : 'Quando alguém novo se cadastrar, aparece aqui.'}
+        extra={<Link className="lid-bt-txt" href="/time">Ver o time</Link>}
+      />
 
       {/* A REGRA INTEIRA, UMA VEZ SÓ. Ela não se repete nas 32 linhas abaixo:
           repetir "vale como ajuda até você conferir" em cada linha não informa,

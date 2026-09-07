@@ -1,4 +1,5 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
 import Shell, { useApp } from '@/components/Shell';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -78,21 +79,11 @@ function Ministerios() {
 
   return (
     <div className="lid">
-      <div className="lid-faixa">
-        <div className="lid-faixa-in"><div className="lid-faixa-txt">
-          <span className="rot">Ministérios</span>
-          <h1>A casa inteira</h1>
-          <p className="lid-faixa-sub">
-            Esta é a única página que alcança os outros ministérios. Cada um tem time,
-            funções e escala próprios, e a escala automática do dia 26 monta todos.
-          </p>
-        </div>
-        <div className="lid-placar">
-          <b>{equipes.length}</b>
-          <span>{equipes.length === 1 ? 'ministério' : 'ministérios'}</span>
-        </div>
-        </div>
-      </div>
+      <Faixa
+        titulo="A casa inteira"
+        sub="Esta é a única página que alcança os outros ministérios. Cada um tem time, funções e escala próprios, e a escala automática do dia 26 monta todos."
+        placar={{ n: equipes.length, rot: equipes.length === 1 ? 'ministério' : 'ministérios' }}
+      />
 
       {/* O AVISO VEM ANTES DA LISTA. Depois dela seria post-mortem. */}
       <div style={{ marginTop: 'var(--e5)' }}>
@@ -108,21 +99,36 @@ function Ministerios() {
           <span className="rot">Os ministérios da igreja</span>
           <span className="lid-secao-nota">O nome salva ao sair do campo</span>
         </div>
+        {/* MESMA LINHA DO /ajustes E DO /time: fechada diz o nome e o estado;
+            aberta mostra renomear e apagar. "Abrir" (trocar de ministério) é a
+            ação que a pessoa mais usa aqui e fica visível na linha fechada; o
+            "apagar" de um ministério inteiro — que leva time, funções e
+            escalas — deixa de ser um link permanente a 80px do dedo. */}
         <div className="ajt-lista">
           {equipes.map(e => (
-            <div className="ajt-item" key={e.id}>
-              <input enterKeyHint="done" className="ajt-nome" key={e.nome} defaultValue={e.nome}
-                aria-label={`nome do ministério ${e.nome}`}
-                onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
-              <span className="ajt-sub">{e.id === equipe?.id ? 'aberto agora' : ''}</span>
-              <div className="ajt-acoes">
-                {e.id !== equipe?.id &&
-                  <button className="lid-bt-txt" onClick={() => trocarEquipe(e.id)}>abrir</button>}
-                <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`}
-                  disabled={equipes.length < 2}
-                  onClick={() => void apagar(e.id, e.nome)}>apagar</button>
+            <details className="ajt-item" key={e.id}>
+              <summary>
+                <span className="ajt-nome estatico">{e.nome}</span>
+                <span className="ajt-quando-rot">
+                  {e.id === equipe?.id
+                    ? 'aberto agora'
+                    : <button type="button" className="lid-bt-txt" onClick={ev => { ev.preventDefault(); trocarEquipe(e.id); }}>Abrir</button>}
+                </span>
+              </summary>
+              <div className="ajt-corpo">
+                <label className="ajt-campo">
+                  <span className="ajt-rot">Nome</span>
+                  <input enterKeyHint="done" key={e.nome} defaultValue={e.nome}
+                    aria-label={`nome do ministério ${e.nome}`}
+                    onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
+                </label>
+                <div className="ajt-acoes">
+                  <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`}
+                    disabled={equipes.length < 2}
+                    onClick={() => void apagar(e.id, e.nome)}>Apagar este ministério</button>
+                </div>
               </div>
-            </div>
+            </details>
           ))}
         </div>
       </section>

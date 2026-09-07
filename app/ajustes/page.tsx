@@ -1,4 +1,5 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { Escolha, Trabalhando } from '@/components/Ui';
@@ -129,13 +130,10 @@ function Ajustes() {
   return (
     <div className="lid">
       {gravando && <Trabalhando />}
-      <div className="lid-faixa">
-        <div className="lid-faixa-in"><div className="lid-faixa-txt">
-          <span className="rot">Ajustes</span>
-          <h1>{equipe?.nome}</h1>
-          <p className="lid-faixa-sub">Tudo nesta página vale só para este ministério. Os outros seguem com os ajustes deles.</p>
-        </div></div>
-      </div>
+      <Faixa
+        titulo="Ajustes"
+        sub="Tudo nesta página vale só para este ministério. Os outros seguem com os ajustes deles."
+      />
 
       {/* O ÍNDICE — 07/09/2026.
           Esta página tem 2.995px e seis assuntos que não se parecem: o grupo
@@ -262,25 +260,48 @@ function Ajustes() {
             cabe em 390px por mais bem estilizada que esteja.
             Vira a mesma linha do resto do sistema: nome em cima, o que ele é
             embaixo, ações no fim, separados por fio. */}
+        {/* NOVE LINHAS, TRINTA E SEIS CONTROLES. 07/09/2026. Cada função mostrava,
+            o tempo todo, um campo editável, um seletor e dois botões de texto —
+            e um deles era "apagar". Nove "apagar" permanentes numa tela é
+            poluição e é risco: o dedo que rola encontra um botão destrutivo a
+            cada 80px. E a pessoa que abre esta página quer LER a lista de
+            funções; editar é exceção.
+
+            Vira o mesmo desenho do /time e da /escala: a linha fechada mostra
+            o nome e quando acontece; abrir a linha revela o campo, o seletor e
+            as duas ações. Nove linhas legíveis, e o "apagar" só existe para
+            quem abriu de propósito a função que quer apagar. */}
         <div className="ajt-lista">
           {S.funcoes.map(f => (
-            <div className={`ajt-item ${f.ativa ? '' : 'off'}`} key={f.id}>
-              <input enterKeyHint="done" className="ajt-nome" key={f.nome} defaultValue={f.nome} aria-label="nome da função"
-                onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
-              <Escolha valor={f.simultanea ? '1' : '0'} rotulo="quando acontece" classe="ajt-quando"
-                mostra={f.simultanea ? 'durante o culto' : 'depois do culto'}
-                aoMudar={v => fn(f.id!, { simultanea: v === '1' })}>
-                <option value="1">durante o culto</option>
-                <option value="0">depois do culto</option>
-              </Escolha>
-              <div className="ajt-acoes">
-                <button className="lid-bt-txt" onClick={() => fn(f.id!, { ativa: !f.ativa })}>
-                  {f.ativa ? 'ocultar' : 'reativar'}
-                </button>
-                <button className="lid-bt-txt perigo" aria-label={`apagar ${f.nome}`}
-                  onClick={() => delFn(f.id!, f.nome)}>apagar</button>
+            <details className={`ajt-item ${f.ativa ? '' : 'off'}`} key={f.id}>
+              <summary>
+                <span className="ajt-nome estatico">{f.nome}</span>
+                <span className="ajt-quando-rot">{f.simultanea ? 'durante o culto' : 'depois do culto'}{!f.ativa && ' · oculta'}</span>
+              </summary>
+              <div className="ajt-corpo">
+                <label className="ajt-campo">
+                  <span className="ajt-rot">Nome</span>
+                  <input enterKeyHint="done" key={f.nome} defaultValue={f.nome} aria-label="nome da função"
+                    onBlur={e => e.target.value !== f.nome && fn(f.id!, { nome: e.target.value.toUpperCase() })} />
+                </label>
+                <div className="ajt-campo">
+                  <span className="ajt-rot">Quando acontece</span>
+                  <Escolha valor={f.simultanea ? '1' : '0'} rotulo="quando acontece" classe="ajt-quando"
+                    mostra={f.simultanea ? 'durante o culto' : 'depois do culto'}
+                    aoMudar={v => fn(f.id!, { simultanea: v === '1' })}>
+                    <option value="1">durante o culto</option>
+                    <option value="0">depois do culto</option>
+                  </Escolha>
+                </div>
+                <div className="ajt-acoes">
+                  <button className="lid-bt-txt" onClick={() => fn(f.id!, { ativa: !f.ativa })}>
+                    {f.ativa ? 'Ocultar da escala' : 'Reativar'}
+                  </button>
+                  <button className="lid-bt-txt perigo" aria-label={`apagar ${f.nome}`}
+                    onClick={() => delFn(f.id!, f.nome)}>Apagar</button>
+                </div>
               </div>
-            </div>
+            </details>
           ))}
         </div>
         <div className="linha" style={{ marginTop: 14 }}>

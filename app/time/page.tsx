@@ -5,6 +5,8 @@ import { Fragment, useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
 } from '@/lib/db';
+import { Faixa } from '@/components/Faixa';
+import { cont } from '@/lib/plural';
 import { Aviso, Medidor, Trabalhando } from '@/components/Ui';
 import { IcBusca, IcCopiar, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
@@ -136,21 +138,16 @@ function Time() {
   return (
     <div className="lid">
       {ocupado && <Trabalhando />}
-      <div className="lid-faixa">
-        <div className="lid-faixa-in"><div className="lid-faixa-txt">
-          <span className="rot">Time</span>
-          <h1>{equipe?.nome}</h1>
-          <p className="lid-faixa-sub">
-            {S.voluntarios.length
-              ? 'Quem serve, o que cada um sabe fazer e quanto cada um já pegou.'
-              : 'Sem saber quem sabe fazer o quê, não existe rodízio.'}
-          </p>
-        </div>
-        {!!S.voluntarios.length && (
-          <div className="lid-placar"><b>{ativos}</b><span>no time</span></div>
-        )}
-        </div>
-      </div>
+      {/* O h1 ERA "MÍDIA". A navegação, 30px acima, já diz Mídia. O maior texto
+          da tela repetia o menor e não acrescentava um fato. Agora o título é a
+          situação do time, e o placar saiu daqui porque diria o mesmo número em
+          outra fonte. Ver components/Faixa.tsx. */}
+      <Faixa
+        titulo={S.voluntarios.length ? `${cont(ativos, 'pessoa', 'pessoas')} no time` : 'Ainda não tem time'}
+        sub={S.voluntarios.length
+          ? 'Quem serve, o que cada um sabe fazer e quanto cada um já pegou.'
+          : 'Sem saber quem sabe fazer o quê, não existe rodízio.'}
+      />
       {!S.voluntarios.length && (
         <Aviso tom="info">Comece pelas pessoas que serviram no último domingo.</Aviso>
       )}

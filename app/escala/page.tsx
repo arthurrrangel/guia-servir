@@ -1,4 +1,5 @@
 'use client';
+import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
 import { mudarStatus, salvarDia, salvarDias } from '@/lib/db';
@@ -250,78 +251,48 @@ function Escala() {
   return (
     <div className="lid">
       {ocupado && <Trabalhando />}
-      {/* ---------------------------------------------------------- a faixa */}
-      <div className={`lid-faixa ${urge ? 'fogo' : ''}`}>
-        {/* O NÚMERO DO MÊS ERA A ÚLTIMA COISA DO CABEÇALHO. 07/09/2026.
-            Medido no celular: o placar nascia em y=449, DEPOIS do subtítulo,
-            dos dois botões e do link de ajuda. A ordem de leitura era mês →
-            frase sobre o estado → duas ações → e só então o número que é o
-            estado. Duas afirmações do mesmo fato ("falta a confirmação de quem
-            foi escalado" e "24 ainda não confirmaram") separadas por 200px de
-            botões, e a mais rápida das duas chegando por último.
-
-            O placar passou para DENTRO da coluna de texto, logo abaixo do mês.
-            No celular ele cai naturalmente ali; no desktop uma grade o devolve
-            à direita, que é onde ele já estava e onde funciona. Uma marcação,
-            duas leituras, sem duplicar elemento — placar repetido seria lido
-            duas vezes por quem usa leitor de tela. */}
-        <div className="lid-faixa-in">
-          <div className="lid-faixa-txt esc-cab">
-            <span className="rot">Escala</span>
-            <div className="esc-mes">
-              <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
-              <h1>{MESES[mes - 1]} {ano}</h1>
-              <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
-            </div>
-            {placar && (
-              <div className="lid-placar">
-                <b>{placar.n}</b>
-                <span>{placar.rot}</span>
-              </div>
-            )}
-            <p className="lid-faixa-sub">
-              {!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
-                : contas.aMontar === futuros.length ? 'Nada montado ainda. O sorteio respeita quem não pode e quem já serviu.'
-                : contas.vagas ? 'Vaga sem ninguém é o que faz o culto não acontecer. É por onde começar.'
-                : contas.pendentes ? 'A escala está de pé. Falta a confirmação de quem foi escalado.'
-                : 'Mês fechado.'}
+      {/* ---------------------------------------------------------- a faixa
+          A legenda "Escala" saiu (a aba já diz), o placar cola no mês e o
+          cabeçalho passa a ser o mesmo componente das outras seis telas. Ver
+          components/Faixa.tsx para a regra; a nota sobre a ordem placar/frase/
+          botões no celular está lá. A ajuda recolhida continua: ela é material
+          de primeira vez e fechada custa zero a quem já sabe. */}
+      <Faixa
+        urgente={urge}
+        titulo={
+          <span className="esc-mes">
+            <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
+            <span className="esc-mes-nome">{MESES[mes - 1]} {ano}</span>
+            <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
+          </span>
+        }
+        placar={placar ? { n: placar.n, rot: placar.rot } : null}
+        sub={!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
+          : contas.aMontar === futuros.length ? 'Nada montado ainda. O sorteio respeita quem não pode e quem já serviu.'
+          : contas.vagas ? 'Vaga sem ninguém é o que faz o culto não acontecer. É por onde começar.'
+          : contas.pendentes ? 'Falta a confirmação de quem foi escalado.'
+          : 'Mês fechado.'}
+        acao={
+          <button className="lid-bt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
+            Montar o mês inteiro
+          </button>
+        }
+        extra={
+          <button className="lid-bt-txt" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
+            Pedir a disponibilidade
+          </button>
+        }
+        rodape={
+          <details className="esc-ajuda">
+            <summary>O que esses botões fazem</summary>
+            <p>
+              Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
+              e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
+              um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
             </p>
-            <div className="lid-faixa-acoes">
-              <button className="lid-bt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
-                Montar o mês inteiro
-              </button>
-              <button className="lid-bt-txt" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
-                Pedir a disponibilidade
-              </button>
-            </div>
-            {/* O BOTÃO QUE REESCREVE O MÊS NÃO DIZIA O QUE IA FAZER.
-                O motor é cuidadoso: quem confirmou e quem foi travado são
-                intocáveis, quem recusou não volta a ser sorteado. Só que essa
-                garantia estava no comentário do engine, não na tela. O líder
-                com pressa lê "Montar o mês inteiro" e a pergunta honesta dele
-                é "isso apaga o que a Malu já confirmou?". Sem resposta, ou ele
-                não aperta, ou aperta com medo. As duas são caras.
-
-                RECOLHIDO EM 07/09/2026, E O MOTIVO NÃO É ESPAÇO. Medido no
-                celular: da palavra "ESCALA" até o primeiro culto iam ~500px de
-                cabeçalho, e este parágrafo era 4 das linhas. Ele é material de
-                primeira vez: responde uma dúvida que existe UMA vez e depois
-                nunca mais. Quem monta escala toda semana lia a mesma aula na
-                20ª visita, e o preço era o culto que ele veio resolver começar
-                abaixo da dobra. Fechado, custa um toque a quem precisa e zero
-                a quem já sabe. A resposta continua a um toque de distância do
-                botão que a provoca, que é o requisito real. */}
-            <details className="esc-ajuda">
-              <summary>O que esses botões fazem</summary>
-              <p>
-                Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
-                e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
-                um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
-              </p>
-            </details>
-          </div>
-        </div>
-      </div>
+          </details>
+        }
+      />
 
       {semFuncoes && (
         <div style={{ marginTop: 'var(--e5)' }}>
@@ -573,7 +544,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
         </button>
         {!passado && !!cobranca && (
           <button className="lid-bt-txt" onClick={() => copiar(cobranca, aviso, 'Cobrança copiada. Cole no grupo.')}>
-            Cobrar quem falta confirmar
+            Cobrar confirmação
           </button>
         )}
       </div>
