@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
@@ -112,8 +112,46 @@ export default function Servir() {
      não deixar a pessoa digitar o que vai ser rejeitado */
   const soTel = (v: string) => v.replace(/\D/g, '').slice(0, 13);
 
+  /* A ALTURA DO RODAPÉ FIXO, MEDIDA. O `.wiz` precisa reservar embaixo
+     exatamente o que o rodapé ocupa, e o rodapé muda de altura conforme a
+     frase do que está faltando aparece, some, ou quebra em duas linhas. Um
+     número no CSS não acompanha isso: o que estava lá era 104px contra 119
+     reais, e a diferença cobria o último campo. O observador devolve a medida
+     a cada mudança de tamanho, inclusive quando o teclado do celular muda a
+     largura disponível e a frase reflui. */
+  const pe = useRef<HTMLDivElement>(null);
+  /* `fase` NA LISTA DE DEPENDÊNCIAS NÃO É ZELO, É O QUE FAZ FUNCIONAR. Escrevi
+     este efeito com `[]` e ele não mediu nada: enquanto `fase` é 'carregando'
+     a função retorna cedo, o rodapé não existe no DOM, e `pe.current` é nulo
+     no único momento em que o efeito rodava. A variável ficava vazia e o CSS
+     caía no valor de partida — ou seja, o conserto não consertava e a medição
+     é que mostrou isso. */
+  useEffect(() => {
+    const el = pe.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const medir = () => document.documentElement.style
+      .setProperty('--wiz-pe', `${Math.ceil(el.getBoundingClientRect().height)}px`);
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => { ro.disconnect(); document.documentElement.style.removeProperty('--wiz-pe'); };
+  }, [fase]);
+
+  /* E-MAIL PASSA A SER OBRIGATÓRIO. 07/09/2026, a pedido do Arthur.
+     Era opcional desde o começo, com o argumento de que o WhatsApp basta para
+     a liderança falar com a pessoa. Passa a ser exigido porque o cadastro
+     deixou de ser só "como te chamo" e virou a base de quem serve na casa: um
+     telefone muda quando a pessoa troca de número e a linha se perde; o e-mail
+     é a segunda âncora.
+
+     A validação é a mesma que o banco aplica (`EMAIL_INVALIDO` já existia na
+     RPC): pede arroba e um ponto depois dela. Não vale mais que isso — quem
+     escreve errado de propósito escreve `a@a.aa` — mas pega o erro real, que é
+     digitar o nome sem o domínio. */
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+
   const podeAvancar = (() => {
-    if (passo === 0) return nome.trim().includes(' ') && soTel(tel).length >= 10;
+    if (passo === 0) return nome.trim().includes(' ') && soTel(tel).length >= 10 && emailOk;
     if (passo === 1) return escolhidas.length > 0;
     if (passo === 2) return perguntas.every(q => !q.obrigatoria || (resp[q.id] || '').trim() !== '');
     return true;
@@ -132,7 +170,14 @@ export default function Servir() {
       if (!nome.trim()) faltas.push('seu nome');
       else if (!nome.trim().includes(' ')) faltas.push('seu sobrenome');
       if (soTel(tel).length < 10) faltas.push(soTel(tel).length ? 'o WhatsApp completo, com DDD' : 'seu WhatsApp com DDD');
-      return 'Falta ' + faltas.join(' e ') + '.';
+      if (!emailOk) faltas.push(email.trim() ? 'o e-mail completo' : 'seu e-mail');
+      /* três faltas numa lista com "e" entre todas vira ladainha: "Falta seu
+         nome e seu WhatsApp com DDD e seu e-mail". Vírgula nas primeiras, "e"
+         só na última, que é como se escreve em português. */
+      const lista = faltas.length > 2
+        ? `${faltas.slice(0, -1).join(', ')} e ${faltas[faltas.length - 1]}`
+        : faltas.join(' e ');
+      return 'Falta ' + lista + '.';
     }
     if (passo === 1) return 'Marque pelo menos uma coisa que você quer fazer.';
     if (passo === 2) {
@@ -233,7 +278,7 @@ export default function Servir() {
         {passo === 0 && (
           <>
             <h2>Quem é você?</h2>
-            <p className="dim pequeno">Só o essencial. Nada disso vai para lugar nenhum além da liderança da área.</p>
+            <p className="dim pequeno">Entra no cadastro da igreja e fica visível para a liderança. Não vai para mais lugar nenhum.</p>
             <label htmlFor="w-nome">Nome completo</label>
             {/* Três campos, três teclados diferentes. Sem type/inputMode o
                 celular abre o mesmo teclado de letras nos três e a pessoa
@@ -249,10 +294,11 @@ export default function Servir() {
               enterKeyHint="next"
               onChange={e => setTel(soTel(e.target.value))} />
             <p className="dim peq">É por aqui que a liderança fala com você.</p>
-            <label htmlFor="w-mail">E-mail <span className="dim">(opcional)</span></label>
+            <label htmlFor="w-mail">E-mail</label>
             <input id="w-mail" value={email} type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com"
               autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onChange={e => setEmail(e.target.value)} />
+            <p className="dim peq">Fica no cadastro da igreja, junto com o seu nome.</p>
           </>
         )}
 
@@ -384,8 +430,12 @@ export default function Servir() {
         )}
       </section>
 
-      {/* rodapé fixo: no celular o botão não pode sumir atrás do teclado */}
-      <div className="wiz-pe">
+      {/* rodapé fixo: no celular o botão não pode sumir atrás do teclado.
+          A altura dele é MEDIDA e devolvida ao `.wiz` como `--wiz-pe`, porque o
+          104px que estava no CSS venceu quando este rodapé ganhou a frase do
+          que está faltando: 119px reais contra 104 reservados, e os 15px de
+          diferença cobriam o último campo do passo. Ver a nota no globals. */}
+      <div className="wiz-pe" ref={pe}>
         {!!oQueFalta && <span className="wiz-falta" role="status">{oQueFalta}</span>}
         {passo > 0 && (
           <button type="button" className="btn claro" disabled={ocupado}

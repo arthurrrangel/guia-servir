@@ -1297,7 +1297,25 @@ details > summary::marker{content:""}
    celular o teclado sobe e engole qualquer botão que esteja no fluxo.
    ========================================================================== */
 
-.wiz{padding-bottom:104px}          /* espaço para o rodapé fixo */
+.wiz{padding-bottom:calc(var(--wiz-pe, 104px) + var(--e5))}
+/* 104px ERA UM NÚMERO ESCRITO À MÃO, E ELE VENCEU. 07/09/2026.
+   O rodapé do cadastro é `position:fixed` e o `.wiz` reservava 104px embaixo
+   para ele não cobrir nada. Medido agora: o rodapé tem 119px no celular e 117
+   no desktop. Faltavam 15, e o que sobra por cima do conteúdo é a borda
+   superior dele — foi exatamente o "corte" que apareceu por cima do campo de
+   e-mail na captura do Arthur.
+
+   A causa não é o 104 estar errado desde o começo: é que depois dele o rodapé
+   ganhou a frase "Falta seu nome e seu WhatsApp com DDD", que entra como uma
+   linha inteira acima dos botões (`.wiz-falta`, `order:-1`, `flex:1 0 100%`).
+   O rodapé cresceu, a reserva não. E cresce mais ainda quando a frase quebra
+   em duas linhas, o que acontece em tela estreita e em passo com mais de um
+   campo faltando.
+
+   Qualquer número novo escrito aqui teria o mesmo destino na próxima frase que
+   alguém acrescentar. Então o valor passa a vir de uma medição em tempo real
+   (ver o ResizeObserver em cadastro/page.tsx) e o 104 fica só como valor de
+   partida, para o primeiro quadro antes de o observador responder. */
 
 .wiz-passos{
   display:flex;list-style:none;margin:0 0 var(--e5);padding:0;gap:var(--e1);
@@ -7098,3 +7116,22 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 /* o índice do /ajustes é a única coisa da página que ia até 1270 enquanto o
    conteúdo parava em 730: duas bordas direitas na mesma tela */
 .aj-indice{ max-width:var(--lista) }
+
+/* A BARRA FIXA CORTAVA O CAMPO EM VEZ DE PASSAR POR CIMA DELE. O rodapé do
+   cadastro tem `border-top:1px` e fundo sólido: no meio da rolagem, esse fio
+   atravessa o input que está passando por baixo e o resultado LÊ como campo
+   cortado, não como barra sobreposta. Foi assim que o defeito chegou até mim,
+   por captura, com a reserva de altura já sendo o problema de fundo.
+
+   O fio sai e entra uma dissolvência de 24px acima da barra. O conteúdo some
+   gradualmente por baixo dela, que é o que de fato acontece, e some a leitura
+   de "guilhotina". A borda continua existindo para quem não tem gradiente. */
+.wiz-pe{ border-top:0; position:fixed }
+.wiz-pe::before{
+  content:""; position:absolute; left:0; right:0; top:-24px; height:24px;
+  background:linear-gradient(to top, var(--papel), transparent);
+  pointer-events:none;
+}
+@supports not (background:linear-gradient(to top,#000,transparent)){
+  .wiz-pe{ border-top:1px solid var(--linha) }
+}
