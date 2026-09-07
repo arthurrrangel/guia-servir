@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Logo } from './Marca';
+import { IcSeta } from './Icones';
 import { IGREJA } from '@/lib/igreja';
 import Movimento from './Movimento';
 
@@ -105,31 +106,115 @@ export function Barra({ atual }: { atual?: string }) {
    fatos — onde, quando, como falar. É a última coisa que a pessoa vê, e a
    que ela lembra quando fecha. /privacidade continua alcançável de qualquer
    página, como a LGPD pede. */
+/* =============================================================================
+   O RODAPÉ
+
+   A VERSÃO ANTERIOR ERA UM MONUMENTO, NÃO UM RODAPÉ. Logo grande centrado, a
+   frase da igreja embaixo, seis links numa fileira só e o endereço miúdo no
+   meio de tudo. Numa tela de 1900px, isso ocupava uma faixa central de 700 e
+   deixava 600px de vazio de cada lado. E os seis links vinham sem hierarquia:
+   para achar "Como chegar" era preciso ler os seis.
+
+   A referência que o Arthur trouxe (o rodapé da Igreja Batista Atitude) acerta
+   em três coisas, e são as três que entram aqui:
+     1. agrupar link por assunto, com título de categoria — quem procura lê a
+        categoria, não a lista inteira;
+     2. dar peso ao endereço, que num site de igreja é a informação mais
+        acionável que existe;
+     3. usar a largura em colunas em vez de empilhar tudo num eixo.
+
+   E erra em quatro, que não entram:
+     1. laranja gritante nos títulos de categoria — aqui a cor de rótulo já é a
+        areia, e ela é da marca;
+     2. redes sociais em minúsculas contra títulos em caixa alta, na mesma
+        grade;
+     3. colunas desbalanceadas (uma com dois itens, outra com quatro), que
+        abrem buraco no fim da linha;
+     4. botão flutuante de WhatsApp, que é vocabulário de template.
+
+   O AGRUPAMENTO É POR INTENÇÃO, e não pela estrutura do site. Ninguém chega ao
+   rodapé procurando "páginas": chega querendo visitar, entender ou servir.
+============================================================================= */
+
+/* três grupos de dois a três, que fecham a linha sem sobra. Ordem pela
+   probabilidade de quem rolou até aqui: visitar antes de servir. */
+const RODAPE = [
+  {
+    t: 'Visitar',
+    itens: [
+      { href: '/cultos', rot: 'O domingo' },
+      { href: '/como-chegar', rot: 'Como chegar' },
+      { href: '/pequena-guia', rot: 'Pequena Guia' },
+    ],
+  },
+  {
+    t: 'A igreja',
+    itens: [
+      { href: '/sobre', rot: 'Quem somos' },
+      { href: '/guia-church-tv', rot: 'GUIA Church TV' },
+      { href: IGREJA.instagram, rot: 'Instagram', fora: true },
+    ],
+  },
+  {
+    /* "Onde me encaixo" existe e hoje só é alcançável de dentro da /servir.
+       É a página de quem não sabe escolher, que é justamente quem precisa de
+       um caminho — e ela fecha a terceira coluna com três, como as outras. */
+    t: 'Servir',
+    itens: [
+      { href: '/servir', rot: 'Quero servir' },
+      { href: '/servir/onde-me-encaixo', rot: 'Onde me encaixo' },
+      { href: '/acessar', rot: 'Acesso às equipes' },
+    ],
+  },
+];
+
 export function Rodape() {
   return (
-    <footer className="g-pe centro rev">
+    <footer className="g-pe rev">
       <div className="g">
-        <div className="g-pe-marca" aria-label={IGREJA.nome}>
-          <Logo className="logo" />
+        {/* O ENDEREÇO EM FAIXA, ANTES DAS COLUNAS.
+            Ele começou dentro da coluna da marca e o resultado foi medido:
+            as três colunas de link terminavam 260px antes dela, e o rodapé
+            fechava com um buraco de meia tela à direita — o mesmo
+            desbalanceamento que eu tinha criticado na referência.
+            Em faixa, ele resolve as duas coisas de uma vez: ganha a largura
+            inteira, que é o destaque que a informação de maior intenção do
+            site merece, e devolve à coluna da marca uma altura parecida com a
+            das outras três. */}
+        <Link href="/como-chegar" className="g-pe-onde">
+          <span className="g-pe-quando">{IGREJA.cultoDia}, {IGREJA.cultoHora}</span>
+          <span className="g-pe-rua">
+            {IGREJA.rua} · {IGREJA.bairro}, {IGREJA.cidade}
+          </span>
+          <span className="g-pe-ver">Ver no mapa <IcSeta /></span>
+        </Link>
+
+        <div className="g-pe-cols">
+          <div className="g-pe-eu">
+            <div className="g-pe-marca" aria-label={IGREJA.nome}>
+              <Logo className="logo" />
+            </div>
+            <p className="g-pe-frase">{IGREJA.frase}</p>
+          </div>
+
+          {RODAPE.map(g => (
+            <nav key={g.t} aria-label={g.t}>
+              <h4>{g.t}</h4>
+              {g.itens.map(i => ('fora' in i && i.fora)
+                ? <a key={i.href} href={i.href} target="_blank" rel="noreferrer">{i.rot}</a>
+                : <Link key={i.href} href={i.href}>{i.rot}</Link>)}
+            </nav>
+          ))}
         </div>
-        <p className="g-ed g-pe-frase" style={{ color: 'var(--areia)' }}>{IGREJA.frase}</p>
 
-        <nav className="g-pe-links" aria-label="Páginas">
-          {PAGINAS.map(p => <Link key={p.href} href={p.href}>{p.rot}</Link>)}
-          <Link href="/servir">Quero servir</Link>
-          <Link href="/acessar">Acesso às equipes</Link>
-        </nav>
-
-        <p className="g-pe-fato">
-          <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b><br />
-          {IGREJA.rua}<br />
-          {IGREJA.bairro}, {IGREJA.cidade}
-        </p>
-
+        {/* três itens com space-between deixavam o @ boiando no meio da
+            linha, longe dos dois vizinhos. Um de cada lado. */}
         <div className="g-pe-linha">
           <span>© {new Date().getFullYear()} {IGREJA.nome}</span>
-          <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-          <Link href="/privacidade">Privacidade</Link>
+          <span className="g-pe-fim">
+            <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
+            <Link href="/privacidade">Privacidade</Link>
+          </span>
         </div>
       </div>
     </footer>

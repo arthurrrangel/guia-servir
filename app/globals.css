@@ -6464,3 +6464,112 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    varredura de vazios logo depois do primeiro conserto. Sem mapa, a seção
    passa a valer o que o cartão e a mira valem. */
 .mapa:has(iframe.falhou){ min-height:clamp(300px,42vh,420px) }
+
+/* =============================================================================
+   O RODAPÉ EM COLUNAS
+   07/09/2026. Ver a nota longa em components/Site.tsx sobre o que foi tomado
+   do rodapé da Igreja Batista Atitude e o que foi recusado.
+
+   A medida: a coluna da marca vale por duas das de link, porque leva logo,
+   frase e o bloco de endereço; as três de link são iguais entre si, com dois
+   a três itens cada — nenhuma sobra de fim de linha.
+============================================================================= */
+.g-pe.rev{ text-align:left }
+.g-pe > .g{ padding-top:clamp(72px,9vw,128px); padding-bottom:26px }
+.g-pe-cols{
+  display:grid; grid-template-columns:1fr; gap:clamp(40px,5vw,56px) clamp(24px,3vw,48px);
+  margin-top:0; align-items:start;
+}
+@media(min-width:760px){ .g-pe-cols{ grid-template-columns:repeat(3,1fr) } }
+@media(min-width:1040px){ .g-pe-cols{ grid-template-columns:1.7fr 1fr 1fr 1fr; gap:clamp(28px,3vw,44px) } }
+
+.g-pe-eu{ max-width:34ch }
+@media(min-width:760px) and (max-width:1039px){ .g-pe-eu{ grid-column:1/-1; max-width:46ch } }
+.g-pe-marca{ width:min(100%,300px) }
+.g-pe-frase{
+  margin:var(--e4) 0 0; font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
+  font-size:clamp(20px,1.9vw,25px); line-height:1.25; color:var(--areia); letter-spacing:-.01em;
+}
+
+/* O ENDEREÇO VIRA CAMINHO. No rodapé antigo ele era um <p> de 15px cinza no
+   meio da faixa: a informação de maior intenção do site inteiro, escrita como
+   nota de rodapé e sem levar a lugar nenhum. Agora é o bloco mais alto da
+   coluna e leva para /como-chegar, que é onde estão o mapa e as rotas. */
+/* a faixa: horário, endereço e a saída para o mapa numa linha só, de ponta a
+   ponta da coluna, com um fio embaixo separando-a da navegação. */
+.g-pe-onde{
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:10px clamp(16px,2.4vw,32px);
+  text-decoration:none; color:inherit;
+  padding-bottom:clamp(26px,3vw,38px); margin-bottom:clamp(34px,4vw,52px);
+  border-bottom:1px solid rgba(255,255,255,.12);
+  transition:border-color var(--t);
+}
+.g-pe-onde:hover,.g-pe-onde:focus-visible{ border-bottom-color:rgba(228,212,180,.45) }
+.g-pe-quando{
+  font-family:var(--fonte-display); font-weight:600; font-size:12px;
+  letter-spacing:.15em; text-transform:uppercase; color:var(--areia); flex:none;
+}
+.g-pe-rua{ font-size:clamp(17px,1.5vw,20px); line-height:1.35; color:rgba(255,255,255,.86) }
+.g-pe-ver{
+  display:inline-flex; align-items:center; gap:8px; margin-left:auto;
+  font-family:var(--fonte-display); font-weight:500; font-size:11px;
+  letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.55);
+  transition:color var(--t); flex:none;
+}
+@media(max-width:759px){ .g-pe-ver{ margin-left:0 } }
+.g-pe-ver svg{ width:11px; height:11px; transition:transform var(--t) }
+.g-pe-onde:hover .g-pe-ver{ color:var(--areia) }
+.g-pe-onde:hover .g-pe-ver svg{ transform:translateX(3px) }
+
+/* os títulos de categoria usam a areia do sistema, não uma cor de destaque
+   importada: é o mesmo rótulo de `.g-rot`, que já é a voz de índice da casa. */
+.g-pe h4{
+  margin:0 0 16px; font-family:var(--fonte-display); font-weight:600; font-size:11px;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--areia);
+}
+.g-pe-cols nav a{
+  display:block; color:rgba(255,255,255,.8); text-decoration:none;
+  font-size:16px; line-height:1.4; padding:7px 0;
+  transition:color var(--t), transform var(--t);
+}
+.g-pe-cols nav a:hover,.g-pe-cols nav a:focus-visible{ color:#fff; transform:translateX(3px) }
+
+.g-pe-linha{ margin-top:clamp(52px,6vw,80px) }
+@media(max-width:759px){
+  .g-pe-marca{ width:min(100%,230px) }
+  .g-pe-cols{ gap:34px }
+  .g-pe-linha{ justify-content:flex-start; gap:8px 20px }
+}
+
+/* o logotipo era 300px contra colunas de 240: dominava a linha em vez de
+   abri-la. E o endereço tinha entrelinha de parágrafo, que solta três linhas
+   curtas que deveriam ler como um bloco só. */
+.g-pe-marca{ width:min(100%,224px) }
+.g-pe-fim{ display:inline-flex; flex-wrap:wrap; gap:8px 22px }
+
+/* -----------------------------------------------------------------------------
+   O RODAPÉ NO CELULAR NÃO PODE SER UMA TELA E MEIA
+   07/09/2026, medido em 390px: 1.020px de altura, com os três grupos de link
+   empilhados um debaixo do outro. Quem chega ao fim da página rola mais uma
+   tela inteira de rodapé para achar o link que quer.
+
+   Duas colunas cortam quase pela metade e ainda cabem: "Acesso às equipes",
+   o rótulo mais longo, mede ~130px numa coluna de 163.
+----------------------------------------------------------------------------- */
+@media(max-width:759px){
+  .g-pe-cols{ grid-template-columns:1fr 1fr; gap:30px 18px }
+  .g-pe-eu{ grid-column:1/-1; max-width:none }
+  .g-pe-cols nav a{ font-size:15px; padding:6px 0 }
+  .g-pe h4{ margin-bottom:10px }
+  .g-pe-onde{ gap:6px 14px }
+  /* 224px de logo numa tela de 390 e a marca ocupa 57% da largura */
+  .g-pe-marca{ width:min(100%,188px) }
+  .g-pe-rua{ font-size:16px }
+}
+
+/* a única ação do rodapé estava em branco a 55%, quase sumindo no fundo.
+   Ela é a saída para o mapa numa igreja: leva a cor da marca. */
+.g-pe-ver{ color:var(--areia); opacity:.82 }
+.g-pe-onde:hover .g-pe-ver{ opacity:1 }
+/* o ícone empurrava a linha de base do bloco todo para baixo do endereço */
+.g-pe-ver{ align-self:baseline }
