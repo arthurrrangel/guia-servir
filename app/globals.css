@@ -6785,3 +6785,162 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    com "ver o time todo" e voltou aqui em "posso no mês" e "posso em todos":
    são ações de conveniência, não a ação da tela. */
 .vol-mes-todos,.vol-quem{ text-transform:none; letter-spacing:0; font-weight:var(--p-corpo) }
+
+/* =============================================================================
+   FASE 22 · A ESCALA GANHA UMA SEGUNDA COLUNA
+   07/09/2026. Ver as notas longas em app/escala/page.tsx. Em resumo do que foi
+   medido: cabeçalho de ~500px antes do primeiro culto no celular, e 434px de
+   largura sem uso nenhum ao lado da lista no desktop.
+============================================================================= */
+
+/* A AULA QUE SÓ SE LÊ UMA VEZ. Era um parágrafo fixo de quatro linhas no topo
+   de uma tela de trabalho semanal. Fechado, some para quem já sabe e continua
+   a um toque de quem não sabe. A caixa de toque é a linha inteira: `summary` é
+   clicável de ponta a ponta e o alvo precisa da altura da lei. */
+.esc-ajuda{ margin-top:var(--e4); max-width:64ch }
+.esc-ajuda > summary{
+  display:inline-flex; align-items:center; min-height:var(--toque);
+  cursor:pointer; list-style:none;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--mudo); text-decoration:underline; text-underline-offset:4px;
+  text-decoration-color:rgba(37,37,37,.28);
+}
+.esc-ajuda > summary::-webkit-details-marker{ display:none }
+.esc-ajuda > summary::marker{ content:'' }
+.esc-ajuda > summary:hover{ color:var(--ink) }
+.esc-ajuda p{
+  margin:var(--e2) 0 0; font-size:var(--t-apoio); line-height:1.7; color:var(--cinza);
+}
+.lid-faixa.fogo .esc-ajuda > summary{ color:rgba(255,255,255,.62); text-decoration-color:rgba(255,255,255,.3) }
+.lid-faixa.fogo .esc-ajuda > summary:hover{ color:#fff }
+.lid-faixa.fogo .esc-ajuda p{ color:rgba(255,255,255,.72) }
+
+/* O PALCO. Uma coluna no celular, duas quando existe largura para as duas.
+   1100px é o ponto em que `--lista` (64ch, ~686px) mais uma coluna de 300 mais
+   o respiro entre elas param de espremer a lista, e espremer a lista seria
+   desfazer a medição que fixou os 64ch. */
+.esc-palco{ display:grid; gap:var(--e6); align-items:start }
+.esc-lista{ min-width:0 }
+@media(min-width:1100px){
+  .esc-palco{ grid-template-columns:minmax(0,var(--lista)) minmax(260px,1fr); gap:var(--e7) }
+  /* dentro do palco a coluna já limita: o max-width viraria uma segunda régua */
+  .esc-palco .esc-dia{ max-width:none }
+  .esc-peso{ position:sticky; top:var(--e6) }
+}
+
+/* ------------------------------------------------------------- o mês em pessoas */
+.esc-peso{ min-width:0; padding-top:var(--e5) }
+@media(min-width:1100px){ .esc-peso{ padding-top:0 } }
+.esc-peso-t{
+  margin:0; font-family:var(--fonte-display); font-weight:var(--p-corpo);
+  font-size:var(--d-lead); letter-spacing:-.01em; line-height:1.15; color:var(--ink);
+}
+.esc-peso-sub{ margin:var(--e2) 0 0; font-size:var(--t-apoio); line-height:1.6; color:var(--cinza) }
+.esc-peso-l{
+  list-style:none; margin:var(--e4) 0 0; padding:0;
+  border-top:1px solid var(--noite);
+}
+.esc-peso-l li{
+  display:grid; grid-template-columns:minmax(0,1fr) 84px 2.4ch; gap:0 var(--e3);
+  align-items:center; padding:var(--e2) 0; border-bottom:1px solid var(--linha2);
+}
+.esc-peso-n{
+  font-size:var(--t-apoio); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.esc-peso-q{
+  font-size:var(--t-apoio); text-align:right; color:var(--cinza);
+  font-variant-numeric:tabular-nums;
+}
+/* A FITA. Um traço por culto montado: cheio quando a pessoa entra. O padrão de
+   repetição aparece antes de qualquer número ser lido, e é por isso que ela
+   existe — o número sozinho diz "5", a fita diz "cinco seguidos". */
+.esc-peso-fita{ display:flex; gap:2px; height:12px }
+.esc-peso-fita i{ flex:1 1 0; min-width:0; border:1px solid var(--linha); background:transparent }
+.esc-peso-fita i.on{ background:var(--noite); border-color:var(--noite) }
+.esc-peso-l li.todos .esc-peso-fita i.on{ background:var(--bad); border-color:var(--bad) }
+.esc-peso-l li.todos .esc-peso-n,
+.esc-peso-l li.todos .esc-peso-q{ color:var(--bad) }
+.esc-peso-l li.acima .esc-peso-fita i.on{ background:var(--warn); border-color:var(--warn) }
+.esc-peso-l li.acima .esc-peso-n,
+.esc-peso-l li.acima .esc-peso-q{ color:var(--warn) }
+
+.esc-peso-nota{ margin:var(--e3) 0 0; font-size:var(--t-apoio); line-height:1.6 }
+.esc-peso-nota.todos{ color:var(--bad) }
+.esc-peso-nota.acima{ color:var(--warn) }
+.esc-peso-zero{ margin-top:var(--e4) }
+.esc-peso-zero p{
+  margin:var(--e2) 0 0; font-size:var(--t-apoio); line-height:1.7; color:var(--cinza);
+}
+
+/* AS AÇÕES EMPILHADAS GASTAVAM 171px PARA DOIS LINKS. 07/09/2026.
+   Eu tinha atacado o cabeçalho da /escala pelo parágrafo didático, e a captura
+   mostrou que o desperdício estava em outro lugar. Medido em 390: do fim do
+   botão sólido até o placar iam 171px, e o que mora ali são dois botões de
+   texto. `.lid-faixa-acoes` e `.esc-acoes` usam `gap:var(--e5)` — 20px — e num
+   celular esses filhos não ficam lado a lado: cada um vira uma faixa de 44px
+   (a lei do alvo de toque) com 20px de ar entre ela e a próxima. O gap que
+   separa DUAS COISAS numa linha vira, quando a linha quebra, o gap que separa
+   duas faixas empilhadas, e aí ele é grande demais.
+
+   A altura de 44px já é o alvo; o respiro entre alvos adjacentes não precisa
+   ser 20. Fica 8 na vertical e 20 na horizontal: mesma regra, dois eixos,
+   porque são dois problemas diferentes que o `gap` de valor único juntava. */
+@media(max-width:640px){
+  .lid-faixa-acoes,.esc-acoes{ gap:var(--e2) var(--e5) }
+  .esc-ajuda{ margin-top:var(--e2) }
+}
+
+/* O ESTADO DO DIA FLUTUAVA NO MEIO DE DUAS LINHAS. O `summary` centraliza os
+   filhos, e a coluna da esquerda tem duas linhas (nome do dia + "5 de 5
+   postos") contra uma da direita. Centrado, "2 a confirmar" descia e passava a
+   encostar em "5 DE 5 POSTOS", que é a linha que ele NÃO qualifica. Alinhado
+   pela primeira linha de texto, ele volta a pertencer ao nome do dia. */
+.esc-dia > summary{ align-items:baseline }
+.esc-dia > summary > .lid-marca{ align-self:stretch }
+
+/* O CABEÇALHO DA ESCALA VIRA GRADE NO DESKTOP. Ver a nota em page.tsx: o
+   placar mudou de lugar no HTML para nascer ao lado do mês no celular. Aqui
+   ele volta para a direita quando existe largura, sem sair da coluna de texto
+   nem ser escrito duas vezes. As linhas são declaradas na mão porque o placar
+   precisa começar na linha do mês, não empilhar depois dele. */
+@media(min-width:760px){
+  .esc-cab{
+    display:grid; grid-template-columns:minmax(0,1fr) auto;
+    column-gap:var(--e6); align-items:start;
+  }
+  .esc-cab > .rot{ grid-column:1; grid-row:1 }
+  .esc-cab > .esc-mes{ grid-column:1; grid-row:2 }
+  .esc-cab > .lid-faixa-sub{ grid-column:1; grid-row:3 }
+  .esc-cab > .lid-faixa-acoes{ grid-column:1; grid-row:4 }
+  .esc-cab > .esc-ajuda{ grid-column:1; grid-row:5 }
+  /* começa na linha do mês e não estica: colado no topo da direita */
+  .esc-cab > .lid-placar{ grid-column:2; grid-row:1 / span 3; align-self:start }
+}
+/* No celular ele é a resposta imediata do título, então encosta nele. O
+   `--d-heroi` de 44px continua sendo o tamanho: o número é o assunto. */
+@media(max-width:759px){
+  .esc-cab > .lid-placar{ text-align:left; margin-top:var(--e3) }
+  .esc-cab > .lid-faixa-sub{ margin-top:var(--e4) }
+}
+
+/* O H1 DA PÁGINA ESTAVA 48px FORA DA RÉGUA. 07/09/2026.
+   Medido em 390 e 1440: o rótulo "ESCALA", o subtítulo, o placar e todo o
+   resto da faixa começam em x=32 (170 no desktop). O `h1` começa em 80 (218).
+   A causa é a seta ‹ à esquerda dele: a caixa dela É a lei de toque, 44px, e
+   com o gap de 4 empurra o título 48px para dentro. O maior texto da tela era
+   o único elemento fora da régua, e o arquivo já tem uma nota longa de 29/08
+   sobre esse mesmo defeito noutra forma ("Agosto 2026 e Follow, sábado 29/08
+   nunca estiveram na mesma vertical").
+
+   As duas setas passam para DEPOIS do título, com `order` — a ordem do HTML
+   continua ‹ título ›, que é a ordem que faz sentido para quem lê por leitor
+   de tela e para quem navega por teclado. O título encosta na régua, e as
+   setas viram um par adjacente, que é melhor para o polegar: dá para ir e
+   voltar de mês sem tirar a mão do lugar.
+
+   `flex-wrap` é a rede: se num idioma ou num mês de nome longo o par não
+   couber ao lado, ele desce inteiro em vez de espremer o título. */
+.esc-mes{ flex-wrap:wrap; column-gap:0 }
+.esc-mes h1{ order:0 }
+.esc-mes .esc-seta{ order:1 }

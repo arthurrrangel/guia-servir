@@ -247,6 +247,63 @@ export function cultosDoMes(ano: number, mes: number): string[] {
   return [...domingosDoMes(ano, mes), ...sabadosDoFollow(ano, mes)].sort();
 }
 
+/* =============================================================================
+   QUEM ESTÁ CARREGANDO O MÊS
+
+   O produto inteiro olha um culto por vez. `resumoDia` responde "este domingo
+   está de pé?", `problemas` responde "alguém está em dois postos hoje?", e a
+   /escala empilha essas respostas. Nenhuma delas soma o mês, e é aí que mora
+   a pergunta que o líder não consegue fazer: quem está indo em TODOS, e quem
+   não vai servir nenhuma vez.
+
+   O motor já equilibra carga ao sortear — `candidatos` ordena por `cargaJanela`
+   antes de escolher. Mas o resultado desse equilíbrio nunca aparece em lugar
+   nenhum: `carga` só é lida dentro do texto de um `<option>`, no momento da
+   troca manual. Ou seja, o líder confia num equilíbrio que ele não pode
+   conferir, e quando o sorteio é desfeito na mão — que é o caso comum, porque
+   travar e trocar existem — ninguém percebe que a Amanda ficou com cinco e o
+   João com zero.
+
+   Conta DIAS distintos, não postos: quem faz FOTO e EDIÇÃO no mesmo domingo
+   foi à igreja uma vez. É a mesma regra que `cargaJanela` usa (ver a nota em
+   "carga e teto contam DOMINGOS distintos"), e divergir dela aqui faria a tela
+   contradizer o sorteio.
+
+   `montados` existe porque comparar contra o mês inteiro mente num mês pela
+   metade: com dois de seis cultos montados, quem está nos dois estaria "em
+   todos" e a tela gritaria um alarme falso.
+============================================================================= */
+export function cargaDoMes(S: Estado, ano: number, mes: number) {
+  const dias = cultosDoMes(ano, mes);
+  const conta = new Map<string, { dias: Set<string>; funcoes: Set<string> }>();
+  for (const d of dias) {
+    for (const [fn, sl] of Object.entries(S.escalas[d]?.slots || {})) {
+      if (!sl?.vid) continue;
+      const at = conta.get(sl.vid) || { dias: new Set<string>(), funcoes: new Set<string>() };
+      at.dias.add(d); at.funcoes.add(fn);
+      conta.set(sl.vid, at);
+    }
+  }
+  const pessoas = S.voluntarios.filter(v => v.ativo).map(v => {
+    const c = conta.get(v.id);
+    return {
+      id: v.id, nome: v.nome, n: c ? c.dias.size : 0,
+      dias: c ? [...c.dias].sort() : [],
+      funcoes: c ? [...c.funcoes].sort() : [],
+      limite: v.limiteMes ?? S.config.limitePadrao,
+    };
+  }).sort((a, b) => b.n - a.n || (a.nome < b.nome ? -1 : 1));
+  const montados = dias.filter(d => Object.values(S.escalas[d]?.slots || {}).some(s => s?.vid));
+  return {
+    dias, montados, pessoas,
+    escalados: pessoas.filter(p => p.n > 0),
+    zerados: pessoas.filter(p => p.n === 0),
+    /* "em todos" só é um fato quando há mais de um culto montado para estar */
+    emTodos: montados.length > 1 ? pessoas.filter(p => p.n === montados.length) : [],
+    acimaDoLimite: pessoas.filter(p => p.limite > 0 && p.n > p.limite),
+  };
+}
+
 /* As áreas que este dia precisa. O Follow não tem HEAD nem transmissão,
    então escalar essas funções num sábado seria criar vaga que não existe. */
 export function funcoesDoDia(S: Estado, data: string) {

@@ -6,7 +6,7 @@ import { Aviso, Escolha, Trabalhando } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  candidatos, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
+  candidatos, cargaDoMes, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
   resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
 } from '@/lib/engine';
@@ -252,14 +252,33 @@ function Escala() {
       {ocupado && <Trabalhando />}
       {/* ---------------------------------------------------------- a faixa */}
       <div className={`lid-faixa ${urge ? 'fogo' : ''}`}>
+        {/* O NÚMERO DO MÊS ERA A ÚLTIMA COISA DO CABEÇALHO. 07/09/2026.
+            Medido no celular: o placar nascia em y=449, DEPOIS do subtítulo,
+            dos dois botões e do link de ajuda. A ordem de leitura era mês →
+            frase sobre o estado → duas ações → e só então o número que é o
+            estado. Duas afirmações do mesmo fato ("falta a confirmação de quem
+            foi escalado" e "24 ainda não confirmaram") separadas por 200px de
+            botões, e a mais rápida das duas chegando por último.
+
+            O placar passou para DENTRO da coluna de texto, logo abaixo do mês.
+            No celular ele cai naturalmente ali; no desktop uma grade o devolve
+            à direita, que é onde ele já estava e onde funciona. Uma marcação,
+            duas leituras, sem duplicar elemento — placar repetido seria lido
+            duas vezes por quem usa leitor de tela. */}
         <div className="lid-faixa-in">
-          <div className="lid-faixa-txt">
+          <div className="lid-faixa-txt esc-cab">
             <span className="rot">Escala</span>
             <div className="esc-mes">
               <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
               <h1>{MESES[mes - 1]} {ano}</h1>
               <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
             </div>
+            {placar && (
+              <div className="lid-placar">
+                <b>{placar.n}</b>
+                <span>{placar.rot}</span>
+              </div>
+            )}
             <p className="lid-faixa-sub">
               {!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
                 : contas.aMontar === futuros.length ? 'Nada montado ainda. O sorteio respeita quem não pode e quem já serviu.'
@@ -276,27 +295,31 @@ function Escala() {
               </button>
             </div>
             {/* O BOTÃO QUE REESCREVE O MÊS NÃO DIZIA O QUE IA FAZER.
-                O motor é cuidadoso — quem confirmou e quem foi travado são
+                O motor é cuidadoso: quem confirmou e quem foi travado são
                 intocáveis, quem recusou não volta a ser sorteado. Só que essa
                 garantia estava no comentário do engine, não na tela. O líder
                 com pressa lê "Montar o mês inteiro" e a pergunta honesta dele
                 é "isso apaga o que a Malu já confirmou?". Sem resposta, ou ele
                 não aperta, ou aperta com medo. As duas são caras.
 
-                Isto não é aviso de perigo: é o contrário. É a frase que
-                transforma um botão assustador num botão seguro. */}
-            <p className="esc-oquefaz">
-              Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
-              e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
-              um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
-            </p>
+                RECOLHIDO EM 07/09/2026, E O MOTIVO NÃO É ESPAÇO. Medido no
+                celular: da palavra "ESCALA" até o primeiro culto iam ~500px de
+                cabeçalho, e este parágrafo era 4 das linhas. Ele é material de
+                primeira vez: responde uma dúvida que existe UMA vez e depois
+                nunca mais. Quem monta escala toda semana lia a mesma aula na
+                20ª visita, e o preço era o culto que ele veio resolver começar
+                abaixo da dobra. Fechado, custa um toque a quem precisa e zero
+                a quem já sabe. A resposta continua a um toque de distância do
+                botão que a provoca, que é o requisito real. */}
+            <details className="esc-ajuda">
+              <summary>O que esses botões fazem</summary>
+              <p>
+                Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
+                e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
+                um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
+              </p>
+            </details>
           </div>
-          {placar && (
-            <div className="lid-placar">
-              <b>{placar.n}</b>
-              <span>{placar.rot}</span>
-            </div>
-          )}
         </div>
       </div>
 
@@ -321,30 +344,126 @@ function Escala() {
           delas só para navegar na outra, é complexidade que eu mesmo tinha
           acabado de criar. */}
 
-      {/* ---------------------------------------------------- o que ainda vem */}
-      {futuros.map(d => (
-        <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
-          {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
-      ))}
-
-      {/* ------------------------------------------------------ o que passou
-          Recolhido. É referência: o líder vem aqui para registrar um furo ou
-          conferir o que aconteceu, não para trabalhar. */}
-      {!!passados.length && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab">
-            <span className="rot">Já passaram</span>
-            <button className="lid-bt-txt" onClick={() => setVerPassado(v => !v)}>
-              {verPassado ? 'esconder' : `ver ${passados.length}`}
-            </button>
-          </div>
-          {verPassado && passados.map(d => (
-            <DiaCard key={d} d={d} aberto={false} passado
+      {/* A LISTA E O PESO, LADO A LADO. 07/09/2026.
+          Medido em 1440: o cartão de dia acaba em x=856 e o `.lid` vai até
+          1290. São 434px vazios em toda a altura da página, e em 1920 são os
+          mesmos 434 mais 390 de margem de cada lado. A tentação era alargar o
+          cartão, e ela está errada: a largura dele é 64ch por medição (ver a
+          nota em globals.css), porque uma linha de nome + estado é uma linha
+          de LEITURA. O que cabe ali do lado é conteúdo de outra natureza. */}
+      <div className="esc-palco">
+        <div className="esc-lista">
+          {/* -------------------------------------------------- o que ainda vem */}
+          {futuros.map(d => (
+            <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
               {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
           ))}
-        </section>
-      )}
+
+          {/* ---------------------------------------------------- o que passou
+              Recolhido. É referência: o líder vem aqui para registrar um furo
+              ou conferir o que aconteceu, não para trabalhar. */}
+          {!!passados.length && (
+            <section className="lid-secao">
+              <div className="lid-secao-cab">
+                <span className="rot">Já passaram</span>
+                <button className="lid-bt-txt" onClick={() => setVerPassado(v => !v)}>
+                  {verPassado ? 'esconder' : `ver ${passados.length}`}
+                </button>
+              </div>
+              {verPassado && passados.map(d => (
+                <DiaCard key={d} d={d} aberto={false} passado
+                  {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+              ))}
+            </section>
+          )}
+        </div>
+
+        <MesEmPessoas S={S} ano={ano} mes={mes} />
+      </div>
     </div>
+  );
+}
+
+/* =============================================================================
+   O MÊS EM PESSOAS
+
+   A tela inteira olha um culto por vez, e por isso não responde as duas
+   perguntas que decidem se uma escala é justa: quem está indo em TODOS, e quem
+   não vai servir nenhuma vez. O motor equilibra carga ao sortear, mas o líder
+   trava, troca e remonta na mão — e é exatamente aí que o equilíbrio se desfaz
+   sem ninguém ver.
+
+   A FORMA É UMA FITA POR PESSOA, NÃO UMA GRADE. Uma grade cultos × funções tem
+   42 células com a demo de hoje: legível no desktop, impossível no celular, e
+   ela responde "quem faz o quê" — que a lista abaixo já responde melhor. A
+   pergunta daqui é outra e é de repetição, então a unidade é a PESSOA e cada
+   culto do mês vira um traço: cheio se ela entra, vazio se não. Seis traços
+   numa linha de 200px cabem no celular e mostram o padrão sem ler número
+   nenhum. Quem tem a fita toda cheia salta aos olhos antes de qualquer rótulo.
+
+   Os traços são decorativos para quem lê com leitor de tela: quem carrega o
+   fato é o número ao lado e a lista de datas escondida. Desenho não pode ser
+   a única via de uma informação.
+============================================================================= */
+function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) {
+  const [verZerados, setVerZerados] = useState(false);
+  const m = cargaDoMes(S, ano, mes);
+  /* mês sem nada montado não tem peso para mostrar, e um painel vazio ao lado
+     da lista é pior que painel nenhum */
+  if (!m.montados.length) return null;
+
+  const marca = (id: string) =>
+    m.emTodos.some(x => x.id === id) ? 'todos'
+      : m.acimaDoLimite.some(x => x.id === id) ? 'acima' : '';
+
+  return (
+    <aside className="esc-peso" aria-labelledby="esc-peso-t">
+      <h2 className="esc-peso-t" id="esc-peso-t">O mês em pessoas</h2>
+      <p className="esc-peso-sub">
+        {cont(m.escalados.length, 'pessoa entra', 'pessoas entram')} nos{' '}
+        {cont(m.montados.length, 'culto montado', 'cultos montados')} de {MESES[mes - 1]}.
+      </p>
+
+      <ol className="esc-peso-l">
+        {m.escalados.map(p => (
+          <li key={p.id} className={marca(p.id)}>
+            <span className="esc-peso-n">{p.nome}</span>
+            <span className="esc-peso-fita" aria-hidden="true">
+              {m.montados.map(d => (
+                <i key={d} className={p.dias.includes(d) ? 'on' : ''} />
+              ))}
+            </span>
+            <span className="esc-peso-q">{p.n}</span>
+            <span className="so-leitor">
+              {cont(p.n, 'culto', 'cultos')} em {MESES[mes - 1]}: {p.dias.map(fmtDia).join(', ')}
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {!!m.emTodos.length && (
+        <p className="esc-peso-nota todos">
+          {m.emTodos.map(p => p.nome.split(' ')[0]).join(' · ')}{' '}
+          {pl(m.emTodos.length, 'está', 'estão')} em todos os cultos montados.
+        </p>
+      )}
+      {!!m.acimaDoLimite.length && (
+        <p className="esc-peso-nota acima">
+          {m.acimaDoLimite.map(p => p.nome.split(' ')[0]).join(' · ')}{' '}
+          {pl(m.acimaDoLimite.length, 'passou', 'passaram')} do limite do mês.
+        </p>
+      )}
+
+      {!!m.zerados.length && (
+        <div className="esc-peso-zero">
+          <button className="lid-bt-txt" onClick={() => setVerZerados(v => !v)}
+            aria-expanded={verZerados}>
+            {cont(m.zerados.length, 'pessoa não entra', 'pessoas não entram')} em nenhum
+          </button>
+          {verZerados && <p>{m.zerados.map(p => p.nome).join(' · ')}</p>}
+        </div>
+      )}
+    </aside>
   );
 }
 
