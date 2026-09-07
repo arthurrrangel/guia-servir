@@ -7135,3 +7135,26 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @supports not (background:linear-gradient(to top,#000,transparent)){
   .wiz-pe{ border-top:1px solid var(--linha) }
 }
+
+/* =============================================================================
+   O RODAPÉ DEIXAVA MEIA TELA VAZIA AO LADO DO ÚLTIMO GRUPO
+   07/09/2026. Capturado em 390: `.g-pe-cols` é uma grade de duas colunas e os
+   grupos de links são TRÊS. "Visitar" e "A igreja" dividem a primeira linha;
+   "Servir" cai sozinho na segunda, com a metade direita da tela vazia por toda
+   a altura dele. Três em duas colunas sempre sobra um, e o que sobra é buraco.
+
+   As saídas honestas eram poucas. Três colunas não cabem em 390 (cada uma com
+   110px, e "Acesso às equipes" quebraria em duas linhas). Uma coluna só alinha
+   perfeito e custa ~150px a mais de altura, num rodapé que já ocupa 0,9 da
+   tela em toda página do site — trocar buraco por rolagem não é ganho.
+
+   Então o terceiro grupo ocupa a linha inteira e distribui os próprios links
+   na horizontal. A linha fica cheia, a altura não cresce, e o rodapé passa a
+   ter duas formas de lista em vez de um vazio. */
+@media(max-width:899px){
+  .g-pe-cols > *:last-child{ grid-column:1 / -1 }
+  .g-pe-cols > *:last-child h4{ margin-bottom:10px }
+  .g-pe-cols > *:last-child a{
+    display:inline-block; padding:5px 0; margin-right:var(--e5);
+  }
+}
