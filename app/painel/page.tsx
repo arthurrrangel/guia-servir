@@ -88,10 +88,27 @@ function Igreja() {
      lista logo abaixo. */
   const emFalta = areas.filter(a => leitura(a).cls === 'ruim').length;
 
+  /* A DATA ESTAVA ESCRITA CINCO VEZES. 07/09/2026. Cada linha de área trazia
+     "DOMINGO 12/09 · 9 de 9". Cinco áreas, cinco vezes a mesma data, uma
+     debaixo da outra — e por ser a mesma em todas ela não distinguia nenhuma:
+     era ruído com aparência de dado. O que a linha precisa dizer é quantos
+     postos estão de pé; QUANDO é uma propriedade do domingo, não da área.
+
+     Só sai da linha quando é de fato comum a todas. Igreja em que uma área
+     serve no sábado do Follow e as outras no domingo continua vendo a data em
+     cada linha, porque aí ela volta a distinguir. */
+  const datas = new Set(areas.map(a => a.proxima_data ? `${a.tipo}|${a.proxima_data}` : ''));
+  const umaSoData = datas.size === 1 && !datas.has('');
+  const comum = umaSoData ? areas[0] : null;
+
   return (
     <section className="lid-secao">
       <div className="lid-secao-cab">
-        <span className="rot">O domingo da igreja</span>
+        <span className="rot">
+          {comum
+            ? `${comum.tipo === 'follow' ? 'O Follow de' : 'O domingo'} ${fmtDia(comum.proxima_data!)}`
+            : 'O domingo da igreja'}
+        </span>
         <span className="lid-secao-nota">
           {emFalta === 0 ? 'Todas as áreas de pé' : emFalta === 1 ? '1 área precisa de gente' : `${emFalta} áreas precisam de gente`}
         </span>
@@ -119,7 +136,9 @@ function Igreja() {
               <span className="lid-area-nome">{a.equipe}</span>
               <span className="lid-area-est">{l.txt}</span>
               <span className="lid-area-sub">
-                {a.proxima_data ? `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)} · ${a.preenchidos} de ${a.postos}` : cont(a.postos, 'função', 'funções')}
+                {!a.proxima_data ? cont(a.postos, 'função', 'funções')
+                  : umaSoData ? `${a.preenchidos} de ${a.postos}`
+                  : `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)} · ${a.preenchidos} de ${a.postos}`}
                 {a.candidaturas_novas > 0 && ` · ${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar`}
               </span>
             </Link>

@@ -4339,7 +4339,7 @@ html{ scroll-padding-top:88px }
    até 1445, o campo de recado em 1057. Trocar um buraco por cinco desalinhos
    não é conserto. O corte é UM, no bloco do dia inteiro: tudo lá dentro herda
    a mesma borda direita e o fio de baixo acompanha. */
-:root{ --lista:64ch }
+:root{ --lista:35rem }   /* 560px. Era 64ch — ver a nota da FASE 23 sobre `@property` */
 .esc-dia{ max-width:var(--lista) }
 
 /* 64ch, e não 78: o valor veio de medir o conteúdo, não de escolher um número
@@ -6944,3 +6944,157 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .esc-mes{ flex-wrap:wrap; column-gap:0 }
 .esc-mes h1{ order:0 }
 .esc-mes .esc-seta{ order:1 }
+
+/* =============================================================================
+   FASE 23 · UMA RÉGUA POR TELA
+   07/09/2026. Escrevi `scripts/regua-lider.mjs` porque `reguas.mjs` percorre
+   `section, footer` e as telas do líder são `div.lid` — ele é estruturalmente
+   cego a elas, e provou ser: deu zero na /escala no mesmo dia em que o `h1`
+   estava 48px fora da régua. O novo verificador conta quantas bordas esquerdas
+   distintas a espinha de cada tela usa. A /time usava quatro.
+============================================================================= */
+
+/* AS LINHAS DE UMA LISTA NÃO SE ALINHAVAM ENTRE SI. Medido em 390: a régua da
+   página é 32. Uma linha comum de pessoa põe o conteúdo em 36 (4px de padding
+   do `summary`); uma linha marcada como nova põe em 39, porque `.card-novo`
+   acrescenta `border-left:3px` e a borda empurra o conteúdo. Duas pessoas
+   seguidas na MESMA lista, uma 3px à direita da outra, pelo estado de uma
+   delas. No desktop o mesmo defeito vale 11px (8 de padding + 3 de borda).
+
+   Três pixels não se enxerga isolado; enxerga-se numa coluna de dezessete
+   nomes, como um serrilhado que ninguém sabe nomear e todo mundo sente.
+
+   O produto já resolveu isto onze vezes: a marca de estado é um fio absoluto
+   na margem, fora do fluxo, e o conteúdo fica onde estava (ver `.lid-marca` e
+   a nota em `.vol-linha`). `.card-novo` ficou de fora daquela conversão porque
+   é usado num lugar só. Agora usa a mesma regra, e o padding horizontal do
+   `summary` vai a zero: a linha é de largura cheia, o fundo do hover também
+   era, e os 4px só serviam para tirar o nome da régua. */
+.tm-pessoa{ position:relative }
+.tm-pessoa > summary{ padding-left:0; padding-right:0 }
+.card-novo{ border-left:0 }
+.tm-pessoa.card-novo::before{
+  content:""; position:absolute; left:calc(-1 * var(--e3)); top:0; bottom:0;
+  width:3px; background:var(--warn);
+}
+
+/* UM DEGRAU DE ANINHAMENTO, NÃO SEIS. O verificador de réguas, com a atribuição
+   de culpa ligada, listou os empurrões que o produto usa para "conteúdo um
+   nível dentro de um contêiner":
+
+     .pessoa-corpo        8px
+     .slot               12px
+     .bloco-extra-corpo  16px
+     .esc-corpo          20px no desktop, 16 no celular
+
+   Quatro valores para a mesma ideia, e nenhum deles errado sozinho. Juntos são
+   o serrilhado: o líder passa da /time para a /escala e o texto interno começa
+   em outro lugar, sem que nada tenha mudado de natureza. Espaçamento que varia
+   sem motivo é lido como descuido mesmo por quem não sabe medir.
+
+   Passa a ser `--e4`, 16px, em todos. O número não é escolhido por gosto: é o
+   degrau da escala imediatamente acima dos 12px em que a marca de estado mora
+   (`--e3`), então o conteúdo limpa a marca com folga de um passo, e é o mesmo
+   valor que os cartões com borda já usavam de padding — o que faz o conteúdo
+   de um cartão e o de uma linha expandida caírem na MESMA vertical, com 1px de
+   diferença pela borda do cartão. */
+.pessoa-corpo{ padding-left:var(--e4); padding-right:var(--e4) }
+.slot{ padding-left:var(--e4); padding-right:var(--e4) }
+.esc-corpo{ padding-left:var(--e4) }
+@media(max-width:640px){ .esc-corpo{ padding-left:var(--e4) } }
+/* mesma regra do degrau único: era 20 no desktop e 16 no celular, o que fazia
+   a linha aberta de uma candidatura começar num lugar no computador e noutro
+   no telefone, para o mesmo líder no mesmo dia */
+.lid-cand-corpo{ padding-left:var(--e4) }
+
+/* =============================================================================
+   A MEDIDA DA LISTA VALE PARA TODAS AS LISTAS, NÃO SÓ PARA A DA /escala
+   07/09/2026. Capturado em 1440: no /painel o nome "Louvor" começa em x=170 e
+   o estado "10 sem ninguém" em x=1160. Na /time o nome da pessoa em 170 e o
+   "0/4" em 1230. Mil pixels de nada entre a coisa e o que se diz dela, em
+   listas cujo conteúdo real cabe em menos de metade disso. É o "espalhado" em
+   estado puro: o olho termina o nome, atravessa o vazio e precisa conferir se
+   voltou na linha certa.
+
+   O produto já tinha resolvido isto uma vez. `--lista` é 64ch e a nota que a
+   fixou está a algumas centenas de linhas acima: as duas colunas da /escala
+   pedem 406px de conteúdo real, 78ch dava 836px e "o que sobrava virava buraco
+   entre o nome e o estado". A conclusão valia para toda lista de nome + estado
+   do produto; foi aplicada a uma classe só, `.esc-dia`, porque foi lá que eu
+   estava olhando naquele dia.
+
+   Agora vale para a seção inteira: cabeçalho e linhas dividem a mesma medida,
+   então o título da seção, o nome de cada item e o estado de cada item ficam
+   nas mesmas duas verticais. O que sobra à direita não é desperdício, é
+   margem — e na /escala já é onde mora o painel do mês.
+============================================================================= */
+.lid-secao{ max-width:var(--lista) }
+.lid-alerta{ max-width:var(--lista) }
+/* dentro de uma grade de duas colunas quem manda é a coluna, e uma segunda
+   trava só criaria uma medida menor que a que a grade já decidiu */
+.lid-duas .lid-secao{ max-width:none }
+/* a /time não põe as pessoas dentro de `.lid-secao`: `.tm-pessoa`, o cabeçalho
+   e a busca são filhos diretos de `.lid`. Sem estas linhas a lista continuava
+   com o nome em 170 e o "0/4" em 1230, que é o defeito que esta fase existe
+   para matar. Os filtros entram junto: uma fileira que corre até 1175 sobre
+   uma lista que acaba em 856 deixa a coluna com duas bordas direitas. */
+.lid-secao-cab,.tm-pessoa,.tm-achar,.tm-funcoes,.bloco-extra{ max-width:var(--lista) }
+.lid-duas .lid-secao-cab,.lid-duas .bloco-extra{ max-width:none }
+
+/* =============================================================================
+   `--lista` VALIA UMA COISA DIFERENTE EM CADA ELEMENTO
+   07/09/2026. Capturado logo depois de aplicar a medida às listas do líder: na
+   /time a régua do alerta terminava em x=795 e a da busca em x=856, com as
+   duas declarando `max-width:var(--lista)`. Não é arredondamento: são 61px.
+
+   A causa é `ch`. Propriedade personalizada não guarda valor computado, guarda
+   TOKEN — `var(--lista)` reescreve `64ch` dentro de cada elemento, e `ch` é
+   relativo à fonte DAQUELE elemento. `.lid-alerta` roda em 15,5px e `.esc-dia`
+   em 17: 64ch dá 625 num e 686 no outro. Uma constante que muda de valor
+   conforme quem a lê não é constante, é armadilha — e o efeito visível é
+   exatamente o que este trabalho está tentando eliminar: bordas direitas que
+   quase se alinham.
+
+   `@property` com `syntax:'<length>'` obriga o valor a ser computado onde é
+   declarado, em `:root`, e a ser herdado já em pixels. Onde `@property` não
+   existir, o comportamento volta a ser o de hoje: nada regride.
+============================================================================= */
+@property --lista{ syntax:'<length>'; inherits:true; initial-value:35rem }
+
+/* E AÍ O VALOR APARECEU ERRADO DOS DOIS LADOS. Com `@property` no lugar, `64ch`
+   passou a ser computado em `:root`, onde a fonte é 16px, e deu 512px. Antes
+   dava 686 no `.esc-dia` (fonte 17) e 625 no `.lid-alerta` (fonte 15,5) — três
+   números para uma constante. A nota original que fixou a medida diz, com a
+   conta à mão: 406px de conteúdo real e "64ch (~563px) deixa 157px de folga".
+   Ou seja, o valor que eu QUERIA sempre foi ~563, e nenhum dos três elementos
+   estava entregando isso.
+
+   Vira `35rem` = 560px: a medida que a medição pediu, escrita num tamanho que
+   não depende da fonte de quem lê a variável. `ch` só faz sentido quando o
+   elemento que resolve a conta é o elemento que exibe o texto, e uma variável
+   global nunca é esse elemento. */
+
+/* CAMPOS VIZINHOS EM ALTURAS DIFERENTES. Capturado no /ajustes em 1440: o
+   rótulo "Máximo de escalas por pessoa por mês" quebra em duas linhas e o
+   vizinho "Plantonistas por domingo" não, então os dois seletores da MESMA
+   fileira ficam com 20px de diferença na vertical. Cada célula da `.grade` é
+   uma pilha independente: rótulo em cima, campo embaixo, e a altura do campo
+   passa a depender de quantas palavras tem o rótulo dele.
+
+   `subgrid` resolve na raiz: a célula deixa de ter linhas próprias e passa a
+   usar as duas linhas da grade mãe, então todos os rótulos dividem a primeira
+   e todos os campos a segunda. O `:has` restringe às células que são de fato
+   um par rótulo + campo — `.grade` também carrega blocos de outra forma, e
+   forçar subgrid neles quebraria o que hoje funciona. */
+@media(min-width:640px){
+  .grade{ grid-auto-rows:min-content }
+  .grade > div:has(> label + select),
+  .grade > div:has(> label + input),
+  .grade > div:has(> label + textarea){
+    display:grid; grid-template-rows:subgrid; grid-row:span 2; gap:0;
+  }
+}
+
+/* o índice do /ajustes é a única coisa da página que ia até 1270 enquanto o
+   conteúdo parava em 730: duas bordas direitas na mesma tela */
+.aj-indice{ max-width:var(--lista) }
