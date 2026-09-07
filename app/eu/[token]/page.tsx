@@ -40,6 +40,12 @@ const diaCurto = (s: string) => {
   const m = String(dt.getUTCMonth() + 1).padStart(2, '0');
   return ehSabado(s) ? `sáb ${d}/${m} · Follow` : `dom ${d}/${m}`;
 };
+/* o mesmo rótulo sem o mês, para dentro de um grupo que já diz de que mês é */
+const diaNoMes = (s: string) => {
+  const dt = new Date(s + 'T12:00:00Z');
+  const d = String(dt.getUTCDate()).padStart(2, '0');
+  return ehSabado(s) ? `sáb ${d} · Follow` : `dom ${d}`;
+};
 const diaLongo = (s: string) => {
   const dt = new Date(s + 'T12:00:00Z');
   const q = ehSabado(s) ? 'sábado (Follow)' : 'domingo';
@@ -255,6 +261,34 @@ export default function Eu() {
     else await carregar(false);
     setOcupado('');
   }
+  /* a mesma coisa de `possoTodos`, restrita a um mês. Não vale extrair as
+     duas para uma só: a de cima responde "tudo", esta responde "isto aqui", e
+     juntá-las custaria um parâmetro que só existe para economizar seis
+     linhas. */
+  /* os dias agrupados pelo mês a que pertencem, na ordem em que vêm. Cálculo
+     de leitura, não de estado: nada aqui precisa de memo. */
+  const porMes = (() => {
+    const g: { chave: string; rot: string; dias: string[] }[] = [];
+    for (const d of domingos) {
+      const chave = d.slice(0, 7);
+      const at = g.find(x => x.chave === chave);
+      if (at) at.dias.push(d);
+      else g.push({ chave, rot: `${MESES[+d.slice(5, 7) - 1]} de ${d.slice(0, 4)}`, dias: [d] });
+    }
+    return g;
+  })();
+
+  async function possoNoMes(dias: string[]) {
+    if (!dias.length) return;
+    setOcupado('todos'); setErro('');
+    for (const d of dias) {
+      const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' });
+      if (error) { setErro(aviseHumano(error, 'salvar o mês')); break; }
+    }
+    await carregar(false);
+    setOcupado('');
+  }
+
   async function possoTodos() {
     const faltando = domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d));
     if (!faltando.length) return;
@@ -620,23 +654,54 @@ export default function Eu() {
                 ? `${pl(semResposta.length, 'Falta', 'Faltam')} ${cont(semResposta.length, 'dia', 'dias')} para responder. É isso que garante seu lugar na escala.`
                 : 'Tudo respondido. Pode mudar quando quiser.'}
             </p>
-            <div className="vol-disp" style={{ marginTop: 16 }}>
-              {domingos.map(d => {
-                const pode = disponivel.includes(d);
-                const nao = indisp.includes(d);
-                return (
-                  <div className="vol-dia" key={d}>
-                    <span className="vol-dia-nome">{diaCurto(d)}</span>
-                    <span className="vol-dia-btns">
-                      <button className={`vol-dia-bt ${pode ? 'on' : ''}`} disabled={ocupado === d}
-                        onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>posso</button>
-                      <button className={`vol-dia-bt nao ${nao ? 'on' : ''}`} disabled={ocupado === d}
-                        onClick={() => responderDisp(d, 'nao')} aria-pressed={nao}>não</button>
+            {/* POR MÊS, E NÃO NUMA GRADE CORRIDA. 07/09/2026.
+                Eram quinze datas em duas colunas sem separação nenhuma. E o
+                padrão se perdia sozinho: entre 27/09 e 04/10 não existe sábado
+                de Follow, então a coluna da esquerda troca de sábado para
+                domingo no meio da lista. O olho perde a régua e quem quer
+                responder "não posso em outubro" precisa caçar as datas de
+                outubro espalhadas nas duas colunas.
+                Com o mês por cima, a troca de padrão passa a ter explicação, a
+                contagem responde "quanto falta aqui" sem contar na mão, e cada
+                mês ganha a própria ação em massa — que é como as pessoas
+                pensam disponibilidade: por viagem, por período, por mês. */}
+            {porMes.map(g => {
+              const faltamNoMes = g.dias.filter(d => !indisp.includes(d) && !disponivel.includes(d));
+              return (
+                <div className="vol-mes" key={g.chave}>
+                  <div className="vol-mes-cab">
+                    <span className="vol-mes-nome">{g.rot}</span>
+                    <span className="vol-mes-nota">
+                      {faltamNoMes.length
+                        ? `${faltamNoMes.length} de ${g.dias.length} sem resposta`
+                        : 'tudo respondido'}
                     </span>
+                    {faltamNoMes.length > 1 && (
+                      <button type="button" className="vol-mes-todos"
+                        disabled={!!ocupado}
+                        onClick={() => possoNoMes(faltamNoMes)}>Posso no mês</button>
+                    )}
                   </div>
-                );
-              })}
-            </div>
+                  <div className="vol-disp">
+                    {g.dias.map(d => {
+                      const pode = disponivel.includes(d);
+                      const nao = indisp.includes(d);
+                      return (
+                        <div className="vol-dia" key={d}>
+                          <span className="vol-dia-nome">{diaNoMes(d)}</span>
+                          <span className="vol-dia-btns">
+                            <button className={`vol-dia-bt sim ${pode ? 'on' : ''}`} disabled={ocupado === d}
+                              onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>posso</button>
+                            <button className={`vol-dia-bt nao ${nao ? 'on' : ''}`} disabled={ocupado === d}
+                              onClick={() => responderDisp(d, 'nao')} aria-pressed={nao}>não</button>
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </section>
         )}
 

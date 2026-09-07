@@ -3554,12 +3554,28 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   border:1px solid var(--linha); background:transparent; color:var(--cinza);
   border-radius:0; padding:var(--e2) var(--e3); cursor:pointer; min-height:var(--toque);
 }
+/* VERDE NO POSSO, VERMELHO NO NÃO — e a nota que morava aqui estava errada.
+   07/09/2026. O texto anterior defendia pintar as duas de preto, com o
+   argumento de que vermelho neste sistema quer dizer "tem um problema" e que
+   avisar com três semanas de antecedência é o contrário de um problema.
+
+   O argumento é bom e o sistema não o seguia. Medido: app/time/page.tsx:350
+   já renderiza as datas em que a pessoa avisou que não pode com
+   `marca-est bad` — vermelho —, e o /painel classifica "não pode" como
+   `ruim`. O mesmo fato era vermelho em duas telas do líder e preto na do
+   voluntário. Não havia doutrina sendo protegida: havia uma tela fora do
+   acordo, e era justamente a única em que a leitura é de relance, num
+   celular, com quinze linhas iguais.
+
+   Preto nos dois também apagava a informação: numa coluna em que "posso" e
+   "não" são o mesmo retângulo escuro, não dá para ver o padrão do próprio mês
+   sem ler palavra por palavra. */
+.vol-dia-bt.sim.on{ background:var(--ok); color:#fff; border-color:var(--ok) }
+.vol-dia-bt.nao.on{ background:var(--bad); color:#fff; border-color:var(--bad) }
+/* o fallback continua: botão marcado sem classe de lado fica escuro */
 .vol-dia-bt.on{ background:var(--noite); color:#fff; border-color:var(--noite) }
-/* NÃO havia um segundo caso, pintado de vermelho. Vermelho neste sistema quer
-   dizer "tem um problema aqui" — e a pessoa avisar com três semanas que não
-   pode num domingo é exatamente o contrário de um problema: é o aviso que
-   permite trocar a tempo. Quem escolheu já está dito pela palavra preenchida;
-   pintar a resposta honesta de vermelho repreende quem respondeu direito. */
+.vol-dia-bt.sim:hover:not(.on){ border-color:var(--ok); color:var(--ok) }
+.vol-dia-bt.nao:hover:not(.on){ border-color:var(--bad); color:var(--bad) }
 .vol-dia-bt:hover:not(.on),
 .vol-dia-bt:active:not(.on){ border-color:var(--noite); color:var(--noite) }
 
@@ -6714,3 +6730,37 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 }
 /* na largura em que tudo cabe, a máscara só apagaria o fim do último item */
 @media(min-width:900px){ .aj-indice{ -webkit-mask-image:none; mask-image:none } }
+
+/* =============================================================================
+   A DISPONIBILIDADE POR MÊS
+   07/09/2026. Ver a nota em app/eu/[token]/page.tsx: quinze datas numa grade
+   corrida, sem separação, e com o padrão trocando de coluna sozinho quando o
+   mês vira. O cabeçalho do mês devolve a régua, a contagem responde "quanto
+   falta aqui" e a ação em massa cobre o caso real — quem viaja, viaja o mês.
+============================================================================= */
+.vol-mes + .vol-mes{ margin-top:var(--e7) }
+.vol-mes-cab{
+  display:flex; align-items:baseline; flex-wrap:wrap; gap:var(--e2) var(--e4);
+  padding-bottom:var(--e2); border-bottom:1px solid var(--linha);
+}
+.vol-mes-nome{
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--ink);
+}
+.vol-mes-nota{ font-size:var(--t-rot); color:var(--cinza) }
+.vol-mes-todos{
+  margin-left:auto; border:0; background:transparent; padding:0; cursor:pointer;
+  font-family:var(--fonte); font-size:var(--t-apoio); color:var(--ink);
+  border-bottom:1px solid rgba(37,37,37,.3); transition:border-color var(--t);
+}
+.vol-mes-todos:hover:not(:disabled){ border-bottom-color:currentColor }
+.vol-mes-todos:disabled{ opacity:.4; cursor:default }
+.vol-mes .vol-disp{ margin-top:var(--e2) }
+@media(max-width:519px){ .vol-mes-todos{ margin-left:0 } }
+
+/* botões de texto herdam caixa alta e entreletra da regra global de `button`,
+   e passam a competir com o título da seção que estão dentro. Já aconteceu
+   com "ver o time todo" e voltou aqui em "posso no mês" e "posso em todos":
+   são ações de conveniência, não a ação da tela. */
+.vol-mes-todos,.vol-quem{ text-transform:none; letter-spacing:0; font-weight:var(--p-corpo) }
