@@ -44,6 +44,10 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
   const mapa = useRef<any>(null);
   const pinos = useRef<Record<string, any>>({});
   const L = useRef<any>(null);
+  /* o `zoomend` é registrado uma vez, na montagem, e o `desenhar` daquele
+     render prenderia a lista daquela hora: depois de filtrar por dia, um zoom
+     redesenharia TODOS os grupos. A referência aponta sempre para o último. */
+  const desenharAtual = useRef<(enquadrar: boolean) => void>(() => {});
 
   const comPonto = grupos.filter(g => g.coord);
 
@@ -81,7 +85,9 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
       }).addTo(m);
       m.zoomControl.setPosition('bottomright');
       mapa.current = m;
-      desenhar();
+      /* a junção dos pinos depende do zoom: refaz a cada mudança, sem reenquadrar */
+      m.on('zoomend', () => desenharAtual.current(false));
+      desenhar(true);
     })();
     return () => {
       vivo = false;
@@ -91,36 +97,47 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
   }, []);
 
   /* ---------------------------------------------------------- os pinos */
-  function desenhar() {
+  function desenhar(enquadrar: boolean) {
     const l = L.current, m = mapa.current;
     if (!l || !m) return;
     for (const k of Object.keys(pinos.current)) { m.removeLayer(pinos.current[k]); }
     pinos.current = {};
     if (!comPonto.length) return;
 
-    /* DOIS GRUPOS NO MESMO PONTO SÃO UM PONTO. Betel e Elas acontecem na
-       igreja; Elohim e Bali no mesmo bairro. Coordenada idêntica faz um pino
-       cair em cima do outro e o de baixo fica inclicável: o grupo existe na
-       lista e some do mapa.
+    /* PINOS QUE SE ENCOSTAM VIRAM UM PINO COM NÚMERO. 07/09/2026.
+       A primeira versão só juntava grupos de coordenada IDÊNTICA (Betel e
+       Elas, na igreja; Elohim e Bali). Em produção, com o mapa enquadrando de
+       Marechal Hermes ao Recreio (zoom 11), Barraspace e Farol de Itaúna caíam
+       a poucos pixels da igreja e os círculos se empilhavam: quatro grupos,
+       uma pilha ilegível, e o de baixo inclicável.
 
-       A primeira tentativa foi afastar os repetidos em círculo. Fiz a conta
-       depois de escrever, que é a ordem errada: 0,00036 grau são ~40 metros, e
-       no zoom 13 a escala é ~17,6 m/pixel. Dois pixels de afastamento entre
-       dois pinos de 34 pixels não separa nada, e ainda mentia sobre onde o
-       grupo fica.
+       Agora a junção é por DISTÂNCIA NA TELA no zoom atual (menos de 40px
+       entre centros, com o pino medindo 34), refeita a cada mudança de zoom.
+       Um pino com "3" no zoom da cidade vira três pinos quando a pessoa
+       aproxima — que é o gesto natural de quem quer saber "qual fica perto de
+       mim". Tocar num pino com número aproxima até separar; tocar num pino de
+       um grupo só acende o cartão dele. Grupos no MESMO ponto (a igreja) nunca
+       se separam, e aí o pino diz os dois e acende o primeiro.
 
-       Um ponto, um pino. Se dois grupos acontecem no mesmo lugar — e no caso
-       da igreja isso é literalmente verdade — o pino diz os dois. Clicar nele
-       acende o primeiro; a lista embaixo mostra os dois inteiros. */
-    const porPonto = new Map<string, PequenaGuia[]>();
+       A primeira tentativa de resolver isso, dias atrás, foi afastar os
+       repetidos em círculo: 0,00036 grau são ~40 metros, dois pixels no zoom
+       13. Não separava nada e mentia sobre onde o grupo fica. */
+    const zoom = m.getZoom();
+    const RAIO = 40;
+    type Grupo = { membros: PequenaGuia[]; px: any };
+    const grupos2: Grupo[] = [];
     for (const g of comPonto) {
-      const chave = (g.coord as [number, number]).join(',');
-      porPonto.set(chave, [...(porPonto.get(chave) || []), g]);
+      const px = m.project(l.latLng(g.coord), zoom);
+      const perto = grupos2.find(c => c.px.distanceTo(px) < RAIO);
+      if (perto) perto.membros.push(g); else grupos2.push({ membros: [g], px });
     }
 
-    for (const [chave, doPonto] of porPonto) {
-      const [lat, lon] = chave.split(',').map(Number) as [number, number];
+    for (const c of grupos2) {
+      const doPonto = c.membros;
       const primeiro = doPonto[0];
+      const limites = l.latLngBounds(doPonto.map(g => g.coord));
+      const centro = limites.getCenter();
+      const separavel = doPonto.length > 1 && !limites.getNorthEast().equals(limites.getSouthWest());
       const icone = l.divIcon({
         className: 'pin-guia',
         html: `<span class="pin-guia-c"><svg viewBox="504.6 2.5 90 95" aria-hidden="true"><path d="M515.18 2.50 L602.58 48.68 L605.08 50.00 L602.58 51.32 L515.18 97.50 L515.18 76.10 L577.38 50.00 L515.18 23.90 Z"/></svg>${doPonto.length > 1 ? `<b class="pin-guia-n">${doPonto.length}</b>` : ''}</span>`,
@@ -130,23 +147,31 @@ export function MapaGuias({ grupos, focoNome, aoEscolher }: Props) {
         iconSize: [44, 44], iconAnchor: [22, 22],
       });
       const rotulo = doPonto.map(g => `${g.nome} · ${g.dia}, ${g.hora}`).join('<br>');
-      const p = l.marker([lat, lon], { icon: icone, title: doPonto.map(g => g.nome).join(', ') }).addTo(m);
+      const p = l.marker(centro, { icon: icone, title: doPonto.map(g => g.nome).join(', ') }).addTo(m);
       p.bindTooltip(rotulo, { direction: 'top', offset: [0, -19] });
-      p.on('click', () => aoEscolher?.(primeiro.nome));
+      p.on('click', () => {
+        if (separavel) m.fitBounds(limites, { padding: [70, 70], maxZoom: 16 });
+        else aoEscolher?.(primeiro.nome);
+      });
       /* o mesmo pino responde por todos os grupos daquele ponto: assim o
          cartão de qualquer um deles acende o pino certo */
       for (const g of doPonto) pinos.current[g.nome] = p;
     }
-    /* enquadra TODOS os pinos visíveis. Sem isto o mapa nasce num zoom fixo e
-       o grupo de Marechal Hermes, que é o mais longe, fica fora da moldura —
-       e "não tem grupo perto de mim" é a conclusão errada mais cara da
-       página. */
-    const limites = l.latLngBounds(comPonto.map(g => g.coord));
-    m.fitBounds(limites, { padding: [46, 46], maxZoom: 13 });
+    /* enquadra TODOS os pinos visíveis quando a LISTA muda (não a cada zoom:
+       aí o enquadramento desfaria o gesto da pessoa). Sem isto o mapa nasce
+       num zoom fixo e o grupo de Marechal Hermes, que é o mais longe, fica
+       fora da moldura — e "não tem grupo perto de mim" é a conclusão errada
+       mais cara da página. */
+    if (enquadrar) {
+      const limites = l.latLngBounds(comPonto.map(g => g.coord));
+      m.fitBounds(limites, { padding: [46, 46], maxZoom: 13 });
+    }
   }
 
+  desenharAtual.current = desenhar;
+
   /* redesenha quando o filtro muda a lista */
-  useEffect(() => { desenhar(); },
+  useEffect(() => { desenhar(true); },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [grupos.map(g => g.nome).join('|')]);
 
