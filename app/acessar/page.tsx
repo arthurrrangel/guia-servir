@@ -33,7 +33,8 @@ const PORTAS = [
 const PERGUNTAS = [
   { q: 'Perdi o meu link. E agora?',
     r: 'Entre por Sou voluntário, escolha a sua área, ache o seu nome e entre com o seu PIN de quatro números. Sem PIN, você cria na hora.' },
-  { q: 'Tentei entrar pelo e-mail e não recebi nada',
+  /* U+2060 depois do hífen: "e-mail" não parte em "e-" / "mail" a 390 */
+  { q: 'Tentei entrar pelo e-\u2060mail e não recebi nada',
     r: 'Aquela porta é da organização. Se você serve numa equipe, o seu caminho é o primeiro azulejo.' },
   { q: 'Ainda não sirvo, mas quero',
     r: 'O terceiro azulejo. Você escolhe a área, se cadastra, e a liderança fala com você antes de qualquer escala.' },

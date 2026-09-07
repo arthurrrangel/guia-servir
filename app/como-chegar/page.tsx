@@ -58,7 +58,10 @@ export default function ComoChegar() {
         <div className="g">
           <p className="g-rot">Onde fica</p>
           <Tit as="h1" className="g-h1">Como chegar</Tit>
-          <p className="g-ed">{IGREJA.rua}, {IGREJA.bairro}.</p>
+          {/* rua e bairro não quebram por dentro: em 390 saía "Rua Pedra de
+              Itaúna, / 534, Barra da Tijuca." — o número órfão da rua, na
+              única linha da página cujo trabalho é dar o endereço. */}
+          <p className="g-ed"><span className="nao-quebra">{IGREJA.rua}</span>, <span className="nao-quebra">{IGREJA.bairro}</span>.</p>
           <div className="g-acoes">
             <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Traçar rota no Maps <IcSeta /></a>
             <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="acao">Abrir no Waze</a>

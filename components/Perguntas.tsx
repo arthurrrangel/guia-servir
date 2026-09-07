@@ -40,7 +40,12 @@ export function Perguntas({ itens, className = '' }: { itens: Pergunta[]; classN
       {itens.map((p, i) => (
         <li key={p.q}>
           <details open={largo || undefined}>
-            <summary>
+            {/* no desktop a lista nasce aberta e o summary não é controle:
+                `pointer-events:none` tirava o toque mas não o teclado — um
+                Enter fechava a resposta (some um parágrafo da política de
+                privacidade) e nenhum clique a trazia de volta. Fora da ordem
+                de tabulação e sem alternar. */}
+            <summary tabIndex={largo ? -1 : 0} onClick={e => { if (largo) e.preventDefault(); }}>
               <span className="qa-n" aria-hidden="true">0{i + 1}</span>
               <h3 className="qa-q">{p.q}</h3>
               <span className="qa-mais" aria-hidden="true" />

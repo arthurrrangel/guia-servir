@@ -1699,7 +1699,7 @@ html,body{overflow-x:clip}
 
 
 .casa-nav{display:none;gap:var(--e6);justify-content:center;grid-column:2}
-@media(min-width:920px){ .casa-nav{display:flex} }
+@media(min-width:900px){ .casa-nav{display:flex} }
 .casa-nav a{
   color:inherit;text-decoration:none;opacity:.72;
   font-family:var(--fonte-display);font-weight:var(--p-rot);
@@ -1709,7 +1709,7 @@ html,body{overflow-x:clip}
 .casa-nav a:hover,
 .casa-nav a:active{opacity:1}
 .casa-barra-fim{display:flex;align-items:center;gap:var(--e2);justify-content:flex-end;grid-column:3}
-@media(max-width:919px){ .casa-barra{grid-template-columns:auto 1fr} .casa-barra-fim{grid-column:2} }
+@media(max-width:899px){ .casa-barra{grid-template-columns:auto 1fr} .casa-barra-fim{grid-column:2} }
 .bt-barra{
   display:inline-flex;align-items:center;gap:var(--e2);white-space:nowrap;color:inherit;
   font-family:var(--fonte-display);font-weight:var(--p-rot);
@@ -1879,7 +1879,10 @@ html,body{overflow-x:clip}
 }
 .casa-area-selo{
   display:block;margin-top:var(--e5);font-family:var(--fonte-display);font-weight:var(--p-rot);
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:rgba(255,255,255,.55);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
+  /* .55 dava 4,28:1 no pior pixel dos cinco cartões no celular (mínimo 4,5);
+     .75 leva os cinco a 6,4:1 — medido sobre a foto real. */
+  color:rgba(255,255,255,.75);
 }
 
 @media(min-width:860px){
@@ -2087,7 +2090,7 @@ html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important;
   display:inline-flex;flex-direction:column;justify-content:center;gap:var(--e1);
   width:40px;height:40px;padding:0 var(--e2);background:none;border:0;cursor:pointer;color:inherit;
 }
-@media(min-width:920px){ .menu-bt{display:none} }
+@media(min-width:900px){ .menu-bt{display:none} }
 .menu-bt i{display:block;height:1.5px;background:currentColor;transition:transform var(--t),opacity var(--t)}
 .menu-bt i:nth-child(1){width:100%}
 .menu-bt i:nth-child(2){width:70%;align-self:flex-end}
@@ -2115,7 +2118,7 @@ html:not(.js) .pal,.nao-anima .pal{opacity:1!important;transform:none!important;
 .menu .menu-pe{
   margin-top:var(--e7);display:grid;gap:var(--e3);
   font-family:var(--fonte-display);font-weight:var(--p-rot);
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:rgba(255,255,255,.55);
+  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;color:rgba(255,255,255,.7);
 }
 .menu .menu-pe a{font-size:var(--t-rot);font-weight:var(--p-rot);letter-spacing:var(--tr);padding:0;color:rgba(255,255,255,.75)}
 
@@ -5630,11 +5633,13 @@ html{ scroll-behavior:smooth }
   .g-tiles.letras .g-tile-l{ font-size:40px }
   .g-tiles.letras .g-tile-t{ font-size:12px; letter-spacing:0 }
 }
-/* o azulejo com descrição (só em /sobre): no celular, uma coluna e texto inteiro */
+/* o azulejo com descrição (só em /sobre): no celular, uma coluna e texto
+   inteiro. 07/09: a nota sempre disse "uma coluna" e a regra escrevia DUAS
+   (173px cada, 135 de texto, 14 caracteres por linha — e um 13.5px fora da
+   escala para caber). A regra de uma coluna está no bloco da segunda
+   auditoria, no fim do arquivo. */
 @media(max-width:899px){
-  .g-tiles.quatro:not(.letras){ grid-template-columns:1fr 1fr }
   .g-tile{ aspect-ratio:auto; min-height:0; gap:14px; padding:18px }
-  .g-tile-d{ font-size:13.5px; line-height:1.45 }
   .g-tiles.tres{ grid-template-columns:1fr }
   .g-tiles.tres .g-tile{ aspect-ratio:auto; min-height:200px }
 }
@@ -6046,19 +6051,23 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @keyframes barra-scrim{ from{ opacity:1 } to{ opacity:0 } }
 
 /* =============================================================================
-   05/09 — A BARRA ENTRE 920 E 1200px COLIDIA
-   Com quatro links, "Acesso às equipes" e "Quero servir", a barra só cabe
-   com folga acima de ~1260px. Entre 920 e 1200 os links encostavam nos
-   botões, e até 1260 ficavam apertados. Regra: abaixo de 1260px a navegação
-   vai para o menu (hambúrguer),
-   e "Acesso às equipes" some da barra (continua no menu). Nada some do
-   site; só muda de lugar quando não cabe.
+   05/09 — A BARRA ENTRE 920 E 1200px COLIDIA · 07/09 — E DEPOIS SUMIU DEMAIS
+   Com quatro links, "Acesso às equipes" e "Quero servir", a barra só cabia
+   com folga acima de ~1260px. A resposta de 05/09 foi mandar TUDO para o
+   hambúrguer abaixo de 1260 — e a auditoria de 07/09 mediu o preço: em 1259px
+   a barra mostrava a marca, 862px de vazio e um hambúrguer. iPad em paisagem
+   (1024/1180) e notebook de 13" (1280 a 102%) navegavam com menu de celular.
+
+   A conta que justificou o 1260 era a de uma barra que abaixo de 1260 não
+   existe: o mesmo bloco já escondia "Acesso às equipes". Sem ele, a barra
+   precisa de 858px (marca 143 + links 481 + "Quero servir" 162 + vãos 32 +
+   calhas 40). Medido em 900, 960, 1024, 1100 e 1259: cabe, vãos de 16/16,
+   folga de 20, nada colide. Então: de 900 a 1259 a navegação inteira fica,
+   com o vão entre links em 20 (era 32) e sem "Acesso às equipes" (continua no
+   rodapé de toda página); o hambúrguer só abaixo de 900. Nada some do site.
    ============================================================================= */
-@media(max-width:1259px){
-  .casa-nav{ display:none }
-  .menu-bt{ display:inline-flex }
-  .casa-barra{ grid-template-columns:auto 1fr }
-  .casa-barra-fim{ grid-column:2 }
+@media(min-width:900px) and (max-width:1259px){
+  .casa-nav{ gap:var(--e5) }
   .casa-barra .bt-barra.discreto{ display:none }
 }
 
@@ -7750,4 +7759,65 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 @media(max-width:479px){
   .ajt-novo{ flex-wrap:wrap }
   .ajt-novo input{ flex:1 1 100% }
+}
+
+/* =============================================================================
+   SITE PÚBLICO, SEGUNDA AUDITORIA
+   07/09/2026. Doze achados de uma segunda passada externa, depois dos doze da
+   primeira. O que entrou aqui, medido de novo antes de entrar:
+
+   1. O ANEL DE FOCO NASCIA DA COR ERRADA. O anel global é `currentColor` a
+      3px para fora. Num botão PREENCHIDO o texto é o oposto do fundo do
+      botão — logo, a mesma família da faixa em volta, onde o anel é pintado.
+      Medido com Tab de verdade: /servir, botão sobre areia, anel areia sobre
+      areia, 1,00:1. Em vez de listar exceções por contexto, o anel do
+      preenchido vai para DENTRO dele (offset -5px): ali `currentColor` é o
+      texto sobre o próprio fundo, e esse par é de alto contraste por
+      construção, em qualquer faixa.
+   2. SEIS CLASSES, CINCO TAMANHOS, UM PAPEL. A linha de apoio sob um título
+      saía em 13,5 / 14,5 / 15 / 15,5 / 16px conforme o componente — quatro
+      deles fora da escala. Todos pedem `--t-ui`. (Não se cria token novo
+      entre 14 e 15,5 para acomodar números que nunca deviam ter existido.)
+   5. Na ficha da /cultos o único valor que é link ("Onde") saía idêntico aos
+      cinco que não são, com 22px de alvo. Sublinhado e 44.
+   7. Duas réguas em .qa no desktop: a grade muda de 52+8 para 60, o recuo da
+      resposta ficava em 60 — 8px à esquerda da própria pergunta, 24 vezes.
+      A régua vira variável e os dois lados pedem a ela.
+   9. No herói, o hover INVERTIA a hierarquia: o preenchido branco caía para
+      84% de opacidade ("desligado") e o vazado virava branco cheio, mais
+      claro que o primário sob o cursor. O primário se move pela tinta do
+      texto; o vazado ganha lavagem e filete, sem chegar a branco.
+   12. A primeira tela da home tinha a largura de UMA FRASE: flex-column com
+      `align-items:center` deixa o filho em max-content, e a calha ia de 20px
+      (em 360) a 55 (em 430) enquanto o resto do site fica em 20. A caixa é
+      do bloco, não da frase.
+   E a barra entre 900 e 1259 (ver a nota "A BARRA ENTRE 920 E 1200px").
+   ============================================================================= */
+.acao.cheia:focus-visible,button.pri:focus-visible,.btn.pri:focus-visible,.lid-bt:focus-visible,
+.bt-barra:focus-visible,.pg-chip[aria-pressed="true"]:focus-visible{ outline-offset:-5px }
+
+.g-tile-d,.fato-d,.pg-nota,.ficha-d,.cartao-d,.qa-r{ font-size:var(--t-ui); line-height:1.5 }
+
+.ficha a.ficha-v{
+  min-height:var(--toque);
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.16em;
+  text-decoration-color:rgba(59,50,34,.38);
+}
+.ficha a.ficha-v:hover,.ficha a.ficha-v:focus-visible{ text-decoration-color:currentColor }
+.casa-escuro .ficha a.ficha-v{ text-decoration-color:rgba(255,255,255,.38) }
+
+.qa{ --qa-regua:60px }
+.qa-r,.qa-c{ margin-left:var(--qa-regua) }
+@media(min-width:900px){ .qa{ --qa-regua:68px } }
+
+.g-cheio .acao.cheia:hover,
+.g-cheio .acao.cheia:active{ opacity:1; background:#fff; color:var(--areia-tinta); border-color:#fff }
+.g-cheio .acao:not(.cheia):hover,
+.g-cheio .acao:not(.cheia):active{ background:rgba(255,255,255,.14); color:#fff; border-color:#fff }
+
+@media(max-width:899px){
+  .casa-heroi-in{ width:100%; max-width:880px }
+  .g-tiles.quatro:not(.letras){ grid-template-columns:1fr }
+  .g-tiles.quatro:not(.letras) .g-tile{ align-items:flex-start; text-align:left }
+  .g-tiles.quatro:not(.letras) .g-tile-d{ text-align:left }
 }
