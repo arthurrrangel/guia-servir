@@ -7191,3 +7191,51 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
     display:inline-block; padding:5px 0; margin-right:var(--e5);
   }
 }
+
+/* =============================================================================
+   FASE 24 · UM MAPA COM UM PINO POR GRUPO
+   07/09/2026. Ver as notas em components/MapaGuias.tsx e components/Grupos.tsx.
+   Doze embeds do Google viraram um mapa Leaflet. O CSS do Leaflet entra por
+   import no componente; aqui fica só o que é da casa: a moldura, o pino com a
+   marca e o cartão sem mapa dentro.
+============================================================================= */
+.pg-mapao{ position:relative; margin-top:clamp(24px,3vw,36px); border:1px solid var(--linha) }
+.pg-mapao-tela{
+  height:clamp(320px,52vh,560px); width:100%; background:var(--card2);
+}
+.pg-mapao-tela:focus-visible{ outline:2px solid var(--noite); outline-offset:2px }
+
+/* O PINO É A MARCA. Círculo escuro, chevron da GUIA em branco. Num mapa claro
+   ele lê à distância; era por isso que o basemap tinha que ser o claro. */
+.pin-guia{ background:none; border:0 }
+.pin-guia-c{
+  display:grid; place-items:center; width:34px; height:34px; border-radius:50%;
+  background:var(--noite); box-shadow:0 1px 6px rgba(0,0,0,.34);
+  transition:transform var(--t),background var(--t);
+}
+.pin-guia-c svg{ width:13px; height:auto; fill:#fff; margin-left:2px }
+.pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
+/* o pino do cartão em foco cresce e vira areia: é o par visível entre a lista
+   e o mapa, e sem ele clicar num pino não teria consequência nenhuma */
+.pin-guia.on .pin-guia-c{ transform:scale(1.28); background:var(--areia) }
+.pin-guia.on .pin-guia-c svg{ fill:var(--noite) }
+
+/* o cartão perdeu o mapa de dentro: agora é ficha, e a ficha é de texto */
+.pg{ background:var(--noite); color:#fff }
+.pg-corpo{ padding:clamp(20px,2.4vw,26px) }
+.pg.aceso{ outline:2px solid var(--areia); outline-offset:-2px }
+.pg .g-acoes{ margin-top:var(--e4); display:flex; flex-wrap:wrap; gap:var(--e2) var(--e3) }
+
+/* a atribuição do CARTO e do OSM é obrigatória e fica legível, mas não compete:
+   11px, canto, mesma família do resto */
+.pg-mapao .leaflet-control-attribution{
+  font-family:var(--fonte); font-size:10.5px; background:rgba(255,255,255,.82);
+}
+.pg-mapao .leaflet-control-attribution a{ color:var(--noite) }
+/* o contador do pino que responde por mais de um grupo */
+.pin-guia-n{
+  position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px;
+  display:grid; place-items:center; border-radius:9px; background:var(--areia); color:var(--noite);
+  font-family:var(--fonte-display); font-weight:600; font-size:10.5px; line-height:1;
+}
+.pin-guia-c{ position:relative }
