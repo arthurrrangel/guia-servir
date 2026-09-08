@@ -217,7 +217,9 @@ export function Rodape() {
 
           {RODAPE.map(g => (
             <nav key={g.t} aria-label={g.t}>
-              <h4>{g.t}</h4>
+              {/* h2, não h4: o rodapé é uma seção da página como as outras, e o
+                  h4 pulava níveis (na /guia-church-tv, de h1 direto para h4). */}
+              <h2 className="g-pe-h">{g.t}</h2>
               {g.itens.map(i => ('fora' in i && i.fora)
                 ? <a key={i.href} href={i.href} target="_blank" rel="noreferrer">{i.rot}</a>
                 : <Link key={i.href} href={i.href}>{i.rot}</Link>)}

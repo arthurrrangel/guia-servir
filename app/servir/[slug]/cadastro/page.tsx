@@ -251,6 +251,9 @@ export default function Servir() {
           tinha como saber de que área é o cadastro, e leitor de tela começava
           a página no meio da hierarquia. O h1 é fixo nas quatro etapas; quem
           muda é o h2 de cada passo. */}
+      {/* <main> sem o estilo global de main (largura e padding são do .porta):
+          a página não tinha marco principal e o axe acusava em todo passo. */}
+      <main style={{ maxWidth: 'none', margin: 0, padding: 0 }}>
       <div className="wiz-cabeca">
         <nav className="migalha" aria-label="Onde você está">
           <Link href="/servir">Servir</Link>
@@ -445,6 +448,7 @@ export default function Servir() {
           </>
         )}
       </section>
+      </main>
 
       {/* rodapé fixo: no celular o botão não pode sumir atrás do teclado.
           A altura dele é MEDIDA e devolvida ao `.wiz` como `--wiz-pe`, porque o

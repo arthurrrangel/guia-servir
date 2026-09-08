@@ -5344,7 +5344,7 @@ html{ scroll-behavior:smooth }
 .g-pe-frase{ margin:var(--e5) 0 0 }
 .g-pe-cols{ display:grid; grid-template-columns:repeat(2,1fr); gap:clamp(28px,4vw,48px) clamp(20px,3vw,40px); margin-top:clamp(48px,6vw,80px) }
 @media(min-width:900px){ .g-pe-cols{ grid-template-columns:1.6fr 1fr 1fr 1fr } }
-.g-pe h4{ margin:0 0 14px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:rgba(228,212,180,.7) }
+.g-pe .g-pe-h{ margin:0 0 14px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:rgba(228,212,180,.7) }
 .g-pe-cols a,.g-pe-cols span{ display:block; color:rgba(255,255,255,.86); text-decoration:none; font-size:16.5px; line-height:1.45; padding:5px 0 }
 .g-pe-cols a:hover{ color:var(--areia) }
 .g-pe-linha{
@@ -6605,8 +6605,8 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 
 /* os títulos de categoria usam a areia do sistema, não uma cor de destaque
    importada: é o mesmo rótulo de `.g-rot`, que já é a voz de índice da casa. */
-.g-pe h4{
-  margin:0 0 16px; font-family:var(--fonte-display); font-weight:600; font-size:11px;
+.g-pe .g-pe-h{
+  margin:0 0 16px; display:block; line-height:1.4; font-family:var(--fonte-display); font-weight:600; font-size:11px;
   letter-spacing:.16em; text-transform:uppercase; color:var(--areia);
 }
 .g-pe-cols nav a{
@@ -6642,7 +6642,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
   .g-pe-cols{ grid-template-columns:1fr 1fr; gap:30px 18px }
   .g-pe-eu{ grid-column:1/-1; max-width:none }
   .g-pe-cols nav a{ font-size:15px; padding:6px 0 }
-  .g-pe h4{ margin-bottom:10px }
+  .g-pe .g-pe-h{ margin-bottom:10px }
   .g-pe-onde{ gap:6px 14px }
   /* 224px de logo numa tela de 390 e a marca ocupa 57% da largura */
   .g-pe-marca{ width:min(100%,188px) }
@@ -7214,7 +7214,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
   .g-pe-cols > nav:last-child{
     grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; column-gap:18px;
   }
-  .g-pe-cols > nav:last-child h4{ grid-column:1 / -1; margin-bottom:10px }
+  .g-pe-cols > nav:last-child .g-pe-h{ grid-column:1 / -1; margin-bottom:10px }
 }
 
 /* =============================================================================
@@ -7848,3 +7848,25 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
    linha. Coluna do estado fixa (o mais longo, "FALTA CONFIRMAR ▾", mede
    ~140px): os carets alinham numa vertical só. */
 @media(min-width:641px){ .esc-posto{ grid-template-columns:minmax(0,1fr) 9.5rem } }
+/* o título de grupo do rodapé é h2 semanticamente, mas veste o rótulo */
+.g-pe .g-pe-h{ text-wrap:balance }
+/* os numerais decorativos (aria-hidden) em areia sobre areia davam 2,84:1
+   (limite 3:1 para texto grande, medido pelo axe); e o denominador do placar
+   ("/5") a .42 dava 3,93 no celular, onde ele tem 18px. */
+.qa-n{ opacity:.66 }
+.casa-areia .cartao-n{ opacity:.66 }
+.casa-papel .cartao-n{ opacity:.66 }
+.lid-placar b i{ opacity:.62 }
+/* a linha do ministério sem <details>: o nome é um botão que abre/fecha e
+   "Abrir" é irmão dele (nada interativo dentro de interativo). Mesma anatomia
+   visual do summary da lista de funções. */
+.ajt-item-cab{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 var(--e4);
+  align-items:baseline; min-height:var(--toque);
+}
+.ajt-toggle{
+  all:unset; display:block; width:100%; box-sizing:border-box; cursor:pointer;
+  padding:var(--e4) 0; font:inherit; color:inherit; text-align:left;
+}
+.ajt-toggle:hover .ajt-nome{ text-decoration:underline; text-underline-offset:3px }
+.ajt-toggle:focus-visible{ outline:2px solid currentColor; outline-offset:3px }

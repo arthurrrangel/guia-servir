@@ -40,6 +40,7 @@ function Ministerios() {
   const { aviso, equipe, equipes, recarregarEquipes, trocarEquipe } = useApp();
   const [nova, setNova] = useState('');
   const [gravando, setGravando] = useState(false);
+  const [aberto, setAberto] = useState<string | null>(null);
 
   async function renomear(id: string, atual: string, valor: string) {
     const v = valor.trim();
@@ -103,33 +104,46 @@ function Ministerios() {
             aberta mostra renomear e apagar. "Abrir" (trocar de ministério) é a
             ação que a pessoa mais usa aqui e fica visível na linha fechada; o
             "apagar" de um ministério inteiro — que leva time, funções e
-            escalas — deixa de ser um link permanente a 80px do dedo. */}
+            escalas — deixa de ser um link permanente a 80px do dedo.
+
+            08/09: não é <details>. Botão dentro de <summary> é interativo
+            aninhado em interativo (o axe acusou, e leitor de tela anuncia os
+            dois como um só). O nome é um botão que abre/fecha (aria-expanded);
+            "Abrir" é irmão dele na mesma linha, não filho. */}
         <div className="ajt-lista">
-          {equipes.map(e => (
-            <details className="ajt-item" key={e.id}>
-              <summary>
-                <span className="ajt-nome estatico">{e.nome}</span>
-                <span className="ajt-quando-rot">
-                  {e.id === equipe?.id
-                    ? 'aberto agora'
-                    : <button type="button" className="lid-bt-txt" onClick={ev => { ev.preventDefault(); trocarEquipe(e.id); }}>Abrir</button>}
-                </span>
-              </summary>
-              <div className="ajt-corpo">
-                <label className="ajt-campo">
-                  <span className="ajt-rot">Nome</span>
-                  <input enterKeyHint="done" key={e.nome} defaultValue={e.nome}
-                    aria-label={`nome do ministério ${e.nome}`}
-                    onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
-                </label>
-                <div className="ajt-acoes">
-                  <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`}
-                    disabled={equipes.length < 2}
-                    onClick={() => void apagar(e.id, e.nome)}>Apagar este ministério</button>
+          {equipes.map(e => {
+            const estaAberto = aberto === e.id;
+            return (
+              <div className="ajt-item" key={e.id}>
+                <div className="ajt-item-cab">
+                  <button type="button" className="ajt-toggle" aria-expanded={estaAberto} aria-controls={`min-${e.id}`}
+                    onClick={() => setAberto(a => (a === e.id ? null : e.id))}>
+                    <span className="ajt-nome estatico">{e.nome}</span>
+                  </button>
+                  <span className="ajt-quando-rot">
+                    {e.id === equipe?.id
+                      ? 'aberto agora'
+                      : <button type="button" className="lid-bt-txt" onClick={() => trocarEquipe(e.id)}>Abrir</button>}
+                  </span>
                 </div>
+                {estaAberto && (
+                  <div className="ajt-corpo" id={`min-${e.id}`}>
+                    <label className="ajt-campo">
+                      <span className="ajt-rot">Nome</span>
+                      <input enterKeyHint="done" key={e.nome} defaultValue={e.nome}
+                        aria-label={`nome do ministério ${e.nome}`}
+                        onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
+                    </label>
+                    <div className="ajt-acoes">
+                      <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`}
+                        disabled={equipes.length < 2}
+                        onClick={() => void apagar(e.id, e.nome)}>Apagar este ministério</button>
+                    </div>
+                  </div>
+                )}
               </div>
-            </details>
-          ))}
+            );
+          })}
         </div>
       </section>
 
