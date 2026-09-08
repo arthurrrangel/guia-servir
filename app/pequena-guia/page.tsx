@@ -55,7 +55,7 @@ export default function PequenaGuia() {
           <p className="g-ed">Uma hora por semana, perto de você.</p>
           <div className="g-acoes">
             <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">Quero participar <IcSeta /></a>
-            <Link href="/cultos" className="acao">Prefiro começar pelo domingo</Link>
+            <Link href="/cultos" className="g-link claro">Prefiro começar pelo domingo</Link>
           </div>
         </div>
       </section>

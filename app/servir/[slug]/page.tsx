@@ -143,7 +143,7 @@ export default function Area() {
           {min.descricao && <p className="g-ed menor">{min.descricao}</p>}
           <div className="g-acoes">
             <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
-            <Link href="/servir" className="acao">Ver todas as áreas</Link>
+            <Link href="/servir" className="g-link claro">Ver todas as áreas</Link>
           </div>
         </div>
       </section>
@@ -228,7 +228,7 @@ export default function Area() {
           {min.convite && <p className="g-ed menor">{min.convite}</p>}
           <div className="g-acoes">
             <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
-            <Link href="/eu" className="acao">Já sirvo aqui</Link>
+            <Link href="/eu" className="g-link claro">Já sirvo aqui</Link>
           </div>
           {!min.aberto && (
             <p className="g-nota">Essa área conversa com cada pessoa antes de escalar. Você preenche o cadastro e a liderança fala com você.</p>

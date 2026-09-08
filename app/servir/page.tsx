@@ -68,7 +68,7 @@ export default function Servir() {
           <p className="g-ed">Todo trabalho importa.</p>
           <div className="g-acoes">
             <a href="#areas" className="acao cheia">Ver as áreas <IcSeta /></a>
-            <Link href="/servir/onde-me-encaixo" className="acao">Não sei qual é a minha</Link>
+            <Link href="/servir/onde-me-encaixo" className="g-link claro">Não sei qual é a minha</Link>
           </div>
         </div>
       </section>

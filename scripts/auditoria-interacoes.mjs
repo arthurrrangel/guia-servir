@@ -43,13 +43,14 @@ for (const W of [390, 1440]) {
     const depois = await p.$$eval('.pin-guia', ps => ps.length); ok(depois !== pins || true, `clique no pino agrupado redesenha (${pins} → ${depois} pinos)`); }
   await p.locator('.pg-perto .acao').scrollIntoViewIfNeeded(); await p.click('.pg-perto .acao'); await p.waitForTimeout(2500);
   const perto = await p.evaluate(() => ({ txt: document.querySelector('.pg-perto-txt')?.innerText.replace(/\s+/g, ' '), aceso: document.querySelector('.pg.aceso .pg-nome')?.textContent, pessoa: document.querySelectorAll('.pin-pessoa').length }));
-  ok(/Mais perto de você/.test(perto.txt || '') && /km|m ·/.test(perto.txt || ''), `perto de mim: "${perto.txt}"`);
+  ok(/mais perto de você/i.test(perto.txt || '') && /\d\s?(km|m)\b/.test(perto.txt || ''), `perto de mim: "${perto.txt}"`);
   ok(!!perto.aceso, `cartão aceso: ${perto.aceso}`); ok(perto.pessoa === 1, 'pino "você está aqui" no mapa');
   // FAQ em /cultos? (perguntas ficam em /acessar e /onde-me-encaixo)
   await p.goto(B + '/acessar', { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1500);
   const sum = p.locator('.qa summary').first(); await sum.scrollIntoViewIfNeeded(); await sum.click({ force: true }); await p.waitForTimeout(400);
   ok(await p.$eval('.qa details', d => d.open), 'pergunta abre no toque');
-  await sum.click({ force: true }); await p.waitForTimeout(400); ok(!(await p.$eval('.qa details', d => d.open)), 'pergunta fecha no segundo toque');
+  /* no desktop as perguntas ficam abertas por desenho (Perguntas.tsx `largo`) */
+  if (W < 900) { await sum.click({ force: true }); await p.waitForTimeout(400); ok(!(await p.$eval('.qa details', d => d.open)), 'pergunta fecha no segundo toque'); }
   // /cultos#follow
   await p.goto(B + '/cultos#follow', { waitUntil: 'load' }); await p.waitForTimeout(2000);
   const ft = await p.evaluate(() => Math.round(document.querySelector('#follow').getBoundingClientRect().top)); ok(ft >= 60 && ft <= 220, `#follow rola até a seção (topo em ${ft}px)`);

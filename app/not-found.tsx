@@ -33,7 +33,7 @@ export default function NaoEncontrada() {
           <p className="g-ed">Mas o domingo existe.</p>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-            <Link href="/" className="acao">Ir para o início</Link>
+            <Link href="/" className="g-link claro">Ir para o início</Link>
           </div>
         </div>
       </section>

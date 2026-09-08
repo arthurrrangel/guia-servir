@@ -476,7 +476,7 @@ export default function Casa() {
           <Tit className="g-h2">{num ? `${pl(num.pessoas, 'Hoje é', 'Hoje são')} ${cont(num.pessoas, 'pessoa servindo', 'pessoas servindo')} em ${cont(num.ministerios, 'área', 'áreas')}.` : 'Ninguém aqui começou sabendo.'}</Tit>
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
-            <Link href="/eu" className="acao">Já sirvo · abrir meu espaço</Link>
+            <Link href="/eu" className="g-link claro">Já sirvo · abrir meu espaço</Link>
           </div>
         </div>
       </section>

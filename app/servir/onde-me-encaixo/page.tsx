@@ -157,7 +157,7 @@ export default function OndeMeEncaixo() {
           <p className="g-ed">É a resposta mais comum.</p>
           <div className="g-acoes">
             <a href="#areas" className="acao cheia">Ver o que se faz <IcSeta /></a>
-            <Link href="/servir" className="acao">Ver as áreas lado a lado</Link>
+            <Link href="/servir" className="g-link claro">Ver as áreas lado a lado</Link>
           </div>
         </div>
       </section>

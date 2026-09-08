@@ -65,7 +65,7 @@ export default function ComoChegar() {
           <p className="g-ed"><span className="nao-quebra">{IGREJA.rua}</span>, <span className="nao-quebra">{IGREJA.bairro}</span>.</p>
           <div className="g-acoes">
             <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Traçar rota no Maps <IcSeta /></a>
-            <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="acao">Abrir no Waze</a>
+            <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="g-link claro">Abrir no Waze</a>
           </div>
         </div>
       </section>
@@ -123,7 +123,7 @@ export default function ComoChegar() {
           <Tit className="g-h2">O que esperar de um domingo</Tit>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-            <a href={MAPA} target="_blank" rel="noreferrer" className="acao">Traçar rota</a>
+            <a href={MAPA} target="_blank" rel="noreferrer" className="g-link claro">Traçar rota</a>
           </div>
         </div>
       </section>

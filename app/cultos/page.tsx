@@ -84,7 +84,7 @@ export default function Cultos() {
           <p className="g-ed">Às 10h, na Barra da Tijuca.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
-            <Link href="/sobre" className="acao">Quem somos</Link>
+            <Link href="/sobre" className="g-link claro">Quem somos</Link>
           </div>
         </div>
       </section>
@@ -161,7 +161,7 @@ export default function Cultos() {
           <Tit className="g-h2">A porta é a mesma para todo mundo.</Tit>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Traçar rota <IcSeta /></Link>
-            <Link href="/pequena-guia" className="acao">Ou começar pela semana</Link>
+            <Link href="/pequena-guia" className="g-link claro">Ou começar pela semana</Link>
           </div>
         </div>
       </section>

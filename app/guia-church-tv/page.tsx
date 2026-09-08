@@ -40,7 +40,7 @@ export default function TV() {
             {canal
               ? <a href={canal} target="_blank" rel="noreferrer" className="acao cheia">Ver no canal <IcSeta /></a>
               : <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao cheia">Acompanhar no Instagram <IcSeta /></a>}
-            <Link href="/cultos" className="acao">Ver o domingo ao vivo</Link>
+            <Link href="/cultos" className="g-link claro">Ver o domingo ao vivo</Link>
           </div>
         </div>
       </section>

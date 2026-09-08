@@ -52,7 +52,7 @@ export default function Sobre() {
           <p className="g-ed">Um povo, não uma plateia.</p>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-            <Link href="/pequena-guia" className="acao">Pequena Guia</Link>
+            <Link href="/pequena-guia" className="g-link claro">Pequena Guia</Link>
           </div>
         </div>
       </section>
@@ -143,7 +143,7 @@ export default function Sobre() {
           <Tit className="g-h2">Isso tem dois endereços na semana.</Tit>
           <div className="g-acoes">
             <Link href="/pequena-guia" className="acao cheia">Pequena Guia <IcSeta /></Link>
-            <Link href="/servir" className="acao">Quero servir</Link>
+            <Link href="/servir" className="g-link claro">Quero servir</Link>
           </div>
         </div>
       </section>
