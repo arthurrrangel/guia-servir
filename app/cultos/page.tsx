@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
-import { Cabecalho, Fecho } from '@/components/Pagina';
 import ProximoCulto from '@/components/ProximoCulto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
@@ -13,15 +12,9 @@ import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
 
    Responde QUANDO e O QUE ESPERAR. O ONDE tem página própria (/como-chegar).
 
-   V3 (08/09/2026): cabeçalho da casa (sem foto obrigatória), a ordem do
-   culto em quatro passos de tipo (eram quatro fotos), a ficha do domingo, o
-   FOLLOW com âncora própria (#follow: a home aponta para cá quando o
-   próximo evento é o sábado), e o fecho.
-
-   A ORDEM diz o que a pessoa vai ver, com as palavras que as próprias áreas
-   escreveram no banco (recepção e setores do salão; vocal, banda, som e
-   palco; projeção e transmissão; a livraria que fecha depois). Nada aqui
-   inventa horário nem função.
+   Quatro blocos, todos centrados: o herói com a hora, a ordem do culto em
+   quatro fotos, as três perguntas de quem nunca foi, o fecho. O Kids virou
+   uma das perguntas; a de estacionamento mora em /como-chegar.
 
    AS PERGUNTAS são palavra por palavra as da igreja. Três, não cinco: é o
    que cabe numa tela sem virar parede de texto.
@@ -43,17 +36,19 @@ const FICHA = [
   { r: 'Estacionamento', v: 'Com equipe', d: 'Chegue com dez minutos de folga se vier dirigindo.' },
 ];
 
-const ORDEM = [
-  { n: '01', t: 'Acolhida', d: 'Alguém recebe você na porta e indica o lugar.' },
-  { n: '02', t: 'Louvor', d: 'Vocal, banda, som e palco conduzem a igreja na adoração.' },
-  { n: '03', t: 'Palavra', d: 'A mensagem do domingo, no telão e na transmissão.' },
-  { n: '04', t: 'Oração e saída', d: 'A livraria fica aberta depois do culto.' },
-];
-
-/* o horário do Follow não está confirmado (ver lib/igreja.ts): enquanto for
-   null, a página diz o dia e oferece a conversa para a hora */
+/* O FOLLOW, com âncora própria (#follow): a home aponta para cá quando a
+   próxima coisa da semana é o sábado. O horário não está confirmado (ver
+   lib/igreja.ts): enquanto for null, a seção diz o dia e oferece a conversa
+   para a hora. */
 const FOLLOW_HORA = IGREJA.followHora as string | null;
 const PERGUNTAR_FOLLOW = canalDeConversa('Oi! Vi o site da GUIA e quero saber o horário do Follow, o culto de jovens. ');
+
+const PASSOS = [
+  { n: '01', t: 'Acolhida', foto: 'recepcao.webp' },
+  { n: '02', t: 'Louvor', foto: 'teclado.webp' },
+  { n: '03', t: 'Palavra', foto: 'palavra.webp' },
+  { n: '04', t: 'Oração e saída', foto: 'congregacao.webp' },
+];
 
 export const metadata: Metadata = {
   title: 'Cultos',
@@ -65,7 +60,7 @@ export const metadata: Metadata = {
 
 export default function Cultos() {
   return (
-    <Site atual="/cultos" escuro>
+    <Site atual="/cultos">
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
@@ -80,15 +75,21 @@ export default function Cultos() {
       }} />
 
       {/* ------------------------------------------------------------ herói */}
-      <Cabecalho criativo="cultos" rot={<ProximoCulto />} titulo="Culto de domingo"
-        ed={<>Toda semana, às {IGREJA.cultoHora}, na {IGREJA.bairro}.</>}
-        acoes={<>
-          <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
-          <Link href="/#semana" className="g-link claro">Ver a semana inteira</Link>
-        </>} />
+      <section className="g-cheio alta centro rev">
+        <img src="/fotos/equipe.webp" alt="Momento de louvor no culto de domingo da GUIA Church" fetchPriority="high" />
+        <div className="g">
+          <p className="g-rot"><ProximoCulto /></p>
+          <Tit as="h1" className="g-h1">Culto de domingo</Tit>
+          <p className="g-ed">Às 10h, na Barra da Tijuca.</p>
+          <div className="g-acoes">
+            <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
+            <Link href="/sobre" className="acao">Quem somos</Link>
+          </div>
+        </div>
+      </section>
 
       {/* ------------------------------------------------- a ordem do culto */}
-      <section className="casa-papel rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
@@ -97,17 +98,15 @@ export default function Cultos() {
               <p className="g-ed">Na mesma ordem, toda semana.</p>
             </div>
           </div>
-          <ol className="ordem c-bloco grande" aria-label="A ordem do culto">
-            {ORDEM.map(p => (
-              <li key={p.n} className="ordem-i">
-                <span className="ordem-n" aria-hidden="true">{p.n}</span>
-                <div>
-                  <h3 className="ordem-t">{p.t}</h3>
-                  <p className="ordem-d">{p.d}</p>
-                </div>
-              </li>
+          <div className="g-passos centro c-bloco grande">
+            {PASSOS.map(p => (
+              <div key={p.n} className="g-passo">
+                <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
+                <span className="g-passo-n">{p.n}</span>
+                <span className="g-passo-t">{p.t}</span>
+              </div>
             ))}
-          </ol>
+          </div>
         </div>
       </section>
 
@@ -154,11 +153,17 @@ export default function Cultos() {
       </section>
 
       {/* ------------------------------------------------------------ fecho */}
-      <Fecho rot="Te esperamos" titulo="A porta é a mesma para todo mundo."
-        acoes={<>
-          <Link href="/como-chegar" className="acao cheia">Traçar rota <IcSeta /></Link>
-          <Link href="/pequena-guia" className="g-link claro">Ou começar pela semana</Link>
-        </>} />
+      <section className="g-cheio centro fecho rev">
+        <img src="/fotos/palco.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Te esperamos</p>
+          <Tit className="g-h2">A porta é a mesma para todo mundo.</Tit>
+          <div className="g-acoes">
+            <Link href="/como-chegar" className="acao cheia">Traçar rota <IcSeta /></Link>
+            <Link href="/pequena-guia" className="acao">Ou começar pela semana</Link>
+          </div>
+        </div>
+      </section>
     </Site>
   );
 }

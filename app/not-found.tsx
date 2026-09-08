@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Site } from '@/components/Site';
-import { Cabecalho } from '@/components/Pagina';
+import { Tit } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 
 /* =============================================================================
@@ -23,12 +23,19 @@ export const metadata: Metadata = {
 
 export default function NaoEncontrada() {
   return (
-    <Site escuro>
-      <Cabecalho criativo="chegar" rot="404" titulo="Esse endereço não existe" ed="Mas o domingo existe."
-        acoes={<>
-          <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-          <Link href="/" className="g-link claro">Ir para o início</Link>
-        </>} />
+    <Site>
+      <section className="g-cheio alta centro rev">
+        <img src="/fotos/predio.webp" alt="" />
+        <div className="g">
+          <p className="g-rot">404</p>
+          <Tit as="h1" className="g-h1">Esse endereço não existe</Tit>
+          <p className="g-ed">Mas o domingo existe.</p>
+          <div className="g-acoes">
+            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <Link href="/" className="acao">Ir para o início</Link>
+          </div>
+        </div>
+      </section>
     </Site>
   );
 }

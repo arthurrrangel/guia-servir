@@ -8199,3 +8199,35 @@ a.dia-in:hover,a.dia-in:focus-visible{ background:var(--card2) }
 /* o criativo no herói do acompanhamento de candidatura: atrás do véu (::after
    em z-index -1), como a foto que ele substitui */
 .porta-hero .porta-hero-cria{ z-index:-2 }
+
+/* =============================================================================
+   ============================================================================
+   V4 — DE VOLTA AO MODELO STARTUP, COM O QUE O V3 GANHOU (08/09/2026)
+
+   O Arthur viu o v3 no ar e mandou parar: pesado, sem personalidade. A
+   direção agora é a de produto digital premium: menos elementos, muito
+   espaço negativo, tipografia forte, grid impecável, componentes limpos,
+   animações sutis. As páginas voltaram ao desenho anterior (fotos de ponta
+   a ponta, cartões), e o que o v3 ganhou fica: o chevron oficial, a linha
+   viva da semana (aqui como pílula no herói), os slots de criativo, a
+   âncora do Follow e o filtro por dia.
+   ============================================================================
+   ============================================================================= */
+
+/* ---- a pílula viva do herói ------------------------------------------------ */
+.agora-pill{
+  display:inline-flex; align-items:center; gap:10px; margin:0 auto var(--e5);
+  padding:8px 14px 8px 12px; border-radius:999px;
+  border:1px solid rgba(255,255,255,.22); background:rgba(37,37,37,.42);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+  color:#fff; text-decoration:none; font-size:14px; line-height:1; letter-spacing:.01em;
+  transition:border-color var(--t),background var(--t),transform var(--t);
+  min-height:var(--toque);
+}
+.agora-pill:hover,.agora-pill:focus-visible{ border-color:rgba(255,255,255,.5); background:rgba(37,37,37,.6) }
+.agora-pill-pt{ width:7px; height:7px; border-radius:50%; background:var(--areia); box-shadow:0 0 0 3px rgba(228,212,180,.22); flex:none }
+.agora-pill-q{ font-weight:600 }
+.agora-pill-o{ color:rgba(255,255,255,.72) }
+.agora-pill-o::before{ content:"·"; margin-right:10px; color:rgba(255,255,255,.4) }
+.agora-pill svg{ width:14px; height:14px; color:var(--areia) }
+@media(max-width:479px){ .agora-pill{ font-size:13px; gap:8px } .agora-pill-o{ max-width:44vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis } }

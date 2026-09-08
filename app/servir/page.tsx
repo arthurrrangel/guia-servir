@@ -5,9 +5,8 @@ import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
-import { Cabecalho } from '@/components/Pagina';
-import { Chevron } from '@/components/Marca';
-import { Vazio } from '@/components/Tela';
+import { AreasCarregando, Vazio } from '@/components/Tela';
+import { fotoDaArea } from '@/lib/fotos';
 
 /* =============================================================================
    /servir — ONDE A JORNADA COMEÇA
@@ -26,10 +25,6 @@ import { Vazio } from '@/components/Tela';
    Agora ela usa o casco público (barra, rodapé, grade editorial), e só a
    partir da área escolhida (/servir/[slug]) o fluxo afunila e a navegação
    some de propósito. A lógica de dados não mudou uma linha.
-
-   V3 (08/09/2026): as áreas deixaram de ser cartões com foto e viraram um
-   ÍNDICE em tipo grande — nome, o que faz, quantos postos, o chevron. Sem
-   foto obrigatória, e a comparação entre áreas fica numa coluna só.
 
    SOBRE QUANTAS ÁREAS APARECEM AQUI
    Aparece o que o banco tem, e o banco tem o que tem líder, funções e alguém
@@ -61,13 +56,20 @@ export default function Servir() {
   }, []);
 
   return (
-    <Site atual="/servir" escuro>
+    <Site atual="/servir">
       {/* ------------------------------------------------------------- herói */}
-      <Cabecalho criativo="servir" rot="Servir" titulo="Encontre seu lugar" ed="Todo trabalho importa."
-        acoes={<>
-          <a href="#areas" className="acao cheia">Ver as áreas <IcSeta /></a>
-          <Link href="/servir/onde-me-encaixo" className="g-link claro">Não sei qual é a minha</Link>
-        </>} />
+      <section className="g-cheio alta centro rev">
+        <img src="/fotos/midia.webp" alt="Equipe Creative na mesa de transmissão do culto" fetchPriority="high" />
+        <div className="g">
+          <p className="g-rot">Servir</p>
+          <Tit as="h1" className="g-h1">Encontre seu lugar</Tit>
+          <p className="g-ed">Todo trabalho importa.</p>
+          <div className="g-acoes">
+            <a href="#areas" className="acao cheia">Ver as áreas <IcSeta /></a>
+            <Link href="/servir/onde-me-encaixo" className="acao">Não sei qual é a minha</Link>
+          </div>
+        </div>
+      </section>
 
       {/* ------------------------------------------------------------ as áreas */}
       <section id="areas" className="casa-papel rev" aria-label="As áreas">
@@ -80,11 +82,7 @@ export default function Servir() {
             </div>
           </div>
           <div className="c-bloco grande">
-            {fase === 'carregando' && (
-              <ol className="ind" aria-label="Carregando as áreas" aria-busy="true">
-                {[0, 1, 2, 3, 4].map(i => <li key={i} className="ind-i esqueleto" />)}
-              </ol>
-            )}
+            {fase === 'carregando' && <AreasCarregando />}
             {fase === 'rede' && (
               <Vazio
                 titulo="Sem conexão agora"
@@ -93,26 +91,21 @@ export default function Servir() {
               />
             )}
             {fase === 'pronto' && (
-              <ol className="ind">
-                {mins.map((m, i) => (
-                  <li key={m.slug} className="ind-i">
-                    <Link href={`/servir/${m.slug}`} className="ind-a">
-                      <span className="ind-n" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
-                      <span>
-                        <span className="ind-t">{m.nome}</span>
-                        {m.descricao && <span className="ind-d">{m.descricao}</span>}
-                        <span className="ind-s">
-                          {/* FUNÇÃO é o tipo de trabalho (CÂMERA), POSTO é uma posição
-                              dele na escala (CÂMERA 1). O campo conta postos. */}
-                          {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
-                          {!m.aberto && ' · conversa antes'}
-                        </span>
-                      </span>
-                      <span className="ind-chev" aria-hidden="true"><Chevron /></span>
-                    </Link>
-                  </li>
+              <div className="casa-areas centro rente">
+                {mins.map(m => (
+                  <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
+                    <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
+                    <span className="casa-area-nome">{m.nome}</span>
+                    {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
+                    <span className="casa-area-selo">
+                      {/* FUNÇÃO é o tipo de trabalho (CÂMERA), POSTO é uma posição
+                          dele na escala (CÂMERA 1). O campo conta postos. */}
+                      {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
+                      {!m.aberto && ' · conversa antes'}
+                    </span>
+                  </Link>
                 ))}
-              </ol>
+              </div>
             )}
           </div>
         </div>

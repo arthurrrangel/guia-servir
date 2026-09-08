@@ -4,18 +4,19 @@ import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
+import { Agora } from '@/components/Agora';
+import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
 import { Barra, Rodape } from '@/components/Site';
-import { IGREJA, SITE, MAPA as MAPA_SCHEMA, SIGLA_FRASE } from '@/lib/igreja';
+import { AreasCarregando } from '@/components/Tela';
+import Contador from '@/components/Contador';
+import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
+import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
+import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl, cont } from '@/lib/plural';
-import { Criativo } from '@/components/Criativo';
-import { Agora } from '@/components/Agora';
-import { Semana } from '@/components/Semana';
-import { Cidade } from '@/components/Cidade';
-import { PorDentro } from '@/components/PorDentro';
 
 /* =============================================================================
    A HOME
@@ -236,137 +237,236 @@ export default function Casa() {
           erro de SEO local mais comum e o mais caro. */}
       <Schema dados={{
         '@context': 'https://schema.org',
-        '@type': 'Church',
-        name: IGREJA.nomeLegal,
-        alternateName: 'GUIA',
-        url: SITE,
-        address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: IGREJA.cidade, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' },
-        hasMap: MAPA_SCHEMA,
-        openingHoursSpecification: [{ '@type': 'OpeningHoursSpecification', dayOfWeek: 'Sunday', opens: '10:00', closes: '12:00' }],
-        sameAs: [IGREJA.instagram],
-        slogan: IGREJA.frase,
+        '@graph': [
+          {
+            '@type': 'WebSite', '@id': `${SITE}/#site`,
+            url: SITE, name: IGREJA.nome, inLanguage: 'pt-BR',
+            publisher: { '@id': `${SITE}/#igreja` },
+          },
+          {
+            '@type': 'Church', '@id': `${SITE}/#igreja`,
+            name: IGREJA.nome, slogan: IGREJA.frase, url: SITE,
+            image: `${SITE}/og.jpg`, hasMap: MAPA_SCHEMA,
+            sameAs: [IGREJA.instagram, ...(IGREJA.youtube ? [IGREJA.youtube] : [])],
+            address: {
+              '@type': 'PostalAddress',
+              streetAddress: IGREJA.rua,
+              addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`,
+              addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR',
+            },
+            openingHoursSpecification: [{
+              '@type': 'OpeningHoursSpecification',
+              dayOfWeek: 'https://schema.org/Sunday', opens: '10:00', closes: '12:00',
+            }],
+          },
+        ],
       }} />
       <div className="progresso" ref={fio} style={{ color: solida ? 'var(--noite)' : '#fff' }} aria-hidden="true" />
 
+      {/* o mesmo atalho de teclado das outras páginas: a home era a única sem
+          <main> e sem "pular para o conteúdo" — e é a página em que mais se
+          chega por teclado, porque é a primeira. */}
       <a href="#conteudo" className="pular">Pular para o conteúdo</a>
       <Barra inicio solida={solida} />
 
       <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 0 }}>
-
-      {/* ================================================================ AGORA
-          A primeira tela fala no presente: a próxima coisa que acontece na
-          igreja, calculada no aparelho (components/Agora.tsx), a frase da
-          casa e UMA ação — a certa para aquele momento. O criativo do herói
-          fica atrás, quando existir; até lá, o painel da marca. */}
-      <section className="agora casa-escuro rev visto">
-        <Criativo id="heroi" fundo prioridade />
-        <div className="agora-in">
-          {/* o chevron da marca em traço, no espaço que sobra acima do texto:
-              no celular ele ocupa o que o texto deixa (nunca cruza o título),
-              no monitor mora na coluna da direita */}
-          <div className="agora-selo" aria-hidden="true"><Chevron traco /></div>
-          <p className="g-rot agora-rot">{IGREJA.nome} · {IGREJA.bairro}</p>
-          <Tit as="h1" className="agora-h1">Existe um lugar para você</Tit>
-          <Agora />
+      {/* ------------------------------------------------------------ herói
+          Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
+          dois botões, a régua. Nada de parágrafo. */}
+      <section className="casa-heroi rev visto">
+        <img className="casa-heroi-foto" src="/fotos/palco.webp" alt="" fetchPriority="high" />
+        <div className="casa-heroi-in">
+          {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
+              no aparelho (lib/semana.ts), com a ação certa para o momento */}
+          <Agora pill />
+          <Tit as="h1" className="">Existe um lugar para você</Tit>
+          <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>{IGREJA.frase}.</p>
+          {/* UM PRIMÁRIO, UMA PALAVRA. 06/09/2026.
+              Eram dois botões do mesmo tamanho: um branco sólido e um
+              contornado. Sobre foto escura o contornado praticamente some, e
+              "Quero servir" já é um botão com borda na barra do topo — a
+              mesma ação aparecia três vezes na primeira tela. O sólido fica
+              com quem chega pela primeira vez; servir vira palavra, que é o
+              peso certo para a ação de quem já está dentro. */}
+          <div className="acoes">
+            <Link href="/cultos" className="acao cheia">Quero conhecer</Link>
+            <Link href="/servir" className="g-link claro">Quero servir</Link>
+          </div>
         </div>
       </section>
 
-      {/* ============================================================== A SEMANA
-          Sete colunas: o ritmo da igreja numa olhada. Cada coluna é uma porta. */}
-      <section id="semana" className="semana casa-papel rev">
-        <div className="g g-secao">
-          <div className="g-cab">
-            <div className="g-cab-txt">
-              <p className="g-rot">A semana</p>
-              <Tit className="g-h2">Toda semana tem lugar</Tit>
-              <p className="g-ed">Culto no domingo, grupos de terça a quinta, Follow no sábado.</p>
+      {/* ------------------------------------------ os três fatos, estruturados
+          O que a pessoa procura num site de igreja em três segundos: quando é
+          o próximo culto (data de verdade, calculada no aparelho), onde fica,
+          e o que existe durante a semana. Cada um é uma porta. */}
+      <section className="fatos rev visto" aria-label="O essencial">
+        <Link href="/cultos" className="fato">
+          <span className="fato-r">Próximo culto</span>
+          <span className="fato-v"><ProximoCulto /><IcSeta /></span>
+          <span className="fato-d">Chega a hora que der. Tem alguém na porta.</span>
+        </Link>
+        <Link href="/como-chegar" className="fato">
+          <span className="fato-r">Onde</span>
+          <span className="fato-v">{IGREJA.rua}<IcSeta /></span>
+          <span className="fato-d">{IGREJA.bairro}, {IGREJA.cidade}. Estacionamento com equipe.</span>
+        </Link>
+        <Link href="/pequena-guia" className="fato">
+          <span className="fato-r">Durante a semana</span>
+          <span className="fato-v">{PEQUENAS_GUIAS.length} Pequenas Guias<IcSeta /></span>
+          <span className="fato-d">Grupos de terça a quinta, perto de onde você mora.</span>
+        </Link>
+      </section>
+
+      {/* --------------------------------------------- prova: sai do banco
+          A única prova concreta da página, em quatro números. */}
+      {num && (
+        <section className="casa-escuro rev" aria-label="A igreja em números">
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">Hoje na GUIA</p>
+              <p className="g-ed" style={{ margin: 0 }}>Quem faz o domingo acontecer.</p>
+            </div>
+            <div className="g-num centro c-bloco grande">
+              <div><b><Contador n={num.pessoas} /></b><span>{pl(num.pessoas, 'pessoa servindo', 'pessoas servindo')}</span></div>
+              <div><b><Contador n={num.ministerios} /></b><span>{pl(num.ministerios, 'área aberta', 'áreas abertas')}</span></div>
+              <div><b><Contador n={num.postos} /></b><span>{pl(num.postos, 'posto na escala', 'postos na escala')}</span></div>
+              <div><b><Contador n={num.cultos_no_mes} /></b><span>{pl(num.cultos_no_mes, 'encontro neste mês', 'encontros neste mês')}</span></div>
             </div>
           </div>
-          <Semana />
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ============================================================ OS CAMINHOS
-          Três portas, em tipo grande. Não são cartões: são três frases que a
-          pessoa reconhece como a dela. O número em itálica editorial é a voz
-          de índice do site; o chevron da marca aponta o caminho. */}
-      <section className="caminhos casa-escuro rev" aria-label="Por onde entrar">
-        <div className="g">
-          <Link href="/cultos" className="caminho">
-            <span className="caminho-n">01</span>
-            <span className="caminho-txt">
-              <span className="caminho-t">Visitar no domingo</span>
-              <span className="caminho-d">{IGREJA.cultoHora}, na {IGREJA.bairro}. Chegue como você está.</span>
-            </span>
-            <span className="caminho-chev" aria-hidden="true"><Chevron /></span>
-          </Link>
-          <Link href="/pequena-guia" className="caminho">
-            <span className="caminho-n">02</span>
-            <span className="caminho-txt">
-              <span className="caminho-t">Um grupo perto de você</span>
-              <span className="caminho-d">{cont(PEQUENAS_GUIAS.length, 'Pequena Guia', 'Pequenas Guias')} durante a semana, em casa e por vídeo.</span>
-            </span>
-            <span className="caminho-chev" aria-hidden="true"><Chevron /></span>
-          </Link>
-          <Link href="/servir" className="caminho">
-            <span className="caminho-n">03</span>
-            <span className="caminho-txt">
-              <span className="caminho-t">Servir com a gente</span>
-              <span className="caminho-d">{num ? `${cont(num.ministerios, 'área', 'áreas')}, ${cont(num.pessoas, 'pessoa', 'pessoas')} chegando mais cedo.` : 'Cinco áreas. Ninguém aqui começou sabendo.'}</span>
-            </span>
-            <span className="caminho-chev" aria-hidden="true"><Chevron /></span>
-          </Link>
-        </div>
-      </section>
-
-      {/* ============================================================== A CIDADE
-          O mapa como espinha: a igreja e os grupos espalhados pelo Rio, e o
-          botão que responde à única pergunta de quem olha um mapa. */}
-      <section id="cidade" className="cidade-secao casa-papel rev">
+      {/* ----------------------------------------------- 01 · O DOMINGO
+          Título, uma linha, dois botões, a foto. As perguntas de quem nunca
+          foi moram em /cultos — a home não repete. */}
+      <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
+          {/* assimétrico: o texto na esquerda, a ação no fim da linha. Ver
+              FASE 20 no globals — era aqui que a home repetia .c pela segunda
+              das quatro vezes. */}
           <div className="g-cab">
             <div className="g-cab-txt">
-              <p className="g-rot">Na cidade</p>
-              <Tit className="g-h2">A GUIA está espalhada pelo Rio</Tit>
-              <p className="g-ed">{cont(PEQUENAS_GUIAS.filter(g => g.coord).length, 'grupo', 'grupos')} em {cont(new Set(PEQUENAS_GUIAS.filter(g => g.coord).map(g => g.bairro)).size, 'bairro', 'bairros')}, e o culto na {IGREJA.bairro}.</p>
+              <p className="g-rot">O domingo</p>
+              <Tit className="g-h2">Como é o domingo</Tit>
+              <p className="g-ed">Louvor, palavra e acolhida.</p>
+            </div>
+            <div className="g-acoes">
+              <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
+              <Link href="/como-chegar" className="g-link">Como chegar</Link>
             </div>
           </div>
-          <Cidade />
+          <div className="c-foto">
+            <div className="g-foto leva">
+              <img src="/fotos/congregacao.webp" alt="Congregação reunida no culto de domingo" loading="lazy" decoding="async" />
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* =================================================== UM DOMINGO POR DENTRO
-          As áreas apresentadas pelo domingo, momento a momento, com a equipe
-          que faz cada um acontecer. O fio à esquerda anda com a rolagem. */}
-      <section id="areas" className="por-dentro casa-escuro rev">
+      {/* ------------------------------------------------ 02 · QUEM É A GUIA
+          No desktop, uma história em rolagem: a página trava e G, U, I e >
+          atravessam a tela, uma letra por vez, com a palavra e a frase da
+          igreja (CSS scroll-driven, ver .rolo). Onde não há suporte ou no
+          celular, os quatro azulejos. O texto é o da igreja, palavra por
+          palavra. */}
+      <section id="igreja" className="casa-escuro retic rev">
+        <div className="rolo">
+          <div className="rolo-in">
+            <div className="rolo-cab">
+              <p className="g-rot" style={{ justifyContent: 'center' }}>A igreja</p>
+            </div>
+            <div className="rolo-track">
+              {SIGLA.map((l, i) => (
+                <div key={l.t} className="rolo-p">
+                  <div>
+                    <div className="rolo-l">{l.l === '>' ? <span className="marca-chev"><Chevron /></span> : l.l}</div>
+                    <p className="rolo-t">{l.t}</p>
+                    <p className="rolo-d">{l.d}</p>
+                    {i === SIGLA.length - 1 && (
+                      <div className="g-acoes" style={{ justifyContent: 'center' }}>
+                        <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <span className="rolo-n">Somos GUIA · quatro palavras</span>
+            <div className="rolo-prog"><i /></div>
+          </div>
+        </div>
+
+        <div className="sigla-azulejos">
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">A igreja</p>
+              <Tit className="g-h2">Somos GUIA</Tit>
+              <p className="g-ed">{SIGLA_FRASE}.</p>
+            </div>
+            <div className="g-tiles quatro letras centro c-larga">
+              {SIGLA.map(l => (
+                <div key={l.t} className="g-tile">
+                  <span className="g-tile-l">{l.l === '>' ? <span className="marca-chev" aria-hidden="true"><Chevron /></span> : l.l}</span>
+                  <span className="g-tile-t">{l.t}</span>
+                </div>
+              ))}
+            </div>
+            <div className="c">
+              <div className="g-acoes">
+                <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------- 03 · SERVIR
+          Título, uma linha, um botão, e as áreas com foto real saídas do
+          banco. Os passos e a nota saíram: cada área explica o caminho. */}
+      <section id="areas" className="casa-papel rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
-              <p className="g-rot">Um domingo por dentro</p>
-              <Tit className="g-h2">Quem chega antes de você</Tit>
-              <p className="g-ed">Cada momento do culto tem uma equipe. E lugar para mais uma pessoa.</p>
+              <p className="g-rot">Servir</p>
+              <Tit className="g-h2">A igreja não é o prédio</Tit>
+              <p className="g-ed">São pessoas que chegaram mais cedo.</p>
             </div>
             <div className="g-acoes">
               <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
             </div>
           </div>
-          <div className="por-dentro-corpo">
-            <PorDentro mins={mins} fase={fase} />
-            <Criativo id="domingo" className="por-dentro-cria" />
+
+          {fase === 'carregando' && <AreasCarregando />}
+          {fase === 'rede' && (
+            <p className="g-corpo c" style={{ textAlign: 'center' }}>
+              Não consegui carregar as áreas agora. Atualize a página.
+            </p>
+          )}
+          <div className="casa-areas centro">
+            {mins.map(m => (
+              <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
+                <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
+                <span className="casa-area-nome">{m.nome}</span>
+                {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
+                <span className="casa-area-selo">
+                  {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
+                  {!m.aberto && ' · conversa antes'}
+                </span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ================================================================ FECHO */}
-      <section className="fecho-v3 casa-escuro rev">
-        <Criativo id="fecho" fundo />
+      {/* --------------------------------------------------------- FECHO */}
+      <section className="g-cheio centro fecho rev">
+        <img src="/fotos/oferta.webp" alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
           <Tit className="g-h2">{num ? `${pl(num.pessoas, 'Hoje é', 'Hoje são')} ${cont(num.pessoas, 'pessoa servindo', 'pessoas servindo')} em ${cont(num.ministerios, 'área', 'áreas')}.` : 'Ninguém aqui começou sabendo.'}</Tit>
-          <p className="g-ed fecho-sigla">{SIGLA_FRASE}.</p>
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
-            <Link href="/eu" className="g-link claro">Já sirvo · abrir meu espaço</Link>
+            <Link href="/eu" className="acao">Já sirvo · abrir meu espaço</Link>
           </div>
         </div>
       </section>

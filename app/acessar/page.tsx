@@ -11,8 +11,7 @@ import { IcSeta } from '@/components/Icones';
 
    A fronteira entre o site público e o sistema. Pública, indexável, e sem
    nada do sistema dentro: pergunta quem é a pessoa e a entrega na porta
-   certa. Três azulejos iguais, em tipo (v3: sem foto), e três perguntas de
-   quem se perdeu.
+   certa. Três azulejos iguais com foto, e três perguntas de quem se perdeu.
 
    A porta do voluntário aponta para /eu, que já explica e resolve (área →
    nome → PIN). /acessar/voluntario é 308 para lá.
@@ -26,9 +25,9 @@ export const metadata: Metadata = {
 };
 
 const PORTAS = [
-  { href: '/eu', n: '01', t: 'Sou voluntário', d: 'Ver a minha escala.' },
-  { href: '/entrar', n: '02', t: 'Sou da organização', d: 'Administrar escalas e equipes.' },
-  { href: '/servir', n: '03', t: 'Quero participar', d: 'Começar a servir numa área.' },
+  { href: '/eu', n: '01', t: 'Sou voluntário', d: 'Ver a minha escala.', foto: 'equipe.webp' },
+  { href: '/entrar', n: '02', t: 'Sou da organização', d: 'Administrar escalas e equipes.', foto: 'midia.webp' },
+  { href: '/servir', n: '03', t: 'Quero participar', d: 'Começar a servir numa área.', foto: 'acolhida.webp' },
 ];
 
 const PERGUNTAS = [
@@ -43,10 +42,8 @@ const PERGUNTAS = [
 
 export default function Acessar() {
   return (
-    <Site escuro>
-      {/* a barra nasce transparente sobre o escuro (como nas outras páginas):
-          a seção reserva a altura dela por dentro */}
-      <section className="casa-escuro rev" style={{ paddingTop: 'var(--barra-alt)' }}>
+    <Site>
+      <section className="casa-escuro rev">
         <div className="g g-secao primeira">
           <div className="c">
             <p className="g-rot">Acesso às equipes</p>
@@ -56,6 +53,7 @@ export default function Acessar() {
           <div className="g-tiles tres centro c-larga c-bloco grande">
             {PORTAS.map(p => (
               <Link key={p.href} href={p.href} className="g-tile">
+                <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
                 <span className="g-tile-seta" aria-hidden="true"><IcSeta /></span>
                 <span className="g-tile-l" style={{ fontFamily: 'var(--fonte-editorial)', fontStyle: 'italic', fontWeight: 200, letterSpacing: '-.02em' }}>{p.n}</span>
                 <span><span className="g-tile-t">{p.t}</span><span className="g-tile-d">{p.d}</span></span>

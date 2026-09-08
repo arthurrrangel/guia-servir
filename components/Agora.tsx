@@ -19,7 +19,7 @@ import { wazeDaPequenaGuia } from '@/lib/pequenas-guias';
    pula.
    ============================================================================= */
 
-export function Agora() {
+export function Agora({ pill }: { pill?: boolean } = {}) {
   const [o, setO] = useState<Ocorrencia | null>(null);
   useEffect(() => {
     const tique = () => setO(proxima(new Date()));
@@ -40,6 +40,22 @@ export function Agora() {
     else acao = { href: canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${g.nome} (${g.dia}, ${g.hora}). Meu nome é: `).href, rot: 'Quero ir nessa', fora: true };
   } else if (o?.evento.tipo === 'follow') {
     acao = { href: '/cultos#follow', rot: 'Sobre o Follow' };
+  }
+
+  /* a versão compacta: uma pílula acima do título do herói, no lugar do
+     rótulo fixo — o "agora" da igreja como o anúncio de um produto */
+  if (pill) {
+    const dentro = (
+      <>
+        <span className="agora-pill-pt" aria-hidden="true" />
+        <span className="agora-pill-q">{f.quando}</span>
+        <span className="agora-pill-o">{f.oque}</span>
+        <IcSeta />
+      </>
+    );
+    return acao.fora
+      ? <a href={acao.href} target="_blank" rel="noreferrer" className="agora-pill" aria-live="polite">{dentro}</a>
+      : <Link href={acao.href} className="agora-pill" aria-live="polite">{dentro}</Link>;
   }
 
   return (

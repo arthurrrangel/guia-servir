@@ -3,8 +3,6 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema, Luz } from '@/components/Texto';
-import { Cabecalho, Fecho } from '@/components/Pagina';
-import { Criativo } from '@/components/Criativo';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
@@ -13,10 +11,9 @@ import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
    /sobre — QUEM SOMOS
 
    TODO O TEXTO DE IDENTIDADE É DA IGREJA, palavra por palavra: sigla,
-   versículo, pilares e alvo. Aqui cada pedaço tem um recipiente: a sigla em
-   quatro azulejos, o versículo de ponta a ponta (sobre o criativo `palavra`,
-   quando existir), os pilares em três cartões, o alvo como de → para.
-   V3 (08/09/2026): cabeçalho da casa em vez da foto da congregação.
+   versículo, pilares e alvo. Aqui cada pedaço tem um recipiente, centrado:
+   a sigla em quatro azulejos, o versículo de ponta a ponta sobre a foto da
+   palavra, os pilares como três perguntas, o alvo como de → para.
 
    O bloco de liderança saiu da página enquanto nome e papel não estão
    definidos: quadro vazio com "entra aqui depois" é bastidor, não site.
@@ -38,7 +35,7 @@ export const metadata: Metadata = {
 
 export default function Sobre() {
   return (
-    <Site atual="/sobre" escuro>
+    <Site atual="/sobre">
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'AboutPage', name: `Quem somos · ${IGREJA.nome}`, url: `${SITE}/sobre`,
         about: { '@type': 'Church', name: IGREJA.nome, slogan: IGREJA.frase, url: SITE,
@@ -46,14 +43,21 @@ export default function Sobre() {
       }} />
 
       {/* ------------------------------------------------------------- herói */}
-      <Cabecalho criativo="sobre" rot="A igreja" titulo="Quem somos" ed="Um povo, não uma plateia."
-        acoes={<>
-          <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-          <Link href="/pequena-guia" className="g-link claro">Pequena Guia</Link>
-        </>} />
+      <section className="g-cheio alta centro rev">
+        <img src="/fotos/congregacao.webp" alt="Congregação da GUIA Church reunida" fetchPriority="high" />
+        <div className="g">
+          <p className="g-rot">A igreja</p>
+          <Tit as="h1" className="g-h1">Quem somos</Tit>
+          <p className="g-ed">Um povo, não uma plateia.</p>
+          <div className="g-acoes">
+            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <Link href="/pequena-guia" className="acao">Pequena Guia</Link>
+          </div>
+        </div>
+      </section>
 
       {/* -------------------------------------------------------------- a sigla */}
-      <section className="casa-papel rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="c">
             <p className="g-rot">O nome</p>
@@ -80,13 +84,13 @@ export default function Sobre() {
       </section>
 
       {/* -------------------------------------------- o versículo, de ponta a ponta */}
-      <section className="vers-v3 casa-escuro rev">
-        <Criativo id="palavra" fundo />
-        <div className="g vers-v3-in">
-          <blockquote className="g-ed vers-v3-txt">
+      <section className="g-cheio meio centro rev">
+        <img src="/fotos/palavra.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <blockquote className="g-ed" style={{ margin: '0 auto', fontSize: 'clamp(26px,3.8vw,56px)', color: '#fff', maxWidth: '26ch' }}>
             <Luz>Eis que o povo é um, e todos têm uma mesma língua; e isto é o que começam a fazer; e, agora, não haverá restrição para tudo o que eles intentarem fazer.</Luz>
           </blockquote>
-          <p className="g-rot vers-v3-ref">Gênesis 11:6</p>
+          <p className="g-rot" style={{ marginTop: 28, marginBottom: 0 }}>Gênesis 11:6</p>
         </div>
       </section>
 
@@ -131,11 +135,17 @@ export default function Sobre() {
       </section>
 
       {/* --------------------------------------------------------------- fecho */}
-      <Fecho rot="Na prática" titulo="Isso tem dois endereços na semana."
-        acoes={<>
-          <Link href="/pequena-guia" className="acao cheia">Pequena Guia <IcSeta /></Link>
-          <Link href="/servir" className="g-link claro">Quero servir</Link>
-        </>} />
+      <section className="g-cheio centro fecho rev">
+        <img src="/fotos/acolhida.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Na prática</p>
+          <Tit className="g-h2">Isso tem dois endereços na semana.</Tit>
+          <div className="g-acoes">
+            <Link href="/pequena-guia" className="acao cheia">Pequena Guia <IcSeta /></Link>
+            <Link href="/servir" className="acao">Quero servir</Link>
+          </div>
+        </div>
+      </section>
     </Site>
   );
 }

@@ -3,21 +3,16 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
-import { Cabecalho, Fecho } from '@/components/Pagina';
-import { MapaGuias } from '@/components/MapaGuias';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, MAPA, ROTA_WAZE, SITE } from '@/lib/igreja';
+import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
 
-   Quem abre esta página já decidiu ir. Ela abre com o cabeçalho da casa e o
-   endereço (o criativo `chegar` é o lugar da FACHADA, a foto que faz a
-   pessoa reconhecer a porta — ver lib/criativos.ts). Depois o mapa inteiro:
-   o mesmo mapa da cidade da home (OpenStreetMap, o pino da marca), fechado
-   na rua, com o cartão de endereço e as duas rotas. Os três modos de chegar,
-   e o fecho. V3, 08/09/2026: saiu o embed do Google (era um iframe com
-   filtro de cor e retícula por cima).
+   Quem abre esta página já decidiu ir. Ela abre com a FACHADA — a foto que
+   faz a pessoa reconhecer o lugar — e o endereço em cima dela, centrado.
+   Depois o mapa inteiro, tratado para a paleta, com o cartão de endereço e
+   as duas rotas. Três perguntas de quem está chegando, e o fecho.
 
    O CTA leva para fora, e está certo: a conversão aqui é a pessoa fechar o
    navegador e sair de casa.
@@ -33,7 +28,7 @@ const MODOS = [
 const PERGUNTAS = [
   { q: 'Onde eu deixo o carro?', r: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo.' },
   { q: 'Vou de aplicativo. Qual é o destino?', r: `${IGREJA.rua}, ${IGREJA.bairro}. O carro para em frente à porta.` },
-  { q: 'É a primeira vez. Como eu sei que cheguei?', r: 'Por alguém na porta: tem equipe de acolhida antes do horário.' },
+  { q: 'É a primeira vez. Como eu sei que cheguei?', r: 'Pela fachada da foto, e por alguém na porta: tem equipe de acolhida antes do horário.' },
 ];
 
 export const metadata: Metadata = {
@@ -46,7 +41,7 @@ export const metadata: Metadata = {
 
 export default function ComoChegar() {
   return (
-    <Site atual="/como-chegar" escuro>
+    <Site atual="/como-chegar">
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Place', name: IGREJA.nome, hasMap: MAPA, url: `${SITE}/como-chegar`,
         address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' },
@@ -57,19 +52,35 @@ export default function ComoChegar() {
         mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
       }} />
 
-      {/* ------------------------------------------------------------- herói */}
-      <Cabecalho criativo="chegar" rot="Onde fica" titulo="Como chegar"
-        ed={<><span className="nao-quebra">{IGREJA.rua}</span>, <span className="nao-quebra">{IGREJA.bairro}</span>.</>}
-        acoes={<>
-          <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Traçar rota no Maps <IcSeta /></a>
-          <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="g-link claro">Abrir no Waze</a>
-        </>} />
+      {/* ------------------------------------------------- a fachada, inteira */}
+      <section className="g-cheio alta centro rev">
+        <img src="/fotos/predio.webp" alt={`Fachada da ${IGREJA.nome} na ${IGREJA.rua}`} fetchPriority="high" />
+        <div className="g">
+          <p className="g-rot">Onde fica</p>
+          <Tit as="h1" className="g-h1">Como chegar</Tit>
+          {/* rua e bairro não quebram por dentro: em 390 saía "Rua Pedra de
+              Itaúna, / 534, Barra da Tijuca." — o número órfão da rua, na
+              única linha da página cujo trabalho é dar o endereço. */}
+          <p className="g-ed"><span className="nao-quebra">{IGREJA.rua}</span>, <span className="nao-quebra">{IGREJA.bairro}</span>.</p>
+          <div className="g-acoes">
+            <a href={MAPA} target="_blank" rel="noreferrer" className="acao cheia">Traçar rota no Maps <IcSeta /></a>
+            <a href={ROTA_WAZE} target="_blank" rel="noreferrer" className="acao">Abrir no Waze</a>
+          </div>
+        </div>
+      </section>
 
       {/* ------------------------------------------------------ o mapa, inteiro
-          O mapa da casa (components/MapaGuias.tsx), só com o pino da igreja,
-          fechado na rua. O cartão de endereço fica por cima. */}
-      <section className="mapa limpo rev" aria-label="Mapa de como chegar">
-        <MapaGuias grupos={[]} igreja zoomMax={16} />
+          Google Maps de ponta a ponta, tratado para a paleta (ver .mapa em
+          globals.css). Carrega só quando chega perto da tela. */}
+      <section className="mapa centro rev" aria-label="Mapa de como chegar">
+        <iframe
+          src={MAPA_EMBED}
+          title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`}
+          loading="lazy"
+          allowFullScreen={false}
+          referrerPolicy="no-referrer-when-downgrade"
+        />
+        <div className="mapa-mira" aria-hidden="true"><i /></div>
         <div className="mapa-cartao">
           <p className="g-rot">{IGREJA.cultoDia}, {IGREJA.cultoHora}</p>
           <p className="g-h3">{IGREJA.rua}</p>
@@ -82,7 +93,7 @@ export default function ComoChegar() {
       </section>
 
       {/* ------------------------------------------------------------ chegando */}
-      <section className="casa-papel rev">
+      <section className="casa-escuro retic rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
@@ -104,11 +115,17 @@ export default function ComoChegar() {
       </section>
 
       {/* --------------------------------------------------------------- fecho */}
-      <Fecho rot="Antes de vir" titulo="O que esperar de um domingo"
-        acoes={<>
-          <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
-          <a href={MAPA} target="_blank" rel="noreferrer" className="g-link claro">Traçar rota</a>
-        </>} />
+      <section className="g-cheio centro fecho rev">
+        <img src="/fotos/recepcao.webp" alt="" loading="lazy" decoding="async" />
+        <div className="g">
+          <p className="g-rot">Antes de vir</p>
+          <Tit className="g-h2">O que esperar de um domingo</Tit>
+          <div className="g-acoes">
+            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <a href={MAPA} target="_blank" rel="noreferrer" className="acao">Traçar rota</a>
+          </div>
+        </div>
+      </section>
     </Site>
   );
 }
