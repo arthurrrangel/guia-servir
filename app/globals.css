@@ -7990,3 +7990,46 @@ input,select,textarea{ border-radius:var(--r4) }
    fechado — as caixas altas entreletradas eram a voz editorial */
 .menu ul a{ text-transform:none; letter-spacing:-.02em; font-weight:600; font-size:clamp(30px,8vw,40px) }
 .menu .menu-pe,.menu .menu-pe a{ text-transform:none; letter-spacing:0; font-size:14.5px; font-weight:500 }
+
+/* ---- CELULAR: TUDO CENTRADO (pedido do Arthur, 08/09/2026) ----------------
+   Abaixo de 760px todo texto de conteúdo é centrado, e os blocos que se
+   alinham por flex/grid acompanham: rótulos, ações, cartões, chips, o
+   rodapé. A barra do topo fica como está (marca à esquerda, ação à direita:
+   é navegação, não conteúdo). */
+@media(max-width:759px){
+  main,footer.casa-pe{ text-align:center }
+  .g-rot,.fato-r,.pg .g-rot{ justify-content:center }
+  .g-h1,.g-h2,.g-h3,.g-ed,.g-corpo,.g-nota,.fato-d,.pg-nota,.cartao-d{ margin-inline:auto }
+  .g-cab{ display:block }
+  .g-cab .g-acoes,.g-acoes,.pg .g-acoes,.pg-chips,.acoes{ justify-content:center }
+  .fato{ align-items:center; text-align:center }
+  .fato-v{ justify-content:center }
+  .pg-corpo{ text-align:center; align-items:center }
+  .pg-nome,.pg-quando,.pg-nota{ display:block }
+  .pg-perto{ justify-items:center }
+  .pg-perto-txt{ justify-items:center }
+  /* perguntas: o número sai, a pergunta centra, o "+" fica na ponta */
+  .g-perg li,.qa li{ text-align:center }
+  .g-perg li{ grid-template-columns:1fr }
+  .g-perg-r{ margin-inline:auto }
+  .qa summary{ grid-template-columns:20px 1fr 20px }
+  .qa-n,.g-perg-n{ display:none }
+  .qa-q{ text-align:center; justify-content:center; grid-column:2 }  /* o h3 do sistema é flex */
+  .g-perg-q{ text-align:center; justify-content:center }
+  .qa-r{ margin-left:auto; margin-right:auto }
+  /* rodapé */
+  .g-pe,.g-pe-onde,.g-pe-cols > *,.g-pe-linha{ text-align:center }
+  .g-pe-onde{ flex-direction:column; align-items:center; justify-content:center }
+  .g-pe-ver{ margin-left:0; align-self:center }
+  .g-pe-marca{ margin-inline:auto }
+  .g-pe-linha{ justify-content:center }
+  .mapa-cartao,.g-vira li{ text-align:center }
+  .g-vira li{ justify-items:center }
+  .g-ini{ margin-inline:auto }
+  /* os azulejos da sigla em /sobre (uma coluna) e o conteúdo das perguntas
+     com cartões: a régua de 60px da resposta sai, o bloco centra */
+  .g-tiles.quatro:not(.letras) .g-tile{ align-items:center; text-align:center }
+  .g-tiles.quatro:not(.letras) .g-tile-d{ text-align:center; margin-inline:auto }
+  .qa{ --qa-regua:0px }
+  .qa-c{ margin-inline:auto }
+}
