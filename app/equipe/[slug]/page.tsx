@@ -105,6 +105,7 @@ export default function EntradaEquipe() {
   const misturado = nomesArea.some(a => a.tipos.includes('follow'))
     && nomesArea.some(a => !a.tipos.includes('follow'));
   const marcadas = Object.keys(fNiveis).length;
+  const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(fEmail.trim());
 
   useEffect(() => { try { setTokenSalvo(localStorage.getItem(K_TOKEN) || ''); } catch {} }, []);
 
@@ -524,7 +525,10 @@ export default function EntradaEquipe() {
               É por ele que você confirma que é você, e é onde a organização te chama.
             </p>
 
-            <label htmlFor="eq-email" style={{ marginTop: 14, display: 'block' }}>E-mail <span className="dim">(opcional)</span></label>
+            {/* obrigatório, como no cadastro do site (decisão do Arthur em
+                07/09: "tem que ter email"). Duas portas de entrada com regras
+                diferentes eram duas bases de dados diferentes. */}
+            <label htmlFor="eq-email" style={{ marginTop: 14, display: 'block' }}>E-{"\u2060"}mail</label>
             <input id="eq-email" value={fEmail} disabled={ocupado} placeholder="seu@email.com" type="email" inputMode="email"
               autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
               onChange={e => setFEmail(e.target.value)} />
@@ -624,17 +628,18 @@ export default function EntradaEquipe() {
 
             {/* mesma regra do cadastro: botão que não pode ser apertado diz
                 o que falta, senão a pessoa acha que o site travou */}
-            {!ocupado && (!fNome.trim() || !fTel.trim() || !marcadas) && (
+            {!ocupado && (!fNome.trim() || !fTel.trim() || !emailOk || !marcadas) && (
               <p className="postos-falta" role="status">
                 {'Falta ' + [
                   !fNome.trim() && 'seu nome',
                   !fTel.trim() && 'seu WhatsApp',
+                  !emailOk && (fEmail.trim() ? 'o e-\u2060mail completo' : 'seu e-\u2060mail'),
                   !marcadas && 'marcar onde você serve',
                 ].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.'}
               </p>
             )}
             <button className="pri" style={{ marginTop: 20, width: '100%' }}
-              disabled={ocupado || !fNome.trim() || !fTel.trim() || !marcadas} onClick={inscrever}>
+              disabled={ocupado || !fNome.trim() || !fTel.trim() || !emailOk || !marcadas} onClick={inscrever}>
               {ocupado ? 'entrando…' : 'Entrar no time'}
             </button>
             <button className="btn fantasma" style={{ margin: '10px auto 0', display: 'flex' }}
