@@ -7166,9 +7166,13 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
   }
 }
 
-/* o índice do /ajustes é a única coisa da página que ia até 1270 enquanto o
-   conteúdo parava em 730: duas bordas direitas na mesma tela */
-.aj-indice{ max-width:var(--lista) }
+/* o índice do /ajustes ia até 1270 enquanto o conteúdo parava em 730, e a
+   primeira resposta foi travá-lo em --lista. Errado: com 560px os cinco itens
+   não cabem (690px) e, como a máscara de desbote some a partir de 900, o
+   último saía CORTADO seco ("QU"). Índice é navegação, como as abas do topo,
+   e navegação corre a largura da tela; só o conteúdo tem a medida da lista.
+   No celular continua rolável com desbote. */
+@media(max-width:899px){ .aj-indice{ max-width:var(--lista) } }
 
 /* A BARRA FIXA CORTAVA O CAMPO EM VEZ DE PASSAR POR CIMA DELE. O rodapé do
    cadastro tem `border-top:1px` e fundo sólido: no meio da rolagem, esse fio
@@ -7821,3 +7825,21 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
   .g-tiles.quatro:not(.letras) .g-tile{ align-items:flex-start; text-align:left }
   .g-tiles.quatro:not(.letras) .g-tile-d{ text-align:left }
 }
+
+/* =============================================================================
+   SISTEMA, SEGUNDA PASSADA (a olho, tela a tela, depois das auditorias)
+   08/09/2026.
+   ============================================================================= */
+/* "Apagar" é botão de texto com classe .perigo e herdava o hover do botão-pílula
+   .perigo (fundo rosa): virava um marca-texto atrás da palavra. Texto é texto. */
+.lid-bt-txt.perigo:hover,.lid-bt-txt.perigo:active,.lid-bt-txt.perigo:focus-visible{
+  background:transparent; border-color:transparent;
+}
+/* as ações de uma pessoa aberta em /time: a mesma linha de ações de todo o
+   líder (uma sólida + texto), no lugar de cinco pílulas em quatro trajes */
+.lid-acoes{ display:flex; gap:0 var(--e5); align-items:center; flex-wrap:wrap; margin-top:var(--e2) }
+/* os chips de função: tracejado é vocabulário de rascunho. "Adicionar" é
+   vazado e quieto; "declarado e não conferido" já diz "?" no texto. */
+.chip.add{ border-style:solid; background:transparent }
+.chip.so-dito{ border-style:solid; opacity:1 }
+.pessoa-campos{ align-items:flex-end }

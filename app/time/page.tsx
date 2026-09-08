@@ -8,7 +8,7 @@ import {
 import { Faixa } from '@/components/Faixa';
 import { cont } from '@/lib/plural';
 import { Aviso, Medidor, Trabalhando } from '@/components/Ui';
-import { IcBusca, IcCopiar, IcMais, IcSeta } from '@/components/Icones';
+import { IcBusca, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
@@ -284,21 +284,30 @@ function Time() {
                 {est.carga} escala{est.carga === 1 ? '' : 's'} em {S.config.janelaCarga} dias
                 {est.parado > 60 && est.carga === 0 && <> · há muito tempo sem servir</>}
               </div>
-              <div className="linha" style={{ gap: 8 }}>
-                {(() => {
-                  const tel = (v.tel || '').replace(/\D/g, '');
-                  const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgConvite(S, v.id, base))}` : null;
-                  return zap
-                    ? <a className="btn mini zap" href={zap} target="_blank" rel="noopener">enviar link no WhatsApp</a>
-                    : null;
-                })()}
-                <button className="mini" onClick={() => copiar(msgConvite(S, v.id, base), aviso, 'Link pessoal copiado. Mande no privado.')}>
-                  <IcCopiar /> link pessoal
-                </button>
-                {novo && <button className="mini verde" onClick={() => conferir(v.id, v.nome)}>conferi, está certo</button>}
-                <button className="mini fantasma" onClick={() => mudar(v.id, { ativo: !v.ativo })}>{v.ativo ? 'pausar' : 'reativar'}</button>
-                <button className="mini perigo" onClick={() => remover(v.id, v.nome)}>remover</button>
-              </div>
+              {/* AS AÇÕES DA PESSOA, NA VOZ DO LÍDER. 08/09/2026. Eram cinco
+                  botões em quatro trajes (pílula verde vazada, pílula com
+                  ícone, verde sólido, fantasma em caixa alta, vazado cinza),
+                  em quatro linhas no celular — o ponto mais pesado do
+                  sistema. Agora é a anatomia de toda ação do líder: UMA sólida
+                  (conferir o nível, se a pessoa é nova; senão, mandar o link)
+                  e o resto em texto, na mesma linha. */}
+              {(() => {
+                const tel = (v.tel || '').replace(/\D/g, '');
+                const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgConvite(S, v.id, base))}` : null;
+                const copiarLink = () => copiar(msgConvite(S, v.id, base), aviso, 'Link pessoal copiado. Mande no privado.');
+                const link = zap
+                  ? <a key="zap" className={novo ? 'lid-bt-txt' : 'lid-bt'} href={zap} target="_blank" rel="noopener">Enviar link no WhatsApp</a>
+                  : <button key="copia" className={novo ? 'lid-bt-txt' : 'lid-bt'} onClick={copiarLink}>Copiar link pessoal</button>;
+                return (
+                  <div className="lid-acoes">
+                    {novo && <button className="lid-bt" onClick={() => conferir(v.id, v.nome)}>Conferi, está certo</button>}
+                    {link}
+                    {zap && <button className="lid-bt-txt" onClick={copiarLink}>Copiar link</button>}
+                    <button className="lid-bt-txt" onClick={() => mudar(v.id, { ativo: !v.ativo })}>{v.ativo ? 'Pausar' : 'Reativar'}</button>
+                    <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="chips" style={{ marginTop: 14 }}>
@@ -321,7 +330,10 @@ function Time() {
               })}
             </div>
 
-            <div className="linha" style={{ marginTop: 14 }}>
+            {/* `pessoa-campos`: alinhado pela base. Com o rótulo de duas linhas
+                ("Máximo de escalas por mês") o `.linha` centrado deixava os dois
+                campos 9px fora um do outro. */}
+            <div className="linha pessoa-campos" style={{ marginTop: 14 }}>
               <div style={{ width: 190 }}>
                 <label htmlFor={'tel-' + v.id}>WhatsApp</label>
                 <input id={'tel-' + v.id} key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
