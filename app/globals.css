@@ -8071,3 +8071,14 @@ a.g-tile:hover{ transform:translateY(-2px) }
    escala dos rótulos (12px), rua na escala dos títulos de cartão. */
 .mapa-cartao p.g-rot{ font-size:12px; line-height:1 }
 .mapa-cartao p.g-h3{ font-size:clamp(19px,1.8vw,24px); line-height:1.15; letter-spacing:-.02em }
+
+/* ---- utilitários que substituem estilos em linha nas páginas (08/09/2026) ---
+   Estilo em linha é decisão escondida do sistema: some da folha, não entra
+   nas medições e não se repete igual. Cada um destes tem nome. */
+.m0{ margin:0 }
+.g-rot.centro{ justify-content:center }
+.g-acoes.centro{ justify-content:center }
+.casa-heroi-frase{ color:var(--areia); margin:var(--e5) auto 0 }
+.g-versiculo{ margin:0 auto; font-size:clamp(26px,3.8vw,56px); color:#fff; max-width:26ch }
+.g-versiculo-ref{ margin:var(--e6) 0 0; justify-content:center }
+.g-tile-l.num{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; letter-spacing:-.02em }

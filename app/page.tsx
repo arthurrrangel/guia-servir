@@ -285,7 +285,7 @@ export default function Casa() {
               no aparelho (lib/semana.ts), com a ação certa para o momento */}
           <Agora pill />
           <Tit as="h1" className="">Existe um lugar para você</Tit>
-          <p className="g-ed" style={{ color: 'var(--areia)', margin: '18px auto 0' }}>{IGREJA.frase}.</p>
+          <p className="g-ed casa-heroi-frase">{IGREJA.frase}.</p>
           {/* UM PRIMÁRIO, UMA PALAVRA. 06/09/2026.
               Eram dois botões do mesmo tamanho: um branco sólido e um
               contornado. Sobre foto escura o contornado praticamente some, e
@@ -329,7 +329,7 @@ export default function Casa() {
           <div className="g g-secao">
             <div className="c">
               <p className="g-rot">Hoje na GUIA</p>
-              <p className="g-ed" style={{ margin: 0 }}>Quem faz o domingo acontecer.</p>
+              <p className="g-ed m0">Quem faz o domingo acontecer.</p>
             </div>
             <div className="g-num centro c-bloco grande">
               <div><b><Contador n={num.pessoas} /></b><span>{pl(num.pessoas, 'pessoa servindo', 'pessoas servindo')}</span></div>
@@ -378,7 +378,7 @@ export default function Casa() {
         <div className="rolo">
           <div className="rolo-in">
             <div className="rolo-cab">
-              <p className="g-rot" style={{ justifyContent: 'center' }}>A igreja</p>
+              <p className="g-rot centro">A igreja</p>
             </div>
             <div className="rolo-track">
               {SIGLA.map((l, i) => (
@@ -388,7 +388,7 @@ export default function Casa() {
                     <p className="rolo-t">{l.t}</p>
                     <p className="rolo-d">{l.d}</p>
                     {i === SIGLA.length - 1 && (
-                      <div className="g-acoes" style={{ justifyContent: 'center' }}>
+                      <div className="g-acoes centro">
                         <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
                       </div>
                     )}
@@ -443,12 +443,12 @@ export default function Casa() {
 
           {fase === 'carregando' && <AreasCarregando />}
           {fase === 'rede' && (
-            <p className="g-corpo c" style={{ textAlign: 'center' }}>
+            <p className="g-corpo c">
               Não consegui carregar as áreas agora. Atualize a página.
             </p>
           )}
           {fase === 'pronto' && !mins.length && (
-            <p className="g-corpo c" style={{ textAlign: 'center' }}>
+            <p className="g-corpo c">
               As áreas aparecem aqui assim que a liderança abrir as vagas.
             </p>
           )}

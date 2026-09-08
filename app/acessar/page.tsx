@@ -56,7 +56,7 @@ export default function Acessar() {
               <Link key={p.href} href={p.href} className="g-tile">
                 <img src={cria(p.foto)} alt="" loading="lazy" decoding="async" />
                 <span className="g-tile-seta" aria-hidden="true"><IcSeta /></span>
-                <span className="g-tile-l" style={{ fontFamily: 'var(--fonte-editorial)', fontStyle: 'italic', fontWeight: 200, letterSpacing: '-.02em' }}>{p.n}</span>
+                <span className="g-tile-l num">{p.n}</span>
                 <span><span className="g-tile-t">{p.t}</span><span className="g-tile-d">{p.d}</span></span>
               </Link>
             ))}
