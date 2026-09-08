@@ -91,7 +91,7 @@ export default function Sobre() {
           <blockquote className="g-ed" style={{ margin: '0 auto', fontSize: 'clamp(26px,3.8vw,56px)', color: '#fff', maxWidth: '26ch' }}>
             <Luz>Eis que o povo é um, e todos têm uma mesma língua; e isto é o que começam a fazer; e, agora, não haverá restrição para tudo o que eles intentarem fazer.</Luz>
           </blockquote>
-          <p className="g-rot" style={{ marginTop: 28, marginBottom: 0 }}>Gênesis 11:6</p>
+          <p className="g-rot" style={{ marginTop: 'var(--e6)', marginBottom: 0 }}>Gênesis 11:6</p>
         </div>
       </section>
 

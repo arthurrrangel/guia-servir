@@ -131,7 +131,11 @@ export default function Casa() {
       if (!vivo) return;
       if (lista.error) { setFase('rede'); return; }
       setMins((lista.data || []) as Min[]);
-      if (!n.error) setNum(n.data as Numeros);
+      /* a faixa de números só entra com números de verdade: a RPC devolve um
+         objeto; se voltar vazio ou em outro formato, a faixa não aparece, em
+         vez de mostrar quatro rótulos sem número (08/09/2026) */
+      const nd = Array.isArray(n.data) ? n.data[0] : n.data;
+      if (!n.error && nd && typeof nd.pessoas === 'number') setNum(nd as Numeros);
       setFase('pronto');
     })();
     return () => { vivo = false; };
@@ -441,6 +445,11 @@ export default function Casa() {
           {fase === 'rede' && (
             <p className="g-corpo c" style={{ textAlign: 'center' }}>
               Não consegui carregar as áreas agora. Atualize a página.
+            </p>
+          )}
+          {fase === 'pronto' && !mins.length && (
+            <p className="g-corpo c" style={{ textAlign: 'center' }}>
+              As áreas aparecem aqui assim que a liderança abrir as vagas.
             </p>
           )}
           <div className="casa-areas centro">

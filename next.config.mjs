@@ -30,8 +30,12 @@ const CABECALHOS = [
   /* ninguém coloca o painel do líder dentro de um quadro para roubar o clique */
   { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
   { key: 'X-Frame-Options', value: 'DENY' },
-  /* o produto não usa nenhuma dessas: desligar é mais barato que confiar */
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()' },
+  /* o produto não usa câmera, microfone, pagamento nem USB: desligar é mais
+     barato que confiar. GEOLOCALIZAÇÃO fica liberada para a própria origem
+     (08/09/2026): o "achar o mais perto de mim" de /pequena-guia pede a
+     posição do aparelho, só ao toque — com `geolocation=()` o navegador
+     recusava antes de perguntar, e o botão morria em "sem a posição". */
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(self), payment=(), usb=()' },
 ];
 
 /* =============================================================================

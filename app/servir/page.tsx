@@ -8,6 +8,7 @@ import { Tit } from '@/components/Texto';
 import { AreasCarregando, Vazio } from '@/components/Tela';
 import { fotoDaArea } from '@/lib/fotos';
 import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { canalDeConversa } from '@/lib/igreja';
 
 /* =============================================================================
    /servir — ONDE A JORNADA COMEÇA
@@ -91,7 +92,16 @@ export default function Servir() {
                 acao={{ href: '/', rot: 'Voltar ao início' }}
               />
             )}
-            {fase === 'pronto' && (
+            {/* banco sem área publicada: a página diz isso em vez de ficar com
+                o título e nada embaixo (08/09/2026) */}
+            {fase === 'pronto' && !mins.length && (
+              <Vazio
+                titulo="Nenhuma área aberta agora"
+                texto="As áreas aparecem aqui assim que a liderança abrir as vagas. Enquanto isso, fale com a gente."
+                acao={{ href: canalDeConversa('Oi! Vi o site da GUIA e quero servir. Em que área posso ajudar?').href, rot: 'Falar com a gente' }}
+              />
+            )}
+            {fase === 'pronto' && mins.length > 0 && (
               <div className="casa-areas centro rente">
                 {mins.map(m => (
                   <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">

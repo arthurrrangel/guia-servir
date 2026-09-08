@@ -5566,7 +5566,7 @@ html{ scroll-behavior:smooth }
 .c .g-acoes{ justify-content:center }
 .c-larga{ max-width:1120px; margin-inline:auto }
 .c-media{ max-width:820px; margin-inline:auto }
-.c-bloco{ margin-top:clamp(36px,5vw,64px) }
+.c-bloco{ margin-top:clamp(40px,5vw,64px) }
 .c-bloco.grande{ margin-top:clamp(44px,6vw,80px) }
 .c .g-h1{ max-width:14ch }
 .c .g-h2{ max-width:18ch }
@@ -5709,7 +5709,7 @@ html{ scroll-behavior:smooth }
 .pgs-dica{ display:none }
 @media(max-width:759px){
   .pgs.fila{ display:flex; gap:10px; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-    margin-inline:calc(-1 * clamp(20px,4vw,52px)); padding-inline:clamp(20px,4vw,52px); scrollbar-width:none; margin-top:36px }
+    margin-inline:calc(-1 * clamp(20px,4vw,52px)); padding-inline:clamp(20px,4vw,52px); scrollbar-width:none; margin-top:40px }
   .pgs.fila::-webkit-scrollbar{ display:none }
   .pgs.fila .pg{ flex:0 0 84%; scroll-snap-align:center }
   .pgs-dica{ display:block; text-align:center; margin:16px 0 0; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mudo) }
@@ -5841,7 +5841,7 @@ svg.logo{ width:auto }
 
    O prefixo `pg-` põe cada coisa na sua página. A família já existia aqui
    (.pgs, .pg), só estas duas tinham ficado sem sobrenome. */
-.pg-chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:clamp(28px,4vw,40px) }
+.pg-chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin-top:clamp(32px,4vw,40px) }
 .pg-chip{
   font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.12em; text-transform:uppercase;
   padding:12px 18px; border:1px solid rgba(37,37,37,.25); background:transparent; color:var(--noite); cursor:pointer;
@@ -6101,7 +6101,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .g-cheio .g-nota{ color:rgba(255,255,255,.62) }
 .qa .g-nota{ margin:14px 0 0 }
 /* quem responde: as iniciais, e o nome em tamanho de nome */
-.g-ini{ display:grid; place-items:center; width:64px; height:64px; margin:0 auto clamp(18px,2.4vw,26px); border-radius:50%; background:var(--areia-tinta); color:var(--areia); font-family:var(--fonte-display); font-weight:700; font-size:18px; letter-spacing:.06em }
+.g-ini{ display:grid; place-items:center; width:64px; height:64px; margin:0 auto clamp(20px,2.4vw,32px); border-radius:50%; background:var(--areia-tinta); color:var(--areia); font-family:var(--fonte-display); font-weight:700; font-size:18px; letter-spacing:.06em }
 .g-h2.nome{ font-size:clamp(30px,3.8vw,52px) }
 /* carregando dentro do herói escuro */
 .g-cheio .estado-tela p{ color:rgba(255,255,255,.72) }
@@ -7224,7 +7224,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    import no componente; aqui fica só o que é da casa: a moldura, o pino com a
    marca e o cartão sem mapa dentro.
 ============================================================================= */
-.pg-mapao{ position:relative; margin-top:clamp(24px,3vw,36px); border:1px solid var(--linha) }
+.pg-mapao{ position:relative; margin-top:clamp(20px,3vw,32px); border:1px solid var(--linha) }
 .pg-mapao-tela{
   height:clamp(320px,52vh,560px); width:100%; background:var(--card2);
 }
@@ -8066,3 +8066,8 @@ a.g-tile:hover{ transform:translateY(-2px) }
      na largura do texto (width:100% esticava o sublinhado de ponta a ponta) */
   .entrada .entrada-troca{ align-self:center; width:auto }
 }
+/* o cartão de endereço do mapa: o rótulo e o título estavam herdando o
+   15,5px do parágrafo (a regra `.mapa-cartao p` pegava os dois). Rótulo na
+   escala dos rótulos (12px), rua na escala dos títulos de cartão. */
+.mapa-cartao p.g-rot{ font-size:12px; line-height:1 }
+.mapa-cartao p.g-h3{ font-size:clamp(19px,1.8vw,24px); line-height:1.15; letter-spacing:-.02em }

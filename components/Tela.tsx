@@ -92,7 +92,9 @@ export function Vazio({ titulo, texto, acao }:
     <div className="estado-tela">
       <span className="rot">{titulo}</span>
       <p>{texto}</p>
-      {acao && <Link href={acao.href} className="acao">{acao.rot}</Link>}
+      {acao && (/^https?:/.test(acao.href)
+        ? <a href={acao.href} target="_blank" rel="noreferrer" className="acao">{acao.rot}</a>
+        : <Link href={acao.href} className="acao">{acao.rot}</Link>)}
     </div>
   );
 }
