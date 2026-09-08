@@ -310,7 +310,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
                 {ocupado ? 'salvando…' : 'Aprovar e criar no time'}
               </button>
               {c.status !== 'recusada' && (
-                <button className="lid-bt-txt lid-cand-perigo" disabled={ocupado}
+                <button className="lid-bt-txt perigo" disabled={ocupado}
                   onClick={() => agir('recusada', 'candidatura encerrada')}>
                   Encerrar por enquanto
                 </button>

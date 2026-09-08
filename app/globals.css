@@ -3786,7 +3786,6 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   color:var(--cinza); border-bottom:1px solid var(--linha);
 }
-.lid-cand-perigo{ color:var(--bad) }
 
 /* =============================================================================
    A ESCALA  (.esc-*)
@@ -7843,3 +7842,9 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 .chip.add{ border-style:solid; background:transparent }
 .chip.so-dito{ border-style:solid; opacity:1 }
 .pessoa-campos{ align-items:flex-end }
+/* na /escala do desktop o caret do nome caía num x diferente em cada linha:
+   a coluna do estado era `auto` e "CONFIRMOU", "FALTA CONFIRMAR" e "NÃO PODE"
+   têm larguras diferentes, então a coluna do nome mudava de largura a cada
+   linha. Coluna do estado fixa (o mais longo, "FALTA CONFIRMAR ▾", mede
+   ~140px): os carets alinham numa vertical só. */
+@media(min-width:641px){ .esc-posto{ grid-template-columns:minmax(0,1fr) 9.5rem } }
