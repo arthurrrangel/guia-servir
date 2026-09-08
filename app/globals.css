@@ -7870,3 +7870,6 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 }
 .ajt-toggle:hover .ajt-nome{ text-decoration:underline; text-underline-offset:3px }
 .ajt-toggle:focus-visible{ outline:2px solid currentColor; outline-offset:3px }
+/* a regra de 44px da migalha (linha ~2696) era vencida por uma de 32px escrita
+   depois (~2808): os dois links do cadastro mediam 32. Aqui, por último. */
+.migalha a{ min-height:var(--toque); padding:var(--e3) 0 }
