@@ -6,6 +6,7 @@ import { Tit, Schema } from '@/components/Texto';
 import ProximoCulto from '@/components/ProximoCulto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /cultos — A PÁGINA QUE TIRA ALGUÉM DE CASA
@@ -44,11 +45,11 @@ const FOLLOW_HORA = IGREJA.followHora as string | null;
 const PERGUNTAR_FOLLOW = canalDeConversa('Oi! Vi o site da GUIA e quero saber o horário do Follow, o culto de jovens. ');
 
 const PASSOS = [
-  { n: '01', t: 'Acolhida', foto: 'recepcao.webp' },
-  { n: '02', t: 'Louvor', foto: 'teclado.webp' },
-  { n: '03', t: 'Palavra', foto: 'palavra.webp' },
-  { n: '04', t: 'Oração e saída', foto: 'congregacao.webp' },
-];
+  { n: '01', t: 'Acolhida', foto: 'cultos-acolhida' },
+  { n: '02', t: 'Louvor', foto: 'cultos-louvor' },
+  { n: '03', t: 'Palavra', foto: 'cultos-palavra' },
+  { n: '04', t: 'Oração e saída', foto: 'cultos-saida' },
+] as const;
 
 export const metadata: Metadata = {
   title: 'Cultos',
@@ -60,7 +61,7 @@ export const metadata: Metadata = {
 
 export default function Cultos() {
   return (
-    <Site atual="/cultos">
+    <Site atual="/cultos" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
@@ -76,7 +77,7 @@ export default function Cultos() {
 
       {/* ------------------------------------------------------------ herói */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/equipe.webp" alt="Momento de louvor no culto de domingo da GUIA Church" fetchPriority="high" />
+        <img src={cria('cultos')} alt={criaAlt('cultos')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot"><ProximoCulto /></p>
           <Tit as="h1" className="g-h1">Culto de domingo</Tit>
@@ -101,7 +102,7 @@ export default function Cultos() {
           <div className="g-passos centro c-bloco grande">
             {PASSOS.map(p => (
               <div key={p.n} className="g-passo">
-                <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
+                <img src={cria(p.foto)} alt="" loading="lazy" decoding="async" />
                 <span className="g-passo-n">{p.n}</span>
                 <span className="g-passo-t">{p.t}</span>
               </div>
@@ -154,7 +155,7 @@ export default function Cultos() {
 
       {/* ------------------------------------------------------------ fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/palco.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('cultos-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Te esperamos</p>
           <Tit className="g-h2">A porta é a mesma para todo mundo.</Tit>

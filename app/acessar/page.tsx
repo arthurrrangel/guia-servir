@@ -5,6 +5,7 @@ import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { Perguntas } from '@/components/Perguntas';
 import { IcSeta } from '@/components/Icones';
+import { src as cria } from '@/lib/criativos';
 
 /* =============================================================================
    /acessar — AS TRÊS PORTAS
@@ -25,10 +26,10 @@ export const metadata: Metadata = {
 };
 
 const PORTAS = [
-  { href: '/eu', n: '01', t: 'Sou voluntário', d: 'Ver a minha escala.', foto: 'equipe.webp' },
-  { href: '/entrar', n: '02', t: 'Sou da organização', d: 'Administrar escalas e equipes.', foto: 'midia.webp' },
-  { href: '/servir', n: '03', t: 'Quero participar', d: 'Começar a servir numa área.', foto: 'acolhida.webp' },
-];
+  { href: '/eu', n: '01', t: 'Sou voluntário', d: 'Ver a minha escala.', foto: 'acesso-voluntario' },
+  { href: '/entrar', n: '02', t: 'Sou da organização', d: 'Administrar escalas e equipes.', foto: 'acesso-organizacao' },
+  { href: '/servir', n: '03', t: 'Quero participar', d: 'Começar a servir numa área.', foto: 'acesso-participar' },
+] as const;
 
 const PERGUNTAS = [
   { q: 'Perdi o meu link. E agora?',
@@ -53,7 +54,7 @@ export default function Acessar() {
           <div className="g-tiles tres centro c-larga c-bloco grande">
             {PORTAS.map(p => (
               <Link key={p.href} href={p.href} className="g-tile">
-                <img src={`/fotos/${p.foto}`} alt="" loading="lazy" decoding="async" />
+                <img src={cria(p.foto)} alt="" loading="lazy" decoding="async" />
                 <span className="g-tile-seta" aria-hidden="true"><IcSeta /></span>
                 <span className="g-tile-l" style={{ fontFamily: 'var(--fonte-editorial)', fontStyle: 'italic', fontWeight: 200, letterSpacing: '-.02em' }}>{p.n}</span>
                 <span><span className="g-tile-t">{p.t}</span><span className="g-tile-d">{p.d}</span></span>

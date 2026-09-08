@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
+import { src as cria } from '@/lib/criativos';
 
 /* =============================================================================
    404 — a página que ninguém planeja e todo mundo acaba vendo
@@ -23,9 +24,9 @@ export const metadata: Metadata = {
 
 export default function NaoEncontrada() {
   return (
-    <Site>
+    <Site escuro>
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/predio.webp" alt="" />
+        <img src={cria('nao-encontrada')} alt="" />
         <div className="g">
           <p className="g-rot">404</p>
           <Tit as="h1" className="g-h1">Esse endereço não existe</Tit>

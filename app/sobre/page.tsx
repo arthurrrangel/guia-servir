@@ -6,6 +6,7 @@ import { Tit, Schema, Luz } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /sobre — QUEM SOMOS
@@ -35,7 +36,7 @@ export const metadata: Metadata = {
 
 export default function Sobre() {
   return (
-    <Site atual="/sobre">
+    <Site atual="/sobre" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'AboutPage', name: `Quem somos · ${IGREJA.nome}`, url: `${SITE}/sobre`,
         about: { '@type': 'Church', name: IGREJA.nome, slogan: IGREJA.frase, url: SITE,
@@ -44,7 +45,7 @@ export default function Sobre() {
 
       {/* ------------------------------------------------------------- herói */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/congregacao.webp" alt="Congregação da GUIA Church reunida" fetchPriority="high" />
+        <img src={cria('sobre')} alt={criaAlt('sobre')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">A igreja</p>
           <Tit as="h1" className="g-h1">Quem somos</Tit>
@@ -85,7 +86,7 @@ export default function Sobre() {
 
       {/* -------------------------------------------- o versículo, de ponta a ponta */}
       <section className="g-cheio meio centro rev">
-        <img src="/fotos/palavra.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('palavra')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <blockquote className="g-ed" style={{ margin: '0 auto', fontSize: 'clamp(26px,3.8vw,56px)', color: '#fff', maxWidth: '26ch' }}>
             <Luz>Eis que o povo é um, e todos têm uma mesma língua; e isto é o que começam a fazer; e, agora, não haverá restrição para tudo o que eles intentarem fazer.</Luz>
@@ -136,7 +137,7 @@ export default function Sobre() {
 
       {/* --------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/acolhida.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('sobre-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Na prática</p>
           <Tit className="g-h2">Isso tem dois endereços na semana.</Tit>

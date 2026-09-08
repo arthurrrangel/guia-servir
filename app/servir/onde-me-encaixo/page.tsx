@@ -7,6 +7,7 @@ import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { Perguntas } from '@/components/Perguntas';
 import { Carregando, Vazio } from '@/components/Tela';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /servir/onde-me-encaixo — O DEGRAU QUE FALTAVA
@@ -146,10 +147,10 @@ export default function OndeMeEncaixo() {
   }));
 
   return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/recepcao.webp" alt="Duas pessoas da equipe de recepção conversando na porta da igreja" fetchPriority="high" />
+        <img src={cria('encaixo')} alt={criaAlt('encaixo')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
           <Tit as="h1" className="g-h1">Não sei onde me encaixo</Tit>
@@ -200,7 +201,7 @@ export default function OndeMeEncaixo() {
           Tira o peso, não convence. E devolve a lista completa: esta página é
           atalho, nunca funil. */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/congregacao.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('encaixo-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Em dúvida entre duas?</p>
           <Tit className="g-h2">Escolha qualquer uma das duas.</Tit>

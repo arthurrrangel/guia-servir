@@ -1,104 +1,100 @@
 /* =============================================================================
-   OS CRIATIVOS — os lugares do site que esperam uma imagem
+   OS CRIATIVOS — cada imagem do site público, em um lugar só
 
-   08/09/2026. O Arthur pediu para esquecer as fotos atuais e deixar espaço
-   para criativos novos. Então o site v3 não DEPENDE de foto: cada lugar que
-   pode receber uma imagem é um "criativo" registrado aqui, e enquanto o
-   arquivo não existe o lugar mostra um painel da marca (a retícula e o
-   chevron), que é desenho, não buraco.
+   08/09/2026. O Arthur pediu espaço para criativos novos. Cada lugar que
+   mostra uma imagem no site está registrado aqui com o arquivo ATUAL, a
+   proporção em que o lugar corta, a largura mínima e a instrução para quem
+   vai produzir a peça nova. As páginas não escrevem caminho de foto: pedem
+   `src('cultos')`. Trocar um criativo é trocar UMA linha aqui.
 
-   COMO COLOCAR UM CRIATIVO NOVO
-   1. Exportar a imagem na proporção do lugar (abaixo), em WebP, na largura
-      indicada ou maior. Nome curto, sem espaço, sem acento.
-   2. Salvar em public/criativos/.
-   3. Escrever o caminho em `arquivo` no lugar certo, ex.: '/criativos/heroi.webp'.
-   Só isso: a página troca o painel pela imagem, com o mesmo corte e o mesmo
-   véu de leitura. Para tirar, é só apagar a linha.
+   COMO TROCAR UM CRIATIVO
+   1. Exportar em WebP na proporção do lugar, na largura indicada ou maior.
+      Nome curto, sem espaço, sem acento.
+   2. Salvar em public/criativos/ (as fotos antigas moram em public/fotos/).
+   3. Trocar o `arquivo` do lugar, ex.: '/criativos/heroi.webp'. Só isso.
 
    `foco` é o ponto da imagem que não pode ser cortado ("50% 30%" = centro,
-   um pouco acima), porque o mesmo arquivo é cortado de dois jeitos: quase
-   quadrado no celular, muito largo no monitor.
+   um pouco acima): o mesmo arquivo é cortado quase quadrado no celular e
+   muito largo no monitor. As fotos das ÁREAS (Mídia, Louvor...) têm o
+   próprio registro em lib/fotos.ts, porque três telas mostram a mesma área.
    ============================================================================= */
 
-export type Proporcao = '16:9' | '21:9' | '4:5' | '1:1' | '3:2';
-
 export type Criativo = {
-  /** o arquivo em public/. Ausente = painel da marca. */
-  arquivo?: string;
+  /** o arquivo em public/ */
+  arquivo: string;
   /** o que a imagem mostra, para quem não enxerga. Vazio quando é só clima. */
   alt: string;
-  proporcao: Proporcao;
+  /** a proporção em que o lugar corta a imagem */
+  proporcao: '16:9' | '21:9' | '16:8' | '4:3' | '1:1';
   /** largura mínima para não amolecer no monitor */
   largura: number;
   foco?: string;
-  /** a instrução para quem vai produzir a peça */
+  /** a instrução para quem vai produzir a peça nova */
   nota: string;
 };
 
 export const CRIATIVOS = {
-  heroi: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'A primeira tela do site. Fica atrás do título branco: precisa de área escura ou de um véu. Cortada quase quadrada no celular: o assunto no centro.',
-  },
-  domingo: {
-    alt: '', proporcao: '4:5', largura: 1200,
-    nota: 'O domingo por dentro: a equipe trabalhando (mesa, palco, porta), não o público.',
-  },
-  fecho: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'O fim de todas as páginas, atrás de uma frase branca. Clima, sem rosto no centro.',
-  },
-  cultos: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /cultos: o salão no domingo, de dentro.',
-  },
-  grupos: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /pequena-guia: uma sala de casa, gente sentada perto. Sem rosto de criança.',
-  },
-  servir: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /servir: quem chega antes, de costas ou de lado, trabalhando.',
-  },
-  sobre: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /sobre: o prédio ou a congregação, de longe.',
-  },
-  palavra: {
-    alt: '', proporcao: '21:9', largura: 2400,
-    nota: 'Atrás do versículo em /sobre. Escuro, quase abstrato: a frase é o assunto.',
-  },
-  chegar: {
-    alt: 'Fachada da GUIA Church na Rua Pedra de Itaúna', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /como-chegar: A FACHADA, de frente, de dia. É a foto que faz a pessoa reconhecer a porta.',
-  },
-  tv: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /guia-church-tv: o palco visto da mesa de transmissão, ou a câmera.',
-  },
-  /* AS ÁREAS: um por slug do banco (area-midia, area-servico, area-kids,
-     area-louvor, area-livraria). Área sem criativo próprio usa `area`. */
-  area: {
-    alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'Herói genérico de área: a equipe trabalhando, de lado, sem rosto em close.',
-  },
-  'area-midia': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Mídia: a mesa de transmissão ou a câmera, durante o culto.' },
-  'area-servico': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Connect: a porta, alguém recebendo.' },
-  'area-kids': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Kids: a sala, de longe, sem rosto de criança.' },
-  'area-louvor': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Louvor: a banda no palco, de lado.' },
-  'area-livraria': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Livraria: a bancada com os livros.' },
+  /* ------------------------------------------------------------- a home */
+  heroi: { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400,
+    nota: 'A primeira tela do site, atrás do título branco: precisa de área escura ou de um véu. No celular é cortada quase quadrada: o assunto no centro.' },
+  domingo: { arquivo: '/fotos/congregacao.webp', alt: 'Congregação reunida no culto de domingo', proporcao: '16:8', largura: 1600,
+    nota: '"Como é o domingo", na home: a congregação, o salão, de dentro.' },
+  fecho: { arquivo: '/fotos/oferta.webp', alt: '', proporcao: '16:9', largura: 2400,
+    nota: 'O fim da home, atrás de uma frase branca. Clima, sem rosto no centro.' },
+
+  /* ----------------------------------------------------------- /cultos */
+  cultos: { arquivo: '/fotos/equipe.webp', alt: 'Momento de louvor no culto de domingo da GUIA Church', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /cultos: o salão no domingo, de dentro.' },
+  'cultos-acolhida': { arquivo: '/fotos/recepcao.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 01 do domingo: a porta, alguém recebendo.' },
+  'cultos-louvor': { arquivo: '/fotos/teclado.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 02: a banda, o palco.' },
+  'cultos-palavra': { arquivo: '/fotos/palavra.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 03: a mensagem, o telão.' },
+  'cultos-saida': { arquivo: '/fotos/congregacao.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 04: oração e saída, a congregação.' },
+  'cultos-fecho': { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /cultos.' },
+
+  /* ------------------------------------------------------------ /sobre */
+  sobre: { arquivo: '/fotos/congregacao.webp', alt: 'Congregação da GUIA Church reunida', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /sobre: o prédio ou a congregação, de longe.' },
+  palavra: { arquivo: '/fotos/palavra.webp', alt: '', proporcao: '21:9', largura: 2400,
+    nota: 'Atrás do versículo em /sobre. Escuro, quase abstrato: a frase é o assunto.' },
+  'sobre-fecho': { arquivo: '/fotos/acolhida.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /sobre.' },
+
+  /* ----------------------------------------------------------- /servir */
+  servir: { arquivo: '/fotos/midia.webp', alt: 'Equipe Creative na mesa de transmissão do culto', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /servir: quem chega antes, de costas ou de lado, trabalhando.' },
+  encaixo: { arquivo: '/fotos/recepcao.webp', alt: 'Duas pessoas da equipe de recepção conversando na porta da igreja', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /servir/onde-me-encaixo.' },
+  'encaixo-fecho': { arquivo: '/fotos/congregacao.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /servir/onde-me-encaixo.' },
+  'area-fecho': { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho das páginas de área (/servir/<área>).' },
+
+  /* ----------------------------------------------------- /pequena-guia */
+  grupos: { arquivo: '/fotos/acolhida.webp', alt: 'Pessoas da GUIA Church se cumprimentando', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /pequena-guia: uma sala de casa, gente sentada perto. Sem rosto de criança.' },
+  'grupos-fecho': { arquivo: '/fotos/congregacao.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /pequena-guia.' },
+
+  /* ------------------------------------------------------ /como-chegar */
+  chegar: { arquivo: '/fotos/predio.webp', alt: 'Fachada da GUIA Church na Rua Pedra de Itaúna', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /como-chegar: A FACHADA, de frente, de dia. É a foto que faz a pessoa reconhecer a porta.' },
+  'chegar-fecho': { arquivo: '/fotos/recepcao.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /como-chegar.' },
+
+  /* ---------------------------------------------------------- /acessar */
+  'acesso-voluntario': { arquivo: '/fotos/equipe.webp', alt: '', proporcao: '1:1', largura: 900, nota: 'Azulejo "Sou voluntário".' },
+  'acesso-organizacao': { arquivo: '/fotos/midia.webp', alt: '', proporcao: '1:1', largura: 900, nota: 'Azulejo "Sou da organização".' },
+  'acesso-participar': { arquivo: '/fotos/acolhida.webp', alt: '', proporcao: '1:1', largura: 900, nota: 'Azulejo "Quero participar".' },
+
+  /* ------------------------------------------------------------ outros */
+  tv: { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /guia-church-tv: o palco visto da mesa de transmissão, ou a câmera.' },
+  'nao-encontrada': { arquivo: '/fotos/predio.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'A página 404.' },
 } satisfies Record<string, Criativo>;
 
-/* id conhecido, ou qualquer área (o slug vem do banco) */
-export type IdCriativo = keyof typeof CRIATIVOS | `area-${string}`;
+export type IdCriativo = keyof typeof CRIATIVOS;
 
-/** o criativo de um lugar; uma área sem criativo próprio cai no genérico */
-export function criativo(id: IdCriativo): Criativo {
-  const tudo = CRIATIVOS as Record<string, Criativo>;
-  return tudo[id] || (id.startsWith('area-') ? tudo.area : tudo.heroi);
+/** o caminho do arquivo de um lugar */
+export function src(id: IdCriativo): string {
+  return CRIATIVOS[id].arquivo;
 }
 
-/** a proporção como número, para o CSS (aspect-ratio) */
-export function razao(p: Proporcao): string {
-  return p.replace(':', ' / ');
+/** o texto alternativo de um lugar */
+export function alt(id: IdCriativo): string {
+  return CRIATIVOS[id].alt;
 }

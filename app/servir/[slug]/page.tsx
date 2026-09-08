@@ -8,6 +8,7 @@ import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { Carregando, Vazio, linkZap } from '@/components/Tela';
 import { fotoDaArea, focoDaArea } from '@/lib/fotos';
+import { src as cria } from '@/lib/criativos';
 
 /* =============================================================================
    /servir/[slug] — A ÁREA
@@ -102,7 +103,7 @@ export default function Area() {
   const foco = focoDaArea(slug);
 
   if (fase !== 'pronto' || !min) return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       <section className="g-cheio alta centro rev">
         <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
         <div className="g">
@@ -132,7 +133,7 @@ export default function Area() {
   const iniciais = (min.responsavel || '').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
 
   return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
       <section className="g-cheio alta centro rev">
         <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
@@ -220,7 +221,7 @@ export default function Area() {
 
       {/* ------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/palco.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('area-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">O convite</p>
           <Tit className="g-h2">Existe um lugar para você aqui.</Tit>

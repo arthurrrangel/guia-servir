@@ -7,6 +7,7 @@ import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /pequena-guia — O GRUPO DA SEMANA
@@ -37,7 +38,7 @@ export default function PequenaGuia() {
   const presenciais = PEQUENAS_GUIAS.filter(p => !p.online).length;
   const online = PEQUENAS_GUIAS.length - presenciais;
   return (
-    <Site atual="/pequena-guia">
+    <Site atual="/pequena-guia" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`,
         isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE },
@@ -47,7 +48,7 @@ export default function PequenaGuia() {
 
       {/* ------------------------------------------------------------- herói */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/acolhida.webp" alt="Pessoas da GUIA Church se cumprimentando" fetchPriority="high" />
+        <img src={cria('grupos')} alt={criaAlt('grupos')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Durante a semana</p>
           <Tit as="h1" className="g-h1">Pequena Guia</Tit>
@@ -94,7 +95,7 @@ export default function PequenaGuia() {
 
       {/* ------------------------------------------------------------ a conversa */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/congregacao.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('grupos-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Achar o seu</p>
           <Tit className="g-h2">Diga onde você mora. A gente diz qual fica perto.</Tit>

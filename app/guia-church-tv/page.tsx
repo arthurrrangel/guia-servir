@@ -5,6 +5,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE } from '@/lib/igreja';
+import { src as cria } from '@/lib/criativos';
 
 /* =============================================================================
    /guia-church-tv — RETENÇÃO, NÃO AQUISIÇÃO
@@ -26,11 +27,11 @@ export const metadata: Metadata = {
 export default function TV() {
   const canal = IGREJA.youtube;
   return (
-    <Site>
+    <Site escuro>
       {canal && <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Guia Church TV', url: `${SITE}/guia-church-tv`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />}
 
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/palco.webp" alt="" fetchPriority="high" />
+        <img src={cria('tv')} alt="" fetchPriority="high" />
         <div className="g">
           <p className="g-rot">GUIA Church TV</p>
           <Tit as="h1" className="g-h1">A mensagem de domingo</Tit>

@@ -5,6 +5,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
@@ -41,7 +42,7 @@ export const metadata: Metadata = {
 
 export default function ComoChegar() {
   return (
-    <Site atual="/como-chegar">
+    <Site atual="/como-chegar" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Place', name: IGREJA.nome, hasMap: MAPA, url: `${SITE}/como-chegar`,
         address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' },
@@ -54,7 +55,7 @@ export default function ComoChegar() {
 
       {/* ------------------------------------------------- a fachada, inteira */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/predio.webp" alt={`Fachada da ${IGREJA.nome} na ${IGREJA.rua}`} fetchPriority="high" />
+        <img src={cria('chegar')} alt={criaAlt('chegar')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Onde fica</p>
           <Tit as="h1" className="g-h1">Como chegar</Tit>
@@ -116,7 +117,7 @@ export default function ComoChegar() {
 
       {/* --------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/recepcao.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('chegar-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Antes de vir</p>
           <Tit className="g-h2">O que esperar de um domingo</Tit>

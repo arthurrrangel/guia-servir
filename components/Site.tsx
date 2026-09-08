@@ -81,7 +81,7 @@ export function Barra({ atual, inicio, solida = true }: { atual?: string; inicio
         <div className="casa-barra-fim">
           <Link href="/acessar" className="bt-barra discreto">Acesso às equipes</Link>
           <Link href="/servir" className="bt-barra">
-            <span className="so-largo">Quero</span>servir
+            <span className="so-largo">Quero servir</span><span className="so-estreito">Servir</span>
           </Link>
           <button ref={bt} className="menu-bt" aria-expanded={menu} aria-controls="menu-site"
                   aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
@@ -245,11 +245,11 @@ export function Rodape() {
    nova. A `main` fica fora do casco de propósito — cada página escolhe as
    próprias faixas, e faixa precisa sangrar de ponta a ponta. */
 export function Site({ atual, escuro, children }: { atual?: string; escuro?: boolean; children: React.ReactNode }) {
-  /* `escuro` (v3, 08/09/2026): a página abre com o cabeçalho escuro da casa
-     (components/Pagina.tsx), e a barra nasce transparente sobre ele, como na
-     home, e fica opaca pela rolagem — pelo compositor onde há
-     animation-timeline, e por este estado onde não há. O `main` deixa de
-     reservar a altura da barra: o cabeçalho já a reserva por dentro. */
+  /* `escuro` (08/09/2026): a página abre com foto de ponta a ponta, e a
+     barra nasce transparente sobre ela, como na home, e fica opaca pela
+     rolagem — pelo compositor onde há animation-timeline, e por este estado
+     onde não há. O `main` deixa de reservar a altura da barra: o herói
+     (.g-cheio) já reserva por dentro (padding-top ≥ 120px). */
   const [solida, setSolida] = useState(!escuro);
   useEffect(() => {
     if (!escuro) return;

@@ -17,6 +17,7 @@ import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl, cont } from '@/lib/plural';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    A HOME
@@ -274,7 +275,7 @@ export default function Casa() {
           Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
           dois botões, a régua. Nada de parágrafo. */}
       <section className="casa-heroi rev visto">
-        <img className="casa-heroi-foto" src="/fotos/palco.webp" alt="" fetchPriority="high" />
+        <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
         <div className="casa-heroi-in">
           {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
               no aparelho (lib/semana.ts), com a ação certa para o momento */}
@@ -357,7 +358,7 @@ export default function Casa() {
           </div>
           <div className="c-foto">
             <div className="g-foto leva">
-              <img src="/fotos/congregacao.webp" alt="Congregação reunida no culto de domingo" loading="lazy" decoding="async" />
+              <img src={cria('domingo')} alt={criaAlt('domingo')} loading="lazy" decoding="async" />
             </div>
           </div>
         </div>
@@ -460,7 +461,7 @@ export default function Casa() {
 
       {/* --------------------------------------------------------- FECHO */}
       <section className="g-cheio centro fecho rev">
-        <img src="/fotos/oferta.webp" alt="" loading="lazy" decoding="async" />
+        <img src={cria('fecho')} alt={criaAlt('fecho')} loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
           <Tit className="g-h2">{num ? `${pl(num.pessoas, 'Hoje é', 'Hoje são')} ${cont(num.pessoas, 'pessoa servindo', 'pessoas servindo')} em ${cont(num.ministerios, 'área', 'áreas')}.` : 'Ninguém aqui começou sabendo.'}</Tit>

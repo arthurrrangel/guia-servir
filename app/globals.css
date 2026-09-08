@@ -6042,9 +6042,6 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @supports (animation-timeline: scroll()) {
   .casa-barra.inicio{ animation:barra-fica linear both; animation-timeline:scroll(root); animation-range:35vh 70vh; transition:none }
   .casa-barra.inicio::before{ animation:barra-scrim linear both; animation-timeline:scroll(root); animation-range:35vh 70vh }
-  /* nas páginas internas o cabeçalho escuro tem 66svh, não 100: a barra
-     fica opaca antes de o cabeçalho sair de baixo dela (08/09/2026) */
-  body:has(.pag-cab) .casa-barra.inicio,body:has(.pag-cab) .casa-barra.inicio::before{ animation-range:26vh 52vh }
 }
 @keyframes barra-fica{
   from{ background:rgba(250,254,255,0); color:#fff; border-bottom-color:transparent }
@@ -7877,328 +7874,11 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
    depois (~2808): os dois links do cadastro mediam 32. Aqui, por último. */
 .migalha a{ min-height:var(--toque); padding:var(--e3) 0 }
 
-/* =============================================================================
-   ============================================================================
-   O SITE V3 — "A GUIA AGORA"
-   08/09/2026. O Arthur pediu uma experiência nova, não um redesign. Três
-   princípios, e tudo abaixo serve a um deles:
-
-   TEMPO   o site fala no presente. A primeira tela diz a PRÓXIMA coisa que
-           acontece na igreja (lib/semana.ts), a semana inteira cabe em sete
-           colunas, e a ação principal muda com a hora.
-   LUGAR   o mapa da cidade é espinha, não apêndice: a igreja e os grupos, e
-           o botão que responde "qual fica perto de mim?".
-   CAMINHO o chevron da marca é o guia. Três portas em tipo grande, o fio
-           que anda com a rolagem no domingo por dentro, o chevron que
-           aponta o próximo passo em cada linha.
-
-   SEM FOTO OBRIGATÓRIA. Cada lugar de imagem é um "criativo" (lib/criativos)
-   que mostra o painel da marca até o arquivo chegar. O desenho tem que
-   ficar de pé sem nenhuma foto — e fica: tipo, ritmo, escuro e areia.
-
-   Os tokens são os mesmos do site (--e*, --d-*, .g, .g-cab, .acao, .g-link):
-   o v3 muda a experiência, não a gramática.
-   ============================================================================
-   ============================================================================= */
-
-/* ---- o criativo ------------------------------------------------------------ */
-.cria{ position:relative; overflow:hidden; background:var(--noite); color:var(--areia) }
-.cria-bloco{ width:100% }
-.cria-fundo{ position:absolute; inset:0; z-index:0 }
-.cria img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
-/* o painel vazio é liso: preto e o chevron em traço. (Tinha uma retícula de
-   32px atrás; saiu porque retícula é vocabulário de startup, não de
-   instituição.) O bloco em proporção ganha um fio de moldura, para o lugar
-   da imagem ter borda mesmo quando o fundo em volta é o mesmo preto. */
-.cria-bloco.vazio{ box-shadow:inset 0 0 0 1px rgba(228,212,180,.22) }
-.cria-marca{ position:absolute; left:50%; top:50%; width:min(46%,420px); height:auto; transform:translate(-50%,-50%); opacity:.55 }
-.cria-rot{
-  position:absolute; left:12px; bottom:10px; z-index:1;
-  font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--areia); opacity:.8;
-}
-/* o véu de leitura: texto branco em cima de foto pede escuro atrás */
-.cria-fundo.com::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(37,37,37,.28) 0%,rgba(37,37,37,.62) 60%,rgba(37,37,37,.86) 100%) }
-
-/* ---- AGORA: a primeira tela ---------------------------------------------- */
-.agora{
-  position:relative; isolation:isolate; min-height:100svh; overflow:hidden;
-  background:var(--noite); color:#fff;
-  display:flex; flex-direction:column; justify-content:flex-end;
-  padding:calc(var(--barra-alt) + var(--e7)) 0 clamp(52px,8vh,96px);
-}
-.agora-in{
-  position:relative; z-index:1; width:100%; max-width:1360px; margin:0 auto; padding-inline:clamp(20px,4vw,52px);
-  flex:1 0 auto; display:flex; flex-direction:column; justify-content:flex-end;
-}
-/* o chevron do herói mora no próprio fluxo (.agora-selo), não no criativo:
-   no celular ele ocupa exatamente o espaço que o texto deixa livre acima
-   (flex:1), sai pela direita e nunca cruza o título; no monitor vira a
-   coluna da direita, centrado na altura. O criativo do herói não desenha o
-   seu chevron, para não haver dois. */
-.agora .cria-marca{ display:none }
-.agora-selo{ position:relative; flex:1 1 auto; min-height:110px; margin-bottom:var(--e6); color:var(--areia); opacity:.6 }
-.agora-selo svg{ position:absolute; right:-14%; top:0; height:100%; max-height:400px; width:auto; display:block }
-@media(min-width:900px){
-  /* 34vw e o título a 11,2vw: entre "para você" e o chevron sobram ≥77px
-     em qualquer largura de 900 a 1600 (medido em 900, 1024, 1200 e 1440) */
-  .agora-selo{ position:absolute; right:4%; top:50%; width:min(34vw,600px); aspect-ratio:757.5/826.3; transform:translateY(-50%); flex:none; min-height:0; margin:0 }
-  .agora-selo svg{ position:static; height:100%; width:100%; max-height:none }
-}
-.agora-rot{ color:rgba(255,255,255,.62) }
-.agora-h1{
-  margin:var(--e4) 0 0; max-width:11ch; color:#fff;
-  font-family:var(--fonte-display); font-weight:700; letter-spacing:-.035em; line-height:.96;
-  font-size:clamp(48px,11.2vw,132px); text-wrap:balance;
-}
-.agora-vivo{ margin-top:clamp(24px,4vh,44px); max-width:760px }
-.agora-linha{
-  margin:0; display:flex; flex-wrap:wrap; align-items:baseline; column-gap:.45em; row-gap:2px;
-  font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
-  font-size:clamp(23px,3.2vw,36px); line-height:1.2; color:var(--areia);
-}
-.agora-quando{ color:#fff }
-.agora-sep{ opacity:.5 }
-.agora-onde{
-  flex:1 0 100%; margin-top:6px;
-  font-family:var(--fonte); font-style:normal; font-weight:400; font-size:var(--t-ui); color:rgba(255,255,255,.62);
-}
-.agora-acoes{ margin-top:clamp(20px,3vh,30px) }
-/* (havia um chevron pulando no canto para dizer "role": saiu. Cue animado de
-   rolagem é clichê de landing page, e "Ver a semana inteira" já é o convite.) */
-
-/* ---- A SEMANA: sete colunas ---------------------------------------------- */
-.semana-dias{
-  list-style:none; margin:clamp(28px,4vw,48px) 0 0; padding:0;
-  display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:1px;
-  background:var(--linha2); border:1px solid var(--linha2);
-}
-.dia-in{
-  display:flex; flex-direction:column; gap:var(--e2); min-height:118px;
-  padding:var(--e3) var(--e3); background:var(--papel); color:inherit; text-decoration:none;
-  transition:background var(--t),color var(--t);
-}
-a.dia-in:hover,a.dia-in:focus-visible{ background:var(--card2) }
-.dia-n{ font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mudo) }
-.dia-l{ display:flex; flex-direction:column; gap:3px; margin-top:var(--e5); min-width:0 }
-.dia-l b{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(13px,1.15vw,17px); letter-spacing:-.01em; line-height:1.1 }
-.dia-l i{ font-style:normal; font-size:12px; color:var(--cinza); line-height:1.2 }
-.dia.vazio .dia-in{ color:var(--mudo) }
-.dia.hoje .dia-in{ background:var(--noite); color:#fff }
-.dia.hoje .dia-n{ color:var(--areia) }
-.dia.hoje .dia-l i{ color:rgba(255,255,255,.72) }
-.dia.hoje a.dia-in:hover{ background:#111 }
-@media(max-width:759px){
-  .dia-in{ min-height:104px; padding:10px 7px }
-  .dia-n{ font-size:10px; letter-spacing:.1em }
-  .dia-l b{ font-size:12px } .dia-l i{ font-size:11px }
-}
-
-/* ---- OS CAMINHOS: três portas em tipo grande ------------------------------ */
-.caminhos{ padding:clamp(8px,2vw,24px) 0 clamp(44px,6vw,96px) }
-.caminho{
-  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:var(--e3) var(--e5); align-items:center;
-  padding:clamp(26px,4vw,56px) 0; border-top:1px solid rgba(255,255,255,.16);
-  color:#fff; text-decoration:none;
-}
-.caminho:last-child{ border-bottom:1px solid rgba(255,255,255,.16) }
-.caminho-n{
-  font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
-  font-size:clamp(20px,2.4vw,34px); line-height:1; color:var(--areia); min-width:2.4em;
-}
-.caminho-t{
-  display:block; font-family:var(--fonte-display); font-weight:700; letter-spacing:-.03em; line-height:1.02;
-  font-size:clamp(30px,5.4vw,68px); transition:color var(--t); text-wrap:balance;
-}
-.caminho-d{ display:block; margin-top:10px; font-size:var(--t-ui); line-height:1.5; color:rgba(255,255,255,.7); max-width:60ch; text-wrap:pretty }
-.caminho-chev{ display:grid; place-items:center; font-size:clamp(24px,2.4vw,36px); color:var(--areia); transition:transform var(--t) }
-.caminho:hover .caminho-chev,.caminho:focus-visible .caminho-chev{ transform:translateX(10px) }
-.caminho:hover .caminho-t{ color:var(--areia) }
-@media(max-width:759px){
-  .caminho{ grid-template-columns:minmax(0,1fr) auto; gap:var(--e2) var(--e4) }
-  .caminho-n{ grid-column:1 / -1; min-width:0; font-size:17px }
-}
-
-/* ---- A CIDADE: o mapa e o mais perto ------------------------------------- */
-.cidade{ margin-top:clamp(28px,4vw,48px) }
-.cidade .pg-mapao{ margin-top:0 }
-.cidade-pe{ display:grid; gap:var(--e4); padding-top:var(--e5) }
-@media(min-width:900px){ .cidade-pe{ grid-template-columns:minmax(0,1fr) auto; align-items:end; column-gap:var(--e7) } }
-.cidade-achado{ margin:0; display:grid; gap:4px }
-.cidade-achado .g-rot{ margin-bottom:6px }
-.cidade-achado b{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(22px,2.4vw,32px); letter-spacing:-.02em; line-height:1.1 }
-.cidade-achado-d{ font-size:var(--t-ui); color:var(--cinza); line-height:1.5 }
-/* a igreja é o único pino com anel de areia; a pessoa é o ponto azul de GPS */
+/* ---- o pino da igreja e o "você está aqui" no mapa (MapaGuias `igreja`/`pessoa`) ---- */
 .pin-igreja .pin-guia-c{ width:38px; height:38px; box-shadow:0 0 0 3px var(--areia),0 1px 6px rgba(0,0,0,.34) }
 .pin-igreja .pin-guia-c svg{ width:15px }
 .pin-pessoa{ background:none; border:0 }
 .pin-pessoa-c{ display:block; width:18px; height:18px; border-radius:50%; background:#2f6bff; border:3px solid #fff; box-shadow:0 0 0 6px rgba(47,107,255,.22) }
-
-/* ---- UM DOMINGO POR DENTRO: o fio e os momentos --------------------------- */
-.por-dentro-corpo{ display:grid; gap:clamp(28px,4vw,56px); margin-top:clamp(28px,4vw,48px) }
-@media(min-width:1000px){
-  .por-dentro-corpo{ grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); align-items:start; column-gap:clamp(40px,5vw,84px) }
-  .por-dentro-cria{ position:sticky; top:calc(var(--barra-alt) + var(--e5)) }
-}
-.momentos{ list-style:none; margin:0; padding:0; position:relative; border-left:1px solid rgba(255,255,255,.16) }
-/* o fio: a linha de areia que desce com a rolagem, o chevron da marca em
-   movimento. Sem suporte a animação por rolagem, a linha fica inteira. */
-.momentos::after{
-  content:""; position:absolute; left:-1px; top:0; width:1px; height:100%;
-  background:var(--areia); transform-origin:top; transform:scaleY(1);
-}
-@supports (animation-timeline: view()){
-  .momentos::after{ animation:fio-cresce linear both; animation-timeline:view(); animation-range:entry 30% cover 75% }
-  @keyframes fio-cresce{ from{ transform:scaleY(0) } to{ transform:scaleY(1) } }
-}
-.momento{
-  position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:0 var(--e4); align-items:start;
-  padding:clamp(18px,2.6vw,30px) 0 clamp(18px,2.6vw,30px) clamp(20px,3vw,36px);
-}
-.momento::before{ content:""; position:absolute; left:-4px; top:calc(clamp(18px,2.6vw,30px) + .5em); width:7px; height:7px; background:var(--areia) }
-.momento-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2vw,28px); line-height:1; color:var(--areia); padding-top:.15em }
-.momento-t{ margin:0; font-family:var(--fonte-display); font-weight:700; font-size:clamp(22px,2.4vw,32px); letter-spacing:-.02em; line-height:1.1; color:#fff; text-transform:none; display:block }
-.momento-t::before{ content:none }
-.momento-d{ margin:8px 0 0; font-size:var(--t-ui); line-height:1.5; color:rgba(255,255,255,.72); max-width:46ch }
-.momento-areas{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px }
-.momento-area{
-  display:inline-flex; align-items:center; gap:10px; min-height:var(--toque); padding:6px 14px;
-  border:1px solid rgba(255,255,255,.28); color:#fff; text-decoration:none;
-  transition:border-color var(--t),background var(--t);
-}
-.momento-area:hover,.momento-area:focus-visible{ border-color:#fff; background:rgba(255,255,255,.06) }
-.momento-area-nome{ font-family:var(--fonte-display); font-weight:700; font-size:var(--t-apoio) }
-.momento-area-p{ font-size:12px; color:rgba(255,255,255,.62) }
-.momento-area svg{ width:14px; height:14px; color:var(--areia) }
-.momento-area.esqueleto{ width:150px; border-color:rgba(255,255,255,.12) }
-@media(max-width:759px){ .momento{ grid-template-columns:minmax(0,1fr) } .momento-n{ margin-bottom:6px } }
-
-/* ---- O FECHO --------------------------------------------------------------- */
-.fecho-v3{ position:relative; isolation:isolate; background:var(--noite); color:#fff; padding:clamp(80px,12vw,160px) 0; text-align:center }
-.fecho-v3 > .g{ position:relative; z-index:1; max-width:920px }
-.fecho-v3 .g-rot{ justify-content:center }
-.fecho-v3 .g-h2{ margin-inline:auto; max-width:16ch; color:#fff }
-.fecho-v3 .g-ed{ color:var(--areia); margin-inline:auto }
-.fecho-v3 .g-acoes{ justify-content:center }
-.fecho-v3 .cria-fundo.vazio .cria-marca{ opacity:.35 }
-@media(max-width:899px){ .fecho-v3 .g-acoes{ flex-direction:column; align-items:center } }
-/* no desktop a coluna do dia diz quais grupos; no celular não cabe e não falta */
-.dia-nomes{ display:none; font-size:12.5px; line-height:1.4; color:var(--cinza); margin-top:2px; text-wrap:pretty }
-.dia.hoje .dia-nomes{ color:rgba(255,255,255,.62) }
-@media(min-width:900px){ .dia-nomes{ display:block } .dia-in{ min-height:150px } }
-/* no celular o criativo do domingo por dentro é decoração de 440px entre
-   seis momentos e o fecho: some. Volta no desktop, grudado ao lado do fio. */
-@media(max-width:999px){ .por-dentro-cria{ display:none } }
-
-/* =============================================================================
-   ============================================================================
-   AS PÁGINAS INTERNAS NO V3 — 08/09/2026 (components/Pagina.tsx)
-
-   O mesmo cabeçalho da home, encurtado, em todas as portas: fundo escuro
-   (o criativo do lugar, quando existir), texto à esquerda, o chevron da
-   marca em traço na coluna da direita. As fotos de ponta a ponta saíram de
-   todas as páginas: onde havia foto obrigatória há um slot de criativo.
-   ============================================================================
-   ============================================================================= */
-
-/* ---- o cabeçalho ---------------------------------------------------------- */
-.pag-cab{
-  position:relative; isolation:isolate; overflow:hidden;
-  background:var(--noite); color:#fff;
-  min-height:clamp(440px,66svh,720px);
-  display:flex; align-items:flex-end;
-  padding:calc(var(--barra-alt) + var(--e7)) 0 clamp(44px,6vh,80px);
-}
-.pag-cab-in{ position:relative; z-index:1; width:100%; max-width:1360px }
-.pag-cab .cria-marca{ display:none }
-/* a coluna da direita: 26vw no monitor; no celular, um selo no canto de cima,
-   no espaço que o padding-top do cabeçalho já reserva */
-.pag-cab-selo{
-  position:absolute; z-index:1; right:-6%; top:calc(var(--barra-alt) + 12px);
-  height:min(22vh,120px); aspect-ratio:757.5/826.3; color:var(--areia); opacity:.55; pointer-events:none;
-}
-.pag-cab-selo svg{ display:block; width:100%; height:100% }
-@media(min-width:900px){
-  /* alinhado à borda interna da grade (.g: 1360 + 52 de cada lado) */
-  .pag-cab-selo{ right:max(4%,calc((100% - 1360px) / 2 + 52px)); top:50%; transform:translateY(-50%); height:auto; width:min(26vw,420px) }
-}
-.pag-cab-rot{ color:rgba(255,255,255,.62) }
-.pag-h1{
-  margin:var(--e4) 0 0; max-width:12ch; color:#fff;
-  font-family:var(--fonte-display); font-weight:700; letter-spacing:-.035em; line-height:.96;
-  font-size:clamp(44px,8.4vw,108px); text-wrap:balance;
-}
-.pag-ed{ max-width:24ch; color:var(--areia) }
-.pag-cab .g-ed.pag-ed{ font-size:clamp(22px,2.9vw,40px); line-height:1.18; margin-top:.5em }
-.pag-cab-acoes{ margin-top:clamp(22px,3.4vh,34px) }
-/* no monitor o texto não invade a coluna do chevron */
-@media(min-width:900px){ .pag-cab-in > *{ max-width:62% } .pag-h1{ max-width:14ch } }
-.fecho-nota{ color:rgba(255,255,255,.62); max-width:48ch; margin-inline:auto }
-
-/* ---- A ORDEM: uma sequência em tipo, sem foto (o domingo em /cultos) -------
-   As cores vêm da casa: no papel, tinta; no escuro, branco. */
-.ordem{ --fio:var(--linha2); --num:var(--areia-tinta); --desc:var(--cinza); list-style:none; margin:0; padding:0; display:grid; gap:0; border-top:1px solid var(--fio) }
-.casa-escuro .ordem{ --fio:rgba(255,255,255,.2); --num:var(--areia); --desc:rgba(255,255,255,.7) }
-.ordem-i{
-  display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:clamp(16px,3vw,40px); align-items:start;
-  padding:clamp(22px,3vw,34px) 0; border-bottom:1px solid var(--fio);
-}
-.ordem-n{
-  font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(28px,3.4vw,44px);
-  line-height:1; color:var(--num); min-width:2.2ch;
-}
-/* h3 do sistema vem em caixa alta com "›": aqui é título de bloco */
-.ordem-t{ margin:0; display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(24px,3.2vw,40px); line-height:1.05; letter-spacing:-.025em; color:inherit; text-transform:none }
-.ordem-t::before{ content:none }
-.ordem-d{ margin:8px 0 0; font-size:var(--t-ui); line-height:1.5; color:var(--desc); max-width:56ch; text-wrap:pretty }
-@media(min-width:900px){
-  .ordem{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 clamp(20px,2.6vw,40px); border-top:0 }
-  .ordem-i{ grid-template-columns:minmax(0,1fr); border-bottom:0; border-top:1px solid var(--fio); padding:var(--e5) 0 0 }
-  .ordem-n{ margin-bottom:var(--e6) }
-}
-
-/* ---- O ÍNDICE: linhas em tipo grande (as áreas em /servir) ---------------- */
-.ind{ list-style:none; margin:0; padding:0; border-top:1px solid var(--linha) }
-.ind-i{ border-bottom:1px solid var(--linha) }
-.ind-a{
-  display:grid; grid-template-columns:auto minmax(0,1fr) auto; column-gap:clamp(16px,3vw,44px); align-items:center;
-  padding:clamp(22px,3vw,36px) 0; color:inherit; text-decoration:none;
-}
-.ind-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(24px,3vw,40px); line-height:1; color:var(--areia-tinta); min-width:2.2ch }
-.ind-t{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(28px,4.2vw,54px); line-height:1; letter-spacing:-.03em; transition:color var(--t) }
-.ind-d{ display:block; margin-top:8px; font-size:var(--t-ui); line-height:1.5; color:var(--cinza); max-width:60ch; text-wrap:pretty }
-.ind-s{ display:inline-block; margin-top:10px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--mudo) }
-.ind-chev{ display:grid; place-items:center; font-size:clamp(20px,2.2vw,32px); color:var(--areia-tinta); transition:transform var(--t) }
-.ind-a:hover .ind-t,.ind-a:focus-visible .ind-t{ color:var(--areia-tinta) }
-.ind-a:hover .ind-chev,.ind-a:focus-visible .ind-chev{ transform:translateX(8px) }
-.ind-i.esqueleto{ height:112px; background:linear-gradient(90deg,transparent,rgba(0,0,0,.04),transparent) }
-@media(max-width:759px){ .ind-a{ grid-template-columns:minmax(0,1fr) auto } .ind-n{ display:none } }
-
-/* ---- o mapa de /como-chegar no v3: o mapa da casa, de ponta a ponta --------
-   No monitor o cartão de endereço flutua sobre o mapa; no celular ele vem
-   DEPOIS do mapa, no fluxo — por cima ele cobria o pino e brigava com o zoom. */
-.mapa.limpo{ background:var(--card2); min-height:0; display:flex; flex-direction:column }
-.mapa.limpo::before,.mapa.limpo::after{ content:none }
-.mapa.limpo .pg-mapao{ position:relative; margin:0; border:0; flex:none }
-.mapa.limpo .pg-mapao-tela{ height:clamp(360px,56vh,520px) }
-.mapa.limpo .mapa-cartao{ position:static; width:auto; padding-inline:clamp(20px,4vw,52px) }
-@media(min-width:900px){
-  .mapa.limpo{ min-height:clamp(520px,78vh,860px); display:block }
-  .mapa.limpo .pg-mapao{ position:absolute; inset:0 }
-  .mapa.limpo .pg-mapao-tela{ height:100% }
-  .mapa.limpo .mapa-cartao{ position:absolute; width:min(440px,calc(100% - 2*clamp(20px,4vw,52px))); padding:clamp(22px,2.6vw,34px) }
-}
-
-/* ---- o versículo de /sobre: de ponta a ponta, centrado, sobre o criativo --
-   (`.versiculo` já é o bloco de versículo do sistema interno: outro nome) */
-.vers-v3{ position:relative; isolation:isolate; padding:clamp(88px,14vh,180px) 0; text-align:center }
-.vers-v3-in{ position:relative; z-index:1 }
-.vers-v3-txt{ margin:0 auto; max-width:26ch; font-size:clamp(26px,3.8vw,56px); color:#fff }
-.vers-v3-ref{ justify-content:center; margin:28px 0 0 }
-.vers-v3 .cria-fundo.vazio .cria-marca{ opacity:.3 }
-/* o criativo no herói do acompanhamento de candidatura: atrás do véu (::after
-   em z-index -1), como a foto que ele substitui */
-.porta-hero .porta-hero-cria{ z-index:-2 }
 
 /* =============================================================================
    ============================================================================
@@ -8231,3 +7911,82 @@ a.dia-in:hover,a.dia-in:focus-visible{ background:var(--card2) }
 .agora-pill-o::before{ content:"·"; margin-right:10px; color:rgba(255,255,255,.4) }
 .agora-pill svg{ width:14px; height:14px; color:var(--areia) }
 @media(max-width:479px){ .agora-pill{ font-size:13px; gap:8px } .agora-pill-o{ max-width:44vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis } }
+
+/* ---- V4: componentes de produto ------------------------------------------
+   Cantos arredondados, filete fino, sombra só no hover, botão em caixa
+   baixa. É a camada que muda o "tom" de editorial para produto digital sem
+   mexer na estrutura das páginas. Tudo aqui é sobreposição: as regras
+   anteriores continuam valendo onde não há uma nova. */
+:root{ --r4:10px; --r4-card:16px; --r4-foto:20px; --sombra4:0 10px 30px -12px rgba(37,37,37,.22); --sombra4-forte:0 18px 44px -16px rgba(37,37,37,.32) }
+
+/* botões: caixa baixa, 15px, peso 600, 46px de altura, canto 10px */
+.acao{
+  text-transform:none; letter-spacing:-.005em; font-size:15px; font-weight:600;
+  padding:0 20px; min-height:46px; border-radius:var(--r4);
+  transition:background var(--t),color var(--t),border-color var(--t),opacity var(--t),transform 220ms var(--ease),box-shadow var(--t);
+}
+.acao.cheia:hover,.acao.cheia:active{ opacity:1; background:#111; border-color:#111; transform:translateY(-1px); box-shadow:var(--sombra4) }
+.acao:not(.cheia){ border-color:rgba(37,37,37,.22) }
+.acao:not(.cheia):hover,.acao:not(.cheia):active{ background:var(--noite); border-color:var(--noite); color:#fff; transform:translateY(-1px) }
+.acao svg{ width:15px; height:15px }
+.casa-escuro .acao:not(.cheia),.casa-heroi .acao:not(.cheia),.casa-foto .acao:not(.cheia),.g-cheio .acao:not(.cheia){ border-color:rgba(255,255,255,.34) }
+.casa-escuro .acao:not(.cheia):hover,.g-cheio .acao:not(.cheia):hover{ background:#fff; border-color:#fff; color:var(--noite) }
+.g-cheio .acao.cheia:hover,.casa-heroi .acao.cheia:hover{ background:#fff; border-color:#fff; opacity:1 }
+/* a barra: o botão do topo no mesmo tom, 40px */
+.bt-barra{ text-transform:none; letter-spacing:-.005em; font-size:14px; font-weight:600; padding:0 16px; min-height:40px; border-radius:8px; border-color:rgba(255,255,255,.34) }
+.casa-barra.opaco .bt-barra{ border-color:rgba(37,37,37,.22) }
+.bt-barra.discreto{ border:0; padding-inline:8px }
+/* "Quero servir" no largo, "Servir" no estreito: duas palavras inteiras, sem
+   margem fingindo espaço (o rótulo agora é caixa baixa, e a maiúscula de
+   "Servir" sozinho precisa existir de verdade) */
+.bt-barra .so-largo{ margin-right:0 }
+.bt-barra .so-estreito{ display:none }
+@media(max-width:399px){ .bt-barra .so-estreito{ display:inline } }
+/* links do menu: caixa baixa, 14px */
+.casa-nav a{ text-transform:none; letter-spacing:-.005em; font-size:14.5px; font-weight:500 }
+/* chips: pílulas */
+.pg-chip{ text-transform:none; letter-spacing:-.005em; font-size:14px; font-weight:600; padding:0 16px; min-height:40px; border-radius:999px; border-color:rgba(37,37,37,.18); display:inline-flex; align-items:center }
+.pg-chip small{ letter-spacing:0; font-size:12px }
+.pg-chips{ gap:8px }
+
+/* cartões: separados, canto 16, filete, levantam no hover */
+.fatos{ gap:12px; background:transparent; border:0; padding:clamp(20px,4vw,52px) clamp(20px,4vw,52px) 0; max-width:1360px; margin-inline:auto }
+.fato{ border:1px solid var(--linha2); border-radius:var(--r4-card); transition:transform 220ms var(--ease),box-shadow var(--t),border-color var(--t) }
+a.fato:hover{ transform:translateY(-2px); box-shadow:var(--sombra4); border-color:rgba(37,37,37,.28) }
+.cartoes{ gap:12px; background:transparent; border:0 }
+.cartao{ border:1px solid rgba(255,255,255,.12); border-radius:var(--r4-card) }
+.casa-papel .cartoes,.casa-areia .cartoes{ background:transparent; border:0 }
+.casa-papel .cartao{ border-color:var(--linha2) } .casa-areia .cartao{ border-color:rgba(59,50,34,.18) }
+.ficha{ gap:12px; background:transparent; border:0 }
+.ficha > div{ border:1px solid var(--linha2); border-radius:var(--r4-card) }
+.casa-escuro .ficha > div{ border-color:rgba(255,255,255,.12) }
+.g-tiles{ gap:12px }
+.g-tile{ border-radius:var(--r4-card); transition:transform 220ms var(--ease),box-shadow var(--t),background var(--t),border-color var(--t) }
+a.g-tile:hover{ transform:translateY(-2px) }
+.pgs{ gap:12px }
+.pg{ border-radius:var(--r4-card) }
+.pg-mapao{ border-radius:var(--r4-card); overflow:hidden; border-color:var(--linha2) }
+.mapa-cartao{ border-radius:var(--r4-card) }
+.casa-areas{ gap:12px }
+.casa-area{ border-radius:var(--r4-card); transition:transform 220ms var(--ease),box-shadow var(--t) }
+.casa-area:hover{ transform:translateY(-2px); box-shadow:var(--sombra4-forte) }
+.g-foto,.c-foto .g-foto{ border-radius:var(--r4-foto) }
+.g-passo{ border-radius:var(--r4-card); overflow:hidden }
+.g-num > div{ border-radius:var(--r4-card) }
+/* a foto de ponta a ponta continua de ponta a ponta; o cartão da barra e o
+   menu ganham o mesmo canto do sistema */
+.menu-bt{ border-radius:8px }
+input,select,textarea{ border-radius:var(--r4) }
+/* "qual fica perto de mim?" em /pequena-guia: a pergunta e o botão numa
+   linha, a resposta no lugar da pergunta */
+.pg-perto{ display:grid; gap:var(--e4); padding:var(--e5) 0 0 }
+.pg-perto-txt{ margin:0; display:grid; gap:4px }
+.pg-perto-txt .g-rot{ margin:0 0 6px }
+.pg-perto-txt b{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.8vw,24px); letter-spacing:-.02em; line-height:1.15 }
+.pg-perto-txt span:last-child{ font-size:var(--t-ui); color:var(--cinza); line-height:1.5 }
+.pg-perto .acao[disabled]{ opacity:.6; cursor:wait }
+@media(min-width:760px){ .pg-perto{ grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:var(--e7) } }
+/* o menu do celular no mesmo tom de produto: caixa baixa, peso 600, tracking
+   fechado — as caixas altas entreletradas eram a voz editorial */
+.menu ul a{ text-transform:none; letter-spacing:-.02em; font-weight:600; font-size:clamp(30px,8vw,40px) }
+.menu .menu-pe,.menu .menu-pe a{ text-transform:none; letter-spacing:0; font-size:14.5px; font-weight:500 }

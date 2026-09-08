@@ -7,6 +7,7 @@ import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { AreasCarregando, Vazio } from '@/components/Tela';
 import { fotoDaArea } from '@/lib/fotos';
+import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
    /servir — ONDE A JORNADA COMEÇA
@@ -56,10 +57,10 @@ export default function Servir() {
   }, []);
 
   return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
       <section className="g-cheio alta centro rev">
-        <img src="/fotos/midia.webp" alt="Equipe Creative na mesa de transmissão do culto" fetchPriority="high" />
+        <img src={cria('servir')} alt={criaAlt('servir')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
           <Tit as="h1" className="g-h1">Encontre seu lugar</Tit>
