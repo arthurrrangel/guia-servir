@@ -7,7 +7,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/engine.test.mjs"
+    "test": "node scripts/engine.test.mjs && node --import ./scripts/_ts.mjs scripts/semana.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.48.1",

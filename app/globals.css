@@ -7873,3 +7873,216 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 /* a regra de 44px da migalha (linha ~2696) era vencida por uma de 32px escrita
    depois (~2808): os dois links do cadastro mediam 32. Aqui, por último. */
 .migalha a{ min-height:var(--toque); padding:var(--e3) 0 }
+
+/* =============================================================================
+   ============================================================================
+   O SITE V3 — "A GUIA AGORA"
+   08/09/2026. O Arthur pediu uma experiência nova, não um redesign. Três
+   princípios, e tudo abaixo serve a um deles:
+
+   TEMPO   o site fala no presente. A primeira tela diz a PRÓXIMA coisa que
+           acontece na igreja (lib/semana.ts), a semana inteira cabe em sete
+           colunas, e a ação principal muda com a hora.
+   LUGAR   o mapa da cidade é espinha, não apêndice: a igreja e os grupos, e
+           o botão que responde "qual fica perto de mim?".
+   CAMINHO o chevron da marca é o guia. Três portas em tipo grande, o fio
+           que anda com a rolagem no domingo por dentro, o chevron que
+           aponta o próximo passo em cada linha.
+
+   SEM FOTO OBRIGATÓRIA. Cada lugar de imagem é um "criativo" (lib/criativos)
+   que mostra o painel da marca até o arquivo chegar. O desenho tem que
+   ficar de pé sem nenhuma foto — e fica: tipo, ritmo, escuro e areia.
+
+   Os tokens são os mesmos do site (--e*, --d-*, .g, .g-cab, .acao, .g-link):
+   o v3 muda a experiência, não a gramática.
+   ============================================================================
+   ============================================================================= */
+
+/* ---- o criativo ------------------------------------------------------------ */
+.cria{ position:relative; overflow:hidden; background:var(--noite); color:var(--areia) }
+.cria-bloco{ width:100% }
+.cria-fundo{ position:absolute; inset:0; z-index:0 }
+.cria img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block }
+/* o painel vazio é liso: preto e o chevron em traço. (Tinha uma retícula de
+   32px atrás; saiu porque retícula é vocabulário de startup, não de
+   instituição.) O bloco em proporção ganha um fio de moldura, para o lugar
+   da imagem ter borda mesmo quando o fundo em volta é o mesmo preto. */
+.cria-bloco.vazio{ box-shadow:inset 0 0 0 1px rgba(228,212,180,.22) }
+.cria-marca{ position:absolute; left:50%; top:50%; width:min(46%,420px); height:auto; transform:translate(-50%,-50%); opacity:.55 }
+.cria-rot{
+  position:absolute; left:12px; bottom:10px; z-index:1;
+  font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--areia); opacity:.8;
+}
+/* o véu de leitura: texto branco em cima de foto pede escuro atrás */
+.cria-fundo.com::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(37,37,37,.28) 0%,rgba(37,37,37,.62) 60%,rgba(37,37,37,.86) 100%) }
+
+/* ---- AGORA: a primeira tela ---------------------------------------------- */
+.agora{
+  position:relative; isolation:isolate; min-height:100svh; overflow:hidden;
+  background:var(--noite); color:#fff;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  padding:calc(var(--barra-alt) + var(--e7)) 0 clamp(52px,8vh,96px);
+}
+.agora-in{
+  position:relative; z-index:1; width:100%; max-width:1360px; margin:0 auto; padding-inline:clamp(20px,4vw,52px);
+  flex:1 0 auto; display:flex; flex-direction:column; justify-content:flex-end;
+}
+/* o chevron do herói mora no próprio fluxo (.agora-selo), não no criativo:
+   no celular ele ocupa exatamente o espaço que o texto deixa livre acima
+   (flex:1), sai pela direita e nunca cruza o título; no monitor vira a
+   coluna da direita, centrado na altura. O criativo do herói não desenha o
+   seu chevron, para não haver dois. */
+.agora .cria-marca{ display:none }
+.agora-selo{ position:relative; flex:1 1 auto; min-height:110px; margin-bottom:var(--e6); color:var(--areia); opacity:.6 }
+.agora-selo svg{ position:absolute; right:-14%; top:0; height:100%; max-height:400px; width:auto; display:block }
+@media(min-width:900px){
+  /* 34vw e o título a 11,2vw: entre "para você" e o chevron sobram ≥77px
+     em qualquer largura de 900 a 1600 (medido em 900, 1024, 1200 e 1440) */
+  .agora-selo{ position:absolute; right:4%; top:50%; width:min(34vw,600px); aspect-ratio:757.5/826.3; transform:translateY(-50%); flex:none; min-height:0; margin:0 }
+  .agora-selo svg{ position:static; height:100%; width:100%; max-height:none }
+}
+.agora-rot{ color:rgba(255,255,255,.62) }
+.agora-h1{
+  margin:var(--e4) 0 0; max-width:11ch; color:#fff;
+  font-family:var(--fonte-display); font-weight:700; letter-spacing:-.035em; line-height:.96;
+  font-size:clamp(48px,11.2vw,132px); text-wrap:balance;
+}
+.agora-vivo{ margin-top:clamp(24px,4vh,44px); max-width:760px }
+.agora-linha{
+  margin:0; display:flex; flex-wrap:wrap; align-items:baseline; column-gap:.45em; row-gap:2px;
+  font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
+  font-size:clamp(23px,3.2vw,36px); line-height:1.2; color:var(--areia);
+}
+.agora-quando{ color:#fff }
+.agora-sep{ opacity:.5 }
+.agora-onde{
+  flex:1 0 100%; margin-top:6px;
+  font-family:var(--fonte); font-style:normal; font-weight:400; font-size:var(--t-ui); color:rgba(255,255,255,.62);
+}
+.agora-acoes{ margin-top:clamp(20px,3vh,30px) }
+/* (havia um chevron pulando no canto para dizer "role": saiu. Cue animado de
+   rolagem é clichê de landing page, e "Ver a semana inteira" já é o convite.) */
+
+/* ---- A SEMANA: sete colunas ---------------------------------------------- */
+.semana-dias{
+  list-style:none; margin:clamp(28px,4vw,48px) 0 0; padding:0;
+  display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:1px;
+  background:var(--linha2); border:1px solid var(--linha2);
+}
+.dia-in{
+  display:flex; flex-direction:column; gap:var(--e2); min-height:118px;
+  padding:var(--e3) var(--e3); background:var(--papel); color:inherit; text-decoration:none;
+  transition:background var(--t),color var(--t);
+}
+a.dia-in:hover,a.dia-in:focus-visible{ background:var(--card2) }
+.dia-n{ font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mudo) }
+.dia-l{ display:flex; flex-direction:column; gap:3px; margin-top:var(--e5); min-width:0 }
+.dia-l b{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(13px,1.15vw,17px); letter-spacing:-.01em; line-height:1.1 }
+.dia-l i{ font-style:normal; font-size:12px; color:var(--cinza); line-height:1.2 }
+.dia.vazio .dia-in{ color:var(--mudo) }
+.dia.hoje .dia-in{ background:var(--noite); color:#fff }
+.dia.hoje .dia-n{ color:var(--areia) }
+.dia.hoje .dia-l i{ color:rgba(255,255,255,.72) }
+.dia.hoje a.dia-in:hover{ background:#111 }
+@media(max-width:759px){
+  .dia-in{ min-height:104px; padding:10px 7px }
+  .dia-n{ font-size:10px; letter-spacing:.1em }
+  .dia-l b{ font-size:12px } .dia-l i{ font-size:11px }
+}
+
+/* ---- OS CAMINHOS: três portas em tipo grande ------------------------------ */
+.caminhos{ padding:clamp(8px,2vw,24px) 0 clamp(44px,6vw,96px) }
+.caminho{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:var(--e3) var(--e5); align-items:center;
+  padding:clamp(26px,4vw,56px) 0; border-top:1px solid rgba(255,255,255,.16);
+  color:#fff; text-decoration:none;
+}
+.caminho:last-child{ border-bottom:1px solid rgba(255,255,255,.16) }
+.caminho-n{
+  font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
+  font-size:clamp(20px,2.4vw,34px); line-height:1; color:var(--areia); min-width:2.4em;
+}
+.caminho-t{
+  display:block; font-family:var(--fonte-display); font-weight:700; letter-spacing:-.03em; line-height:1.02;
+  font-size:clamp(30px,5.4vw,68px); transition:color var(--t); text-wrap:balance;
+}
+.caminho-d{ display:block; margin-top:10px; font-size:var(--t-ui); line-height:1.5; color:rgba(255,255,255,.7); max-width:60ch; text-wrap:pretty }
+.caminho-chev{ display:grid; place-items:center; font-size:clamp(24px,2.4vw,36px); color:var(--areia); transition:transform var(--t) }
+.caminho:hover .caminho-chev,.caminho:focus-visible .caminho-chev{ transform:translateX(10px) }
+.caminho:hover .caminho-t{ color:var(--areia) }
+@media(max-width:759px){
+  .caminho{ grid-template-columns:minmax(0,1fr) auto; gap:var(--e2) var(--e4) }
+  .caminho-n{ grid-column:1 / -1; min-width:0; font-size:17px }
+}
+
+/* ---- A CIDADE: o mapa e o mais perto ------------------------------------- */
+.cidade{ margin-top:clamp(28px,4vw,48px) }
+.cidade .pg-mapao{ margin-top:0 }
+.cidade-pe{ display:grid; gap:var(--e4); padding-top:var(--e5) }
+@media(min-width:900px){ .cidade-pe{ grid-template-columns:minmax(0,1fr) auto; align-items:end; column-gap:var(--e7) } }
+.cidade-achado{ margin:0; display:grid; gap:4px }
+.cidade-achado .g-rot{ margin-bottom:6px }
+.cidade-achado b{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(22px,2.4vw,32px); letter-spacing:-.02em; line-height:1.1 }
+.cidade-achado-d{ font-size:var(--t-ui); color:var(--cinza); line-height:1.5 }
+/* a igreja é o único pino com anel de areia; a pessoa é o ponto azul de GPS */
+.pin-igreja .pin-guia-c{ width:38px; height:38px; box-shadow:0 0 0 3px var(--areia),0 1px 6px rgba(0,0,0,.34) }
+.pin-igreja .pin-guia-c svg{ width:15px }
+.pin-pessoa{ background:none; border:0 }
+.pin-pessoa-c{ display:block; width:18px; height:18px; border-radius:50%; background:#2f6bff; border:3px solid #fff; box-shadow:0 0 0 6px rgba(47,107,255,.22) }
+
+/* ---- UM DOMINGO POR DENTRO: o fio e os momentos --------------------------- */
+.por-dentro-corpo{ display:grid; gap:clamp(28px,4vw,56px); margin-top:clamp(28px,4vw,48px) }
+@media(min-width:1000px){
+  .por-dentro-corpo{ grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); align-items:start; column-gap:clamp(40px,5vw,84px) }
+  .por-dentro-cria{ position:sticky; top:calc(var(--barra-alt) + var(--e5)) }
+}
+.momentos{ list-style:none; margin:0; padding:0; position:relative; border-left:1px solid rgba(255,255,255,.16) }
+/* o fio: a linha de areia que desce com a rolagem, o chevron da marca em
+   movimento. Sem suporte a animação por rolagem, a linha fica inteira. */
+.momentos::after{
+  content:""; position:absolute; left:-1px; top:0; width:1px; height:100%;
+  background:var(--areia); transform-origin:top; transform:scaleY(1);
+}
+@supports (animation-timeline: view()){
+  .momentos::after{ animation:fio-cresce linear both; animation-timeline:view(); animation-range:entry 30% cover 75% }
+  @keyframes fio-cresce{ from{ transform:scaleY(0) } to{ transform:scaleY(1) } }
+}
+.momento{
+  position:relative; display:grid; grid-template-columns:auto minmax(0,1fr); gap:0 var(--e4); align-items:start;
+  padding:clamp(18px,2.6vw,30px) 0 clamp(18px,2.6vw,30px) clamp(20px,3vw,36px);
+}
+.momento::before{ content:""; position:absolute; left:-4px; top:calc(clamp(18px,2.6vw,30px) + .5em); width:7px; height:7px; background:var(--areia) }
+.momento-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2vw,28px); line-height:1; color:var(--areia); padding-top:.15em }
+.momento-t{ margin:0; font-family:var(--fonte-display); font-weight:700; font-size:clamp(22px,2.4vw,32px); letter-spacing:-.02em; line-height:1.1; color:#fff; text-transform:none; display:block }
+.momento-t::before{ content:none }
+.momento-d{ margin:8px 0 0; font-size:var(--t-ui); line-height:1.5; color:rgba(255,255,255,.72); max-width:46ch }
+.momento-areas{ display:flex; flex-wrap:wrap; gap:8px; margin-top:14px }
+.momento-area{
+  display:inline-flex; align-items:center; gap:10px; min-height:var(--toque); padding:6px 14px;
+  border:1px solid rgba(255,255,255,.28); color:#fff; text-decoration:none;
+  transition:border-color var(--t),background var(--t);
+}
+.momento-area:hover,.momento-area:focus-visible{ border-color:#fff; background:rgba(255,255,255,.06) }
+.momento-area-nome{ font-family:var(--fonte-display); font-weight:700; font-size:var(--t-apoio) }
+.momento-area-p{ font-size:12px; color:rgba(255,255,255,.62) }
+.momento-area svg{ width:14px; height:14px; color:var(--areia) }
+.momento-area.esqueleto{ width:150px; border-color:rgba(255,255,255,.12) }
+@media(max-width:759px){ .momento{ grid-template-columns:minmax(0,1fr) } .momento-n{ margin-bottom:6px } }
+
+/* ---- O FECHO --------------------------------------------------------------- */
+.fecho-v3{ position:relative; isolation:isolate; background:var(--noite); color:#fff; padding:clamp(80px,12vw,160px) 0; text-align:center }
+.fecho-v3 > .g{ position:relative; z-index:1; max-width:920px }
+.fecho-v3 .g-rot{ justify-content:center }
+.fecho-v3 .g-h2{ margin-inline:auto; max-width:16ch; color:#fff }
+.fecho-v3 .g-ed{ color:var(--areia); margin-inline:auto }
+.fecho-v3 .g-acoes{ justify-content:center }
+.fecho-v3 .cria-fundo.vazio .cria-marca{ opacity:.35 }
+@media(max-width:899px){ .fecho-v3 .g-acoes{ flex-direction:column; align-items:center } }
+/* no desktop a coluna do dia diz quais grupos; no celular não cabe e não falta */
+.dia-nomes{ display:none; font-size:12.5px; line-height:1.4; color:var(--cinza); margin-top:2px; text-wrap:pretty }
+.dia.hoje .dia-nomes{ color:rgba(255,255,255,.62) }
+@media(min-width:900px){ .dia-nomes{ display:block } .dia-in{ min-height:150px } }
+/* no celular o criativo do domingo por dentro é decoração de 440px entre
+   seis momentos e o fecho: some. Volta no desktop, grudado ao lado do fio. */
+@media(max-width:999px){ .por-dentro-cria{ display:none } }

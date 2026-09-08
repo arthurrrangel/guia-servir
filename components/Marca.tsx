@@ -23,10 +23,16 @@
    e não quebra se o build perder a fonte.
 
    O chevron NÃO é o sinal ">" de nenhuma fonte — é mais alto que a caixa
-   alta, tem as pontas cortadas na vertical e o braço bem mais grosso que
-   qualquer glifo. Medi ele no bitmap (espessura do braço, recuo do ápice,
-   largura e altura) e ajustei um polígono até bater. É desenho, e por isso
-   está desenhado.
+   alta, tem a ponta cortada na vertical, os cantos arredondados e o braço
+   bem mais grosso que qualquer glifo. O `Chevron` solto (abaixo) é a MESMA
+   forma do traçado, redesenhada em retas e arcos: medi as quatro bordas por
+   mínimos quadrados sobre o traçado ampliado a 1515 px (braço a 22,9°,
+   espessura 179/826 da altura, ápice interno a 67% da largura, ponta chata
+   com 170/826) e os raios de cada canto por sobreposição (IoU 0,9928 com o
+   traçado; o que sobra é a ondulação do próprio potrace). Por isso ele sai
+   limpo em qualquer tamanho, inclusive com 600 px no herói, onde o traçado
+   mostraria as ondas. 08/09/2026: o Arthur apontou que o polígono anterior
+   (ponta afiada, cantos vivos) não era o da GUIA. Não era.
 
    Proporções, todas em alturas de caixa alta, medidas no original:
      G 0,94 · U 0,89 · I 0,30 · chevron 0,90 × 0,95
@@ -73,12 +79,27 @@ export function Simbolo({ className, titulo = 'GUIA Church' }: { className?: str
 }
 
 /* só o chevron, para usar como marcador de seção e como bullet — é o único
-   ornamento do sistema, e é literalmente um pedaço da marca */
-export function Chevron({ className }: { className?: string }) {
+   ornamento do sistema, e é literalmente um pedaço da marca. A forma oficial,
+   em retas e arcos (ver o cabeçalho): quem precisar do traçado fora de React
+   (o pino do mapa monta HTML em texto) usa CHEVRON_VB e CHEVRON_D. */
+export const CHEVRON_VB = '0 0 757.5 826.3';
+export const CHEVRON_D = 'M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z';
+
+export function Chevron({ className, traco }: { className?: string; traco?: boolean }) {
+  /* `traco`: só o contorno, em linha de 1px na tela em qualquer tamanho — é o
+     chevron grande do herói e dos painéis de criativo. Sem estilo em linha,
+     para o CSS do lugar mandar no tamanho. */
+  if (traco) {
+    return (
+      <svg className={className} viewBox={CHEVRON_VB} aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <path d={CHEVRON_D} fill="none" stroke="currentColor" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      </svg>
+    );
+  }
   return (
-    <svg className={className} viewBox="504.6 2.5 90 95" aria-hidden="true"
+    <svg className={className} viewBox={CHEVRON_VB} aria-hidden="true"
          fill="currentColor" style={{ display: 'block', height: '1em', width: 'auto' }}>
-      <path d="M515.18 2.50 L602.58 48.68 L605.08 50.00 L602.58 51.32 L515.18 97.50 L515.18 76.10 L577.38 50.00 L515.18 23.90 Z" />
+      <path d={CHEVRON_D} />
     </svg>
   );
 }

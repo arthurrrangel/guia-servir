@@ -24,11 +24,20 @@ export const IGREJA = {
   cidade: 'Rio de Janeiro',
   uf: 'RJ',
   cep: '22793-390',
+  /* [lat, lon] da porta da igreja, geocodificado pelo Nominatim a partir do
+     endereço acima e conferido pelo display_name (07/09/2026). É o pino da
+     igreja no mapa da cidade e o ponto das Pequenas Guias que acontecem nela. */
+  coord: [-23.01036, -43.42369] as [number, number],
 
   /* domingo, 10h. Corrigido pelo Arthur em 03/09 — o material antigo dizia
      outra hora e chegou a circular. Uma fonte só evita a próxima divergência. */
   cultoDia: 'Domingo',
   cultoHora: '10h',
+  /* O FOLLOW, culto de jovens: sábados do mês, menos o primeiro (dito pelo
+     Arthur em ago/2026). O HORÁRIO não está confirmado em lugar nenhum e por
+     isso é null: enquanto for, o site diz "Sábado · Follow" sem hora. Quando
+     a igreja confirmar, escrever aqui ("19h") liga a hora em todas as telas. */
+  followHora: null as string | null,
 
   instagram: 'https://instagram.com/guiachurch',
   instagramArroba: '@guiachurch',

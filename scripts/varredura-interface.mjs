@@ -56,12 +56,22 @@ const CHECK = () => {
   const lum=c=>{const [r,g,b]=c.map(v=>{v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});
     return .2126*r+.7152*g+.0722*b};
   const rgb=s=>{const m=s.match(/\d+(\.\d+)?/g); return m?m.slice(0,3).map(Number):null};
-  const fundo=e=>{let p=e; while(p&&p!==document.documentElement){const b=cs(p).backgroundColor;
-    const m=b.match(/rgba?\(([^)]+)\)/); if(m){const v=m[1].split(',').map(parseFloat);
-      if(v.length<4||v[3]>0.9) return v.slice(0,3);} p=p.parentElement;} return [255,255,255]};
+  const pintado=p=>{const b=cs(p).backgroundColor; const m=b.match(/rgba?\(([^)]+)\)/);
+    if(m){const v=m[1].split(',').map(parseFloat); if(v.length<4||v[3]>0.9) return v.slice(0,3);} return null};
+  /* 08/09/2026: quando nenhum ANCESTRAL pinta (barra transparente e fixa sobre
+     o heroi), olha o que esta DEBAIXO do texto na tela — elementsFromPoint no
+     centro dele, pulando o proprio texto e os ancestrais. Se o primeiro
+     pintado for uma imagem, nao da para saber: devolve null e o texto e
+     pulado (o ponto cego de 06/09 vira "nao medido" em vez de alarme falso). */
+  const fundo=e=>{let p=e; while(p&&p!==document.body){const v=pintado(p); if(v) return v; p=p.parentElement;}
+    const r=e.getBoundingClientRect(); if(r.width&&r.height){
+      const pilha=document.elementsFromPoint(r.left+r.width/2,r.top+r.height/2);
+      for(const q of pilha){ if(q===e||q.contains(e)) continue; if(q.tagName==='IMG'||q.tagName==='VIDEO'||q.tagName==='CANVAS') return null;
+        const v=pintado(q); if(v) return v; } }
+    return pintado(document.body)||[255,255,255]};
   for(const e of raiz.querySelectorAll('*')){
     if(e.children.length||!(e.textContent||'').trim()||!vis(e)) continue;
-    const s=cs(e), f=rgb(s.color), b=fundo(e); if(!f) continue;
+    const s=cs(e), f=rgb(s.color), b=fundo(e); if(!f||!b) continue;
     const L1=lum(f)+.05, L2=lum(b)+.05, r=(Math.max(L1,L2)/Math.min(L1,L2));
     const px=parseFloat(s.fontSize), grande=px>=24||(px>=18.66&&+s.fontWeight>=700);
     const min=grande?3:4.5;
