@@ -72,6 +72,9 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMa
         center: RIO, zoom: 11, scrollWheelZoom: false,
         zoomControl: true, attributionControl: true,
       });
+      /* os dois links da atribuição abrem em nova aba: são os únicos externos
+         do site que o Leaflet escreve sozinho, e todos os outros abrem assim */
+      m.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noreferrer">Leaflet</a>');
       /* O CARTO PEDE CHAVE, E EU SÓ DESCOBRI EM PRODUÇÃO. 07/09/2026.
          A primeira versão usava o basemap Voyager do CARTO, no entendimento de
          que era livre com atribuição. Subiu, e o mapa apareceu com "API KEY
@@ -88,7 +91,7 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMa
          atribuição visível). Mapa claro, parque verde e água azul, que é o que
          deixa o pino escuro da marca legível. */
       l.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(m);
       m.zoomControl.setPosition('bottomright');

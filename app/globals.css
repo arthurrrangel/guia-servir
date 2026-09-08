@@ -7976,7 +7976,16 @@ a.g-tile:hover{ transform:translateY(-2px) }
 /* a foto de ponta a ponta continua de ponta a ponta; o cartão da barra e o
    menu ganham o mesmo canto do sistema */
 .menu-bt{ border-radius:8px }
-input,select,textarea{ border-radius:var(--r4) }
+/* o funil público (cadastro e o espaço do voluntário, casco .tela-corpo)
+   segue o mesmo tom de produto do site: campos, opções, chips e botões com
+   canto 10px e o botão em caixa baixa. O sistema interno (painel, escala)
+   continua quadrado: é outra superfície, dos líderes. */
+.tela-corpo input,.tela-corpo select,.tela-corpo textarea,.porta.wiz input,.porta.wiz select,.porta.wiz textarea,.entrada input{ border-radius:var(--r4) }
+.wiz-op,.wiz-resumo{ border-radius:12px }
+.wiz-op-marca{ border-radius:6px }
+.wiz-chip,.escolha{ border-radius:var(--r4) }
+.porta.wiz .btn,.tela-corpo .btn,.entrada .lid-bt{ border-radius:var(--r4); text-transform:none; letter-spacing:-.005em; font-size:15px; font-weight:600 }
+.wiz-pe .btn{ min-height:46px }
 /* "qual fica perto de mim?" em /pequena-guia: a pergunta e o botão numa
    linha, a resposta no lugar da pergunta */
 .pg-perto{ display:grid; gap:var(--e4); padding:var(--e5) 0 0 }
@@ -8032,4 +8041,28 @@ input,select,textarea{ border-radius:var(--r4) }
   .g-tiles.quatro:not(.letras) .g-tile-d{ text-align:center; margin-inline:auto }
   .qa{ --qa-regua:0px }
   .qa-c{ margin-inline:auto }
+}
+/* ---- CELULAR CENTRADO, também no funil e nas portas de acesso ------------
+   O cadastro (/servir/<área>/cadastro), o espaço do voluntário (/eu) e a
+   entrada do organizador (/entrar) são alcançados pelo site e seguem a
+   mesma regra: texto centrado, controles centrados. Os cartões de opção
+   com caixa de marcar (.wiz-op) continuam à esquerda por dentro: são um
+   controle de formulário, e a leitura "marca + nome + descrição" depende da
+   coluna. */
+@media(max-width:759px){
+  .tela-corpo,.porta.wiz{ text-align:center }
+  .wiz-chips,.wiz-passos{ justify-content:center }
+  .porta.wiz .aviso,.wiz-falta,.wiz-q,.wiz-rot,.wiz-obr{ text-align:center; margin-inline:auto }
+  .wiz-op{ text-align:left }
+  .wiz-resumo{ text-align:center }
+  /* /eu: a lista de áreas — texto centrado, a seta fica na ponta */
+  .escolha{ text-align:center; align-items:center }
+  .escolha-txt{ flex:1; text-align:center }
+  /* /entrar */
+  .entrada,.entrada-marca{ text-align:center }
+  .entrada .entrada-logo,.entrada .marca-link{ margin-inline:auto; display:block; width:max-content }
+  .entrada form label,.entrada .rot{ text-align:center; display:block }
+  /* o botão-texto "prefiro entrar com senha" centrado, com o sublinhado só
+     na largura do texto (width:100% esticava o sublinhado de ponta a ponta) */
+  .entrada .entrada-troca{ align-self:center; width:auto }
 }
