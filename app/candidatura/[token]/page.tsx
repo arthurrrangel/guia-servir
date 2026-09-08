@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { Logo } from '@/components/Marca';
 import { IcSeta, IcCheck } from '@/components/Icones';
-import { fotoDaArea, focoDaArea } from '@/lib/fotos';
+import { Criativo } from '@/components/Criativo';
 
 /* =============================================================================
    /candidatura/[token] — ONDE EU ESTOU
@@ -123,8 +123,9 @@ export default function Candidatura() {
 
       {/* a área que a pessoa escolheu, para ela reconhecer onde está */}
       <section className="porta-hero porta-hero-min">
-        <img className="porta-hero-foto" src={fotoDaArea(d.equipe_slug)}
-          style={{ objectPosition: focoDaArea(d.equipe_slug) }} alt="" />
+        {/* v3 (08/09/2026): o criativo da área (lib/criativos.ts) no lugar da
+            foto obrigatória; até o arquivo existir, o painel da marca */}
+        <Criativo id={`area-${d.equipe_slug}`} fundo className="porta-hero-cria" />
         <div className="porta-hero-in">
           <span className="rot" style={{ color: 'rgba(255,255,255,.6)' }}>
             {primeiro}, seu caminho {na} {d.equipe}

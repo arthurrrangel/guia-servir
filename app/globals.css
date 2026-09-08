@@ -6042,6 +6042,9 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @supports (animation-timeline: scroll()) {
   .casa-barra.inicio{ animation:barra-fica linear both; animation-timeline:scroll(root); animation-range:35vh 70vh; transition:none }
   .casa-barra.inicio::before{ animation:barra-scrim linear both; animation-timeline:scroll(root); animation-range:35vh 70vh }
+  /* nas páginas internas o cabeçalho escuro tem 66svh, não 100: a barra
+     fica opaca antes de o cabeçalho sair de baixo dela (08/09/2026) */
+  body:has(.pag-cab) .casa-barra.inicio,body:has(.pag-cab) .casa-barra.inicio::before{ animation-range:26vh 52vh }
 }
 @keyframes barra-fica{
   from{ background:rgba(250,254,255,0); color:#fff; border-bottom-color:transparent }
@@ -8086,3 +8089,113 @@ a.dia-in:hover,a.dia-in:focus-visible{ background:var(--card2) }
 /* no celular o criativo do domingo por dentro é decoração de 440px entre
    seis momentos e o fecho: some. Volta no desktop, grudado ao lado do fio. */
 @media(max-width:999px){ .por-dentro-cria{ display:none } }
+
+/* =============================================================================
+   ============================================================================
+   AS PÁGINAS INTERNAS NO V3 — 08/09/2026 (components/Pagina.tsx)
+
+   O mesmo cabeçalho da home, encurtado, em todas as portas: fundo escuro
+   (o criativo do lugar, quando existir), texto à esquerda, o chevron da
+   marca em traço na coluna da direita. As fotos de ponta a ponta saíram de
+   todas as páginas: onde havia foto obrigatória há um slot de criativo.
+   ============================================================================
+   ============================================================================= */
+
+/* ---- o cabeçalho ---------------------------------------------------------- */
+.pag-cab{
+  position:relative; isolation:isolate; overflow:hidden;
+  background:var(--noite); color:#fff;
+  min-height:clamp(440px,66svh,720px);
+  display:flex; align-items:flex-end;
+  padding:calc(var(--barra-alt) + var(--e7)) 0 clamp(44px,6vh,80px);
+}
+.pag-cab-in{ position:relative; z-index:1; width:100%; max-width:1360px }
+.pag-cab .cria-marca{ display:none }
+/* a coluna da direita: 26vw no monitor; no celular, um selo no canto de cima,
+   no espaço que o padding-top do cabeçalho já reserva */
+.pag-cab-selo{
+  position:absolute; z-index:1; right:-6%; top:calc(var(--barra-alt) + 12px);
+  height:min(22vh,120px); aspect-ratio:757.5/826.3; color:var(--areia); opacity:.55; pointer-events:none;
+}
+.pag-cab-selo svg{ display:block; width:100%; height:100% }
+@media(min-width:900px){
+  /* alinhado à borda interna da grade (.g: 1360 + 52 de cada lado) */
+  .pag-cab-selo{ right:max(4%,calc((100% - 1360px) / 2 + 52px)); top:50%; transform:translateY(-50%); height:auto; width:min(26vw,420px) }
+}
+.pag-cab-rot{ color:rgba(255,255,255,.62) }
+.pag-h1{
+  margin:var(--e4) 0 0; max-width:12ch; color:#fff;
+  font-family:var(--fonte-display); font-weight:700; letter-spacing:-.035em; line-height:.96;
+  font-size:clamp(44px,8.4vw,108px); text-wrap:balance;
+}
+.pag-ed{ max-width:24ch; color:var(--areia) }
+.pag-cab .g-ed.pag-ed{ font-size:clamp(22px,2.9vw,40px); line-height:1.18; margin-top:.5em }
+.pag-cab-acoes{ margin-top:clamp(22px,3.4vh,34px) }
+/* no monitor o texto não invade a coluna do chevron */
+@media(min-width:900px){ .pag-cab-in > *{ max-width:62% } .pag-h1{ max-width:14ch } }
+.fecho-nota{ color:rgba(255,255,255,.62); max-width:48ch; margin-inline:auto }
+
+/* ---- A ORDEM: uma sequência em tipo, sem foto (o domingo em /cultos) -------
+   As cores vêm da casa: no papel, tinta; no escuro, branco. */
+.ordem{ --fio:var(--linha2); --num:var(--areia-tinta); --desc:var(--cinza); list-style:none; margin:0; padding:0; display:grid; gap:0; border-top:1px solid var(--fio) }
+.casa-escuro .ordem{ --fio:rgba(255,255,255,.2); --num:var(--areia); --desc:rgba(255,255,255,.7) }
+.ordem-i{
+  display:grid; grid-template-columns:auto minmax(0,1fr); column-gap:clamp(16px,3vw,40px); align-items:start;
+  padding:clamp(22px,3vw,34px) 0; border-bottom:1px solid var(--fio);
+}
+.ordem-n{
+  font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(28px,3.4vw,44px);
+  line-height:1; color:var(--num); min-width:2.2ch;
+}
+/* h3 do sistema vem em caixa alta com "›": aqui é título de bloco */
+.ordem-t{ margin:0; display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(24px,3.2vw,40px); line-height:1.05; letter-spacing:-.025em; color:inherit; text-transform:none }
+.ordem-t::before{ content:none }
+.ordem-d{ margin:8px 0 0; font-size:var(--t-ui); line-height:1.5; color:var(--desc); max-width:56ch; text-wrap:pretty }
+@media(min-width:900px){
+  .ordem{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:0 clamp(20px,2.6vw,40px); border-top:0 }
+  .ordem-i{ grid-template-columns:minmax(0,1fr); border-bottom:0; border-top:1px solid var(--fio); padding:var(--e5) 0 0 }
+  .ordem-n{ margin-bottom:var(--e6) }
+}
+
+/* ---- O ÍNDICE: linhas em tipo grande (as áreas em /servir) ---------------- */
+.ind{ list-style:none; margin:0; padding:0; border-top:1px solid var(--linha) }
+.ind-i{ border-bottom:1px solid var(--linha) }
+.ind-a{
+  display:grid; grid-template-columns:auto minmax(0,1fr) auto; column-gap:clamp(16px,3vw,44px); align-items:center;
+  padding:clamp(22px,3vw,36px) 0; color:inherit; text-decoration:none;
+}
+.ind-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(24px,3vw,40px); line-height:1; color:var(--areia-tinta); min-width:2.2ch }
+.ind-t{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(28px,4.2vw,54px); line-height:1; letter-spacing:-.03em; transition:color var(--t) }
+.ind-d{ display:block; margin-top:8px; font-size:var(--t-ui); line-height:1.5; color:var(--cinza); max-width:60ch; text-wrap:pretty }
+.ind-s{ display:inline-block; margin-top:10px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--mudo) }
+.ind-chev{ display:grid; place-items:center; font-size:clamp(20px,2.2vw,32px); color:var(--areia-tinta); transition:transform var(--t) }
+.ind-a:hover .ind-t,.ind-a:focus-visible .ind-t{ color:var(--areia-tinta) }
+.ind-a:hover .ind-chev,.ind-a:focus-visible .ind-chev{ transform:translateX(8px) }
+.ind-i.esqueleto{ height:112px; background:linear-gradient(90deg,transparent,rgba(0,0,0,.04),transparent) }
+@media(max-width:759px){ .ind-a{ grid-template-columns:minmax(0,1fr) auto } .ind-n{ display:none } }
+
+/* ---- o mapa de /como-chegar no v3: o mapa da casa, de ponta a ponta --------
+   No monitor o cartão de endereço flutua sobre o mapa; no celular ele vem
+   DEPOIS do mapa, no fluxo — por cima ele cobria o pino e brigava com o zoom. */
+.mapa.limpo{ background:var(--card2); min-height:0; display:flex; flex-direction:column }
+.mapa.limpo::before,.mapa.limpo::after{ content:none }
+.mapa.limpo .pg-mapao{ position:relative; margin:0; border:0; flex:none }
+.mapa.limpo .pg-mapao-tela{ height:clamp(360px,56vh,520px) }
+.mapa.limpo .mapa-cartao{ position:static; width:auto; padding-inline:clamp(20px,4vw,52px) }
+@media(min-width:900px){
+  .mapa.limpo{ min-height:clamp(520px,78vh,860px); display:block }
+  .mapa.limpo .pg-mapao{ position:absolute; inset:0 }
+  .mapa.limpo .pg-mapao-tela{ height:100% }
+  .mapa.limpo .mapa-cartao{ position:absolute; width:min(440px,calc(100% - 2*clamp(20px,4vw,52px))); padding:clamp(22px,2.6vw,34px) }
+}
+
+/* ---- o versículo de /sobre: de ponta a ponta, centrado, sobre o criativo --
+   (`.versiculo` já é o bloco de versículo do sistema interno: outro nome) */
+.vers-v3{ position:relative; isolation:isolate; padding:clamp(88px,14vh,180px) 0; text-align:center }
+.vers-v3-in{ position:relative; z-index:1 }
+.vers-v3-txt{ margin:0 auto; max-width:26ch; font-size:clamp(26px,3.8vw,56px); color:#fff }
+.vers-v3-ref{ justify-content:center; margin:28px 0 0 }
+.vers-v3 .cria-fundo.vazio .cria-marca{ opacity:.3 }
+/* o criativo no herói do acompanhamento de candidatura: atrás do véu (::after
+   em z-index -1), como a foto que ele substitui */
+.porta-hero .porta-hero-cria{ z-index:-2 }

@@ -1,5 +1,5 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { IcSeta } from '@/components/Icones';
 import { canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, wazeDaPequenaGuia, mapaExterno, type PequenaGuia } from '@/lib/pequenas-guias';
@@ -30,17 +30,31 @@ import { MapaGuias } from '@/components/MapaGuias';
    `wazeDaPequenaGuia`.
    ============================================================================= */
 
-const DIAS: Array<{ rot: string; teste: (p: PequenaGuia) => boolean }> = [
-  { rot: 'Todos', teste: () => true },
-  { rot: 'Terça', teste: p => p.dia === 'Terça' && !p.online },
-  { rot: 'Quarta', teste: p => p.dia === 'Quarta' && !p.online },
-  { rot: 'Quinta', teste: p => p.dia === 'Quinta' && !p.online },
-  { rot: 'Online', teste: p => !!p.online },
+/* `url` é o valor de ?dia= que a home usa nas colunas da semana
+   (/pequena-guia?dia=qua): o filtro nasce já no dia certo, e mudar o filtro
+   escreve a URL de volta, para o link ser compartilhável. */
+const DIAS: Array<{ rot: string; url: string; teste: (p: PequenaGuia) => boolean }> = [
+  { rot: 'Todos', url: '', teste: () => true },
+  { rot: 'Terça', url: 'ter', teste: p => p.dia === 'Terça' && !p.online },
+  { rot: 'Quarta', url: 'qua', teste: p => p.dia === 'Quarta' && !p.online },
+  { rot: 'Quinta', url: 'qui', teste: p => p.dia === 'Quinta' && !p.online },
+  { rot: 'Online', url: 'online', teste: p => !!p.online },
 ];
 
 export function Grupos() {
   const [ativo, setAtivo] = useState(0);
   const [foco, setFoco] = useState('');
+  useEffect(() => {
+    const dia = new URLSearchParams(window.location.search).get('dia') || '';
+    const i = DIAS.findIndex(d => d.url === dia);
+    if (i > 0) setAtivo(i);
+  }, []);
+  const escolher = (i: number) => {
+    setAtivo(i); setFoco('');
+    const u = new URL(window.location.href);
+    if (DIAS[i].url) u.searchParams.set('dia', DIAS[i].url); else u.searchParams.delete('dia');
+    window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+  };
   const contagens = useMemo(() => DIAS.map(d => PEQUENAS_GUIAS.filter(d.teste).length), []);
   const teste = DIAS[ativo].teste;
   const visiveis = useMemo(() => PEQUENAS_GUIAS.filter(teste), [teste]);
@@ -51,7 +65,7 @@ export function Grupos() {
       <div className="pg-chips" role="group" aria-label="Filtrar por dia">
         {DIAS.map((d, i) => (
           <button key={d.rot} type="button" className="pg-chip" aria-pressed={i === ativo}
-            onClick={() => { setAtivo(i); setFoco(''); }}>
+            onClick={() => escolher(i)}>
             {d.rot}<small>{contagens[i]}</small>
           </button>
         ))}

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
+import { Cabecalho, Fecho } from '@/components/Pagina';
 import { Tit } from '@/components/Texto';
 import { Perguntas } from '@/components/Perguntas';
 import { Carregando, Vazio } from '@/components/Tela';
@@ -146,20 +147,13 @@ export default function OndeMeEncaixo() {
   }));
 
   return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
-        <img src="/fotos/recepcao.webp" alt="Duas pessoas da equipe de recepção conversando na porta da igreja" fetchPriority="high" />
-        <div className="g">
-          <p className="g-rot">Servir</p>
-          <Tit as="h1" className="g-h1">Não sei onde me encaixo</Tit>
-          <p className="g-ed">É a resposta mais comum.</p>
-          <div className="g-acoes">
-            <a href="#areas" className="acao cheia">Ver o que se faz <IcSeta /></a>
-            <Link href="/servir" className="acao">Ver as áreas lado a lado</Link>
-          </div>
-        </div>
-      </section>
+      <Cabecalho criativo="servir" rot="Servir" titulo="Não sei onde me encaixo" ed="É a resposta mais comum."
+        acoes={<>
+          <a href="#areas" className="acao cheia">Ver o que se faz <IcSeta /></a>
+          <Link href="/servir" className="g-link claro">Ver as áreas lado a lado</Link>
+        </>} />
 
       {/* ---------------------------------------------------------- as travas */}
       <section className="casa-areia rev">
@@ -199,17 +193,9 @@ export default function OndeMeEncaixo() {
       {/* ------------------------------------------------------------- fecho
           Tira o peso, não convence. E devolve a lista completa: esta página é
           atalho, nunca funil. */}
-      <section className="g-cheio centro fecho rev">
-        <img src="/fotos/congregacao.webp" alt="" loading="lazy" decoding="async" />
-        <div className="g">
-          <p className="g-rot">Em dúvida entre duas?</p>
-          <Tit className="g-h2">Escolha qualquer uma das duas.</Tit>
-          <p className="g-ed menor">A conversa com a liderança existe para isso, e mudar de área depois é normal aqui.</p>
-          <div className="g-acoes">
-            <Link href="/servir" className="acao cheia">Ver as áreas <IcSeta /></Link>
-          </div>
-        </div>
-      </section>
+      <Fecho rot="Em dúvida entre duas?" titulo="Escolha qualquer uma das duas."
+        ed="A conversa com a liderança existe para isso, e mudar de área depois é normal aqui."
+        acoes={<Link href="/servir" className="acao cheia">Ver as áreas <IcSeta /></Link>} />
     </Site>
   );
 }

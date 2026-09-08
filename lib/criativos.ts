@@ -35,7 +35,7 @@ export type Criativo = {
   nota: string;
 };
 
-export const CRIATIVOS: Record<string, Criativo> = {
+export const CRIATIVOS = {
   heroi: {
     alt: '', proporcao: '16:9', largura: 2400,
     nota: 'A primeira tela do site. Fica atrás do título branco: precisa de área escura ou de um véu. Cortada quase quadrada no celular: o assunto no centro.',
@@ -46,7 +46,7 @@ export const CRIATIVOS: Record<string, Criativo> = {
   },
   fecho: {
     alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'O fim da home, atrás de uma frase branca. Clima, sem rosto no centro.',
+    nota: 'O fim de todas as páginas, atrás de uma frase branca. Clima, sem rosto no centro.',
   },
   cultos: {
     alt: '', proporcao: '16:9', largura: 2400,
@@ -64,9 +64,39 @@ export const CRIATIVOS: Record<string, Criativo> = {
     alt: '', proporcao: '16:9', largura: 2400,
     nota: 'Herói de /sobre: o prédio ou a congregação, de longe.',
   },
-};
+  palavra: {
+    alt: '', proporcao: '21:9', largura: 2400,
+    nota: 'Atrás do versículo em /sobre. Escuro, quase abstrato: a frase é o assunto.',
+  },
+  chegar: {
+    alt: 'Fachada da GUIA Church na Rua Pedra de Itaúna', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /como-chegar: A FACHADA, de frente, de dia. É a foto que faz a pessoa reconhecer a porta.',
+  },
+  tv: {
+    alt: '', proporcao: '16:9', largura: 2400,
+    nota: 'Herói de /guia-church-tv: o palco visto da mesa de transmissão, ou a câmera.',
+  },
+  /* AS ÁREAS: um por slug do banco (area-midia, area-servico, area-kids,
+     area-louvor, area-livraria). Área sem criativo próprio usa `area`. */
+  area: {
+    alt: '', proporcao: '16:9', largura: 2400,
+    nota: 'Herói genérico de área: a equipe trabalhando, de lado, sem rosto em close.',
+  },
+  'area-midia': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Mídia: a mesa de transmissão ou a câmera, durante o culto.' },
+  'area-servico': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Connect: a porta, alguém recebendo.' },
+  'area-kids': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Kids: a sala, de longe, sem rosto de criança.' },
+  'area-louvor': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Louvor: a banda no palco, de lado.' },
+  'area-livraria': { alt: '', proporcao: '16:9', largura: 2400, nota: 'Livraria: a bancada com os livros.' },
+} satisfies Record<string, Criativo>;
 
-export type IdCriativo = 'heroi' | 'domingo' | 'fecho' | 'cultos' | 'grupos' | 'servir' | 'sobre';
+/* id conhecido, ou qualquer área (o slug vem do banco) */
+export type IdCriativo = keyof typeof CRIATIVOS | `area-${string}`;
+
+/** o criativo de um lugar; uma área sem criativo próprio cai no genérico */
+export function criativo(id: IdCriativo): Criativo {
+  const tudo = CRIATIVOS as Record<string, Criativo>;
+  return tudo[id] || (id.startsWith('area-') ? tudo.area : tudo.heroi);
+}
 
 /** a proporção como número, para o CSS (aspect-ratio) */
 export function razao(p: Proporcao): string {

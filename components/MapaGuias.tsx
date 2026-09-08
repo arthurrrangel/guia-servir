@@ -41,11 +41,13 @@ type Props = {
   igreja?: boolean;
   /** um ponto extra: onde a pessoa está, quando ela deixou */
   pessoa?: [number, number] | null;
+  /** até onde o enquadramento aproxima (13 = a cidade; 16 = a rua, em /como-chegar) */
+  zoomMax?: number;
 };
 
 const RIO: [number, number] = [-22.955, -43.38];
 
-export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa }: Props) {
+export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMax = 13 }: Props) {
   const caixa = useRef<HTMLDivElement>(null);
   const mapa = useRef<any>(null);
   const pinos = useRef<Record<string, any>>({});
@@ -210,7 +212,7 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa }: Prop
       if (igreja) pontos.push(IGREJA.coord);
       if (pessoa) pontos.push(pessoa);
       const limites = l.latLngBounds(pontos);
-      m.fitBounds(limites, { padding: [46, 46], maxZoom: 13 });
+      m.fitBounds(limites, { padding: [46, 46], maxZoom: zoomMax });
     }
   }
 
@@ -237,7 +239,7 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa }: Prop
   return (
     <div className="pg-mapao">
       <div ref={caixa} className="pg-mapao-tela" role="application"
-        aria-label={`Mapa com ${comPonto.length} Pequenas Guias no Rio de Janeiro`} />
+        aria-label={comPonto.length ? `Mapa com ${comPonto.length} Pequenas Guias no Rio de Janeiro` : `Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`} />
       {/* o mapa é desenho: quem não enxerga precisa do mesmo fato em texto */}
       <p className="so-leitor">
         {comPonto.map(g => `${g.nome} em ${g.bairro}, ${g.dia} às ${g.hora}.`).join(' ')}

@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { cartao } from '@/lib/meta';
 import Link from 'next/link';
 import { Site } from '@/components/Site';
-import { Tit, Schema } from '@/components/Texto';
+import { Cabecalho, Fecho } from '@/components/Pagina';
+import { Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE } from '@/lib/igreja';
 
@@ -26,23 +27,24 @@ export const metadata: Metadata = {
 export default function TV() {
   const canal = IGREJA.youtube;
   return (
-    <Site>
+    <Site escuro>
       {canal && <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Guia Church TV', url: `${SITE}/guia-church-tv`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />}
 
-      <section className="g-cheio alta centro rev">
-        <img src="/fotos/palco.webp" alt="" fetchPriority="high" />
-        <div className="g">
-          <p className="g-rot">GUIA Church TV</p>
-          <Tit as="h1" className="g-h1">A mensagem de domingo</Tit>
-          <p className="g-ed">{canal ? 'Para ver de novo.' : `Toda semana, em ${IGREJA.instagramArroba}.`}</p>
-          <div className="g-acoes">
-            {canal
-              ? <a href={canal} target="_blank" rel="noreferrer" className="acao cheia">Ver no canal <IcSeta /></a>
-              : <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao cheia">Acompanhar no Instagram <IcSeta /></a>}
-            <Link href="/cultos" className="acao">Ver o domingo ao vivo</Link>
-          </div>
-        </div>
-      </section>
+      <Cabecalho criativo="tv" rot="GUIA Church TV" titulo="A mensagem de domingo"
+        ed={canal ? 'Para ver de novo.' : `Toda semana, em ${IGREJA.instagramArroba}.`}
+        acoes={<>
+          {canal
+            ? <a href={canal} target="_blank" rel="noreferrer" className="acao cheia">Ver no canal <IcSeta /></a>
+            : <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="acao cheia">Acompanhar no Instagram <IcSeta /></a>}
+          <Link href="/cultos" className="g-link claro">Ver o domingo ao vivo</Link>
+        </>} />
+      {/* o domingo, para quem chegou aqui procurando a mensagem: a página não
+          fica só no cabeçalho (v3, 08/09/2026) */}
+      <Fecho rot="Ao vivo" titulo="Domingo, 10h, na Barra da Tijuca."
+        acoes={<>
+          <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+          <Link href="/como-chegar" className="g-link claro">Como chegar</Link>
+        </>} />
     </Site>
   );
 }

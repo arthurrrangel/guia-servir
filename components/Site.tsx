@@ -244,19 +244,34 @@ export function Rodape() {
 /* açúcar: barra + conteúdo + rodapé, que é o formato de toda página pública
    nova. A `main` fica fora do casco de propósito — cada página escolhe as
    próprias faixas, e faixa precisa sangrar de ponta a ponta. */
-export function Site({ atual, children }: { atual?: string; children: React.ReactNode }) {
+export function Site({ atual, escuro, children }: { atual?: string; escuro?: boolean; children: React.ReactNode }) {
+  /* `escuro` (v3, 08/09/2026): a página abre com o cabeçalho escuro da casa
+     (components/Pagina.tsx), e a barra nasce transparente sobre ele, como na
+     home, e fica opaca pela rolagem — pelo compositor onde há
+     animation-timeline, e por este estado onde não há. O `main` deixa de
+     reservar a altura da barra: o cabeçalho já a reserva por dentro. */
+  const [solida, setSolida] = useState(!escuro);
+  useEffect(() => {
+    if (!escuro) return;
+    let pedindo = false;
+    const medir = () => { pedindo = false; setSolida(window.scrollY > window.innerHeight * 0.5); };
+    const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(medir); } };
+    medir();
+    window.addEventListener('scroll', aoRolar, { passive: true });
+    return () => window.removeEventListener('scroll', aoRolar);
+  }, [escuro]);
   return (
     <div data-movimento>
       {/* o primeiro item focável da página. Quem navega por teclado pula a
           barra inteira com um Tab e um Enter. Invisível até receber foco. */}
       <a href="#conteudo" className="pular">Pular para o conteúdo</a>
       <Movimento />
-      <Barra atual={atual} />
+      <Barra atual={atual} inicio={escuro} solida={solida} />
       {/* a regra global de `main` é do app interno: largura travada em 1180 e
           padding lateral. Aqui as faixas precisam sangrar de ponta a ponta,
           então a regra é desfeita nesta instância — não no CSS, que continua
           valendo para todas as telas do sistema. */}
-      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 'var(--barra-alt) 0 0' }}>{children}</main>
+      <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: escuro ? 0 : 'var(--barra-alt) 0 0' }}>{children}</main>
       <Rodape />
     </div>
   );

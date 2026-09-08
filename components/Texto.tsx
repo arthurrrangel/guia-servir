@@ -15,11 +15,11 @@
    de apagar a cópia de lá e importar daqui.
    ============================================================================= */
 
-export function Tit({ children, className = 'tit', as: Tag = 'h2' }:
-  { children: string; className?: string; as?: 'h1' | 'h2' | 'h3' }) {
+export function Tit({ children, className = 'tit', as: Tag = 'h2', id }:
+  { children: string; className?: string; as?: 'h1' | 'h2' | 'h3'; id?: string }) {
   const pals = children.split(' ');
   return (
-    <Tag className={className}>
+    <Tag className={className} id={id}>
       {pals.map((p, i) => (
         /* o espaço fica FORA do span, como nó de texto entre eles. Dentro, o
            navegador descarta o espaço final de um inline-block e as palavras

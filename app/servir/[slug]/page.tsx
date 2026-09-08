@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
+import { Cabecalho, Fecho } from '@/components/Pagina';
 import { Tit } from '@/components/Texto';
-import { Carregando, Vazio, linkZap } from '@/components/Tela';
-import { fotoDaArea, focoDaArea } from '@/lib/fotos';
+import { Carregando, linkZap } from '@/components/Tela';
 
 /* =============================================================================
    /servir/[slug] — A ÁREA
@@ -29,9 +29,10 @@ import { fotoDaArea, focoDaArea } from '@/lib/fotos';
    O CASCO (05/09/2026): a pessoa vinha de /servir, que já falava a língua do
    site, e caía aqui numa tela do sistema interno: outra barra, outro tipo,
    tudo à esquerda. Era o "fora do lugar" mais visível do funil. Agora a área
-   usa a mesma gramática das outras páginas públicas: herói centrado com a
-   foto da área, as funções em cartões, os quatro passos, quem responde, e o
-   fecho com o convite. A lógica de dados não mudou uma linha.
+   usa a mesma gramática das outras páginas públicas: o cabeçalho da casa
+   (v3: o criativo `area-<slug>`, quando existir, em vez da foto da área), as
+   funções em cartões, os quatro passos, quem responde, e o fecho com o
+   convite. A lógica de dados não mudou uma linha.
    ============================================================================= */
 
 type Min = {
@@ -95,35 +96,22 @@ export default function Area() {
     return [...m.entries()];
   })();
 
-  /* A FOTO NÃO ESPERA O BANCO. Ela vem do slug, então o herói já nasce com
-     a imagem certa enquanto o nome e as funções chegam. Quem abre a página
-     vê a área, não uma tela em branco com um pulso. */
-  const foto = fotoDaArea(slug);
-  const foco = focoDaArea(slug);
+  /* O CRIATIVO NÃO ESPERA O BANCO: vem do slug, então o cabeçalho já nasce
+     com o painel certo enquanto o nome e as funções chegam. */
+  const criativo = `area-${slug}` as const;
 
   if (fase !== 'pronto' || !min) return (
-    <Site atual="/servir">
-      <section className="g-cheio alta centro rev">
-        <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
-        <div className="g">
-          <p className="g-rot">Servir</p>
-          {fase === 'carregando'
-            ? <Carregando o="Carregando a área" />
-            : (
-              <>
-                <Tit as="h1" className="g-h1">{fase === 'erro' ? 'Área não encontrada' : 'Sem conexão agora'}</Tit>
-                <p className="g-ed menor">
-                  {fase === 'erro'
-                    ? 'O link pode estar errado. Volte e escolha uma das áreas da lista.'
-                    : 'Atualize a página. O endereço continua valendo.'}
-                </p>
-                <div className="g-acoes">
-                  <Link href="/servir" className="acao cheia">Ver as áreas <IcSeta /></Link>
-                </div>
-              </>
-            )}
-        </div>
-      </section>
+    <Site atual="/servir" escuro>
+      {fase === 'carregando'
+        ? <Cabecalho criativo={criativo} rot="Servir" titulo="" semTitulo><Carregando o="Carregando a área" /></Cabecalho>
+        : (
+          <Cabecalho criativo={criativo} rot="Servir"
+            titulo={fase === 'erro' ? 'Área não encontrada' : 'Sem conexão agora'}
+            ed={fase === 'erro'
+              ? 'O link pode estar errado. Volte e escolha uma das áreas da lista.'
+              : 'Atualize a página. O endereço continua valendo.'}
+            acoes={<Link href="/servir" className="acao cheia">Ver as áreas <IcSeta /></Link>} />
+        )}
     </Site>
   );
 
@@ -132,20 +120,13 @@ export default function Area() {
   const iniciais = (min.responsavel || '').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
 
   return (
-    <Site atual="/servir">
+    <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
-        <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
-        <div className="g">
-          <p className="g-rot">Servir</p>
-          <Tit as="h1" className="g-h1">{min.nome}</Tit>
-          {min.descricao && <p className="g-ed menor">{min.descricao}</p>}
-          <div className="g-acoes">
-            <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
-            <Link href="/servir" className="acao">Ver todas as áreas</Link>
-          </div>
-        </div>
-      </section>
+      <Cabecalho criativo={criativo} rot="Servir" titulo={min.nome} ed={min.descricao || undefined}
+        acoes={<>
+          <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
+          <Link href="/servir" className="g-link claro">Ver todas as áreas</Link>
+        </>} />
 
       {/* ------------------------------------------------------- as funções */}
       <section className="casa-papel rev">
@@ -178,7 +159,7 @@ export default function Area() {
       </section>
 
       {/* ----------------------------------------------------- como funciona */}
-      <section className="casa-escuro retic rev">
+      <section className="casa-escuro rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
@@ -219,21 +200,12 @@ export default function Area() {
       )}
 
       {/* ------------------------------------------------------------- fecho */}
-      <section className="g-cheio centro fecho rev">
-        <img src="/fotos/palco.webp" alt="" loading="lazy" decoding="async" />
-        <div className="g">
-          <p className="g-rot">O convite</p>
-          <Tit className="g-h2">Existe um lugar para você aqui.</Tit>
-          {min.convite && <p className="g-ed menor">{min.convite}</p>}
-          <div className="g-acoes">
-            <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
-            <Link href="/eu" className="acao">Já sirvo aqui</Link>
-          </div>
-          {!min.aberto && (
-            <p className="g-nota">Essa área conversa com cada pessoa antes de escalar. Você preenche o cadastro e a liderança fala com você.</p>
-          )}
-        </div>
-      </section>
+      <Fecho rot="O convite" titulo="Existe um lugar para você aqui." ed={min.convite || undefined}
+        acoes={<>
+          <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
+          <Link href="/eu" className="g-link claro">Já sirvo aqui</Link>
+        </>}
+        nota={!min.aberto ? 'Essa área conversa com cada pessoa antes de escalar. Você preenche o cadastro e a liderança fala com você.' : undefined} />
     </Site>
   );
 }

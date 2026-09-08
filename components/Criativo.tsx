@@ -1,4 +1,4 @@
-import { CRIATIVOS, razao, type IdCriativo } from '@/lib/criativos';
+import { criativo, razao, type IdCriativo } from '@/lib/criativos';
 import { Chevron } from './Marca';
 
 /* =============================================================================
@@ -24,7 +24,7 @@ type Props = {
 };
 
 export function Criativo({ id, fundo, className = '', prioridade }: Props) {
-  const c = CRIATIVOS[id];
+  const c = criativo(id);
   const dev = process.env.NODE_ENV === 'development';
   const classe = `cria ${fundo ? 'cria-fundo' : 'cria-bloco'} ${c.arquivo ? 'com' : 'vazio'} ${className}`.trim();
 

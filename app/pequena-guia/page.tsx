@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
+import { Cabecalho, Fecho } from '@/components/Pagina';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
@@ -37,7 +38,7 @@ export default function PequenaGuia() {
   const presenciais = PEQUENAS_GUIAS.filter(p => !p.online).length;
   const online = PEQUENAS_GUIAS.length - presenciais;
   return (
-    <Site atual="/pequena-guia">
+    <Site atual="/pequena-guia" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`,
         isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE },
@@ -46,18 +47,12 @@ export default function PequenaGuia() {
       }} />
 
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
-        <img src="/fotos/acolhida.webp" alt="Pessoas da GUIA Church se cumprimentando" fetchPriority="high" />
-        <div className="g">
-          <p className="g-rot">Durante a semana</p>
-          <Tit as="h1" className="g-h1">Pequena Guia</Tit>
-          <p className="g-ed">Uma hora por semana, perto de você.</p>
-          <div className="g-acoes">
-            <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">Quero participar <IcSeta /></a>
-            <Link href="/cultos" className="acao">Prefiro começar pelo domingo</Link>
-          </div>
-        </div>
-      </section>
+      <Cabecalho criativo="grupos" rot="Durante a semana" titulo="Pequena Guia"
+        ed="Uma hora por semana, perto de você."
+        acoes={<>
+          <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">Quero participar <IcSeta /></a>
+          <Link href="/cultos" className="g-link claro">Prefiro começar pelo domingo</Link>
+        </>} />
 
       {/* --------------------------------------------------- onde elas acontecem */}
       <section className="casa-papel rev">
@@ -93,16 +88,8 @@ export default function PequenaGuia() {
       </section>
 
       {/* ------------------------------------------------------------ a conversa */}
-      <section className="g-cheio centro fecho rev">
-        <img src="/fotos/congregacao.webp" alt="" loading="lazy" decoding="async" />
-        <div className="g">
-          <p className="g-rot">Achar o seu</p>
-          <Tit className="g-h2">Diga onde você mora. A gente diz qual fica perto.</Tit>
-          <div className="g-acoes">
-            <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">{CONVITE.rot} <IcSeta /></a>
-          </div>
-        </div>
-      </section>
+      <Fecho rot="Achar o seu" titulo="Diga onde você mora. A gente diz qual fica perto."
+        acoes={<a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">{CONVITE.rot} <IcSeta /></a>} />
     </Site>
   );
 }
