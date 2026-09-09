@@ -16,11 +16,12 @@ import { IcBusca, IcSeta } from '@/components/Icones';
 
 const K_TOKEN = 'escala.meu-token';
 
-/* `desempate` (migração 42): o SOBRENOME, preenchido pelo banco só para quem
-   tem homônimo DENTRO da equipe. Vem indefinido enquanto a migração não roda,
-   e aí a lista se comporta como antes. */
+/* `nome_completo` (migração 42): o nome inteiro, como a pessoa se cadastrou,
+   de TODO MUNDO da lista. Vem indefinido enquanto a migração não roda, e aí a
+   lista mostra o primeiro nome, como antes. `primeiro_nome` continua existindo
+   porque é ele que abre a saudação depois do PIN. */
 type Pessoa = {
-  voluntario_id: string; primeiro_nome: string; desempate?: string | null;
+  voluntario_id: string; primeiro_nome: string; nome_completo?: string | null;
   tem_pin: boolean; tem_tel: boolean;
   /* preenchido só quando o primeiro nome se repete na equipe: as OUTRAS
      funções desta pessoa, que é o que a diferencia da homônima */
@@ -48,11 +49,11 @@ const emFrase = (s: string) => {
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
 /* A dica que separa duas pessoas de mesmo nome, em no máximo duas funções.
-   Ela é a REDE, não o cinto: quando a migração 42 rodar e o `desempate` (o
-   sobrenome) chegar, ele já resolve sozinho e a dica sai de cena. Dois
-   diferenciadores na mesma linha seriam ruído permanente. */
+   Ela é a REDE, não o cinto: quando a migração 42 rodar e o nome inteiro
+   chegar, ele resolve sozinho e a dica sai de cena. Dois diferenciadores na
+   mesma linha seriam ruído permanente. */
 const dicaDe = (p: Pessoa) => {
-  if (p.desempate) return null;
+  if (p.nome_completo) return null;
   const f = p.outrasFuncoes;
   if (!f) return null;
   if (!f.length) return 'só nesta função';
@@ -60,13 +61,15 @@ const dicaDe = (p: Pessoa) => {
   return f.length > 2 ? `também em ${mostra} +${f.length - 2}` : `também em ${mostra}`;
 };
 
-/* O NOME QUE APARECE NA LISTA — 09/09/2026, pedido da Joice.
+/* O NOME QUE APARECE NA LISTA — 09/09/2026, pedido da Joice e decisão do Arthur.
    A Connect tem dois CLAUDIO e duas LUCIENE; a Mídia, duas MARIA; o Louvor,
    dois JOÃO. A lista mostrava só o primeiro nome, então as linhas ficavam
    idênticas e ninguém sabia qual era a sua. Tocar na errada nunca abriu o
    espaço de outra pessoa (o PIN exige os 4 últimos dígitos do telefone dela),
-   mas a pessoa tentava, não entrava e concluía que o sistema estava quebrado. */
-const nomeNaLista = (p: Pessoa) => p.desempate ? `${p.primeiro_nome} ${p.desempate}` : p.primeiro_nome;
+   mas a pessoa tentava, não entrava e concluía que o sistema estava quebrado.
+   A lista passa a mostrar o nome inteiro de TODO MUNDO — não só de quem tem
+   homônimo, o que criaria uma lista de duas classes. */
+const nomeNaLista = (p: Pessoa) => p.nome_completo || p.primeiro_nome;
 type Linha = Pessoa & { area: string; ordem: number; nivel: string };
 
 /* buscar por "jo" tem que achar "João": tira acento e caixa dos dois lados */
@@ -191,7 +194,7 @@ export default function EntradaEquipe() {
     const linhasTime = (time.data || []) as Linha[];
 
     /* O DESEMPATE QUE NÃO ESPERA O BANCO — 09/09/2026.
-       A migração 42 acrescenta o sobrenome, mas enquanto ela não roda a lista
+       A migração 42 traz o nome inteiro, mas enquanto ela não roda a lista
        fica com dois CLAUDIO idênticos. O dado que separa os dois
        JÁ ESTÁ nesta resposta: cada pessoa vem com o conjunto de funções que
        marcou, e os dois Cláudios da Connect não marcaram as mesmas. "também na
@@ -238,7 +241,7 @@ export default function EntradaEquipe() {
             .sort((x, y) => Number(doOutro.has(x)) - Number(doOutro.has(y)))
         : [];
       arr.push({
-        voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, desempate: l.desempate,
+        voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, nome_completo: l.nome_completo,
         tem_pin: l.tem_pin, tem_tel: l.tem_tel,
         outrasFuncoes: repetido ? outras : undefined,
       });
@@ -446,8 +449,9 @@ export default function EntradaEquipe() {
     </div></div></div>
   );
 
-  /* na confirmação o desempate volta a aparecer: é o instante exato em que a
-     pessoa precisa ter certeza de que escolheu a linha dela */
+  /* a saudação usa o primeiro nome ("Oi, Cláudio"), mas a CONFIRMAÇÃO usa o
+     nome inteiro: é o instante exato em que a pessoa precisa ter certeza de
+     que escolheu a linha dela */
   const titulo = fase === 'pin' ? `Oi, ${alvo?.primeiro_nome}`
     : fase === 'criar' ? `É você, ${alvo ? nomeNaLista(alvo) : ''}?`
     : fase === 'cadastro' ? 'Entrar no time'
