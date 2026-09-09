@@ -417,7 +417,7 @@ export default function EntradaEquipe() {
        devolve token — a pessoa está cadastrada, mas ainda não está no time.
        Mandar ela para /eu/<token> aqui seria mentir sobre o próprio estado. */
     if (res.pendente) {
-      setEnviadoPor((res.nome || '').split(' ')[0] || '');
+      setEnviadoPor((res.nome || '').trim() || '');
       setOcupado(false); setFase('enviado'); window.scrollTo(0, 0); return;
     }
     if (!res.token) {
@@ -452,7 +452,7 @@ export default function EntradaEquipe() {
   /* a saudação usa o primeiro nome ("Oi, Cláudio"), mas a CONFIRMAÇÃO usa o
      nome inteiro: é o instante exato em que a pessoa precisa ter certeza de
      que escolheu a linha dela */
-  const titulo = fase === 'pin' ? `Oi, ${alvo?.primeiro_nome}`
+  const titulo = fase === 'pin' ? `Oi, ${alvo ? nomeNaLista(alvo) : ''}`
     : fase === 'criar' ? `É você, ${alvo ? nomeNaLista(alvo) : ''}?`
     : fase === 'cadastro' ? 'Entrar no time'
     : fase === 'enviado' ? (enviadoPor ? `Recebido, ${enviadoPor}` : 'Recebido')
