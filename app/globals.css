@@ -112,6 +112,10 @@
      diferencia "isto é um lugar" de "isto é um sinal". */
   --r:0px; --r-sm:0px; --r-lg:0px; --r-pill:0px;
   --sombra:none;
+  /* V4 (08/09/2026): a camada de produto. Botão 10px, cartão 16px, foto 20px,
+     sombra só no hover. Vale para o site e para o sistema. */
+  --r4:10px; --r4-card:16px; --r4-foto:20px;
+  --sombra4:0 10px 30px -12px rgba(37,37,37,.22); --sombra4-forte:0 18px 44px -16px rgba(37,37,37,.32);
 
   /* UMA CURVA SÓ, E CURTA. Movimento nesta identidade é confirmação de que a
      interface respondeu, não espetáculo: 140ms com saída rápida. */
@@ -119,50 +123,33 @@
   --t:140ms var(--ease);                         /* interação — hover, pressão, troca de estado */
   --t-lento:520ms var(--ease);                   /* revelação ao rolar */
   --largura:1180px;
-  /* A MARCA PRIMEIRO, E ATRÁS DELA SÓ O SISTEMA.
-     "PP Neue Montreal" chega pelo @font-face que scripts/fontes.mjs gera no
-     build a partir da origem privada (o arquivo é licenciado e não pode
-     morar num repositório público). Se não tiver chegado, a pessoa vê a
-     grotesca do próprio aparelho — Helvetica Neue no iPhone, Roboto no
-     Android — e NENHUMA outra família é baixada. Decisão do Arthur: nada de
-     substituta; ou a fonte da marca, ou a do sistema. */
-  --fonte:"PP Neue Montreal",-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,Roboto,Arial,sans-serif;
+  /* UMA FAMÍLIA SÓ, SERVIDA DAQUI — 08/09/2026.
+     Até hoje o CSS pedia "PP Neue Montreal" e caía na fonte do aparelho,
+     porque os .woff2 licenciados nunca foram configurados na Vercel (o
+     marca.css servido em produção estava vazio, medido). O site tinha três
+     caras: San Francisco no Mac, Arial no Windows, Roboto no Android. O
+     Arthur viu a /eu no Mac, gostou, e pediu "essa identidade em todo site
+     e sistema". A única forma de entregar a mesma cara em todo aparelho é
+     servir a fonte: Inter, aberta (SIL OFL, licença em public/tipos/), já
+     no repositório, desenhada para tela e para parecer a fonte do Mac. O
+     sistema usava Inter + Raleway; agora é Inter em tudo, e a hierarquia é
+     PESO e TAMANHO, não família. */
+  --fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
 }
 
 /* ============================================================================
-   A TIPOGRAFIA DO SISTEMA — e por que ela é diferente da do site
+   A FONTE — Inter, variável (wght 100–900), 48kB, servida do próprio domínio
 
-   MEDIDO EM PRODUÇÃO (05/09/2026): o CSS servido em guiaservir.com tinha ZERO
-   @font-face. Nenhum. `--fonte` pedia "PP Neue Montreal" e o navegador caía na
-   pilha do aparelho: Arial no Windows, San Francisco no Mac, Roboto no Android.
-   E `--fonte-display` era `var(--fonte)`, então título e corpo eram a MESMA
-   coisa — a área do gestor chamava `--fonte-display` em 18 lugares que não
-   faziam nada.
+   Um arquivo, todas as telas: home, /cultos, /servir, o painel do líder, o
+   espaço do voluntário. Quem abre /escala às sete da manhã de domingo lê a
+   mesma letra que o visitante da home leu no sábado. Não depende de licença
+   comprada nem de variável de ambiente, e não muda de aparelho para aparelho.
 
-   A causa: scripts/fontes.mjs baixa os .woff2 licenciados de uma origem privada
-   durante o build, lendo FONTES_ORIGEM e FONTES_TOKEN do painel da Vercel. As
-   duas variáveis nunca foram configuradas. O script foi escrito para NÃO
-   quebrar o build quando faltam (a decisão está certa: igreja sem site por
-   causa de tipografia é o custo errado) — então ele escreve um CSS vazio e o
-   defeito nunca aparece no build, só na tela.
-
-   Essa regra continua valendo PARA O SITE: ou a fonte da marca, ou a do
-   aparelho, nunca uma substituta. Site é marca.
-
-   Mas o sistema não é marca, é FERRAMENTA. Quem abre /escala às sete da manhã
-   de domingo precisa que a tela esteja igual à de ontem, no Windows da igreja e
-   no celular, sem depender de licença comprada nem de variável de ambiente. Por
-   isso a área do gestor tem tipografia PRÓPRIA, servida do próprio domínio,
-   com fonte aberta (SIL OFL, licença junto em public/tipos/):
-
-   · Inter    — corpo e interface. Desenhada para tela, altura-x alta, números
-                tabulares. É o que se lê numa escala.
-   · Raleway  — título e rótulo. É a que o produto usava antes de o manual
-                chegar, e devolve o CONTRASTE que se perdeu quando display e
-                corpo viraram a mesma família.
-
-   Variáveis (wght 100–900) em um arquivo cada: 48kB, e só baixa em tela de
-   gestor, porque nenhuma regra fora de .sistema pede essas famílias.
+   Histórico, para quem chegar depois: o manual da marca pede PP Neue
+   Montreal e PP Editorial New (licenciadas, não podem morar num repositório
+   público); o mecanismo que as buscaria no build (scripts/fontes.mjs,
+   FONTES_ORIGEM / FONTES_TOKEN) nunca foi configurado e foi aposentado em
+   08/09/2026 junto com a Raleway do sistema. Ver o commit desse dia.
    ========================================================================== */
 @font-face{
   font-family:"Inter";
@@ -171,40 +158,6 @@
   font-display:swap;
   src:url(/tipos/inter.woff2) format("woff2");
 }
-@font-face{
-  font-family:"Raleway";
-  font-style:normal;
-  font-weight:100 900;
-  font-display:swap;
-  src:url(/tipos/raleway.woff2) format("woff2");
-}
-/* O casco inteiro do gestor: barra do topo, abas, conteúdo, barra de baixo.
-   Trocar só `--fonte` não bastava — `body` resolve `font:… var(--fonte)` lá em
-   cima, onde a variável ainda é a do site, e o filho herda o VALOR já
-   calculado, não a variável. Por isso o font-family explícito aqui. */
-/* Os quatro cascos do SISTEMA, e por que são estes quatro:
-     .sistema   o casco do gestor (Shell): topo, abas, conteúdo, barra de baixo
-     .lid       /entrar — não passa pelo Shell, e seria a única tela do fluxo
-                do gestor falando outra fonte
-     .vol       /eu/<token> — o espaço do voluntário: onde ele vê seus dias,
-                confirma presença e avisa que não pode
-     .eu-fundo  /equipe/<slug> — a lista onde a pessoa acha o próprio nome
-
-   Os dois últimos entram porque ferramenta é ferramenta dos dois lados. O
-   voluntário abre a dele no celular, no domingo de manhã, e não tem por que
-   ler uma fonte diferente da que o líder está vendo na mesma escala.
-
-   O que fica de fora, de propósito: tudo que é SITE — home, /sobre, /cultos,
-   /servir, /pequena-guia. Lá a regra continua sendo a do manual: ou a fonte da
-   marca, ou a do aparelho. Site é marca; sistema é trabalho. */
-.sistema,
-.lid,
-.vol,
-.eu-fundo{
-  --fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-  --fonte-display:"Raleway",var(--fonte);
-  font-family:var(--fonte);
-}
 
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;background:var(--bg)}
@@ -212,7 +165,6 @@ html,body{padding:0;margin:0}
 body{
   background:var(--bg);color:var(--ink);
   font:17px/1.6 var(--fonte);
-  font-feature-settings:"cv05" 1,"cv11" 1,"ss03" 1,"tnum" 0;
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;
   /* 100vh no iPhone conta a barra do Safari que some ao rolar: a página
      nasce mais alta que o visível e o rodapé fica atrás do navegador.
@@ -408,27 +360,16 @@ main{max-width:var(--largura);margin:0 auto;padding:var(--e5) var(--e4) 104px}
 .linha{display:flex;align-items:center;gap:var(--e2);flex-wrap:wrap}
 
 /* --------------------------------------------------------------- botões --- */
-/* A VOZ DO BOTÃO.
-   A medição achou VINTE E SETE aparências de botão em catorze telas, e em
-   duas tipografias. A passada de identidade converteu os botões da casca do
-   líder (.lid-bt) para a voz da marca — display, caixa alta, tracking largo —
-   e esta regra base, que pega todo o resto do produto, continuou dizendo
-   `font:inherit` e `letter-spacing:-.008em`. Ou seja: metade dos botões
-   falava Raleway e a outra metade Inter, dependendo de qual tela.
-
-   A regra, agora, cabe numa frase:
-
-       COMANDO FALA NA VOZ DA MARCA. ESCOLHA FALA NA VOZ DO CONTEÚDO.
-
-   Apertar "COPIAR A ESCALA" é dar uma ordem, e ordem é curta e é da marca.
-   Ler "Dois por mês" e marcar é responder uma pergunta — isso é conteúdo, e
-   conteúdo continua em Inter, em caixa normal, logo abaixo. As exceções
-   estão listadas no bloco seguinte, e cada uma é uma escolha, não um
-   comando. */
+/* A VOZ DO BOTÃO — 08/09/2026: UMA SÓ, NO SITE E NO SISTEMA.
+   Era caixa alta espaçada de 12px ("COPIAR A ESCALA") no sistema e caixa
+   baixa de 15px ("Quero conhecer") no site: dois produtos. A identidade que
+   o Arthur escolheu é a do site: caixa baixa, 15px, peso 600, canto de 10px.
+   O rótulo em caixa alta continua existindo, mas para rótulo (.rot, aba,
+   nome numa linha), nunca para comando. */
 button,.btn{
-  font-family:var(--fonte-display);font-weight:var(--p-forte);
-  font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;
-  border-radius:var(--r-pill);border:1px solid var(--linha2);
+  font-family:var(--fonte-display);font-weight:600;
+  font-size:15px;letter-spacing:-.005em;text-transform:none;
+  border-radius:var(--r4);border:1px solid var(--linha2);
   background:transparent;color:var(--ink);
   padding:var(--e3) var(--e5);cursor:pointer;display:inline-flex;align-items:center;
   gap:var(--e2);justify-content:center;min-height:var(--toque);
@@ -487,7 +428,7 @@ button.perigo:focus-visible{
 .lid-bt-txt.perigo:active,
 .lid-bt-txt.perigo:focus-visible{ color:var(--bad) }
 /* "mini" a 14px, contra 12px do botão normal: o pequeno era o maior. */
-button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:var(--t-min);min-height:var(--toque);border-radius:var(--r-pill)}
+button.mini,.btn.mini{padding:var(--e2) var(--e4);font-size:14px;min-height:var(--toque);border-radius:var(--r4)}
 button.mini svg,.btn.mini svg{width:var(--i-min);height:var(--i-min)}
 
 
@@ -662,9 +603,12 @@ select option{background:#fff;color:var(--ink)}
 
 
 /* botão "claro" é o nome antigo da ação principal; mantém funcionando */
-.claro,.btn.claro{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:var(--p-forte)}
-.claro:hover,
-.claro:active,
+/* `.claro` sozinho pegava QUALQUER elemento com a classe — inclusive o
+   `.g-link.claro` do site (o link branco sobre foto), que ganhava um bloco
+   preto atrás do texto. Visto na home em 08/09/2026. Agora só botão. */
+button.claro,.btn.claro{background:var(--preto);color:#fff;border-color:var(--preto);font-weight:var(--p-forte)}
+button.claro:hover,
+button.claro:active,
 .btn.claro:hover,
 .btn.claro:active{background:var(--preto-toque);border-color:var(--preto-toque)}
 
@@ -686,15 +630,15 @@ select option{background:#fff;color:var(--ink)}
 .hero .anel-texto .n{color:#fff}
 .hero .anel .fundo{stroke:rgba(255,255,255,.16)}
 /* no preto a ação principal inverte de novo: vira branca */
-.hero .pri,.hero .btn.pri,.hero .claro,.hero .btn.claro{
+.hero .pri,.hero .btn.pri,.hero button.claro,.hero .btn.claro{
   background:#fff;color:var(--preto);border-color:#fff;
 }
 .hero .pri:hover,
 .hero .pri:active,
 .hero .btn.pri:hover,
 .hero .btn.pri:active,
-.hero .claro:hover,
-.hero .claro:active,
+.hero button.claro:hover,
+.hero button.claro:active,
 .hero .btn.claro:hover,
 .hero .btn.claro:active{
   background:#e6e6e9;border-color:#e6e6e9;
@@ -822,9 +766,9 @@ select option{background:#fff;color:var(--ink)}
    parecia vir de outro produto. E não era nem um heading: era um <div>, o
    que também deixava a tela sem título para quem usa leitor de tela. */
 .eu-titulo{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-faixa); letter-spacing:-.01em;
-  margin-top:var(--e2); line-height:1.15; text-wrap:balance;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-faixa); letter-spacing:-.03em;
+  margin-top:var(--e2); line-height:1.08; text-wrap:balance;
 }
 .eu-sub{color:var(--ink2);margin:var(--e3) 0 0;font-size:var(--t-ui);line-height:1.65}
 .eu{max-width:620px;margin:0 auto;padding:var(--e5) var(--e5) 120px}
@@ -1350,8 +1294,8 @@ details > summary::marker{content:""}
    cinza sobre branco — o campo aparecia como uma caixa apagada, não como um
    lugar onde se escreve. */
 .wiz-corpo h2{
-  margin:0 0 var(--e1);font-family:var(--fonte-display);font-weight:var(--p-leve);
-  font-size:var(--d-faixa);line-height:1.15;letter-spacing:-.01em;text-wrap:balance;
+  margin:0 0 var(--e1);font-family:var(--fonte-display);font-weight:700;
+  font-size:var(--d-faixa);line-height:1.08;letter-spacing:-.03em;text-wrap:balance;
 }
 .wiz-corpo label{
   display:block;margin:var(--e5) 0 var(--e2);
@@ -1581,13 +1525,11 @@ details > summary::marker{content:""}
   --cinza:#5f5f5f;          /* corpo de texto: 6,4:1 no papel do manual */
   --cinza-cl:rgba(255,255,255,.72);
 
-  /* display e corpo são a MESMA família na marca: PP Neue Montreal, Bold para
-     título e Book para texto. O peso faz a hierarquia, não a família. */
+  /* display e corpo são a MESMA família: Inter. O peso faz a hierarquia,
+     não a família. A serifa itálica do manual (PP Editorial New) saiu em
+     08/09/2026: a linha de apoio virou texto regular em cinza, igual à da
+     /eu que o Arthur escolheu como referência. */
   --fonte-display:var(--fonte);
-  /* a serifa editorial do manual, para frase de respiro — nunca texto
-     corrido. Fallback do sistema: a serifa alta em contraste que o aparelho
-     tiver (Didot no iPhone é surpreendentemente próxima). */
-  --fonte-editorial:"PP Editorial New","Didot","Bodoni 72","Iowan Old Style",Georgia,serif;
 }
 
 /* SOBRE OCUPAR A LARGURA INTEIRA
@@ -1870,8 +1812,8 @@ html,body{overflow-x:clip}
 .casa-area:active::after{background:linear-gradient(180deg,rgba(7,7,8,.34) 0%,rgba(7,7,8,.52) 50%,rgba(7,7,8,.84) 100%)}
 .casa-area:focus-visible{outline-color:#fff;outline-offset:-3px}
 .casa-area-nome{
-  font-family:var(--fonte-display);font-weight:var(--p-leve);color:#fff;
-  font-size:var(--d-bloco);letter-spacing:var(--tr);text-transform:uppercase;
+  font-family:var(--fonte-display);font-weight:700;color:#fff;
+  font-size:var(--d-bloco);letter-spacing:-.02em;
 }
 .casa-area-desc{
   margin:20px auto 0;max-width:34ch;color:rgba(255,255,255,.74);
@@ -1992,9 +1934,9 @@ html,body{overflow-x:clip}
 .porta-hero::after{content:"";position:absolute;inset:0;z-index:-1;background:rgba(7,7,8,.62)}
 .porta-hero-in{position:relative;padding:110px var(--e5) var(--e7);max-width:800px;margin:0 auto}
 .porta-hero h1{
-  font-family:var(--fonte-display);font-weight:var(--p-leve);
-  font-size:var(--d-faixa);line-height:1.15;letter-spacing:.16em;
-  text-transform:uppercase;margin:0;text-wrap:balance;
+  font-family:var(--fonte-display);font-weight:700;
+  font-size:var(--d-faixa);line-height:1.08;letter-spacing:-.03em;
+  margin:0;text-wrap:balance;
 }
 .porta-hero-min h1{font-size:var(--d-secao);letter-spacing:.12em}
 .porta-hero-sub{
@@ -2340,7 +2282,7 @@ body:has(.porta) { background:var(--papel) }
 
      Cinco pesos, cada um com um trabalho. Se um peça novo não couber em
      nenhum destes, o problema é a peça, não a escala. */
-  --p-leve:200;      /* display grande: título, hero */
+  --p-leve:300;      /* número grande e display leve (Inter 200 é fio de cabelo) */
   --p-corpo:400;     /* leitura */
   --p-rot:500;       /* rótulo, aba, item de lista */
   --p-forte:600;     /* rótulo forte, botão, chapéu */
@@ -2453,11 +2395,11 @@ body:has(.porta) { background:var(--papel) }
 .cabeca{max-width:720px;margin:0 auto var(--e8);text-align:center}
 .cabeca .rot{margin-bottom:var(--e5)}
 .cabeca h1{
-  font-family:var(--fonte-display);font-weight:var(--p-leve);
-  font-size:var(--d-faixa);line-height:1.15;letter-spacing:.16em;
-  text-transform:uppercase;margin:0;text-wrap:balance;
+  font-family:var(--fonte-display);font-weight:700;
+  font-size:var(--d-faixa);line-height:1.04;letter-spacing:-.03em;
+  margin:0;text-wrap:balance;
 }
-.cabeca h1.menor{font-size:var(--d-secao);letter-spacing:.14em}
+.cabeca h1.menor{font-size:var(--d-secao);letter-spacing:-.02em}
 .cabeca p{
   margin:var(--e5) auto 0;max-width:52ch;
   font-size:var(--t-corpo);line-height:1.65;color:var(--cinza);
@@ -2736,7 +2678,7 @@ body:has(.porta) { background:var(--papel) }
    porque o seletor não era `button,.btn` e o meu grep procurava por esse.
    Duas regras para a mesma peça é como a inconsistência entra sem ninguém
    decidir nada. */
-.btn{ border-radius:0 }
+.btn{ border-radius:var(--r4) }
 
 /* --- MEDIDA DE LEITURA: linhas de 81ch ---------------------------------
    Acima de ~70 caracteres o olho perde o começo da linha seguinte. Vale para
@@ -2825,9 +2767,9 @@ body:has(.porta) { background:var(--papel) }
 .wiz-cabeca{padding:96px 0 var(--e1);text-align:left}
 @media(min-width:900px){ .wiz-cabeca{padding-top:128px} }
 .wiz-cabeca h1{
-  font-family:var(--fonte-display);font-weight:var(--p-leve);
-  font-size:var(--d-secao);line-height:1.15;letter-spacing:.12em;
-  text-transform:uppercase;margin:var(--e4) 0 0;
+  font-family:var(--fonte-display);font-weight:700;
+  font-size:var(--d-secao);line-height:1.08;letter-spacing:-.03em;
+  margin:var(--e4) 0 0;
 }
 .wiz-cabeca-sub{
   margin:var(--e3) 0 0;max-width:var(--medida);
@@ -2839,8 +2781,8 @@ body:has(.porta) { background:var(--papel) }
 .entrada-marca{ margin-bottom:var(--e7); padding-bottom:var(--e6); border-bottom:1px solid var(--noite) }
 .entrada-logo{ height:18px; margin:0 0 var(--e6) }
 .entrada-titulo{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-secao); line-height:1.15; letter-spacing:-.01em; margin:var(--e1) 0 0;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-secao); line-height:1.08; letter-spacing:-.03em; margin:var(--e1) 0 0;
 }
 .entrada-sub{ margin:var(--e3) 0 0; font-size:var(--t-ui); line-height:1.65; color:var(--cinza) }
 .entrada-bt{ width:100%; justify-content:center; margin-top:var(--e6) }
@@ -2993,8 +2935,8 @@ button:disabled:active,
 .lid-faixa-in{ max-width:1136px; margin:0 auto; display:flex; gap:var(--e6); align-items:flex-start; flex-wrap:wrap }
 .lid-faixa-txt{ flex:1 1 460px; min-width:0 }
 .lid-faixa h1{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-faixa); line-height:1.08; letter-spacing:-.03em;
   margin:var(--e3) 0 0; text-wrap:balance;
 }
 .lid-faixa-sub{ margin:var(--e3) 0 0; max-width:56ch; font-size:var(--t-ui); line-height:1.65; color:var(--cinza) }
@@ -3016,9 +2958,9 @@ button:disabled:active,
 /* --------------------------------------------------------------- os botões */
 .lid-bt{
   display:inline-flex; align-items:center; gap:var(--e2);
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
-  text-decoration:none; border:1px solid var(--noite); border-radius:0;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:15px; letter-spacing:-.005em;
+  text-decoration:none; border:1px solid var(--noite); border-radius:var(--r4);
   background:var(--noite); color:#fff; padding:var(--e4) var(--e5); cursor:pointer;
   transition:opacity var(--t);
 }
@@ -3026,8 +2968,8 @@ button:disabled:active,
 .lid-bt:active{ opacity:.84 }
 .lid-faixa.fogo .lid-bt{ background:#fff; color:var(--noite); border-color:#fff }
 .lid-bt-txt{
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:15px; letter-spacing:-.005em;
   background:none; border:0; padding:0 0 var(--e1); cursor:pointer;
   color:inherit; border-bottom:1px solid currentColor; opacity:.72;
   /* o botão global é pílula com 48px de altura mínima. Herdando isso, o
@@ -3502,8 +3444,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-chamada.age .rot{ color:rgba(255,255,255,.55) }
 .vol-chamada.age .vol-sub{ color:rgba(255,255,255,.72) }
 .vol-chamada h1{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-faixa); line-height:1.08; letter-spacing:-.03em;
   margin:var(--e3) 0 0; text-wrap:balance;
 }
 .vol-sub{ margin:var(--e3) 0 0; font-size:var(--t-ui); line-height:1.65; color:var(--cinza); max-width:44ch }
@@ -3522,9 +3464,9 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-bt{
   flex:1 1 auto; min-width:150px; min-height:var(--toque);
   display:inline-flex; align-items:center; justify-content:center; gap:var(--e2);
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
-  border-radius:0; padding:var(--e4) var(--e5); cursor:pointer; text-decoration:none;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:15px; letter-spacing:-.005em;
+  border-radius:var(--r4); padding:var(--e4) var(--e5); cursor:pointer; text-decoration:none;
   background:#fff; color:var(--noite); border:1px solid #fff;
   transition:opacity var(--t);
 }
@@ -3551,8 +3493,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .vol-prox-dia{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-secao); line-height:1.15; margin-top:var(--e2); letter-spacing:-.01em;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-secao); line-height:1.08; margin-top:var(--e2); letter-spacing:-.03em;
 }
 .vol-prox-est{ margin-top:var(--e3); font-size:var(--t-ui); color:var(--cinza) }
 
@@ -3603,10 +3545,10 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-dia-nome{ font-size:var(--t-ui); min-width:0 }
 .vol-dia-btns{ display:flex; gap:var(--e1); flex:0 0 auto }
 .vol-dia-bt{
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:14px; letter-spacing:-.005em;
   border:1px solid var(--linha); background:transparent; color:var(--cinza);
-  border-radius:0; padding:var(--e2) var(--e3); cursor:pointer; min-height:var(--toque);
+  border-radius:var(--r4); padding:var(--e2) var(--e3); cursor:pointer; min-height:var(--toque);
 }
 /* VERDE NO POSSO, VERMELHO NO NÃO — e a nota que morava aqui estava errada.
    07/09/2026. O texto anterior defendia pintar as duas de preto, com o
@@ -3801,8 +3743,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .esc-mes{ display:inline-flex; align-items:center; gap:var(--e1) }
 .esc-mes-nome{ text-transform:capitalize }
 .esc-mes h1{
-  font-family:var(--fonte-display); font-weight:var(--p-leve);
-  font-size:var(--d-faixa); line-height:1.15; letter-spacing:-.01em;
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:var(--d-faixa); line-height:1.08; letter-spacing:-.03em;
   margin:var(--e3) 0 0; text-transform:capitalize;
 }
 .esc-seta{
@@ -4037,8 +3979,8 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-acao{
   position:relative; display:inline-block; margin-top:var(--e1); padding:var(--e4) 0 var(--e4);
   background:none; border:0; border-radius:0; min-height:0; line-height:1;
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:14px; letter-spacing:-.005em;
   color:var(--cinza); cursor:pointer;
 }
 .vol-acao::after{
@@ -4295,8 +4237,8 @@ html{ scroll-padding-top:88px }
    do "posso / não" da tela do voluntário, que já era display em caixa alta.
    Eram duas gramáticas para o mesmo gesto em telas vizinhas. */
 .conf-btns .seg,.chip{
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  font-family:var(--fonte-display); font-weight:600;
+  font-size:14px; letter-spacing:-.005em;
 }
 .conf-btns .seg.on{ font-weight:var(--p-forte) }
 
@@ -4845,12 +4787,12 @@ html{ scroll-padding-top:88px }
    três momentos em que a página para de informar e passa a respirar.
    Em corpo de texto ela cansa; em uma frase por tela, ela é a marca. */
 .editorial{
-  font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
-  font-size:clamp(24px,3.4vw,40px); line-height:1.28; letter-spacing:-.01em;
-  text-transform:none; max-width:22ch; margin:0 auto;
+  font-family:var(--fonte); font-weight:400;
+  font-size:clamp(20px,2.4vw,30px); line-height:1.35; letter-spacing:-.012em;
+  text-transform:none; max-width:30ch; margin:0 auto;
 }
 .casa-col .editorial{ margin-top:var(--e5) }
-.versiculo{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200 }
+.versiculo{ font-family:var(--fonte); font-weight:400 }
 
 /* ---- VAGA DE IMAGEM -----------------------------------------------------
    O espaço reservado para as fotos que ainda vão ser produzidas. Ele não é
@@ -5185,25 +5127,32 @@ html{ scroll-behavior:smooth }
 }
 
 /* ---- a voz ---------------------------------------------------------------- */
+/* O RÓTULO É UM SÓ — 08/09/2026: `.g-rot` (site) e `.rot` (sistema) eram
+   quase iguais; o do site tinha um quadrado areia na frente. A referência
+   que o Arthur escolheu (a /eu) não tem quadrado: caixa alta, espaçada,
+   cinza, e só. Mesmos tokens do `.rot`. */
 .g-rot{
-  display:flex; align-items:center; gap:12px; margin:0 0 var(--e5);
-  font-family:var(--fonte-display); font-weight:500; font-size:12px; line-height:1;
-  letter-spacing:.15em; text-transform:uppercase; color:var(--mudo);
+  display:flex; align-items:center; margin:0 0 var(--e5);
+  font-family:var(--fonte-display); font-weight:var(--p-rot); font-size:var(--t-rot); line-height:1;
+  letter-spacing:var(--tr); text-transform:uppercase; color:var(--mudo);
 }
-.g-rot::before{ content:""; width:9px; height:9px; background:var(--areia); flex:none }
 .casa-escuro .g-rot,.g-cheio .g-rot{ color:rgba(255,255,255,.58) }
-.casa-areia .g-rot{ color:rgba(59,50,34,.78) } .casa-areia .g-rot::before{ background:var(--areia-tinta) }
+.casa-areia .g-rot{ color:rgba(59,50,34,.78) }
 .g-h1,.g-h2,.g-h3{ font-family:var(--fonte-display); font-weight:700; margin:0; text-wrap:balance; color:inherit }
 .g-h1{ font-size:clamp(46px,7.4vw,108px); line-height:.96; letter-spacing:-.036em }
 .g-h2{ font-size:clamp(34px,4.8vw,66px); line-height:1.0; letter-spacing:-.03em }
 .g-h3{ font-size:clamp(22px,2.4vw,30px); line-height:1.15; letter-spacing:-.02em }
+/* A LINHA DE APOIO — 08/09/2026: era a serifa itálica em 26–52px. Agora é a
+   mesma voz do `.cabeca p` da /eu: Inter regular, cinza, 18–24px, largura de
+   leitura. O título manda; a linha explica. */
 .g-ed{
-  display:block; font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
-  font-size:clamp(26px,3.6vw,52px); line-height:1.12; letter-spacing:-.012em; margin:.4em 0 0; color:inherit;
+  display:block; font-family:var(--fonte); font-weight:400;
+  font-size:clamp(18px,1.55vw,24px); line-height:1.45; letter-spacing:-.006em; margin:var(--e4) 0 0;
+  color:var(--cinza); max-width:56ch; text-wrap:balance;
 }
-.g-h1 .g-ed,.g-h2 .g-ed{ font-size:.82em; margin-top:.08em; letter-spacing:-.02em }
-.casa-escuro .g-ed,.g-cheio .g-ed{ color:var(--areia) }
-.casa-papel .g-ed{ color:var(--areia-tinta) }
+.casa-escuro .g-ed,.g-cheio .g-ed{ color:rgba(255,255,255,.76) }
+.casa-areia .g-ed{ color:rgba(59,50,34,.84) }
+.c .g-ed,.centro .g-ed,.g-cheio.centro .g-ed,.g-cab.centro .g-ed{ margin-inline:auto }
 .g-corpo{
   font-size:clamp(17px,1.25vw,19px); line-height:1.6; color:var(--cinza);
   max-width:54ch; margin:var(--e5) 0 0; text-wrap:pretty;
@@ -5276,7 +5225,7 @@ html{ scroll-behavior:smooth }
 }
 .g-passo:hover img{ transform:scale(1.05) }
 .g-passo::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,transparent 30%,rgba(37,37,37,.85) 100%) }
-.g-passo-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(40px,4.6vw,66px); line-height:1; color:var(--areia) }
+.g-passo-n{ font-family:var(--fonte); font-weight:300; font-size:clamp(30px,3.4vw,48px); line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums; color:var(--areia) }
 .g-passo-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(17px,1.6vw,22px); letter-spacing:-.02em; margin-top:10px; line-height:1.15 }
 .g-passo-d{ font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.74); margin-top:6px; text-wrap:pretty }
 
@@ -5290,7 +5239,7 @@ html{ scroll-behavior:smooth }
 }
 .casa-areia .g-perg li{ border-bottom-color:rgba(59,50,34,.18) }
 .casa-escuro .g-perg li{ border-bottom-color:rgba(255,255,255,.10) }
-.g-perg-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(28px,3vw,40px); line-height:1; color:var(--areia-tinta); opacity:.55; padding-top:2px }
+.g-perg-n{ font-family:var(--fonte); font-weight:300; font-size:clamp(22px,2.4vw,32px); line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--areia-tinta); opacity:.55; padding-top:2px }
 .casa-escuro .g-perg-n{ color:var(--areia); opacity:.8 }
 .g-perg-q{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.8vw,25px); letter-spacing:-.02em; margin:0; line-height:1.2 }
 .g-perg-r{ font-size:clamp(16px,1.2vw,17.5px); line-height:1.6; color:var(--cinza); margin:10px 0 0; max-width:60ch; text-wrap:pretty }
@@ -5331,7 +5280,7 @@ html{ scroll-behavior:smooth }
 .casa-escuro .g-vira{ border-top-color:rgba(255,255,255,.16) }
 .g-vira li{ display:grid; grid-template-columns:1fr auto 1fr; gap:clamp(12px,2vw,32px); align-items:center; padding:clamp(18px,2.2vw,28px) 0; border-bottom:1px solid var(--linha) }
 .casa-escuro .g-vira li{ border-bottom-color:rgba(255,255,255,.10) }
-.g-vira-de{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2.2vw,30px); color:var(--mudo); text-decoration:line-through; text-decoration-thickness:1px; text-decoration-color:rgba(37,37,37,.35) }
+.g-vira-de{ font-family:var(--fonte); font-weight:400; font-size:clamp(17px,1.6vw,22px); color:var(--mudo); text-decoration:line-through; text-decoration-thickness:1px; text-decoration-color:rgba(37,37,37,.35) }
 .casa-escuro .g-vira-de{ color:rgba(255,255,255,.5); text-decoration-color:rgba(255,255,255,.3) }
 .g-vira-chev{ color:var(--areia); font-size:16px; display:inline-flex }
 .g-vira-para{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(18px,1.9vw,26px); letter-spacing:-.02em; line-height:1.2 }
@@ -5443,9 +5392,10 @@ html{ scroll-behavior:smooth }
   width:min(440px,calc(100% - 2*clamp(20px,4vw,52px)));
   background:var(--areia); color:var(--areia-tinta); padding:clamp(22px,2.6vw,34px);
 }
-.mapa-cartao .g-rot{ color:rgba(59,50,34,.78); margin-bottom:14px } .mapa-cartao .g-rot::before{ background:var(--areia-tinta) }
+.mapa-cartao .g-rot{ color:rgba(59,50,34,.78); margin-bottom:14px }
 .mapa-cartao .g-h3{ margin:0 }
-.mapa-cartao p{ margin:6px 0 0; font-size:15.5px; line-height:1.5; color:rgba(59,50,34,.86) }
+/* `p` genérico pegava o rótulo e o título do cartão junto; agora só o texto */
+.mapa-cartao p:not(.g-rot):not(.g-h3){ margin:6px 0 0; font-size:15.5px; line-height:1.5; color:rgba(59,50,34,.86) }
 .mapa-cartao .g-acoes{ margin-top:18px; gap:10px }
 .mapa-cartao .acao{ color:var(--areia-tinta); border-color:rgba(59,50,34,.45) }
 .mapa-cartao .acao.cheia{ background:var(--areia-tinta); color:var(--areia); border-color:var(--areia-tinta) }
@@ -5496,7 +5446,7 @@ html{ scroll-behavior:smooth }
 .pg-corpo{ padding:clamp(18px,2.2vw,26px); display:flex; flex-direction:column; gap:6px; flex:1 }
 .pg-corpo .g-rot{ margin-bottom:6px; color:rgba(228,212,180,.78) }
 .pg-nome{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(20px,1.8vw,24px); letter-spacing:-.02em; line-height:1.15 }
-.pg-quando{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,1.9vw,26px); color:var(--areia); line-height:1.2 }
+.pg-quando{ font-family:var(--fonte); font-weight:400; font-size:clamp(16px,1.3vw,18px); color:var(--areia); line-height:1.35 }
 .pg-nota{ font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.72) }
 .pg-corpo .g-acoes{ margin-top:auto; padding-top:14px }
 /* o botão do azulejo: areia sobre o preto. `.acao.cheia` é preto, e preto
@@ -5534,15 +5484,6 @@ html{ scroll-behavior:smooth }
 .g-atalho a:hover,.g-atalho a:active{ border-bottom-color:currentColor }
 /* /servir: a grade das áreas fica colada no herói, sem a margem de 64px da home */
 .casa-areas.rente{ margin-top:0 }
-
-/* =============================================================================
-   AUDITORIA 04/09 — a voz do manual chega às telas do sistema
-   .cabeca h1 (Encontre seu lugar, Seu espaço, Painel…) ainda saía em caixa
-   alta leve e espaçada. Mesma identidade, mesma plataforma: bold, caixa
-   baixa, apertado — como todo título do site. O tamanho não muda.
-   ============================================================================= */
-.cabeca h1{ font-weight:700; text-transform:none; letter-spacing:-.03em; line-height:1.04 }
-.cabeca h1.menor{ letter-spacing:-.02em }
 
 /* =============================================================================
    04/09 — CENTRO: a gramática nova das páginas públicas
@@ -5604,7 +5545,7 @@ html{ scroll-behavior:smooth }
 .qa summary::-webkit-details-marker{ display:none }
 .qa summary::marker{ content:"" }
 .qa summary:focus-visible{ outline:2px solid var(--areia); outline-offset:4px }
-.qa-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(26px,2.6vw,36px); line-height:1; color:var(--areia-tinta); opacity:.55 }
+.qa-n{ font-family:var(--fonte); font-weight:300; font-size:clamp(20px,2vw,28px); line-height:1; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--areia-tinta); opacity:.55 }
 .casa-escuro .qa-n{ color:var(--areia); opacity:.8 }
 .qa-q{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(18px,1.7vw,24px); letter-spacing:-.02em; line-height:1.2; margin:0; text-transform:none; color:inherit }
 .qa-q::before{ content:none }
@@ -5695,7 +5636,6 @@ html{ scroll-behavior:smooth }
   .g-cheio.centro.fecho > .g{ padding-top:72px; padding-bottom:72px }
   .g-h1{ font-size:clamp(40px,11.5vw,52px) }
   .g-h2{ font-size:clamp(30px,8.4vw,40px) }
-  .g-ed{ font-size:clamp(22px,6.2vw,28px) }
   .g-acoes{ gap:10px }
   .g-acoes .acao{ width:100%; justify-content:center; max-width:360px; margin-inline:auto }
   .c .g-acoes,.g-cheio.centro .g-acoes{ flex-direction:column; align-items:center }
@@ -5782,9 +5722,8 @@ svg.logo{ width:auto }
 .casa-areia .ficha{ background:rgba(59,50,34,.18); border-color:rgba(59,50,34,.18) }
 .casa-areia .ficha > div{ background:var(--areia) }
 .ficha-r{ display:flex; align-items:center; gap:10px; margin:0 0 12px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mudo) }
-.ficha-r::before{ content:""; width:7px; height:7px; background:var(--areia); flex:none }
 .casa-escuro .ficha-r{ color:rgba(255,255,255,.55) }
-.casa-areia .ficha-r{ color:rgba(59,50,34,.82) } .casa-areia .ficha-r::before{ background:var(--areia-tinta) }
+.casa-areia .ficha-r{ color:rgba(59,50,34,.82) }
 .ficha-v{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.9vw,26px); letter-spacing:-.02em; line-height:1.15; margin:0; text-transform:none; color:inherit }
 .ficha-v::before{ content:none }
 .ficha-d{ margin:8px 0 0; font-size:15px; line-height:1.5; color:var(--cinza); text-wrap:pretty }
@@ -5806,7 +5745,7 @@ svg.logo{ width:auto }
 .cartao{ position:relative; background:var(--noite); padding:clamp(24px,3vw,40px) clamp(20px,2.4vw,32px); display:flex; flex-direction:column; gap:14px; transition:background var(--t) }
 .casa-escuro.retic .cartao{ background:rgba(37,37,37,.92) }
 .cartao:hover{ background:rgba(228,212,180,.06) }
-.cartao-n{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(36px,3.6vw,52px); line-height:1; color:var(--areia) }
+.cartao-n{ font-family:var(--fonte); font-weight:300; font-size:clamp(28px,2.8vw,40px); line-height:1; letter-spacing:-.03em; font-variant-numeric:tabular-nums; color:var(--areia) }
 .cartao-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.8vw,24px); letter-spacing:-.02em; line-height:1.15; margin:0; text-transform:none; color:#fff }
 .cartao-t::before{ content:none }
 .cartao-d{ margin:0; font-size:15.5px; line-height:1.55; color:rgba(255,255,255,.72); text-wrap:pretty }
@@ -5861,7 +5800,6 @@ svg.logo{ width:auto }
 .fato{ background:var(--papel); padding:clamp(22px,2.6vw,34px) clamp(20px,4vw,52px); text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:8px; transition:background var(--t) }
 a.fato:hover{ background:#fff }
 .fato-r{ display:flex; align-items:center; gap:10px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.15em; text-transform:uppercase; color:var(--mudo) }
-.fato-r::before{ content:""; width:7px; height:7px; background:var(--areia); flex:none }
 .fato-v{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(19px,1.8vw,24px); letter-spacing:-.02em; line-height:1.15; display:flex; align-items:center; gap:10px }
 .fato-v svg{ width:.5em; height:.5em; color:var(--areia-tinta); opacity:.7; transition:transform var(--t) }
 a.fato:hover .fato-v svg{ transform:translateX(3px) }
@@ -5966,7 +5904,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
     .rolo-l{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(200px,42vh,460px); line-height:.86; letter-spacing:-.05em; color:var(--areia) }
     .rolo-l .marca-chev{ display:inline-block; font-size:.86em; vertical-align:-.02em }
     .rolo-t{ font-family:var(--fonte-display); font-weight:700; font-size:clamp(34px,4.2vw,58px); letter-spacing:-.03em; line-height:1; margin:26px 0 0; color:#fff }
-    .rolo-d{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(22px,2.4vw,34px); color:rgba(255,255,255,.72); margin:14px auto 0; max-width:34ch }
+    .rolo-d{ font-family:var(--fonte); font-weight:400; font-size:clamp(17px,1.5vw,22px); line-height:1.45; color:rgba(255,255,255,.72); margin:14px auto 0; max-width:40ch }
     .rolo-cab{ position:absolute; top:clamp(88px,12vh,128px); left:0; right:0; text-align:center; pointer-events:none }
     .rolo-prog{ position:absolute; left:50%; bottom:clamp(36px,6vh,64px); transform:translateX(-50%); width:220px; height:1px; background:rgba(255,255,255,.18) }
     .rolo-prog i{ position:absolute; left:0; top:-1px; height:3px; width:100%; background:var(--areia); transform-origin:left; animation:enche linear both; animation-timeline:--rolo; animation-range:contain 0% contain 100% }
@@ -6141,7 +6079,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .cad .wiz-cabeca{ text-align:center; max-width:760px; margin-inline:auto }
 .cad .wiz-cabeca .migalha{ justify-content:center }
 .cad .wiz-cabeca h1{ font-weight:700; font-size:clamp(34px,4.8vw,60px); line-height:1.0; letter-spacing:-.03em; text-transform:none; margin-top:var(--e5); text-wrap:balance }
-.cad .wiz-cabeca-sub{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; font-size:clamp(20px,2.3vw,30px); line-height:1.2; color:var(--areia-tinta); max-width:36ch; margin:14px auto 0 }
+.cad .wiz-cabeca-sub{ font-family:var(--fonte); font-weight:400; font-size:clamp(17px,1.5vw,21px); line-height:1.45; color:var(--areia-tinta); max-width:44ch; margin:14px auto 0 }
 .cad .wiz-passos{ max-width:760px; margin:clamp(28px,3.6vw,44px) auto 0 }
 .cad .wiz-corpo{ max-width:640px; margin:clamp(36px,4.5vw,56px) auto 0 }
 .cad .wiz-corpo h2{ font-weight:700; font-size:clamp(24px,2.6vw,32px); letter-spacing:-.025em; line-height:1.1; text-align:center; margin-bottom:10px }
@@ -6245,11 +6183,8 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    esticado à altura dele */
 .g-acoes .g-link{ align-self:center }
 
-/* ---- 3. a itálica apoia, não compete ------------------------------------- */
-.g-h2 + .g-ed{
-  font-size:clamp(20px,2.3vw,33px); line-height:1.28;
-  margin-top:.6em; letter-spacing:-.008em;
-}
+/* ---- 3. (a regra "a itálica apoia, não compete" saiu em 08/09/2026: a
+   linha de apoio já nasce menor que o título, ver `.g-ed`) ----------------- */
 
 /* o vão do botão principal da barra. Ele existe como margem e não como espaço
    duro dentro do trecho entreletrado — ver o comentário no page.tsx. Some
@@ -6534,6 +6469,7 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .g-cab ~ .pgs,
 .g-cab ~ .g-tiles,
 .g-cab ~ .c-larga,
+.g-cab ~ .g-linhas,
 .g-cab ~ .g-num{ max-width:none; margin-inline:0 }
 .g-cab ~ .c-media{ margin-inline:0 }
 
@@ -6569,8 +6505,8 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 @media(min-width:760px) and (max-width:1039px){ .g-pe-eu{ grid-column:1/-1; max-width:46ch } }
 .g-pe-marca{ width:min(100%,300px) }
 .g-pe-frase{
-  margin:var(--e4) 0 0; font-family:var(--fonte-editorial); font-style:italic; font-weight:200;
-  font-size:clamp(20px,1.9vw,25px); line-height:1.25; color:var(--areia); letter-spacing:-.01em;
+  margin:var(--e4) 0 0; font-family:var(--fonte); font-weight:400;
+  font-size:clamp(16px,1.3vw,19px); line-height:1.45; color:rgba(255,255,255,.72); letter-spacing:-.006em; max-width:34ch;
 }
 
 /* O ENDEREÇO VIRA CAMINHO. No rodapé antigo ele era um <p> de 15px cinza no
@@ -7204,17 +7140,13 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
    perfeito e custa ~150px a mais de altura, num rodapé que já ocupa 0,9 da
    tela em toda página do site — trocar buraco por rolagem não é ganho.
 
-   Então o terceiro grupo ocupa a linha inteira e distribui os próprios links
-   nas MESMAS duas colunas dos grupos de cima: "Onde me encaixo" nasce na
-   régua de "A igreja", não num terceiro eixo. (A primeira versão punha os
-   links em linha corrida e criava uma terceira régua a 123px; e valia até
-   899px, onde a grade já tem três colunas e o grupo cabia na terceira — lá o
-   spanning deixava a terceira coluna vazia.) */
+   Então o terceiro grupo ocupa a linha inteira. 08/09/2026: ele distribuía
+   os três links nas duas colunas de cima e o terceiro ("Acesso às equipes")
+   sobrava sozinho à esquerda — com o celular todo centrado, um órfão
+   descentrado. Agora os três ficam numa coluna só, centrados como o resto:
+   custa duas linhas de altura e não deixa buraco nem órfão. */
 @media(max-width:759px){
-  .g-pe-cols > nav:last-child{
-    grid-column:1 / -1; display:grid; grid-template-columns:1fr 1fr; column-gap:18px;
-  }
-  .g-pe-cols > nav:last-child .g-pe-h{ grid-column:1 / -1; margin-bottom:10px }
+  .g-pe-cols > nav:last-child{ grid-column:1 / -1 }
 }
 
 /* =============================================================================
@@ -7910,14 +7842,28 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 .agora-pill-o{ color:rgba(255,255,255,.72) }
 .agora-pill-o::before{ content:"·"; margin-right:10px; color:rgba(255,255,255,.4) }
 .agora-pill svg{ width:14px; height:14px; color:var(--areia) }
-@media(max-width:479px){ .agora-pill{ font-size:13px; gap:8px } .agora-pill-o{ max-width:44vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis } }
+/* no celular a pílula empilha: "Amanhã, 20h" em cima, "Pequena Guia
+   Barrashopping" embaixo, inteiro. Numa linha só o nome do grupo saía
+   cortado ("Barrasp…"), visto em 390px. */
+@media(max-width:479px){
+  .agora-pill{
+    display:inline-grid; grid-template-columns:auto minmax(0,1fr) auto; grid-template-rows:auto auto;
+    column-gap:10px; row-gap:3px; align-items:center; text-align:center;
+    font-size:13px; line-height:1.2; padding:9px 14px 9px 12px; border-radius:14px; max-width:100%;
+  }
+  .agora-pill-pt{ grid-row:1/3 }
+  .agora-pill-q{ grid-column:2; grid-row:1 }
+  .agora-pill-o{ grid-column:2; grid-row:2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+  .agora-pill-o::before{ content:none }
+  .agora-pill svg{ grid-column:3; grid-row:1/3 }
+}
 
 /* ---- V4: componentes de produto ------------------------------------------
    Cantos arredondados, filete fino, sombra só no hover, botão em caixa
    baixa. É a camada que muda o "tom" de editorial para produto digital sem
    mexer na estrutura das páginas. Tudo aqui é sobreposição: as regras
    anteriores continuam valendo onde não há uma nova. */
-:root{ --r4:10px; --r4-card:16px; --r4-foto:20px; --sombra4:0 10px 30px -12px rgba(37,37,37,.22); --sombra4-forte:0 18px 44px -16px rgba(37,37,37,.32) }
+/* os tokens --r4* moram no :root do topo do arquivo (o botão base já os usa) */
 
 /* botões: caixa baixa, 15px, peso 600, 46px de altura, canto 10px */
 .acao{
@@ -7950,7 +7896,7 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 .pg-chips{ gap:8px }
 
 /* cartões: separados, canto 16, filete, levantam no hover */
-.fatos{ gap:12px; background:transparent; border:0; padding:clamp(20px,4vw,52px) clamp(20px,4vw,52px) 0; max-width:1360px; margin-inline:auto }
+.fatos{ gap:12px; background:transparent; border:0; padding:clamp(20px,4vw,52px); max-width:1360px; margin-inline:auto }
 .fato{ border:1px solid var(--linha2); border-radius:var(--r4-card); transition:transform 220ms var(--ease),box-shadow var(--t),border-color var(--t) }
 a.fato:hover{ transform:translateY(-2px); box-shadow:var(--sombra4); border-color:rgba(37,37,37,.28) }
 .cartoes{ gap:12px; background:transparent; border:0 }
@@ -7984,7 +7930,6 @@ a.g-tile:hover{ transform:translateY(-2px) }
 .wiz-op,.wiz-resumo{ border-radius:12px }
 .wiz-op-marca{ border-radius:6px }
 .wiz-chip,.escolha{ border-radius:var(--r4) }
-.porta.wiz .btn,.tela-corpo .btn,.entrada .lid-bt{ border-radius:var(--r4); text-transform:none; letter-spacing:-.005em; font-size:15px; font-weight:600 }
 .wiz-pe .btn{ min-height:46px }
 /* "qual fica perto de mim?" em /pequena-guia: a pergunta e o botão numa
    linha, a resposta no lugar da pergunta */
@@ -8069,7 +8014,9 @@ a.g-tile:hover{ transform:translateY(-2px) }
 /* o cartão de endereço do mapa: o rótulo e o título estavam herdando o
    15,5px do parágrafo (a regra `.mapa-cartao p` pegava os dois). Rótulo na
    escala dos rótulos (12px), rua na escala dos títulos de cartão. */
-.mapa-cartao p.g-rot{ font-size:12px; line-height:1 }
+/* o tamanho vem do token (--t-rot), como todo rótulo do site: cravar 12px
+   aqui dava um rótulo diferente dos outros no celular (medido 08/09/2026) */
+.mapa-cartao p.g-rot{ line-height:1 }
 .mapa-cartao p.g-h3{ font-size:clamp(19px,1.8vw,24px); line-height:1.15; letter-spacing:-.02em }
 
 /* ---- utilitários que substituem estilos em linha nas páginas (08/09/2026) ---
@@ -8079,6 +8026,160 @@ a.g-tile:hover{ transform:translateY(-2px) }
 .g-rot.centro{ justify-content:center }
 .g-acoes.centro{ justify-content:center }
 .casa-heroi-frase{ color:var(--areia); margin:var(--e5) auto 0 }
-.g-versiculo{ margin:0 auto; font-size:clamp(26px,3.8vw,56px); color:#fff; max-width:26ch }
+.g-versiculo{ margin:0 auto; font-size:clamp(22px,2.6vw,36px); line-height:1.35; font-weight:400; letter-spacing:-.012em; color:#fff; max-width:34ch }
 .g-versiculo-ref{ margin:var(--e6) 0 0; justify-content:center }
-.g-tile-l.num{ font-family:var(--fonte-editorial); font-style:italic; font-weight:200; letter-spacing:-.02em }
+.g-tile-l.num{ font-weight:300; letter-spacing:-.04em; font-variant-numeric:tabular-nums }
+
+/* =============================================================================
+   DUAS PORTAS PARA O DOMINGO — home, 08/09/2026
+   "Participe da nossa comunidade de onde estiver": campus físico e
+   transmissão ao vivo, dois azulejos iguais (o componente das áreas), com o
+   texto de apoio visível também no celular, porque aqui ele é a informação.
+   ============================================================================= */
+.casa-areas.duas{ max-width:1120px; margin-inline:auto }
+@media(min-width:820px){
+  .casa-areas.duas{ grid-template-columns:repeat(2,1fr) }
+  .casa-areas.centro.duas > .casa-area:first-child{ grid-column:auto }
+}
+@media(max-width:899px){
+  .casa-areas.duas .casa-area{ aspect-ratio:auto; min-height:300px; padding:28px 22px }
+  .casa-areas.duas .casa-area-desc{ display:block; margin-top:12px; font-size:15px }
+}
+/* o vídeo do herói: sem o filtro fotográfico (é caro para o celular filtrar
+   30 quadros por segundo) e sem a respiração de escala (um filme já se
+   move). O véu escuro do ::after continua, e é ele que dá contraste ao
+   título. */
+video.casa-heroi-foto{ filter:none; animation:none }
+
+/* em /servir (grade `.rente`) a descrição de cada área aparece também no
+   celular: é o texto que a igreja escreveu para cada uma (08/09/2026), não
+   um enfeite. Na home os azulejos continuam compactos, só nome e selo. */
+@media(max-width:899px){
+  .casa-areas.rente .casa-area{ aspect-ratio:auto; min-height:300px; padding:28px 22px }
+  .casa-areas.rente .casa-area-desc{ display:block; margin-top:12px; font-size:15px }
+}
+
+/* =============================================================================
+   LINHAS — a lista em linhas da /eu, para o site
+   08/09/2026. "O que você precisa saber" em /cultos: cinco fatos, cada um
+   com o rótulo em caixa alta e o texto ao lado, divididos por um fio. É o
+   mesmo desenho das linhas `.escolha` do sistema, sem a seta (não são
+   escolhas, são fatos). No celular o rótulo fica em cima e tudo centra.
+   ============================================================================= */
+.g-linhas{ list-style:none; margin:0; padding:0; max-width:920px; margin-inline:auto; border-top:1px solid var(--linha2) }
+.g-linhas li{
+  display:grid; grid-template-columns:clamp(120px,14vw,180px) 1fr; column-gap:clamp(20px,3vw,44px); align-items:baseline;
+  padding:clamp(18px,2vw,26px) 0; border-bottom:1px solid var(--linha2);
+}
+.g-linhas-r{
+  font-family:var(--fonte-display); font-weight:var(--p-rot); font-size:var(--t-rot); letter-spacing:var(--tr);
+  text-transform:uppercase; color:var(--mudo); line-height:1.4;
+}
+.g-linhas-v{
+  font-size:clamp(17px,1.35vw,20px); line-height:1.45; font-weight:500; color:var(--ink); text-wrap:pretty;
+  text-decoration:none; display:inline-flex; align-items:baseline; gap:8px;
+}
+a.g-linhas-v{
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.22em;
+  text-decoration-color:rgba(37,37,37,.3); transition:text-decoration-color var(--t);
+  /* ALVO DE TOQUE SEM MEXER NO LAYOUT: a linha tem 28px de altura e o mínimo
+     é 44. O padding cresce a caixa e a margem negativa devolve o espaço, então
+     a régua da lista continua igual e o dedo ganha os 44px. */
+  padding-block:8px; margin-block:-8px;
+}
+a.g-linhas-v svg{ width:.6em; height:.6em; flex:none; align-self:center; color:var(--mudo); transition:transform var(--t) }
+a.g-linhas-v:hover svg{ transform:translateX(3px) }
+.casa-areia .g-linhas,.casa-areia .g-linhas li{ border-color:rgba(59,50,34,.22) }
+.casa-areia .g-linhas-r{ color:rgba(59,50,34,.82) }
+.casa-areia .g-linhas-v{ color:var(--areia-tinta) }
+.casa-areia a.g-linhas-v{ text-decoration-color:rgba(59,50,34,.35) }
+.casa-escuro .g-linhas,.casa-escuro .g-linhas li{ border-color:rgba(255,255,255,.14) }
+.casa-escuro .g-linhas-r{ color:rgba(255,255,255,.55) }
+.casa-escuro .g-linhas-v{ color:#fff }
+/* o hover vem DEPOIS dos contextos: `.casa-areia a.g-linhas-v` tem a mesma
+   especificidade de `a.g-linhas-v:hover` e, escrito antes, o hover nunca
+   valia sobre a areia (medido em 08/09/2026, /cultos). */
+a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
+.casa-areia a.g-linhas-v:hover,.casa-areia a.g-linhas-v:focus-visible,
+.casa-escuro a.g-linhas-v:hover,.casa-escuro a.g-linhas-v:focus-visible{ text-decoration-color:currentColor }
+@media(max-width:759px){
+  .g-linhas li{ grid-template-columns:1fr; row-gap:8px; text-align:center; justify-items:center }
+  .g-linhas-v{ max-width:30ch; justify-content:center }
+}
+
+/* a chamada dentro do azulejo de foto ("Quero participar de um culto"):
+   a última linha do azulejo, na voz do link claro — o azulejo inteiro é o
+   link, esta linha só diz o verbo */
+.casa-area-cta{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px; margin-top:var(--e5);
+  font-family:var(--fonte-display); font-weight:600; font-size:15px; letter-spacing:-.005em; color:#fff;
+  text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:.3em; text-decoration-color:rgba(255,255,255,.45);
+  transition:text-decoration-color var(--t);
+}
+.casa-area-cta svg{ width:14px; height:14px; transition:transform var(--t) }
+.casa-area:hover .casa-area-cta{ text-decoration-color:#fff }
+.casa-area:hover .casa-area-cta svg{ transform:translateX(3px) }
+@media(max-width:899px){ .casa-area-cta{ margin-top:14px } }
+
+/* o endereço dentro do cartão "De aplicativo" (/como-chegar): uma linha
+   própria, em branco e mais firme, para ser lida e copiada de uma vez */
+.cartao-end{ margin:0; font-family:var(--fonte-display); font-weight:600; font-size:clamp(16px,1.3vw,18px); letter-spacing:-.01em; line-height:1.4; color:#fff; user-select:all }
+.cartao .cartao-d + .cartao-end{ margin-top:-4px }
+
+/* =============================================================================
+   O FORMULÁRIO DO SITE — /pequena-guia, 08/09/2026
+   Cinco campos na voz do produto: rótulo em caixa alta, campo de 48px com
+   canto de 10px e fio fino, dois por linha no largo, um por linha no celular
+   (tudo centrado, como o resto). O erro fala uma vez, embaixo, e marca o
+   campo. A tela final ocupa o lugar do formulário: nada empilha.
+   ============================================================================= */
+.g-form{ max-width:720px; margin-inline:auto }
+.g-form-chamada{ margin:var(--e5) auto 0; max-width:46ch; font-size:clamp(17px,1.25vw,19px); line-height:1.6; font-weight:500; color:var(--areia-tinta); text-wrap:balance }
+.g-form-grade{ display:grid; grid-template-columns:1fr 1fr; gap:18px 16px }
+.g-form-campo{ display:grid; gap:10px; min-width:0; text-align:left }
+.g-form-campo .g-rot{ margin:0 }
+.g-form-largo{ grid-column:1 / -1 }
+.g-form input,.g-form select{
+  width:100%; min-height:48px; padding:0 16px; margin:0;
+  font:16px/1.3 var(--fonte); color:var(--ink); background:#fff;
+  border:1px solid rgba(59,50,34,.28); border-radius:var(--r4); outline:none; appearance:none; -webkit-appearance:none;
+  transition:border-color var(--t),box-shadow var(--t);
+}
+.g-form select{
+  padding-right:44px; cursor:pointer;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%23252525' stroke-width='1.5'/></svg>");
+  background-repeat:no-repeat; background-position:right 16px center;
+}
+.g-form input::placeholder{ color:rgba(37,37,37,.4) }
+.g-form input:focus-visible,.g-form select:focus-visible{ border-color:var(--noite); box-shadow:0 0 0 3px rgba(37,37,37,.12) }
+.g-form [aria-invalid="true"]{ border-color:var(--bad); box-shadow:0 0 0 3px var(--bad-bg) }
+.g-form-isca{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
+.g-form-erro{ margin:16px auto 0; max-width:52ch; text-align:center; font-size:15px; line-height:1.5; color:var(--bad); font-weight:500 }
+.g-form-pe{ margin-top:var(--e6) }
+.g-form-pe .acao{ width:100%; max-width:420px }
+/* .72 dava 4,28:1 sobre a areia (axe, 08/09/2026); .86 leva a 5,7:1 */
+.g-form-nota{ margin:var(--e5) auto 0; max-width:46ch; text-align:center; font-size:13.5px; line-height:1.55; color:rgba(59,50,34,.86) }
+.g-form-nota a{ color:inherit; text-decoration:underline; text-underline-offset:.2em; text-decoration-color:rgba(59,50,34,.4) }
+.g-form-nota a:hover{ text-decoration-color:currentColor }
+/* a tela final */
+.g-form-fim{ max-width:640px; margin-inline:auto; text-align:center }
+.g-form-fim .g-rot{ justify-content:center }
+.g-form-fim .g-h3{ margin:0 auto; max-width:30ch; text-wrap:balance }
+.g-form-msg{
+  margin:var(--e5) auto 0; max-width:420px; padding:18px 20px; text-align:left; white-space:pre-wrap;
+  font:15px/1.6 var(--fonte); color:var(--areia-tinta); background:rgba(255,255,255,.55);
+  border:1px solid rgba(59,50,34,.22); border-radius:var(--r4-card); user-select:all;
+}
+.g-form-fim .g-acoes{ margin-top:var(--e5) }
+.g-form-fim button.g-link{ background:none; border:0; padding:0; min-height:var(--toque); border-radius:0; font-size:14px; font-weight:500 }
+@media(max-width:639px){
+  .g-form-grade{ grid-template-columns:1fr; gap:16px }
+  .g-form-campo{ text-align:center }
+  .g-form-campo .g-rot{ justify-content:center }
+  .g-form input,.g-form select{ text-align:center; padding-right:16px }
+  .g-form select{ background-position:right 14px center; padding-right:40px; padding-left:40px }
+}
+
+/* a frase-declaração sozinha numa faixa (/sobre, "o que acreditamos"): um
+   degrau acima da linha de apoio, sem virar título */
+.g-ed-grande{ font-size:clamp(20px,2.1vw,30px); line-height:1.4; font-weight:400; color:var(--ink); max-width:38ch; letter-spacing:-.012em; margin-top:var(--e5) }
