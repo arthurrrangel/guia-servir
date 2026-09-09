@@ -1,43 +1,21 @@
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import Medidas from '@/components/Medidas';
 
 /* =============================================================================
-   TIPOGRAFIA — as fontes do manual, e só elas
+   TIPOGRAFIA — uma família, servida daqui
 
-   O manual da marca (Apresentação GuiaChurch.pdf, 01/09/2026) define duas
-   famílias: PP Neue Montreal (Bold e Book) e PP Editorial New (Ultralight
-   Italic). O Arthur foi explícito: nada de substituta. Então a pilha de
-   fontes do CSS tem a marca em primeiro lugar e, atrás dela, só o que o
-   sistema operacional da pessoa já tem — nenhuma outra família é carregada.
+   Inter, variável, um arquivo de 48kB em public/tipos/ (SIL OFL, licença ao
+   lado). O @font-face mora no globals.css; aqui só o preload, para o título
+   da primeira tela não piscar na fonte do aparelho.
 
-   POR QUE OS ARQUIVOS NÃO ESTÃO NESTE REPOSITÓRIO, e não é escolha minha:
-   as duas são da Pangram Pangram, licenciadas, e o EULA deles proíbe
-   textualmente pôr a fonte em "public internet file transfer or storing
-   channel". Este repositório é público. Os .woff2 entram no BUILD, baixados
-   de uma origem privada por scripts/fontes.mjs, e são servidos pelo próprio
-   guiaservir.com — que é o que a Web License cobre.
-
-   Antes havia aqui dois `next/font/local` (Inter e, por um dia, Instrument
-   Serif). Saíram: `next/font/local` exige que o arquivo exista no build, e
-   arquivo licenciado não pode existir no repositório. No lugar, um bloco
-   <style> com os @font-face que o script gerou — inline, sem requisição a
-   mais — e os preloads de cada arquivo que de fato está presente.
+   Até 08/09/2026 este arquivo lia um marca.css gerado no build com as fontes
+   licenciadas do manual (PP Neue Montreal / PP Editorial New), baixadas de
+   uma origem privada por scripts/fontes.mjs. As variáveis de ambiente nunca
+   foram configuradas, o CSS servido era vazio e o site caía na fonte de cada
+   aparelho. O Arthur escolheu a Inter para o site e o sistema; o mecanismo
+   saiu (está no histórico do git, se um dia a marca voltar a pedir).
    ============================================================================= */
-const PASTA_FONTES = join(process.cwd(), 'public', 'fontes');
-
-function fontesDaMarca(): { css: string; arquivos: string[] } {
-  try {
-    const css = readFileSync(join(PASTA_FONTES, 'marca.css'), 'utf8');
-    const m = JSON.parse(readFileSync(join(PASTA_FONTES, 'manifest.json'), 'utf8'));
-    return { css, arquivos: Array.isArray(m.fontes) ? m.fontes : [] };
-  } catch {
-    /* sem prebuild (por exemplo `next dev` sem rodar o script): fallback */
-    return { css: '', arquivos: [] };
-  }
-}
 
 /* O título era 'Escala de Mídia' e valia para o site inteiro: a aba do Louvor
    dizia Mídia, a da Diaconia dizia Mídia, e o link que a pessoa recebe no
@@ -69,16 +47,10 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const fontes = fontesDaMarca();
   return (
     <html lang="pt-BR">
       <head>
-        {/* preload só do que existe: um preload de arquivo ausente é um 404
-            na abertura de toda página */}
-        {fontes.arquivos.map(a => (
-          <link key={a} rel="preload" href={`/fontes/${a}`} as="font" type="font/woff2" crossOrigin="anonymous" />
-        ))}
-        {fontes.css && <style dangerouslySetInnerHTML={{ __html: fontes.css }} />}
+        <link rel="preload" href="/tipos/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       <body><Medidas />{children}</body>
     </html>
