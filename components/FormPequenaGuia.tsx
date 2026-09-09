@@ -97,7 +97,7 @@ export function FormPequenaGuia() {
     const msg = mensagemDoPedido(fim.pedido);
     const canal = canalDeConversa(msg);
     const temZap = !!IGREJA.whatsapp;
-    const primeiro = fim.pedido.nome.split(' ')[0];
+    const primeiro = fim.pedido.nome.trim();
     return (
       <div className="g-form-fim" role="status" aria-live="polite">
         <p className="g-rot">{fim.guardado ? 'Recebemos' : 'Quase lá'}</p>
