@@ -155,7 +155,7 @@ export default function Entrar() {
       </form>
       {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
       <button className="lid-bt-txt entrada-troca" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
-        {modo === 'link' ? 'prefiro entrar com senha' : 'prefiro receber um link no email'}
+        {modo === 'link' ? 'Prefiro entrar com senha' : 'Prefiro receber um link no email'}
       </button>
     </main>
   );
