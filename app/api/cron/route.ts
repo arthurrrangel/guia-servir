@@ -202,7 +202,7 @@ export async function GET(req: Request) {
         resumo.push({ equipe: e.nome, culto: rotulo, pendentes: pend.length, vagas: vagas.length });
         const linhas = pend.map(([fn, sl]: any) => {
           const v = S.voluntarios.find(x => x.id === sl.vid);
-          const texto = `${(v?.nome || '').split(' ')[0]}, você está na escala d${tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo'} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
+          const texto = `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo'} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
           const zap = linkZap(v?.tel, texto);
           return `• ${nomeDe(S, sl.vid)} — ${fn}\n  ${zap ? `1 toque: ${zap}` : `sem telefone: ${SITE}/eu/${v?.token}`}`;
         }).join('\n\n');
