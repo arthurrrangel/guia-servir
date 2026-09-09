@@ -36,21 +36,24 @@
       conclui que o sistema está quebrado e desiste — e a lista não lhe dá
       nenhuma pista de qual das duas linhas é ela.
 
-   O CONSERTO. `equipe_time` passa a devolver `desempate`: o SOBRENOME, e só
-   para quem tem homônimo na equipe. Quem não tem recebe nulo e a tela continua
-   exatamente como está hoje.
+   O CONSERTO. `equipe_time` passa a devolver `nome_completo`: o nome inteiro,
+   como a pessoa se cadastrou, para TODO MUNDO da lista.
 
-   Eu tinha escrito a inicial ("CLAUDIO S."), por receio de publicar nome
-   completo numa lista aberta a quem tem o link. O Arthur pediu o sobrenome, e
-   ao conferir o robots.txt o receio se mostrou grande demais: `/equipe/` está
-   em Disallow, ou seja a página não é indexada — ela é compartilhada por link
-   dentro da equipe, que é exatamente o lugar onde uma lista de nomes tem que
-   ter sobrenome. A Joice pediu isso com estas palavras: "quem tem nome igual,
-   não aparece o sobrenome para diferenciar".
+   Cheguei aqui em três passos, e vale registrar por que os dois primeiros
+   ficaram para trás. Primeiro escrevi a inicial do sobrenome ("CLAUDIO S."),
+   e só para quem tinha homônimo — por receio de publicar nome completo numa
+   lista aberta a quem tem o link. Depois virou o sobrenome, ainda só para os
+   homônimos. Agora é o nome inteiro de todos, decisão do Arthur.
 
-   A escada, do menos ao mais: primeiro sobrenome; se dois homônimos tiverem
-   também o mesmo primeiro sobrenome, o resto do nome inteiro. Nunca mais do
-   que o necessário para separar.
+   O receio não se sustentava: `/equipe/` está em Disallow no robots.txt, ou
+   seja a página não é indexada — ela circula por link DENTRO da equipe, que é
+   exatamente o lugar onde uma lista de gente tem nome inteiro. E mostrar o
+   nome só de quem tem homônimo criava uma lista de duas classes, em que a
+   marca de "tem alguém com seu nome" era justamente aparecer por extenso.
+
+   `primeiro_nome` continua vindo, e continua sendo o primeiro nome: é ele que
+   abre a saudação depois do PIN ("Oi, Cláudio"). Nome completo em saudação soa
+   a cartório.
 
    ---------------------------------------------------------------------------
    PARTE 2 — OS TEXTOS DAS CINCO ÁREAS (era o 41)
@@ -71,39 +74,19 @@ drop function if exists equipe_time(text);
 
 create function equipe_time(p_slug text)
 returns table(area text, ordem int, voluntario_id uuid, primeiro_nome text,
-              desempate text, nivel text, tem_pin boolean, tem_tel boolean)
+              nome_completo text, nivel text, tem_pin boolean, tem_tel boolean)
 language sql security definer set search_path = public stable as $fn$
-  with pessoa as (
-    select v.id,
-           btrim(v.nome)                                  as nome_todo,
-           split_part(btrim(v.nome), ' ', 1)              as pnome,
-           /* o resto do nome, sem o primeiro: "" quando a pessoa só tem um nome */
-           btrim(substr(btrim(v.nome), length(split_part(btrim(v.nome), ' ', 1)) + 1)) as resto,
-           v.equipe_id
-      from voluntarios v
-      join equipes e on e.id = v.equipe_id and e.slug = p_slug
-     where v.ativo
-  ),
-  /* quantas pessoas DISTINTAS têm este primeiro nome nesta equipe */
-  repete as (
-    select id, pnome, resto,
-           count(*) over (partition by equipe_id, upper(pnome))                                  as n_pnome,
-           count(*) over (partition by equipe_id, upper(pnome),
-                          upper(split_part(resto, ' ', 1)))                                      as n_sobrenome
-      from pessoa
-  )
   select f.nome, f.ordem, v.id,
-         r.pnome,
-         case
-           when r.n_pnome < 2 or r.resto = '' then null      -- não repete, ou só tem um nome
-           when r.n_sobrenome < 2 then split_part(r.resto, ' ', 1)  -- o primeiro sobrenome separa
-           else r.resto                                      -- mesmo sobrenome: o nome todo
-         end,
+         /* o primeiro nome CONTINUA vindo: é ele que abre a saudação depois do
+            PIN ("Oi, Cláudio"). Nome completo em saudação soa a cartório. */
+         split_part(btrim(v.nome), ' ', 1),
+         /* o nome como a pessoa se cadastrou, inteiro, sem cortar em sobrenome
+            nenhum — é o que a lista mostra */
+         btrim(v.nome),
          h.nivel::text,
          v.pin_hash is not null,
          nullif(tel_norm(v.telefone),'') is not null
     from voluntarios v
-    join repete r on r.id = v.id
     join equipes e on e.id = v.equipe_id and e.slug = p_slug
     join habilidades h on h.voluntario_id = v.id
     join funcoes f on f.id = h.funcao_id and f.ativa
@@ -142,11 +125,11 @@ select slug, nome, left(descricao, 60) || '…' as descricao
  where slug in ('midia', 'louvor', 'kids', 'servico', 'livraria')
  order by ordem, nome;
 
--- 2) o desempate: tem que aparecer preenchido para Cláudio e Luciene
-select distinct primeiro_nome, desempate
+-- 2) o nome inteiro: tem que vir preenchido para TODO MUNDO, e os dois Cláudios
+--    têm que aparecer como duas linhas diferentes
+select distinct primeiro_nome, nome_completo
   from equipe_time('servico')
- where desempate is not null
- order by 1;
+ order by 1, 2;
 
 /* =============================================================================
    PARTE 3 — CADASTRO EM DUPLICIDADE (a terceira pergunta da Joice)
