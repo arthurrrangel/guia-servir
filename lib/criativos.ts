@@ -17,6 +17,14 @@
    um pouco acima): o mesmo arquivo é cortado quase quadrado no celular e
    muito largo no monitor. As fotos das ÁREAS (Mídia, Louvor...) têm o
    próprio registro em lib/fotos.ts, porque três telas mostram a mesma área.
+
+   VÍDEO NO HERÓI (08/09/2026, pedido do Arthur). O lugar `heroi` aceita um
+   `video`: MP4 (H.264 + AAC ausente, ou seja SEM faixa de áudio), horizontal,
+   1920×1080, 10 a 20 segundos, até uns 8 MB. Salvar em public/criativos/ e
+   escrever `video: '/criativos/heroi.mp4'` na linha do herói. A foto do
+   `arquivo` continua sendo a capa (poster) enquanto o vídeo carrega, e vira a
+   imagem definitiva para quem pediu "reduzir movimento" no aparelho. Sem a
+   linha `video`, a home mostra a foto, como sempre.
    ============================================================================= */
 
 export type Criativo = {
@@ -29,6 +37,8 @@ export type Criativo = {
   /** largura mínima para não amolecer no monitor */
   largura: number;
   foco?: string;
+  /** só no herói: o MP4 mudo em loop; a foto do `arquivo` é a capa */
+  video?: string;
   /** a instrução para quem vai produzir a peça nova */
   nota: string;
 };
@@ -36,7 +46,7 @@ export type Criativo = {
 export const CRIATIVOS = {
   /* ------------------------------------------------------------- a home */
   heroi: { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'A primeira tela do site, atrás do título branco: precisa de área escura ou de um véu. No celular é cortada quase quadrada: o assunto no centro.' },
+    nota: 'A primeira tela do site, atrás do título branco: precisa de área escura ou de um véu. No celular é cortada quase quadrada: o assunto no centro. Aceita `video` (ver o cabeçalho).' },
   domingo: { arquivo: '/fotos/congregacao.webp', alt: 'Congregação reunida no culto de domingo', proporcao: '16:8', largura: 1600,
     nota: '"Como é o domingo", na home: a congregação, o salão, de dentro.' },
   fecho: { arquivo: '/fotos/oferta.webp', alt: '', proporcao: '16:9', largura: 2400,
@@ -49,7 +59,7 @@ export const CRIATIVOS = {
   'cultos-louvor': { arquivo: '/fotos/teclado.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 02: a banda, o palco.' },
   'cultos-palavra': { arquivo: '/fotos/palavra.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 03: a mensagem, o telão.' },
   'cultos-saida': { arquivo: '/fotos/congregacao.webp', alt: '', proporcao: '4:3', largura: 1200, nota: 'Passo 04: oração e saída, a congregação.' },
-  'cultos-fecho': { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /cultos.' },
+  'cultos-fecho': { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Azulejo "Participe de um culto", no fim de /cultos: o salão cheio, de dentro.' },
 
   /* ------------------------------------------------------------ /sobre */
   sobre: { arquivo: '/fotos/congregacao.webp', alt: 'Congregação da GUIA Church reunida', proporcao: '16:9', largura: 2400,
@@ -97,4 +107,9 @@ export function src(id: IdCriativo): string {
 /** o texto alternativo de um lugar */
 export function alt(id: IdCriativo): string {
   return CRIATIVOS[id].alt;
+}
+
+/** o vídeo de um lugar, quando registrado (hoje só o herói aceita) */
+export function video(id: IdCriativo): string | null {
+  return (CRIATIVOS[id] as Criativo).video ?? null;
 }
