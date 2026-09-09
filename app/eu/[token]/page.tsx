@@ -628,7 +628,7 @@ export default function Eu() {
                   <button className="vol-acao" disabled={ocupado === i.culto_id}
                     onClick={() => responder(i.culto_id,
                       i.status === 'recusado' ? 'confirmado' : 'recusado', i.data)}>
-                    {i.status === 'recusado' ? 'consegui, posso sim' : 'não vou mais poder'}
+                    {i.status === 'recusado' ? 'Consegui, posso sim' : 'Não vou mais poder'}
                   </button>
                 </span>
                 <span className="vol-linha-est">{est(i).txt}</span>
@@ -704,9 +704,9 @@ export default function Eu() {
                           <span className="vol-dia-nome">{diaNoMes(d)}</span>
                           <span className="vol-dia-btns">
                             <button className={`vol-dia-bt sim ${pode ? 'on' : ''}`} disabled={ocupado === d}
-                              onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>posso</button>
+                              onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>Posso</button>
                             <button className={`vol-dia-bt nao ${nao ? 'on' : ''}`} disabled={ocupado === d}
-                              onClick={() => responderDisp(d, 'nao')} aria-pressed={nao}>não</button>
+                              onClick={() => responderDisp(d, 'nao')} aria-pressed={nao}>Não</button>
                           </span>
                         </div>
                       );
