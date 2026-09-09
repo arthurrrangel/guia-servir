@@ -46,10 +46,10 @@ export default function Pagina() { return <Shell><Conferir /></Shell>; }
 
 const MINI: Record<string, string> = { titular: 'sozinho', reserva: 'ajuda', treino: 'aprende' };
 const OPCOES: { nivel: Nivel | null; rotulo: string }[] = [
-  { nivel: 'titular', rotulo: 'sozinho' },
-  { nivel: 'reserva', rotulo: 'ajuda' },
-  { nivel: 'treino', rotulo: 'aprende' },
-  { nivel: null, rotulo: 'não faz' },
+  { nivel: 'titular', rotulo: 'Sozinho' },
+  { nivel: 'reserva', rotulo: 'Ajuda' },
+  { nivel: 'treino', rotulo: 'Aprende' },
+  { nivel: null, rotulo: 'Não faz' },
 ];
 
 function Conferir() {
