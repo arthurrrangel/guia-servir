@@ -404,7 +404,7 @@ export default function EntradaEquipe() {
               <div className="linha" style={{ marginBottom: 14, gap: 8 }}>
                 <a className="btn claro cresce" href={`/eu/${tokenSalvo}`}>Já entrei neste aparelho, abrir minha página</a>
                 <button className="mini fantasma" onClick={() => { try { localStorage.removeItem(K_TOKEN); } catch {} setTokenSalvo(''); }}>
-                  não sou eu
+                  Não sou eu
                 </button>
               </div>
             )}
@@ -415,7 +415,7 @@ export default function EntradaEquipe() {
                 <input value={busca} onChange={e => setBusca(e.target.value)}
                   placeholder="digite seu nome" aria-label="Buscar seu nome"
                   autoComplete="off" enterKeyHint="search" />
-                {!!busca && <button className="mini fantasma" onClick={() => setBusca('')}>limpar</button>}
+                {!!busca && <button className="mini fantasma" onClick={() => setBusca('')}>Limpar</button>}
               </div>
             )}
 
