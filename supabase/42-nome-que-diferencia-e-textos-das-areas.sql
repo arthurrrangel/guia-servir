@@ -36,15 +36,21 @@
       conclui que o sistema está quebrado e desiste — e a lista não lhe dá
       nenhuma pista de qual das duas linhas é ela.
 
-   O CONSERTO. `equipe_time` passa a devolver `desempate`: a inicial do
-   sobrenome, e só. Não o sobrenome inteiro — esta lista é aberta a quem tem o
-   link, e primeiro nome + inicial já separa os dois sem publicar o nome
-   completo de ninguém. A inicial só é preenchida quando o primeiro nome se
-   repete DENTRO da mesma equipe; quando não repete, vem nula e a tela continua
+   O CONSERTO. `equipe_time` passa a devolver `desempate`: o SOBRENOME, e só
+   para quem tem homônimo na equipe. Quem não tem recebe nulo e a tela continua
    exatamente como está hoje.
 
-   Quando duas pessoas repetem primeiro nome E inicial do sobrenome, a coluna
-   traz o sobrenome inteiro daquelas duas — é o mínimo que ainda separa.
+   Eu tinha escrito a inicial ("CLAUDIO S."), por receio de publicar nome
+   completo numa lista aberta a quem tem o link. O Arthur pediu o sobrenome, e
+   ao conferir o robots.txt o receio se mostrou grande demais: `/equipe/` está
+   em Disallow, ou seja a página não é indexada — ela é compartilhada por link
+   dentro da equipe, que é exatamente o lugar onde uma lista de nomes tem que
+   ter sobrenome. A Joice pediu isso com estas palavras: "quem tem nome igual,
+   não aparece o sobrenome para diferenciar".
+
+   A escada, do menos ao mais: primeiro sobrenome; se dois homônimos tiverem
+   também o mesmo primeiro sobrenome, o resto do nome inteiro. Nunca mais do
+   que o necessário para separar.
 
    ---------------------------------------------------------------------------
    PARTE 2 — OS TEXTOS DAS CINCO ÁREAS (era o 41)
@@ -81,16 +87,17 @@ language sql security definer set search_path = public stable as $fn$
   /* quantas pessoas DISTINTAS têm este primeiro nome nesta equipe */
   repete as (
     select id, pnome, resto,
-           count(*) over (partition by equipe_id, upper(pnome))                        as n_pnome,
-           count(*) over (partition by equipe_id, upper(pnome), upper(left(resto,1)))  as n_inicial
+           count(*) over (partition by equipe_id, upper(pnome))                                  as n_pnome,
+           count(*) over (partition by equipe_id, upper(pnome),
+                          upper(split_part(resto, ' ', 1)))                                      as n_sobrenome
       from pessoa
   )
   select f.nome, f.ordem, v.id,
          r.pnome,
          case
-           when r.n_pnome < 2 or r.resto = '' then null            -- não repete, ou não há sobrenome
-           when r.n_inicial < 2 then left(r.resto, 1) || '.'       -- a inicial já separa
-           else split_part(r.resto, ' ', 1)                        -- inicial igual: o sobrenome inteiro
+           when r.n_pnome < 2 or r.resto = '' then null      -- não repete, ou só tem um nome
+           when r.n_sobrenome < 2 then split_part(r.resto, ' ', 1)  -- o primeiro sobrenome separa
+           else r.resto                                      -- mesmo sobrenome: o nome todo
          end,
          h.nivel::text,
          v.pin_hash is not null,
