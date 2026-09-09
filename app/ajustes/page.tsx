@@ -194,7 +194,7 @@ function Ajustes() {
         <div className="msg-preview">{kit}</div>
         <div className="linha" style={{ marginTop: 10 }}>
           <button className="pri" onClick={() => copiar(kit, aviso, 'Copiado. Cole e fixe no grupo da equipe.')}>Copiar mensagem do grupo</button>
-          <a className="btn" href={linkGrupo} target="_blank" rel="noopener">abrir a página da equipe</a>
+          <a className="btn" href={linkGrupo} target="_blank" rel="noopener">Abrir a página da equipe</a>
         </div>
       </details>
 
@@ -353,7 +353,7 @@ function Ajustes() {
                     })) return;
                     try { await removerLider(l.email, l.equipe_id); await recarregarLideres(); aviso('Removido'); }
                     catch (err) { aviso(aviseHumano(err)); }
-                  }}>tirar acesso</button>
+                  }}>Tirar acesso</button>
               </div>
             </div>
           ))}
