@@ -57,7 +57,7 @@ const dia = (iso: string) => {
 const diasAtras = (iso: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 const espera = (n: number) => n === 0 ? 'chegou hoje' : n === 1 ? 'há 1 dia' : `há ${n} dias`;
-const primeiro = (n: string) => (n || '').trim().split(/\s+/)[0] || '';
+const nomeInteiro = (n: string) => (n || '').trim();
 
 function Fila() {
   const { equipe, aviso, recarregar } = useApp();
@@ -240,7 +240,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
      navegador bloqueia a aba); a mudança de estado sai atrás, sem travar. */
   const chamando = c.status === 'enviada' || c.status === 'em_analise';
   const zapContato = tel ? linkWhatsApp(tel,
-    `Oi ${primeiro(nome)}! Aqui é da ${equipeNome} da GUIA. Vi seu cadastro para servir com a gente. Posso te fazer umas perguntas?`) : '';
+    `Oi ${nomeInteiro(nome)}! Aqui é da ${equipeNome} da GUIA. Vi seu cadastro para servir com a gente. Posso te fazer umas perguntas?`) : '';
   function aoChamar() {
     if (!chamando) return;
     void decidir(c.id, 'conversa').then(() => mudou('marcado como em conversa')).catch(() => {});
@@ -279,7 +279,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
         <div className="lid-cand-btns">
           {f.chama && zapContato && (
             <a className="lid-bt" href={zapContato} target="_blank" rel="noreferrer" onClick={aoChamar}>
-              Chamar {primeiro(nome)} no WhatsApp
+              Chamar {nomeInteiro(nome)} no WhatsApp
             </a>
           )}
           {f.chama && !zapContato && (
@@ -289,7 +289,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
           )}
           {c.status === 'aprovada' && zapLink && (
             <a className="lid-bt" href={zapLink} target="_blank" rel="noreferrer">
-              Mandar o link de {primeiro(nome)}
+              Mandar o link de {nomeInteiro(nome)}
             </a>
           )}
           {c.status === 'entrevista' && zapContato && (
@@ -303,10 +303,10 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
             do mundo real, e a tela passa a ter a mesma. */}
         {!NO_TIME.includes(c.status) && (
           <>
-            <span className="lid-cand-mini">Depois de falar com {primeiro(nome)}</span>
+            <span className="lid-cand-mini">Depois de falar com {nomeInteiro(nome)}</span>
             <div className="lid-cand-btns" style={{ marginTop: 16 }}>
               <button className="lid-bt-txt" disabled={ocupado}
-                onClick={() => agir('aprovada', `${primeiro(nome)} entrou no time`)}>
+                onClick={() => agir('aprovada', `${nomeInteiro(nome)} entrou no time`)}>
                 {ocupado ? 'salvando…' : 'Aprovar e criar no time'}
               </button>
               {c.status !== 'recusada' && (
@@ -337,7 +337,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
         )}
 
         {/* O QUE ELA MANDOU */}
-        <span className="lid-cand-mini">O que {primeiro(nome)} mandou</span>
+        <span className="lid-cand-mini">O que {nomeInteiro(nome)} mandou</span>
         <dl className="lid-cand-dl">
           <dt>Chegou</dt><dd>{dia(c.criado_em)} · {espera(dias)}</dd>
           <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>

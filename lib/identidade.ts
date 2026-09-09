@@ -67,8 +67,10 @@ export const dupla = (i?: Identidade | null) => organiza(i) && serve(i);
 /** As áreas em que serve, fora aquela de onde veio o link. */
 export const outrasAreas = (i?: Identidade | null) => (i?.serve ?? []).filter(v => !v.este);
 
-/** Como chamar a pessoa numa frase, sem soar como formulário. */
-export const comoChamar = (i?: Identidade | null) => i?.pessoa?.primeiro_nome || '';
+/** Como chamar a pessoa numa frase. Nome inteiro: decisão do Arthur em 09/09,
+    para todo o sistema, sem exceção para saudação. */
+export const comoChamar = (i?: Identidade | null) =>
+  (i?.pessoa?.nome || '').trim() || i?.pessoa?.primeiro_nome || '';
 
 /** Uma linha honesta sobre o papel, para a tela não precisar montar a frase.
     Ordem importa: o mais amplo primeiro, porque é o que define o acesso. */

@@ -6,6 +6,19 @@
    rodar. Supabase → SQL Editor → colar tudo → Run. É idempotente: rodar duas
    vezes dá o mesmo resultado.
 
+   NÃO É MAIS URGENTE — leia isto antes de correr para o SQL Editor. Em 09/09
+   o nome inteiro passou a chegar à lista por outro caminho: o servidor da
+   página lê `voluntarios.nome` e entrega o mapa à tela (`page.tsx` →
+   `lib/nomes-servidor.ts`). Ou seja, a Joice já vê o sobrenome dos dois
+   CLAUDIO sem que ninguém rode nada.
+
+   Então por que rodar. Porque isto aqui é o conserto na ORIGEM: enquanto a
+   função devolver só o primeiro nome, todo consumidor futuro dela nasce
+   cortado, e o site carrega um desvio que existe só por causa disso. Rodando,
+   `equipe_time` passa a mandar `nome_completo`, a tela prefere esse campo
+   sozinha, e `lib/nomes-servidor.ts` pode ser apagado. Os textos das cinco
+   áreas (parte 2) e a busca por duplicidade (parte 3) continuam valendo.
+
    ---------------------------------------------------------------------------
    PARTE 1 — O PROBLEMA QUE A JOICE VIU
 
@@ -51,9 +64,12 @@
    nome só de quem tem homônimo criava uma lista de duas classes, em que a
    marca de "tem alguém com seu nome" era justamente aparecer por extenso.
 
-   `primeiro_nome` continua vindo, e continua sendo o primeiro nome: é ele que
-   abre a saudação depois do PIN ("Oi, Cláudio"). Nome completo em saudação soa
-   a cartório.
+   `primeiro_nome` continua vindo, mas NÃO por causa de saudação: cheguei a
+   escrever que a saudação depois do PIN ficaria no primeiro nome porque nome
+   inteiro "soa a cartório" — isso foi exceção minha, que o Arthur não pediu e
+   mandou tirar. A tela usa o nome inteiro em toda parte. A coluna fica porque
+   é ela que a busca casa quando a pessoa digita só o primeiro nome, e porque é
+   o último degrau quando nenhum nome inteiro chegou.
 
    ---------------------------------------------------------------------------
    PARTE 2 — OS TEXTOS DAS CINCO ÁREAS (era o 41)
@@ -77,8 +93,8 @@ returns table(area text, ordem int, voluntario_id uuid, primeiro_nome text,
               nome_completo text, nivel text, tem_pin boolean, tem_tel boolean)
 language sql security definer set search_path = public stable as $fn$
   select f.nome, f.ordem, v.id,
-         /* o primeiro nome CONTINUA vindo: é ele que abre a saudação depois do
-            PIN ("Oi, Cláudio"). Nome completo em saudação soa a cartório. */
+         /* o primeiro nome CONTINUA vindo: é o que a busca casa quando a
+            pessoa digita só ele, e é o último degrau da queda na tela */
          split_part(btrim(v.nome), ' ', 1),
          /* o nome como a pessoa se cadastrou, inteiro, sem cortar em sobrenome
             nenhum — é o que a lista mostra */
