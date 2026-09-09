@@ -151,7 +151,10 @@ function Escala() {
     const atual = S.escalas[d]?.slots?.[funcao];
     /* trocar ou limpar alguém que JÁ respondeu apaga essa resposta: avisar antes */
     if (atual?.vid && atual.status && atual.status !== 'pendente' && atual.vid !== vid) {
-      const nome = nomeDe(S, atual.vid).split(' ')[0];
+      /* 09/09/2026: era o primeiro nome, e a igreja tem dois CLAUDIO e duas
+         LUCIENE. Este aviso decide se o líder apaga a resposta de alguém — é o
+         pior lugar possível para um nome ambíguo. */
+      const nome = nomeDe(S, atual.vid);
       const oQue = atual.status === 'confirmado' ? `${nome} já CONFIRMOU esse dia`
         : atual.status === 'furou' ? `${nome} está marcado como FUROU (isso conta no histórico)`
         : `${nome} avisou que não pode`;
@@ -418,13 +421,13 @@ function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) 
 
       {!!m.emTodos.length && (
         <p className="esc-peso-nota todos">
-          {m.emTodos.map(p => p.nome.split(' ')[0]).join(' · ')}{' '}
+          {m.emTodos.map(p => p.nome).join(' · ')}{' '}
           {pl(m.emTodos.length, 'está', 'estão')} em todos os cultos montados.
         </p>
       )}
       {!!m.acimaDoLimite.length && (
         <p className="esc-peso-nota acima">
-          {m.acimaDoLimite.map(p => p.nome.split(' ')[0]).join(' · ')}{' '}
+          {m.acimaDoLimite.map(p => p.nome).join(' · ')}{' '}
           {pl(m.acimaDoLimite.length, 'passou', 'passaram')} do limite do mês.
         </p>
       )}
@@ -737,7 +740,7 @@ function Disponibilidade({ d, S, aviso }: any) {
         {!!rp.mudo.length && (
           <button className="lid-bt-txt" style={{ marginTop: 14 }}
             onClick={() => copiar(
-              `Pessoal, quem ainda não respondeu a disponibilidade de ${fmtDia(d)}: ${rp.mudo.map((v: any) => v.nome.split(' ')[0]).join(', ')}. Entrem no link de vocês e marquem posso ou não posso, é rapidinho.`,
+              `Pessoal, quem ainda não respondeu a disponibilidade de ${fmtDia(d)}: ${rp.mudo.map((v: any) => v.nome).join(', ')}. Entrem no link de vocês e marquem posso ou não posso, é rapidinho.`,
               aviso, 'Cobrança copiada. Cole no grupo.')}>
             Cobrar quem não respondeu
           </button>
