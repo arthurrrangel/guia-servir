@@ -342,7 +342,7 @@ function Escala() {
               <div className="lid-secao-cab">
                 <span className="rot">Já passaram</span>
                 <button className="lid-bt-txt" onClick={() => setVerPassado(v => !v)}>
-                  {verPassado ? 'esconder' : `ver ${passados.length}`}
+                  {verPassado ? 'Esconder' : `Ver ${passados.length}`}
                 </button>
               </div>
               {verPassado && passados.map(d => (
@@ -631,7 +631,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
             {dia?.plantao?.length ? dia.plantao.map((p: string) => nomeDe(S, p)).join(', ') : 'ninguém ainda'}
           </span>
           <button className="lid-bt-txt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => novoPlantao(d)}>
-            sugerir
+            Sugerir
           </button>
         </div>
       </div>
