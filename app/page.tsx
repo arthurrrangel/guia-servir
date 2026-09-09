@@ -18,6 +18,7 @@ import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl } from '@/lib/plural';
 import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
+import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
    A HOME
@@ -479,7 +480,7 @@ export default function Casa() {
               <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
                 <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
                 <span className="casa-area-nome">{m.nome}</span>
-                {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
+                {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
                 <span className="casa-area-selo">
                   {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
                   {!m.aberto && ' · conversa antes'}
