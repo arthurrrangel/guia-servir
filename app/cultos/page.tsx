@@ -13,28 +13,36 @@ import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
    Responde QUANDO e O QUE ESPERAR. O ONDE tem página própria (/como-chegar).
 
-   Quatro blocos, todos centrados: o herói com a hora, a ordem do culto em
-   quatro fotos, as três perguntas de quem nunca foi, o fecho. O Kids virou
-   uma das perguntas; a de estacionamento mora em /como-chegar.
+   08/09/2026: os textos são os do Arthur, palavra por palavra, na ordem que
+   ele pediu — "Um domingo para pertencer", "É a sua primeira vez?", "O que
+   você precisa saber", "Escolha seu próximo passo". O que ele não citou e
+   decidiu manter: as quatro fotos da ordem do culto e a seção do Follow (a
+   pílula da home aponta para #follow quando a próxima coisa é o sábado).
 
-   AS PERGUNTAS são palavra por palavra as da igreja. Três, não cinco: é o
-   que cabe numa tela sem virar parede de texto.
+   Como o texto é mais longo que o de antes, ele é diagramado em blocos
+   curtos: o parágrafo do herói dividido entre o herói e a faixa das fotos,
+   a primeira vez em três fichas (chegar / culto / crianças), o que precisa
+   saber em cinco linhas, o próximo passo em duas portas de foto. Nenhuma
+   parede de texto.
    ============================================================================= */
 
-/* A FICHA DO DOMINGO: os fatos de quem nunca foi, em rótulo + valor + uma
-   linha. É a mesma informação das antigas "cinco perguntas", sem a prosa. */
-const PERGUNTAS = [
-  { q: 'Como eu me visto?', r: 'Do jeito que você já está. Tem gente de terno e gente de chinelo na mesma fileira.' },
-  { q: 'Vou ter que falar alguma coisa?', r: 'Não. Tem um momento de acolhida no meio do culto, e ficar sentado é uma resposta perfeitamente boa.' },
-  { q: 'E o meu filho?', r: 'Tem o GUIA Kids, com sala e equipe próprias, dividido por faixa etária. Check-in na entrada.' },
+/* É A SUA PRIMEIRA VEZ? — três momentos, os três parágrafos do Arthur */
+const PRIMEIRA_VEZ = [
+  { r: 'Ao chegar', v: 'A equipe Connect recebe você',
+    d: 'Ao chegar, nossa equipe de Connect estará disponível para orientar você, apresentar os espaços da igreja e responder às suas dúvidas.' },
+  { r: 'Durante o culto', v: 'Louvor, mensagem e comunidade',
+    d: 'Durante o culto, você poderá participar de um momento de louvor, ouvir uma mensagem baseada na Bíblia e conhecer uma comunidade que valoriza relacionamento, generosidade e serviço.' },
+  { r: 'Com crianças', v: 'GUIA Kids',
+    d: 'Se vier com crianças, a GUIA Kids oferece um ambiente preparado para recebê-las com segurança, cuidado e uma linguagem adequada para cada faixa etária.' },
 ];
-const FICHA = [
-  { r: 'Quando', v: 'Domingo, 10h', d: 'Toda semana, no mesmo horário.' },
-  { r: 'Onde', v: IGREJA.rua, d: `${IGREJA.bairro}, ${IGREJA.cidade}.`, href: '/como-chegar' },
-  { r: 'Crianças', v: 'GUIA Kids', d: 'Sala e equipe próprias, por faixa etária. Check-in na entrada.' },
-  { r: 'Roupa', v: 'A que você já usa', d: 'Tem gente de terno e gente de chinelo na mesma fileira.' },
-  { r: 'Participação', v: 'Nenhuma obrigatória', d: 'Ficar sentado é uma resposta perfeitamente boa.' },
-  { r: 'Estacionamento', v: 'Com equipe', d: 'Chegue com dez minutos de folga se vier dirigindo.' },
+
+/* O QUE VOCÊ PRECISA SABER — cinco linhas, as cinco do Arthur */
+const PRECISA_SABER: Array<{ r: string; v: string; href?: string }> = [
+  { r: 'Quando', v: 'Culto aos domingos, às 10h' },
+  { r: 'Onde', v: `${IGREJA.rua}, ${IGREJA.bairro}`, href: '/como-chegar' },
+  { r: 'Recepção', v: 'Nossa equipe estará pronta para receber você' },
+  { r: 'Crianças', v: 'Temos um espaço preparado para as crianças' },
+  { r: 'Chegada', v: 'Você pode chegar alguns minutos antes para conhecer o ambiente com calma' },
 ];
 
 /* O FOLLOW, com âncora própria (#follow): a home aponta para cá quando a
@@ -54,9 +62,9 @@ const PASSOS = [
 export const metadata: Metadata = {
   title: 'Cultos',
   description:
-    'Culto aos domingos, às 10h, na Barra da Tijuca. O que esperar antes de você sair de casa.',
+    'Um domingo para pertencer: culto aos domingos, às 10h, na Barra da Tijuca. O que esperar na sua primeira vez.',
   alternates: { canonical: '/cultos' },
-  ...cartao({ titulo: 'Cultos', descricao: 'Domingo, 10h, Barra da Tijuca. O que esperar antes de sair de casa.', caminho: '/cultos', imagem: 'cultos' }),
+  ...cartao({ titulo: 'Cultos', descricao: 'Um domingo para pertencer. Domingo, 10h, Barra da Tijuca.', caminho: '/cultos', imagem: 'cultos' }),
 };
 
 export default function Cultos() {
@@ -64,7 +72,11 @@ export default function Cultos() {
     <Site atual="/cultos" escuro>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
-        mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })),
+        mainEntity: [
+          { '@type': 'Question', name: 'É a sua primeira vez na GUIA Church?', acceptedAnswer: { '@type': 'Answer', text: 'Você será recebido por uma equipe preparada para ajudar em cada etapa da sua experiência. ' + PRIMEIRA_VEZ.map(p => p.d).join(' ') } },
+          { '@type': 'Question', name: 'Que horas é o culto?', acceptedAnswer: { '@type': 'Answer', text: `Culto aos domingos, às 10h, na ${IGREJA.rua}, ${IGREJA.bairro}. Você pode chegar alguns minutos antes para conhecer o ambiente com calma.` } },
+          { '@type': 'Question', name: 'Tem espaço para crianças?', acceptedAnswer: { '@type': 'Answer', text: PRIMEIRA_VEZ[2].d } },
+        ],
       }} />
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Event',
@@ -80,8 +92,8 @@ export default function Cultos() {
         <img src={cria('cultos')} alt={criaAlt('cultos')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot"><ProximoCulto /></p>
-          <Tit as="h1" className="g-h1">Culto de domingo</Tit>
-          <p className="g-ed">Às 10h, na Barra da Tijuca.</p>
+          <Tit as="h1" className="g-h1">Um domingo para pertencer</Tit>
+          <p className="g-ed">Aos domingos, nos reunimos para adorar a Deus, ouvir a Palavra e viver a comunhão com outras pessoas.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
             <Link href="/sobre" className="g-link claro">Quem somos</Link>
@@ -96,7 +108,7 @@ export default function Cultos() {
             <div className="g-cab-txt">
               <p className="g-rot">Na prática</p>
               <Tit className="g-h2">Como é um domingo aqui</Tit>
-              <p className="g-ed">Na mesma ordem, toda semana.</p>
+              <p className="g-ed">Cada momento é preparado para que você e sua família se sintam acolhidos, participem da celebração e encontrem um lugar para pertencer.</p>
             </div>
           </div>
           <div className="g-passos centro c-bloco grande">
@@ -111,27 +123,47 @@ export default function Cultos() {
         </div>
       </section>
 
-      {/* ------------------------------------------------- a ficha do domingo */}
-      <section className="casa-areia rev">
+      {/* ------------------------------------------------- a primeira vez */}
+      <section className="casa-papel rev" aria-labelledby="primeira-t">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
               <p className="g-rot">Primeira vez</p>
-              <Tit className="g-h2">O que você precisa saber</Tit>
-              <p className="g-ed">Seis coisas, nenhuma sobre doutrina.</p>
+              <Tit className="g-h2" id="primeira-t">É a sua primeira vez?</Tit>
+              <p className="g-ed">Você será recebido por uma equipe preparada para ajudar em cada etapa da sua experiência.</p>
             </div>
           </div>
           <div className="ficha c-bloco grande">
-            {FICHA.map(f => (
+            {PRIMEIRA_VEZ.map(f => (
               <div key={f.r}>
                 <p className="ficha-r">{f.r}</p>
-                {f.href
-                  ? <Link href={f.href} className="ficha-v">{f.v} <IcSeta /></Link>
-                  : <p className="ficha-v">{f.v}</p>}
+                <p className="ficha-v">{f.v}</p>
                 <p className="ficha-d">{f.d}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------- o que precisa saber */}
+      <section className="casa-areia rev" aria-labelledby="saber-t">
+        <div className="g g-secao">
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Antes de sair de casa</p>
+              <Tit className="g-h2" id="saber-t">O que você precisa saber</Tit>
+            </div>
+          </div>
+          <ul className="g-linhas c-bloco grande">
+            {PRECISA_SABER.map(l => (
+              <li key={l.r}>
+                <span className="g-linhas-r">{l.r}</span>
+                {l.href
+                  ? <Link href={l.href} className="g-linhas-v">{l.v} <IcSeta /></Link>
+                  : <span className="g-linhas-v">{l.v}</span>}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
@@ -153,15 +185,28 @@ export default function Cultos() {
         </div>
       </section>
 
-      {/* ------------------------------------------------------------ fecho */}
-      <section className="g-cheio centro fecho rev">
-        <img src={cria('cultos-fecho')} alt="" loading="lazy" decoding="async" />
-        <div className="g">
-          <p className="g-rot">Te esperamos</p>
-          <Tit className="g-h2">A porta é a mesma para todo mundo.</Tit>
-          <div className="g-acoes">
-            <Link href="/como-chegar" className="acao cheia">Traçar rota <IcSeta /></Link>
-            <Link href="/pequena-guia" className="g-link claro">Ou começar pela semana</Link>
+      {/* ------------------------------------------------ o próximo passo
+          Duas portas de foto, o mesmo componente da home: participar de um
+          culto (o caminho é o endereço) ou conhecer uma Pequena Guia. */}
+      <section className="casa-escuro rev" aria-labelledby="passo-t">
+        <div className="g g-secao">
+          <div className="c">
+            <p className="g-rot">Próximo passo</p>
+            <Tit className="g-h2" id="passo-t">Escolha seu próximo passo</Tit>
+          </div>
+          <div className="casa-areas centro duas c-bloco">
+            <Link href="/como-chegar" className="casa-area corte">
+              <img src={cria('cultos-fecho')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Participe de um culto</span>
+              <p className="casa-area-desc">Venha conhecer a GUIA, celebrar com a gente e viver uma experiência de domingo em comunidade.</p>
+              <span className="casa-area-cta">Quero participar de um culto <IcSeta /></span>
+            </Link>
+            <Link href="/pequena-guia" className="casa-area corte">
+              <img src={cria('grupos')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Conheça uma Pequena Guia</span>
+              <p className="casa-area-desc">Se você deseja construir relacionamentos mais próximos e continuar sua caminhada durante a semana, encontre uma Pequena Guia perto de você.</p>
+              <span className="casa-area-cta">Quero conhecer uma Pequena Guia <IcSeta /></span>
+            </Link>
           </div>
         </div>
       </section>
