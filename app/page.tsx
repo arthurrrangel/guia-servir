@@ -17,7 +17,7 @@ import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl, cont } from '@/lib/plural';
-import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
 
 /* =============================================================================
    A HOME
@@ -94,6 +94,19 @@ export default function Casa() {
   const [solida, setSolida] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
   const fio = useRef<HTMLDivElement>(null);
+  const filme = useRef<HTMLVideoElement>(null);
+  const VIDEO = criaVideo('heroi');
+
+  /* O VÍDEO DO HERÓI RESPEITA "REDUZIR MOVIMENTO": quem pediu isso no
+     aparelho vê a foto de capa parada, não um loop. E fora da tela ele pausa,
+     para não gastar bateria decodificando o que ninguém está vendo. */
+  useEffect(() => {
+    const v = filme.current; if (!v) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { v.removeAttribute('autoplay'); v.pause(); return; }
+    const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) void v.play().catch(() => {}); else v.pause(); }));
+    obs.observe(v);
+    return () => obs.disconnect();
+  }, []);
 
   /* O LINK DE ACESSO DO ORGANIZADOR CAÍA AQUI E MORRIA.
 
@@ -279,7 +292,16 @@ export default function Casa() {
           Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
           dois botões, a régua. Nada de parágrafo. */}
       <section className="casa-heroi rev visto">
-        <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
+        {/* com `video` registrado em lib/criativos.ts, o fundo é o filme mudo
+            em loop e a foto vira a capa; sem ele, a foto de sempre */}
+        {VIDEO ? (
+          <video ref={filme} className="casa-heroi-foto" autoPlay muted loop playsInline
+                 poster={cria('heroi')} preload="metadata" aria-hidden="true" tabIndex={-1}>
+            <source src={VIDEO} type="video/mp4" />
+          </video>
+        ) : (
+          <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
+        )}
         <div className="casa-heroi-in">
           {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
               no aparelho (lib/semana.ts), com a ação certa para o momento */}
@@ -316,9 +338,9 @@ export default function Casa() {
           <span className="fato-d">{IGREJA.bairro}, {IGREJA.cidade}. Estacionamento com equipe.</span>
         </Link>
         <Link href="/pequena-guia" className="fato">
-          <span className="fato-r">Durante a semana</span>
-          <span className="fato-v">{PEQUENAS_GUIAS.length} Pequenas Guias<IcSeta /></span>
-          <span className="fato-d">Grupos de terça a quinta, perto de onde você mora.</span>
+          <span className="fato-r">Comunidade</span>
+          <span className="fato-v">Conheça uma Pequena Guia<IcSeta /></span>
+          <span className="fato-d">{PEQUENAS_GUIAS.length} grupos de terça a quinta, perto de onde você mora.</span>
         </Link>
       </section>
 
@@ -335,35 +357,38 @@ export default function Casa() {
               <div><b><Contador n={num.pessoas} /></b><span>{pl(num.pessoas, 'pessoa servindo', 'pessoas servindo')}</span></div>
               <div><b><Contador n={num.ministerios} /></b><span>{pl(num.ministerios, 'área aberta', 'áreas abertas')}</span></div>
               <div><b><Contador n={num.postos} /></b><span>{pl(num.postos, 'posto na escala', 'postos na escala')}</span></div>
-              <div><b><Contador n={num.cultos_no_mes} /></b><span>{pl(num.cultos_no_mes, 'encontro neste mês', 'encontros neste mês')}</span></div>
+              <div><b><Contador n={num.cultos_no_mes} /></b><span>{pl(num.cultos_no_mes, 'encontro no mês', 'encontros no mês')}</span></div>
             </div>
           </div>
         </section>
       )}
 
       {/* ----------------------------------------------- 01 · O DOMINGO
-          Título, uma linha, dois botões, a foto. As perguntas de quem nunca
-          foi moram em /cultos — a home não repete. */}
+          08/09/2026, pedido do Arthur: "Participe da nossa comunidade de onde
+          estiver", com duas portas — o campus físico e a transmissão ao vivo.
+          São dois azulejos de foto (o mesmo componente das áreas), cada um com
+          o texto de apoio e o selo com o essencial. As perguntas de quem nunca
+          foi continuam em /cultos — a home não repete. */}
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
-          {/* assimétrico: o texto na esquerda, a ação no fim da linha. Ver
-              FASE 20 no globals — era aqui que a home repetia .c pela segunda
-              das quatro vezes. */}
-          <div className="g-cab">
-            <div className="g-cab-txt">
-              <p className="g-rot">O domingo</p>
-              <Tit className="g-h2">Como é o domingo</Tit>
-              <p className="g-ed">Louvor, palavra e acolhida.</p>
-            </div>
-            <div className="g-acoes">
-              <Link href="/cultos" className="acao cheia">O domingo por inteiro <IcSeta /></Link>
-              <Link href="/como-chegar" className="g-link">Como chegar</Link>
-            </div>
+          <div className="c">
+            <p className="g-rot">O domingo</p>
+            <Tit className="g-h2">Participe da nossa comunidade de onde estiver</Tit>
+            <p className="g-ed">No campus da Barra da Tijuca ou ao vivo, no mesmo horário.</p>
           </div>
-          <div className="c-foto">
-            <div className="g-foto leva">
-              <img src={cria('domingo')} alt={criaAlt('domingo')} loading="lazy" decoding="async" />
-            </div>
+          <div className="casa-areas centro duas c-bloco">
+            <Link href="/cultos" className="casa-area corte">
+              <img src={cria('domingo')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Campus físico</span>
+              <p className="casa-area-desc">Na {IGREJA.rua}. Equipe na porta, estacionamento orientado e GUIA Kids para as crianças.</p>
+              <span className="casa-area-selo">Domingo · 10h · {IGREJA.bairro}</span>
+            </Link>
+            <Link href="/guia-church-tv" className="casa-area corte">
+              <img src={cria('tv')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Transmissão ao vivo</span>
+              <p className="casa-area-desc">O culto de domingo ao vivo, no mesmo horário, pela GUIA Church TV. Para quem está longe, viajando ou ainda conhecendo a igreja.</p>
+              <span className="casa-area-selo">Domingo · 10h · Ao vivo</span>
+            </Link>
           </div>
         </div>
       </section>
