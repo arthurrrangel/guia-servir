@@ -56,6 +56,25 @@ for (const W of [390, 1440]) {
   const ft = await p.evaluate(() => Math.round(document.querySelector('#follow').getBoundingClientRect().top)); ok(ft >= 60 && ft <= 220, `#follow rola até a seção (topo em ${ft}px)`);
   // botão principal do herói de /cultos
   const acao = await p.$eval('.g-cheio .acao.cheia', a => a.getAttribute('href')); ok(acao === '/como-chegar', `ação do herói de /cultos → ${acao}`);
+  /* O FORMULÁRIO DA PEQUENA GUIA, de ponta a ponta (08/09/2026): campo errado
+     acusa e não envia; preenchido certo, chama /api/pequena-guia e troca a
+     tela pelo agradecimento com a mensagem pronta. */
+  await p.goto(B + '/pequena-guia#encontrar', { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1800);
+  await p.fill('.g-form input[name="nome"]', 'Teste da Auditoria');
+  await p.fill('.g-form input[name="telefone"]', '2199');
+  await p.click('.g-form button[type="submit"]'); await p.waitForTimeout(500);
+  const err = await p.$eval('.g-form-erro', e => e.textContent).catch(() => '');
+  ok(/telefone/i.test(err || ''), `campo errado acusa: "${(err || '').slice(0, 40)}"`);
+  ok(!(await p.$('.g-form-fim')), 'campo errado não envia');
+  await p.fill('.g-form input[name="telefone"]', '21999998888');
+  await p.fill('.g-form input[name="cep"]', '22793000');
+  await p.fill('.g-form input[name="idade"]', '28');
+  await p.selectOption('.g-form select[name="dia"]', 'Quarta');
+  let chamou = false; p.on('request', r => { if (r.url().includes('/api/pequena-guia')) chamou = true; });
+  await p.click('.g-form button[type="submit"]'); await p.waitForTimeout(2500);
+  const fim = await p.$eval('.g-form-fim', e => e.innerText.replace(/\s+/g, ' ')).catch(() => '');
+  ok(chamou, 'formulário chama /api/pequena-guia');
+  ok(/Teste/.test(fim), `tela final com a mensagem pronta: "${fim.slice(0, 60)}"`);
   ok(erros.length === 0, `sem erros de console/página (${erros.length})`); if (erros.length) console.log(erros.slice(0, 5));
   await ctx.close();
 }
