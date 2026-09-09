@@ -9,6 +9,7 @@ import { AreasCarregando, Vazio } from '@/components/Tela';
 import { fotoDaArea } from '@/lib/fotos';
 import { src as cria, alt as criaAlt } from '@/lib/criativos';
 import { canalDeConversa } from '@/lib/igreja';
+import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
    /servir — ONDE A JORNADA COMEÇA
@@ -107,7 +108,7 @@ export default function Servir() {
                   <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
                     <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
                     <span className="casa-area-nome">{m.nome}</span>
-                    {m.descricao && <p className="casa-area-desc">{m.descricao}</p>}
+                    {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
                     <span className="casa-area-selo">
                       {/* FUNÇÃO é o tipo de trabalho (CÂMERA), POSTO é uma posição
                           dele na escala (CÂMERA 1). O campo conta postos. */}
