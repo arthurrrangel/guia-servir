@@ -19,7 +19,42 @@ const K_TOKEN = 'escala.meu-token';
 /* `desempate` (migração 42): a inicial do sobrenome, preenchida pelo banco só
    quando o primeiro nome se repete DENTRO da equipe. Vem indefinido enquanto a
    migração não roda, e aí a lista se comporta como antes. */
-type Pessoa = { voluntario_id: string; primeiro_nome: string; desempate?: string | null; tem_pin: boolean; tem_tel: boolean };
+type Pessoa = {
+  voluntario_id: string; primeiro_nome: string; desempate?: string | null;
+  tem_pin: boolean; tem_tel: boolean;
+  /* preenchido só quando o primeiro nome se repete na equipe: as OUTRAS
+     funções desta pessoa, que é o que a diferencia da homônima */
+  outrasFuncoes?: string[];
+};
+
+/* O nome da função vem em caixa alta ("ESTACIONAMENTO 1", "SETOR D",
+   "TRANSMISSÃO (CORTE + PTZ)"). Na dica ele é frase, não rótulo — mas duas
+   coisas não podem cair para minúscula: a letra que identifica o setor (senão
+   sai "Setor d", que parece erro de digitação) e as siglas. Palavra por
+   palavra: sigla curta e letra sozinha ficam; o resto desce. */
+const MIUDAS = new Set(['e', 'a', 'o', 'à', 'de', 'da', 'do', 'em']);
+const emFrase = (s: string) => {
+  const ps = s.trim().split(/\s+/);
+  const t = ps.map((p, i) => {
+    const letras = p.replace(/[^A-Za-zÀ-ÿ]/g, '');
+    /* uma letra sozinha NO FIM é identificador ("SETOR A", "SETOR D"); no meio
+       é conjunção ("COZINHA E BANHEIROS"). É o que separa "Setor A" de
+       "cozinha e banheiros" sem precisar de lista de exceção. */
+    if (letras.length === 1) return i === ps.length - 1 ? p.toUpperCase() : p.toLowerCase();
+    if (MIUDAS.has(p.toLowerCase())) return p.toLowerCase();
+    if (letras.length <= 4 && letras === letras.toUpperCase()) return p; // PTZ, HEAD
+    return p.toLowerCase();
+  }).join(' ');
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+/* a dica que separa duas pessoas de mesmo nome, em no máximo duas funções */
+const dicaDe = (p: Pessoa) => {
+  const f = p.outrasFuncoes;
+  if (!f) return null;
+  if (!f.length) return 'só nesta função';
+  const mostra = f.slice(0, 2).map(emFrase).join(', ');
+  return f.length > 2 ? `também em ${mostra} +${f.length - 2}` : `também em ${mostra}`;
+};
 
 /* O NOME QUE APARECE NA LISTA — 09/09/2026, pedido da Joice.
    A Connect tem dois CLAUDIO e duas LUCIENE; a Mídia, duas MARIA; o Louvor,
@@ -149,10 +184,60 @@ export default function EntradaEquipe() {
 
     /* uma seção por área, na ordem da escala. A mesma pessoa aparece em cada
        área que ela marcou no cadastro — é assim que ela se acha. */
+    const linhasTime = (time.data || []) as Linha[];
+
+    /* O DESEMPATE QUE NÃO ESPERA O BANCO — 09/09/2026.
+       A migração 42 acrescenta a inicial do sobrenome, mas enquanto ela não
+       roda a lista fica com dois CLAUDIO idênticos. O dado que separa os dois
+       JÁ ESTÁ nesta resposta: cada pessoa vem com o conjunto de funções que
+       marcou, e os dois Cláudios da Connect não marcaram as mesmas. "também na
+       Recepção" contra "também no Gabinete" resolve na hora — e resolve melhor
+       que um sobrenome, porque a pessoa reconhece a PRÓPRIA função.
+       Não expõe nada novo: essas funções já estão desenhadas na mesma página,
+       cada uma na sua seção. */
+    const funcoesDe = new Map<string, string[]>();
+    for (const l of linhasTime) {
+      const arr = funcoesDe.get(l.voluntario_id) || [];
+      if (!arr.includes(l.area)) arr.push(l.area);
+      funcoesDe.set(l.voluntario_id, arr);
+    }
+    /* quantas pessoas DISTINTAS têm cada primeiro nome, na equipe inteira */
+    const quantos = new Map<string, Set<string>>();
+    for (const l of linhasTime) {
+      const k = normal(l.primeiro_nome);
+      const s = quantos.get(k) || new Set<string>();
+      s.add(l.voluntario_id);
+      quantos.set(k, s);
+    }
+
+    /* O QUE VEM PRIMEIRO NA DICA. A caixa é estreita e corta com reticências,
+       então a função que a homônima NÃO faz tem que vir na frente — é ela que
+       separa as duas. Sem isto, os dois Cláudios começavam a dica com a mesma
+       palavra e a diferença morria depois do "…". */
+    const doHomonimo = (vid: string, pnome: string) => {
+      const s = new Set<string>();
+      for (const outro of quantos.get(normal(pnome)) || []) {
+        if (outro === vid) continue;
+        for (const a of funcoesDe.get(outro) || []) s.add(a);
+      }
+      return s;
+    };
+
     const porArea = new Map<string, Pessoa[]>();
-    for (const l of ((time.data || []) as Linha[])) {
+    for (const l of linhasTime) {
       const arr = porArea.get(l.area) || [];
-      arr.push({ voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, desempate: l.desempate, tem_pin: l.tem_pin, tem_tel: l.tem_tel });
+      const repetido = (quantos.get(normal(l.primeiro_nome))?.size || 0) > 1;
+      const doOutro = repetido ? doHomonimo(l.voluntario_id, l.primeiro_nome) : new Set<string>();
+      const outras = repetido
+        ? (funcoesDe.get(l.voluntario_id) || [])
+            .filter(a => a !== l.area)
+            .sort((x, y) => Number(doOutro.has(x)) - Number(doOutro.has(y)))
+        : [];
+      arr.push({
+        voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, desempate: l.desempate,
+        tem_pin: l.tem_pin, tem_tel: l.tem_tel,
+        outrasFuncoes: repetido ? outras : undefined,
+      });
       porArea.set(l.area, arr);
     }
     setAreas([...porArea.entries()].map(([area, gente]) => ({ area, gente })));
@@ -452,7 +537,10 @@ export default function EntradaEquipe() {
                     {gente.map(p => (
                       <button key={area + p.voluntario_id} className="pick-nome" disabled={ocupado}
                         onClick={() => escolher(p)}>
-                        <span className="cresce">{nomeNaLista(p)}</span>
+                        <span className="cresce">
+                          {nomeNaLista(p)}
+                          {dicaDe(p) && <span className="pick-dica">{dicaDe(p)}</span>}
+                        </span>
                         {!p.tem_pin && <span className="pill">criar PIN</span>}
                         <IcSeta />
                       </button>
