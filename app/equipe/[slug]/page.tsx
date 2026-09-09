@@ -16,7 +16,18 @@ import { IcBusca, IcSeta } from '@/components/Icones';
 
 const K_TOKEN = 'escala.meu-token';
 
-type Pessoa = { voluntario_id: string; primeiro_nome: string; tem_pin: boolean; tem_tel: boolean };
+/* `desempate` (migração 42): a inicial do sobrenome, preenchida pelo banco só
+   quando o primeiro nome se repete DENTRO da equipe. Vem indefinido enquanto a
+   migração não roda, e aí a lista se comporta como antes. */
+type Pessoa = { voluntario_id: string; primeiro_nome: string; desempate?: string | null; tem_pin: boolean; tem_tel: boolean };
+
+/* O NOME QUE APARECE NA LISTA — 09/09/2026, pedido da Joice.
+   A Connect tem dois CLAUDIO e duas LUCIENE; a Mídia, duas MARIA; o Louvor,
+   dois JOÃO. A lista mostrava só o primeiro nome, então as linhas ficavam
+   idênticas e ninguém sabia qual era a sua. Tocar na errada nunca abriu o
+   espaço de outra pessoa (o PIN exige os 4 últimos dígitos do telefone dela),
+   mas a pessoa tentava, não entrava e concluía que o sistema estava quebrado. */
+const nomeNaLista = (p: Pessoa) => p.desempate ? `${p.primeiro_nome} ${p.desempate}` : p.primeiro_nome;
 type Linha = Pessoa & { area: string; ordem: number; nivel: string };
 
 /* buscar por "jo" tem que achar "João": tira acento e caixa dos dois lados */
@@ -141,7 +152,7 @@ export default function EntradaEquipe() {
     const porArea = new Map<string, Pessoa[]>();
     for (const l of ((time.data || []) as Linha[])) {
       const arr = porArea.get(l.area) || [];
-      arr.push({ voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, tem_pin: l.tem_pin, tem_tel: l.tem_tel });
+      arr.push({ voluntario_id: l.voluntario_id, primeiro_nome: l.primeiro_nome, desempate: l.desempate, tem_pin: l.tem_pin, tem_tel: l.tem_tel });
       porArea.set(l.area, arr);
     }
     setAreas([...porArea.entries()].map(([area, gente]) => ({ area, gente })));
@@ -346,8 +357,10 @@ export default function EntradaEquipe() {
     </div></div></div>
   );
 
+  /* na confirmação o desempate volta a aparecer: é o instante exato em que a
+     pessoa precisa ter certeza de que escolheu a linha dela */
   const titulo = fase === 'pin' ? `Oi, ${alvo?.primeiro_nome}`
-    : fase === 'criar' ? `É você, ${alvo?.primeiro_nome}?`
+    : fase === 'criar' ? `É você, ${alvo ? nomeNaLista(alvo) : ''}?`
     : fase === 'cadastro' ? 'Entrar no time'
     : fase === 'enviado' ? (enviadoPor ? `Recebido, ${enviadoPor}` : 'Recebido')
     : 'Quem é você?';
@@ -429,7 +442,7 @@ export default function EntradaEquipe() {
                 .map(({ area, gente }) => ({
                   area,
                   gente: busca.trim()
-                    ? gente.filter(p => normal(p.primeiro_nome).includes(normal(busca)))
+                    ? gente.filter(p => normal(nomeNaLista(p)).includes(normal(busca)))
                     : gente,
                 }))
                 .filter(a => a.gente.length)
@@ -439,7 +452,7 @@ export default function EntradaEquipe() {
                     {gente.map(p => (
                       <button key={area + p.voluntario_id} className="pick-nome" disabled={ocupado}
                         onClick={() => escolher(p)}>
-                        <span className="cresce">{p.primeiro_nome}</span>
+                        <span className="cresce">{nomeNaLista(p)}</span>
                         {!p.tem_pin && <span className="pill">criar PIN</span>}
                         <IcSeta />
                       </button>
