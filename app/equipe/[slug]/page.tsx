@@ -16,9 +16,9 @@ import { IcBusca, IcSeta } from '@/components/Icones';
 
 const K_TOKEN = 'escala.meu-token';
 
-/* `desempate` (migração 42): a inicial do sobrenome, preenchida pelo banco só
-   quando o primeiro nome se repete DENTRO da equipe. Vem indefinido enquanto a
-   migração não roda, e aí a lista se comporta como antes. */
+/* `desempate` (migração 42): o SOBRENOME, preenchido pelo banco só para quem
+   tem homônimo DENTRO da equipe. Vem indefinido enquanto a migração não roda,
+   e aí a lista se comporta como antes. */
 type Pessoa = {
   voluntario_id: string; primeiro_nome: string; desempate?: string | null;
   tem_pin: boolean; tem_tel: boolean;
@@ -47,8 +47,12 @@ const emFrase = (s: string) => {
   }).join(' ');
   return t.charAt(0).toUpperCase() + t.slice(1);
 };
-/* a dica que separa duas pessoas de mesmo nome, em no máximo duas funções */
+/* A dica que separa duas pessoas de mesmo nome, em no máximo duas funções.
+   Ela é a REDE, não o cinto: quando a migração 42 rodar e o `desempate` (o
+   sobrenome) chegar, ele já resolve sozinho e a dica sai de cena. Dois
+   diferenciadores na mesma linha seriam ruído permanente. */
 const dicaDe = (p: Pessoa) => {
+  if (p.desempate) return null;
   const f = p.outrasFuncoes;
   if (!f) return null;
   if (!f.length) return 'só nesta função';
@@ -187,8 +191,8 @@ export default function EntradaEquipe() {
     const linhasTime = (time.data || []) as Linha[];
 
     /* O DESEMPATE QUE NÃO ESPERA O BANCO — 09/09/2026.
-       A migração 42 acrescenta a inicial do sobrenome, mas enquanto ela não
-       roda a lista fica com dois CLAUDIO idênticos. O dado que separa os dois
+       A migração 42 acrescenta o sobrenome, mas enquanto ela não roda a lista
+       fica com dois CLAUDIO idênticos. O dado que separa os dois
        JÁ ESTÁ nesta resposta: cada pessoa vem com o conjunto de funções que
        marcou, e os dois Cláudios da Connect não marcaram as mesmas. "também na
        Recepção" contra "também no Gabinete" resolve na hora — e resolve melhor
