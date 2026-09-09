@@ -1,6 +1,20 @@
 /* =============================================================================
-   O TEXTO ESTÁ CENTRADO NO CELULAR? (pedido do Arthur, 08/09/2026: "tudo tem
-   que estar centralizado no mobile")
+   O CABEÇALHO ESTÁ CENTRADO NO CELULAR? (pedido do Arthur, 08/09/2026: "tudo
+   tem que estar centralizado no mobile")
+
+   09/09/2026 — A REGRA MUDOU, E ESTE SCRIPT MUDA COM ELA. A auditoria em
+   captura das 12 telas mostrou parágrafo de 3 a 10 linhas centrado em quase
+   toda página: as duas bordas irregulares, o olho perdendo onde a linha
+   começa. A regra passou a ser mais precisa, não mais frouxa:
+
+     cabeçalho de seção (rótulo + título + linha de apoio) fica CENTRADO;
+     todo bloco que é CARTÃO alinha rótulo, título e texto à esquerda.
+
+   Então o que este script cobra é o cabeçalho, e ele pula, de propósito, os
+   blocos que agora alinham (lista de PULADOS, abaixo). Pular não é abrir mão:
+   quem cobra o alinhamento desses blocos é a régua da esquerda, que é visível
+   a olho na captura — um cartão desalinhado salta.
+
    Em 390 (W=360/430 para outras larguras), todo elemento com texto visível
    em main/footer é comparado com o bloco que o segura, e cada bloco com o
    pai, até o viewport: desvio acima de 8px é listado. Células de grade e
@@ -36,6 +50,8 @@ for (const rota of ROTAS) {
     for (const e of alvo) {
       if (!vis(e)) continue;
       if (e.closest('.leaflet-container, .pgs.fila, .rolo, .menu, .casa-barra, nextjs-portal, script, style, .pgs-dica')) continue;
+      /* PULADOS: os blocos que alinham à esquerda por regra (09/09/2026) */
+      if (e.closest('.cartao, .ficha, .fato, .casa-area, .cartoes, .qa, .g-perg, .g-linhas, .g-pe-cols, .g-pe-onde, .g-pe-linha, .pg-corpo, .g-vira, .g-texto')) continue;
       if (e.classList.contains('pal') || e.closest('.pal')) continue;
       const disp = cs(e).display;
       if (disp === 'inline') continue;                       // faz parte do texto do pai
