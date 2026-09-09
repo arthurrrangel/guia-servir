@@ -8,14 +8,20 @@ import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { FormPequenaGuia } from '@/components/FormPequenaGuia';
 
 /* =============================================================================
    /pequena-guia — O GRUPO DA SEMANA
 
-   Três blocos: o herói (o que é, em uma linha), os grupos (um cartão por
-   grupo, com o mapa do bairro — nunca da casa, ver lib/pequenas-guias), e
-   o fecho com a conversa. O formulário é uma conversa por link: nenhum dado
-   de visitante entra num banco que está no ar servindo a escala de todo mundo.
+   Quatro blocos: o herói (a frase do Arthur, 08/09/2026), os grupos (um mapa
+   com um pino por grupo e a lista, nunca a casa de ninguém, ver
+   lib/pequenas-guias), o pedido "Encontre uma Pequena Guia perto de você"
+   com o formulário, e o fecho com a conversa.
+
+   O FORMULÁRIO (components/FormPequenaGuia.tsx) grava numa planilha da igreja
+   pela rota /api/pequena-guia e abre a conversa com a mensagem pronta. O que
+   continua valendo desde o primeiro dia: nenhum dado de visitante entra no
+   banco que está no ar servindo a escala de todo mundo.
 
    No celular os cartões viram uma fila que desliza para o lado: doze mapas
    empilhados eram dez telas de rolagem.
@@ -24,9 +30,9 @@ import { src as cria, alt as criaAlt } from '@/lib/criativos';
 export const metadata: Metadata = {
   title: 'Pequena Guia',
   description:
-    'As Pequenas Guias são os grupos da GUIA Church que se encontram durante a semana, perto de onde você mora. Sem inscrição, sem custo — é só dizer onde você está.',
+    'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana para compartilhar a vida, estudar a Palavra e crescer em comunidade, perto de onde você mora.',
   alternates: { canonical: '/pequena-guia' },
-  ...cartao({ titulo: 'Pequena Guia', descricao: 'O grupo da semana, perto de onde você mora. Uma hora, na casa de alguém.', caminho: '/pequena-guia', imagem: 'pequena-guia' }),
+  ...cartao({ titulo: 'Pequena Guia', descricao: 'Relacionamentos que fortalecem sua fé. Um grupo perto de onde você mora.', caminho: '/pequena-guia', imagem: 'pequena-guia' }),
 };
 
 const CONVITE = canalDeConversa(
@@ -50,11 +56,11 @@ export default function PequenaGuia() {
       <section className="g-cheio alta centro rev">
         <img src={cria('grupos')} alt={criaAlt('grupos')} fetchPriority="high" />
         <div className="g">
-          <p className="g-rot">Durante a semana</p>
-          <Tit as="h1" className="g-h1">Pequena Guia</Tit>
-          <p className="g-ed">Uma hora por semana, perto de você.</p>
+          <p className="g-rot">Pequena Guia</p>
+          <Tit as="h1" className="g-h1">Relacionamentos que fortalecem sua fé.</Tit>
+          <p className="g-ed">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
           <div className="g-acoes">
-            <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">Quero participar <IcSeta /></a>
+            <a href="#encontrar" className="acao cheia">Quero encontrar uma Pequena Guia <IcSeta /></a>
             <Link href="/cultos" className="g-link claro">Prefiro começar pelo domingo</Link>
           </div>
         </div>
@@ -93,6 +99,23 @@ export default function PequenaGuia() {
         </div>
       </section>
 
+      {/* ------------------------------------------ encontre a sua: o pedido
+          O texto do Arthur e o formulário de cinco campos. A âncora #encontrar
+          é o destino do botão do herói. */}
+      <section id="encontrar" className="casa-areia rev" aria-labelledby="encontrar-t">
+        <div className="g g-secao">
+          <div className="c">
+            <p className="g-rot">Perto de você</p>
+            <Tit className="g-h2" id="encontrar-t">Encontre uma Pequena Guia perto de você</Tit>
+            <p className="g-ed">A Pequena Guia é um grupo que se reúne durante a semana para compartilhar a vida, estudar a Palavra e crescer em comunidade. É um espaço de relacionamento, cuidado e fé, onde você pode caminhar com outras pessoas e encontrar um grupo próximo da sua casa.</p>
+            <p className="g-form-chamada">Preencha seus dados e encontre um grupo próximo da sua casa.</p>
+          </div>
+          <div className="c c-bloco">
+            <FormPequenaGuia />
+          </div>
+        </div>
+      </section>
+
       {/* ------------------------------------------------------------ a conversa */}
       <section className="g-cheio centro fecho rev">
         <img src={cria('grupos-fecho')} alt="" loading="lazy" decoding="async" />
@@ -100,7 +123,8 @@ export default function PequenaGuia() {
           <p className="g-rot">Achar o seu</p>
           <Tit className="g-h2">Diga onde você mora. A gente diz qual fica perto.</Tit>
           <div className="g-acoes">
-            <a href={CONVITE.href} target="_blank" rel="noreferrer" className="acao cheia">{CONVITE.rot} <IcSeta /></a>
+            <a href="#encontrar" className="acao cheia">Quero encontrar uma Pequena Guia <IcSeta /></a>
+            <a href={CONVITE.href} target="_blank" rel="noreferrer" className="g-link claro">Prefiro conversar direto</a>
           </div>
         </div>
       </section>
