@@ -19,17 +19,25 @@ import { src as cria, alt as criaAlt } from '@/lib/criativos';
    navegador e sair de casa.
    ============================================================================= */
 
-/* TRÊS MODOS DE CHEGAR, em cartões iguais. A mesma informação das antigas
-   perguntas, organizada pelo jeito que a pessoa vem. */
-const MODOS = [
-  { n: '01', t: 'De carro', d: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga.' },
-  { n: '02', t: 'De aplicativo', d: `Destino: ${IGREJA.rua}, ${IGREJA.bairro}. O carro para em frente à porta.` },
-  { n: '03', t: 'Chegando', d: 'Tem equipe de acolhida na porta antes do horário. Pode dizer que é a primeira vez.' },
+/* TRÊS MODOS DE CHEGAR, em cartões iguais. Textos do Arthur (08/09/2026),
+   palavra por palavra; só o endereço sai de lib/igreja.ts, como em todo o
+   site, para nunca divergir entre páginas. */
+const MODOS: Array<{ n: string; t: string; d: string; endereco?: string; d2?: string }> = [
+  { n: '01', t: 'De carro',
+    d: 'Aos domingos pela manhã, nossa equipe estará no local para orientar sua chegada e indicar o melhor lugar para estacionar. Para chegar com tranquilidade, recomendamos que você venha com pelo menos 10 minutos de antecedência.' },
+  /* "o endereço abaixo": o endereço sai numa linha própria, copiável, para a
+     frase ser verdade */
+  { n: '02', t: 'De aplicativo',
+    d: 'Insira o endereço abaixo no seu aplicativo:', endereco: `${IGREJA.rua}, ${IGREJA.bairro}`,
+    d2: 'O desembarque acontece diretamente na entrada da GUIA Church.' },
+  { n: '03', t: 'Chegando na nossa casa',
+    d: 'Nossa equipe estará na entrada para receber você antes do início do culto. Se for sua primeira vez, informe à recepção. Será uma alegria ajudar você e apresentar a GUIA Church.' },
 ];
+const texto = (m: typeof MODOS[number]) => [m.d, m.endereco ? `${m.endereco}.` : '', m.d2 || ''].filter(Boolean).join(' ');
 const PERGUNTAS = [
-  { q: 'Onde eu deixo o carro?', r: 'Tem equipe de estacionamento no domingo de manhã. Chegue com dez minutos de folga se vier dirigindo.' },
-  { q: 'Vou de aplicativo. Qual é o destino?', r: `${IGREJA.rua}, ${IGREJA.bairro}. O carro para em frente à porta.` },
-  { q: 'É a primeira vez. Como eu sei que cheguei?', r: 'Pela fachada da foto, e por alguém na porta: tem equipe de acolhida antes do horário.' },
+  { q: 'Onde eu deixo o carro?', r: texto(MODOS[0]) },
+  { q: 'Vou de aplicativo. Qual é o destino?', r: texto(MODOS[1]) },
+  { q: 'É a primeira vez. Como eu sei que cheguei?', r: texto(MODOS[2]) },
 ];
 
 export const metadata: Metadata = {
@@ -99,8 +107,8 @@ export default function ComoChegar() {
           <div className="g-cab">
             <div className="g-cab-txt">
               <p className="g-rot">Chegando</p>
-              <Tit className="g-h2">De carro, de aplicativo, a pé</Tit>
-              <p className="g-ed">Tem alguém na porta.</p>
+              <Tit className="g-h2">Como chegar até a gente</Tit>
+              <p className="g-ed">De carro, de aplicativo ou a pé: tem alguém na porta esperando você.</p>
             </div>
           </div>
           <div className="cartoes c-bloco grande">
@@ -109,6 +117,8 @@ export default function ComoChegar() {
                 <span className="cartao-n">{m.n}</span>
                 <h3 className="cartao-t">{m.t}</h3>
                 <p className="cartao-d">{m.d}</p>
+                {m.endereco && <p className="cartao-end">{m.endereco}</p>}
+                {m.d2 && <p className="cartao-d">{m.d2}</p>}
               </div>
             ))}
           </div>
