@@ -11,10 +11,12 @@ import { src as cria, alt as criaAlt } from '@/lib/criativos';
 /* =============================================================================
    /sobre — QUEM SOMOS
 
-   TODO O TEXTO DE IDENTIDADE É DA IGREJA, palavra por palavra: sigla,
-   versículo, pilares e alvo. Aqui cada pedaço tem um recipiente, centrado:
-   a sigla em quatro azulejos, o versículo de ponta a ponta sobre a foto da
-   palavra, os pilares como três perguntas, o alvo como de → para.
+   TODO O TEXTO DE IDENTIDADE É DA IGREJA, palavra por palavra: a abertura
+   (08/09/2026, do Arthur: "Uma comunidade que cultiva uma nova cultura" e os
+   dois parágrafos), sigla, versículo, pilares e alvo. Aqui cada pedaço tem
+   um recipiente, centrado: a sigla em quatro azulejos, o versículo de ponta a
+   ponta sobre a foto da palavra, os pilares em três cartões, o alvo como
+   de → para. O fecho convida para o culto e leva ao endereço.
 
    O bloco de liderança saiu da página enquanto nome e papel não estão
    definidos: quadro vazio com "entra aqui depois" é bastidor, não site.
@@ -29,7 +31,7 @@ const PILARES = [
 export const metadata: Metadata = {
   title: 'Quem somos',
   description:
-    `GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
+    `Uma comunidade que cultiva uma nova cultura. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
   ...cartao({ titulo: 'Quem somos', descricao: `${SIGLA_FRASE}. Cultivando uma nova cultura, na Barra da Tijuca.`, caminho: '/sobre', imagem: 'sobre' }),
 };
@@ -47,12 +49,24 @@ export default function Sobre() {
       <section className="g-cheio alta centro rev">
         <img src={cria('sobre')} alt={criaAlt('sobre')} fetchPriority="high" />
         <div className="g">
-          <p className="g-rot">A igreja</p>
-          <Tit as="h1" className="g-h1">Quem somos</Tit>
-          <p className="g-ed">Um povo, não uma plateia.</p>
+          <p className="g-rot">Quem somos</p>
+          <Tit as="h1" className="g-h1">Uma comunidade que cultiva uma nova cultura</Tit>
+          <p className="g-ed">A GUIA é uma igreja que existe para ajudar pessoas a viverem uma fé prática, construída em relacionamento com Deus e com outras pessoas.</p>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
             <Link href="/pequena-guia" className="g-link claro">Pequena Guia</Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------ o que acreditamos
+          O segundo parágrafo do Arthur, sozinho numa faixa clara: é a frase
+          que explica a de cima, e merece respirar antes da sigla. */}
+      <section className="casa-papel rev">
+        <div className="g g-secao justa">
+          <div className="c">
+            <p className="g-rot">O que acreditamos</p>
+            <p className="g-ed g-ed-grande">Acreditamos que a igreja é mais do que um lugar para frequentar. É uma comunidade onde cada pessoa pode encontrar acolhimento, crescer na fé, desenvolver seus dons e participar do que Deus está fazendo.</p>
           </div>
         </div>
       </section>
@@ -139,11 +153,12 @@ export default function Sobre() {
       <section className="g-cheio centro fecho rev">
         <img src={cria('sobre-fecho')} alt="" loading="lazy" decoding="async" />
         <div className="g">
-          <p className="g-rot">Na prática</p>
-          <Tit className="g-h2">Isso tem dois endereços na semana.</Tit>
+          <p className="g-rot">Venha nos visitar</p>
+          <Tit className="g-h2">Conheça a GUIA de perto</Tit>
+          <p className="g-ed">Participe de um culto e descubra uma comunidade preparada para receber você e sua família.</p>
           <div className="g-acoes">
-            <Link href="/pequena-guia" className="acao cheia">Pequena Guia <IcSeta /></Link>
-            <Link href="/servir" className="g-link claro">Quero servir</Link>
+            <Link href="/como-chegar" className="acao cheia">Quero conhecer a GUIA <IcSeta /></Link>
+            <Link href="/cultos" className="g-link claro">Como é o domingo</Link>
           </div>
         </div>
       </section>
