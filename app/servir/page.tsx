@@ -64,8 +64,8 @@ export default function Servir() {
         <img src={cria('servir')} alt={criaAlt('servir')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
-          <Tit as="h1" className="g-h1">Encontre seu lugar</Tit>
-          <p className="g-ed">Todo trabalho importa.</p>
+          <Tit as="h1" className="g-h1">Encontre seu lugar para servir</Tit>
+          <p className="g-ed">Deus colocou dons e talentos em cada pessoa. Na GUIA, você pode usá-los para cuidar de pessoas, fortalecer a comunidade e contribuir para o Reino.</p>
           <div className="g-acoes">
             <a href="#areas" className="acao cheia">Ver as áreas <IcSeta /></a>
             <Link href="/servir/onde-me-encaixo" className="g-link claro">Não sei qual é a minha</Link>
@@ -79,8 +79,8 @@ export default function Servir() {
           <div className="g-cab">
             <div className="g-cab-txt">
               <p className="g-rot">As áreas</p>
-              <Tit className="g-h2">Escolha uma e veja o que ela faz</Tit>
-              <p className="g-ed">O cadastro leva um minuto.</p>
+              <Tit className="g-h2">Escolha uma área de serviço</Tit>
+              <p className="g-ed">Preencha o formulário e nossa equipe entra em contato para apresentar os próximos passos.</p>
             </div>
           </div>
           <div className="c-bloco grande">
