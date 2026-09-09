@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cartao } from '@/lib/meta';
 import { rpcPublica } from '@/lib/publico';
+import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* A prévia do link no WhatsApp lê o HTML do servidor, e a página é client
    component: sem este layout o card sai com o título genérico do site. A
@@ -19,7 +20,7 @@ export async function generateMetadata(
   const m = (Array.isArray(lista) ? lista : []).find(x => x.slug === slug) || null;
 
   const titulo = m?.nome || 'Áreas';
-  const desc = m?.descricao || 'Conheça as áreas onde você pode servir na GUIA Church.';
+  const desc = (m ? descricaoPublica(m.slug, m.descricao) : null) || 'Conheça as áreas onde você pode servir na GUIA Church.';
   return {
     title: titulo,
     description: desc,
