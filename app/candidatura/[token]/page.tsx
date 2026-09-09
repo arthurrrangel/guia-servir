@@ -111,7 +111,7 @@ export default function Candidatura() {
 
   const encerrada = d.etapa === 0;
   const na = d.artigo === 'a' ? 'na' : 'no';
-  const primeiro = (d.nome || '').split(' ')[0];
+  const primeiro = (d.nome || '').trim();
   const zap = d.whatsapp
     ? `https://wa.me/${d.whatsapp.length <= 11 ? '55' + d.whatsapp : d.whatsapp}` +
       `?text=${encodeURIComponent(`Oi! Sou ${d.nome}, me cadastrei ${na} ${d.equipe} pelo site da GUIA.`)}`
