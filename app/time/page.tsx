@@ -68,7 +68,7 @@ function Time() {
     try {
       await criarVoluntario(equipe!.id, nome.trim(), tel.trim(), S.config.limitePadrao, novas);
       setNome(''); setTel(''); setNovas({});
-      await recarregar(); aviso(`${nome.trim().split(' ')[0]} entrou no time`);
+      await recarregar(); aviso(`${nome.trim()} entrou no time`);
     } catch (e) { aviso(aviseHumano(e)); }
     setOcupado(false);
   }
@@ -105,7 +105,7 @@ function Time() {
   /* quem se cadastrou sozinho já entra valendo; isto só tira o destaque
      depois que o líder olhou o nível que a pessoa declarou. */
   async function conferir(vid: string, nome: string) {
-    try { await conferirVoluntario(vid); await recarregar(); aviso(`${nome.split(' ')[0]} conferido`); }
+    try { await conferirVoluntario(vid); await recarregar(); aviso(`${nome} conferido`); }
     catch (e) { aviso(aviseHumano(e)); }
   }
 
