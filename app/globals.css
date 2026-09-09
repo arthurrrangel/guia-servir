@@ -8183,3 +8183,142 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
 /* a frase-declaração sozinha numa faixa (/sobre, "o que acreditamos"): um
    degrau acima da linha de apoio, sem virar título */
 .g-ed-grande{ font-size:clamp(20px,2.1vw,30px); line-height:1.4; font-weight:400; color:var(--ink); max-width:38ch; letter-spacing:-.012em; margin-top:var(--e5) }
+
+/* =============================================================================
+   09/09/2026 — UMA RÉGUA SÓ: O CABEÇALHO CENTRA, O CARTÃO ALINHA
+
+   Auditoria em captura das 12 telas públicas (390 e 1440) mostrou o mesmo
+   erro em toda página: parágrafo de 3 a 10 linhas centralizado. Título
+   centrado é composição; parágrafo centrado é ruído — as duas bordas ficam
+   irregulares e o olho perde onde a linha começa.
+
+   A REGRA, uma frase: cabeçalho de seção (rótulo + título + linha de apoio)
+   fica centrado; qualquer bloco que seja CARTÃO (ficha, cartão, fato,
+   azulejo de foto, linha de lista) alinha rótulo, título e texto na mesma
+   régua à esquerda.
+
+   Fica de fora, de propósito: os azulejos de letra (`.g-tiles`), onde a
+   letra grande É a composição, e o formulário no celular.
+   ============================================================================= */
+
+/* ---- fichas, cartões e a tira de fatos -------------------------------------- */
+.ficha > div,.cartao,.fato{ text-align:left; align-items:flex-start }
+.ficha-r,.fato-r{ justify-content:flex-start }
+.ficha a.ficha-v,.fato-v{ justify-content:flex-start }
+.ficha-d,.cartao-d{ margin-inline:0; max-width:46ch }
+/* a seta do fato ia para o fim da linha quando o título tinha duas linhas */
+.fato-v{ gap:8px }
+
+/* ---- azulejo de foto (home, /cultos, /servir) ------------------------------- */
+.casa-area{ text-align:left; align-items:flex-start }
+.casa-area-desc{ margin:16px 0 0; max-width:42ch }
+.casa-area-cta{ justify-content:flex-start }
+.casa-area.esqueleto .esq-l{ margin-inline:0 }
+
+/* ---- linhas de fato (/cultos, "o que você precisa saber") -------------------
+   No celular era rótulo em cima, valor embaixo, os dois centrados, com fio
+   no meio: desenho de cupom. Agora é o mesmo par alinhado à esquerda, que é
+   como se lê uma ficha. */
+@media(max-width:759px){
+  .g-linhas li{ text-align:left; justify-items:start }
+  .g-linhas-v{ max-width:none; justify-content:flex-start }
+}
+
+/* ---- o que a medição mostrou, um a um --------------------------------------
+   Medido em 390 com o build de produção (scripts/medir no scratchpad):
+
+   · TÍTULO ENCOSTANDO. `.g-h1` em 11.5vw dava 44,85px em 390. Na
+     /pequena-guia a linha mais larga media 354px numa caixa de 350: quatro
+     pixels PARA FORA. /servir ficava com 8px de folga, /sobre com 13. O
+     mínimo confortável é ~16px de cada lado, então a escala cai para 10.2vw
+     (39,8px em 390) — a linha mais larga passa a 314px, folga de 18px.
+   · O HERÓI NÃO TEM BURACO. 844px de altura, 254px acima do conteúdo e
+     246px abaixo: está centrado. O que eu tinha lido como vazio é a foto de
+     tela cheia, que é o desenho. Nada a fazer.
+   · OS PASSOS NÃO SE SOBREPÕEM: 10px entre o numeral e o título. O que pesa
+     é o numeral de 30px em tan ao lado de um título de 17px — o número
+     grita mais que o nome do passo. No celular ele encolhe e recua.
+   ---------------------------------------------------------------------------- */
+@media(max-width:899px){
+  .g-h1{ font-size:clamp(38px,10.2vw,50px) }
+  .g-passo-n{ font-size:22px; opacity:.7 }
+  .g-passo-t{ margin-top:6px }
+}
+/* o nome do azulejo quebrava deixando uma palavra sozinha
+   ("Conheça uma Pequena / Guia") */
+.casa-area-nome{ text-wrap:balance }
+/* os três fatos no desktop: um título de uma linha e dois de duas deixavam
+   as descrições em alturas diferentes. A linha do título reserva duas. */
+@media(min-width:760px){ .fato-v{ min-height:calc(2 * 1.15em) } }
+
+/* ---- o resto do celular que ainda centrava parágrafo ------------------------
+   O bloco "CELULAR: TUDO CENTRADO" (08/09) centrava também pergunta,
+   resposta, cartão de grupo e rodapé. O cabeçalho de seção continua
+   centrado; estes são cartões e listas, e passam a alinhar. */
+@media(max-width:759px){
+  .qa li,.g-perg li{ text-align:left }
+  .qa-q,.g-perg-q{ text-align:left; justify-content:flex-start }
+  .qa-r,.g-perg-r,.qa-c{ margin-inline:0 }
+  .pg-corpo{ text-align:left; align-items:flex-start }
+  /* `.pg-perto` NÃO entra: é um bloco de ação (pergunta curta + botão), não
+     um cartão de leitura. Alinhá-lo à esquerda deixava o botão fora do eixo
+     do resto da seção — medido em 45px de desvio. Fica centrado. */
+  .g-vira li{ text-align:left; justify-items:start }
+  /* rodapé: marca, colunas e a linha final na mesma régua da esquerda */
+  .g-pe,.g-pe-onde,.g-pe-cols > *,.g-pe-linha{ text-align:left }
+  .g-pe-onde{ align-items:flex-start }
+  .g-pe-ver{ align-self:flex-start }
+  .g-pe-marca{ margin-inline:0 }
+  /* o terceiro grupo de links esticava e centrava sozinho na linha de baixo.
+     Alinhado à esquerda ele volta a ser a primeira coluna da segunda linha,
+     na mesma régua de "Visitar" — grade, não órfão. */
+  .g-pe-cols > nav:last-child{ grid-column:auto }
+}
+/* a última fila de cartões de função (/servir/onde-me-encaixo) ficava
+   centrada sob uma grade de três colunas: 3+3+2, com os dois últimos no
+   meio. Alinhados ao início, a grade fecha. */
+.cartoes.livre{ justify-content:flex-start }
+@media(max-width:759px){ .g-pe-linha{ justify-content:flex-start } }
+/* a linha de apoio que virou parágrafo: mesma voz, régua de leitura. Usada
+   onde o texto do Arthur tem mais de quatro linhas (hoje: /pequena-guia). */
+.g-ed.g-texto{ text-align:left; max-width:60ch; text-wrap:pretty; margin-inline:auto }
+/* a chamada que fecha uma seção depois da lista: 52px, que está na escala
+   (o `c-bloco` dava 48, e 48 não é degrau do sistema) */
+.g-acoes.g-acoes-fecha{ margin-top:var(--e7); justify-content:center }
+/* a data de atualização logo abaixo da linha de apoio (/privacidade) */
+.g-rot.g-rot-data{ margin:var(--e5) 0 0 }
+
+/* ---- os dois últimos apertos, medidos ---------------------------------------
+   · `.g-h2` em 8.4vw dava 32,76px em 390: na /pequena-guia a linha mais larga
+     batia nos dois lados (folga zero), na /privacidade sobravam 6px e na home
+     9. Em 7.7vw são 30px e a mesma linha passa a ter ~15px de cada lado.
+   · O link da linha de fato (/cultos, "Onde") ocupava os 350px inteiros da
+     célula, então o chevron ia parar na borda direita, a 220px do fim do
+     texto — parecia um ícone solto, não a seta daquele link. Com a largura
+     do conteúdo ele volta a andar junto da última palavra.
+   ---------------------------------------------------------------------------- */
+/* Diminuir a fonte NÃO resolve sozinho: com `text-wrap:balance` o navegador
+   reequilibra as linhas e produz outra linha quase do tamanho da caixa — a
+   cada tamanho novo, um título diferente encostava. O que resolve é dar ao
+   título uma caixa menor que a coluna: aí a folga é garantida, qualquer que
+   seja a quebra. 92% de 350 = 322, com 14px de cada lado. */
+/* A caixa do título já tinha teto em `ch` (18ch no `.c`, 16ch no `.g-cheio`),
+   e em 390 esses tetos são MAIORES que a coluna: 18ch = 397px numa coluna de
+   350, então não seguravam nada. O teto passa a ser o menor entre os dois, e
+   por isso a regra repete a especificidade de cada um — um teto de 92% escrito
+   com um seletor mais fraco nunca valeria. */
+@media(max-width:759px){
+  .g-h1,.g-h2,
+  .c .g-h1,.c .g-h2,
+  .g-cheio .g-h1,.g-cheio .g-h2,
+  .g-cheio.centro .g-h1,.g-cheio.centro .g-h2,
+  .g-cheio.centro.fecho .g-h1,.g-cheio.centro.fecho .g-h2,
+  .g-cab-txt .g-h1,.g-cab-txt .g-h2{ max-width:92%; margin-inline:auto }
+}
+/* O chevron ia para a borda porque o link é um flex em linha: com o texto em
+   duas linhas, o item de texto ocupa a largura toda e empurra a seta para o
+   fim. Em linha comum, a seta volta a andar colada na última palavra. */
+@media(max-width:759px){
+  a.g-linhas-v{ display:inline; gap:0 }
+  a.g-linhas-v svg{ margin-left:8px; vertical-align:-.02em }
+}
