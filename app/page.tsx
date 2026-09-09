@@ -16,7 +16,7 @@ import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { pl, cont } from '@/lib/plural';
+import { pl } from '@/lib/plural';
 import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
 
 /* =============================================================================
@@ -372,7 +372,7 @@ export default function Casa() {
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
           <div className="c">
-            <p className="g-rot">O domingo</p>
+            <p className="g-rot">Onde participar</p>
             <Tit className="g-h2">Participe da nossa comunidade de onde estiver</Tit>
             <p className="g-ed">No campus da Barra da Tijuca ou ao vivo, no mesmo horário.</p>
           </div>
@@ -461,9 +461,6 @@ export default function Casa() {
               <Tit className="g-h2">A igreja não é o prédio</Tit>
               <p className="g-ed">São pessoas que chegaram mais cedo.</p>
             </div>
-            <div className="g-acoes">
-              <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
-            </div>
           </div>
 
           {fase === 'carregando' && <AreasCarregando />}
@@ -490,6 +487,12 @@ export default function Casa() {
               </Link>
             ))}
           </div>
+          {/* 09/09/2026: a chamada vinha ANTES da lista que ela aponta — no
+              celular a pessoa lia "ver todas as áreas" e só depois via as
+              áreas. Uma chamada fecha a seção, não a abre. */}
+          <div className="g-acoes centro g-acoes-fecha">
+            <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+          </div>
         </div>
       </section>
 
@@ -498,7 +501,11 @@ export default function Casa() {
         <img src={cria('fecho')} alt={criaAlt('fecho')} loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
-          <Tit className="g-h2">{num ? `${pl(num.pessoas, 'Hoje é', 'Hoje são')} ${cont(num.pessoas, 'pessoa servindo', 'pessoas servindo')} em ${cont(num.ministerios, 'área', 'áreas')}.` : 'Ninguém aqui começou sabendo.'}</Tit>
+          {/* 09/09/2026: aqui repetia, com as mesmas palavras, os números da
+              faixa escura lá em cima ("45 pessoas servindo em 5 áreas"). Duas
+              vezes a mesma informação na mesma página é ruído: o fecho volta a
+              ser o convite, e a prova fica onde ela já estava. */}
+          <Tit className="g-h2">Ninguém aqui começou sabendo.</Tit>
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
             <Link href="/eu" className="g-link claro">Já sirvo · abrir meu espaço</Link>
