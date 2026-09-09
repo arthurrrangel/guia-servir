@@ -372,7 +372,7 @@ export default function Eu() {
   /* ------------------------------------------------------------- os fatos
      Calculados uma vez e usados na ordem em que a pessoa pergunta. */
   const hoje = hojeISO();
-  const primeiro = (nome || '').split(' ')[0];
+  const primeiro = (nome || '').trim();
   const agenda = itens.filter(i => !i.plantao);
   const plantoes = itens.filter(i => i.plantao);
   const pendentes = agenda.filter(i => (i.status || 'pendente') === 'pendente');
