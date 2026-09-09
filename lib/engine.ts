@@ -632,7 +632,7 @@ export function msgConfirmar(S: Estado, data: string) {
   const faltam = funcoesDoDia(S, data)
     .map(f => dia?.slots?.[f.nome])
     .filter(sl => sl?.vid && (sl.status || 'pendente') === 'pendente')
-    .map(sl => nomeDe(S, sl!.vid!).split(' ')[0]);
+    .map(sl => nomeDe(S, sl!.vid!));
   const nomes = [...new Set(faltam)];
   if (!nomes.length) return '';
   const quem = nomes.length === 1 ? nomes[0]
@@ -690,7 +690,7 @@ export function msgEscala(S: Estado, data: string) {
 export function msgConvite(S: Estado, vid: string, base: string) {
   const v = vol(S, vid);
   if (!v) return '';
-  return `${v.nome.split(' ')[0]}, esse é o seu link pessoal da escala${S.equipe ? ` de ${S.equipe}` : ''}. `
+  return `${v.nome.trim()}, esse é o seu link pessoal da escala${S.equipe ? ` de ${S.equipe}` : ''}. `
     + `Salva no favorito: sempre que você for escalado, é aqui que você confirma e é aqui que você avisa quando não pode.\n\n`
     + `${base}/eu/${v.token}`;
 }
@@ -698,7 +698,7 @@ export function msgConvite(S: Estado, vid: string, base: string) {
 export function msgCobranca(S: Estado, vid: string, data: string, base: string) {
   const v = vol(S, vid);
   const fns = Object.entries(S.escalas[data]?.slots || {}).filter(([, s]) => s?.vid === vid).map(([f]) => f);
-  return `${(v?.nome || '').split(' ')[0]}, você está na escala d${tipoDoDia(data) === 'follow' ? `o Follow de sábado` : 'e domingo'} (${fmtDia(data)}) em ${fns.join(' e ')}. `
+  return `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? `o Follow de sábado` : 'e domingo'} (${fmtDia(data)}) em ${fns.join(' e ')}. `
     + `Confirma no seu link até ${S.config.prazoConfirmacao}?\n${base}/eu/${v?.token}`;
 }
 
@@ -752,7 +752,7 @@ export function declaracoesSuspeitas(S: Estado): Suspeita[] {
     const areas = Object.keys(v.funcoes || {}).filter(f => ativas.includes(f));
     const naoConferidas = areas.filter(f => !confirmada(v, f));
     if (!naoConferidas.length) continue;
-    const p = v.nome.split(' ')[0];
+    const p = v.nome.trim();
 
     const pilar = naoConferidas.filter(f =>
       ['titular', 'reserva'].includes(v.funcoes[f]) && aptosSem(S, f, v.id) <= 1);
