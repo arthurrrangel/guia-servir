@@ -8322,3 +8322,22 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
   a.g-linhas-v{ display:inline; gap:0 }
   a.g-linhas-v svg{ margin-left:8px; vertical-align:-.02em }
 }
+
+/* =============================================================================
+   A DICA QUE SEPARA DUAS PESSOAS DE MESMO NOME (09/09/2026)
+
+   A Connect tem dois CLAUDIO e duas LUCIENE; a Mídia, duas MARIA; o Louvor,
+   dois JOÃO. Na lista de "quem é você" as linhas ficavam idênticas: a pessoa
+   não sabia qual era a dela, tentava, errava os quatro dígitos do telefone e
+   concluía que o sistema estava quebrado.
+
+   A dica só aparece para quem TEM homônimo na equipe, e diz as outras funções
+   daquela pessoa — o dado que ela reconhece de si mesma. Fica embaixo do nome,
+   em corpo menor e cor muda, para não competir com ele.
+   ============================================================================= */
+.pick-nome > .cresce{ display:flex; flex-direction:column; gap:2px; min-width:0 }
+.pick-dica{
+  font-family:var(--fonte); font-weight:400; font-size:12.5px; line-height:1.35;
+  letter-spacing:0; color:var(--mudo); text-transform:none;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
