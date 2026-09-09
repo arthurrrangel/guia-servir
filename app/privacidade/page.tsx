@@ -73,7 +73,9 @@ export default function Privacidade() {
             <p className="g-rot">LGPD · Lei 13.709/2018</p>
             <Tit as="h1" className="g-h1">Privacidade</Tit>
             <p className="g-ed">O que a gente guarda, e por quê.</p>
-            <p className="g-rot" style={{ marginTop: 28, marginBottom: 0 }}>Atualizada em setembro de 2026</p>
+            {/* 09/09/2026: era estilo em linha com 28px, que não é degrau da
+                escala (…24, 32…). Virou classe, com 24. */}
+            <p className="g-rot g-rot-data">Atualizada em setembro de 2026</p>
           </div>
         </div>
       </section>
