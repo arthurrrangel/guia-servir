@@ -9,6 +9,7 @@ import { Tit } from '@/components/Texto';
 import { Carregando, Vazio, linkZap } from '@/components/Tela';
 import { fotoDaArea, focoDaArea } from '@/lib/fotos';
 import { src as cria } from '@/lib/criativos';
+import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
    /servir/[slug] — A ÁREA
@@ -140,7 +141,7 @@ export default function Area() {
         <div className="g">
           <p className="g-rot">Servir</p>
           <Tit as="h1" className="g-h1">{min.nome}</Tit>
-          {min.descricao && <p className="g-ed menor">{min.descricao}</p>}
+          {descricaoPublica(min.slug, min.descricao) && <p className="g-ed menor">{descricaoPublica(min.slug, min.descricao)}</p>}
           <div className="g-acoes">
             <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
             <Link href="/servir" className="g-link claro">Ver todas as áreas</Link>
