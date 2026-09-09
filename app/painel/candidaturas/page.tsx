@@ -186,7 +186,7 @@ function Fila() {
           <div className="lid-secao-cab">
             <span className="rot">Encerradas</span>
             <button className="lid-bt-txt" onClick={() => setVerEncerradas(v => !v)}>
-              {verEncerradas ? 'esconder' : `ver ${fechadas.length}`}
+              {verEncerradas ? 'Esconder' : `Ver ${fechadas.length}`}
             </button>
           </div>
           {verEncerradas && fechadas.map(c => (
