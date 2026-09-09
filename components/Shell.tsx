@@ -322,7 +322,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             )}
           </div>
           <button className="mini fantasma" onClick={async () => { await sb()!.auth.signOut(); location.href = '/entrar'; }}>
-            <IcSair /> sair
+            <IcSair /> Sair
           </button>
         </div>
         <nav className="abas" aria-label="Seções">
