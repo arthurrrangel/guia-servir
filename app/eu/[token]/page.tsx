@@ -83,12 +83,16 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
         domingo lê isso antes de começar.
       </p>
       <label htmlFor={'rel' + item.culto_id}>Como foi o andamento do trabalho</label>
-      <textarea id={'rel' + item.culto_id} rows={3} value={texto}
+      {/* teto de 1000 nos dois campos: quem lidera escreve isto no celular, no
+          fim do culto, e o que o próximo líder lê antes de começar é um
+          parágrafo, não um relatório longo. Teto também fecha a porta de um
+          texto colado inteiro por engano. */}
+      <textarea id={'rel' + item.culto_id} rows={3} value={texto} maxLength={1000}
         onChange={e => setTexto(e.target.value)}
         placeholder="Equipe completa, tudo tranquilo." />
       <div style={{ height: 12 }} />
       <label htmlFor={'prob' + item.culto_id}>Algum defeito ou falta de material</label>
-      <textarea id={'prob' + item.culto_id} rows={2} value={probs}
+      <textarea id={'prob' + item.culto_id} rows={2} value={probs} maxLength={1000}
         onChange={e => setProbs(e.target.value)}
         placeholder="Banheiro masculino sem papel. Bebedouro vazando." />
       {!salvando && !texto.trim() && !probs.trim() && (
@@ -806,9 +810,12 @@ export default function Eu() {
           )}
         </section>
 
-        {/* 5. MANUTENÇÃO, no rodapé, que é onde manutenção mora. */}
+        {/* 5. MANUTENÇÃO, no rodapé, que é onde manutenção mora.
+            `tem_pin` sai de `eu_espaco` e chega DEPOIS da tela; enquanto não
+            chegou, `espaco` é nulo e o rótulo não pode chutar — por isso passa
+            null, e não false. */}
         <div className="vol-pe">
-          <TrocarPin token={token} />
+          <TrocarPin token={token} temPin={espaco ? !!espaco.tem_pin : null} />
         </div>
 
         {!!erro && <p className="vol-nota" role="status" style={{ color: 'var(--bad)' }}>{erro}</p>}
@@ -828,8 +835,19 @@ export default function Eu() {
    antigo: quem esqueceu ficava dependendo do organizador reenviar o link, que
    é o gargalo que o PIN foi criado para eliminar.
    Fica fechado por padrão: é manutenção, não é o assunto da página.
+
+   "TROCAR" NÃO DESCREVE O QUE QUEM AINDA NÃO TEM PIN VAI FAZER.
+   Dez das 65 pessoas do sistema estão sem PIN nenhum, e este era o único lugar
+   onde elas poderiam criar um — atrás de um botão que fala de trocar uma coisa
+   que elas não possuem. Quem acabou de ser cadastrada lê "Trocar meu PIN",
+   entende que não é para ela, e segue sem PIN até o dia em que perde o link.
+   `tem_pin` vem de `eu_espaco` (supabase/26-meu-espaco.sql) e é o que desfaz
+   isso. Chega depois da primeira pintura: até chegar, `temPin` é null, que
+   quer dizer NÃO SEI, e aí o rótulo continua sendo o antigo — prometer "criar"
+   a quem já tem PIN é trocar um erro por outro.
 --------------------------------------------------------------------------- */
-function TrocarPin({ token }: { token: string }) {
+function TrocarPin({ token, temPin }: { token: string; temPin: boolean | null }) {
+  const criar = temPin === false;
   const [aberto, setAberto] = useState(false);
   const [pin, setPin] = useState('');
   const [salvando, setSalvando] = useState(false);
@@ -851,24 +869,30 @@ function TrocarPin({ token }: { token: string }) {
     setPin(''); setFeito(true);
   }
 
+  const rotulo = criar ? 'Criar meu PIN' : 'Trocar meu PIN';
+
   if (!aberto) return (
     <p className="dim pequeno" style={{ margin: '28px 0 0', textAlign: 'center' }}>
-      <button className="btn fantasma" onClick={() => setAberto(true)}>Trocar meu PIN</button>
+      <button className="btn fantasma" onClick={() => setAberto(true)}>{rotulo}</button>
     </p>
   );
 
   return (
     <>
-      <h3 aria-level={2} style={{ marginTop: 30 }}>Trocar meu PIN</h3>
+      <h3 aria-level={2} style={{ marginTop: 30 }}>{rotulo}</h3>
       <p className="dim pequeno" style={{ marginTop: -6, marginBottom: 12 }}>
         O PIN é o que te deixa entrar pela lista da equipe quando você está sem este link.
-        Esqueceu? Escolha um novo aqui, não precisa saber o antigo.
+        {criar
+          ? ' Você ainda não tem um. Escolha 4 números que você lembre.'
+          : ' Esqueceu? Escolha um novo aqui, não precisa saber o antigo.'}
       </p>
       {feito ? (
-        <Aviso tom="bom">PIN trocado. É esse que você usa da próxima vez que entrar pela lista.</Aviso>
+        <Aviso tom="bom">
+          {criar ? 'PIN criado.' : 'PIN trocado.'} É esse que você usa da próxima vez que entrar pela lista.
+        </Aviso>
       ) : (
         <div className="escalacao">
-          <label htmlFor="pin-novo">Novo PIN de 4 números</label>
+          <label htmlFor="pin-novo">{criar ? 'Seu PIN de 4 números' : 'Novo PIN de 4 números'}</label>
           <input id="pin-novo" enterKeyHint="done" value={pin} inputMode="numeric" className="campo-pin" placeholder="••••"
             disabled={salvando}
             onChange={e => { setPin(e.target.value.replace(/\D/g, '').slice(0, 4)); setErro(''); }} />
@@ -878,7 +902,7 @@ function TrocarPin({ token }: { token: string }) {
           {!!erro && <Aviso tom="atencao">{erro}</Aviso>}
           <button className="pri" style={{ marginTop: 14, width: '100%' }}
             disabled={salvando || pin.length !== 4} onClick={salvar}>
-            {salvando ? 'salvando…' : 'Salvar PIN novo'}
+            {salvando ? 'salvando…' : criar ? 'Salvar meu PIN' : 'Salvar PIN novo'}
           </button>
           <button className="btn fantasma" style={{ margin: '10px auto 0', display: 'flex' }}
             disabled={salvando} onClick={() => { setAberto(false); setPin(''); setErro(''); }}>

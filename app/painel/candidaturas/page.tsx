@@ -353,7 +353,9 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
 
         {/* ANOTAÇÃO */}
         <span className="lid-cand-mini">Anotação da liderança</span>
-        <textarea rows={2} value={nota} className="lid-cand-nota"
+        {/* teto de 500: é uma anotação de decisão, não um prontuário — e campo
+            sem teto é por onde entra um texto colado inteiro sem querer */}
+        <textarea rows={2} value={nota} className="lid-cand-nota" maxLength={500}
           placeholder="o que ficou combinado, o que falta…"
           aria-label={`Anotação sobre ${nome}, só a liderança vê`}
           onChange={e => setNota(e.target.value)} />

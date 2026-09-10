@@ -92,6 +92,32 @@ function Time() {
     catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
   }
 
+  /* O TELEFONE NÃO É TEXTO LIVRE: É CHAVE.
+     O banco tem uma unique em (equipe_id, tel_norm(telefone)) que só alcança
+     quem tem 10 dígitos ou mais, e a entrada pela lista da equipe confere os 4
+     últimos dígitos do número. Um número quebrado digitado aqui não reclama na
+     hora: ele escapa por baixo da unique — duas linhas da mesma pessoa passam
+     a conviver — e some da conferência de 4 dígitos. Quem descobre é a própria
+     pessoa, no domingo, sem conseguir entrar.
+     A régua é a mesma do cadastro público (supabase/06-auto-cadastro.sql, que
+     recusa abaixo de 10 e acima de 13): dígito, e só dígito, é o que conta.
+     Vazio continua salvando — apagar o número de alguém é decisão legítima da
+     liderança, e vazio não entra na unique nem na conferência. */
+  async function salvarTelefone(vid: string, atual: string, campo: HTMLInputElement) {
+    const texto = campo.value.trim();
+    if (texto === atual) return;
+    const dig = texto.replace(/\D/g, '');
+    if (texto && (dig.length < 10 || dig.length > 13)) {
+      /* devolver o valor anterior é o que impede a tela de mentir: sem isso o
+         campo continua mostrando o número recusado, e o líder sai da página
+         achando que salvou. */
+      campo.value = atual;
+      aviso('WhatsApp com DDD, de 10 a 13 números. Não salvei.');
+      return;
+    }
+    await mudar(vid, { telefone: texto || null });
+  }
+
   async function remover(vid: string, nome: string) {
     if (!await confirmar({
       titulo: `Remover ${nome} do time?`,
@@ -338,7 +364,7 @@ function Time() {
                 <label htmlFor={'tel-' + v.id}>WhatsApp</label>
                 <input id={'tel-' + v.id} key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
                   type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
-                  onBlur={e => { if (e.target.value.trim() !== (v.tel || '')) void mudar(v.id, { telefone: e.target.value.trim() || null }); }} />
+                  onBlur={e => void salvarTelefone(v.id, v.tel || '', e.target)} />
               </div>
               <div style={{ width: 200 }}>
                 <label>Máximo de escalas por mês</label>

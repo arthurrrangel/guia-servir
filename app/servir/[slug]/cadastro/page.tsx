@@ -61,6 +61,54 @@ export default function Servir() {
   const [resp, setResp] = useState<Record<string, string>>({});
   const [ocupado, setOcupado] = useState(false);
   const [erro, setErro] = useState('');
+  /* só depois de tentar ler o rascunho é que se pode começar a gravar, senão o
+     primeiro render (com tudo vazio) apaga o que estava guardado */
+  const leuRascunho = useRef(false);
+
+  /* =========================================================================
+     O RASCUNHO — 10/09/2026
+
+     A tela de "sem conexão" prometia, com estas palavras, "O que você já
+     preencheu continua aqui" (é o texto do Vazio, mais abaixo). Não continuava:
+     nada era guardado, e um F5 no meio do wizard zerava os quatro passos. Numa
+     igreja, no celular, em pé depois do culto, F5 acontece.
+
+     Guarda por SLUG, porque o rascunho da Mídia não é o do Connect. Apaga no
+     envio bem-sucedido — deixar dado de contato parado no aparelho depois que
+     ele já cumpriu a função é lixo com nome e telefone dentro, ainda mais em
+     celular emprestado. Envelhece em 24h pelo mesmo motivo.
+     ========================================================================= */
+  const K_RASCUNHO = `guia.cadastro.${slug}`;
+
+  useEffect(() => {
+    try {
+      const cru = localStorage.getItem(K_RASCUNHO);
+      if (cru) {
+        const d = JSON.parse(cru);
+        if (d && Date.now() - (d.em || 0) < 24 * 60 * 60 * 1000) {
+          if (typeof d.nome === 'string') setNome(d.nome);
+          if (typeof d.tel === 'string') setTel(d.tel);
+          if (typeof d.email === 'string') setEmail(d.email);
+          if (Array.isArray(d.escolhidas)) setEscolhidas(d.escolhidas);
+          if (d.resp && typeof d.resp === 'object') setResp(d.resp);
+          if (typeof d.passo === 'number') setPasso(Math.min(Math.max(d.passo, 0), 3));
+        } else {
+          localStorage.removeItem(K_RASCUNHO);
+        }
+      }
+    } catch {}
+    leuRascunho.current = true;
+  }, [K_RASCUNHO]);
+
+  useEffect(() => {
+    if (!leuRascunho.current) return;
+    try {
+      const vazio = !nome && !tel && !email && !escolhidas.length && !Object.keys(resp).length;
+      if (vazio) return;
+      localStorage.setItem(K_RASCUNHO,
+        JSON.stringify({ em: Date.now(), passo, nome, tel, email, escolhidas, resp }));
+    } catch {}
+  }, [K_RASCUNHO, passo, nome, tel, email, escolhidas, resp]);
 
   useEffect(() => {
     let vivo = true;
@@ -200,10 +248,25 @@ export default function Servir() {
     });
     const r = data as any;
     if (error) { setErro('Sem conexão agora. Tente de novo, nada foi perdido.'); setOcupado(false); return; }
-    if (r?.ok && r.token) { location.href = `/candidatura/${r.token}`; return; }
+    const limpaRascunho = () => { try { localStorage.removeItem(K_RASCUNHO); } catch {} };
+    /* MINISTÉRIO SEM PORTÃO — depende da migração 43.
+       Hoje `candidatar` não lê `equipes.exige_aprovacao`: toda pessoa que
+       chega pelo site vira candidatura pendente, inclusive nas áreas que o
+       próprio site anuncia como abertas (Connect, Mídia, Livraria). A migração
+       43 conserta isso na origem e faz a função devolver `pendente:false` com
+       o token pessoal, igual ao `inscrever`. Este ramo já está aqui para que,
+       no instante em que ela rodar, quem se cadastra numa área aberta entre
+       direto no seu espaço em vez de esperar numa fila. Enquanto não roda, ele
+       simplesmente nunca é escolhido. */
+    if (r?.ok && r.pendente === false && r.token) {
+      limpaRascunho();
+      try { localStorage.setItem('escala.meu-token', r.token); } catch {}
+      location.href = `/eu/${r.token}`; return;
+    }
+    if (r?.ok && r.token) { limpaRascunho(); location.href = `/candidatura/${r.token}`; return; }
     /* JA_CANDIDATOU devolve o token da candidatura que já existe: em vez de um
        erro seco, leva a pessoa para o acompanhamento dela. */
-    if (r?.erro === 'JA_CANDIDATOU' && r.token) { location.href = `/candidatura/${r.token}`; return; }
+    if (r?.erro === 'JA_CANDIDATOU' && r.token) { limpaRascunho(); location.href = `/candidatura/${r.token}`; return; }
     const m: Record<string, string> = {
       NOME_INCOMPLETO: 'Escreva seu nome e sobrenome.',
       TELEFONE_INVALIDO: 'Confira o WhatsApp, com DDD, só números.',
@@ -214,7 +277,7 @@ export default function Servir() {
     };
     setErro(m[r?.erro] || 'Não consegui enviar. Tente de novo, ou fale com a liderança da área.');
     setOcupado(false);
-  }, [ocupado, slug, nome, tel, email, funcoesReais, resp]);
+  }, [ocupado, slug, nome, tel, email, funcoesReais, resp, K_RASCUNHO]);
 
   if (fase !== 'ok') return (
     <Tela volta="/servir" voltaRot="Áreas">
@@ -295,7 +358,7 @@ export default function Servir() {
                 direita: dá para preencher a ficha inteira sem tirar o
                 polegar do teclado. */}
             <input id="w-nome" value={nome} autoComplete="name" placeholder="nome e sobrenome"
-              autoCapitalize="words" enterKeyHint="next"
+              autoCapitalize="words" enterKeyHint="next" maxLength={80}
               onChange={e => setNome(e.target.value)} />
             <label htmlFor="w-tel">WhatsApp com DDD</label>
             <input id="w-tel" value={tel} type="tel" inputMode="tel" autoComplete="tel" placeholder="21999998888"
@@ -304,7 +367,7 @@ export default function Servir() {
             <p className="dim peq">É por aqui que a liderança fala com você.</p>
             <label htmlFor="w-mail">E-{"\u2060"}mail</label>
             <input id="w-mail" value={email} type="email" inputMode="email" autoComplete="email" placeholder="seu@email.com"
-              autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done"
+              autoCapitalize="off" autoCorrect="off" spellCheck={false} enterKeyHint="done" maxLength={120}
               onChange={e => setEmail(e.target.value)} />
             <p className="dim peq">Fica no cadastro da igreja, junto com o seu nome.</p>
           </>
@@ -354,15 +417,15 @@ export default function Servir() {
                 {q.ajuda && <p className="dim peq" style={{ margin: '2px 0 8px' }}>{q.ajuda}</p>}
 
                 {q.tipo === 'texto' && (
-                  <input enterKeyHint="done" id={`q-${q.id}`} value={resp[q.id] || ''}
+                  <input enterKeyHint="done" id={`q-${q.id}`} maxLength={200} value={resp[q.id] || ''}
                     onChange={e => setResp(r => ({ ...r, [q.id]: e.target.value }))} />
                 )}
                 {q.tipo === 'numero' && (
-                  <input enterKeyHint="done" id={`q-${q.id}`} inputMode="numeric" value={resp[q.id] || ''}
+                  <input enterKeyHint="done" id={`q-${q.id}`} inputMode="numeric" maxLength={6} value={resp[q.id] || ''}
                     onChange={e => setResp(r => ({ ...r, [q.id]: e.target.value.replace(/\D/g, '') }))} />
                 )}
                 {q.tipo === 'texto_longo' && (
-                  <textarea id={`q-${q.id}`} rows={3} value={resp[q.id] || ''}
+                  <textarea id={`q-${q.id}`} rows={3} maxLength={1000} value={resp[q.id] || ''}
                     onChange={e => setResp(r => ({ ...r, [q.id]: e.target.value }))} />
                 )}
                 {q.tipo === 'sim_nao' && (

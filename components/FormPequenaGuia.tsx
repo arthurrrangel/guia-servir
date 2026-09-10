@@ -1,5 +1,5 @@
 'use client';
-import { useId, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import Link from 'next/link';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
@@ -54,6 +54,16 @@ export function FormPequenaGuia() {
   const [enviando, setEnviando] = useState(false);
   const [fim, setFim] = useState<Fim | null>(null);
   const [copiado, setCopiado] = useState(false);
+  /* A TRAVA DE VERDADE É ESTA REF, não o `disabled` do botão lá embaixo.
+     `enviando` é estado: ele só chega ao botão no PRÓXIMO render, e dois toques
+     rápidos no celular acontecem antes disso, no mesmo tick — o segundo toque
+     entrava com `enviando` ainda false e virava uma segunda linha na planilha
+     da igreja, com o mesmo nome e o mesmo telefone. Quem recebe o pedido não
+     tem como saber que são a mesma pessoa. A ref vale no mesmo tick, antes de
+     qualquer re-render; o `disabled` continua, mas como sinal para a pessoa, e
+     não como a trava. Mesmo padrão da ref `enviando` da entrada por PIN em
+     app/equipe/[slug]/Lista.tsx. */
+  const enviandoRef = useRef(false);
 
   const muda = (k: keyof Campos) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     let v = e.target.value;
@@ -66,12 +76,14 @@ export function FormPequenaGuia() {
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
+    if (enviandoRef.current) return;
     const v = validar(c);
     if ('erro' in v) {
       setErro({ campo: v.campo, msg: v.erro });
       document.getElementById(`${id}-${v.campo}`)?.focus();
       return;
     }
+    enviandoRef.current = true;
     setEnviando(true);
     let guardado = false;
     try {
@@ -82,6 +94,10 @@ export function FormPequenaGuia() {
       if (!r.ok) { setErro({ campo: j.campo || 'nome', msg: j.erro || 'Não deu para enviar. Confira os campos.' }); setEnviando(false); return; }
       guardado = !!j.guardado;
     } catch { /* sem rede: a conversa ainda é o caminho */ }
+    /* solta a trava inclusive na saída pelo `return` do campo recusado: quem
+       corrigiu o campo tem que conseguir enviar de novo. Entre este `finally` e
+       o `setFim` não corre nenhum await, então nenhum segundo toque cabe aí. */
+    finally { enviandoRef.current = false; }
     setEnviando(false);
     /* a conversa NÃO abre sozinha: window.open depois de um await é o que os
        bloqueadores de pop-up do celular barram. A tela final oferece o botão,

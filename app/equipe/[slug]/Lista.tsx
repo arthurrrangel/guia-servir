@@ -125,11 +125,15 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
 
   const [equipe, setEquipe] = useState('');
   const [areas, setAreas] = useState<{ area: string; gente: Pessoa[] }[]>([]);
-  const [fase, setFase] = useState<'carregando' | 'erro' | 'rede' | 'inicio' | 'pin' | 'criar' | 'cadastro' | 'enviado'>('carregando');
+  const [fase, setFase] = useState<'carregando' | 'erro' | 'rede' | 'inicio' | 'pin' | 'criar' | 'cadastro' | 'enviado' | 'pin-primeiro'>('carregando');
   /* primeiro nome de quem acabou de se cadastrar num ministério com portão.
      Guardado à parte porque a pessoa não vira `alvo`: ela ainda não tem página. */
   const [enviadoPor, setEnviadoPor] = useState('');
   const [alvo, setAlvo] = useState<Pessoa | null>(null);
+  /* token de quem ACABOU de se cadastrar num ministério sem portão. Fica aqui,
+     e não em `tokenSalvo`, porque `tokenSalvo` é "já entrei neste aparelho
+     antes" e este é "entrei agora, ainda não tenho PIN". */
+  const [tokenNovo, setTokenNovo] = useState('');
   const [erro, setErro] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [tokenSalvo, setTokenSalvo] = useState('');
@@ -382,15 +386,20 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     entrou(res.token);
   }
 
+  /* `enviando` (ref) e não só `ocupado` (estado): o estado só chega ao botão no
+     render seguinte, então dois toques no mesmo tick disparavam dois envios — e
+     cada tentativa errada queima uma das 8 do dia. É a mesma trava que
+     `entrarComPin` já tinha; aqui faltava. */
   async function criarPin() {
-    if (ocupado || dig.length !== 4 || pinNovo.length !== 4 || !alvo) return;
+    if (enviando.current || ocupado || dig.length !== 4 || pinNovo.length !== 4 || !alvo) return;
+    enviando.current = true;
     setOcupado(true); setErro('');
     const { data, error } = await sb()!.rpc('equipe_pin_criar',
       { p_slug: slug, p_voluntario: alvo.voluntario_id, p_ult4: dig, p_pin: pinNovo });
     const res = data as any;
     if (error || !res?.ok) {
       setErro(error ? 'Sem conexão agora. Tente de novo.' : textoDoErro(res?.erro || '', res?.restam));
-      setOcupado(false); return;
+      setOcupado(false); enviando.current = false; return;
     }
     entrou(res.token);
   }
@@ -439,10 +448,51 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     if (!res.token) {
       setErro(textoDoErro('')); setOcupado(false); return;
     }
-    entrou(res.token);
+    /* O CADASTRO NÃO TERMINA NO ENVIO, TERMINA COM A PESSOA PODENDO VOLTAR.
+       Antes daqui saía `entrou(res.token)` direto: a pessoa caía em /eu/<token>
+       com o link na mão e nenhum PIN. E link se perde. Medido em 10/09/2026:
+       10 das 65 pessoas do sistema estavam sem PIN, 7 delas no Louvor — 58% da
+       área — porque não existia caminho para criar o PIN na mesma sessão. Em
+       /eu só havia "Trocar meu PIN", que não descreve o que ela ia fazer.
+       O token já está salvo no aparelho ANTES do passo do PIN: se ela fechar a
+       tela aqui, não perde nada — volta pelo "já entrei neste aparelho". */
+    try { localStorage.setItem(K_TOKEN, res.token); } catch {}
+    setTokenNovo(res.token);
+    setEnviadoPor((res.nome || '').trim() || fNome.trim());
+    setPinNovo(''); setOcupado(false); setFase('pin-primeiro');
+    window.scrollTo(0, 0);
+    setTimeout(() => refPin.current?.focus(), 60);
+  }
+
+  /* `eu_trocar_pin` e não `equipe_pin_criar`: o token recém-devolvido JÁ é
+     prova de identidade (é o que a própria função diz no comentário dela em
+     supabase/16-trocar-pin.sql), então não faz sentido pedir os 4 últimos
+     dígitos do telefone que a pessoa acabou de digitar dois campos atrás.
+     `valor` existe pelo mesmo motivo do `entrarComPin`: o auto-envio do 4º
+     dígito roda dentro de um setTimeout e o closure ainda vê 3 dígitos. */
+  async function criarPrimeiroPin(valor?: string) {
+    const p = valor ?? pinNovo;
+    if (enviando.current || ocupado || p.length !== 4 || !tokenNovo) return;
+    enviando.current = true;
+    setOcupado(true); setErro('');
+    const { data, error } = await sb()!.rpc('eu_trocar_pin', { p_token: tokenNovo, p_pin: p });
+    const res = data as any;
+    if (error || !res?.ok) {
+      setErro(error ? 'Sem conexão agora. Tente de novo.' : 'Não consegui guardar esse PIN. Tente outro.');
+      setPinNovo(''); setOcupado(false); enviando.current = false;
+      setTimeout(() => refPin.current?.focus(), 40); return;
+    }
+    entrou(tokenNovo);
   }
 
   const so4 = (v: string) => v.replace(/\D/g, '').slice(0, 4);
+  /* MESMA higiene do formulário público (`app/servir/[slug]/cadastro`), que
+     aqui faltava: o campo aceitava qualquer texto e o único juiz era o banco,
+     10 a 13 dígitos. Quem digitava "11 9999" só descobria o erro depois do
+     round-trip, com a mensagem genérica. Agora só entra dígito, e o botão só
+     libera quando o número tem tamanho de telefone. */
+  const soTel = (v: string) => v.replace(/\D/g, '').slice(0, 13);
+  const telOk = soTel(fTel).length >= 10;
 
   if (fase === 'carregando') return (
     <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
@@ -472,11 +522,13 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     : fase === 'criar' ? `É você, ${alvo ? nomeNaLista(alvo) : ''}?`
     : fase === 'cadastro' ? 'Entrar no time'
     : fase === 'enviado' ? (enviadoPor ? `Recebido, ${emNome(enviadoPor)}` : 'Recebido')
+    : fase === 'pin-primeiro' ? (enviadoPor ? `Você está no time, ${emNome(enviadoPor)}` : 'Você está no time')
     : 'Quem é você?';
   const sub = fase === 'pin' ? 'Digite seu PIN de 4 números para abrir sua página.'
     : fase === 'criar' ? 'Primeira vez aqui. Confirme que é você e crie um PIN só seu.'
     : fase === 'cadastro' ? 'Leva menos de um minuto. Depois você recebe a escala e responde por aqui.'
     : fase === 'enviado' ? `Seu cadastro chegou para a liderança do ${equipe}.`
+    : fase === 'pin-primeiro' ? 'Falta uma coisa só: um PIN de 4 números para você voltar aqui.'
     : 'Ache seu nome na sua área e toque nele.';
 
   return (
@@ -636,6 +688,44 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
           </div>
         )}
 
+        {/* O ÚLTIMO PASSO DO CADASTRO, e o mais importante para ela.
+            A pessoa já está no time neste instante: o `inscrever` voltou com
+            token e o token já foi guardado no aparelho. O que falta é a chave
+            que não se perde. Um campo, envio automático no 4º dígito, e uma
+            saída honesta — "agora não" leva para /eu/<token>, onde criar o PIN
+            continua disponível, então nem o atalho é beco. */}
+        {fase === 'pin-primeiro' && (
+          <div className="escalacao">
+            <Aviso tom="bom">
+              Pronto. Seu nome já está na lista do {equipe}.
+            </Aviso>
+
+            <label htmlFor="eq-pin1" style={{ marginTop: 16, display: 'block' }}>
+              Crie um PIN de 4 números
+            </label>
+            <input id="eq-pin1" ref={refPin} enterKeyHint="done" value={pinNovo} inputMode="numeric"
+              className="campo-pin" placeholder="••••" autoComplete="one-time-code" disabled={ocupado}
+              onChange={e => {
+                const v = so4(e.target.value);
+                setPinNovo(v);
+                if (v.length === 4) setTimeout(() => criarPrimeiroPin(v), 0);
+              }} />
+            <p className="dim pequeno" style={{ margin: '8px 0 0' }}>
+              É com ele que você abre a sua escala das próximas vezes, sem depender de link.
+              Não use os mesmos 4 números do seu telefone: quem está no grupo enxerga o seu número.
+            </p>
+
+            <button className="pri" style={{ marginTop: 16, width: '100%' }}
+              disabled={ocupado || pinNovo.length !== 4} onClick={() => criarPrimeiroPin()}>
+              {ocupado ? 'guardando…' : 'Guardar meu PIN e entrar'}
+            </button>
+            <button className="btn fantasma" style={{ margin: '10px auto 0', display: 'flex' }}
+              disabled={ocupado} onClick={() => entrou(tokenNovo)}>
+              agora não, abrir minha página
+            </button>
+          </div>
+        )}
+
         {fase === 'cadastro' && (
           <div className="escalacao">
             <label htmlFor="eq-nome">Seu nome completo</label>
@@ -645,7 +735,7 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
 
             <label htmlFor="eq-tel" style={{ marginTop: 14, display: 'block' }}>Seu WhatsApp (com DDD)</label>
             <input id="eq-tel" value={fTel} disabled={ocupado} placeholder="11999998888" type="tel" inputMode="tel"
-              autoComplete="tel" enterKeyHint="next" onChange={e => setFTel(e.target.value)} />
+              autoComplete="tel" enterKeyHint="next" onChange={e => setFTel(soTel(e.target.value))} />
             <p className="dim pequeno" style={{ margin: '6px 0 0' }}>
               É por ele que você confirma que é você, e é onde a organização te chama.
             </p>
@@ -753,18 +843,18 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
 
             {/* mesma regra do cadastro: botão que não pode ser apertado diz
                 o que falta, senão a pessoa acha que o site travou */}
-            {!ocupado && (!fNome.trim() || !fTel.trim() || !emailOk || !marcadas) && (
+            {!ocupado && (!fNome.trim() || !telOk || !emailOk || !marcadas) && (
               <p className="postos-falta" role="status">
                 {'Falta ' + [
                   !fNome.trim() && 'seu nome',
-                  !fTel.trim() && 'seu WhatsApp',
+                  !telOk && (fTel.trim() ? 'o WhatsApp completo, com DDD' : 'seu WhatsApp'),
                   !emailOk && (fEmail.trim() ? 'o e-\u2060mail completo' : 'seu e-\u2060mail'),
                   !marcadas && 'marcar onde você serve',
                 ].filter(Boolean).join(', ').replace(/, ([^,]*)$/, ' e $1') + '.'}
               </p>
             )}
             <button className="pri" style={{ marginTop: 20, width: '100%' }}
-              disabled={ocupado || !fNome.trim() || !fTel.trim() || !emailOk || !marcadas} onClick={inscrever}>
+              disabled={ocupado || !fNome.trim() || !telOk || !emailOk || !marcadas} onClick={inscrever}>
               {ocupado ? 'entrando…' : 'Entrar no time'}
             </button>
             <button className="btn fantasma" style={{ margin: '10px auto 0', display: 'flex' }}
