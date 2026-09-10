@@ -108,11 +108,13 @@ export default function PequenaGuia() {
             <p className="g-rot">Perto de você</p>
             <Tit className="g-h2" id="encontrar-t">Encontre uma Pequena Guia perto de você</Tit>
             {/* 09/09/2026: eram oito linhas centradas — parágrafo, não linha de
-                apoio. O texto é o mesmo; muda a régua. E a chamada do
-                formulário repetia, palavra por palavra, o fim do parágrafo
-                ("encontrar um grupo próximo da sua casa"). */}
+                apoio. O texto é o mesmo; muda a régua.
+                10/09/2026: a chamada do formulário volta a ser a do Arthur,
+                palavra por palavra. Ela ecoa o fim do parágrafo ("um grupo
+                próximo da sua casa") de propósito: é o texto dele, e o eco é
+                a instrução repetida no ponto em que a pessoa vai agir. */}
             <p className="g-ed g-texto">A Pequena Guia é um grupo que se reúne durante a semana para compartilhar a vida, estudar a Palavra e crescer em comunidade. É um espaço de relacionamento, cuidado e fé, onde você pode caminhar com outras pessoas e encontrar um grupo próximo da sua casa.</p>
-            <p className="g-form-chamada">Preencha os cinco campos e a equipe indica qual fica mais perto.</p>
+            <p className="g-form-chamada">Preencha seus dados e encontre um grupo próximo da sua casa.</p>
           </div>
           <div className="c c-bloco">
             <FormPequenaGuia />
