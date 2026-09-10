@@ -132,7 +132,7 @@ export default function ComoChegar() {
           <p className="g-rot">Antes de vir</p>
           <Tit className="g-h2">O que esperar de um domingo</Tit>
           <div className="g-acoes">
-            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <Link href="/cultos" className="acao cheia">Ver os cultos <IcSeta /></Link>
             <a href={MAPA} target="_blank" rel="noreferrer" className="g-link claro">Traçar rota</a>
           </div>
         </div>
