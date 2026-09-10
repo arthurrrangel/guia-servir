@@ -66,7 +66,11 @@ export default function Servir() {
         <div className="g">
           <p className="g-rot">Servir</p>
           <Tit as="h1" className="g-h1">Encontre seu lugar para servir</Tit>
-          <p className="g-ed">Deus colocou dons e talentos em cada pessoa. Na GUIA, você pode usá-los para cuidar de pessoas, fortalecer a comunidade e contribuir para o Reino.</p>
+          {/* O texto de apoio é do Arthur, palavra por palavra (10/09/2026). Ele
+              o escreveu como um parágrafo só, e é aqui que ele cabe inteiro: o
+              `.g-ed` do herói tem 56ch. O `.g-ed` do `.g-cab` lá embaixo tem
+              22ch — slot de etiqueta curta, não de frase. Não quebre em duas. */}
+          <p className="g-ed">Deus colocou dons e talentos em cada pessoa. Na GUIA, você pode usá-los para cuidar de pessoas, fortalecer a comunidade e contribuir para o Reino. Escolha uma área de serviço, preencha o formulário e nossa equipe entrará em contato para apresentar os próximos passos.</p>
           <div className="g-acoes">
             <a href="#areas" className="acao cheia">Ver as áreas <IcSeta /></a>
             <Link href="/servir/onde-me-encaixo" className="g-link claro">Não sei qual é a minha</Link>
@@ -80,8 +84,11 @@ export default function Servir() {
           <div className="g-cab">
             <div className="g-cab-txt">
               <p className="g-rot">As áreas</p>
+              {/* o h2 é a mesma frase dele, usada como título. A linha de apoio
+                  que existia aqui ("...nossa equipe entra em contato...") era
+                  uma segunda versão da promessa, em outro tempo verbal; agora a
+                  promessa é dita uma vez só, no herói, como ele escreveu. */}
               <Tit className="g-h2">Escolha uma área de serviço</Tit>
-              <p className="g-ed">Preencha o formulário e nossa equipe entra em contato para apresentar os próximos passos.</p>
             </div>
           </div>
           <div className="c-bloco grande">
