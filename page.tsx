@@ -20,10 +20,16 @@ import { src as cria, alt as criaAlt } from '@/lib/criativos';
    pílula da home aponta para #follow quando a próxima coisa é o sábado).
 
    Como o texto é mais longo que o de antes, ele é diagramado em blocos
-   curtos: o parágrafo do herói dividido entre o herói e a faixa das fotos,
-   a primeira vez em três fichas (chegar / culto / crianças), o que precisa
-   saber em cinco linhas, o próximo passo em duas portas de foto. Nenhuma
-   parede de texto.
+   curtos: a primeira vez em três fichas (chegar / culto / crianças), o que
+   precisa saber em cinco linhas, o próximo passo em duas portas de foto.
+   Nenhuma parede de texto.
+
+   10/09/2026: o parágrafo de abertura estava PARTIDO — a primeira frase no
+   herói, a segunda ("Cada momento é preparado...") como linha da faixa das
+   fotos. No texto do Arthur as duas são UM parágrafo só, logo abaixo do
+   título. Elas voltaram a ficar juntas no herói, e a faixa das fotos ficou
+   com rótulo e título, sem linha de apoio — repetir a frase nos dois lugares
+   seria escrever o que ele não escreveu. A seção não saiu.
    ============================================================================= */
 
 /* É A SUA PRIMEIRA VEZ? — três momentos, os três parágrafos do Arthur */
@@ -39,7 +45,7 @@ const PRIMEIRA_VEZ = [
 /* O QUE VOCÊ PRECISA SABER — cinco linhas, as cinco do Arthur */
 const PRECISA_SABER: Array<{ r: string; v: string; href?: string }> = [
   { r: 'Quando', v: 'Culto aos domingos, às 10h' },
-  { r: 'Onde', v: `${IGREJA.rua}, ${IGREJA.bairro}`, href: '/como-chegar' },
+  { r: 'Endereço', v: `${IGREJA.rua}, ${IGREJA.bairro}`, href: '/como-chegar' },
   { r: 'Recepção', v: 'Nossa equipe estará pronta para receber você' },
   { r: 'Crianças', v: 'Temos um espaço preparado para as crianças' },
   { r: 'Chegada', v: 'Você pode chegar alguns minutos antes para conhecer o ambiente com calma' },
@@ -93,7 +99,7 @@ export default function Cultos() {
         <div className="g">
           <p className="g-rot"><ProximoCulto /></p>
           <Tit as="h1" className="g-h1">Um domingo para pertencer</Tit>
-          <p className="g-ed">Aos domingos, nos reunimos para adorar a Deus, ouvir a Palavra e viver a comunhão com outras pessoas.</p>
+          <p className="g-ed">Aos domingos, nos reunimos para adorar a Deus, ouvir a Palavra e viver a comunhão com outras pessoas. Cada momento é preparado para que você e sua família se sintam acolhidos, participem da celebração e encontrem um lugar para pertencer.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Como chegar <IcSeta /></Link>
             <Link href="/sobre" className="g-link claro">Quem somos</Link>
@@ -108,7 +114,6 @@ export default function Cultos() {
             <div className="g-cab-txt">
               <p className="g-rot">Na prática</p>
               <Tit className="g-h2">Como é um domingo aqui</Tit>
-              <p className="g-ed">Cada momento é preparado para que você e sua família se sintam acolhidos, participem da celebração e encontrem um lugar para pertencer.</p>
             </div>
           </div>
           <div className="g-passos centro c-bloco grande">
