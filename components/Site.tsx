@@ -158,7 +158,7 @@ const RODAPE = [
   {
     t: 'Visitar',
     itens: [
-      { href: '/cultos', rot: 'O domingo' },
+      { href: '/cultos', rot: 'Cultos' },
       { href: '/como-chegar', rot: 'Como chegar' },
       { href: '/pequena-guia', rot: 'Pequena Guia' },
     ],
