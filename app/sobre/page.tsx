@@ -53,7 +53,7 @@ export default function Sobre() {
           <Tit as="h1" className="g-h1">Uma comunidade que cultiva uma nova cultura</Tit>
           <p className="g-ed">A GUIA é uma igreja que existe para ajudar pessoas a viverem uma fé prática, construída em relacionamento com Deus e com outras pessoas.</p>
           <div className="g-acoes">
-            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <Link href="/cultos" className="acao cheia">Ver os cultos <IcSeta /></Link>
             <Link href="/pequena-guia" className="g-link claro">Pequena Guia</Link>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function Sobre() {
           <p className="g-ed">Participe de um culto e descubra uma comunidade preparada para receber você e sua família.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Quero conhecer a GUIA <IcSeta /></Link>
-            <Link href="/cultos" className="g-link claro">Como é o domingo</Link>
+            <Link href="/cultos" className="g-link claro">Ver os cultos</Link>
           </div>
         </div>
       </section>
