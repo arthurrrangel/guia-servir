@@ -32,7 +32,7 @@ export default function NaoEncontrada() {
           <Tit as="h1" className="g-h1">Esse endereço não existe</Tit>
           <p className="g-ed">Mas o domingo existe.</p>
           <div className="g-acoes">
-            <Link href="/cultos" className="acao cheia">Ver o domingo <IcSeta /></Link>
+            <Link href="/cultos" className="acao cheia">Ver os cultos <IcSeta /></Link>
             <Link href="/" className="g-link claro">Ir para o início</Link>
           </div>
         </div>
