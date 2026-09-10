@@ -61,7 +61,7 @@ export default function PequenaGuia() {
           <p className="g-ed">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
           <div className="g-acoes">
             <a href="#encontrar" className="acao cheia">Quero encontrar uma Pequena Guia <IcSeta /></a>
-            <Link href="/cultos" className="g-link claro">Prefiro começar pelo domingo</Link>
+            <Link href="/cultos" className="g-link claro">Prefiro começar pelos cultos</Link>
           </div>
         </div>
       </section>
