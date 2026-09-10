@@ -14,7 +14,6 @@ import Contador from '@/components/Contador';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
-import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl } from '@/lib/plural';
 import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
@@ -326,7 +325,7 @@ export default function Casa() {
       {/* ------------------------------------------ os três fatos, estruturados
           O que a pessoa procura num site de igreja em três segundos: quando é
           o próximo culto (data de verdade, calculada no aparelho), onde fica,
-          e o que existe durante a semana. Cada um é uma porta. */}
+          e o que existe fora do domingo. Cada um é uma porta. */}
       <section className="fatos rev visto" aria-label="O essencial">
         <Link href="/cultos" className="fato">
           <span className="fato-r">Próximo culto</span>
@@ -338,10 +337,16 @@ export default function Casa() {
           <span className="fato-v">{IGREJA.rua}<IcSeta /></span>
           <span className="fato-d">{IGREJA.bairro}, {IGREJA.cidade}. Estacionamento com equipe.</span>
         </Link>
+        {/* 10/09/2026, pedido do Arthur: "Conheça uma Pequena Guia" e abaixo um
+            texto de apoio. Ele não disse qual, e página de igreja não é lugar de
+            frase inventada: o apoio é a frase que ELE já escreveu sobre a
+            Pequena Guia ("compartilhar a vida, estudar a Palavra e crescer em
+            comunidade", o parágrafo de /pequena-guia). Saiu daqui a contagem de
+            grupos — o apoio é um só, e a contagem continua em /pequena-guia. */}
         <Link href="/pequena-guia" className="fato">
           <span className="fato-r">Comunidade</span>
           <span className="fato-v">Conheça uma Pequena Guia<IcSeta /></span>
-          <span className="fato-d">{PEQUENAS_GUIAS.length} grupos de terça a quinta, perto de onde você mora.</span>
+          <span className="fato-d">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</span>
         </Link>
       </section>
 
