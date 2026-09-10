@@ -8341,3 +8341,145 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
   letter-spacing:0; color:var(--mudo); text-transform:none;
   overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
+
+/* =============================================================================
+   10/09/2026 — O EIXO VOLTA AO CENTRO
+
+   Decisão do Arthur, olhando /sobre. Ela DESFAZ, de propósito, a assimetria
+   que eu tinha montado em 07/09 (bloco "cabeçalho assimétrico", acima), cujo
+   argumento era: eixo repetido em toda seção tira hierarquia e a página vira
+   corredor. O argumento continua de pé; o dono do desenho decidiu o outro
+   lado, e a razão dele é a que manda numa escolha de composição.
+
+   O que fica: o cabeçalho de seção (rótulo + título + apoio + ação) passa a
+   ser um bloco centrado, em TODAS as larguras — não é ajuste de celular.
+   O cartão passa a compor pelo centro junto com ele, senão a página teria dois
+   eixos: título no meio, cartão embaixo dele começando na esquerda.
+
+   O que NÃO muda, e é a única coisa que eu segurei: parágrafo LONGO continua
+   alinhado à esquerda onde ele é leitura corrida (`.g-ed.g-texto`, o corpo das
+   páginas de texto, as perguntas). Centrar texto de 6 linhas deixa as duas
+   bordas irregulares e o olho perde onde a linha começa — isso é legibilidade
+   medida, não gosto. A descrição do cartão tem 2 ou 3 linhas e cabe centrada.
+   ============================================================================= */
+
+/* ---- 1. o cabeçalho de seção ------------------------------------------------
+   `display:block` e não `grid`: sem colunas para distribuir, grid seria
+   propriedade escrita e morta. O `gap` sai junto, pelo mesmo motivo. */
+.g-cab{ display:block; gap:0; text-align:center }
+.g-cab-txt{ margin-inline:auto }
+/* `.g-rot` é flex (o rótulo tem fio e ícone ao lado em algumas telas), e flex
+   não obedece `text-align`: quem centra é o eixo principal. Sem esta linha o
+   rótulo ficava sozinho na esquerda com o título já centrado embaixo dele. */
+.g-cab-txt .g-rot{ justify-content:center }
+.g-cab-txt .g-h2,.g-cab-txt .g-ed{ max-width:22ch; margin-inline:auto }
+.g-cab > .g-acoes{ justify-content:center; margin-top:var(--e6); padding-bottom:0 }
+@media(max-width:899px){
+  .g-cab > .g-acoes{ justify-content:center }
+  .g-cab-txt .g-h2,.g-cab-txt .g-ed{ max-width:none }
+}
+/* o teto de 92% no celular continua valendo: é o que impede o título de
+   encostar na borda, e ele é mais específico que o `max-width:none` acima */
+@media(max-width:759px){
+  .g-cab-txt .g-h1,.g-cab-txt .g-h2{ max-width:92%; margin-inline:auto }
+}
+
+/* ---- 2. o cartão compõe pelo centro ---------------------------------------- */
+.cartao{ text-align:center; align-items:center }
+.cartao-d{ margin-inline:auto; max-width:38ch }
+.cartao-end,.cartao-s{ margin-inline:auto }
+
+/* ---- 3. a lista "de → para" espelha a seta ---------------------------------
+   A grade é `1fr auto 1fr`. Centrar o texto de cada célula separaria as duas
+   metades da frase; o que centra a composição é ancorá-las na seta: o lado
+   antigo termina nela, o novo começa nela. A seta fica no eixo da página e as
+   duas colunas ficam simétricas — que é o desenho que o "de → para" quer. */
+.g-vira li{ justify-items:stretch }
+.g-vira-de{ text-align:right }
+.g-vira-para{ text-align:left }
+@media(max-width:759px){
+  /* empilhado, o espelho não existe: aí sim cada linha centra em si */
+  .g-vira li{ text-align:center; justify-items:center }
+  .g-vira-de,.g-vira-para{ text-align:center }
+}
+
+/* ---- 4. o bloco de conteúdo volta ao eixo do cabeçalho ---------------------
+   Estas regras nasceram com `margin-inline:0` para casar com o cabeçalho
+   assimétrico: se o título começa na esquerda, o bloco embaixo dele também
+   tem que começar. Com o cabeçalho centrado, `0` passou a ser exatamente o
+   erro que ele existia para evitar — dois eixos na mesma seção. Medido em
+   /sobre: a lista "de → para" ficava nos 65% da esquerda com o título já no
+   meio. `auto` devolve o par ao mesmo eixo. */
+.g-cab ~ .c-media,
+.g-cab ~ .c-larga,
+.g-cab ~ .ficha,
+.g-cab ~ .pgs,
+.g-cab ~ .g-linhas,
+.g-cab ~ .g-num{ margin-inline:auto }
+
+/* ---- 5. o resto das seções, pelo mesmo eixo --------------------------------
+   "Não somente das duas seções, mas de todas as outras" — Arthur, 10/09.
+
+   Isto SUPERSEDE o bloco de 09/09 acima ("uma régua só: o cabeçalho centra, o
+   cartão alinha"). Aquele bloco continua no arquivo porque o raciocínio dele
+   ainda explica por que estas linhas existem; o que mudou foi a decisão.
+
+   O critério aqui não é "tudo centrado e pronto": é que **rótulo, título e
+   texto curto centram; leitura corrida não**. Uma linha de 2 ou 3 linhas
+   centrada compõe. Um bloco de 8 linhas centrado tem as duas bordas
+   irregulares e o olho perde onde a próxima linha começa — isso não é gosto,
+   é o que a medição de 09/09 mostrou. Então o texto longo continua alinhado à
+   esquerda, mas dentro de uma caixa centrada na página: o bloco fica no eixo,
+   a leitura fica legível. É o único lugar em que eu não segui ao pé da letra,
+   e está escrito aqui para poder ser desfeito em uma linha. */
+
+/* azulejos de foto (home, /cultos, /servir) */
+.casa-area{ text-align:center; align-items:center }
+.casa-area-desc{ margin:16px auto 0; max-width:42ch }
+.casa-area-cta{ justify-content:center }
+.casa-area.esqueleto .esq-l{ margin-inline:auto }
+
+/* fichas (/cultos "primeira vez") e a tira de fatos (home) */
+.ficha > div,.fato{ text-align:center; align-items:center }
+.ficha-r,.fato-r{ justify-content:center }
+.ficha a.ficha-v,.fato-v{ justify-content:center }
+.ficha-d,.cartao-d{ margin-inline:auto }
+.ficha-d{ max-width:46ch }
+
+/* linhas de fato (/cultos, "o que você precisa saber"): mesmo espelho da
+   lista "de → para" — o rótulo termina no eixo, o valor começa nele */
+/* a grade era `clamp(120px,14vw,180px) 1fr`: com o rótulo à direita e o valor
+   à esquerda, o eixo do espelho caía nos 15% da largura, não no meio. `1fr 1fr`
+   põe a dobra no centro da lista, que é o que "centrado" quer dizer aqui. */
+.g-linhas li{ grid-template-columns:1fr 1fr; justify-items:stretch }
+.g-linhas-r{ text-align:right; justify-content:flex-end }
+.g-linhas-v{ text-align:left; justify-content:flex-start; max-width:none }
+@media(max-width:759px){
+  /* empilhado não há espelho: cada linha centra em si */
+  .g-linhas li{ text-align:center; justify-items:center }
+  .g-linhas-r,.g-linhas-v{ text-align:center; justify-content:center }
+}
+
+/* Pequena Guia: o cartão de cada grupo */
+.pg-nome,.pg-quando,.pg-nota{ text-align:center }
+.pg-corpo{ text-align:center; align-items:center }
+
+/* perguntas e respostas (/servir/onde-me-encaixo, /pequena-guia) */
+.qa,.g-perg{ text-align:center }
+.qa li,.g-perg li{ text-align:center }
+.qa-q,.g-perg-q{ text-align:center; justify-content:center }
+.qa-r,.g-perg-r{ margin-inline:auto; max-width:60ch }
+
+/* rodapé */
+.g-pe,.g-pe-onde,.g-pe-cols > *,.g-pe-linha{ text-align:center }
+.g-pe-linha{ justify-content:center }
+.g-pe-rot,.g-pe .g-rot{ justify-content:center }
+
+/* O ÚNICO QUE NÃO CENTRA A LINHA: leitura corrida. A caixa vai ao eixo. */
+.g-ed.g-texto{ text-align:left; max-width:60ch; margin-inline:auto }
+
+/* o apoio do cabeçalho não é etiqueta: 22ch cortava a frase do Arthur em
+   /servir em coluna de duas palavras. Título curto, apoio com medida de
+   leitura, os dois no eixo. */
+.g-cab-txt .g-h2{ max-width:22ch }
+.g-cab-txt .g-ed{ max-width:52ch }
