@@ -8261,19 +8261,16 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
    resposta, cartão de grupo e rodapé. O cabeçalho de seção continua
    centrado; estes são cartões e listas, e passam a alinhar. */
 @media(max-width:759px){
-  .qa li,.g-perg li{ text-align:left }
-  .qa-q,.g-perg-q{ text-align:left; justify-content:flex-start }
   .qa-r,.g-perg-r,.qa-c{ margin-inline:0 }
-  .pg-corpo{ text-align:left; align-items:flex-start }
   /* `.pg-perto` NÃO entra: é um bloco de ação (pergunta curta + botão), não
      um cartão de leitura. Alinhá-lo à esquerda deixava o botão fora do eixo
      do resto da seção — medido em 45px de desvio. Fica centrado. */
-  .g-vira li{ text-align:left; justify-items:start }
-  /* rodapé: marca, colunas e a linha final na mesma régua da esquerda */
-  .g-pe,.g-pe-onde,.g-pe-cols > *,.g-pe-linha{ text-align:left }
-  .g-pe-onde{ align-items:flex-start }
-  .g-pe-ver{ align-self:flex-start }
-  .g-pe-marca{ margin-inline:0 }
+  /* 10/09/2026 — as três linhas que alinhavam o celular à esquerda saíram
+     daqui (`.qa`, `.g-perg`, `.pg-corpo`, `.g-vira`, e o rodapé inteiro). A
+     decisão do Arthur é o centro, em todas as larguras; deixar o contrário
+     escrito aqui, quinze mil caracteres antes, é como se cria uma folha que
+     mente sobre si mesma — foi exatamente isso que fez eu "centrar" o rodapé
+     e ele continuar torto. O que vale está na seção 8, no fim do arquivo. */
   /* o terceiro grupo de links esticava e centrava sozinho na linha de baixo.
      Alinhado à esquerda ele volta a ser a primeira coluna da segunda linha,
      na mesma régua de "Visitar" — grade, não órfão. */
@@ -8531,3 +8528,46 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
    colada à esquerda com a frase centrada logo abaixo — dois eixos no mesmo
    bloco. No celular dava o mesmo, em escala menor. */
 .g-pe-marca{ margin-inline:auto }
+
+/* ---- 8. o rodapé, de verdade desta vez -------------------------------------
+   O Arthur mandou a captura: rodapé todo desalinhado. Ele estava certo e a
+   minha regra da seção 5 não tinha efeito nenhum ali. O motivo é uma linha de
+   07/09 quinze mil caracteres acima:
+
+       .g-pe.rev{ text-align:left }
+
+   Duas classes contra a minha de uma (`.g-pe`), então ela vencia em TODOS os
+   descendentes. Eu tinha "centrado" o rodapé e medido `text-align:center` no
+   elemento errado — em `.g-pe` puro, que nunca é o que renderiza, porque o
+   rodapé sempre carrega `.rev`. Foi medição minha mal feita, não CSS teimoso.
+
+   E três blocos não obedecem a `text-align` de jeito nenhum: `.g-pe-eu` e
+   `.g-pe-marca` são caixas com largura fixa (34ch e 300px) — caixa estreita
+   sem margem automática encosta na esquerda, por mais centrado que esteja o
+   texto dentro dela. E `.g-pe-onde` e `.g-pe-linha` são flex, que só obedece
+   `justify-content`. */
+.g-pe.rev,
+.g-pe.rev .g-pe-cols > *,
+.g-pe.rev .g-pe-h,
+.g-pe.rev .g-pe-cols a,
+.g-pe.rev .g-pe-cols span{ text-align:center }
+
+.g-pe-eu,.g-pe-frase{ margin-inline:auto }
+.g-pe-onde{ justify-content:center }
+.g-pe.rev .g-pe-linha{ justify-content:center }
+.g-pe-rua,.g-pe-quando,.g-pe-ver,.g-pe-fim{ justify-content:center }
+
+/* o celular, explicitamente, no fim do arquivo — para não haver dúvida de
+   quem vence: a coluna do endereço empilha CENTRADA, não encostada. */
+@media(max-width:759px){
+  .g-pe.rev,.g-pe.rev .g-pe-onde,.g-pe.rev .g-pe-cols > *,.g-pe.rev .g-pe-linha{ text-align:center }
+  .g-pe-onde{ flex-direction:column; align-items:center; justify-content:center }
+  .g-pe-ver{ align-self:center; margin-left:0 }
+  .g-pe-marca{ margin-inline:auto }
+}
+
+/* a faixa do endereço no desktop: `.g-pe-ver` tinha `margin-left:auto`, que a
+   empurrava para a borda direita e esticava a linha de ponta a ponta — desenho
+   do rodapé assimétrico antigo. Sem ela, os três pedaços (horário, endereço,
+   saída) viram um grupo só, centrado como o resto. */
+.g-pe-ver{ margin-left:0 }
