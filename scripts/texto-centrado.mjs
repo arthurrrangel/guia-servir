@@ -53,6 +53,12 @@ for (const rota of ROTAS) {
       /* PULADOS: os blocos que alinham à esquerda por regra (09/09/2026) */
       if (e.closest('.cartao, .ficha, .fato, .casa-area, .cartoes, .qa, .g-perg, .g-linhas, .g-pe-cols, .g-pe-onde, .g-pe-linha, .pg-corpo, .g-vira, .g-texto')) continue;
       if (e.classList.contains('pal') || e.closest('.pal')) continue;
+      /* 10/09/2026 — link EM LINHA dentro de frase centrada. O link "Como
+         cuidamos deles" ganhou `inline-block` com padding para virar alvo de
+         toque de 40px; isso deu caixa a ele, e a régua passou a cobrar dele o
+         que só faz sentido para bloco. Quem tem que estar centrada é a frase,
+         e ela está. */
+      if (e.tagName === 'A' && e.closest('.g-form-nota, .dim, .pequeno')) continue;
       const disp = cs(e).display;
       if (disp === 'inline') continue;                       // faz parte do texto do pai
       if (e.matches('.g-rot,.fato-r,.ficha-r,small,.so-leitor,.lz')) continue; // rótulo com quadradinho (centrado como conjunto), contador do chip, só-leitor, palavra do versículo
