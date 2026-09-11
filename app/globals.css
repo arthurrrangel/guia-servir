@@ -8161,6 +8161,11 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
 .g-form-nota{ margin:var(--e5) auto 0; max-width:46ch; text-align:center; font-size:13.5px; line-height:1.55; color:rgba(59,50,34,.86) }
 .g-form-nota a{ color:inherit; text-decoration:underline; text-underline-offset:.2em; text-decoration-color:rgba(59,50,34,.4) }
 .g-form-nota a:hover{ text-decoration-color:currentColor }
+/* ALVO DE TOQUE SEM MEXER NO LAYOUT: o link tinha 16px de altura numa nota de
+   13,5px, e o mínimo confortável é 40. `inline-block` com padding vertical e
+   margem negativa igual cresce a área tocável sem empurrar a linha de baixo.
+   Mesmo truque que `a.g-linhas-v` já usa nesta folha. */
+.g-form-nota a{ display:inline-block; padding:12px 0; margin:-12px 0 }
 /* a tela final */
 .g-form-fim{ max-width:640px; margin-inline:auto; text-align:center }
 .g-form-fim .g-rot{ justify-content:center }
@@ -8483,3 +8488,46 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
    leitura, os dois no eixo. */
 .g-cab-txt .g-h2{ max-width:22ch }
 .g-cab-txt .g-ed{ max-width:52ch }
+
+/* ---- 6. o espelho tem que ser DE CONTEUDO, nao de coluna ------------------
+   10/09/2026, correção do que eu fiz três horas antes.
+
+   Eu tinha posto `1fr 1fr` para o eixo cair no meio. Cai — mas 1fr é METADE
+   DA CAIXA, e a etiqueta tem seis letras. Medido em 1440: a célula do rótulo
+   tem 606px e o texto "QUANDO" ocupa 50 deles, encostado à direita. Sobra um
+   vazio de ~550px na esquerda da linha, com a tinta toda amontoada no meio e
+   à direita. No papel o eixo estava certo; no olho a seção estava torta, e o
+   Arthur mandou a captura mostrando exatamente isso.
+
+   O certo é a coluna medir o CONTEÚDO (`auto`) e a GRADE INTEIRA se centrar
+   (`justify-content:center`). Aí a dobra fica onde a etiqueta mais longa
+   termina, o conjunto fica no meio da página, e não há vazio nenhum. O valor
+   ganha teto em ch para quebrar em vez de esticar. */
+.g-linhas li{
+  grid-template-columns:1fr; justify-items:center; text-align:center; gap:6px;
+}
+.g-linhas-r{ text-align:center; justify-content:center }
+.g-linhas-v{ text-align:center; justify-content:center; max-width:52ch }
+/* A "de → para" quer o contrário da lista de cima: aqui a SETA tem que cair
+   sempre no mesmo x, senão a coluna de setas serpenteia linha a linha (medido:
+   534, 710 e 577px em três linhas com colunas `auto`). Largura fixa em ch nos
+   dois lados dá eixo constante, e como a grade inteira passa a ter largura
+   constante, `justify-content:center` centra o conjunto. O lado antigo termina
+   na seta, o novo começa nela. */
+.g-vira li{
+  /* colunas IGUAIS: e o que poe a seta no eixo exato da pagina, e nao so num
+     eixo constante. Com 22/30 a seta ficava 44px a esquerda do centro. */
+  grid-template-columns:26ch auto 26ch;
+  justify-content:center;
+}
+@media(max-width:759px){
+  /* empilhado continua sendo uma coluna centrada em si */
+  .g-linhas li,.g-vira li{ grid-template-columns:1fr; justify-content:stretch }
+}
+
+/* ---- 7. o rodapé inteiro no eixo -------------------------------------------
+   O texto do rodapé já centrava, mas a MARCA não: `.g-pe-marca` é um bloco de
+   `min(100%,520px)` sem margem automática, então em 1440 ela ficava 520px
+   colada à esquerda com a frase centrada logo abaixo — dois eixos no mesmo
+   bloco. No celular dava o mesmo, em escala menor. */
+.g-pe-marca{ margin-inline:auto }
