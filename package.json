@@ -6,12 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node scripts/engine.test.mjs && node --import ./scripts/_ts.mjs scripts/semana.test.mjs && node --import ./scripts/_ts.mjs scripts/nome.test.mjs"
+    "test": "node scripts/engine.test.mjs && node --import ./scripts/_ts.mjs scripts/semana.test.mjs && node --import ./scripts/_ts.mjs scripts/nome.test.mjs && node --import ./scripts/_ts.mjs scripts/pix.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.48.1",
     "leaflet": "1.9.4",
     "next": "15.5.22",
+    "qrcode-generator": "^1.4.4",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
