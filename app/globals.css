@@ -8571,3 +8571,156 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
    do rodapé assimétrico antigo. Sem ela, os três pedaços (horário, endereço,
    saída) viram um grupo só, centrado como o resto. */
 .g-pe-ver{ margin-left:0 }
+
+/* =============================================================================
+   12/09/2026 · /ofertar — A TELA DA OFERTA
+
+   Ela é estreita de propósito. Todo o resto do site usa a largura inteira;
+   aqui a pessoa está de pé, no escuro, com a igreja cantando, decidindo um
+   número. Linha curta, alvo grande, e nada na periferia para olhar.
+
+   O ALVO MÍNIMO AQUI É 56px, não 44px. A régua do site é 44 (WCAG 2.5.5), e
+   ela vale para quem está sentado com a mão firme. Este é o único lugar do
+   site usado em pé, no escuro, com pressa — os dois botões de tipo e os de
+   pagamento vão a 56 e 60.
+   ============================================================================= */
+/* o passo novo sobe para o topo (components/Ofertar.tsx), e a barra fixa não
+   pode comer o título dele */
+.of{
+  scroll-margin-top:calc(var(--barra-alt) + var(--e3));
+  max-width:36rem; margin-inline:auto;
+  /* o respiro depois do cabeçalho: `.g-cab ~ …` lista os blocos que ganham
+     essa margem, e `.of` vive noutro `.g`, fora do alcance daquele seletor */
+  margin-top:clamp(40px,5.5vw,72px);
+  display:flex; flex-direction:column; gap:var(--e5);
+  text-align:center;
+}
+.of > .g-h2{ max-width:22ch; margin-inline:auto }
+.of > .g-ed{ max-width:46ch; margin-inline:auto }
+
+/* --------------------------------------------------------- dízimo | oferta */
+.of-tipo{
+  border:0; padding:0; margin:0;
+  display:grid; grid-template-columns:1fr 1fr; gap:var(--e2);
+}
+.of-tipo > legend{
+  /* `legend` dentro de grid não participa do grid em todos os navegadores;
+     tirar do fluxo e recolocar acima é o jeito de ela não virar uma terceira
+     coluna fantasma no Safari */
+  float:left; width:100%; margin-bottom:var(--e2);
+}
+.of-tipo-bt{
+  min-height:56px; padding:var(--e3) var(--e2);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  background:var(--card); color:var(--ink);
+  border:1px solid var(--linha); border-radius:14px;
+  cursor:pointer; text-align:center;
+  transition:background var(--t), border-color var(--t), color var(--t);
+}
+.of-tipo-bt:hover{ border-color:var(--ink4) }
+/* o estado escolhido NÃO é só cor: a borda engrossa e o fundo inverte, então
+   ele sobrevive a daltonismo e a projetor desbotado */
+.of-tipo-bt.on{ background:var(--noite); border-color:var(--noite); color:#fff }
+.of-tipo-rot{ font-family:var(--fonte-display); font-weight:700; font-size:20px; letter-spacing:-.02em }
+.of-tipo-dica{ font-size:13px; line-height:1.35; opacity:.72; max-width:20ch }
+
+/* ------------------------------------------------------------------- valor */
+/* A FOLHA TEM UM `label{}` GLOBAL (linha ~440) que deixa TODO label em caixa
+   alta, espaçado e na cor apagada — nos formulários do sistema o próprio
+   label É o rótulo. Aqui dentro o rótulo é um <span class="g-rot">, e o label
+   é só o embrulho que faz o toque cair no campo. Sem este reset, o aviso de
+   privacidade da oração saía em caixa alta e espaçado: cinco linhas gritando
+   exatamente onde o texto precisa ser lido com calma. */
+.of-valor, .of-oracao{
+  text-transform:none; letter-spacing:normal; color:var(--ink);
+  font-size:inherit; font-weight:inherit; margin-bottom:0;
+}
+.of-valor{ display:flex; flex-direction:column; gap:var(--e2) }
+.of-valor-box{ position:relative; display:block }
+.of-valor-cx{
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:clamp(44px,11vw,72px); line-height:1.05; letter-spacing:-.03em;
+  padding:var(--e3) var(--e2);
+  border:1px solid var(--linha); border-radius:14px;
+  background:var(--card); color:var(--ink);
+  min-height:96px; display:flex; align-items:center; justify-content:center;
+  transition:border-color var(--t), color var(--t);
+}
+/* o campo real fica por cima, invisível e do tamanho da caixa: o toque cai
+   nele, o teclado que abre é numérico, e o número que a pessoa vê é o
+   formatado atrás. Sem cursor piscando, porque o valor entra pela direita
+   como em maquininha e um cursor no lugar errado só confunde. */
+.of-valor-in{
+  position:absolute; inset:0; width:100%; height:100%;
+  opacity:0; border:0; background:none;
+  font-size:16px; /* < 16px faz o iOS dar zoom ao focar */
+  cursor:pointer;
+}
+.of-valor:focus-within .of-valor-cx{ border-color:var(--ink); box-shadow:0 0 0 3px var(--halo) }
+/* R$ 0,00 ainda não é valor: fica apagado até a pessoa digitar. A classe vem
+   do React e não de um seletor de irmão porque `[value=""]` lê o ATRIBUTO, que
+   num input controlado não acompanha o que foi digitado. */
+.of-valor-cx.vazio{ color:var(--mudo) }
+
+/* ------------------------------------------------------ meios de pagamento */
+.of-meios{ display:flex; flex-direction:column; gap:var(--e2) }
+.of-meios .acao{ min-height:60px; justify-content:center; font-size:17px }
+
+/* --------------------------------------------------------------------- pix */
+.of-copiar{ min-height:60px; justify-content:center; font-size:17px }
+.of-codigo{
+  width:100%; margin:0;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:12px; line-height:1.5; word-break:break-all; text-align:left;
+  padding:var(--e2); border:1px solid var(--linha); border-radius:12px;
+  background:var(--card2); color:var(--ink2);
+  /* um toque seleciona o código inteiro; selecionar meio código Pix e colar
+     no banco é o jeito mais silencioso de a oferta falhar */
+  user-select:all; -webkit-user-select:all;
+}
+.of-ou{ position:relative; text-align:center }
+.of-ou::before{
+  content:''; position:absolute; inset:50% 0 auto; height:1px; background:var(--linha);
+}
+.of-ou span{
+  position:relative; background:var(--bg); padding-inline:var(--e2);
+  font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--mudo);
+}
+/* o QR tem fundo branco fixo e não herda o tema: um QR em tema escuro com os
+   módulos claros sobre fundo escuro é invertido, e leitor de celular não lê
+   invertido de forma confiável. Fundo branco sempre, com a moldura do site. */
+.of-qr{
+  width:100%; max-width:260px; margin-inline:auto; display:block;
+  border-radius:12px; border:1px solid var(--linha);
+}
+
+/* --------------------------------------------------------------------- fim */
+.of-fim{ align-items:center }
+.of-selo{
+  width:56px; height:56px; border-radius:50%;
+  display:grid; place-items:center; margin:0 auto;
+  background:var(--noite); color:#fff;
+}
+.of-selo svg{ width:28px; height:28px }
+.of-linha{ width:100%; border:0; border-top:1px solid var(--linha); margin:var(--e3) 0 0 }
+.of-oracao{ display:flex; flex-direction:column; gap:var(--e2); width:100%; text-align:left }
+.of-oracao .g-form-nota{ margin:0; max-width:none; text-align:left }
+.of-causa{
+  width:100%; resize:vertical; min-height:90px;
+  padding:var(--e2); border:1px solid var(--linha); border-radius:12px;
+  background:var(--card); color:var(--ink); font:inherit; font-size:16px;
+}
+.of-causa:focus-visible{ outline:none; border-color:var(--ink); box-shadow:0 0 0 3px var(--halo) }
+
+/* ------------------------------------------------------------------ 480px  */
+@media (max-width:479px){
+  /* lado a lado em 390px daria 165px por botão e a dica quebraria em cinco
+     linhas. Empilhados, cada um fica com a largura inteira.
+
+     TENTEI pôr o rótulo à esquerda e a dica à direita, para poupar altura, e
+     `scripts/texto-centrado.mjs` reprovou: desvio de 23 e 25px do eixo. A
+     régua está certa e a economia não valia — no celular tudo fica centrado,
+     e são 20px a mais por botão. */
+  .of-tipo{ grid-template-columns:1fr }
+  .of-tipo-dica{ max-width:28ch }
+}
