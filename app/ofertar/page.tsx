@@ -4,6 +4,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IGREJA, SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
+import { TEM_CHECKOUT } from '@/lib/checkout';
 
 /* =============================================================================
    /ofertar — O DESTINO DO QR
@@ -42,6 +43,22 @@ export const metadata: Metadata = {
   }),
 };
 
+/* ESTA PÁGINA É ESTÁTICA, E ISSO IMPORTA MAIS DO QUE PARECE.
+
+   Ela existe para ser aberta por duzentas pessoas ao mesmo tempo, às 11h de
+   domingo, na 4G lotada de um salão cheio. Estática, ela sai da borda do CDN e
+   não acorda função nenhuma.
+
+   Foi por isso que os parâmetros de volta do adquirente (?fim=1&t=&v=) NÃO são
+   lidos aqui: `searchParams` num componente de servidor torna a rota dinâmica,
+   e a página inteira passaria a ser renderizada a cada abertura por causa de um
+   caso que acontece depois do pagamento. Quem lê aqueles parâmetros é o
+   componente, no navegador (components/Ofertar.tsx).
+
+   `TEM_CHECKOUT` é lido no BUILD, não a cada visita: por isso, no dia em que a
+   credencial do adquirente entrar no painel da Vercel, é preciso um redeploy
+   para o botão aparecer. É o preço da página estática, e ele é barato — a
+   credencial muda uma vez na vida. */
 export default function Pagina() {
   return (
     <Site atual="/ofertar">
@@ -68,7 +85,7 @@ export default function Pagina() {
         </div>
 
         <div className="g">
-          <Ofertar />
+          <Ofertar temCartao={TEM_CHECKOUT} />
         </div>
       </section>
     </Site>
