@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import qrcode from 'qrcode-generator';
 import { pixCopiaECola } from '@/lib/pix';
 import {
-  TIPOS, TEM_PIX, TEM_CARTAO, PIX_CHAVE, PIX_NOME, PIX_CIDADE, CHECKOUT_URL,
+  TIPOS, TEM_PIX, PIX_CHAVE, PIX_NOME, PIX_CIDADE,
   txidDe, valorDeDigitos, emReais, valorInvalido, type TipoOferta,
 } from '@/lib/oferta';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
@@ -58,12 +58,37 @@ function QR({ texto, rotulo }: { texto: string; rotulo: string }) {
   );
 }
 
-export function Ofertar() {
+/** Quem volta do checkout do adquirente chega em ?fim=1&t=<tipo>&v=<valor>.
+ *
+ *  ESTES VALORES VÊM DA URL, ou seja qualquer pessoa pode digitá-los. Servem SÓ
+ *  para a tela de agradecimento saber o que escrever: nada é gravado, nada é
+ *  confirmado, nenhum dinheiro muda de lugar por causa deles. Quem prova que a
+ *  oferta aconteceu é o extrato do adquirente e o do banco.
+ *
+ *  Lido no navegador e não no servidor de propósito: `searchParams` numa página
+ *  de servidor a tornaria dinâmica, e esta precisa sair do CDN (ver a nota em
+ *  app/ofertar/page.tsx). */
+function lerVolta(): { tipo: TipoOferta; valor: number; pendente: boolean } | null {
+  if (typeof window === 'undefined') return null;
+  const q = new URLSearchParams(window.location.search);
+  if (q.get('fim') !== '1') return null;
+  const t = q.get('t');
+  if (t !== 'dizimo' && t !== 'oferta') return null;
+  const v = Number(q.get('v'));
+  return { tipo: t, valor: Number.isFinite(v) && v > 0 && v < 1e6 ? v : 0, pendente: q.get('p') === '1' };
+}
+
+/** `temCartao` vem do SERVIDOR (app/ofertar/page.tsx), não de uma variável de
+ *  ambiente pública: é só um booleano dizendo se existe credencial de
+ *  adquirente configurada. O token nunca chega aqui. */
+export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
+  const [volta, setVolta] = useState<ReturnType<typeof lerVolta>>(null);
   const [tipo, setTipo] = useState<TipoOferta | null>(null);
   const [digitos, setDigitos] = useState('');
   const [fase, setFase] = useState<Fase>('escolher');
   const [erro, setErro] = useState<string | null>(null);
   const [copiou, setCopiou] = useState(false);
+  const [indo, setIndo] = useState(false);
   const [txid, setTxid] = useState('');
   const campo = useRef<HTMLInputElement>(null);
   const caixa = useRef<HTMLDivElement>(null);
@@ -82,6 +107,17 @@ export function Ofertar() {
     passoAnterior.current = fase;
     caixa.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   }, [fase]);
+
+  /* a volta do adquirente, depois da hidratação: na montagem, não na
+     renderização, senão o HTML do servidor e o do cliente divergem */
+  useEffect(() => {
+    const v = lerVolta();
+    if (!v) return;
+    setVolta(v);
+    setTipo(v.tipo);
+    setDigitos(String(Math.round(v.valor * 100)));
+    setFase('fim');
+  }, []);
 
   const valor = valorDeDigitos(digitos);
   const rotuloTipo = TIPOS.find(t => t.id === tipo)?.rot ?? '';
@@ -116,12 +152,29 @@ export function Ofertar() {
     setFase('pix');
   }
 
-  function irParaCartao() {
-    if (!conferir()) return;
-    const u = new URL(CHECKOUT_URL);
-    u.searchParams.set('valor', valor.toFixed(2));
-    u.searchParams.set('tipo', tipo!);
-    window.location.href = u.toString();
+  /* O cartão, o Apple Pay e o Google Pay saem daqui. A tela NÃO fala com o
+     adquirente: pede ao nosso servidor uma URL de checkout e vai para lá. A
+     credencial fica do lado de lá o tempo todo (lib/checkout.ts).
+
+     `indo` não é enfeite: sem ele, dois toques no botão abrem duas sessões de
+     pagamento, e a pessoa pode acabar pagando duas vezes. */
+  async function irParaCartao() {
+    if (indo || !conferir()) return;
+    setIndo(true);
+    const meu = txidDe(tipo!);
+    try {
+      const r = await fetch('/api/ofertar/checkout', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ valor, tipo, txid: meu }),
+      });
+      const j = await r.json().catch(() => null);
+      if (j?.ok && j.url) { window.location.href = j.url; return; }
+      setErro(j?.erro || 'Não consegui abrir o pagamento por cartão. Tente o Pix.');
+    } catch {
+      setErro('Sem conexão para abrir o pagamento por cartão. Tente o Pix.');
+    }
+    setIndo(false);
   }
 
   async function copiar() {
@@ -147,7 +200,7 @@ export function Ofertar() {
   if (fase === 'fim') {
     return (
       <div className="of of-fim" ref={caixa}>
-        <Fim tipo={tipo} valor={valor} />
+        <Fim tipo={tipo} valor={valor} pendente={!!volta?.pendente} />
       </div>
     );
   }
@@ -223,14 +276,17 @@ export function Ofertar() {
 
       {erro && <p className="g-form-erro" role="alert">{erro}</p>}
 
+      {/* A ORDEM NÃO É ESTÉTICA, É DINHEIRO DA IGREJA. Pix custa a tarifa do
+          banco; cartão custa 3 a 5 por cento do que a pessoa deu, todo mês,
+          para sempre. Em R$10 mil de oferta são ~R$400 que deixam de virar
+          trabalho da igreja. Por isso o Pix é o botão cheio e vem primeiro.
+
+          E o cartão fica logo abaixo, visível, sem pegadinha: para quem tem
+          Apple Pay na mão são três segundos, e oferta que não acontece custa
+          mais caro que taxa de adquirente. */}
       <div className="of-meios">
-        {TEM_CARTAO && (
-          <button type="button" className="acao cheia" onClick={irParaCartao}>
-            Apple Pay, Google Pay ou cartão
-          </button>
-        )}
         {TEM_PIX ? (
-          <button type="button" className={`acao${TEM_CARTAO ? '' : ' cheia'}`} onClick={irParaPix}>
+          <button type="button" className="acao cheia" onClick={irParaPix}>
             Pix
           </button>
         ) : (
@@ -238,6 +294,12 @@ export function Ofertar() {
             O Pix está sendo configurado. Por enquanto, fale com a gente pelo{' '}
             <a href={canalDeConversa().href}>{canalDeConversa().rot.replace('Falar no ', '')}</a>.
           </p>
+        )}
+
+        {temCartao && (
+          <button type="button" className="acao" onClick={irParaCartao} disabled={indo}>
+            {indo ? 'Abrindo…' : 'Apple Pay, Google Pay ou cartão'}
+          </button>
         )}
       </div>
 
@@ -262,7 +324,8 @@ export function Ofertar() {
    hoje. Enquanto não existirem, o pedido vai para uma pessoa, não para uma
    tabela.
    ============================================================================= */
-function Fim({ tipo, valor }: { tipo: TipoOferta | null; valor: number }) {
+function Fim({ tipo, valor, pendente = false }:
+  { tipo: TipoOferta | null; valor: number; pendente?: boolean }) {
   const [causa, setCausa] = useState('');
   const rot = TIPOS.find(t => t.id === tipo)?.rot ?? 'Oferta';
   const canal = canalDeConversa(
@@ -270,10 +333,15 @@ function Fim({ tipo, valor }: { tipo: TipoOferta | null; valor: number }) {
   );
   return (
     <>
+      {/* PENDENTE NÃO É PAGO. Boleto e alguns cartões voltam como "em
+          análise", e escrever "recebemos" ali seria a tela mentir para a
+          pessoa sobre o dinheiro dela. */}
       <p className="of-selo" aria-hidden="true"><IcCheck /></p>
-      <h2 className="g-h2">Recebemos. Obrigado.</h2>
+      <h2 className="g-h2">{pendente ? 'Estamos aguardando a confirmação.' : 'Recebemos. Obrigado.'}</h2>
       <p className="g-ed">
-        {rot} de {emReais(valor)}. Que Deus multiplique o que você semeou.
+        {pendente
+          ? `Seu ${rot.toLowerCase()}${valor ? ` de ${emReais(valor)}` : ''} foi enviado e o banco ainda está confirmando. Assim que cair, está tudo certo.`
+          : `${rot}${valor ? ` de ${emReais(valor)}` : ''}. Que Deus multiplique o que você semeou.`}
       </p>
 
       <hr className="of-linha" />
