@@ -81,10 +81,14 @@ export const PIX_CIDADE = process.env.NEXT_PUBLIC_PIX_CIDADE || 'Rio de Janeiro'
  *  Enquanto for false, a perna do Pix mostra o aviso e não desenha QR nenhum. */
 export const TEM_PIX = PIX_CHAVE.trim().length > 0;
 
-/** O checkout do adquirente (cartão, Apple Pay, Google Pay). Enquanto for
- *  vazio, os botões não aparecem — em vez de aparecerem e falharem. */
-export const CHECKOUT_URL = process.env.NEXT_PUBLIC_CHECKOUT_URL || '';
-export const TEM_CARTAO = CHECKOUT_URL.trim().length > 0;
+/* O cartão, o Apple Pay e o Google Pay NÃO têm constante aqui, e isso é uma
+   decisão de segurança, não de organização: a credencial do adquirente mora em
+   `MP_ACCESS_TOKEN`, sem prefixo público, e qualquer `NEXT_PUBLIC_` que a
+   tocasse a mandaria inteira para o JavaScript que qualquer pessoa baixa.
+
+   Quem sabe se o cartão está ligado é o servidor (`lib/checkout.ts`), e ele
+   conta para a tela por propriedade, na página. A tela recebe um booleano e
+   nunca vê o token. */
 
 /* --------------------------------------------------------------------- txid ---
    Até 25 caracteres alfanuméricos, e é a ÚNICA coisa nossa que volta no
