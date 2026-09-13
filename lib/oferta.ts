@@ -51,6 +51,8 @@
    pagamento, que era o outro motivo.
    ============================================================================= */
 
+import { IGREJA } from './igreja';
+
 export type TipoOferta = 'dizimo' | 'oferta';
 
 export const TIPOS: { id: TipoOferta; rot: string; dica: string }[] = [
@@ -66,16 +68,20 @@ export const TIPOS: { id: TipoOferta; rot: string; dica: string }[] = [
   },
 ];
 
-/** A chave Pix da igreja. É PÚBLICA por natureza — uma chave de recebimento
- *  existe para ser divulgada, e esta vai impressa em adesivo de cadeira. Por
- *  isso `NEXT_PUBLIC_`: o código é montado no próprio celular, sem ida ao
- *  servidor, e a página continua funcionando com a rede ruim da igreja. */
-export const PIX_CHAVE = process.env.NEXT_PUBLIC_PIX_CHAVE || '';
+/** A chave Pix da igreja. Vem de `lib/igreja.ts`, ao lado do endereço e do @,
+ *  porque é um fato público da igreja e não um segredo: chave Pix só RECEBE,
+ *  e esta vai impressa em adesivo de cadeira. A variável de ambiente continua
+ *  valendo como atalho (trocar sem commit), mas não é mais obrigatória — a
+ *  razão inteira está escrita em `lib/igreja.ts`.
+ *
+ *  O código é montado no próprio celular, sem ida ao servidor, e por isso a
+ *  página continua funcionando com a rede ruim de um salão cheio. */
+export const PIX_CHAVE = (process.env.NEXT_PUBLIC_PIX_CHAVE || IGREJA.pixChave || '').trim();
 
 /** O nome que aparece no app de quem paga, antes de confirmar (campo 59 do BR
  *  Code). Máximo 25 caracteres, sem acento — `lib/pix.ts` corta e limpa. */
-export const PIX_NOME = process.env.NEXT_PUBLIC_PIX_NOME || 'GUIA CHURCH';
-export const PIX_CIDADE = process.env.NEXT_PUBLIC_PIX_CIDADE || 'Rio de Janeiro';
+export const PIX_NOME = process.env.NEXT_PUBLIC_PIX_NOME || IGREJA.pixNome;
+export const PIX_CIDADE = process.env.NEXT_PUBLIC_PIX_CIDADE || IGREJA.pixCidade;
 
 /** A página existe mesmo sem chave configurada: ela explica em vez de quebrar.
  *  Enquanto for false, a perna do Pix mostra o aviso e não desenha QR nenhum. */
@@ -83,8 +89,12 @@ export const TEM_PIX = PIX_CHAVE.trim().length > 0;
 
 /* O cartão, o Apple Pay e o Google Pay NÃO têm constante aqui, e isso é uma
    decisão de segurança, não de organização: a credencial do adquirente mora em
-   `MP_ACCESS_TOKEN`, sem prefixo público, e qualquer `NEXT_PUBLIC_` que a
-   tocasse a mandaria inteira para o JavaScript que qualquer pessoa baixa.
+   `STONE_SECRET_KEY` (ou `MP_ACCESS_TOKEN`), sem prefixo público, e qualquer
+   `NEXT_PUBLIC_` que a tocasse a mandaria inteira para o JavaScript que
+   qualquer pessoa baixa.
+
+   É EXATAMENTE POR ISSO que a chave Pix pôde sair da variável de ambiente e a
+   do adquirente não: uma só recebe, a outra cobra.
 
    Quem sabe se o cartão está ligado é o servidor (`lib/checkout.ts`), e ele
    conta para a tela por propriedade, na página. A tela recebe um booleano e
