@@ -60,6 +60,35 @@ export const IGREJA = {
      ------------------------------------------------------------------------ */
   whatsapp: null as string | null,
   youtube: null as string | null,
+
+  /* ------------------------------------------------------------------------
+     A CHAVE PIX DA IGREJA
+
+     Ela mora AQUI, ao lado do endereço e do @, e não numa variável de ambiente.
+     Cheguei a pôr em `NEXT_PUBLIC_PIX_CHAVE` e estava errado, por uma razão
+     que só aparece quando se olha para onde o valor termina: uma variável
+     `NEXT_PUBLIC_` é copiada inteira para o JavaScript que a página entrega a
+     quem abre o site. Ou seja, ela nunca foi segredo — e ainda obrigava um
+     deploy inteiro para mudar de valor. Pagava-se o preço sem receber nada.
+
+     E chave Pix não é credencial: ela só RECEBE. Ninguém tira dinheiro de
+     conta nenhuma com ela. É a mesma natureza do endereço da igreja, e vai
+     impressa no adesivo da cadeira e no slide do telão — publicá-la é o
+     objetivo, não um acidente.
+
+     O que continua sendo segredo de verdade, e por isso continua em variável
+     de ambiente sem prefixo público: a chave do adquirente (`STONE_SECRET_KEY`),
+     que autoriza COBRAR em nome da igreja. Aquela nunca entra em arquivo.
+
+     Formato: só dígitos para CNPJ, CPF ou telefone (o telefone com o 55 na
+     frente), ou o e-mail, ou a chave aleatória inteira.
+
+     `pixNome` é o que aparece no app de quem paga antes de confirmar: no
+     máximo 25 caracteres, sem acento (lib/pix.ts corta e limpa sozinho).
+     ------------------------------------------------------------------------ */
+  pixChave: null as string | null,
+  pixNome: 'GUIA CHURCH',
+  pixCidade: 'Rio de Janeiro',
 } as const;
 
 export const ENDERECO_LINHA =
