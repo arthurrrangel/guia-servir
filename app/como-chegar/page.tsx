@@ -62,7 +62,7 @@ export default function ComoChegar() {
       }} />
 
       {/* ------------------------------------------------- a fachada, inteira */}
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('chegar')} alt={criaAlt('chegar')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Onde fica</p>
