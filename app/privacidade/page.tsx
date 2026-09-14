@@ -1,11 +1,10 @@
 import type { Metadata } from 'next';
 import { cartao } from '@/lib/meta';
-import Link from 'next/link';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { Perguntas } from '@/components/Perguntas';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, ENDERECO_LINHA, SITE, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL
