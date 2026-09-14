@@ -87,6 +87,9 @@ export async function visaoGeral(): Promise<AreaVisao[]> {
   const s = sb();
   if (!s) return [];
   const { data, error } = await s.rpc('visao_geral');
-  if (error) return [];
+  /* 14/09/2026: erro não é lista vazia. Vazio significa "nenhuma área";
+     erro significa "não sei" — e o painel tem que saber a diferença para não
+     mostrar uma igreja limpa a um líder cujo token acabou de expirar. */
+  if (error) throw error;
   return (data || []) as AreaVisao[];
 }
