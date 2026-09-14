@@ -61,7 +61,7 @@ export default function Servir() {
   return (
     <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('servir')} alt={criaAlt('servir')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
