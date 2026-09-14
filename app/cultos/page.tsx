@@ -5,7 +5,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import ProximoCulto from '@/components/ProximoCulto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, SITE, CULTO_QUANDO, canalDeConversa } from '@/lib/igreja';
 import { src as cria, alt as criaAlt } from '@/lib/criativos';
 
 /* =============================================================================
@@ -44,7 +44,7 @@ const PRIMEIRA_VEZ = [
 
 /* O QUE VOCÊ PRECISA SABER — cinco linhas, as cinco do Arthur */
 const PRECISA_SABER: Array<{ r: string; v: string; href?: string }> = [
-  { r: 'Quando', v: 'Culto aos domingos, às 10h' },
+  { r: 'Quando', v: `Culto aos ${IGREJA.cultoDia.toLowerCase()}s, às ${IGREJA.cultoHora}` },
   { r: 'Endereço', v: `${IGREJA.rua}, ${IGREJA.bairro}`, href: '/como-chegar' },
   { r: 'Recepção', v: 'Nossa equipe estará pronta para receber você' },
   { r: 'Crianças', v: 'Temos um espaço preparado para as crianças' },
@@ -68,9 +68,9 @@ const PASSOS = [
 export const metadata: Metadata = {
   title: 'Cultos',
   description:
-    'Um domingo para pertencer: culto aos domingos, às 10h, na Barra da Tijuca. O que esperar na sua primeira vez.',
+    `Um domingo para pertencer: culto aos ${IGREJA.cultoDia.toLowerCase()}s, às ${IGREJA.cultoHora}, na ${IGREJA.bairro}. O que esperar na sua primeira vez.`,
   alternates: { canonical: '/cultos' },
-  ...cartao({ titulo: 'Cultos', descricao: 'Um domingo para pertencer. Domingo, 10h, Barra da Tijuca.', caminho: '/cultos', imagem: 'cultos' }),
+  ...cartao({ titulo: 'Cultos', descricao: `Um domingo para pertencer. ${CULTO_QUANDO}, ${IGREJA.bairro}.`, caminho: '/cultos', imagem: 'cultos' }),
 };
 
 export default function Cultos() {
@@ -94,7 +94,7 @@ export default function Cultos() {
       }} />
 
       {/* ------------------------------------------------------------ herói */}
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('cultos')} alt={criaAlt('cultos')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot"><ProximoCulto /></p>
