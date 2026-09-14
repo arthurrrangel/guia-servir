@@ -42,6 +42,12 @@ export const IGREJA = {
   instagram: 'https://instagram.com/guiachurch',
   instagramArroba: '@guiachurch',
 
+  /* 14/09/2026. O canal estava escrito "Guia Church TV" no <title> e no JSON-LD
+     da própria página do canal, e "GUIA Church TV" em todo o resto do site —
+     as duas grafias da mesma marca saíam juntas na aba do navegador ("Guia
+     Church TV · GUIA Church"). Uma fonte só, como o resto. */
+  canalNome: 'GUIA Church TV',
+
   /* ------------------------------------------------------------------------
      OS DOIS CANAIS QUE AINDA NÃO TÊM DONO DECIDIDO
 
@@ -90,6 +96,13 @@ export const IGREJA = {
   pixNome: 'GUIA CHURCH',
   pixCidade: 'Rio de Janeiro',
 } as const;
+
+/** "Domingo, 10h" — o dia e a hora do culto na forma que o site escreve.
+ *  14/09/2026: estava escrito à mão em nove lugares (home, /cultos, o
+ *  <ProximoCulto>, a descrição do site inteiro), contra a regra deste próprio
+ *  arquivo. Trocar `cultoHora` consertava o rodapé e deixava o Google dizendo
+ *  a hora velha. Agora todos leem daqui. */
+export const CULTO_QUANDO = `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`;
 
 export const ENDERECO_LINHA =
   `${IGREJA.rua} · ${IGREJA.bairro}, ${IGREJA.cidade}, ${IGREJA.uf} · ${IGREJA.cep}`;
