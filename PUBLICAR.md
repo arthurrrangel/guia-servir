@@ -80,6 +80,30 @@ Um segundo sintoma da mesma doença: se o caminho tem só um nível
 (`app/page.tsx`), o `tree-save` responde **422 "A file with the same name
 already exists"** em vez de renomear. Caminho completo resolve os dois.
 
+### Apagar um arquivo (descoberto em 14/09)
+
+Não existe `tree-save` para apagar. A página `/delete/master/<caminho>` é React
+e entrega em `webCommitInfo.saveUrl` o endpoint real:
+
+`DELETE /<dono>/<repo>/blob/master/<caminho>` — método HTTP `DELETE` mesmo,
+sem `_method`. O `FormData` é o mesmo do `tree-save` sem `filename`,
+`new_filename`, `value` e `content_changed`; os cabeçalhos são idênticos. A
+resposta boa é `{"data":{"message":"File successfully deleted.", …}}`.
+
+### Trinta arquivos de uma vez: o Chrome congela o `javascript_tool`
+
+Um `await` que percorre 15 publicações dentro de uma chamada só estoura o
+limite de 45s da ferramenta ("Runtime.evaluate timed out"), e o resultado some
+— mas as publicações CONTINUAM acontecendo por trás. Em 14/09 as 15 tinham
+entrado e o único problema foi não saber.
+
+O jeito: disparar o laço **sem `await`** dentro da chamada, escrevendo o
+progresso em `window.__prog = {feitos, erros, rodando}`, e ler `__prog` em
+chamadas curtas separadas. Cada publicação leva ~2,8s; 15 arquivos levam 47s.
+Antes de mandar de novo o que "pode ter falhado", leia
+`/commits/master?per_page=50` e procure as mensagens: é a lista exata do que
+entrou.
+
 ### Conferir DEPOIS, sempre
 
 O `commitQuorumPollPath` da resposta nem sempre traz o sha novo. Não confie
