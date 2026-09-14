@@ -17,7 +17,7 @@ import { src as cria } from '@/lib/criativos';
    ============================================================================= */
 
 export const metadata: Metadata = {
-  title: 'Guia Church TV',
+  title: IGREJA.canalNome,
   description: 'A mensagem de domingo da GUIA Church, para ver de novo ou para quem não pôde vir.',
   alternates: { canonical: '/guia-church-tv' },
   robots: IGREJA.youtube ? undefined : { index: false, follow: true },
@@ -28,9 +28,9 @@ export default function TV() {
   const canal = IGREJA.youtube;
   return (
     <Site escuro>
-      {canal && <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Guia Church TV', url: `${SITE}/guia-church-tv`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />}
+      {canal && <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: IGREJA.canalNome, url: `${SITE}/guia-church-tv`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />}
 
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('tv')} alt="" fetchPriority="high" />
         <div className="g">
           <p className="g-rot">GUIA Church TV</p>
