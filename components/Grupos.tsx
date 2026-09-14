@@ -139,7 +139,14 @@ export function Grupos() {
           {achado ? 'Calcular de novo' : 'Achar o mais perto de mim'} <IcSeta />
         </button>
       </div>
-      <div className="pgs fila" aria-live="polite">
+      {/* 14/09/2026: a live region ERA a lista inteira de cartões. Trocar o
+          filtro mudava a visibilidade de vários cartões de uma vez dentro de
+          uma região viva, e o leitor de tela lia todos os que apareceram. Agora
+          a lista é só lista, e uma frase curta anuncia o resultado do filtro. */}
+      <p className="so-leitor" role="status" aria-live="polite">
+        {`${PEQUENAS_GUIAS.filter(teste).length} de ${PEQUENAS_GUIAS.length} grupos no filtro atual`}
+      </p>
+      <div className="pgs fila">
         {PEQUENAS_GUIAS.map(pg => {
           const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
           const visivel = teste(pg);
