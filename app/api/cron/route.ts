@@ -68,11 +68,22 @@ const soGlobais = (ls: Lider[]) =>
 async function enviar(para: string[], assunto: string, corpo: string) {
   const chave = process.env.RESEND_API_KEY;
   if (!chave || !para.length) return { enviado: false, motivo: chave ? 'sem destinatário' : 'sem RESEND_API_KEY' };
-  const r = await fetch('https://api.resend.com/emails', {
-    method: 'POST', headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: 'Escala <onboarding@resend.dev>', to: para, subject: assunto, text: corpo }),
-  });
-  return { enviado: r.ok, motivo: r.ok ? 'ok' : `resend ${r.status}` };
+  /* 14/09/2026: o fetch pode REJEITAR (DNS, rede), não só responder mal. Sem o
+     try, o primeiro email que falhasse estourava a rota inteira DEPOIS de as
+     escalas já estarem no banco: nenhum líder recebia nada, o alerta de
+     "não montado" não saía, e no dia seguinte o jaTem pulava tudo — os emails
+     simplesmente nunca aconteciam. Falha de email é dado do relatório, não
+     exceção. */
+  try {
+    const r = await fetch('https://api.resend.com/emails', {
+      method: 'POST', headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'Escala <onboarding@resend.dev>', to: para, subject: assunto, text: corpo }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    return { enviado: r.ok, motivo: r.ok ? 'ok' : `resend ${r.status}` };
+  } catch (e) {
+    return { enviado: false, motivo: `rede: ${String((e as Error)?.message || e).slice(0, 80)}` };
+  }
 }
 const linkZap = (tel?: string, texto?: string) => {
   const n = String(tel || '').replace(/\D/g, '');
@@ -123,18 +134,24 @@ export async function GET(req: Request) {
     const prox = proxMes(iso);
     /* um email POR ministério, para quem enxerga aquele ministério */
     const envios: any[] = [];
+    const falhas: string[] = [];
     for (const e of equipes) {
-      const S = await estadoDaEquipe(s, e);
-      if (!funcoesAtivas(S).length) continue;
-      envios.push({
-        equipe: e.nome,
-        email: await enviar(paraEquipe(lideres, e.id),
-          `${e.nome} · dia 20: pedir indisponibilidade de ${MESES[prox.mes - 1]}`,
-          `Cole no grupo do ministério:\n\n${msgColeta(S, prox.ano, prox.mes, SITE)}`),
-      });
+      /* uma equipe que não carrega não pode calar as outras quatro */
+      try {
+        const S = await estadoDaEquipe(s, e);
+        if (!funcoesAtivas(S).length) continue;
+        envios.push({
+          equipe: e.nome,
+          email: await enviar(paraEquipe(lideres, e.id),
+            `${e.nome} · dia 20: pedir indisponibilidade de ${MESES[prox.mes - 1]}`,
+            `Cole no grupo do ministério:\n\n${msgColeta(S, prox.ano, prox.mes, SITE)}`),
+        });
+      } catch (err) {
+        falhas.push(`${e.nome}: ${String((err as Error)?.message || err).slice(0, 120)}`);
+      }
     }
     rel.acoes.push({ acao: 'coleta', mes: `${prox.ano}-${String(prox.mes).padStart(2, '0')}`,
-      ministerios: envios.length, envios });
+      ministerios: envios.length, envios, falhas });
   }
 
   // ---------- DIA 26: montar o mês de cada equipe ----------
@@ -145,7 +162,18 @@ export async function GET(req: Request) {
     const blocos: { id: string; nome: string; vagas: number; texto: string }[] = [];
     const falhas: string[] = [];
     for (const e of equipes) {
-      const S = await estadoDaEquipe(s, e);
+      /* 14/09/2026: a carga do estado agora LANÇA quando qualquer leitura
+         falha (lib/ponte.ts). É de propósito: antes, escalação que não carregava
+         virava "não tem escala", e daí gerarMes + salvar_dia apagavam o mês.
+         Aqui a falha vira linha em `falhas`, o organizador global recebe o
+         alerta, e as outras equipes seguem. Nada é escrito no banco de uma
+         equipe cujo estado não se sabe. */
+      let S: Estado;
+      try { S = await estadoDaEquipe(s, e); }
+      catch (err) {
+        const m = `${e.nome}: não carregou o estado (${String((err as Error)?.message || err).slice(0, 100)})`;
+        resumo.push({ equipe: e.nome, erro: m }); falhas.push(m); continue;
+      }
       if (!S.voluntarios.filter(v => v.ativo).length || !funcoesAtivas(S).length) { resumo.push({ equipe: e.nome, pulado: 'sem time/funções ativas' }); continue; }
       const jaTem = dias.some(d => Object.values(S.escalas[d]?.slots || {}).some((x: any) => x?.vid));
       if (jaTem) { resumo.push({ equipe: e.nome, pulado: 'já tinha escala' }); continue; }
@@ -190,10 +218,21 @@ export async function GET(req: Request) {
     const alvos = cultosAte(iso, 4);
     const porEquipe: Record<string, { nome: string; partes: string[] }> = {};
     const resumo: any[] = [];
+    const falhas: string[] = [];
+    /* 14/09/2026: o estado de cada equipe é carregado UMA vez, não uma vez por
+       data. Eram 5 datas × 5 equipes = 25 cargas de ~10 consultas cada, para um
+       dado que só depende da equipe. E a carga que falha vira linha em
+       `falhas`, em vez de derrubar a cobrança de todo mundo. */
+    const estados = new Map<string, Estado>();
+    for (const e of equipes) {
+      try { estados.set(e.id, await estadoDaEquipe(s, e)); }
+      catch (err) { falhas.push(`${e.nome}: não carregou o estado (${String((err as Error)?.message || err).slice(0, 100)})`); }
+    }
     for (const data of alvos) {
       const rotulo = tipoDoDia(data) === 'follow' ? `Follow sáb ${fmtDia(data)}` : `domingo ${fmtDia(data)}`;
       for (const e of equipes) {
-        const S = await estadoDaEquipe(s, e);
+        const S = estados.get(e.id);
+        if (!S) continue;
         const dia = S.escalas[data];
         if (!dia) continue;
         const pend = Object.entries(dia.slots).filter(([, sl]: any) => sl?.vid && (sl.status || 'pendente') === 'pendente');
@@ -220,7 +259,12 @@ export async function GET(req: Request) {
           `${b.nome} · pendentes de ${alvos.map(d => fmtDia(d)).join(' e ')}`,
           `Cada link abre o WhatsApp da pessoa com a cobrança digitada. Só apertar enviar.\n\n${b.partes.join('\n\n' + '='.repeat(34) + '\n\n')}`) });
     }
-    rel.acoes.push({ acao: 'cobranca', cultos: alvos, resumo, envios });
+    /* falha de carga vai para o organizador global, como no dia 26 */
+    const alertaCob = falhas.length
+      ? await enviar(soGlobais(lideres), `[ATENÇÃO] cobrança de quinta incompleta`,
+          `\u26a0 Não consegui carregar estes ministérios, e eles ficaram SEM cobrança:\n${falhas.map(f => '• ' + f).join('\n')}`)
+      : { enviado: false, motivo: 'nenhuma falha' };
+    rel.acoes.push({ acao: 'cobranca', cultos: alvos, resumo, envios, falhas, alerta: alertaCob });
   }
 
   if (!rel.acoes.length) rel.acoes = 'nada agendado para hoje';
