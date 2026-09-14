@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { IGREJA, CULTO_QUANDO } from '@/lib/igreja';
 
 /* =============================================================================
    PRÓXIMO CULTO — a data do próximo domingo, calculada na hora
@@ -11,7 +12,7 @@ import { useEffect, useState } from 'react';
    Aos domingos até as 12h, o "próximo" é hoje.
    ============================================================================= */
 
-export default function ProximoCulto({ fixo = 'Domingo, 10h' }: { fixo?: string }) {
+export default function ProximoCulto({ fixo = CULTO_QUANDO }: { fixo?: string }) {
   const [txt, setTxt] = useState(fixo);
   useEffect(() => {
     const agora = new Date();
@@ -21,7 +22,7 @@ export default function ProximoCulto({ fixo = 'Domingo, 10h' }: { fixo?: string 
     if (dia === 0 && agora.getHours() >= 12) falta = 7;
     d.setDate(d.getDate() + falta);
     const f = d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
-    setTxt(falta === 0 ? `Hoje, ${f} · 10h` : `Domingo, ${f} · 10h`);
+    setTxt(falta === 0 ? `Hoje, ${f} · ${IGREJA.cultoHora}` : `${IGREJA.cultoDia}, ${f} · ${IGREJA.cultoHora}`);
   }, []);
   return <>{txt}</>;
 }
