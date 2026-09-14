@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
-import { Carregando, Vazio, linkZap } from '@/components/Tela';
+import { Carregando, linkZap } from '@/components/Tela';
 import { fotoDaArea, focoDaArea } from '@/lib/fotos';
 import { src as cria } from '@/lib/criativos';
 import { descricaoPublica } from '@/lib/areas-publicas';
@@ -105,7 +105,7 @@ export default function Area() {
 
   if (fase !== 'pronto' || !min) return (
     <Site atual="/servir" escuro>
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
@@ -136,7 +136,7 @@ export default function Area() {
   return (
     <Site atual="/servir" escuro>
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={foto} style={{ objectPosition: foco }} alt="" fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Servir</p>
