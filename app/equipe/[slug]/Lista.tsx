@@ -277,6 +277,20 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
      lista de quem JÁ está no time faz a pessoa procurar o próprio nome numa
      lista onde ele não pode estar. ?novo=1 pula direto para o cadastro. */
   const [pulouParaCadastro, setPulou] = useState(false);
+  /* useCallback porque `abrirCadastro` é dependência do efeito que lê ?novo=1:
+     como função solta, ela nascia nova a cada render e o efeito rodava a cada
+     render também (aviso do react-hooks/exhaustive-deps, 14/09/2026). */
+  const abrirCadastro = useCallback(async () => {
+    setErro(''); setFase('cadastro');
+    const { data } = await sb()!.rpc('equipe_funcoes', { p_slug: slug });
+    setNomesArea(((data || []) as any[]).map(f => ({
+      nome: f.nome,
+      tipos: Array.isArray(f.tipos) && f.tipos.length ? f.tipos : ['domingo', 'follow'],
+      descricao: f.descricao || '',
+      familia: f.descricao_familia || '',
+    })));
+  }, [slug]);
+
   useEffect(() => {
     if (pulouParaCadastro || fase !== 'inicio') return;
     if (new URLSearchParams(window.location.search).get('novo') !== '1') return;
@@ -404,16 +418,6 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     entrou(res.token);
   }
 
-  async function abrirCadastro() {
-    setErro(''); setFase('cadastro');
-    const { data } = await sb()!.rpc('equipe_funcoes', { p_slug: slug });
-    setNomesArea(((data || []) as any[]).map(f => ({
-      nome: f.nome,
-      tipos: Array.isArray(f.tipos) && f.tipos.length ? f.tipos : ['domingo', 'follow'],
-      descricao: f.descricao || '',
-      familia: f.descricao_familia || '',
-    })));
-  }
 
   /* Era um chip que ciclava a cada toque: null > ajudo > sozinho > aprendo.
      Funcionava, mas o nível só existia dentro da cabeça de quem tocou, e para
