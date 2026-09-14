@@ -178,7 +178,7 @@ export async function painelDoMinisterio(equipeId: string): Promise<Painel | nul
     return painelDemo();
   }
   const { data, error } = await sb()!.rpc('painel_ministerio', { p_equipe: equipeId });
-  if (error) return null;
+  if (error) throw error;   // 14/09/2026: null é "sem pendência"; erro é "não sei"
   return data as Painel;
 }
 
