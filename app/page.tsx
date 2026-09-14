@@ -387,13 +387,13 @@ export default function Casa() {
               <img src={cria('domingo')} alt="" loading="lazy" decoding="async" />
               <span className="casa-area-nome">Campus físico</span>
               <p className="casa-area-desc">Na {IGREJA.rua}. Equipe na porta, estacionamento orientado e GUIA Kids para as crianças.</p>
-              <span className="casa-area-selo">Domingo · 10h · {IGREJA.bairro}</span>
+              <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · {IGREJA.bairro}</span>
             </Link>
             <Link href="/guia-church-tv" className="casa-area corte">
               <img src={cria('tv')} alt="" loading="lazy" decoding="async" />
               <span className="casa-area-nome">Transmissão ao vivo</span>
               <p className="casa-area-desc">O culto de domingo ao vivo, no mesmo horário, pela GUIA Church TV. Para quem está longe, viajando ou ainda conhecendo a igreja.</p>
-              <span className="casa-area-selo">Domingo · 10h · Ao vivo</span>
+              <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · Ao vivo</span>
             </Link>
           </div>
         </div>
@@ -410,6 +410,12 @@ export default function Casa() {
           <div className="rolo-in">
             <div className="rolo-cab">
               <p className="g-rot centro">A igreja</p>
+              {/* 14/09/2026: no desktop com scroll-timeline o `.sigla-azulejos`
+                  (que carrega o <h2>Somos GUIA</h2>) fica display:none, e a
+                  seção mais longa do site ficava sem título nenhum no sumário
+                  de cabeçalhos. O mesmo h2, só para leitor de tela e sumário:
+                  o visual do rolo continua o que era. */}
+              <h2 className="so-leitor">Somos GUIA</h2>
             </div>
             <div className="rolo-track">
               {SIGLA.map((l, i) => (
