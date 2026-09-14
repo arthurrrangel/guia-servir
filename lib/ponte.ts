@@ -186,6 +186,20 @@ export async function linhasDaEquipe(
     cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
     volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
   ]);
+  /* 14/09/2026. ESTAS SEIS TAMBÉM SOBEM. Antes, um erro aqui virava lista
+     vazia em silêncio — e lista vazia de `escalacoes` não é "ninguém escalado",
+     é "não sei". A diferença custa o mês inteiro: o cron lê escalação vazia
+     como "o líder não montou", chama gerarMes e depois salvar_dia, e
+     salvar_dia APAGA toda escalação da equipe naquele culto que não estiver
+     nos slots novos (05-melhorias.sql:55-58). Um 5xx passageiro do PostgREST
+     às 9h do dia 26 zeraria a escala de outubro, e o relatório diria "vagas:
+     9" como se fosse normal. O mesmo caminho existe na tela: mês vazio, botão
+     "Montar a escala deste mês", um toque.
+
+     Leitura que falha tem que falhar. Quem chama decide o que fazer com isso;
+     ninguém decide nada com um vazio que mente. */
+  const ruim2 = [habs, indis, escs, plants, recados, disp].find((r: any) => r?.error);
+  if (ruim2?.error) throw ruim2.error;
 
   return {
     funcoes: funcoes.data || [], voluntarios: vols.data || [],
