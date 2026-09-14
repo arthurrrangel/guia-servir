@@ -91,8 +91,14 @@ export function Barra({ atual, inicio, solida = true }: { atual?: string; inicio
         </div>
       </header>
 
+      {/* SEM aria-modal, de propósito (14/09/2026). A barra com o botão que
+          vira X continua viva POR CIMA da cortina — é assim que se fecha. Com
+          aria-modal="true", o leitor de tela é instruído a ignorar tudo fora do
+          diálogo, e "tudo fora" incluía o X: quem usa VoiceOver abria o menu e
+          a única saída era trocar de página. É um painel, não um modal, e
+          agora se apresenta como tal. */}
       <div ref={cortina} id="menu-site" className={'menu' + (menu ? ' aberto' : '')}
-           role="dialog" aria-modal="true" aria-label="Menu" aria-hidden={!menu}
+           role="dialog" aria-label="Menu" aria-hidden={!menu}
            onClick={e => { if (e.target === e.currentTarget) setMenu(false); }}>
         <div>
           <ul>
