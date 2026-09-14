@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 export default function NaoEncontrada() {
   return (
     <Site escuro>
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('nao-encontrada')} alt="" />
         <div className="g">
           <p className="g-rot">404</p>
