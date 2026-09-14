@@ -90,6 +90,14 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
   const [copiou, setCopiou] = useState(false);
   const [indo, setIndo] = useState(false);
   const [txid, setTxid] = useState('');
+  /* O txid do CARTÃO vive fora da tentativa. Antes, cada toque em "Apple Pay,
+     Google Pay ou cartão" gerava um txid inédito, e o cabeçalho de idempotência
+     que a rota manda ao adquirente nunca se repetia: um toque que estourasse o
+     tempo e um segundo toque viravam dois links de pagamento vivos para a mesma
+     oferta. Agora o txid nasce no primeiro toque e é reaproveitado enquanto
+     tipo e valor não mudarem — a retentativa é a MESMA operação, e o adquirente
+     devolve o mesmo link. (achado da auditoria de 14/09/2026) */
+  const txidCartao = useRef<{ chave: string; id: string } | null>(null);
   const campo = useRef<HTMLInputElement>(null);
   const caixa = useRef<HTMLDivElement>(null);
 
@@ -102,10 +110,25 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
      Só depois da primeira pintura e só quando o passo muda: na carga inicial
      a página tem que abrir onde o navegador abriu. */
   const passoAnterior = useRef<Fase>('escolher');
+  const [anuncio, setAnuncio] = useState('');
   useEffect(() => {
     if (passoAnterior.current === fase) return;
     passoAnterior.current = fase;
     caixa.current?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    /* A TELA INTEIRA TROCA, e o botão que recebeu o toque deixa de existir.
+       Sem isto, o leitor de tela não anuncia nada e o foco cai no <body>: a
+       pessoa cega toca em "Pix" e a leitura recomeça do topo do documento, no
+       meio de uma oferta. O foco vai para o título do passo novo (tabindex=-1
+       para ser focável sem entrar na ordem do Tab) e a live region diz o que
+       aconteceu. (auditoria de 14/09/2026) */
+    setAnuncio(fase === 'pix' ? 'Código Pix pronto. Copie e cole no app do seu banco.'
+             : fase === 'fim' ? 'Oferta registrada. Obrigado.'
+             : 'De volta ao começo.');
+    requestAnimationFrame(() => {
+      const t = caixa.current?.querySelector<HTMLElement>('h2, .g-rot');
+      t?.setAttribute('tabindex', '-1');
+      t?.focus({ preventScroll: true });
+    });
   }, [fase]);
 
   /* a volta do adquirente, depois da hidratação: na montagem, não na
@@ -161,7 +184,9 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
   async function irParaCartao() {
     if (indo || !conferir()) return;
     setIndo(true);
-    const meu = txidDe(tipo!);
+    const chave = `${tipo}:${valor.toFixed(2)}`;
+    if (txidCartao.current?.chave !== chave) txidCartao.current = { chave, id: txidDe(tipo!) };
+    const meu = txidCartao.current.id;
     try {
       const r = await fetch('/api/ofertar/checkout', {
         method: 'POST',
@@ -196,10 +221,15 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
     }
   }
 
+  /* a região viva nasce vazia e antes de tudo: inserir região e texto juntos
+     não anuncia nada (é assim que live region funciona) */
+  const vivo = <p className="so-leitor" role="status" aria-live="polite">{anuncio}</p>;
+
   /* ------------------------------------------------------------------- fim */
   if (fase === 'fim') {
     return (
       <div className="of of-fim" ref={caixa}>
+        {vivo}
         <Fim tipo={tipo} valor={valor} pendente={!!volta?.pendente} />
       </div>
     );
@@ -209,6 +239,7 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
   if (fase === 'pix') {
     return (
       <div className="of" ref={caixa}>
+        {vivo}
         <p className="g-rot">{rotuloTipo} · {emReais(valor)}</p>
         <h2 className="g-h2">Copie o código e cole no app do seu banco.</h2>
 
@@ -244,6 +275,7 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
   /* -------------------------------------------------------------- escolher */
   return (
     <div className="of" ref={caixa}>
+      {vivo}
       <p className="g-ed">Leva menos de um minuto, e você decide o valor.</p>
 
       <fieldset className="of-tipo">
