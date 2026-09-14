@@ -5848,14 +5848,12 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 }
 @media(prefers-reduced-motion:reduce){ .luz .lz{ opacity:1; animation:none } }
 
-/* o anel do cursor: só existe com ponteiro fino (o Movimento só o cria lá) */
-.anel{
-  position:fixed; left:0; top:0; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%;
-  border:1px solid rgba(228,212,180,.85); pointer-events:none; z-index:9999; opacity:0;
-  transition:opacity .25s var(--ease),width .25s var(--ease),height .25s var(--ease),margin .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
-}
-.anel.ver{ opacity:1 }
-.anel.sobre{ width:56px; height:56px; margin:-28px 0 0 -28px; background:rgba(228,212,180,.12); border-color:rgba(228,212,180,1) }
+/* o anel do cursor: só existe com ponteiro fino (o Movimento só o cria lá).
+   14/09/2026: era `.anel`, o MESMO seletor do anel de progresso de Ui.tsx, e
+   este bloco derrubava aquele. Agora é `.anel-cursor`; a regra base está no
+   fim da folha, na seção da auditoria. */
+.anel-cursor.ver{ opacity:1 }
+.anel-cursor.sobre{ width:56px; height:56px; margin:-28px 0 0 -28px; background:rgba(228,212,180,.12); border-color:rgba(228,212,180,1) }
 
 /* a abertura: o símbolo aparece, e a cortina sobe. Uma vez por sessão. */
 .abertura{
@@ -8723,4 +8721,78 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
      e são 20px a mais por botão. */
   .of-tipo{ grid-template-columns:1fr }
   .of-tipo-dica{ max-width:28ch }
+}
+
+/* =============================================================================
+   14/09/2026 · AUDITORIA COMPLETA — o que a medição em sete larguras pegou
+
+   Sete aparelhos (320, 390, 430, 768, 1024, 1440, 1920) × 20 rotas = 140
+   telas, medidas antes de olhadas: estouro, caixa vazando da borda, texto
+   cortado, alvo pequeno, título invisível, fonte miúda, Inter carregada. Do
+   que sobrou depois de tirar o que é decorativo por desenho (a foto do herói
+   que sobra na borda, o rolo horizontal de cartões), três coisas eram defeito
+   de verdade, e as três moravam em 320px. Nenhuma em 390 para cima.
+   ============================================================================= */
+
+/* 1. A PALAVRA QUE NÃO CABE. Em 320px o H1 tem 258px úteis, e
+   "Relacionamentos" mede, MEDIDO com a fonte real: 363px a 46px (o piso do
+   clamp), 300 a 38, 276 a 35, 252 a 32. Uma palavra não quebra: a 46px ela
+   saía pelas duas bordas com o "R" e o "s" cortados.
+
+   Duas tentativas erradas antes desta, e vale registrar: 38px ainda passava,
+   e `overflow-wrap:anywhere` como rede "resolvia" quebrando a palavra ao meio
+   ("Relacionamen / tos"), que é pior do que o defeito. A rede certa para
+   título é HÍFEN, que o português tem e o <html lang="pt-BR"> habilita, e só
+   nas telas estreitas: em 360 para cima nada muda, e a auditoria mediu zero
+   problema lá. */
+@media (max-width:359px){
+  .g-h1{ font-size:clamp(32px,10vw,46px); hyphens:auto; -webkit-hyphens:auto }
+  .g-h2{ hyphens:auto; -webkit-hyphens:auto }
+}
+
+/* 2. O BOTÃO QUE NÃO DEIXA O TEXTO QUEBRAR. `.acao` nasce com nowrap (linha
+   ~1596) e em telas estreitas ganha `width:100%; max-width:360px`: a caixa
+   fica limitada e o texto não. "Quero encontrar uma Pequena Guia" em 320px
+   encostava nas duas bordas do botão, sem respiro, com a seta espremida. A
+   folha já tinha diagnosticado o mesmo defeito na `.pill` e consertado lá; o
+   botão principal do site continuava com ele. Abaixo de 380px o texto quebra
+   e o botão cresce em altura, que é o que um botão deve fazer. */
+@media (max-width:379px){
+  .acao{ white-space:normal; text-align:center; line-height:1.25 }
+}
+
+/* 3. O RÓTULO DO PASSO NO CADASTRO. Quatro passos lado a lado em 280px dão
+   67px cada, e "Onde servir" mede 72: saía "Onde serv…". Em vez de reticência
+   num rótulo de duas palavras, duas linhas. */
+@media (max-width:379px){
+  .wiz-rot{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.2 }
+}
+
+/* -----------------------------------------------------------------------------
+   E o que a leitura do código pegou, sem depender de largura:
+   ----------------------------------------------------------------------------- */
+
+/* 4. A ARMADILHA DO TÍTULO INVISÍVEL, DESARMADA. `.tit .pal{opacity:0}` (linha
+   ~2003) valia SEMPRE que houvesse JS, e só o `.visto` devolvia a palavra.
+   `.rev`, `.corte` e `.g-h1/.g-h2` estão todos travados por `.js-rev`, que só
+   existe quando o observador de revelação montou; este não estava. Resultado:
+   qualquer título fora de uma seção `.rev` sumia para sempre, sem erro, sem
+   aviso — foi exatamente o que aconteceu com o H1 de /ofertar na primeira
+   captura (10/09). Agora a regra só esconde quando existe quem vá revelar. A
+   `.tit` nem é usada em JSX nenhum hoje; a trava fica para a próxima. */
+.tit .pal,.casa-heroi h1 .pal{ opacity:1; transform:none }
+.js-rev .tit .pal,.js-rev .casa-heroi h1 .pal{ opacity:0; transform:translateY(.42em) }
+.js-rev .visto .tit .pal,.js-rev .visto .casa-heroi h1 .pal,.js-rev .casa-heroi.visto h1 .pal,
+.js-rev .tit.visto .pal,.js-rev h1.visto .pal{ opacity:1; transform:none }
+
+/* 5. `.anel` ERA DUAS COISAS. O anel de progresso de components/Ui.tsx
+   (position:relative, 96px) e o anel do cursor de components/Movimento.tsx
+   (position:fixed, 34px, opacity 0) tinham o MESMO seletor, e o de baixo
+   vencia: o primeiro `<Anel>` que alguém usasse nasceria como um círculo
+   invisível colado no canto da janela. O do cursor vira `.anel-cursor`; o
+   componente foi trocado junto. */
+.anel-cursor{
+  position:fixed; left:0; top:0; width:34px; height:34px; margin:-17px 0 0 -17px; border-radius:50%;
+  border:1px solid rgba(228,212,180,.85); pointer-events:none; z-index:9999; opacity:0;
+  transition:opacity .25s var(--ease),width .25s var(--ease),height .25s var(--ease),margin .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
 }
