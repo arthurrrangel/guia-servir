@@ -58,20 +58,10 @@ export function Agora({ pill }: { pill?: boolean } = {}) {
       : <Link href={acao.href} className="agora-pill" aria-live="polite">{dentro}</Link>;
   }
 
-  return (
-    <div className="agora-vivo" data-tipo={o?.evento.tipo || 'culto'}>
-      <p className="agora-linha" aria-live="polite">
-        <span className="agora-quando">{f.quando}</span>
-        <span className="agora-sep" aria-hidden="true">·</span>
-        <span className="agora-oque">{f.oque}</span>
-        {o?.evento.tipo === 'grupo' && <span className="agora-onde">{o.evento.onde}</span>}
-      </p>
-      <div className="g-acoes agora-acoes">
-        {acao.fora
-          ? <a href={acao.href} target="_blank" rel="noreferrer" className="acao cheia">{acao.rot} <IcSeta /></a>
-          : <Link href={acao.href} className="acao cheia">{acao.rot} <IcSeta /></Link>}
-        <a href="#semana" className="g-link claro">Ver a semana inteira</a>
-      </div>
-    </div>
-  );
+  /* 14/09/2026: só existe <Agora pill /> no site. O ramo sem `pill` que ficava
+     aqui usava sete classes que nunca existiram na folha (agora-vivo,
+     agora-linha, agora-quando, agora-sep, agora-oque, agora-onde, agora-acoes)
+     e uma âncora #semana que não corresponde a id nenhum. Sairia sem estilo se
+     alguém ligasse. Ramo morto, apagado. */
+  return null;
 }
