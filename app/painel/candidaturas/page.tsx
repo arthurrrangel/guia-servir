@@ -243,7 +243,8 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
     `Oi ${nomeInteiro(nome)}! Aqui é da ${equipeNome} da GUIA. Vi seu cadastro para servir com a gente. Posso te fazer umas perguntas?`) : '';
   function aoChamar() {
     if (!chamando) return;
-    void decidir(c.id, 'conversa').then(() => mudou('marcado como em conversa')).catch(() => {});
+    void decidir(c.id, 'conversa').then(() => mudou('marcado como em conversa'))
+      .catch(() => mudou('o WhatsApp abriu, mas não consegui marcar "em conversa". Marque de novo quando a rede voltar.'));
   }
 
   /* aprovada: o link pessoal já está no banco e a pessoa já o recebe sozinha
