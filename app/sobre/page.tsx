@@ -46,7 +46,7 @@ export default function Sobre() {
       }} />
 
       {/* ------------------------------------------------------------- herói */}
-      <section className="g-cheio alta centro rev">
+      <section className="g-cheio alta centro rev visto">
         <img src={cria('sobre')} alt={criaAlt('sobre')} fetchPriority="high" />
         <div className="g">
           <p className="g-rot">Quem somos</p>
