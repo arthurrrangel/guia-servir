@@ -248,7 +248,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     const onKey = (ev: KeyboardEvent) => { if (ev.key === 'Escape') fecharMenu(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [menuAberto]);
+  }, [menuAberto, fecharMenu]);
 
   if (fase === 'carregando') return <Esqueleto />;
   if (fase === 'sem-conexao') return <Conexao aoSalvar={() => location.reload()} />;
