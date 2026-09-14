@@ -139,7 +139,7 @@ export default function Movimento({ semRevelar = false }: { semRevelar?: boolean
        cresce sobre links e botões. O cursor do sistema continua lá — o anel
        é acompanhamento, não substituto. */
     const anel = document.createElement('div');
-    anel.className = 'anel'; anel.setAttribute('aria-hidden', 'true');
+    anel.className = 'anel-cursor'; anel.setAttribute('aria-hidden', 'true');
     document.body.appendChild(anel);
     let ax = -100, ay = -100, mx = -100, my = -100, vivo = true;
     const segue = () => {
