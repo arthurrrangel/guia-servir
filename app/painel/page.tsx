@@ -7,7 +7,7 @@ import { mudarStatus } from '@/lib/db';
 import { Painel as NumPainel, painelDoMinisterio } from '@/lib/candidaturas';
 import { AreaVisao, visaoGeral } from '@/lib/equipes';
 import { IcSino, IcSeta, IcCopiar } from '@/components/Icones';
-import { Escolha } from '@/components/Ui';
+import { Escolha, Aviso } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
@@ -52,16 +52,21 @@ export default function Pagina() { return <Shell><Painel /></Shell>; }
 /* --------------------------------------------------------- a igreja inteira */
 function Igreja() {
   const [areas, setAreas] = useState<AreaVisao[] | null>(null);
+  /* 14/09/2026: vazio e falha eram o mesmo desenho (a seção sumia). Um líder
+     com o token expirado via um painel limpo e concluía que estava tudo
+     coberto. Agora a falha tem cara de falha. */
+  const [falhou, setFalhou] = useState(false);
   useEffect(() => {
     let vivo = true;
     /* sem .catch, uma rede que cai deixa `areas` em null para sempre e esta
        seção some sem dizer nada. Lista vazia é o mesmo desenho (a seção não
        aparece), mas agora é uma decisão e não uma promessa órfã. */
-    void visaoGeral().then(r => { if (vivo) setAreas(r); }).catch(() => { if (vivo) setAreas([]); });
+    void visaoGeral().then(r => { if (vivo) setAreas(r); }).catch(() => { if (vivo) { setAreas([]); setFalhou(true); } });
     return () => { vivo = false; };
   }, []);
 
   /* uma área só não é visão geral: é a própria tela. */
+  if (falhou) return <Aviso tom="erro">Não consegui carregar a visão geral da igreja. Recarregue a página; se continuar, saia e entre de novo.</Aviso>;
   if (!areas || areas.length < 2) return null;
 
   /* "1 NÃO PODE" SAÍA ÂMBAR AQUI E VERMELHO NO BLOCO DE BAIXO. 05/09/2026.
@@ -156,12 +161,14 @@ function Igreja() {
 function Pendencias() {
   const { equipe } = useApp();
   const [p, setP] = useState<NumPainel | null>(null);
+  const [pFalhou, setPFalhou] = useState(false);
   useEffect(() => {
     let vivo = true;
     if (!equipe?.id) return;
-    void painelDoMinisterio(equipe.id).then(r => { if (vivo) setP(r); }).catch(() => {});
+    void painelDoMinisterio(equipe.id).then(r => { if (vivo) setP(r); }).catch(() => { if (vivo) setPFalhou(true); });
     return () => { vivo = false; };
   }, [equipe?.id]);
+  if (pFalhou) return <Aviso tom="erro">Não consegui carregar as pendências deste ministério. Recarregue a página.</Aviso>;
   if (!p) return null;
 
   /* CADA LINHA É UMA FRASE INTEIRA, E CONCORDA COM O NÚMERO. 05/09/2026.
