@@ -53,7 +53,7 @@ const OPCOES: { nivel: Nivel | null; rotulo: string }[] = [
 ];
 
 function Conferir() {
-  const { S, recarregar, aviso, equipe } = useApp();
+  const { S, recarregar, aviso } = useApp();
   const [chipSalvando, setChipSalvando] = useState('');
   const mapa = new Map(S.funcoes.map(f => [f.nome, f.id!]));
 
