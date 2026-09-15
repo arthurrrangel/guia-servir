@@ -47,6 +47,24 @@ type Props = {
 
 const RIO: [number, number] = [-22.955, -43.38];
 
+/* UM PINO QUE O TECLADO ALCANÇA MAS NÃO ACIONA É UM BOTÃO QUEBRADO. 15/09/2026.
+   O Leaflet 1.9 dá `tabindex=0` e `role=button` a cada marcador: o Tab chega,
+   o foco aparece, a tooltip abre. E o Enter não faz nada — desde a 1.1 o
+   Leaflet não converte tecla em clique (só abre popup, e aqui não há popup).
+   Medido: Tab nº 17 chega no pino "Farol de Itaúna", Enter, e nenhum cartão
+   acende. Para quem navega por teclado, o mapa era um desenho com botões
+   pintados.
+
+   O clique e as duas teclas que o padrão de botão exige (Enter e Espaço) vão
+   para a mesma função. O Espaço tem o padrão impedido, senão a página rola. */
+function acionar(pino: any, fazer: () => void) {
+  pino.on('click', fazer);
+  pino.on('keydown', (e: any) => {
+    const k = e.originalEvent?.key;
+    if (k === 'Enter' || k === ' ') { e.originalEvent.preventDefault(); fazer(); }
+  });
+}
+
 export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMax = 13 }: Props) {
   const caixa = useRef<HTMLDivElement>(null);
   const mapa = useRef<any>(null);
@@ -171,7 +189,7 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMa
       const rotulo = doPonto.map(g => `${g.nome} · ${g.dia}, ${g.hora}`).join('<br>');
       const p = l.marker(centro, { icon: icone, title: doPonto.map(g => g.nome).join(', ') }).addTo(m);
       p.bindTooltip(rotulo, { direction: 'top', offset: [0, -19] });
-      p.on('click', () => {
+      acionar(p, () => {
         if (separavel) m.fitBounds(limites, { padding: [70, 70], maxZoom: 16 });
         else aoEscolher?.(primeiro.nome);
       });
@@ -191,7 +209,7 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMa
       const linhas = [`${IGREJA.nome} · ${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, ...comIgreja.map(g => `${g.nome} · ${g.dia}, ${g.hora}`)];
       const p = l.marker(IGREJA.coord, { icon: ic, title: IGREJA.nome, zIndexOffset: 500 }).addTo(m);
       p.bindTooltip(linhas.join('<br>'), { direction: 'top', offset: [0, -19] });
-      p.on('click', () => {
+      acionar(p, () => {
         /* com grupo só encostado (não na igreja), o toque aproxima até separar */
         if (pertoDaIgreja.length) m.fitBounds(l.latLngBounds([IGREJA.coord, ...pertoDaIgreja.map(g => g.coord as [number, number])]), { padding: [70, 70], maxZoom: 16 });
         else if (naIgreja[0]) aoEscolher?.(naIgreja[0].nome);
