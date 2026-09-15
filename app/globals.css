@@ -7181,12 +7181,16 @@ a.fato:hover .fato-v svg{ transform:translateX(3px) }
 .pg.aceso{ outline:2px solid var(--areia); outline-offset:-2px }
 .pg .g-acoes{ margin-top:var(--e4); display:flex; flex-wrap:wrap; gap:var(--e2) var(--e3) }
 
-/* a atribuição do CARTO e do OSM é obrigatória e fica legível, mas não compete:
-   11px, canto, mesma família do resto */
+/* a atribuição do OSM é obrigatória e fica legível, mas não compete: canto,
+   mesma família do resto. 15/09/2026: estava em 10,5px, abaixo do piso de 12px
+   que a própria auditoria cobra do resto do site, e os dois links tinham
+   ~13px de alvo. Sobe ao piso e os links ganham 24px de altura de toque (o
+   mínimo do WCAG 2.5.8), com padding em vez de fonte maior. */
 .pg-mapao .leaflet-control-attribution{
-  font-family:var(--fonte); font-size:10.5px; background:rgba(255,255,255,.82);
+  font-family:var(--fonte); font-size:12px; line-height:1; padding:0 6px;
+  background:rgba(255,255,255,.86);
 }
-.pg-mapao .leaflet-control-attribution a{ color:var(--noite) }
+.pg-mapao .leaflet-control-attribution a{ color:var(--noite); display:inline-block; padding:6px 2px }
 /* o contador do pino que responde por mais de um grupo */
 .pin-guia-n{
   position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px;
