@@ -351,6 +351,12 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
       return `PIN errado.${restam ? ` Restam ${restam} tentativa${restam > 1 ? 's' : ''}.` : ''}`;
     if (codigo === 'MUITAS_TENTATIVAS')
       return 'Muitas tentativas erradas hoje. Peça seu link pessoal a quem organiza a escala.';
+    /* o freio POR EQUIPE (migrações 31 e 44): existia desde a 31 na entrada
+       por PIN e caía na frase genérica. Não é erro da pessoa, é a área inteira
+       pausada até a virada do dia, e a frase tem que dizer isso e apontar a
+       saída, que é o link pessoal. */
+    if (codigo === 'MUITAS_TENTATIVAS_EQUIPE')
+      return 'A entrada por PIN desta área está pausada até amanhã, por excesso de erros. Use seu link pessoal, ou peça a quem organiza a escala.';
     if (codigo === 'SEM_TELEFONE')
       return 'Seu WhatsApp ainda não está cadastrado. Peça o link pessoal a quem organiza a escala.';
     if (codigo === 'PIN_INVALIDO') return 'O PIN precisa ter 4 números.';
