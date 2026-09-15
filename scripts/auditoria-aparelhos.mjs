@@ -7,8 +7,9 @@
      vazando    elemento cuja caixa passa da borda direita da janela
      cortado    texto com scrollWidth > clientWidth dentro de overflow:hidden
                 (o rótulo que sai do botão sem ninguém ver)
-     alvo       controle interativo com menos de 44×44 (WCAG 2.5.5), fora os
-                da atribuição do Leaflet, que são da biblioteca
+     alvo       controle interativo com menos de 44×44 (WCAG 2.5.5); links
+                dentro de texto corrido (e os da atribuição do mapa) seguem a
+                exceção de link em linha do WCAG 2.5.8
      invisivel  .pal ou .rev que ficou em opacity:0 depois de a página assentar
                 (o título que some quando falta .rev)
      fonte      texto visível abaixo de 12px
@@ -103,6 +104,23 @@ async function umaLargura([W, H, nome]) {
        em paralelo, o observador e as transições de 62ms por palavra às vezes
        ainda estão no meio quando 1,5s passam, e a medição acusava título
        invisível que uma pessoa nunca veria (10 falsos positivos na 2ª rodada). */
+    /* 15/09: A SEGUNDA CHANCE, QUE É O QUE UMA PESSOA FAZ. Mesmo com a espera
+       acima, sobrava um sinal por rodada (1024 /servir/midia; 1440 /como-chegar),
+       sempre as cinco palavras do fecho lá embaixo, sempre passando quando a
+       rota rodava sozinha. Com três larguras disputando CPU, a varredura passa
+       pela seção antes de o observador rodar, e ela fica `.rev` sem `.visto`
+       — coisa que nunca acontece com alguém olhando, porque a pessoa PARA na
+       seção. Então o medidor faz o mesmo: o que não revelou, ele centra na
+       tela e espera. Só é defeito o que continua invisível DEPOIS de estar
+       na tela por 1,4s, que é mais do que o failsafe de 1,2s do Movimento. */
+    await p.evaluate(async () => {
+      for (let volta = 0; volta < 2; volta++) {
+        const pend = [...document.querySelectorAll('.rev:not(.visto)')];
+        if (!pend.length) break;
+        for (const e of pend) { e.scrollIntoView({ block: 'center' }); await new Promise(r => setTimeout(r, 700)); }
+      }
+      window.scrollTo(0, 0);
+    });
     try {
       await p.waitForFunction(() => {
         const pend = [...document.querySelectorAll('.rev:not(.visto)')];
@@ -162,14 +180,16 @@ async function umaLargura([W, H, nome]) {
       const alvo = [];
       for (const e of document.querySelectorAll('a[href], button, input, select, textarea, [role=button], summary')) {
         if (!vis(e)) continue;
-        if (e.closest('.leaflet-control-attribution')) continue;
         if (e.type === 'hidden') continue;
         const r = e.getBoundingClientRect();
         /* área tocável real: a caixa OU o padding negativo que a folha usa para
            crescer o alvo sem mexer no layout (inline-block com margin negativa) */
         const alt = Math.max(r.height, parseFloat(getComputedStyle(e).paddingTop) * 2 + r.height * 0);
         if (r.height < 40 && r.width < 40) alvo.push(`${seletor(e)} ${Math.round(r.width)}×${Math.round(r.height)} "${rot(e)}"`);
-        else if (r.height < 40 && !e.closest('p, li, .g-form-nota, .dim, .pequeno, .g-pe')) alvo.push(`${seletor(e)} ${Math.round(r.width)}×${Math.round(r.height)} "${rot(e)}"`);
+        /* os links da atribuição do mapa são links dentro de texto corrido, como os
+           de um parágrafo: a mesma exceção do WCAG 2.5.8 (15/09: antes eram
+           pulados inteiros; agora são medidos como prosa) */
+        else if (r.height < 40 && !e.closest('p, li, .g-form-nota, .dim, .pequeno, .g-pe, .leaflet-control-attribution')) alvo.push(`${seletor(e)} ${Math.round(r.width)}×${Math.round(r.height)} "${rot(e)}"`);
         if (alvo.length > 8) break;
       }
 
@@ -186,7 +206,7 @@ async function umaLargura([W, H, nome]) {
       for (const e of document.querySelectorAll('p, span, a, li, h1, h2, h3, label, button, small')) {
         if (!vis(e)) continue;
         if (!e.textContent.trim()) continue;
-        if (e.closest('.leaflet-control-attribution, .so-leitor')) continue;
+        if (e.closest('.so-leitor')) continue;
         const fs = parseFloat(getComputedStyle(e).fontSize);
         /* 11px é o tamanho dos rótulos em caixa alta do sistema (g-rot, g-pe-h,
            fato-r); abaixo de 10.5 é que é defeito */
