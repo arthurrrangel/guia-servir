@@ -87,7 +87,16 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const seq = useRef(0);          // descarta resposta fora de ordem da MESMA equipe
   const [meus, setMeus] = useState<MeuVinculo[]>([]);
 
-  const aviso = useCallback((t: string) => { setMsg(t); setTimeout(() => setMsg(''), 2200); }, []);
+  /* 16/09/2026: o aviso durava 2,2s para qualquer texto. "Recado salvo" cabe
+     nisso; uma recusa do banco com nome e motivo, não. Agora dura o tempo de
+     ler: uns 45ms por caractere, entre 2,2s e 8s. Um aviso novo substitui o
+     anterior e zera o relógio, senão o timer do curto apagava o longo. */
+  const relogioAviso = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aviso = useCallback((t: string) => {
+    setMsg(t);
+    if (relogioAviso.current) clearTimeout(relogioAviso.current);
+    relogioAviso.current = setTimeout(() => setMsg(''), Math.min(8000, Math.max(2200, 900 + t.length * 45)));
+  }, []);
   /* nova referência do mesmo Estado: força o React a repintar com o que a ação
      acabou de mudar em memória, sem esperar o servidor. */
   const pinta = useCallback(() => setS(s => ({ ...s })), []);
