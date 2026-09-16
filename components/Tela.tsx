@@ -68,50 +68,10 @@ export function Carregando({ o = 'Carregando' }: { o?: string }) {
    quem usa leitor de tela ouve "Carregando as áreas", não cinco cartões
    fantasma.
 ============================================================================= */
-/* 16/09/2026: a home e a /servir deixaram de usar os cartões de 420px. A home
-   mostra um rolo de fotos verticais (.rostos) e a /servir uma lista de
-   escolha (.areas-esc). O esqueleto tem que ter a forma do que vem, senão
-   volta o salto que ele existe para evitar: `forma` escolhe o desenho. */
-export function AreasCarregando({ n = 5, forma = 'cartoes' }: { n?: number; forma?: 'cartoes' | 'rostos' | 'lista' }) {
-  const aviso = <p className="so-leitor" role="status" aria-live="polite">Carregando as áreas</p>;
-  if (forma === 'rostos') return (
-    <>
-      {aviso}
-      <div className="rostos" aria-hidden="true">
-        {Array.from({ length: n }, (_, i) => (
-          <div key={i} className="rosto esqueleto">
-            <span className="rosto-txt">
-              <span className="esq-l" style={{ width: i % 2 ? '48%' : '62%' }} />
-              <span className="esq-l selo" style={{ width: '34%' }} />
-            </span>
-          </div>
-        ))}
-      </div>
-    </>
-  );
-  if (forma === 'lista') return (
-    <>
-      {aviso}
-      <div className="areas-esc" aria-hidden="true">
-        {Array.from({ length: n }, (_, i) => (
-          <div key={i} className="area-esc esqueleto">
-            <span className="area-esc-foto" />
-            <span className="area-esc-nome"><span className="esq-l" style={{ width: i % 2 ? '40%' : '52%' }} /></span>
-            <span className="area-esc-desc">
-              <span className="esq-l fina" style={{ width: '92%' }} />
-              <span className="esq-l fina" style={{ width: '84%' }} />
-              <span className="esq-l fina" style={{ width: i % 2 ? '48%' : '64%' }} />
-            </span>
-            <span className="area-esc-selo"><span className="esq-l selo" style={{ width: '26%' }} /></span>
-            <span className="area-esc-seta" />
-          </div>
-        ))}
-      </div>
-    </>
-  );
+export function AreasCarregando({ n = 5 }: { n?: number }) {
   return (
     <>
-      {aviso}
+      <p className="so-leitor" role="status" aria-live="polite">Carregando as áreas</p>
       <div className="casa-areas centro rente" aria-hidden="true">
         {Array.from({ length: n }, (_, i) => (
           <div key={i} className="casa-area esqueleto">

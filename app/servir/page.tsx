@@ -6,7 +6,7 @@ import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { AreasCarregando, Vazio } from '@/components/Tela';
-import { fotoDaArea, fotoDaAreaCelular, focoDaArea } from '@/lib/fotos';
+import { fotoDaArea } from '@/lib/fotos';
 import { src as cria, alt as criaAlt } from '@/lib/criativos';
 import { canalDeConversa } from '@/lib/igreja';
 import { descricaoPublica } from '@/lib/areas-publicas';
@@ -92,7 +92,7 @@ export default function Servir() {
             </div>
           </div>
           <div className="c-bloco grande">
-            {fase === 'carregando' && <AreasCarregando forma="lista" />}
+            {fase === 'carregando' && <AreasCarregando />}
             {fase === 'rede' && (
               <Vazio
                 titulo="Sem conexão agora"
@@ -109,42 +109,21 @@ export default function Servir() {
                 acao={{ href: canalDeConversa('Oi! Vi o site da GUIA e quero servir. Em que área posso ajudar?').href, rot: 'Falar com a gente' }}
               />
             )}
-            {/* 16/09/2026: de cinco cartões escuros de 420px (seis linhas de
-                texto sobre foto, no celular uma tela por área) para uma lista
-                de escolha: foto vertical pequena, nome, uma descrição de duas
-                linhas, o selo e a seta. A pessoa compara cinco áreas numa
-                tela só, que é o que "escolha uma área" pede. */}
             {fase === 'pronto' && mins.length > 0 && (
-              <div className="areas-esc">
-                {mins.map(m => {
-                  const cel = fotoDaAreaCelular(m.slug);
-                  return (
-                    <Link key={m.slug} href={`/servir/${m.slug}`} className="area-esc">
-                      <picture className="area-esc-foto">
-                        {cel && <source type="image/avif" srcSet={cel.avif} />}
-                        {cel && <source srcSet={cel.webp} />}
-                        <img src={fotoDaArea(m.slug)} alt="" loading="lazy" decoding="async"
-                             style={{ objectPosition: focoDaArea(m.slug) }} />
-                      </picture>
-                      {/* sem invólucro de texto: cada peça é um item da grade e
-                          ocupa a área que o CSS lhe dá. No celular a descrição
-                          desce para baixo da foto, na largura inteira (três
-                          linhas em vez de seis); no desktop fica entre o nome e
-                          o selo, ao lado da foto. */}
-                      <span className="area-esc-nome">{m.nome}</span>
-                      {descricaoPublica(m.slug, m.descricao) && <span className="area-esc-desc">{descricaoPublica(m.slug, m.descricao)}</span>}
-                      <span className="area-esc-selo">
-                        {/* FUNÇÃO é o tipo de trabalho (CÂMERA), POSTO é uma posição
-                            dele na escala (CÂMERA 1). O campo conta postos. Cada
-                            parte num span: se não couber, quebra no "·", nunca
-                            no meio de "conversa antes". */}
-                        <span>{m.postos} {m.postos === 1 ? 'posto' : 'postos'}</span>
-                        {!m.aberto && <span>conversa antes</span>}
-                      </span>
-                      <IcSeta />
-                    </Link>
-                  );
-                })}
+              <div className="casa-areas centro rente">
+                {mins.map(m => (
+                  <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
+                    <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
+                    <span className="casa-area-nome">{m.nome}</span>
+                    {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
+                    <span className="casa-area-selo">
+                      {/* FUNÇÃO é o tipo de trabalho (CÂMERA), POSTO é uma posição
+                          dele na escala (CÂMERA 1). O campo conta postos. */}
+                      {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
+                      {!m.aberto && ' · conversa antes'}
+                    </span>
+                  </Link>
+                ))}
               </div>
             )}
           </div>

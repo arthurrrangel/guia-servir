@@ -3,62 +3,93 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
 import { IcSeta } from '@/components/Icones';
+import { Chevron } from '@/components/Marca';
 import { Agora } from '@/components/Agora';
-import { fotoDaArea, fotoDaAreaCelular, focoDaArea } from '@/lib/fotos';
+import { fotoDaArea } from '@/lib/fotos';
 import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
 import { Barra, Rodape } from '@/components/Site';
-import PassoFixo from '@/components/PassoFixo';
 import { AreasCarregando } from '@/components/Tela';
+import Contador from '@/components/Contador';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
-import { src as cria, alt as criaAlt, video as criaVideo, fontes } from '@/lib/criativos';
+import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
+import { pl } from '@/lib/plural';
+import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
 import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
-   A HOME · TRÊS TELAS
+   A HOME
 
-   16/09/2026. A versão anterior tinha vinte blocos empilhados: no celular
-   dava 5.981px de rolagem (sete telas) para dizer o que cabe em três. Era o
-   desktop empilhado, não uma página desenhada para o polegar: o mesmo cartão
-   escuro com foto repetido sete vezes, uma faixa de números que não decide
-   nada para quem visita, e a sigla presa ao scroll gastando três telas.
+   O QUE ELA RESOLVE, EM CINCO SEGUNDOS
+   Quem é a GUIA, o que acontece no domingo, e por onde entrar. Nada mais.
+   A home não é o lugar de explicar como funciona a escala nem de listar
+   função por função: para isso existe /servir, e ela leva para lá.
 
-   O QUE A HOME RESOLVE, E SÓ ISSO
-   Um visitante no celular quer três respostas (quando, onde, como é) e um
-   passo (ir, assistir, achar um grupo, servir). Cada tela responde uma coisa:
+   A versão anterior tentava fazer as duas coisas e virou um bloco SERVIR de
+   cinco telas dentro da home, com portas, áreas, passos e "perdi meu link"
+   empilhados. Quem chegou para conhecer a igreja passava por tudo aquilo;
+   quem chegou para se cadastrar rolava cinco telas antes de achar. Agora a
+   home mostra as áreas e para por aí.
 
-     1. HERÓI      pessoas, a próxima coisa que acontece, um botão.
-     2. CAMINHOS   "o que você quer fazer": quatro portas, lista de toque.
-     3. ROSTOS     as áreas com foto vertical, num rolo de polegar, e o fecho.
-
-   O que saiu daqui continua existindo onde pertence: a sigla em /sobre, o
-   campus e a transmissão dentro de "Visitar" e "Assistir", os números no
-   painel do organizador. A barra fixa de próximo passo (components/PassoFixo)
-   fica embaixo do polegar em toda página pública.
-
-   NADA DE TÍTULO PALAVRA POR PALAVRA. A revelação por seção (.rev) fica; a
-   por palavra saiu: era o efeito que todo site tem, e no celular ela atrasava
-   o primeiro texto que a pessoa lê.
+   DOIS PÚBLICOS, DUAS PORTAS, LOGO NO PRIMEIRO DOBRA
+   "Quero conhecer" desce a página. "Quero servir" sai para /servir. Quem já
+   serve tem a própria porta em /eu, que é curta o bastante para dizer em voz
+   alta num aviso de culto.
    ============================================================================= */
 
 type Min = {
   slug: string; nome: string; descricao: string | null;
   convite: string | null; postos: number; aberto: boolean; artigo: string;
 };
+type Numeros = {
+  pessoas: number; ministerios: number; postos: number;
+  cultos_no_mes: number; respostas: number;
+};
 
-/* Os quatro caminhos, na ordem da decisão: tirar alguém de casa vem antes de
-   qualquer outra coisa; servir é de quem já decidiu ficar. */
-const CAMINHOS = [
-  { href: '/cultos', t: 'Visitar no domingo', d: null, nota: 'Tem alguém na porta.' },
-  { href: '/guia-church-tv', t: 'Assistir ao vivo', d: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, pela ${IGREJA.canalNome}.`, nota: null },
-  { href: '/pequena-guia', t: 'Achar uma Pequena Guia', d: 'Um grupo perto de você, durante a semana.', nota: null },
-  { href: '/servir', t: 'Servir na GUIA', d: 'Cinco áreas. Ninguém começou sabendo.', nota: null },
-];
+/* endereço, mapa e @ saem de lib/igreja.ts — uma fonte só para o site inteiro */
+
+/* a sigla mora em lib/igreja.ts — ver a nota lá sobre por que ela saiu daqui */
+
+/* As seções internas da home continuam com os mesmos ids — #domingo, #igreja
+   e #areas seguem sendo endereços válidos, e os links dentro do conteúdo os
+   usam. O que sumiu foi a lista SECOES e o marcador de capítulo ativo: eles
+   existiam só para pintar o item do menu que estava na tela, e o menu não é
+   mais de âncora. Código que não pinta mais nada não fica de lembrança.
+
+/* O MENU DEIXOU DE SER ÂNCORA (03/09/2026) E DEPOIS DEIXOU DE SER CÓPIA (07/09).
+   Enquanto a home era a única página pública, um menu de âncoras era a
+   navegação certa. Virando páginas de verdade, o menu passou a ser o mesmo do
+   resto do site — e por quatro dias foi uma CÓPIA dele, 50 linhas iguais aqui
+   e em components/Site.tsx. Agora é o mesmo componente: `Barra`, com
+   `inicio` (nasce transparente sobre a foto) e `solida` (fica opaca quando a
+   rolagem passa do herói). */
+
+/* o título monta palavra por palavra. Fica em componente porque a quebra em
+   <span> tem que existir no HTML do servidor: se fosse feita no efeito, a
+   primeira pintura sairia com o texto inteiro e depois piscaria. */
+function Tit({ children, className = 'tit', as: Tag = 'h2' }:
+  { children: string; className?: string; as?: 'h1' | 'h2' }) {
+  const pals = children.split(' ');
+  return (
+    <Tag className={className}>
+      {pals.map((p, i) => (
+        /* o espaço fica FORA do span, como nó de texto entre eles. Dentro, o
+           navegador descarta o espaço final de um inline-block e o título sai
+           com as palavras coladas: "RELACIONAMENTO,GENEROSIDADEESERVIÇO". */
+        <span key={i}>
+          <span className="pal" style={{ ['--i' as string]: i }}>{p}</span>
+          {i < pals.length - 1 ? ' ' : ''}
+        </span>
+      ))}
+    </Tag>
+  );
+}
 
 export default function Casa() {
   const [mins, setMins] = useState<Min[]>([]);
+  const [num, setNum] = useState<Numeros | null>(null);
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
   const [solida, setSolida] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
@@ -78,11 +109,23 @@ export default function Casa() {
   }, []);
 
   /* O LINK DE ACESSO DO ORGANIZADOR CAÍA AQUI E MORRIA.
+
      O email volta para o endereço do site com o token no fragmento
-     (#access_token=…). A home fala com o banco pelo cliente PÚBLICO, que não
-     olha para a URL de propósito. Quem reencaminha é o navegador, aqui. É rede
-     de segurança: o caminho principal é o emailRedirectTo apontando para
-     /entrar. */
+     (#access_token=…). Só que a home fala com o banco pelo cliente PÚBLICO,
+     que nasce com detectSessionInUrl:false e persistSession:false de
+     propósito: a página do voluntário não pode guardar sessão de ninguém.
+     Resultado: o token chegava numa tela programada para não olhar para ele.
+     A pessoa clicava no link do email, via a home, e concluía que o login
+     estava quebrado. Estava.
+
+     Fragmento não sobe para o servidor, então não existe redirecionamento de
+     borda que resolva: quem tem que reencaminhar é o navegador, aqui.
+
+     Isto é uma rede de segurança, não o caminho principal. O caminho é o
+     emailRedirectTo apontando para /entrar. Esta rede existe porque, se o
+     endereço /entrar não estiver na lista de Redirect URLs do Supabase, o
+     Supabase descarta o destino pedido e joga tudo no Site URL, que é esta
+     página — e aí a única saída é esta. */
   useEffect(() => {
     const h = window.location.hash;
     if (/[#&](access_token|error_code|error_description)=/.test(h)) {
@@ -95,20 +138,40 @@ export default function Casa() {
     void (async () => {
       const s = sb();
       if (!s) { if (vivo) setFase('rede'); return; }
-      const lista = await s.rpc('ministerios_publicos');
+      const [lista, n] = await Promise.all([
+        s.rpc('ministerios_publicos'), s.rpc('numeros_publicos'),
+      ]);
       if (!vivo) return;
       if (lista.error) { setFase('rede'); return; }
       setMins((lista.data || []) as Min[]);
+      /* a faixa de números só entra com números de verdade: a RPC devolve um
+         objeto; se voltar vazio ou em outro formato, a faixa não aparece, em
+         vez de mostrar quatro rótulos sem número (08/09/2026) */
+      const nd = Array.isArray(n.data) ? n.data[0] : n.data;
+      if (!n.error && nd && typeof nd.pessoas === 'number') setNum(nd as Numeros);
       setFase('pronto');
     })();
     return () => { vivo = false; };
   }, []);
 
-  /* A REVELAÇÃO POR SEÇÃO. O observador marca .rev → .visto quando a seção
-     entra; a rolagem também revela (uma rolagem rápida saltava seções entre
-     dois quadros do observador); e uma rede de 1,2s revela o que sobrou.
-     Conteúdo invisível é pior que conteúdo sem animação. Reobserva quando as
-     áreas chegam do banco, porque o rolo de rostos entra no DOM depois. */
+  /* A REVELAÇÃO, E O BURACO QUE ELA ABRIU
+     Este efeito rodava uma vez, na montagem, e observava os .rev que existiam
+     naquele instante. A faixa dos números só entra no DOM quando a consulta
+     ao banco volta, ou seja DEPOIS: ninguém observava ela, o opacity:0 nunca
+     saía, e o resultado era uma mancha de 404px de nada logo abaixo do herói.
+
+     Duas correções, e a segunda é a que importa:
+
+     1. o efeito reobserva quando os dados chegam. Resolve o caso conhecido.
+     2. uma rede de segurança revela QUALQUER .rev que ainda esteja escondido
+        depois de 2,5s. Resolve o caso que eu ainda não conheço. Numa página
+        pública, conteúdo invisível é pior que conteúdo sem animação, e
+        nenhum efeito vale o risco de a pessoa ver um bloco vazio.
+
+     E a lição de método: eu vinha conferindo as telas com um script que
+     forçava .visto em tudo antes de medir. Isso desligava exatamente o
+     mecanismo quebrado. Verificação que desliga o que ela deveria testar não
+     é verificação. */
   useEffect(() => {
     const r = raiz.current; if (!r) return;
     const parado = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -123,6 +186,11 @@ export default function Casa() {
     const pendentes = Array.from(r.querySelectorAll<HTMLElement>('.rev:not(.visto)'));
     pendentes.forEach(e => obs.observe(e));
 
+    /* A ROLAGEM TAMBÉM REVELA (igual ao Movimento das outras páginas): todo
+       evento de rolagem, num rAF, revela o que já está na tela ou acima dela.
+       Uma rolagem rápida saltava seções inteiras entre dois quadros do
+       observador e a faixa chegava vazia. A rede de 1,2s fica só para o caso
+       em que nada rolou. */
     let pedindo = false;
     const varre = () => {
       pedindo = false;
@@ -142,10 +210,13 @@ export default function Casa() {
     window.addEventListener('scroll', aoRolar, { passive: true });
     const rede = setTimeout(varre, 1200);
     return () => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); };
-  }, [fase]);
+  }, [fase, num]);
 
-  /* barra opaca depois do herói e o fio de progresso, num handler só, em rAF */
+  /* barra, fio de progresso, capítulo ativo e parallax num handler só, dentro
+     de rAF. Quatro listeners separados brigam pelo mesmo quadro e o celular
+     sente na rolagem. */
   useEffect(() => {
+    const parado = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let pedindo = false;
     const medir = () => {
       pedindo = false;
@@ -153,6 +224,14 @@ export default function Casa() {
       setSolida(y > h * 0.78);
       const total = document.documentElement.scrollHeight - h;
       if (fio.current) fio.current.style.setProperty('--p', String(total > 0 ? Math.min(1, y / total) : 0));
+      if (!parado) {
+        document.querySelectorAll<HTMLElement>('.casa-foto').forEach(f => {
+          const r = f.getBoundingClientRect();
+          if (r.bottom < -200 || r.top > h + 200) return;
+          const img = f.querySelector<HTMLElement>('img');
+          if (img) img.style.setProperty('--par', (((r.top + r.height / 2 - h / 2) / h) * -58).toFixed(1) + 'px');
+        });
+      }
     };
     const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(medir); } };
     medir();
@@ -163,11 +242,17 @@ export default function Casa() {
 
   return (
     <div ref={raiz} data-movimento>
+      {/* a home tem a própria revelação (com parallax); daqui só entram o
+          foco de luz no preto e o ímã do botão principal */}
       <Movimento semRevelar />
       <Abertura />
-      {/* A ENTIDADE. O endereço diz "guiaservir"; o que o Google lê como
-          identidade é este bloco. Nada aqui é escrito à mão: sai de
-          lib/igreja.ts, a mesma fonte de /como-chegar e do rodapé. */}
+      {/* A ENTIDADE. É aqui que o custo do nome do domínio é pago.
+          O endereço diz "guiaservir"; o que o Google lê como identidade é
+          este bloco — name, endereço, horário e os perfis oficiais. Domínio
+          não é entidade: `name` + NAP idêntico ao Google Empresa é. Por isso
+          nada aqui é escrito à mão: sai de lib/igreja.ts, a mesma fonte de
+          /como-chegar e do rodapé. Um endereço divergente entre páginas é o
+          erro de SEO local mais comum e o mais caro. */}
       <Schema dados={{
         '@context': 'https://schema.org',
         '@graph': [
@@ -196,114 +281,230 @@ export default function Casa() {
       }} />
       <div className="progresso" ref={fio} style={{ color: solida ? 'var(--noite)' : '#fff' }} aria-hidden="true" />
 
+      {/* o mesmo atalho de teclado das outras páginas: a home era a única sem
+          <main> e sem "pular para o conteúdo" — e é a página em que mais se
+          chega por teclado, porque é a primeira. */}
       <a href="#conteudo" className="pular">Pular para o conteúdo</a>
       <Barra inicio solida={solida} />
 
       <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 0 }}>
-      {/* ------------------------------------------------------- 1 · HERÓI
-          Pessoas de ponta a ponta. No celular o corte é vertical, feito à
-          mão, com o rosto em cima e o texto embaixo, na zona do polegar. */}
-      <section className="casa-heroi h-heroi rev visto">
+      {/* ------------------------------------------------------------ herói
+          Foto de ponta a ponta, tudo centrado: rótulo, título, uma linha,
+          dois botões, a régua. Nada de parágrafo. */}
+      <section className="casa-heroi rev visto">
+        {/* com `video` registrado em lib/criativos.ts, o fundo é o filme mudo
+            em loop e a foto vira a capa; sem ele, a foto de sempre */}
         {VIDEO ? (
           <video ref={filme} className="casa-heroi-foto" autoPlay muted loop playsInline
                  poster={cria('heroi')} preload="metadata" aria-hidden="true" tabIndex={-1}>
             <source src={VIDEO} type="video/mp4" />
           </video>
         ) : (
-          <picture>
-            {fontes('heroi').map((f, i) => <source key={i} media={f.media} type={f.type} srcSet={f.srcSet} />)}
-            <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" decoding="async" />
-          </picture>
+          <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
         )}
-        <div className="casa-heroi-in h-in">
+        <div className="casa-heroi-in">
           {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
               no aparelho (lib/semana.ts), com a ação certa para o momento */}
           <Agora pill />
-          <h1 className="h-h1">Existe um lugar para você</h1>
-          <p className="h-frase">{IGREJA.frase}.</p>
-          <div className="acoes h-acoes">
+          <Tit as="h1" className="">Existe um lugar para você</Tit>
+          <p className="g-ed casa-heroi-frase">{IGREJA.frase}.</p>
+          {/* UM PRIMÁRIO, UMA PALAVRA. 06/09/2026.
+              Eram dois botões do mesmo tamanho: um branco sólido e um
+              contornado. Sobre foto escura o contornado praticamente some, e
+              "Quero servir" já é um botão com borda na barra do topo — a
+              mesma ação aparecia três vezes na primeira tela. O sólido fica
+              com quem chega pela primeira vez; servir vira palavra, que é o
+              peso certo para a ação de quem já está dentro. */}
+          <div className="acoes">
             <Link href="/cultos" className="acao cheia">Quero conhecer</Link>
             <Link href="/servir" className="g-link claro">Quero servir</Link>
           </div>
         </div>
       </section>
 
-      {/* --------------------------------------------------- 2 · CAMINHOS
-          A pergunta que a home responde: o que você quer fazer? Quatro portas
-          numa lista de toque (linha inteira tocável, 72px de altura). No
-          desktop, as mesmas quatro lado a lado. A data do domingo é de
-          verdade, calculada no aparelho. */}
-      <section className="caminhos-sec rev" aria-labelledby="caminhos-t">
-        <div className="g">
-          <div className="c">
-            <p className="g-rot">Por onde começar</p>
-            <h2 id="caminhos-t" className="g-h2 h-h2">O que você quer fazer?</h2>
+      {/* ------------------------------------------ os três fatos, estruturados
+          O que a pessoa procura num site de igreja em três segundos: quando é
+          o próximo culto (data de verdade, calculada no aparelho), onde fica,
+          e o que existe fora do domingo. Cada um é uma porta. */}
+      <section className="fatos rev visto" aria-label="O essencial">
+        <Link href="/cultos" className="fato">
+          <span className="fato-r">Próximo culto</span>
+          <span className="fato-v"><ProximoCulto /><IcSeta /></span>
+          <span className="fato-d">Chega a hora que der. Tem alguém na porta.</span>
+        </Link>
+        <Link href="/como-chegar" className="fato">
+          <span className="fato-r">Onde</span>
+          <span className="fato-v">{IGREJA.rua}<IcSeta /></span>
+          <span className="fato-d">{IGREJA.bairro}, {IGREJA.cidade}. Estacionamento com equipe.</span>
+        </Link>
+        {/* 10/09/2026, pedido do Arthur: "Conheça uma Pequena Guia" e abaixo um
+            texto de apoio. Ele não disse qual, e página de igreja não é lugar de
+            frase inventada: o apoio é a frase que ELE já escreveu sobre a
+            Pequena Guia ("compartilhar a vida, estudar a Palavra e crescer em
+            comunidade", o parágrafo de /pequena-guia). Saiu daqui a contagem de
+            grupos — o apoio é um só, e a contagem continua em /pequena-guia. */}
+        <Link href="/pequena-guia" className="fato">
+          <span className="fato-r">Comunidade</span>
+          <span className="fato-v">Conheça uma Pequena Guia<IcSeta /></span>
+          <span className="fato-d">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</span>
+        </Link>
+      </section>
+
+      {/* --------------------------------------------- prova: sai do banco
+          A única prova concreta da página, em quatro números. */}
+      {num && (
+        <section className="casa-escuro rev" aria-label="A igreja em números">
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">Hoje na GUIA</p>
+              <p className="g-ed m0">Quem faz o domingo acontecer.</p>
+            </div>
+            <div className="g-num centro c-bloco grande">
+              <div><b><Contador n={num.pessoas} /></b><span>{pl(num.pessoas, 'pessoa servindo', 'pessoas servindo')}</span></div>
+              <div><b><Contador n={num.ministerios} /></b><span>{pl(num.ministerios, 'área aberta', 'áreas abertas')}</span></div>
+              <div><b><Contador n={num.postos} /></b><span>{pl(num.postos, 'posto na escala', 'postos na escala')}</span></div>
+              <div><b><Contador n={num.cultos_no_mes} /></b><span>{pl(num.cultos_no_mes, 'encontro no mês', 'encontros no mês')}</span></div>
+            </div>
           </div>
-          <nav className="caminhos" aria-label="Caminhos">
-            {CAMINHOS.map((c, i) => (
-              <Link key={c.href} href={c.href} className="caminho">
-                <span className="caminho-n" aria-hidden="true">0{i + 1}</span>
-                <span className="caminho-txt">
-                  <span className="caminho-t">{c.t}</span>
-                  <span className="caminho-d">
-                    {i === 0 ? <><ProximoCulto /> · {IGREJA.bairro}. {c.nota}</> : c.d}
-                  </span>
-                </span>
-                <IcSeta />
-              </Link>
-            ))}
-          </nav>
+        </section>
+      )}
+
+      {/* ----------------------------------------------- 01 · O DOMINGO
+          08/09/2026, pedido do Arthur: "Participe da nossa comunidade de onde
+          estiver", com duas portas — o campus físico e a transmissão ao vivo.
+          São dois azulejos de foto (o mesmo componente das áreas), cada um com
+          o texto de apoio e o selo com o essencial. As perguntas de quem nunca
+          foi continuam em /cultos — a home não repete. */}
+      <section id="domingo" className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="c">
+            <p className="g-rot">Onde participar</p>
+            <Tit className="g-h2">Participe da nossa comunidade de onde estiver</Tit>
+            <p className="g-ed">No campus da Barra da Tijuca ou ao vivo, no mesmo horário.</p>
+          </div>
+          <div className="casa-areas centro duas c-bloco">
+            <Link href="/cultos" className="casa-area corte">
+              <img src={cria('domingo')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Campus físico</span>
+              <p className="casa-area-desc">Na {IGREJA.rua}. Equipe na porta, estacionamento orientado e GUIA Kids para as crianças.</p>
+              <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · {IGREJA.bairro}</span>
+            </Link>
+            <Link href="/guia-church-tv" className="casa-area corte">
+              <img src={cria('tv')} alt="" loading="lazy" decoding="async" />
+              <span className="casa-area-nome">Transmissão ao vivo</span>
+              <p className="casa-area-desc">O culto de domingo ao vivo, no mesmo horário, pela GUIA Church TV. Para quem está longe, viajando ou ainda conhecendo a igreja.</p>
+              <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · Ao vivo</span>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ----------------------------------------------------- 3 · ROSTOS
-          A igreja não é o prédio. As áreas com foto vertical e a pessoa no
-          centro: no celular, um rolo de polegar com encaixe; no desktop, a
-          fileira. Toca e vai para a área. */}
-      <section id="areas" className="rostos-sec casa-papel rev" aria-labelledby="rostos-t">
-        <div className="g">
-          <div className="c">
-            <p className="g-rot">Servir</p>
-            <h2 id="rostos-t" className="g-h2 h-h2">A igreja não é o prédio</h2>
-            <p className="g-ed">São pessoas que chegaram mais cedo.</p>
+      {/* ------------------------------------------------ 02 · QUEM É A GUIA
+          No desktop, uma história em rolagem: a página trava e G, U, I e >
+          atravessam a tela, uma letra por vez, com a palavra e a frase da
+          igreja (CSS scroll-driven, ver .rolo). Onde não há suporte ou no
+          celular, os quatro azulejos. O texto é o da igreja, palavra por
+          palavra. */}
+      <section id="igreja" className="casa-escuro retic rev">
+        <div className="rolo">
+          <div className="rolo-in">
+            <div className="rolo-cab">
+              <p className="g-rot centro">A igreja</p>
+              {/* 14/09/2026: no desktop com scroll-timeline o `.sigla-azulejos`
+                  (que carrega o <h2>Somos GUIA</h2>) fica display:none, e a
+                  seção mais longa do site ficava sem título nenhum no sumário
+                  de cabeçalhos. O mesmo h2, só para leitor de tela e sumário:
+                  o visual do rolo continua o que era. */}
+              <h2 className="so-leitor">Somos GUIA</h2>
+            </div>
+            <div className="rolo-track">
+              {SIGLA.map((l, i) => (
+                <div key={l.t} className="rolo-p">
+                  <div>
+                    <div className="rolo-l">{l.l === '>' ? <span className="marca-chev"><Chevron /></span> : l.l}</div>
+                    <p className="rolo-t">{l.t}</p>
+                    <p className="rolo-d">{l.d}</p>
+                    {i === SIGLA.length - 1 && (
+                      <div className="g-acoes centro">
+                        <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <span className="rolo-n">Somos GUIA · quatro palavras</span>
+            <div className="rolo-prog"><i /></div>
           </div>
         </div>
 
-        {fase === 'carregando' && <AreasCarregando forma="rostos" />}
-        {fase === 'rede' && (
-          <p className="g-corpo c">Não consegui carregar as áreas agora. Atualize a página.</p>
-        )}
-        {fase === 'pronto' && !mins.length && (
-          <p className="g-corpo c">As áreas aparecem aqui assim que a liderança abrir as vagas.</p>
-        )}
-        {fase === 'pronto' && !!mins.length && (
-          <div className="rostos" role="list" aria-label="Áreas para servir">
-            {mins.map(m => {
-              const cel = fotoDaAreaCelular(m.slug);
-              return (
-                <Link key={m.slug} href={`/servir/${m.slug}`} className="rosto" role="listitem">
-                  <picture>
-                    {cel && <source media="(max-width: 899px)" type="image/avif" srcSet={cel.avif} />}
-                    {cel && <source media="(max-width: 899px)" srcSet={cel.webp} />}
-                    <img src={fotoDaArea(m.slug)} alt="" loading="lazy" decoding="async"
-                         style={{ objectPosition: focoDaArea(m.slug) }} />
-                  </picture>
-                  <span className="rosto-txt">
-                    <span className="rosto-nome">{m.nome}</span>
-                    <span className="rosto-selo">
-                      {m.postos} {m.postos === 1 ? 'posto' : 'postos'}{!m.aberto && ' · conversa antes'}
-                    </span>
-                    {descricaoPublica(m.slug, m.descricao) && (
-                      <span className="rosto-desc">{descricaoPublica(m.slug, m.descricao)}</span>
-                    )}
-                  </span>
-                </Link>
-              );
-            })}
+        <div className="sigla-azulejos">
+          <div className="g g-secao">
+            <div className="c">
+              <p className="g-rot">A igreja</p>
+              <Tit className="g-h2">Somos GUIA</Tit>
+              <p className="g-ed">{SIGLA_FRASE}.</p>
+            </div>
+            <div className="g-tiles quatro letras centro c-larga">
+              {SIGLA.map(l => (
+                <div key={l.t} className="g-tile">
+                  <span className="g-tile-l">{l.l === '>' ? <span className="marca-chev" aria-hidden="true"><Chevron /></span> : l.l}</span>
+                  <span className="g-tile-t">{l.t}</span>
+                </div>
+              ))}
+            </div>
+            <div className="c">
+              <div className="g-acoes">
+                <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
+              </div>
+            </div>
           </div>
-        )}
-        <div className="g g-acoes centro g-acoes-fecha">
-          <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+        </div>
+      </section>
+
+      {/* ---------------------------------------------------- 03 · SERVIR
+          Título, uma linha, um botão, e as áreas com foto real saídas do
+          banco. Os passos e a nota saíram: cada área explica o caminho. */}
+      <section id="areas" className="casa-papel rev">
+        <div className="g g-secao">
+          <div className="g-cab">
+            <div className="g-cab-txt">
+              <p className="g-rot">Servir</p>
+              <Tit className="g-h2">A igreja não é o prédio</Tit>
+              <p className="g-ed">São pessoas que chegaram mais cedo.</p>
+            </div>
+          </div>
+
+          {fase === 'carregando' && <AreasCarregando />}
+          {fase === 'rede' && (
+            <p className="g-corpo c">
+              Não consegui carregar as áreas agora. Atualize a página.
+            </p>
+          )}
+          {fase === 'pronto' && !mins.length && (
+            <p className="g-corpo c">
+              As áreas aparecem aqui assim que a liderança abrir as vagas.
+            </p>
+          )}
+          <div className="casa-areas centro">
+            {mins.map(m => (
+              <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
+                <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
+                <span className="casa-area-nome">{m.nome}</span>
+                {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
+                <span className="casa-area-selo">
+                  {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
+                  {!m.aberto && ' · conversa antes'}
+                </span>
+              </Link>
+            ))}
+          </div>
+          {/* 09/09/2026: a chamada vinha ANTES da lista que ela aponta — no
+              celular a pessoa lia "ver todas as áreas" e só depois via as
+              áreas. Uma chamada fecha a seção, não a abre. */}
+          <div className="g-acoes centro g-acoes-fecha">
+            <Link href="/servir" className="acao cheia">Ver todas as áreas <IcSeta /></Link>
+          </div>
         </div>
       </section>
 
@@ -312,7 +513,11 @@ export default function Casa() {
         <img src={cria('fecho')} alt={criaAlt('fecho')} loading="lazy" decoding="async" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
-          <h2 className="g-h2 h-h2">Ninguém aqui começou sabendo.</h2>
+          {/* 09/09/2026: aqui repetia, com as mesmas palavras, os números da
+              faixa escura lá em cima ("45 pessoas servindo em 5 áreas"). Duas
+              vezes a mesma informação na mesma página é ruído: o fecho volta a
+              ser o convite, e a prova fica onde ela já estava. */}
+          <Tit className="g-h2">Ninguém aqui começou sabendo.</Tit>
           <div className="g-acoes">
             <Link href="/servir" className="acao cheia">Encontrar minha área <IcSeta /></Link>
             <Link href="/eu" className="g-link claro">Já sirvo · abrir meu espaço</Link>
@@ -322,7 +527,7 @@ export default function Casa() {
       </main>
 
       <Rodape />
-      <PassoFixo />
+
     </div>
   );
 }

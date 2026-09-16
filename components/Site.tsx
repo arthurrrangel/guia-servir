@@ -5,7 +5,6 @@ import { Logo } from './Marca';
 import { IcSeta } from './Icones';
 import { IGREJA } from '@/lib/igreja';
 import Movimento from './Movimento';
-import PassoFixo from './PassoFixo';
 
 /* =============================================================================
    O CASCO DAS PÁGINAS PÚBLICAS
@@ -280,9 +279,6 @@ export function Site({ atual, escuro, children }: { atual?: string; escuro?: boo
           valendo para todas as telas do sistema. */}
       <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: escuro ? 0 : 'var(--barra-alt) 0 0' }}>{children}</main>
       <Rodape />
-      {/* 16/09/2026: o próximo passo fixo no rodapé do celular, em toda página
-          pública (ver components/PassoFixo.tsx: ele mesmo sabe onde não entrar) */}
-      <PassoFixo />
     </div>
   );
 }
