@@ -8867,3 +8867,43 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
 @media(min-width:900px){ .tela-corpo{ padding-top:calc(128px + var(--topo-seguro)) } }
 .topo,body:has(.lid) .topo,.vol-barra{ padding-top:var(--topo-seguro) }
 .progresso,.trabalhando{ top:var(--topo-seguro) }
+
+/* =============================================================================
+   16/09/2026 · SAFARI 26: A FAIXA DA BARRA DE STATUS TEM A COR DO BODY
+
+   Segunda captura do Arthur, mesma tela: a marca já desceu, mas apareceu uma
+   faixa BRANCA atrás do relógio, em cima do herói escuro. É o Safari 26
+   (Liquid Glass): com a página no topo, ele não mostra o que está por baixo
+   da barra de status; pinta a faixa com uma cor que amostra do elemento fixo
+   encostado no topo e, se ele é transparente (a barra do site é), com o
+   `background-color` do body. O body era branco, a faixa saía branca. O
+   `theme-color` não conta mais nessa versão.
+
+   Então, nas páginas que abrem com foto escura de ponta a ponta (a home e
+   os heróis `.g-cheio`), o BODY passa a ser noite e o `main` assume o papel
+   que era do body: a faixa sai escura, do tom do herói, e o resto da página
+   não muda (medido: o único lugar onde o body aparecia era a faixa entre o
+   herói e os fatos, e o antialias dos textos; os dois agora caem no main).
+   Efeito colateral aceito: o excesso de rolagem e a barra de baixo do Safari
+   ficam escuros nessas páginas. Nas outras (papel no topo), nada muda.
+   ============================================================================= */
+body:has(main > section:first-of-type.casa-heroi),
+body:has(main > section:first-of-type.g-cheio){ background:var(--noite) }
+body:has(main > section:first-of-type.casa-heroi) main,
+body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
+
+/* =============================================================================
+   16/09/2026 · O BOTÃO DE ENTRAR SUMIA DEPOIS DO PRIMEIRO TOQUE
+
+   Três capturas do mesmo dia (a Monik no Android, o Arthur no iPhone, eu no
+   Chrome dele) mostravam "Receber link de acesso" como um retângulo quase
+   branco com texto branco. Medido na produção: em repouso o botão é noite
+   com texto branco; depois de um toque, `button:hover, button:active` (o
+   genérico do sistema, especificidade 0,1,1) vence `.lid-bt` (0,1,0) e troca
+   o fundo por `--card3` (#fafafb), mantendo o texto branco. No celular o
+   hover fica preso depois do toque, então o botão principal de TODAS as
+   telas do organizador sumia a partir do primeiro uso. O `.lid-bt:hover`
+   que existia só mexia na opacidade. Agora repõe fundo, borda e texto.
+   ============================================================================= */
+.lid-bt:hover,.lid-bt:active{ background:var(--noite); border-color:var(--noite); color:#fff; opacity:.84 }
+.lid-faixa.fogo .lid-bt:hover,.lid-faixa.fogo .lid-bt:active{ background:#fff; color:var(--noite); border-color:#fff }
