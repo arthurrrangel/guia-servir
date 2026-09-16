@@ -55,6 +55,16 @@ const PORTEXTO: [RegExp, string][] = [
    'Você não tem permissão para isso neste ministério. Fale com quem organiza a igreja.'],
   [/telefone|phone/i,
    'Confira o WhatsApp: precisa do DDD e só números.'],
+  /* 17/09/2026: o Arthur viu "espere alguns segundos" quando o Supabase
+     recusou MANDAR o e-mail do link ("email rate limit exceeded"): o
+     serviço de e-mail embutido do Supabase manda pouquíssimos por hora, e
+     "segundos" o fazia clicar de novo, o que só estende o bloqueio. Quem
+     manda e-mail de acesso e cai no limite precisa saber que é por hora e
+     que a senha continua funcionando. */
+  [/email rate limit|over_email_send_rate_limit/i,
+   'O sistema chegou ao limite de e-mails de acesso desta hora. Entre com a senha (o link "Prefiro entrar com senha", abaixo), ou peça o link de novo daqui a uma hora. Se você já pediu antes, confira a caixa de entrada e o spam: o primeiro pode ter chegado.'],
+  [/security purposes|only request this after|can only request/i,
+   'Você acabou de pedir um link. Espere um minuto antes de pedir outro; o primeiro já deve estar chegando.'],
   [/rate ?limit|too many/i,
    'Muita coisa ao mesmo tempo. Espere alguns segundos e tente de novo.'],
 ];
