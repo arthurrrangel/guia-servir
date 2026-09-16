@@ -96,6 +96,11 @@
 }
 .casa-nav a{ font-weight:500 }
 .menu{ background:var(--papel); color:var(--ink) }
+/* 16/09/2026: o menu ficou claro, mas a barra por cima dele continuava
+   forçada a branco (globals: `.casa-barra:has(.menu-bt[aria-expanded="true"])
+   { color:#fff }`): marca e o X do fechar sumiam no papel. Medido em 390px
+   com o menu aberto. Sobre o menu claro, a barra é tinta. */
+.casa-barra:has(.menu-bt[aria-expanded="true"]){ color:var(--ink) }
 .menu a{ color:var(--ink); text-transform:none; letter-spacing:-.02em; font-weight:600 }
 .menu .menu-pe,.menu .menu-pe a{ color:var(--mudo) }
 .menu a:focus-visible{ outline-color:var(--noite) }
