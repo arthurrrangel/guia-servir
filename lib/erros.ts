@@ -27,7 +27,52 @@
    precisa não tropeça nele.
    ============================================================================= */
 
-export type ErroHumano = { texto: string; tecnico?: string };
+export type ErroHumano = { texto: string; tecnico?: string; generico?: boolean };
+
+/* =============================================================================
+   16/09/2026 · O BANCO JÁ DIZIA O MOTIVO, E A TELA ESCONDIA
+
+   O João Victor, na escala da Mídia, viu "Não consegui salvar. Tente de novo;
+   se continuar, avise quem organiza a igreja." Nenhuma pista. O detalhe ia
+   para o console de um celular, que ninguém abre.
+
+   O banco tem regras que RECUSAM uma escala com uma frase em português,
+   escrita por nós (`raise exception`): a pessoa já está em outra função ao
+   mesmo tempo naquele culto; a pessoa avisou que não pode naquele dia; o
+   ministério não veio; a função ou a pessoa é de outro ministério. Todas
+   chegam com o código P0001 e nenhuma casava com a lista abaixo, então todas
+   viravam a frase genérica. A regra certa, que dizia exatamente o que fazer,
+   era jogada fora.
+
+   Agora: as frases conhecidas ganham a forma da folha (com acento, e com o
+   que fazer); qualquer outro P0001 passa como veio, porque foi a gente que
+   escreveu. E `aviseHumano`, que é o atalho de quem só tem uma linha, mostra
+   o detalhe técnico quando cai no genérico: melhor uma linha feia que dá para
+   mandar por WhatsApp do que uma bonita que não diz nada.
+   ============================================================================= */
+type Tradutor = [RegExp, (m: RegExpMatchArray) => string];
+const PORBANCO: Tradutor[] = [
+  /* fn_conflito_simultaneo (migração 04): "% ja esta em % ao mesmo tempo neste domingo." */
+  [/^(.+?) ja esta em (.+?) ao mesmo tempo neste domingo/i,
+   m => `${m[1]} já está em ${m[2]} nesse mesmo culto. Uma pessoa não fica em duas funções ao mesmo tempo: tire de uma delas antes, ou escolha outra pessoa.`],
+  /* a versão anterior da mesma regra (migração 01) */
+  [/Essa pessoa já está em (.+?) neste domingo/i,
+   m => `Essa pessoa já está em ${m[1]} nesse mesmo culto. Tire de lá antes, ou escolha outra pessoa.`],
+  /* fn_indisponivel (04): "% avisou que nao pode neste domingo." */
+  [/^(.+?) avisou que nao pode neste domingo/i,
+   m => `${m[1]} avisou que não pode nesse dia. Escolha outra pessoa.`],
+  /* a versão anterior (01): "Essa pessoa avisou que não pode em DD/MM." */
+  [/Essa pessoa avisou que não pode em (\d\d\/\d\d)/i,
+   m => `Essa pessoa avisou que não pode em ${m[1]}. Escolha outra pessoa.`],
+  /* salvar_dia */
+  [/salvar_dia sem ministerio/i,
+   () => 'Não achei o ministério desta escala. Recarregue a página e tente de novo.'],
+  [/funcao de outro ministerio|voluntario de outro ministerio/i,
+   () => 'Alguém desta escala não é deste ministério. Recarregue a página e tente de novo; se continuar, avise quem organiza a igreja.'],
+  /* eu_dados e companhia */
+  [/^Link invalido/i,
+   () => 'Esse link não é válido. Peça o seu link de novo para quem organiza a igreja.'],
+];
 
 /* Postgres devolve código; PostgREST devolve outro. Os que a gente realmente
    encontra estão aqui. O resto cai no genérico, que também é uma frase. */
@@ -55,7 +100,7 @@ const PORTEXTO: [RegExp, string][] = [
    'Você não tem permissão para isso neste ministério. Fale com quem organiza a igreja.'],
   [/telefone|phone/i,
    'Confira o WhatsApp: precisa do DDD e só números.'],
-  /* 17/09/2026: o Arthur viu "espere alguns segundos" quando o Supabase
+  /* 16/09/2026: o Arthur viu "espere alguns segundos" quando o Supabase
      recusou MANDAR o e-mail do link ("email rate limit exceeded"): o
      serviço de e-mail embutido do Supabase manda pouquíssimos por hora, e
      "segundos" o fazia clicar de novo, o que só estende o bloqueio. Quem
@@ -76,20 +121,34 @@ export function humano(e: unknown, oQueFazia?: string): ErroHumano {
   const codigo = obj.code || '';
 
   let texto = codigo && PORCODIGO[codigo];
+  /* as recusas do próprio banco vêm antes dos trechos genéricos: "avisou que
+     nao pode" não pode cair em /telefone|phone/ nem em nada parecido */
+  if (!texto) for (const [re, f] of PORBANCO) { const m = bruto.match(re); if (m) { texto = f(m); break; } }
+  /* P0001 é `raise exception` nosso, escrito em português para gente ler.
+     Passa como veio, só com o ponto final garantido. */
+  if (!texto && codigo === 'P0001' && obj.message) texto = obj.message.trim().replace(/[.!]*$/, '.');
   if (!texto) for (const [re, t] of PORTEXTO) if (re.test(bruto)) { texto = t; break; }
 
   /* O genérico também precisa dizer o que fazer. "Erro inesperado" é só a
      mensagem crua vestida de português. */
+  let generico = false;
   if (!texto) {
+    generico = true;
     texto = oQueFazia
       ? `Não consegui ${oQueFazia}. Tente de novo; se continuar, avise quem organiza a igreja.`
       : 'Não consegui completar. Tente de novo; se continuar, avise quem organiza a igreja.';
   }
 
   if (bruto) { try { console.warn('[detalhe técnico]', bruto, codigo); } catch { /* console pode faltar */ } }
-  return { texto, tecnico: bruto || undefined };
+  return { texto, tecnico: bruto || undefined, generico };
 }
 
 /* Atalho para os lugares que só têm uma linha de aviso e nenhum lugar para
-   pendurar o detalhe. */
-export const aviseHumano = (e: unknown, oQueFazia?: string) => humano(e, oQueFazia).texto;
+   pendurar o detalhe. Quando a frase é a genérica, o detalhe vai junto, na
+   mesma linha: é a única cópia dele que a pessoa consegue mandar para alguém. */
+export function aviseHumano(e: unknown, oQueFazia?: string) {
+  const h = humano(e, oQueFazia);
+  if (!h.generico || !h.tecnico) return h.texto;
+  const detalhe = h.tecnico.length > 140 ? h.tecnico.slice(0, 137) + '…' : h.tecnico;
+  return `${h.texto} Detalhe: ${detalhe}`;
+}
