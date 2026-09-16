@@ -8974,3 +8974,90 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
 .instalar-acoes{ display:flex; align-items:center; gap:14px; flex-wrap:wrap }
 .instalar-acoes .vol-bt{ flex:0 1 auto; min-width:140px; background:var(--noite); color:#fff; border-color:var(--noite) }
 .instalar-depois{ background:none; border:0; padding:10px 2px; min-height:44px; font:inherit; font-size:14.5px; color:var(--mudo); cursor:pointer; text-decoration:underline; text-underline-offset:3px }
+
+/* ---- 8. a lista de escolha de área em /servir --------------------------- */
+/* Cada peça (foto, nome, descrição, selo, seta) é um item da grade e vai
+   para a área que a largura lhe dá:
+
+     celular (<900px)                 desktop (≥900px, duas colunas)
+     ┌──────┬────────────┬───┐        ┌──────┬──────────────────┬───┐
+     │ foto │ nome       │   │        │      │ nome             │   │
+     │      │ selo       │ › │        │ foto │ descrição        │ › │
+     ├──────┴────────────┴───┤        │      │ selo             │   │
+     │ descrição inteira     │        └──────┴──────────────────┴───┘
+     └───────────────────────┘
+
+   No celular a descrição desce para baixo e usa a largura toda: são as
+   frases inteiras do Arthur (10/09), e ao lado de uma foto de 72px elas
+   viravam seis linhas de 30 caracteres. Embaixo são três, de 45. */
+.areas-esc{ display:grid; gap:0; margin-top:clamp(24px,3vw,44px); border-top:1px solid var(--linha2) }
+.area-esc{
+  display:grid; grid-template-columns:72px 1fr auto; grid-template-rows:1fr 1fr auto;
+  grid-template-areas:"foto nome seta" "foto selo seta" "desc desc desc";
+  column-gap:16px; row-gap:0;
+  padding:14px 4px; border-bottom:1px solid var(--linha2); text-decoration:none; color:inherit;
+  transition:background var(--t);
+}
+.area-esc:hover,.area-esc:active{ background:rgba(37,37,37,.03) }
+.area-esc:focus-visible{ outline:2px solid var(--noite); outline-offset:-2px }
+.area-esc-foto{ grid-area:foto; display:block; width:72px; aspect-ratio:4/5; overflow:hidden; background:var(--noite); align-self:center }
+.area-esc-foto img{ width:100%; height:100%; object-fit:cover; filter:saturate(.72) contrast(1.03) }
+.area-esc-nome{ grid-area:nome; align-self:end; min-width:0; display:block; font-family:var(--fonte-display); font-weight:700; font-size:20px; letter-spacing:-.02em; line-height:1.15 }
+.area-esc-selo{
+  grid-area:selo; align-self:start; margin-top:6px;
+  display:flex; flex-wrap:wrap; gap:2px 6px;
+  font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mudo);
+}
+.area-esc-selo > span{ white-space:nowrap }
+.area-esc-selo > span + span::before{ content:"·"; margin-right:6px }
+.area-esc-desc{ grid-area:desc; display:block; margin-top:12px; font-size:15px; line-height:1.5; color:var(--cinza); text-wrap:pretty }
+.area-esc > svg,.area-esc-seta{ grid-area:seta; align-self:center; width:18px; height:18px; color:var(--areia-tinta); transition:transform var(--t) }
+.area-esc:hover > svg,.area-esc:active > svg{ transform:translateX(3px) }
+@media(max-width:759px){ .area-esc-selo{ justify-content:center } }
+@media(min-width:900px){
+  .areas-esc{ grid-template-columns:1fr 1fr; gap:0 40px; border-top:0 }
+  .area-esc{
+    grid-template-columns:96px 1fr auto; grid-template-rows:1fr auto 1fr;
+    grid-template-areas:"foto nome seta" "foto desc seta" "foto selo seta";
+    padding:20px 4px; border-top:1px solid var(--linha2); border-bottom:0;
+  }
+  .area-esc-foto{ width:96px }
+  .area-esc-nome{ font-size:22px }
+  .area-esc-desc{ margin-top:4px; font-size:15px; line-height:1.45 }
+  .area-esc-selo{ margin-top:8px }
+}
+/* as cinco linhas entram em escada quando a faixa aparece; se o banco
+   responder depois da faixa já estar à vista, montam prontas (sem piscar) */
+.js-rev .rev .area-esc{ opacity:0; transform:translateY(8px); transition:opacity .36s var(--ease),transform .36s var(--ease),background var(--t) }
+.js-rev .rev.visto .area-esc{ opacity:1; transform:none }
+.js-rev .rev.visto .area-esc:nth-child(1){ transition-delay:80ms }
+.js-rev .rev.visto .area-esc:nth-child(2){ transition-delay:160ms }
+.js-rev .rev.visto .area-esc:nth-child(3){ transition-delay:240ms }
+.js-rev .rev.visto .area-esc:nth-child(4){ transition-delay:320ms }
+.js-rev .rev.visto .area-esc:nth-child(n+5){ transition-delay:400ms }
+
+/* ---- 9. esqueletos com a forma nova (home: rostos; /servir: lista) -------- */
+/* `.esqueleto` também é o invólucro de carregamento do sistema (max-width,
+   margin auto, padding, lá em cima): aqui as duas peças zeram isso, senão a
+   linha encolhe para 130px e o rosto ganha 40px de borda interna */
+.rosto.esqueleto{ pointer-events:none; cursor:default; max-width:none; margin:0; padding:0 }
+.rosto.esqueleto .rosto-txt{ display:grid; gap:10px }
+.rosto.esqueleto .esq-l.selo{ margin-top:0 }
+.area-esc.esqueleto{ pointer-events:none; cursor:default; max-width:none; margin:0; padding:14px 4px }
+@media(min-width:900px){ .area-esc.esqueleto{ padding:20px 4px } }
+.area-esc.esqueleto .area-esc-foto{ background:rgba(37,37,37,.10) }
+.area-esc.esqueleto .area-esc-desc{ display:grid; gap:8px }
+.area-esc.esqueleto .esq-l{
+  background-image:linear-gradient(90deg,rgba(37,37,37,.06) 0%,rgba(37,37,37,.14) 45%,rgba(37,37,37,.06) 100%);
+  background-color:transparent;
+}
+.area-esc.esqueleto .esq-l.selo{ margin-top:0 }
+@media(max-width:759px){ .area-esc.esqueleto .esq-l,.rosto.esqueleto .esq-l{ margin-inline:auto } }
+@media(max-width:759px){ .area-esc-selo{ justify-content:center } }
+@media(min-width:900px){
+  .areas-esc{ grid-template-columns:1fr 1fr; gap:0 40px; border-top:0 }
+  .area-esc{ grid-template-columns:96px 1fr auto; padding:20px 4px; border-top:1px solid var(--linha2); border-bottom:0; align-items:center }
+  .area-esc-foto{ width:96px }
+  .area-esc-nome{ font-size:22px }
+  .area-esc-desc{ font-size:15px }
+}

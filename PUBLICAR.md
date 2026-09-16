@@ -52,6 +52,30 @@ execução — use `vercel.cmd` no `cmd`, não no PowerShell. E o PowerShell tra
 stderr do git como erro: `git push` "falhando" com `NativeCommandError` e
 mostrando `975dc2d..89ff909 master -> master` **deu certo**.
 
+### B automatizado (funcionou em 16/09/2026): o agente faz tudo, sem o Arthur digitar
+
+Quando a sessão está ligada à máquina dele, o agente tem duas ferramentas que
+juntas fecham o caminho inteiro, inclusive **binários** (fotos, AVIF), que o
+caminho C não leva:
+
+1. **Patch com binário**, no container:
+   `git format-patch --binary origin/master..HEAD --stdout > fase.patch`.
+   Teste num clone limpo NA BASE (`git checkout <sha da base>` explícito —
+   um clone recente já pode ter o commit e o `git am` diz "already applied",
+   o que não prova nada).
+2. **Entregar o arquivo**: `SendUserFile(fase.patch)` → pega o `file_uuid` →
+   `device_commit_files` para `C:\Users\PICHAU\guia-servir\_publicar\fase.patch`.
+   (`device_bash` NÃO monta pastas nessa máquina — bug do Windows; não insista.)
+3. **Aplicar e empurrar** com o Desktop Commander, `start_process` com shell
+   `cmd` (não PowerShell), em `C:\Users\PICHAU\guia-servir`:
+   `git pull --ff-only origin master && git am --3way _publicar\fase.patch && git push origin master`
+   No `cmd` não existe `tail`, e `HEAD^{tree}` precisa de aspas: `"HEAD^{tree}"`.
+4. **Conferir**: `git rev-parse HEAD` na máquina dele e `git fetch` +
+   `git rev-parse origin/master` no container têm que bater; depois
+   `git reset --hard origin/master` no container para os dois ficarem iguais.
+   Limpe `_publicar\` na máquina dele (o Desktop Commander apaga; a ponte não).
+5. Vercel constrói sozinha. Confira a produção como sempre (abaixo).
+
 ## Caminho C — a interface web do GitHub, pelo Chrome
 
 Funciona quando a extensão do Chrome responde. Publica **um commit por

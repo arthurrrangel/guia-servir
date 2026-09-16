@@ -269,7 +269,7 @@ export default function Casa() {
           </div>
         </div>
 
-        {fase === 'carregando' && <div className="g"><AreasCarregando /></div>}
+        {fase === 'carregando' && <AreasCarregando forma="rostos" />}
         {fase === 'rede' && (
           <p className="g-corpo c">Não consegui carregar as áreas agora. Atualize a página.</p>
         )}
