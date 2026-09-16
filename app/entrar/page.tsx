@@ -6,6 +6,7 @@ import { Conexao } from '@/components/Shell';
 import { Logo } from '@/components/Marca';
 import { Aviso } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
+import { sugerirEmail } from '@/lib/email';
 
 export default function Entrar() {
   const [pronto, setPronto] = useState(false);
@@ -19,7 +20,7 @@ export default function Entrar() {
      login recusado apareceria com o ✓ verde de sucesso. Quem manda a
      mensagem agora manda o tom junto. */
   const [msg, setMsg] = useState('');
-  const [tom, setTom] = useState<'erro' | 'bom'>('bom');
+  const [tom, setTom] = useState<'erro' | 'bom' | 'atencao'>('bom');
   const [carregando, setCarregando] = useState(false);
   const [entrando, setEntrando] = useState(false);
 
@@ -83,7 +84,14 @@ export default function Entrar() {
   if (entrando) return <div className="carregando">entrando…</div>;
 
   async function porLink(e: React.FormEvent) {
-    e.preventDefault(); setCarregando(true); setMsg('');
+    e.preventDefault(); setMsg('');
+    /* 16/09/2026: cada pedido de link é um e-mail, e o projeto tem cota de
+       e-mails por hora. Um endereço com erro de digitação (a Monik pediu com
+       "hotmail.comm") gasta a cota de todo mundo e não chega a ninguém. Os
+       erros mais comuns são pegos aqui, antes de gastar. */
+    const sug = sugerirEmail(email);
+    if (sug) { setTom('atencao'); setMsg(`Confira o e-mail: parece que é ${sug}. Corrija e peça o link de novo.`); return; }
+    setCarregando(true);
     /* O DESTINO É /entrar, NÃO A RAIZ.
        Era window.location.origin, e a raiz é a home: uma página que fala com o
        banco pelo cliente público, que por contrato não olha para token nenhum
