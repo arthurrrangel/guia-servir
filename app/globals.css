@@ -8838,3 +8838,32 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
 .instalar-acoes .vol-bt{ flex:0 1 auto; min-width:140px; background:var(--noite); color:#fff; border-color:var(--noite) }
 .instalar-depois{ background:none; border:0; padding:10px 2px; min-height:44px; font:inherit; font-size:14.5px; color:var(--mudo); cursor:pointer; text-decoration:underline; text-underline-offset:3px }
 
+
+/* =============================================================================
+   16/09/2026 · O APP INSTALADO NASCE POR BAIXO DA BARRA DE STATUS
+
+   Captura do Arthur, no celular: "4:44", o sinal, o wi-fi e a bateria em
+   cima da marca, do "Quero servir" e do menu. É o site salvo na tela inicial
+   (o "Instalar" de 16/09): o manifesto é `standalone`, a barra de status é
+   `black-translucent` e o viewport é `cover`, então a página começa no pixel
+   zero do vidro e a barra de status do sistema é pintada por cima. No Safari
+   comum isso não aparece, porque o navegador tem barra própria; no app
+   instalado, tudo o que está preso ao topo precisa descer a altura da barra
+   de status, que o sistema informa em `env(safe-area-inset-top)` (0 fora do
+   app, 47px num iPhone com Dynamic Island, 24px num Android).
+
+   Uma variável, e cada coisa presa ao topo a soma: a barra do site cresce e
+   centraliza o conteúdo abaixo da barra de status (o herói continua
+   sangrando por baixo, que é bonito); o menu, o topo das telas internas, o
+   topo do organizador, a barra do voluntário e as duas réguas de progresso
+   descem junto; quem reserva espaço para a barra fixa reserva a soma.
+   ============================================================================= */
+:root{ --topo-seguro:env(safe-area-inset-top, 0px) }
+.casa-barra,.casa-barra.opaco{ height:calc(var(--barra-alt) + var(--topo-seguro)); padding-top:var(--topo-seguro) }
+.menu{ padding-top:calc(var(--barra-alt) + var(--e5) + var(--topo-seguro)) }
+.of{ scroll-margin-top:calc(var(--barra-alt) + var(--e3) + var(--topo-seguro)) }
+.tela-topo{ padding-top:calc(var(--e4) + var(--topo-seguro)) }
+.tela-corpo{ padding-top:calc(var(--reserva) + var(--topo-seguro)) }
+@media(min-width:900px){ .tela-corpo{ padding-top:calc(128px + var(--topo-seguro)) } }
+.topo,body:has(.lid) .topo,.vol-barra{ padding-top:var(--topo-seguro) }
+.progresso,.trabalhando{ top:var(--topo-seguro) }
