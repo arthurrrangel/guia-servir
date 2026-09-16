@@ -207,7 +207,7 @@ export default function Cultos() {
               <span className="casa-area-cta">Quero participar de um culto <IcSeta /></span>
             </Link>
             <Link href="/pequena-guia" className="casa-area corte">
-              <img src={cria('grupos')} alt="" loading="lazy" decoding="async" />
+              <img src={cria('grupos-cartao')} alt="" loading="lazy" decoding="async" />
               <span className="casa-area-nome">Conheça uma Pequena Guia</span>
               <p className="casa-area-desc">Se você deseja construir relacionamentos mais próximos e continuar sua caminhada durante a semana, encontre uma Pequena Guia perto de você.</p>
               <span className="casa-area-cta">Quero conhecer uma Pequena Guia <IcSeta /></span>

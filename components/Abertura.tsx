@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Simbolo } from './Marca';
 
 /* =============================================================================
-   A ABERTURA — 1,3 segundo, uma vez por sessão
+   A ABERTURA — um segundo, uma vez por sessão, só no desktop
 
    O símbolo aparece no escuro e a cortina sobe sobre o herói. É o gesto que
    diz "isto é uma marca" antes de qualquer texto. Só na primeira página da
@@ -18,8 +18,11 @@ export default function Abertura() {
       sessionStorage.setItem('guia-abriu', '1');
     } catch { /* sem storage: mostra mesmo assim */ }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    /* 17/09/2026: só no desktop, e mais curta (0,95s). No celular a primeira
+       tela é o que mais custa, e a cortina atrasava o título em 1,5s. */
+    if (window.innerWidth < 900) return;
     setVer(true);
-    const t = setTimeout(() => setVer(false), 1500);
+    const t = setTimeout(() => setVer(false), 1000);
     return () => clearTimeout(t);
   }, []);
   if (!ver) return null;

@@ -16,14 +16,14 @@ const FOTO: Record<string, string> = {
      trabalho de outra equipe. Esta mostra o trabalho em si, e o escuro dela
      ainda deixa o texto branco do herói com folga (luminância média 35). */
   midia: '/fotos/midia.webp',
-  louvor: '/fotos/equipe.webp',    // a banda no domingo
+  louvor: '/fotos/louvor-cor.webp', // a cantora no domingo (17/09/2026)
   /* kids-2 e não kids-1 de propósito: a primeira é um retrato de rosto
      inteiro de uma criança, e essa foto ia virar a imagem de capa da área num
      site público. Esta mostra a atividade, com as crianças de cabeça baixa
      desenhando. Se a igreja tiver autorização de imagem assinada dos pais,
      dá para trocar; enquanto não tiver, a escolha é a menos identificável. */
-  kids: '/fotos/kids-2.webp',
-  servico: '/fotos/recepcao.webp', // quem recebe na porta
+  kids: '/fotos/kids-sala.webp',   // a sala do Kids, de dentro (17/09/2026)
+  servico: '/fotos/porta-sorriso.webp', // quem recebe na porta (17/09/2026)
   /* ATENÇÃO: o original desta chegou com 278x297 px, e o herói da área é
      full-bleed. Está ampliada para 1200 e o véu de 62% preto do herói esconde
      boa parte da moleza, mas em tela grande ela amolece. Trocar assim que o
@@ -50,6 +50,7 @@ export const fotoDaArea = (slug?: string | null) =>
    Fica aqui, e não no CSS, porque foco é propriedade da FOTO, não da tela. */
 const FOCO: Record<string, string> = {
   livraria: '50% 20%',   // a mão e o marca-texto, não a capa invertida
+  kids: '62% 50%',       // a criança e as mãos da tia; a foto é larga (17/09/2026)
 };
 
 export const focoDaArea = (slug?: string | null) =>

@@ -1,0 +1,298 @@
+/* =============================================================================
+   EDITORIAL CLARO · 17/09/2026
+
+   Pedido do Arthur: "quero que o site fique realmente bonito, moderno e
+   tecnológico, com uma UI bem trabalhada, profissional e com bastante atenção
+   aos detalhes", SEM mudar a estrutura. Direção escolhida por ele entre três:
+   "claro editorial" (fundo claro dominante, muito respiro, tipografia grande,
+   foto como protagonista, quase nenhuma decoração) com movimento "discreto".
+
+   Esta folha entra DEPOIS de globals.css e só reveste o site público: as
+   mesmas seções, na mesma ordem, com os mesmos textos. Nenhuma classe nova
+   no HTML das páginas; nenhuma regra aqui toca as telas do sistema (painel,
+   escala, /eu). Tirar a linha `import './editorial.css'` do layout devolve o
+   site de ontem inteiro: é uma folha só, de propósito.
+
+   O sistema de acabamento, em seis decisões:
+   1. UMA superfície de cartão: branco, fio de 1px a 8%, raio 20, sombra
+      quase invisível em repouso e uma elevação curta no hover. Vale para
+      fato, área, azulejo, ficha, cartão, pergunta.
+   2. As faixas escuras viram faixas claras (papel2). Escuro só onde há foto
+      por trás: herói e fecho. É o que "claro dominante" quer dizer.
+   3. Foto dentro de moldura, não atrás de texto: o cartão de área passa a
+      ter a foto em cima (16:10, cantos do cartão) e o texto embaixo, na
+      cor da tinta. Resolve de uma vez a legibilidade medida em 14/09 e a
+      foto ampliada 3,6× do celular (a moldura pede um terço dos pixels).
+   4. Botão-pílula: 999px de raio, 48px de altura, uma família, um peso.
+   5. Tipografia: títulos com -0,04em e linha .94; leads a 1,5; rótulos a
+      12px com +0,16em; números tabulares. Nada em caixa alta além do rótulo.
+   6. Movimento: revelação por seção (já existia), elevação no hover, entrada
+      de página em fade. Sem anel de cursor, sem holofote, sem ímã, sem rolo.
+   ============================================================================= */
+
+:root{
+  --ed-raio:20px;
+  --ed-raio-p:14px;
+  --ed-linha:rgba(37,37,37,.08);
+  --ed-linha-2:rgba(37,37,37,.14);
+  --ed-branco:#ffffff;
+  --ed-sombra:0 1px 2px rgba(37,37,37,.04),0 4px 14px -6px rgba(37,37,37,.06);
+  --ed-sombra-alta:0 2px 4px rgba(37,37,37,.04),0 22px 44px -16px rgba(37,37,37,.18);
+  --ed-sobe:translateY(-3px);
+  --ed-t-cartao:transform .32s var(--ease),box-shadow .32s var(--ease),border-color .2s var(--ease),background .2s var(--ease);
+}
+
+/* ---- base ------------------------------------------------------------------- */
+::selection{ background:var(--areia); color:var(--noite) }
+.g-h1,.g-h2,.g-h3,.casa-heroi h1{ text-wrap:balance; font-variant-numeric:tabular-nums }
+.g-ed,.g-corpo,.g-nota,.fato-d,.casa-area-desc,.cartao-d,.g-tile-d,.g-passo-d,.qa-r,.g-perg-r{ text-wrap:pretty }
+
+/* ---- tipografia ------------------------------------------------------------- */
+.g-h1{ font-size:clamp(40px,7.2vw,104px); line-height:.94; letter-spacing:-.04em }
+/* iPhone SE (320px): "Relacionamentos" precisa caber numa linha, como medido
+   em 14/09; abaixo de 360px a régua antiga volta a mandar */
+@media(max-width:359px){ .g-h1{ font-size:clamp(32px,10vw,44px) } }
+.g-h2{ font-size:clamp(34px,4.6vw,64px); line-height:1.0; letter-spacing:-.035em }
+.casa-heroi h1{ letter-spacing:-.04em; line-height:.94 }
+.g-ed{ line-height:1.5; letter-spacing:-.008em }
+.g-rot{ font-size:12px; letter-spacing:.16em; font-weight:500 }
+.g-num b{ font-variant-numeric:tabular-nums; letter-spacing:-.05em }
+
+/* ---- botões: pílula, uma altura ---------------------------------------------- */
+.acao{
+  border-radius:999px; min-height:48px; padding:0 22px; gap:10px;
+  font-size:15px; font-weight:600; letter-spacing:-.005em; text-transform:none;
+  box-shadow:none;
+  transition:background .16s var(--ease),color .16s var(--ease),border-color .16s var(--ease),
+             transform .22s var(--ease),box-shadow .22s var(--ease),opacity .16s var(--ease);
+}
+.acao.cheia{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.acao.cheia:hover,.acao.cheia:active{ opacity:1; background:#111; border-color:#111; transform:translateY(-1px); box-shadow:0 10px 24px -10px rgba(37,37,37,.45) }
+.acao:not(.cheia){ border-color:var(--ed-linha-2); background:var(--ed-branco); color:var(--ink) }
+.acao:not(.cheia):hover,.acao:not(.cheia):active{ background:var(--noite); color:#fff; border-color:var(--noite); transform:translateY(-1px) }
+.acao:active,.acao.cheia:active{ transform:translateY(0) scale(.985); box-shadow:none }
+.acao svg{ width:16px; height:16px }
+.acao:focus-visible{ outline:2px solid var(--noite); outline-offset:3px }
+/* sobre foto (herói, fecho): branco cheio, ou vidro */
+.casa-heroi .acao.cheia,.g-cheio .acao.cheia{ background:#fff; color:var(--noite); border-color:#fff }
+.casa-heroi .acao.cheia:hover,.g-cheio .acao.cheia:hover{ background:#fff; color:var(--noite); border-color:#fff; box-shadow:0 12px 28px -10px rgba(0,0,0,.5) }
+.casa-heroi .acao:not(.cheia),.g-cheio .acao:not(.cheia){
+  color:#fff; background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.28);
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+}
+.casa-heroi .acao:not(.cheia):hover,.g-cheio .acao:not(.cheia):hover{ background:#fff; color:var(--noite); border-color:#fff }
+.g-link{ font-weight:500; text-underline-offset:5px; text-decoration-thickness:1px }
+.bt-barra{ border-radius:999px; font-weight:600 }
+
+/* ---- a barra: transparente sobre a foto, vidro claro depois ----------------- */
+.casa-barra.opaco{
+  background:rgba(250,254,255,.86); color:var(--ink);
+  border-bottom-color:var(--ed-linha);
+}
+/* o desfoque só onde há ponteiro fino (desktop): no celular a barra quase
+   opaca lê igual e não custa um quadro por rolagem */
+@media(hover:hover) and (pointer:fine){
+  .casa-barra.opaco{ background:rgba(250,254,255,.72); -webkit-backdrop-filter:saturate(1.6) blur(16px); backdrop-filter:saturate(1.6) blur(16px) }
+}
+.casa-nav a{ font-weight:500 }
+.menu{ background:var(--papel); color:var(--ink) }
+.menu a{ color:var(--ink); text-transform:none; letter-spacing:-.02em; font-weight:600 }
+.menu .menu-pe,.menu .menu-pe a{ color:var(--mudo) }
+.menu a:focus-visible{ outline-color:var(--noite) }
+
+/* ---- herói: a foto respira, o texto assenta ---------------------------------- */
+.casa-heroi::after{
+  background:
+    radial-gradient(70% 60% at 50% 62%,rgba(37,37,37,.50),transparent 74%),
+    linear-gradient(180deg,rgba(37,37,37,.46) 0%,rgba(37,37,37,.16) 38%,rgba(37,37,37,.90) 100%);
+}
+.casa-heroi-foto{ filter:saturate(.72) contrast(1.04) }
+/* a foto nova do herói (pregacao): a cabeça fica no terço de cima; no
+   monitor o corte largo tem que guardá-la */
+@media(min-width:760px){ .casa-heroi-foto{ object-position:50% 28% } }
+.g-cheio > img{ filter:saturate(.72) contrast(1.04) }
+.g-cheio::before{ background:linear-gradient(180deg,rgba(37,37,37,.34) 0%,rgba(37,37,37,.10) 38%,rgba(37,37,37,.88) 100%) }
+.agora-pill{
+  background:rgba(255,255,255,.10); border-color:rgba(255,255,255,.24);
+  -webkit-backdrop-filter:saturate(1.4) blur(12px); backdrop-filter:saturate(1.4) blur(12px);
+}
+.agora-pill:hover,.agora-pill:focus-visible{ background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.45) }
+.casa-heroi-frase{ color:rgba(255,255,255,.86) }
+
+/* ---- as faixas escuras viram claras ----------------------------------------- */
+.casa-escuro{ background:var(--papel2); color:var(--ink) }
+.casa-escuro.retic{ background-image:none }
+.casa-escuro::before,.casa-escuro::after{ display:none }
+.casa-escuro .g-rot{ color:var(--mudo) }
+.casa-escuro .g-ed{ color:var(--cinza) }
+.casa-escuro .g-h2,.casa-escuro .g-h3{ color:var(--ink) }
+.casa-escuro .g-corpo{ color:var(--cinza) }
+.casa-escuro .acao{ color:var(--ink); border-color:var(--ed-linha-2); background:var(--ed-branco) }
+.casa-escuro .acao:hover,.casa-escuro .acao:active{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.casa-escuro .acao.cheia{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.casa-escuro .g-link{ color:var(--ink) }
+.casa-escuro .g-link.claro{ color:var(--ink); text-decoration-color:rgba(37,37,37,.35) }
+
+/* números */
+.casa-escuro .g-num > div{ background:var(--ed-branco); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra); padding:clamp(24px,3vw,40px) 16px }
+.casa-escuro .g-num b{ color:var(--ink) }
+.casa-escuro .g-num b + span{ color:var(--mudo); opacity:1 }
+
+/* azulejos (letras da sigla, pilares, portas de acesso) */
+.g-tile{ background:var(--ed-branco); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra); color:var(--ink); transition:var(--ed-t-cartao) }
+.g-tile:hover{ background:var(--ed-branco); border-color:var(--ed-linha-2); box-shadow:var(--ed-sombra-alta); transform:var(--ed-sobe) }
+.g-tiles{ gap:12px }
+.g-tile-l{ color:var(--areia-tinta) }
+.g-tile-t{ color:var(--ink) }
+.g-tile-d{ color:var(--cinza) }
+.g-tile-seta{ color:var(--mudo) }
+.g-tile:hover .g-tile-seta{ transform:translateX(3px); color:var(--ink) }
+/* azulejo com foto (acesso às equipes): a foto fica, o texto continua branco */
+.g-tile:has(> img){ color:#fff }
+.g-tile:has(> img) .g-tile-t{ color:#fff }
+.g-tile:has(> img) .g-tile-d{ color:rgba(255,255,255,.8) }
+.g-tile:has(> img) .g-tile-l{ color:var(--areia) }
+.g-tile:has(> img) .g-tile-seta{ color:#fff }
+
+/* passos com foto (o domingo, os três passos de chegar) */
+.g-passos.centro{ background:transparent; border:0; gap:12px }
+.g-passos{ gap:12px }
+.g-passo{ border-radius:var(--ed-raio); transition:var(--ed-t-cartao) }
+.g-passo:hover{ transform:var(--ed-sobe); box-shadow:var(--ed-sombra-alta) }
+
+/* fichas e cartões que viviam no escuro */
+.casa-escuro .ficha{ background:var(--ed-linha); border-color:var(--ed-linha) }
+.casa-escuro .ficha > div,.casa-escuro.retic .ficha > div{ background:var(--ed-branco) }
+.cartao,.casa-escuro.retic .cartao{ background:var(--ed-branco); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra); color:var(--ink); transition:var(--ed-t-cartao) }
+.cartao:hover{ background:var(--ed-branco); border-color:var(--ed-linha-2); box-shadow:var(--ed-sombra-alta); transform:var(--ed-sobe) }
+.cartao-n{ color:var(--areia-tinta) }
+.cartao-t{ color:var(--ink) }
+.cartao-d{ color:var(--cinza) }
+
+/* ---- o rolo da sigla sai; os quatro azulejos valem em toda largura ---------- */
+.rolo{ display:none !important }
+.sigla-azulejos{ display:block !important }
+.g-tiles.letras .g-tile{ aspect-ratio:auto; padding:clamp(28px,3vw,44px) clamp(16px,2vw,28px) }
+.g-tiles.letras .g-tile-l{ font-size:clamp(56px,6.4vw,104px); line-height:.9 }
+
+/* ---- os três fatos e os cartões de área: uma superfície só ------------------- */
+.fatos{ gap:12px }
+.fato{
+  background:var(--ed-branco); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra);
+  transition:var(--ed-t-cartao);
+}
+.fato:hover,.fato:focus-visible{ background:var(--ed-branco); border-color:var(--ed-linha-2); box-shadow:var(--ed-sombra-alta); transform:var(--ed-sobe) }
+.fato-r{ color:var(--mudo) }
+.fato-v svg{ color:var(--mudo); transition:transform var(--t) }
+.fato:hover .fato-v svg{ transform:translateX(3px) }
+
+.casa-areas{ gap:16px }
+.casa-area{
+  background:var(--ed-branco); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra);
+  color:var(--ink); min-height:0; padding:0; justify-content:flex-start; align-items:stretch;
+  transition:var(--ed-t-cartao);
+}
+.casa-area::after{ display:none }
+.casa-area img{
+  position:relative; inset:auto; z-index:0; display:block; width:100%; height:auto;
+  aspect-ratio:16/10; object-fit:cover; filter:saturate(.9) contrast(1.02);
+  border-radius:0; transition:transform 1.1s var(--ease);
+}
+.casa-area:hover,.casa-area:active{ border-color:var(--ed-linha-2); box-shadow:var(--ed-sombra-alta); transform:var(--ed-sobe) }
+.casa-area:hover img,.casa-area:active img{ transform:scale(1.03) }
+.casa-area:focus-visible{ outline:2px solid var(--noite); outline-offset:3px }
+.casa-area-nome{ color:var(--ink); font-size:clamp(22px,1.9vw,28px); letter-spacing:-.025em; line-height:1.1; margin:22px 24px 0 }
+.casa-area-desc,.casa-area-desc.g-ed{ color:var(--cinza); margin:10px 24px 0; max-width:none; font-size:15.5px; line-height:1.55 }
+.casa-area-selo{ color:var(--mudo); margin:14px 24px 24px }
+.casa-area-cta{ color:var(--ink); margin:16px 24px 24px }
+.casa-area-cta svg{ color:var(--mudo) }
+/* no desktop as fotos têm a MESMA altura em todos os cartões da grade: o
+   primeiro, que atravessa duas colunas, mostra um corte mais largo, não mais
+   alto, e as linhas ficam alinhadas */
+@media(min-width:820px){ .casa-area img{ aspect-ratio:auto; height:clamp(200px,19vw,280px) } }
+/* no celular o cartão antigo era um azulejo 16:9 com o texto por cima; agora
+   a foto é 16:10 e o texto vem embaixo, então a proporção e o recheio saem.
+   Na home fica nome e selo (a descrição continua escondida, como era); em
+   /servir (.rente) e nos pares (.duas) a descrição continua aparecendo. */
+@media(max-width:899px){
+  .casa-area,.casa-areas.duas .casa-area,.casa-areas.rente .casa-area{ aspect-ratio:auto; min-height:0; padding:0 }
+  .casa-area-nome{ font-size:22px; margin:18px 20px 0 }
+  .casa-areas.duas .casa-area-desc,.casa-areas.rente .casa-area-desc{ margin:8px 20px 0; font-size:15px }
+  .casa-area-selo{ margin:10px 20px 20px }
+  .casa-area-cta{ margin:14px 20px 20px }
+}
+@media(max-width:759px){
+  .casa-area{ text-align:center; align-items:stretch }
+  .casa-area-cta{ justify-content:center }
+}
+/* o esqueleto tem a forma do cartão claro */
+.casa-area.esqueleto{ background:var(--ed-branco); min-height:360px; justify-content:flex-end; padding:24px }
+.casa-area.esqueleto .esq-l{ background-image:linear-gradient(90deg,rgba(37,37,37,.06) 0%,rgba(37,37,37,.14) 45%,rgba(37,37,37,.06) 100%); background-color:transparent }
+
+/* ---- as fichas das Pequenas Guias: de azulejo escuro a cartão claro ---------- */
+.pgs{ gap:12px }
+.pg{ background:var(--ed-branco); color:var(--ink); border:1px solid var(--ed-linha); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra); transition:var(--ed-t-cartao),opacity .35s var(--ease) }
+.pg:hover{ border-color:var(--ed-linha-2); box-shadow:var(--ed-sombra-alta); transform:var(--ed-sobe) }
+.pg.aceso{ outline:2px solid var(--noite); outline-offset:-2px }
+.pg-corpo .g-rot{ color:var(--mudo) }
+.pg-nome{ color:var(--ink) }
+.pg-quando{ color:var(--areia-tinta) }
+.pg-nota{ color:var(--cinza) }
+.pg .acao.cheia{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.pg .acao.cheia:hover,.pg .acao.cheia:active{ background:#111; border-color:#111; color:#fff }
+.pg .g-link{ color:var(--ink) }
+.pg-mapa{ background:var(--papel2) }
+.pg-mapao,.pg-mapao-tela{ border-radius:var(--ed-raio); overflow:hidden }
+.pg-mapao{ border-color:var(--ed-linha-2) }
+.pg-chip{ border-radius:999px }
+.pg-regiao{ border-radius:var(--ed-raio) }
+
+/* ---- o mapa de /como-chegar: claro, sem inversão, sem retícula --------------- */
+.mapa{ background:var(--papel2); border-radius:var(--ed-raio); border:1px solid var(--ed-linha-2) }
+.mapa iframe,.mapa:hover iframe{ filter:grayscale(1) contrast(1.02) }
+.mapa::before{ background:linear-gradient(180deg,rgba(250,254,255,.35) 0%,rgba(250,254,255,0) 18%,rgba(250,254,255,0) 82%,rgba(250,254,255,.45) 100%) }
+.mapa::after{ display:none }
+.mapa-mira::before,.mapa-mira::after,.mapa-mira i{ background:var(--noite); border-color:var(--noite) }
+.mapa-mira::before,.mapa-mira::after{ background:var(--noite) }
+.mapa-cartao{ background:var(--ed-branco); border:1px solid var(--ed-linha-2); border-radius:var(--ed-raio); box-shadow:var(--ed-sombra-alta); color:var(--ink) }
+.mapa-cartao .g-rot{ color:var(--mudo) }
+.mapa-cartao p:not(.g-rot):not(.g-h3){ color:var(--cinza) }
+.mapa-cartao .acao{ color:var(--ink); border-color:var(--ed-linha-2) }
+.mapa-cartao .acao.cheia{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.mapa-cartao .acao:not(.cheia):hover{ background:var(--noite); color:#fff; border-color:var(--noite) }
+.mapa-hud{ color:var(--mudo) } .mapa-hud b{ color:var(--ink) }
+
+/* ---- a areia: mantém, com fios mais finos ------------------------------------ */
+.casa-areia .ficha{ background:rgba(59,50,34,.12); border-color:rgba(59,50,34,.12) }
+
+/* ---- perguntas, listas e fichas nas faixas claras ---------------------------- */
+.qa li,.g-perg li{ border-color:var(--ed-linha-2) }
+
+/* ---- o rodapé, claro --------------------------------------------------------- */
+.g-pe{ background:var(--papel2); color:var(--ink); border-top:1px solid var(--ed-linha) }
+.g-pe-marca{ color:var(--ink) }
+.g-pe-frase{ color:var(--cinza) }
+.g-pe-onde{ border-bottom-color:var(--ed-linha-2) }
+.g-pe-onde:hover,.g-pe-onde:focus-visible{ border-bottom-color:var(--noite) }
+.g-pe-quando{ color:var(--areia-tinta) }
+.g-pe-rua{ color:var(--ink) }
+.g-pe-ver{ color:var(--mudo) }
+.g-pe-onde:hover .g-pe-ver{ color:var(--ink) }
+.g-pe .g-pe-h{ color:var(--mudo) }
+.g-pe-cols a,.g-pe-cols span,.g-pe-cols nav a{ color:var(--cinza) }
+.g-pe-cols a:hover,.g-pe-cols nav a:hover,.g-pe-cols nav a:focus-visible{ color:var(--ink) }
+.g-pe-linha{ color:var(--mudo); border-top-color:var(--ed-linha-2) }
+.g-pe-linha a:hover{ color:var(--ink) }
+.g-pe a:focus-visible,.casa-pe a:focus-visible{ outline-color:var(--noite) }
+
+/* ---- movimento discreto ------------------------------------------------------ */
+.anel-cursor{ display:none !important }
+.abertura{ animation-duration:.95s }
+.abertura svg{ animation-duration:.8s }
+@media(max-width:899px){ .abertura{ display:none } }
+/* entrada de página: só opacidade (transform criaria um bloco de contenção
+   para a barra fixa e ela pularia durante a animação) */
+@media(prefers-reduced-motion:no-preference){
+  .pg-entra{ animation:pg-entra .34s var(--ease) both }
+}
+@keyframes pg-entra{ from{ opacity:0 } to{ opacity:1 } }

@@ -1,7 +1,9 @@
 import { IGREJA } from '@/lib/igreja';
 import './globals.css';
+import './editorial.css';
 import type { Metadata, Viewport } from 'next';
 import Medidas from '@/components/Medidas';
+import Transicao from '@/components/Transicao';
 
 /* =============================================================================
    TIPOGRAFIA — uma família, servida daqui
@@ -53,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preload" href="/tipos/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body><Medidas />{children}</body>
+      <body><Medidas /><Transicao>{children}</Transicao></body>
     </html>
   );
 }

@@ -16,7 +16,7 @@ import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl } from '@/lib/plural';
-import { src as cria, alt as criaAlt, video as criaVideo } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, video as criaVideo, celular as criaCelular } from '@/lib/criativos';
 import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
@@ -300,7 +300,12 @@ export default function Casa() {
             <source src={VIDEO} type="video/mp4" />
           </video>
         ) : (
-          <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
+          <picture>
+            {/* 17/09/2026: abaixo de 900px entra o corte vertical (4:5) da mesma
+                foto, com a pessoa no centro; no monitor, o corte largo */}
+            {criaCelular('heroi') && <source media="(max-width: 899px)" srcSet={criaCelular('heroi') as string} />}
+            <img className="casa-heroi-foto" src={cria('heroi')} alt={criaAlt('heroi')} fetchPriority="high" />
+          </picture>
         )}
         <div className="casa-heroi-in">
           {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
