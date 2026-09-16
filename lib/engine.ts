@@ -699,7 +699,7 @@ export function msgCobranca(S: Estado, vid: string, data: string, base: string) 
   const v = vol(S, vid);
   const fns = Object.entries(S.escalas[data]?.slots || {}).filter(([, s]) => s?.vid === vid).map(([f]) => f);
   return `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? `o Follow de sábado` : 'e domingo'} (${fmtDia(data)}) em ${fns.join(' e ')}. `
-    + `Confirma no seu link até ${S.config.prazoConfirmacao}?\n${base}/eu/${v?.token}`;
+    + `Confirma no seu link até ${S.config.prazoConfirmacao}?\n${base}/eu/${v?.token}#confirmar`;
 }
 
 export function msgColeta(S: Estado, ano: number, mes: number, _base: string) {

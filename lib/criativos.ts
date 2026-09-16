@@ -39,14 +39,29 @@ export type Criativo = {
   foco?: string;
   /** só no herói: o MP4 mudo em loop; a foto do `arquivo` é a capa */
   video?: string;
+  /** 16/09/2026: o corte VERTICAL (4:5) do mesmo lugar, para telas até 899px.
+      Uma foto horizontal cortada quase quadrada pelo navegador some com a
+      pessoa; um corte feito à mão a mantém no centro. Gerado por
+      scripts/cortes-celular.py a partir da foto original. */
+  celular?: string;
+  /** o mesmo arquivo em AVIF (20 a 40% menor que o WebP), quando existe;
+      o <picture> oferece primeiro e o navegador que não lê cai no WebP */
+  avif?: string;
+  celularAvif?: string;
   /** a instrução para quem vai produzir a peça nova */
   nota: string;
 };
 
 export const CRIATIVOS = {
   /* ------------------------------------------------------------- a home */
-  heroi: { arquivo: '/fotos/palco.webp', alt: '', proporcao: '16:9', largura: 2400,
-    nota: 'A primeira tela do site, atrás do título branco: precisa de área escura ou de um véu. No celular é cortada quase quadrada: o assunto no centro. Aceita `video` (ver o cabeçalho).' },
+  /* 16/09/2026: o palco vazio (palco.webp) saiu do herói. "Existe um lugar
+     para você" sobre um palco com gente do tamanho de um grão dizia "o lugar é
+     um prédio"; sobre a congregação, diz "o lugar é entre pessoas". No celular,
+     o corte vertical feito à mão deixa o rosto em cima e o texto embaixo. */
+  heroi: { arquivo: '/fotos/congregacao.webp', avif: '/fotos/congregacao.avif',
+    celular: '/fotos/m/heroi.webp', celularAvif: '/fotos/m/heroi.avif',
+    alt: '', proporcao: '16:9', largura: 2400, foco: '62% 45%',
+    nota: 'A primeira tela do site, atrás do título branco: PESSOAS, de perto, olhando para a câmera ou em adoração; área escura embaixo para o texto. Dois arquivos: o horizontal (2400 de largura) e o vertical 4:5 para o celular (`celular`, 1080×1350). Aceita `video` (ver o cabeçalho).' },
   domingo: { arquivo: '/fotos/congregacao.webp', alt: 'Congregação reunida no culto de domingo', proporcao: '16:8', largura: 1600,
     nota: '"Como é o domingo", na home: a congregação, o salão, de dentro.' },
   fecho: { arquivo: '/fotos/oferta.webp', alt: '', proporcao: '16:9', largura: 2400,
@@ -112,4 +127,16 @@ export function alt(id: IdCriativo): string {
 /** o vídeo de um lugar, quando registrado (hoje só o herói aceita) */
 export function video(id: IdCriativo): string | null {
   return (CRIATIVOS[id] as Criativo).video ?? null;
+}
+
+/** as fontes de um <picture>: o corte do celular (até 899px) e o AVIF antes do
+ *  WebP, cada um só quando o lugar tem o arquivo. A ordem importa: o navegador
+ *  usa a PRIMEIRA <source> que casa mídia e tipo. */
+export function fontes(id: IdCriativo): { media?: string; type?: string; srcSet: string }[] {
+  const c = CRIATIVOS[id] as Criativo;
+  const f: { media?: string; type?: string; srcSet: string }[] = [];
+  if (c.celularAvif) f.push({ media: '(max-width: 899px)', type: 'image/avif', srcSet: c.celularAvif });
+  if (c.celular) f.push({ media: '(max-width: 899px)', srcSet: c.celular });
+  if (c.avif) f.push({ type: 'image/avif', srcSet: c.avif });
+  return f;
 }

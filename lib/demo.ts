@@ -103,7 +103,9 @@ export function estadoDemo(): Estado {
 export { demoLigado } from './demo-ligado';
 
 /* Fixture da página do voluntário. Mesma forma que o eu_dados devolve. */
-export function euDemo() {
+/* `?demo=confirmado` mostra a tela de quem já respondeu tudo: é a única em
+   que o ingresso da próxima escala aparece (16/09/2026). */
+export function euDemo(variante: string = '') {
   const hoje = hojeISO();
   const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
   const dias = cultosDoMes(ano, mes).filter(d => d >= hoje);
@@ -121,8 +123,8 @@ export function euDemo() {
     nome: 'Giovana Rosalem',
     equipe: 'Mídia',
     escalas: [
-      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: 'pendente', primeira_vez: false, plantao: false },
-      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: 'pendente', primeira_vez: true, plantao: false },
+      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false },
+      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false },
       { culto_id: 'c2', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false },
       { culto_id: 'c3', data: prox[2] || prox[0], funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), status: 'recusado', primeira_vez: false, plantao: false },
       { culto_id: 'c4', data: prox[3] || prox[0], funcao: '', status: '', primeira_vez: false, plantao: true },

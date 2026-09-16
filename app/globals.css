@@ -5011,7 +5011,9 @@ html{ scroll-behavior:smooth }
   opacity:1;
 }
 @media(pointer:fine){
-  .casa-escuro:hover::after{ opacity:1 }
+  /* 16/09/2026: o foco de luz saiu com o JS que o movia (Movimento.tsx);
+     sem --mx/--my ele acenderia parado no centro. */
+  .casa-escuro:hover::after{ opacity:0 }
 }
 @media(prefers-reduced-motion:reduce){ .casa-escuro::after{ display:none } }
 
@@ -8800,3 +8802,175 @@ a.g-linhas-v:hover,a.g-linhas-v:focus-visible,
   border:1px solid rgba(228,212,180,.85); pointer-events:none; z-index:9999; opacity:0;
   transition:opacity .25s var(--ease),width .25s var(--ease),height .25s var(--ease),margin .25s var(--ease),border-color .25s var(--ease),background .25s var(--ease);
 }
+
+/* =============================================================================
+   16/09/2026 · A HOME EM TRÊS TELAS E O PRÓXIMO PASSO DEBAIXO DO POLEGAR
+
+   Medido antes: home em 390px com 5.981px de altura (sete telas), vinte blocos
+   empilhados, o mesmo cartão escuro sete vezes. O celular era o desktop
+   empilhado. Este bloco desenha o celular primeiro e deixa o desktop herdar.
+   Ver app/page.tsx e components/PassoFixo.tsx.
+   ============================================================================= */
+
+/* ---- 1. o herói: pessoas, texto embaixo, um botão --------------------------- */
+.h-heroi .casa-heroi-foto{ object-position:62% 45% }
+.h-heroi h1.h-h1{
+  font-family:var(--fonte-display); font-weight:700; text-transform:none;
+  font-size:clamp(56px,6.4vw,96px); line-height:.98; letter-spacing:-.036em;
+  max-width:10ch; margin:18px auto 0; text-wrap:balance;
+}
+.h-heroi .h-frase{ margin:18px auto 0; max-width:36ch; font-size:clamp(17px,1.4vw,21px); line-height:1.5; color:rgba(255,255,255,.84) }
+.h-heroi .h-acoes{ margin-top:32px }
+@media(max-width:899px){
+  /* o corte vertical já centra a pessoa: o rosto fica no terço de cima,
+     o texto no de baixo, onde o polegar chega */
+  .h-heroi{ justify-content:flex-end; min-height:100svh }
+  .h-heroi .casa-heroi-foto{ object-position:50% 22% }
+  .h-heroi::after{
+    background:
+      linear-gradient(180deg,rgba(37,37,37,.30) 0%,rgba(37,37,37,.06) 30%,rgba(37,37,37,.62) 62%,rgba(37,37,37,.94) 100%);
+  }
+  .h-heroi .casa-heroi-in{ padding:0 20px calc(28px + env(safe-area-inset-bottom,0px)); width:100%; max-width:none }
+  .h-heroi h1.h-h1{ font-size:clamp(36px,10.6vw,44px); margin-top:14px }
+  .h-heroi .h-frase{ margin-top:12px; font-size:16px; color:rgba(255,255,255,.80) }
+  .h-heroi .h-acoes{ margin-top:22px; flex-direction:column; align-items:stretch; gap:14px }
+  .h-heroi .h-acoes .acao{ width:100%; justify-content:center; padding:16px 20px; font-size:16px }
+  .h-heroi .h-acoes .g-link{ align-self:center }
+}
+/* o herói é a primeira tela: nasce visível, sem esperar observador nenhum */
+.js-rev .h-heroi.rev{ opacity:1; transform:none }
+
+/* ---- 2. os caminhos: uma lista de toque ----------------------------------- */
+.caminhos-sec{ background:var(--papel); padding-block:clamp(48px,7vw,104px) }
+.caminhos{ margin-top:clamp(24px,3vw,44px); border-top:1px solid var(--linha2) }
+.caminho{
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:16px;
+  padding:18px 4px; min-height:76px; border-bottom:1px solid var(--linha2);
+  text-decoration:none; color:inherit; transition:background var(--t);
+}
+.caminho:hover,.caminho:active{ background:rgba(37,37,37,.03) }
+.caminho-n{ font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.14em; color:var(--mudo); min-width:2ch }
+.caminho-txt{ min-width:0 }
+.caminho-t{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:clamp(20px,5.4vw,22px); letter-spacing:-.02em; line-height:1.15 }
+.caminho-d{ display:block; margin-top:5px; font-size:15px; line-height:1.45; color:var(--cinza) }
+.caminho > svg{ width:18px; height:18px; color:var(--areia-tinta); flex:none; transition:transform var(--t) }
+.caminho:hover > svg,.caminho:active > svg{ transform:translateX(3px) }
+.caminho:focus-visible{ outline:2px solid var(--noite); outline-offset:-2px }
+@media(min-width:900px){
+  .caminhos{ display:grid; grid-template-columns:repeat(4,1fr); border-top:0 }
+  .caminho{
+    grid-template-columns:1fr; grid-template-rows:auto auto 1fr; align-content:start;
+    padding:28px 28px 26px; min-height:236px; border:1px solid var(--linha2); border-left:0;
+  }
+  .caminho:first-child{ border-left:1px solid var(--linha2) }
+  .caminho-t{ font-size:clamp(22px,1.8vw,26px); margin-top:22px }
+  .caminho-d{ font-size:15.5px; margin-top:8px }
+  .caminho > svg{ align-self:end; justify-self:end; margin-top:18px; width:20px; height:20px }
+}
+
+/* ---- 3. os rostos: foto vertical, a pessoa no centro, rolo de polegar ------ */
+.rostos-sec{ padding-block:clamp(48px,7vw,104px); overflow:hidden }
+.rostos{
+  display:flex; gap:12px; margin-top:clamp(24px,3vw,44px);
+  padding:0 clamp(20px,4vw,52px) 6px; overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory; scroll-padding-inline:clamp(20px,4vw,52px);
+  -webkit-overflow-scrolling:touch; scrollbar-width:none;
+}
+.rostos::-webkit-scrollbar{ display:none }
+.rosto{
+  position:relative; flex:0 0 min(72vw,300px); aspect-ratio:4/5; scroll-snap-align:start;
+  overflow:hidden; background:var(--noite); color:#fff; text-decoration:none; isolation:isolate;
+  display:flex; align-items:flex-end;
+}
+.rosto picture{ position:absolute; inset:0; z-index:-2; display:block }
+.rosto img{ width:100%; height:100%; object-fit:cover; filter:saturate(.72) contrast(1.03); transition:transform var(--t-lento) }
+.rosto::after{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:linear-gradient(180deg,rgba(37,37,37,0) 34%,rgba(37,37,37,.52) 64%,rgba(37,37,37,.92) 100%);
+}
+.rosto:hover img,.rosto:active img{ transform:scale(1.04) }
+.rosto:focus-visible{ outline:2px solid #fff; outline-offset:-3px }
+.rosto-txt{ display:block; padding:18px 18px 20px; width:100% }
+.rosto-nome{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:24px; letter-spacing:-.02em; line-height:1.05 }
+.rosto-selo{ display:block; margin-top:8px; font-family:var(--fonte-display); font-weight:500; font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.78) }
+.rosto-desc{ display:none }
+@media(min-width:900px){
+  .rostos{
+    display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:14px; overflow:visible;
+    max-width:1360px; margin-inline:auto; padding:0 clamp(20px,4vw,52px);
+  }
+  .rostos{ margin-top:clamp(24px,3vw,44px) }
+  .rosto{ flex:auto }
+  .rosto-txt{ padding:22px 22px 24px }
+  .rosto-nome{ font-size:clamp(22px,1.9vw,28px) }
+  /* a descrição fica na página da área: em 250px de largura ela cobria a foto */
+}
+.rostos-sec .g-acoes-fecha{ margin-top:clamp(28px,3vw,40px) }
+
+/* ---- 4. o próximo passo, fixo, só no celular ------------------------------- */
+.passo-fixo{ position:fixed; left:0; right:0; bottom:0; z-index:50; display:none }
+@media(max-width:899px){
+  .passo-fixo{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(250,254,255,.92); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    border-top:1px solid var(--linha2); color:var(--noite);
+    transform:translateY(110%); transition:transform .32s var(--ease);
+  }
+  .passo-fixo.ver{ transform:none }
+  .passo-fixo-txt{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px }
+  .passo-fixo-rot{ font-family:var(--fonte-display); font-weight:700; font-size:15px; letter-spacing:-.01em; line-height:1.2 }
+  .passo-fixo-sub{ font-size:12.5px; line-height:1.3; color:var(--mudo) }
+  .passo-fixo-bt{ flex:none; min-height:44px; padding:12px 18px; font-size:15px }
+  /* o rodapé não termina escondido atrás da barra */
+  html.com-passo body{ padding-bottom:calc(72px + env(safe-area-inset-bottom,0px)) }
+}
+@media(prefers-reduced-motion:reduce){ .passo-fixo{ transition:none } }
+
+/* ---- 5. a escala do celular: menor, mais perto, menos respiro ------------- */
+@media(max-width:599px){
+  .g-h1{ font-size:clamp(36px,10.6vw,42px); line-height:1.0 }
+  .g-h2,.h-h2{ font-size:clamp(28px,8.4vw,33px); line-height:1.04 }
+  .g-secao{ padding-block:clamp(48px,12vw,64px) }
+  .g-ed{ font-size:17px }
+}
+
+/* ---- 6. o rodapé no celular: 867px viravam uma tela inteira ---------------- */
+@media(max-width:599px){
+  .g-pe > .g{ padding-top:40px; padding-bottom:20px }
+  .g-pe-cols{ grid-template-columns:1fr 1fr; gap:28px 20px; margin-top:32px }
+  .g-pe-eu{ grid-column:1/-1; display:flex; align-items:center; gap:14px; max-width:none }
+  .g-pe-marca{ width:120px; flex:none }
+  .g-pe-marca .logo{ max-width:120px }
+  .g-pe-frase{ margin:0; font-size:14px; color:rgba(255,255,255,.72) }
+  .g-pe-linha{ margin-top:32px }
+}
+
+/* ---- 7. o ingresso e o convite de instalar, na página pessoal ------------- */
+.ingresso{ display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start; padding:20px 0 4px }
+.ingresso-data{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:84px;
+  padding:12px 10px 10px; border:1px solid var(--linha2); background:var(--card);
+}
+.ingresso-dia{ font-family:var(--fonte-display); font-weight:700; font-size:40px; line-height:.95; letter-spacing:-.04em }
+.ingresso-mes{ margin-top:6px; font-family:var(--fonte-display); font-weight:500; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--mudo) }
+.ingresso-corpo{ min-width:0 }
+.ingresso .vol-prox-dia{ font-size:clamp(22px,5.6vw,26px) }
+.ingresso-acoes{ margin-top:14px; display:flex; flex-wrap:wrap; gap:10px 18px }
+.ingresso-cal{
+  display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 2px;
+  font-family:var(--fonte-display); font-weight:600; font-size:15px; color:var(--noite); text-decoration:none;
+  border-bottom:1px solid var(--linha3);
+}
+.ingresso-cal svg{ width:16px; height:16px }
+.ingresso-cal:hover,.ingresso-cal:active{ border-bottom-color:var(--noite) }
+
+.instalar{
+  margin-top:var(--e7); padding:18px 20px; border:1px solid var(--linha2); background:var(--card2);
+  display:grid; gap:14px;
+}
+.instalar-t{ display:block; font-family:var(--fonte-display); font-weight:700; font-size:17px; letter-spacing:-.01em }
+.instalar-d{ display:block; margin-top:4px; font-size:14.5px; line-height:1.5; color:var(--cinza) }
+.instalar-acoes{ display:flex; align-items:center; gap:14px; flex-wrap:wrap }
+.instalar-acoes .vol-bt{ flex:0 1 auto; min-width:140px; background:var(--noite); color:#fff; border-color:var(--noite) }
+.instalar-depois{ background:none; border:0; padding:10px 2px; min-height:44px; font:inherit; font-size:14.5px; color:var(--mudo); cursor:pointer; text-decoration:underline; text-underline-offset:3px }

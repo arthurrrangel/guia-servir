@@ -149,7 +149,7 @@ async function umaLargura([W, H, nome]) {
              cartões, os chips, a sigla em rolagem no desktop). A página em si não
              rola de lado: `estouro` cuida disso. */
           if (e.tagName === 'IMG') continue;
-          if (e.closest('.pgs, .fila, .rolo, .rolo-p, .chips, .g-pe-cols, [class*="rolo"]')) continue;
+          if (e.closest('.pgs, .fila, .rolo, .rolo-p, .rostos, .chips, .g-pe-cols, [class*="rolo"]')) continue;
           let anc = e.parentElement, dentroDeRolo = false;
           while (anc && anc !== document.body) { const cs = getComputedStyle(anc); if (/(auto|scroll)/.test(cs.overflowX)) { dentroDeRolo = true; break; } anc = anc.parentElement; }
           if (dentroDeRolo) continue;

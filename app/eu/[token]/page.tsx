@@ -3,9 +3,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
+import Instalar from '@/components/Instalar';
+import { icsDaEscala } from '@/lib/ics';
+import { IGREJA } from '@/lib/igreja';
 import { MESES } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
-import { IcCheck, IcSeta } from '@/components/Icones';
+import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
 import { quemSou, outrasAreas, organiza, type Identidade } from '@/lib/identidade';
 import { aviseHumano } from '@/lib/erros';
@@ -144,7 +147,7 @@ export default function Eu() {
     if (process.env.NODE_ENV === 'development'
         && new URLSearchParams(window.location.search).has('demo')) {
       const { euDemo } = await import('@/lib/demo');
-      const d = euDemo();
+      const d = euDemo(new URLSearchParams(window.location.search).get('demo') || '');
       setNome(d.nome); setEquipe(d.equipe); setItens(d.escalas as any);
       setIndisp(d.indisponivel); setDisponivel(d.disponivel);
       setDomingos(d.dias); setFase('ok');
@@ -164,6 +167,13 @@ export default function Eu() {
     }
     if (!data?.length) { if (inicial) setFase('erro'); return; }
     setErro('');
+    /* 16/09/2026: o aparelho passa a saber quem é a pessoa. Até aqui só quem
+       entrava pelo PIN guardava o token; quem só usava o link pessoal era
+       estranho para o site a cada visita. Com o token guardado, a barra de
+       próximo passo das páginas públicas vira "Sua escala", e a porta /eu
+       reconhece o aparelho. É o mesmo token do link: nada novo entra no
+       aparelho que a pessoa já não tivesse na barra de endereço. */
+    try { localStorage.setItem('escala.meu-token', token); } catch {}
     setNome(data[0].nome);
     setEquipe(data[0].equipe || '');
     /* o título era global e dizia 'Escala de Mídia' para todo mundo, inclusive
@@ -432,7 +442,7 @@ export default function Eu() {
         {/* 1. O QUE PRECISO FAZER.
             Quando há confirmação pendente, ela toma a primeira dobra e o fundo
             vira tinta. Quando não há, a mesma faixa em papel diz o que vem. */}
-        <div className={`vol-chamada ${pendentes.length ? 'age' : ''}`}>
+        <div id="confirmar" className={`vol-chamada ${pendentes.length ? 'age' : ''}`}>
           <span className="rot">
             {pendentes.length ? 'Precisa de você' : novo ? 'Bem-vindo' : `Olá, ${primeiro}`}
           </span>
@@ -548,14 +558,35 @@ export default function Eu() {
         {proxima && !jaMostrados.has(proxima.culto_id + proxima.funcao) && (
           <section className="vol-secao">
             <div className="vol-secao-cab"><span className="rot">Sua próxima escala</span></div>
-            <div className="vol-prox">
-              <div className="vol-prox-fn">{proxima.funcao}</div>
-              <div className="vol-prox-dia">{diaLongo(proxima.data)}</div>
-              <div className="vol-prox-est">
-                {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
-                {novidade(proxima) ? ` Você ${novidade(proxima)} nessa escala.` : ''}
+            {/* 16/09/2026: O INGRESSO. A data é o assunto, então ela é o
+                maior elemento da tela, como num ingresso: o dia em número, o
+                mês, o que você faz, a hora, com quem. E o botão que faltava:
+                "Adicionar ao calendário", um .ics montado no aparelho, com o
+                endereço e o link pessoal dentro, e um lembrete na véspera. */}
+            <div className="vol-prox ingresso">
+              <div className="ingresso-data" aria-hidden="true">
+                <span className="ingresso-dia">{proxima.data.slice(8, 10)}</span>
+                <span className="ingresso-mes">{MESES[Number(proxima.data.slice(5, 7)) - 1].slice(0, 3)} · {ehSabado(proxima.data) ? 'sáb' : 'dom'}</span>
               </div>
-              {proxima.obs && <p className="vol-pede-obs claro">{proxima.obs}</p>}
+              <div className="ingresso-corpo">
+                <div className="vol-prox-fn">{proxima.funcao}</div>
+                <div className="vol-prox-dia">
+                  {diaLongo(proxima.data)}{ehSabado(proxima.data) ? (IGREJA.followHora ? `, ${IGREJA.followHora}` : '') : `, ${IGREJA.cultoHora}`}
+                </div>
+                <div className="vol-prox-est">
+                  {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
+                  {novidade(proxima) ? ` Você ${novidade(proxima)} nessa escala.` : ''}
+                  {juntos.length > 1 && ` Com ${juntos.filter(j => !j.eu).slice(0, 3).map(j => j.nome.split(' ')[0]).join(', ')}${juntos.length > 4 ? ` e mais ${juntos.length - 4}` : ''}.`}
+                </div>
+                {proxima.obs && <p className="vol-pede-obs claro">{proxima.obs}</p>}
+                <div className="ingresso-acoes">
+                  <a className="ingresso-cal" download={`guia-${proxima.data}.ics`}
+                     href={icsDaEscala({ data: proxima.data, funcao: proxima.funcao, equipe: equipe || 'GUIA', token,
+                       hora: ehSabado(proxima.data) ? (IGREJA.followHora ?? null) : IGREJA.cultoHora, obs: proxima.obs })}>
+                    <IcCalendario /> Adicionar ao calendário
+                  </a>
+                </div>
+              </div>
             </div>
           </section>
         )}
@@ -574,6 +605,8 @@ export default function Eu() {
 
             Nome e função, sem telefone: a pessoa não precisa ligar para
             ninguém, precisa saber com quem vai trabalhar. */}
+        <Instalar token={token} />
+
         {juntos.length > 1 && (
           <section className="vol-secao">
             <div className="vol-secao-cab">

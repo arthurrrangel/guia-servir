@@ -54,3 +54,20 @@ const FOCO: Record<string, string> = {
 
 export const focoDaArea = (slug?: string | null) =>
   (slug && FOCO[slug]) || '50% 45%';
+
+/* ------------------------------------------------- O CORTE DO CELULAR
+
+   16/09/2026. As mesmas fotos, cortadas 4:5 à mão, com a pessoa no centro
+   (scripts/cortes-celular.py). Servem os "rostos" da home no celular, onde a
+   foto horizontal cortada quase quadrada pelo navegador sumia com o assunto.
+   Sem corte registrado, o navegador corta a horizontal como sempre fez. */
+const FOTO_CELULAR: Record<string, { webp: string; avif: string }> = {
+  midia:    { webp: '/fotos/m/midia.webp',    avif: '/fotos/m/midia.avif' },
+  louvor:   { webp: '/fotos/m/louvor.webp',   avif: '/fotos/m/louvor.avif' },
+  kids:     { webp: '/fotos/m/kids.webp',     avif: '/fotos/m/kids.avif' },
+  servico:  { webp: '/fotos/m/servico.webp',  avif: '/fotos/m/servico.avif' },
+  livraria: { webp: '/fotos/m/livraria.webp', avif: '/fotos/m/livraria.avif' },
+};
+
+export const fotoDaAreaCelular = (slug?: string | null) =>
+  (slug && FOTO_CELULAR[slug]) || null;

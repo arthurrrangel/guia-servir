@@ -17,20 +17,11 @@
 
 export function Tit({ children, className = 'tit', as: Tag = 'h2', id }:
   { children: string; className?: string; as?: 'h1' | 'h2' | 'h3'; id?: string }) {
-  const pals = children.split(' ');
-  return (
-    <Tag className={className} id={id}>
-      {pals.map((p, i) => (
-        /* o espaço fica FORA do span, como nó de texto entre eles. Dentro, o
-           navegador descarta o espaço final de um inline-block e as palavras
-           saem coladas. */
-        <span key={i}>
-          <span className="pal" style={{ ['--i' as string]: i }}>{p}</span>
-          {i < pals.length - 1 ? ' ' : ''}
-        </span>
-      ))}
-    </Tag>
-  );
+  /* 16/09/2026: o título deixou de aparecer palavra por palavra. Era o efeito
+     que todo site tem; no celular atrasava o primeiro texto que a pessoa lê e
+     era a causa de todo "título invisível" das auditorias. A revelação por
+     seção (.rev) continua. O componente fica porque 30 páginas o chamam. */
+  return <Tag className={className} id={id}>{children}</Tag>;
 }
 
 /* JSON-LD. Sempre por este componente, nunca por dangerouslySetInnerHTML
