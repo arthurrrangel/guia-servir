@@ -108,8 +108,15 @@
 }
 .casa-heroi-foto{ filter:saturate(.72) contrast(1.04) }
 /* a foto nova do herói (pregacao): a cabeça fica no terço de cima; no
-   monitor o corte largo tem que guardá-la */
+   monitor o corte largo tem que guardá-la; no celular o corte 4:5 já a
+   centra */
 @media(min-width:760px){ .casa-heroi-foto{ object-position:50% 28% } }
+@media(max-width:759px){ .casa-heroi-foto{ object-position:50% 50% } }
+/* o título do herói nasce visível: é a primeira coisa da página, e a
+   revelação palavra a palavra segurava a primeira pintura de texto em
+   ~2,2s no 4G simulado (medido em 17/09). As outras seções continuam
+   revelando ao rolar. */
+.js-rev .casa-heroi h1 .pal,.js-rev .g-cheio .g-h1 .pal{ opacity:1; transform:none; filter:none; transition:none }
 .g-cheio > img{ filter:saturate(.72) contrast(1.04) }
 .g-cheio::before{ background:linear-gradient(180deg,rgba(37,37,37,.34) 0%,rgba(37,37,37,.10) 38%,rgba(37,37,37,.88) 100%) }
 .agora-pill{
