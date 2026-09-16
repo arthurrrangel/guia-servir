@@ -8,8 +8,8 @@ import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
   candidatos, cargaDoMes, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
-  hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, problemas, respostaDe, respostasDoDia,
-  resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
+  hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
+  respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -149,6 +149,23 @@ function Escala() {
 
   async function trocar(d: string, funcao: string, vid: string) {
     const atual = S.escalas[d]?.slots?.[funcao];
+    /* 16/09/2026: o banco RECUSA duas coisas que a lista deixava escolher
+       (ela mostra quem já está em outra função, de propósito, para o líder
+       ver o time inteiro): a pessoa em duas funções simultâneas no mesmo
+       culto, e a pessoa que avisou que não pode no dia. A recusa vinha como
+       "Não consegui salvar", sem motivo; foi assim que o João Victor a viu
+       na Mídia. Agora a tela diz o motivo antes de tentar, com as mesmas
+       regras do banco (fn_conflito_simultaneo e fn_indisponivel). */
+    if (vid && vid !== atual?.vid) {
+      const vol = S.voluntarios.find(v => v.id === vid);
+      if (vol && respostaDe(vol, d) === 'nao') {
+        aviso(`${nomeDe(S, vid)} avisou que não pode nesse dia. Escolha outra pessoa.`); return;
+      }
+      const outra = ocupadoNoDia(S, d, vid, funcao);
+      if (outra && metaFuncao(S, funcao).simultanea && metaFuncao(S, outra).simultanea) {
+        aviso(`${nomeDe(S, vid)} já está em ${outra} nesse mesmo culto. Tire de lá antes, ou escolha outra pessoa.`); return;
+      }
+    }
     /* trocar ou limpar alguém que JÁ respondeu apaga essa resposta: avisar antes */
     if (atual?.vid && atual.status && atual.status !== 'pendente' && atual.vid !== vid) {
       /* 09/09/2026: era o primeiro nome, e a igreja tem dois CLAUDIO e duas
