@@ -90,7 +90,12 @@ export default function Entrar() {
        "hotmail.comm") gasta a cota de todo mundo e não chega a ninguém. Os
        erros mais comuns são pegos aqui, antes de gastar. */
     const sug = sugerirEmail(email);
-    if (sug) { setTom('atencao'); setMsg(`Confira o e-mail: parece que é ${sug}. Corrija e peça o link de novo.`); return; }
+    /* 16/09/2026, segunda captura da Monik: ela viu a sugestão, e continuou
+       com "hotmail.comm" no campo. Sugerir e devolver a tarefa não funcionou;
+       a correção é óbvia, então a tela corrige, manda para o endereço certo
+       e diz que corrigiu. O campo passa a mostrar o endereço usado. */
+    const alvo = sug || email.trim();
+    if (sug) setEmail(sug);
     setCarregando(true);
     /* O DESTINO É /entrar, NÃO A RAIZ.
        Era window.location.origin, e a raiz é a home: uma página que fala com o
@@ -99,12 +104,12 @@ export default function Entrar() {
        única tela que cria o cliente do líder, que persiste sessão e lê o
        fragmento. O link tem que voltar para cá. */
     const { error } = await sb()!.auth.signInWithOtp({
-      email: email.trim(), options: { emailRedirectTo: window.location.origin + '/entrar' },
+      email: alvo, options: { emailRedirectTo: window.location.origin + '/entrar' },
     });
     setCarregando(false);
     setTom(error ? 'erro' : 'bom');
     setMsg(error ? aviseHumano(error, 'enviar o link')
-      : 'Pronto. Abra seu email e clique no link para entrar. O link vale por uma hora e serve uma vez só.');
+      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu email (olhe também o spam ou "Outros") e clique no link para entrar. O link vale por uma hora e serve uma vez só.`);
   }
 
   async function porSenha(e: React.FormEvent) {
