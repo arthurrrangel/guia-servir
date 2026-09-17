@@ -2,6 +2,7 @@
 import { sb } from './supabase';
 import { addDias, Estado, hojeISO, Nivel, Status } from './engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
+import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
 /* Ponte entre o banco e o objeto de estado que o motor entende.
    O motor nunca sabe que existe Supabase. */
@@ -17,14 +18,88 @@ export async function carregarEstado(equipeId: string, nomeEquipe = ''): Promise
 }
 
 /* -------------------------------------------------------------- escrita --- */
+/* 17/09/2026: era a RPC `salvar_dia`, uma transação só. Ela regrava o dia
+   inteiro por upsert, e o gatilho BEFORE INSERT `fn_indisponivel` recusava
+   quem já estava na vaga e avisou "não posso" depois de escalado (o caso do
+   João Victor em 20/09: nada no dia salvava). Agora o dia é salvo em partes,
+   só o que mudou, direto nas tabelas (o RLS já valia na RPC, que era
+   `security invoker`). O plano é puro e testado em lib/escala-diff.ts. Se uma
+   parte falhar, a tela recarrega do banco e mostra o motivo; nada fica
+   "meio salvo" sem a pessoa ver. */
 export async function salvarDia(S: Estado, data: string, equipeId: string) {
   const s = sb()!;
-  const params = paraSalvarDia(S, data, equipeId);
-  if (!params) return;
-  // uma transação só: ou grava o domingo inteiro, ou não mexe em nada
-  const { data: cultoId, error } = await s.rpc('salvar_dia', params);
-  if (error) throw error;
-  S.escalas[data].cultoId = cultoId as string;
+  const p = paraSalvarDia(S, data, equipeId);
+  if (!p) return;
+
+  /* 1. o culto do dia (a data é única) */
+  let cultoId: string | undefined;
+  {
+    const { data: c, error } = await s.from('cultos').select('id').eq('data', p.p_data).maybeSingle();
+    if (error) throw error;
+    cultoId = c?.id;
+    if (!cultoId) {
+      const { data: novo, error: e2 } = await s.from('cultos').insert({ data: p.p_data }).select('id').single();
+      if (e2) {
+        /* outro líder criou o mesmo dia neste instante: busca de novo */
+        const { data: c2, error: e3 } = await s.from('cultos').select('id').eq('data', p.p_data).maybeSingle();
+        if (e3 || !c2) throw e2;
+        cultoId = c2.id;
+      } else cultoId = novo.id;
+    }
+  }
+
+  /* 2. o recado do dia deste ministério */
+  {
+    const { error } = await s.from('culto_obs')
+      .upsert({ culto_id: cultoId, equipe_id: p.p_equipe, obs: p.p_obs }, { onConflict: 'culto_id,equipe_id' });
+    if (error) throw error;
+  }
+
+  /* 3. as vagas: só o que mudou */
+  const funcaoIds = S.funcoes.map(f => f.id!).filter(Boolean);
+  {
+    const { data: atuais, error } = await s.from('escalacoes')
+      .select('id,funcao_id,voluntario_id,fixo,primeira_vez')
+      .eq('culto_id', cultoId).in('funcao_id', funcaoIds);
+    if (error) throw error;
+    const plano = planoDoDia(p.p_slots as SlotDesejado[], (atuais || []) as LinhaAtual[]);
+    if (plano.apagar.length) {
+      const { error: e } = await s.from('escalacoes').delete().in('id', plano.apagar);
+      if (e) throw e;
+    }
+    for (const a of plano.atualizar) {
+      const { id, ...patch } = a;
+      const { error: e } = await s.from('escalacoes').update(patch).eq('id', id);
+      if (e) throw e;
+    }
+    if (plano.inserir.length) {
+      const { error: e } = await s.from('escalacoes').insert(plano.inserir.map(x => ({
+        culto_id: cultoId, funcao_id: x.funcao_id, voluntario_id: x.voluntario_id,
+        status: x.status, fixo: x.fixo, primeira_vez: x.primeira_vez,
+      })));
+      if (e) throw e;
+    }
+  }
+
+  /* 4. o plantão */
+  {
+    const meus = S.voluntarios.map(v => v.id);
+    const { data: atuais, error } = meus.length
+      ? await s.from('plantoes').select('voluntario_id').eq('culto_id', cultoId).in('voluntario_id', meus)
+      : { data: [], error: null };
+    if (error) throw error;
+    const plano = planoDoPlantao(p.p_plantao, (atuais || []).map((r: any) => r.voluntario_id as string));
+    if (plano.apagar.length) {
+      const { error: e } = await s.from('plantoes').delete().eq('culto_id', cultoId).in('voluntario_id', plano.apagar);
+      if (e) throw e;
+    }
+    if (plano.inserir.length) {
+      const { error: e } = await s.from('plantoes').insert(plano.inserir.map(v => ({ culto_id: cultoId, voluntario_id: v })));
+      if (e) throw e;
+    }
+  }
+
+  S.escalas[data].cultoId = cultoId;
 }
 
 export async function salvarDias(S: Estado, datas: string[], equipeId: string) {
