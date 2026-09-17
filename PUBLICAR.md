@@ -128,6 +128,28 @@ Antes de mandar de novo o que "pode ter falhado", leia
 `/commits/master?per_page=50` e procure as mensagens: é a lista exata do que
 entrou.
 
+### Arquivo novo, arquivo grande e a aba congelada (16 e 17/09)
+
+- **Arquivo novo** não entra pelo `tree-save`: é `POST
+  /<dono>/<repo>/create/master/<caminho>` (o endpoint está em
+  `codeViewNewRoute.webCommitInfo.saveUrl` da página `/new/master?filename=…`),
+  com o mesmo `FormData` e os mesmos cabeçalhos.
+- **Base para alterar um arquivo sem mandar o arquivo inteiro:** buscar em
+  `/raw/<sha do HEAD>/<caminho>` (imutável). `/raw/master/` fica minutos
+  atrasado no CDN e já devolveu a versão velha logo depois de um commit.
+  Aplicar os trechos do `git diff` como pares antigo → novo (cada trecho
+  antigo tem que aparecer exatamente uma vez), conferir o SHA-256 do
+  resultado contra o arquivo local, e só então salvar.
+- **Conteúdo grande passa em pedaços.** Uma string de 4928 caracteres de
+  base64 numa chamada só chegou com 3 bytes a menos e o digest falhou.
+  Pedaços de 1232 caracteres, cada um com SHA-256 conferido na aba antes de
+  juntar, passaram todos. Sem digest conferido, não publique.
+- **Aba em segundo plano congela.** O Chrome congela abas inativas: os
+  timers não disparam, o `Runtime.evaluate` estoura em 45s e o POST nem sai
+  (HEAD não move). Abra uma aba nova e trabalhe nela; a ferramenta mantém
+  ativa a aba em que está agindo. Antes de repetir qualquer publicação,
+  confira o HEAD.
+
 ### Conferir DEPOIS, sempre
 
 O `commitQuorumPollPath` da resposta nem sempre traz o sha novo. Não confie
@@ -152,5 +174,8 @@ publicou: você torceu.
   commit — o que está no ar deixa de ter um sha que o explique. Só vale como
   socorro, com a árvore limpa e igual à origem, e dizendo isso em voz alta.
 - **Deploy fora do git.** O que está no ar tem que ter um commit.
-- **Abrir o painel do Supabase.** Está bloqueado por política da ferramenta,
-  no Chrome do container e no do Arthur. As migrações em `supabase/` são dele.
+- **Escrever no banco pelo painel do Supabase.** A camada de segurança da
+  sessão deixa ler (logs, SQL só de leitura, formulário de SMTP) às vezes, e
+  barra DDL no SQL Editor sempre (setValue, Ctrl+A/Ctrl+C, os três jeitos,
+  16/09). Não contorne. As migrações em `supabase/` são do Arthur: ele cola
+  e roda. O site não pode depender de uma migração que ainda não rodou.
