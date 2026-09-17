@@ -1,0 +1,97 @@
+/* O plano de salvar um dia em partes. Roda com `npm test`.
+
+   17/09/2026. A regra que este arquivo protege: uma vaga que continua com a
+   mesma pessoa NUNCA vira DELETE+INSERT (é isso que fazia o gatilho recusar
+   quem avisou "não posso" depois de escalado); e trocar de pessoa é sempre
+   DELETE e depois INSERT, nunca UPDATE de voluntario_id, para que dois nomes
+   trocando de lugar não tropecem na regra de função simultânea. */
+import { planoDoDia, planoDoPlantao } from '../lib/escala-diff.ts';
+
+let falhas = 0;
+const ok = (cond, rotulo, extra = '') => { if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
+const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+const F = { proj: 'f-proj', ilum: 'f-ilum', edic: 'f-edic', foto: 'f-foto' };
+const V = { leticia: 'v-let', thiago: 'v-thi', maria: 'v-mar', joao: 'v-joao' };
+const atual = [
+  { id: 'e1', funcao_id: F.proj, voluntario_id: V.leticia, fixo: true, primeira_vez: false },
+  { id: 'e2', funcao_id: F.ilum, voluntario_id: V.thiago, fixo: true, primeira_vez: false },
+  { id: 'e3', funcao_id: F.edic, voluntario_id: V.maria, fixo: true, primeira_vez: false },
+];
+const quer = (sobrescreve = {}) => [
+  { funcao_id: F.proj, voluntario_id: V.leticia, status: 'pendente', fixo: true, primeira_vez: false },
+  { funcao_id: F.ilum, voluntario_id: V.thiago, status: 'pendente', fixo: true, primeira_vez: false },
+  { funcao_id: F.edic, voluntario_id: V.maria, status: 'pendente', fixo: true, primeira_vez: false },
+].map(s => ({ ...s, ...(sobrescreve[s.funcao_id] || {}) }));
+
+/* 1. nada mudou: plano vazio. É o caso do recado e do "destravar" que o
+   João não conseguia: o Thiago (que avisou que não pode) continua na vaga e
+   NÃO é regravado. */
+{
+  const p = planoDoDia(quer(), atual);
+  ok(igual(p, { apagar: [], atualizar: [], inserir: [] }), 'nada mudou → plano vazio', JSON.stringify(p));
+}
+
+/* 2. destravar a Letícia: só um UPDATE de fixo, ninguém mais é tocado */
+{
+  const p = planoDoDia(quer({ [F.proj]: { fixo: false } }), atual);
+  ok(igual(p, { apagar: [], atualizar: [{ id: 'e1', fixo: false }], inserir: [] }), 'destravar → um update', JSON.stringify(p));
+}
+
+/* 3. trocar o Thiago pelo João: DELETE do Thiago + INSERT do João, o resto quieto */
+{
+  const p = planoDoDia(quer({ [F.ilum]: { voluntario_id: V.joao } }), atual);
+  ok(igual(p.apagar, ['e2']), 'trocar → apaga a linha antiga', JSON.stringify(p));
+  ok(p.atualizar.length === 0, 'trocar → nenhum update');
+  ok(p.inserir.length === 1 && p.inserir[0].voluntario_id === V.joao && p.inserir[0].funcao_id === F.ilum, 'trocar → insere o novo', JSON.stringify(p.inserir));
+}
+
+/* 4. tirar o Thiago (vaga fica vazia): só DELETE */
+{
+  const p = planoDoDia(quer().filter(s => s.funcao_id !== F.ilum), atual);
+  ok(igual(p, { apagar: ['e2'], atualizar: [], inserir: [] }), 'tirar → só delete', JSON.stringify(p));
+}
+
+/* 5. vaga nova (Foto) num dia já gravado: só INSERT */
+{
+  const p = planoDoDia([...quer(), { funcao_id: F.foto, voluntario_id: V.joao, status: 'pendente', fixo: false, primeira_vez: true }], atual);
+  ok(p.apagar.length === 0 && p.atualizar.length === 0 && p.inserir.length === 1 && p.inserir[0].funcao_id === F.foto, 'vaga nova → só insert', JSON.stringify(p));
+}
+
+/* 6. duas pessoas trocam de lugar: os dois DELETEs vêm no plano antes dos
+   dois INSERTs (quem grava faz apagar → atualizar → inserir) */
+{
+  const p = planoDoDia(quer({ [F.proj]: { voluntario_id: V.thiago }, [F.ilum]: { voluntario_id: V.leticia } }), atual);
+  ok(igual([...p.apagar].sort(), ['e1', 'e2']), 'troca cruzada → apaga as duas', JSON.stringify(p.apagar));
+  ok(p.inserir.length === 2, 'troca cruzada → insere as duas');
+}
+
+/* 7. dia sem nada no banco: tudo INSERT */
+{
+  const p = planoDoDia(quer(), []);
+  ok(p.inserir.length === 3 && p.apagar.length === 0, 'dia novo → três inserts');
+}
+
+/* 8. marca de 1ª vez e travar juntos: um update com os dois campos */
+{
+  const p = planoDoDia(quer({ [F.edic]: { fixo: false, primeira_vez: true } }), atual);
+  ok(igual(p.atualizar, [{ id: 'e3', fixo: false, primeira_vez: true }]), '1ª vez + destravar → um update', JSON.stringify(p.atualizar));
+}
+
+/* 9. linha duplicada da mesma função no banco (não deveria existir): a
+   segunda sai */
+{
+  const p = planoDoDia(quer(), [...atual, { id: 'e9', funcao_id: F.proj, voluntario_id: V.joao, fixo: false, primeira_vez: false }]);
+  ok(igual(p.apagar, ['e9']), 'duplicada → apaga a sobra', JSON.stringify(p));
+}
+
+/* 10. plantão */
+{
+  const p = planoDoPlantao([V.joao, V.maria], [V.maria, V.thiago]);
+  ok(igual(p, { apagar: [V.thiago], inserir: [V.joao] }), 'plantão: sai um, entra um', JSON.stringify(p));
+  ok(igual(planoDoPlantao([], []), { apagar: [], inserir: [] }), 'plantão vazio');
+}
+
+const total = 14;
+if (falhas) { console.log(`escala-diff: ${falhas} falha(s) em ${total}`); process.exit(1); }
+console.log(`escala-diff: ${total}/${total} ok`);
