@@ -174,8 +174,15 @@ export async function salvarConfig(equipeId: string, dados: any) {
    "Salvo". Agora é a RPC `salvar_funcoes` (migração 32): uma transação, e ela
    ainda recusa explicitamente função de outro ministério em vez de deixar a
    RLS fazer a linha sumir em silêncio. */
-export async function salvarFuncoes(equipeId: string, funcoes: { id?: string; nome: string; simultanea: boolean; ordem: number; ativa: boolean }[]) {
-  const { error } = await sb()!.rpc('salvar_funcoes', { p_equipe: equipeId, p_funcoes: funcoes });
+export async function salvarFuncoes(equipeId: string, funcoes: { id?: string; nome: string; simultanea: boolean; ordem: number; ativa: boolean; exigeSexo?: 'M' | 'F' }[]) {
+  /* a RPC fala a língua do banco (exige_sexo), o motor fala a da tela
+     (exigeSexo). A tradução mora aqui, que é a fronteira. `null` é
+     explícito: sem ele, tirar a exigência de um posto não apagaria nada. */
+  const p_funcoes = funcoes.map(f => ({
+    id: f.id, nome: f.nome, simultanea: f.simultanea, ordem: f.ordem, ativa: f.ativa,
+    exige_sexo: f.exigeSexo || null,
+  }));
+  const { error } = await sb()!.rpc('salvar_funcoes', { p_equipe: equipeId, p_funcoes });
   if (error) throw error;
 }
 
