@@ -27,6 +27,11 @@ export type Vinculo = {
      de propósito: um link vazado não pode virar chave de tudo. */
   este: boolean;
   funcoes: string[];
+  /* 18/09/2026, migração 49. `precisa_sexo` = esta área tem posto que exige
+     homem ou mulher e a pessoa está habilitada nele. Só aí a tela pergunta:
+     perguntar para quem serve só na Projeção seria coletar dado por coletar. */
+  sexo?: 'M' | 'F' | null;
+  precisa_sexo?: boolean;
 };
 
 export type Identidade = {
@@ -63,6 +68,15 @@ export const serve = (i?: Identidade | null) => (i?.serve?.length ?? 0) > 0;
 
 /** Faz as duas coisas. É o caso que o sistema tratava como duas pessoas. */
 export const dupla = (i?: Identidade | null) => organiza(i) && serve(i);
+
+/** O vínculo de onde veio o link: é dele que a tela do voluntário fala. */
+export const vinculoDeste = (i?: Identidade | null) => (i?.serve ?? []).find(v => v.este);
+
+/** Falta esta pessoa dizer se é homem ou mulher, e faz diferença para ela. */
+export const faltaDizerSexo = (i?: Identidade | null) => {
+  const v = vinculoDeste(i);
+  return !!v?.precisa_sexo && !v?.sexo;
+};
 
 /** As áreas em que serve, fora aquela de onde veio o link. */
 export const outrasAreas = (i?: Identidade | null) => (i?.serve ?? []).filter(v => !v.este);
