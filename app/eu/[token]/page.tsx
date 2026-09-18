@@ -10,7 +10,7 @@ import { MESES } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
-import { quemSou, outrasAreas, organiza, type Identidade } from '@/lib/identidade';
+import { quemSou, outrasAreas, organiza, faltaDizerSexo, vinculoDeste, type Identidade } from '@/lib/identidade';
 import { aviseHumano } from '@/lib/erros';
 import { pl, cont } from '@/lib/plural';
 
@@ -138,6 +138,7 @@ export default function Eu() {
   /* quem é a pessoa na igreja inteira, não só neste vínculo. É o que permite
      dizer "você também serve na Mídia" para quem chegou pelo link do Louvor. */
   const [eu, setEu] = useState<Identidade | null>(null);
+  const [salvandoSexo, setSalvandoSexo] = useState('');
 
   /* inicial=true: primeira carga, pode mostrar tela cheia de erro/rede.
      inicial=false: reload de fundo após uma ação — NUNCA rebaixar a tela
@@ -434,6 +435,26 @@ export default function Eu() {
     return dias <= 0 ? 'entrou hoje' : dias === 1 ? 'entrou ontem' : `entrou há ${dias} dias`;
   };
 
+  /* 18/09/2026. A liderança do Connect: "mulher não pode acessar banheiro
+     masculino e nem sala dos pastores". O sistema passou a saber a regra
+     (migração 48), e faltava o dado. A alternativa era a liderança abrir 21
+     pessoas uma a uma; aqui a própria pessoa responde, em um toque, no link
+     que ela já usa. Grava em todas as áreas dela: sexo é da pessoa, não do
+     vínculo (migração 49). */
+  async function dizerSexo(v: 'M' | 'F') {
+    if (salvandoSexo) return;
+    setSalvandoSexo(v); setErro('');
+    const { data, error } = await sb()!.rpc('eu_sexo', { p_token: token, p_sexo: v });
+    if (error || !(data as any)?.ok) {
+      setErro(aviseHumano(error || new Error((data as any)?.erro || ''), 'salvar'));
+      setSalvandoSexo(''); return;
+    }
+    /* recarrega a identidade: é ela que decide se o card continua na tela */
+    const i = await quemSou(token).catch(() => null);
+    if (i?.ok) setEu(i);
+    setSalvandoSexo('');
+  }
+
   return (
     <div className="vol">
       <Barra perfil />
@@ -520,6 +541,32 @@ export default function Eu() {
             </div>
           ))}
         </div>
+
+        {/* A PERGUNTA QUE SÓ APARECE PARA QUEM ELA MUDA ALGUMA COISA.
+            Alguns postos só aceitam homem ou só mulher — não por preferência,
+            por acesso: quem confere o banheiro masculino tem que poder entrar
+            nele. Enquanto a pessoa não responde, o sorteio não a considera
+            para esses postos, e a vaga fica vazia. Duas condições para este
+            card existir: a área tem posto assim E ela está habilitada nele. */}
+        {faltaDizerSexo(eu) && (
+          <section className="vol-secao" id="sou">
+            <div className="vol-secao-cab"><span className="rot">Falta uma coisa</span></div>
+            <p className="vol-sub" style={{ marginTop: 0 }}>
+              {vinculoDeste(eu)?.equipe
+                ? `${vinculoDeste(eu)!.equipe} tem posto que só aceita homem ou só mulher, porque depende de poder entrar no lugar (banheiro, gabinete).`
+                : 'Sua área tem posto que só aceita homem ou só mulher, porque depende de poder entrar no lugar.'}
+              {' '}Sem isso a escala não te coloca nesses dias.
+            </p>
+            <div className="linha" style={{ marginTop: 14 }}>
+              <button className="vol-bt sim" disabled={!!salvandoSexo} onClick={() => dizerSexo('M')}>
+                {salvandoSexo === 'M' ? 'salvando…' : 'Sou homem'}
+              </button>
+              <button className="vol-bt sim" disabled={!!salvandoSexo} onClick={() => dizerSexo('F')}>
+                {salvandoSexo === 'F' ? 'salvando…' : 'Sou mulher'}
+              </button>
+            </div>
+          </section>
+        )}
 
         {/* quem ajuda a fechar o buraco que a pessoa abriu em cima da hora */}
         {Object.entries(cobrem).map(([cid, lista]) => !!lista.length && (
