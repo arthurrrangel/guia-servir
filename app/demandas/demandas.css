@@ -1,0 +1,281 @@
+/* ==========================================================================
+   DEMANDAS — a folha de estilo do segundo sistema
+
+   TUDO AQUI MORA DENTRO DE `.dm`, E ISSO NÃO É ESTILO: É A TRAVA.
+
+   Este arquivo divide a mesma página com `globals.css`, que veste o sistema
+   de escalas inteiro. O Next junta todo o CSS numa folha só, então importar
+   este arquivo "só dentro de /demandas" não isola nada. Medido antes de
+   escrever uma linha:
+
+     · 20 das minhas 42 classes já existiam lá — `card`, `btn`, `pill`,
+       `aviso`, `abas`, `topo`, `logo`, `rot`, `peq`, `dim`;
+     · 21 das minhas variáveis já existiam lá — `--bg`, `--card`, `--preto`,
+       `--ink`, `--linha`, `--ok`, `--warn`, `--r`, `--t`, `--e1`, `--fonte`.
+
+   Qualquer uma delas solta reescreveria o botão, o cartão e o espaçamento de
+   TODA tela do líder. Por isso, três regras que não têm exceção aqui:
+
+     1. toda classe começa com `dm-`;
+     2. toda variável começa com `--dm-`, e nasce em `.dm`, nunca em `:root`;
+     3. nenhum seletor de elemento solto. Nada de `body{}`, `a{}`, `h1{}`,
+        `*{}` — tudo pendurado em `.dm`, senão vale para a página inteira.
+
+   A identidade é a mesma do sistema de escalas, de propósito: é a mesma
+   igreja e a mesma pessoa usando os dois. Monocromático, cor só para estado,
+   o tipo como interface, e o chevron como único ornamento. Os valores foram
+   copiados do `globals.css` — se a marca mudar lá, muda aqui na mão, que é o
+   preço de não deixar os dois sistemas se tocarem.
+   ========================================================================== */
+
+.dm{
+  /* ---- superfícies */
+  --dm-bg:#ffffff;
+  --dm-card:#ffffff;
+  --dm-card2:#f5f5f7;
+  --dm-card3:#fafafb;
+  --dm-preto:#252525;          /* o preto do manual da marca */
+  --dm-preto-toque:#3a3a3a;
+
+  /* ---- traços: sombra do preto sobre o claro, nunca cinza opaco */
+  --dm-linha:rgba(37,37,37,.11);
+  --dm-linha2:rgba(37,37,37,.18);
+  --dm-linha3:rgba(37,37,37,.33);
+
+  /* ---- tinta */
+  --dm-ink:#252525;
+  --dm-ink2:rgba(37,37,37,.70);
+  --dm-mudo:rgba(37,37,37,.68);   /* 6,1:1 no branco, medido */
+  --dm-marca:rgba(37,37,37,.34);  /* NÃO é cor de texto: ponto, chevron, seta */
+
+  /* ---- estado. Medidos sobre o próprio fundo de 10%, não sobre o branco:
+         a pílula verde é texto verde em cima de verde a 10%, e é ali que o
+         contraste aperta. */
+  --dm-ok:#0a6b3f;   --dm-ok-bg:rgba(10,107,63,.10);   --dm-ok-ln:rgba(10,107,63,.30);
+  --dm-warn:#7a5005; --dm-warn-bg:rgba(170,112,10,.13);--dm-warn-ln:rgba(170,112,10,.34);
+  --dm-bad:#a82e24;  --dm-bad-bg:rgba(168,46,36,.09);  --dm-bad-ln:rgba(168,46,36,.28);
+  --dm-info:#1b53ad; --dm-info-bg:rgba(27,83,173,.08); --dm-info-ln:rgba(27,83,173,.26);
+
+  /* ---- ritmo */
+  --dm-e1:8px; --dm-e2:12px; --dm-e3:16px; --dm-e4:24px; --dm-e5:36px; --dm-e6:56px;
+
+  /* CAIXA NÃO TEM CANTO, MARCA É CÍRCULO — a mesma regra do outro sistema.
+     Só o botão e o campo têm raio, porque são alvo de toque e o raio ajuda a
+     ler a área clicável. Cartão é fio de 1px, sem sombra. */
+  --dm-r:10px;
+  --dm-t:140ms cubic-bezier(.22,.61,.36,1);
+  --dm-largura:1080px;
+  --dm-fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+
+  background:var(--dm-bg);
+  color:var(--dm-ink);
+  font-family:var(--dm-fonte);
+  font-size:16px;
+  line-height:1.5;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+}
+
+.dm *,.dm *::before,.dm *::after{box-sizing:border-box}
+.dm a{color:inherit}
+.dm :focus-visible{outline:2px solid var(--dm-ink); outline-offset:2px}
+.dm button,.dm input,.dm select,.dm textarea{font:inherit;color:inherit}
+
+/* ------------------------------------------------------------------ texto */
+.dm h1,.dm h2,.dm h3{margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+.dm h1{font-size:clamp(26px,5vw,34px)}
+.dm h2{font-size:20px}
+.dm h3{font-size:16px}
+.dm p{margin:0 0 var(--dm-e2)}
+.dm-rot{
+  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dm-mudo);font-weight:600;
+}
+.dm-peq{font-size:13px}
+.dm-dim{color:var(--dm-ink2)}
+.dm-mudo{color:var(--dm-mudo)}
+.dm-centro{text-align:center}
+.dm-cresce{flex:1;min-width:0}
+.dm-corta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* --------------------------------------------------------------- estrutura */
+.dm-topo{
+  position:sticky;top:0;z-index:30;background:var(--dm-bg);
+  border-bottom:1px solid var(--dm-linha);
+}
+.dm-topo-in{
+  max-width:var(--dm-largura);margin:0 auto;padding:var(--dm-e2) var(--dm-e3);
+  display:flex;align-items:center;gap:var(--dm-e3);
+}
+.dm-logo{
+  background:var(--dm-preto);color:#fff;font-weight:700;
+  letter-spacing:.26em;font-size:12px;padding:8px 10px 8px 14px;
+  text-decoration:none;flex:none;
+}
+.dm-onde{font-size:13px;color:var(--dm-mudo);min-width:0}
+.dm-onde b{color:var(--dm-ink);font-weight:600}
+.dm-abas{
+  display:flex;gap:var(--dm-e4);overflow-x:auto;scrollbar-width:none;
+  max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-e3);
+}
+.dm-abas::-webkit-scrollbar{display:none}
+.dm-abas a{
+  padding:10px 0 12px;font-size:14px;color:var(--dm-mudo);text-decoration:none;
+  border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--dm-t);
+}
+.dm-abas a:hover{color:var(--dm-ink2)}
+.dm-abas a[aria-current="page"]{color:var(--dm-ink);border-bottom-color:var(--dm-ink);font-weight:600}
+.dm-corpo{flex:1;max-width:var(--dm-largura);margin:0 auto;width:100%;padding:var(--dm-e4) var(--dm-e3) var(--dm-e6)}
+.dm-rodape{
+  max-width:var(--dm-largura);margin:0 auto;width:100%;
+  padding:var(--dm-e4) var(--dm-e3);font-size:12px;color:var(--dm-mudo);
+  border-top:1px solid var(--dm-linha);
+}
+.dm-rodape a{color:var(--dm-ink2)}
+
+/* ------------------------------------------------------------------ peças */
+.dm-card{
+  background:var(--dm-card);border:1px solid var(--dm-linha);
+  padding:var(--dm-e3);margin-bottom:var(--dm-e2);
+}
+.dm-grade{display:grid;gap:var(--dm-e2)}
+.dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
+@media (min-width:760px){ .dm-dupla{grid-template-columns:1fr 1fr} }
+.dm-tres{display:grid;gap:var(--dm-e2);grid-template-columns:repeat(2,1fr)}
+@media (min-width:760px){ .dm-tres{grid-template-columns:repeat(4,1fr)} }
+
+.dm-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 var(--dm-e3);border:1px solid var(--dm-linha2);
+  background:var(--dm-card);border-radius:var(--dm-r);cursor:pointer;
+  font-size:15px;font-weight:550;text-decoration:none;
+  transition:background var(--dm-t),border-color var(--dm-t),opacity var(--dm-t);
+}
+.dm-btn:hover:not(:disabled){background:var(--dm-card3);border-color:var(--dm-linha3)}
+.dm-btn:disabled{opacity:.45;cursor:not-allowed}
+.dm-btn.dm-pri{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
+.dm-btn.dm-pri:hover:not(:disabled){background:var(--dm-preto-toque);border-color:var(--dm-preto-toque)}
+.dm-btn.dm-zap{color:var(--dm-ok);border-color:var(--dm-ok-ln)}
+.dm-btn.dm-zap:hover{background:var(--dm-ok-bg)}
+.dm-btn.dm-perigo{color:var(--dm-bad);border-color:var(--dm-bad-ln)}
+.dm-btn.dm-perigo:hover{background:var(--dm-bad-bg)}
+.dm-btn.dm-mini{min-height:36px;padding:0 var(--dm-e2);font-size:13px}
+.dm-btn.dm-larga{width:100%}
+
+.dm-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 9px;border:1px solid var(--dm-linha2);background:var(--dm-card2);
+  font-size:12px;font-weight:600;white-space:nowrap;
+}
+.dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);border-color:var(--dm-ok-ln)}
+.dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);border-color:var(--dm-warn-ln)}
+.dm-pill.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);border-color:var(--dm-bad-ln)}
+.dm-pill.dm-info{background:var(--dm-info-bg);color:var(--dm-info);border-color:var(--dm-info-ln)}
+.dm-ponto{width:6px;height:6px;border-radius:50%;background:var(--dm-marca);flex:none}
+.dm-ponto.dm-ok{background:var(--dm-ok)}
+.dm-ponto.dm-warn{background:var(--dm-warn)}
+.dm-ponto.dm-bad{background:var(--dm-bad)}
+
+.dm-aviso{
+  display:flex;gap:var(--dm-e2);align-items:flex-start;
+  padding:var(--dm-e2) var(--dm-e3);border:1px solid var(--dm-linha2);
+  background:var(--dm-card2);font-size:14px;margin-bottom:var(--dm-e2);
+}
+.dm-aviso.dm-ok{background:var(--dm-ok-bg);border-color:var(--dm-ok-ln);color:var(--dm-ok)}
+.dm-aviso.dm-warn{background:var(--dm-warn-bg);border-color:var(--dm-warn-ln);color:var(--dm-warn)}
+.dm-aviso.dm-bad{background:var(--dm-bad-bg);border-color:var(--dm-bad-ln);color:var(--dm-bad)}
+.dm-aviso.dm-info{background:var(--dm-info-bg);border-color:var(--dm-info-ln);color:var(--dm-info)}
+.dm-aviso b{font-weight:650}
+
+/* ------------------------------------------------------------------ campos */
+.dm-campo{display:block;margin-bottom:var(--dm-e3)}
+.dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
+.dm-campo input,.dm-campo select,.dm-campo textarea{
+  width:100%;min-height:46px;padding:10px var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);
+}
+.dm-campo textarea{min-height:110px;resize:vertical;line-height:1.5}
+.dm-campo input:focus,.dm-campo select:focus,.dm-campo textarea:focus{
+  outline:2px solid var(--dm-ink);outline-offset:-1px;background:var(--dm-card);
+}
+.dm-entrada{
+  min-height:46px;padding:0 var(--dm-e2);border:1px solid var(--dm-linha2);
+  background:var(--dm-card3);border-radius:var(--dm-r);
+}
+.dm-opcoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
+.dm-opcoes button{
+  flex:1 1 auto;min-width:80px;min-height:44px;padding:0 var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
+  cursor:pointer;font-size:14px;transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t);
+}
+.dm-opcoes button[aria-pressed="true"]{
+  background:var(--dm-preto);color:#fff;border-color:var(--dm-preto);font-weight:600;
+}
+
+/* ------------------------------------------------------------------ lista */
+.dm-fila{border-top:1px solid var(--dm-linha)}
+.dm-item{
+  display:block;text-decoration:none;color:inherit;
+  padding:var(--dm-e3) 0;border-bottom:1px solid var(--dm-linha);
+  transition:background var(--dm-t);
+}
+.dm-item:hover{background:var(--dm-card3)}
+.dm-item-topo{display:flex;align-items:baseline;gap:var(--dm-e2);margin-bottom:5px}
+.dm-item-num{font-size:12px;color:var(--dm-marca);font-weight:700;flex:none}
+.dm-item-tit{font-weight:600;letter-spacing:-.01em;min-width:0}
+.dm-item-baixo{
+  display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;
+  font-size:12px;color:var(--dm-mudo);
+}
+.dm-item.dm-urgente{border-left:3px solid var(--dm-bad);padding-left:var(--dm-e2)}
+.dm-item.dm-atrasada .dm-prazo{color:var(--dm-bad);font-weight:600}
+
+/* --------------------------------------------------------------- números */
+.dm-num{border:1px solid var(--dm-linha);padding:var(--dm-e3)}
+.dm-num .dm-v{font-size:30px;font-weight:650;letter-spacing:-.03em;line-height:1.05}
+.dm-num .dm-r{font-size:12px;color:var(--dm-mudo);margin-top:4px}
+.dm-num.dm-destaque{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
+.dm-num.dm-destaque .dm-r{color:rgba(255,255,255,.72)}
+.dm-barra{height:6px;background:var(--dm-card2);margin-top:8px}
+.dm-barra i{display:block;height:100%;background:var(--dm-ink)}
+
+.dm-tab{width:100%;border-collapse:collapse;font-size:14px}
+.dm-tab th{
+  text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
+  border-bottom:1px solid var(--dm-linha);
+}
+.dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha)}
+.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
+.dm-tab select,.dm-tab input{
+  min-height:36px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);padding:0 8px;max-width:100%;
+}
+
+/* -------------------------------------------------------------- histórico */
+.dm-hist{list-style:none;margin:0;padding:0;border-left:1px solid var(--dm-linha);margin-left:5px}
+.dm-hist li{position:relative;padding:0 0 var(--dm-e3) var(--dm-e3)}
+.dm-hist li::before{
+  content:'';position:absolute;left:-4px;top:7px;width:7px;height:7px;
+  border-radius:50%;background:var(--dm-marca);
+}
+.dm-hist li.dm-marco::before{background:var(--dm-ink)}
+.dm-hist .dm-q{font-size:13px;color:var(--dm-mudo)}
+.dm-hist .dm-t{white-space:pre-wrap;margin-top:3px}
+.dm-hist .dm-interno{
+  border-left:3px solid var(--dm-warn);padding-left:var(--dm-e2);
+  background:var(--dm-warn-bg);
+}
+
+/* O nome do @keyframes é global, como o da classe. `pulso` sozinho brigaria
+   com os vinte do outro sistema no dia em que um deles se chamasse assim. */
+.dm-esqueleto div{background:var(--dm-card2);animation:dm-pulso 1.4s ease-in-out infinite}
+@keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
+@media (prefers-reduced-motion:reduce){
+  .dm *{animation:none!important;transition:none!important}
+}
