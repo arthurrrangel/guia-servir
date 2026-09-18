@@ -61,6 +61,13 @@ const PORBANCO: Tradutor[] = [
   /* fn_indisponivel (04): "% avisou que nao pode neste domingo." */
   [/^(.+?) avisou que nao pode neste domingo/i,
    m => `${m[1]} avisou que não pode nesse dia. Escolha outra pessoa.`],
+  /* fn_sexo_do_posto (migração 48): a regra do prédio. O SQL escreve sem
+     acento (é o jeito de o arquivo atravessar qualquer editor sem virar
+     mojibake); a frase que a pessoa lê tem que ter. */
+  [/^Falta dizer se (.+?) e homem ou mulher, e (.+?) e um posto de (homens|mulheres)/i,
+   m => `Falta dizer se ${m[1]} é homem ou mulher, e ${m[2]} é um posto de ${m[3]}. Informe na aba Time, no campo ao lado do WhatsApp.`],
+  [/^(.+?) e um posto de (homens|mulheres)\./i,
+   m => `${m[1]} é um posto de ${m[2]}. Escolha outra pessoa.`],
   /* a versão anterior (01): "Essa pessoa avisou que não pode em DD/MM." */
   [/Essa pessoa avisou que não pode em (\d\d\/\d\d)/i,
    m => `Essa pessoa avisou que não pode em ${m[1]}. Escolha outra pessoa.`],
