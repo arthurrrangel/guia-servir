@@ -12,8 +12,8 @@
    =========================================================================== */
 import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, hojeISO, funcoesDoDia, tipoDoDia } from './engine';
 
-const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow']) =>
-  ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any });
+const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
+  ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any, exigeSexo });
 
 const P = (
   nome: string, funcoes: Record<string, Nivel>, conferido = false, tel = '21999990000',
@@ -35,11 +35,18 @@ export function estadoDemo(): Estado {
     F('TRANSMISSÃO (CORTE + PTZ)', 7, true, ['domingo']),
     F('CÂMERA 1', 8, true, ['domingo']),
     F('CÂMERA 2', 9, true, ['domingo']),
+    /* 18/09/2026: um posto com a regra do prédio, para o harness cobrir o
+       estado que só existe quando alguém não informou o sexo. Sem ele, os
+       três avisos do topo do /time nunca apareciam no desenvolvimento e eu
+       só veria o layout deles em produção, com gente de verdade. */
+    F('APOIO NO BANHEIRO', 10, true, ['domingo'], 'F'),
   ];
   S.voluntarios = [
     P('Arthur Rangel', { 'PROJEÇÃO': 'titular' }, true),
-    P('Amanda Ribeiro de Souza', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular' }),
-    P('Giovana Rosalem', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'FOTO': 'titular', 'HEAD': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'titular', 'CÂMERA 1': 'titular', 'CÂMERA 2': 'titular' }),
+    /* Amanda informou, Giovana não: é o par que faz os avisos do topo do
+       /time aparecerem no harness. */
+    { ...P('Amanda Ribeiro de Souza', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'APOIO NO BANHEIRO': 'titular' }), sexo: 'F' as const },
+    P('Giovana Rosalem', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'FOTO': 'titular', 'HEAD': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'titular', 'CÂMERA 1': 'titular', 'CÂMERA 2': 'titular', 'APOIO NO BANHEIRO': 'titular' }),
     P('William Silva', { 'PROJEÇÃO': 'titular', 'ILUMINAÇÃO': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'titular' }),
     P('Eduardo Rodrigues', { 'ILUMINAÇÃO': 'titular', 'CÂMERA 1': 'reserva', 'CÂMERA 2': 'reserva', 'TRANSMISSÃO (CORTE + PTZ)': 'treino' }),
     P('Mateus Dourado', { 'ILUMINAÇÃO': 'titular', 'TRANSMISSÃO (CORTE + PTZ)': 'treino', 'CÂMERA 1': 'treino', 'CÂMERA 2': 'treino' }),
