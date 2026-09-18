@@ -6,7 +6,7 @@ import { Escolha, Trabalhando } from '@/components/Ui';
 import { IcSeta } from '@/components/Icones';
 import { useEffect, useRef, useState } from 'react';
 import {
-  addLider, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
+  addLider, definirMinhaSenha, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
   souOrganizadorGeral, type LinhaLider,
 } from '@/lib/db';
 import { atualizarEquipe } from '@/lib/equipes';
@@ -68,6 +68,7 @@ function Ajustes() {
   const [equipeDoLider, setEquipeDoLider] = useState<string>('');
   const [geral, setGeral] = useState(false);
   const [gravando, setGravando] = useState(false);
+  const [minhaSenha, setMinhaSenha] = useState('');
   useEffect(() => { listarLideres().then(setLideres).catch(() => {}); }, []);
   useEffect(() => { souOrganizadorGeral().then(setGeral).catch(() => {}); }, []);
   async function recarregarLideres() { try { setLideres(await listarLideres()); } catch {} }
@@ -326,6 +327,31 @@ function Ajustes() {
           ministério que organiza. Quem está como <strong>todos</strong> vê tudo
           e dá acesso aos outros. Voluntário não entra aqui: ele usa o link pessoal.
         </p>
+        {/* 18/09/2026: a senha de quem está logado. Até aqui organizador só
+            entrava pelo link do email; agora pode escolher uma senha e usar
+            "Prefiro entrar com senha" na tela de entrar. Quem não está logado
+            cria a senha pela própria tela de entrar ("Criar ou trocar minha
+            senha"), que manda um link. */}
+        <div className="ajt-senha">
+          <span className="rot">Sua senha</span>
+          <p className="dim pequeno">
+            Você entra por um link no email. Se preferir senha, escolha uma aqui: da
+            próxima vez, toque em <strong>Prefiro entrar com senha</strong> na tela de entrar.
+          </p>
+          <form className="linha" onSubmit={async e => {
+            e.preventDefault();
+            if (minhaSenha.length < 8 || gravando) return;
+            setGravando(true);
+            try { await definirMinhaSenha(minhaSenha); setMinhaSenha(''); aviso('Senha salva. Da próxima vez, entre com email e senha.'); }
+            catch (err) { aviso(aviseHumano(err, 'salvar a senha')); }
+            setGravando(false);
+          }}>
+            <input type="password" value={minhaSenha} onChange={e => setMinhaSenha(e.target.value)}
+              aria-label="Senha nova" autoComplete="new-password" minLength={8} enterKeyHint="done"
+              placeholder="pelo menos 8 caracteres" style={{ maxWidth: 260 }} />
+            <button type="submit" disabled={minhaSenha.length < 8 || gravando}>Salvar senha</button>
+          </form>
+        </div>
         <div className="ajt-lista">
           {lideres.map(l => (
             <div className="ajt-item" key={l.email + (l.equipe_id || 'tudo')}>
