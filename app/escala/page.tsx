@@ -9,7 +9,7 @@ import { confirmar } from '@/lib/confirmar';
 import {
   candidatos, cargaDoMes, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
-  respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado,
+  respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -165,6 +165,12 @@ function Escala() {
       if (outra && metaFuncao(S, funcao).simultanea && metaFuncao(S, outra).simultanea) {
         aviso(`${nomeDe(S, vid)} já está em ${outra} nesse mesmo culto. Tire de lá antes, ou escolha outra pessoa.`); return;
       }
+      /* 18/09/2026: a regra do prédio (fn_sexo_do_posto). A lista nem oferece
+         quem não pode, então isto só pega o caminho de fora da lista; mas a
+         regra que o banco aplica tem que ter voz na tela, senão vira "não
+         consegui salvar" de novo. */
+      const porque = vol ? porqueNaoPode(S, vol, funcao) : '';
+      if (porque) { aviso(porque); return; }
     }
     /* trocar ou limpar alguém que JÁ respondeu apaga essa resposta: avisar antes */
     if (atual?.vid && atual.status && atual.status !== 'pendente' && atual.vid !== vid) {
