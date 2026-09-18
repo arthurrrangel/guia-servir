@@ -294,6 +294,21 @@ function Ajustes() {
                     <option value="0">depois do culto</option>
                   </Escolha>
                 </div>
+                {/* 18/09/2026: a regra do PRÉDIO, não da pessoa. "Mulher não
+                    pode acessar banheiro masculino e nem sala dos pastores"
+                    (liderança do Connect). Isso não é saber fazer, é poder
+                    entrar, e por isso mora no posto: vale para todo mundo de
+                    uma vez, inclusive para quem se cadastrar amanhã. */}
+                <div className="ajt-campo">
+                  <span className="ajt-rot">Quem pode entrar</span>
+                  <Escolha valor={f.exigeSexo || ''} rotulo="quem pode entrar neste posto" classe="ajt-quando"
+                    mostra={f.exigeSexo === 'M' ? 'só homens' : f.exigeSexo === 'F' ? 'só mulheres' : 'qualquer pessoa'}
+                    aoMudar={v => fn(f.id!, { exigeSexo: (v || undefined) as 'M' | 'F' | undefined })}>
+                    <option value="">qualquer pessoa</option>
+                    <option value="M">só homens</option>
+                    <option value="F">só mulheres</option>
+                  </Escolha>
+                </div>
                 <div className="ajt-acoes">
                   <button className="lid-bt-txt" onClick={() => fn(f.id!, { ativa: !f.ativa })}>
                     {f.ativa ? 'Ocultar da escala' : 'Reativar'}
