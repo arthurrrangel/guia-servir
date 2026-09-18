@@ -11,9 +11,18 @@ import { sugerirEmail } from '@/lib/email';
 export default function Entrar() {
   const [pronto, setPronto] = useState(false);
   const [temConexao, setTem] = useState(false);
-  const [modo, setModo] = useState<'link' | 'senha'>('link');
+  /* 18/09/2026: `criar` é o terceiro modo. Pedido do Arthur: "no login do
+     organizador tem que ter opção de cadastrar senha". Quem organiza nunca
+     teve senha: entrava só pelo link do email, e o email é a parte frágil
+     (cota por hora, spam, "Outros"). O caminho: a pessoa pede aqui um link de
+     definição de senha, o link volta para ESTA tela com `type=recovery` no
+     fragmento, e a tela mostra o campo de senha nova em vez de mandar para o
+     painel. Quem já está dentro troca a senha em Ajustes → Quem organiza. */
+  const [modo, setModo] = useState<'link' | 'senha' | 'criar'>('link');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [recuperando, setRecuperando] = useState(false);
+  const [novaSenha, setNovaSenha] = useState('');
   /* O tom do aviso era decidido por `msg.startsWith('Erro')`. Isso parou de
      funcionar no instante em que as mensagens deixaram de começar com a
      palavra "Erro" — e o modo de falhar era silencioso e ao contrário: um
@@ -38,6 +47,10 @@ export default function Entrar() {
     const frag = new URLSearchParams(window.location.hash.replace(/^#/, ''));
     const temToken = !!frag.get('access_token');
     const erroLink = frag.get('error_code') || frag.get('error');
+    /* link de "criar senha": a sessão abre igual, mas o destino é o campo de
+       senha nova, não o painel. O supabase-js apaga o fragmento logo em
+       seguida, então isto é lido aqui, antes dele. */
+    const eRecuperacao = temToken && frag.get('type') === 'recovery';
     if (temToken) setEntrando(true);
 
     /* "entrando…" não pode ser um estado do qual não se sai. Abrir a sessão
@@ -56,6 +69,7 @@ export default function Entrar() {
     if (s) s.auth.getSession()
       .then(({ data }) => {
         clearTimeout(teto);
+        if (data.session && eRecuperacao) { setEntrando(false); setRecuperando(true); return; }
         if (data.session) { location.href = '/painel'; return; }
         /* chegou com token e mesmo assim não virou sessão: falhar calado aqui
            seria o pior dos mundos, porque a pessoa acabou de fazer tudo certo. */
@@ -119,6 +133,63 @@ export default function Entrar() {
     if (error) { setTom('erro'); setMsg(aviseHumano(error, 'entrar')); } else location.href = '/painel';
   }
 
+  /* pede o link que volta para cá com type=recovery. É o mesmo canal do link
+     de acesso (um email), com a mesma correção de endereço digitado errado.
+     Serve para criar a primeira senha e para trocar uma esquecida: para o
+     servidor as duas coisas são a mesma. */
+  async function porCriar(e: React.FormEvent) {
+    e.preventDefault(); setMsg('');
+    const sug = sugerirEmail(email);
+    const alvo = sug || email.trim();
+    if (sug) setEmail(sug);
+    setCarregando(true);
+    const { error } = await sb()!.auth.resetPasswordForEmail(alvo, {
+      redirectTo: window.location.origin + '/entrar',
+    });
+    setCarregando(false);
+    setTom(error ? 'erro' : 'bom');
+    setMsg(error ? aviseHumano(error, 'enviar o link')
+      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu email (olhe também o spam ou "Outros") e clique no link: você volta para esta tela para escolher a senha. O link vale por uma hora.`);
+  }
+
+  /* a sessão já está aberta pelo link; só falta gravar a senha */
+  async function definirSenha(e: React.FormEvent) {
+    e.preventDefault(); setMsg('');
+    if (novaSenha.length < 8) { setTom('atencao'); setMsg('A senha precisa ter pelo menos 8 caracteres.'); return; }
+    setCarregando(true);
+    const { error } = await sb()!.auth.updateUser({ password: novaSenha });
+    setCarregando(false);
+    if (error) { setTom('erro'); setMsg(aviseHumano(error, 'salvar a senha')); return; }
+    location.href = '/painel';
+  }
+
+  if (recuperando) return (
+    <main className="lid entrada">
+      <div className="entrada-marca">
+        <Link href="/" className="marca-link" aria-label="Voltar para o site da GUIA Church">
+          <Logo className="logo entrada-logo" />
+        </Link>
+        <span className="rot">Espaço do organizador</span>
+        <h1 className="entrada-titulo">Escolha sua senha</h1>
+        <p className="entrada-sub">
+          Da próxima vez você entra com email e senha, sem esperar link.
+        </p>
+      </div>
+      <form onSubmit={definirSenha}>
+        <label htmlFor="ent-nova">Senha nova</label>
+        <input id="ent-nova" type="password" required minLength={8} autoComplete="new-password"
+          enterKeyHint="go" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
+          placeholder="pelo menos 8 caracteres" />
+        <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
+          {carregando ? 'aguarde…' : 'Salvar senha e entrar'}
+        </button>
+      </form>
+      {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
+    </main>
+  );
+
+  const enviar = modo === 'link' ? porLink : modo === 'senha' ? porSenha : porCriar;
+
   return (
     /* A PORTA DA FRENTE FALAVA A LÍNGUA VELHA. Fundo cinza, cartão branco
        flutuando no meio com sombra, tudo em Inter — enquanto atrás dela o
@@ -138,13 +209,15 @@ export default function Entrar() {
           <Logo className="logo entrada-logo" />
         </Link>
         <span className="rot">Espaço do organizador</span>
-        <h1 className="entrada-titulo">Entrar</h1>
+        <h1 className="entrada-titulo">{modo === 'criar' ? 'Criar senha' : 'Entrar'}</h1>
         <p className="entrada-sub">
-          Voluntário não entra por aqui: ele usa o link pessoal que você manda.
+          {modo === 'criar'
+            ? 'Vale para a primeira senha e para trocar uma esquecida. Você recebe um link por email e escolhe a senha aqui.'
+            : 'Voluntário não entra por aqui: ele usa o link pessoal que você manda.'}
         </p>
       </div>
 
-      <form onSubmit={modo === 'link' ? porLink : porSenha}>
+      <form onSubmit={enviar}>
         <label htmlFor="ent-email">Seu email</label>
         {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
             "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
@@ -163,13 +236,26 @@ export default function Entrar() {
           </>
         )}
         <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
-          {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : 'Entrar'}
+          {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : modo === 'senha' ? 'Entrar' : 'Receber link para criar senha'}
         </button>
       </form>
       {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
-      <button className="lid-bt-txt entrada-troca" onClick={() => { setModo(modo === 'link' ? 'senha' : 'link'); setMsg(''); }}>
-        {modo === 'link' ? 'Prefiro entrar com senha' : 'Prefiro receber um link no email'}
-      </button>
+      {/* duas saídas de texto, uma por linha. "Criar senha" aparece nos dois
+          modos de entrar: quem chegou pelo link e quem esqueceu a senha
+          precisam da mesma porta. */}
+      <div className="entrada-trocas">
+        {modo !== 'link' && (
+          <button className="lid-bt-txt" onClick={() => { setModo('link'); setMsg(''); }}>Prefiro receber um link no email</button>
+        )}
+        {modo !== 'senha' && (
+          <button className="lid-bt-txt" onClick={() => { setModo('senha'); setMsg(''); }}>Prefiro entrar com senha</button>
+        )}
+        {modo !== 'criar' && (
+          <button className="lid-bt-txt" onClick={() => { setModo('criar'); setMsg(''); }}>
+            {modo === 'senha' ? 'Esqueci ou ainda não tenho senha' : 'Criar ou trocar minha senha'}
+          </button>
+        )}
+      </div>
     </main>
   );
 }
