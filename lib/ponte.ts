@@ -27,6 +27,9 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     tipos: Array.isArray(f.tipos) && f.tipos.length ? f.tipos : ['domingo', 'follow'],
     /* posto que preenche o relatório do dia (líder escalado do Serviço) */
     relata: !!f.relata,
+    /* a regra do prédio: 'M', 'F' ou nada. Coluna nova, então linha antiga
+       vem sem ela e vale como "qualquer pessoa", que é o que era antes. */
+    exigeSexo: f.exige_sexo === 'M' || f.exige_sexo === 'F' ? f.exige_sexo : undefined,
   }));
 
   const nomeFuncao = new Map<string, string>((l.funcoes || []).map(f => [f.id, f.nome]));
@@ -60,6 +63,9 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     limiteMes: v.limite_mes, token: v.token,
     /* coluna nova: cadastros antigos vêm sem ela e valem como conferidos */
     conferido: v.conferido !== false,
+    /* undefined de propósito quando ninguém informou: o motor trata "não sei"
+       diferente de "tanto faz". */
+    sexo: v.sexo === 'M' || v.sexo === 'F' ? v.sexo : undefined,
     funcoes: habPorVol.get(v.id) || {}, confirmadas: okPorVol.get(v.id) || {},
     indisponivel: indisPorVol.get(v.id) || [],
     disponivel: dispPorVol.get(v.id) || [],
@@ -152,7 +158,7 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
    O cron passaria por cima (service role), mas escrever `*` lá é uma armadilha
    esperando o dia em que aquele código rodar com outra credencial. */
 const COLUNAS_VOLUNTARIO =
-  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email';
+  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email,sexo';
 
 /* A carga olha no máximo 180 dias para trás. Sem a janela, cada troca de
    ministério puxava o histórico inteiro da igreja desde sempre. */
