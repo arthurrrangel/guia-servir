@@ -140,10 +140,19 @@ entrou.
   Aplicar os trechos do `git diff` como pares antigo → novo (cada trecho
   antigo tem que aparecer exatamente uma vez), conferir o SHA-256 do
   resultado contra o arquivo local, e só então salvar.
-- **Conteúdo grande passa em pedaços.** Uma string de 4928 caracteres de
-  base64 numa chamada só chegou com 3 bytes a menos e o digest falhou.
-  Pedaços de 1232 caracteres, cada um com SHA-256 conferido na aba antes de
-  juntar, passaram todos. Sem digest conferido, não publique.
+- **Conteúdo grande passa em pedaços, e comprimido.** Uma string de 4928
+  caracteres de base64 numa chamada só chegou com 3 bytes a menos e o digest
+  falhou. Pedaços com SHA-256 conferido na aba antes de juntar resolvem. Em
+  18/09, publicando 11 arquivos, o caminho ficou assim: gzip do conteúdo (ou
+  da lista de pares) → base64 → pedaços de até 3500 caracteres → na aba,
+  `DecompressionStream('gzip')`, que o Chrome tem nativo. 65.448 → 21.688
+  caracteres, 67% menor, 13 pedaços em vez de 58.
+- **Confira CADA pedaço, não só o arquivo montado.** Em 18/09 um pedaço chegou
+  com o **tamanho certo e o hash errado**: um caractere alterado no caminho,
+  não truncado. Conferindo só o digest final, a mensagem é "não bate" sem
+  dizer onde; conferindo pedaço a pedaço, dá para reenviar só o pedaço ruim
+  (partido em dois, que foi o que passou). Sem isso, seria uma migração
+  corrompida rodando em produção.
 - **Aba em segundo plano congela.** O Chrome congela abas inativas: os
   timers não disparam, o `Runtime.evaluate` estoura em 45s e o POST nem sai
   (HEAD não move). Abra uma aba nova e trabalhe nela; a ferramenta mantém
