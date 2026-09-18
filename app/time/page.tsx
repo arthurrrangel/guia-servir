@@ -12,8 +12,8 @@ import { IcBusca, IcMais, IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  Nivel, confirmada, filaDeConferencia, funcoesAtivas,
-  msgConvite, saudeDoTime,
+  Nivel, SEXOS, confirmada, filaDeConferencia, funcoesAtivas,
+  msgConvite, pendenciasDeSexo, saudeDoTime,
 } from '@/lib/engine';
 
 export default function Pagina() { return <Shell><Time /></Shell>; }
@@ -47,6 +47,7 @@ function Time() {
   const [nome, setNome] = useState('');
   const [tel, setTel] = useState('');
   const [novas, setNovas] = useState<Record<string, Nivel>>({});
+  const [novoSexo, setNovoSexo] = useState('');
   const [ocupado, setOcupado] = useState(false);
   const [chipSalvando, setChipSalvando] = useState('');
   /* BUSCA E FILTRO — 07/09/2026.
@@ -66,8 +67,15 @@ function Time() {
     if (!nome.trim()) return;
     setOcupado(true);
     try {
-      await criarVoluntario(equipe!.id, nome.trim(), tel.trim(), S.config.limitePadrao, novas);
-      setNome(''); setTel(''); setNovas({});
+      const novoId = await criarVoluntario(equipe!.id, nome.trim(), tel.trim(), S.config.limitePadrao, novas);
+      /* o sexo vai num segundo passo de propósito. A RPC `criar_voluntario`
+         existe para identidade, vínculo e habilidades caírem numa transação
+         só; sexo não é nada disso, e mudar a assinatura dela obrigaria a
+         migrar o cadastro público junto. Se este passo falhar, a pessoa nasce
+         sem sexo e o aviso do topo desta tela cobra — que é exatamente o que
+         já acontece com quem foi cadastrado antes desta regra existir. */
+      if (novoSexo) { try { await atualizarVoluntario(novoId, { sexo: novoSexo }); } catch {} }
+      setNome(''); setTel(''); setNovas({}); setNovoSexo('');
       await recarregar(); aviso(`${nome.trim()} entrou no time`);
     } catch (e) { aviso(aviseHumano(e)); }
     setOcupado(false);
@@ -161,6 +169,12 @@ function Time() {
      embaixo, que é a pergunta em aberto com o Arthur e não é minha para
      responder sozinho. */
   const ativos = S.voluntarios.filter(v => v.ativo).length;
+  /* 18/09/2026. A regra do prédio (posto que só aceita homem ou só mulher) é
+     aplicada pelo motor e pelo banco, em silêncio. Silêncio aqui é vaga vazia
+     sem ninguém entender por quê, então a tela diz a frase inteira: quem falta
+     informar, e qual posto ficou sem gente. */
+  const temExigencia = funcoesAtivas(S).some(f => f.exigeSexo);
+  const pend = pendenciasDeSexo(S);
   return (
     <div className="lid">
       {ocupado && <Trabalhando />}
@@ -176,6 +190,29 @@ function Time() {
       />
       {!S.voluntarios.length && (
         <Aviso tom="info">Comece pelas pessoas que serviram no último domingo.</Aviso>
+      )}
+      {!!pend.semSexo.length && (
+        <Aviso tom="atencao">
+          {cont(pend.semSexo.length, 'pessoa está', 'pessoas estão')} sem informar se é homem ou
+          mulher, e por isso {pend.semSexo.length === 1 ? 'fica' : 'ficam'} de fora dos postos que
+          exigem: {pend.semSexo.map(p => p.nome).join(', ')}. Abra a pessoa e informe no campo
+          ao lado do WhatsApp.
+        </Aviso>
+      )}
+      {!!pend.postosSemNinguem.length && (
+        <Aviso tom="erro">
+          {pend.postosSemNinguem.map(p => `${p.nome} (só ${p.exigeSexo === 'M' ? 'homens' : 'mulheres'})`).join(' e ')}
+          {pend.postosSemNinguem.length === 1 ? ' não tem' : ' não têm'} ninguém que possa entrar.
+          Essa vaga não vai preencher sozinha.
+        </Aviso>
+      )}
+      {!!pend.escaladosErrados.length && (
+        <Aviso tom="atencao">
+          Tem gente escalada onde não pode entrar, de antes desta regra existir:{' '}
+          {pend.escaladosErrados.slice(0, 4).map(x => `${x.nome} em ${x.funcao} (${x.data.slice(8, 10)}/${x.data.slice(5, 7)})`).join(', ')}
+          {pend.escaladosErrados.length > 4 ? ` e mais ${pend.escaladosErrados.length - 4}` : ''}.
+          Ninguém foi tirado da escala: troque na aba Escala.
+        </Aviso>
       )}
 
       {/* A FILA DE CONFERÊNCIA SAIU DAQUI — arquitetura de informação, 29/08/2026.
@@ -366,6 +403,22 @@ function Time() {
                   type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
                   onBlur={e => void salvarTelefone(v.id, v.tel || '', e.target)} />
               </div>
+              {/* 18/09/2026: só aparece onde serve para alguma coisa. Se
+                  nenhum posto desta área tem exigência, perguntar o sexo de
+                  todo mundo seria coletar dado por coletar. */}
+              {/* largura 180 e não 150: em 390px o texto "não informado" era
+                  cortado no meio da palavra dentro do seletor. */}
+              {temExigencia && (
+                <div style={{ width: 180 }}>
+                  <label>Homem ou mulher</label>
+                  <select key={String(v.sexo)} aria-label={`Homem ou mulher: ${v.nome}`}
+                    defaultValue={v.sexo || ''}
+                    onChange={e => mudar(v.id, { sexo: e.target.value || null })}>
+                    <option value="">não informado</option>
+                    {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
+                  </select>
+                </div>
+              )}
               <div style={{ width: 200 }}>
                 <label>Máximo de escalas por mês</label>
                 <select key={String(v.limiteMes)} aria-label={`Máximo de escalas por mês de ${v.nome}`}
@@ -457,6 +510,13 @@ function Time() {
           <div><label htmlFor="add-tel">WhatsApp, sem ele a pessoa não entra pelo link do grupo</label>
             <input id="add-tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
               type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done" /></div>
+          {temExigencia && (
+            <div><label htmlFor="add-sexo">Homem ou mulher, porque esta área tem posto que só aceita um</label>
+              <select id="add-sexo" value={novoSexo} onChange={e => setNovoSexo(e.target.value)}>
+                <option value="">não informado</option>
+                {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
+              </select></div>
+          )}
         </div>
         <div style={{ marginTop: 14 }}>
           <label>O que essa pessoa sabe fazer</label>
