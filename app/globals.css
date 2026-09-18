@@ -8907,3 +8907,17 @@ body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
    ============================================================================= */
 .lid-bt:hover,.lid-bt:active{ background:var(--noite); border-color:var(--noite); color:#fff; opacity:.84 }
 .lid-faixa.fogo .lid-bt:hover,.lid-faixa.fogo .lid-bt:active{ background:#fff; color:var(--noite); border-color:#fff }
+
+/* /entrar, 18/09/2026: as saídas de texto embaixo do formulário viraram duas
+   ou três ("link", "senha", "criar senha"), uma por linha, cada uma do tamanho
+   do próprio texto (o sublinhado de repouso não pode virar um fio da largura
+   da coluna). No celular, centradas como o resto da tela. */
+.entrada-trocas{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--e3); margin-top:var(--e6) }
+.entrada-trocas .lid-bt-txt{ width:auto }
+@media(max-width:640px){ .entrada-trocas{ align-items:center } }
+/* Ajustes → Quem organiza → "Sua senha": um bloco fechado por um fio, antes
+   da lista de acessos, no mesmo ritmo dos outros blocos da página. */
+.ajt-senha{ margin-top:var(--e5); padding-top:var(--e5); border-top:1px solid var(--linha2) }
+.ajt-senha .rot{ display:block }
+.ajt-senha .pequeno{ margin-top:var(--e2) }
+.ajt-senha .linha{ margin-top:var(--e4) }
