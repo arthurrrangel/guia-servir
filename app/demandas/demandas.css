@@ -78,7 +78,27 @@
 }
 
 .dm *,.dm *::before,.dm *::after{box-sizing:border-box}
-.dm a{color:inherit}
+
+/* O `:where()` AQUI NÃO É ENFEITE, É O CONSERTO DE UM DEFEITO REAL.
+
+   Escrito assim, `.dm a{color:inherit}` pesa 0-1-1: uma classe mais um
+   elemento. E `.dm-logo{color:#fff}` pesa 0-1-0: só a classe. Ou seja, a
+   regra genérica GANHA de qualquer classe minha aplicada num link — e foi
+   exatamente o que aconteceu: a logo do topo, que é um link, ficou com
+   texto #252525 sobre fundo #252525. Preto no preto. Uma caixa escura e
+   vazia no canto da tela.
+
+   Repare que a culpa é da própria disciplina de escopo: como TUDO aqui tem
+   que estar pendurado em `.dm`, toda regra de elemento vira classe+elemento
+   e passa a ganhar das classes. Consertar só a `.dm-logo` seria remendo: a
+   próxima classe que pintar cor num link cairia no mesmo buraco calada.
+
+   `:where()` zera o peso do que está dentro dele. A regra continua valendo
+   para todo link da casca, continua ganhando do estilo padrão do navegador
+   (regra de autor sempre ganha da do agente), e perde de qualquer classe —
+   que é o certo. */
+:where(.dm a){color:inherit}
+
 .dm :focus-visible{outline:2px solid var(--dm-ink); outline-offset:2px}
 .dm button,.dm input,.dm select,.dm textarea{font:inherit;color:inherit}
 
