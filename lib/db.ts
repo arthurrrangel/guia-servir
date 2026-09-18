@@ -205,6 +205,15 @@ export async function removerLider(email: string, equipeId: string | null) {
   const { error } = await q;
   if (error) throw error;
 }
+/* 18/09/2026: quem organiza nunca teve senha, entrava só pelo link do
+   email. A senha é da conta de quem está logado (Supabase Auth), não de um
+   ministério: por isso não passa por RLS nem por tabela nossa. Quem chegou
+   pelo link de acesso pode criar a senha aqui mesmo, sem outro email. */
+export async function definirMinhaSenha(senha: string) {
+  const { error } = await sb()!.auth.updateUser({ password: senha });
+  if (error) throw error;
+}
+
 /* quem organiza TUDO é quem pode dar e tirar acesso */
 export async function souOrganizadorGeral(): Promise<boolean> {
   const { data, error } = await sb()!.rpc('lidera_tudo');
