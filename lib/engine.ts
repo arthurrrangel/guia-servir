@@ -22,15 +22,50 @@ export const SITUACOES: { v: Status; rot: string }[] = [
 /* Tipos de culto que a igreja tem hoje. O Follow é no sábado e não usa
    todas as áreas — por isso a função guarda em quais cultos ela entra. */
 export type TipoCulto = 'domingo' | 'follow';
+
+/* ---------------------------------------------------------------- sexo ---
+   18/09/2026. Em 22/08 a decisão registrada foi "não existe campo de sexo, e
+   não precisa": estacionamento é dos homens, e isso já estaria dito pela
+   habilidade, porque sexo seria só mais um motivo de saber ou não fazer.
+
+   Estava errado, e a liderança do Connect mostrou por quê: "mulher não pode
+   acessar banheiro masculino e nem sala dos pastores". Isso não é saber
+   fazer, é poder entrar. E a diferença importa no ponto em que o sistema
+   decide sozinho:
+
+   · habilidade é POR PESSOA, e alguém precisa marcar uma por uma. Vale
+     enquanto um humano lembrar, para sempre, inclusive para quem se cadastrar
+     amanhã pelo link público;
+   · a regra do prédio vale para TODO MUNDO de uma vez, e o sistema consegue
+     aplicá-la sem ninguém lembrar.
+
+   Guardar como habilidade era pedir que a pessoa certa lembrasse toda vez. Em
+   18/09 eu mesmo provei o custo disso: ao dividir o posto do Connect, copiei
+   as 21 habilidades para as três vagas novas e, naquele instante, o sorteio
+   passou a poder pôr uma mulher no banheiro masculino.
+
+   `exigeSexo` fica na FUNÇÃO porque a restrição é do lugar, não da pessoa.
+   Sexo não informado (undefined) NÃO entra em posto com exigência: é melhor a
+   vaga ficar visivelmente vazia do que preenchida por chute.               */
+export type Sexo = 'M' | 'F';
+export const SEXOS: { v: Sexo; rot: string; plural: string }[] = [
+  { v: 'M', rot: 'homem', plural: 'homens' },
+  { v: 'F', rot: 'mulher', plural: 'mulheres' },
+];
+
 export type Funcao = {
   id?: string; nome: string; simultanea: boolean; ordem: number; ativa: boolean;
   tipos?: TipoCulto[];
   /* quem está escalado aqui preenche o relatório do dia pelo próprio link */
   relata?: boolean;
+  /* o posto só aceita esse sexo. undefined = qualquer pessoa. */
+  exigeSexo?: Sexo;
 };
 export type Voluntario = {
   id: string; nome: string; tel?: string; ativo: boolean; limiteMes: number;
   token?: string; funcoes: Record<string, Nivel>; indisponivel: string[];
+  /* undefined = ninguém informou ainda. Não é "não importa": é "não sei". */
+  sexo?: Sexo;
   /* false = a pessoa se cadastrou sozinha pelo link e o líder ainda não
      conferiu o nível que ela declarou. Não bloqueia nada: só destaca. */
   conferido?: boolean;
@@ -341,6 +376,31 @@ export const metaFuncao = (S: Estado, nome: string) =>
 export const funcoesAtivas = (S: Estado) =>
   S.funcoes.filter(f => f.ativa !== false).sort((a, b) => a.ordem - b.ordem);
 
+/* A REGRA DO PRÉDIO, EM UM LUGAR SÓ.
+   Todo caminho que decide "esta pessoa pode ficar nesta vaga" passa por aqui:
+   o sorteio, a lista de nomes que o líder abre, a conta de quantos seguram a
+   área e o diagnóstico do painel. Espalhar a comparação por essas quatro
+   telas seria a mesma consulta em quatro cópias, que é como a busca da equipe
+   divergiu em silêncio antes de virar `linhasDaEquipe`.
+
+   Quem não tem sexo informado fica de fora do posto com exigência, de
+   propósito. O banco recusa de qualquer jeito (gatilho da migração 48), e
+   vaga vazia com motivo na tela é melhor que erro na hora de salvar. */
+export function podeNoPosto(S: Estado, v: Voluntario, funcao: string): boolean {
+  const exige = metaFuncao(S, funcao).exigeSexo;
+  return !exige || v.sexo === exige;
+}
+
+/* Por que esta pessoa não pode, em uma frase para a tela. '' = pode. */
+export function porqueNaoPode(S: Estado, v: Voluntario, funcao: string): string {
+  const exige = metaFuncao(S, funcao).exigeSexo;
+  if (!exige || v.sexo === exige) return '';
+  const rot = SEXOS.find(s => s.v === exige)!;
+  return v.sexo
+    ? `${funcao} é um posto de ${rot.plural}.`
+    : `Falta dizer se ${v.nome.split(' ')[0]} é homem ou mulher, e ${funcao} é um posto de ${rot.plural}.`;
+}
+
 export function escalacoesDe(S: Estado, vid: string) {
   const out: { data: string; funcao: string; status: Status }[] = [];
   for (const [data, dia] of Object.entries(S.escalas)) {
@@ -419,6 +479,11 @@ export function candidatos(
     const nivel = nivelEfetivo(v, funcao);
     if (!nivel) return false;
     if (nivel === 'treino' && !o.incluirTreino) return false;
+    /* a regra do prédio vem antes de qualquer outra: não adianta estar livre,
+       ter nível e estar em dia com o limite se a pessoa não pode entrar ali.
+       Fica acima do `ignorarLimite` de propósito — nenhuma opção desta função
+       destrava isso, porque o banco também não destrava. */
+    if (!podeNoPosto(S, v, funcao)) return false;
     if ((v.indisponivel || []).includes(data)) return false;
     if (!o.ignorarLimite) {
       const limite = v.limiteMes || S.config.limitePadrao;
@@ -741,7 +806,8 @@ export type Suspeita = {
 /* Quantas pessoas seguem aptas nesta área se tirarmos esta pessoa. */
 function aptosSem(S: Estado, funcao: string, vid: string) {
   return S.voluntarios.filter(v =>
-    v.ativo && v.id !== vid && ['titular', 'reserva'].includes(nivelEfetivo(v, funcao) as string)).length;
+    v.ativo && v.id !== vid && podeNoPosto(S, v, funcao)
+    && ['titular', 'reserva'].includes(nivelEfetivo(v, funcao) as string)).length;
 }
 
 export function declaracoesSuspeitas(S: Estado): Suspeita[] {
@@ -798,11 +864,52 @@ export function filaDeConferencia(S: Estado) {
   })).filter(x => x.pendentes.length);
 }
 
+/* O QUE A REGRA DO PRÉDIO ESTÁ SEGURANDO HOJE.
+   Uma regra que o sistema aplica sozinho e em silêncio é uma vaga que fica
+   vazia sem ninguém entender por quê. Esta função existe para a tela poder
+   dizer a frase inteira: quem falta informar, e qual posto ficou sem gente.
+
+   `semSexo` só lista quem a falta de informação realmente atrapalha — alguém
+   habilitado num posto que exige. Pedir o sexo de quem só serve na Projeção
+   seria coletar dado por coletar. */
+export function pendenciasDeSexo(S: Estado) {
+  const comExigencia = funcoesAtivas(S).filter(f => f.exigeSexo);
+  const ativos = S.voluntarios.filter(v => v.ativo);
+
+  const semSexo = ativos
+    .filter(v => !v.sexo && comExigencia.some(f => nivelEfetivo(v, f.nome)))
+    .map(v => ({ id: v.id, nome: v.nome }))
+    .sort((a, b) => (a.nome < b.nome ? -1 : 1));
+
+  /* posto que exige e não tem ninguém que possa: a vaga nunca vai preencher */
+  const postosSemNinguem = comExigencia
+    .filter(f => !ativos.some(v => podeNoPosto(S, v, f.nome)
+      && ['titular', 'reserva'].includes(nivelEfetivo(v, f.nome) as string)))
+    .map(f => ({ nome: f.nome, exigeSexo: f.exigeSexo! }));
+
+  /* já está escalado num posto que não aceita: entrou antes da regra existir */
+  const escaladosErrados: { data: string; funcao: string; nome: string }[] = [];
+  for (const [data, dia] of Object.entries(S.escalas)) {
+    for (const [fn, slot] of Object.entries(dia.slots || {})) {
+      if (!slot?.vid) continue;
+      const v = S.voluntarios.find(x => x.id === slot.vid);
+      if (v && !podeNoPosto(S, v, fn)) escaladosErrados.push({ data, funcao: fn, nome: v.nome });
+    }
+  }
+  escaladosErrados.sort((a, b) => (a.data < b.data ? -1 : 1));
+
+  return { semSexo, postosSemNinguem, escaladosErrados };
+}
+
 /* ----------------------------------------------------------- diagnóstico --- */
 export function saudeDoTime(S: Estado) {
   const ref = hojeISO();
   const funcoes = funcoesAtivas(S).map(f => {
-    const ativos = S.voluntarios.filter(v => v.ativo);
+    /* quem NÃO PODE entrar no posto não conta como gente da área. Contar
+       fazia o painel dizer "ok, 21 pessoas" para um posto de homens em que
+       só 9 podem entrar — o mesmo jeito de mentir que já tinha acontecido
+       ao contar declaração não conferida como titular. */
+    const ativos = S.voluntarios.filter(v => v.ativo && podeNoPosto(S, v, f.nome));
     const aptos = ativos.filter(v => ['titular', 'reserva'].includes(nivelEfetivo(v, f.nome) as string));
     const treino = ativos.filter(v => nivelEfetivo(v, f.nome) === 'treino');
     /* quem a gente SABE que segura a área sozinho. Contar declaração como
