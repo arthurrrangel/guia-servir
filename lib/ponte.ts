@@ -1,6 +1,11 @@
 /* Ponte pura entre as linhas do banco e o Estado do motor.
    SEM 'use client': roda no navegador (db.ts) e no servidor (cron). */
-import { CONFIG_PADRAO, Estado, Nivel, Status, estadoVazio, garantirDia } from './engine';
+/* Os TIPOS vêm em `import type` separado dos VALORES. Não é estilo: sem
+   isso, o Node de linha de comando (que só apaga os tipos, não os resolve)
+   tenta importar `Estado` como valor em tempo de execução e o módulo nem
+   carrega — foi o que impediu de testar este arquivo. */
+import { CONFIG_PADRAO, estadoVazio, garantirDia } from './engine';
+import type { Estado, Nivel, Status } from './engine';
 
 export type LinhasDoBanco = {
   funcoes: any[]; voluntarios: any[]; habilidades: any[]; indisponibilidades: any[];
@@ -157,8 +162,49 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
    "permission denied for column" em vez de simplesmente omitir a coluna.
    O cron passaria por cima (service role), mas escrever `*` lá é uma armadilha
    esperando o dia em que aquele código rodar com outra credencial. */
-const COLUNAS_VOLUNTARIO =
-  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email,sexo';
+/* 18/09/2026 — A COLUNA NOVA QUE DERRUBOU O PAINEL.
+
+   O parágrafo acima descreve a armadilha, e eu caí nela assim mesmo. A
+   migração 48 criou `voluntarios.sexo`; no Postgres, coluna nova NÃO herda o
+   GRANT da tabela, e aqui o GRANT é por coluna. No mesmo dia eu acrescentei
+   `sexo` a esta lista. A partir daí, toda carga do Painel, da Escala e do
+   Time pedia uma coluna proibida — e o PostgREST recusa o PEDIDO INTEIRO com
+   42501, não só a coluna. A tela do líder caiu junto: "LOUVOR · 0" e um
+   aviso de permissão, com os 13 voluntários intactos no banco o tempo todo.
+
+   Consertado com `grant select (sexo), update (sexo) … to authenticated`.
+
+   O que fica aqui é a lição, não o remendo: a lista agora é ESSENCIAL +
+   OPCIONAIS. Se o banco recusar as opcionais, `lerVoluntarios` pede de novo
+   só as essenciais e a tela continua de pé, com a informação que falta
+   aparecendo como "não sei" em vez de derrubar o produto. Degradar é melhor
+   que morrer — principalmente numa lista de colunas que vai crescer de novo. */
+const COLUNAS_ESSENCIAIS =
+  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email';
+const COLUNAS_OPCIONAIS = ['sexo'];
+const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
+
+/** Permissão negada em alguma coluna. 42501 é o código do Postgres. */
+const semPermissao = (e: any) =>
+  e?.code === '42501' || /permission denied/i.test(e?.message || '');
+
+async function lerVoluntarios(s: any, equipeId: string) {
+  const pede = (cols: string) =>
+    s.from('voluntarios').select(cols).eq('equipe_id', equipeId).order('nome');
+
+  const r = await pede(COLUNAS_VOLUNTARIO);
+  if (!r?.error || !semPermissao(r.error)) return r;
+
+  /* segunda tentativa sem as opcionais. Se ESTA falhar, o erro sobe: aí não é
+     coluna nova sem grant, é a tabela fechada, e esconder isso seria pior. */
+  const r2 = await pede(COLUNAS_ESSENCIAIS);
+  if (r2?.error) return r2;
+  if (typeof console !== 'undefined') {
+    console.warn('[ponte] o banco recusou', COLUNAS_OPCIONAIS.join(', '),
+      '— segui sem essa(s) coluna(s). Falta um GRANT.');
+  }
+  return r2;
+}
 
 /* A carga olha no máximo 180 dias para trás. Sem a janela, cada troca de
    ministério puxava o histórico inteiro da igreja desde sempre. */
@@ -170,7 +216,7 @@ export async function linhasDaEquipe(
   const vazio = { data: [] as any[] };
   const [funcoes, vols, cultos, cfg] = await Promise.all([
     s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
-    s.from('voluntarios').select(COLUNAS_VOLUNTARIO).eq('equipe_id', equipeId).order('nome'),
+    lerVoluntarios(s, equipeId),
     s.from('cultos').select('id,data').gte('data', desde).order('data'),
     s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
   ]);
