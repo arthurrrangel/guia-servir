@@ -93,7 +93,24 @@ const ROTAS_FECHADAS = [
 const nextConfig = {
   /* O harness de design roda `next dev` ao mesmo tempo em que eu rodo
      `next build` para conferir o deploy. Com o mesmo distDir, o build apaga os
-     chunks que o dev está servindo e a tela quebra no meio da revisão. */
+     chunks que o dev está servindo e a tela quebra no meio da revisão.
+
+     CUIDADO AO USAR ISTO: `NEXT_DIST_DIR` SUJA UM ARQUIVO RASTREADO.
+
+     19/09/2026. O Next reescreve `next-env.d.ts` a cada execução, e a linha
+     de referência segue o distDir:
+
+         -/// <reference path="./.next/types/routes.d.ts" />
+         +/// <reference path="./.next-dev/types/routes.d.ts" />
+
+     O arquivo é gerado, mas está versionado, então a mudança aparece no
+     `git status` como se fosse trabalho. Commitá-la quebra o `tsc` de quem
+     não tem `.next-dev` na máquina — e ela é fácil de commitar sem querer,
+     junto de um `git add -A`, justamente porque este arquivo diz em voz alta
+     "NOTE: This file should not be edited" e ninguém olha o diff dele.
+
+     Antes de commitar depois de usar o truque:  git checkout -- next-env.d.ts
+     Ele volta sozinho no próximo `next build` sem a variável. */
   distDir: process.env.NEXT_DIST_DIR || '.next',
 
   /* O OTIMIZADOR DE IMAGEM ESTAVA NO AR SEM NINGUÉM USAR — 19/09/2026.
