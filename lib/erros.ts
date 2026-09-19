@@ -71,8 +71,38 @@ const PORBANCO: Tradutor[] = [
   /* a versão anterior (01): "Essa pessoa avisou que não pode em DD/MM." */
   [/Essa pessoa avisou que não pode em (\d\d\/\d\d)/i,
    m => `Essa pessoa avisou que não pode em ${m[1]}. Escolha outra pessoa.`],
-  /* salvar_dia */
-  [/salvar_dia sem ministerio/i,
+  /* voluntario_nao_apaga_historico (migração 52): apagar quem já serviu
+     levaria a escala inteira junto, sem volta. O gatilho recusa e manda
+     pausar — e o recado tem que dizer isso, senão a pessoa fica tentando de
+     novo um botão que nunca vai funcionar. O SQL escreve sem acento; a frase
+     que a pessoa lê tem que ter. */
+  [/VOLUNTARIO_COM_HISTORICO:\s*(.+?) ja serviu (\d+) vez/i,
+   m => `${m[1]} já serviu ${m[2]} ${+m[2] === 1 ? 'vez' : 'vezes'}, e apagar levaria toda a escala dela junto, sem volta. Use "Pausar" — a pessoa sai das próximas escalas e o histórico fica.`],
+  /* evento esporádico (migração 54): as recusas de `criar_evento` chegam como
+     código curto, e cada uma tem um caminho de saída diferente */
+  [/^JA_TEM_CULTO$/,
+   () => 'Esse dia já tem culto marcado. O evento entra num dia sem culto — se ele for no mesmo dia do culto, a escala do culto já cobre esse ministério.'],
+  [/^DATA_NO_PASSADO$/,
+   () => 'Essa data já passou. Escolha hoje ou um dia à frente.'],
+  [/^FALTA_NOME$/,
+   () => 'Falta o nome do evento (por exemplo: GUIA Empreendedor).'],
+  [/^FALTA_DATA$/, () => 'Falta a data do evento.'],
+  [/^NAO_E_EVENTO$/,
+   () => 'Isso é um culto da programação fixa, não um evento. Culto não se apaga por aqui.'],
+  [/^EVENTO_NAO_CRIADO$/, () => 'Não consegui criar o evento. Confira a data e o nome.'],
+  [/^EVENTO_NAO_APAGADO$/, () => 'Não consegui apagar o evento. Recarregue a tela e tente de novo.'],
+  /* A ESCALA MUDOU DEBAIXO DA TELA.
+
+     `mudarStatus` grava dizendo de quem é a vaga. Se ninguém casar, é porque
+     outro organizador trocou a pessoa enquanto esta tela estava aberta — e
+     marcar "furou" ali dentro poria o furo na ficha de quem não faltou. */
+  [/ESCALA_MUDOU_NO_POSTO/i,
+   () => 'Outra pessoa entrou nesse posto enquanto você olhava. Recarreguei a escala — confira quem está lá agora e marque de novo.'],
+  /* salvar_dia. Aceita os dois nomes de propósito: a mensagem nasceu na RPC
+     `salvar_dia` e passou a ser lançada por `salvarDia`, em JavaScript, quando
+     a gravação virou diferença. A expressão tinha ficado para trás e a frase
+     boa só valia para o cron, que não desenha tela nenhuma. */
+  [/salvar_?dia sem minist[eé]rio/i,
    () => 'Não achei o ministério desta escala. Recarregue a página e tente de novo.'],
   [/funcao de outro ministerio|voluntario de outro ministerio/i,
    () => 'Alguém desta escala não é deste ministério. Recarregue a página e tente de novo; se continuar, avise quem organiza a igreja.'],

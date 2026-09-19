@@ -191,6 +191,15 @@ export type Dia = {
   cultoId?: string; slots: Record<string, Slot>; plantao: string[]; obs: string;
   /* relatório que o líder escalado escreve no fim do culto */
   relatorio?: string; problemas?: string; relatadoEm?: string | null; relatadoPor?: string | null;
+  /* EVENTO ESPORÁDICO (migração 54) — nome do evento quando este dia NÃO é da
+     programação fixa. Nulo/ausente = domingo ou Follow, como sempre.
+
+     É por este campo, e não pela data, que o motor sabe que o dia é evento:
+     `tipoDoDia()` só olha o dia da semana, e um evento pode cair em qualquer
+     dia — inclusive num domingo, junto com o culto. */
+  evento?: string;
+  /* horário de início, quando informado. É a "hora" do pedido do Arthur. */
+  inicio?: string | null;
 };
 export type Config = {
   limitePadrao: number; janelaCarga: number; plantaoQtd: number;
@@ -243,6 +252,42 @@ export const fmtDia = (s: string) => `${s.slice(8, 10)}/${s.slice(5, 7)}`;
 export const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 export const fmtLongo = (s: string) => `${+s.slice(8, 10)} de ${MESES[+s.slice(5, 7) - 1]}`;
 
+/* =============================================================================
+   O QUE O ROBÔ DAS 3H PODE FAZER SOZINHO
+
+   19/09/2026. Esta decisão morava dentro de dois `if` no meio do laço de
+   `app/api/cron/route.ts`, escrita como regra de produto. Ela é isso, mas é
+   também a coisa que segura uma divergência de gravação:
+
+     · a tela grava pela DIFERENÇA (`salvarDia` → `planoDoDia`): toca só no
+       que mudou, porque regravar linha que não mudou fazia o gatilho recusar
+       quem avisou "não posso" depois de escalado;
+     · o robô grava pela RPC `salvar_dia`, que APAGA a escala da equipe no
+       domingo inteiro e regrava.
+
+   Os dois dão o mesmo resultado enquanto — e SOMENTE enquanto — o robô só
+   grava em mês onde não há nada. É por isso que a regra saiu de dentro do
+   `if` e virou função: aqui ela tem nome, tem motivo escrito e tem teste.
+
+   Três casos, e o do meio é o que faltava quando o mês ficou pela metade e
+   rodar de novo não consertava:
+     · nenhum dia montado → 'monta'
+     · todos montados     → 'ja-tem'   (não toca)
+     · alguns montados    → 'parcial'  (não monta, mas AVISA — completar por
+       conta própria re-sortearia o que o líder pôs à mão, porque `gerarDia`
+       só respeita o que está travado ou confirmado)
+
+   ⚠️  SE UM DIA 'parcial' PASSAR A MONTAR, a gravação do robô tem que virar
+   `salvarDia` ANTES — senão o robô apaga o trabalho manual do líder às 3h da
+   manhã, sem ninguém olhando. */
+export type DecisaoDoRobo = 'monta' | 'ja-tem' | 'parcial';
+export function decisaoDoRobo(diasMontados: number, diasNoMes: number): DecisaoDoRobo {
+  if (diasNoMes <= 0) return 'ja-tem';          // mês sem culto: nada a fazer
+  if (diasMontados <= 0) return 'monta';
+  if (diasMontados >= diasNoMes) return 'ja-tem';
+  return 'parcial';
+}
+
 export function domingosDoMes(ano: number, mes: number): string[] {
   const out: string[] = [];
   const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
@@ -270,8 +315,9 @@ export const tipoDoDia = (data: string): TipoCulto =>
 
 /* Como o culto é chamado nas mensagens e na tela. Uma função só, para não
    sobrar "domingo" escrito na mão em canto nenhum. */
-export const tituloDoCulto = (data: string) =>
-  tipoDoDia(data) === 'follow' ? 'Escala do Follow, sábado' : 'Escala de domingo';
+export const tituloDoCulto = (data: string, evento?: string) =>
+  evento ? `Escala do ${evento}`
+    : tipoDoDia(data) === 'follow' ? 'Escala do Follow, sábado' : 'Escala de domingo';
 export const nomeDoCulto = (data: string) =>
   tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'o domingo';
 export const rotuloCurto = (data: string) =>
@@ -309,7 +355,10 @@ export function cultosDoMes(ano: number, mes: number): string[] {
    todos" e a tela gritaria um alarme falso.
 ============================================================================= */
 export function cargaDoMes(S: Estado, ano: number, mes: number) {
-  const dias = cultosDoMes(ano, mes);
+  /* evento conta como serviço: quem ficou no GUIA Empreendedor foi à igreja
+     naquele dia, e a conta de carga do mês tem que enxergar isso — senão o
+     sorteio do domingo seguinte acha que a pessoa está descansada */
+  const dias = diasDoMes(S, ano, mes);
   const conta = new Map<string, { dias: Set<string>; funcoes: Set<string> }>();
   for (const d of dias) {
     for (const [fn, sl] of Object.entries(S.escalas[d]?.slots || {})) {
@@ -342,8 +391,40 @@ export function cargaDoMes(S: Estado, ano: number, mes: number) {
 /* As áreas que este dia precisa. O Follow não tem HEAD nem transmissão,
    então escalar essas funções num sábado seria criar vaga que não existe. */
 export function funcoesDoDia(S: Estado, data: string) {
+  /* EVENTO ESPORÁDICO: valem TODOS os postos ativos do ministério.
+
+     `funcoes.tipos` responde "em qual culto RECORRENTE este posto existe" —
+     PROJEÇÃO no domingo e no Follow, HEAD só no domingo. Evento não é
+     recorrente: ele já diz de quem é (`cultos.equipe_id`), e quem é dono leva
+     os postos todos.
+
+     A alternativa seria marcar posto por posto a cada evento — que é
+     exatamente o trabalho manual no grupo dos coordenadores que este recurso
+     existe para acabar. Se um dia um evento precisar de menos postos, o
+     caminho é o líder tirar da escala depois de montada, que é o mesmo
+     caminho de qualquer outro dia. */
+  if (S.escalas[data]?.evento) return funcoesAtivas(S);
   const tipo = tipoDoDia(data);
   return funcoesAtivas(S).filter(f => !f.tipos?.length || f.tipos.includes(tipo));
+}
+
+/* OS DIAS DO MÊS QUE ESTE MINISTÉRIO PRECISA MONTAR.
+
+   `cultosDoMes` é aritmética pura: domingos mais os sábados de Follow. Ela
+   continua existindo e continua pura, porque o texto das mensagens e a
+   `lib/demo.ts` dependem disso.
+
+   Mas a lista de TRABALHO não é mais só aritmética: desde a 54 existem
+   eventos esporádicos, que vêm do banco e caem em qualquer dia da semana.
+   Quem monta escala tem que ver os dois, em ordem.
+
+   A união é feita sobre `S.escalas` porque `ponte.ts` materializa os dias de
+   evento DESTE ministério ao montar o Estado — e só os deste, para o Louvor
+   não abrir a escala e ver um dia do Connect. */
+export function diasDoMes(S: Estado, ano: number, mes: number): string[] {
+  const pre = `${ano}-${d2(mes)}`;
+  const eventos = Object.keys(S.escalas).filter(d => d.startsWith(pre) && S.escalas[d]?.evento);
+  return [...new Set([...cultosDoMes(ano, mes), ...eventos])].sort();
 }
 
 /* Cultos de hoje até daqui a n dias. A cobrança de quinta precisa pegar o
@@ -411,20 +492,118 @@ export function escalacoesDe(S: Estado, vid: string) {
   return out.sort((a, b) => (a.data < b.data ? -1 : 1));
 }
 
+/* =============================================================================
+   19/09/2026 — O CUSTO DE "MONTAR A ESCALA DESTE MÊS" NÃO ESTAVA ONDE EU ACHEI.
+
+   Eu tinha posto um teto de passos no backtracking de `aumentar()` e anotado
+   que ele derrubava o mês difícil de 5.591 ms para 711 ms. MEDI DE NOVO, com o
+   teto variando de 20 a 200.000 passos, e o tempo e a cobertura não se mexem:
+   são os mesmos em todos os valores. O teto nunca chega a pesar, porque o
+   conjunto `visto` já limita a busca a (pessoa × dia) uma vez só. O número
+   estava errado e a explicação também. Ficam o registro e o método: só vale
+   como prova a medição que varia o que se afirma ser a causa.
+
+   O custo real é ESTE PEDAÇO. `escalacoesDe` varre O ESTADO INTEIRO — todos os
+   dias carregados, todos os postos de cada dia — e ainda ORDENA, para
+   responder sobre UMA pessoa. E ela é chamada três vezes por pessoa dentro de
+   `candidatos()` (uma em `cargaJanela`, duas em `diasDesdeUltima`), que por
+   sua vez roda duas vezes por posto dentro de `gerarDia`.
+
+   Ou seja, o trabalho cresce com (dias carregados × postos) × (postos ×
+   pessoas). Medido, com 6 meses de histórico no Estado — que é o que a carga
+   traz de verdade:
+
+       11 postos / 17 pessoas ..........    85 ms
+       24 postos / 17 pessoas ...........  565 ms
+       40 postos / 25 pessoas ........... 2.968 ms
+
+   E o histórico dobra a conta: os mesmos 40 postos sem histórico levam
+   1.459 ms. Num Android mediano, 2.968 ms viram algo entre 12 e 24 segundos de
+   tela morta — e a igreja está ANDANDO para lá, porque a migração 47 dividiu
+   um posto do Connect em três sem somar uma pessoa.
+
+   A correção abaixo não muda nenhuma resposta: muda o caminho até ela.
+     · `diasDesdeUltima` quer a ÚLTIMA data antes da referência. Varrer tudo e
+       pegar o fim da lista é o jeito caro de responder isso. Varrendo os dias
+       de trás para frente e parando no primeiro achado, o caso comum olha um
+       ou dois dias em vez de sessenta.
+     · `cargaJanela`, `escalasNoMes` e `furosJanela` querem uma janela. Só os
+       dias DA JANELA precisam ser olhados.
+
+   As duas precisam das datas em ordem. Ordenar a cada chamada seria trocar um
+   custo por outro, então a lista de dias fica guardada e é refeita quando o
+   NÚMERO de dias muda — que é o único jeito de o conjunto mudar aqui: dia é
+   criado por `garantirDia` e nunca apagado durante a geração (o que se apaga
+   são slots DENTRO do dia). Se um dia algo passar a apagar dia, esta premissa
+   cai junto, e é por isso que ela está escrita.
+   ============================================================================= */
+type ComCache = Estado & { _diasOrd?: string[]; _diasN?: number };
+function diasEmOrdem(S: Estado): string[] {
+  const s = S as ComCache;
+  const n = Object.keys(S.escalas).length;
+  if (s._diasOrd && s._diasN === n) return s._diasOrd;
+  const ord = Object.keys(S.escalas).sort();
+  Object.defineProperty(s, '_diasOrd', { value: ord, writable: true, enumerable: false, configurable: true });
+  Object.defineProperty(s, '_diasN', { value: n, writable: true, enumerable: false, configurable: true });
+  return ord;
+}
+
+/** Dias distintos, dentro de [ini, fim], em que a pessoa aparece. */
+function diasComAPessoa(S: Estado, vid: string, ini: string, fim: string, filtro?: (s: any, fn: string) => boolean) {
+  let n = 0;
+  for (const data of diasEmOrdem(S)) {
+    if (data < ini) continue;
+    if (data > fim) break;
+    const slots = S.escalas[data]?.slots;
+    if (!slots) continue;
+    for (const fn in slots) {
+      const sl = (slots as any)[fn];
+      if (sl?.vid !== vid) continue;
+      if (filtro && !filtro(sl, fn)) continue;
+      n++; break;                       // o dia conta UMA vez
+    }
+  }
+  return n;
+}
+
 /* carga e teto contam DOMINGOS distintos: FOTO+EDIÇÃO no mesmo dia vale 1 */
-export const cargaJanela = (S: Estado, vid: string, ref: string, dias: number) => {
-  const ini = addDias(ref, -dias);
-  return new Set(escalacoesDe(S, vid).filter(e => e.data >= ini && e.data <= ref).map(e => e.data)).size;
+export const cargaJanela = (S: Estado, vid: string, ref: string, dias: number) =>
+  diasComAPessoa(S, vid, addDias(ref, -dias), ref);
+export const escalasNoMes = (S: Estado, vid: string, ano: number, mes: number) => {
+  const pre = `${ano}-${d2(mes)}`;
+  return diasComAPessoa(S, vid, pre + '-01', pre + '-31');
 };
-export const escalasNoMes = (S: Estado, vid: string, ano: number, mes: number) =>
-  new Set(escalacoesDe(S, vid).filter(e => e.data.startsWith(`${ano}-${d2(mes)}`)).map(e => e.data)).size;
+/* `furou` conta POSTOS, não dias: furar dois postos no mesmo domingo é furar
+   duas vezes. Era assim antes e continua sendo — por isso este não usa
+   `diasComAPessoa`, que conta dia. */
 export const furosJanela = (S: Estado, vid: string, ref: string, dias: number) => {
   const ini = addDias(ref, -dias);
-  return escalacoesDe(S, vid).filter(e => e.data >= ini && e.data <= ref && e.status === 'furou').length;
+  let n = 0;
+  for (const data of diasEmOrdem(S)) {
+    if (data < ini) continue;
+    if (data > ref) break;
+    const slots = S.escalas[data]?.slots || {};
+    for (const fn in slots) {
+      const sl = (slots as any)[fn];
+      if (sl?.vid === vid && sl.status === 'furou') n++;
+    }
+  }
+  return n;
 };
 export function diasDesdeUltima(S: Estado, vid: string, ref: string, funcao?: string) {
-  const l = escalacoesDe(S, vid).filter(e => e.data < ref && (!funcao || e.funcao === funcao));
-  return l.length ? diffDias(l[l.length - 1].data, ref) : 9999;
+  const dias = diasEmOrdem(S);
+  for (let i = dias.length - 1; i >= 0; i--) {
+    const data = dias[i];
+    if (data >= ref) continue;
+    const slots = S.escalas[data]?.slots;
+    if (!slots) continue;
+    if (funcao) {
+      if ((slots as any)[funcao]?.vid === vid) return diffDias(data, ref);
+      continue;
+    }
+    for (const fn in slots) if ((slots as any)[fn]?.vid === vid) return diffDias(data, ref);
+  }
+  return 9999;
 }
 
 export function ocupadoNoDia(S: Estado, data: string, vid: string, funcaoAlvo: string | null) {
@@ -575,11 +754,45 @@ export function gerarDia(S: Estado, data: string) {
    confirmado pela pessoa. Mover alguém que confirmou é quebrar um combinado. */
 const travado = (sl?: Slot | null) => !!sl && (sl.fixo || sl.status === 'confirmado');
 
-/* Reparo por caminho aumentante: quando sobra vaga, procura uma CADEIA de
-   remanejamentos (A sai daqui, B assume o lugar de A) que fecha o buraco sem
-   violar nenhuma regra. Slot travado nunca é tocado. */
+/* O ORÇAMENTO DE BUSCA QUE ESTEVE AQUI, E POR QUE ELE SAIU — 19/09/2026.
+
+   Durante algumas horas deste dia, este arquivo teve um teto de passos para o
+   backtracking de `aumentar()`, com um comentário que dizia, em números, que
+   ele derrubava o mês difícil de 5.591 ms para 711 ms.
+
+   O número estava errado, e a explicação também. Medindo com o teto variando
+   de 50 a 500.000 passos, em casos de 24 a 90 postos e de 17 a 60 pessoas, a
+   cobertura sai IDÊNTICA e o tempo sai IDÊNTICO. Em 90 postos e 60 pessoas —
+   cinco vezes o maior ministério da igreja — são 516/900 vagas preenchidas em
+   ~1.100 ms com teto 50, com teto 3.000 e com teto 500.000.
+
+   A razão é estrutural, e estava no próprio código o tempo todo: o conjunto
+   `visto` registra o par (pessoa, dia) ANTES de recursar e nunca o solta.
+   Então a busca já é limitada a pessoas × dias, que é pequeno. O teto nunca
+   chegava a pesar porque nunca era alcançado.
+
+   Um botão que não liga nada é pior que botão nenhum: o próximo a passar por
+   aqui vai confiar nele, vai ajustá-lo para resolver alguma lentidão, e vai
+   concluir que "não adiantou nada" sem descobrir onde o tempo realmente está.
+   Por isso ele saiu, e por isso este comentário fica.
+
+   ONDE O TEMPO ESTAVA DE VERDADE: nas quatro contagens por pessoa
+   (`cargaJanela`, `escalasNoMes`, `furosJanela`, `diasDesdeUltima`), que
+   varriam o Estado inteiro a cada chamada. A nota delas, mais acima, tem a
+   medição e o resultado — 2.968 ms para 223 ms, com a mesma escala saindo do
+   outro lado, provado em `scripts/engine-contagens.test.mjs`.
+
+   A LIÇÃO, que vale mais que a correção: uma medição só prova causa quando
+   VARIA aquilo que se afirma ser a causa. Eu tinha medido "antes e depois" de
+   uma mudança que fez duas coisas ao mesmo tempo e creditei a errada. */
+
 function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[]): boolean {
-  for (const c of candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true })) {
+  /* `ignorarLimite` de propósito: quem já bateu o teto do mês ainda é
+     candidato AQUI, porque a linha mais abaixo confere o teto e, se ele
+     estourou, tenta liberar um domingo dessa pessoa em outro dia. É esse
+     remanejamento que `aumentar` existe para achar. */
+  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true });
+  for (const c of lista) {
     const chave = c.id + '|' + data;
     if (visto.has(chave)) continue;
     visto.add(chave);
@@ -641,12 +854,16 @@ export function repararDia(S: Estado, data: string) {
 }
 
 export function gerarMes(S: Estado, ano: number, mes: number, aPartirDe?: string) {
-  const todos = cultosDoMes(ano, mes);
+  /* `diasDoMes` e não `cultosDoMes`: os eventos esporádicos da 54 entram no
+     mesmo sorteio, com as mesmas regras, que é o pedido inteiro. */
+  const todos = diasDoMes(S, ano, mes);
   /* dias antes do corte são história: contam na carga e no teto, mas nunca
      são regenerados nem usados como origem/destino de remanejamento */
   const dias = aPartirDe ? todos.filter(d => d >= aPartirDe) : todos;
   for (const d of dias) gerarDia(S, d);
-  for (const D of dias) for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias);
+  for (const D of dias) {
+    for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias);
+  }
   for (const d of dias) S.escalas[d].plantao = sugerirPlantao(S, d, S.config.plantaoQtd);
   return dias.map(d => ({ data: d, vagas: vagasDe(S, d) }));
 }

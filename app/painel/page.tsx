@@ -336,9 +336,12 @@ function Painel() {
 
   async function marcar(funcao: string, status: Status) {
     const f = S.funcoes.find(x => x.nome === funcao);
-    if (!f?.id || !dia?.cultoId) return;
+    /* quem a tela acredita estar na vaga vai junto na gravação — ver o
+       comentário de `mudarStatus` em lib/db.ts */
+    const vid = dia?.slots?.[funcao]?.vid;
+    if (!f?.id || !dia?.cultoId || !vid) return;
     setSalvando(funcao); setOtimista({ f: funcao, st: status });
-    try { await mudarStatus(dia.cultoId, f.id, status); await recarregar(); }
+    try { await mudarStatus(dia.cultoId, f.id, vid, status); await recarregar(); }
     catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
     setSalvando(''); setOtimista(null);
   }

@@ -27,9 +27,40 @@ export function montarEstado(l: LinhasDoBanco): Estado {
   S.config = { ...CONFIG_PADRAO, ...(l.config?.dados || {}) };
   S.funcoes = (l.funcoes || []).map(f => ({
     id: f.id, nome: f.nome, simultanea: f.simultanea, ordem: f.ordem, ativa: f.ativa,
-    /* em que tipo de culto esta área existe. Linha antiga (sem a coluna) vale
-       para os dois: só quem foi marcado explicitamente fica de fora do Follow. */
-    tipos: Array.isArray(f.tipos) && f.tipos.length ? f.tipos : ['domingo', 'follow'],
+    /* Em que tipo de culto esta área existe. Linha antiga (sem a coluna) vale
+       para os dois: só quem foi marcado explicitamente fica de fora do Follow.
+
+       19/09/2026 — POR QUE ISTO FILTRA EM VEZ DE REPASSAR.
+
+       `cultos.tipo` é coluna gerada e só produz 'domingo' ou 'follow'. Uma
+       palavra fora dessas duas no array não casa com nada, e o posto some da
+       escala EM SILÊNCIO — `vagasDe` não o lista, `resumoDia` não o conta, e
+       o dia fecha "9 de 9" sem ele existir.
+
+       Não é hipótese: a migração 18 achou 'evento' no Louvor e tirou; a 29
+       pôs 'culto' e o GUIA Kids INTEIRO (9 postos), a Livraria (2) e quatro
+       postos do Connect passaram meses sem aparecer em domingo nenhum. A 53
+       consertou as linhas e pôs um CHECK para a palavra inventada não entrar
+       de novo.
+
+       Aqui é a segunda tranca, para o caso de a carga vir de um banco que
+       ainda não recebeu a 53. A escolha do fallback é deliberada: se sobrar
+       NADA de conhecido, o posto vale para os dois tipos — ou seja, ele
+       APARECE. Posto aparecendo onde não devia alguém percebe e reclama;
+       posto que nunca aparece ninguém percebe nunca. Entre errar para o lado
+       visível e errar para o lado invisível, este arquivo erra para o
+       visível. */
+    tipos: (() => {
+      const conhecidos = (Array.isArray(f.tipos) ? f.tipos : []).filter(
+        (t: unknown) => t === 'domingo' || t === 'follow',
+      );
+      if (conhecidos.length) return conhecidos;
+      if (Array.isArray(f.tipos) && f.tipos.length && typeof console !== 'undefined') {
+        console.warn('[ponte] o posto', f.nome, 'tem tipos', f.tipos,
+          '— nenhum deles existe. Vale para domingo e follow para NÃO sumir da escala. Falta a migração 53.');
+      }
+      return ['domingo', 'follow'];
+    })(),
     /* posto que preenche o relatório do dia (líder escalado do Serviço) */
     relata: !!f.relata,
     /* a regra do prédio: 'M', 'F' ou nada. Coluna nova, então linha antiga
@@ -88,6 +119,26 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     if (id) d.cultoId = id;
     return d;
   };
+
+  /* OS DIAS DE EVENTO SÃO MATERIALIZADOS; OS DEMAIS, NÃO.
+
+     A regra geral deste arquivo é NÃO criar o dia só porque ele existe em
+     `cultos` — está explicado mais abaixo: materializar um domingo só porque
+     outro ministério montou nele fazia o app mostrar "7 funções sem ninguém"
+     e sumir com o botão de montar o mês.
+
+     Evento é o caso oposto, e por isso é a exceção: ele só chega aqui se for
+     DESTE ministério (o filtro da consulta garante), e ele precisa aparecer
+     mesmo vazio — um evento recém-criado não tem escalação nenhuma, e se ele
+     não aparecesse, o líder cadastraria o GUIA Empreendedor e não veria
+     nada. O dia vazio COM nome é justamente o que ele precisa ver para
+     tocar "montar". */
+  for (const c of l.cultos || []) {
+    if (!c.evento) continue;
+    const d = abrir(c.data);
+    d.evento = c.evento;
+    d.inicio = c.inicio || null;
+  }
   for (const e of l.escalacoes || []) {
     const data = dataDoCulto.get(e.culto_id); const fn = nomeFuncao.get(e.funcao_id);
     if (!data || !fn) continue;
@@ -206,8 +257,16 @@ async function lerVoluntarios(s: any, equipeId: string) {
   return r2;
 }
 
-/* A carga olha no máximo 180 dias para trás. Sem a janela, cada troca de
-   ministério puxava o histórico inteiro da igreja desde sempre. */
+/* A carga olha no máximo 200 dias para trás. Sem a janela, cada troca de
+   ministério puxava o histórico inteiro da equipe desde sempre.
+
+   200 e não 180: o comentário dizia 180 e o código dizia 200 desde que o
+   número foi ajustado, e comentário que mente num arquivo onde o comentário É
+   a documentação é o começo da erosão. Vale 200, e o motivo do número é a
+   folga sobre `janelaCarga`, que vale 90 por padrão — `cargaJanela` e
+   `escalasNoMes` contam em cima do que foi CARREGADO, então encurtar esta
+   janela muda o resultado do sorteio em silêncio. Não desça daqui sem mexer
+   no motor junto. */
 export const DIAS_DE_HISTORICO = -200;
 
 export async function linhasDaEquipe(
@@ -217,7 +276,13 @@ export async function linhasDaEquipe(
   const [funcoes, vols, cultos, cfg] = await Promise.all([
     s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
     lerVoluntarios(s, equipeId),
-    s.from('cultos').select('id,data').gte('data', desde).order('data'),
+    /* EVENTO ESPORÁDICO (migração 54): o dia do evento vem junto com os
+       domingos, e o filtro é o que impede o Louvor de abrir a escala e ver um
+       dia do Connect. `equipe_id is null` são os cultos da programação fixa,
+       que são da igreja inteira; preenchido é evento, e só o dono enxerga. */
+    s.from('cultos').select('id,data,evento,equipe_id,inicio')
+      .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
+      .gte('data', desde).order('data'),
     s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
   ]);
   /* config pode vir nula por RLS (quem logou sem estar na allowlist) — isso é
@@ -230,11 +295,26 @@ export async function linhasDaEquipe(
   const volIds = (vols.data || []).map((v: any) => v.id);
   const cultoIds = (cultos.data || []).map((c: any) => c.id);
 
+  /* A JANELA VALE PARA AS TABELAS QUE CRESCEM COM O TEMPO.
+
+     Ela chegava só a `cultos` e `disponibilidade`. `escalacoes`,
+     `indisponibilidades` e `plantoes` vinham INTEIRAS — todo o histórico
+     daquela equipe desde o primeiro domingo —, e `montarEstado` jogava fora
+     o que não casava com nenhum culto carregado. Ou seja: o navegador baixava
+     anos de escala para calcular o mês que vem, a cada carga de tela e a cada
+     `recarregar()`, que roda depois de CADA ação do líder.
+
+     `escalacoes` e `plantoes` cortam por `culto_id`, não por data: os ids já
+     estão calculados logo acima, e vêm de uma consulta que JÁ é janelada.
+     `indisponibilidades` corta por data, como `disponibilidade`.
+
+     `habilidades` fica inteira de propósito — ela é por pessoa e por função,
+     não cresce com o tempo, e é o que diz quem PODE fazer o quê. */
   const [habs, indis, escs, plants, recados, disp] = await Promise.all([
     volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : vazio,
-    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds) : vazio,
-    funcaoIds.length ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds) : vazio,
-    volIds.length ? s.from('plantoes').select('*').in('voluntario_id', volIds) : vazio,
+    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
+    (funcaoIds.length && cultoIds.length) ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds).in('culto_id', cultoIds) : vazio,
+    (volIds.length && cultoIds.length) ? s.from('plantoes').select('*').in('voluntario_id', volIds).in('culto_id', cultoIds) : vazio,
     cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
     volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
   ]);

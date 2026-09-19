@@ -126,10 +126,16 @@ function Time() {
     await mudar(vid, { telefone: texto || null });
   }
 
+  /* 19/09/2026: o texto daqui dizia "O histórico de escalas dele some junto",
+     e isso deixou de ser verdade. A migração 52 pôs um gatilho que RECUSA
+     apagar quem já serviu — porque o mesmo botão resolvia duas coisas muito
+     diferentes: limpar um cadastro errado (certo, e continua funcionando) e
+     jogar fora três anos da Letícia (irreversível, e ninguém quer).
+     Quem tem histórico sai por "Pausar", que está na linha ao lado. */
   async function remover(vid: string, nome: string) {
     if (!await confirmar({
       titulo: `Remover ${nome} do time?`,
-      texto: 'O histórico de escalas dele some junto.',
+      texto: 'Só dá para remover quem ainda não serviu nenhuma vez — é para limpar cadastro errado. Quem já tem escala no histórico sai por "Pausar".',
       acao: 'Remover', perigo: true,
     })) return;
     try { await removerVoluntario(vid); await recarregar(); aviso('Removido'); }

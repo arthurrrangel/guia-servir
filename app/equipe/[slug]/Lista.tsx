@@ -17,16 +17,18 @@ import { emNome } from '@/lib/nome';
 
 const K_TOKEN = 'escala.meu-token';
 
-/* DE ONDE VEM O NOME INTEIRO, e por que são dois caminhos.
+/* DE ONDE VEM O NOME INTEIRO.
 
-   `nome_completo` chega dentro da própria linha quando a migração 42 tiver
-   rodado — é o conserto na origem, e é o que se quer.
+   `nome_completo` chega dentro da própria linha, de `equipe_time` — o conserto
+   na origem, feito pela migração 42.
 
-   Enquanto ela não roda, o nome inteiro chega por fora: o servidor da página
-   (`page.tsx` → `lib/nomes-servidor.ts`) lê `voluntarios.nome` e entrega o
-   mapa `id → nome` na prop `nomes`. A tela prefere o campo da linha; se ele
-   não existir, usa o mapa; se nenhum dos dois existir, mostra o primeiro nome,
-   que é o comportamento antigo.
+   A prop `nomes` é o caminho ANTIGO, e hoje chega sempre vazia. Até 19/09/2026
+   ela era preenchida por `lib/nomes-servidor.ts`, que lia `voluntarios.nome`
+   no servidor da página com `SUPABASE_SERVICE_ROLE` — uma chave que ignora
+   RLS, numa rota que qualquer pessoa abre sem se identificar. Aquilo existia
+   porque a 42 ainda não tinha rodado; ela rodou, e o atalho ficou. Foi
+   removido, e a prop segue na assinatura porque o fallback abaixo não custa
+   nada e é a rede de segurança se `nome_completo` faltar numa linha.
 
    `primeiro_nome` continua chegando porque é ele que a busca casa quando a
    pessoa digita só o primeiro nome, e porque é o último degrau da queda. */

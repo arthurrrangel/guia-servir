@@ -58,7 +58,13 @@ begin
 end $function$
 ;
 
-$function$;
+/* 19/09/2026 — aqui havia um `$function$;` órfão, sobra da extração com
+   pg_get_functiondef. Ele não fechava nada: o Postgres o lia como ABERTURA de
+   uma nova string com cifrão, que então engolia tudo até o `$function$`
+   seguinte — justamente o que abre `tel_norm` logo abaixo. Resultado: este
+   arquivo nunca pôde ser reaplicado, e `tel_norm` (usada por 11 outras
+   migrações) sumia junto. Passou despercebido por 24 dias porque ninguém
+   reconstrói o banco a partir das migrações; ver a nota no fim da 52. */
 
 CREATE OR REPLACE FUNCTION public.tel_norm(t text)
  RETURNS text

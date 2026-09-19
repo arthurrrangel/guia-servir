@@ -9,7 +9,12 @@ import { planoDoDia, planoDoPlantao } from '../lib/escala-diff.ts';
 
 let falhas = 0;
 const ok = (cond, rotulo, extra = '') => { if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
-const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+/* `apagarPrimeiro` entrou no plano em 19/09 e é comparado à parte, nos três
+   casos do fim do arquivo. Aqui a comparação continua sendo sobre as três
+   listas — senão cada teste antigo teria que repetir um campo que não é o
+   assunto dele. */
+const igual = (a, b) => JSON.stringify({ apagar: a.apagar, atualizar: a.atualizar, inserir: a.inserir })
+  === JSON.stringify({ apagar: b.apagar, atualizar: b.atualizar, inserir: b.inserir });
 
 const F = { proj: 'f-proj', ilum: 'f-ilum', edic: 'f-edic', foto: 'f-foto' };
 const V = { leticia: 'v-let', thiago: 'v-thi', maria: 'v-mar', joao: 'v-joao' };
@@ -92,6 +97,45 @@ const quer = (sobrescreve = {}) => [
   ok(igual(planoDoPlantao([], []), { apagar: [], inserir: [] }), 'plantão vazio');
 }
 
-const total = 14;
+const total = 17;
+/* ---- 19/09/2026: a ordem entre apagar e inserir ----
+
+   Três requisições, três transações. Se o DELETE passa e o INSERT é recusado
+   por gatilho, a vaga esvazia por causa da tentativa. Inserir primeiro evita
+   a perda — exceto na permuta, onde liberar antes é obrigatório, senão o
+   gatilho de função simultânea recusa a entrada antes de a saída acontecer.
+   Este é o caso que não pode afrouxar. */
+{
+  /* troca simples: sai a Fernanda, entra o Thiago. Ninguém aparece dos dois
+     lados, então dá para inserir primeiro. */
+  const p = planoDoDia(
+    [{ funcao_id: 'f1', voluntario_id: 'thiago', status: 'pendente', fixo: false, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'f1', voluntario_id: 'fernanda', fixo: false, primeira_vez: false }],
+  );
+  ok(p.apagarPrimeiro === false, 'troca simples insere primeiro (nada se perde se o gatilho recusar)');
+}
+{
+  /* permuta: Letícia e Thiago trocam de posto. Os dois saem E entram. */
+  const p = planoDoDia(
+    [
+      { funcao_id: 'f1', voluntario_id: 'thiago', status: 'pendente', fixo: false, primeira_vez: false },
+      { funcao_id: 'f2', voluntario_id: 'leticia', status: 'pendente', fixo: false, primeira_vez: false },
+    ],
+    [
+      { id: 'l1', funcao_id: 'f1', voluntario_id: 'leticia', fixo: false, primeira_vez: false },
+      { id: 'l2', funcao_id: 'f2', voluntario_id: 'thiago', fixo: false, primeira_vez: false },
+    ],
+  );
+  ok(p.apagarPrimeiro === true, 'permuta apaga primeiro (senão o gatilho de simultânea recusa)');
+}
+{
+  /* vaga nova, sem ninguém saindo */
+  const p = planoDoDia(
+    [{ funcao_id: 'f1', voluntario_id: 'ana', status: 'pendente', fixo: false, primeira_vez: false }],
+    [],
+  );
+  ok(p.apagarPrimeiro === false, 'vaga nova insere primeiro');
+}
+
 if (falhas) { console.log(`escala-diff: ${falhas} falha(s) em ${total}`); process.exit(1); }
 console.log(`escala-diff: ${total}/${total} ok`);

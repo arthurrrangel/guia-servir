@@ -1657,6 +1657,9 @@ html,body{overflow-x:clip}
   font-family:var(--fonte-display);font-weight:var(--p-rot);
   font-size:var(--t-rot);letter-spacing:var(--tr);text-transform:uppercase;text-decoration:none;
   padding:var(--e3) var(--e5);border:1px solid currentColor;
+  /* a altura mínima deste botão NÃO se decide aqui: uma revisão lá embaixo
+     redeclara `.bt-barra` inteiro e é ela que vale. Procure por min-height
+     em `.bt-barra` perto do fim desta folha antes de mexer. */
   transition:background var(--t),color var(--t),opacity var(--t);
 }
 .bt-barra svg{width:var(--i-min);height:var(--i-min)}
@@ -3711,7 +3714,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .lid-cand-nota{
   width:100%; margin-top:var(--e2); padding:var(--e3) var(--e3); border-radius:0;
   border:1px solid var(--linha); background:var(--papel);
-  font:15px/1.55 var(--fonte); color:var(--ink); resize:vertical;
+  /* 16px, NÃO 15: abaixo de 16 o Safari do iPhone dá zoom sozinho ao focar,
+     e a pessoa fica escrevendo a nota da candidatura com a tela torta e a
+     régua horizontal aparecendo. Um pixel a mais resolve; o `max()` cuida de
+     quando a régua de tipo do sistema subir. */
+  font:max(16px,var(--t-corpo))/1.55 var(--fonte); color:var(--ink); resize:vertical;
 }
 .lid-cand-nota:focus-visible{ outline-offset:-3px; border-color:var(--noite) }
 
@@ -3784,6 +3791,45 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   text-align:right; white-space:nowrap; color:var(--cinza);
 }
+/* =============================================================================
+   EVENTO ESPORÁDICO (migração 54)
+
+   O que não está na programação fixa. Some visualmente com o resto de
+   propósito: o evento é um dia como outro qualquer depois de criado, e um
+   cartão com cara diferente faria parecer que as regras são outras — elas não
+   são. A única distinção é o nome no lugar de "Domingo, 04/10".
+   ============================================================================= */
+.esc-evento{ border:1px solid var(--linha); border-radius:var(--r2); background:var(--papel) }
+.esc-evento-abrir{
+  cursor:pointer; list-style:none; padding:var(--e3) var(--e4);
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
+  /* 44px de alvo: a regra de toque vale aqui como em todo o resto */
+  min-height:44px; display:flex; align-items:center;
+}
+.esc-evento-abrir::-webkit-details-marker{ display:none }
+.esc-evento[open] .esc-evento-abrir{ color:var(--tinta); border-bottom:1px solid var(--linha) }
+.esc-evento-corpo{ padding:var(--e4); display:grid; gap:var(--e4) }
+.esc-evento-dica{ margin:0; font-size:var(--t-peq); line-height:1.55; color:var(--cinza) }
+.esc-evento-campos{ display:grid; gap:var(--e3) }
+@media (min-width:560px){
+  .esc-evento-campos{ grid-template-columns:1fr auto auto; align-items:end }
+}
+.esc-evento-campos label{ display:grid; gap:var(--e1) }
+.esc-evento-campos label > span{
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
+}
+.esc-evento-opc{ text-transform:none; letter-spacing:0; font-weight:400 }
+.esc-evento-campos input{
+  /* 16px é o piso: abaixo disso o iOS dá zoom sozinho ao focar o campo */
+  font:max(16px,var(--t-corpo))/1.4 var(--fonte-corpo);
+  padding:var(--e2) var(--e3); min-height:44px;
+  border:1px solid var(--linha); border-radius:var(--r1);
+  background:var(--fundo); color:var(--tinta); width:100%;
+}
+.esc-evento-tirar{ margin-top:var(--e4); padding-top:var(--e3); border-top:1px solid var(--linha) }
+
 .esc-dia.ruim > summary .esc-dia-est{ color:var(--bad) }
 .esc-dia.pend > summary .esc-dia-est{ color:var(--warn) }
 .esc-dia.ok   > summary .esc-dia-est{ color:var(--ok) }
@@ -4940,9 +4986,31 @@ html{ scroll-behavior:smooth }
 .js-rev .rev.visto .escolha:nth-child(1){ transition-delay:120ms }
 .js-rev .rev.visto .escolha:nth-child(2){ transition-delay:220ms }
 .js-rev .rev.visto .escolha:nth-child(3){ transition-delay:320ms }
-.nao-anima .rev *,.nao-anima .rev{ opacity:1!important; transform:none!important; transition:none!important; filter:none!important }
+/* A ESCOTILHA DE "SEM MOVIMENTO" NÃO PODE LEVAR O DESENHO JUNTO.
+
+   Estas duas regras existem para uma coisa só: garantir que, com o movimento
+   desligado, nada fique escondido — nem meio transparente, nem deslocado,
+   nem borrado. A versão anterior fazia isso com `filter:none!important` em
+   TODO descendente de `.rev`, e aí levou junto um filtro que não era de
+   animação nenhuma: o escurecimento das fotos.
+
+   O efeito era bem feio e bem escondido. `.g-tile img` tem
+   `brightness(.44)`, que é o que deixa a foto escura o bastante para o texto
+   branco por cima ser lido. Com o filtro zerado, a foto volta ao brilho
+   cheio — e o cartão 03 de `/acessar`, que é um abraço em frente a uma
+   parede clara, ficou com "Quero participar" em branco sobre branco:
+   medido, 1.75:1.
+
+   Quem via isso? Exatamente quem marcou "reduzir movimento" no aparelho. A
+   configuração de acessibilidade estava piorando a acessibilidade.
+
+   O único filtro que a revelação aplica é `blur()`, e só nas palavras
+   (`.pal`). Então é só isso que precisa ser desfeito. */
+.nao-anima .rev *,.nao-anima .rev{ opacity:1!important; transform:none!important; transition:none!important }
+.nao-anima .rev .pal,.nao-anima .rev.pal{ filter:none!important }
 @media(prefers-reduced-motion:reduce){
-  .js-rev .rev *{ opacity:1!important; transform:none!important; transition:none!important; filter:none!important }
+  .js-rev .rev *{ opacity:1!important; transform:none!important; transition:none!important }
+  .js-rev .rev .pal{ filter:none!important }
 }
 
 /* ---- o herói respira ------------------------------------------------------
@@ -7880,8 +7948,15 @@ label{ font-family:var(--fonte-display); font-weight:var(--p-rot); letter-spacin
 .casa-escuro .acao:not(.cheia),.casa-heroi .acao:not(.cheia),.casa-foto .acao:not(.cheia),.g-cheio .acao:not(.cheia){ border-color:rgba(255,255,255,.34) }
 .casa-escuro .acao:not(.cheia):hover,.g-cheio .acao:not(.cheia):hover{ background:#fff; border-color:#fff; color:var(--noite) }
 .g-cheio .acao.cheia:hover,.casa-heroi .acao.cheia:hover{ background:#fff; border-color:#fff; opacity:1 }
-/* a barra: o botão do topo no mesmo tom, 40px */
-.bt-barra{ text-transform:none; letter-spacing:-.005em; font-size:14px; font-weight:600; padding:0 16px; min-height:40px; border-radius:8px; border-color:rgba(255,255,255,.34) }
+/* a barra: o botão do topo no mesmo tom.
+
+   44px, NÃO 40. Medido no celular: este botão dava 74×40, e os 4px que
+   faltavam são a diferença entre acertar de primeira e errar duas vezes com
+   o polegar andando. É o mínimo da WCAG 2.5.5 e o da Apple, e este é o ÚNICO
+   caminho para "Servir" na barra do site — errar aqui custa uma pessoa.
+   (Há um `min-height` antigo lá em cima, na primeira declaração de
+   `.bt-barra`; quem manda é esta, que vem depois.) */
+.bt-barra{ text-transform:none; letter-spacing:-.005em; font-size:14px; font-weight:600; padding:0 16px; min-height:44px; border-radius:8px; border-color:rgba(255,255,255,.34) }
 .casa-barra.opaco .bt-barra{ border-color:rgba(37,37,37,.22) }
 .bt-barra.discreto{ border:0; padding-inline:8px }
 /* "Quero servir" no largo, "Servir" no estreito: duas palavras inteiras, sem

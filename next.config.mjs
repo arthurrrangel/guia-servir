@@ -82,6 +82,12 @@ const ROTAS_FECHADAS = [
   /* lista de nomes por equipe, e convite de uso único */
   '/equipe/:caminho+',
   '/candidatura/:caminho+',
+  /* 19/09/2026 — Demandas estava FORA desta lista e fora do robots.txt, e é
+     justamente a única rota do sistema que recebe a credencial pela query
+     string (`/demandas?t=<token>`). Ou seja: a página mais exposta era a
+     única sem `noindex`. O `?t=` agora sai da barra assim que é guardado
+     (ver `meuToken` em lib/demandas/api.ts), e a rota entra aqui junto. */
+  '/demandas', '/demandas/:caminho+',
 ];
 
 const nextConfig = {
@@ -89,6 +95,28 @@ const nextConfig = {
      `next build` para conferir o deploy. Com o mesmo distDir, o build apaga os
      chunks que o dev está servindo e a tela quebra no meio da revisão. */
   distDir: process.env.NEXT_DIST_DIR || '.next',
+
+  /* O OTIMIZADOR DE IMAGEM ESTAVA NO AR SEM NINGUÉM USAR — 19/09/2026.
+
+     Este app não importa `next/image` em lugar nenhum: são 23 `<img>` crus.
+     Daí a conclusão natural, e errada, de que o otimizador não é assunto
+     nosso. O Next monta `/_next/image` INCONDICIONALMENTE, importe-se ou não.
+     Medido num build limpo:
+
+         GET /_next/image?url=%2Ffotos%2Fabraco.webp&w=1080&q=75
+         → 200, content-type: image/jpeg, JPEG 545x425
+
+     Ou seja: uma requisição anônima fazia o `sharp` transcodificar as fotos
+     da igreja. Sem `remotePatterns`, nenhuma URL de fora entra (dá 400), e
+     largura fora de `deviceSizes` também dá 400 — então não é SSRF. O que
+     sobra é re-encodar a mesma foto quantas vezes alguém pedir, e carregar um
+     decodificador nativo que aparece em aviso de segurança atrás de outro.
+
+     `unoptimized: true` desliga a rota inteira. Custo: nenhum, porque
+     ninguém a usa. No dia em que `next/image` for útil aqui, tira-se esta
+     linha de propósito, sabendo o que se está ligando. */
+  images: { unoptimized: true },
+
   async headers() {
     return [
       { source: '/:caminho*', headers: CABECALHOS },

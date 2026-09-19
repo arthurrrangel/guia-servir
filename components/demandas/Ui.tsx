@@ -89,13 +89,54 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
   );
 }
 
-/** Copia para a área de transferência e diz que copiou. */
+/** Copia para a área de transferência e diz que copiou — ou que não copiou.
+
+    O `catch {}` VAZIO ERA UM BOTÃO QUE MENTE — 19/09/2026.
+
+    A versão anterior tentava `navigator.clipboard.writeText` e engolia a
+    falha. Quando falhava, o rótulo simplesmente não mudava: a pessoa tocava,
+    nada acontecia, nada explicava, e ela ia colar uma área de transferência
+    vazia no grupo do WhatsApp.
+
+    E falha com frequência: `navigator.clipboard` exige contexto seguro e,
+    em vários navegadores, gesto do usuário reconhecido — dentro de um
+    `async` que já cedeu a vez, o gesto pode ter expirado. É por isso que o
+    `copiar()` do outro sistema (`components/Shell.tsx`) tem o plano B com
+    `execCommand` e avisa quando os dois falham. Aqui faltava.
+
+    Três estados agora, e o terceiro é o que importa: copiou, não copiou, e
+    o texto à mostra para a pessoa selecionar com o dedo. */
 export function Copiar({ texto, rot = 'Copiar' }: { texto: string; rot?: string }) {
-  const [feito, setFeito] = useState(false);
-  useEffect(() => { if (!feito) return; const i = setTimeout(() => setFeito(false), 1800); return () => clearTimeout(i); }, [feito]);
+  const [fase, setFase] = useState<'' | 'feito' | 'falhou'>('');
+  useEffect(() => {
+    if (fase !== 'feito') return;
+    const i = setTimeout(() => setFase(''), 1800);
+    return () => clearTimeout(i);
+  }, [fase]);
+
+  async function tentar() {
+    try { await navigator.clipboard.writeText(texto); setFase('feito'); return; } catch { /* plano B */ }
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = texto; ta.readOnly = true;
+      ta.style.position = 'fixed'; ta.style.left = '-9999px'; ta.style.top = '0';
+      document.body.appendChild(ta); ta.select();
+      const deu = document.execCommand('copy');
+      ta.remove();
+      setFase(deu ? 'feito' : 'falhou');
+    } catch { setFase('falhou'); }
+  }
+
+  if (fase === 'falhou') {
+    return (
+      <span className="dm-copiar-falhou">
+        <span className="dm-peq dm-mudo">Não consegui copiar. Selecione e copie:</span>
+        <textarea className="dm-copiar-cru" readOnly rows={3} value={texto}
+          onFocus={e => e.currentTarget.select()} />
+      </span>
+    );
+  }
   return (
-    <button className="dm-btn dm-peq" onClick={async () => {
-      try { await navigator.clipboard.writeText(texto); setFeito(true); } catch {}
-    }}>{feito ? 'Copiado' : rot}</button>
+    <button className="dm-btn dm-peq" onClick={tentar}>{fase === 'feito' ? 'Copiado' : rot}</button>
   );
 }

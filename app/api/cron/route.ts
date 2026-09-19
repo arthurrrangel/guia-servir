@@ -14,7 +14,7 @@ import { cont } from '@/lib/plural';
 import { createClient } from '@supabase/supabase-js';
 import {
   addDias, cultosAte, cultosDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
-  tipoDoDia, vagasDe, nomeDe, MESES, Estado,
+  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
@@ -57,8 +57,22 @@ async function estadoDaEquipe(s: any, equipe: any): Promise<Estado> {
    ministério: organizador global (equipe_id nulo) ou preso a ele. */
 type Lider = { email: string; equipe_id: string | null };
 
+/* LEITURA QUE FALHA TEM QUE FALHAR.
+
+   Esta função descartava `error`. supabase-js não lança em erro do
+   PostgREST — devolve `{data: null, error}` —, então um 5xx passageiro
+   virava `[]`, e `[]` aqui significa "nenhum líder existe". A partir daí
+   `paraEquipe` devolve lista vazia, TODO envio responde "sem destinatário", e
+   o alerta de `[ATENÇÃO] ministério não montado` também vai para ninguém. O
+   mês é gravado certinho no banco e NINGUÉM é avisado de nada.
+
+   É a mesma lição que `lib/ponte.ts` já tinha aprendido e escrito: "lista
+   vazia não é ninguém, é não sei. Quem chama decide o que fazer com isso;
+   ninguém decide nada com um vazio que mente." A lição estava aplicada lá
+   dentro e não aqui, na rota que roda sozinha às 9h sem ninguém olhando. */
 async function lideresTodos(s: any): Promise<Lider[]> {
-  const { data } = await s.from('lideres').select('email,equipe_id');
+  const { data, error } = await s.from('lideres').select('email,equipe_id');
+  if (error) throw error;
   return (data || []) as Lider[];
 }
 const paraEquipe = (ls: Lider[], equipeId: string) =>
@@ -109,6 +123,22 @@ const proxMes = (iso: string) => { const [a, m] = iso.split('-').map(Number); re
 
    Se este segredo já foi usado em URL alguma vez, gire o CRON_SECRET na Vercel. */
 export async function GET(req: Request) {
+  try { return await rodar(req); }
+  catch (e: any) {
+    /* EXCEÇÃO AQUI NÃO PODE VIRAR TELA PADRÃO DO FRAMEWORK.
+
+       Qualquer leitura que agora estoura (ver `lideresTodos` e a leitura de
+       `equipes`) precisa chegar como 500 COM MOTIVO no corpo, para o log da
+       Vercel guardar o que aconteceu. Sem isto, o throw viraria um
+       "Internal Server Error" seco e a informação morreria. */
+    return Response.json(
+      { erro: 'o cron falhou', detalhe: String(e?.message || e).slice(0, 300) },
+      { status: 500 },
+    );
+  }
+}
+
+async function rodar(req: Request) {
   const segredo = process.env.CRON_SECRET;
   const auth = req.headers.get('authorization');
   const url = new URL(req.url);
@@ -124,7 +154,17 @@ export async function GET(req: Request) {
   const fazMes = forcar === 'mes' || (!forcar && diaMes === 26);
   const fazCobranca = forcar === 'cobranca' || (!forcar && diaSemana === 4);
 
-  const { data: equipes } = await s.from('equipes').select('*').order('ordem');
+  /* SEM ESTAS DUAS LEITURAS NÃO HÁ TRABALHO POSSÍVEL, E FALHAR CALADO É PIOR
+     QUE NÃO RODAR.
+
+     `from('equipes')` descartava `error` do mesmo jeito. Com `equipes` nulo, a
+     linha de baixo devolvia `{obs:'nenhuma equipe'}` com HTTP 200 — e o dia 26
+     passava sem a escala do mês ser montada, sem e-mail, sem alerta, com a
+     Vercel registrando sucesso. O líder descobria no dia 1º, olhando o app
+     vazio. Agora isso estoura, vira 500 no `catch` lá embaixo, e 500 é o
+     único sinal que a plataforma já sabe ler sem instalar nada. */
+  const { data: equipes, error: erroEquipes } = await s.from('equipes').select('*').order('ordem');
+  if (erroEquipes) throw erroEquipes;
   const lideres = await lideresTodos(s);
   const rel: any = { hoje: iso, equipes: (equipes || []).length, acoes: [] };
   if (!equipes?.length) return Response.json({ ...rel, obs: 'nenhuma equipe' });
@@ -175,16 +215,76 @@ export async function GET(req: Request) {
         resumo.push({ equipe: e.nome, erro: m }); falhas.push(m); continue;
       }
       if (!S.voluntarios.filter(v => v.ativo).length || !funcoesAtivas(S).length) { resumo.push({ equipe: e.nome, pulado: 'sem time/funções ativas' }); continue; }
-      const jaTem = dias.some(d => Object.values(S.escalas[d]?.slots || {}).some((x: any) => x?.vid));
-      if (jaTem) { resumo.push({ equipe: e.nome, pulado: 'já tinha escala' }); continue; }
+      /* "JÁ TINHA ESCALA" PRECISA DISTINGUIR QUEM MONTOU.
+
+         O guarda existe para não passar por cima do que o líder montou à mão,
+         e isso está certo. Mas ele olhava `.some(...)`: BASTAVA UM dia com
+         gente. Se o dia 26 falhasse no terceiro dos sete cultos, dois ficavam
+         gravados e cinco não — e rodar de novo não consertava, porque agora
+         "já tinha escala" era verdade. O mês ficava permanentemente pela
+         metade até alguém montar na mão.
+
+         Agora são três casos, e o do meio é o que faltava:
+           · nenhum dia montado  → monta o mês;
+           · TODOS montados      → não toca (é o guarda original);
+           · alguns montados     → não monta sozinho, mas AVISA, porque
+             completar por conta própria re-sortearia o que o líder pôs à mão
+             (`gerarDia` só respeita o que está travado ou confirmado). */
+      const montados = dias.filter(d => Object.values(S.escalas[d]?.slots || {}).some((x: any) => x?.vid));
+      /* a regra mora em lib/engine.ts (`decisaoDoRobo`), com o motivo escrito
+         e com teste: ela é o que segura a divergência de gravação explicada
+         mais abaixo, e regra load-bearing não pode viver solta dentro de um
+         `if` no meio de um laço */
+      const decisao = decisaoDoRobo(montados.length, dias.length);
+      if (decisao === 'ja-tem') { resumo.push({ equipe: e.nome, pulado: 'já tinha escala' }); continue; }
+      if (decisao === 'parcial') {
+        const m = `${e.nome}: mês pela metade (${montados.length} de ${dias.length} dias já têm gente). Não montei sozinho para não re-sortear o que já está lá — abra o app e use "Remontar".`;
+        resumo.push({ equipe: e.nome, pulado: 'mês parcial', dias: `${montados.length}/${dias.length}` });
+        falhas.push(m);
+        continue;
+      }
       const r = gerarMes(S, prox.ano, prox.mes, iso);
-      let erro = '';
+      /* UM DIA RUIM NÃO PODE IMPEDIR OS OUTROS SEIS.
+
+         Era `break`: o primeiro `salvar_dia` recusado abortava o laço e os
+         dias seguintes nem eram tentados. Um gatilho que recusa um domingo
+         específico (alguém avisou que não pode) levava o mês inteiro junto.
+         Agora cada dia é tentado, e os erros são acumulados para o alerta. */
+      /* POR QUE AQUI USA `salvar_dia` E A TELA NÃO — 19/09/2026.
+
+         São dois caminhos de gravação diferentes para a mesma coisa, e isso
+         normalmente seria um defeito:
+
+           · a tela usa `salvarDia` (lib/db.ts), que calcula a DIFERENÇA
+             (`planoDoDia`) e toca só no que mudou. Ela precisa disso porque
+             regravar uma linha que não mudou fazia o gatilho recusar quem
+             tinha avisado "não posso" depois de escalado — o caso do João
+             Victor, 17/09 — e porque a ordem entre apagar e inserir importa
+             na permuta (19/09);
+
+           · aqui usa a RPC `salvar_dia`, que APAGA a escala inteira da equipe
+             naquele domingo e regrava.
+
+         A divergência é segura por UM motivo, e só por ele: o laço acima só
+         chega aqui quando `montados.length === 0`, ou seja, quando NENHUM dia
+         do mês tem gente. Não há o que preservar, então diferença e
+         wipe-and-write dão o mesmo resultado.
+
+         ⚠️  O GUARDA DE `montados` É O QUE SEGURA ISSO. Se alguém um dia
+         afrouxar aquele `if` para o robô completar mês pela metade, este
+         laço passa a apagar o que o líder pôs à mão — e nenhum teste daqui
+         vai acusar, porque o teste que protege a gravação cirúrgica
+         (`scripts/escala-diff.test.mjs`) só cobre o caminho da tela.
+         Afrouxou o guarda? Troque este `rpc('salvar_dia')` por `salvarDia`
+         ANTES, não depois. */
+      const errosDoDia: string[] = [];
       for (const d of dias) {
         const params = paraSalvarDia(S, d, e.id);
         if (!params) continue;
         const { error } = await s.rpc('salvar_dia', params);
-        if (error) { erro = `${d}: ${error.message}`; break; }
+        if (error) errosDoDia.push(`${d}: ${error.message}`);
       }
+      const erro = errosDoDia.join(' | ');
       const vagas = r.reduce((a: number, x: any) => a + x.vagas.length, 0);
       resumo.push({ equipe: e.nome, vagas, erro: erro || undefined });
       if (erro) falhas.push(`${e.nome}: ${erro}`);
@@ -268,5 +368,16 @@ export async function GET(req: Request) {
   }
 
   if (!rel.acoes.length) rel.acoes = 'nada agendado para hoje';
-  return Response.json(rel);
+  /* O STATUS PRECISA DIZER A VERDADE.
+
+     A rota devolvia 200 mesmo quando um ministério não foi montado, e a
+     Vercel guarda o status — não o corpo. Um dia 26 que falhou parcialmente
+     ficava indistinguível de um que deu certo.
+
+     Conta só `falhas`, NUNCA `pulado`: "sem time/funções ativas" e "já tinha
+     escala" são estados normais, e um cron que fica vermelho todo dia por
+     estado normal é um cron que ninguém olha mais em duas semanas. */
+  const falhou = Array.isArray(rel.acoes)
+    && rel.acoes.some((a: any) => Array.isArray(a?.falhas) && a.falhas.length);
+  return Response.json(rel, { status: falhou ? 500 : 200 });
 }

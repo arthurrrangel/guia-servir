@@ -81,6 +81,41 @@ for (const [entrada, esperado] of EMAILS) {
   ok(r === esperado, `sugerirEmail(${JSON.stringify(entrada)})`, `→ ${JSON.stringify(r)}, esperado ${JSON.stringify(esperado)}`);
 }
 
-const total = 26 + EMAILS.length;
+/* ---- 19/09/2026: dois casos que nasceram de defeitos de verdade ---- */
+
+/* 1) A escala mudou debaixo da tela. `mudarStatus` passou a gravar dizendo de
+      quem é a vaga; quando ninguém casa, a pessoa precisa entender o que
+      houve, não levar um "Não consegui". */
+const mudou = humano(new Error('ESCALA_MUDOU_NO_POSTO'), 'salvar');
+ok(!mudou.generico, 'escala mudou no posto não é genérico', mudou.texto);
+ok(/outra pessoa entrou/i.test(mudou.texto), 'escala mudou diz o que aconteceu', mudou.texto);
+
+/* 1b) APAGAR QUEM JÁ SERVIU. A migração 52 pôs um gatilho que recusa, com o
+       nome e a contagem no recado. Sem tradução, isso caía no genérico "Não
+       consegui. Tente de novo" — para uma ação que NUNCA vai funcionar, o que
+       faz a pessoa tentar de novo para sempre. O recado tem que dizer o
+       caminho que funciona, que é Pausar. */
+const apagou = humano(
+  { code: '23001', message: 'VOLUNTARIO_COM_HISTORICO: Leticia Ramos ja serviu 12 vez(es). Apagar levaria junto toda a escala dela, sem volta. Use Pausar.' },
+  'salvar');
+ok(!apagou.generico, 'apagar quem tem histórico não é genérico', apagou.texto);
+ok(/Leticia Ramos/.test(apagou.texto), 'e diz de quem é', apagou.texto);
+ok(/12 vezes/.test(apagou.texto), 'e quantas vezes serviu, no plural certo', apagou.texto);
+ok(/Pausar/i.test(apagou.texto), 'e manda para o caminho que funciona', apagou.texto);
+const apagou1 = humano(
+  { code: '23001', message: 'VOLUNTARIO_COM_HISTORICO: Ana ja serviu 1 vez(es). Use Pausar.' }, 'salvar');
+ok(/1 vez[^e]/.test(apagou1.texto), 'uma vez só fica no singular', apagou1.texto);
+
+/* 2) A mensagem de "sem ministério" mudou de nome quando a gravação deixou de
+      ser a RPC `salvar_dia` e passou a ser `salvarDia`, em JavaScript. A
+      tradução ficou para trás e só valia para o cron, que não tem tela. As
+      DUAS grafias precisam cair na mesma frase. */
+for (const msg of ['salvar_dia sem ministerio', 'salvarDia sem ministério']) {
+  const r = humano(new Error(msg), 'salvar');
+  ok(!r.generico, `"${msg}" não cai no genérico`, r.texto);
+  ok(/Não achei o ministério/.test(r.texto), `"${msg}" acha a frase certa`, r.texto);
+}
+
+const total = 31 + 6 + EMAILS.length;
 if (falhas) { console.log(`erros: ${falhas} falha(s) em ${total}`); process.exit(1); }
 console.log(`erros: ${total}/${total} ok`);

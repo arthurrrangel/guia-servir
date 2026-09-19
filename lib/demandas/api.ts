@@ -55,10 +55,38 @@ export function guardarToken(t: string) {
   try { localStorage.setItem(K, t); } catch {}
 }
 
+/* O TOKEN NÃO PODE FICAR NA BARRA DE ENDEREÇO.
+
+   19/09/2026. O link pessoal do membro chega como `/demandas?t=<token>`, e
+   este arquivo guardava o token e ia embora — deixando-o na barra, no
+   histórico do navegador e, principalmente, no log de requisição da Vercel,
+   que grava a URL inteira de cada acesso.
+
+   A regra já estava escrita neste repositório, em app/api/cron/route.ts:
+   "Query string não é lugar de credencial. (…) Um segredo que já apareceu
+   numa URL deve ser considerado conhecido." Lá o `?secret=` foi removido; aqui
+   o `?t=` tinha ficado.
+
+   O `replaceState` tira o parâmetro assim que ele é guardado, sem recarregar
+   a página e sem criar entrada nova no histórico. Não desfaz o que já foi
+   registrado — para isso o token precisaria ser trocado —, mas fecha a porta
+   a partir de agora, que é o que dá para fazer daqui.
+
+   Um dia isto deve virar `/demandas/t/<token>`, que é o padrão que
+   `/eu/[token]` já usa e que nunca põe o segredo em query string. Enquanto
+   não vira, o link antigo continua funcionando e se limpa sozinho. */
 export function meuToken(): string | null {
   if (typeof window === 'undefined') return null;
   const naUrl = new URLSearchParams(window.location.search).get('t');
-  if (naUrl) { guardarToken(naUrl); return naUrl; }
+  if (naUrl) {
+    guardarToken(naUrl);
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.delete('t');
+      window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+    } catch { /* navegador sem history: o token fica na barra, mas funciona */ }
+    return naUrl;
+  }
   try { return localStorage.getItem(K); } catch { return null; }
 }
 

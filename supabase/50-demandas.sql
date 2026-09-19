@@ -5,6 +5,30 @@
    Supabase → SQL Editor → colar tudo → Run. Idempotente: rodar duas vezes não
    duplica nada.
 
+   ⚠️  MAS LEIA ISTO ANTES DE RODAR DE NOVO — 19/09/2026.
+
+   "Idempotente" aqui quer dizer que nada DUPLICA. Não quer dizer que nada se
+   PERDE. Este arquivo define `dem_abrir` e `dem_mover` com `create or
+   replace`, e a migração 52 redefiniu as duas com correções que não estão
+   aqui:
+
+     · `for update` em `dem_mover` — sem ele, duas pessoas agindo no mesmo
+       segundo passam as duas pelo mesmo guarda;
+     · `SETOR_NAO_ATENDE` em `dem_abrir` — sem ele, demanda nasce endereçada
+       a setor desativado e fica onde ninguém olha;
+     · reabrir uma demanda RECUSADA volta ao portão de aprovação em vez de
+       cair direto em execução — sem isso, quem teve a compra negada devolve
+       o pedido à fila como trabalho aprovado;
+     · o setor solicitante deixa de aceitar o que o cliente mandar quando o
+       membro não tem setor;
+     · `foreign_key_violation` vira recado em vez de erro cru do Postgres.
+
+   Rodar ESTE arquivo por cima de um banco que já tem a 52 apaga as cinco, em
+   silêncio, e o sistema volta a ter os defeitos sem ninguém tocar em nada.
+
+   SE VOCÊ RODAR ESTE ARQUIVO, RODE A 52 LOGO DEPOIS. A conferência no fim
+   deste arquivo confere isso e avisa em letras grandes.
+
    ---------------------------------------------------------------------------
    ONDE ISTO MORA, E POR QUÊ
 
@@ -1063,3 +1087,28 @@ select
        public.dem_numeros(text,date,date), public.dem_ajustar(text,text,jsonb),
        public.dem_pessoas(text), public.unaccent_simples(text);
    ============================================================================= */
+
+
+/* =============================================================================
+   A TRANCA CONTRA A REAPLICAÇÃO — 19/09/2026
+
+   Ver o aviso no topo. Este bloco não conserta nada: ele GRITA. Consertar
+   daqui exigiria repetir o corpo das funções da 52 dentro da 50, que é
+   exatamente a duplicação que criou o problema.
+   ============================================================================= */
+do $tranca$
+begin
+  /* A 52 deixa marcas que ESTE arquivo não sabe fazer. A restrição do anexo
+     é uma delas e serve de sinal: se ela existe, a 52 já rodou neste banco —
+     e, portanto, o `create or replace` que acabou de passar aqui acabou de
+     sobrescrever as funções dela.
+
+     Não existe caminho em que isso NÃO aconteça: o aviso é sobre o que este
+     arquivo acabou de fazer, não sobre o que ele pode vir a fazer. Por isso
+     são dois ramos e não três. */
+  if exists (select 1 from pg_constraint where conname = 'anexos_url_http_ck') then
+    raise warning E'\n\n  ####################################################################\n  #  ATENCAO: a 52 ja tinha rodado neste banco, e esta migracao\n  #  acabou de SOBRESCREVER dem_abrir e dem_mover com a versao antiga.\n  #\n  #  Voltaram cinco defeitos: corrida em dem_mover (duas pessoas agindo\n  #  no mesmo segundo passam as duas), demanda nascendo em setor que nao\n  #  atende, recusa de aprovacao que da para desfazer reabrindo, setor\n  #  solicitante aceitando o que o cliente mandar, e erro cru do Postgres\n  #  na tela.\n  #\n  #  RODE A MIGRACAO 52 AGORA, antes de usar o sistema.\n  ####################################################################\n';
+  else
+    raise notice 'OK — banco novo. Rode a 52 em seguida, como de costume.';
+  end if;
+end $tranca$;

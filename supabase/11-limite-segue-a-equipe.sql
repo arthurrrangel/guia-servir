@@ -26,6 +26,14 @@ comment on column voluntarios.limite_mes is
   'null = segue config.limitePadrao da equipe. Só preencha para dar um teto diferente a UMA pessoa.';
 
 -- conferência
-select (select dados->>'limitePadrao' from config) as padrao_da_equipe,
+-- 19/09/2026: era `(select dados->>'limitePadrao' from config)`, sem dizer de
+-- QUAL ministério. Com um só, funcionava; com vários, o Postgres recusa a
+-- subconsulta por devolver mais de uma linha — e, pior, quando devolvia uma,
+-- devolvia a de um ministério qualquer com o rótulo "padrao_da_equipe".
+select (select e.nome from equipes e
+         order by e.ordem, e.criado_em limit 1) as ministerio,
+       (select c.dados->>'limitePadrao' from config c
+          join equipes e on e.id = c.equipe_id
+         order by e.ordem, e.criado_em limit 1) as padrao_da_equipe,
        (select count(*) from voluntarios where limite_mes is not null) as com_teto_proprio,
        (select count(*) from voluntarios where ativo) as ativos;

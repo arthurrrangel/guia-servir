@@ -76,6 +76,11 @@ create policy eq_escalacoes on escalacoes for all to authenticated
 -- o seletor do topo passa a listar só o que a pessoa organiza
 drop policy if exists lider_tudo_equipes on equipes;
 drop policy if exists eq_equipes on equipes;
+/* 19/09/2026: faltavam os drops DESTES DOIS nomes — os que o arquivo cria
+   logo abaixo. Rodar a 13 duas vezes morria em "policy already exists", o
+   que é o mesmo que dizer que ela não podia ser reaplicada. */
+drop policy if exists eq_equipes_ler on equipes;
+drop policy if exists eq_equipes_mexer on equipes;
 create policy eq_equipes_ler on equipes for select to authenticated using (lidera_equipe(id));
 create policy eq_equipes_mexer on equipes for all to authenticated
   using (lidera_tudo()) with check (lidera_tudo());
@@ -84,6 +89,9 @@ create policy eq_equipes_mexer on equipes for all to authenticated
 -- (para saber quem mais mexe no ministério dele).
 drop policy if exists lider_tudo_lideres on lideres;
 drop policy if exists eq_lideres on lideres;
+/* mesma falta de idempotência do bloco de `equipes`, logo acima */
+drop policy if exists eq_lideres_ler on lideres;
+drop policy if exists eq_lideres_mexer on lideres;
 create policy eq_lideres_ler on lideres for select to authenticated
   using (lidera_tudo() or equipe_id is null or lidera_equipe(equipe_id));
 create policy eq_lideres_mexer on lideres for all to authenticated

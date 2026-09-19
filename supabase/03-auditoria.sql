@@ -206,9 +206,13 @@ create index if not exists ix_vol_equipe  on voluntarios(equipe_id);
 create index if not exists ix_func_equipe on funcoes(equipe_id);
 create index if not exists ix_indisp_vol  on indisponibilidades(voluntario_id);
 
-/* ---------- 6. tabelas novas não podem nascer abertas para anon (padrão do Supabase) */
-revoke all on table culto_obs, entrar_tentativas, equipes, lideres from anon, public;
-grant select, insert, update, delete on table culto_obs to authenticated;
+/* ---------- 6. tabelas novas não podem nascer abertas para anon (padrão do Supabase)
+
+   19/09/2026: este bloco citava `culto_obs` VINTE LINHAS ANTES de a tabela ser
+   criada, logo abaixo, no item 7. Em produção passou porque a tabela já
+   existia quando o arquivo foi reaplicado; num banco vazio o arquivo morre
+   aqui. As permissões de `culto_obs` foram para junto da criação dela. */
+revoke all on table entrar_tentativas, equipes, lideres from anon, public;
 
 /* -----------------------------------------------------------------------------
    7. Recado do domingo POR MINISTÉRIO.
@@ -224,6 +228,9 @@ create table if not exists culto_obs (
   primary key (culto_id, equipe_id)
 );
 alter table culto_obs enable row level security;
+/* as permissões que estavam no item 6, agora DEPOIS da criação */
+revoke all on table culto_obs from anon, public;
+grant select, insert, update, delete on table culto_obs to authenticated;
 drop policy if exists p_culto_obs on culto_obs;
 create policy p_culto_obs on culto_obs for all to authenticated
   using (is_lider()) with check (is_lider());

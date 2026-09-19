@@ -77,7 +77,7 @@ function Uma() {
 
   return (
     <>
-      <Link className="dm-peq dm-mudo" href="/demandas" style={{ textDecoration: 'none' }}>{'<'} todas as demandas</Link>
+      <Link className="dm-peq dm-mudo dm-voltar" href="/demandas">{'<'} todas as demandas</Link>
 
       <div style={{ margin: 'var(--dm-e2) 0 var(--dm-e3)' }}>
         <div className="dm-rot">{'>'} demanda #{d.numero} · {d.grupo} · {d.categoria}</div>

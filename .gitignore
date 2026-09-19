@@ -13,3 +13,6 @@ tsconfig.tsbuildinfo
 # no diretório de trabalho). São prova de um run, não código.
 est-*.png
 s-*.png
+
+# 19/09/2026: saida de build de sessoes anteriores (167 MB). Nao e fonte.
+tmp/

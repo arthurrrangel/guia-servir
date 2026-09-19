@@ -13,6 +13,10 @@
 import type {
   Aprovacao, Categoria, Prioridade, Resumo, Status, Trava,
 } from './tipos';
+/* o chão de transporte é o mesmo dos dois sistemas: mesmo Postgres, mesmo
+   PostgREST, mesma rede. Ver a nota em `recadoDoErro`. `lib/erros.ts` é puro
+   e não importa nada de escalas, então isto não acopla um sistema ao outro. */
+import { humano } from '../erros';
 
 /* ---------------------------------------------------------------- palavras */
 
@@ -149,6 +153,14 @@ export function oQueFalta(r: Rascunho, temSetor: boolean): string[] {
   if (!r.prazo && !r.sem_prazo_porque.trim()) f.push('uma data desejada, ou o porquê de não ter data');
   if (r.prioridade === 'urgente' && !r.impacto.trim()) f.push('o que acontece se não for feito (urgente pede isso)');
   if (r.evento.trim() && !r.evento_data) f.push('a data do evento');
+  /* 19/09/2026 — os tetos da migração 52, conferidos AQUI também.
+     O comentário logo acima desta função promete "as mesmas regras que o
+     banco impõe como CHECK, aqui só para a pessoa saber ANTES"; quando a 52
+     acrescentou quatro CHECKs e esta função não acompanhou, a promessa virou
+     mentira e o texto de 300 letras só era recusado depois de enviado. */
+  if (r.titulo.trim().length > 200) f.push('um título mais curto (o limite é 200 letras; o texto longo cabe na descrição)');
+  if (r.descricao.trim().length > 20000) f.push('uma descrição menor (o limite é 20 mil letras)');
+  if (r.evento.trim().length > 120) f.push('um nome de evento mais curto (o limite é 120 letras)');
   return f;
 }
 
@@ -216,11 +228,29 @@ export function soDigitos(t: string | null | undefined): string {
   return (t || '').replace(/\D/g, '');
 }
 
-/** Devolve '' quando não há telefone: quem chama decide se esconde o botão. */
+/** Devolve '' quando não há telefone: quem chama decide se esconde o botão.
+
+    O DDI SE DECIDE PELO COMPRIMENTO, NÃO PELO PREFIXO — 19/09/2026.
+
+    Esta função usava `n.startsWith('55') ? n : '55' + n`, e essa é a única
+    das dez montagens de `wa.me` do repositório que erra. Celular do DDD 55
+    (Santa Maria, Bagé, Uruguaiana — o interior do Rio Grande do Sul) tem onze
+    dígitos e COMEÇA com 55: `55999998888`. O teste de prefixo acha que o DDI
+    já está lá e devolve `wa.me/55999998888`, que o WhatsApp lê como Brasil +
+    DDD 99, no Maranhão. A mensagem vai para outra pessoa, ou para ninguém.
+
+    Número brasileiro com DDD tem 10 ou 11 dígitos; com DDI, 12 ou 13. O
+    comprimento responde sem ambiguidade, e é o que as outras nove fazem.
+
+    Vale dizer o tamanho real disto: a igreja é na Barra da Tijuca, DDD 21. O
+    defeito atinge perto de ninguém hoje. Está aqui porque a regra "como se
+    monta um número brasileiro" tinha dez donos e um deles discordava — e a
+    próxima vez que ela mudar, nove lugares mudam juntos e um fica para trás
+    de novo. */
 export function linkZap(telefone: string | null | undefined, texto: string): string {
   const n = soDigitos(telefone);
   if (n.length < 10) return '';
-  const cheio = n.startsWith('55') ? n : '55' + n;
+  const cheio = n.length <= 11 ? '55' + n : n;
   return `https://wa.me/${cheio}?text=${encodeURIComponent(texto)}`;
 }
 
@@ -320,6 +350,14 @@ const PORCHECK: [RegExp, string][] = [
   [/ck_prioridade/, 'Prioridade inválida.'],
   [/ck_status/,     'Status inválido.'],
   [/ck_papel/,      'Papel inválido.'],
+  /* 19/09/2026 — as quatro restrições da migração 52. Sem estas linhas, um
+     título de 300 letras voltava como "Falta alguma coisa obrigatória nesta
+     demanda", que não diz o que fazer. O limite do título não é capricho: o
+     título viaja em TODA carga da lista, para todo membro. */
+  [/demandas_titulo_tam_ck/,    'O título precisa ter entre 3 e 200 letras. Se o texto é longo, ele cabe na descrição.'],
+  [/demandas_descricao_tam_ck/, 'A descrição passou de 20 mil letras. Anexe o arquivo por link em vez de colar o texto inteiro.'],
+  [/demandas_evento_tam_ck/,    'O nome do evento precisa ter até 120 letras.'],
+  [/anexos_url_http_ck/,        'O anexo precisa ser um endereço que comece com http:// ou https://.'],
 ];
 
 /* O `ok?` na assinatura não é decoração. Sem ele, o tipo é "fraco" para o
@@ -333,5 +371,23 @@ export function recadoDoErro(r: { ok?: boolean; erro?: string; regra?: string } 
     for (const [re, txt] of PORCHECK) if (re.test(r.regra)) return txt;
     return 'Falta alguma coisa obrigatória nesta demanda.';
   }
-  return PORBANCO[r.erro] || 'Não consegui. Tente de novo.';
+  /* O TRANSPORTE É O MESMO DOS DOIS SISTEMAS; SÓ O NEGÓCIO É DAQUI.
+
+     `lib/demandas/api.ts` colapsa tudo que não é recusa de regra em
+     `erro:'REDE'`, guardando a mensagem verdadeira em `regra`. E `REDE` nunca
+     esteve em `PORBANCO` — nem `SEM_CONFIG`, nem `VAZIO`. Resultado: sessão
+     expirada, permissão faltando (42501), limite de e-mail do Supabase e
+     wi-fi caído produziam a MESMA frase de quatro palavras, e a mensagem do
+     banco era jogada fora sem nem ir para o console.
+
+     É exatamente o defeito que `lib/erros.ts` foi escrito para matar do lado
+     das escalas, de volta inteiro do lado das demandas. E não precisava: o
+     Postgres é o mesmo, o PostgREST é o mesmo, a rede é a mesma. O que é
+     legitimamente próprio daqui é o vocabulário de NEGÓCIO — `SEM_ACESSO`,
+     `JA_FECHADA`, `SO_QUEM_ATENDE` —, e esse continua em `PORBANCO`, com
+     precedência. O chão de transporte passa a ser compartilhado. */
+  const doNegocio = PORBANCO[r.erro];
+  if (doNegocio) return doNegocio;
+  if (r.regra) return humano(new Error(r.regra), 'salvar').texto;
+  return 'Não consegui. Tente de novo.';
 }

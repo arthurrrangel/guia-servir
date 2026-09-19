@@ -21,25 +21,63 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { quemSou } from '@/lib/demandas/api';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { esquecerToken, quemSou } from '@/lib/demandas/api';
 import { sb } from '@/lib/supabase';
 import type { Eu } from '@/lib/demandas/tipos';
 import { Aviso, Esqueleto } from './Ui';
 
+/* QUEM SOU EU, UMA VEZ POR TELA — NÃO DUAS.
+
+   `useEu` era estado por instância. A casca chamava, e as telas de lista,
+   nova e ajustes chamavam de novo: DUAS idas ao banco por carga em três das
+   cinco telas, para responder a mesma pergunta. Pior que o custo: as duas
+   respostas podem discordar se a sessão virar no meio, e aí a casca decide o
+   portão com uma e a tela decide as abas com a outra.
+
+   O lado das escalas já tinha resolvido isso com contexto (`Shell.tsx`). Aqui
+   é a mesma solução: a casca pergunta, o contexto distribui, e `useEu()`
+   continua com a mesma assinatura — nenhuma tela precisou mudar. */
+const Contexto = createContext<{ eu: Eu | null; carregando: boolean } | null>(null);
+
 export function useEu() {
+  const doContexto = useContext(Contexto);
+  /* dentro da casca (o caso normal) o contexto responde; fora dela — um teste,
+     uma tela solta — o gancho ainda funciona sozinho. */
   const [eu, setEu] = useState<Eu | null>(null);
   const [carregando, setCarregando] = useState(true);
   useEffect(() => {
+    if (doContexto) return;            // a casca já perguntou
     let vivo = true;
     quemSou().then(r => {
       if (!vivo) return;
-      setEu(r.ok ? (r as unknown as Eu) : null);
-      setCarregando(false);
+      /* TOKEN RUIM NÃO PODE SOMBREAR O LOGIN PARA SEMPRE.
+
+         `demandas.quem()` tenta o token E DEPOIS o e-mail do JWT — mas só
+         quando o token vem vazio. Um link antigo guardado no localStorage
+         fazia a função devolver "não sei quem é" e o caminho do e-mail nunca
+         era tentado. A pessoa via "Este link não vale mais" e não tinha saída
+         nenhuma, porque `esquecerToken()` existia e nunca era chamada (uma
+         ocorrência no repositório inteiro: a própria definição).
+
+         Agora, se a resposta for negativa E houver token guardado, o token é
+         descartado e a pergunta é refeita. Na segunda vez `p_token` vem
+         vazio, o JWT entra, e quem tem login entra por ele. */
+      if (r.ok) { setEu(r as unknown as Eu); setCarregando(false); return; }
+      if (typeof window !== 'undefined' && localStorage.getItem('demandas.link')) {
+        esquecerToken();
+        quemSou().then(r2 => {
+          if (!vivo) return;
+          setEu(r2.ok ? (r2 as unknown as Eu) : null);
+          setCarregando(false);
+        });
+        return;
+      }
+      setEu(null); setCarregando(false);
     });
     return () => { vivo = false; };
-  }, []);
-  return { eu, carregando };
+  }, [doContexto]);
+  return doContexto ?? { eu, carregando };
 }
 
 const ABAS = (eu: Eu) => {
@@ -49,7 +87,7 @@ const ABAS = (eu: Eu) => {
   return a;
 };
 
-export default function Casca({ children }: { children: React.ReactNode }) {
+function CascaInterna({ children }: { children: React.ReactNode }) {
   const { eu, carregando } = useEu();
   const caminho = usePathname();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
@@ -113,7 +151,7 @@ export default function Casca({ children }: { children: React.ReactNode }) {
           <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
           <div className="dm-onde dm-cresce dm-corta">
             Demandas · <b>{eu.primeiro_nome}</b>
-            {eu.setor ? <span className="dm-mudo"> · {eu.setor}</span> : null}
+            {eu.setor ? <span className="dm-mudo dm-setor"> · {eu.setor}</span> : null}
           </div>
           <Link href="/painel" className="dm-peq dm-mudo" style={{ textDecoration: 'none' }}>
             Escalas {'>'}
@@ -149,5 +187,40 @@ function Rodape() {
       GUIA Church · operacional e demandas. Toda demanda tem um setor, um prazo e um responsável.
       {' · '}<Link href="/painel">escalas</Link>
     </footer>
+  );
+}
+
+/* O PROVEDOR. Pergunta "quem sou eu" UMA vez e distribui.
+
+   Ele precisa estar por FORA de `CascaInterna` porque a casca também consome
+   o contexto — quem pergunta não pode ser quem responde. O gancho continua
+   funcionando sem provedor (ver `useEu`), então nada que já existia quebra. */
+export default function Casca({ children }: { children: React.ReactNode }) {
+  const [eu, setEu] = useState<Eu | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  useEffect(() => {
+    let vivo = true;
+    const responder = (r: { ok?: boolean } | null) => {
+      if (!vivo) return;
+      setEu(r && r.ok ? (r as unknown as Eu) : null);
+      setCarregando(false);
+    };
+    quemSou().then(r => {
+      if (!vivo) return;
+      if (r.ok) { responder(r); return; }
+      /* link velho guardado sombreia o login por e-mail: descarta e repergunta */
+      if (typeof window !== 'undefined' && localStorage.getItem('demandas.link')) {
+        esquecerToken();
+        quemSou().then(responder);
+        return;
+      }
+      responder(null);
+    });
+    return () => { vivo = false; };
+  }, []);
+  return (
+    <Contexto.Provider value={{ eu, carregando }}>
+      <CascaInterna>{children}</CascaInterna>
+    </Contexto.Provider>
   );
 }

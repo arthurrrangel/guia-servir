@@ -58,6 +58,13 @@ comment on column voluntarios.pin_hash is
 -- =========================================================================
 
 drop policy if exists lider_tudo_cultos on cultos;
+/* 19/09/2026: faltavam os drops dos quatro nomes criados logo abaixo. Uma
+   migração de SEGURANÇA que não pode ser reaplicada é uma correção que só
+   se consegue aplicar uma vez, e no escuro. */
+drop policy if exists cultos_ler on cultos;
+drop policy if exists cultos_criar on cultos;
+drop policy if exists cultos_editar on cultos;
+drop policy if exists cultos_apagar on cultos;
 
 create policy cultos_ler    on cultos for select to authenticated using (sou_lider());
 create policy cultos_criar  on cultos for insert to authenticated with check (sou_lider());

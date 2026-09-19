@@ -35,6 +35,9 @@ export default function robots(): MetadataRoute.Robots {
         '/painel', '/escala', '/time', '/ajustes', '/entrar',
         /* listas por equipe e convites: nome de pessoa, ou token de uso único */
         '/equipe/', '/candidatura/',
+        /* Demandas: o link pessoal do membro é `/demandas?t=<token>`, e o
+           token é a credencial inteira. Ficou de fora daqui até 19/09/2026. */
+        '/demandas',
         /* rota de serviço */
         '/api/',
       ],

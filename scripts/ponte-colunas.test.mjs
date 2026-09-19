@@ -32,6 +32,8 @@ function fingeBanco({ recusa = [], erroDuro = null } = {}) {
       select(cols) { estado.cols = cols; return eu; },
       eq() { return eu; },
       gte() { return eu; },
+      /* migração 54: a consulta de cultos passou a filtrar evento por equipe */
+      or() { return eu; },
       in() { return eu; },
       maybeSingle() { return resposta(); },
       order() { return resposta(); },

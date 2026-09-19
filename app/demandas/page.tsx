@@ -47,12 +47,19 @@ function Painel() {
 
   if (!eu) return null;
 
+  /* RÓTULO CURTO PARA OS QUATRO CABEREM NA TELA DE UMA VEZ.
+
+     Com "O que eu pedi / Do meu setor / Comigo / Tudo que eu vejo", o quarto
+     recorte ficava fora da tela em 390px, e nada avisava que ele existia.
+     A saída óbvia seria um esmaecido na borda indicando rolagem — mas isso é
+     resolver por sinalização um problema que some com rótulo menor. Filtro
+     que cabe inteiro na tela não precisa ser descoberto. */
   const abas: { v: Filtro['aba']; rot: string }[] = [
-    { v: 'minhas', rot: 'O que eu pedi' },
+    { v: 'minhas', rot: 'Eu pedi' },
   ];
-  if (eu.setor_atende) abas.push({ v: 'setor', rot: 'Do meu setor' });
+  if (eu.setor_atende) abas.push({ v: 'setor', rot: 'Meu setor' });
   if (eu.papel !== 'solicitante') abas.push({ v: 'comigo', rot: 'Comigo' });
-  abas.push({ v: 'tudo', rot: eu.papel === 'gestor' || eu.papel === 'admin' ? 'Tudo' : 'Tudo que eu vejo' });
+  abas.push({ v: 'tudo', rot: 'Tudo' });
 
   return (
     <>
@@ -64,22 +71,29 @@ function Painel() {
         <Link className="dm-btn dm-pri" href="/demandas/nova">Pedir alguma coisa</Link>
       </div>
 
+      {/* Duas perguntas, dois controles, nessa ordem: primeiro "de quem?",
+          depois "em que estado?". Juntas num monte só, como estavam, elas se
+          anulavam — a pessoa não sabia qual mexer para achar o que queria. */}
       <div className="dm-card">
-        <div className="dm-opcoes" role="group" aria-label="Recorte" style={{ marginBottom: 'var(--dm-e2)' }}>
+        <div className="dm-seg" role="group" aria-label="De quem">
           {abas.map(a => (
             <button key={a.v} type="button" aria-pressed={aba === a.v} onClick={() => setAba(a.v)}>{a.rot}</button>
           ))}
         </div>
-        <div className="dm-linha">
-          <div className="dm-opcoes dm-cresce">
-            {([['abertas', 'Em aberto'], ['atrasadas', 'Atrasadas'], ['tudo', 'Todas']] as const).map(([v, r]) => (
-              <button key={v} type="button" aria-pressed={so === v} onClick={() => setSo(v)}>{r}</button>
-            ))}
-          </div>
-          <input aria-label="Procurar" placeholder="Procurar por título ou número"
-            value={busca} onChange={e => setBusca(e.target.value)}
-            style={{ minHeight: 44, padding: '0 12px', border: '1px solid var(--dm-linha2)', borderRadius: 'var(--dm-r)', background: 'var(--dm-card3)', minWidth: 200, flex: '1 1 200px' }} />
+        <div className="dm-seg dm-igual" role="group" aria-label="Em que estado"
+          style={{ marginTop: 'var(--dm-e1)' }}>
+          {([['abertas', 'Em aberto'], ['atrasadas', 'Atrasadas'], ['tudo', 'Todas']] as const).map(([v, r]) => (
+            <button key={v} type="button" aria-pressed={so === v} onClick={() => setSo(v)}>{r}</button>
+          ))}
         </div>
+        <label className="dm-busca">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M11 11l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          <input aria-label="Procurar" placeholder="Procurar por título ou número"
+            value={busca} onChange={e => setBusca(e.target.value)} />
+        </label>
       </div>
 
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
@@ -141,13 +155,26 @@ function Linha({ d }: { d: Resumo }) {
         </Pill>
         {tomPrioridade(d.prioridade)
           ? <Pill tom={tomPrioridade(d.prioridade)}>{rotPrioridade(d.prioridade)}</Pill> : null}
-        <span>{d.solicitante} {'>'} {d.responsavel_setor}</span>
+        {/* TRÊS FATOS, NÃO CINCO.
+
+            Antes esta linha carregava: setor de quem pediu, setor que
+            atende, prazo, tempo desde a última mexida e quem está com ela.
+            Em 390px isso virava duas linhas e meia de texto cinza, e a
+            segunda linha começava com um ponto solto — parecia lista com
+            marcador quebrado.
+
+            Numa lista, a pergunta é "o que preciso olhar primeiro". Quem
+            responde isso é: de quem é, para quando, e com quem está. O setor
+            de quem pediu e o "há 1 min" são contexto, não decisão, e estão
+            os dois na tela da demanda, a um toque daqui. Quando a demanda
+            empaca, aí sim o tempo vira decisão — e aí ele aparece. */}
+        <span>{d.responsavel_setor}</span>
         <span className="dm-prazo">
           {sit === 'atrasada' ? `${atraso} ${atraso === 1 ? 'dia' : 'dias'} de atraso`
             : sit === 'hoje' ? 'vence hoje'
             : d.prazo ? `para ${dataCurta(d.prazo)}` : 'sem data'}
         </span>
-        {sit === 'parada' ? <span>parada há {d.parada_dias} dias</span> : <span>{quando(d.mexida_em)}</span>}
+        {sit === 'parada' ? <span>parada há {d.parada_dias} dias</span> : null}
         {d.responsavel ? <span>com {d.responsavel.split(' ')[0]}</span> : null}
       </div>
     </Link>

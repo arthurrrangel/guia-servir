@@ -24,7 +24,7 @@ create or replace function auth.jwt() returns jsonb language sql stable as $$
 $$;
 SQL
 B=$(cd "$(dirname "$0")/.." && pwd)
-cp "$B/supabase/50-demandas.sql" /tmp/_mig.sql
+cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" > /tmp/_mig.sql
 cp "$B/scripts/demandas-banco.test.sql"   /tmp/_test.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_test.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -f /tmp/_prep.sql"

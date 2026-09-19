@@ -79,6 +79,41 @@
 
 .dm *,.dm *::before,.dm *::after{box-sizing:border-box}
 
+/* O VAZAMENTO QUE EU TINHA MEDIDO SÓ NUMA DIREÇÃO.
+
+   A trava lá em cima impede que ESTA folha alcance o sistema de escalas, e
+   isso está provado: nas dez rotas do painel e do site, zero regras daqui.
+   Só que a porta tem dois lados, e eu nunca tinha medido o outro.
+
+   `globals.css` tem 91 seletores SEM CLASSE — os mesmos que eu proibi aqui.
+   Dois deles entram por baixo da casca e mudam telas inteiras de demandas:
+
+     · `label{text-transform:uppercase;letter-spacing:.12em;font-size:…}`
+       Todo campo do formulário é um `<label>`. Resultado: rótulo E texto de
+       ajuda saíam em CAIXA ALTA ESPAÇADA. "UMA LINHA QUE JÁ DIGA DO QUE SE
+       TRATA." gritava mais que o próprio campo, e caixa alta com
+       espaçamento é justamente o que menos se lê no celular;
+     · `h3::before{content:"›"}` pendurava um chevron em todo h3 daqui.
+
+   Consertar em `globals.css` seria mexer no sistema que não pode ser
+   afetado. Então a casca se defende: devolve os valores ao que ESTA folha
+   diz, e a partir daqui rótulo é rótulo e ajuda é ajuda.
+
+   E a defesa vai dentro de `:where()` pelo mesmo motivo do link ali em
+   cima — o meu próprio teste de CSS pegou isto antes de eu publicar:
+   escrita como `.dm label{}`, ela pesa 0-1-1 e passaria a ganhar de
+   `.dm-busca{display:flex}` e `.dm-campo{}`, que são classes minhas em cima
+   de `<label>`. Eu teria consertado o vazamento de fora criando um
+   vazamento meu, de dentro.
+
+   `.dm :where(label)` pesa 0-1-0: ganha do `label{}` do outro sistema, que
+   é 0-0-1, e perde de qualquer classe daqui. Que é a ordem certa. */
+.dm :where(label){
+  text-transform:none;letter-spacing:normal;font-size:inherit;
+  font-weight:inherit;color:inherit;display:block;margin:0;
+}
+.dm :where(h3)::before{content:none}
+
 /* O `:where()` AQUI NÃO É ENFEITE, É O CONSERTO DE UM DEFEITO REAL.
 
    Escrito assim, `.dm a{color:inherit}` pesa 0-1-1: uma classe mais um
@@ -102,14 +137,31 @@
 .dm :focus-visible{outline:2px solid var(--dm-ink); outline-offset:2px}
 .dm button,.dm input,.dm select,.dm textarea{font:inherit;color:inherit}
 
+/* 16px NOS CAMPOS, E O MOTIVO NÃO É ESTÉTICO.
+
+   O Safari do iPhone dá zoom sozinho quando a pessoa toca num campo com
+   fonte menor que 16px. A tela salta, a coluna do formulário sai de
+   enquadramento, e a pessoa tem que pinçar para voltar — a cada campo. Era
+   13px aqui, então isso acontecia em TODO campo de TODA tela.
+
+   16px é o limiar exato em que o Safari para de fazer isso. Não é
+   recomendação de tipografia, é o número que desarma o comportamento. */
+.dm input,.dm select,.dm textarea{font-size:16px}
+
 /* ------------------------------------------------------------------ texto */
 .dm h1,.dm h2,.dm h3{margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
 .dm h1{font-size:clamp(26px,5vw,34px)}
 .dm h2{font-size:20px}
 .dm h3{font-size:16px}
 .dm p{margin:0 0 var(--dm-e2)}
+/* 12px É O CHÃO, NÃO UMA SUGESTÃO.
+
+   Estava 11px. No monitor parece elegante; no ônibus, com o celular a meio
+   braço de distância, some. 12px é o menor tamanho que ainda se lê em
+   movimento, e caixa alta com espaçamento de letra come legibilidade, então
+   justamente aqui não dá para economizar. */
 .dm-rot{
-  font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  font-size:12px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--dm-mudo);font-weight:600;
 }
 .dm-peq{font-size:13px}
@@ -128,13 +180,34 @@
   max-width:var(--dm-largura);margin:0 auto;padding:var(--dm-e2) var(--dm-e3);
   display:flex;align-items:center;gap:var(--dm-e3);
 }
+/* 44px DE ALVO NO TOPO, PORQUE POLEGAR NÃO É PONTEIRO.
+
+   A logo tinha 34px de altura e o link "Escalas >" tinha 20. O dedo cobre
+   mais ou menos 9mm, que dá perto de 44px na densidade de um celular comum,
+   e é daí que vem o mínimo de 44 da WCAG 2.5.5 e do guia da Apple. Abaixo
+   disso a pessoa erra, tenta de novo, erra, e conclui que "o sistema não
+   responde" — quando o sistema só era pequeno demais para ser acertado.
+
+   Ganha altura sem ganhar peso visual: o alvo cresce, o desenho não. */
+.dm-topo-in a,.dm-topo-in button{
+  min-height:44px;display:inline-flex;align-items:center;
+}
+/* o link de voltar, que fica sozinho no topo do conteúdo e é o caminho de
+   saída mais usado no celular: 16px de altura não se acerta com o polegar */
+.dm-voltar{
+  min-height:44px;display:inline-flex;align-items:center;
+  text-decoration:none;
+}
 .dm-logo{
   background:var(--dm-preto);color:#fff;font-weight:700;
-  letter-spacing:.26em;font-size:12px;padding:8px 10px 8px 14px;
+  letter-spacing:.26em;font-size:12px;padding:0 10px 0 14px;
   text-decoration:none;flex:none;
 }
 .dm-onde{font-size:13px;color:var(--dm-mudo);min-width:0}
 .dm-onde b{color:var(--dm-ink);font-weight:600}
+/* "Tecnologi…" não informa nada e ainda suja o topo. Num celular estreito o
+   setor sai inteiro de cena; o nome, que é o que localiza a pessoa, fica. */
+@media (max-width:520px){ .dm-onde .dm-setor{display:none} }
 .dm-abas{
   display:flex;gap:var(--dm-e4);overflow-x:auto;scrollbar-width:none;
   max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-e3);
@@ -159,9 +232,26 @@
   background:var(--dm-card);border:1px solid var(--dm-linha);
   padding:var(--dm-e3);margin-bottom:var(--dm-e2);
 }
+/* O `min-width:0` AQUI É O QUE IMPEDE A PÁGINA DE ANDAR DE LADO.
+
+   Filho de grid e filho de flex nascem com `min-width:auto`, que quer dizer
+   "não encolho abaixo do meu conteúdo". Se dentro dele houver um texto que
+   não quebra — e `.dm-corta` usa `white-space:nowrap` de propósito, para
+   cortar com reticências — o conteúdo mínimo vira a linha inteira, o item
+   se recusa a encolher, e empurra o pai, que empurra a página.
+
+   O sintoma é traiçoeiro porque o texto APARECE cortado, bonitinho, com as
+   reticências no lugar: a tela parece certa e mesmo assim desliza. Foi o que
+   aconteceu na tela de Números, em 320px: documento de 350px, e o culpado
+   era um rótulo de categoria que já estava visualmente truncado.
+
+   `min-width:0` devolve a permissão de encolher. As reticências continuam. */
 .dm-grade{display:grid;gap:var(--dm-e2)}
+.dm-grade > *{min-width:0}
 .dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-entre > *{min-width:0}
 .dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-linha > *{min-width:0}
 .dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
 @media (min-width:760px){ .dm-dupla{grid-template-columns:1fr 1fr} }
 .dm-tres{display:grid;gap:var(--dm-e2);grid-template-columns:repeat(2,1fr)}
@@ -185,10 +275,23 @@
 .dm-btn.dm-mini{min-height:36px;padding:0 var(--dm-e2);font-size:13px}
 .dm-btn.dm-larga{width:100%}
 
+/* A PÍLULA NÃO PODE EMPURRAR A TELA DE LADO.
+
+   Com `white-space:nowrap` fixo, "Travada · esperando informação" virava uma
+   pílula de 325px dentro de uma tela de 320px, e a PÁGINA INTEIRA passava a
+   deslizar na horizontal. Um texto comprido num canto e o documento todo
+   anda junto: é o defeito de celular mais comum e o mais invisível no
+   monitor, onde sempre sobra largura.
+
+   A regra agora é: não quebra enquanto couber, quebra quando não couber.
+   `max-width:100%` prende a pílula na largura disponível e
+   `overflow-wrap:anywhere` deixa o texto virar duas linhas em vez de
+   arrastar a tela. */
 .dm-pill{
   display:inline-flex;align-items:center;gap:6px;
   padding:3px 9px;border:1px solid var(--dm-linha2);background:var(--dm-card2);
-  font-size:12px;font-weight:600;white-space:nowrap;
+  font-size:12px;font-weight:600;
+  max-width:100%;overflow-wrap:anywhere;text-align:left;
 }
 .dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);border-color:var(--dm-ok-ln)}
 .dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);border-color:var(--dm-warn-ln)}
@@ -211,7 +314,9 @@
 .dm-aviso b{font-weight:650}
 
 /* ------------------------------------------------------------------ campos */
-.dm-campo{display:block;margin-bottom:var(--dm-e3)}
+/* 24px entre campos, não 16: com 16 o texto de ajuda de um campo encostava
+   no rótulo do campo seguinte, e a ajuda parecia pertencer ao próximo. */
+.dm-campo{display:block;margin-bottom:var(--dm-e4)}
 .dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
 .dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
 .dm-campo input,.dm-campo select,.dm-campo textarea{
@@ -227,9 +332,87 @@
   min-height:46px;padding:0 var(--dm-e2);border:1px solid var(--dm-linha2);
   background:var(--dm-card3);border-radius:var(--dm-r);
 }
-.dm-opcoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
+/* FILTRO NÃO PODE VIRAR ESCADA.
+
+   Era `flex-wrap:wrap` com `flex:1 1 auto` e `min-width:80px`. Como os
+   rótulos têm comprimentos diferentes ("Comigo" e "Tudo que eu vejo"), as
+   opções quebravam em degraus irregulares: duas numa linha, uma sozinha na
+   seguinte, outra grudada no campo de busca. Sete controles empilhados sem
+   ordem, e as DUAS perguntas diferentes que eles fazem — "de quem?" e "em
+   que estado?" — misturadas no mesmo monte.
+
+   Quem abre isso no celular não lê um filtro, lê um amontoado. É o tal
+   "visual de sistema inacabado".
+
+   Agora são dois controles segmentados, cada um com uma pergunta só:
+
+     · `.dm-seg` para a pergunta de recorte, com rótulos compridos: UMA
+       linha que desliza na horizontal em vez de quebrar. Deslizar um trilho
+       de filtro é gesto conhecido; escada não é;
+     · `.dm-seg.dm-igual` para a pergunta de estado, com rótulos curtos:
+       três fatias iguais, sem rolagem, porque cabem.
+
+   O texto nunca quebra dentro do botão (`white-space:nowrap`): era o que
+   fazia "Em aberto" virar duas linhas dentro da própria pílula. */
+.dm-seg{
+  display:flex;gap:4px;padding:3px;background:var(--dm-card2);
+  border-radius:calc(var(--dm-r) + 4px);
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.dm-seg::-webkit-scrollbar{display:none}
+.dm-seg button{
+  flex:1 1 0;min-height:44px;padding:0 10px;
+  /* sem isto "Meu setor" quebra em duas linhas dentro da própria fatia e o
+     trilho fica com altura de dois andares */
+  white-space:nowrap;
+  border:0;background:transparent;color:var(--dm-ink2);
+  border-radius:var(--dm-r);cursor:pointer;font-size:14px;font-weight:550;
+  text-align:center;
+  transition:background var(--dm-t),color var(--dm-t),box-shadow var(--dm-t);
+}
+.dm-seg button:hover{color:var(--dm-ink)}
+.dm-seg button[aria-pressed="true"]{
+  background:var(--dm-card);color:var(--dm-ink);font-weight:650;
+  box-shadow:0 1px 2px rgba(37,37,37,.10),0 0 0 1px var(--dm-linha);
+}
+.dm-seg.dm-igual{overflow:visible}
+/* Em 320px os quatro recortes não cabem numa fita só, e o último fica
+   espiando pela borda. Duas por duas: os quatro aparecem inteiros, as
+   fatias continuam do mesmo tamanho, e ninguém precisa descobrir que
+   aquilo rolava. */
+@media (max-width:370px){
+  .dm-seg:not(.dm-igual){display:grid;grid-template-columns:1fr 1fr;overflow:visible}
+}
+
+/* a busca ganha a linha inteira: espremida entre botões ela ficava com 200px
+   e o texto do placeholder saía cortado no meio da palavra */
+.dm-busca{
+  display:flex;align-items:center;gap:8px;width:100%;min-height:46px;
+  margin-top:var(--dm-e2);padding:0 12px;
+  border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);
+}
+.dm-busca:focus-within{outline:2px solid var(--dm-ink);outline-offset:-1px;background:var(--dm-card)}
+.dm-busca svg{flex:none;opacity:.5}
+.dm-busca input{
+  flex:1;min-width:0;border:0;background:transparent;outline:0;
+  min-height:44px;padding:0;
+}
+
+/* GRADE, NÃO FILA QUE QUEBRA.
+
+   Com `flex-wrap`, quatro opções de larguras diferentes viravam três numa
+   linha e "Urgente" sozinha, ocupando a largura inteira na linha de baixo —
+   como se fosse mais importante que as outras três, quando é só a última da
+   lista. O mesmo degrau do filtro da lista, em outro lugar.
+
+   Duas colunas no celular resolve sem pensar: quatro opções viram 2×2, com
+   todas as células do mesmo tamanho. Acima de 520px cabem as quatro lado a
+   lado. Nenhuma opção ganha destaque por acidente de quebra de linha. */
+.dm-opcoes{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--dm-e1)}
+@media (min-width:520px){ .dm-opcoes{grid-template-columns:repeat(4,1fr)} }
 .dm-opcoes button{
-  flex:1 1 auto;min-width:80px;min-height:44px;padding:0 var(--dm-e2);
+  min-height:44px;padding:0 var(--dm-e2);
   border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
   cursor:pointer;font-size:14px;transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t);
 }
@@ -246,11 +429,41 @@
 }
 .dm-item:hover{background:var(--dm-card3)}
 .dm-item-topo{display:flex;align-items:baseline;gap:var(--dm-e2);margin-bottom:5px}
-.dm-item-num{font-size:12px;color:var(--dm-marca);font-weight:700;flex:none}
+/* O NÚMERO DA DEMANDA É TEXTO, E ESTAVA PINTADO COM A COR DE MARCA.
+
+   19/09/2026, achado medindo. `--dm-marca` é rgba(37,37,37,.34) e o
+   comentário dela, três linhas acima na declaração, já dizia: "NÃO é cor de
+   texto: ponto, chevron, seta". Este seletor usava mesmo assim.
+
+   Medido em 320px e 390px, nos três papéis: 2,05:1 sobre o branco. O mínimo
+   de AA para texto é 4,5:1. E não é um texto qualquer — "#4" é COMO A PESSOA
+   ACHA A DEMANDA DELA na lista e como ela se refere ao pedido no WhatsApp.
+
+   `--dm-mudo` é rgba(37,37,37,.68), medido em 6,1:1: continua discreto ao
+   lado do título em peso 600, e dá para ler. */
+.dm-item-num{font-size:12px;color:var(--dm-mudo);font-weight:700;flex:none}
 .dm-item-tit{font-weight:600;letter-spacing:-.01em;min-width:0}
+/* NOME COMPRIDO NÃO PODE ARRASTAR A LINHA.
+
+   "Pedro Henrique Almeida Vasconcelos > Comunicação e divulgação" é um nome
+   real de igreja, não um caso de laboratório, e num item de lista ele saía
+   pela direita da tela em 320px. Um filho de flex tem `min-width:auto` por
+   padrão, ou seja, ele se recusa a encolher abaixo do próprio conteúdo — e
+   arrasta o pai junto.
+
+   `min-width:0` devolve a permissão de encolher; `overflow-wrap:anywhere`
+   deixa o nome virar duas linhas em vez de empurrar a página. */
 .dm-item-baixo{
   display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;
   font-size:12px;color:var(--dm-mudo);
+}
+.dm-item-baixo > *{min-width:0;overflow-wrap:anywhere}
+/* quatro fatos seguidos separados só por espaço viram uma frase só:
+   "Eventos e logística > Comunicação para 22/09 há 21 min com Maria".
+   Um ponto entre eles devolve a leitura em pedaços. Entre pílulas não vai
+   ponto: a borda delas já separa. */
+.dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{
+  content:'·';margin-right:6px;opacity:.5;
 }
 .dm-item.dm-urgente{border-left:3px solid var(--dm-bad);padding-left:var(--dm-e2)}
 .dm-item.dm-atrasada .dm-prazo{color:var(--dm-bad);font-weight:600}
@@ -266,15 +479,52 @@
 
 .dm-tab{width:100%;border-collapse:collapse;font-size:14px}
 .dm-tab th{
-  text-align:left;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  text-align:left;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
   border-bottom:1px solid var(--dm-linha);
 }
 .dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha)}
 .dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
 .dm-tab select,.dm-tab input{
-  min-height:36px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  min-height:44px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
   border-radius:var(--dm-r);padding:0 8px;max-width:100%;
+}
+
+/* DUAS TABELAS DIFERENTES PEDEM DUAS SAÍDAS DIFERENTES NO CELULAR.
+
+   Aqui `.dm-tab` cobre duas coisas que só por fora se parecem:
+
+     · a da tela de uma demanda é rótulo e valor, sem cabeçalho. Não é uma
+       grade, é uma ficha. Em 320px ela saía 48px pela direita e levava a
+       página junto. Vira lista empilhada: o rótulo em cima, o valor
+       embaixo, cada par respirando. Fica melhor no celular do que a tabela
+       era no monitor;
+
+     · a de Números e a de Ajustes têm cabeçalho e são grade de verdade.
+       Empilhar uma grade de cinco colunas destrói a comparação, que é a
+       única razão de ela existir. Então a grade continua grade e quem passa
+       a rolar é o CARTÃO, não a página. A diferença importa: página que
+       desliza de lado desorienta, cartão que desliza é um gesto local e
+       esperado.
+
+   O `:has(thead)` é o que separa os dois casos sem precisar de classe nova
+   no JSX, porque cabeçalho é exatamente o que distingue ficha de grade. */
+@media (max-width:460px){
+  .dm-tab:not(:has(thead)),
+  .dm-tab:not(:has(thead)) tbody,
+  .dm-tab:not(:has(thead)) tr,
+  .dm-tab:not(:has(thead)) th,
+  .dm-tab:not(:has(thead)) td{display:block;width:auto}
+  .dm-tab:not(:has(thead)) tr{
+    padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
+  }
+  .dm-tab:not(:has(thead)) tr:last-child{border-bottom:0}
+  .dm-tab:not(:has(thead)) th{border:0;padding:0 0 3px}
+  .dm-tab:not(:has(thead)) td{border:0;padding:0;overflow-wrap:anywhere}
+}
+@media (max-width:560px){
+  .dm-card:has(.dm-tab thead){overflow-x:auto}
+  .dm-tab:has(thead){min-width:max-content}
 }
 
 /* -------------------------------------------------------------- histórico */
@@ -298,4 +548,47 @@
 @keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
 @media (prefers-reduced-motion:reduce){
   .dm *{animation:none!important;transition:none!important}
+}
+
+/* O "MAIS DETALHES" NÃO É UMA AÇÃO, É UMA GAVETA.
+
+   Desenhado como botão de largura inteira e texto centralizado, ele
+   competia com "Enviar a demanda", que é a única ação de verdade da tela —
+   e ainda quebrava em duas linhas centralizadas, parecendo defeito.
+
+   Gaveta se abre pela borda esquerda, com um sinal de direção e sem moldura
+   de botão. Assim o olho encontra uma ação só embaixo do formulário. */
+.dm .dm-gaveta{
+  display:inline-flex;align-items:center;gap:8px;
+  min-height:44px;padding:0;border:0;background:transparent;
+  color:var(--dm-ink2);font-size:14px;font-weight:600;cursor:pointer;
+  text-align:left;
+}
+.dm .dm-gaveta:hover{color:var(--dm-ink)}
+.dm .dm-gaveta::before{
+  content:'›';color:var(--dm-marca);font-size:17px;line-height:1;
+  transition:transform var(--dm-t);
+}
+.dm .dm-gaveta[aria-expanded="true"]::before{transform:rotate(90deg)}
+
+/* O BOTÃO DE COPIAR QUANDO O NAVEGADOR NÃO DEIXA COPIAR.
+
+   `navigator.clipboard` exige contexto seguro e, em parte dos navegadores,
+   um gesto ainda "quente" — dentro de um `async` que já cedeu a vez, ele
+   pode ter esfriado. O plano B com `execCommand` cobre quase tudo; quando
+   nem ele vai, a saída honesta é pôr o texto na tela para a pessoa
+   selecionar com o dedo, em vez de deixar um botão que não faz nada.
+
+   16px no campo porque abaixo disso o Safari do iPhone dá zoom ao focar, e
+   focar aqui é justamente o que a pessoa vai fazer. */
+.dm-copiar-falhou{ display:block }
+/* `.dm .dm-copiar-cru` e não `.dm-copiar-cru` sozinho: a folha já tem
+   `.dm textarea{font,color}`, que pesa 0-1-1 e ganharia de uma classe solta
+   (0-1-0). Foi o `scripts/demandas-css.test.mjs` que pegou — a mesma
+   armadilha que apagou a logo em 18/09, agora contra mim. */
+.dm .dm-copiar-cru{
+  display:block; width:100%; margin-top:var(--dm-e1);
+  padding:var(--dm-e2); border:1px solid var(--dm-linha); border-radius:var(--dm-r);
+  background:var(--dm-card2); color:var(--dm-ink);
+  font:inherit; font-size:max(16px,1rem); line-height:1.5; resize:vertical;
 }

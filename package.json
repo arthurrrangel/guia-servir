@@ -2,11 +2,17 @@
   "name": "escala-midia",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.18"
+  },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm test && next build",
     "start": "next start",
-    "test": "node scripts/engine.test.mjs && node --import ./scripts/_ts.mjs scripts/semana.test.mjs && node --import ./scripts/_ts.mjs scripts/nome.test.mjs && node --import ./scripts/_ts.mjs scripts/pix.test.mjs && node --import ./scripts/_ts.mjs scripts/erros.test.mjs && node --import ./scripts/_ts.mjs scripts/escala-diff.test.mjs && node --import ./scripts/_ts.mjs scripts/sexo.test.mjs"
+    "test": "node scripts/engine.test.mjs && node --import ./scripts/_ts.mjs scripts/semana.test.mjs && node --import ./scripts/_ts.mjs scripts/nome.test.mjs && node --import ./scripts/_ts.mjs scripts/pix.test.mjs && node --import ./scripts/_ts.mjs scripts/erros.test.mjs && node --import ./scripts/_ts.mjs scripts/escala-diff.test.mjs && node --import ./scripts/_ts.mjs scripts/sexo.test.mjs && node --import ./scripts/_ts.mjs scripts/engine-tempo.test.mjs && node --import ./scripts/_ts.mjs scripts/engine-contagens.test.mjs && node --import ./scripts/_ts.mjs scripts/demandas.test.mjs && node --import ./scripts/_ts.mjs scripts/ponte-colunas.test.mjs && node --import ./scripts/_ts.mjs scripts/ponte-janela.test.mjs && node --import ./scripts/_ts.mjs scripts/postos-visiveis.test.mjs && node --import ./scripts/_ts.mjs scripts/cron-guarda.test.mjs && node --import ./scripts/_ts.mjs scripts/evento-esporadico.test.mjs && node scripts/demandas-css.test.mjs && node scripts/demandas-token-na-url.test.mjs",
+    "test:tela": "node scripts/medida-celular.test.mjs && node scripts/contraste-real.test.mjs",
+    "test:banco": "bash scripts/banco-do-zero.sh && bash scripts/demandas-banco.sh && bash scripts/escala-banco.sh",
+    "test:demandas": "bash scripts/demandas-celular-subir.sh && node scripts/demandas-vazamento.mjs && node scripts/demandas-celular.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.48.1",

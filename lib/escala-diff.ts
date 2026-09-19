@@ -37,10 +37,28 @@ export type PlanoDoDia = {
   apagar: string[];                                        // ids de escalacoes
   atualizar: { id: string; fixo?: boolean; primeira_vez?: boolean }[];
   inserir: SlotDesejado[];
+  /* A ORDEM ENTRE APAGAR E INSERIR NÃO É SEMPRE A MESMA — 19/09/2026.
+
+     São três requisições separadas ao PostgREST, logo três transações. Se o
+     DELETE passar e o INSERT for recusado por gatilho — a pessoa avisou que
+     não pode entre a carga da tela e o clique, ou outro líder mexeu —, a vaga
+     fica VAZIA no banco. A tela mostra o erro e recarrega, então ninguém fica
+     com informação errada; mas a vaga esvaziou por causa da tentativa, e o
+     comentário desta função prometia que nada ficava meio salvo.
+
+     Quando dá, inserir PRIMEIRO resolve: se o INSERT for recusado, o DELETE
+     nem acontece e nada se perde. Só não dá quando as mesmas pessoas
+     aparecem dos dois lados — a permuta, "Letícia e Thiago trocam de posto".
+     Aí é preciso liberar antes, senão o gatilho de função simultânea recusa
+     a segunda antes de a primeira ter saído. Esse é o caso que o
+     `escala-diff.test.mjs` já cobre e que não pode afrouxar.
+
+     `apagarPrimeiro` diz qual dos dois mundos é este. Quem grava obedece. */
+  apagarPrimeiro: boolean;
 };
 
 export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): PlanoDoDia {
-  const plano: PlanoDoDia = { apagar: [], atualizar: [], inserir: [] };
+  const plano: PlanoDoDia = { apagar: [], atualizar: [], inserir: [], apagarPrimeiro: false };
   const porFuncao = new Map(desejados.map(d => [d.funcao_id, d]));
   const vistas = new Set<string>();
 
@@ -64,6 +82,14 @@ export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): Pla
     if ('fixo' in patch || 'primeira_vez' in patch) plano.atualizar.push(patch);
   }
   for (const d of desejados) if (!vistas.has(d.funcao_id)) plano.inserir.push(d);
+
+  /* permuta = alguém que SAI de um posto também ENTRA em outro no mesmo dia.
+     Só nesse caso o DELETE precisa vir antes. */
+  const idParaLinha = new Map(atuais.map(l => [l.id, l]));
+  const saindo = new Set(
+    plano.apagar.map(id => idParaLinha.get(id)?.voluntario_id).filter(Boolean) as string[],
+  );
+  plano.apagarPrimeiro = plano.inserir.some(d => saindo.has(d.voluntario_id));
   return plano;
 }
 

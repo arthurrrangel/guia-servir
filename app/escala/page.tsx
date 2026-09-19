@@ -2,12 +2,12 @@
 import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
-import { mudarStatus, salvarDia, salvarDias } from '@/lib/db';
+import { apagarEvento, criarEvento, mudarStatus, salvarDia, salvarDias } from '@/lib/db';
 import { Aviso, Escolha, Trabalhando } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  candidatos, cargaDoMes, cultosDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
+  candidatos, cargaDoMes, cultosDoMes, diasDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
 } from '@/lib/engine';
@@ -81,7 +81,14 @@ function Escala() {
   const [mes, setMes] = useState(+hoje.slice(5, 7));
   const [ocupado, setOcupado] = useState(false);
   const [verPassado, setVerPassado] = useState(false);
-  const dias = cultosDoMes(ano, mes);
+  /* EVENTO ESPORÁDICO (migração 54) — o que não está na programação fixa. */
+  const [abrirEvento, setAbrirEvento] = useState(false);
+  const [evData, setEvData] = useState('');
+  const [evHora, setEvHora] = useState('');
+  const [evNome, setEvNome] = useState('');
+  /* `diasDoMes` e não `cultosDoMes`: desde a 54 os eventos esporádicos entram
+     na lista junto com os domingos e os sábados de Follow. */
+  const dias = diasDoMes(S, ano, mes);
   const futuros = dias.filter(d => d >= hoje);
   const passados = dias.filter(d => d < hoje);
   const proximo = futuros[0];
@@ -96,6 +103,33 @@ function Escala() {
     const el = document.getElementById(window.location.hash.slice(1));
     if (el) { rolou.current = true; el.scrollIntoView({ block: 'start' }); }
   });
+
+  async function criarOEvento() {
+    if (!equipe?.id) { aviso('Escolha o ministério no topo antes.'); return; }
+    setOcupado(true);
+    try {
+      const r = await criarEvento(equipe.id, evData, evNome.trim(), evHora || null);
+      /* leva a tela para o mês do evento, senão a pessoa cria e não vê nada
+         porque o evento caiu em outro mês */
+      setAno(+r.data.slice(0, 4)); setMes(+r.data.slice(5, 7));
+      setEvNome(''); setEvData(''); setEvHora(''); setAbrirEvento(false);
+      await recarregar();
+      aviso(`${r.nome} entrou na escala. Agora é só montar.`);
+    } catch (e) { aviso(aviseHumano(e, 'salvar')); }
+    finally { setOcupado(false); }
+  }
+
+  async function tirarOEvento(cultoId: string, nome: string) {
+    if (!await confirmar({
+      titulo: `Tirar ${nome} da escala?`,
+      texto: 'A escala montada para esse evento sai junto. Os domingos não são afetados.',
+      acao: 'Tirar', perigo: true,
+    })) return;
+    setOcupado(true);
+    try { await apagarEvento(cultoId); await recarregar(); aviso('Evento removido'); }
+    catch (e) { aviso(aviseHumano(e, 'salvar')); }
+    finally { setOcupado(false); }
+  }
 
   function mover(n: number) {
     let m = mes + n, a = ano;
@@ -201,12 +235,15 @@ function Escala() {
   async function situacao(d: string, funcao: string, st: Status) {
     const dia = S.escalas[d];
     const f = S.funcoes.find(x => x.nome === funcao);
-    if (!dia?.cultoId || !f?.id) return;
+    /* o id de quem a TELA acredita estar na vaga vai junto: se a escala mudou
+       por baixo, a gravação recusa em vez de marcar o nome errado */
+    const vid = dia?.slots?.[funcao]?.vid;
+    if (!dia?.cultoId || !f?.id || !vid) return;
     setOcupado(true);
     const snap = retrato([d]);
     /* pinta o novo status na hora; a gravacao segue por baixo */
     if (dia.slots?.[funcao]) { dia.slots[funcao].status = st; pinta(); }
-    try { await mudarStatus(dia.cultoId, f.id, st); await recarregar(); }
+    try { await mudarStatus(dia.cultoId, f.id, vid, st); await recarregar(); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -338,6 +375,53 @@ function Escala() {
         </div>
       )}
 
+      {/* ===================================================== EVENTO ESPORÁDICO
+
+          O que não está na programação fixa: o GUIA Empreendedor numa quinta,
+          um ensaio geral num sábado. Depois de criado, o dia entra na lista
+          como qualquer domingo e "Montar" sorteia com as MESMAS regras.
+
+          Fica fechado por padrão e no fim da área de ações porque é o caminho
+          raro: o comum é montar o mês. Um formulário aberto aqui em cima
+          competiria com o botão que a pessoa veio usar. */}
+      <details className="esc-evento" open={abrirEvento}
+        onToggle={e => setAbrirEvento((e.currentTarget as HTMLDetailsElement).open)}
+        style={{ marginTop: 'var(--e5)' }}>
+        <summary className="esc-evento-abrir">Adicionar evento esporádico</summary>
+        <div className="esc-evento-corpo">
+          <p className="esc-evento-dica">
+            Para o que não é domingo nem Follow — um GUIA Empreendedor, um ensaio,
+            uma conferência. Depois de criado ele aparece na lista com os outros
+            dias, e o sorteio respeita quem avisou que não pode e quem já serviu
+            demais no mês.
+          </p>
+          <div className="esc-evento-campos">
+            <label>
+              <span>O que é</span>
+              <input value={evNome} maxLength={80} placeholder="GUIA Empreendedor"
+                onChange={e => setEvNome(e.target.value)} />
+            </label>
+            <label>
+              <span>Dia</span>
+              <input type="date" value={evData} min={hoje}
+                onChange={e => setEvData(e.target.value)} />
+            </label>
+            <label>
+              <span>Hora <span className="esc-evento-opc">(opcional)</span></span>
+              <input type="time" value={evHora} onChange={e => setEvHora(e.target.value)} />
+            </label>
+          </div>
+          <button className="lid-bt" disabled={ocupado || evNome.trim().length < 2 || !evData}
+            onClick={criarOEvento}>
+            Criar {evNome.trim() ? `"${evNome.trim()}"` : 'o evento'}
+          </button>
+          <p className="esc-evento-dica">
+            O evento é <strong>deste ministério</strong> ({equipe?.nome || 'o do topo'}) e
+            só aparece para quem organiza ele.
+          </p>
+        </div>
+      </details>
+
       {/* A FITA DE DOMINGOS SAIU. Ela existia para pular para um dia no meio
           de nove cartões em ordem de data. Com o próximo em cima e o passado
           recolhido, a lista tem dois a cinco itens e a fita virava uma segunda
@@ -357,7 +441,7 @@ function Escala() {
           {/* -------------------------------------------------- o que ainda vem */}
           {futuros.map(d => (
             <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
-              {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+              {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
           ))}
 
           {/* ---------------------------------------------------- o que passou
@@ -373,7 +457,7 @@ function Escala() {
               </div>
               {verPassado && passados.map(d => (
                 <DiaCard key={d} d={d} aberto={false} passado
-                  {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+                  {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
               ))}
             </section>
           )}
@@ -500,6 +584,8 @@ type AcoesDoDia = {
   marcarPrimeira: (d: string, funcao: string) => Promise<void>;
   salvarObs: (d: string, txt: string) => Promise<void>;
   novoPlantao: (d: string) => Promise<void>;
+  /* evento esporádico (54): só existe para o dia que TEM evento */
+  tirarOEvento: (cultoId: string, nome: string) => Promise<void>;
 };
 
 type PropsDiaCard = AcoesDoDia & {
@@ -513,7 +599,7 @@ type PropsPosto = Pick<AcoesDoDia, 'ocupado' | 'trocar' | 'situacao' | 'travar' 
   d: string; f: FnDoDia; S: Estado; dia: any;
 };
 
-function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsDiaCard) {
+function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }: PropsDiaCard) {
   const dia = S.escalas[d];
   const doDia = funcoesDoDia(S, d);
   const r = dia ? resumoDia(S, d) : null;
@@ -541,8 +627,13 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
       <summary>
         <span className="lid-marca" aria-hidden="true" />
         <span>
-          <span className="esc-dia-nome">{nomeDia(d)}, {fmtDia(d)}</span>
+          <span className="esc-dia-nome">
+            {dia?.evento ? dia.evento : `${nomeDia(d)}, ${fmtDia(d)}`}
+          </span>
           <span className="esc-dia-sub">
+            {/* num evento, a data e a hora vão no subtítulo: o nome já ocupou
+                a linha de cima, e é a hora que a pessoa procura */}
+            {dia?.evento && `${nomeDia(d)}, ${fmtDia(d)}${dia.inicio ? ` · ${String(dia.inicio).slice(0, 5)}` : ''} · `}
             {passado ? 'já passou' : preenchidos ? `${preenchidos} de ${cont(doDia.length, 'posto', 'postos')}` : cont(doDia.length, 'posto', 'postos')}
           </span>
         </span>
@@ -551,7 +642,19 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
 
       <div className="esc-corpo">
         <Corpo {...{ d, passado, S, dia, doDia, r, probs, preenchidos, ocupado, semFuncoes, aviso,
-          gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }} />
+          gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+        {/* tirar o evento fica DENTRO do dia, e não na lista de cima: quem
+            quer remover está olhando para ele. E só aparece em evento — o
+            domingo não se apaga por aqui (a RPC recusa, e a tela também não
+            oferece). */}
+        {dia?.evento && dia?.cultoId && !passado && (
+          <div className="esc-evento-tirar">
+            <button className="lid-bt-txt" disabled={ocupado}
+              onClick={() => tirarOEvento(dia.cultoId!, dia.evento!)}>
+              Tirar {dia.evento} da escala
+            </button>
+          </div>
+        )}
       </div>
     </details>
   );
