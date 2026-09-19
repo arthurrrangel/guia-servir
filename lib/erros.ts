@@ -91,6 +91,62 @@ const PORBANCO: Tradutor[] = [
    () => 'Isso é um culto da programação fixa, não um evento. Culto não se apaga por aqui.'],
   [/^EVENTO_NAO_CRIADO$/, () => 'Não consegui criar o evento. Confira a data e o nome.'],
   [/^EVENTO_NAO_APAGADO$/, () => 'Não consegui apagar o evento. Recarregue a tela e tente de novo.'],
+  /* OS QUATRO QUE FALTAVAM, E O PRIMEIRO É O MAIS PROVÁVEL DE TODOS.
+
+     `criar_evento` e `apagar_evento` devolvem nove códigos; cinco estavam
+     traduzidos e quatro chegavam crus na tela, como
+     "Não consegui salvar. Detalhe: DIA_DE_CULTO".
+
+     E `DIA_DE_CULTO` não é um caso de canto: o campo é um `<input
+     type="date">` comum, que não impede escolher um domingo, e escolher um
+     domingo é a primeira coisa que alguém tenta ao cadastrar um evento. O
+     erro mais frequente do recurso inteiro era o que menos dizia. */
+  [/^DIA_DE_CULTO$/,
+   () => 'Esse dia já é dia de culto (domingo, ou sábado de Follow). O evento esporádico é para os dias em que não há culto — a escala do culto já cobre o ministério nesse dia.'],
+  [/^SEM_PERMISSAO$/,
+   () => 'Você não organiza esse ministério. Confira o ministério escolhido no topo da tela.'],
+  [/^NAO_EXISTE$/,
+   () => 'Esse evento não está mais lá — alguém pode ter apagado enquanto você olhava. Recarregue a tela.'],
+  [/^REGRA$/,
+   () => 'O banco recusou por uma regra da escala. Recarregue a tela e tente de novo; se continuar, avise quem organiza a igreja.'],
+  /* e o que a 56 acrescentou: o segundo evento do mesmo dia */
+  [/^JA_TEM_EVENTO$/,
+   () => 'Esse ministério já tem um evento nesse dia, e a escala é um dia por data. Escolha outro dia, ou tire o evento que já está lá.'],
+  /* A MESMA RECUSA, VINDO PELO GATILHO EM VEZ DA PORTA.
+
+     `criar_evento` devolve código curto; o gatilho `culto_guarda` lança
+     `raise exception` com o texto colado. Os dois caminhos existem porque a
+     porta é a tela e o gatilho é a última linha de defesa — e o texto do
+     gatilho é escrito sem acento, de máquina, para atravessar qualquer
+     editor sem virar mojibake. Quem lê é gente. */
+  [/^JA_TEM_EVENTO:\s*\S+ ja tem "(.+?)" marcado/i,
+   m => `Esse ministério já tem "${m[1]}" marcado nesse dia, e a escala é um dia por data. Escolha outro dia, ou tire esse evento antes.`],
+  [/^DIA_DE_CULTO:\s*(\S+) e (domingo|sabado de Follow)/i,
+   m => `${m[1].split('-').reverse().join('/')} é ${m[2] === 'domingo' ? 'domingo' : 'sábado de Follow'}, e esse dia já tem culto. O evento esporádico é para dia sem culto.`],
+  [/^CULTO_REGULAR_SO_ORGANIZADOR_GERAL:\s*(?:apagar|mudar) o culto de (\S+)/i,
+   m => `O culto de ${m[1].split('-').reverse().join('/')} é da igreja inteira: mexer nele mexe na escala de todos os ministérios daquele dia. Só quem organiza a igreja pode. Fale com quem cuida disso.`],
+  [/^CULTO_REGULAR_NAO_VIRA_EVENTO/i,
+   () => 'Esse dia é um culto da igreja inteira, e não dá para transformá-lo num evento de um ministério só.'],
+  [/^EVENTO_NAO_VIRA_CULTO_REGULAR/i,
+   () => 'Isso transformaria o evento num culto da igreja inteira. Só quem organiza a igreja pode fazer isso.'],
+  [/^EVENTO_NAO_TROCA_DE_DONO/i,
+   () => 'Só quem organiza os dois ministérios pode passar um evento de um para o outro.'],
+  [/^EVENTO_DE_OUTRO_MINISTERIO:\s*(.+?) nao e do seu ministerio/i,
+   m => `"${m[1]}" é de outro ministério. Troque o ministério no topo da tela, ou fale com quem organiza aquele.`],
+  [/^EVENTO_SEM_MINISTERIO/i,
+   () => 'Falta dizer de qual ministério é o evento. Escolha o ministério no topo da tela.'],
+  [/^DATA_NO_PASSADO:\s*(\S+) ja passou/i,
+   m => `${m[1].split('-').reverse().join('/')} já passou. Escolha hoje ou um dia à frente.`],
+  [/^JA_TEM_CULTO:\s*(\S+) ja tem culto/i,
+   m => `${m[1].split('-').reverse().join('/')} já tem culto marcado. O evento entra num dia sem culto.`],
+  [/^MINISTERIOS_DIFERENTES:\s*(.+?) nao e do ministerio de (.+?)\./i,
+   m => `${m[1]} e ${m[2]} não são do mesmo ministério. Recarregue a tela; se continuar, avise quem organiza a igreja.`],
+  [/^EVENTOS_DUPLICADOS/i,
+   () => 'Há mais de um evento no mesmo dia para o mesmo ministério, e a escala é um dia por data. Avise quem organiza a igreja.'],
+  /* a tranca de migração (55/56): quem vê isto é quem aplica SQL, não o
+     líder — mas se vazar para uma tela, que vaze em português */
+  [/^MIGRACAO SUPERADA/i,
+   () => 'Esse arquivo de banco é mais antigo que o banco. Não aplique: ele desfaria correções mais novas.'],
   /* A ESCALA MUDOU DEBAIXO DA TELA.
 
      `mudarStatus` grava dizendo de quem é a vaga. Se ninguém casar, é porque
@@ -157,10 +213,26 @@ export function humano(e: unknown, oQueFazia?: string): ErroHumano {
     || (typeof e === 'string' ? e : '');
   const codigo = obj.code || '';
 
-  let texto = codigo && PORCODIGO[codigo];
-  /* as recusas do próprio banco vêm antes dos trechos genéricos: "avisou que
-     nao pode" não pode cair em /telefone|phone/ nem em nada parecido */
-  if (!texto) for (const [re, f] of PORBANCO) { const m = bruto.match(re); if (m) { texto = f(m); break; } }
+  /* A ORDEM MUDOU EM 19/09/2026, E A RAZÃO É ESPECÍFICO ANTES DE GENÉRICO.
+
+     Era `PORCODIGO` primeiro. `PORCODIGO` responde pela CLASSE do erro
+     (42501 = permissão, 23505 = duplicado); `PORBANCO` responde pela FRASE
+     que nós mesmos escrevemos no `raise exception`. A frase é sempre mais
+     específica que a classe dela, então checar a classe antes apagava a
+     explicação boa em favor de uma genérica correta. Medido:
+
+       CULTO_REGULAR_SO_ORGANIZADOR_GERAL: mudar o culto de 2026-11-01 ...
+         com a ordem antiga -> "Você não tem permissão para isso neste
+                                ministério."               (certo, e vazio)
+         com a ordem nova   -> "O culto de 01/11/2026 é da igreja inteira:
+                                mexer nele mexe na escala de todos os
+                                ministérios daquele dia."  (diz o porquê)
+
+     `PORBANCO` só tem padrões ancorados em texto nosso, então ele não
+     rouba nada de `PORCODIGO`: o que ele não reconhecer cai adiante igual. */
+  let texto: string | undefined;
+  for (const [re, f] of PORBANCO) { const m = bruto.match(re); if (m) { texto = f(m); break; } }
+  if (!texto && codigo) texto = PORCODIGO[codigo];
   /* P0001 é `raise exception` nosso, escrito em português para gente ler.
      Passa como veio, só com o ponto final garantido. */
   if (!texto && codigo === 'P0001' && obj.message) texto = obj.message.trim().replace(/[.!]*$/, '.');

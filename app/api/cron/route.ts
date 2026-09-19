@@ -19,6 +19,25 @@ import {
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
 export const dynamic = 'force-dynamic';
+
+/* O TEMPO LIMITE DESTA ROTA ERA UM NÚMERO QUE NÃO ESTAVA EM LUGAR NENHUM.
+
+   19/09/2026. Sem `maxDuration`, o limite é o padrão da plataforma: ele não
+   está neste arquivo, não está em `vercel.json`, e muda quando o plano muda
+   ou quando a Vercel muda o padrão. Ou seja, o tempo que o robô das 3h tem
+   para rodar era decidido por fora do repositório, sem ninguém saber qual era.
+
+   O que esta rota faz, por equipe, em SÉRIE: cerca de dez consultas, mais
+   `gerarMes`, mais um `salvar_dia` por culto. Com quatro ministérios isso
+   cabe folgado; o custo cresce a cada ministério novo, e `gerarMes` sozinho
+   já foi medido em 6,5 segundos num caso de 40 postos.
+
+   300 é o teto do plano Pro e dá margem de sobra para o crescimento previsto.
+   O que importa mais que o número é ele estar ESCRITO: quando um dia o robô
+   for cortado no meio, o primeiro lugar em que alguém vai olhar é aqui, e
+   agora tem o que ler. Se a conta for Hobby, a plataforma corta antes — e aí
+   o limite aparece no log como tal, em vez de virar mistério. */
+export const maxDuration = 300;
 /* Domínio próprio desde 26/08. O antigo `escala-midia-iota.vercel.app` continua
    respondendo, mas todo link NOVO tem que nascer no endereço definitivo: link de
    grupo de WhatsApp vive em descrição por meses, e link que envelhece amarra o

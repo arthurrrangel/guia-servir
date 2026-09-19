@@ -298,8 +298,28 @@ export function domingosDoMes(ano: number, mes: number): string[] {
 }
 
 /* Culto do Follow: todo sábado do mês MENOS o primeiro.
-   A mesma regra vale no banco (coluna gerada em cultos.tipo), então app e
-   banco nunca discordam sobre o que é um sábado de Follow. */
+
+   ATENÇÃO AO QUE ESTAVA ESCRITO AQUI ANTES — 19/09/2026.
+
+   Esta linha dizia: "a mesma regra vale no banco (coluna gerada em
+   cultos.tipo), então app e banco nunca discordam sobre o que é um sábado de
+   Follow". É FALSO, e foi medido:
+
+       2026-10-03 (1º sábado)  cultos.tipo (coluna gerada) -> 'follow'
+                               sabadosDoFollow / cultosAte -> não é dia de culto
+
+   A coluna gerada é `case when dow = 6 then 'follow' else 'domingo' end`, sem
+   a exceção do primeiro sábado. Quem tem a exceção são `sabadosDoFollow`
+   aqui, `cultosAte` abaixo, `culto_guarda` (migração 54) e
+   `eu_proximos_domingos` (migração 09), todos com `dia > 7`.
+
+   NA PRÁTICA NÃO DÓI, e por isso não virou migração: no primeiro sábado não
+   existe culto em nenhum dos dois lados, então a coluna gerada só rotula uma
+   linha que, naquele dia, só existe se for EVENTO — e evento ignora `tipos`.
+   Trocar a expressão de uma coluna gerada exige reescrever a tabela inteira.
+
+   O que doía era o comentário: ele mandava confiar numa igualdade que não
+   existe, e quem fosse depurar calendário procuraria no lugar errado. */
 export function sabadosDoFollow(ano: number, mes: number): string[] {
   const out: string[] = [];
   const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
@@ -537,14 +557,64 @@ export function escalacoesDe(S: Estado, vid: string) {
    são slots DENTRO do dia). Se um dia algo passar a apagar dia, esta premissa
    cai junto, e é por isso que ela está escrita.
    ============================================================================= */
-type ComCache = Estado & { _diasOrd?: string[]; _diasN?: number };
+type ComCache = Estado & { _diasOrd?: string[]; _diasN?: number; _diasSelo?: number };
+let SELO = 0;
+
+/* A GUARDA ERA A CONTAGEM DE DIAS, E A CONTAGEM NÃO BASTA — 19/09/2026.
+
+   A versão anterior refazia o cache quando `Object.keys(S.escalas).length`
+   mudava, apostando que dia só nasce e nunca morre. O parágrafo acima até
+   avisava: "se um dia algo passar a apagar dia, esta premissa cai junto".
+   Esse algo já estava no repositório, em app/escala/page.tsx, na rotina que
+   restaura o retrato local quando a gravação falha:
+
+       if (!est) for (const [d, dia] of snap) { if (dia) S.escalas[d] = dia;
+                                                else delete S.escalas[d]; }
+
+   Apagar um dia e criar outro deixa a CONTAGEM igual, e o cache continua
+   servindo a lista velha. Medido:
+
+       escalas: 01/03, 08/03, 15/03  ->  apaga 15/03, cria 25/03  (ainda 3)
+       diasDesdeUltima(ref=01/04) devolveu 24   (a resposta certa é 7)
+       cargaJanela(ref=01/04, janela=10) devolveu 0   (a certa é 1)
+
+   Nada quebra na hora: só muda quem é sorteado, semanas depois, sem ninguém
+   ligar uma coisa à outra. É o defeito mais caro que existe neste motor.
+
+   A GUARDA NOVA É CONTAGEM **MAIS SELO**, e o selo é o que fecha o buraco:
+   um número global que sobe toda vez que `garantirDia` CRIA um dia e toda vez
+   que alguém avisa, por `esqueceOsDias`, que mexeu em `S.escalas` por fora.
+   A troca que enganava a contagem (apaga um, cria outro) mexe no selo pela
+   criação, então o cache se refaz.
+
+   E A TENTATIVA QUE EU MEDI E JOGUEI FORA, que é o motivo deste parágrafo:
+
+   A primeira versão desta correção trocava a contagem por uma chave
+   `contagem|primeiro|último`, varrendo `S.escalas` a cada chamada. Eu escrevi
+   no comentário que ela era "O(1) e mais barata". As duas coisas eram
+   falsas, e a medição disse o contrário do que eu tinha afirmado:
+
+       40 postos / 60 pessoas / limite 2   antes 6.222 ms   com a chave 7.754 ms
+
+   Varrer as chaves é O(n) e roda 1,4 milhão de vezes numa geração de mês:
+   ficou 25% MAIS LENTO que o `Object.keys().length` que eu estava tentando
+   otimizar. Correção de segurança paga com 25% de lentidão continua valendo;
+   o que não vale é anunciá-la como ganho. O selo faz o mesmo trabalho em
+   tempo constante, e é o que ficou.
+
+   Quem mexe em `S.escalas` fora do motor chama `esqueceOsDias(S)`. */
+
+/** Diz ao motor que o conjunto de dias mudou por fora. O(1) e idempotente. */
+export function esqueceOsDias(_S?: Estado) { SELO++; }
+
 function diasEmOrdem(S: Estado): string[] {
   const s = S as ComCache;
   const n = Object.keys(S.escalas).length;
-  if (s._diasOrd && s._diasN === n) return s._diasOrd;
+  if (s._diasOrd && s._diasN === n && s._diasSelo === SELO) return s._diasOrd;
   const ord = Object.keys(S.escalas).sort();
   Object.defineProperty(s, '_diasOrd', { value: ord, writable: true, enumerable: false, configurable: true });
   Object.defineProperty(s, '_diasN', { value: n, writable: true, enumerable: false, configurable: true });
+  Object.defineProperty(s, '_diasSelo', { value: SELO, writable: true, enumerable: false, configurable: true });
   return ord;
 }
 
@@ -617,7 +687,11 @@ export function ocupadoNoDia(S: Estado, data: string, vid: string, funcaoAlvo: s
 }
 
 export function garantirDia(S: Estado, data: string): Dia {
-  if (!S.escalas[data]) S.escalas[data] = { slots: {}, plantao: [], obs: '' };
+  /* CRIAR dia sobe o selo do cache de datas (ver `diasEmOrdem`). Sem isso,
+     apagar um dia e criar outro mantém a contagem e a lista em ordem fica
+     velha, o que muda quem é sorteado semanas depois sem nada quebrar na
+     hora. Uma soma, e só quando o dia realmente nasce. */
+  if (!S.escalas[data]) { S.escalas[data] = { slots: {}, plantao: [], obs: '' }; esqueceOsDias(); }
   const d = S.escalas[data];
   d.slots ||= {}; d.plantao ||= []; d.obs ??= '';
   return d;
@@ -646,14 +720,29 @@ export function nivelEfetivo(v: Voluntario, funcao: string): Nivel | undefined {
 
 export type Candidato = { id: string; nome: string; nivel: Nivel; carga: number; paradoGeral: number; paradoFuncao: number };
 
-export function candidatos(
+/* QUEM PODE, SEM PONTUAR NINGUÉM.
+
+   Esta metade saiu de `candidatos` em 19/09/2026 por causa de uma linha em
+   `gerarDia` que só queria o TAMANHO da lista:
+
+       .map((f, i) => ({ f, i, n: candidatos(S, f.nome, data, {...}).length }))
+
+   Contar assim custava, para CADA pessoa elegível de CADA posto, uma
+   `cargaJanela` e duas `diasDesdeUltima` — as três funções mais caras do
+   arquivo — e o resultado ia para o lixo uma linha depois. Aparecia no perfil
+   como 9,7% do tempo, com o nome de uma função anônima.
+
+   Filtrar é barato; pontuar e ordenar é que não é. Separar as duas deixa o
+   `candidatos` idêntico (ele chama esta e pontua em cima) e dá a `gerarDia`
+   uma contagem que custa o que uma contagem deve custar. */
+function elegiveis(
   S: Estado, funcao: string, data: string,
   o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
-): Candidato[] {
+): Voluntario[] {
   const excluirOcupados = o.excluirOcupados !== false;
   const [ano, mes] = data.split('-').map(Number);
 
-  const lista = S.voluntarios.filter(v => {
+  return S.voluntarios.filter(v => {
     if (!v.ativo) return false;
     const nivel = nivelEfetivo(v, funcao);
     if (!nivel) return false;
@@ -673,9 +762,20 @@ export function candidatos(
     if (excluirOcupados && ocupadoNoDia(S, data, v.id, funcao)) return false;
     return true;
   });
+}
 
+/** Quantas pessoas podem, sem pontuar nenhuma. Mesmo filtro de `candidatos`. */
+export const quantosPodem = (
+  S: Estado, funcao: string, data: string,
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
+) => elegiveis(S, funcao, data, o).length;
+
+export function candidatos(
+  S: Estado, funcao: string, data: string,
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
+): Candidato[] {
   const peso = (n: Nivel) => (n === 'titular' ? 0 : n === 'reserva' ? 1 : 2);
-  return lista
+  return elegiveis(S, funcao, data, o)
     .map(v => ({
       id: v.id, nome: v.nome, nivel: nivelEfetivo(v, funcao)!,
       carga: cargaJanela(S, v.id, data, S.config.janelaCarga),
@@ -736,8 +836,11 @@ export function gerarDia(S: Estado, data: string) {
     const meta = S.funcoes.find(f => f.nome === nome);
     if ((!meta || meta.ativa === false || !doDia.has(nome)) && !intocavel(nome)) delete dia.slots[nome];
   }
+  /* `quantosPodem` e não `candidatos(...).length`: aqui só o número importa, e
+     pontuar para descartar a pontuação custava 9,7% da geração do mês. A
+     ORDEM que sai daqui é idêntica — é o mesmo filtro. */
   const ordem = funcoesDoDia(S, data)
-    .map((f, i) => ({ f, i, n: candidatos(S, f.nome, data, { excluirOcupados: false }).length }))
+    .map((f, i) => ({ f, i, n: quantosPodem(S, f.nome, data, { excluirOcupados: false }) }))
     .sort((a, b) => a.n - b.n || a.i - b.i);
 
   for (const { f } of ordem) {
@@ -946,7 +1049,12 @@ export function resumoDia(S: Estado, data: string) {
 /* ------------------------------------------------------------- mensagens --- */
 export function msgEscala(S: Estado, data: string) {
   const dia = S.escalas[data] || { slots: {}, plantao: [], obs: '' };
-  const L: string[] = [S.config.saudacao, `${tituloDoCulto(data)} (${fmtDia(data)})`, ''];
+  /* `dia.evento` e não só `data`: sem ele a mensagem do grupo saía dizendo
+     "Escala de domingo (15/10)" numa QUINTA de evento. A tela já acertava,
+     porque passa o evento; a mensagem ficou para trás quando a 54 criou o
+     terceiro tipo de dia, e é ela que vai para o WhatsApp de todo mundo. */
+  const L: string[] = [S.config.saudacao,
+    `${tituloDoCulto(data, dia.evento)} (${fmtDia(data)})`, ''];
   for (const f of funcoesDoDia(S, data)) {
     const sl = dia.slots?.[f.nome];
     L.push(f.nome);

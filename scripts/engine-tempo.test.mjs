@@ -75,10 +75,39 @@ function caso({ postos, pessoas, limite, densidade, meses }) {
    caso de 40 postos com 25 pessoas é DUAS vezes o maior ministério de hoje:
    ele existe para a conta continuar de pé quando o Connect crescer. */
 const LIMITE_MS = 1200;
+
+/* O TETO MENSAL MUDA O CUSTO EM 37 VEZES, E ESTE ARQUIVO MEDIA O MAIS BARATO.
+
+   19/09/2026. Os três casos usavam limite 6, 8 e 10. Medido, variando SÓ o
+   limite no terceiro caso, palavra por palavra igual ao resto:
+
+       limite  2 ->   865 ms      limite  6 ->   595 ms
+       limite  3 -> 1.010 ms      limite  8 ->   223 ms
+       limite  4 -> 1.152 ms      limite 10 ->   243 ms   <- o que estava aqui
+
+   A curva não é monótona, e é por isso que ela engana: o custo sobe até o
+   ponto em que o teto ainda deixa vaga aberta e despenca quando o teto é
+   folgado o bastante para preencher tudo. Vaga que NÃO TEM COMO ser
+   preenchida custa a busca inteira antes de o motor desistir, e cada vaga
+   paga essa busca por conta própria.
+
+   Limite 10 é o vale da curva. Nenhum ministério usa 10: o padrão de equipe
+   nova é 2 (`CONFIG_PADRAO.limitePadrao`), e a migração 11 gravou 4 no que
+   está no ar. O teste media a configuração que ninguém tem.
+
+   OS CASOS AGORA USAM OS LIMITES REAIS — 2 e 4 —, que é o pior lado da curva.
+   O terceiro caso passou de 243 ms para cerca de 1.050 ms pela troca do
+   limite, sem nada ter piorado no motor: ele só parou de medir o barato.
+
+   O quarto caso é NOVO e tem teto próprio, bem mais alto: ele não afirma que
+   o clique é rápido, afirma que ele não é ETERNO. É o caso que documenta, com
+   número, que `limitePadrao = 2` num ministério de 40 postos custa segundos —
+   decisão de produto que está registrada no rodapé da migração 56 e não é
+   minha para tomar. */
 const CASOS = [
-  { postos: 11, pessoas: 17, limite: 6, densidade: 2, meses: 6 },
-  { postos: 24, pessoas: 17, limite: 8, densidade: 3, meses: 6 },
-  { postos: 40, pessoas: 25, limite: 10, densidade: 3, meses: 6 },
+  { postos: 11, pessoas: 17, limite: 4, densidade: 2, meses: 6 },
+  { postos: 24, pessoas: 17, limite: 4, densidade: 3, meses: 6 },
+  { postos: 40, pessoas: 25, limite: 4, densidade: 3, meses: 6 },
 ];
 for (const c of CASOS) {
   const S = caso(c);
@@ -86,6 +115,30 @@ for (const c of CASOS) {
   E.gerarMes(S, 2026, 10, '2026-09-19');
   const ms = Date.now() - t0;
   ok(ms < LIMITE_MS, `${c.postos} postos / ${c.pessoas} pessoas / ${c.meses} meses de historico sai em menos de ${LIMITE_MS}ms`, `levou ${ms}ms`);
+}
+
+/* --- 1b. O PIOR CASO CONHECIDO, com teto próprio -------------------------
+
+   `limitePadrao = 2` é o que todo ministério novo recebe, e é o lado mais
+   caro da curva acima: com 40 postos e 60 pessoas custou entre 6 e 7 segundos
+   de SERVIDOR na medição de 19/09, o que num Android mediano são dezenas de
+   segundos de tela morta dentro de um clique.
+
+   Este caso não pede que isso seja rápido. Ele pede que não piore, e existe
+   para que a próxima pessoa que mexer no motor veja o número em vez de
+   descobri-lo num domingo. Se ele começar a falhar, a resposta provavelmente
+   não é otimizar mais: é a decisão de produto que está no rodapé da migração
+   56 (mudar o padrão, ou tirar `gerarMes` do navegador). */
+{
+  const TETO_PIOR_CASO = 15000;
+  const S2 = caso({ postos: 40, pessoas: 60, limite: 2, densidade: 3, meses: 7 });
+  const t0 = Date.now();
+  E.gerarMes(S2, 2026, 10, '2026-09-19');
+  const ms = Date.now() - t0;
+  ok(ms < TETO_PIOR_CASO,
+    `pior caso conhecido (40 postos / 60 pessoas / limite 2) fica abaixo de ${TETO_PIOR_CASO}ms`,
+    `levou ${ms}ms`);
+  console.log(`  [medida] pior caso conhecido: ${ms}ms`);
 }
 
 /* ------------------------------------------- 2. e o resultado é válido */

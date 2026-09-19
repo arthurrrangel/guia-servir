@@ -153,7 +153,13 @@
 .dm h1{font-size:clamp(26px,5vw,34px)}
 .dm h2{font-size:20px}
 .dm h3{font-size:16px}
-.dm p{margin:0 0 var(--dm-e2)}
+/* `:where(p)` E NÃO `p`: o teste de CSS pegou isto na hora, que é para o que
+   ele existe. `.dm p` pesa 0-1-1 e ganha de qualquer classe de 0-1-0, então
+   toda classe nova aplicada num <p> nascia sem poder escolher a própria
+   margem — foi assim que `.dm-corte` chegou com `margin:12px 0 0` e recebeu
+   a margem de baixo do parágrafo genérico. Dentro de `:where()` a regra
+   continua valendo como padrão e para de ganhar de quem vem depois. */
+.dm :where(p){margin:0 0 var(--dm-e2)}
 /* 12px É O CHÃO, NÃO UMA SUGESTÃO.
 
    Estava 11px. No monitor parece elegante; no ônibus, com o celular a meio
@@ -591,4 +597,14 @@
   padding:var(--dm-e2); border:1px solid var(--dm-linha); border-radius:var(--dm-r);
   background:var(--dm-card2); color:var(--dm-ink);
   font:inherit; font-size:max(16px,1rem); line-height:1.5; resize:vertical;
+}
+
+/* A LISTA FOI CORTADA, E ISSO PRECISA APARECER.
+   Migração 56: `dem_lista` passou a ter teto de 300. `--dm-mudo` tem 6,1:1
+   no branco (medido), então serve para texto de apoio sem cair abaixo do
+   4,5:1 que a regra da casa cobra. */
+.dm-corte{
+  margin:12px 0 0; padding:10px 12px;
+  font-size:14px; line-height:1.5; color:var(--dm-mudo);
+  border-top:1px solid var(--dm-linha, rgba(37,37,37,.12));
 }

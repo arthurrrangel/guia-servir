@@ -126,8 +126,17 @@ export type Filtro = {
   setor?: string; busca?: string;
 };
 
+/* `total` e `tem_mais` chegam desde a migração 56, que pôs teto de 300 na
+   `dem_lista`. Sem teto, a aba "Tudo" com 20 mil demandas media 10 MB de
+   JSON; com teto e SEM aviso, a lista passaria a mentir em silêncio, que é
+   exatamente a classe de defeito que este repositório mais paga caro. A tela
+   diz quantas ficaram de fora e o que fazer (filtrar, ou buscar pelo número).
+
+   Os dois campos são opcionais no tipo porque um banco que ainda não recebeu
+   a 56 não os manda, e a tela precisa continuar de pé nessa janela. */
 export const lista = (f: Filtro = {}) =>
-  rpc<{ itens: Resumo[] }>('dem_lista', { p_token: t(), p_f: f });
+  rpc<{ itens: Resumo[]; total?: number; tem_mais?: boolean; limite?: number }>(
+    'dem_lista', { p_token: t(), p_f: f });
 
 export const ver = (numero: number) =>
   rpc<Vista>('dem_ver', { p_token: t(), p_numero: numero });

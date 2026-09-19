@@ -43,7 +43,11 @@ $$;
 SQL
 # 19/09/2026: a 52 redefine dem_abrir e dem_mover. Subir so a 50 punha no ar
 # a versao antiga, e o teste media um sistema que nao e o que esta publicado.
-cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" > /tmp/_mig.sql
+# A 57 entra aqui desde 19/09/2026. Sem ela, este roteiro monta a base com a
+# `dem_lista` ANTIGA e as 252 conferencias de tela ficam verdes medindo a
+# versao errada — que e exatamente por que o teto foi tirado da 56 e posto
+# num arquivo so de Demandas. Um arquivo, um sistema.
+cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" > /tmp/_mig.sql
 cp "$B/scripts/demandas-celular-semear.sql" /tmp/_seed.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_seed.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -f /tmp/_prep.sql"

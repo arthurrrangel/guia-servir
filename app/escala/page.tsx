@@ -95,8 +95,23 @@ function Escala() {
   const rolou = useRef(false);
 
   useEffect(() => {
+    /* `?m=` VEM DE FORA E PRECISA SER CONFERIDO, NÃO SÓ RECONHECIDO.
+
+       A regex antiga (`\d{4}-\d{2}`) aceitava a FORMA e não o VALOR: `2026-13`
+       passava, `2026-00` passava, `0000-01` passava. Com `?m=2026-13` a tela
+       mostrava o ano sem nome de mês, o diálogo perguntava "Remontar os 9
+       cultos de undefined?" e a lista dizia "domingo, 03/13". Um toque em
+       "Montar" mandaria `insert into cultos (data) values ('2026-13-03')`, que
+       o Postgres recusa com 22008 — um código que ninguém traduziu.
+
+       Não é ataque: é um link colado errado, ou um `?m=` de outro sistema. A
+       resposta certa é ignorar o parâmetro e abrir no mês de hoje, que é o que
+       a tela faz quando não vem `?m=` nenhum. */
     const m = new URLSearchParams(window.location.search).get('m');
-    if (m && /^\d{4}-\d{2}$/.test(m)) { setAno(+m.slice(0, 4)); setMes(+m.slice(5, 7)); }
+    if (m && /^\d{4}-\d{2}$/.test(m)) {
+      const a = +m.slice(0, 4), s = +m.slice(5, 7);
+      if (s >= 1 && s <= 12 && a >= 2020 && a <= 2100) { setAno(a); setMes(s); }
+    }
   }, []);
   useEffect(() => {
     if (rolou.current || !window.location.hash) return;
@@ -411,10 +426,39 @@ function Escala() {
               <input type="time" value={evHora} onChange={e => setEvHora(e.target.value)} />
             </label>
           </div>
-          <button className="lid-bt" disabled={ocupado || evNome.trim().length < 2 || !evData}
-            onClick={criarOEvento}>
-            Criar {evNome.trim() ? `"${evNome.trim()}"` : 'o evento'}
-          </button>
+          {/* BOTÃO CINZA QUE NÃO DIZ O QUE FALTA É UM BECO.
+
+              Com o nome preenchido e a data em branco o botão ficava cinza e
+              nada na vizinhança dizia qual dos três campos estava faltando.
+              Medido nos dois tamanhos de tela. A pessoa toca, não acontece
+              nada, e não há como descobrir o porquê a não ser adivinhando.
+
+              E O RÓTULO PAROU DE ECOAR O QUE FOI DIGITADO. Ele era
+              `Criar "{nome}"`, então em 390px um nome longo quebrava em duas
+              linhas e o botão ia de 53px para 72px de altura, empurrando tudo
+              o que estava abaixo para baixo enquanto a pessoa digitava.
+              Medido: 292x53 vazio, 292x72 com "Conferencia de Missoes…". O
+              nome já está no campo logo acima; repeti-lo no botão custava um
+              layout que pula e não acrescentava nada. */}
+          {(() => {
+            const falta = [
+              evNome.trim().length < 2 ? 'o nome' : null,
+              !evData ? 'o dia' : null,
+            ].filter(Boolean);
+            return (
+              <>
+                <button className="lid-bt" disabled={ocupado || falta.length > 0}
+                  onClick={criarOEvento}>
+                  {ocupado ? 'Criando…' : 'Criar o evento'}
+                </button>
+                {falta.length > 0 && (
+                  <p className="esc-evento-falta" role="status">
+                    Falta {falta.join(' e ')}.
+                  </p>
+                )}
+              </>
+            );
+          })()}
           <p className="esc-evento-dica">
             O evento é <strong>deste ministério</strong> ({equipe?.nome || 'o do topo'}) e
             só aparece para quem organiza ele.

@@ -54,6 +54,11 @@ id postgres >/dev/null 2>&1 || useradd -m postgres >/dev/null 2>&1
 
 echo "· subindo um Postgres vazio em $DIR (porta $PORTA)"
 "$PGBIN/pg_ctl" -D "$DIR/data" stop >/dev/null 2>&1
+# SOCKET ÓRFÃO EM /tmp FAZ A SEGUNDA EXECUÇÃO FALHAR SEM DIZER POR QUÊ.
+# `rm -rf` no diretório de dados não apaga `/tmp/.s.PGSQL.<porta>.lock`, e o
+# Postgres seguinte recusa subir com "lock file already exists". A mensagem
+# some no /dev/null do start e o script diz só "não subiu". Uma linha resolve.
+rm -f /tmp/.s.PGSQL.$PORTA*
 rm -rf "$DIR"; mkdir -p "$DIR"; chown -R postgres:postgres "$DIR"
 su postgres -c "$PGBIN/initdb -D $DIR/data -U postgres --auth=trust" >/dev/null 2>&1 || { echo "initdb falhou"; exit 1; }
 su postgres -c "$PGBIN/pg_ctl -D $DIR/data -l $DIR/log -o '-k /tmp -p $PORTA -c listen_addresses=' start" >/dev/null 2>&1
@@ -62,34 +67,13 @@ sleep 2
 P="psql -h /tmp -p $PORTA -U postgres"
 $P -q -c "create database guia;" >/dev/null 2>&1 || { echo "nao subiu; veja $DIR/log"; exit 1; }
 
-# ---------------------------------------------------------------------------
-# O PEDAÇO DO SUPABASE QUE NÃO ESTÁ NAS MIGRAÇÕES.
-#
-# Os papéis `anon`/`authenticated`/`service_role`, o esquema `auth` com
-# `auth.jwt()`, o pgcrypto em `extensions` e os GRANTs padrão em tabelas novas
-# são da plataforma, não do projeto. Estão aqui, e não escondidos, porque toda
-# migração que fala de RLS depende deles: quem reconstrói precisa saber que
-# este andar existe.
-# ---------------------------------------------------------------------------
-$P -d guia -q <<'SQL' >/dev/null 2>&1
-create schema if not exists auth;
-create schema if not exists extensions;
-create role anon nologin;
-create role authenticated nologin;
-create role service_role nologin bypassrls;
-grant usage on schema public, extensions, auth to anon, authenticated, service_role;
-create extension if not exists pgcrypto with schema extensions;
-alter database guia set search_path to public, extensions;
-create or replace function auth.jwt() returns jsonb language sql stable as $$
-  select coalesce(nullif(current_setting('request.jwt.claims', true),'')::jsonb, '{}'::jsonb) $$;
-create or replace function auth.uid() returns uuid language sql stable as $$
-  select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
-create or replace function auth.email() returns text language sql stable as $$
-  select nullif(current_setting('request.jwt.claim.email', true),'') $$;
-alter default privileges in schema public grant all on tables    to anon, authenticated, service_role;
-alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
-alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
-SQL
+# O ANDAR DO SUPABASE, que nenhuma migração cria (papéis, esquema `auth`,
+# pgcrypto, GRANTs padrão). Mora em `scripts/andar-do-supabase.sql` para o
+# `escala-banco.sh` usar o MESMO: era copiado, e copiar já custou 73 casos
+# reprovando por `role "authenticated" does not exist` num roteiro que não
+# tinha a cópia. O arquivo explica o resto.
+$P -d guia -q -v ON_ERROR_STOP=1 -f "$RAIZ/scripts/andar-do-supabase.sql" >/dev/null 2>&1 \
+  || { echo "nao consegui montar o andar do Supabase"; exit 1; }
 
 # ---------------------------------------------------------------------------
 # 1 · as migrações, em ordem

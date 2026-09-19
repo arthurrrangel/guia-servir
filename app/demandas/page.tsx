@@ -29,6 +29,8 @@ export default function Pagina() {
 function Painel() {
   const { eu } = useEu();
   const [itens, setItens] = useState<Resumo[] | null>(null);
+  /* quantas ficaram de fora do teto de 300 da migração 56 (0 = nenhuma) */
+  const [sobraram, setSobraram] = useState(0);
   const [erro, setErro] = useState('');
   const [aba, setAba] = useState<Filtro['aba']>('tudo');
   const [so, setSo] = useState<'abertas' | 'atrasadas' | 'tudo'>('abertas');
@@ -39,8 +41,9 @@ function Painel() {
     if (so === 'abertas') f.abertas = true;
     if (so === 'atrasadas') f.atrasadas = true;
     const r = await lista(f);
-    if (!r.ok) { setErro(recadoDoErro(r)); setItens([]); return; }
+    if (!r.ok) { setErro(recadoDoErro(r)); setItens([]); setSobraram(0); return; }
     setErro(''); setItens(r.itens);
+    setSobraram(r.tem_mais ? Math.max((r.total || 0) - r.itens.length, 0) : 0);
   }, [aba, so, busca]);
 
   useEffect(() => { setItens(null); buscar(); }, [buscar]);
@@ -108,6 +111,18 @@ function Painel() {
         <>
           <Resumão itens={itens} eu={eu} />
           <div className="dm-fila">{itens.map(d => <Linha key={d.numero} d={d} />)}</div>
+          {/* LISTA CORTADA TEM QUE DIZER QUE FOI CORTADA.
+
+              A migração 56 pôs teto de 300 na consulta, porque sem teto a aba
+              "Tudo" descia 10 MB de JSON. Teto sem aviso é pior que o
+              problema que ele resolve: a pessoa olharia uma lista incompleta
+              achando que é a lista. */}
+          {sobraram > 0 && (
+            <p className="dm-corte" role="status">
+              Mostrando as {itens.length} mais urgentes. Outras {sobraram} não
+              couberam — use os filtros acima, ou busque pelo número da demanda.
+            </p>
+          )}
         </>
       )}
     </>

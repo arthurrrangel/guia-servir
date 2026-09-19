@@ -32,7 +32,7 @@ const ok = (c, rot, extra = '') => {
 };
 
 /* dublê que REGISTRA os filtros aplicados em cada tabela */
-function fingeBanco(linhas = {}) {
+function fingeBanco(linhas = {}, recusa = null) {
   const pedidos = [];
   const tabela = (nome) => {
     const reg = { tabela: nome, gte: [], in: [], eq: [], or: [], cols: '' };
@@ -48,6 +48,11 @@ function fingeBanco(linhas = {}) {
     };
     const resposta = () => {
       pedidos.push(reg);
+      /* `recusa` simula o banco que ainda não recebeu a migração: a coluna não
+         existe e o PostgREST recusa o PEDIDO INTEIRO, não a coluna. */
+      if (recusa && recusa.tabela === nome && recusa.cols.some(c => (reg.cols || '').includes(c))) {
+        return { data: null, error: { code: '42703', message: `column cultos.${recusa.cols[0]} does not exist` } };
+      }
       return { data: linhas[nome] ?? [], error: null };
     };
     return eu;
@@ -93,6 +98,45 @@ const DESDE = '2026-03-03';
     'e filtra: culto da igreja (sem dono) OU evento DESTE ministerio',
     JSON.stringify(c?.or));
   ok(c.or.some(e => e.includes('e1')), 'o filtro usa o id da equipe pedida', JSON.stringify(c?.or));
+}
+
+/* ---- 1b. O CÓDIGO PODE SUBIR ANTES DA MIGRAÇÃO 54 SEM DERRUBAR A TELA
+
+   A Vercel publica sozinha no `git push`. Então existe uma janela entre o
+   deploy e a aplicação da migração em que o app pede `evento`, `equipe_id` e
+   `inicio` de uma tabela que ainda não tem essas colunas — e o PostgREST
+   recusa o PEDIDO INTEIRO, não a coluna. Sem rede, Painel, Escala e Time
+   morrem juntos, que é exatamente o apagão de 18/09.
+
+   A carga tem que degradar: sem as colunas, segue com `id,data`, sem o filtro
+   `.or()` (que fala justamente de `equipe_id`), e os eventos simplesmente não
+   aparecem até a migração rodar. */
+{
+  const { cliente, pedidos } = fingeBanco(
+    { voluntarios: [], funcoes: [], cultos: [{ id: 'c1', data: '2026-10-04' }] },
+    { tabela: 'cultos', cols: ['evento', 'equipe_id', 'inicio'] },
+  );
+  let estourou = null, l = null;
+  try { l = await linhasDaEquipe(cliente, 'e1', DESDE, 'Mídia'); }
+  catch (e) { estourou = e; }
+
+  ok(!estourou, 'banco sem a migração 54 NÃO derruba a carga',
+    estourou ? String(estourou.message || estourou) : '');
+  ok(Array.isArray(l?.cultos) && l.cultos.length === 1,
+    'e os cultos chegam mesmo assim', JSON.stringify(l?.cultos));
+
+  const deCultos = pedidos.filter(p => p.tabela === 'cultos');
+  ok(deCultos.length === 2, 'tentou com as colunas novas e, recusado, tentou sem',
+    `${deCultos.length} tentativa(s)`);
+  ok(/evento/.test(deCultos[0]?.cols || ''), 'a primeira tentativa pede as colunas da 54', deCultos[0]?.cols);
+  ok(!/evento/.test(deCultos[1]?.cols || ''), 'a segunda vai sem elas', deCultos[1]?.cols);
+  ok(deCultos[1]?.or.length === 0,
+    'e sem o filtro .or(), que fala da coluna que não existe', JSON.stringify(deCultos[1]?.or));
+
+  /* e o Estado montado a partir disso é o de antes da 54: sem evento nenhum */
+  const S = montarEstado(l);
+  ok(!Object.values(S.escalas).some(d => d.evento),
+    'nenhum dia vira evento quando o banco não tem a coluna');
 }
 
 /* ------------------------------ 2. o Estado montado não muda com o corte

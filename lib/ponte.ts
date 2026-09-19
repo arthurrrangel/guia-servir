@@ -239,12 +239,75 @@ const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
 const semPermissao = (e: any) =>
   e?.code === '42501' || /permission denied/i.test(e?.message || '');
 
+/** A coluna não existe NESTE banco. 42703 é o código do Postgres, e o
+    PostgREST também devolve PGRST204 quando não acha a coluna no schema.
+
+    19/09/2026 — por que isto passou a existir ao lado de `semPermissao`:
+
+    As duas situações são a mesma do ponto de vista da tela. "Você não pode ler
+    esta coluna" e "esta coluna ainda não existe" chegam como códigos
+    diferentes e têm a MESMA consequência: o PostgREST recusa o pedido INTEIRO,
+    não a coluna, e a tela morre.
+
+    A segunda acontece numa janela muito concreta: entre PUBLICAR o código e
+    APLICAR a migração. Se o deploy sobe antes, o app pede colunas que o banco
+    ainda não tem, e Painel, Escala e Time caem juntos — exatamente o apagão de
+    18/09, pela porta ao lado. */
+const colunaNaoExiste = (e: any) =>
+  e?.code === '42703' || e?.code === 'PGRST204' ||
+  /column .* does not exist|could not find the .* column/i.test(e?.message || '');
+
+const bancoRecusouColuna = (e: any) => semPermissao(e) || colunaNaoExiste(e);
+
+/* OS CULTOS, COM A MESMA REDE DE PROTEÇÃO DOS VOLUNTÁRIOS — 19/09/2026.
+
+   A migração 54 acrescentou `evento`, `equipe_id` e `inicio` em `cultos`, e a
+   consulta passou a pedir as três mais um filtro `.or()` sobre `equipe_id`.
+
+   Eu escrevi isso algumas horas DEPOIS de consertar o apagão de 18/09, e caí
+   na mesma armadilha pela porta ao lado: uma lista de colunas sem rede.
+   Publicar o código antes de aplicar a migração faria o PostgREST recusar o
+   pedido inteiro, e Painel, Escala e Time morreriam juntos — de novo.
+
+   E a ordem "migração primeiro, deploy depois" não é uma garantia: a Vercel
+   publica sozinha no `git push`, então a janela existe quer alguém lembre da
+   ordem ou não.
+
+   Com a degradação abaixo a ordem deixa de importar. Sem as colunas, a carga
+   segue com `id,data` e sem o filtro: o app funciona exatamente como
+   funcionava antes da 54, e os eventos simplesmente não aparecem até a
+   migração rodar. É o mesmo contrato do `lerVoluntarios`, pelo mesmo motivo:
+   degradar é melhor que morrer.
+
+   O filtro `.or()` sai junto, e tem que sair: ele fala de `equipe_id`, que é
+   justamente a coluna que pode não existir. */
+const CULTOS_ESSENCIAL = 'id,data';
+const CULTOS_COM_EVENTO = 'id,data,evento,equipe_id,inicio';
+
+async function lerCultos(s: any, equipeId: string, desde: string) {
+  const r = await s.from('cultos').select(CULTOS_COM_EVENTO)
+    .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
+    .gte('data', desde).order('data');
+  if (!r?.error || !bancoRecusouColuna(r.error)) return r;
+
+  /* segunda tentativa sem nada da 54. Se ESTA falhar, o erro sobe: aí não é
+     migração que falta, é a tabela fechada, e esconder isso seria pior. */
+  const r2 = await s.from('cultos').select(CULTOS_ESSENCIAL)
+    .gte('data', desde).order('data');
+  if (r2?.error) return r2;
+  if (typeof console !== 'undefined') {
+    console.warn('[ponte] o banco recusou evento/equipe_id/inicio em cultos',
+      '— segui sem eventos esporádicos. Falta aplicar a migração 54.');
+  }
+  return r2;
+}
+
 async function lerVoluntarios(s: any, equipeId: string) {
   const pede = (cols: string) =>
     s.from('voluntarios').select(cols).eq('equipe_id', equipeId).order('nome');
 
   const r = await pede(COLUNAS_VOLUNTARIO);
-  if (!r?.error || !semPermissao(r.error)) return r;
+  if (!r?.error || !bancoRecusouColuna(r.error)) return r;
 
   /* segunda tentativa sem as opcionais. Se ESTA falhar, o erro sobe: aí não é
      coluna nova sem grant, é a tabela fechada, e esconder isso seria pior. */
@@ -269,20 +332,100 @@ async function lerVoluntarios(s: any, equipeId: string) {
    no motor junto. */
 export const DIAS_DE_HISTORICO = -200;
 
+/* =============================================================================
+   A LISTA DE IDs VAI NA URL, E URL TEM TETO — 19/09/2026.
+
+   `.in('voluntario_id', volIds)` não vira corpo de requisição: vira query
+   string de um GET, com um UUID de 36 letras por pessoa mais vírgula. Medido,
+   montando a consulta com o próprio `@supabase/supabase-js` e lendo a URL
+   antes do envio:
+
+        voluntários     habilidades        plantões (dois `.in`)
+            13 (hoje)        593 B               2.946 B
+            60            2.426 B               4.779 B
+           150            5.936 B               8.289 B     <- passa de 8 KB
+           300           11.786 B              14.139 B
+
+   Oito quilobytes é o `large_client_header_buffers` padrão do nginx, que é o
+   que roda na frente do PostgREST. Passando disso a resposta é 414, e como
+   um erro de leitura SOBE (e deve subir), a tela do líder morre inteira:
+   Painel, Escala e Time juntos. Não é lentidão, é apagão.
+
+   O gatilho é 150 pessoas em UM ministério, não na igreja. Hoje o maior tem
+   17. Mas o Connect e o GUIA Kids são os que crescem, e o modo de falhar é o
+   pior que existe: tela branca, sem pista, para quem não mudou nada.
+
+   LOTE DE 100 porque 100 UUIDs dão cerca de 3,9 KB, metade do teto, e sobra
+   espaço para o segundo `.in('culto_id', ...)` de `escalacoes` e `plantoes`.
+   O custo é uma requisição a mais a cada 100 pessoas, todas em paralelo.
+
+   E O ERRO CONTINUA SUBINDO: se QUALQUER lote falhar, a função devolve o
+   erro, porque meio resultado é pior que nenhum — lista parcial de escalação
+   faz o robô das 3h achar que o líder não montou o mês.
+   ============================================================================= */
+const POR_LOTE = 100;
+
+/* =============================================================================
+   `funcoes` ERA A ÚLTIMA `select('*')` DA CARGA.
+
+   O parágrafo mais abaixo neste arquivo diz, desde o apagão de 18/09:
+   "Colunas explícitas, nunca `*`". `voluntarios` e `cultos` seguiram a regra;
+   `funcoes` ficou de fora — e é a tabela que mais ganhou coluna nova na
+   história deste banco (sete migrações mexeram nela).
+
+   O que `*` custava, medido: `descricao` e `descricao_familia` (migrações 14
+   e 15) somam cerca de 139 letras cada, vêm em toda carga e `montarEstado`
+   não lê nenhuma das duas. `chegada` também não é lida em lugar nenhum do
+   app. Com 40 postos são uns 11 KB por carga, e `recarregar()` é chamado de
+   onze lugares só na tela de escala.
+
+   Mas o motivo principal não são os bytes: é que `*` esconde de quem lê o
+   código quais colunas a tela realmente precisa, e é isso que transforma uma
+   coluna nova sem GRANT num apagão silencioso.
+
+   `exige_sexo` entra como OPCIONAL, com a mesma degradação de `sexo` em
+   `voluntarios`: ela nasceu na 48, é a mais nova da lista, e se um dia faltar
+   GRANT a tela tem que continuar de pé sem a regra do prédio em vez de morrer
+   inteira.
+   ============================================================================= */
+const FUNCOES_ESSENCIAIS = 'id,nome,simultanea,ordem,ativa,equipe_id,tipos,relata';
+const FUNCOES_OPCIONAIS = ['exige_sexo'];
+const FUNCOES_COMPLETAS = [FUNCOES_ESSENCIAIS, ...FUNCOES_OPCIONAIS].join(',');
+
+async function lerFuncoes(s: any, equipeId: string) {
+  const pede = (cols: string) =>
+    s.from('funcoes').select(cols).eq('equipe_id', equipeId).order('ordem');
+  const r = await pede(FUNCOES_COMPLETAS);
+  if (!r?.error || !bancoRecusouColuna(r.error)) return r;
+  const r2 = await pede(FUNCOES_ESSENCIAIS);
+  if (!r2?.error && typeof console !== 'undefined') {
+    console.warn('[ponte] o banco recusou', FUNCOES_OPCIONAIS.join(', '),
+      'em funcoes — segui sem a regra de sexo do posto. Falta um GRANT.');
+  }
+  return r2;
+}
+
+export async function emLotes(
+  ids: string[], consulta: (ids: string[]) => any,
+): Promise<{ data: any[]; error?: any }> {
+  if (!ids.length) return { data: [] };
+  if (ids.length <= POR_LOTE) return await consulta(ids);
+  const lotes: string[][] = [];
+  for (let i = 0; i < ids.length; i += POR_LOTE) lotes.push(ids.slice(i, i + POR_LOTE));
+  const rs = await Promise.all(lotes.map(l => consulta(l)));
+  const ruim = rs.find((r: any) => r?.error);
+  if (ruim) return ruim;
+  return { data: rs.flatMap((r: any) => r?.data || []) };
+}
+
 export async function linhasDaEquipe(
   s: any, equipeId: string, desde: string, nomeEquipe = '',
 ): Promise<LinhasDoBanco> {
   const vazio = { data: [] as any[] };
   const [funcoes, vols, cultos, cfg] = await Promise.all([
-    s.from('funcoes').select('*').eq('equipe_id', equipeId).order('ordem'),
+    lerFuncoes(s, equipeId),
     lerVoluntarios(s, equipeId),
-    /* EVENTO ESPORÁDICO (migração 54): o dia do evento vem junto com os
-       domingos, e o filtro é o que impede o Louvor de abrir a escala e ver um
-       dia do Connect. `equipe_id is null` são os cultos da programação fixa,
-       que são da igreja inteira; preenchido é evento, e só o dono enxerga. */
-    s.from('cultos').select('id,data,evento,equipe_id,inicio')
-      .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
-      .gte('data', desde).order('data'),
+    lerCultos(s, equipeId, desde),
     s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
   ]);
   /* config pode vir nula por RLS (quem logou sem estar na allowlist) — isso é
@@ -311,12 +454,16 @@ export async function linhasDaEquipe(
      `habilidades` fica inteira de propósito — ela é por pessoa e por função,
      não cresce com o tempo, e é o que diz quem PODE fazer o quê. */
   const [habs, indis, escs, plants, recados, disp] = await Promise.all([
-    volIds.length ? s.from('habilidades').select('*').in('voluntario_id', volIds) : vazio,
-    volIds.length ? s.from('indisponibilidades').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
-    (funcaoIds.length && cultoIds.length) ? s.from('escalacoes').select('*').in('funcao_id', funcaoIds).in('culto_id', cultoIds) : vazio,
-    (volIds.length && cultoIds.length) ? s.from('plantoes').select('*').in('voluntario_id', volIds).in('culto_id', cultoIds) : vazio,
+    emLotes(volIds, ids => s.from('habilidades').select('*').in('voluntario_id', ids)),
+    emLotes(volIds, ids => s.from('indisponibilidades').select('*').in('voluntario_id', ids).gte('data', desde)),
+    cultoIds.length
+      ? emLotes(funcaoIds, ids => s.from('escalacoes').select('*').in('funcao_id', ids).in('culto_id', cultoIds))
+      : vazio,
+    cultoIds.length
+      ? emLotes(volIds, ids => s.from('plantoes').select('*').in('voluntario_id', ids).in('culto_id', cultoIds))
+      : vazio,
     cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
-    volIds.length ? s.from('disponibilidade').select('*').in('voluntario_id', volIds).gte('data', desde) : vazio,
+    emLotes(volIds, ids => s.from('disponibilidade').select('*').in('voluntario_id', ids).gte('data', desde)),
   ]);
   /* 14/09/2026. ESTAS SEIS TAMBÉM SOBEM. Antes, um erro aqui virava lista
      vazia em silêncio — e lista vazia de `escalacoes` não é "ninguém escalado",

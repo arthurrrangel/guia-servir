@@ -3718,7 +3718,11 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
      e a pessoa fica escrevendo a nota da candidatura com a tela torta e a
      régua horizontal aparecendo. Um pixel a mais resolve; o `max()` cuida de
      quando a régua de tipo do sistema subir. */
-  font:max(16px,var(--t-corpo))/1.55 var(--fonte); color:var(--ink); resize:vertical;
+  /* longhand, não atalho: um valor inválido no `font:` derruba TAMANHO,
+     ENTRELINHA e FAMÍLIA de uma vez, e aqui o tamanho é o piso que impede o
+     iOS de dar zoom ao focar. Ver scripts/css-tokens.test.mjs. */
+  font-size:max(16px,var(--t-corpo)); line-height:1.55; font-family:var(--fonte);
+  color:var(--ink); resize:vertical;
 }
 .lid-cand-nota:focus-visible{ outline-offset:-3px; border-color:var(--noite) }
 
@@ -3799,7 +3803,7 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    cartão com cara diferente faria parecer que as regras são outras — elas não
    são. A única distinção é o nome no lugar de "Domingo, 04/10".
    ============================================================================= */
-.esc-evento{ border:1px solid var(--linha); border-radius:var(--r2); background:var(--papel) }
+.esc-evento{ border:1px solid var(--linha); border-radius:var(--r4); background:var(--papel) }
 .esc-evento-abrir{
   cursor:pointer; list-style:none; padding:var(--e3) var(--e4);
   font-family:var(--fonte-display); font-weight:var(--p-forte);
@@ -3808,9 +3812,17 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   min-height:44px; display:flex; align-items:center;
 }
 .esc-evento-abrir::-webkit-details-marker{ display:none }
-.esc-evento[open] .esc-evento-abrir{ color:var(--tinta); border-bottom:1px solid var(--linha) }
+.esc-evento[open] .esc-evento-abrir{ color:var(--ink); border-bottom:1px solid var(--linha) }
 .esc-evento-corpo{ padding:var(--e4); display:grid; gap:var(--e4) }
-.esc-evento-dica{ margin:0; font-size:var(--t-peq); line-height:1.55; color:var(--cinza) }
+/* `--t-apoio` e não `--t-peq`: o segundo eu inventei na hora e ele não existe
+   em lugar nenhum da folha. Declaração com token indefinido é DESCARTADA, e a
+   dica herdava o tamanho do corpo — ficava MAIOR que o rótulo do botão que a
+   pessoa veio apertar. `--t-apoio` é o degrau da casa para nota e legenda. */
+.esc-evento-dica{ margin:0; font-size:var(--t-apoio); line-height:1.55; color:var(--cinza) }
+/* O QUE FALTA, ao lado do botão cinza. `--ink` e não `--cinza`: esta frase é
+   a única saída de quem tocou o botão e não viu nada acontecer, então ela
+   precisa do contraste de texto normal, não do de apoio. */
+.esc-evento-falta{ margin:.35rem 0 0; font-size:var(--t-apoio); line-height:1.55; color:var(--ink) }
 .esc-evento-campos{ display:grid; gap:var(--e3) }
 @media (min-width:560px){
   .esc-evento-campos{ grid-template-columns:1fr auto auto; align-items:end }
@@ -3822,11 +3834,26 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 }
 .esc-evento-opc{ text-transform:none; letter-spacing:0; font-weight:400 }
 .esc-evento-campos input{
-  /* 16px é o piso: abaixo disso o iOS dá zoom sozinho ao focar o campo */
-  font:max(16px,var(--t-corpo))/1.4 var(--fonte-corpo);
+  /* 16px é o piso: abaixo disso o iOS dá zoom sozinho ao focar o campo.
+
+     EM LONGHAND, E NÃO NO ATALHO `font:`, por um motivo medido: o atalho
+     trazia `var(--fonte-corpo)`, um token que eu inventei e que não existe na
+     folha. Token indefinido invalida a declaração INTEIRA — não só a família:
+     tamanho, entrelinha e peso caem junto. O campo ficava com 12px herdados,
+     e o iOS passava a dar zoom exatamente onde o comentário diz que não dá.
+
+     Em 320 e 390 o defeito não aparecia, porque a regra geral da casa
+     (`@media(max-width:719px)`) põe um piso de 16px em todo input. Acima de
+     719px — iPad em retrato — o piso some e sobrava a regra morta. Foi assim
+     que passou nos testes de celular e quebrou no tablet.
+
+     Longhand não tem esse tudo-ou-nada: se uma linha cair, as outras ficam. */
+  font-size:max(16px,var(--t-corpo));
+  line-height:1.4;
+  font-family:var(--fonte);
   padding:var(--e2) var(--e3); min-height:44px;
-  border:1px solid var(--linha); border-radius:var(--r1);
-  background:var(--fundo); color:var(--tinta); width:100%;
+  border:1px solid var(--linha); border-radius:var(--r4);
+  background:var(--papel); color:var(--ink); width:100%;
 }
 .esc-evento-tirar{ margin-top:var(--e4); padding-top:var(--e3); border-top:1px solid var(--linha) }
 

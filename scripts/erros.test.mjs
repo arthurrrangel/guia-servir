@@ -116,6 +116,68 @@ for (const msg of ['salvar_dia sem ministerio', 'salvarDia sem ministério']) {
   ok(/Não achei o ministério/.test(r.texto), `"${msg}" acha a frase certa`, r.texto);
 }
 
-const total = 31 + 6 + EMAILS.length;
+
+/* 3) OS CÓDIGOS DO EVENTO ESPORÁDICO, E POR QUE O MAIS PROVÁVEL FALTAVA.
+
+      `criar_evento` e `apagar_evento` devolvem nove códigos curtos. Cinco
+      estavam traduzidos; quatro chegavam crus na tela como
+      "Não consegui salvar. Detalhe: DIA_DE_CULTO".
+
+      `DIA_DE_CULTO` não é caso de canto: o campo é um `<input type="date">`
+      comum, que não impede escolher um domingo, e escolher um domingo é a
+      primeira coisa que alguém tenta. O erro mais frequente do recurso
+      inteiro era o que menos dizia.
+
+      E o gatilho do banco lança OS MESMOS casos por outro caminho, com o
+      texto colado (`DIA_DE_CULTO: 2026-10-04 e domingo...`), escrito sem
+      acento para o arquivo SQL atravessar qualquer editor. Quem lê é gente,
+      então as duas formas precisam cair em português. */
+const CODIGOS_DO_EVENTO = [
+  'DIA_DE_CULTO', 'SEM_PERMISSAO', 'NAO_EXISTE', 'REGRA', 'JA_TEM_EVENTO',
+  'JA_TEM_CULTO', 'DATA_NO_PASSADO', 'FALTA_NOME', 'FALTA_DATA',
+  'NAO_E_EVENTO', 'EVENTO_NAO_CRIADO', 'EVENTO_NAO_APAGADO',
+];
+for (const c of CODIGOS_DO_EVENTO) {
+  const r = humano(new Error(c), 'salvar');
+  ok(!r.generico, `${c} tem frase própria`, r.texto);
+  ok(!/[A-Z_]{6,}/.test(r.texto), `${c} não vaza o código na frase`, r.texto);
+}
+
+/* as mesmas recusas vindas do gatilho, com texto colado e código SQLSTATE */
+const DO_GATILHO = [
+  ['P0001', 'DIA_DE_CULTO: 2026-10-04 e domingo, e domingo ja tem culto.', /04\/10\/2026/],
+  ['23505', 'JA_TEM_EVENTO: 2026-10-15 ja tem "GUIA Empreendedor" marcado para este ministerio, e a escala e um dia por data.', /GUIA Empreendedor/],
+  ['42501', 'CULTO_REGULAR_SO_ORGANIZADOR_GERAL: mudar o culto de 2026-11-01 muda a escala de todos os ministerios daquele dia.', /todos os minist/],
+  ['42501', 'EVENTO_DE_OUTRO_MINISTERIO: GUIA Empreendedor nao e do seu ministerio.', /outro minist/],
+  ['42501', 'EVENTO_NAO_TROCA_DE_DONO: so quem lidera os dois ministerios.', /dois minist/],
+  ['P0001', 'MINISTERIOS_DIFERENTES: FOTO nao e do ministerio de Ana.', /mesmo minist/],
+  ['P0001', 'DATA_NO_PASSADO: 2020-01-05 ja passou.', /05\/01\/2020/],
+];
+for (const [code, message, esperado] of DO_GATILHO) {
+  const r = humano({ code, message }, 'salvar');
+  ok(!r.generico, `gatilho "${message.slice(0, 28)}…" não cai no genérico`, r.texto);
+  ok(esperado.test(r.texto), `gatilho "${message.slice(0, 28)}…" diz o que importa`, r.texto);
+  ok(!/[A-Z_]{6,}/.test(r.texto), `gatilho "${message.slice(0, 28)}…" não vaza o código`, r.texto);
+}
+
+/* 4) E A ORDEM: frase nossa ganha do código genérico.
+
+      `PORCODIGO` responde pela CLASSE (42501 = permissão); `PORBANCO`
+      responde pela FRASE que nós escrevemos. A frase é sempre mais
+      específica. Com a ordem antiga (código primeiro), a explicação boa era
+      apagada por uma genérica correta e vazia. */
+{
+  const r = humano({ code: '42501',
+    message: 'CULTO_REGULAR_SO_ORGANIZADOR_GERAL: mudar o culto de 2026-11-01 muda a escala de todos os ministerios daquele dia.' }, 'salvar');
+  ok(/igreja inteira/.test(r.texto),
+    'a frase específica do banco ganha do texto genérico do código 42501', r.texto);
+  const g = humano({ code: '42501', message: 'permission denied for table voluntarios' }, 'salvar');
+  ok(/permiss/i.test(g.texto),
+    'e um 42501 sem frase nossa continua caindo na frase do código', g.texto);
+}
+
+const EXTRA = CODIGOS_DO_EVENTO.length * 2 + DO_GATILHO.length * 3 + 2;
+
+const total = 31 + 6 + EMAILS.length + EXTRA;
 if (falhas) { console.log(`erros: ${falhas} falha(s) em ${total}`); process.exit(1); }
 console.log(`erros: ${total}/${total} ok`);

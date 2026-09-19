@@ -1,3 +1,26 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a
+   versao deste arquivo por cima da que estiver la, seja ela mais nova ou
+   nao, e sem um aviso. Medido em 19/09/2026: reaplicar a 23 num banco na
+   versao 55 desfez a correcao de seguranca da 51 em silencio, e a regua
+   continuou afirmando 55.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     conflitos_entre_ministerios (a 31 refez)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 30. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe e o bloco nao faz
+   nada — e e assim que tem que ser, senao o rebuild do repositorio parava
+   no primeiro arquivo.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(30);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    18 — FASE 0: fechar os três furos achados na auditoria de 26/08
 
