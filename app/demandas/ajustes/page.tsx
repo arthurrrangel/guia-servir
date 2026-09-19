@@ -147,14 +147,14 @@ function Gente({ ms, b, indo, salvar }: {
                 <td>
                   <select value={m.setor_id || ''} disabled={indo}
                     onChange={e => salvar('membro', { id: m.id, setor_id: e.target.value })}
-                    style={{ minHeight: 36, border: '1px solid var(--dm-linha2)', background: 'var(--dm-card3)', borderRadius: 'var(--dm-r)', maxWidth: 150 }}>
+                    style={{ maxWidth: 150 }}>
                     {b.setores.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
                   </select>
                 </td>
                 <td>
                   <select value={m.papel} disabled={indo}
                     onChange={e => salvar('membro', { id: m.id, papel: e.target.value })}
-                    style={{ minHeight: 36, border: '1px solid var(--dm-linha2)', background: 'var(--dm-card3)', borderRadius: 'var(--dm-r)' }}>
+                    >
                     {PAPEIS.map(p => <option key={p.v} value={p.v}>{p.rot}</option>)}
                   </select>
                 </td>
@@ -263,7 +263,7 @@ function Categorias({ b, indo, salvar }: {
                 <td>
                   <select value={c.setor_id || ''} disabled={indo}
                     onChange={e => salvar('categoria', { id: c.id, setor_id: e.target.value })}
-                    style={{ minHeight: 36, border: '1px solid var(--dm-linha2)', background: 'var(--dm-card3)', borderRadius: 'var(--dm-r)', maxWidth: 170 }}>
+                    style={{ maxWidth: 170 }}>
                     {b.setores.filter(s => s.atende).map(s => (
                       <option key={s.id} value={s.id}>{s.nome}</option>
                     ))}
@@ -284,7 +284,7 @@ function Categorias({ b, indo, salvar }: {
                       if (String(v) === String(antigo)) return;
                       salvar('categoria', { id: c.id, prazo_padrao_dias: v });
                     }}
-                    style={{ width: 62, minHeight: 36, textAlign: 'right', padding: '0 8px', border: '1px solid var(--dm-linha2)', background: 'var(--dm-card3)', borderRadius: 'var(--dm-r)' }} />
+                    style={{ width: 72, textAlign: 'right' }} />
                   <span className="dm-peq dm-mudo"> dias</span>
                 </td>
               </tr>
