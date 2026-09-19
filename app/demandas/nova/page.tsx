@@ -198,8 +198,9 @@ function Nova() {
         ) : null}
       </div>
 
-      <button className="dm-btn dm-larga" onClick={() => setMais(x => !x)} style={{ marginBottom: 'var(--dm-e2)' }}>
-        {mais ? 'Esconder os detalhes' : 'Mais detalhes (evento, local, orçamento, anexos)'}
+      <button type="button" className="dm-gaveta" aria-expanded={mais}
+        onClick={() => setMais(x => !x)} style={{ marginBottom: 'var(--dm-e2)' }}>
+        {mais ? 'Esconder os detalhes' : 'Evento, local, orçamento e anexos'}
       </button>
 
       {mais ? (
