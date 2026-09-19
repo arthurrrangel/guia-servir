@@ -113,7 +113,7 @@ export default function Casca({ children }: { children: React.ReactNode }) {
           <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
           <div className="dm-onde dm-cresce dm-corta">
             Demandas · <b>{eu.primeiro_nome}</b>
-            {eu.setor ? <span className="dm-mudo"> · {eu.setor}</span> : null}
+            {eu.setor ? <span className="dm-mudo dm-setor"> · {eu.setor}</span> : null}
           </div>
           <Link href="/painel" className="dm-peq dm-mudo" style={{ textDecoration: 'none' }}>
             Escalas {'>'}
