@@ -303,8 +303,26 @@ function Escala() {
     setOcupado(false);
   }
 
+  /* O RECADO SUMIA EM SILÊNCIO — 20/09/2026, auditoria de frontend.
+
+     Esta função começava com `if (ocupado) return;`, e o `return` era mudo: a
+     pessoa escrevia o recado, tocava em outro botão, o `onBlur` disparava, a
+     função voltava sem fazer nada e o texto continuava no campo como se
+     tivesse sido salvo. Sumia no próximo `recarregar`.
+
+     E não é caso raro: o campo é `disabled={ocupado}`, então o blur só
+     acontece com `ocupado` ligado quando é o PRÓPRIO toque no outro botão que
+     liga `ocupado` — que é exatamente a sequência natural de "escrevo o
+     recado e mando montar o dia".
+
+     A guarda em si está certa e fica: `salvarObs` escreve no mesmo dia que o
+     sorteio, e as duas gravações correndo juntas disputam as mesmas linhas.
+     O que muda é que o recado agora ESPERA em vez de sumir: fica guardado num
+     ref e é gravado assim que o que está em voo terminar. */
+  const recadoEmEspera = useRef<{ d: string; txt: string } | null>(null);
+
   async function salvarObs(d: string, txt: string) {
-    if (ocupado) return;               // nunca concorre com sorteio/troca em voo
+    if (ocupado) { recadoEmEspera.current = { d, txt }; return; }
     setOcupado(true);
     const snap = retrato([d]);
     garantirDia(S, d).obs = txt;
@@ -312,6 +330,17 @@ function Escala() {
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
+
+  /* o despejo do que ficou esperando. Roda quando `ocupado` cai, que é o
+     único instante em que gravar é seguro. */
+  useEffect(() => {
+    if (ocupado) return;
+    const p = recadoEmEspera.current;
+    if (!p) return;
+    recadoEmEspera.current = null;
+    void salvarObs(p.d, p.txt);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ocupado]);
 
   async function novoPlantao(d: string) {
     setOcupado(true);

@@ -96,9 +96,21 @@ function Time() {
     if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); fn(); }
   };
 
+  /* GRAVAÇÃO SEM SINAL NENHUM — 20/09/2026, auditoria de frontend.
+
+     Esta função grava nome, telefone, teto e sexo, e não dizia nada: nem
+     enquanto grava, nem quando termina. A pessoa mudava o teto de alguém,
+     tocava fora, e a tela ficava igual. Sem saber se salvou, o líder ou
+     desiste ou faz de novo — e fazer de novo numa gravação que deu certo é
+     como nascem os toques duplos.
+
+     `ciclar`, vinte linhas acima, já fazia certo com `chipSalvando`. Aqui
+     faltava. O erro já falava; o silêncio era só do caminho que dá certo. */
   async function mudar(vid: string, campos: any) {
-    try { await atualizarVoluntario(vid, campos); await recarregar(); }
+    setOcupado(true);
+    try { await atualizarVoluntario(vid, campos); await recarregar(); aviso('Salvo'); }
     catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
+    setOcupado(false);
   }
 
   /* O TELEFONE NÃO É TEXTO LIVRE: É CHAVE.

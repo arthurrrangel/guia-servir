@@ -63,5 +63,50 @@ ok(/'dm-marco'/.test(ficha), 'o marco do histórico usa a classe com prefixo');
 ok(!/[^-]'marco'/.test(ficha), 'e não a versão sem prefixo');
 ok(naFolha.has('dm-interno') && naFolha.has('dm-marco'), 'e as duas existem na folha');
 
+/* 3) E A DIREÇÃO CONTRÁRIA: regra na folha que ninguém usa.
+
+   `.dm-entrada` existia em `demandas.css` com seis declarações e nenhum JSX
+   a escrevia. Não faz mal nenhum ao usuário — é peso de bytes e, pior, é
+   armadilha de leitura: quem chega e vê a regra acredita que existe um
+   componente "entrada" e vai procurá-lo.
+
+   É uma lista de perdão, e não uma proibição, porque classe usada só via
+   template (`dm-${x}`) não aparece na varredura acima e não pode reprovar
+   por isso. Quando a lista crescer sem motivo, é sinal de que a folha está
+   virando sótão. */
+/* A LISTA DE PERDÃO, COM O LUGAR DE CADA UMA.
+
+   Classe montada por concatenação (`'dm-' + tom`) não aparece em varredura
+   estática nenhuma, e reprovar por isso seria reprovar código correto. Cada
+   entrada aqui aponta ONDE ela nasce, para a próxima pessoa poder conferir em
+   vez de acreditar. */
+const PERDOADAS = new Set([
+  /* `'dm-' + tomPill(status)` — app/demandas/page.tsx:167,
+     app/demandas/d/[numero]/page.tsx:87 e components/demandas/Ui.tsx:19.
+     Os valores possíveis estão em lib/demandas/regras.ts:52. */
+  'dm-ok', 'dm-warn', 'dm-bad',
+  /* `dm-pill dm-${tom}` em components/demandas/Ui.tsx, com `tom` vindo de
+     quem chama: 'info' é usado na ficha da demanda. */
+  'dm-info',
+  /* `dm-item dm-${situacao}` e `dm-num ${destaque ? 'dm-destaque' : ''}` */
+  'dm-atrasada', 'dm-urgente', 'dm-hoje', 'dm-aviso', 'dm-ruim', 'dm-destaque',
+  /* escritas à mão no JSX e conferidas pelo bloco 2, logo acima */
+  'dm-interno', 'dm-marco',
+  /* utilitária de cor, usada via composição em outras regras da própria
+     folha (`.dm-x .dm-dim`), não pelo JSX */
+  'dm-dim',
+]);
+const usadasNoJsx = new Set();
+for (const a of arquivos) {
+  const txt = readFileSync(a, 'utf8');
+  for (const m of txt.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\}|\{[^}]*?'([^']*)'[^}]*?\})/g)) {
+    const bruto = `${m[1] || ''} ${m[2] || ''} ${m[3] || ''}`;
+    for (const c of bruto.split(/[\s${}?:()|&]+/)) if (/^dm-[a-z0-9-]+$/.test(c)) usadasNoJsx.add(c);
+  }
+}
+const sobrando = [...naFolha].filter(c => !usadasNoJsx.has(c) && !PERDOADAS.has(c)).sort();
+ok(sobrando.length === 0, 'nenhuma regra dm- na folha sem ninguém que a escreva',
+   sobrando.join(', '));
+
 if (falhas) { console.log(`classe-que-a-folha-conhece: ${falhas} falha(s) em ${feitas}`); process.exit(1); }
 console.log(`classe-que-a-folha-conhece: ${feitas}/${feitas} ok`);

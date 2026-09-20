@@ -344,10 +344,6 @@
 .dm-campo input:focus,.dm-campo select:focus,.dm-campo textarea:focus{
   outline:2px solid var(--dm-ink);outline-offset:-1px;background:var(--dm-card);
 }
-.dm-entrada{
-  min-height:46px;padding:0 var(--dm-e2);border:1px solid var(--dm-linha2);
-  background:var(--dm-card3);border-radius:var(--dm-r);
-}
 /* FILTRO NÃO PODE VIRAR ESCADA.
 
    Era `flex-wrap:wrap` com `flex:1 1 auto` e `min-width:80px`. Como os

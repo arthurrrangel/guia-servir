@@ -278,11 +278,27 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   return (
     <C.Provider value={{ S, recarregar, pinta, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
-      {/* .sistema é o casco tipográfico do gestor. Precisa envolver TUDO —
-          topo, abas, conteúdo e barra de baixo — senão a barra fica numa fonte
-          e a tela em outra. É um <div> nu de propósito: sem transform, sem
-          filter, sem overflow, que são as três coisas que quebrariam o
-          position:sticky do .topo e o position:fixed da .barra-fundo. */}
+      {/* O COMENTÁRIO QUE ESTAVA AQUI DESCREVIA UMA REGRA QUE NÃO EXISTE.
+
+          Ele dizia que `.sistema` é "o casco tipográfico do gestor" e que sem
+          ele "a barra fica numa fonte e a tela em outra". Nenhuma das três
+          folhas do projeto define `.sistema`: a classe não tem uma única
+          declaração. Ela já foi o casco, e deixou de ser no dia em que a
+          tipografia passou a ser Inter em tudo, declarada no `body` — o que
+          `globals.css` registra como "agora é Inter em tudo". O comentário
+          ficou.
+
+          Comentário que descreve regra inexistente é pior que comentário
+          nenhum: o próximo a passar por aqui lê, acredita, e ou vai procurar
+          a regra que não existe ou deixa de mexer numa coisa que não faz nada.
+
+          O <div> FICA, e o motivo real é o segundo parágrafo do comentário
+          antigo, que continua verdadeiro: ele envolve topo, abas, conteúdo e
+          barra de baixo, e é nu de propósito — sem transform, sem filter, sem
+          overflow, que são as três coisas que quebrariam o `position:sticky`
+          do `.topo` e o `position:fixed` da `.barra-fundo`. É um contêiner
+          estrutural, e a classe é o gancho para quando voltar a precisar de
+          estilo. */}
       <div className="sistema">
       <header className="topo">
         <div className="topo-in">

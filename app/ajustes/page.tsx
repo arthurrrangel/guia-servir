@@ -98,10 +98,14 @@ function Ajustes() {
     try { await salvarConfig(equipe!.id, cfgRef.current); await recarregar(); aviso('Salvo'); }
     catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
   }
+  /* mesma correção de `mudar` em /time: gravava em silêncio, sem indicador
+     em voo e sem confirmação no fim. `cfg`, logo acima, já dizia 'Salvo'. */
   async function fn(id: string, campos: any) {
     const f = S.funcoes.find(x => x.id === id)!;
-    try { await salvarFuncoes(equipe!.id, [{ ...f, ...campos }]); await recarregar(); }
+    setGravando(true);
+    try { await salvarFuncoes(equipe!.id, [{ ...f, ...campos }]); await recarregar(); aviso('Salvo'); }
     catch (e) { aviso(aviseHumano(e)); }
+    setGravando(false);
   }
   async function addFn() {
     const nome = nova.trim().toUpperCase();
