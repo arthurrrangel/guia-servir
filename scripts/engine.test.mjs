@@ -829,5 +829,40 @@ console.log('\n29. Furo de domingo que já passou não vira tarefa de hoje');
 }
 
 
+console.log('\n30. A cor e o proximo mes saem de um lugar so');
+/* Os dois eram cópias escritas fora de `lib/`. A cor já tinha divergido uma
+   vez (05/09: "1 não pode" saía âmbar na visão geral e vermelho no bloco de
+   baixo, na mesma rolagem) e foi alinhada à mão — à mão elas voltam a
+   divergir na próxima regra nova. O mês seguinte decide QUAL MÊS o botão
+   "Montar" e o robô do dia 26 agem sobre: divergir é o líder montar outubro
+   e o robô montar novembro no mesmo dia. */
+{
+  const c = E.classificar;
+  ok(c({ vagas: 0, furos: 0, recusados: 0, pendentes: 0 }) === 'ok', 'tudo respondido é verde');
+  ok(c({ vagas: 0, furos: 0, recusados: 0, pendentes: 3 }) === 'atencao', 'só pendente é âmbar');
+  ok(c({ vagas: 1, furos: 0, recusados: 0, pendentes: 0 }) === 'critico', 'vaga é vermelho');
+  ok(c({ vagas: 0, furos: 1, recusados: 0, pendentes: 0 }) === 'critico', 'furo é vermelho');
+  ok(c({ vagas: 0, furos: 0, recusados: 1, pendentes: 0 }) === 'critico', 'recusa é vermelho');
+  ok(c({ vagas: 0, furos: 0, recusados: 1, pendentes: 9 }) === 'critico',
+     'vermelho vence âmbar quando os dois valem');
+
+  /* e `resumoDia` usa exatamente ela: se alguém reescrever a conta lá dentro,
+     este caso continua passando, mas o de baixo não */
+  const S = base(TIME());
+  const D = E.domingosDoMes(2026, 8)[0];
+  E.gerarDia(S, D);
+  const r = E.resumoDia(S, D);
+  ok(r.situacao === c({ vagas: r.vagas.length, furos: r.furos, recusados: r.recusados, pendentes: r.pendentes }),
+     'resumoDia devolve o que `classificar` diz, com os números dele',
+     JSON.stringify(r));
+}
+{
+  ok(JSON.stringify(E.proxMes('2026-01-15')) === '{"ano":2026,"mes":2}', 'janeiro vira fevereiro');
+  ok(JSON.stringify(E.proxMes('2026-11-30')) === '{"ano":2026,"mes":12}', 'novembro vira dezembro');
+  ok(JSON.stringify(E.proxMes('2026-12-01')) === '{"ano":2027,"mes":1}', 'dezembro vira janeiro do ano seguinte');
+  ok(JSON.stringify(E.proxMes('2026-12-31')) === '{"ano":2027,"mes":1}', 'o último dia do ano também');
+}
+
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

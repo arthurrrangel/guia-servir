@@ -18,7 +18,7 @@ import { Aviso, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/U
 import { abrir, bases } from '@/lib/demandas/api';
 import {
   PRIORIDADES, dataCheia, linkZap, oQueFalta, prazoSugerido, rascunhoVazio,
-  recadoDoErro, type Rascunho,
+  recadoDoErro, quemManda, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
 
@@ -70,7 +70,7 @@ function Nova() {
     return [...m.entries()];
   }, [b]);
 
-  const manda = eu?.papel === 'gestor' || eu?.papel === 'admin';
+  const manda = quemManda(eu?.papel);
   const temSetor = !!(r.setor_solicitante || eu?.setor_id);
   const falta = oQueFalta(r, temSetor);
 

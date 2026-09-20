@@ -11,7 +11,7 @@ import { Escolha, Aviso } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
-  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES,
+  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes, classificar,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -80,13 +80,22 @@ function Igreja() {
      — re-sorteie ou troque antes de publicar", com botão de resolver agora.
      Recusa abre buraco na escala. A regra agora é a mesma dos dois lados:
      falta gente = vermelho, ninguém respondeu ainda = âmbar. */
+  /* 20/09/2026: a COR agora vem de `classificar`, em lib/engine.ts, que é a
+     mesma função que `resumoDia` usa no bloco de baixo. O parágrafo acima
+     conta como as duas divergiram uma vez e como foram alinhadas à mão; à
+     mão elas voltam a divergir na próxima regra nova. O TEXTO continua aqui,
+     porque ele é desta tela: a visão geral diz "3 sem ninguém" e o bloco de
+     baixo diz outra coisa, de propósito. */
   const leitura = (a: AreaVisao) => {
     if (a.vagas === null) return { cls: '', txt: 'sem culto marcado' };
-    if (a.vagas > 0) return { cls: 'ruim', txt: `${a.vagas} sem ninguém` };
-    if (a.furos > 0) return { cls: 'ruim', txt: `${a.furos} ${pl(a.furos, 'furou', 'furaram')}` };
-    if (a.recusados > 0) return { cls: 'ruim', txt: `${a.recusados} ${pl(a.recusados, 'não pode', 'não podem')}` };
-    if (a.pendentes > 0) return { cls: 'pend', txt: `${a.pendentes} sem responder` };
-    return { cls: 'ok', txt: 'coberto' };
+    const cls = { critico: 'ruim', atencao: 'pend', ok: 'ok' }[classificar({
+      vagas: a.vagas, furos: a.furos, recusados: a.recusados, pendentes: a.pendentes,
+    })];
+    if (a.vagas > 0) return { cls, txt: `${a.vagas} sem ninguém` };
+    if (a.furos > 0) return { cls, txt: `${a.furos} ${pl(a.furos, 'furou', 'furaram')}` };
+    if (a.recusados > 0) return { cls, txt: `${a.recusados} ${pl(a.recusados, 'não pode', 'não podem')}` };
+    if (a.pendentes > 0) return { cls, txt: `${a.pendentes} sem responder` };
+    return { cls, txt: 'coberto' };
   };
   /* a conta da nota do cabeçalho segue a mesma régua da cor: área vermelha é
      área que precisa de gente. Antes ela contava vaga e furo mas ignorava
@@ -352,8 +361,11 @@ function Painel() {
   /* o mês seguinte já está na hora de montar? (o cron faz no dia 26; a partir
      do dia 18 o painel já cutuca, pra ninguém deixar pro último dia) */
   const diaDoMes = +hoje.slice(8, 10);
-  const pm = (() => { const a = +hoje.slice(0, 4), m = +hoje.slice(5, 7); return m === 12 ? { a: a + 1, m: 1 } : { a, m: m + 1 }; })();
-  const proxMesMontado = cultosDoMes(pm.a, pm.m).some(d => { const x = S.escalas[d]; return x && Object.values(x.slots || {}).some((s: any) => s?.vid); });
+  /* a mesma `proxMes` que o robô do dia 26 usa (lib/engine.ts). Era uma cópia
+     desta aritmética escrita aqui, e ela decide QUAL MÊS o botão "Montar"
+     agiria: divergir do robô é o líder montar um mês e o robô montar outro. */
+  const pm = proxMes(hoje);
+  const proxMesMontado = cultosDoMes(pm.ano, pm.mes).some(d => { const x = S.escalas[d]; return x && Object.values(x.slots || {}).some((s: any) => s?.vid); });
   const cutucaProxMes = diaDoMes >= 18 && !proxMesMontado;
 
   const vagas = r ? r.vagas.length : 0;
@@ -386,9 +398,9 @@ function Painel() {
         sub: `${pend === 1 ? '1 pessoa ainda não respondeu' : `${pend} pessoas ainda não responderam`} para ${fmtLongo(prox)}. Um toque abre o WhatsApp de cada um com a cobrança pronta.`,
         acao: { tipo: 'rolar', label: 'Ver quem falta' } }
     : cutucaProxMes
-    ? { urg: '', tag: 'Adiante o próximo mês', titulo: `Hora de montar ${mesDe(pm.a, pm.m)}`,
-        sub: `${Dia} está redondo. Aproveite: peça a indisponibilidade e monte ${mesDe(pm.a, pm.m)} antes do fim do mês, sem correria.`,
-        acao: { tipo: 'link', label: `Montar ${mesDe(pm.a, pm.m)}`, href: `/escala?m=${pm.a}-${String(pm.m).padStart(2, '0')}` } }
+    ? { urg: '', tag: 'Adiante o próximo mês', titulo: `Hora de montar ${mesDe(pm.ano, pm.mes)}`,
+        sub: `${Dia} está redondo. Aproveite: peça a indisponibilidade e monte ${mesDe(pm.ano, pm.mes)} antes do fim do mês, sem correria.`,
+        acao: { tipo: 'link', label: `Montar ${mesDe(pm.ano, pm.mes)}`, href: `/escala?m=${pm.ano}-${String(pm.mes).padStart(2, '0')}` } }
     : { urg: '', tag: 'Tudo pronto', titulo: `${Dia} está redondo`,
         sub: `Todo mundo confirmado para ${fmtLongo(prox)}. É só publicar, ou reenviar, a escala no grupo.`,
         acao: { tipo: 'copiar', label: 'Copiar para o WhatsApp' } };

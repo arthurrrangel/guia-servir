@@ -18,7 +18,7 @@ import { Aviso, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
 import { lista, type Filtro } from '@/lib/demandas/api';
 import {
   dataCurta, diasDeAtraso, quando, recadoDoErro, rotPrioridade, rotStatus,
-  rotTrava, situacao, tomPill, tomPrioridade,
+  rotTrava, situacao, tomPill, tomPrioridade, quemManda,
 } from '@/lib/demandas/regras';
 import type { Eu, Resumo } from '@/lib/demandas/tipos';
 
@@ -143,7 +143,7 @@ function Resumão({ itens, eu }: { itens: Resumo[]; eu: Eu }) {
   const atrasadas = itens.filter(d => situacao(d) === 'atrasada').length;
   const paradas = itens.filter(d => situacao(d) === 'parada').length;
   const esperando = itens.filter(d => d.aprovacao === 'pendente').length;
-  const manda = eu.papel === 'gestor' || eu.papel === 'admin';
+  const manda = quemManda(eu.papel);
   if (!atrasadas && !paradas && !(esperando && manda)) return null;
   const partes: string[] = [];
   if (atrasadas) partes.push(`${atrasadas} ${atrasadas === 1 ? 'passou do prazo' : 'passaram do prazo'}`);

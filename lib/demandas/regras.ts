@@ -11,7 +11,7 @@
    conferem a matriz inteira de papel × setor × status. */
 
 import type {
-  Aprovacao, Categoria, Prioridade, Resumo, Status, Trava,
+  Aprovacao, Categoria, Papel, Prioridade, Resumo, Status, Trava,
 } from './tipos';
 /* o chão de transporte é o mesmo dos dois sistemas: mesmo Postgres, mesmo
    PostgREST, mesma rede. Ver a nota em `recadoDoErro`. `lib/erros.ts` é puro
@@ -208,11 +208,24 @@ export type Acao =
 /** Quem está olhando, do ponto de vista de UMA demanda. Vem de `dem_ver`. */
 export type Quem = { papel: string; atende: boolean; abriu: boolean };
 
+/* QUEM MANDA, EM UM LUGAR SÓ — 20/09/2026.
+
+   Esta expressão estava escrita três vezes: aqui, em
+   `app/demandas/nova/page.tsx:73` e em `app/demandas/page.tsx:146`. Com
+   quatro papéis e a lista estável, custava pouco. No dia em que nascer um
+   quinto papel, ela custa três buscas e uma chance de esquecer a terceira.
+
+   O espelho no banco é `m.papel in ('gestor','admin')`, e `dem_ajustar` usa
+   `m.papel <> 'admin'` para a sua própria porta, que é mais estreita de
+   propósito. */
+export const quemManda = (p: Papel | string | null | undefined) =>
+  p === 'gestor' || p === 'admin';
+
 export function acoesDe(
   d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'> & { responsavel?: string | null },
   eu: Quem,
 ): Acao[] {
-  const manda = eu.papel === 'gestor' || eu.papel === 'admin';
+  const manda = quemManda(eu.papel);
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
   const esperandoAprovacao = d.aprovacao === 'pendente';
   const a: Acao[] = [];

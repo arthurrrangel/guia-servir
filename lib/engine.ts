@@ -880,6 +880,21 @@ export function sugerirPlantao(S: Estado, data: string, qtd: number, fora?: Fora
     .slice(0, qtd).map(p => p.id);
 }
 
+/* O MÊS SEGUINTE, EM UM LUGAR SÓ — 20/09/2026.
+
+   Esta aritmética estava copiada em dois lugares, nenhum deles em `lib/`:
+   `app/api/cron/route.ts:125` e `app/painel/page.tsx:355`. Ela decide QUAL
+   MÊS o botão "Montar" do líder e o robô do dia 26 agem sobre. As duas
+   divergirem é o líder montar outubro e o robô montar novembro no mesmo dia,
+   e nenhuma tela dizer que isso aconteceu.
+
+   Mora aqui, ao lado de `MESES`, `cultosDoMes` e `diasDoMes`, que é onde o
+   resto do vocabulário de calendário já estava. */
+export const proxMes = (iso: string): { ano: number; mes: number } => {
+  const [a, m] = iso.split('-').map(Number);
+  return m === 12 ? { ano: a + 1, mes: 1 } : { ano: a, mes: m + 1 };
+};
+
 /* Empate de nome: o comparador de DUAS vias (`a.nome < b.nome ? -1 : 1`)
    devolve 1 nos dois sentidos quando os nomes são IGUAIS, e aí a ordem final
    passa a ser a ordem física com que o banco devolveu as linhas — que muda
@@ -1160,6 +1175,29 @@ export function msgConfirmar(S: Estado, data: string) {
     + `Se não puder, marca "não posso" que eu chamo outra pessoa, sem problema.`;
 }
 
+/* A COR DO DIA, EM UM LUGAR SÓ — 20/09/2026.
+
+   Esta decisão estava escrita duas vezes: aqui, dentro de `resumoDia`, e à
+   mão dentro de `app/painel/page.tsx`, na função `leitura()`. As duas JÁ
+   DIVERGIRAM uma vez, em 05/09: "1 não pode" saía âmbar na visão geral e
+   vermelho no bloco de baixo, na mesma rolagem. O comentário que conta essa
+   história ainda está no painel, e ele termina dizendo "a regra agora é a
+   mesma dos dois lados" — o que era verdade naquele dia e continuaria sendo
+   por acaso, até a próxima regra nova entrar só de um lado.
+
+   Cor é a primeira coisa que se lê num painel. Se ela discorda de si mesma,
+   o líder para de confiar na cor, e aí o painel inteiro vira decoração.
+
+   A regra: falta gente (vaga, furo ou recusa) = vermelho; ninguém respondeu
+   ainda = âmbar; o resto = verde. */
+export type Situacao = 'ok' | 'atencao' | 'critico';
+export function classificar(n: {
+  vagas: number; furos: number; recusados: number; pendentes: number;
+}): Situacao {
+  if (n.vagas > 0 || n.furos > 0 || n.recusados > 0) return 'critico';
+  return n.pendentes > 0 ? 'atencao' : 'ok';
+}
+
 export function resumoDia(S: Estado, data: string) {
   const dia = S.escalas[data];
   const ativos = funcoesDoDia(S, data);
@@ -1169,8 +1207,10 @@ export function resumoDia(S: Estado, data: string) {
   const furos = preenchidos.filter(f => dia.slots[f.nome].status === 'furou');
   const pendentes = preenchidos.filter(f => (dia.slots[f.nome].status || 'pendente') === 'pendente');
   const vagas = vagasDe(S, data);
-  const situacao: 'ok' | 'atencao' | 'critico' =
-    vagas.length || recusados.length || furos.length ? 'critico' : pendentes.length ? 'atencao' : 'ok';
+  const situacao = classificar({
+    vagas: vagas.length, furos: furos.length,
+    recusados: recusados.length, pendentes: pendentes.length,
+  });
   return {
     total: ativos.length, preenchidos: preenchidos.length,
     confirmados: confirmados.length, pendentes: pendentes.length,

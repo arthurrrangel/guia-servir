@@ -14,7 +14,7 @@ import { cont } from '@/lib/plural';
 import { createClient } from '@supabase/supabase-js';
 import {
   addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
-  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo,
+  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo, proxMes,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
@@ -122,7 +122,9 @@ const linkZap = (tel?: string, texto?: string) => {
   const n = String(tel || '').replace(/\D/g, '');
   return n ? `https://wa.me/${n.length <= 11 ? '55' + n : n}${texto ? `?text=${encodeURIComponent(texto)}` : ''}` : null;
 };
-const proxMes = (iso: string) => { const [a, m] = iso.split('-').map(Number); return m === 12 ? { ano: a + 1, mes: 1 } : { ano: a, mes: m + 1 }; };
+/* `proxMes` mora em lib/engine.ts desde 20/09: ele decide qual mês o robô
+   monta, e o painel usa a mesma conta. Duas cópias divergirem e o líder
+   montar outubro enquanto o robô monta novembro. */
 
 /* ------------------------------------------------------------- rota --- */
 /* O SEGREDO SAIU DA URL.
