@@ -1,5 +1,6 @@
 /* node scripts/semana.test.mjs — o motor do "agora" */
 import * as S from '../lib/semana.ts';
+import { PEQUENAS_GUIAS } from '../lib/pequenas-guias.ts';
 let ok = 0, falhou = 0;
 const t = (nome, cond) => { if (cond) { ok++; console.log('  PASS ', nome); } else { falhou++; console.log('  FAIL ', nome); } };
 const d = (y, m, dd, h = 0, mi = 0) => new Date(y, m - 1, dd, h, mi);
@@ -33,8 +34,21 @@ const p6 = S.proxima(d(2026, 9, 6, 12));
 t('domingo 12h → terça, Elas', p6 && p6.evento.nome === 'Elas' && p6.emDias === 2 && S.rotuloDoDia(p6) === 'Terça');
 // segunda: nada acontece
 t('segunda tem zero eventos', S.eventosDoDia(1).length === 0);
-t('quarta tem 5 grupos (Barraspace, Elohim, Bali, Seasons, Kairós)', S.eventosDoDia(3).length === 5);
-t('quinta tem 6 grupos', S.eventosDoDia(4).length === 6);
+/* OS DOIS NÚMEROS SAEM DA FONTE, NÃO DO RETRATO — 20/09/2026.
+   Eram `=== 5` e `=== 6` escritos à mão: o número de Pequenas Guias de quarta
+   e de quinta no dia em que o teste nasceu. Abrir um grupo novo na quarta
+   quebrava o teste sem nenhuma regra ter sido violada, e teste que reprova
+   por notícia boa ensina a ignorar vermelho.
+
+   O que ele quer provar é que `eventosDoDia` lê a agenda inteira e não perde
+   nem inventa grupo. Então o esperado vem de `PEQUENAS_GUIAS`, que é a
+   agenda. */
+const DIAS = { Segunda: 1, Terça: 2, Quarta: 3, Quinta: 4, Sexta: 5, Sábado: 6 };
+const guiasDe = (dow) => PEQUENAS_GUIAS.filter(g => DIAS[g.dia] === dow).length;
+t(`quarta tem os ${guiasDe(3)} grupos da agenda`, S.eventosDoDia(3).length === guiasDe(3));
+t(`quinta tem os ${guiasDe(4)} grupos da agenda`, S.eventosDoDia(4).length === guiasDe(4));
+t('e a agenda não está vazia (senão os dois acima passam por nada)',
+  guiasDe(3) > 0 && guiasDe(4) > 0);
 t('domingo tem o culto', S.eventosDoDia(0).length === 1 && S.eventosDoDia(0)[0].tipo === 'culto');
 t('a ordem de terça é por hora', S.eventosDoDia(2)[0].nome === 'Elas');
 const f = S.fraseDoAgora(p1);

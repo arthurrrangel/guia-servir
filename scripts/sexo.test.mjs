@@ -15,7 +15,8 @@ import {
 } from '../lib/engine.ts';
 
 let falhas = 0;
-const ok = (cond, rotulo, extra = '') => { if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
+let feitas = 0;
+const ok = (cond, rotulo, extra = '') => { feitas++; if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
 
 const DIA = '2026-09-20';
 function base() {
@@ -131,6 +132,10 @@ const nomes = (S, f) => candidatos(S, f, DIA, { excluirOcupados: false }).map(c 
     'e não tira ninguém da escala sozinho');
 }
 
-const total = 16;
+/* O PLACAR CONTA, EM VEZ DE SER DECLARADO — 20/09/2026.
+   Era `const total = 16`, desacoplado do número real de `ok()`. Acrescentar
+   uma asserção fazia a saída dizer "16/16" com 17 rodando, e a décima sétima
+   podia estar reprovando sem aparecer no número que a gente lê. */
+const total = feitas;
 if (falhas) { console.log(`sexo: ${falhas} falha(s) em ${total}`); process.exit(1); }
 console.log(`sexo: ${total}/${total} ok`);

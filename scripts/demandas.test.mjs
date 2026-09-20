@@ -27,6 +27,48 @@ const ok = (cond, rotulo, extra = '') => {
    O que `supabase/50-demandas.sql` aceita, transcrito. Se você mudar o SQL,
    mude aqui e veja o teste apontar a divergência.
    ============================================================================= */
+/* AS TRÊS DIVERGÊNCIAS QUE SÃO DE PROPÓSITO — 20/09/2026.
+
+   Rodando o espelho nos dois sentidos pela primeira vez, apareceram 118
+   combinações em que o servidor aceita e a tela não oferece. Todas caem em
+   três ações, e as três são decisão, não esquecimento. Ficam escritas aqui,
+   uma a uma, para que QUALQUER divergência nova reprove — que é o ponto.
+
+   Deixar o teste exigir zero seria mentir do outro lado: ele passaria a
+   reprovar por três escolhas conscientes, alguém relaxaria o teste, e aí nada
+   mais seria pego. */
+const COMBINADAS = [
+  {
+    acao: 'travar',
+    /* 72 casos. A demanda JÁ está travada. O servidor aceita re-travar (é
+       idempotente); a tela esconde porque oferecer "travar" no que está
+       travado é oferecer um botão que não muda nada. */
+    quando: (d) => d.status === 'travada',
+  },
+  {
+    acao: 'destravar',
+    /* 28 casos. Quem ABRIU a demanda destrava quando a trava é de INFORMAÇÃO:
+       a informação pedida é dele, ele responde e segue. Trava de APROVAÇÃO e
+       de TERCEIROS não são dele para soltar — quem aprova é gestor, e quem
+       espera terceiro é o setor. O servidor é mais frouxo que isto
+       (`52:710`), e a tela é que está certa. */
+    quando: (d, eu) => eu.abriu && !eu.atende && d.travada_por !== 'informacao',
+  },
+  {
+    acao: 'assumir',
+    /* 18 casos. A demanda já está em EXECUÇÃO, ou seja, alguém do setor já
+       assumiu. O servidor deixa outro tomar por cima; a tela esconde.
+
+       Esta é a única das três que é discutível, e está anotada como pergunta
+       para o Arthur: quando quem assumiu some, o colega de setor hoje precisa
+       chamar um gestor em vez de simplesmente assumir. Enquanto a resposta não
+       vem, o combinado é o de hoje, escrito. */
+    quando: (d) => d.status === 'execucao',
+  },
+];
+const combinado = (acao, d, eu) =>
+  COMBINADAS.some(c => c.acao === acao && c.quando(d, eu));
+
 function servidorAceita(acao, d, eu) {
   const manda = eu.papel === 'gestor' || eu.papel === 'admin';
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
@@ -62,7 +104,8 @@ function servidorAceita(acao, d, eu) {
   const TODAS = ['assumir', 'travar', 'destravar', 'aprovar', 'rejeitar', 'prazo',
     'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'comentar', 'anexar'];
 
-  let casos = 0, oferecidasDemais = 0;
+  let casos = 0, oferecidasDemais = 0, escondidas = 0;
+  const exemplos = [];
   for (const papel of PAPEIS)
     for (const atende of [false, true])
       for (const abriu of [false, true])
@@ -84,7 +127,42 @@ function servidorAceita(acao, d, eu) {
                   }
                 }
               }
-              for (const a of TODAS) if (dadas.includes(a) && !TODAS.includes(a)) falhas++;
+              /* O ESPELHO SÓ OLHAVA PARA UM LADO — 20/09/2026, auditoria de QA.
+
+                 A linha que estava aqui era:
+
+                     for (const a of TODAS)
+                       if (dadas.includes(a) && !TODAS.includes(a)) falhas++;
+
+                 `a` vem de `TODAS`, então `!TODAS.includes(a)` é sempre falso
+                 e o laço nunca incrementava nada. Parecia conferir "ação fora
+                 do vocabulário" e não conferia coisa alguma.
+
+                 Pior: o laço de cima só contava botão A MAIS (a tela oferece,
+                 o servidor recusa). Botão A MENOS — o servidor aceitaria e a
+                 tela esconde — não era contado por ninguém. Sabotando
+                 `lib/demandas/regras.ts` para sumir com `cancelar` de TODO
+                 MUNDO, ou para tirar `comentar` e `anexar` de demanda aberta,
+                 a suíte passava 80/80.
+
+                 Botão a menos é o defeito mais silencioso dos dois: ninguém
+                 reclama de um botão que nunca viu. */
+              for (const a of TODAS) {
+                if (!dadas.includes(a) && servidorAceita(a, d, eu) && !combinado(a, d, eu)) {
+                  escondidas++;
+                  if (exemplos.length < 4) {
+                    exemplos.push(`${a} — ${JSON.stringify({ ...d, ...eu })}`);
+                  }
+                }
+                /* e o vocabulário, agora de verdade: nada fora da lista */
+                if (!TODAS.includes(a)) falhas++;
+              }
+              for (const a of dadas) {
+                if (!TODAS.includes(a)) {
+                  falhas++;
+                  console.log('  ação fora do vocabulário:', a);
+                }
+              }
             }
   /* 392 = 4 papéis x atende x abriu x os estados possíveis, tirando os
      impossíveis (travada sem motivo, motivo sem travada, solicitante que
@@ -92,6 +170,32 @@ function servidorAceita(acao, d, eu) {
      matriz e tem que olhar por quê. */
   ok(casos === 392, 'a matriz cobre a combinação inteira', 'casos=' + casos);
   ok(oferecidasDemais === 0, 'nenhum botão oferecido que o servidor recusa', 'sobras=' + oferecidasDemais);
+  if (escondidas) exemplos.forEach(e => console.log('  botão que o servidor aceita e a tela esconde:', e));
+  ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os três combinados',
+     'faltas=' + escondidas);
+
+  /* e as três combinadas TÊM que continuar acontecendo: se alguma sumir, ou o
+     `acoesDe` mudou ou o espelho mudou, e nos dois casos a lista acima ficou
+     velha. Um combinado que ninguém mais exercita é um comentário, não uma
+     regra. */
+  for (const c of COMBINADAS) {
+    let vezes = 0;
+    for (const papel of PAPEIS)
+      for (const atende of [false, true])
+        for (const abriu of [false, true])
+          for (const status of STATUS)
+            for (const travada_por of TRAVAS)
+              for (const aprovacao of APROV) {
+                if (status !== 'travada' && travada_por !== null) continue;
+                if (status === 'travada' && travada_por === null) continue;
+                if (papel === 'solicitante' && atende) continue;
+                const d = { status, travada_por, aprovacao, responsavel: null };
+                const eu = { papel, atende, abriu };
+                if (!acoesDe(d, eu).includes(c.acao) && servidorAceita(c.acao, d, eu)
+                    && c.quando(d, eu)) vezes++;
+              }
+    ok(vezes > 0, `a divergência combinada de "${c.acao}" ainda existe`, 'vezes=' + vezes);
+  }
 }
 
 /* 1b. e o contrário, nos casos que importam: as ações principais TÊM que

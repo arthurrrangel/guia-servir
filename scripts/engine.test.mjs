@@ -663,5 +663,171 @@ console.log('\n17. O sistema aponta sozinho a declaração implausível');
 }
 
 
+console.log('\n25. Os alarmes DISPARAM, e não só ficam quietos');
+/* AUDITORIA DE QA, 20/09/2026: toda referência a `problemas()` nesta suíte era
+   NEGATIVA — `!p.some(...)`, `erros === 0`, `errosDuros.length === 0`.
+   Ninguém jamais afirmava que um conflito de verdade É reportado. Sabotando
+   `lib/engine.ts`, os três erros duros podiam ser apagados um a um com a
+   suíte inteira verde.
+
+   Um alarme só testado em silêncio é um alarme testado pela metade: prova que
+   ele não toca à toa, e nada sobre ele tocar quando deve. */
+{
+  const F2 = [
+    { nome: 'FOTO', simultanea: true, ordem: 1, ativa: true },
+    { nome: 'FILMAGEM', simultanea: true, ordem: 2, ativa: true },
+    { nome: 'EDIÇÃO', simultanea: false, ordem: 3, ativa: true },
+  ];
+  const D = E.domingosDoMes(2026, 8)[0];
+
+  /* a) duas simultâneas na mesma pessoa É erro vermelho */
+  const S = base([v('Pedro', { 'FOTO': 'titular', 'FILMAGEM': 'titular', 'EDIÇÃO': 'titular' }, 9)], F2);
+  const d = E.garantirDia(S, D);
+  d.slots['FOTO'] = { vid: 'id_pedro', status: 'pendente', fixo: true };
+  d.slots['FILMAGEM'] = { vid: 'id_pedro', status: 'pendente', fixo: true };
+  d.slots['EDIÇÃO'] = { vid: 'id_pedro', status: 'pendente', fixo: true };
+  const p = E.problemas(S, D);
+  const conflito = p.find(x => /ao mesmo tempo/.test(x.texto));
+  ok(conflito?.grau === 'erro', 'duas simultâneas na mesma pessoa É erro vermelho', JSON.stringify(p));
+  ok([...(conflito?.foco || [])].sort().join() === 'FILMAGEM,FOTO',
+     'e o foco aponta exatamente os dois postos simultâneos', JSON.stringify(conflito?.foco));
+  ok(conflito?.texto.includes('Pedro'), 'e diz de quem é');
+
+  /* b) pós-culto junto é AVISO, não erro — a diferença é o produto inteiro */
+  const S2 = base([v('Ana', { 'FOTO': 'titular', 'EDIÇÃO': 'titular' }, 9)], F2);
+  const d2 = E.garantirDia(S2, D);
+  d2.slots['FOTO'] = { vid: 'id_ana', status: 'pendente', fixo: true };
+  d2.slots['EDIÇÃO'] = { vid: 'id_ana', status: 'pendente', fixo: true };
+  const p2 = E.problemas(S2, D).filter(x => !/Sem ninguém/.test(x.texto));
+  ok(p2.length === 1 && p2[0].grau === 'aviso', 'FOTO + EDIÇÃO é aviso amarelo, não erro', JSON.stringify(p2));
+
+  /* c) escalar quem avisou que não pode É erro */
+  const S3 = base([v('Bia', { 'FOTO': 'titular' }, 9, [D])], F2);
+  E.garantirDia(S3, D).slots['FOTO'] = { vid: 'id_bia', status: 'pendente', fixo: true };
+  ok(E.problemas(S3, D).some(x => x.grau === 'erro' && /avisou que não pode/.test(x.texto)),
+     'escalar quem avisou "não posso" É erro', JSON.stringify(E.problemas(S3, D)));
+
+  /* d) vaga aberta É erro, e diz qual posto */
+  const S4 = base([], F2);
+  E.garantirDia(S4, D);
+  const p4 = E.problemas(S4, D).find(x => /Sem ninguém/.test(x.texto));
+  ok(p4?.grau === 'erro', 'vaga aberta É erro', JSON.stringify(E.problemas(S4, D)));
+  ok([...(p4?.foco || [])].sort().join() === 'EDIÇÃO,FILMAGEM,FOTO', 'e aponta os três postos vazios',
+     JSON.stringify(p4?.foco));
+}
+
+console.log('\n26. O semáforo do painel pinta cada estado');
+/* O caso 12 só montava dias cheios, então o ramo `critico` por VAGA nunca era
+   exercitado: dava para tirar `vagas.length` da conta e a suíte não via. */
+{
+  const S = base(TIME());
+  const D = E.domingosDoMes(2026, 8)[0];
+  E.gerarDia(S, D);
+  ok(E.resumoDia(S, D).situacao === 'atencao', 'dia montado e não respondido é amarelo',
+     E.resumoDia(S, D).situacao);
+
+  delete S.escalas[D].slots['HEAD'];
+  ok(E.resumoDia(S, D).situacao === 'critico', 'dia com VAGA aberta é vermelho',
+     E.resumoDia(S, D).situacao);
+  ok(E.resumoDia(S, D).vagas.includes('HEAD'), 'e a vaga aparece no resumo',
+     JSON.stringify(E.resumoDia(S, D).vagas));
+
+  const S2 = base(TIME());
+  E.gerarDia(S2, D);
+  for (const sl of Object.values(S2.escalas[D].slots)) sl.status = 'confirmado';
+  ok(E.resumoDia(S2, D).situacao === 'ok', 'dia inteiro confirmado é verde', E.resumoDia(S2, D).situacao);
+
+  S2.escalas[D].slots['PROJEÇÃO'].status = 'recusado';
+  ok(E.resumoDia(S2, D).situacao === 'critico', 'uma recusa já é vermelho', E.resumoDia(S2, D).situacao);
+  S2.escalas[D].slots['PROJEÇÃO'].status = 'furou';
+  ok(E.resumoDia(S2, D).situacao === 'critico', 'um furo também', E.resumoDia(S2, D).situacao);
+}
+
+console.log('\n27. A mensagem do grupo não pode mentir');
+/* `msgEscala` era conferida só por "contém o nome" e "contém o rótulo". Dava
+   para fazer quem RECUSOU voltar a aparecer como escalado, e para sumir com o
+   bloco inteiro do plantão, sem nenhuma falha. É a mensagem que vai para o
+   grupo do WhatsApp: se ela mente, a igreja inteira acredita. */
+{
+  const S = base(TIME());
+  const D = E.domingosDoMes(2026, 8)[0];
+  E.gerarDia(S, D);
+  const quem = S.escalas[D].slots['PROJEÇÃO'].vid;
+  S.escalas[D].slots['PROJEÇÃO'].status = 'recusado';
+  const m = E.msgEscala(S, D);
+  ok(m.includes('PRECISO DE ALGUÉM'), 'quem recusou vira buraco na mensagem', m.slice(0, 200));
+  ok(!new RegExp(E.nomeDe(S, quem) + '\\s*\\(').test(m),
+     'e o nome dela sai de onde estava escalada', m.slice(0, 200));
+
+  S.escalas[D].plantao = [S.voluntarios[3].id];
+  const m2 = E.msgEscala(S, D);
+  ok(m2.includes('PLANTÃO'), 'o plantão aparece na mensagem');
+  ok(m2.includes(S.voluntarios[3].nome), 'com o nome de quem está de plantão');
+
+  S.escalas[D].plantao = [];
+  ok(!E.msgEscala(S, D).includes('PLANTÃO'), 'e some quando não há plantonista');
+}
+
+console.log('\n28. O diagnóstico do time tem três graus, não dois');
+/* `saudeDoTime` só era exercitada no ramo `critico`. O ramo `atencao` podia
+   ser apagado e a suíte continuava verde — e é ele que avisa o líder ANTES
+   de a área virar uma pessoa só. */
+{
+  const F1 = [{ nome: 'FOTO', simultanea: true, ordem: 1, ativa: true }];
+  const olha = (S) => E.saudeDoTime(S).funcoes.find(x => x.nome === 'FOTO');
+
+  const so1 = base([v('A', { 'FOTO': 'titular' })], F1);
+  ok(olha(so1)?.grau === 'critico', 'uma pessoa só é crítico', JSON.stringify(olha(so1)));
+
+  const dois = base([v('A', { 'FOTO': 'titular' }), v('B', { 'FOTO': 'reserva' })], F1);
+  ok(olha(dois)?.grau === 'atencao', 'DOIS aptos é atenção, não ok', JSON.stringify(olha(dois)));
+  /* o texto e o grau não saem da mesma conta: aqui são DUAS razões ao mesmo
+     tempo (dois aptos E um titular só) e o texto escolhe a mais específica */
+  ok(olha(dois)?.texto === 'um titular só', 'e o texto nomeia a razão mais apertada',
+     JSON.stringify(olha(dois)));
+
+  const doisTitulares = base([v('A', { 'FOTO': 'titular' }), v('B', { 'FOTO': 'titular' })], F1);
+  ok(olha(doisTitulares)?.grau === 'atencao', 'dois TITULARES e mais ninguém ainda é atenção',
+     JSON.stringify(olha(doisTitulares)));
+  ok(olha(doisTitulares)?.texto === 'sem folga', 'e aí o texto é "sem folga"',
+     JSON.stringify(olha(doisTitulares)));
+
+  const umTitular = base([
+    v('A', { 'FOTO': 'titular' }), v('B', { 'FOTO': 'reserva' }), v('C', { 'FOTO': 'reserva' }),
+  ], F1);
+  ok(olha(umTitular)?.grau === 'atencao', 'um titular só é atenção mesmo com três aptos',
+     JSON.stringify(olha(umTitular)));
+
+  const folgado = base([
+    v('A', { 'FOTO': 'titular' }), v('B', { 'FOTO': 'titular' }), v('C', { 'FOTO': 'reserva' }),
+  ], F1);
+  ok(olha(folgado)?.grau === 'ok', 'dois titulares e um reserva é ok', JSON.stringify(olha(folgado)));
+}
+
+console.log('\n29. Furo de domingo que já passou não vira tarefa de hoje');
+/* A guarda `if (data < hoje) continue` era decorativa: o único teste que
+   chamava `furosAbertos` passava `hoje` ANTES do único dia do estado, então
+   nunca havia um dia passado para ela filtrar. Sem a guarda, o líder abre o
+   painel e vê furos de meses atrás como "resolver agora". */
+{
+  const S = base(TIME());
+  const passado = '2026-08-02', futuro = '2026-09-06';
+  E.garantirDia(S, passado).slots['PROJEÇÃO'] = { vid: 'id_lele', status: 'furou', fixo: false };
+  E.garantirDia(S, futuro).slots['PROJEÇÃO'] = { vid: 'id_lele', status: 'furou', fixo: false };
+
+  const abertos = E.furosAbertos(S, '2026-09-01');
+  ok(!abertos.some(x => x.data === passado), 'furo de domingo que já passou fica fora',
+     JSON.stringify(abertos.map(x => x.data)));
+  ok(abertos.some(x => x.data === futuro), 'e o do futuro continua entrando',
+     JSON.stringify(abertos.map(x => x.data)));
+  ok(abertos.length === 1, 'exatamente um', String(abertos.length));
+
+  /* e recuando o "hoje", o antigo volta: prova que o filtro é a DATA, e não
+     alguma outra coisa que por acaso separou os dois */
+  ok(E.furosAbertos(S, '2026-07-01').length === 2, 'recuando o hoje, os dois aparecem',
+     String(E.furosAbertos(S, '2026-07-01').length));
+}
+
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

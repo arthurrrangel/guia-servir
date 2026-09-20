@@ -8,13 +8,42 @@
 import { planoDoDia, planoDoPlantao } from '../lib/escala-diff.ts';
 
 let falhas = 0;
-const ok = (cond, rotulo, extra = '') => { if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
+let feitas = 0;
+const ok = (cond, rotulo, extra = '') => { feitas++; if (!cond) { falhas++; console.log('  FALHOU:', rotulo, extra); } };
 /* `apagarPrimeiro` entrou no plano em 19/09 e é comparado à parte, nos três
    casos do fim do arquivo. Aqui a comparação continua sendo sobre as três
    listas — senão cada teste antigo teria que repetir um campo que não é o
    assunto dele. */
-const igual = (a, b) => JSON.stringify({ apagar: a.apagar, atualizar: a.atualizar, inserir: a.inserir })
-  === JSON.stringify({ apagar: b.apagar, atualizar: b.atualizar, inserir: b.inserir });
+const igual = (a, b) => {
+  /* A GUARDA QUE FALTAVA, E O QUE ELA CUSTOU — 20/09/2026.
+
+     `igual` lê `.apagar`, `.atualizar` e `.inserir` dos dois lados. Quando os
+     dois lados são ARRAYS, esses três campos são `undefined` nos dois, os
+     dois viram a string "{}" e a comparação é SEMPRE verdadeira:
+
+         igual(['e9'], ['e2'])           -> true
+         igual([],     ['e9'])           -> true
+         igual(['x','y','z'], ['e1'])    -> true
+
+     Quatro asserções deste arquivo comparavam array com array por aqui, e
+     nenhuma delas podia falhar. Confirmado sabotando `lib/escala-diff.ts`
+     para transformar "trocar de pessoa" em UPDATE: `p.apagar` virou `[]` e a
+     asserção da linha 49 não apareceu entre as falhas.
+
+     Pior: o caso 9 escondia um defeito de verdade. Tirando o
+     `vistas.has(linha.funcao_id)` do filtro, o plano passava a emitir um
+     INSERT de alguém num posto cuja linha NÃO foi apagada — linha duplicada
+     em `escalacoes`, ou violação de unique na hora de gravar. O teste só
+     olhava `apagar`, então passava.
+
+     Agora `igual` só compara PLANOS, e quem compara array usa `mesmo`. */
+  if (Array.isArray(a) || Array.isArray(b)) {
+    throw new Error('igual() compara PLANOS, não arrays — use mesmo() para array');
+  }
+  return JSON.stringify({ apagar: a.apagar, atualizar: a.atualizar, inserir: a.inserir })
+    === JSON.stringify({ apagar: b.apagar, atualizar: b.atualizar, inserir: b.inserir });
+};
+const mesmo = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 const F = { proj: 'f-proj', ilum: 'f-ilum', edic: 'f-edic', foto: 'f-foto' };
 const V = { leticia: 'v-let', thiago: 'v-thi', maria: 'v-mar', joao: 'v-joao' };
@@ -46,7 +75,7 @@ const quer = (sobrescreve = {}) => [
 /* 3. trocar o Thiago pelo João: DELETE do Thiago + INSERT do João, o resto quieto */
 {
   const p = planoDoDia(quer({ [F.ilum]: { voluntario_id: V.joao } }), atual);
-  ok(igual(p.apagar, ['e2']), 'trocar → apaga a linha antiga', JSON.stringify(p));
+  ok(mesmo(p.apagar, ['e2']), 'trocar → apaga a linha antiga', JSON.stringify(p));
   ok(p.atualizar.length === 0, 'trocar → nenhum update');
   ok(p.inserir.length === 1 && p.inserir[0].voluntario_id === V.joao && p.inserir[0].funcao_id === F.ilum, 'trocar → insere o novo', JSON.stringify(p.inserir));
 }
@@ -67,7 +96,7 @@ const quer = (sobrescreve = {}) => [
    dois INSERTs (quem grava faz apagar → atualizar → inserir) */
 {
   const p = planoDoDia(quer({ [F.proj]: { voluntario_id: V.thiago }, [F.ilum]: { voluntario_id: V.leticia } }), atual);
-  ok(igual([...p.apagar].sort(), ['e1', 'e2']), 'troca cruzada → apaga as duas', JSON.stringify(p.apagar));
+  ok(mesmo([...p.apagar].sort(), ['e1', 'e2']), 'troca cruzada → apaga as duas', JSON.stringify(p.apagar));
   ok(p.inserir.length === 2, 'troca cruzada → insere as duas');
 }
 
@@ -80,24 +109,31 @@ const quer = (sobrescreve = {}) => [
 /* 8. marca de 1ª vez e travar juntos: um update com os dois campos */
 {
   const p = planoDoDia(quer({ [F.edic]: { fixo: false, primeira_vez: true } }), atual);
-  ok(igual(p.atualizar, [{ id: 'e3', fixo: false, primeira_vez: true }]), '1ª vez + destravar → um update', JSON.stringify(p.atualizar));
+  ok(mesmo(p.atualizar, [{ id: 'e3', fixo: false, primeira_vez: true }]), '1ª vez + destravar → um update', JSON.stringify(p.atualizar));
 }
 
 /* 9. linha duplicada da mesma função no banco (não deveria existir): a
    segunda sai */
 {
   const p = planoDoDia(quer(), [...atual, { id: 'e9', funcao_id: F.proj, voluntario_id: V.joao, fixo: false, primeira_vez: false }]);
-  ok(igual(p.apagar, ['e9']), 'duplicada → apaga a sobra', JSON.stringify(p));
+  /* o plano INTEIRO, e não só `apagar`: era aqui que o teste deixava passar
+     um INSERT a mais, que vira linha duplicada em `escalacoes` ou estouro de
+     unique na hora de gravar. */
+  ok(igual(p, { apagar: ['e9'], atualizar: [], inserir: [] }),
+     'duplicada → apaga a sobra E NÃO insere nada', JSON.stringify(p));
 }
 
 /* 10. plantão */
 {
   const p = planoDoPlantao([V.joao, V.maria], [V.maria, V.thiago]);
-  ok(igual(p, { apagar: [V.thiago], inserir: [V.joao] }), 'plantão: sai um, entra um', JSON.stringify(p));
-  ok(igual(planoDoPlantao([], []), { apagar: [], inserir: [] }), 'plantão vazio');
+  ok(mesmo(p, { apagar: [V.thiago], inserir: [V.joao] }), 'plantão: sai um, entra um', JSON.stringify(p));
+  ok(mesmo(planoDoPlantao([], []), { apagar: [], inserir: [] }), 'plantão vazio');
 }
 
-const total = 17;
+/* O PLACAR ERA UMA CONSTANTE, E ELA NÃO SABIA QUANTAS ASSERÇÕES EXISTEM.
+   17 escrito à mão, com 4 das 17 mortas: o "17/17" cobria 13 de verdade.
+   Agora `ok` conta, como no resto da suíte. */
+const total = feitas;
 /* ---- 19/09/2026: a ordem entre apagar e inserir ----
 
    Três requisições, três transações. Se o DELETE passa e o INSERT é recusado

@@ -123,8 +123,18 @@ ok(jogou, 'valor absurdo deveria dar erro');
 ok(!pixValido(''), 'string vazia não é código válido');
 ok(!pixValido('00020101'), 'lixo curto não é código válido');
 
-/* o código completo tem que caber num QR que se lê de longe */
+/* O CÓDIGO TEM QUE CABER NUM QR QUE SE LÊ DE LONGE.
+
+   O teto era 200 escrito à mão, e ele media o tamanho da chave Pix de hoje:
+   trocar a chave por uma mais longa quebraria o teste sem nada estar errado.
+   Agora ele mede o que de fato depende de nós — o que o código acrescenta
+   ALÉM da chave — e mantém um teto absoluto folgado para o QR.
+
+   Por que 200 continua ali como teto duro: acima disso o QR sai denso demais
+   para alguém ler do fundo da igreja, e isso independe de quem é a chave. */
 const completo = pixCopiaECola({ ...BASE, valor: 100, txid: 'OFERTA20260913A7' });
+const semChave = completo.length - BASE.chave.length;
+ok(semChave < 130, `o código acrescenta ${semChave} caracteres à chave: gordo demais para o QR`);
 ok(completo.length < 200, `código com ${completo.length} caracteres: QR fica denso demais para projetar`);
 
 if (mal) { console.error(`\npix.test: ${mal} falharam`); process.exit(1); }
