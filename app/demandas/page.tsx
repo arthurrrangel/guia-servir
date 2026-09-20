@@ -29,7 +29,7 @@ export default function Pagina() {
 function Painel() {
   const { eu } = useEu();
   const [itens, setItens] = useState<Resumo[] | null>(null);
-  /* quantas ficaram de fora do teto de 300 da migração 56 (0 = nenhuma) */
+  /* quantas ficaram de fora do teto de 300 da migração 57 (0 = nenhuma) */
   const [sobraram, setSobraram] = useState(0);
   const [erro, setErro] = useState('');
   const [aba, setAba] = useState<Filtro['aba']>('tudo');
@@ -113,7 +113,7 @@ function Painel() {
           <div className="dm-fila">{itens.map(d => <Linha key={d.numero} d={d} />)}</div>
           {/* LISTA CORTADA TEM QUE DIZER QUE FOI CORTADA.
 
-              A migração 56 pôs teto de 300 na consulta, porque sem teto a aba
+              A migração 57 pôs teto de 300 na consulta, porque sem teto a aba
               "Tudo" descia 10 MB de JSON. Teto sem aviso é pior que o
               problema que ele resolve: a pessoa olharia uma lista incompleta
               achando que é a lista. */}

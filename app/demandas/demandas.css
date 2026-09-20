@@ -600,7 +600,7 @@
 }
 
 /* A LISTA FOI CORTADA, E ISSO PRECISA APARECER.
-   Migração 56: `dem_lista` passou a ter teto de 300. `--dm-mudo` tem 6,1:1
+   Migração 57: `dem_lista` passou a ter teto de 300. `--dm-mudo` tem 6,1:1
    no branco (medido), então serve para texto de apoio sem cair abaixo do
    4,5:1 que a regra da casa cobra. */
 .dm-corte{

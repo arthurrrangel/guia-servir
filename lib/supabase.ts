@@ -1,5 +1,20 @@
 'use client';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+/* `type SupabaseClient` E NÃO `SupabaseClient` — 20/09/2026.
+
+   `SupabaseClient` só é usado em posição de TIPO neste arquivo. Escrito como
+   importação de valor, o TypeScript entende (ele apaga na compilação), mas um
+   runtime que só TIRA OS TIPOS — o Node com `--experimental-strip-types`, que
+   é como a suíte roda — deixa a importação de pé e tenta carregar um export
+   que não existe em tempo de execução:
+
+     SyntaxError: The requested module '@supabase/supabase-js' does not
+     provide an export named 'SupabaseClient'
+
+   Consequência prática: nenhum teste conseguia IMPORTAR qualquer módulo que
+   dependesse deste — e a saída fácil vira ler o arquivo como texto e passar
+   expressão regular, que foi como `cron-guarda.test.mjs` ficou verde uma vez
+   com o guarda removido. Uma palavra aqui destrava testar de verdade. */
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 /* A chave "anon" é pública por design: ela só diz QUAL projeto é. Quem decide o
    que cada pessoa pode ver é o RLS dentro do banco, que já está fechado:

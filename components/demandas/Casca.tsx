@@ -22,7 +22,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { esquecerToken, quemSou } from '@/lib/demandas/api';
+import { ehRecusaDeIdentidade, esquecerToken, quemSou } from '@/lib/demandas/api';
 import { sb } from '@/lib/supabase';
 import type { Eu } from '@/lib/demandas/tipos';
 import { Aviso, Esqueleto } from './Ui';
@@ -38,7 +38,8 @@ import { Aviso, Esqueleto } from './Ui';
    O lado das escalas já tinha resolvido isso com contexto (`Shell.tsx`). Aqui
    é a mesma solução: a casca pergunta, o contexto distribui, e `useEu()`
    continua com a mesma assinatura — nenhuma tela precisou mudar. */
-const Contexto = createContext<{ eu: Eu | null; carregando: boolean } | null>(null);
+const Contexto = createContext<{ eu: Eu | null; carregando: boolean; semSistema?: boolean } | null>(null);
+
 
 export function useEu() {
   const doContexto = useContext(Contexto);
@@ -64,7 +65,8 @@ export function useEu() {
          descartado e a pergunta é refeita. Na segunda vez `p_token` vem
          vazio, o JWT entra, e quem tem login entra por ele. */
       if (r.ok) { setEu(r as unknown as Eu); setCarregando(false); return; }
-      if (typeof window !== 'undefined' && localStorage.getItem('demandas.link')) {
+      if (ehRecusaDeIdentidade(r) && typeof window !== 'undefined'
+          && localStorage.getItem('demandas.link')) {
         esquecerToken();
         quemSou().then(r2 => {
           if (!vivo) return;
@@ -88,7 +90,9 @@ const ABAS = (eu: Eu) => {
 };
 
 function CascaInterna({ children }: { children: React.ReactNode }) {
-  const { eu, carregando } = useEu();
+  const ctx = useEu() as { eu: Eu | null; carregando: boolean; semSistema?: boolean };
+  const { eu, carregando } = ctx;
+  const semSistema = !!ctx.semSistema;
   const caminho = usePathname();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
 
@@ -111,7 +115,37 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
       <div className="dm">
         <Topo />
         <div className="dm-corpo" style={{ maxWidth: 520 }}>
-          {email === undefined ? <Esqueleto linhas={2} /> : email ? (
+          {/* O SISTEMA NÃO ESTÁ INSTALADO NESTE AMBIENTE.
+
+              Este ramo vem antes do de "não cadastrado" porque ele é a causa,
+              e o outro era o sintoma vestido de instrução. Medido em produção
+              em 20/09/2026: o schema `demandas` não existe naquele banco, e a
+              tela mandava o dono do sistema procurar, em Ajustes, um cadastro
+              que não podia existir.
+
+              Aqui não há o que a pessoa possa fazer sozinha, então a tela não
+              finge que há: diz o que falta e devolve para onde ela consegue
+              trabalhar. */}
+          {semSistema ? (
+            <>
+              <div className="dm-rot">{'>'} indisponível</div>
+              <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>
+                O sistema de demandas ainda não foi instalado.
+              </h1>
+              <Aviso tom="warn">
+                <div>
+                  As telas estão no ar, mas o banco deste ambiente ainda não tem as tabelas
+                  de demandas. Não é cadastro faltando, e não há nada que você possa fazer
+                  por aqui: falta aplicar a migração do banco.
+                </div>
+              </Aviso>
+              <p className="dm-peq dm-mudo">
+                Se você administra o sistema, aplique <b>supabase/50-demandas.sql</b> e as
+                migrações seguintes no banco deste ambiente.
+              </p>
+              <Link className="dm-btn" href="/painel">Voltar para as escalas</Link>
+            </>
+          ) : email === undefined ? <Esqueleto linhas={2} /> : email ? (
             <>
               <div className="dm-rot">{'>'} ainda não</div>
               <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Você não está no sistema de demandas.</h1>
@@ -198,28 +232,32 @@ function Rodape() {
 export default function Casca({ children }: { children: React.ReactNode }) {
   const [eu, setEu] = useState<Eu | null>(null);
   const [carregando, setCarregando] = useState(true);
+  const [semSistema, setSemSistema] = useState(false);
   useEffect(() => {
     let vivo = true;
-    const responder = (r: { ok?: boolean } | null) => {
+    const responder = (r: { ok?: boolean; erro?: string } | null) => {
       if (!vivo) return;
       setEu(r && r.ok ? (r as unknown as Eu) : null);
+      setSemSistema(!!r && !r.ok && r.erro === 'SEM_SISTEMA');
       setCarregando(false);
     };
     quemSou().then(r => {
       if (!vivo) return;
       if (r.ok) { responder(r); return; }
-      /* link velho guardado sombreia o login por e-mail: descarta e repergunta */
-      if (typeof window !== 'undefined' && localStorage.getItem('demandas.link')) {
+      /* link velho guardado sombreia o login por e-mail: descarta e repergunta.
+         Só quando a recusa é de IDENTIDADE — ver `ehRecusaDeIdentidade`. */
+      if (ehRecusaDeIdentidade(r) && typeof window !== 'undefined'
+          && localStorage.getItem('demandas.link')) {
         esquecerToken();
         quemSou().then(responder);
         return;
       }
-      responder(null);
+      responder(r);
     });
     return () => { vivo = false; };
   }, []);
   return (
-    <Contexto.Provider value={{ eu, carregando }}>
+    <Contexto.Provider value={{ eu, carregando, semSistema }}>
       <CascaInterna>{children}</CascaInterna>
     </Contexto.Provider>
   );
