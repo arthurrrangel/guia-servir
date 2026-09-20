@@ -261,7 +261,7 @@ end $reg$;
 
 do $conf$
 declare
-  v_eq uuid; v_p uuid; v_fn uuid; v_tel text;
+  v_eq uuid; v_p uuid; v_fn uuid; v_tel text; v_tel_lider text; v_tel_intruso text;
   v_r jsonb; v_vol uuid; v_cand uuid; v_pessoa_cand uuid;
   ok int := 0; falhou int := 0; msg text := '';
 begin
@@ -269,7 +269,32 @@ begin
     raise notice 'PULEI a conferencia da 59: base sem public.voluntarios.'; return;
   end if;
 
-  v_tel := '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0');
+  /* Os três telefones são SORTEADOS, e conferidos contra o banco antes de
+     qualquer escrita.
+
+     A primeira versão deste arquivo usava '11900000059' e '21999990059'
+     fixos. O limpa-limpa do fim apaga por telefone, e o insert do líder
+     tinha `on conflict (telefone) do update set auth_email`. Num banco de
+     produção onde algum desses números pertencesse a uma pessoa de
+     verdade, a conferência trocaria o e-mail de acesso dela, apagaria os
+     papéis dela e apagaria a linha dela em `pessoas`. Chance remota, dano
+     irreversível: o preço certo de pagar é abortar antes de escrever. */
+  v_tel         := '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0');
+  v_tel_lider   := '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0');
+  v_tel_intruso := '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0');
+
+  if v_tel = v_tel_lider or v_tel = v_tel_intruso or v_tel_lider = v_tel_intruso
+     or exists (select 1 from pessoas p
+                 where p.telefone in (v_tel, v_tel_lider, v_tel_intruso))
+     or exists (select 1 from voluntarios v
+                 where tel_norm(v.telefone) in (v_tel, v_tel_lider, v_tel_intruso)) then
+    raise exception 'A conferencia da 59 sorteou um telefone que JA EXISTE neste banco. Nao escrevi nada. Rode o arquivo de novo: o sorteio e outro.'
+      using errcode = 'raise_exception';
+  end if;
+  if exists (select 1 from pessoas where lower(auth_email) = 'conf59@teste.local') then
+    raise exception 'Ja existe alguem com auth_email conf59@teste.local neste banco. Nao escrevi nada: apague essa linha antes de rodar a 59.'
+      using errcode = 'raise_exception';
+  end if;
 
   insert into equipes (slug, nome) values ('conf59','Conferencia 59')
     on conflict (slug) do nothing;
@@ -280,11 +305,11 @@ begin
     on conflict do nothing;
   select id into v_fn from funcoes where equipe_id = v_eq and nome = 'POSTO CONF 59';
 
+  /* sem `on conflict`: a guarda acima já provou que este telefone é livre.
+     Se ainda assim colidir, quero a exceção, não a sobrescrita. */
   insert into pessoas (nome, telefone, auth_email)
-       values ('Lider Conf 59', '11900000059', 'conf59@teste.local')
-    on conflict (telefone) do update set auth_email = 'conf59@teste.local'
+       values ('Lider Conf 59', v_tel_lider, 'conf59@teste.local')
     returning id into v_p;
-  if v_p is null then select id into v_p from pessoas where telefone = '11900000059'; end if;
   insert into papeis (pessoa_id, equipe_id, papel) values (v_p, v_eq, 'lider')
     on conflict do nothing;
 
@@ -323,10 +348,11 @@ begin
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims', '{"email":"conf59@teste.local","role":"authenticated"}', true);
-    v_r := criar_voluntario(v_eq, 'Outro Nome Cinquentaenove', '11900000059', 2, '{}'::jsonb);
+    v_r := criar_voluntario(v_eq, 'Outro Nome Cinquentaenove', v_tel_lider, 2, '{}'::jsonb);
     reset role;
-    /* a pessoa 11900000059 já existe: tem que entrar assim mesmo, reusando
-       a identidade, e não morrer em permission denied no `on conflict` */
+    /* a pessoa de v_tel_lider já existe (é o próprio líder da conferência):
+       tem que entrar assim mesmo, reusando a identidade, e não morrer em
+       permission denied no `on conflict` */
     if coalesce((v_r->>'ok')::boolean, false) then ok := ok + 1;
     else
       falhou := falhou + 1;
@@ -369,7 +395,7 @@ begin
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims', '{"email":"ninguem59@exemplo.invalido","role":"authenticated"}', true);
-    v_r := criar_voluntario(v_eq, 'Intruso Cinquentaenove', '21999990059', 2, '{}'::jsonb);
+    v_r := criar_voluntario(v_eq, 'Intruso Cinquentaenove', v_tel_intruso, 2, '{}'::jsonb);
     reset role;
     if coalesce(v_r->>'erro','') = 'SEM_PERMISSAO' then ok := ok + 1;
     else
@@ -380,7 +406,7 @@ begin
     reset role; falhou := falhou + 1;
     msg := msg || E'\n  x a guarda EXPLODIU em vez de recusar: ' || sqlerrm;
   end;
-  if exists (select 1 from voluntarios where telefone = '21999990059') then
+  if exists (select 1 from voluntarios where tel_norm(telefone) = v_tel_intruso) then
     falhou := falhou + 1;
     msg := msg || E'\n  x o estranho recusado AINDA assim gravou a linha';
   else ok := ok + 1; end if;
@@ -400,8 +426,11 @@ begin
   delete from voluntarios where equipe_id = v_eq;
   delete from funcoes where equipe_id = v_eq;
   delete from papeis where pessoa_id = v_p;
-  delete from voluntarios where telefone = '21999990059';
-  delete from pessoas where id in (v_p, v_pessoa_cand) or telefone in (v_tel, '21999990059');
+  /* o limpa-limpa apaga POR ID sempre que há id. Onde é por telefone, são os
+     três sorteados deste bloco, que a guarda do topo provou serem livres. */
+  delete from voluntarios where tel_norm(telefone) = v_tel_intruso;
+  delete from pessoas where id in (v_p, v_pessoa_cand)
+     or telefone in (v_tel, v_tel_lider, v_tel_intruso);
   delete from equipes where id = v_eq;
 
   if falhou > 0 then

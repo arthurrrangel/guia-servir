@@ -62,7 +62,11 @@ export type Funcao = {
   exigeSexo?: Sexo;
 };
 export type Voluntario = {
-  id: string; nome: string; tel?: string; ativo: boolean; limiteMes: number;
+  id: string; nome: string; tel?: string; ativo: boolean;
+  /* null = SEGUE o limitePadrao da equipe, que é a regra escrita na migração
+     11. O tipo dizia `number` e a ponte grava `v.limite_mes` cru, que é nulo
+     no banco: o compilador jurava que este campo sempre tinha número. */
+  limiteMes: number | null;
   token?: string; funcoes: Record<string, Nivel>; indisponivel: string[];
   /* undefined = ninguém informou ainda. Não é "não importa": é "não sei". */
   sexo?: Sexo;
@@ -94,12 +98,46 @@ export function respostaDe(v: Voluntario, data: string): Resposta {
    coisa: ficar registrada, aparecer para o grupo e cobrar quem desmarca em
    cima da hora a ajudar a resolver.                                          */
 
-/* Horas entre a resposta e o culto. O culto é à noite; 18h é a referência.
+/* A HORA DO CULTO, EM MINUTOS DESDE A MEIA-NOITE.
+
+   Até 20/09 esta conta usava `18:00` fixo, com o comentário "o culto é à
+   noite". O culto é às 10h: `lib/igreja.ts` diz `cultoHora: '10h'`, corrigido
+   pelo Arthur em 03/09 justamente porque a hora errada tinha circulado.
+
+   Eram oito horas de erro, sempre para o lado de perdoar. Quem avisava às
+   11h30 de domingo, hora e meia DEPOIS de o culto começar, era registrado com
+   sete horas de antecedência. O limiar de 48h escondia isso na maioria dos
+   casos, mas deslocava a fronteira: quem desmarcava sexta às 18h tinha 40h
+   reais de aviso (tardio) e o sistema calculava 48 (não tardio). A ficha de
+   compromisso que o líder usa para conversar com a pessoa errava exatamente
+   no ponto que decide a conversa.
+
+   Por que os números estão AQUI e não importados de `lib/igreja.ts`: este
+   arquivo é lógica pura e não importa nada, de propósito, e
+   `scripts/engine.test.mjs` o carrega cru pelo node, que não resolve import
+   sem extensão. A cópia é conferida contra a fonte por
+   `scripts/hora-do-culto.test.mjs`, que reprova se as duas divergirem. */
+export const MIN_CULTO_DOMINGO = 10 * 60;   // 10h — IGREJA.cultoHora
+/* O Follow não tem hora confirmada em lugar nenhum (IGREJA.followHora é null,
+   e `lib/semana.ts` diz o mesmo). 18h continua sendo palpite, e fica escrito
+   que é. Quando a igreja confirmar, os dois lugares mudam juntos. */
+export const MIN_FOLLOW_PALPITE = 18 * 60;
+
+/** Hora de início deste dia, em minutos. Um evento com `inicio` informado
+ *  manda; senão vale o tipo do dia. */
+export function minutosDoCulto(S: Estado, data: string): number {
+  const inicio = S.escalas[data]?.inicio;
+  const m = inicio ? /^(\d{1,2})h(\d{2})?$/.exec(String(inicio).trim()) : null;
+  if (m) return +m[1] * 60 + (m[2] ? +m[2] : 0);
+  return tipoDoDia(data) === 'follow' ? MIN_FOLLOW_PALPITE : MIN_CULTO_DOMINGO;
+}
+
+/* Horas entre a resposta e o culto.
    Sem respondido_em não dá para julgar, e aí não conta como tardio. */
-export function horasDeAntecedencia(data: string, respondidoEm?: string | null) {
+export function horasDeAntecedencia(data: string, respondidoEm?: string | null, minutos = MIN_CULTO_DOMINGO) {
   if (!respondidoEm) return null;
   const quando = Date.parse(respondidoEm);
-  const culto = Date.parse(`${data}T18:00:00-03:00`);
+  const culto = Date.parse(`${data}T${d2(Math.floor(minutos / 60))}:${d2(minutos % 60)}:00-03:00`);
   if (Number.isNaN(quando) || Number.isNaN(culto)) return null;
   return Math.round((culto - quando) / 3600000);
 }
@@ -107,7 +145,7 @@ export function horasDeAntecedencia(data: string, respondidoEm?: string | null) 
 /* Desmarque em cima da hora: recusou dentro da janela de horasTardio. */
 export function desmarqueTardio(S: Estado, data: string, sl?: Slot | null) {
   if (!sl || sl.status !== 'recusado') return false;
-  const h = horasDeAntecedencia(data, sl.respondidoEm);
+  const h = horasDeAntecedencia(data, sl.respondidoEm, minutosDoCulto(S, data));
   return h !== null && h < (S.config.horasTardio ?? 48);
 }
 
@@ -166,7 +204,7 @@ export function quemPodeCobrir(S: Estado, data: string, funcao: string, qtd = 3)
     .sort((a, b) =>
       (a.resposta === 'posso' ? 0 : 1) - (b.resposta === 'posso' ? 0 : 1)
       || a.carga - b.carga
-      || (a.nome < b.nome ? -1 : 1))
+      || porNome(a, b))
     .slice(0, qtd);
 }
 
@@ -396,7 +434,7 @@ export function cargaDoMes(S: Estado, ano: number, mes: number) {
       funcoes: c ? [...c.funcoes].sort() : [],
       limite: v.limiteMes ?? S.config.limitePadrao,
     };
-  }).sort((a, b) => b.n - a.n || (a.nome < b.nome ? -1 : 1));
+  }).sort((a, b) => b.n - a.n || porNome(a, b));
   const montados = dias.filter(d => Object.values(S.escalas[d]?.slots || {}).some(s => s?.vid));
   return {
     dias, montados, pessoas,
@@ -404,7 +442,9 @@ export function cargaDoMes(S: Estado, ano: number, mes: number) {
     zerados: pessoas.filter(p => p.n === 0),
     /* "em todos" só é um fato quando há mais de um culto montado para estar */
     emTodos: montados.length > 1 ? pessoas.filter(p => p.n === montados.length) : [],
-    acimaDoLimite: pessoas.filter(p => p.limite > 0 && p.n > p.limite),
+    /* sem a guarda `p.limite > 0`: ela existia para tratar zero como "sem
+       teto", e zero é teto. Agora `p.limite` já vem de `?? limitePadrao`. */
+    acimaDoLimite: pessoas.filter(p => p.n > p.limite),
   };
 }
 
@@ -757,7 +797,7 @@ export type Candidato = { id: string; nome: string; nivel: Nivel; carga: number;
    uma contagem que custa o que uma contagem deve custar. */
 function elegiveis(
   S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
 ): Voluntario[] {
   const excluirOcupados = o.excluirOcupados !== false;
   const [ano, mes] = data.split('-').map(Number);
@@ -773,10 +813,21 @@ function elegiveis(
        destrava isso, porque o banco também não destrava. */
     if (!podeNoPosto(S, v, funcao)) return false;
     if ((v.indisponivel || []).includes(data)) return false;
+    if (foraDe(o.fora, data, v.id)) return false;
     if (!o.ignorarLimite) {
-      const limite = v.limiteMes || S.config.limitePadrao;
-      const atual = S.escalas[data]?.slots?.[funcao];
-      const desconto = atual?.vid === v.id ? 1 : 0;
+      /* `??` e não `||`: zero é um teto ("nenhuma vez este mês"), e com `||`
+         ele caía em falsy e virava o padrão da equipe. Medido: pessoa com
+         limiteMes 0 e limitePadrao 2 era escalada duas vezes, e o alarme da
+         tela não acusava porque ele também tinha a mesma guarda. */
+      const limite = v.limiteMes ?? S.config.limitePadrao;
+      /* O teto conta DIAS (`escalasNoMes` -> `diasComAPessoa`), e o dia atual
+         já entrou nessa conta quando a pessoa está em QUALQUER posto dele. O
+         desconto olhava só a mesma vaga, então quem já servia FOTO no dia era
+         barrada de EDIÇÃO no mesmo dia — um segundo posto que custa zero dia.
+         A vaga ficava aberta à toa, e é exatamente o acúmulo pós-culto que a
+         nota de `cargaJanela` descreve como legal. */
+      const jaNesteDia = Object.values(S.escalas[data]?.slots || {}).some(s => s?.vid === v.id);
+      const desconto = jaNesteDia ? 1 : 0;
       if (escalasNoMes(S, v.id, ano, mes) - desconto >= limite) return false;
     }
     if (excluirOcupados && ocupadoNoDia(S, data, v.id, funcao)) return false;
@@ -787,12 +838,12 @@ function elegiveis(
 /** Quantas pessoas podem, sem pontuar nenhuma. Mesmo filtro de `candidatos`. */
 export const quantosPodem = (
   S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
 ) => elegiveis(S, funcao, data, o).length;
 
 export function candidatos(
   S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean } = {},
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
 ): Candidato[] {
   const peso = (n: Nivel) => (n === 'titular' ? 0 : n === 'reserva' ? 1 : 2);
   return elegiveis(S, funcao, data, o)
@@ -807,7 +858,7 @@ export function candidatos(
       a.carga - b.carga ||
       b.paradoFuncao - a.paradoFuncao ||
       b.paradoGeral - a.paradoGeral ||
-      (a.nome < b.nome ? -1 : 1));
+      porNome(a, b));
 }
 
 export const vagasDe = (S: Estado, data: string) =>
@@ -819,25 +870,62 @@ export const vagasDe = (S: Estado, data: string) =>
 export function ehCuringa(v: Voluntario) {
   return Object.values(v.funcoes || {}).filter(n => n === 'titular' || n === 'reserva').length >= 2;
 }
-export function sugerirPlantao(S: Estado, data: string, qtd: number) {
+export function sugerirPlantao(S: Estado, data: string, qtd: number, fora?: ForaDoDia) {
   return S.voluntarios
     .filter(v => v.ativo && ehCuringa(v) &&
-      !(v.indisponivel || []).includes(data) && !ocupadoNoDia(S, data, v.id, null))
+      !(v.indisponivel || []).includes(data) && !foraDe(fora, data, v.id) &&
+      !ocupadoNoDia(S, data, v.id, null))
     .map(v => ({ id: v.id, nome: v.nome, carga: cargaJanela(S, v.id, data, S.config.janelaCarga), parado: diasDesdeUltima(S, v.id, data) }))
-    .sort((a, b) => a.carga - b.carga || b.parado - a.parado || (a.nome < b.nome ? -1 : 1))
+    .sort((a, b) => a.carga - b.carga || b.parado - a.parado || porNome(a, b))
     .slice(0, qtd).map(p => p.id);
 }
 
+/* Empate de nome: o comparador de DUAS vias (`a.nome < b.nome ? -1 : 1`)
+   devolve 1 nos dois sentidos quando os nomes são IGUAIS, e aí a ordem final
+   passa a ser a ordem física com que o banco devolveu as linhas — que muda
+   sozinha. É o mesmo defeito que `funcoesAtivas` já corrigiu para postos, e
+   que não tinha sido replicado para pessoas. Duas Marias no mesmo ministério
+   não é hipótese remota. O `id` é o desempate estável. */
+type ComNome = { nome: string; id?: string; vid?: string };
+const chaveEstavel = (x: ComNome) => x.id ?? x.vid ?? '';
+export const porNome = (a: ComNome, b: ComNome) => {
+  if (a.nome !== b.nome) return a.nome < b.nome ? -1 : 1;
+  const ka = chaveEstavel(a), kb = chaveEstavel(b);
+  return ka < kb ? -1 : ka > kb ? 1 : 0;
+};
+
+/* Quem RECUSOU um posto num dia não volta no re-sorteio DAQUELE dia.
+
+   Isto é um fato deste sorteio, não uma indisponibilidade que a pessoa
+   declarou. Até 20/09 o motor transportava o fato escrevendo a data dentro de
+   `v.indisponivel`, ou seja, inventando no objeto do voluntário uma linha que
+   a tabela `indisponibilidades` não tem. O estrago era em três lugares, todos
+   dentro da mesma sessão do navegador: `problemas()` passava a acusar "avisou
+   que não pode, mas está em FOTO" depois que o líder repunha a pessoa;
+   /time mostrava a data sob "Avisou que não pode"; e o motor deixava de ser
+   função do estado que recebeu.
+
+   Agora o fato é lido dos próprios slots, ANTES de o sorteio apagá-los, e
+   viaja num mapa por dia. Um mapa e não um conjunto porque `aumentar`
+   atravessa dias: remanejar alguém para o dia 11 precisa saber quem recusou
+   o dia 11, não quem recusou o dia de onde a busca partiu. */
+export type ForaDoDia = Map<string, Set<string>>;
+export function quemRecusou(S: Estado, data: string): Set<string> {
+  const out = new Set<string>();
+  for (const sl of Object.values(S.escalas[data]?.slots || {}))
+    if (sl?.vid && sl.status === 'recusado') out.add(sl.vid);
+  return out;
+}
+const foraDe = (fora: ForaDoDia | undefined, data: string, vid: string) =>
+  !!fora?.get(data)?.has(vid);
+
 /* ------------------------------------------------------------- geração ----- */
-export function gerarDia(S: Estado, data: string) {
+export function gerarDia(S: Estado, data: string, fora?: ForaDoDia) {
   const dia = garantirDia(S, data);
-  /* quem RECUSOU este dia não volta no re-sorteio: vira indisponibilidade do dia */
-  for (const slot of Object.values(dia.slots)) {
-    if (slot?.vid && slot.status === 'recusado') {
-      const v = vol(S, slot.vid);
-      if (v && !(v.indisponivel || []).includes(data)) (v.indisponivel ||= []).push(data);
-    }
-  }
+  /* quem RECUSOU este dia não volta no re-sorteio deste dia. Lido dos slots
+     ANTES de o sorteio apagá-los, e carregado à parte — ver `quemRecusou`.
+     Quando `gerarMes` chama, o mapa já vem pronto para o mês inteiro. */
+  const F: ForaDoDia = fora ?? new Map([[data, quemRecusou(S, data)]]);
   /* quem JÁ CONFIRMOU vale cadeado: a pessoa combinou o domingo dela e o
      sorteio não desmancha isso pelas costas do líder. Para trocar mesmo assim,
      o líder usa o select da tela (que avisa antes). */
@@ -860,16 +948,16 @@ export function gerarDia(S: Estado, data: string) {
      pontuar para descartar a pontuação custava 9,7% da geração do mês. A
      ORDEM que sai daqui é idêntica — é o mesmo filtro. */
   const ordem = funcoesDoDia(S, data)
-    .map((f, i) => ({ f, i, n: quantosPodem(S, f.nome, data, { excluirOcupados: false }) }))
+    .map((f, i) => ({ f, i, n: quantosPodem(S, f.nome, data, { excluirOcupados: false, fora: F }) }))
     .sort((a, b) => a.n - b.n || a.i - b.i);
 
   for (const { f } of ordem) {
     if (dia.slots[f.nome]) continue;
-    const c = candidatos(S, f.nome, data);
+    const c = candidatos(S, f.nome, data, { fora: F });
     if (c.length) dia.slots[f.nome] = { vid: c[0].id, status: 'pendente', fixo: false };
   }
-  repararDia(S, data);
-  dia.plantao = sugerirPlantao(S, data, S.config.plantaoQtd);
+  repararDia(S, data, F);
+  dia.plantao = sugerirPlantao(S, data, S.config.plantaoQtd, F);
   return { vagas: vagasDe(S, data) };
 }
 
@@ -909,12 +997,12 @@ const travado = (sl?: Slot | null) => !!sl && (sl.fixo || sl.status === 'confirm
    VARIA aquilo que se afirma ser a causa. Eu tinha medido "antes e depois" de
    uma mudança que fez duas coisas ao mesmo tempo e creditei a errada. */
 
-function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[]): boolean {
+function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[], fora?: ForaDoDia): boolean {
   /* `ignorarLimite` de propósito: quem já bateu o teto do mês ainda é
      candidato AQUI, porque a linha mais abaixo confere o teto e, se ele
      estourou, tenta liberar um domingo dessa pessoa em outro dia. É esse
      remanejamento que `aumentar` existe para achar. */
-  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true });
+  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true, fora });
   for (const c of lista) {
     const chave = c.id + '|' + data;
     if (visto.has(chave)) continue;
@@ -937,7 +1025,7 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
       delete S.escalas[data].slots[ocup];
       garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
       if (!meta || meta.ativa === false) return true;      // função morta: não repõe
-      if (aumentar(S, data, ocup, visto, dias)) return true;
+      if (aumentar(S, data, ocup, visto, dias, fora)) return true;
       delete S.escalas[data].slots[F];
       S.escalas[data].slots[ocup] = s2;
       continue;
@@ -949,30 +1037,50 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
     }
 
     const [ano, mes] = data.split('-').map(Number);
-    const limite = vol(S, c.id)?.limiteMes || S.config.limitePadrao;
-    if (escalasNoMes(S, c.id, ano, mes) < limite) {
+    /* `??`: zero é teto. Mesma correção de `elegiveis`. */
+    const limite = vol(S, c.id)?.limiteMes ?? S.config.limitePadrao;
+    /* pôr esta pessoa aqui só gasta um DIA novo se ela ainda não está neste
+       dia em nenhum outro posto. */
+    const jaNesteDia = Object.values(S.escalas[data]?.slots || {}).some(x => x?.vid === c.id);
+    const custa = jaNesteDia ? 0 : 1;
+    if (escalasNoMes(S, c.id, ano, mes) + custa <= limite) {
       garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
       return true;
     }
 
+    /* REMANEJAMENTO ENTRE DIAS: tirar a pessoa de outro dia para caber aqui.
+       Só é neutro no teto quando tirar aquele posto LIBERA O DIA d2, ou seja,
+       quando é o único posto dela lá. Sem essa guarda, quem tinha FOTO e
+       EDIÇÃO no mesmo domingo perdia um dos dois, continuava naquele domingo,
+       e ganhava mais um — um dia a mais no mês, acima do teto.
+
+       Medido em 20/09: 17 pessoas, 11 postos, teto 2. Depois de `gerarDia` em
+       todos os dias, ninguém acima do teto; depois da segunda passada de
+       `gerarMes`, 6 das 17 com 3 domingos. O teste que deveria ter pego isso
+       (`engine-tempo`, "ninguem passou do limite do mes") rodava com
+       `limite: 10`, e o próprio arquivo escreve que nenhum ministério usa 10.
+       Produção usa 4, e o Louvor usa 6: os dois valores quebrados. */
     for (const d2 of dias) {
       if (d2 === data) continue;
-      for (const [F2, s] of Object.entries(S.escalas[d2]?.slots || {})) {
-        if (s?.vid !== c.id || travado(s)) continue;
+      const postosLa = Object.entries(S.escalas[d2]?.slots || {}).filter(([, sl]) => sl?.vid === c.id);
+      if (postosLa.length !== 1) continue;
+      for (const [F2, s] of postosLa) {
+        if (travado(s)) continue;
         delete S.escalas[d2].slots[F2];
         garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
-        if (aumentar(S, d2, F2, visto, dias)) return true;
+        if (aumentar(S, d2, F2, visto, dias, fora)) return true;
         delete S.escalas[data].slots[F];
-        S.escalas[d2].slots[F2] = s;
+        S.escalas[d2].slots[F2] = s!;
       }
     }
   }
   return false;
 }
 
-export function repararDia(S: Estado, data: string) {
+export function repararDia(S: Estado, data: string, fora?: ForaDoDia) {
+  const Fo: ForaDoDia = fora ?? new Map([[data, quemRecusou(S, data)]]);
   let n = 0;
-  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data])) n++;
+  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data], Fo)) n++;
   return n;
 }
 
@@ -983,11 +1091,15 @@ export function gerarMes(S: Estado, ano: number, mes: number, aPartirDe?: string
   /* dias antes do corte são história: contam na carga e no teto, mas nunca
      são regenerados nem usados como origem/destino de remanejamento */
   const dias = aPartirDe ? todos.filter(d => d >= aPartirDe) : todos;
-  for (const d of dias) gerarDia(S, d);
+  /* o mapa de recusas é montado para o mês INTEIRO antes do primeiro sorteio,
+     porque `gerarDia` apaga os slots recusados e o remanejamento do segundo
+     laço atravessa dias: ele precisa saber quem recusou o dia de DESTINO. */
+  const fora: ForaDoDia = new Map(dias.map(d => [d, quemRecusou(S, d)]));
+  for (const d of dias) gerarDia(S, d, fora);
   for (const D of dias) {
-    for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias);
+    for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias, fora);
   }
-  for (const d of dias) S.escalas[d].plantao = sugerirPlantao(S, d, S.config.plantaoQtd);
+  for (const d of dias) S.escalas[d].plantao = sugerirPlantao(S, d, S.config.plantaoQtd, fora);
   return dias.map(d => ({ data: d, vagas: vagasDe(S, d) }));
 }
 
@@ -1194,7 +1306,7 @@ export function declaracoesSuspeitas(S: Estado): Suspeita[] {
   return out.sort((a, b) =>
     (a.motivo === 'pilar_unico' ? 0 : 1) - (b.motivo === 'pilar_unico' ? 0 : 1)
     || b.areas.length - a.areas.length
-    || (a.nome < b.nome ? -1 : 1));
+    || porNome(a, b));
 }
 
 /* A fila de conferência do líder, uma área por vez: quem declarou o quê e
@@ -1205,7 +1317,7 @@ export function filaDeConferencia(S: Estado) {
     pendentes: S.voluntarios
       .filter(v => v.ativo && v.funcoes?.[f.nome] && !confirmada(v, f.nome))
       .map(v => ({ id: v.id, nome: v.nome, declarou: v.funcoes[f.nome], efetivo: nivelEfetivo(v, f.nome)! }))
-      .sort((a, b) => (a.nome < b.nome ? -1 : 1)),
+      .sort(porNome),
   })).filter(x => x.pendentes.length);
 }
 
@@ -1224,7 +1336,7 @@ export function pendenciasDeSexo(S: Estado) {
   const semSexo = ativos
     .filter(v => !v.sexo && comExigencia.some(f => nivelEfetivo(v, f.nome)))
     .map(v => ({ id: v.id, nome: v.nome }))
-    .sort((a, b) => (a.nome < b.nome ? -1 : 1));
+    .sort(porNome);
 
   /* posto que exige e não tem ninguém que possa: a vaga nunca vai preencher */
   const postosSemNinguem = comExigencia
@@ -1281,6 +1393,6 @@ export function saudeDoTime(S: Estado) {
     furos: furosJanela(S, v.id, ref, S.config.janelaCarga),
     parado: diasDesdeUltima(S, v.id, ref),
     funcoes: Object.keys(v.funcoes || {}),
-  })).sort((a, b) => b.carga - a.carga || (a.nome < b.nome ? -1 : 1));
+  })).sort((a, b) => b.carga - a.carga || porNome(a, b));
   return { funcoes, pessoas };
 }

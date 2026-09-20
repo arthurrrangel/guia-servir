@@ -48,7 +48,12 @@ const DIA = '2026-10-04';
 const quem = (entrada) => {
   const S = estado(entrada);
   garantirDia(S, DIA);
-  gerarDia(S, DIA, '2026-09-01');
+  /* o terceiro argumento que estava aqui ('2026-09-01') nunca existiu na
+     assinatura de `gerarDia`: era engolido em silêncio. Apareceu quando
+     `gerarDia` ganhou um terceiro parâmetro de verdade (o mapa de recusas) e
+     a string explodiu dentro dele. Fica o registro: em .mjs o compilador não
+     confere argumento a mais, então argumento a mais dorme até incomodar. */
+  gerarDia(S, DIA);
   const slots = S.escalas[DIA].slots || {};
   return Object.keys(slots).filter(k => slots[k]?.vid).sort().join('+');
 };

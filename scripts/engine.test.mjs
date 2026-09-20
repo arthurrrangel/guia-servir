@@ -401,9 +401,15 @@ console.log('\n24. AUDITORIA: marca de "1ª vez" sobrevive ao ir e voltar do ban
     v('Cau', { 'PROJEÇÃO': 'titular' }),
     v('Dan', { 'PROJEÇÃO': 'treino' }),
   ]);
-  const D = '2026-09-06';                       // culto às 18h -03
+  const D = '2026-09-06';                       // domingo, culto às 10h -03
   E.garantirDia(S, D);
-  const culto = Date.parse(`${D}T18:00:00-03:00`);
+  /* A referência é a HORA DO CULTO, e o culto de domingo é às 10h. Este bloco
+     usava 18h fixo, igual ao motor, então os dois erravam juntos e o teste
+     dava certo. Agora a hora sai do próprio motor: se alguém a trocar sem
+     trocar `lib/igreja.ts`, `scripts/hora-do-culto.test.mjs` reprova. */
+  ok(E.minutosDoCulto(S, D) === 10 * 60, 'domingo tem referência às 10h, não 18h',
+     String(E.minutosDoCulto(S, D)));
+  const culto = Date.parse(`${D}T10:00:00-03:00`);
   const hAntes = (h) => new Date(culto - h * 3600000).toISOString();
 
   // avisou com 5 dias: não é tardio
@@ -417,6 +423,24 @@ console.log('\n24. AUDITORIA: marca de "1ª vez" sobrevive ao ir e voltar do ban
   // exatamente no limite de 48h não conta como tardio
   S.escalas[D].slots['PROJEÇÃO'].respondidoEm = hAntes(48);
   ok(E.desmarqueTardio(S, D, S.escalas[D].slots['PROJEÇÃO']) === false, 'exatamente 48h não é tardio');
+
+  /* A FRONTEIRA QUE O 18h DESLOCAVA: sexta às 18h são 40 horas reais de aviso
+     para um culto de domingo às 10h, logo é tardio. Com a referência antiga
+     a conta dava 48 e a pessoa saía impune. */
+  S.escalas[D].slots['PROJEÇÃO'].respondidoEm = new Date(Date.parse('2026-09-04T18:00:00-03:00')).toISOString();
+  ok(E.horasDeAntecedencia(D, S.escalas[D].slots['PROJEÇÃO'].respondidoEm, E.minutosDoCulto(S, D)) === 40,
+     'sexta 18h para domingo 10h são 40 horas, não 48',
+     String(E.horasDeAntecedencia(D, S.escalas[D].slots['PROJEÇÃO'].respondidoEm, E.minutosDoCulto(S, D))));
+  ok(E.desmarqueTardio(S, D, S.escalas[D].slots['PROJEÇÃO']) === true, 'e por isso É tardio');
+
+  /* Evento com hora informada manda na conta. */
+  E.garantirDia(S, '2026-09-10').evento = 'GUIA Empreendedor';
+  S.escalas['2026-09-10'].inicio = '19h30';
+  ok(E.minutosDoCulto(S, '2026-09-10') === 19 * 60 + 30, 'evento com hora informada usa a hora dele',
+     String(E.minutosDoCulto(S, '2026-09-10')));
+
+  // volta o dia D ao estado que o resto do bloco espera
+  S.escalas[D].slots['PROJEÇÃO'].respondidoEm = hAntes(48);
 
   // sem respondido_em não dá para julgar
   S.escalas[D].slots['PROJEÇÃO'].respondidoEm = null;
@@ -522,7 +546,12 @@ console.log('\n15. Culto do Follow (sábado, sem HEAD e sem transmissão)');
      'a cobrança não inventa Follow no primeiro sábado');
 }
 
-console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
+/* O PLACAR FICAVA AQUI, E MENTIA.
+   Os blocos 16 e 17 rodam DEPOIS desta linha, com 23 asserções. O banner
+   dizia "98/98" e nunca as mencionava: um quinto do arquivo ficava fora do
+   número que a gente lê para dizer que está tudo certo. O `process.exit` no
+   fim salvava a correção, mas quem lê a saída acreditava no placar. Ele
+   agora é a última coisa do arquivo, ao lado do `process.exit`. */
 
 console.log('\n16. Nível declarado x nível conferido');
 {
@@ -634,4 +663,5 @@ console.log('\n17. O sistema aponta sozinho a declaração implausível');
 }
 
 
+console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

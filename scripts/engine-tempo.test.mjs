@@ -188,7 +188,15 @@ for (const c of CASOS) {
 }
 
 /* ------------------------------------------- 2. e o resultado é válido */
-const S = caso({ postos: 40, pessoas: 25, limite: 10, densidade: 3, meses: 6 });
+/* `limite: 4` e não 10. O cabeçalho deste arquivo já dizia, desde 19/09, que
+   "os casos agora usam os limites reais — 2 e 4 — que é o pior lado da
+   curva". A troca tinha sido feita nos casos de TEMPO e esquecida aqui, no
+   caso que confere se o resultado é VÁLIDO. E era justamente aqui que ela
+   importava: a asserção "ninguem passou do limite do mes", logo abaixo,
+   rodava com o único valor em que o estouro do teto não aparecia. Medido em
+   20/09, o remanejamento entre dias furava o teto em 2, 3 e 4, e não em 6 nem
+   em 10. O teste escolhia o número que não quebra. */
+const S = caso({ postos: 40, pessoas: 25, limite: 4, densidade: 3, meses: 6 });
 E.gerarMes(S, 2026, 10, '2026-09-19');
 
 let indisponivelEscalado = 0, duplicadoNoDia = 0;
@@ -208,17 +216,27 @@ for (const [data, dia] of Object.entries(S.escalas)) {
 ok(indisponivelEscalado === 0, 'ninguem indisponivel foi escalado', `${indisponivelEscalado} caso(s)`);
 ok(duplicadoNoDia === 0, 'ninguem em dois postos simultaneos no mesmo dia', `${duplicadoNoDia} caso(s)`);
 
-/* limite mensal: conta DOMINGOS distintos, que é a regra do motor */
+/* limite mensal: conta DOMINGOS distintos, que é a regra do motor.
+
+   O corte é `2026-10`, e não `>= 2026-09-19` como estava. O teto é POR MÊS, e
+   a janela antiga pegava a última semana de setembro junto com outubro
+   inteiro, somando dois meses numa conta mensal. Com `limite: 10` isso nunca
+   estourava e o defeito dormia; com o 4 de produção, 14 pessoas apareceram
+   "com 6 dias" sendo que tinham 2 em setembro e 4 em outubro, dentro do teto
+   nos dois. Setembro aqui é história sintética montada por `caso()`, que
+   preenche os meses anteriores sem olhar limite nenhum: cobrar teto dela é
+   cobrar de quem não jogou. */
 const diasPorPessoa = {};
 for (const [data, dia] of Object.entries(S.escalas)) {
-  if (data < '2026-09-19') continue;
+  if (!data.startsWith('2026-10')) continue;
   for (const sl of Object.values(dia.slots || {})) {
     if (!sl?.vid) continue;
     (diasPorPessoa[sl.vid] ||= new Set()).add(data);
   }
 }
 const acima = Object.entries(diasPorPessoa).filter(([, s]) => s.size > S.config.limitePadrao);
-ok(acima.length === 0, 'ninguem passou do limite do mes', acima.map(([v, s]) => `${v}:${s.size}`).join(', '));
+ok(acima.length === 0, `ninguem passou do limite do mes (teto ${S.config.limitePadrao})`,
+   acima.map(([v, s]) => `${v}:${s.size}`).join(', '));
 
 /* --------------------------------------- 3. a cobertura, medida certo
 
@@ -234,18 +252,30 @@ for (const data of Object.keys(S.escalas)) {
   preenchidos += fs.filter(f => S.escalas[data]?.slots?.[f.nome]?.vid).length;
 }
 ok(postosTotal > 300, 'o caso é grande de verdade (senão o teste mede o nada)', `${postosTotal} postos`);
-/* 194/400 é o que este caso dá hoje, medido três vezes com o mesmo resultado
-   (o caso é determinístico de propósito). Não é "a cobertura boa": é o caso
-   escasso de propósito — 25 pessoas, um terço fora a cada domingo, cada uma
-   sabendo um posto em cada três. O valor está aqui como PATAMAR: se cair, uma
-   mudança tirou escala de alguém e isso tem que aparecer como falha. Se subir,
-   ótimo — é só atualizar o número junto com a explicação do que melhorou. */
-ok(preenchidos >= 194, 'a cobertura não caiu do patamar medido em 19/09', `${preenchidos}/${postosTotal}`);
+/* 128/400 é o que este caso dá com o teto 4 de produção, medido em 20/09.
+   Era 194 quando o caso rodava com teto 10, e a queda é inteiramente do teto:
+   medido lado a lado, o motor antes e depois das correções de 20/09 dá o
+   MESMO número nos dois tetos (128 em 4, 194 em 10). Não é regressão, é o
+   caso tendo passado a medir a configuração que a igreja tem.
+
+   Não é "a cobertura boa": é o caso escasso de propósito — 25 pessoas, um
+   terço fora a cada domingo, cada uma sabendo um posto em cada três. O valor
+   está aqui como PATAMAR: se cair, uma mudança tirou escala de alguém.
+
+   E UMA HONESTIDADE SOBRE O QUE ESTE PATAMAR **NÃO** PROTEGE. Ele não
+   protege o backtracking. Medido: trocando o corpo de `aumentar()` por
+   `return false`, a cobertura sai IDÊNTICA nos dois tetos — 128 e 194. O
+   patamar descreve o que o sorteio guloso entrega sozinho. Quem guarda o
+   backtracking é `scripts/teto-do-mes.test.mjs`, bloco 6, com um caso que só
+   o remanejamento entre dias resolve. Um número que não distingue as duas
+   implementações não é guarda de regressão daquilo que ele parece guardar,
+   e ficar escrito é mais barato que a próxima pessoa redescobrir. */
+ok(preenchidos >= 128, 'a cobertura não caiu do patamar medido em 20/09', `${preenchidos}/${postosTotal}`);
 
 /* e o motor de fato TRABALHOU: teste que passa porque não escalou ninguém
    não prova coisa nenhuma */
 const total = Object.values(vezes).reduce((a, n) => a + n, 0);
-ok(total > 150, 'o motor escalou gente de verdade no caso grande', `escalou ${total}`);
+ok(total >= 128, 'o motor escalou gente de verdade no caso grande', `escalou ${total}`);
 
 console.log(falhas ? `\nengine-tempo: ${falhas} falha(s) em ${feitas}` : `\nengine-tempo: ${feitas}/${feitas} ok`);
 process.exit(falhas ? 1 : 0);
