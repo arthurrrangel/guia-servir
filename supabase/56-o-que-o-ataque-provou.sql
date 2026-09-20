@@ -472,6 +472,7 @@ do $conf$
 declare
   v_eq uuid; v_eq2 uuid; v_p uuid; v_culto uuid;
   ok int := 0; falhou int := 0; v_regua_ruim int := 0; msg text := '';
+  v_culto_meu boolean := false; v_data_teste date; v_i int;
   procedure_ret record;
 begin
   -- ---------------------------------------------------------------- cenário
@@ -490,11 +491,37 @@ begin
   insert into papeis (pessoa_id, equipe_id, papel) values (v_p, v_eq, 'lider')
     on conflict do nothing;
 
-  -- um domingo futuro qualquer, criado FORA da identidade de teste
-  insert into cultos (data) values (date_trunc('week', current_date + 40)::date + 6)
-    on conflict do nothing;
-  select id into v_culto from cultos
-   where data = date_trunc('week', current_date + 40)::date + 6 and evento is null;
+  /* UM DOMINGO DE TESTE QUE SÓ EXISTE SE EU O CRIAR, E QUE SOME NO FIM.
+
+     A primeira versão fazia `insert ... on conflict do nothing` e depois lia
+     o id de volta. Duas consequências que só apareceram quando eu simulei a
+     aplicação num banco com dados:
+
+       · num banco onde JÁ EXISTE culto naquela data, o `on conflict` não
+         cria nada e `v_culto` passa a apontar para o CULTO DE VERDADE. O
+         caso 3 então gravava `inicio = '18:00'` nele: uma migração mudando
+         o horário de um domingo real da igreja;
+
+       · num banco onde não existe, a linha ficava para trás. A limpeza
+         apagava `cultos where equipe_id in (...)`, e culto regular tem
+         `equipe_id` NULO, então ela não alcançava. Medido: depois de aplicar
+         as 57 num banco do zero, sobrava um `2026-11-01` órfão.
+
+     Migração que deixa linha ou mexe em dado real não é conferência, é
+     efeito colateral. O `returning` diz se a linha é MINHA; se não for, o
+     teste procura outra data em vez de encostar no que é da igreja. */
+  v_culto := null;
+  for v_i in 0..12 loop
+    v_data_teste := date_trunc('week', current_date + 40 + v_i * 7)::date + 6;
+    if not exists (select 1 from cultos c where c.data = v_data_teste) then
+      insert into cultos (data) values (v_data_teste) returning id into v_culto;
+      v_culto_meu := true;
+      exit;
+    end if;
+  end loop;
+  if v_culto is null then
+    raise exception 'A CONFERENCIA DA 56 NAO ACHOU DATA LIVRE: os 13 domingos a partir de % ja tem culto. Nao vou mexer num culto de verdade para testar.', date_trunc('week', current_date + 40)::date + 6;
+  end if;
 
   -- ------------------------------------------------- 1. o ataque da data
   begin
@@ -605,7 +632,16 @@ begin
   end if;
 
   -- ------------------------------------------------------------- limpeza
+  /* o culto de teste só é apagado se ele for MEU (ver o bloco do cenário).
+     `v_culto_meu` é a diferença entre limpar o que eu sujei e apagar um
+     domingo da igreja. */
   delete from cultos where equipe_id in (v_eq, v_eq2);
+  if v_culto_meu and v_culto is not null then
+    delete from escalacoes where culto_id = v_culto;
+    delete from culto_obs where culto_id = v_culto;
+    delete from plantoes where culto_id = v_culto;
+    delete from cultos where id = v_culto;
+  end if;
   delete from papeis where pessoa_id = v_p;
   delete from pessoas where id = v_p;
   delete from equipes where slug in ('conf56a','conf56b');
