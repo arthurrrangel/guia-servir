@@ -13,7 +13,7 @@ import { cont } from '@/lib/plural';
    ============================================================================= */
 import { createClient } from '@supabase/supabase-js';
 import {
-  addDias, cultosAte, cultosDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
+  addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
   tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
@@ -216,7 +216,27 @@ async function rodar(req: Request) {
   // ---------- DIA 26: montar o mês de cada equipe ----------
   if (fazMes) {
     const prox = proxMes(iso);
-    const dias = cultosDoMes(prox.ano, prox.mes);   // domingos + sábados do Follow
+    /* OS DIAS SAEM DE DENTRO DO LAÇO, E O MOTIVO É UM DEFEITO MEDIDO — 20/09.
+
+       Aqui era `cultosDoMes(prox.ano, prox.mes)`, calculado UMA vez antes do
+       laço: aritmética pura de domingos mais sábados de Follow. Só que
+       `gerarMes` usa `diasDoMes` (engine.ts:962), que inclui os eventos
+       esporádicos da 54. As duas listas divergiam, e a divergência custava
+       duas coisas de uma vez:
+
+         · o dia do evento era SORTEADO e nunca GRAVADO, porque o laço de
+           gravação percorria `dias` (sem evento). Medido com um evento numa
+           quinta: três pessoas escaladas em memória, zero linhas no banco;
+         · e quem foi escalado no evento GASTOU a vaga do mês mesmo assim
+           (`escalasNoMes` conta o dia do evento, engine.ts:381), então um
+           domingo terminava vazio por causa de um dia que nunca existiu.
+           Medido: mesma equipe, mesmo mês, só criando o evento — o domingo
+           31/10 passou de completo para uma vaga aberta.
+
+       `diasDoMes` precisa do estado, que só existe depois de
+       `estadoDaEquipe`. Por isso a lista passa a ser por equipe: cada
+       ministério tem os seus eventos, e é assim que a tela já fazia
+       (app/escala/page.tsx:91). */
     const resumo: any[] = [];
     const blocos: { id: string; nome: string; vagas: number; texto: string }[] = [];
     const falhas: string[] = [];
@@ -249,6 +269,8 @@ async function rodar(req: Request) {
            · alguns montados     → não monta sozinho, mas AVISA, porque
              completar por conta própria re-sortearia o que o líder pôs à mão
              (`gerarDia` só respeita o que está travado ou confirmado). */
+      /* por equipe, porque os eventos são de UM ministério (migração 54) */
+      const dias = diasDoMes(S, prox.ano, prox.mes);
       const montados = dias.filter(d => Object.values(S.escalas[d]?.slots || {}).some((x: any) => x?.vid));
       /* a regra mora em lib/engine.ts (`decisaoDoRobo`), com o motivo escrito
          e com teste: ela é o que segura a divergência de gravação explicada

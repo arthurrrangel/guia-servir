@@ -43,7 +43,9 @@ function fingeBanco(linhas = {}, recusa = null) {
       gte(col, v) { reg.gte.push({ col, v }); return eu; },
       in(col, vs) { reg.in.push({ col, n: (vs || []).length }); return eu; },
       maybeSingle() { return resposta(); },
-      order() { return resposta(); },
+      /* devolve o CONSTRUTOR, como o cliente de verdade: desde 20/09
+         `lerFuncoes` encadeia `.order('ordem').order('nome')` */
+      order() { return eu; },
       then(res) { return Promise.resolve(resposta()).then(res); },
     };
     const resposta = () => {

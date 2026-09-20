@@ -7,7 +7,7 @@ import { Aviso, Escolha, Trabalhando } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  candidatos, cargaDoMes, cultosDoMes, diasDoMes, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
+  candidatos, cargaDoMes, cultosDoMes, diasDoMes, esqueceOsDias, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
 } from '@/lib/engine';
@@ -73,7 +73,22 @@ function Escala() {
     datas.map(d => [d, S.escalas[d] ? JSON.parse(JSON.stringify(S.escalas[d])) : null] as const);
   async function falhou(e: any, snap: ReturnType<typeof retrato>) {
     const est = await recarregar();
-    if (!est) for (const [d, dia] of snap) { if (dia) S.escalas[d] = dia; else delete S.escalas[d]; }
+    if (!est) {
+      for (const [d, dia] of snap) { if (dia) S.escalas[d] = dia; else delete S.escalas[d]; }
+      /* O CACHE DE DATAS PRECISA SABER QUE `S.escalas` MUDOU POR FORA.
+
+         `lib/engine.ts` documenta esta linha como o chamador de
+         `esqueceOsDias`, com o código copiado no comentário — e o chamador
+         não existia. O cache só reconta quando o NÚMERO de dias muda; trocar
+         um dia por outro mantém a contagem e o cache fica apontando para uma
+         lista velha. Medido: com três dias e uma troca (apaga um, entra
+         outro), `paradoGeral` foi de 7 para 24 e `escalasNoMes` contou 2 em
+         vez de 3 — ou seja, a pessoa passa do teto do mês sem nada quebrar.
+
+         Hoje o SELO salva por acidente, porque todo caminho até aqui passou
+         antes por `gerarDia`. Proteção por acidente não é proteção. */
+      esqueceOsDias(S);
+    }
     aviso(aviseHumano(e, 'salvar'));
   }
 

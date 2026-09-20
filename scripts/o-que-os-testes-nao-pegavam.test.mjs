@@ -65,7 +65,9 @@ function fingeBanco({ quebrada = null } = {}) {
       select() { return eu; }, eq() { return eu; }, gte() { return eu; },
       or() { return eu; }, in() { return eu; },
       maybeSingle() { return resposta(); },
-      order() { return resposta(); },
+      /* devolve o CONSTRUTOR, como o cliente de verdade: desde 20/09
+         `lerFuncoes` encadeia `.order('ordem').order('nome')` */
+      order() { return eu; },
       then(res) { return Promise.resolve(resposta()).then(res); },
     };
     const resposta = () => {

@@ -165,6 +165,27 @@ const PORBANCO: Tradutor[] = [
   /* eu_dados e companhia */
   [/^Link invalido/i,
    () => 'Esse link não é válido. Peça o seu link de novo para quem organiza a igreja.'],
+
+  /* ---- 20/09/2026: CINCO MENSAGENS QUE CHEGAVAM CRUAS NA TELA ----------
+
+     Auditoria de backend. O repasse de `P0001` mais abaixo evita o genérico,
+     mas entrega o texto de máquina literal, sem acento e às vezes com nome de
+     coluna do banco. Duas destas aparecem na tela do VOLUNTÁRIO (/eu/<token>),
+     onde não há líder por perto para traduzir.
+
+     O acento é o detalhe que mais engana: o banco de produção lança
+     `Link inválido` COM acento (01-schema-inicial.sql:185), e o padrão acima
+     casa `invalido` SEM acento. Como `.` não casa acento e o `i` do regex não
+     normaliza, o repasse cru vencia. Por isso `bruto` passa a ser comparado
+     sem acento (ver `semAcento` no corpo de `aviseHumano`). */
+  [/^Voce nao e o lider deste culto/i,
+   () => 'Só quem organiza este ministério pode relatar este culto.'],
+  [/^Resposta invalida/i,
+   () => 'Essa resposta não vale. Responda se você pode ou não pode servir no dia.'],
+  [/^funcao sem nome/i,
+   () => 'Todo posto precisa de um nome. Preencha o nome antes de salvar.'],
+  [/^exige_sexo invalido/i,
+   () => 'O posto só aceita "qualquer pessoa", "só homens" ou "só mulheres". Escolha uma das três.'],
 ];
 
 /* Postgres devolve código; PostgREST devolve outro. Os que a gente realmente
@@ -230,8 +251,23 @@ export function humano(e: unknown, oQueFazia?: string): ErroHumano {
 
      `PORBANCO` só tem padrões ancorados em texto nosso, então ele não
      rouba nada de `PORCODIGO`: o que ele não reconhecer cai adiante igual. */
+  /* O MESMO RECADO CHEGA COM E SEM ACENTO, E ISSO JÁ CUSTOU UMA TRADUÇÃO.
+
+     `eu_dados` lança `Link inválido` com acento em 01-schema-inicial.sql:185,
+     e o retrato do banco (00-ESTADO-REAL-DO-BANCO.sql:228) traz a mesma frase
+     sem acento. O padrão daqui casava só a versão sem, então metade dos
+     bancos mostrava a frase traduzida e a outra metade mostrava o texto do
+     Postgres. Comparar sem acento resolve os dois de uma vez, e não custa
+     nada para os padrões que já casavam: nenhum deles depende de acento para
+     ser específico. */
+  const semAcento = (t: string) => t.normalize('NFD').replace(/\p{M}/gu, '');
+  const achatado = semAcento(bruto);
+
   let texto: string | undefined;
-  for (const [re, f] of PORBANCO) { const m = bruto.match(re); if (m) { texto = f(m); break; } }
+  for (const [re, f] of PORBANCO) {
+    const m = bruto.match(re) || achatado.match(re);
+    if (m) { texto = f(m); break; }
+  }
   if (!texto && codigo) texto = PORCODIGO[codigo];
   /* P0001 é `raise exception` nosso, escrito em português para gente ler.
      Passa como veio, só com o ponto final garantido. */

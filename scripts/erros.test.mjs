@@ -176,7 +176,32 @@ for (const [code, message, esperado] of DO_GATILHO) {
     'e um 42501 sem frase nossa continua caindo na frase do código', g.texto);
 }
 
-const EXTRA = CODIGOS_DO_EVENTO.length * 2 + DO_GATILHO.length * 3 + 2;
+/* 5) AS CINCO QUE CHEGAVAM CRUAS — 20/09/2026.
+
+      Auditoria de backend. O repasse de P0001 evitava o genérico e entregava
+      o texto de máquina: sem acento, e num caso com nome de coluna do banco
+      (`exige_sexo invalido`) na tela de Ajustes. Duas delas aparecem na tela
+      do VOLUNTÁRIO, que não tem a quem perguntar.
+
+      O caso do `Link inválido` é o que prova o conserto de acento: o banco de
+      produção lança COM acento e o padrão casava só SEM. */
+const CRUAS = [
+  ['Voce nao e o lider deste culto', /organiza/i],
+  ['Resposta invalida',              /pode servir/i],
+  ['funcao sem nome',                /nome/i],
+  ['exige_sexo invalido',            /homens|mulheres/i],
+  ['Link inválido',                  /link/i],
+  ['Link invalido',                  /link/i],
+];
+for (const [message, esperado] of CRUAS) {
+  const r = humano({ code: 'P0001', message }, 'salvar');
+  ok(esperado.test(r.texto), `"${message}" vira frase de gente`, r.texto);
+  ok(r.texto !== message && !r.texto.startsWith(message),
+     `"${message}" não é repassada crua`, r.texto);
+  ok(!/exige_sexo|_id\b/.test(r.texto), `"${message}" não vaza nome de coluna`, r.texto);
+}
+
+const EXTRA = CODIGOS_DO_EVENTO.length * 2 + DO_GATILHO.length * 3 + 2 + CRUAS.length * 3;
 
 const total = 31 + 6 + EMAILS.length + EXTRA;
 if (falhas) { console.log(`erros: ${falhas} falha(s) em ${total}`); process.exit(1); }

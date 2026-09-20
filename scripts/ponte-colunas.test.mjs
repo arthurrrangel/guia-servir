@@ -36,7 +36,16 @@ function fingeBanco({ recusa = [], erroDuro = null } = {}) {
       or() { return eu; },
       in() { return eu; },
       maybeSingle() { return resposta(); },
-      order() { return resposta(); },
+      /* `.order()` DEVOLVE O CONSTRUTOR, e não a resposta.
+
+         Era `return resposta()`, e isso funcionava só enquanto ninguém
+         encadeasse dois. Em 20/09 `lerFuncoes` passou a pedir
+         `.order('ordem').order('nome')` (desempate de `funcoes.ordem`, que
+         não tem unique), e o dublê estourou com "order is not a function" —
+         ou seja, o dublê não era mais um dublê do cliente de verdade, que
+         devolve o construtor e só resolve no `await`. Dublê que diverge do
+         original testa o dublê. */
+      order() { return eu; },
       then(res) { return Promise.resolve(resposta()).then(res); },
     };
     const resposta = () => {

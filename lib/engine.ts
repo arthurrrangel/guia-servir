@@ -474,8 +474,28 @@ export const vol = (S: Estado, id: string | null) => S.voluntarios.find(v => v.i
 export const nomeDe = (S: Estado, id: string | null) => vol(S, id)?.nome ?? '';
 export const metaFuncao = (S: Estado, nome: string) =>
   S.funcoes.find(f => f.nome === nome) || { nome, simultanea: true, ordem: 99, ativa: true };
+/* O DESEMPATE POR NOME NÃO É ENFEITE — 20/09/2026.
+
+   `funcoes.ordem` é `int not null default 0` e NÃO tem unique. Empate é
+   alcançável pela tela: `app/ajustes/page.tsx` cria posto novo com
+   `ordem: S.funcoes.length + 1`, então apagar um posto e criar outro produz
+   dois postos com a mesma ordem. A migração 47 também empurrou ordens em
+   bloco.
+
+   Com empate e sem desempate, a ordem final era a que o banco devolveu — que
+   é ordem de heap e muda sozinha a cada UPDATE. E `gerarDia` usa a POSIÇÃO
+   no array para desempatar prioridade entre postos, então "Sortear de novo"
+   com os mesmos dados dava escalas diferentes, e qual posto ficava vazio
+   dependia de qual linha veio primeiro. Medido: mesma equipe, mesmas pessoas,
+   só trocando a ordem física das linhas, a mesma pessoa caiu em PROJEÇÃO numa
+   execução e em ILUMINAÇÃO na outra.
+
+   `lerFuncoes` (lib/ponte.ts) pede `.order('ordem').order('nome')` pelo mesmo
+   motivo; aqui o desempate é repetido porque o motor também roda sobre estado
+   montado à mão, nos testes e no cron. */
 export const funcoesAtivas = (S: Estado) =>
-  S.funcoes.filter(f => f.ativa !== false).sort((a, b) => a.ordem - b.ordem);
+  S.funcoes.filter(f => f.ativa !== false)
+    .sort((a, b) => a.ordem - b.ordem || (a.nome < b.nome ? -1 : a.nome > b.nome ? 1 : 0));
 
 /* A REGRA DO PRÉDIO, EM UM LUGAR SÓ.
    Todo caminho que decide "esta pessoa pode ficar nesta vaga" passa por aqui:

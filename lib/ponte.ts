@@ -394,7 +394,11 @@ const FUNCOES_COMPLETAS = [FUNCOES_ESSENCIAIS, ...FUNCOES_OPCIONAIS].join(',');
 
 async function lerFuncoes(s: any, equipeId: string) {
   const pede = (cols: string) =>
-    s.from('funcoes').select(cols).eq('equipe_id', equipeId).order('ordem');
+    /* `.order('nome')` como desempate: `funcoes.ordem` não tem unique e a
+       tela consegue criar dois postos com a mesma ordem. Sem isso a ordem
+       vinha do heap do Postgres e o sorteio mudava de resultado entre duas
+       execuções com os mesmos dados (ver `funcoesAtivas` em lib/engine.ts). */
+    s.from('funcoes').select(cols).eq('equipe_id', equipeId).order('ordem').order('nome');
   const r = await pede(FUNCOES_COMPLETAS);
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
   const r2 = await pede(FUNCOES_ESSENCIAIS);
@@ -430,8 +434,26 @@ export async function linhasDaEquipe(
   ]);
   /* config pode vir nula por RLS (quem logou sem estar na allowlist) — isso é
      informação, não falha. As outras três, se falharem, a tela não tem o que
-     mostrar e o erro precisa subir. */
-  const ruim = [funcoes, vols, cultos].find((r: any) => r?.error);
+     mostrar e o erro precisa subir.
+
+     20/09/2026: "NULA POR RLS" E "A LEITURA FALHOU" NÃO SÃO A MESMA COISA.
+
+     Esta linha era `[funcoes, vols, cultos]` e `cfg` ficava inteiramente de
+     fora, com o comentário acima como justificativa. Só que RLS negando
+     devolve `{data: null, error: null}`, enquanto um 5xx passageiro devolve
+     `error` — e os dois viravam `config: null`. `montarEstado` então monta o
+     padrão, jogando fora `limitePadrao`, `janelaCarga`, `plantaoQtd` e
+     `horasTardio` da equipe.
+
+     O estrago não é de tela: é do robô das 3h. Medido com o Connect, que usa
+     `limitePadrao: 4` e `plantaoQtd: 3` — com a leitura de `config` falhando,
+     o mês sai sorteado com teto 2 e um plantão só, e o e-mail diz que está
+     montado. Indistinguível de um mês legitimamente apertado.
+
+     PGRST116 é "nenhuma linha", que é o caso legítimo do `maybeSingle` e
+     continua passando. O resto sobe junto com as outras três. */
+  const cfgRuim = cfg?.error && cfg.error.code !== 'PGRST116' ? cfg : null;
+  const ruim = [funcoes, vols, cultos, cfgRuim].find((r: any) => r?.error);
   if (ruim?.error) throw ruim.error;
 
   const funcaoIds = (funcoes.data || []).map((f: any) => f.id);
