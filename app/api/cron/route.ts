@@ -371,7 +371,6 @@ async function rodar(req: Request) {
   /* 4 dias a partir da quinta alcança o sábado do Follow e o domingo. Mirar
      só no domingo deixava o Follow sem cobrança nenhuma. */
   if (fazCobranca) {
-    const alvos = cultosAte(iso, 4);
     const porEquipe: Record<string, { nome: string; partes: string[] }> = {};
     const resumo: any[] = [];
     const falhas: string[] = [];
@@ -384,8 +383,38 @@ async function rodar(req: Request) {
       try { estados.set(e.id, await estadoDaEquipe(s, e)); }
       catch (err) { falhas.push(`${e.nome}: não carregou o estado (${String((err as Error)?.message || err).slice(0, 100)})`); }
     }
+
+    /* O ROBÔ DE QUINTA NUNCA COBRAVA UM EVENTO — 20/09/2026.
+
+       Esta linha era `const alvos = cultosAte(iso, 4)`, e `cultosAte` só
+       produz domingos e sábados de Follow: nunca um dia de evento. Ou seja, o
+       robô do dia 26 montava a escala do GUIA Empreendedor na quinta e, na
+       quinta anterior ao evento, ninguém era cobrado. E era silencioso: o
+       relatório do cron não mencionava o evento porque ele não estava na
+       lista.
+
+       É a mesma classe de divergência que o bloco do dia 26 já tinha
+       consertado, doze dias atrás, trocando `cultosDoMes` por `diasDoMes`
+       porque as duas listas discordavam. Aqui não tinha sido replicada.
+
+       Os dias de evento saem dos ESTADOS já carregados, um por equipe, e
+       entram na mesma janela de 4 dias. O laço de baixo já ignora dia que a
+       equipe não tem (`if (!dia) continue`), então o evento do Connect não
+       cobra ninguém do Louvor. */
+    const ate = addDias(iso, 4);
+    const alvos = [...new Set([
+      ...cultosAte(iso, 4),
+      ...[...estados.values()].flatMap(S => Object.keys(S.escalas)
+        .filter(d => S.escalas[d]?.evento && d >= iso && d <= ate)),
+    ])].sort();
+
     for (const data of alvos) {
-      const rotulo = tipoDoDia(data) === 'follow' ? `Follow sáb ${fmtDia(data)}` : `domingo ${fmtDia(data)}`;
+      /* o rótulo do evento sai do estado de quem o tem; se ninguém tiver
+         (não acontece, mas o tipo permite), cai no rótulo do dia da semana */
+      const nomeEvento = [...estados.values()]
+        .map(S => S.escalas[data]?.evento).find(Boolean);
+      const rotulo = nomeEvento ? `${nomeEvento} · ${fmtDia(data)}`
+        : tipoDoDia(data) === 'follow' ? `Follow sáb ${fmtDia(data)}` : `domingo ${fmtDia(data)}`;
       for (const e of equipes) {
         const S = estados.get(e.id);
         if (!S) continue;
@@ -397,7 +426,9 @@ async function rodar(req: Request) {
         resumo.push({ equipe: e.nome, culto: rotulo, pendentes: pend.length, vagas: vagas.length });
         const linhas = pend.map(([fn, sl]: any) => {
           const v = S.voluntarios.find(x => x.id === sl.vid);
-          const texto = `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo'} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
+          const onde = nomeEvento ? `o ${nomeEvento}`
+            : tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo';
+          const texto = `${(v?.nome || '').trim()}, você está na escala d${onde} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
           const zap = linkZap(v?.tel, texto);
           return `• ${nomeDe(S, sl.vid)} — ${fn}\n  ${zap ? `1 toque: ${zap}` : `sem telefone: ${SITE}/eu/${v?.token}`}`;
         }).join('\n\n');

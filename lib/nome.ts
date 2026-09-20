@@ -35,3 +35,24 @@ export function emNome(n: string | null | undefined): string {
     })
     .join(' ');
 }
+
+/* =============================================================================
+   A RÉGUA DO TELEFONE, EM UM LUGAR SÓ — 20/09/2026.
+
+   A lei mora no banco: `supabase/06-auto-cadastro.sql:88` e as oito migrações
+   que copiaram a mesma linha recusam com TELEFONE_INVALIDO fora de 10..13
+   dígitos. Três lugares no app repetiam a régua à mão, e um deles discordava:
+
+     lib/pedido-pequena-guia.ts:29      10..13   ✓
+     app/time/page.tsx:118              10..13   ✓
+     app/servir/[slug]/cadastro         >= 10    ✗ sem teto
+
+   Quem digitava 14 ou mais no cadastro público via "Continuar" ligado,
+   preenchia os três passos e só tomava TELEFONE_INVALIDO no envio final, com
+   o formulário inteiro para trás. A única das quatro que mentia.
+
+   Os limites: 10 é DDD + oito dígitos (fixo antigo); 13 é 55 + DDD + nove. */
+export const TEL_MIN = 10;
+export const TEL_MAX = 13;
+export const telefoneOk = (digitos: string) =>
+  digitos.length >= TEL_MIN && digitos.length <= TEL_MAX;

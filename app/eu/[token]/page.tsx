@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES } from '@/lib/engine';
+import { MESES, fmtDia } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -305,28 +305,45 @@ export default function Eu() {
     }));
   })();
 
-  async function possoNoMes(dias: string[]) {
+  /* "POSSO EM TODOS" CUSTAVA QUATRO SEGUNDOS, E PARAVA NO MEIO — 20/09/2026.
+
+     `eu_proximos_domingos` devolve 60 dias de domingos mais os sábados de
+     Follow: 15 a 16 datas. Isto era um laço `for` com `await` dentro, uma RPC
+     por data, uma atrás da outra. Num 4G ruim (RTT de 220 ms), 16 RPCs em
+     série mais a recarga dão 4,0 segundos com o botão travado e sem sinal de
+     progresso — e quem toca de novo dispara tudo outra vez.
+
+     Pior que a lentidão: o `break` no primeiro erro. Não há transação aqui,
+     então falhar na quarta de oito deixava três gravadas e cinco não, e a
+     pessoa que tocou um botão só tinha que descobrir sozinha quais.
+
+     Em paralelo, as 16 viagens viram uma onda: 4,0 s caem para 0,44 s. E
+     `allSettled` em vez de `break`: todas são tentadas, e a mensagem diz
+     QUANTAS e QUAIS datas não entraram, em vez de deixar a pessoa adivinhar.
+
+     O certo mesmo é uma RPC `eu_disponibilidade_lote(token, datas[], resposta)`
+     que faça o laço dentro de UMA transação no banco: 16 viagens viram 1, e
+     "gravou parte" deixa de existir. Fica anotado como a próxima migração de
+     Escalas; esta correção é a que cabe do lado de cá sem mexer no banco. */
+  async function marcarPosso(dias: string[], oQue: string) {
     if (!dias.length) return;
     setOcupado('todos'); setErro('');
-    for (const d of dias) {
-      const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' });
-      if (error) { setErro(aviseHumano(error, 'salvar o mês')); break; }
+    const rs = await Promise.allSettled(dias.map(d =>
+      sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' })
+        .then((r: any) => { if (r?.error) throw r.error; return r; })));
+    const ruins = rs.map((r, i) => ({ r, d: dias[i] })).filter(o => o.r.status === 'rejected');
+    if (ruins.length) {
+      const e0 = (ruins[0].r as PromiseRejectedResult).reason;
+      const quais = ruins.map(o => fmtDia(o.d)).join(', ');
+      setErro(`${aviseHumano(e0, oQue)} Não entraram: ${quais}.`);
     }
     await carregar(false);
     setOcupado('');
   }
 
-  async function possoTodos() {
-    const faltando = domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d));
-    if (!faltando.length) return;
-    setOcupado('todos'); setErro('');
-    for (const d of faltando) {
-      const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' });
-      if (error) { setErro(aviseHumano(error, 'salvar tudo')); break; }
-    }
-    await carregar(false);
-    setOcupado('');
-  }
+  const possoNoMes = (dias: string[]) => marcarPosso(dias, 'salvar o mês');
+  const possoTodos = () =>
+    marcarPosso(domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d)), 'salvar tudo');
 
   /* ------------------------------------------------------------ os estados
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em

@@ -1,3 +1,34 @@
+/* =============================================================================
+   ESTE ARQUIVO NÃO É UMA MIGRAÇÃO, E APLICÁ-LO DESFAZ CORREÇÕES — 20/09/2026.
+
+   Ele é um RETRATO do banco em agosto, tirado para leitura. Mas ele é feito
+   de ~25 `CREATE OR REPLACE FUNCTION` com assinatura IDÊNTICA à atual, então
+   o Postgres aceita todos em silêncio e o banco anda para trás. Os dois
+   piores:
+
+     `lidera_equipe(uuid)` volta ao corpo pré-33: só a tabela `lideres`, SEM
+     `papeis`. Todo admin cujo papel vem de `papeis` perde acesso na hora, em
+     toda RLS do sistema.
+
+     `salvar_dia(...)` volta ao corpo pré-54, com o `on conflict (data)` que a
+     54 provou estourar 42P10 desde que eventos esporádicos existem.
+
+   Nenhum dos dois scripts de teste o enxerga: os dois filtram com
+   `grep -v '00-ESTADO'`. Ou seja, ele era a única parte do diretório
+   `supabase/` sem nenhuma guarda, nem automática nem escrita.
+
+   A tranca abaixo é `exige_versao_ate(0)`: num banco com régua, ela SEMPRE
+   recusa. Para ler o conteúdo, abra o arquivo; para reaplicar de propósito
+   (recuperação de desastre, banco vazio), apague estas linhas sabendo o que
+   está fazendo.
+   ============================================================================= */
+
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(0);
+  end if;
+end $tranca$;
+
 -- ===== FUNÇÕES =====
 CREATE OR REPLACE FUNCTION public._tmp_get()
  RETURNS text

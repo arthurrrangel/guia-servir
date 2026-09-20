@@ -230,8 +230,26 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
    só as essenciais e a tela continua de pé, com a informação que falta
    aparecendo como "não sei" em vez de derrubar o produto. Degradar é melhor
    que morrer — principalmente numa lista de colunas que vai crescer de novo. */
+/* TRÊS COLUNAS SAÍRAM DAQUI EM 20/09, E O MOTIVO É O PRÓPRIO PARÁGRAFO ACIMA.
+
+   A lista estava assim:
+     'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email'
+
+   `criado_em` e `email` NINGUÉM LÊ. `montarEstado`, logo no começo deste
+   arquivo, mapeia id, nome, telefone, ativo, limite_mes, token, conferido e
+   sexo — e mais nada. Nenhuma tela lê as outras duas (o `criado_em` que
+   aparece em /painel/candidaturas é da tabela `candidaturas`).
+
+   ESSENCIAL é a lista SEM REDE: se o banco recusar qualquer uma delas, a
+   consulta não degrada, o erro sobe e Painel, Escala e Time caem juntos. Era
+   o apagão de 18/09 armado de novo, em duas colunas que o produto não usa.
+   Um `revoke` acidental em `voluntarios.email` derrubaria a tela do líder
+   inteira para não entregar nada.
+
+   `equipe_id` fica: é a coluna do `.eq('equipe_id', equipeId)` logo abaixo,
+   então sem ela a consulta não existe. */
 const COLUNAS_ESSENCIAIS =
-  'id,nome,telefone,ativo,limite_mes,token,criado_em,equipe_id,conferido,email';
+  'id,nome,telefone,ativo,limite_mes,token,equipe_id,conferido';
 const COLUNAS_OPCIONAIS = ['sexo'];
 const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
 
@@ -365,6 +383,41 @@ export const DIAS_DE_HISTORICO = -200;
    ============================================================================= */
 const POR_LOTE = 100;
 
+/* O SEGUNDO `.in()` TAMBÉM CONTA, E NINGUÉM TINHA CONTADO — 20/09/2026.
+
+   O parágrafo acima dimensionou o lote de 100 dizendo que "sobra espaço para
+   o segundo `.in('culto_id', ...)`". Medido, não sobra. Cada UUID custa
+   exatamente 39 bytes na URL (36 do id + 3 da vírgula codificada, `%2C`), e
+   o teto do nginx na frente do PostgREST é 8192:
+
+       100 voluntarios       -> 3.916 B
+       106 cultos (a janela de hoje: 200 dias para trás + 1 mês montado)
+                             -> 4.146 B
+       + base                -> 8.137 B = 99,3% do teto
+
+   Ou seja, o lote foi calculado como se o segundo `.in()` fosse de graça. O
+   dia em que um ministério passar de 100 pessoas, a primeira carga volta 414
+   e Painel, Escala e Time caem juntos — que é exatamente o modo de falha que
+   os lotes foram criados para evitar.
+
+   E o termo que CRESCE SOZINHO é o dos cultos, não o das pessoas: a janela é
+   `gte('data', hoje - 200 dias)` sem teto superior, então a lista engorda um
+   culto por semana sem ninguém mexer em nada.
+
+   POR QUE LOTEAR OS DOIS E NÃO TROCAR POR UM JOIN. O caminho mais elegante é
+   filtrar pela data do culto com o join embutido do PostgREST
+   (`select('*, cultos!inner(data)').gte('cultos.data', desde)`), e aí a URL
+   para de crescer com o número de cultos, para sempre. É o que este arquivo
+   deve fazer um dia. Não é o que ele faz hoje porque essa é uma mudança de
+   FORMA da consulta no caminho que carrega o app inteiro, e não há PostgREST
+   aqui para experimentá-la: o apagão de 18/09, documentado mais abaixo,
+   nasceu exatamente de uma mudança dessas aplicada sem experimentar.
+
+   Lotear as duas dimensões é aritmética do lado de cá, com a MESMA forma de
+   consulta que já está no ar há meses. O teto some do mesmo jeito, ao custo
+   de mais requisições — todas em paralelo, numa onda só. */
+const CULTOS_POR_LOTE = 60;   /* 60 x 39 B = 2.340 B, sobra folga para 100 pessoas */
+
 /* =============================================================================
    `funcoes` ERA A ÚLTIMA `select('*')` DA CARGA.
 
@@ -388,8 +441,12 @@ const POR_LOTE = 100;
    GRANT a tela tem que continuar de pé sem a regra do prédio em vez de morrer
    inteira.
    ============================================================================= */
-const FUNCOES_ESSENCIAIS = 'id,nome,simultanea,ordem,ativa,equipe_id,tipos,relata';
-const FUNCOES_OPCIONAIS = ['exige_sexo'];
+/* `relata` saiu da lista sem rede pelo mesmo motivo de `criado_em` e `email`
+   em `voluntarios`: ele é opcional na prática (o mapa logo acima trata
+   ausência) e não tem por que derrubar a tela inteira se for recusado.
+   `equipe_id` fica: é a coluna do `.eq()` desta própria consulta. */
+const FUNCOES_ESSENCIAIS = 'id,nome,simultanea,ordem,ativa,equipe_id,tipos';
+const FUNCOES_OPCIONAIS = ['exige_sexo', 'relata'];
 const FUNCOES_COMPLETAS = [FUNCOES_ESSENCIAIS, ...FUNCOES_OPCIONAIS].join(',');
 
 async function lerFuncoes(s: any, equipeId: string) {
@@ -409,14 +466,13 @@ async function lerFuncoes(s: any, equipeId: string) {
   return r2;
 }
 
-export async function emLotes(
-  ids: string[], consulta: (ids: string[]) => any,
-): Promise<{ data: any[]; error?: any; count?: number }> {
-  if (!ids.length) return { data: [] };
-  if (ids.length <= POR_LOTE) return await consulta(ids);
-  const lotes: string[][] = [];
-  for (let i = 0; i < ids.length; i += POR_LOTE) lotes.push(ids.slice(i, i + POR_LOTE));
-  const rs = await Promise.all(lotes.map(l => consulta(l)));
+const fatiar = (ids: string[], por: number) => {
+  const out: string[][] = [];
+  for (let i = 0; i < ids.length; i += por) out.push(ids.slice(i, i + por));
+  return out;
+};
+
+const juntar = (rs: any[]): { data: any[]; error?: any; count?: number } => {
   const ruim = rs.find((r: any) => r?.error);
   if (ruim) return ruim;
   /* `count` soma: cada lote traz o total DELE, e quem confere o corte é
@@ -426,6 +482,28 @@ export async function emLotes(
     data: rs.flatMap((r: any) => r?.data || []),
     ...(temCount ? { count: rs.reduce((a: number, r: any) => a + (r?.count || 0), 0) } : {}),
   };
+};
+
+export async function emLotes(
+  ids: string[], consulta: (ids: string[]) => any,
+): Promise<{ data: any[]; error?: any; count?: number }> {
+  if (!ids.length) return { data: [] };
+  if (ids.length <= POR_LOTE) return await consulta(ids);
+  return juntar(await Promise.all(fatiar(ids, POR_LOTE).map(l => consulta(l))));
+}
+
+/* Lote em DUAS dimensões, para as consultas que têm dois `.in()`.
+   Ver a nota de `CULTOS_POR_LOTE`: o segundo `.in()` ia inteiro dentro de
+   cada lote do primeiro, e era ele que empurrava a URL para o teto. */
+export async function emLotes2(
+  ids: string[], cultos: string[], consulta: (ids: string[], cultos: string[]) => any,
+): Promise<{ data: any[]; error?: any; count?: number }> {
+  if (!ids.length || !cultos.length) return { data: [] };
+  const a = fatiar(ids, POR_LOTE), b = fatiar(cultos, CULTOS_POR_LOTE);
+  if (a.length === 1 && b.length === 1) return await consulta(a[0], b[0]);
+  const pares: Promise<any>[] = [];
+  for (const x of a) for (const y of b) pares.push(consulta(x, y));
+  return juntar(await Promise.all(pares));
 }
 
 /* LISTA NO TETO NÃO É A LISTA, É "NÃO SEI" — 20/09/2026.
@@ -467,7 +545,6 @@ export function inteira(r: any, oQue: string) {
 export async function linhasDaEquipe(
   s: any, equipeId: string, desde: string, nomeEquipe = '',
 ): Promise<LinhasDoBanco> {
-  const vazio = { data: [] as any[] };
   const [funcoes, vols, cultos, cfg] = await Promise.all([
     lerFuncoes(s, equipeId),
     lerVoluntarios(s, equipeId),
@@ -523,13 +600,14 @@ export async function linhasDaEquipe(
   const [habs, indis, escs, plants, recados, disp] = (await Promise.all([
     emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids)),
     emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde)),
-    cultoIds.length
-      ? emLotes(funcaoIds, ids => s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cultoIds))
-      : vazio,
-    cultoIds.length
-      ? emLotes(volIds, ids => s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cultoIds))
-      : vazio,
-    cultoIds.length ? s.from('culto_obs').select('*', C).eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
+    emLotes2(funcaoIds, cultoIds, (ids, cs) =>
+      s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cs)),
+    emLotes2(volIds, cultoIds, (ids, cs) =>
+      s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cs)),
+    /* `culto_obs` não passava por lote nenhum: a lista inteira de cultos ia
+       na URL sempre, e era a consulta que estourava primeiro (207 cultos). */
+    emLotes2([equipeId], cultoIds, (ids, cs) =>
+      s.from('culto_obs').select('*', C).in('equipe_id', ids).in('culto_id', cs)),
     emLotes(volIds, ids => s.from('disponibilidade').select('*', C).in('voluntario_id', ids).gte('data', desde)),
   ])).map((r: any, i: number) =>
     inteira(r, ['habilidades', 'indisponibilidades', 'escalacoes', 'plantoes', 'recados do culto', 'disponibilidade'][i]));

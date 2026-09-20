@@ -92,7 +92,40 @@ export function comoOPdfChama(d: {
 
 /* ------------------------------------------------------------------ prazos */
 
-export const HOJE = () => new Date().toISOString().slice(0, 10);
+/* O "HOJE" DO SISTEMA VIRAVA ÀS 21H — 20/09/2026.
+
+   `new Date().toISOString()` é SEMPRE UTC, qualquer que seja o aparelho. A
+   igreja é do Rio (UTC-03). Das 21h às 23h59, `HOJE()` já respondia amanhã.
+
+   Medido com o instante 05/10/2026 21h30 no Rio:
+
+       HOJE() respondia ......... 2026-10-06
+       a data real no Rio era ... 2026-10-05
+       demanda com prazo para HOJE (05/10):
+         situacao()     -> 'atrasada'   (devia ser 'hoje')
+         diasDeAtraso() -> 1            (o prazo só vence à meia-noite)
+         prazo sugerido (categoria de 3 dias) -> 09/10 em vez de 08/10
+
+   Quem consome: /demandas (quatro lugares) e /demandas/d/[numero] (três).
+   Ou seja: toda noite, das 21h em diante, o painel inteiro ficava vermelho
+   três horas antes da hora, e quem abrisse o app depois do culto de domingo
+   à noite via as próprias demandas como atrasadas.
+
+   `app/api/cron/route.ts` já resolve isso certo, com `dataSP()`. Este é o
+   mesmo remédio.
+
+   O BANCO TEM O MESMO DESVIO, POR OUTRO CAMINHO: `current_date` aparece em
+   seis pontos de `supabase/50-demandas.sql` (`atrasada`, `dem_lista`,
+   `atraso_motivo` em `concluir`, e três em `dem_numeros`). O Supabase roda em
+   UTC e não há `set timezone` em migração nenhuma, então os dois lados erram
+   JUNTO — o que é consistente e igualmente errado. Trocar para
+   `(now() at time zone 'America/Sao_Paulo')::date` nos seis pontos fica para
+   a próxima migração de Demandas; mexer neles é mexer em `dem_lista` e
+   `dem_numeros`, que é cirurgia com conferência própria e não cabe de
+   carona. Enquanto isso, a tela para de errar sozinha. */
+export const HOJE = () => new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
+}).format(new Date());
 
 export function somaDias(iso: string, dias: number): string {
   const d = new Date(iso + 'T12:00:00Z');

@@ -6,6 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import {IcSeta} from '@/components/Icones';
 import { Logo } from '@/components/Marca';
 import { Tela, Carregando, Vazio } from '@/components/Tela';
+import { telefoneOk, TEL_MIN } from '@/lib/nome';
 
 /* =============================================================================
    QUERO SERVIR — o wizard  (§5 a §10)
@@ -199,7 +200,7 @@ export default function Servir() {
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
 
   const podeAvancar = (() => {
-    if (passo === 0) return nome.trim().includes(' ') && soTel(tel).length >= 10 && emailOk;
+    if (passo === 0) return nome.trim().includes(' ') && telefoneOk(soTel(tel)) && emailOk;
     if (passo === 1) return escolhidas.length > 0;
     if (passo === 2) return perguntas.every(q => !q.obrigatoria || (resp[q.id] || '').trim() !== '');
     return true;
@@ -217,7 +218,14 @@ export default function Servir() {
       const faltas = [];
       if (!nome.trim()) faltas.push('seu nome');
       else if (!nome.trim().includes(' ')) faltas.push('seu sobrenome');
-      if (soTel(tel).length < 10) faltas.push(soTel(tel).length ? 'o WhatsApp completo, com DDD' : 'seu WhatsApp com DDD');
+      /* o teto importa tanto quanto o piso: sem ele, quem digitava 14+ dígitos
+         via o botão ligado e só levava TELEFONE_INVALIDO no envio final, com
+         os três passos para trás. Ver `telefoneOk` em lib/nome.ts. */
+      if (!telefoneOk(soTel(tel))) {
+        faltas.push(!soTel(tel).length ? 'seu WhatsApp com DDD'
+          : soTel(tel).length < TEL_MIN ? 'o WhatsApp completo, com DDD'
+          : 'um WhatsApp com menos números (parece ter dígito a mais)');
+      }
       /* U+2060 (word joiner) depois do hífen: "e-mail" não quebra em "e-" /
          "mail" no rodapé estreito. Invisível, sem glifo — o hífen que não
          quebra (U+2011) dependeria da fonte licenciada ter o caractere. */

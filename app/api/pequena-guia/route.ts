@@ -37,10 +37,22 @@
    ============================================================================= */
 import { NextResponse } from 'next/server';
 import { validar } from '@/lib/pedido-pequena-guia';
+import { passe, deQuem } from '@/lib/teto-de-taxa';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
+  /* TETO DE TAXA (20/09/2026). Esta rota grava numa planilha do Google que é
+     o destino final e não tem desfazer em massa. O campo-isca pega robô
+     burro; isto pega o que passa por ela. Três por minuto: ninguém pede uma
+     Pequena Guia quatro vezes no mesmo minuto sem ser engano. */
+  const p = passe('pg:' + deQuem(req), 3, 60);
+  if (!p.ok) {
+    return NextResponse.json(
+      { ok: false, erro: 'Recebemos seu pedido. Espere um instante antes de enviar de novo.' },
+      { status: 429, headers: { 'Retry-After': String(p.esperar) } });
+  }
+
   let corpo: unknown;
   try { corpo = await req.json(); } catch { return NextResponse.json({ ok: false, erro: 'Pedido inválido.' }, { status: 400 }); }
 

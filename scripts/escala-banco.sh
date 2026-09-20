@@ -127,8 +127,21 @@ echo "3. A · os arquivos COM tranca RECUSAM, e recusam pelo motivo certo"
 # O passo 3b abaixo cobra exatamente essa propriedade, em vez de deixá-la como
 # buraco na cobertura.
 NOVO=$(echo "$ARQS" | tail -1)
+# OS ARQUIVOS SOLTOS TAMBÉM ENTRAM NA COBRANÇA — 20/09/2026.
+#
+# `00-ESTADO-REAL-DO-BANCO.sql` e `APLICAR-31-32.sql` redefinem, juntos, mais
+# de trinta funções com `create or replace` e assinatura idêntica — inclusive
+# `lidera_equipe`, `salvar_dia`, `salvar_funcoes`, `candidatar`, `inscrever` e
+# `criar_voluntario`. Colar qualquer um deles hoje anda o banco para trás em
+# silêncio. E nenhum dos dois era visto aqui: o de cima é filtrado pelo
+# `grep -v '00-ESTADO'` e o de baixo não casa com `[0-9][0-9]-*.sql`.
+#
+# Eles NÃO entram no passo 2 (não são migrações e não devem ser aplicados),
+# mas entram neste: a cobrança é "todo arquivo com tranca recusa, e recusa
+# pelo motivo certo", e ela vale para os dois.
+SOLTOS=$(ls "$B"/supabase/00-ESTADO-REAL-DO-BANCO.sql "$B"/supabase/APLICAR-31-32.sql 2>/dev/null)
 com=0; com_ruim=0
-for f in $ARQS; do
+for f in $ARQS $SOLTOS; do
   [ "$f" = "$NOVO" ] && continue
   grep -q 'exige_versao_ate' "$f" || continue
   com=$((com+1))

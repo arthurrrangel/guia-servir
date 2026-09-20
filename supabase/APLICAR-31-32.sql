@@ -34,6 +34,33 @@
 
 begin;
 
+
+do $tranca$ begin
+  /* ESTE ARQUIVO REAPLICA A 31 E A 32, E HOJE ISSO DESFAZ CORREÇÕES — 20/09.
+
+     Ele nasceu em 19/09 como "passo 2 de 2" e o texto acima convida a colar
+     tudo no SQL Editor e apertar Run. Desde então vieram a 48, a 51, a 55 e a
+     59, e todas mexeram em funções que este arquivo redefine com `or replace`
+     e assinatura idêntica. Colar isto hoje desfaz, em silêncio:
+
+       48 · `salvar_funcoes` perde `exige_sexo`  -> a regra do prédio para de
+            ser gravada
+       51 e 55 · o vazamento de token volta em `candidatar` e `inscrever`
+       59 · `criar_voluntario` volta a INVOKER  -> cadastrar voluntário
+            quebra de novo
+
+     `schema_versao_conferir()` pegaria `candidatar` e `inscrever` pelas
+     sondas; NÃO pegaria `salvar_funcoes` nem `criar_voluntario`.
+
+     O nome do arquivo não casa com `[0-9][0-9]-*.sql`, então nenhum dos dois
+     scripts de teste o vê. Esta tranca é a guarda que faltava: num banco que
+     já passou da 32, ela recusa antes de a transação escrever qualquer coisa. */
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(32);
+  end if;
+end $tranca$;
+
+
 /* =============================================================================
    31 — FECHA AS BRECHAS DA AUDITORIA DE 27/08/2026
 

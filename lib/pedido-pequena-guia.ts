@@ -6,6 +6,8 @@
    hora, o servidor valida de novo porque não confia em navegador. As duas
    pontas leem as mesmas regras daqui.
    ============================================================================= */
+
+import { telefoneOk } from './nome';
 export const DIAS_PEDIDO = ['Terça', 'Quarta', 'Quinta', 'Qualquer dia'] as const;
 export type DiaPedido = typeof DIAS_PEDIDO[number];
 
@@ -26,7 +28,8 @@ export function validar(corpo: unknown): { pedido: Pedido } | { erro: string; ca
   if (nome.length < 2 || nome.length > 80) return { erro: 'Escreva seu nome.', campo: 'nome' };
 
   const telefone = soDigitos(str('telefone'));
-  if (telefone.length < 10 || telefone.length > 13) return { erro: 'Telefone com DDD, por exemplo (21) 99999-9999.', campo: 'telefone' };
+  /* a régua mora em lib/nome.ts, e a lei mora no banco. Ver a nota lá. */
+  if (!telefoneOk(telefone)) return { erro: 'Telefone com DDD, por exemplo (21) 99999-9999.', campo: 'telefone' };
 
   const cep = soDigitos(str('cep'));
   if (cep.length !== 8) return { erro: 'CEP com oito números, por exemplo 22793-000.', campo: 'cep' };

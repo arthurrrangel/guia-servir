@@ -31,17 +31,35 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
   const p = paraSalvarDia(S, data, equipeId);
   if (!p) return;
 
-  /* 1. o culto do dia (a data é única) */
+  /* 1. o culto do dia.
+
+     A DATA DEIXOU DE SER ÚNICA NA 54, E ESTA FUNÇÃO NÃO SOUBE — 20/09/2026.
+     Até lá `cultos(data)` tinha unique completo e `.maybeSingle()` era
+     seguro. A 54 trocou por um unique PARCIAL (`where evento is null`) para
+     caber evento esporádico, e o unique dos eventos passou a ser
+     `(data, equipe_id)`. Ou seja: o mesmo dia pode ter uma linha regular e
+     uma linha de evento de cada equipe.
+
+     Duas equipes marcando evento na mesma quinta faziam este `.maybeSingle()`
+     receber duas linhas, devolver PGRST116 e estourar `salvarDia` — nenhuma
+     das duas conseguia salvar a escala daquele dia, com um erro cru de
+     PostgREST na tela. `lib/ponte.ts` já aplica o filtro de equipe na
+     leitura (`.or('equipe_id.is.null,equipe_id.eq.<id>')`); aqui não
+     aplicava. A própria 54 escreveu, em letras grandes, que "regra de acesso
+     que só existe no navegador é regra que a próxima tela esquece". Este
+     arquivo era a próxima tela. */
+  const doDia = () => s.from('cultos').select('id').eq('data', p.p_data)
+    .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`);
   let cultoId: string | undefined;
   {
-    const { data: c, error } = await s.from('cultos').select('id').eq('data', p.p_data).maybeSingle();
+    const { data: c, error } = await doDia().maybeSingle();
     if (error) throw error;
     cultoId = c?.id;
     if (!cultoId) {
       const { data: novo, error: e2 } = await s.from('cultos').insert({ data: p.p_data }).select('id').single();
       if (e2) {
         /* outro líder criou o mesmo dia neste instante: busca de novo */
-        const { data: c2, error: e3 } = await s.from('cultos').select('id').eq('data', p.p_data).maybeSingle();
+        const { data: c2, error: e3 } = await doDia().maybeSingle();
         if (e3 || !c2) throw e2;
         cultoId = c2.id;
       } else cultoId = novo.id;
@@ -92,11 +110,15 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
     if (plano.apagarPrimeiro) { await apagar(); }
     else { await inserir(); }
 
-    for (const a of plano.atualizar) {
+    /* em paralelo: são updates por `id`, sem ordem entre si. Em série, um dia
+       remontado com 9 postos custava 9 viagens de rede encadeadas — cerca de
+       2 segundos num 4G ruim, só nesta linha. */
+    const erros = (await Promise.all(plano.atualizar.map(async a => {
       const { id, ...patch } = a;
       const { error: e } = await s.from('escalacoes').update(patch).eq('id', id);
-      if (e) throw e;
-    }
+      return e;
+    }))).filter(Boolean);
+    if (erros.length) throw erros[0];
 
     if (plano.apagarPrimeiro) { await inserir(); }
     else { await apagar(); }
@@ -123,8 +145,37 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
   S.escalas[data].cultoId = cultoId;
 }
 
+/* "MONTAR A ESCALA DESTE MÊS" CUSTAVA 28 SEGUNDOS NUM 4G RUIM — 20/09/2026.
+
+   Em série, `salvarDia` por dia. Cada `salvarDia` já é uma cadeia de 6 a 9
+   viagens encadeadas, então 14 cultos davam 128 viagens uma atrás da outra.
+   Medido pela auditoria de performance, com RTT de 220 ms:
+
+       4 cultos ->  38 viagens ->  8,4 s
+       9 cultos ->  83 viagens -> 18,3 s
+      14 cultos -> 128 viagens -> 28,2 s
+
+   E não era atômico: cair na viagem 60 deixava meio mês gravado, que é
+   exatamente o estado "mês parcial" que `decisaoDoRobo` depois se recusa a
+   completar.
+
+   Os dias são independentes entre si — cultos diferentes, linhas diferentes.
+   Em paralelo, as 128 viagens viram 9 ondas: 28,2 s caem para ~2,4 s.
+
+   `Promise.allSettled` e não `Promise.all`: com `all`, o primeiro erro
+   abandona os outros dias no meio do caminho e a pessoa não fica sabendo
+   quais gravaram. Aqui todos terminam, e o erro que sobe é o primeiro, com a
+   data dentro dele — a tela recarrega do banco e mostra o que de fato ficou. */
 export async function salvarDias(S: Estado, datas: string[], equipeId: string) {
-  for (const d of datas) await salvarDia(S, d, equipeId);
+  const r = await Promise.allSettled(datas.map(d => salvarDia(S, d, equipeId)));
+  const ruim = r.map((x, i) => ({ x, d: datas[i] })).filter(o => o.x.status === 'rejected');
+  if (ruim.length) {
+    const e0: any = (ruim[0].x as PromiseRejectedResult).reason;
+    const quais = ruim.map(o => o.d).join(', ');
+    throw Object.assign(e0 instanceof Error ? e0 : new Error(String(e0?.message || e0)), {
+      message: `${e0?.message || e0} (nao gravou: ${quais})`,
+    });
+  }
 }
 
 /* MARCAR "FUROU" PRECISA DIZER DE QUEM.

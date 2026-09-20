@@ -15,6 +15,7 @@ import {
   Nivel, SEXOS, confirmada, filaDeConferencia, funcoesAtivas,
   msgConvite, pendenciasDeSexo, saudeDoTime,
 } from '@/lib/engine';
+import { telefoneOk } from '@/lib/nome';
 
 export default function Pagina() { return <Shell><Time /></Shell>; }
 
@@ -115,7 +116,7 @@ function Time() {
     const texto = campo.value.trim();
     if (texto === atual) return;
     const dig = texto.replace(/\D/g, '');
-    if (texto && (dig.length < 10 || dig.length > 13)) {
+    if (texto && !telefoneOk(dig)) {
       /* devolver o valor anterior é o que impede a tela de mentir: sem isso o
          campo continua mostrando o número recusado, e o líder sai da página
          achando que salvou. */

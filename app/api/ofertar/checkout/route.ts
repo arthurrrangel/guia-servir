@@ -15,6 +15,7 @@
 import { NextResponse } from 'next/server';
 import { criarCheckout } from '@/lib/checkout';
 import { MIN, MAX, valorInvalido } from '@/lib/oferta';
+import { passe, deQuem } from '@/lib/teto-de-taxa';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,6 +26,18 @@ export const dynamic = 'force-dynamic';
 const TXID_OK = /^[A-Za-z0-9]{1,25}$/;
 
 export async function POST(req: Request) {
+  /* TETO DE TAXA (20/09/2026). Esta rota faz o servidor chamar o adquirente
+     com a chave secreta da igreja e criar uma cobrança por requisição, sem
+     autenticação nenhuma. Seis por minuto é folgado para quem está ofertando
+     de verdade (a pessoa erra o valor, volta, tenta de novo) e fecha o laço
+     de `for` num terminal. Ver a nota inteira em lib/teto-de-taxa.ts. */
+  const p = passe('oferta:' + deQuem(req), 6, 60);
+  if (!p.ok) {
+    return NextResponse.json(
+      { ok: false, erro: 'Muitas tentativas seguidas. Espere um instante e tente de novo.' },
+      { status: 429, headers: { 'Retry-After': String(p.esperar) } });
+  }
+
   let corpo: unknown;
   try {
     corpo = await req.json();
