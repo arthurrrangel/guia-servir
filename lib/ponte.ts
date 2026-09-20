@@ -411,7 +411,7 @@ async function lerFuncoes(s: any, equipeId: string) {
 
 export async function emLotes(
   ids: string[], consulta: (ids: string[]) => any,
-): Promise<{ data: any[]; error?: any }> {
+): Promise<{ data: any[]; error?: any; count?: number }> {
   if (!ids.length) return { data: [] };
   if (ids.length <= POR_LOTE) return await consulta(ids);
   const lotes: string[][] = [];
@@ -419,7 +419,49 @@ export async function emLotes(
   const rs = await Promise.all(lotes.map(l => consulta(l)));
   const ruim = rs.find((r: any) => r?.error);
   if (ruim) return ruim;
-  return { data: rs.flatMap((r: any) => r?.data || []) };
+  /* `count` soma: cada lote traz o total DELE, e quem confere o corte é
+     `inteira()`, que compara com o que chegou. */
+  const temCount = rs.some((r: any) => typeof r?.count === 'number');
+  return {
+    data: rs.flatMap((r: any) => r?.data || []),
+    ...(temCount ? { count: rs.reduce((a: number, r: any) => a + (r?.count || 0), 0) } : {}),
+  };
+}
+
+/* LISTA NO TETO NÃO É A LISTA, É "NÃO SEI" — 20/09/2026.
+
+   Este arquivo já tinha aprendido que lista vazia por erro não é "ninguém":
+   um 5xx virava escalação vazia, o cron lia "o líder não montou" e
+   `salvar_dia` apagava o mês. A mesma frase vale para a lista CORTADA, e
+   esse caminho estava aberto.
+
+   O PostgREST do Supabase tem teto de linhas por resposta (`max-rows`, 1000
+   por padrão). Passando disso ele devolve 200, com menos linhas, e SEM erro.
+   Nenhuma das consultas daqui pedia contagem, então não havia como saber.
+   E `escalacoes` não tinha `order`, então o que caía fora era o que entrou
+   por último: justamente o mês que o líder acabou de montar.
+
+   Simulado com 62 cultos por 20 postos: 1240 linhas viram 1000, sem erro;
+   `montados` conta 0; `decisaoDoRobo` responde 'monta'; e o laço de
+   `salvar_dia` apaga a escala do mês inteiro e regrava sorteada. A rota
+   devolve 200 e o e-mail diz "montada".
+
+   Com `count: 'exact'`, o PostgREST informa o total no cabeçalho
+   Content-Range. Se chegou menos do que o total, a leitura está incompleta e
+   isso vira erro — porque toda decisão feita em cima dela estaria errada. */
+export function inteira(r: any, oQue: string) {
+  if (r?.error) return r;
+  const veio = (r?.data || []).length;
+  const total = typeof r?.count === 'number' ? r.count : null;
+  if (total !== null && veio < total) {
+    return { data: null, error: {
+      code: 'LEITURA_CORTADA',
+      message: `A leitura de ${oQue} veio cortada: ${veio} de ${total} linhas. `
+        + 'O banco limita o tamanho da resposta e o resto ficou de fora. '
+        + 'Nada foi decidido com essa lista pela metade.',
+    } };
+  }
+  return r;
 }
 
 export async function linhasDaEquipe(
@@ -475,18 +517,22 @@ export async function linhasDaEquipe(
 
      `habilidades` fica inteira de propósito — ela é por pessoa e por função,
      não cresce com o tempo, e é o que diz quem PODE fazer o quê. */
-  const [habs, indis, escs, plants, recados, disp] = await Promise.all([
-    emLotes(volIds, ids => s.from('habilidades').select('*').in('voluntario_id', ids)),
-    emLotes(volIds, ids => s.from('indisponibilidades').select('*').in('voluntario_id', ids).gte('data', desde)),
+  /* `{ count: 'exact' }` nas seis: é o que permite `inteira()` saber se a
+     resposta veio completa. Ver o comentário de `inteira` logo acima. */
+  const C = { count: 'exact' as const };
+  const [habs, indis, escs, plants, recados, disp] = (await Promise.all([
+    emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids)),
+    emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde)),
     cultoIds.length
-      ? emLotes(funcaoIds, ids => s.from('escalacoes').select('*').in('funcao_id', ids).in('culto_id', cultoIds))
+      ? emLotes(funcaoIds, ids => s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cultoIds))
       : vazio,
     cultoIds.length
-      ? emLotes(volIds, ids => s.from('plantoes').select('*').in('voluntario_id', ids).in('culto_id', cultoIds))
+      ? emLotes(volIds, ids => s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cultoIds))
       : vazio,
-    cultoIds.length ? s.from('culto_obs').select('*').eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
-    emLotes(volIds, ids => s.from('disponibilidade').select('*').in('voluntario_id', ids).gte('data', desde)),
-  ]);
+    cultoIds.length ? s.from('culto_obs').select('*', C).eq('equipe_id', equipeId).in('culto_id', cultoIds) : vazio,
+    emLotes(volIds, ids => s.from('disponibilidade').select('*', C).in('voluntario_id', ids).gte('data', desde)),
+  ])).map((r: any, i: number) =>
+    inteira(r, ['habilidades', 'indisponibilidades', 'escalacoes', 'plantoes', 'recados do culto', 'disponibilidade'][i]));
   /* 14/09/2026. ESTAS SEIS TAMBÉM SOBEM. Antes, um erro aqui virava lista
      vazia em silêncio — e lista vazia de `escalacoes` não é "ninguém escalado",
      é "não sei". A diferença custa o mês inteiro: o cron lê escalação vazia

@@ -240,6 +240,7 @@ async function rodar(req: Request) {
     const resumo: any[] = [];
     const blocos: { id: string; nome: string; vagas: number; texto: string }[] = [];
     const falhas: string[] = [];
+    const envios: any[] = [];
     for (const e of equipes) {
       /* 14/09/2026: a carga do estado agora LANÇA quando qualquer leitura
          falha (lib/ponte.ts). É de propósito: antes, escalação que não carregava
@@ -329,18 +330,32 @@ async function rodar(req: Request) {
       const vagas = r.reduce((a: number, x: any) => a + x.vagas.length, 0);
       resumo.push({ equipe: e.nome, vagas, erro: erro || undefined });
       if (erro) falhas.push(`${e.nome}: ${erro}`);
-      else blocos.push({ id: e.id, nome: e.nome, vagas,
-        texto: dias.map(d => msgEscala(S, d)).join('\n\n' + '-'.repeat(24) + '\n\n') });
-    }
-    /* falha de um ministério NÃO pode sumir: antes, o bloco dele simplesmente
-       não entrava no email e o líder achava que estava tudo montado */
-    /* um email por ministério, só para quem enxerga aquele ministério */
-    const envios: any[] = [];
-    for (const b of blocos) {
-      envios.push({ equipe: b.nome,
-        email: await enviar(paraEquipe(lideres, b.id),
-          `${b.nome} · escala de ${MESES[prox.mes - 1]} montada${b.vagas ? ` (${cont(b.vagas, 'vaga', 'vagas')} sem gente)` : ''}`,
-          `Revise no app (${SITE}) e cole no grupo:\n\n${b.texto}`) });
+      else {
+        /* O EMAIL SAI AQUI DENTRO, E NÃO DEPOIS DO LAÇO — 20/09/2026.
+
+           Auditoria de backend. Os blocos eram acumulados e enviados só no
+           fim, e essa ordem tinha um modo de falhar sem volta: o laço grava
+           no banco por equipe, mas o envio dependia do laço INTEIRO terminar.
+
+           Dez ministérios, corte por `maxDuration` no sexto:
+             1. cinco meses já estão gravados no banco;
+             2. o handler morre antes do envio: NENHUM email sai, nem os de
+                escala montada, nem o `[ATENÇÃO] não montado`;
+             3. no dia 27 `fazMes` é falso, então não há segunda chance;
+             4. no dia 26 seguinte, os cinco gravados caem em 'ja-tem' e o
+                email deles nunca acontece;
+             5. os cinco que faltaram ficam sem escala E sem alerta.
+
+           Ou seja, o único sinal que a plataforma sabe emitir sumia
+           justamente na falha que o `maxDuration` existe para tornar visível.
+           Enviando por equipe, um corte custa os que faltaram, não todos. */
+        const texto = dias.map(d => msgEscala(S, d)).join('\n\n' + '-'.repeat(24) + '\n\n');
+        blocos.push({ id: e.id, nome: e.nome, vagas, texto });
+        envios.push({ equipe: e.nome,
+          email: await enviar(paraEquipe(lideres, e.id),
+            `${e.nome} · escala de ${MESES[prox.mes - 1]} montada${vagas ? ` (${cont(vagas, 'vaga', 'vagas')} sem gente)` : ''}`,
+            `Revise no app (${SITE}) e cole no grupo:\n\n${texto}`) });
+      }
     }
     /* falha de um ministério NÃO pode sumir. O alerta vai para o organizador
        GLOBAL: é ele quem conserta, e só ele pode ver nome de outro ministério. */
