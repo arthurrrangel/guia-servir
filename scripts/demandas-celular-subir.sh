@@ -33,7 +33,16 @@ fi
 echo "2. banco $BANCO, migração e semente"
 su postgres -c "$PG/psql -h /tmp -U postgres -q -c 'drop database if exists $BANCO;' -c 'create database $BANCO;'" >/dev/null 2>&1
 cat > /tmp/_prep.sql <<'SQL'
-create extension if not exists pgcrypto;
+-- O PGCRYPTO FICA ONDE A PRODUCAO TEM: em `extensions`, fora do search_path
+-- curto das funcoes `security definer`. Medido no Supabase em 20/09/2026:
+-- pgcrypto 1.3 em `extensions`, search_path da sessao "$user", public,
+-- extensions. Com o pgcrypto em `public`, este harness ESCONDIA o defeito
+-- que a 58 conserta (gen_random_bytes invisivel dentro de dem_ajustar).
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+do $$ begin
+  execute format('alter database %I set search_path to public, extensions', current_database());
+end $$;
 do $$ begin create role anon;          exception when duplicate_object then null; end $$;
 do $$ begin create role authenticated; exception when duplicate_object then null; end $$;
 create schema if not exists auth;
@@ -47,7 +56,7 @@ SQL
 # `dem_lista` ANTIGA e as 252 conferencias de tela ficam verdes medindo a
 # versao errada — que e exatamente por que o teto foi tirado da 56 e posto
 # num arquivo so de Demandas. Um arquivo, um sistema.
-cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" > /tmp/_mig.sql
+cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" "$B/supabase/58-membro-novo-nasce-em-producao.sql" > /tmp/_mig.sql
 cp "$B/scripts/demandas-celular-semear.sql" /tmp/_seed.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_seed.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -f /tmp/_prep.sql"

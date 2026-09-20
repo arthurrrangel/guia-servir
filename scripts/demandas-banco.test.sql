@@ -256,6 +256,21 @@ select chk('admin cria categoria', 'true',
     'prazo_padrao_dias',3))->>'ok');
 select chk('e ela ja aparece no formulario', 'sim',
   case when public.dem_bases('tk-jovem')::text like '%Legenda de corte%' then 'sim' else 'nao' end);
+/* CADASTRAR PESSOA, que e o que a tela Ajustes faz primeiro e este arquivo
+   nunca tinha feito. Em producao o pgcrypto mora em `extensions`, fora do
+   search_path curto de `dem_ajustar`; ate a 58, este caso caia com
+   "function gen_random_bytes(integer) does not exist" -- e o harness, com o
+   pgcrypto em `public`, nao teria visto. Agora o harness espelha a producao
+   e este caso existe. */
+select chk('admin cadastra pessoa', 'true',
+  public.dem_ajustar('tk-admin','membro', jsonb_build_object(
+    'nome','Pessoa Cadastrada Pela Tela','papel','solicitante',
+    'setor_id',(select id from demandas.setores where slug='jovens')))->>'ok');
+select chk('e ela nasce com token de 24 hex', '24',
+  (select length(token)::text from demandas.membros where nome = 'Pessoa Cadastrada Pela Tela'));
+select chk('e o token e hexadecimal', 'sim',
+  (select case when token ~ '^[0-9a-f]{24}$' then 'sim' else 'nao' end
+     from demandas.membros where nome = 'Pessoa Cadastrada Pela Tela'));
 
 -- 16 ---------------------------------------------------------- travar ---
 select chk('travar sem motivo valido: recusa', 'MOTIVO_INVALIDO',

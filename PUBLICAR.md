@@ -186,5 +186,18 @@ publicou: você torceu.
 - **Escrever no banco pelo painel do Supabase.** A camada de segurança da
   sessão deixa ler (logs, SQL só de leitura, formulário de SMTP) às vezes, e
   barra DDL no SQL Editor sempre (setValue, Ctrl+A/Ctrl+C, os três jeitos,
-  16/09). Não contorne. As migrações em `supabase/` são do Arthur: ele cola
-  e roda. O site não pode depender de uma migração que ainda não rodou.
+  16/09; de novo em 20/09, com o motivo "Production Deploy"). Não contorne.
+  As migrações em `supabase/` são do Arthur: ele cola e roda. O site não
+  pode depender de uma migração que ainda não rodou.
+
+  O que o agente PODE fazer, e fez em 20/09, para o Arthur apertar um botão
+  só: deixar o script inteiro carregado numa aba do SQL Editor, com o hash
+  conferido no navegador contra o arquivo do repositório (o `Run` do editor
+  manda o texto como UMA consulta, logo uma transação: ou entra tudo, ou
+  nada). Antes disso, aplicar o MESMO script com `psql --single-transaction`
+  num banco local nascido de `andar-do-supabase.sql` + migrações até a
+  versão que a produção tem (`scripts/banco-do-zero.sh` mostra como). Em
+  20/09 foi assim que a 58 apareceu: o pgcrypto da produção mora em
+  `extensions`, e `dem_ajustar` não o alcançava. Ler o banco de produção
+  (`select` no SQL Editor) continua permitido e é o que separa "acho" de
+  "medi".

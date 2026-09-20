@@ -13,7 +13,16 @@ if ! su postgres -c "$PG/pg_ctl -D $D status" >/dev/null 2>&1; then
 fi
 su postgres -c "$PG/psql -h /tmp -U postgres -q -c 'drop database if exists dem;' -c 'create database dem;'" >/dev/null
 cat > /tmp/_prep.sql <<'SQL'
-create extension if not exists pgcrypto;
+-- O PGCRYPTO FICA ONDE A PRODUCAO TEM: em `extensions`, fora do search_path
+-- curto das funcoes `security definer`. Medido no Supabase em 20/09/2026:
+-- pgcrypto 1.3 em `extensions`, search_path da sessao "$user", public,
+-- extensions. Com o pgcrypto em `public`, este harness ESCONDIA o defeito
+-- que a 58 conserta (gen_random_bytes invisivel dentro de dem_ajustar).
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+do $$ begin
+  execute format('alter database %I set search_path to public, extensions', current_database());
+end $$;
 -- os dois papéis que o Supabase cria sozinho e um Postgres cru não tem
 do $$ begin create role anon;          exception when duplicate_object then null; end $$;
 do $$ begin create role authenticated; exception when duplicate_object then null; end $$;
@@ -24,7 +33,7 @@ create or replace function auth.jwt() returns jsonb language sql stable as $$
 $$;
 SQL
 B=$(cd "$(dirname "$0")/.." && pwd)
-cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" > /tmp/_mig.sql
+cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" "$B/supabase/58-membro-novo-nasce-em-producao.sql" > /tmp/_mig.sql
 cp "$B/scripts/demandas-banco.test.sql"   /tmp/_test.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_test.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -f /tmp/_prep.sql"
