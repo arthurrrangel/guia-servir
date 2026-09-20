@@ -69,8 +69,24 @@ function Ajustes() {
   const [geral, setGeral] = useState(false);
   const [gravando, setGravando] = useState(false);
   const [minhaSenha, setMinhaSenha] = useState('');
-  useEffect(() => { listarLideres().then(setLideres).catch(() => {}); }, []);
-  useEffect(() => { souOrganizadorGeral().then(setGeral).catch(() => {}); }, []);
+  /* DOIS `catch` VAZIOS QUE MENTIAM PARA O DONO DO SISTEMA — 20/09/2026.
+
+     Auditoria de tela. Com falha de rede na carga:
+       · `lideres` ficava `[]` — o cabeçalho passava a dizer "0 com acesso" e
+         a lista sumia, como se ninguém tivesse acesso ao produto;
+       · `geral` ficava `false` — o formulário de liberar acesso sumia e a
+         tela imprimia "Só quem organiza todos os ministérios pode liberar ou
+         tirar acesso" PARA O ORGANIZADOR GERAL.
+
+     É a mesma família que o /painel já tinha nomeado: vazio por falha e vazio
+     de verdade desenhados iguais. Aqui o estrago é pior, porque a frase acusa
+     a pessoa de não ter o cargo que ela tem. */
+  const [falhouLista, setFalhouLista] = useState(false);
+  const [falhouGeral, setFalhouGeral] = useState(false);
+  useEffect(() => { listarLideres().then(l => { setLideres(l); setFalhouLista(false); })
+    .catch(() => setFalhouLista(true)); }, []);
+  useEffect(() => { souOrganizadorGeral().then(g => { setGeral(g); setFalhouGeral(false); })
+    .catch(() => setFalhouGeral(true)); }, []);
   async function recarregarLideres() { try { setLideres(await listarLideres()); } catch {} }
 
   /* duas edições em sequência não podem se atropelar: o ref acumula
@@ -334,7 +350,9 @@ function Ajustes() {
       <details className="lid-secao lid-dobra" id="organiza">
         <summary className="lid-secao-cab">
           <span className="rot">Quem organiza</span>
-          <span className="lid-secao-nota">{lideres.length} com acesso</span>
+          <span className="lid-secao-nota">
+            {falhouLista ? 'não consegui carregar a lista' : `${lideres.length} com acesso`}
+          </span>
           <IcSeta className="giro" />
         </summary>
         <p className="dim pequeno">
@@ -423,6 +441,10 @@ function Ajustes() {
               setGravando(false);
             }}>Liberar acesso</button>
           </div>
+        ) : falhouGeral ? (
+          <p className="dim pequeno" style={{ marginTop: 12, color: 'var(--bad)' }} role="status">
+            Não consegui conferir se você organiza todos os ministérios. Recarregue a página.
+          </p>
         ) : (
           <p className="dim pequeno" style={{ marginTop: 12 }}>
             Só quem organiza todos os ministérios pode liberar ou tirar acesso.

@@ -217,8 +217,8 @@ function Uma() {
       <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que já aconteceu</h2>
       <ul className="dm-hist">
         {v.eventos.map((e, i) => (
-          <li key={i} className={marco(e.tipo) ? 'marco' : ''}>
-            <div className={e.interno ? 'interno' : ''}>
+          <li key={i} className={marco(e.tipo) ? 'dm-marco' : ''}>
+            <div className={e.interno ? 'dm-interno' : ''}>
               <div className="dm-q">{frase(e)} <span className="dm-mudo">· {quando(e.em)}</span></div>
               {e.texto ? <div className="dm-t">{e.texto}</div> : null}
             </div>

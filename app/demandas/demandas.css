@@ -178,9 +178,19 @@
 .dm-corta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* --------------------------------------------------------------- estrutura */
+/* A BARRA DO TOPO TAMBÉM RESPEITA O RELÓGIO DO CELULAR — 20/09/2026.
+
+   Auditoria de tela. `app/globals.css` já dá `env(safe-area-inset-top)` a
+   todas as barras de topo do lado das escalas (`.casa-barra`, `.menu`,
+   `.tela-topo`, `.topo`, `.vol-barra`...), depois da captura de 16/09. Esta
+   folha nasceu DEPOIS daquela correção e ficou de fora da lista: com o app
+   instalado (`statusBarStyle: black-translucent` + `viewportFit: cover`, e o
+   manifest com `scope: '/'`), a hora, o wi-fi e a bateria ficavam por cima de
+   "GUI>", de "Demandas · Nome" e do link "Escalas >". */
 .dm-topo{
   position:sticky;top:0;z-index:30;background:var(--dm-bg);
   border-bottom:1px solid var(--dm-linha);
+  padding-top:env(safe-area-inset-top, 0px);
 }
 .dm-topo-in{
   max-width:var(--dm-largura);margin:0 auto;padding:var(--dm-e2) var(--dm-e3);

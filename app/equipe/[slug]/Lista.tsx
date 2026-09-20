@@ -201,6 +201,20 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     /* erro de rede não é link inválido: quem abre no metrô não pode concluir
        que foi tirado da equipe */
     if (eq.error) { setFase(/n(a|ã)o encontr|inv(a|á)lid/i.test(eq.error.message || '') ? 'erro' : 'rede'); return; }
+    /* E O ERRO DO TIME TAMBÉM — 20/09/2026, auditoria de tela.
+
+       O guarda de cima existe desde sempre e diz o motivo: "erro de rede não
+       é link inválido: quem abre no metrô não pode concluir que foi tirado da
+       equipe". Só que ele olhava UMA das duas chamadas. Quando
+       `equipe_publica` respondia e `equipe_time` falhava, `(time.data || [])`
+       virava lista vazia e a tela mostrava, com todas as letras, "Ninguém
+       cadastrado ainda / Seja o primeiro do time" — para quem já está no time
+       há dois anos.
+
+       A pessoa conclui que foi removida e se cadastra de novo: cadastro
+       duplicado, ou o beco do JA_CADASTRADO. É a mesma classe que o /painel
+       nomeou e consertou em 14/09 ("vazio e falha eram o mesmo desenho"). */
+    if (time.error) { setFase('rede'); return; }
     const linhas = (eq.data || []) as any[];
     if (!linhas.length) { setFase('erro'); return; }
     setEquipe(linhas[0].equipe || '');
@@ -595,7 +609,12 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
               </div>
             )}
 
-            {areas.length > 6 && (
+            {/* a busca aparece por número de GENTE, não de seções — 20/09/2026.
+          A intenção escrita acima é "em vez de rolar 7 seções, a pessoa digita
+          3 letras e acha o próprio nome", e a dor é o número de nomes: um
+          ministério com 4 funções e 40 pessoas não ganhava busca, e um com 8
+          funções e 8 pessoas ganhava sem precisar. */}
+        {areas.reduce((a, x) => a + (x.gente?.length || 0), 0) > 12 && (
               <div className="busca-nome">
                 <IcBusca />
                 <input value={busca} onChange={e => setBusca(e.target.value)}

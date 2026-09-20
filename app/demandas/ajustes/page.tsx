@@ -18,6 +18,7 @@ import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Campo, Copiar, Esqueleto } from '@/components/demandas/Ui';
 import { ajustar, bases, pessoas } from '@/lib/demandas/api';
 import { recadoDoErro, soDigitos } from '@/lib/demandas/regras';
+import { confirmar } from '@/lib/confirmar';
 import type { Bases, Membro, Papel } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
@@ -41,7 +42,15 @@ function Ajustes() {
 
   const recarregar = useCallback(async () => {
     const [x, p] = await Promise.all([bases(), pessoas()]);
+    /* O ERRO DE `bases()` ERA DESCARTADO, E A TELA FICAVA EM ESQUELETO ETERNO.
+
+       20/09/2026, auditoria de tela. Só o `if (x.ok)` existia: quando a
+       chamada falhava, `b` continuava nulo para sempre, o `return <Esqueleto/>`
+       mais abaixo vencia, e o `{erro && <Aviso/>}` NUNCA era alcançado. A
+       pessoa ficava olhando três barras cinza animadas, sem texto, sem botão
+       e sem saber que recarregar é o único gesto possível. */
     if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros });
+    else setErro(recadoDoErro(x));
     if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p));
   }, []);
   useEffect(() => { recarregar(); }, [recarregar]);
@@ -57,6 +66,17 @@ function Ajustes() {
 
   if (eu && eu.papel !== 'admin') {
     return <Aviso tom="bad">Esta tela é de quem administra o sistema.</Aviso>;
+  }
+  /* erro ANTES do esqueleto: sem isto, falha de rede vira barra cinza eterna */
+  if (erro && (!b || !ms)) {
+    return (
+      <>
+        <div className="dm-rot">{'>'} ajustes</div>
+        <Aviso tom="bad">{erro}</Aviso>
+        <button className="dm-btn" onClick={() => { setErro(''); recarregar(); }}
+          style={{ marginTop: 'var(--dm-e2)' }}>Tentar de novo</button>
+      </>
+    );
   }
   if (!b || !ms) return <Esqueleto />;
 
@@ -214,8 +234,23 @@ function Setores({ b, indo, salvar }: {
                   </button>
                 </td>
                 <td>
+                  {/* DESATIVAR SETOR PEDE CONFIRMAÇÃO — 20/09/2026.
+
+                      Auditoria de tela. Era um toque, sem pergunta, ao lado
+                      de um "Sim/Não" que é um toggle inócuo. E desativar um
+                      setor o tira dos seletores de "Vai para", de "Quem está
+                      pedindo" e de "Mandar para outro setor" — sem que esta
+                      tela ofereça "Reativar". O lado das escalas pede
+                      confirmação para coisas menores. */}
                   <button className="dm-btn dm-peq" disabled={indo}
-                    onClick={() => salvar('setor', { id: s.id, ativo: false })}>Desativar</button>
+                    onClick={async () => {
+                      const ok = await confirmar({
+                        titulo: `Desativar o setor ${s.nome}?`,
+                        texto: 'Ele some das listas de quem pede e de quem atende, e as demandas que já estão nele continuam lá.',
+                        acao: 'Desativar',
+                      });
+                      if (ok) salvar('setor', { id: s.id, ativo: false });
+                    }}>Desativar</button>
                 </td>
               </tr>
             ))}

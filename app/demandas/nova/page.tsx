@@ -12,7 +12,7 @@
    regra, o CHECK recusa e a frase traduzida aparece igual. */
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { abrir, bases } from '@/lib/demandas/api';
@@ -43,8 +43,22 @@ function Nova() {
   const [indo, setIndo] = useState(false);
   const [pronta, setPronta] = useState<Pronta | null>(null);
   const [tentou, setTentou] = useState(false);
+  const [erroBase, setErroBase] = useState('');
 
-  useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros }); }); }, []);
+  /* O ERRO DE `bases()` ERA DESCARTADO AQUI TAMBÉM — 20/09/2026.
+
+     Esta é, pelo comentário do próprio arquivo, "a tela que decide se o
+     sistema vive". Com a chamada falhando, `b` ficava nulo, o
+     `return <Esqueleto />` vencia, e a pessoa via barras cinza animadas para
+     sempre: sem texto, sem botão, sem "tentar de novo". */
+  const carregar = useCallback(() => {
+    setErroBase('');
+    bases().then(x => {
+      if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros });
+      else setErroBase(recadoDoErro(x));
+    });
+  }, []);
+  useEffect(() => { carregar(); }, [carregar]);
 
   const cat = useMemo(() => b?.categorias.find(c => c.id === r.categoria_id), [b, r.categoria_id]);
   const setorDaCat = useMemo(
@@ -79,6 +93,17 @@ function Nova() {
     setPronta(x as unknown as Pronta);
   }
 
+  if (erroBase && !b) {
+    return (
+      <>
+        <div className="dm-rot">{'>'} nova demanda</div>
+        <Aviso tom="bad">{erroBase}</Aviso>
+        <button className="dm-btn" onClick={carregar} style={{ marginTop: 'var(--dm-e2)' }}>
+          Tentar de novo
+        </button>
+      </>
+    );
+  }
   if (!b) return <Esqueleto />;
 
   if (pronta) {
@@ -259,7 +284,11 @@ function Nova() {
               {anexos.map((a, i) => (
                 <li key={i}>
                   {a.nome}{' '}
-                  <button className="dm-btn dm-peq" style={{ minHeight: 26, padding: '0 8px' }}
+                  {/* `dm-mini` (36px) e não um `minHeight: 26` em linha:
+                      estilo em linha vencia o piso de 44px da folha e deixava
+                      o alvo em 26px, num gesto de CORREÇÃO — o pior lugar
+                      para errar o toque. 20/09/2026, auditoria de tela. */}
+                  <button className="dm-btn dm-mini"
                     onClick={() => setAnexos(x => x.filter((_, j) => j !== i))}>tirar</button>
                 </li>
               ))}

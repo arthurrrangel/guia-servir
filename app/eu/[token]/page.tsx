@@ -898,10 +898,26 @@ export default function Eu() {
           <TrocarPin token={token} temPin={espaco ? !!espaco.tem_pin : null} />
         </div>
 
-        {!!erro && <p className="vol-nota" role="status" style={{ color: 'var(--bad)' }}>{erro}</p>}
       </div>
 
-      {!!flash && <div className="vol-flash" role="status">{flash}</div>}
+      {/* A FALHA APARECE ONDE O SUCESSO APARECE — 20/09/2026.
+
+          Auditoria de tela. O erro era renderizado aqui embaixo, DEPOIS de
+          todas as seções: próxima escala, quem serve com você, quando você
+          pode, perfil, rodapé. Dois a três mil pixels abaixo do botão que a
+          pessoa acabou de tocar. E o sucesso sempre apareceu em barra FIXA.
+
+          A assimetria ensina a coisa errada: "não apareceu nada, então deu
+          certo". A voluntária toca "Eu vou" no 4G ruim, a gravação falha, o
+          botão volta ao normal, nada muda na tela onde ela está olhando — e
+          o líder vê "sem responder" no domingo.
+
+          Agora os dois usam a mesma barra, e a cor diz qual é qual. */}
+      {!!(flash || erro) && (
+        <div className={`vol-flash${erro ? ' vol-flash-ruim' : ''}`} role="status">
+          {erro || flash}
+        </div>
+      )}
     </div>
   );
 }

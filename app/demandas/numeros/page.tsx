@@ -36,12 +36,28 @@ function Painel() {
 
   useEffect(() => { buscar(); }, [buscar]);
 
-  if (erro) return <Aviso tom="bad">{erro}</Aviso>;
+  /* O ERRO NÃO PODE ENGOLIR O ÚNICO CONTROLE DA TELA — 20/09/2026.
+
+     Era `if (erro) return <Aviso/>`, antes do cabeçalho e do seletor de
+     período. Numa falha passageira a página virava uma tarja vermelha
+     sozinha: sem "tentar de novo" e sem como mudar o período, que é
+     justamente o gesto que refaria a consulta. Recarregar era o único
+     caminho possível, e nada na tela dizia isso. Agora o aviso convive com
+     o seletor, como a lista de /demandas já fazia. */
 
   return (
     <>
       <div className="dm-rot">{'>'} números</div>
       <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Como a operação está andando</h1>
+
+      {erro ? (
+        <div style={{ marginBottom: 'var(--dm-e3)' }}>
+          <Aviso tom="bad">{erro}</Aviso>
+          <button className="dm-btn" onClick={buscar} style={{ marginTop: 'var(--dm-e2)' }}>
+            Tentar de novo
+          </button>
+        </div>
+      ) : null}
 
       <div style={{ marginBottom: 'var(--dm-e3)', maxWidth: 380 }}>
         <Opcoes<Janela> rot="Período" valor={janela} aoMudar={setJanela}

@@ -3602,6 +3602,14 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
   max-width:calc(100vw - 40px);
 }
+/* A MESMA BARRA DIZ SUCESSO E FALHA, E A COR SEPARA — 20/09/2026.
+
+   Auditoria de tela: o sucesso sempre apareceu nesta barra fixa, e a falha
+   era renderizada no fim da página, milhares de pixels abaixo do botão. A
+   pessoa concluía que tinha confirmado. Agora as duas aparecem no mesmo
+   lugar; `--bad` é a mesma cor de estado que o resto do sistema usa, e o
+   texto continua branco porque o fundo é escuro. */
+.vol-flash-ruim{ background:var(--bad) }
 .vol-nota{ margin-top:var(--e3); font-size:var(--t-apoio); line-height:1.65; color:var(--cinza); max-width:48ch }
 .vol-pe{ margin-top:var(--e8); padding-top:var(--e5); border-top:1px solid var(--linha) }
 
