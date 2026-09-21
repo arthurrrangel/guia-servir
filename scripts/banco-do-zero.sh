@@ -118,8 +118,8 @@ reprova=0
 # some, derruba. Se um dia um caso for removido por bom motivo, baixar o piso
 # e uma decisao consciente, escrita no commit — que e exatamente o que se
 # quer que aconteca.
-declare -A PISO=( [testar_permissoes]=68 [testar_identidade]=27 )
-for fn in testar_permissoes testar_identidade; do
+declare -A PISO=( [testar_permissoes]=68 [testar_identidade]=27 [testar_porta_publica]=6 )
+for fn in testar_permissoes testar_identidade testar_porta_publica; do
   if ! $P -d guia -tAc "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
                          where n.nspname='public' and p.proname='$fn'" | grep -q 1; then
     echo "  ✗ $fn() não existe no banco reconstruído"; reprova=$((reprova+1)); continue
@@ -143,7 +143,7 @@ su postgres -c "$PGBIN/pg_ctl -D $DIR/data stop" >/dev/null 2>&1
 
 echo
 if [ "$falhou" -eq 0 ] && [ "$reprova" -eq 0 ]; then
-  echo "OK — o banco nasce do repositório: $ok/$ok migrações, e os dois testes de permissão passam."
+  echo "OK — o banco nasce do repositório: $ok/$ok migrações, e os testes de permissão passam."
   exit 0
 fi
 [ "$falhou" -gt 0 ] && echo "FALHOU — não reconstrói:$quebradas"

@@ -171,7 +171,7 @@ fi
 
 echo
 echo "4. B · e o banco continua íntegro depois de tudo isso"
-for fn in testar_permissoes testar_identidade schema_versao_conferir; do
+for fn in testar_permissoes testar_identidade testar_porta_publica schema_versao_conferir; do
   total=$(pergunta "select count(*) from $fn();")
   passou=$(pergunta "select count(*) from $fn() where passou;")
   if [ "$total" = "$passou" ] && [ "$total" != "0" ] && [ -n "$total" ]; then
