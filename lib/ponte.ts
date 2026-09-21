@@ -182,7 +182,25 @@ export function montarEstado(l: LinhasDoBanco): Estado {
      porque outro ministério montou nele fazia o app mostrar "7 funções sem
      ninguém" e sumir com o botão "Montar a escala deste mês". */
   const dataDoCulto = new Map<string, string>((l.cultos || []).map(c => [c.id, c.data]));
-  const idDoCulto = new Map<string, string>((l.cultos || []).map(c => [c.data, c.id]));
+  /* O QUARTO LADO DA MESMA REGRA — 20/09/2026, reauditoria.
+
+     `idDoCulto` chaveia por DATA, e uma data pode ter DUAS linhas nesta
+     lista: a regular e o evento DESTA equipe (a consulta já filtra os de
+     outras). Com `new Map(pares)`, vence o último, e o último é a ordem em
+     que o banco devolveu — que muda sozinha.
+
+     Isso importa porque `salvar_dia` (migração 61) e `salvarDia` (lib/db.ts)
+     gravam sempre no EVENTO. Se `d.cultoId` apontar para a linha regular, a
+     tela escreve num id e grava em outro: `mudarStatus` casa zero linhas e
+     diz `ESCALA_MUDOU_NO_POSTO` sem nada ter mudado. Era o terceiro estrago
+     descrito na 61, e ele sobreviveu à correção dela porque esta linha é um
+     quarto lado que ninguém tinha olhado.
+
+     A regra é a mesma dos outros três: evento da própria equipe ganha. */
+  const idDoCulto = new Map<string, string>();
+  for (const c of l.cultos || []) {
+    if (!idDoCulto.has(c.data) || c.evento) idDoCulto.set(c.data, c.id);
+  }
   const abrir = (data: string) => {
     const d = garantirDia(S, data);
     const id = idDoCulto.get(data);
@@ -373,9 +391,14 @@ const CULTOS_ESSENCIAL = 'id,data';
 const CULTOS_COM_EVENTO = 'id,data,evento,equipe_id,inicio';
 
 async function lerCultos(s: any, equipeId: string, desde: string) {
+  /* `.order('id')` no desempate: com duas linhas na mesma data (a regular e o
+     evento desta equipe), `order('data')` sozinho deixa a ordem por conta do
+     heap, e ela muda sozinha. Quem escolhe entre as duas é o `idDoCulto` lá
+     em cima, mas uma leitura que muda de ordem sem motivo é sempre a semente
+     do próximo defeito difícil. */
   const r = await s.from('cultos').select(CULTOS_COM_EVENTO)
     .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
-    .gte('data', desde).order('data');
+    .gte('data', desde).order('data').order('id');
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
 
   /* segunda tentativa sem nada da 54. Se ESTA falhar, o erro sobe: aí não é

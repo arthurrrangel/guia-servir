@@ -62,9 +62,19 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
      `salvar_dia` passou a seguir na migração 61 e que `visao_geral()` já
      seguia desde a 60 — os três lados agora decidem igual.
 
-     Ordenar por `id` no desempate não é capricho: sem ordem, duas linhas
-     igualmente elegíveis vêm na ordem física do banco, que muda sozinha, e a
-     escala do dia migraria de uma para outra sem ninguém mexer em nada. */
+     O `.order('id')` é cinto e suspensório, e o comentário anterior prometia
+     demais. O esquema JÁ impede duas linhas igualmente elegíveis:
+     `ux_cultos_data_regular` é unique em `data where evento is null`, e
+     `ux_cultos_evento` é unique em `(data, equipe_id) where evento is not
+     null` — então vem no máximo uma de cada tipo, e `escolher` decide entre
+     os dois TIPOS, nunca entre linhas iguais. Conferido no banco: um segundo
+     culto regular na mesma data é recusado, e um segundo evento da mesma
+     equipe também.
+
+     A ordem fica porque leitura sem ordem determinística é a semente do
+     próximo defeito difícil, e não porque resolva algo hoje. Dizer qual das
+     duas coisas é a verdadeira custa duas linhas e evita que o próximo leitor
+     construa em cima de uma garantia que não existe. */
   const candidatas = () => s.from('cultos').select('id,evento,equipe_id')
     .eq('data', p.p_data)
     .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)

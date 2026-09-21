@@ -9,7 +9,7 @@
    janela, ou que conta todo mundo no mesmo balde, é pior que nenhum — o
    primeiro não protege e o segundo derruba gente inocente.
    ============================================================================= */
-import { passe, deQuem, zerar } from '@/lib/teto-de-taxa';
+import { passe, deQuem, zerar, tamanho } from '@/lib/teto-de-taxa';
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -83,7 +83,8 @@ const req = (cab) => new Request('https://exemplo.invalido/', { headers: cab });
   ok(!passe('pg:x', 3, 60, t0).ok, 'pequena-guia: a quarta no mesmo minuto é barrada');
 }
 
-/* 4) a poda não pode apagar balde vivo */
+/* 4) a VARREDURA DE EXPIRADOS não pode apagar balde vivo.
+      (o despejo por teto de entradas é outro mecanismo, e está no bloco 5) */
 {
   zerar();
   const t0 = 7_000_000;
@@ -97,7 +98,15 @@ const req = (cab) => new Request('https://exemplo.invalido/', { headers: cab });
   const r2 = passe('vivo', 3, 3600, t0 + 120_000);
   ok(r2.ok, 'e ele ainda tem o terceiro passe');
   ok(!passe('vivo', 3, 3600, t0 + 120_000).ok,
-     'ou seja: a contagem dele NÃO foi zerada pela poda');
+     'ou seja: a contagem dele NÃO foi zerada pela varredura de expirados');
+
+  /* E O QUE ESTE CASO **NÃO** PROVA, para o rótulo não prometer demais:
+     ele exercita a varredura de EXPIRADOS, que nunca toca balde vivo. O
+     despejo por TETO DE ENTRADAS, do bloco 5, é outra coisa e pode sim
+     derrubar um balde vivo — inclusive o de alguém que já estourou, que volta
+     a passar dentro da janela dele. Isso é a escolha assumida em
+     lib/teto-de-taxa.ts, e um caso que diz "a contagem nunca é zerada" sem
+     essa ressalva vira uma promessa falsa na próxima leitura. */
 }
 
 /* 5) A PODA TEM QUE LIMITAR O MAPA, E NÃO CUSTAR CARO NA ROTA QUENTE.
@@ -133,6 +142,43 @@ const req = (cab) => new Request('https://exemplo.invalido/', { headers: cab });
     ok(passe('novo', 3, 60, t0 + 90000).ok, `com o mapa cheio, o passe ${i + 1} do IP novo entra`);
   }
   ok(!passe('novo', 3, 60, t0 + 90000).ok, 'e o quarto dele é barrado como sempre');
+}
+
+/* 6) `zerar()` TEM QUE ZERAR TAMBÉM O RELÓGIO DA PODA.
+
+   `proximaPoda` é estado de módulo. Se `zerar()` só limpasse o mapa, um bloco
+   que usa instantes ALTOS deixaria a varredura desligada para o bloco
+   seguinte que usa instantes mais baixos — e as asserções do bloco seguinte
+   continuariam passando, porque nenhuma delas olha o tamanho do mapa. O teste
+   viraria decorativo por causa da ORDEM DOS BLOCOS, que é a última coisa em
+   que alguém repara ao acrescentar um caso.
+
+   Este bloco roda DEPOIS do 5 (que usa t0 = 8.000.000) com um t0 bem menor,
+   de propósito: é exatamente o cenário que expõe o defeito. */
+{
+  zerar();
+  const t0 = 100_000;                     // muito menor que o do bloco 5
+  for (let i = 0; i < 5200; i++) passe('exp' + i, 1, 60, t0);
+  /* ainda DENTRO da janela deles: a varredura roda mas não acha vencido */
+  ok(tamanho() >= 5200, 'os 5200 baldes estão no mapa, todos vivos', String(tamanho()));
+
+  /* O CASO QUE DISCRIMINA, E POR QUE ELE PRECISA OLHAR O TAMANHO.
+
+     A primeira versão deste caso media pelo retorno de `passe`, e passava com
+     a poda desligada. O motivo: `passe` trata balde vencido preguiçosamente
+     (`if (!b || b.ate <= agora)` reinicia na hora), então varrer ou não
+     varrer dá EXATAMENTE a mesma resposta a quem chama. A varredura é sobre
+     MEMÓRIA, e memória só se mede olhando o tamanho do mapa.
+
+     Sem o reset de `proximaPoda`, o valor deixado pelo bloco 5
+     (t0 = 8.000.000) é maior que qualquer instante daqui, a varredura nunca
+     roda, e os 5200 vencidos ficam no mapa para sempre. */
+  /* agora DEPOIS da janela: uma chamada qualquer dispara a varredura */
+  passe('gatilho', 1, 60, t0 + 120_000);
+  ok(tamanho() < 100,
+     'a varredura limpou os 5200 vencidos (se não, `zerar()` não zerou o relógio da poda)',
+     `sobraram ${tamanho()} baldes`);
+  ok(passe('vivo6', 3, 3600, t0 + 120_000).ok, 'e um balde novo continua passando');
 }
 
 if (falhas) { console.log(`\nteto-de-taxa: ${falhas} falha(s) em ${feitas}\n`); process.exit(1); }

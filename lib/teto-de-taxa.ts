@@ -133,5 +133,24 @@ export function passe(chave: string, limite: number, janelaSeg: number, agora = 
   return { ok: false as const, esperar: Math.max(1, Math.ceil((b.ate - agora) / 1000)) };
 }
 
-/** Só para os testes: esvazia a contagem entre casos. */
-export function zerar() { baldes.clear(); }
+/** Só para os testes: esvazia a contagem entre casos.
+ *
+ *  `proximaPoda` VAI JUNTO, e isso não é detalhe: ela é estado de módulo, e
+ *  sem resetá-la um bloco de teste deixava a varredura DESLIGADA para o
+ *  seguinte, se o seguinte usasse instantes menores. As asserções do bloco
+ *  seguinte continuariam passando, porque nenhuma delas olhava o tamanho do
+ *  mapa: o teste viraria decorativo por causa da ORDEM DOS BLOCOS, que é a
+ *  última coisa em que alguém repara ao acrescentar um caso. */
+export function zerar() { baldes.clear(); proximaPoda = 0; }
+
+/** Também só para os testes: quantos baldes o mapa está guardando.
+ *
+ *  Sem isto a varredura é INVISÍVEL de fora, e foi assim que eu quase deixei
+ *  passar um teste que não testava: `passe` trata balde vencido
+ *  preguiçosamente (`if (!b || b.ate <= agora)` reinicia na hora), então
+ *  varrer ou não varrer dá exatamente a mesma resposta a quem chama. A
+ *  varredura é sobre MEMÓRIA, e memória só se mede olhando o tamanho.
+ *
+ *  Um teste de poda que só olha o retorno de `passe` passa com a poda
+ *  desligada. É por esse buraco que teste decorativo entra. */
+export const tamanho = () => baldes.size;

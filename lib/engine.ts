@@ -193,26 +193,36 @@ export function quemPodeCobrir(S: Estado, data: string, funcao: string, qtd = 3)
   for (const [fn, sl] of Object.entries(S.escalas[data]?.slots || {})) {
     if (fn === funcao && sl?.vid && (sl.status === 'recusado' || sl.status === 'furou')) vagou.add(sl.vid);
   }
-  /* E QUEM RECUSOU OUTRO POSTO DO MESMO DIA TAMBÉM ESTÁ FORA — 20/09/2026.
+  /* UM ALARME FALSO, E POR QUE ELE FICA ESCRITO — 20/09/2026, tarde.
 
-     `vagou`, acima, só olha a vaga que está sendo coberta. Quem recusou OUTRO
-     posto do mesmo domingo continuava entrando na lista.
+     Uma reauditoria levantou que `vagou` só olha a vaga que está sendo
+     coberta, e que quem recusou OUTRO posto do mesmo domingo entraria na
+     lista — porque `gerarDia` deixou de escrever a recusa em `v.indisponivel`
+     e o `respostaDe` lá embaixo perdeu a informação.
 
-     Até esta manhã isso funcionava por acidente: `gerarDia` escrevia a recusa
-     dentro de `v.indisponivel`, e o `respostaDe` lá embaixo a lia como 'nao'.
-     Tirar aquela mutação (que inventava um dado que a tabela não tem) deixou
-     esta função sem a informação, e o motor ficou assimétrico: o sorteio
-     respeita a recusa, a busca manual de substituto não.
+     O raciocínio está certo e a conclusão está errada, e eu cheguei a
+     "corrigir" antes de conferir. Quem fecha esse caso é `ocupadoNoDia`, duas
+     camadas abaixo: `elegiveis` roda com `excluirOcupados: true`, e
+     `ocupadoNoDia` casa QUALQUER slot do dia, de qualquer status, pulando só
+     a própria `funcaoAlvo`. Então:
 
-     O estrago é pequeno e preciso: o líder que acabou de receber "não posso
-     nesse domingo" da Ana recebe a Ana como sugestão para a outra vaga do
-     mesmo domingo, e ordenada como "não respondeu" em vez de "não pode". O
-     banco aceitaria (o gatilho lê a tabela `indisponibilidades`, não o status
-     do slot), então nada quebra: só a sugestão fica errada, justamente na
-     tela que existe para resolver uma recusa. */
-  const recusaram = quemRecusou(S, data);
+       recusou o posto ALVO   -> `vagou` pega;
+       recusou OUTRO posto    -> `ocupadoNoDia` pega, porque ela continua
+                                 ocupando aquele slot.
+
+     E não há terceiro caso: só enxergamos recusa de quem está num slot.
+
+     A prova de que a "correção" era inócua: com o filtro extra removido, as
+     quatro asserções escritas para prová-lo passavam igual. Era teste vazio,
+     escrito no mesmo dia em que passei um commit inteiro caçando testes
+     vazios. Fica escrito aqui porque a próxima auditoria vai chegar ao mesmo
+     raciocínio, e porque o caminho da conclusão vale mais que ela.
+
+     A assimetria que SOBRA, e que é inerte: `vagou` pega `recusado` E
+     `furou`; um filtro por recusa só pegaria `recusado`. Como `ocupadoNoDia`
+     cobre os dois, não muda nada. */
   return candidatos(S, funcao, data, { excluirOcupados: true, ignorarLimite: true })
-    .filter(c => !vagou.has(c.id) && !recusaram.has(c.id))
+    .filter(c => !vagou.has(c.id))
     .map(c => {
       const v = S.voluntarios.find(x => x.id === c.id)!;
       return { id: c.id, nome: c.nome, tel: v?.tel || '', nivel: c.nivel,

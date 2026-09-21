@@ -298,7 +298,7 @@ end $reg$;
 do $conf$
 declare
   v_eq uuid; v_fn uuid; v_vol uuid; v_p uuid; v_tel text;
-  v_dia date; v_culto uuid; v_ev uuid;
+  v_dia date; v_culto uuid; v_ev uuid; v_reg uuid;
   n int; ok int := 0; falhou int := 0; msg text := '';
 begin
   if to_regprocedure('public.salvar_dia(uuid,date,text,jsonb,uuid[])') is null then
@@ -307,9 +307,36 @@ begin
 
   v_tel := '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0');
   v_dia := (current_date + 400)::date;      -- longe de tudo que exista
-  if exists (select 1 from cultos where data = v_dia)
+
+  /* A GUARDA COBRE AS DUAS DATAS, E NÃO SÓ A PRIMEIRA.
+
+     A primeira versão deste arquivo conferia `v_dia` e o limpa-limpa apagava
+     `v_dia` E `v_dia + 7`, por DATA. Com `on delete cascade` saindo de
+     `cultos`, um culto legítimo em `current_date + 407` era apagado inteiro,
+     com escalações confirmadas e recado, e a conferência ainda dizia 5/5.
+
+     Comprovado por auditoria adversarial: semeando um culto de verdade
+     naquela data e reaplicando o arquivo, `escalacoes` e `culto_obs` do dia
+     saíam zerados, sem um único aviso.
+
+     `current_date + 407` é alcançável: a janela de leitura não tem teto
+     superior, `criar_evento` aceita qualquer data futura, e a tela cria culto
+     sob demanda ao navegar meses para frente. */
+  /* E ELA PROCURA UM PAR DE DATAS LIVRE, EM VEZ DE RECUSAR.
+
+     Guardar sem procurar troca "apaga dado de verdade" por "a migração se
+     recusa a rodar porque o líder montou aquele mês". Os dois são ruins; o
+     segundo só é menos ruim. Procurar as duas datas livres não é nenhum dos
+     dois, e custa uma varredura de algumas semanas. */
+  while exists (select 1 from cultos where data in (v_dia, (v_dia + 7)::date))
+        and v_dia < (current_date + 800)::date loop
+    v_dia := (v_dia + 7)::date;
+  end loop;
+
+  if exists (select 1 from cultos where data in (v_dia, (v_dia + 7)::date))
      or exists (select 1 from pessoas where telefone = v_tel) then
-    raise exception 'A conferencia da 61 sorteou data ou telefone que ja existe. Nao escrevi nada.'
+    raise exception 'A conferencia da 61 nao achou duas datas livres entre % e %, ou o telefone sorteado ja existe. Nao escrevi nada; rode de novo (o sorteio e outro) ou confira por que ha culto marcado a mais de dois anos daqui.',
+      (current_date + 400)::date, (current_date + 800)::date
       using errcode = 'raise_exception';
   end if;
 
@@ -366,7 +393,8 @@ begin
 
   /* ---- 2. e num dia SEM evento nada mudou: cria o regular como sempre -- */
   begin
-    v_culto := salvar_dia(v_eq, (v_dia + 7)::date, '', '[]'::jsonb, '{}'::uuid[]);
+    v_reg := salvar_dia(v_eq, (v_dia + 7)::date, '', '[]'::jsonb, '{}'::uuid[]);
+    v_culto := v_reg;
     select count(*) into n from cultos where data = (v_dia + 7)::date and evento is null;
     if v_culto is not null and n = 1 then ok := ok + 1;
     else
@@ -378,13 +406,22 @@ begin
     msg := msg || E'\n  x dia sem evento EXPLODIU: ' || sqlerrm;
   end;
 
-  /* ---- limpeza, por id ------------------------------------------------- */
+  /* ---- limpeza, POR ID E SÓ POR ID -------------------------------------
+
+     Apagar por DATA foi o defeito da primeira versão deste arquivo. `v_ev` e
+     `v_reg` são os ids que ESTE bloco criou, e são os únicos que ele tem o
+     direito de apagar. Se `v_reg` for nulo (o caso 2 explodiu antes de
+     devolver), a linha regular daquela data fica para trás — e ficar para
+     trás é o erro certo de cometer aqui.
+
+     O comentário antigo já dizia "por id". O código é que não fazia. */
   delete from escalacoes where funcao_id = v_fn;
   delete from plantoes  where voluntario_id = v_vol;
   delete from culto_obs where equipe_id = v_eq;
   delete from voluntarios where id = v_vol;
   delete from funcoes where equipe_id = v_eq;
-  delete from cultos where data in (v_dia, (v_dia + 7)::date);
+  delete from cultos where id = v_ev;
+  if v_reg is not null then delete from cultos where id = v_reg; end if;
   delete from equipes where id = v_eq;
 
   if falhou > 0 then
@@ -398,9 +435,14 @@ end $conf$;
 /* =============================================================================
    CONFERÊNCIA À MÃO, depois de aplicar
 
-     -- nenhuma data com culto regular E evento ao mesmo tempo:
-     select c.data, count(*) from cultos c
-      group by c.data having count(*) > 1;
+     -- nenhuma data com culto regular E evento ao mesmo tempo.
+     -- NAO e `group by data having count(*) > 1`: duas equipes com evento na
+     -- mesma quinta sao DOIS cultos naquela data, de proposito desde a 54, e
+     -- aquela consulta acusaria o caso legitimo. A pergunta certa e a mesma
+     -- que a faxina faz:
+     select c.data, c.id from cultos c
+      where c.evento is null
+        and exists (select 1 from cultos e where e.data = c.data and e.evento is not null);
 
      select * from schema_versao_conferir() where not passou;
      select max(n) from schema_versao;          -- 61

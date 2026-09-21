@@ -332,10 +332,13 @@ function Escala() {
      Guardar o id junto e descartar o pendente quando ele muda é a correção
      inteira. Descartar e não gravar no lugar errado: o texto ainda está no
      campo, e o líder que voltar ao ministério dele o encontra. */
-  const recadoEmEspera = useRef<{ d: string; txt: string; eq: string } | null>(null);
+  const recadoEmEspera = useRef<{ d: string; txt: string; eq: string; eraEvento: boolean } | null>(null);
 
   async function salvarObs(d: string, txt: string) {
-    if (ocupado) { recadoEmEspera.current = { d, txt, eq: equipe?.id || '' }; return; }
+    if (ocupado) {
+      recadoEmEspera.current = { d, txt, eq: equipe?.id || '', eraEvento: !!S.escalas[d]?.evento };
+      return;
+    }
     setOcupado(true);
     const snap = retrato([d]);
     garantirDia(S, d).obs = txt;
@@ -354,10 +357,27 @@ function Escala() {
     /* trocou de ministério enquanto o recado esperava: o dia e o texto são de
        outro time, e gravá-los aqui é pior que perdê-los */
     if (p.eq !== (equipe?.id || '')) return;
-    /* e se o dia sumiu do estado nesse meio-tempo (um evento removido, por
-       exemplo), `garantirDia` o recriaria e `salvarDia` criaria um culto numa
-       data que não tem culto nenhum */
-    if (!S.escalas[p.d]) return;
+    /* SEM ESTA GUARDA E COM ELA LARGA DEMAIS: OS DOIS ERRADOS.
+
+       A intenção é legítima: se o dia sumiu do estado (um evento removido por
+       `tirarOEvento`), `garantirDia` o recriaria e `salvarDia` criaria um
+       culto regular numa quinta que não tem culto nenhum.
+
+       Mas `!S.escalas[p.d]` sozinho é largo demais: `montarEstado` NÃO
+       materializa domingo regular só porque ele existe em `cultos` (é a regra
+       escrita em lib/ponte.ts), então um domingo ainda não montado também
+       cai aqui. E o campo de recado é renderizado nesses dias. Ou seja:
+       escrever o recado num domingo ainda não montado e tocar noutro botão
+       perdia o texto, e perdia MUDO — exatamente a classe de defeito que esta
+       espera existe para matar. Pelo caminho direto o mesmo recado grava,
+       porque `salvarObs` chama `garantirDia`.
+
+       Agora a guarda é só o caso do evento removido, e o que ela recusa é
+       dito, não engolido. */
+    if (!S.escalas[p.d] && p.eraEvento) {
+      aviso('Aquele dia saiu da escala enquanto eu salvava. O recado não foi gravado.');
+      return;
+    }
     void salvarObs(p.d, p.txt);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ocupado, equipe?.id]);
