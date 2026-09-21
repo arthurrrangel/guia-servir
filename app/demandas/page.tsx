@@ -142,7 +142,16 @@ function vazioDe(aba: Filtro['aba'], so: string) {
 function Resumão({ itens, eu }: { itens: Resumo[]; eu: Eu }) {
   const atrasadas = itens.filter(d => situacao(d) === 'atrasada').length;
   const paradas = itens.filter(d => situacao(d) === 'parada').length;
-  const esperando = itens.filter(d => d.aprovacao === 'pendente').length;
+  /* SÓ DEMANDA VIVA — 21/09/2026, auditoria de Demandas.
+     `aprovacao` fica em 'pendente' para sempre quando a demanda é CANCELADA
+     antes de o gestor decidir: quem pediu desistiu, e não existe valor para
+     "retirado antes de decidir" (`ck_aprovacao` aceita pendente, aprovada,
+     rejeitada). Contando todas, o painel dizia "4 esperam a sua aprovação"
+     sobre quatro demandas encerradas — e nenhuma delas abre, porque
+     `JA_FECHADA` barra `aprovar` e `rejeitar` em demanda fechada, com razão.
+     Um contador que nunca zera é um contador que ensina a ignorar o painel. */
+  const esperando = itens.filter(d =>
+    d.aprovacao === 'pendente' && d.status !== 'concluida' && d.status !== 'cancelada').length;
   const manda = quemManda(eu.papel);
   if (!atrasadas && !paradas && !(esperando && manda)) return null;
   const partes: string[] = [];

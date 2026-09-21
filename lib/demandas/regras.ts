@@ -4,11 +4,44 @@
    sem banco e sem navegador (`npm test`).
 
    A parte mais importante deste arquivo é `acoesDe`: ela decide quais botões
-   a tela mostra, e tem que ser o ESPELHO EXATO das checagens de `dem_mover`
-   no banco. Botão que o servidor recusa é pior que botão que não existe — a
-   pessoa toca, toma um "sem permissão" e conclui que o sistema está quebrado.
-   Se você mexer numa das duas pontas, mexa na outra e rode os testes: eles
-   conferem a matriz inteira de papel × setor × status. */
+   a tela mostra. Botão que o servidor recusa é pior que botão que não existe
+   — a pessoa toca, toma um "sem permissão" e conclui que o sistema está
+   quebrado. Se você mexer numa das duas pontas, mexa na outra e rode os
+   testes: eles conferem a matriz inteira de papel × setor × status.
+
+   ---- 21/09/2026: ISTO DIZIA "ESPELHO EXATO", E NÃO ERA ------------------
+
+   Uma auditoria comparou as 360 células (9 estados × 4 papéis × 10 ações)
+   chamando `dem_mover` de verdade para cada uma. Deu NOVE divergências, e
+   todas na mesma direção: a tela ESCONDE, o banco ACEITA.
+
+     execucao                  atende / manda  ->  assumir
+     travada/informacao        atende / manda  ->  travar
+     travada/terceiros         atende / manda  ->  travar
+     travada/terceiros         quem abriu      ->  destravar
+     travada/aprovacao         atende / manda  ->  travar
+
+   Nenhum botão morto, então nenhuma delas produz o sintoma que este arquivo
+   existe para evitar. O que elas produziam era pior de achar: duas delas
+   eram a METADE DE UM DEFEITO. `destravar` por quem abriu, sobre trava de
+   terceiros, era o segundo passo da porta dos fundos que a migração 67
+   fechou — a tela escondia o botão, e por isso ninguém tinha visto que o
+   banco aceitava a chamada direta.
+
+   A LIÇÃO, escrita para a próxima pessoa: tela mais restritiva que o banco
+   NÃO é segurança, é um defeito escondido. A regra tem que existir no banco;
+   esconder o botão só adia a descoberta.
+
+   O que mudou agora: as três regras do PORTÃO DE APROVAÇÃO passaram a existir
+   no banco (migração 67), que era onde faltavam. As outras seis continuam
+   sendo só-da-tela, de propósito: são escolhas de produto (não oferecer
+   "travar" o que já está travado, não oferecer "assumir" o que já está em
+   execução) que não protegem nada e não fazem mal.
+
+   DÍVIDA ANOTADA: não existe teste que compare estas duas pontas
+   automaticamente — o comparador da auditoria era um script de uma vez só,
+   em JS, contra o banco. Enquanto ele não existir, esta lista é o que temos,
+   e ela envelhece. */
 
 import type {
   Aprovacao, Categoria, Papel, Prioridade, Resumo, Status, Trava,

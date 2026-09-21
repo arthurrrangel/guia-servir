@@ -54,7 +54,7 @@ function Nova() {
   const carregar = useCallback(() => {
     setErroBase('');
     bases().then(x => {
-      if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros });
+      if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
       else setErroBase(recadoDoErro(x));
     });
   }, []);

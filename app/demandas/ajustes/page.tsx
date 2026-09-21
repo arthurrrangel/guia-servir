@@ -49,7 +49,7 @@ function Ajustes() {
        mais abaixo vencia, e o `{erro && <Aviso/>}` NUNCA era alcançado. A
        pessoa ficava olhando três barras cinza animadas, sem texto, sem botão
        e sem saber que recarregar é o único gesto possível. */
-    if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros });
+    if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
     else setErro(recadoDoErro(x));
     if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p));
   }, []);

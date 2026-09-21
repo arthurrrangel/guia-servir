@@ -30,7 +30,12 @@ export type Membro = {
   email?: string | null; auth_email?: string | null; token?: string | null; ativo?: boolean;
 };
 
-export type Bases = { setores: Setor[]; categorias: Categoria[]; membros: Membro[] };
+/* SEM `membros` DESDE A MIGRAÇÃO 67. `dem_bases` entregava nome, telefone,
+   papel e setor de todo mundo para qualquer responsável, e as três telas que
+   chamam `bases()` guardavam a lista e nunca a liam — a lista de gente dos
+   Ajustes vem de `dem_pessoas`, que é SÓ_ADMIN. O campo sai do tipo para o
+   tsc cobrar quem tentar voltar a lê-lo de graça. */
+export type Bases = { setores: Setor[]; categorias: Categoria[] };
 
 /** O que a lista devolve por demanda. */
 export type Resumo = {

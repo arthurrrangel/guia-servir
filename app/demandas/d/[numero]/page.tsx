@@ -43,7 +43,7 @@ function Uma() {
   }, [numero]);
 
   useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
-  useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias, membros: x.membros }); }); }, []);
+  useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias }); }); }, []);
 
   async function agir(acao: Acao, dados: Record<string, unknown> = {}) {
     setIndo(true); setErro('');
