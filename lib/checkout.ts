@@ -101,7 +101,12 @@ async function criarMercadoPago({ valor, tipo, txid }: PedidoCheckout): Promise<
     back_urls: {
       success: `${base}/ofertar?fim=1&t=${tipo}&v=${valor.toFixed(2)}`,
       pending: `${base}/ofertar?fim=1&t=${tipo}&v=${valor.toFixed(2)}&p=1`,
-      failure: `${base}/ofertar?erro=1`,
+      /* O TIPO E O VALOR VOLTAM JUNTO — 21/09/2026.
+         Era só `?erro=1`, e a tela nem lia esse parâmetro: quem tinha o cartão
+         recusado voltava para a página inicial da oferta, sem aviso nenhum e
+         com tipo e valor perdidos, como se tivesse acabado de chegar. Agora
+         ela sabe o que dizer e não faz a pessoa digitar tudo de novo. */
+      failure: `${base}/ofertar?erro=1&t=${tipo}&v=${valor.toFixed(2)}`,
     },
   };
   if (httpsOk) corpo.auto_return = 'approved';
@@ -136,7 +141,25 @@ async function criarMercadoPago({ valor, tipo, txid }: PedidoCheckout): Promise<
   }
 
   const j = await r.json().catch(() => null);
-  const url = j?.init_point || j?.sandbox_init_point;
+  /* `sandbox_init_point` SAIU DAQUI — 21/09/2026.
+
+     Era `j?.init_point || j?.sandbox_init_point`. Um token `TEST-...` colado
+     por engano no painel da Vercel manda todo mundo para o checkout de
+     sandbox: a pessoa "paga" com dinheiro falso, vê a tela de sucesso, e a
+     igreja não recebe nada. Nada no repositório conferia isso, e esta linha
+     ainda ajudava o engano aceitando a URL de sandbox como URL de pagamento.
+
+     Medido com um dublê que devolve só `sandbox_init_point`: HTTP 200 e a
+     pessoa mandada para `sandbox.mercadopago.com.br`.
+
+     Agora só `init_point` serve, e o caso de sandbox vira uma linha de log
+     dizendo exatamente o que está errado — que é a diferença entre passar uma
+     manhã de domingo sem receber e trocar uma variável de ambiente. */
+  const url = j?.init_point;
+  if (!url && j?.sandbox_init_point) {
+    console.error('[checkout] mercadopago devolveu SO sandbox_init_point: a credencial '
+      + 'MP_ACCESS_TOKEN e de TESTE. Nenhum dinheiro chega a igreja com ela. Troque na Vercel.');
+  }
   if (!url) {
     console.error('[checkout] mercadopago sem init_point', JSON.stringify(j).slice(0, 300));
     return { ok: false, erro: 'Não consegui abrir o pagamento por cartão. Tente o Pix.' };

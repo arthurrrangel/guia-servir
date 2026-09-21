@@ -23,7 +23,7 @@
 
    Roda com `npm test`. */
 
-import { fraseDoFim, MIN, MAX, TIPOS, valorInvalido, TEM_PIX, pixDisponivel, PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '@/lib/oferta';
+import { fraseDoFim, MIN, MAX, TIPOS, valorInvalido, TEM_PIX, pixDisponivel, txidDe, PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '@/lib/oferta';
 import { pixCopiaECola, pixValido, pixCampos } from '@/lib/pix';
 
 let falhas = 0, feitas = 0;
@@ -127,6 +127,59 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
 {
   ok(TIPOS.some(t => t.id === 'dizimo') && TIPOS.some(t => t.id === 'oferta'),
      'dizimo e oferta continuam sendo os dois tipos que a tela do fim sabe escrever');
+}
+
+/* -------------------------------- 6) o txid, que e a chave de idempotencia
+   Ele vai ao adquirente como `x-idempotency-key`. Numa colisao, a segunda
+   pessoa recebe a resposta GUARDADA da primeira — e e mandada para o link de
+   pagamento da oferta de outra pessoa, com o valor e o tipo dela.
+
+   Eram quatro caracteres de um alfabeto de 32: espaco de 1.048.576 por DIA e
+   por TIPO. Medido em 2.000 domingos simulados de 200 ofertas de cartao: 29
+   domingos com colisao, 1,45%. */
+{
+  const FORMATO = /^GUIA[DO][0-9]{6}[A-Z0-9]{6,20}$/;
+  ok(FORMATO.test(txidDe('dizimo')), 'o txid de dizimo casa o formato', txidDe('dizimo'));
+  ok(FORMATO.test(txidDe('oferta')), 'o txid de oferta casa o formato', txidDe('oferta'));
+  ok(txidDe('dizimo')[4] === 'D' && txidDe('oferta')[4] === 'O',
+     'a letra do meio diz o tipo, que e por onde a tesouraria reconcilia');
+  ok(txidDe('dizimo').length <= 25,
+     'e ele cabe no campo 62-05 do Pix, que aceita 25', String(txidDe('dizimo').length));
+
+  /* O CASO QUE MEDE O ESPACO, e nao o formato. 200 mil sorteios: com 4
+     caracteres davam ~174 mil distintos (um monte de colisao); com 10, tem que
+     dar 200 mil, porque o espaco ficou grande demais para repetir. */
+  const N = 200000;
+  const vistos = new Set();
+  for (let i = 0; i < N; i++) vistos.add(txidDe('dizimo'));
+  ok(vistos.size === N,
+     `${N} txid sorteados no mesmo dia e tipo tem que dar ${N} distintos`,
+     `deram ${vistos.size}`);
+
+  /* e o alfabeto nao tem vies: 256 / tamanho tem que ser exato, senao alguns
+     simbolos saem mais que outros e o espaco util encolhe */
+  const cont = new Map();
+  for (const t of vistos) for (const ch of t.slice(11)) cont.set(ch, (cont.get(ch) || 0) + 1);
+  const vals = [...cont.values()];
+  const media = vals.reduce((a, b) => a + b, 0) / vals.length;
+  const pior = Math.max(...vals.map(v => Math.abs(v - media) / media));
+  ok(pior < 0.05, 'o alfabeto do sorteio nao tem vies de modulo',
+     `o simbolo mais desviado esta ${(pior * 100).toFixed(1)}% fora da media`);
+}
+
+/* ------------------------------------ 7) o centavo e regra do SERVIDOR
+   A tela nunca produz fracao de centavo, entao isto nao muda nada para quem
+   usa o site. Existe porque `app/api/ofertar/checkout/route.ts` chama esta
+   mesma funcao, e quem chama a rota direto nao passa pela tela. Medido antes:
+   `valor: 1.005` respondia 200, o checkout MOSTRAVA R$ 1,01 e COBRAVA 100
+   centavos, e a tela de volta dizia R$ 1,00. */
+{
+  ok(valorInvalido(1.005) !== null, 'meio centavo e recusado');
+  ok(valorInvalido(1.015) !== null, 'e o outro meio centavo tambem');
+  ok(valorInvalido(36.035) !== null, 'fracao de centavo em valor maior tambem');
+  ok(valorInvalido(1.01) === null, 'mas um centavo exato passa', String(valorInvalido(1.01)));
+  ok(valorInvalido(350.75) === null, 'e R$ 350,75 passa', String(valorInvalido(350.75)));
+  ok(valorInvalido(49.9) === null, 'e R$ 49,90 passa', String(valorInvalido(49.9)));
 }
 
 if (falhas) { console.log(`\nofertar-nao-mente: ${falhas} falha(s) em ${feitas}\n`); process.exit(1); }

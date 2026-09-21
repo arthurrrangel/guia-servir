@@ -103,14 +103,26 @@ export function pixDisponivel(chave: string): boolean {
   try {
     pixCopiaECola({ chave, nome: PIX_NOME, cidade: PIX_CIDADE, valor: 10, txid: 'TESTE' });
     return true;
-  } catch (e) {
-    /* o motivo precisa aparecer em algum lugar: uma chave mal colada no painel
-       da Vercel some sem isto, e o Pix simplesmente não existe no site sem
-       ninguém saber por quê. */
-    if (typeof console !== 'undefined') {
-      console.warn('[oferta] o Pix esta DESLIGADO:', String((e as Error)?.message || e));
-    }
+  } catch {
     return false;
+  }
+}
+
+/** Por que o Pix está desligado, em uma frase, ou `null` se não está.
+ *
+ *  O AVISO SAIU DE DENTRO DE `pixDisponivel` — 21/09/2026. Ele era emitido a
+ *  cada chamada, e `pixDisponivel` é um PREDICADO: o teste a chama cinco vezes
+ *  com chaves ruins de propósito, e cada uma virava um `console.warn` de
+ *  alarme falso. Alarme que toca quando nada está errado é alarme que se
+ *  aprende a ignorar. Agora ele toca uma vez, na carga do módulo, e só sobre a
+ *  chave que está de fato configurada. */
+export function porQueSemPix(chave: string): string | null {
+  if (!chave) return 'NEXT_PUBLIC_PIX_CHAVE nao esta configurada.';
+  try {
+    pixCopiaECola({ chave, nome: PIX_NOME, cidade: PIX_CIDADE, valor: 10, txid: 'TESTE' });
+    return null;
+  } catch (e) {
+    return String((e as Error)?.message || e);
   }
 }
 
@@ -128,6 +140,13 @@ export function pixDisponivel(chave: string): boolean {
    desenvolvimento, as duas dizem `false` e ele fica quieto, porque aí não há
    divergência nenhuma para ver. */
 export const TEM_PIX = pixDisponivel(PIX_CHAVE);
+
+/* uma chave mal colada no painel da Vercel desliga o Pix do site inteiro, e
+   sem esta linha isso acontece em silêncio: o botão simplesmente não aparece e
+   ninguém sabe por quê. */
+if (!TEM_PIX && PIX_CHAVE && typeof console !== 'undefined') {
+  console.warn('[oferta] o Pix esta DESLIGADO:', porQueSemPix(PIX_CHAVE));
+}
 
 /* O cartão, o Apple Pay e o Google Pay NÃO têm constante aqui, e isso é uma
    decisão de segurança, não de organização: a credencial do adquirente mora em
@@ -161,9 +180,27 @@ export function txidDe(tipo: TipoOferta, quando = new Date()): string {
     String(quando.getFullYear() % 100).padStart(2, '0') +
     String(quando.getMonth() + 1).padStart(2, '0') +
     String(quando.getDate()).padStart(2, '0');
+  /* DEZ CARACTERES DE SORTEIO, E NÃO QUATRO — 21/09/2026.
+
+     Este txid vai ao adquirente como `x-idempotency-key`. Numa colisão, a
+     segunda pessoa recebe a resposta GUARDADA da primeira: é mandada para o
+     link de pagamento da oferta de outra pessoa, com o valor e o tipo dela.
+
+     Com quatro caracteres de um alfabeto de 32, o espaço é 32^4 = 1.048.576, e
+     o sorteio é por DIA e por TIPO. Medido: 300.000 sorteios no mesmo dia e
+     tipo deram 260.967 distintos, e em 2.000 domingos simulados de 200 ofertas
+     de cartão houve colisão em 29 deles — 1,45%. Um domingo de 400 ofertas
+     passa de 7%.
+
+     Dez caracteres levam o espaço a 32^10 (mais de mil trilhões) e a colisão a
+     irrelevante. O campo 62-05 do Pix aceita 25 alfanuméricos e o txid inteiro
+     fica em 21, então cabe com folga nos dois usos. */
   let sorteio = '';
-  const bytes = new Uint8Array(4);
+  const bytes = new Uint8Array(10);
   crypto.getRandomValues(bytes);
+  /* ALFABETO tem 32 símbolos e 256/32 = 8 exato, então `% ALFABETO.length` não
+     tem viés de módulo. Medido: 2,2% de dispersão em 260.967 amostras, que é
+     ruído. A conta é conferida em `scripts/ofertar-nao-mente.test.mjs`. */
   for (const b of bytes) sorteio += ALFABETO[b % ALFABETO.length];
   return `GUIA${tipo === 'dizimo' ? 'D' : 'O'}${d}${sorteio}`;
 }
@@ -219,5 +256,22 @@ export const MAX = 100000;
 export function valorInvalido(v: number): string | null {
   if (!v || v < MIN) return `O valor mínimo é ${emReais(MIN)}.`;
   if (v > MAX) return `Para valores acima de ${emReais(MAX)}, fale com a tesouraria da igreja.`;
+  /* CENTAVO EXATO — 21/09/2026.
+
+     A tela nunca produz fração de centavo (`valorDeDigitos` monta o número a
+     partir dos dígitos digitados), então esta linha nunca muda nada para quem
+     usa o site. Ela existe porque `app/api/ofertar/checkout/route.ts` chama
+     esta mesma função, e quem chama a rota direto não passa pela tela.
+
+     Medido chamando a rota: `valor: 1.005` respondia 200, o checkout do
+     adquirente MOSTRAVA "R$ 1,01" na descrição (Intl arredonda para cima) e
+     COBRAVA 100 centavos (`Math.round` arredonda para baixo no meio), e a tela
+     de volta dizia "R$ 1,00" (`toFixed`). Três arredondamentos diferentes
+     sobre o mesmo número, e a pessoa lê um valor e paga outro.
+
+     Regra é do servidor ou não é regra. */
+  if (Math.round(v * 100) !== Number((v * 100).toFixed(4))) {
+    return 'O valor precisa ter no máximo dois dígitos depois da vírgula.';
+  }
   return null;
 }

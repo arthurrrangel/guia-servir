@@ -72,6 +72,22 @@ function lerVolta(): { tipo: TipoOferta; valor: number; pendente: boolean; orige
   if (typeof window === 'undefined') return null;
   const q = new URLSearchParams(window.location.search);
   if (q.get('fim') !== '1') return null;
+  return lerParametros(q, 'cartao');
+}
+
+/** A volta de cartão RECUSADO — 21/09/2026. Ela existe para a tela não fingir
+ *  que a pessoa acabou de chegar: o adquirente manda `?erro=1` com o tipo e o
+ *  valor, e o que ela merece é a frase e os dados preenchidos de volta. */
+function lerRecusa(): { tipo: TipoOferta; valor: number } | null {
+  if (typeof window === 'undefined') return null;
+  const q = new URLSearchParams(window.location.search);
+  if (q.get('erro') !== '1') return null;
+  const v = lerParametros(q, 'cartao');
+  return v ? { tipo: v.tipo, valor: v.valor } : null;
+}
+
+function lerParametros(q: URLSearchParams, origem: 'cartao'):
+  { tipo: TipoOferta; valor: number; pendente: boolean; origem: 'cartao' } | null {
   const t = q.get('t');
   if (t !== 'dizimo' && t !== 'oferta') return null;
   /* O VALOR VEM PRESO NA FAIXA QUE A PRÓPRIA TELA ACEITA — 21/09/2026.
@@ -145,11 +161,23 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
      renderização, senão o HTML do servidor e o do cliente divergem */
   useEffect(() => {
     const v = lerVolta();
-    if (!v) return;
-    setVolta(v);
-    setTipo(v.tipo);
-    setDigitos(String(Math.round(v.valor * 100)));
-    setFase('fim');
+    if (v) {
+      setVolta(v);
+      setTipo(v.tipo);
+      setDigitos(String(Math.round(v.valor * 100)));
+      setFase('fim');
+      return;
+    }
+    /* CARTÃO RECUSADO — 21/09/2026. O adquirente mandava para `?erro=1` e esta
+       tela não lia o parâmetro: a pessoa voltava para o começo, sem aviso e
+       com tipo e valor perdidos, como se tivesse acabado de chegar. Agora ela
+       volta com tudo preenchido, lê o que aconteceu, e o Pix está a um toque. */
+    const r = lerRecusa();
+    if (!r) return;
+    setTipo(r.tipo);
+    if (r.valor) setDigitos(String(Math.round(r.valor * 100)));
+    setErro('O pagamento por cartão não foi aprovado. Você pode tentar de novo, '
+          + 'usar outro cartão, ou ofertar pelo Pix — o valor já está aqui.');
   }, []);
 
   const valor = valorDeDigitos(digitos);
