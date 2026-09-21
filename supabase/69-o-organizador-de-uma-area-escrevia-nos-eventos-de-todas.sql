@@ -372,7 +372,7 @@ do $conf$
 declare
   v_ensaio_antes timestamptz;
   v_lv uuid; v_md uuid; v_pessoa uuid; v_ev_lv uuid; v_ev_md uuid; v_reg uuid;
-  v_dia_lv date; v_dia_md date; v_dom date;
+  v_dia_lv date; v_dia_md date; v_dom date; v_dom_fut date;
   v_n int; v_email text := 'conf69@teste.local';
   ok int := 0; falhou int := 0; msg text := '';
 begin
@@ -405,6 +405,30 @@ begin
        values (v_dia_md, 'Conf69 Midia',  v_md, 'anotacao da midia')  returning id into v_ev_md;
   select id into v_reg from cultos where evento is null order by data limit 1;
   select data into v_dom from cultos where id = v_reg;
+  /* ===================================================== 82e ==============
+     O CASO 7 PRECISA DE UM DOMINGO NO FUTURO, E `v_dom` NAO E ISSO.
+
+     `v_reg` e o culto regular MAIS ANTIGO do banco (`order by data limit 1`),
+     e isso e proposital: os casos 5 e 6 atacam uma linha REAL com UPDATE, e
+     para UPDATE a data nao importa.
+
+     O caso 7 e um INSERT, e ai importa: `culto_guarda` confere
+     `DATA_NO_PASSADO` ANTES de `DIA_DE_CULTO`. Num banco de producao, onde o
+     culto mais antigo e de meses atras, o caso 7 recebia a recusa certa pelo
+     motivo errado e a conferencia reprovava.
+
+     MEDIDO em 21/09, aplicando esta migracao no banco de producao:
+
+       A CONFERENCIA DA 69 REPROVOU: 1 de 8 casos
+         x caso 7 recusou, mas por OUTRO motivo (esperava DIA_DE_CULTO):
+           DATA_NO_PASSADO: 2026-08-09 ja passou.
+
+     No banco que o repositorio constroi isso nunca aparecia: la os dois
+     cultos que existem sao futuros. E o tipo de defeito que so a forma do
+     dado de VERDADE revela — a mesma familia da faixa destrutiva da 54.
+
+     Entao o caso 7 calcula o proprio domingo, sempre a frente. */
+  v_dom_fut := (current_date + 7) + ((7 - extract(dow from current_date + 7)::int) % 7);
 
   /* ---- 1. O ATAQUE, E O QUE ELE DEIXA ATRÁS -------------------------
      COBRAR O EFEITO, NÃO O "LEVANTOU".
@@ -585,7 +609,7 @@ begin
     set local role authenticated;
     perform set_config('request.jwt.claims',
       format('{"email":"%s","role":"authenticated"}', v_email), true);
-    insert into cultos (data, evento, equipe_id) values (v_dom, 'Conf69 No Domingo', v_lv);
+    insert into cultos (data, evento, equipe_id) values (v_dom_fut, 'Conf69 No Domingo', v_lv);
     reset role;
     falhou := falhou + 1;
     msg := msg || E'\n  x evento em dia de culto voltou a passar';
@@ -599,7 +623,8 @@ begin
     if sqlerrm like 'DIA_DE_CULTO%' then ok := ok + 1;
     else
       falhou := falhou + 1;
-      msg := msg || E'\n  x caso 7 recusou, mas por OUTRO motivo (esperava DIA_DE_CULTO): ' || sqlerrm;
+      msg := msg || format(E'\n  x caso 7 recusou, mas por OUTRO motivo (esperava DIA_DE_CULTO em %s, dow %s): %s',
+                           v_dom_fut, extract(dow from v_dom_fut), sqlerrm);
     end if;
   end;
 
