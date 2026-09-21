@@ -348,7 +348,15 @@ function Painel() {
     /* quem a tela acredita estar na vaga vai junto na gravação — ver o
        comentário de `mudarStatus` em lib/db.ts */
     const vid = dia?.slots?.[funcao]?.vid;
-    if (!f?.id || !dia?.cultoId || !vid) return;
+    /* o `return` era mudo (20/09, reauditoria). Se a tela oferecer o seletor
+       numa vaga vazia — ou se o dia ainda não tiver `cultoId` porque a carga
+       degradou —, o toque não fazia nada e não dizia nada. É a mesma classe
+       de defeito que o recado tinha. */
+    if (!f?.id || !dia?.cultoId || !vid) {
+      aviso(!vid ? 'Essa vaga está sem ninguém: escolha a pessoa antes de marcar.'
+                 : 'Ainda não carreguei esse domingo por inteiro. Recarregue a página.');
+      return;
+    }
     setSalvando(funcao); setOtimista({ f: funcao, st: status });
     try { await mudarStatus(dia.cultoId, f.id, vid, status); await recarregar(); }
     catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }

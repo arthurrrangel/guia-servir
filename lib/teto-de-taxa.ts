@@ -47,13 +47,65 @@ type Balde = { n: number; ate: number };
    em objeto sem risco de esbarrar em `__proto__`. */
 const baldes = new Map<string, Balde>();
 
-/* Sem esta poda, uma instância de longa vida acumula uma entrada por IP para
-   sempre. Roda quando o mapa cresce, não por tempo: não há timer em serverless
-   que sobreviva à requisição. */
+/* A PODA QUE NÃO PODAVA, E QUE CUSTAVA CARO — 20/09/2026, reauditoria.
+
+   A primeira versão era:
+
+       if (baldes.size < PODA_ACIMA_DE) return;
+       for (const [k, b] of baldes) if (b.ate <= agora) baldes.delete(k);
+
+   Duas coisas erradas ao mesmo tempo, e as duas só aparecem sob o tráfego
+   que este módulo existe para conter:
+
+   1 · Ela só apaga balde EXPIRADO. Com muitos IPs VIVOS, nada é apagado e o
+       mapa cresce sem teto, exatamente o contrário do que o comentário
+       prometia.
+
+   2 · E, acima do limiar, ela varria o mapa inteiro em TODA requisição.
+       Medido: com 20 mil IPs vivos, 2.000 chamadas levaram 468 ms; com o mapa
+       vazio, 1 ms. Quatrocentas e sessenta e oito vezes mais caro, crescendo
+       linearmente — ou seja, o próprio teto de taxa virava o amplificador do
+       ataque.
+
+   Agora a varredura é no máximo uma por segundo, e existe um TETO DE
+   ENTRADAS: cheio, saem os baldes que estão mais perto de expirar.
+
+   E A CORREÇÃO DA CORREÇÃO, que eu só vi rodando: despejar exatamente até o
+   teto tem a MESMA doença. Cada inserção nova empurra o mapa um acima do
+   teto, dispara outra ordenação, e o custo por requisição volta a ser
+   O(n log n). A primeira versão desta poda derrubou o teste de tempo por
+   estouro de dois minutos.
+
+   Por isso o despejo vai até `ALVO_BALDES`, três quartos do teto: depois de
+   uma limpeza cabem mais cinco mil inserções antes da próxima. É histerese, e
+   é o que transforma "toda requisição paga" em "uma em cinco mil paga".
+
+   O QUE ISSO NÃO É, e vale dizer porque a primeira versão também não era:
+   contagem em memória por instância não é defesa contra ataque distribuído.
+   Passando de TETO_BALDES IPs vivos na mesma janela, alguém é despejado e
+   recomeça do zero. A escolha é entre isso e o mapa comendo a memória da
+   função; despejar quem está mais perto de expirar é a perda menor. Defesa de
+   verdade contra flood é a firewall da Vercel ou um contador no banco, como o
+   `entrar_tentativas_equipe` da migração 31. */
 const PODA_ACIMA_DE = 5000;
+const TETO_BALDES = 20000;
+const ALVO_BALDES = Math.floor(TETO_BALDES * 0.75);   // a histerese
+const PODA_A_CADA_MS = 1000;
+let proximaPoda = 0;
+
 function podar(agora: number) {
   if (baldes.size < PODA_ACIMA_DE) return;
+  if (agora < proximaPoda && baldes.size <= TETO_BALDES) return;
+  proximaPoda = agora + PODA_A_CADA_MS;
+
   for (const [k, b] of baldes) if (b.ate <= agora) baldes.delete(k);
+  if (baldes.size <= TETO_BALDES) return;
+
+  /* ainda cheio, e tudo que sobrou está vivo: sai quem expira primeiro, e vai
+     até ALVO_BALDES e não até o teto — senão a próxima inserção paga tudo de
+     novo (ver a nota da histerese, acima). */
+  const porExpirar = [...baldes.entries()].sort((a, b) => a[1].ate - b[1].ate);
+  for (let i = 0; i < porExpirar.length - ALVO_BALDES; i++) baldes.delete(porExpirar[i][0]);
 }
 
 /** O IP de quem chamou, como a Vercel o entrega. Sem cabeçalho, todo mundo

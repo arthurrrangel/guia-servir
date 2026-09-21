@@ -48,20 +48,45 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
      aplicava. A própria 54 escreveu, em letras grandes, que "regra de acesso
      que só existe no navegador é regra que a próxima tela esquece". Este
      arquivo era a próxima tela. */
-  const doDia = () => s.from('cultos').select('id').eq('data', p.p_data)
-    .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`);
+  /* `.maybeSingle()` SAIU DAQUI, E ESSA É A CORREÇÃO — 20/09/2026, tarde.
+
+     A versão da manhã trocou o `.eq('data')` cru por `.eq('data').or(equipe)`
+     e manteve `.maybeSingle()`, resolvendo o caso "duas equipes com evento na
+     mesma quinta". Faltou o caso que o robô do mesmo dia passou a criar: uma
+     data pode ter o evento DESTA equipe E uma linha regular, e aí `.or()`
+     casa as duas, `.maybeSingle()` devolve PGRST116 e a tela do líder para de
+     salvar aquele dia, para sempre, com um erro cru de PostgREST.
+
+     Agora a escolha é explícita e do lado de cá: as candidatas vêm todas, e
+     o evento DESTA equipe ganha do culto regular. É a mesma regra que
+     `salvar_dia` passou a seguir na migração 61 e que `visao_geral()` já
+     seguia desde a 60 — os três lados agora decidem igual.
+
+     Ordenar por `id` no desempate não é capricho: sem ordem, duas linhas
+     igualmente elegíveis vêm na ordem física do banco, que muda sozinha, e a
+     escala do dia migraria de uma para outra sem ninguém mexer em nada. */
+  const candidatas = () => s.from('cultos').select('id,evento,equipe_id')
+    .eq('data', p.p_data)
+    .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
+    .order('id');
+  const escolher = (linhas: any[] | null) => {
+    const l = linhas || [];
+    return (l.find(c => c.evento && c.equipe_id === equipeId) || l.find(c => !c.evento))?.id as string | undefined;
+  };
+
   let cultoId: string | undefined;
   {
-    const { data: c, error } = await doDia().maybeSingle();
+    const { data: cs, error } = await candidatas();
     if (error) throw error;
-    cultoId = c?.id;
+    cultoId = escolher(cs);
     if (!cultoId) {
       const { data: novo, error: e2 } = await s.from('cultos').insert({ data: p.p_data }).select('id').single();
       if (e2) {
         /* outro líder criou o mesmo dia neste instante: busca de novo */
-        const { data: c2, error: e3 } = await doDia().maybeSingle();
-        if (e3 || !c2) throw e2;
-        cultoId = c2.id;
+        const { data: cs2, error: e3 } = await candidatas();
+        if (e3) throw e2;
+        cultoId = escolher(cs2);
+        if (!cultoId) throw e2;
       } else cultoId = novo.id;
     }
   }

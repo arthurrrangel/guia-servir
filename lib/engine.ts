@@ -193,8 +193,26 @@ export function quemPodeCobrir(S: Estado, data: string, funcao: string, qtd = 3)
   for (const [fn, sl] of Object.entries(S.escalas[data]?.slots || {})) {
     if (fn === funcao && sl?.vid && (sl.status === 'recusado' || sl.status === 'furou')) vagou.add(sl.vid);
   }
+  /* E QUEM RECUSOU OUTRO POSTO DO MESMO DIA TAMBÉM ESTÁ FORA — 20/09/2026.
+
+     `vagou`, acima, só olha a vaga que está sendo coberta. Quem recusou OUTRO
+     posto do mesmo domingo continuava entrando na lista.
+
+     Até esta manhã isso funcionava por acidente: `gerarDia` escrevia a recusa
+     dentro de `v.indisponivel`, e o `respostaDe` lá embaixo a lia como 'nao'.
+     Tirar aquela mutação (que inventava um dado que a tabela não tem) deixou
+     esta função sem a informação, e o motor ficou assimétrico: o sorteio
+     respeita a recusa, a busca manual de substituto não.
+
+     O estrago é pequeno e preciso: o líder que acabou de receber "não posso
+     nesse domingo" da Ana recebe a Ana como sugestão para a outra vaga do
+     mesmo domingo, e ordenada como "não respondeu" em vez de "não pode". O
+     banco aceitaria (o gatilho lê a tabela `indisponibilidades`, não o status
+     do slot), então nada quebra: só a sugestão fica errada, justamente na
+     tela que existe para resolver uma recusa. */
+  const recusaram = quemRecusou(S, data);
   return candidatos(S, funcao, data, { excluirOcupados: true, ignorarLimite: true })
-    .filter(c => !vagou.has(c.id))
+    .filter(c => !vagou.has(c.id) && !recusaram.has(c.id))
     .map(c => {
       const v = S.voluntarios.find(x => x.id === c.id)!;
       return { id: c.id, nome: c.nome, tel: v?.tel || '', nivel: c.nivel,

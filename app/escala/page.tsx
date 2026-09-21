@@ -294,7 +294,8 @@ function Escala() {
   async function marcarPrimeira(d: string, funcao: string) {
     const dia = garantirDia(S, d);
     const sl = dia.slots[funcao];
-    if (!sl?.vid) return;
+    /* idem: `return` mudo vira aviso. Ver a nota em /painel. */
+    if (!sl?.vid) { aviso('Essa vaga está sem ninguém: escolha a pessoa antes de marcar a 1ª vez.'); return; }
     setOcupado(true);
     const snap = retrato([d]);
     sl.primeiraVez = !sl.primeiraVez;
@@ -319,10 +320,22 @@ function Escala() {
      sorteio, e as duas gravações correndo juntas disputam as mesmas linhas.
      O que muda é que o recado agora ESPERA em vez de sumir: fica guardado num
      ref e é gravado assim que o que está em voo terminar. */
-  const recadoEmEspera = useRef<{ d: string; txt: string } | null>(null);
+  /* O `equipeId` VAI JUNTO, E ISSO NÃO É ZELO — 20/09/2026, reauditoria.
+
+     O Shell renderiza `<main>{children}</main>` SEM `key`, então esta tela
+     não remonta quando o líder troca de ministério, e o botão de trocar não
+     é `disabled={ocupado}` (o Shell não conhece esse estado). Se a troca cair
+     na janela em que `ocupado` está ligado, o despejo lá embaixo chamaria
+     `salvarObs` lendo `equipe!.id` JÁ TROCADO: o recado da Mídia entraria no
+     `culto_obs` do Louvor, e a Mídia nunca o receberia.
+
+     Guardar o id junto e descartar o pendente quando ele muda é a correção
+     inteira. Descartar e não gravar no lugar errado: o texto ainda está no
+     campo, e o líder que voltar ao ministério dele o encontra. */
+  const recadoEmEspera = useRef<{ d: string; txt: string; eq: string } | null>(null);
 
   async function salvarObs(d: string, txt: string) {
-    if (ocupado) { recadoEmEspera.current = { d, txt }; return; }
+    if (ocupado) { recadoEmEspera.current = { d, txt, eq: equipe?.id || '' }; return; }
     setOcupado(true);
     const snap = retrato([d]);
     garantirDia(S, d).obs = txt;
@@ -338,9 +351,16 @@ function Escala() {
     const p = recadoEmEspera.current;
     if (!p) return;
     recadoEmEspera.current = null;
+    /* trocou de ministério enquanto o recado esperava: o dia e o texto são de
+       outro time, e gravá-los aqui é pior que perdê-los */
+    if (p.eq !== (equipe?.id || '')) return;
+    /* e se o dia sumiu do estado nesse meio-tempo (um evento removido, por
+       exemplo), `garantirDia` o recriaria e `salvarDia` criaria um culto numa
+       data que não tem culto nenhum */
+    if (!S.escalas[p.d]) return;
     void salvarObs(p.d, p.txt);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ocupado]);
+  }, [ocupado, equipe?.id]);
 
   async function novoPlantao(d: string) {
     setOcupado(true);

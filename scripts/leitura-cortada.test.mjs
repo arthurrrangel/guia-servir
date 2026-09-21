@@ -75,5 +75,84 @@ function fingeBanco({ corta = false } = {}) {
   ok(/cortada/i.test(String(subiu?.message || '')), 'e o motivo diz que veio cortada', String(subiu?.message).slice(0, 60));
 }
 
+/* 3) O CORTE DEIXOU DE SER PANE E VIROU RECUPERAÇÃO — 20/09/2026, reauditoria.
+
+   Transformar corte silencioso em erro duro (item 2 acima) era metade da
+   correção. A outra metade é não deixar o app morrer por causa disso.
+
+   Os lotes foram dimensionados contando BYTES DE URL contra os 8192 do nginx.
+   O `max-rows` do PostgREST é um teto DIFERENTE, de LINHAS, e um lote de
+   `escalacoes` são até `funções × cultos` linhas. Medido: o Connect, com 18
+   postos e 106 cultos na janela, chega a ~960 de 1000 — 96% do teto, hoje.
+   No dia em que encher os 18 postos, ou a janela passar de 106 cultos, a tela
+   e o robô passariam a lançar, sem recuperação.
+
+   Agora o lote que volta cortado é partido ao meio e pedido de novo. O corte
+   é OBSERVÁVEL (`count` diz quantas existem, `data.length` diz quantas
+   vieram), então dá para reagir em vez de prever. */
+{
+  /* um banco que corta em 1000 linhas por resposta, como o PostgREST faz */
+  const TETO = 1000;
+  let pedidos = 0, maiorPedido = 0;
+  function bancoQueCorta({ porId = 40, vols = 60 } = {}) {
+    const ids = Array.from({ length: vols }, (_, i) => 'v' + i);
+    const tabela = (nome) => {
+      let pediuCount = false, filtro = null;
+      const eu = {
+        select(_c, o) { pediuCount = o?.count === 'exact'; return eu; },
+        eq() { return eu; }, gte() { return eu; }, or() { return eu; }, order() { return eu; },
+        in(_col, l) { if (!filtro) filtro = l; return eu; },
+        maybeSingle() { return { data: null, error: null }; },
+        then(res) { return Promise.resolve(resposta()).then(res); },
+      };
+      const resposta = () => {
+        if (nome === 'funcoes') return { data: [{ id: 'f1', nome: 'P', equipe_id: 'e1', ativa: true, ordem: 1, simultanea: true, tipos: ['domingo'] }], error: null };
+        if (nome === 'voluntarios') return { data: ids.map(id => ({ id, nome: id, ativo: true, equipe_id: 'e1', telefone: null, limite_mes: null, token: 't'+id, conferido: true })), error: null };
+        if (nome === 'cultos') return { data: [{ id: 'c1', data: '2026-10-04' }], error: null };
+        if (nome === 'habilidades') {
+          pedidos++; maiorPedido = Math.max(maiorPedido, (filtro || []).length);
+          const total = (filtro || []).length * porId;
+          const veio = Math.min(total, TETO);
+          const data = Array.from({ length: veio }, (_, i) => ({ voluntario_id: (filtro || [])[0], funcao_id: 'f' + i, nivel: 'titular', confirmado: true }));
+          return { data, error: null, ...(pediuCount ? { count: total } : {}) };
+        }
+        return { data: [], error: null, ...(pediuCount ? { count: 0 } : {}) };
+      };
+      return eu;
+    };
+    return { from: tabela };
+  }
+
+  /* 60 voluntários × 40 habilidades = 2400 linhas, cortadas em 1000 por
+     resposta. Um lote só não cabe; partido, cabe. */
+  pedidos = 0; maiorPedido = 0;
+  /* em try: sem a partição, `linhasDaEquipe` LANÇA, e um teste que morre por
+     exceção não diz qual asserção falhou — diz só que parou */
+  let r = null, explodiu = null;
+  try { r = await linhasDaEquipe(bancoQueCorta(), 'e1', '2026-01-01'); }
+  catch (e) { explodiu = e; }
+  ok(explodiu === null, 'a carga não falha só porque um lote não coube numa resposta',
+     String(explodiu?.message || '').slice(0, 110));
+  ok((r?.habilidades || []).length === 60 * 40,
+     'o que não cabia numa resposta chega inteiro, partindo o lote',
+     `vieram ${(r?.habilidades || []).length} de ${60 * 40}`);
+  ok(pedidos > 1, 'e o lote foi de fato partido', `pedidos=${pedidos}`);
+  ok(maiorPedido <= 60, 'nenhum pedido levou mais ids que o lote original', String(maiorPedido));
+
+  /* e o caso que partir NÃO resolve: uma linha só que passa do teto. Aí tem
+     que virar erro, e o erro tem que dizer que partir não adianta. */
+  function bancoImpossivel() {
+    const b = bancoQueCorta({ porId: 5000, vols: 2 });
+    return b;
+  }
+  let subiu = null;
+  try { await linhasDaEquipe(bancoImpossivel(), 'e1', '2026-01-01'); }
+  catch (e) { subiu = e; }
+  ok(subiu !== null, 'um id sozinho que não cabe ainda FALHA, em vez de mentir');
+  ok(/um item por vez/.test(String(subiu?.message || '')),
+     'e o erro diz que partir o lote não resolve esse caso',
+     String(subiu?.message).slice(0, 110));
+}
+
 if (falhas) { console.log(`leitura-cortada: ${falhas} falha(s) em ${feitas}`); process.exit(1); }
 console.log(`leitura-cortada: ${feitas}/${feitas} ok`);

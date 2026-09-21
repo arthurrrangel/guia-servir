@@ -554,25 +554,89 @@ const juntar = (rs: any[]): { data: any[]; error?: any; count?: number } => {
   };
 };
 
+/* O LOTE FOI DIMENSIONADO POR BYTES, E EXISTE UM TETO DE LINHAS TAMBÉM.
+
+   20/09/2026, reauditoria. `POR_LOTE` e `CULTOS_POR_LOTE` foram escolhidos
+   contando BYTES DE URL contra os 8192 do nginx. Certo, e insuficiente: o
+   PostgREST tem um segundo teto, o `max-rows` (1000 por padrão no Supabase),
+   e ele corta a resposta devolvendo 200 sem erro. `inteira()`, logo abaixo,
+   passou a detectar esse corte e a transformá-lo em erro — o que é a decisão
+   certa, e que também transforma "tela errada" em "tela que não abre".
+
+   A conta que ninguém tinha feito: um lote de `escalacoes` é até
+   `POR_LOTE funções × CULTOS_POR_LOTE cultos` LINHAS. Medido com os números
+   reais da igreja e 106 cultos na janela:
+
+       Louvor,  10 postos ->  maior lote ~540 linhas   (teto 1000)
+       Connect, 18 postos ->  maior lote ~960 linhas   96% do teto
+       Connect, 18 postos e todos preenchidos -> ~1080  ESTOURA
+
+   E não é só `escalacoes`: `habilidades` é `voluntários × funções`, e
+   `indisponibilidades` é `voluntários × dias marcados`. As três crescem com o
+   produto de duas coisas, e nenhuma delas tem `.range()` em lugar nenhum
+   deste arquivo. Sem recuperação, o app fica morto para aquele ministério até
+   alguém editar uma constante.
+
+   POR QUE PARTIR O LOTE EM VEZ DE ESCOLHER UM NÚMERO MENOR. Um número menor
+   é o mesmo erro de novo, um degrau mais adiante: ele vale para os tamanhos
+   de hoje e alguém descobre o próximo teto do mesmo jeito, em produção. O
+   corte é OBSERVÁVEL (`count` diz quantas linhas existem, `data.length` diz
+   quantas vieram), então dá para reagir a ele em vez de prevê-lo. O lote que
+   voltou cortado é partido ao meio e pedido de novo, recursivamente, e só
+   vira erro quando um lote de UM id ainda vem cortado — aí é uma linha só que
+   passa de mil, e nenhuma constante resolveria.
+
+   Custa no máximo log2(N) rodadas, e só no caso que hoje simplesmente
+   quebrava. O caminho normal continua sendo uma onda só. */
+const cortado = (r: any) =>
+  !r?.error && typeof r?.count === 'number' && (r?.data?.length ?? 0) < r.count;
+
+async function pedirPartindo(
+  ids: string[], consulta: (ids: string[]) => any, oQue: string,
+): Promise<{ data: any[]; error?: any; count?: number }> {
+  const r = await consulta(ids);
+  if (!cortado(r)) return r;
+  if (ids.length <= 1) {
+    return { data: null as any, error: {
+      code: 'LEITURA_CORTADA',
+      message: `A leitura de ${oQue} veio cortada mesmo pedindo um item por vez: `
+        + `${r.data?.length ?? 0} de ${r.count} linhas. Uma linha só da lista passa do teto `
+        + `de linhas do PostgREST, e partir o lote não resolve isso.`,
+    } };
+  }
+  const meio = Math.ceil(ids.length / 2);
+  return juntar(await Promise.all([
+    pedirPartindo(ids.slice(0, meio), consulta, oQue),
+    pedirPartindo(ids.slice(meio), consulta, oQue),
+  ]));
+}
+
 export async function emLotes(
-  ids: string[], consulta: (ids: string[]) => any,
+  ids: string[], consulta: (ids: string[]) => any, oQue = 'esta lista',
 ): Promise<{ data: any[]; error?: any; count?: number }> {
   if (!ids.length) return { data: [] };
-  if (ids.length <= POR_LOTE) return await consulta(ids);
-  return juntar(await Promise.all(fatiar(ids, POR_LOTE).map(l => consulta(l))));
+  return juntar(await Promise.all(
+    fatiar(ids, POR_LOTE).map(l => pedirPartindo(l, consulta, oQue))));
 }
 
 /* Lote em DUAS dimensões, para as consultas que têm dois `.in()`.
    Ver a nota de `CULTOS_POR_LOTE`: o segundo `.in()` ia inteiro dentro de
-   cada lote do primeiro, e era ele que empurrava a URL para o teto. */
+   cada lote do primeiro, e era ele que empurrava a URL para o teto.
+
+   Aqui quem parte é a dimensão dos CULTOS, e não a dos ids: a lista de
+   cultos é a que cresce sozinha (a janela engorda um por semana), enquanto a
+   de funções e voluntários só muda quando a igreja muda. */
 export async function emLotes2(
   ids: string[], cultos: string[], consulta: (ids: string[], cultos: string[]) => any,
+  oQue = 'esta lista',
 ): Promise<{ data: any[]; error?: any; count?: number }> {
   if (!ids.length || !cultos.length) return { data: [] };
-  const a = fatiar(ids, POR_LOTE), b = fatiar(cultos, CULTOS_POR_LOTE);
-  if (a.length === 1 && b.length === 1) return await consulta(a[0], b[0]);
   const pares: Promise<any>[] = [];
-  for (const x of a) for (const y of b) pares.push(consulta(x, y));
+  for (const x of fatiar(ids, POR_LOTE)) {
+    for (const y of fatiar(cultos, CULTOS_POR_LOTE)) {
+      pares.push(pedirPartindo(y, (cs) => consulta(x, cs), oQue));
+    }
+  }
   return juntar(await Promise.all(pares));
 }
 
@@ -668,17 +732,17 @@ export async function linhasDaEquipe(
      resposta veio completa. Ver o comentário de `inteira` logo acima. */
   const C = { count: 'exact' as const };
   const [habs, indis, escs, plants, recados, disp] = (await Promise.all([
-    emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids)),
-    emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde)),
+    emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids), 'habilidades'),
+    emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde), 'indisponibilidades'),
     emLotes2(funcaoIds, cultoIds, (ids, cs) =>
-      s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cs)),
+      s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cs), 'escalacoes'),
     emLotes2(volIds, cultoIds, (ids, cs) =>
-      s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cs)),
+      s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cs), 'plantoes'),
     /* `culto_obs` não passava por lote nenhum: a lista inteira de cultos ia
        na URL sempre, e era a consulta que estourava primeiro (207 cultos). */
     emLotes2([equipeId], cultoIds, (ids, cs) =>
-      s.from('culto_obs').select('*', C).in('equipe_id', ids).in('culto_id', cs)),
-    emLotes(volIds, ids => s.from('disponibilidade').select('*', C).in('voluntario_id', ids).gte('data', desde)),
+      s.from('culto_obs').select('*', C).in('equipe_id', ids).in('culto_id', cs), 'recados do culto'),
+    emLotes(volIds, ids => s.from('disponibilidade').select('*', C).in('voluntario_id', ids).gte('data', desde), 'disponibilidade'),
   ])).map((r: any, i: number) =>
     inteira(r, ['habilidades', 'indisponibilidades', 'escalacoes', 'plantoes', 'recados do culto', 'disponibilidade'][i]));
   /* 14/09/2026. ESTAS SEIS TAMBÉM SOBEM. Antes, um erro aqui virava lista

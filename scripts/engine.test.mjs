@@ -864,5 +864,57 @@ console.log('\n30. A cor e o proximo mes saem de um lugar so');
 }
 
 
+console.log('\n31. Quem recusou o dia nao e sugerido para cobrir OUTRA vaga dele');
+/* Reauditoria, 20/09. `quemPodeCobrir` só olhava a vaga que está sendo
+   coberta (`vagou`). Quem recusou OUTRO posto do mesmo domingo continuava
+   entrando na lista, e ordenado como "não respondeu" em vez de "não pode".
+
+   Funcionava por acidente até esta manhã: `gerarDia` escrevia a recusa dentro
+   de `v.indisponivel` e o `respostaDe` da própria função a lia. Tirar aquela
+   mutação, que inventava um dado que a tabela não tem, deixou esta função sem
+   a informação — e o motor ficou assimétrico: o sorteio respeita a recusa, a
+   busca manual de substituto não.
+
+   É a tela que o líder abre JUSTAMENTE depois de alguém dizer "não posso". */
+{
+  const F2 = [
+    { nome: 'FOTO', simultanea: true, ordem: 1, ativa: true },
+    { nome: 'PROJEÇÃO', simultanea: true, ordem: 2, ativa: true },
+  ];
+  const D = E.domingosDoMes(2026, 8)[0];
+  const S = base([
+    v('Ana', { 'FOTO': 'titular', 'PROJEÇÃO': 'titular' }, 9),
+    v('Carla', { 'PROJEÇÃO': 'titular' }, 9),
+  ], F2);
+  const d = E.garantirDia(S, D);
+  /* Ana recusou FOTO. A vaga a cobrir é PROJEÇÃO, que é outra. */
+  d.slots['FOTO'] = { vid: 'id_ana', status: 'recusado', fixo: false };
+
+  const nomes = E.quemPodeCobrir(S, D, 'PROJEÇÃO').map(x => x.nome);
+  ok(!nomes.includes('Ana'), 'quem recusou outro posto do dia não é sugerido', nomes.join(','));
+  ok(nomes.includes('Carla'), 'e quem não recusou continua sendo', nomes.join(','));
+
+  /* e o caso que já funcionava continua: quem recusou ESTA vaga também fica
+     fora, que é a guarda `vagou` de sempre */
+  const S2 = base([
+    v('Ana', { 'PROJEÇÃO': 'titular' }, 9),
+    v('Carla', { 'PROJEÇÃO': 'titular' }, 9),
+  ], F2);
+  E.garantirDia(S2, D).slots['PROJEÇÃO'] = { vid: 'id_ana', status: 'recusado', fixo: false };
+  const n2 = E.quemPodeCobrir(S2, D, 'PROJEÇÃO').map(x => x.nome);
+  ok(!n2.includes('Ana'), 'quem recusou a própria vaga segue fora', n2.join(','));
+
+  /* e quem só está ESCALADO em outro posto (sem recusar) não pode sumir: ele
+     é ocupado, o que é outra regra, mas a lista não pode ficar vazia à toa */
+  const S3 = base([
+    v('Ana', { 'FOTO': 'titular', 'PROJEÇÃO': 'titular' }, 9),
+    v('Carla', { 'PROJEÇÃO': 'titular' }, 9),
+  ], F2);
+  E.garantirDia(S3, D).slots['FOTO'] = { vid: 'id_ana', status: 'confirmado', fixo: true };
+  ok(E.quemPodeCobrir(S3, D, 'PROJEÇÃO').map(x => x.nome).includes('Carla'),
+     'a lista não some por causa da guarda nova');
+}
+
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

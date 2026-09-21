@@ -100,5 +100,40 @@ const req = (cab) => new Request('https://exemplo.invalido/', { headers: cab });
      'ou seja: a contagem dele NÃO foi zerada pela poda');
 }
 
+/* 5) A PODA TEM QUE LIMITAR O MAPA, E NÃO CUSTAR CARO NA ROTA QUENTE.
+
+   A primeira versão só apagava balde EXPIRADO e varria o mapa inteiro em toda
+   requisição acima do limiar. Com muitos IPs VIVOS — que é o tráfego que este
+   módulo existe para conter — nada era apagado, o mapa crescia sem teto, e a
+   varredura virava o amplificador do próprio ataque. Medido antes da
+   correção: 2.000 chamadas com ~20 mil IPs vivos levaram 468 ms; com o mapa
+   vazio, 1 ms. */
+{
+  zerar();
+  const t0 = 8_000_000;
+  /* 30 mil IPs VIVOS, janela longa: acima do teto de 20 mil, e nenhum deles
+     expira, então a poda por expiração não tem o que apagar. */
+  const antes = Date.now();
+  for (let i = 0; i < 30000; i++) passe('vivo' + i, 5, 3600, t0 + i);
+  const encher = Date.now() - antes;
+  ok(encher < 4000, 'encher o mapa acima do teto não custa uma ordenação por inserção',
+     `30.000 inserções levaram ${encher} ms`);
+  console.log(`  [medida] 30.000 inserções com o mapa acima do teto: ${encher} ms`);
+
+  const marca = Date.now();
+  for (let i = 0; i < 5000; i++) passe('quente', 1e9, 3600, t0 + 40000 + i);
+  const levou = Date.now() - marca;
+  ok(levou < 300, 'e a rota quente não paga varredura do mapa a cada chamada',
+     `5.000 chamadas levaram ${levou} ms`);
+  console.log(`  [medida] 5.000 chamadas no mesmo balde: ${levou} ms`);
+
+  /* o que importa depois de tudo isso: um IP novo ainda é atendido E contado,
+     ou seja, o limitador continua limitando com o mapa cheio */
+  for (let i = 0; i < 3; i++) {
+    ok(passe('novo', 3, 60, t0 + 90000).ok, `com o mapa cheio, o passe ${i + 1} do IP novo entra`);
+  }
+  ok(!passe('novo', 3, 60, t0 + 90000).ok, 'e o quarto dele é barrado como sempre');
+}
+
 if (falhas) { console.log(`\nteto-de-taxa: ${falhas} falha(s) em ${feitas}\n`); process.exit(1); }
 console.log(`\nteto-de-taxa: ${feitas}/${feitas} ok\n`);
