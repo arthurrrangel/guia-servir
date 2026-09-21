@@ -1,4 +1,4 @@
-RESTAURA = [84, 85]
+RESTAURA = [84, 85, 86]
 CASOS = [
  {"nome": "o portao volta a ler so a coluna congelada",
   "sql": "create or replace function demandas.falta_aprovacao(d demandas.demandas) returns boolean "
