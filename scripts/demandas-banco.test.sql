@@ -66,8 +66,8 @@ select chk('abre a demanda do exemplo do PDF', 'true',
      'categoria_id',(select id from demandas.categorias where nome='Criação de arte'),
      'prioridade','alta',
      'publico','Jovens e membros da igreja',
-     'evento','Culto de Celebração', 'evento_data','2026-09-26',
-     'prazo','2026-09-22'))->>'ok'));
+     'evento','Culto de Celebração', 'evento_data',(current_date + 12)::text,
+     'prazo',(current_date + 8)::text))->>'ok'));
 
 select chk('nasce roteada para Comunicacao, sem ninguem triar', 'Comunicação',
   (public.dem_ver('tk-jovem', nd('Divulgação do Culto de Celebração'))->'demanda')->>'responsavel_setor');
@@ -86,18 +86,18 @@ select chk('sem prazo COM justificativa: aceita', 'true',
 
 select chk('urgente sem impacto: recusa', 'REGRA',
   (public.dem_abrir('tk-jovem', jsonb_build_object(
-     'titulo','Urgente cru', 'descricao','x', 'prioridade','urgente', 'prazo','2026-09-20',
+     'titulo','Urgente cru', 'descricao','x', 'prioridade','urgente', 'prazo',(current_date + 6)::text,
      'categoria_id',(select id from demandas.categorias where nome='Suporte de som')))->>'erro'));
 
 select chk('urgente com impacto: aceita', 'true',
   (public.dem_abrir('tk-jovem', jsonb_build_object(
      'titulo','Som mudo no domingo', 'descricao','x', 'prioridade','urgente',
-     'impacto','Sem som nao tem culto', 'prazo','2026-09-20',
+     'impacto','Sem som nao tem culto', 'prazo',(current_date + 6)::text,
      'categoria_id',(select id from demandas.categorias where nome='Suporte de som')))->>'ok'));
 
 select chk('evento sem data: recusa', 'REGRA',
   (public.dem_abrir('tk-jovem', jsonb_build_object(
-     'titulo','Evento solto', 'descricao','x', 'prazo','2026-09-30', 'evento','Congresso',
+     'titulo','Evento solto', 'descricao','x', 'prazo',(current_date + 16)::text, 'evento','Congresso',
      'categoria_id',(select id from demandas.categorias where nome='Reserva de espaço')))->>'erro'));
 
 select chk('numero pulado por abertura recusada nao vira buraco de dado', 'true',
@@ -105,7 +105,7 @@ select chk('numero pulado por abertura recusada nao vira buraco de dado', 'true'
 
 -- 4 ---------------------------------- aprovação vem da categoria, sozinha ---
 select public.dem_abrir('tk-jovem', jsonb_build_object(
-  'titulo','Comprar cadeiras', 'descricao','30 cadeiras', 'prazo','2026-10-10',
+  'titulo','Comprar cadeiras', 'descricao','30 cadeiras', 'prazo',(current_date + 26)::text,
   'orcamento','4500',
   'categoria_id',(select id from demandas.categorias where nome='Compra de equipamentos')));
 
@@ -224,9 +224,22 @@ select chk('solicitante nao consegue marcar comentario como interno', 'false',
       and tipo = 'comentario' order by id desc limit 1));
 
 -- 13b ------------------------------------------- uma que de fato atrasou ---
-/* O prazo 20/09 do "som mudo" ainda não venceu hoje. Para medir atraso o
-   teste precisa de uma demanda com prazo REALMENTE vencido — e o banco aceita
-   prazo no passado de propósito: demanda registrada depois do fato existe. */
+/* Para medir atraso o teste precisa de uma demanda com prazo REALMENTE
+   vencido, e o banco aceita prazo no passado de propósito: demanda registrada
+   depois do fato existe.
+
+   E TODOS OS OUTROS PRAZOS DESTE ARQUIVO SÃO RELATIVOS A `current_date`, POR
+   CAUSA DO QUE ACONTECEU EM 21/09/2026. Eles eram datas absolutas, escritas
+   em 18/09 com o comentário "o prazo 20/09 do som mudo ainda não venceu
+   hoje". No dia 21 a frase deixou de ser verdade sozinha, sem ninguém tocar
+   em uma linha de código: o "som mudo" virou atrasado também, `atrasadas`
+   passou de 1 para 2, e o caso 46 reprovou.
+
+   Ninguém viu, porque `scripts/demandas-banco.sh` imprimia a tabela e saía
+   com código 0 — os 62 casos deste arquivo eram decorativos no CI. As duas
+   coisas foram corrigidas juntas, e é o par que importa: fixture que depende
+   do calendário é bomba-relógio, e harness que não falha é o detonador
+   silencioso. */
 select public.dem_abrir('tk-jovem', jsonb_build_object(
   'titulo','Trocar a lampada do corredor', 'descricao','x',
   'prazo',(current_date - 5)::text,
@@ -293,7 +306,7 @@ select chk('e a resposta dele entrou no historico', 'sim',
 
 -- 17 --------------------------------- travada por aprovacao nao destrava ---
 select public.dem_abrir('tk-jovem', jsonb_build_object(
-  'titulo','Reembolso do combustivel', 'descricao','x', 'prazo','2026-10-01',
+  'titulo','Reembolso do combustivel', 'descricao','x', 'prazo',(current_date + 17)::text,
   'categoria_id',(select id from demandas.categorias where nome='Reembolso')));
 select chk('reembolso tambem nasce esperando aprovacao', 'travada/aprovacao',
   (select status||'/'||travada_por from demandas.demandas where titulo='Reembolso do combustivel'));
@@ -307,3 +320,31 @@ select chk('rejeitar encerra com motivo', 'cancelada',  st('Reembolso do combust
 \t off
 select n, caso, esperado, deu, case when deu = esperado then 'ok' else 'FALHOU' end as v from res order by n;
 select count(*) filter (where deu is distinct from esperado) as falhas, count(*) as total from res;
+
+/* E AGORA O ARQUIVO FALHA DE VERDADE.
+
+   Até 21/09/2026 ele terminava na linha de cima: imprimia "falhas | 1" e
+   devolvia 0 para quem chamou. `\set ON_ERROR_STOP off`, lá no começo, é
+   necessário para um `chk` que erra não abortar os outros 61 — mas ele também
+   faz o psql sair com 0 mesmo depois de erro. Ligar de volta AQUI, na última
+   instrução, é o que transforma a contagem em veredito. */
+\set ON_ERROR_STOP on
+do $veredito$
+/* `v_n` e nao `n`: a coluna `res.n` existe, e um `order by n` dentro do
+   `string_agg` fica ambiguo entre a variavel e a coluna. O Postgres recusa a
+   consulta inteira, o bloco levanta a excecao ERRADA, e o veredito passa a
+   reprovar sempre — inclusive quando os 62 casos estao verdes. Terceira vez
+   que esse mesmo `n` morde neste repositorio (ver migracao 60). */
+declare v_n int; v_total int; d text;
+begin
+  select count(*) filter (where deu is distinct from esperado), count(*)
+    into v_n, v_total from res;
+  if v_n = 0 then
+    raise notice 'demandas-banco: %/% casos.', v_total, v_total;
+    return;
+  end if;
+  select string_agg(format(E'\n  x %s: esperava %L, veio %L', r.caso, r.esperado, r.deu), '' order by r.n)
+    into d from res r where r.deu is distinct from r.esperado;
+  raise exception 'DEMANDAS-BANCO REPROVOU: % de % casos', v_n, v_total
+    using detail = d, errcode = 'raise_exception';
+end $veredito$;
