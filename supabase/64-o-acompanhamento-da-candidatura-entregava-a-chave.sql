@@ -1,3 +1,24 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a versao
+   deste arquivo por cima da que estiver la, seja ela mais nova ou nao, e sem
+   um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     candidatar (a 63 e esta dividem a funcao; fora de ordem uma apaga a outra)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 64. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(64);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    64 · A QUARTA PORTA: O ACOMPANHAMENTO DA CANDIDATURA ENTREGAVA A CHAVE
 

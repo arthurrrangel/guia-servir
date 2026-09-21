@@ -1,3 +1,25 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a versao
+   deste arquivo por cima da que estiver la, seja ela mais nova ou nao, e sem
+   um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     eu_quem_cobre (a 62 e a 76 refizeram: a 62 tirou de sugestao quem recusou o
+     domingo, e a 76 fechou a janela de 48h. Reaplicar aqui devolve as duas)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 2. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(2);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    02 — RECUPERADA DO BANCO (não do histórico)
 

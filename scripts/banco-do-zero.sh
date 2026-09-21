@@ -84,6 +84,23 @@ $P -d guia -q -v ON_ERROR_STOP=1 -f "$RAIZ/scripts/andar-do-supabase.sql" >/dev/
 # `pg_dump` de verdade, o caminho passa a ser aquele, e este vira o teste de
 # que as migrações ainda contam a mesma história que o dump.
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# 0 · AS TRANCAS, ANTES DE APLICAR QUALQUER COISA
+#
+# Migração que pode desfazer outra precisa de `exige_versao_ate`. Isso era
+# posto à mão e em 21/09 vinte e uma estavam sem — inclusive a 52, cuja
+# reaplicação reabre o portão de aprovação que a 67 fechou (medido: as
+# guardas de `aprovacao` em `dem_mover` caem de 32 para 25, e a conferência
+# da 67 passa a reprovar 6 de 14 casos). O teste ao lado faz a pergunta que
+# ninguém fazia. Ele é de LEITURA: não precisa de banco, e por isso roda
+# antes de subir um.
+# ---------------------------------------------------------------------------
+if ! node "$RAIZ/scripts/trancas.test.mjs"; then
+  echo "FALHOU — ha migracao sem tranca que pode desfazer outra (veja acima)."
+  su postgres -c "$PGBIN/pg_ctl -D $DIR/data stop" >/dev/null 2>&1
+  exit 1
+fi
+
 echo "· aplicando as migrações num banco vazio"
 ok=0; falhou=0; quebradas=""
 for f in $(ls "$RAIZ"/supabase/*.sql | grep -E '/[0-9]{2}-' | grep -v '00-ESTADO' | sort); do

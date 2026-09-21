@@ -1,3 +1,27 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a versao
+   deste arquivo por cima da que estiver la, seja ela mais nova ou nao, e sem
+   um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     dem_mover (a 67 refez: MEDIDO em 21/09 num banco na 81 — reaplicar a 52 derruba as
+     mencoes de `aprovacao` em dem_mover de 32 para 25, a conferencia da 67 reprova 6 de
+     14 casos, e a primeira linha e `PORTA 1 ABERTA: concluir fechou o gasto sem
+     aprovacao`. A 52 imprime tres OKs enquanto faz isso.)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 52. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(52);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    52 · O QUE A AUDITORIA DE ARQUITETURA PROVOU
    19/09/2026

@@ -1,3 +1,25 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a versao
+   deste arquivo por cima da que estiver la, seja ela mais nova ou nao, e sem
+   um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     eu_dados (a 71 e a 75 refizeram: reaplicar aqui perde VINCULO_PAUSADO e o
+     conserto do `nao posso` que derrubava todos os postos)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 38. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(38);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    38 — QUANDO A PESSOA ENTROU NAQUELA VAGA
 

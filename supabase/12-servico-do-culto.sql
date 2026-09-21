@@ -1,3 +1,25 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO: ele grava a versao
+   deste arquivo por cima da que estiver la, seja ela mais nova ou nao, e sem
+   um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     eu_relatorio (a 75 refez: reaplicar aqui tira RELATORIO_ANTES_DA_HORA e
+     RELATORIO_DE_QUEM_NAO_FOI, e o relatorio volta a aceitar profecia)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 12. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(12);
+  end if;
+end $tranca$;
+
 -- ===================== SERVIÇO DO CULTO DE DOMINGO (novo ministério) =======
 -- Time separado da Mídia: outras pessoas, outras funções, outra escala. O que
 -- compartilha é só o calendário de cultos, que é o mesmo domingo para todo
