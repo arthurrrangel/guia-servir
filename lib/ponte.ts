@@ -7,14 +7,84 @@
 import { CONFIG_PADRAO, estadoVazio, garantirDia } from './engine';
 import type { Estado, Nivel, Status } from './engine';
 
+/* =============================================================================
+   AS LINHAS DO BANCO, COM TIPO — 20/09/2026.
+
+   Este bloco era `any[]` em todos os nove campos. Entre o `select` e o
+   `montarEstado` não havia tipo nenhum: trocar `f.simultanea` por
+   `f.simultânea` compilava, e a escala quebrava em produção. O compilador
+   existe e estava desligado justo na fronteira onde os nomes vêm de fora.
+
+   O QUE ESTÁ ESCRITO AQUI SAIU DO CATÁLOGO, não de memória: o banco foi
+   reconstruído do repositório (`bash scripts/banco-do-zero.sh`) e
+   `information_schema.columns` respondeu nome, tipo e nulabilidade de cada
+   coluna. Onde o tipo diz `| null`, o banco diz `is_nullable = YES`.
+
+   As colunas OPCIONAIS aparecem com `?` porque a degradação deste arquivo
+   pode não trazê-las: quando o banco recusa uma coluna nova por falta de
+   GRANT, a consulta é refeita sem ela e a linha chega sem o campo. Ver a nota
+   do apagão de 18/09, mais abaixo. `montarEstado` já trata cada uma dessas
+   ausências, e agora o compilador cobra que continue tratando.
+
+   Só entram as colunas que a carga PEDE. `voluntarios` tem treze colunas no
+   banco e a consulta pede oito; pôr as cinco restantes aqui faria o tipo
+   prometer dado que não chega. */
+
+export type LinhaFuncao = {
+  id: string; nome: string; simultanea: boolean; ordem: number;
+  ativa: boolean; equipe_id: string; tipos: string[];
+  relata?: boolean;                    // opcional na carga (degradação)
+  exige_sexo?: string | null;          // idem, e nulável no banco
+};
+export type LinhaVoluntario = {
+  id: string; nome: string; telefone: string | null; ativo: boolean;
+  /* null = SEGUE o limitePadrao da equipe, que é a regra da migração 11.
+     `is_nullable = YES` no banco, e o motor trata null e 0 como coisas
+     diferentes desde 20/09. */
+  limite_mes: number | null;
+  token: string; equipe_id: string; conferido: boolean;
+  sexo?: string | null;                // opcional na carga (degradação)
+};
+export type LinhaHabilidade = {
+  voluntario_id: string; funcao_id: string; nivel: Nivel; confirmado: boolean;
+};
+export type LinhaIndisponibilidade = { voluntario_id: string; data: string };
+export type LinhaDisponibilidade = {
+  voluntario_id: string; data: string; pode: boolean;
+  /* NOT NULL no banco (a coluna nasce com default). `montarEstado` não lê,
+     mas ela vem junto no `select('*')` desta consulta. */
+  respondido_em: string;
+};
+export type LinhaCulto = {
+  id: string; data: string;
+  evento?: string | null;              // as três da 54: somem na degradação
+  equipe_id?: string | null;
+  inicio?: string | null;
+};
+export type LinhaEscalacao = {
+  id: string; culto_id: string; funcao_id: string;
+  voluntario_id: string | null;        // vaga aberta é linha com voluntário nulo
+  status: Status; fixo: boolean; primeira_vez: boolean;
+  respondido_em: string | null; escalado_em: string | null;
+};
+export type LinhaPlantao = { culto_id: string; voluntario_id: string };
+export type LinhaRecado = {
+  culto_id: string; equipe_id: string; obs: string;
+  relatorio: string | null; problemas: string | null;
+  relatado_por: string | null; relatado_em: string | null;
+};
+export type LinhaConfig = { id?: number | null; dados: Record<string, any>; equipe_id: string | null };
+
 export type LinhasDoBanco = {
-  funcoes: any[]; voluntarios: any[]; habilidades: any[]; indisponibilidades: any[];
-  cultos: any[]; escalacoes: any[]; plantoes: any[]; config: any | null;
+  funcoes: LinhaFuncao[]; voluntarios: LinhaVoluntario[];
+  habilidades: LinhaHabilidade[]; indisponibilidades: LinhaIndisponibilidade[];
+  cultos: LinhaCulto[]; escalacoes: LinhaEscalacao[]; plantoes: LinhaPlantao[];
+  config: LinhaConfig | null;
   /* recado do domingo POR EQUIPE (culto_obs). Sem isso, o recado de um
      ministério aparecia no aviso do outro e um sobrescrevia o do outro. */
-  recados?: any[];
+  recados?: LinhaRecado[];
   /* respostas de "posso" por domingo (tabela disponibilidade) */
-  disponibilidades?: any[];
+  disponibilidades?: LinhaDisponibilidade[];
   equipe?: string;
 };
 

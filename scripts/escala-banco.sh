@@ -183,6 +183,18 @@ for fn in testar_permissoes testar_identidade schema_versao_conferir; do
   fi
 done
 
+echo
+echo "5. os tipos de lib/ponte.ts batem com o catalogo deste banco"
+# Ate 20/09 `LinhasDoBanco` era `any[]` nos nove campos: entre o `select` e o
+# `montarEstado` nao havia tipo nenhum, e trocar `f.simultanea` por a mesma
+# palavra com acento compilava e quebrava a escala em producao. Os tipos
+# existem agora, escritos a partir do catalogo. Tipo escrito a mao e verdade no
+# dia em que foi escrito; este passo e o que o mantem verdade.
+if ! PSQL="$PG/psql" PGHOST=/tmp PGPORT="$PORTA" PGUSER=postgres PGDATABASE="$BANCO" \
+     node "$B/scripts/tipos-contra-o-catalogo.mjs"; then
+  falhas=$((falhas+1))
+fi
+
 su postgres -c "$PG/pg_ctl -D $D stop" >/dev/null 2>&1
 
 echo
