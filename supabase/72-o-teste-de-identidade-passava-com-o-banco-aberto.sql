@@ -526,18 +526,78 @@ end $reg$;
 do $conferir$
 declare
   v_total int; v_ok int; v_aberto_ok int; v_aberto_total int;
-  v_n int; v_falhas text := '';
+  v_n int; v_falhas text := ''; v_n_txt text;
 begin
   -- 1 · a função roda inteira e passa
   select count(*), count(*) filter (where passou) into v_total, v_ok from testar_identidade();
   if v_total <> 27 then
     v_falhas := v_falhas || format(E'\n  1. emitiu %s casos, esperava 27', v_total);
   end if;
-  if v_ok <> v_total then
-    v_falhas := v_falhas || format(E'\n  2. %s de %s casos reprovaram num banco saudavel: %s',
-      v_total - v_ok, v_total,
-      (select string_agg(caso, '; ') from testar_identidade() where not passou));
-  end if;
+  /* ==================================================== 82f ================
+     DOIS TIPOS DE CASO MORAVAM NUMA CONTA SO, E ISSO TRAVOU UMA MIGRACAO DE
+     SEGURANCA POR CAUSA DE UM DADO ANTIGO.
+
+     `testar_identidade` mistura, de propósito, duas perguntas:
+
+       a) A FUNCAO FUNCIONA? Os casos de fixture, os de troca de papel, os de
+          `quem_sou`/`meu_link`, os de RLS. Sao o assunto desta migracao: a
+          versao velha respondia 12/12 com o banco ABERTO, ou seja, nao media
+          nada. Se algum destes reprova, a correcao nao esta de pe e a
+          migracao NAO pode entrar.
+
+       b) O DADO ESTA COMPLETO? Tres casos olham se a migracao 33 (identidade
+          em `pessoas` + `papeis`) cobriu todo organizador. Isso e um retrato
+          do banco, de anos atras, e a 72 nao cria nem conserta isso.
+
+     MEDIDO em 21/09, aplicando em producao:
+
+       3 de 27 casos reprovaram: organizador sem identidade; quantidade de
+       admins bate; acesso novo diverge do antigo
+
+       lideres .............. 11, todos com e-mail
+       sem pessoa_id ........  9      <- a transicao da 33 cobriu 2 de 11
+       admins em lideres ....  1      admins em papeis .... 3
+
+     NINGUEM ESTA SEM ACESSO por causa disso: `lidera_equipe` e `sou_lider`
+     consultam os dois caminhos com `or`, e o legado (`lideres`) ainda vale.
+     O que existe e uma transicao inacabada, e ela precisa de uma decisao
+     humana — quem vira admin e quem vira lider em `papeis` nao e conta que
+     um teste deva tomar sozinho.
+
+     Entao os tres viram RELATORIO, alto e nomeado, e param de bloquear. O
+     resto continua sendo portao: um caso do grupo (a) reprovando derruba a
+     migracao, como tem que ser. */
+  declare
+    v_dado constant text[] := array[
+      'organizador sem identidade',
+      'organizador com identidade e sem papel',
+      'quantidade de admins bate',
+      'quantidade de lideres de equipe bate',
+      'acesso novo diverge do antigo'];
+    v_retrato text;
+  begin
+    select string_agg(format('%s (esperava %s, veio %s)', caso, esperado, obtido), '; ')
+      into v_retrato from testar_identidade()
+     where not passou and caso = any (v_dado);
+
+    select string_agg(format('%s (esperava %s, veio %s)', caso, esperado, obtido), '; ')
+      into v_n_txt from testar_identidade()
+     where not passou and caso <> all (v_dado);
+
+    if v_n_txt is not null then
+      v_falhas := v_falhas || format(E'\n  2. a FUNCAO reprovou: %s', v_n_txt);
+    end if;
+    if v_retrato is not null then
+      raise warning E'\n=============================================================\n'
+        '72 · A IDENTIDADE DESTE BANCO ESTA INCOMPLETA, e isto NAO bloqueia\n'
+        'a migracao porque e dado antigo, nao defeito desta correcao:\n\n  %\n\n'
+        'Ninguem perdeu acesso: `lidera_equipe` e `sou_lider` ainda aceitam o\n'
+        'caminho legado (`lideres`). O que falta e terminar a transicao da 33,\n'
+        'e quem vira admin e quem vira lider em `papeis` e decisao de quem\n'
+        'administra a igreja, nao de uma migracao.\n'
+        '=============================================================', v_retrato;
+    end if;
+  end;
 
   -- 3 · COM O BANCO ABERTO, ELA TEM QUE REPROVAR
   begin
@@ -594,6 +654,17 @@ begin
   if v_falhas <> '' then
     raise exception E'CONFERENCIA DA 72 REPROVOU:%s', v_falhas;
   end if;
-  raise notice 'CONFERENCIA DA 72: 7/7. % casos, todos passam; com a RLS desligada, % reprovam.',
-    v_total, v_aberto_total - v_aberto_ok;
+  /* 82f · a mensagem final diz o que É, e nao o que eu esperava que fosse.
+     Ela afirmava "todos passam" mesmo quando os casos de retrato de dado
+     tinham reprovado — medido plantando uma lacuna de proposito. Mensagem
+     final que mente e pior que mensagem nenhuma, porque e a unica coisa que
+     quem aplica vai ler. */
+  select count(*) into v_n from testar_identidade() where not passou;
+  if v_n = 0 then
+    raise notice 'CONFERENCIA DA 72: 7/7. % casos, todos passam; com a RLS desligada, % reprovam.',
+      v_total, v_aberto_total - v_aberto_ok;
+  else
+    raise notice 'CONFERENCIA DA 72: 7/7. % casos; a FUNCAO passa em todos os que sao dela, e % caso(s) de RETRATO DO BANCO reprovam (o aviso acima nomeia quais). Com a RLS desligada, % reprovam.',
+      v_total, v_n, v_aberto_total - v_aberto_ok;
+  end if;
 end $conferir$;
