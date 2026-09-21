@@ -305,6 +305,20 @@
    ilegivel e pior que feio. */
 .dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere}
 
+/* O LINK DO ANEXO E UM ALVO SOZINHO, NAO UM LINK NO MEIO DE UMA FRASE.
+
+   A WCAG 2.5.5 dispensa link dentro de parágrafo — inflar uma palavra no meio
+   do texto estragaria o espaçamento. Mas este mora sozinho numa lista, é a
+   única coisa clicável da linha, e media 16px de altura. Quem erra o toque
+   num anexo, na melhor hipótese não abre nada.
+
+   `padding` vertical em vez de `min-height` porque o link quebra em várias
+   linhas quando a URL é comprida: altura fixa cortaria o texto. */
+.dm-anexo-link{
+  display:inline-block;padding:14px 0;
+  white-space:pre-wrap;overflow-wrap:anywhere;
+}
+
 /* SO PARA QUEM OUVE.
 
    `display:none` e `visibility:hidden` escondem do leitor de tela tambem, que
@@ -353,11 +367,20 @@
    O `::after` cresce a AREA DE TOQUE sem crescer o desenho: o botao continua
    discreto na lista e o dedo acerta. `pointer-events` fica no padrao de
    proposito — o pseudo-elemento faz parte do botao e recebe o toque por ele. */
-.dm-btn.dm-mini{min-height:36px;padding:0 var(--dm-e2);font-size:13px;position:relative}
-.dm-btn.dm-mini::after{
-  content:'';position:absolute;left:0;right:0;top:50%;
-  transform:translateY(-50%);height:44px;
-}
+.dm-btn.dm-mini{min-height:44px;padding:0 var(--dm-e2);font-size:13px;font-weight:500}
+
+/* A PRIMEIRA TENTATIVA DISTO FOI UM `::after` DE 44px SOBRE UM BOTAO DE 36,
+   PARA CRESCER O ALVO SEM CRESCER O DESENHO. Duas coisas derrubaram a ideia:
+
+   1. O medidor le `getBoundingClientRect()` e continuava vendo 36. Uma regra
+      que o instrumento nao consegue conferir e uma regra que ninguem cobra.
+   2. Pior: numa LISTA de anexos com 6px entre as linhas, uma area invisivel
+      de 44px transborda para a linha de cima e de baixo. Eu estaria criando
+      exatamente o "acertar o anexo de cima" que a auditoria descreveu como o
+      dano de errar este toque.
+
+   Entao o botao tem 44px de verdade, e a discricao vem da letra e do peso,
+   nao da altura. */
 .dm-btn.dm-larga{width:100%}
 
 /* A PÍLULA NÃO PODE EMPURRAR A TELA DE LADO.

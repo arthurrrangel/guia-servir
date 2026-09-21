@@ -28,7 +28,7 @@
    Roda com `node scripts/demandas-celular.mjs`. */
 
 import { chromium } from 'playwright';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { MEDIR, chromeDoContainer, criaContador, julgar, imprimirDetalhe } from './medida-celular.mjs';
 import { medirContraste } from './contraste-real.mjs';
 
@@ -44,14 +44,38 @@ const PAPEIS = [
   { tok: 'tok-pede',     quem: 'solicitante' },
 ];
 
+/* OS NUMEROS VEM DA SEMENTE, NAO DA MEMORIA.
+
+   Eram 4, 3 e 6, escritos a mao. `numero` e `nextval`, e sequencia nao volta
+   atras em rollback: cada conferencia de migracao que abre e desfaz uma
+   demanda queima numeros. Quando o roteiro passou a aplicar as migracoes 84 a
+   87, a semente nasceu em 40 e as tres telas de detalhe deixaram de existir —
+   e o medidor seguiu verde, medindo a tela de "essa demanda nao existe", que
+   tambem passa em contraste e em alvo de toque. Instrumento que mede a tela
+   errada e pior que instrumento nenhum.
+
+   Medido: com as tres rotas apontando para o vazio, apagar `min-width:0` de
+   `.dm-dupla` e o `overflow-wrap` do historico nao reprovava nada. */
+const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
+for (const k of ['execucao', 'travada', 'concluida', 'comLink']) {
+  if (!N[k]) {
+    console.error(`sem demanda "${k}" na semente: rode scripts/demandas-celular-subir.sh`);
+    process.exit(1);
+  }
+}
+
 const PAGINAS = [
   { rota: '/demandas',           nome: 'lista' },
   { rota: '/demandas/nova',      nome: 'nova' },
   { rota: '/demandas/numeros',   nome: 'numeros', so: ['admin', 'responsavel'] },
   { rota: '/demandas/ajustes',   nome: 'ajustes', so: ['admin'] },
-  { rota: '/demandas/d/4',       nome: 'detalhe-execucao' },
-  { rota: '/demandas/d/3',       nome: 'detalhe-travada' },
-  { rota: '/demandas/d/6',       nome: 'detalhe-concluida' },
+  { rota: `/demandas/d/${N.execucao}`,  nome: 'detalhe-execucao' },
+  { rota: `/demandas/d/${N.travada}`,   nome: 'detalhe-travada' },
+  { rota: `/demandas/d/${N.concluida}`, nome: 'detalhe-concluida' },
+  /* A DEMANDA COM LINK COLADO E COM ANEXO, QUE E ONDE MORAM OS DEFEITOS DE
+     LARGURA. A semente nao tinha nenhuma ate 21/09, e por isso 252
+     conferencias ficaram verdes com um cartao de 853px dentro de 320px. */
+  { rota: `/demandas/d/${N.comLink}`,   nome: 'detalhe-com-link-colado' },
 ];
 
 const { estado, ok } = criaContador();

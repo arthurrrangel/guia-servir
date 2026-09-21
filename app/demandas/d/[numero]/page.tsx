@@ -217,7 +217,7 @@ function Uma() {
               <ul className="dm-peq" style={{ margin: 0, paddingLeft: 18 }}>
                 {v.anexos.map((a, i) => (
                   <li key={a.id || i} style={{ marginBottom: 6 }}>
-                    <a className="dm-texto-livre" href={a.url} target="_blank" rel="noopener noreferrer">{a.nome}</a>
+                    <a className="dm-anexo-link" href={a.url} target="_blank" rel="noopener noreferrer">{a.nome}</a>
                     <div className="dm-mudo" style={{ fontSize: 12 }}>
                       {a.quem ? `${a.quem} · ` : ''}{dataCurta(a.em)}
                       {a.depois_de_fechar ? <b> · juntado depois de concluída</b> : null}

@@ -60,7 +60,25 @@ export const MEDIR = (largura) => {
      defeito. O que importa é uma coisa só: A PÁGINA anda? Então a medida
      que manda é `larguraDoc`, e a lista de culpados ignora quem já está
      preso por um ancestral que recorta. */
-  const larguraDoc = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+  /* ---- 21/09/2026 · ESTA CONTA RESPONDIA OUTRA PERGUNTA ------------------
+
+     O comentario tres linhas acima diz, com razao, "o que importa e uma coisa
+     so: A PAGINA anda?". E entao a conta usa `Math.max` com
+     `body.scrollWidth`, que nao responde isso. Medido, com um link colado num
+     comentario:
+
+       {"htmlScrollW":320, "bodyScrollW":918, "innerW":320}
+       window.scrollX depois de mandar rolar para a direita = 0
+
+     `body.scrollWidth` foi para 918 e a janela NAO andou um pixel. A conta
+     reprovaria como "desliza de lado" um defeito que e outro: texto cortado
+     SEM RECUPERACAO. Dois defeitos diferentes, dois consertos diferentes, um
+     numero so — e o pior: quem for consertar vai procurar o deslizamento que
+     nao existe.
+
+     Quem faz a JANELA rolar e `documentElement.scrollWidth`. O outro caso
+     ganha medida propria, logo abaixo. */
+  const larguraDoc = document.documentElement.scrollWidth;
   const presoPorAlguem = (e) => {
     let n = e.parentElement;
     while (n && n !== document.documentElement) {
@@ -78,6 +96,59 @@ export const MEDIR = (largura) => {
     const p = e.parentElement && e.parentElement.getBoundingClientRect();
     if (p && (p.right > largura + 1 || p.left < -1)) continue;  // o pai é o culpado
     estoura.push(nome(e) + ` [${Math.round(r.left)}→${Math.round(r.right)}]`);
+  }
+
+  /* 1b · O QUE E CORTADO E NAO TEM COMO SER ALCANCADO.
+
+     O defeito que a conta de cima confundia com deslizamento: o elemento tem
+     mais conteudo do que cabe, RECORTA o excedente, e nao deixa rolar. O
+     texto aparece bonitinho, cortado na borda, e o pedaco escondido nao
+     existe para quem usa. Foi assim que um link do Drive num comentario
+     mostrou 266px de 880px e ninguem notou em 252 medicoes.
+
+     `overflow-x` em `visible` NAO entra aqui: nesse caso o conteudo transborda
+     e alguem acima recorta, o que ja e coberto por `presoPorAlguem`. O que
+     interessa e quem recorta ele mesmo. */
+  /* E O CORTE QUE MORA NA PAGINA INTEIRA, QUE O LOOP ABAIXO NAO ALCANCA.
+
+     `body` tem `overflow-x: visible`, entao ele e pulado pela regra "visivel
+     transborda, quem recorta e outro". So que aqui NINGUEM recorta com
+     rolagem: o conteudo passa de 320px, `body.scrollWidth` vai a 918, e
+     `documentElement.scrollWidth` fica em 320 — a janela nao anda e o
+     excedente some. Medido com um link colado na descricao.
+
+     Esta e a diferenca entre "a pagina desliza" (defeito A, medido por
+     `larguraDoc`) e "o conteudo some sem volta" (defeito B). Confundir os
+     dois num numero so foi o que deixou 252 conferencias verdes. */
+  const cortadoSemSaida = [];
+  if (document.body.scrollWidth > document.documentElement.clientWidth + 1
+      && document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1) {
+    const culpados = [...document.querySelectorAll('body *')]
+      .filter(e => vis(e) && e.getBoundingClientRect().right > largura + 1)
+      .slice(0, 3).map(e => nome(e) + ` ate ${Math.round(e.getBoundingClientRect().right)}px`);
+    cortadoSemSaida.push(
+      `A PAGINA: ${document.body.scrollWidth}px de conteudo em ${document.documentElement.clientWidth}px `
+      + `e a janela nao rola` + (culpados.length ? ` — ${culpados.join(' | ')}` : ''));
+  }
+  for (const e of document.querySelectorAll('body *')) {
+    if (!vis(e)) continue;
+    if (e.scrollWidth <= e.clientWidth + 1) continue;
+    const cs = getComputedStyle(e);
+    const ox = cs.overflowX;
+    if (/auto|scroll/.test(ox)) continue;                 // rola: tem saida
+    if (ox === 'visible') continue;                       // transborda: e o caso de cima
+    /* RETICENCIAS SAO UM AVISO HONESTO, E NAO UM DEFEITO.
+
+       A primeira versao desta medida acusou tres `.dm-corta` da tela de
+       Numeros — rotulos de categoria truncados DE PROPOSITO, com o `…` no
+       lugar. Cortar dizendo que cortou e uma decisao de desenho; o defeito e
+       cortar em silencio, que foi o caso do link no comentario. Um
+       instrumento que nao separa os dois vira barulho, e barulho se
+       desliga. */
+    if (cs.textOverflow === 'ellipsis') continue;
+    /* um filho que rola por conta propria ja resolve o caso */
+    if ([...e.querySelectorAll('*')].some(f => /auto|scroll/.test(getComputedStyle(f).overflowX))) continue;
+    cortadoSemSaida.push(nome(e) + ` mostra ${e.clientWidth}px de ${e.scrollWidth}px`);
   }
 
   /* 2. alvo de toque.
@@ -204,7 +275,7 @@ export const MEDIR = (largura) => {
   const vp = document.querySelector('meta[name="viewport"]')?.content || '';
   const zoomPreso = /user-scalable\s*=\s*(no|0)/.test(vp) || /maximum-scale\s*=\s*1(\.0)?\b/.test(vp);
 
-  return { larguraDoc, estoura, pequenos, miudos, zoomIos, teclado, vp, zoomPreso };
+  return { larguraDoc, estoura, cortadoSemSaida, pequenos, miudos, zoomIos, teclado, vp, zoomPreso };
 };
 
 /* Os sete julgamentos, iguais nos dois sistemas. Recebe o `ok` do contador.
@@ -213,6 +284,13 @@ export function julgar(ok, etiqueta, m, largura) {
   ok(m.larguraDoc <= largura + 1, `${etiqueta} — não desliza de lado`,
     m.larguraDoc > largura + 1
       ? `documento ${m.larguraDoc}px numa tela de ${largura}px; culpados: ${m.estoura.slice(0, 3).join(' | ')}` : '');
+  /* 21/09 · O JULGAMENTO QUE FALTAVA. Ver o comentario de `cortadoSemSaida`
+     no MEDIR: nao e a pagina que anda, e o texto que some sem volta. Um link
+     colado num comentario mostrava 266px de 880px e as 252 medicoes ficaram
+     verdes. */
+  ok((m.cortadoSemSaida || []).length === 0,
+    `${etiqueta} — nada e cortado sem como alcancar`,
+    (m.cortadoSemSaida || []).slice(0, 4).join(' | '));
   ok(m.pequenos.length === 0, `${etiqueta} — todo alvo de toque tem 44px`, m.pequenos.slice(0, 4).join(' | '));
   ok(m.miudos.length === 0, `${etiqueta} — nada de texto abaixo de 12px`, m.miudos.slice(0, 4).join(' | '));
   ok(m.zoomIos.length === 0, `${etiqueta} — nenhum campo dá zoom sozinho no iOS`, m.zoomIos.slice(0, 4).join(' | '));
@@ -230,7 +308,8 @@ export function imprimirDetalhe(achados) {
   console.log('\n  --- detalhe ---');
   for (const a of achados) {
     console.log(`\n  ${a.etiqueta}`);
-    for (const [k, rot] of [['estoura', 'passa da borda'], ['pequenos', 'alvo < 44px'],
+    for (const [k, rot] of [['estoura', 'passa da borda'],
+                            ['cortadoSemSaida', 'cortado sem como rolar'], ['pequenos', 'alvo < 44px'],
                             ['miudos', 'texto < 12px'], ['zoomIos', 'campo < 16px'],
                             ['teclado', 'teclado errado'], ['fracos', 'contraste']]) {
       if (a[k]?.length) console.log(`    ${rot}: ${a[k].length}\n      ` + a[k].slice(0, 8).join('\n      '));

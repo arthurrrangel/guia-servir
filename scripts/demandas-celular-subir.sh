@@ -56,12 +56,66 @@ SQL
 # `dem_lista` ANTIGA e as 252 conferencias de tela ficam verdes medindo a
 # versao errada — que e exatamente por que o teto foi tirado da 56 e posto
 # num arquivo so de Demandas. Um arquivo, um sistema.
-cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" "$B/supabase/58-membro-novo-nasce-em-producao.sql" > /tmp/_mig.sql
+# AS MIGRACOES DO SISTEMA DE DEMANDAS, EM ORDEM.
+#
+# Esta lista era 50/52/57/58 e ficou assim por semanas enquanto o banco andava
+# ate a 87. O medidor de celular estava entao medindo uma versao do sistema
+# que nao existe em lugar nenhum: nem aqui, nem em producao. Um instrumento
+# apontado para o passado nao mede nada — pior, da confianca.
+#
+# As que nao sao do Demandas ficam de fora de proposito (esta base e isolada,
+# sem public.voluntarios), e as do Demandas trazem sozinhas a guarda de
+# "pulei o que depende das escalas".
+# A 67, a 68 e a 80 NAO entram: as tres mexem em `dem_mover` e `dem_lista`, e a
+# 84, a 85 e a 87 reescrevem as duas por inteiro. A 80 ainda mexe em
+# `public.pessoas`, que esta base nao tem de proposito. Listar migracao
+# superada aqui so faria o arquivo morrer no meio.
+for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com-teto \
+         58-membro-novo-nasce-em-producao \
+         84-o-portao-congelava-no-nascimento-e-um-tab-passava-por-texto \
+         85-o-anexo-nao-era-anexo-era-um-link-sem-dono \
+         86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada \
+         87-a-lista-escondia-a-atrasada-e-o-indicador-contava-quem-nao-tinha-prazo; do
+  echo "-- ===== $f ====="
+  cat "$B/supabase/$f.sql"
+done > /tmp/_mig.sql
+
+# A REGUA EXISTE NESTA BASE SO PARA AS MIGRACOES PODEREM ESCREVER NELA.
+# Ela nasce em `55-...`, que e do sistema de escalas e nao entra aqui. Sem esta
+# tabela, toda migracao da 84 em diante morre na ultima linha, DEPOIS de a
+# conferencia dela ter passado — o pior lugar possivel para falhar, porque o
+# log mostra "OK" e o banco fica pela metade.
+{ echo "create table if not exists public.schema_versao (n int primary key, arquivo text, aplicada_em timestamptz not null default now());"
+  cat /tmp/_mig.sql; } > /tmp/_mig2.sql && mv /tmp/_mig2.sql /tmp/_mig.sql
 cp "$B/scripts/demandas-celular-semear.sql" /tmp/_seed.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_seed.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -f /tmp/_prep.sql"
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f /tmp/_mig.sql" >/dev/null
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f /tmp/_seed.sql" 2>&1 | grep -E "^ERROR" || true
+
+# OS NUMEROS DA SEMENTE, PARA O MEDIDOR NAO ADIVINHAR — 21/09/2026.
+#
+# `demandas-celular.mjs` pedia `/demandas/d/4`, `/d/3` e `/d/6` escritos a mao.
+# `numero` vem de `nextval`, e sequencia NAO volta atras em rollback: cada
+# conferencia de migracao que abre e desfaz uma demanda queima numeros. Com as
+# migracoes 84 a 87 no roteiro, a semente passou a nascer em 40, e as tres
+# telas de DETALHE deixaram de ser medidas — em silencio, com o total de
+# conferencias ate subindo, porque a tela de "essa demanda nao existe" tambem
+# passa em contraste e alvo de toque.
+#
+# Medido: com as tres rotas de detalhe apontando para o vazio, apagar
+# `min-width:0` de `.dm-dupla` e o `overflow-wrap` do historico nao reprovava
+# nada. O instrumento estava medindo a tela de erro.
+su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
+  select jsonb_pretty(jsonb_build_object(
+    'execucao', (select min(numero) from demandas.demandas where status = 'execucao'),
+    'travada',  (select min(numero) from demandas.demandas where status = 'travada'),
+    'concluida',(select min(numero) from demandas.demandas where status = 'concluida'),
+    'comLink',  (select min(numero) from demandas.demandas where descricao like '%http%'),
+    'atrasada', (select min(numero) from demandas.demandas where prazo < current_date
+                                       and status in ('aberta','execucao','travada'))))\"" \
+  > /tmp/celular-numeros.json
+chmod 644 /tmp/celular-numeros.json
 
 echo "3. ponte na $PORTA_PONTE"
 ps -eo pid,cmd | grep -E 'ponte-teste|ponte\.mjs' | grep -v grep | awk '{print $1}' | while read p; do kill -9 "$p" 2>/dev/null; done

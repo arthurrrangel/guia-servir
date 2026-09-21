@@ -37,7 +37,7 @@ declare
   t_com   text := 'tok-comunica';
   t_ges   text := 'tok-gestor';
   c_divul uuid; c_compra uuid; c_manut uuid; c_reemb uuid;
-  r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int;
+  r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int; n7 int; n8 int;
 begin
   select id into c_divul  from demandas.categorias where nome = 'Divulgação de culto' limit 1;
   select id into c_compra from demandas.categorias where nome = 'Compra de equipamentos' limit 1;
@@ -113,11 +113,62 @@ begin
     'objetivo','Corredor iluminado.',
     'local','Corredor da secretaria', 'publico','Equipe',
     'categoria_id', c_manut, 'prioridade','normal', 'impacto','baixo',
-    'prazo', (current_date - 2)::text));
+    'prazo', (current_date + 5)::text));
   n6 := (r->>'numero')::int;
+  /* O PRAZO NASCE NO FUTURO E DEPOIS ANDA PARA TRAS, porque e assim que
+     acontece de verdade: ninguem abre uma demanda com prazo que ja passou, e
+     desde a migracao 86 o servidor recusa isso com `PRAZO_NO_PASSADO`. A
+     semente vinha abrindo com `current_date - 2` e, a partir da 86, a demanda
+     6 simplesmente NAO NASCIA — em silencio, porque `perform` nao le a
+     resposta. A tela de detalhe-concluida deixou de ter o que medir. */
+  update demandas.demandas set prazo = current_date - 2 where numero = n6;
   perform public.dem_mover(t_ges, n6, 'assumir', '{}'::jsonb);
+  /* O `atraso` NAO E ENFEITE AQUI: esta demanda vence dois dias antes de ser
+     concluida, e desde a migracao 86 o servidor recusa concluir depois do
+     prazo sem uma palavra sobre o atraso. Sem esta chave a semente falhava em
+     SILENCIO e a tela de detalhe-concluida deixava de existir — foi assim que
+     eu descobri, com o medidor pedindo uma demanda concluida e nao achando
+     nenhuma. */
   perform public.dem_mover(t_ges, n6, 'concluir',
-    jsonb_build_object('texto','Trocadas as três lâmpadas por LED. Sobrou uma de reserva, ficou no armário da secretaria.'));
+    jsonb_build_object('texto','Trocadas as três lâmpadas por LED. Sobrou uma de reserva, ficou no armário da secretaria.',
+                       'atraso','A loja ficou sem LED de 9W e a gente esperou a reposição.'));
 
-  raise notice 'semeado: % % % % % %', n1, n2, n3, n4, n5, n6;
+  /* 7. O QUE FALTAVA NESTA SEMENTE, E POR QUE 252/252 FICOU VERDE COM TRES
+        DEFEITOS GRAVES DENTRO — 21/09/2026.
+
+     Nenhuma das seis demandas acima tem um link colado, um anexo na lista ou
+     uma palavra sem espaco. E e exatamente isso que a tela pede a pessoa:
+     "Cole o link do arquivo (Drive, Fotos, o que for)". O medidor abria cada
+     rota no estado inicial de uma semente higienica e nao via nada.
+
+     As tres linhas abaixo poem no banco o que a igreja realmente cola, e o
+     instrumento passa a pegar sozinho o que eu tive que abrir na mao. */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Arte do Follow para o Instagram',
+    'descricao','Segue a referencia que a gente gostou: ' ||
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLxxxxxxxxxxxxxxxxxxxxxxxx&index=7&t=142s',
+    'objetivo','Divulgar o Follow.',
+    'local','Instagram', 'publico','Jovens',
+    'categoria_id', c_divul, 'prioridade','alta',
+    'prazo', (current_date + 12)::text,
+    'anexos', jsonb_build_array(
+      jsonb_build_object('nome','referencia',
+        'url','https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/view?usp=sharing_eip_se_dm'))));
+  n7 := (r->>'numero')::int;
+  perform public.dem_mover(t_com, n7, 'assumir', '{}'::jsonb);
+  perform public.dem_mover(t_com, n7, 'comentar', jsonb_build_object('texto',
+    'Primeira versao aqui: https://drive.google.com/file/d/1ZyXwVuTsRqPoNmLkJiHgFeDcBa9876543210/view?usp=sharing'));
+
+  /* 8. e uma ATRASADA de verdade, para a ordem da lista ter o que provar */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Consertar o ar da sala do Kids',
+    'descricao','O ar da sala grande do Kids parou de gelar.',
+    'objetivo','Sala utilizavel no domingo.',
+    'local','Kids', 'publico','Criancas',
+    'categoria_id', c_manut, 'prioridade','baixa',
+    'prazo', (current_date + 5)::text));
+  n8 := (r->>'numero')::int;
+  update demandas.demandas set prazo = current_date - 51 where numero = n8;
+
+  raise notice 'semeado: % % % % % % % %', n1, n2, n3, n4, n5, n6, n7, n8;
 end $$;
