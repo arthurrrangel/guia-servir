@@ -339,7 +339,22 @@ function Time() {
           <details className={`tm-pessoa ${novo ? 'card-novo' : ''}`} style={{ opacity: v.ativo ? 1 : .55 }}>
             <summary>
               <span className="cresce">
-                <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="marca-est" style={{ marginLeft: 8 }}>pausado</span>}</span>
+                {/* "pausado" descreve uma DECISÃO da liderança, e depois da
+                    migração 63 a maior parte dos inativos nunca foi ativada:
+                    quem já está no sistema e se cadastra numa segunda área
+                    aberta nasce esperando liberação, porque a porta anônima
+                    deixou de criar vínculo ativo em identidade que ela não
+                    criou. Chamar isso de "pausado" manda a líder procurar uma
+                    decisão que ninguém tomou.
+
+                    O SINAL É `conferido`, E ELE NÃO É PERFEITO: não existe
+                    coluna dizendo "já esteve ativo". Daqui para frente ele
+                    acerta sempre, porque a tela só deixa conferir quem está
+                    ativo (ver as ações, abaixo). Para trás, alguém pausado
+                    antes de ser conferido aparece como "aguardando". Errar
+                    para esse lado é barato: as duas palavras pedem a mesma
+                    ação da líder, que é decidir se a pessoa entra. */}
+                <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="marca-est" style={{ marginLeft: 8 }}>{novo ? 'aguardando' : 'pausado'}</span>}</span>
                 <span className="pessoa-areas">
                   {areas.length
                     ? areas.map(f => (
@@ -380,12 +395,29 @@ function Time() {
                 const link = zap
                   ? <a key="zap" className={novo ? 'lid-bt-txt' : 'lid-bt'} href={zap} target="_blank" rel="noopener">Enviar link no WhatsApp</a>
                   : <button key="copia" className={novo ? 'lid-bt-txt' : 'lid-bt'} onClick={copiarLink}>Copiar link pessoal</button>;
+                /* QUEM NÃO ESTÁ ATIVO NÃO TEM LINK QUE FUNCIONE. `eu_dados`
+                   exige `and v.ativo`, então mandar o link pessoal para quem
+                   está inativo entrega a frase "Link invalido" — e antes da
+                   migração 63 isso era raro, porque quase ninguém nascia
+                   inativo. Depois dela é o caminho comum: toda pessoa que já
+                   existe no sistema e se cadastra numa segunda área aberta
+                   chega assim. Então o cartão de quem está inativo oferece só
+                   o que resolve: liberar. Conferir o nível vem DEPOIS, e isso
+                   também torna inalcançável pela tela o estado
+                   "conferido mas nunca ativado", que é o que faria a marca de
+                   cima dizer "pausado" para quem nunca entrou. */
+                if (!v.ativo) return (
+                  <div className="lid-acoes">
+                    <button className="lid-bt" onClick={() => mudar(v.id, { ativo: true })}>{novo ? 'Liberar' : 'Reativar'}</button>
+                    <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
+                  </div>
+                );
                 return (
                   <div className="lid-acoes">
                     {novo && <button className="lid-bt" onClick={() => conferir(v.id, v.nome)}>Conferi, está certo</button>}
                     {link}
                     {zap && <button className="lid-bt-txt" onClick={copiarLink}>Copiar link</button>}
-                    <button className="lid-bt-txt" onClick={() => mudar(v.id, { ativo: !v.ativo })}>{v.ativo ? 'Pausar' : 'Reativar'}</button>
+                    <button className="lid-bt-txt" onClick={() => mudar(v.id, { ativo: false })}>Pausar</button>
                     <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
                   </div>
                 );
