@@ -405,9 +405,24 @@ begin
   return query select 'visitante'::text, 'lista de ministérios abre'::text,
     m::text, n::text, n = m;
 
+  /* O 6 ESCRITO À MÃO ERA O MESMO DEFEITO QUE ESTA MIGRAÇÃO VEIO REMOVER.
+
+     Os dois casos vizinhos (ministérios, nomes do Louvor) foram corrigidos
+     aqui mesmo para contar a FONTE em vez de repetir um número de agosto, e
+     este escapou: `'6'::text, n::text, n = 6`. Bastava a líder do Louvor
+     escrever uma pergunta nova no formulário dela para `testar_permissoes`
+     ficar vermelho sem nada ter quebrado — e, pior, para a pessoa que lê o
+     relatório aprender a ignorar uma linha vermelha.
+
+     O esperado agora é a mesma consulta que `perguntas_publicas` faz (23:44):
+     pergunta ativa, da equipe ou geral. Encontrado na reauditoria da própria
+     70, em 21/09. */
+  select count(*) into m
+    from perguntas q left join equipes e on e.id = q.equipe_id
+   where q.ativa and (q.equipe_id is null or e.slug = 'louvor');
   set local role anon; select count(*) into n from perguntas_publicas('louvor'); reset role;
   return query select 'visitante'::text, 'formulário do Louvor abre'::text,
-    '6'::text, n::text, n = 6;
+    m::text, n::text, n = m and m > 0;
 
   /* mesma correção do caso de cima: `equipe_publica` devolve uma linha por
      voluntário ATIVO (14:86, com left join), e o 12 escrito à mão era o

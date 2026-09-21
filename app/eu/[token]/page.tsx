@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES, fmtDia } from '@/lib/engine';
+import { MESES, fmtDia, diaLongo } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -17,6 +17,18 @@ import { pl, cont } from '@/lib/plural';
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
   plantao: boolean; primeira_vez?: boolean;
+  /* 71 · o posto, para a resposta ser POR POSTO. A tela desenha um cartão por
+     posto e `eu_responder` mexia no culto inteiro: um toque em "Não posso"
+     derrubava todos os postos da pessoa naquele domingo. */
+  funcao_id?: string | null;
+  /* 71 · evento esporádico. Sem isto, `diaLongo` chamava de "domingo" toda
+     data que não é sábado — e `criar_evento` SÓ aceita dia que não é domingo
+     nem sábado de Follow, então TODO evento aparecia como "domingo", com a
+     hora do domingo no lembrete do calendário. */
+  evento?: string | null; inicio?: string | null;
+  /* 71 · de quem é o relatório que está no campo. `culto_obs` tem uma linha
+     por (culto, equipe) e o Connect tem dois postos que relatam. */
+  relatado_por?: string | null; relatado_eu?: boolean | null;
   /* quando esta pessoa entrou nesta vaga (migração 38). Null nas escalações
      anteriores à migração: null é "não sei", nunca "é antigo". */
   escalado_em?: string | null;
@@ -49,11 +61,10 @@ const diaNoMes = (s: string) => {
   const d = String(dt.getUTCDate()).padStart(2, '0');
   return ehSabado(s) ? `sáb ${d} · Follow` : `dom ${d}`;
 };
-const diaLongo = (s: string) => {
-  const dt = new Date(s + 'T12:00:00Z');
-  const q = ehSabado(s) ? 'sábado (Follow)' : 'domingo';
-  return `${q}, ${dt.getUTCDate()} de ${MESES[dt.getUTCMonth()]}`;
-};
+/* 71 · `diaLongo` mora em `lib/engine.ts`, com o porquê e a regra escritos
+   lá. Saiu daqui porque é a frase que manda a pessoa sair de casa num dia, e
+   dentro deste componente de cliente nenhum teste conseguia importá-la.
+   `scripts/dia-longo.test.mjs` tem a tabela verdade. */
 
 
 /* O relatório é do LÍDER ESCALADO, não do líder do app: quem viveu o culto é
@@ -78,13 +89,38 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
   }
 
   const jaTinha = !!(item.relatorio || item.problemas);
+  /* 71 · DE QUEM É O TEXTO QUE ESTÁ NA CAIXA.
+
+     `culto_obs` tem UMA linha por (culto, equipe), e o Connect tem DOIS postos
+     que relatam (LÍDER 1 e LÍDER 2, migração 12). Medido em 21/09: a Ana
+     escreve, o Caio abre a tela dele e encontra o texto DELA já preenchido na
+     caixa, sob o rótulo "Relatório enviado" e com o botão "Atualizar
+     relatório". Nada dizia que aquilo era de outra pessoa. Ele escreve o dele
+     e some o dela — junto com "bebedouro vazando", que era a manutenção que
+     ninguém mais ia ver.
+
+     A correção é dizer. Sobrescrever continua possível, porque às vezes é
+     exatamente o que se quer (corrigir o próprio texto, completar o do
+     colega), mas agora é uma escolha e não um acidente. */
+  const deOutro = jaTinha && item.relatado_eu === false && !!item.relatado_por;
   return (
     <div className="relatorio">
-      <span className="overline eu-lbl">{jaTinha ? 'Relatório enviado' : 'Relatório do dia'}</span>
+      <span className="overline eu-lbl">
+        {!jaTinha ? 'Relatório do dia'
+          : deOutro ? `Relatório de ${item.relatado_por!.split(' ')[0]}`
+          : 'Relatório enviado'}
+      </span>
       <p className="dim pequeno" style={{ margin: '2px 0 12px' }}>
         Você é líder deste culto. No fim, conta aqui como foi. Quem lidera no próximo
         domingo lê isso antes de começar.
       </p>
+      {deOutro && (
+        <p className="postos-falta" role="note" style={{ marginBottom: 12 }}>
+          Este texto é de {item.relatado_por}, que também liderou este culto. Se você
+          salvar por cima, o dela some. Complete o texto em vez de apagar, ou combine
+          com {item.relatado_por!.split(' ')[0]} quem escreve.
+        </p>
+      )}
       <label htmlFor={'rel' + item.culto_id}>Como foi o andamento do trabalho</label>
       {/* teto de 1000 nos dois campos: quem lidera escreve isto no celular, no
           fim do culto, e o que o próximo líder lê antes de começar é um
@@ -251,9 +287,14 @@ export default function Eu() {
     Math.round((Date.parse(`${data}T18:00:00-03:00`) - Date.now()) / 3600000);
   const TARDIO = 48;
 
-  async function responder(cultoId: string, status: 'confirmado' | 'recusado', data?: string) {
+  /* 71 · `funcaoId` é o parâmetro que faltava. Ele vem de cada cartão, porque
+     é por cartão que a pessoa decide. Nulo quer dizer "respondo pelo dia
+     inteiro", que é o que a grade de disponibilidade manda. */
+  async function responder(cultoId: string, status: 'confirmado' | 'recusado',
+                           data?: string, funcaoId?: string | null) {
     setOcupado(cultoId); setErro('');
-    const { error } = await sb()!.rpc('eu_responder', { p_token: token, p_culto_id: cultoId, p_status: status });
+    const { error } = await sb()!.rpc('eu_responder',
+      { p_token: token, p_culto_id: cultoId, p_status: status, p_funcao_id: funcaoId ?? null });
     if (error) { setErro(aviseHumano(error, 'salvar')); setOcupado(''); return; }
     /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia a
        pessoa não avisar por fora, achando que já estava resolvido. */
@@ -494,7 +535,7 @@ export default function Eu() {
           <p className="vol-sub">
             {pendentes.length
               ? 'Dois toques e a liderança já sabe com quem contar.'
-              : proxima ? `Sua próxima vez é ${diaLongo(proxima.data)}.`
+              : proxima ? `Sua próxima vez é ${diaLongo(proxima.data, proxima.evento)}.`
               : novo ? 'Este endereço é seu. É aqui que a sua escala aparece, e é daqui que você avisa quando não pode.'
               : 'Quando a escala do mês sair, ela aparece aqui.'}
           </p>
@@ -533,7 +574,7 @@ export default function Eu() {
                 {i.funcao}
                 {novidade(i) && <span className="vol-novo">{novidade(i)}</span>}
               </div>
-              <div className="vol-pede-dia">{diaLongo(i.data)}</div>
+              <div className="vol-pede-dia">{diaLongo(i.data, i.evento)}</div>
               {/* O RECADO DO DIA CHEGA AQUI. Ele existe no banco desde sempre
                   (três dias já têm um escrito) e ia só para a mensagem do
                   WhatsApp: a liderança escrevia "chegar 18h, tem batismo" para
@@ -547,11 +588,11 @@ export default function Eu() {
               )}
               <div className="vol-btns">
                 <button className="vol-bt" disabled={ocupado === i.culto_id}
-                  onClick={() => responder(i.culto_id, 'confirmado')}>
+                  onClick={() => responder(i.culto_id, 'confirmado', undefined, i.funcao_id)}>
                   <IcCheck /> Eu vou
                 </button>
                 <button className="vol-bt nao" disabled={ocupado === i.culto_id}
-                  onClick={() => responder(i.culto_id, 'recusado', i.data)}>
+                  onClick={() => responder(i.culto_id, 'recusado', i.data, i.funcao_id)}>
                   Não posso
                 </button>
               </div>
@@ -635,7 +676,7 @@ export default function Eu() {
               <div className="ingresso-corpo">
                 <div className="vol-prox-fn">{proxima.funcao}</div>
                 <div className="vol-prox-dia">
-                  {diaLongo(proxima.data)}{ehSabado(proxima.data) ? (IGREJA.followHora ? `, ${IGREJA.followHora}` : '') : `, ${IGREJA.cultoHora}`}
+                  {diaLongo(proxima.data, proxima.evento)}{ehSabado(proxima.data) ? (IGREJA.followHora ? `, ${IGREJA.followHora}` : '') : `, ${IGREJA.cultoHora}`}
                 </div>
                 <div className="vol-prox-est">
                   {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
@@ -646,9 +687,33 @@ export default function Eu() {
                 <div className="ingresso-acoes">
                   <a className="ingresso-cal" download={`guia-${proxima.data}.ics`}
                      href={icsDaEscala({ data: proxima.data, funcao: proxima.funcao, equipe: equipe || 'GUIA', token,
-                       hora: ehSabado(proxima.data) ? (IGREJA.followHora ?? null) : IGREJA.cultoHora, obs: proxima.obs })}>
+                       /* 71 · a hora do EVENTO quando é evento. O lembrete de um
+                          evento das 19:30 estava saindo com a hora do culto de
+                          domingo, 10h. */
+                       hora: proxima.evento ? (proxima.inicio ?? null)
+                           : ehSabado(proxima.data) ? (IGREJA.followHora ?? null) : IGREJA.cultoHora,
+                       obs: proxima.obs })}>
                     <IcCalendario /> Adicionar ao calendário
                   </a>
+                  {/* 71 · MUDAR DE IDEIA NO DIA QUE MAIS IMPORTA.
+
+                      "Não vou mais poder" existia só na lista "Depois disso", e
+                      `restantes` exclui `proxima` de propósito — então o
+                      domingo MAIS PRÓXIMO, depois de confirmado, era o único
+                      que não tinha como ser desmarcado. O caminho que sobrava
+                      era a grade "Quando você pode", que até a migração 71 não
+                      mexia na escalação: o banco ficava com `confirmado` e
+                      `indisponível` ao mesmo tempo, e a líder tinha uma pessoa
+                      confirmada que não vinha.
+
+                      O comentário da lista de baixo já dizia por que o botão
+                      existe: "Plano muda; o sistema tem que deixar." */}
+                  {est(proxima).txt !== 'confirmar' && (
+                    <button type="button" className="ingresso-cal" disabled={ocupado === proxima.culto_id}
+                      onClick={() => responder(proxima.culto_id, 'recusado', proxima.data, proxima.funcao_id)}>
+                      Não vou mais poder
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -716,7 +781,7 @@ export default function Eu() {
                 <span className="vol-marca" aria-hidden="true" />
                 <span>
                   <span className="vol-linha-dia">
-                    {diaLongo(i.data)}
+                    {diaLongo(i.data, i.evento)}
                     {novidade(i) && <span className="vol-novo">{novidade(i)}</span>}
                   </span>
                   <span className="vol-linha-fn">{i.funcao}</span>
@@ -728,7 +793,7 @@ export default function Eu() {
                       tela deixar. Plano muda; o sistema tem que deixar. */}
                   <button className="vol-acao" disabled={ocupado === i.culto_id}
                     onClick={() => responder(i.culto_id,
-                      i.status === 'recusado' ? 'confirmado' : 'recusado', i.data)}>
+                      i.status === 'recusado' ? 'confirmado' : 'recusado', i.data, i.funcao_id)}>
                     {i.status === 'recusado' ? 'Consegui, posso sim' : 'Não vou mais poder'}
                   </button>
                 </span>

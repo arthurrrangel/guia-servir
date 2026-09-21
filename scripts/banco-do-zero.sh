@@ -101,6 +101,24 @@ echo "  → $ok aplicaram, $falhou falharam"
 # 2 e 3 · os testes que o próprio sistema escreveu para si
 # ---------------------------------------------------------------------------
 reprova=0
+# O PISO DE CASOS, QUE E UMA CATRACA — 21/09/2026, migracao 72.
+#
+# A checagem abaixo compara `total` com `passou`, e o unico piso dela e
+# `!= 0`. Isso deixa passar o modo de falha mais silencioso que estas duas
+# funcoes tem: um caso que para de ser EMITIDO. Foi o que se mediu na 72 —
+# dois blocos de `testar_identidade` so emitiam linha se o banco tivesse um
+# voluntario com token, e num banco sem isso o script imprimia "4/4" e dizia
+# OK, sem ter testado identidade nenhuma.
+#
+# `testar_identidade` passou a conferir a propria contagem por dentro (ultimo
+# caso). `testar_permissoes` nao confere, e o piso aqui cobre as duas.
+#
+# O numero e escrito a mao de proposito e so anda para CIMA: e o que a funcao
+# tinha no dia em que este piso foi posto. Caso novo nao mexe nele; caso que
+# some, derruba. Se um dia um caso for removido por bom motivo, baixar o piso
+# e uma decisao consciente, escrita no commit — que e exatamente o que se
+# quer que aconteca.
+declare -A PISO=( [testar_permissoes]=64 [testar_identidade]=27 )
 for fn in testar_permissoes testar_identidade; do
   if ! $P -d guia -tAc "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
                          where n.nspname='public' and p.proname='$fn'" | grep -q 1; then
@@ -108,7 +126,11 @@ for fn in testar_permissoes testar_identidade; do
   fi
   total=$($P -d guia -tAc "select count(*) from $fn();")
   passou=$($P -d guia -tAc "select count(*) from $fn() where passou;")
-  if [ "$total" = "$passou" ] && [ "$total" != "0" ]; then
+  piso=${PISO[$fn]}
+  if [ "$total" -lt "$piso" ]; then
+    echo "  ✗ $fn(): $passou/$total — emitiu MENOS casos que o piso ($piso). Algum caso parou de sair."
+    reprova=$((reprova+1))
+  elif [ "$total" = "$passou" ] && [ "$total" != "0" ]; then
     echo "  ✓ $fn(): $passou/$total"
   else
     echo "  ✗ $fn(): $passou/$total"

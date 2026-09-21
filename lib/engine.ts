@@ -319,6 +319,58 @@ export const MESES = ['janeiro','fevereiro','março','abril','maio','junho','jul
 export const fmtLongo = (s: string) => `${+s.slice(8, 10)} de ${MESES[+s.slice(5, 7) - 1]}`;
 
 /* =============================================================================
+   QUE DIA É ESSE, DITO PARA A PESSOA QUE VAI SERVIR — 71, 21/09/2026
+
+   Esta regra morava solta dentro de `app/eu/[token]/page.tsx`, que é um
+   componente de cliente: nenhum teste conseguia importá-la, e ela é a frase
+   que manda a pessoa sair de casa num dia. É o mesmo motivo que tirou
+   `decisaoDoRobo`, `avisarDiaSemNinguem` e `bancoAtrasado` de dentro de um
+   `if` no meio de um laço e trouxe para cá.
+
+   O QUE ESTAVA ERRADO. A tela escrevia `ehSabado(s) ? 'sábado (Follow)' :
+   'domingo'` — quer dizer: TUDO que não é sábado virava "domingo". Só que
+   evento esporádico, por construção, NUNCA cai num domingo nem no sábado de
+   Follow: `culto_guarda` recusa os dois com `DIA_DE_CULTO`. Logo todo evento
+   caía no `else` e era anunciado como domingo.
+
+   Medido em 21/09/2026: evento da Mídia numa QUARTA, 07/10, e a tela da
+   voluntária dizia "domingo, 7 de outubro", sem o nome do evento. A tela da
+   líder acerta isso desde a 54; a da pessoa que ia servir, não.
+
+   A REGRA, em uma frase: dia com evento é chamado pelo dia da semana que ele
+   realmente é, e com o nome do evento na frente; dia sem evento é o culto da
+   igreja, e aí sábado é o Follow e o resto é domingo. */
+const DIAS_DA_SEMANA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+/* MEIO-DIA UTC DE PROPÓSITO, e esta é a SEGUNDA camada, não a primeira.
+
+   A data vem do banco como 'AAAA-MM-DD'. Quem protege o dia hoje são os
+   acessores `getUTC*` logo abaixo: com eles, `new Date('2026-10-04')` e
+   `new Date('2026-10-04T12:00:00Z')` respondem o mesmo dia em qualquer fuso,
+   e `scripts/dia-longo.test.mjs` mostra isso medido — sabotar só o meio-dia
+   passa verde, sabotar os acessores reprova.
+
+   O meio-dia fica porque a primeira camada é frágil por natureza: basta
+   alguém escrever `dt.getDate()` numa linha nova (é o que a mão escreve
+   primeiro) para o Acre passar a ver o dia anterior, e aí o domingo vira
+   "sábado (Follow)". Com o meio-dia, esse erro custa nada de UTC-11 a
+   UTC+11, que cobre o Brasil inteiro com folga.
+
+   As duas camadas protegem a mesma coisa, então nenhum teste de
+   comportamento consegue separar uma da outra. Por isso `paraTeste` abaixo
+   expõe esta linha diretamente — mesmo motivo do `paraTeste` em lib/pix.ts. */
+const noMeioDia = (s: string) => new Date(s + 'T12:00:00Z');
+export const ehSabadoDeCulto = (s: string) => noMeioDia(s).getUTCDay() === 6;
+export const diaLongo = (s: string, evento?: string | null) => {
+  const dt = noMeioDia(s);
+  const q = evento ? DIAS_DA_SEMANA[dt.getUTCDay()]
+          : ehSabadoDeCulto(s) ? 'sábado (Follow)' : 'domingo';
+  const quando = `${q}, ${dt.getUTCDate()} de ${MESES[dt.getUTCMonth()]}`;
+  return evento ? `${evento} · ${quando}` : quando;
+};
+/* só para o teste enxergar a camada de baixo (ver o comentário de `noMeioDia`) */
+export const paraTesteDeDia = { noMeioDia };
+
+/* =============================================================================
    O QUE O ROBÔ DAS 3H PODE FAZER SOZINHO
 
    19/09/2026. Esta decisão morava dentro de dois `if` no meio do laço de
