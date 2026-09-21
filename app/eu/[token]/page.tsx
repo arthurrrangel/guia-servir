@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe } from '@/lib/engine';
+import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe, distintivoDoDia, horaDoDia } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -740,12 +740,15 @@ export default function Eu() {
             <div className="vol-prox ingresso">
               <div className="ingresso-data" aria-hidden="true">
                 <span className="ingresso-dia">{proxima.data.slice(8, 10)}</span>
-                <span className="ingresso-mes">{MESES[Number(proxima.data.slice(5, 7)) - 1].slice(0, 3)} · {ehSabado(proxima.data) ? 'sáb' : 'dom'}</span>
+                <span className="ingresso-mes">{distintivoDoDia(proxima.data, proxima.evento)}</span>
               </div>
               <div className="ingresso-corpo">
                 <div className="vol-prox-fn">{proxima.funcao}</div>
                 <div className="vol-prox-dia">
-                  {diaLongo(proxima.data, proxima.evento)}{ehSabado(proxima.data) ? (IGREJA.followHora ? `, ${IGREJA.followHora}` : '') : `, ${IGREJA.cultoHora}`}
+                  {diaLongo(proxima.data, proxima.evento)}{(() => {
+                    const h = horaDoDia(proxima.inicio, proxima.evento, proxima.data, IGREJA.cultoHora, IGREJA.followHora);
+                    return h ? `, ${h}` : '';
+                  })()}
                 </div>
                 <div className="vol-prox-est">
                   {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
@@ -876,7 +879,11 @@ export default function Eu() {
           <section className="vol-secao">
             <div className="vol-secao-cab"><span className="rot">Você é o plantão</span></div>
             <p className="vol-nota" style={{ marginTop: 14 }}>
-              {plantoes.filter(p => p.data >= hoje).map(p => diaLongo(p.data)).join(', ')}. Não precisa confirmar
+              {/* 78 · `p.evento` faltava aqui. `salvar_dia` grava plantão em culto de
+                  evento também (54, 61, 66), e `eu_dados` traz `evento` no ramo do
+                  plantão desde a 71 — só este chamador tinha ficado para trás, e
+                  anunciava o plantão de uma quarta como "domingo". */}
+              {plantoes.filter(p => p.data >= hoje).map(p => diaLongo(p.data, p.evento)).join(', ')}. Não precisa confirmar
               nada: você só entra se alguém faltar. Deixe o celular por perto.
             </p>
           </section>

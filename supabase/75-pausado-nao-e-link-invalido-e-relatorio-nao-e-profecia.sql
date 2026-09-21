@@ -289,11 +289,24 @@ begin
 
      O corte do dia é o começo do culto, e não a meia-noite: relatório se
      escreve no fim do culto, e quem abre a tela de manhã não deveria poder.
-     Sem hora cadastrada, vale meio-dia — a igreja não tem culto de manhã
-     cedo, e errar para o lado de esperar é o lado certo aqui. */
+     Sem hora cadastrada vale 18:00, que é o que o resto do sistema já
+     assume: `eu_quem_cobre` (76) e `horasAte` na tela do voluntário usam
+     18h.
+
+     A primeira versão usava meio-dia, e isso era um buraco de seis horas em
+     TODO culto de produção: `cultos.inicio` é nullable sem default, e
+     `salvar_dia` — a única função que cria culto regular — faz
+     `insert into cultos (data) values (p_data)` sem hora. O ramo do
+     `coalesce` não é a exceção, é o caso comum. Às 12h01 de um domingo de
+     culto das 18h, quem estava escalado escrevia "o culto foi ótimo" pela
+     rede.
+
+     E os dois cultos da conferência abaixo passavam `inicio` explícito,
+     então o ramo do `coalesce` — o único que roda em produção — não era
+     exercitado por nenhum dos nove casos. O caso 4b agora exercita. */
   select c.data, c.inicio into v_data, v_inicio from cultos c where c.id = p_culto_id;
   if v_data is null then raise exception 'Esse culto nao existe'; end if;
-  if (v_data + coalesce(v_inicio, time '12:00')) at time zone 'America/Sao_Paulo' > now() then
+  if (v_data + coalesce(v_inicio, time '18:00')) at time zone 'America/Sao_Paulo' > now() then
     raise exception 'RELATORIO_ANTES_DA_HORA: o culto de % ainda nao comecou, e relatorio se escreve depois.', v_data
       using errcode = 'raise_exception';
   end if;
@@ -456,7 +469,8 @@ do $conferir$
 declare
   v_falhas text := ''; v_eq uuid; v_p uuid; v_v uuid; v_tok text;
   v_fn uuid; v_fn2 uuid; v_futuro uuid; v_passado uuid; v_j jsonb; v_erro text; v_n int;
-  v_suf text;
+  v_suf text; v_meu_futuro boolean := false; v_meu_passado boolean := false;
+  v_hoje uuid; v_meu_hoje boolean := false;
 begin
   /* O CENÁRIO É CRIADO AQUI, e não lido do banco.
 
@@ -507,7 +521,18 @@ begin
   update voluntarios set ativo = true where id = v_v;
 
   -- 4 · RELATÓRIO DE CULTO QUE NÃO COMEÇOU
-  insert into cultos (data, inicio) values (current_date + 60, time '18:00') returning id into v_futuro;
+  /* REUSA o calendário, como a 76 faz. A primeira versão inseria direto e
+     morria em `ux_cultos_data_regular` — o índice da 56 funcionando: culto
+     regular é UM por data. Medido: aplicar esta migração num DOMINGO faz
+     `current_date - 7` cair num domingo que tem culto há semanas, e o
+     arquivo inteiro se recusa a aplicar com erro cru. Ela passou em 21/09
+     por acidente de calendário: era segunda, e nem -7 nem +60 eram dia de
+     culto. */
+  select id into v_futuro from cultos where data = current_date + 60 and evento is null;
+  if v_futuro is null then
+    insert into cultos (data, inicio) values (current_date + 60, time '18:00') returning id into v_futuro;
+    v_meu_futuro := true;
+  end if;
   insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
        values (v_futuro, v_fn, v_v, 'confirmado', false, false);
   begin
@@ -520,8 +545,61 @@ begin
     v_falhas := v_falhas || E'\n  4b. e o texto FOI GRAVADO mesmo assim';
   end if;
 
+  /* 4c · O RAMO DO `coalesce`, QUE É O ÚNICO QUE RODA EM PRODUÇÃO.
+
+     `cultos.inicio` é nullable sem default e `salvar_dia` nunca o preenche,
+     então TODO domingo e TODO sábado de Follow chegam aqui com `inicio`
+     nulo. Os dois cultos do cenário acima passam hora explícita, então este
+     ramo não era exercitado por caso nenhum — e foi onde o meio-dia da
+     primeira versão abriu seis horas de janela.
+
+     O culto é o de HOJE, sem hora: às 00h01 ele ainda não começou. */
+  begin
+    select id into v_hoje from cultos where data = current_date and evento is null;
+    if v_hoje is null then
+      insert into cultos (data) values (current_date) returning id into v_hoje;
+      v_meu_hoje := true;
+    else
+      update cultos set inicio = null where id = v_hoje;
+    end if;
+    insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
+         values (v_hoje, v_fn, v_v, 'confirmado', false, false)
+      on conflict do nothing;
+  end;
+  if (current_date + time '18:00') at time zone 'America/Sao_Paulo' > now() then
+    /* ainda não são 18h: o relatório tem que ser recusado */
+    begin
+      perform eu_relatorio(v_tok, v_hoje, 'Escrevi antes das 18h.', null); v_erro := 'ACEITOU';
+    exception when others then v_erro := sqlerrm; end;
+    if v_erro not like 'RELATORIO_ANTES_DA_HORA%' then
+      v_falhas := v_falhas || format(
+        E'\n  4c. culto de hoje SEM hora cadastrada, antes das 18h: "%s"', v_erro);
+    end if;
+  else
+    /* já passou das 18h: tem que aceitar, senão a guarda tranca quem foi */
+    begin
+      perform eu_relatorio(v_tok, v_hoje, 'Escrevi depois das 18h.', null); v_erro := 'ok';
+    exception when others then v_erro := sqlerrm; end;
+    if v_erro <> 'ok' then
+      v_falhas := v_falhas || format(
+        E'\n  4c. culto de hoje SEM hora, DEPOIS das 18h, foi recusado: "%s"', v_erro);
+    end if;
+  end if;
+  /* e o default é 18:00 e não outro: o caso acima só mede um dos dois lados
+     por dia, então a constante fica pinada no corpo da função */
+  select (position('coalesce(v_inicio, time ''18:00'')' in
+                   regexp_replace(prosrc, '\s+', ' ', 'g')) > 0)::int
+    into v_n from pg_proc where proname = 'eu_relatorio';
+  if v_n <> 1 then
+    v_falhas := v_falhas || E'\n  4d. a hora padrao do relatorio nao e 18:00 (era meio-dia, e abria 6h de janela)';
+  end if;
+
   -- 5 · RELATÓRIO DE QUEM RECUSOU, num culto que JÁ PASSOU
-  insert into cultos (data, inicio) values (current_date - 7, time '18:00') returning id into v_passado;
+  select id into v_passado from cultos where data = current_date - 7 and evento is null;
+  if v_passado is null then
+    insert into cultos (data, inicio) values (current_date - 7, time '18:00') returning id into v_passado;
+    v_meu_passado := true;
+  end if;
   insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
        values (v_passado, v_fn, v_v, 'recusado', false, false);
   begin
@@ -575,11 +653,17 @@ begin
   end if;
 
   -- limpeza
-  delete from culto_obs where culto_id in (v_futuro, v_passado);
+  /* `culto_obs` do culto REUSADO: apaga só a linha da equipe de teste, que é
+     a única que esta conferência escreveu. A linha da equipe real guarda a
+     anotação da líder daquele dia. Mesmo defeito que a 71 tinha. */
+  delete from culto_obs where culto_id in (v_futuro, v_passado) and equipe_id = v_eq;
   delete from escalacoes where voluntario_id = v_v;
   delete from disponibilidade where voluntario_id = v_v;
   delete from indisponibilidades where voluntario_id = v_v;
-  delete from cultos where id in (v_futuro, v_passado);
+  delete from culto_obs where culto_id = v_hoje and equipe_id = v_eq;
+  if v_meu_hoje    then delete from cultos where id = v_hoje;    end if;
+  if v_meu_futuro  then delete from cultos where id = v_futuro;  end if;
+  if v_meu_passado then delete from cultos where id = v_passado; end if;
   delete from voluntarios where id = v_v;
   delete from pessoas where id = v_p;
   delete from funcoes where equipe_id = v_eq;
@@ -588,5 +672,5 @@ begin
   if v_falhas <> '' then
     raise exception E'CONFERENCIA DA 75 REPROVOU:%s', v_falhas;
   end if;
-  raise notice 'CONFERENCIA DA 75: 9/9. Pausado diz pausado, relatorio espera o culto, e eu_responder nao agradece a toa.';
+  raise notice 'CONFERENCIA DA 75: 11/11. Pausado diz pausado, relatorio espera o culto, e eu_responder nao agradece a toa.';
 end $conferir$;

@@ -352,7 +352,7 @@ do $conf$
 declare
   v_eq uuid; v_f1 uuid; v_f2 uuid; v_p uuid; v_vol uuid; v_tok text;
   v_dia date; v_culto uuid; v_ev uuid; v_dia_ev date; v_txt text; v_n int;
-  ok int := 0; falhou int := 0; msg text := '';
+  ok int := 0; falhou int := 0; msg text := ''; v_meu_culto boolean := false;
 begin
   select id into v_eq from equipes where slug = 'midia';
   if v_eq is null then raise notice '71 · PULEI: base sem a equipe de exemplo.'; return; end if;
@@ -367,8 +367,14 @@ begin
 
   v_dia := (current_date + 7)::date;
   while extract(dow from v_dia) <> 0 loop v_dia := v_dia + 1; end loop;
-  insert into cultos (data) values (v_dia) on conflict do nothing;
+  /* REUSA o domingo que já está no calendário; só cria quando não há, e
+     nesse caso a limpeza o apaga. Culto regular criado e deixado para trás é
+     um domingo fantasma no calendário da igreja inteira. */
   select id into v_culto from cultos where data = v_dia and evento is null;
+  if v_culto is null then
+    insert into cultos (data) values (v_dia) returning id into v_culto;
+    v_meu_culto := true;
+  end if;
   insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
        values (v_culto, v_f1, v_vol, 'confirmado', false, false),
               (v_culto, v_f2, v_vol, 'pendente',   false, false);
@@ -455,12 +461,38 @@ begin
     msg := msg || E'\n  x eu_dados nao devolve evento/inicio/funcao_id: a tela chama o evento de "domingo" e manda a hora errada';
   end if;
 
-  /* ---- 8. e diz de quem é o relatório --------------------------------- */
+  /* ---- 8. e diz de quem é o relatório ---------------------------------
+
+     O RELATÓRIO É ESCRITO NO EVENTO DESTE CENÁRIO, E NÃO NO DOMINGO REAL.
+
+     A primeira versão chamava `eu_relatorio(v_tok, v_culto, ...)`, e `v_culto`
+     é o PRÓXIMO DOMINGO DA IGREJA — a linha real. `eu_relatorio` é um upsert
+     em `culto_obs (culto_id, equipe_id)`, e essa é exatamente a linha onde
+     `salvar_dia` guarda a anotação da líder daquele dia. A limpeza logo
+     abaixo apagava a linha inteira.
+
+     Medido em 21/09, com a anotação "Chegar 30min antes, o telão novo
+     precisa de teste." no domingo da Mídia:
+
+         ANTES  -> "Chegar 30min antes, o telao novo precisa de teste."
+         DEPOIS -> <<SUMIU>>
+
+     E o pior é quando: o bloco inteiro é uma instrução só, então o `raise`
+     do caminho de REPROVA desfaz tudo. Os deletes só commitam no caminho de
+     SUCESSO. Este arquivo destruía dado real exatamente quando dizia 8/8.
+
+     A regra está escrita na 72: "um teste que suja o banco que ele deveria
+     proteger é pior que teste nenhum." Eu escrevi essa frase um arquivo
+     depois de quebrá-la aqui.
+
+     `v_ev` é o evento que esta conferência criou dez linhas acima, e ela já
+     o apaga por id no fim. A escalação dele é `pendente`, que é o que
+     `eu_relatorio` aceita. */
   update funcoes set relata = true where id = v_f1;
-  perform eu_relatorio(v_tok, v_culto, 'texto da conf71', null);
+  perform eu_relatorio(v_tok, v_ev, 'texto da conf71', null);
   select count(*) into v_n from eu_dados(v_tok) d,
        lateral jsonb_array_elements(d.escalas) x
-   where (x ->> 'culto_id')::uuid = v_culto
+   where (x ->> 'culto_id')::uuid = v_ev
      and x ->> 'relatado_por' = 'Conf71'
      and (x ->> 'relatado_eu')::boolean;
   if v_n >= 1 then ok := ok + 1;
@@ -469,8 +501,12 @@ begin
     msg := msg || E'\n  x eu_dados nao diz de quem e o relatorio: o segundo lider do dia sobrescreve o do primeiro sem saber';
   end if;
 
-  /* ---- limpeza, POR ID ------------------------------------------------ */
-  delete from culto_obs where culto_id in (v_culto, v_ev) and equipe_id = v_eq;
+  /* ---- limpeza, POR ID -------------------------------------------------
+
+     `culto_obs` do DOMINGO REAL fica de fora: esta conferência não escreve
+     mais lá (ver o caso 8), e apagar a linha que `salvar_dia` mantém levaria
+     junto a anotação da líder. Só sai o que este bloco criou. */
+  delete from culto_obs where culto_id = v_ev and equipe_id = v_eq;
   delete from escalacoes where culto_id in (v_culto, v_ev) and voluntario_id = v_vol;
   delete from disponibilidade where voluntario_id = v_vol;
   delete from indisponibilidades where voluntario_id = v_vol;
@@ -478,6 +514,7 @@ begin
   delete from voluntarios where id = v_vol;
   delete from pessoas where id = v_p;
   delete from cultos where id = v_ev;
+  if v_meu_culto then delete from cultos where id = v_culto; end if;
   delete from funcoes where id in (v_f1, v_f2);
 
   if falhou > 0 then

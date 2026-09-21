@@ -772,11 +772,30 @@ begin
 
   /* C3 · O ATAQUE DA 69: constante sem `where`. `update` que não cita coluna
      nenhuma não passa pela política de SELECT, e sobra só o USING do UPDATE. */
+  /* ============================================================ 78 ======
+     ESTE CASO APAGAVA DADO REAL, E O VEREDITO VINHA DA CAMADA ERRADA.
+
+     `update cultos set obs = null` sem `where`: a política `cultos_editar`
+     deixa o Jander alcançar os EVENTOS que ele lidera, e `culto_guarda` não
+     recusa evento do próprio dono. Então, quando nenhuma outra linha faz o
+     gatilho levantar primeiro, a instrução conclui e zera a anotação de
+     todos os eventos do ministério dele — sem volta, numa função que o
+     cabeçalho diz que alguém roda contra produção.
+
+     Hoje ela é salva por ACIDENTE: alguma linha de culto regular tem `obs`,
+     o gatilho levanta, e o `exception` engole. Depender de outra linha
+     levantar primeiro não é guarda.
+
+     Agora o ataque roda dentro de um savepoint que sempre volta. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
     update cultos set obs = null;
     reset role;
-  exception when others then reset role; end;
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception';
+  exception
+    when triggered_action_exception then null;
+    when others then reset role;
+  end;
   select count(*) into n from cultos where id = v_ev_t and obs = 'anotacao ' || v_suf;
   return query select 'escrita'::text, 'a anotação do evento de outra área sobrevive a `update cultos set obs = null`'::text,
     '1'::text, n::text, n = 1;
@@ -858,11 +877,24 @@ begin
   /* C10 · e o ATAQUE que `cand_editar` permitia continua recusado, venha a
      porta com o nome que vier. Era ele que fazia a tela da candidata dizer
      "Você está servindo" sem existir vínculo nenhum. */
+  /* O ATAQUE VOLTA ATRÁS SOZINHO. `begin ... exception` é savepoint, e o
+     `raise` no fim desfaz o `update` tenha ele alcançado o que for. Sem
+     isso, o dia em que a política voltasse, ESTE TESTE aprovaria toda
+     candidatura do ministério do Jander — e `testar_permissoes` é a função
+     que o cabeçalho diz que alguém roda contra produção meses depois. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
     update candidaturas set status = 'ativa';
     get diagnostics n = row_count; reset role;
-  exception when others then reset role; n := 0; end;
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception', detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+    when others then reset role; n := 0;
+  end;
   return query select 'escrita'::text,
     'organizador NÃO muda status de candidatura por fora de `decidir_candidatura`'::text,
     '0'::text, n::text, n = 0;
@@ -881,11 +913,22 @@ begin
     '0'::text, n::text, n = 0;
 
   /* C12 · e o formulário público do ministério não some numa linha só */
+  /* idem: o delete volta atrás sempre. Sem o savepoint, o dia em que
+     `perg_apagar` voltasse, este caso apagaria o formulário público do
+     Louvor ao ser executado — e ele existe para IMPEDIR isso. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', jwt_jander, true);
     delete from perguntas;
     get diagnostics n = row_count; reset role;
-  exception when others then reset role; n := 0; end;
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception', detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+    when others then reset role; n := 0;
+  end;
   return query select 'escrita'::text,
     'organizador NÃO apaga as perguntas do proprio formulario'::text,
     '0'::text, n::text, n = 0;

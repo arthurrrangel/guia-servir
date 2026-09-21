@@ -68,6 +68,55 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
   ]);
   ok(dois_conf[0].status === 'confirmado',
      'e quem confirmou os dois aparece como confirmada', dois_conf[0].status);
+
+  /* OS PARES QUE A PRIMEIRA VERSÃO DEIXAVA NA ORDEM DE CHEGADA.
+
+     O caso acima só media `confirmado`/`pendente`, que é exatamente o único
+     par para o qual o código ANTIGO já era independente de ordem. Medido na
+     reauditoria: `furou` + `confirmado` devolvia "furou" ou "confirmado"
+     conforme quem chegasse primeiro — e quem decide isso é o `order by
+     f.ordem` do banco.
+
+     `eu_quem_serve` exclui só `recusado`, então `furou` chega aqui. */
+  const PARES = [
+    ['furou', 'confirmado', 'furou'],
+    ['confirmado', 'furou', 'furou'],
+    ['furou', 'pendente', 'furou'],
+    ['pendente', 'furou', 'furou'],
+    ['pendente', 'confirmado', 'pendente'],
+    ['confirmado', 'pendente', 'pendente'],
+  ];
+  for (const [a, b, esperado] of PARES) {
+    const g = agruparQuemServe([
+      { nome: 'Ana', funcao: 'A', eu: false, status: a },
+      { nome: 'Ana', funcao: 'B', eu: false, status: b },
+    ]);
+    ok(g[0].status === esperado,
+       `${a} + ${b} = ${esperado}, venha na ordem que vier`, g[0].status);
+  }
+
+  /* status desconhecido não pode derrubar o que a tela já afirma */
+  const novo = agruparQuemServe([
+    { nome: 'Ana', funcao: 'A', eu: false, status: 'confirmado' },
+    { nome: 'Ana', funcao: 'B', eu: false, status: 'status_que_ainda_nao_existe' },
+  ]);
+  ok(novo[0].status === 'status_que_ainda_nao_existe',
+     'status novo entra como neutro e vence confirmado, que e o lado seguro',
+     novo[0].status);
+}
+
+/* ------------------------------- 2b) homonima nao vira "voce"
+   Duas pessoas de mesmo nome na mesma area, e uma delas e quem esta olhando.
+   Juntar as duas faria `gente.length - 1` virar 0 e a secao inteira sumir —
+   o defeito original ao contrario, escondendo gente que esta la. */
+{
+  const g = agruparQuemServe([
+    { nome: 'Ana Paula', funcao: 'VOCAL',   eu: true,  status: 'confirmado' },
+    { nome: 'Ana Paula', funcao: 'TECLADO', eu: false, status: 'confirmado' },
+  ]);
+  ok(g.length === 2, 'a homonima continua sendo outra pessoa', `deu ${g.length}`);
+  ok(g.filter(p => p.eu).length === 1, 'e so uma das duas e "Você"');
+  ok(g.length - 1 === 1, 'a tela escreve "mais 1 pessoa", e a secao aparece');
 }
 
 /* ------------------------------------------- 3) gente de verdade continua lá
@@ -117,7 +166,10 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
   const NOMES = ['Ana', 'Bruno', 'Carla', 'Davi'];
   const POSTOS = ['A', 'B', 'C', 'D', 'E'];
   const ESTADOS = ['confirmado', 'pendente', 'recusado'];
-  let errosA = 0, errosB = 0, sorteios = 0;
+  let errosA = 0, errosB = 0, errosC = 0, errosD = 0, errosE = 0, sorteios = 0;
+  let primeiroC = '', primeiroE = '';
+  const PESO = { furou: 0, pendente: 1, confirmado: 3 };
+  const peso = (x) => (x in PESO ? PESO[x] : 2);
 
   /* gerador determinístico: o teste tem que dar o mesmo resultado sempre */
   let semente = 12345;
@@ -144,6 +196,30 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
     const paresSaida = new Set(g.flatMap(p => p.funcoes.map(f => p.nome + '§' + f)));
     if (paresEntrada.size !== paresSaida.size) errosB++;
     else for (const par of paresEntrada) if (!paresSaida.has(par)) { errosB++; break; }
+
+    /* (c) O STATUS, que a primeira versao desta varredura NAO OLHAVA — e por
+       isso ela ficou verde por dois commits com o status dependendo da ordem
+       de chegada. A propriedade: o status de cada pessoa tem que ser o de
+       MENOR peso entre os postos dela, e isso nao pode depender da ordem. */
+    for (const p of g) {
+      const minhas = linhas.filter(l => l.nome === p.nome && l.eu === p.eu);
+      const menor = Math.min(...minhas.map(l => peso(l.status)));
+      if (peso(p.status) !== menor) { errosC++; if (!primeiroC) primeiroC = JSON.stringify({ linhas, p }); }
+    }
+
+    /* (d) e o `eu` de cada linha de saida tem que bater com o das entradas
+       que ela agrupa: "Você" nao pode virar outra pessoa nem o contrario */
+    for (const p of g) {
+      const minhas = linhas.filter(l => l.nome === p.nome && l.eu === p.eu);
+      if (!minhas.length) { errosD++; continue; }
+      if (minhas.some(l => l.eu !== p.eu)) errosD++;
+    }
+
+    /* (e) embaralhar a entrada nao pode mudar a saida */
+    const baralho = [...linhas].reverse();
+    const g2 = agruparQuemServe(baralho);
+    const chave = (arr) => arr.map(p => `${p.eu ? 1 : 0}|${p.nome}|${p.status}|${[...p.funcoes].sort().join(',')}`).sort().join(' ; ');
+    if (chave(g) !== chave(g2)) { errosE++; if (!primeiroE) primeiroE = JSON.stringify({ linhas, g: chave(g), g2: chave(g2) }); }
   }
 
   ok(sorteios === 3000, 'a varredura rodou os 3000 sorteios', String(sorteios));
@@ -153,6 +229,13 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
   ok(errosB === 0,
      'e nenhum posto se perde no agrupamento',
      `${errosB} divergencia(s)`);
+  ok(errosC === 0,
+     'o status de cada pessoa e sempre o de menor peso entre os postos dela',
+     `${errosC} divergencia(s), a primeira: ${primeiroC}`);
+  ok(errosD === 0, 'e "Você" nunca vira outra pessoa', `${errosD} divergencia(s)`);
+  ok(errosE === 0,
+     'e embaralhar a entrada nao muda a saida: a ordem do banco nao decide o que a tela diz',
+     `${errosE} divergencia(s), a primeira: ${primeiroE}`);
 }
 
 if (falhas) { console.log(`\nquem-serve-com-voce: ${falhas} falha(s) em ${feitas}\n`); process.exit(1); }

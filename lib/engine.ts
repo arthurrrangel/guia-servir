@@ -396,22 +396,94 @@ export const paraTesteDeDia = { noMeioDia };
      alguém quando chegar, e dois nomes iguais já não resolviam isso. O dia
      em que `eu_quem_serve` devolver id, este agrupamento passa a ser por id.
 
-   · o status que sobra é o MAIS ABERTO. Quem tem um posto pendente ainda
-     está confirmando o dia, mesmo já tendo confirmado o outro — dizer
-     "confirmado" ali seria a tela afirmando mais do que sabe. */
+   · o status que sobra vem de uma PRECEDÊNCIA declarada, e não da ordem de
+     chegada. A primeira versão fazia `if (j.status === 'pendente')` e só
+     isso: qualquer outro par mantinha quem chegou primeiro. Medido na
+     reauditoria de 21/09:
+
+         [{Ana,VOCAL,furou}, {Ana,TECLADO,confirmado}]  ->  "furou"
+         [{Ana,TECLADO,confirmado}, {Ana,VOCAL,furou}]  ->  "confirmado"
+
+     e quem decide a ordem é o `order by f.ordem` de `eu_quem_serve`. O
+     comentário dizia "o mais aberto" e o código não implementava ordem
+     nenhuma. Hoje a tela só desenha algo para `pendente`, então ainda não
+     aparece — é armadilha, não defeito vivo, e por isso fica consertada com
+     regra escrita em vez de deixada como está.
+
+     A ordem é "a notícia menos boa ganha": quem furou um posto e confirmou
+     outro não é uma pessoa confirmada, e quem não respondeu um posto ainda
+     está decidindo o dia.
+
+   · o agrupamento é por NOME **e por `eu`**. Homônimas na mesma área são
+     raras e existem, e juntar "você" com outra pessoa de mesmo nome faria a
+     contagem cair para zero e a seção sumir — o defeito original ao
+     contrário, escondendo gente que está lá. Enquanto `eu_quem_serve` não
+     devolver id, separar por `eu` é o que dá para fazer sem inventar dado. */
 export type ServeCom = { nome: string; funcao: string; eu: boolean; status: string };
 export type ServeComAgrupado = { nome: string; funcoes: string[]; eu: boolean; status: string };
+/* menor = mais "aberto". Status que não está aqui entra como neutro (2):
+   status novo no banco não pode mudar o que a tela já afirma. */
+const PESO_STATUS: Record<string, number> = { furou: 0, pendente: 1, confirmado: 3 };
+const pesoDe = (s: string) => PESO_STATUS[s] ?? 2;
+/* =============================================================================
+   O RÓTULO CURTO E A HORA DO DIA — 78, 21/09/2026
+
+   O cartão "Sua próxima escala" tem um distintivo com mês e dia da semana, e
+   uma linha com a data por extenso e a hora. Os dois liam só
+   `ehSabado(data)`, do jeito que `diaLongo` lia antes da 71: tudo que não é
+   sábado era "dom", com a hora do domingo.
+
+   Medido em 21/09, com o mesmo evento da 71 — Mídia, quarta 07/10, início
+   19:30 — o cartão dizia:
+
+       out · dom
+       Ensaio Geral · quarta, 7 de outubro, 10h
+
+   e duas linhas abaixo o arquivo `.ics` que a pessoa salva no calendário
+   dizia 19:30, porque o `.ics` já lia `proxima.inicio`. A mesma tela
+   afirmando duas horas diferentes para o mesmo compromisso.
+
+   `eu_dados` passou a trazer `evento` e `inicio` na 71; só o consumidor do
+   `.ics` tinha sido atualizado. */
+/* o nome é `distintivoDoDia` e não `rotuloCurto` porque `rotuloCurto` já
+   existe neste arquivo, com outra regra (a do `tipoDoDia`, que sabe que o
+   primeiro sábado do mês não tem Follow). Duas funções com o mesmo nome
+   curto num arquivo só é como se escolhe a errada. */
+export const distintivoDoDia = (s: string, evento?: string | null) => {
+  const mes = MESES[+s.slice(5, 7) - 1].slice(0, 3);
+  const dt = noMeioDia(s);
+  /* com evento, o dia da semana de verdade, abreviado em três letras como o
+     resto do distintivo. Sem evento, o culto: sábado é o Follow. */
+  const dia = evento ? DIAS_DA_SEMANA[dt.getUTCDay()].slice(0, 3)
+            : ehSabadoDeCulto(s) ? 'sáb' : 'dom';
+  return `${mes} · ${dia}`;
+};
+/* a hora que a tela ESCREVE, e a mesma que vai para o `.ics`.
+   `inicio` vem do banco como 'HH:MM:SS'; a tela mostra 'HH:MM' e tira o ':00'
+   redondo, porque "19h" é como a igreja fala. */
+export const horaDoDia = (
+  inicio: string | null | undefined, evento: string | null | undefined,
+  data: string, cultoHora: string, followHora?: string | null,
+): string | null => {
+  if (evento) {
+    if (!inicio) return null;
+    const [h, m] = inicio.split(':');
+    return m === '00' ? `${+h}h` : `${+h}h${m}`;
+  }
+  return ehSabadoDeCulto(data) ? (followHora ?? null) : cultoHora;
+};
+
 export function agruparQuemServe(linhas: ServeCom[]): ServeComAgrupado[] {
   const mapa = new Map<string, ServeComAgrupado>();
   for (const j of linhas) {
-    const atual = mapa.get(j.nome);
+    const chave = `${j.eu ? '1' : '0'}\u0000${j.nome}`;
+    const atual = mapa.get(chave);
     if (!atual) {
-      mapa.set(j.nome, { nome: j.nome, funcoes: [j.funcao], eu: j.eu, status: j.status });
+      mapa.set(chave, { nome: j.nome, funcoes: [j.funcao], eu: j.eu, status: j.status });
       continue;
     }
     if (!atual.funcoes.includes(j.funcao)) atual.funcoes.push(j.funcao);
-    atual.eu = atual.eu || j.eu;
-    if (j.status === 'pendente') atual.status = 'pendente';
+    if (pesoDe(j.status) < pesoDe(atual.status)) atual.status = j.status;
   }
   return [...mapa.values()];
 }

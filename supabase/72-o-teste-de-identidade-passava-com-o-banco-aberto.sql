@@ -339,20 +339,41 @@ begin
      conta e sobra só o USING do UPDATE. `papeis` não tem política de UPDATE,
      o que é deny — mas isso nunca tinha sido medido, e "não tem política" é
      exatamente o tipo de coisa que alguém adiciona sem perceber. */
+  /* O ATAQUE RODA DENTRO DE UM SAVEPOINT QUE SEMPRE VOLTA ATRÁS.
+
+     A primeira versão deixava o `update` commitar. Hoje ele não alcança
+     linha nenhuma, porque `papeis` não tem política de UPDATE — mas o dia em
+     que alguém acrescentar uma (que é LITERALMENTE o que este caso existe
+     para detectar), esta função deixaria toda linha de `papeis` como
+     `admin` sem equipe. O teste destruiria a tabela que ele veio vigiar.
+
+     `begin ... exception` em plpgsql é um savepoint de verdade, então o
+     `raise` no fim desfaz o `update` qualquer que tenha sido o resultado. É
+     o mesmo recurso dos casos 5 e 6, pelo mesmo motivo escrito lá.
+
+     `when others` e não a lista fechada: alguém que lidera DOIS ministérios
+     tem duas linhas em `papeis`, e o update colide em `ux_papeis_unico` com
+     `unique_violation` — que a lista fechada não pegava, e aí a função
+     inteira abortava em vez de reportar. Medido em 21/09. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', v_jwt, true);
     /* `equipe_id = null` JUNTO, e isso importa: `papel = 'admin'` sozinho
        esbarra na constraint `papel_com_escopo_certo` (admin não tem equipe),
-       e aí quem recusa é a constraint, não a política. Um caso que passa por
-       causa da constraint não mede a RLS — foi exatamente o que aconteceu na
-       primeira versão deste caso, e a conferência com a RLS desligada é que
-       mostrou, levantando `check_violation` no meio da função. */
+       e aí quem recusa é a constraint, não a política. */
     update papeis set papel = 'admin', equipe_id = null;
     get diagnostics n = row_count;
     reset role;
-    v_erro := case when n = 0 then 'nenhuma linha' else 'MUDOU ' || n || ' linha(s)' end;
-  exception when insufficient_privilege or check_violation then
-    reset role; v_erro := 'nenhuma linha';
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception',
+      detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+      v_erro := case when n = 0 then 'nenhuma linha' else 'MUDOU ' || n || ' linha(s)' end;
+    when others then
+      reset role; n := 0; v_erro := 'nenhuma linha';
   end;
   return query select 'update em papeis sem where nao promove ninguem'::text,
     'nenhuma linha'::text, v_erro, v_erro = 'nenhuma linha';
@@ -360,13 +381,26 @@ begin
 
   /* I4 · e o mesmo ataque em `lideres`, que tem política de UPDATE
      (`eq_lideres_mexer` é ALL) e portanto um USING de verdade para passar */
+  /* mesmo savepoint do caso acima, e aqui é pior se escapar: `equipe_id is
+     null` em `lideres` é o que `lidera_tudo()` lê como "organiza a igreja
+     inteira". Sem o desfazer, este caso promoveria TODO organizador de área
+     a organizador geral no dia em que a política se abrisse. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', v_jwt, true);
     update lideres set equipe_id = null;
     get diagnostics n = row_count;
     reset role;
-    v_erro := case when n = 0 then 'nenhuma linha' else 'MUDOU ' || n || ' linha(s)' end;
-  exception when insufficient_privilege then reset role; v_erro := 'nenhuma linha';
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception',
+      detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+      v_erro := case when n = 0 then 'nenhuma linha' else 'MUDOU ' || n || ' linha(s)' end;
+    when others then
+      reset role; n := 0; v_erro := 'nenhuma linha';
   end;
   return query select 'update em lideres sem where nao promove ninguem'::text,
     'nenhuma linha'::text, v_erro, v_erro = 'nenhuma linha';

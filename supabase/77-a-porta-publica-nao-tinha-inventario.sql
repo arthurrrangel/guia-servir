@@ -260,7 +260,7 @@ end $reg$;
 -- CONFERÊNCIA
 -- =========================================================================
 do $conferir$
-declare v_falhas text := ''; v_n int; v_total int; v_ok int;
+declare v_falhas text := ''; v_n int; v_total int; v_ok int; v_gatilho text;
 begin
   -- 1 · o teste passa inteiro
   select count(*), count(*) filter (where passou) into v_total, v_ok from testar_porta_publica();
@@ -306,14 +306,28 @@ begin
   delete from porta_publica where funcao = 'funcao_que_nunca_existiu_77()';
   drop function public.porta_de_teste_77();
 
-  -- 5 · e acusa gatilho concedido de volta
-  grant execute on function public.culto_guarda() to anon;
-  select count(*) into v_n from testar_porta_publica()
-   where caso like 'nenhuma funcao de GATILHO%' and not passou;
-  if v_n <> 1 then
-    v_falhas := v_falhas || E'\n  5. concedi um gatilho a anon e o teste NAO acusou';
+  /* 5 · e acusa gatilho concedido de volta.
+
+     O NOME DO GATILHO VEM DO CATÁLOGO, e não escrito aqui: a primeira versão
+     cravava `culto_guarda()` à mão, no arquivo cujo item (a) existe
+     justamente para não listar gatilho à mão. */
+  select 'public.' || quote_ident(p.proname) || '()' into v_gatilho
+    from pg_proc p
+   where p.pronamespace = 'public'::regnamespace
+     and pg_get_function_result(p.oid) = 'trigger'
+     and pg_get_function_identity_arguments(p.oid) = ''
+   order by p.proname limit 1;
+  if v_gatilho is null then
+    v_falhas := v_falhas || E'\n  5. nao achei funcao de gatilho sem argumento: o caso 4 seria vacuo';
+  else
+    execute format('grant execute on function %s to anon', v_gatilho);
+    select count(*) into v_n from testar_porta_publica()
+     where caso like 'nenhuma funcao de GATILHO%' and not passou;
+    if v_n <> 1 then
+      v_falhas := v_falhas || format(E'\n  5. concedi %s a anon e o teste NAO acusou', v_gatilho);
+    end if;
+    execute format('revoke all on function %s from public, anon, authenticated', v_gatilho);
   end if;
-  revoke all on function public.culto_guarda() from public, anon, authenticated;
 
   -- 6 · motivo de uma palavra também reprova
   insert into porta_publica (funcao, motivo, n) values ('tel_norm(t text)', 'ok', 77)

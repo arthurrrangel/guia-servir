@@ -202,8 +202,41 @@ begin
     v_falhas := v_falhas || E'\n  7. o `limit 1` sem ordem continua no corpo da sonda';
   end if;
 
+  /* ===================================================================== 78
+     8 · O CONTROLE NEGATIVO, E SEM ELE OS SETE DE CIMA SÃO DECORATIVOS.
+
+     Medido na reauditoria de 21/09: trocando a busca por `elsif true then`,
+     os sete casos acima continuavam VERDES. Nenhum deles distingue "a sonda
+     funciona" de "a sonda diz sim para tudo" — os casos 3 e 4 filtram linhas
+     e exigem que nada reprove, o que é exatamente o que uma sonda quebrada
+     também entrega.
+
+     É o defeito que o cabeçalho deste arquivo descreve: "uma sonda que às
+     vezes acerta ensina a ignorar a sonda". Eu escrevi a frase e deixei a
+     conferência sem o caso que a sustenta.
+
+     Aqui se planta um trecho que NÃO pode estar em lugar nenhum e se cobra
+     que a sonda ache o SUMIU. A linha é apagada em seguida. */
+  insert into public.schema_sonda (n, caso, alvo, procura)
+       values (73, '73 · controle negativo (linha temporaria da conferencia)',
+               'schema_versao_conferir',
+               'este trecho nao existe em funcao nenhuma deste banco 7e3a9c')
+    on conflict (n, caso) do update set procura = excluded.procura;
+  select count(*) into v_n from schema_versao_conferir()
+   where caso like '73 · controle negativo%' and not passou;
+  if v_n <> 1 then
+    v_falhas := v_falhas || E'\n  8. a sonda NAO acusou um trecho que nao existe: ela esta dizendo sim para tudo';
+  end if;
+  select count(*) into v_n from schema_versao_conferir()
+   where caso like '73 · controle negativo%' and obtido like 'SUMIU%';
+  if v_n <> 1 then
+    v_falhas := v_falhas || E'\n  8b. e nem escreveu SUMIU no lugar certo';
+  end if;
+  delete from public.schema_sonda
+   where n = 73 and caso like '73 · controle negativo%';
+
   if v_falhas <> '' then
     raise exception E'CONFERENCIA DA 73 REPROVOU:%s', v_falhas;
   end if;
-  raise notice 'CONFERENCIA DA 73: 7/7. Sonda %s/%s, e eu_responder tem 2 versoes.', v_ok, v_total;
+  raise notice 'CONFERENCIA DA 73: 8/8. Sonda %s/%s, e eu_responder tem 2 versoes.', v_ok, v_total;
 end $conferir$;
