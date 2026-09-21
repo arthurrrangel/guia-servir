@@ -325,8 +325,41 @@ end $reg$;
 do $conferir$
 declare v_falhas text := ''; v_n int; v_total int; v_ok int; v_gatilho text;
 begin
-  -- 1 · o teste passa inteiro
-  select count(*), count(*) filter (where passou) into v_total, v_ok from testar_porta_publica();
+  /* ==================================================== 82g ================
+     1 · o teste passa inteiro — SALVO o caso que e RETRATO e nao PORTAO.
+
+     `testar_porta_publica` continua dizendo a verdade sobre os dois sentidos
+     (porta sem motivo escrito, e motivo de porta que nao existe). Quem decide
+     o que bloqueia e esta conferencia, que conhece o assunto da migracao.
+
+     O caso "inventario descreve funcao que a internet nao alcanca mais"
+     apontou, em producao, `eu_quem_serve(p_token text, p_culto_id uuid)`:
+     funcao da migracao 40, que aquele banco nunca recebeu (ele e anterior a
+     `schema_versao`, que so existe desde a 55). E lacuna de migracao antiga,
+     e a 77 inventaria portas, nao cria funcao que falta. A 83 cria.
+
+     Bloquear aqui seria impedir uma correcao de hoje por um buraco de meses
+     atras, e junto dela todas as migracoes seguintes, pela tranca de ordem.
+
+     O caso 2 — porta ABERTA sem motivo escrito, que e o que importa para
+     seguranca — continua sendo portao, e foi ele que fechou `ocupados_fora`. */
+  declare v_obsoleto text;
+  begin
+    select obtido into v_obsoleto from testar_porta_publica()
+     where caso like 'nenhuma linha do inventario%' and not passou;
+    if v_obsoleto is not null then
+      raise warning E'\n=============================================================\n'
+        '77 · O INVENTARIO DESCREVE PORTA QUE ESTE BANCO NAO TEM: %\n\n'
+        'Isto NAO bloqueia: e funcao de migracao anterior a regua (a 40), que\n'
+        'este banco nunca recebeu. A 83 cria. O caso que importa para\n'
+        'seguranca — porta aberta SEM motivo escrito — continua sendo portao.\n'
+        '=============================================================', v_obsoleto;
+    end if;
+  end;
+
+  select count(*), count(*) filter (where passou) into v_total, v_ok
+    from testar_porta_publica()
+   where not (caso like 'nenhuma linha do inventario%' and not passou);
   if v_ok <> v_total then
     v_falhas := v_falhas || format(E'\n  1. %s de %s casos reprovaram: %s', v_total - v_ok, v_total,
       (select string_agg(caso || ' -> ' || obtido, ' | ') from testar_porta_publica() where not passou));
@@ -405,41 +438,7 @@ begin
    where funcao = 'tel_norm(t text)';
 
   -- 7 · e o banco voltou inteiro
-  /* ==================================================== 82g ================
-     A DECISAO DE BLOQUEAR SAI DO TESTE E VEM PARA CA.
-
-     A primeira tentativa foi fazer o caso 3 sempre passar. Errada, e o
-     proprio controle negativo desta conferencia me disse: ele planta uma
-     linha de inventario falsa e exige que o caso 3 acuse. Com o caso 3
-     calado, o controle reprovou:
-
-       4. declarei funcao que nao existe e o teste NAO acusou
-
-     O teste tem que continuar dizendo a verdade. Quem decide o que e portao
-     e quem decide o que e relatorio e a CONFERENCIA, que e quem conhece o
-     assunto da migracao. Mesma separacao que a 72 recebeu hoje.
-
-     O caso 3 aponta, em producao, `eu_quem_serve(p_token text, p_culto_id
-     uuid)`: funcao da migracao 40, que aquele banco nunca recebeu (ele e
-     anterior a `schema_versao`, que so existe desde a 55). E lacuna de
-     migracao antiga, nao defeito desta correcao, e a 77 nao cria funcao que
-     falta. A 83 cria. Ate la, relatorio. */
-  declare v_obsoleto text;
-  begin
-    select obtido into v_obsoleto from testar_porta_publica()
-     where caso like 'nenhuma linha do inventario%' and not passou;
-    if v_obsoleto is not null then
-      raise warning E'\n=============================================================\n'
-        '77 · O INVENTARIO DESCREVE PORTA QUE ESTE BANCO NAO TEM: %\n\n'
-        'Isto NAO bloqueia: e funcao de migracao anterior a regua (a 40), que\n'
-        'este banco nunca recebeu. A 83 cria. O caso que importa para\n'
-        'seguranca — porta aberta SEM motivo escrito — continua sendo portao.\n'
-        '=============================================================', v_obsoleto;
-    end if;
-  end;
-
-  select count(*) filter (where passou), count(*) into v_ok, v_total
-    from testar_porta_publica()
+  select count(*) filter (where passou), count(*) into v_ok, v_total from testar_porta_publica()
    where not (caso like 'nenhuma linha do inventario%' and not passou);
   if v_ok <> v_total then
     v_falhas := v_falhas || format(E'\n  7. a conferencia deixou %s caso(s) reprovando no fim', v_total - v_ok);
