@@ -54,7 +54,7 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
    mesmo `throw`, e nenhum teste passava por ele.
 
    Por que importa exatamente nesta: um 5xx passageiro em `escalacoes` que
-   vira lista vazia faz o robô das 3h ler "o líder não montou", chamar
+   vira lista vazia faz o robô das 9h ler "o líder não montou", chamar
    `gerarMes` e depois `salvar_dia` — e `salvar_dia` APAGA toda escalação da
    equipe naquele culto. O comentário no arquivo já dizia isso. O teste é que
    não existia.
@@ -349,7 +349,7 @@ for (const t of ['habilidades', 'indisponibilidades', 'escalacoes', 'plantoes', 
   ok(new Set(r2.data.map(x => x.id)).size === 250, 'e nenhum vem repetido');
 
   /* E O ERRO DE UM LOTE DERRUBA O CONJUNTO. Meio resultado é pior que
-     nenhum: lista parcial de `escalacoes` faz o robô das 3h ler "o líder não
+     nenhum: lista parcial de `escalacoes` faz o robô das 9h ler "o líder não
      montou" e `salvar_dia` apaga o mês. */
   let n = 0;
   const comFalha = (ids) => Promise.resolve(

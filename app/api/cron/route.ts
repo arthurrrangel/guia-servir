@@ -14,7 +14,7 @@ import { cont } from '@/lib/plural';
 import { createClient } from '@supabase/supabase-js';
 import {
   addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
-  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo, proxMes,
+  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado, proxMes,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
@@ -24,7 +24,7 @@ export const dynamic = 'force-dynamic';
 
    19/09/2026. Sem `maxDuration`, o limite é o padrão da plataforma: ele não
    está neste arquivo, não está em `vercel.json`, e muda quando o plano muda
-   ou quando a Vercel muda o padrão. Ou seja, o tempo que o robô das 3h tem
+   ou quando a Vercel muda o padrão. Ou seja, o tempo que o robô das 9h tem
    para rodar era decidido por fora do repositório, sem ninguém saber qual era.
 
    O que esta rota faz, por equipe, em SÉRIE: cerca de dez consultas, mais
@@ -168,6 +168,56 @@ async function rodar(req: Request) {
   }
   const s = servico();
   if (!s) return Response.json({ erro: 'SUPABASE_SERVICE_ROLE ausente' }, { status: 500 });
+
+  /* O BANCO PRECISA ESTAR NA VERSÃO QUE ESTE CÓDIGO ASSUME — 21/09/2026.
+
+     `schema_versao` e `exige_versao_ate` existem desde a 55, e até hoje só as
+     MIGRAÇÕES os consultavam, uma à outra. Nenhuma linha de `app/` ou `lib/`
+     lia a régua. Só que `PUBLICAR.md:190` diz, com todas as letras, que os
+     dois atos são separados: "As migrações em `supabase/` são do Arthur: ele
+     cola e roda. O site não pode depender de uma migração que ainda não
+     rodou." O `vercel --prod` e o `psql` acontecem em momentos diferentes, e
+     entre um e outro o robô roda com o código novo sobre o banco velho.
+
+     Medido em 21/09: com o código de hoje e o banco na 60 (`salvar_dia` ainda
+     na versão da 54), o robô criou um culto fantasma numa quinta-feira de
+     evento, gravou dez pessoas nele, deixou o evento vazio, e respondeu
+     HTTP 200 com zero falhas. Exatamente o estrago que a 61 existe para
+     consertar.
+
+     A régua vale para a PRÓXIMA migração tanto quanto para aquela. Então o
+     robô passa a conferir antes de escrever: banco atrás do mínimo, ele não
+     faz nada, diz por quê, e devolve 500 — que é alto e reversível, ao
+     contrário de escrever torto em silêncio.
+
+     Banco À FRENTE do código é normal e não é erro: migração aplicada antes
+     do deploy é a ordem recomendada. Por isso a conta é `>=`, não `=`.
+
+     QUANDO MEXER AQUI: subiu uma migração de que o robô depende? Este número
+     sobe no mesmo commit. */
+  const VERSAO_MINIMA_DO_BANCO = 66;
+  {
+    const { data: regua, error: erroRegua } = await s
+      .from('schema_versao').select('n').order('n', { ascending: false }).limit(1);
+    if (erroRegua) {
+      return Response.json(
+        { erro: 'não consegui ler a régua do banco (schema_versao)', detalhe: erroRegua.message },
+        { status: 500 });
+    }
+    const noBanco = regua?.[0]?.n as number | undefined;
+    if (bancoAtrasado(noBanco, VERSAO_MINIMA_DO_BANCO)) {
+      const m = `O banco está na migração ${noBanco ?? 0} e este código precisa da ${VERSAO_MINIMA_DO_BANCO}. `
+              + `Não escrevi nada: rodar sobre banco atrasado grava escala no lugar errado, em silêncio. `
+              + `Aplique as migrações que faltam no Supabase e o robô volta sozinho na próxima execução.`;
+      /* o aviso é melhor-esforço: se a leitura de `lideres` também falhar
+         (e ela LANÇA de propósito), o que não pode acontecer é a mensagem
+         específica virar um 500 genérico e a causa se perder no log. */
+      try { await enviar(soGlobais(await lideresTodos(s)), '[ATENÇÃO] o robô parou: banco atrasado', '\u26a0 ' + m); }
+      catch { /* o corpo da resposta abaixo continua dizendo tudo */ }
+      return Response.json({ erro: 'banco atrasado', banco: noBanco ?? 0, minimo: VERSAO_MINIMA_DO_BANCO, detalhe: m },
+                           { status: 500 });
+    }
+  }
 
   const { iso, diaMes, diaSemana } = dataSP();
   const forcar = url.searchParams.get('forcar'); // teste: coleta | mes | cobranca
@@ -331,7 +381,25 @@ async function rodar(req: Request) {
       const erro = errosDoDia.join(' | ');
       const vagas = r.reduce((a: number, x: any) => a + x.vagas.length, 0);
       resumo.push({ equipe: e.nome, vagas, erro: erro || undefined });
-      if (erro) falhas.push(`${e.nome}: ${erro}`);
+      if (erro) {
+        /* QUEM CONSERTA O MÊS DO LOUVOR É O LÍDER DO LOUVOR — 21/09/2026.
+
+           O envio ao líder morava só no `else`, então bastava UM dia recusado
+           para o líder daquele ministério não receber nada: nem "montada",
+           nem "faltou um dia". O único aviso ia para o organizador GLOBAL, e
+           a mensagem do caso 'parcial' ainda dizia "abra o app e use
+           Remontar" — instrução dirigida a quem lidera aquele ministério,
+           entregue a quem não é ele.
+
+           Sete de oito dias gravados é o estado que MAIS precisa de e-mail, e
+           era o único que não gerava nenhum. */
+        falhas.push(`${e.nome}: ${erro}`);
+        envios.push({ equipe: e.nome, parcial: true,
+          email: await enviar(paraEquipe(lideres, e.id),
+            `${e.nome} · a escala de ${MESES[prox.mes - 1]} ficou incompleta`,
+            `Montei o mês, menos o que está abaixo. Abra o app (${SITE}), confira estes dias e complete à mão:\n\n`
+            + errosDoDia.map(x => '• ' + x).join('\n')) });
+      }
       else {
         /* O EMAIL SAI AQUI DENTRO, E NÃO DEPOIS DO LAÇO — 20/09/2026.
 
@@ -417,11 +485,41 @@ async function rodar(req: Request) {
         .map(S => S.escalas[data]?.evento).find(Boolean);
       const rotulo = nomeEvento ? `${nomeEvento} · ${fmtDia(data)}`
         : tipoDoDia(data) === 'follow' ? `Follow sáb ${fmtDia(data)}` : `domingo ${fmtDia(data)}`;
+      /* é um culto REGULAR (domingo ou Follow), pelo mesmo calendário que
+         `diasDoMes` usa para montar o mês? Se não é, o dia só está em `alvos`
+         porque é evento de ALGUM ministério, e aí o silêncio abaixo é certo. */
+      const regular = !nomeEvento;
       for (const e of equipes) {
         const S = estados.get(e.id);
         if (!S) continue;
         const dia = S.escalas[data];
-        if (!dia) continue;
+        if (!dia) {
+          /* O PIOR ESTADO ERA O ÚNICO MUDO — 21/09/2026, auditoria do robô.
+
+             `if (!dia) continue` estava certo pelo motivo escrito acima: dia
+             que outro ministério montou não é problema deste. Só que
+             `montarEstado` (lib/ponte.ts) também não materializa um domingo
+             REGULAR quando a equipe não tem NADA nele — e essa é uma decisão
+             de tela ("não mostrar 7 funções sem ninguém e sumir com o botão
+             de montar"), que o cron herdou como silêncio.
+
+             O resultado, medido: um domingo em que o robô falhou ao gravar
+             não aparecia em NENHUM lugar da cobrança de quinta. A cobrança
+             existe exatamente para ninguém descobrir o furo no sábado, e ela
+             era muda sobre "ninguém escalado", que é o furo inteiro.
+
+             Este aviso não carrega nome nem link de ninguém, então ele pode
+             ir também para o organizador global — ao contrário da lista de
+             pendentes logo abaixo. */
+          const temTime = !!S.voluntarios.filter(v => v.ativo).length && !!funcoesAtivas(S).length;
+          if (!avisarDiaSemNinguem(regular, temTime)) continue;
+          resumo.push({ equipe: e.nome, culto: rotulo, ninguem: true });
+          falhas.push(`${e.nome}: NINGUÉM está escalado em ${rotulo}.`);
+          porEquipe[e.id] = porEquipe[e.id] || { nome: e.nome, partes: [] };
+          porEquipe[e.id].partes.push(
+            `### ${rotulo} ###\nNINGUÉM ESTÁ ESCALADO neste culto. Abra o app (${SITE}) e monte a escala deste dia.`);
+          continue;
+        }
         const pend = Object.entries(dia.slots).filter(([, sl]: any) => sl?.vid && (sl.status || 'pendente') === 'pendente');
         const vagas = vagasDe(S, data);
         if (!pend.length && !vagas.length) { resumo.push({ equipe: e.nome, culto: rotulo, ok: true }); continue; }

@@ -6,7 +6,7 @@
    devolve `{data: null, error: null}`, e um 5xx passageiro devolve `error`.
    Os dois viravam `config: null`, e `montarEstado` montava o PADRÃO.
 
-   O estrago é do robô das 3h, não da tela: com a leitura de `config`
+   O estrago é do robô das 9h, não da tela: com a leitura de `config`
    falhando, o mês do Connect (limitePadrao 4, plantaoQtd 3) sai sorteado com
    teto 2 e um plantão só, e o e-mail diz que está montado.
 

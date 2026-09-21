@@ -1,4 +1,4 @@
-/* O ROBÔ DAS 3H SÓ PODE MONTAR MÊS VAZIO — E ISSO É LOAD-BEARING.
+/* O ROBÔ SÓ PODE MONTAR MÊS VAZIO — E ISSO É LOAD-BEARING.
 
    19/09/2026. `app/api/cron/route.ts` e `lib/db.ts` gravam a escala por
    caminhos DIFERENTES:
@@ -22,7 +22,7 @@
    re-sortear o que o líder pôs à mão"). Quem fosse afrouxá-la um dia estaria
    pensando em produto — "seria bom o robô completar o mês pela metade" — sem
    saber que estava soltando a gravação do robô em cima do trabalho manual do
-   líder, às 3 da manhã, sem ninguém olhando.
+   líder, às 9 da manhã do dia 26 — a hora em que ele também está no app.
 
    POR ISSO A REGRA SAIU DO `if` E VIROU `decisaoDoRobo` em lib/engine.ts:
    com nome, com o motivo escrito em cima, e com esta tabela-verdade. A
@@ -32,7 +32,7 @@
 
    Roda com `npm test`. */
 
-import { decisaoDoRobo } from '../lib/engine.ts';
+import { decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado } from '../lib/engine.ts';
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -97,6 +97,86 @@ for (const [m, n, esperado, porque] of casos) {
     'o robô chama decisaoDoRobo em vez de decidir sozinho');
   ok(!/montados\.length === dias\.length/.test(cron),
     'e a comparação antiga não voltou junto por copiar e colar');
+}
+
+/* ========================================================================
+   A COBRANÇA DE QUINTA E O DIA SEM NINGUÉM — 21/09/2026
+
+   O defeito que esta tabela-verdade fixa: `if (!dia) continue` calava sobre
+   um domingo REGULAR em que a equipe não tinha nada. É o pior estado
+   possível — ninguém escalado, quatro dias antes — e era o único que não
+   gerava aviso nenhum, porque `montarEstado` não materializa o dia e o cron
+   leu essa ausência como "não é comigo".
+
+   Os dois casos que a função precisa separar, e nenhum dos dois é óbvio:
+   evento de OUTRO ministério é silêncio certo (cobrar seria ruído que ensina
+   a ignorar o robô), e domingo regular vazio é alarme.
+   ======================================================================== */
+{
+  ok(avisarDiaSemNinguem(true, true) === true,
+     'domingo regular, equipe com time, nada montado: AVISA');
+  ok(avisarDiaSemNinguem(false, true) === false,
+     'evento de outro ministerio: cala (o dia nao e desta equipe)');
+  ok(avisarDiaSemNinguem(true, false) === false,
+     'equipe sem time ou sem funcao ativa: cala (nao ha o que montar)');
+  ok(avisarDiaSemNinguem(false, false) === false,
+     'evento alheio E sem time: cala');
+}
+
+/* e o robô de fato usa ESTA função, e não voltou a calar sozinho */
+{
+  const { readFileSync } = await import('node:fs');
+  const { fileURLToPath } = await import('node:url');
+  const { dirname, join } = await import('node:path');
+  const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const cron = readFileSync(join(raiz, 'app/api/cron/route.ts'), 'utf8');
+  ok(/avisarDiaSemNinguem\(regular, temTime\)/.test(cron),
+     'a cobranca chama avisarDiaSemNinguem em vez de um `continue` seco');
+  ok(!/const dia = S\.escalas\[data\];\s*\n\s*if \(!dia\) continue;/.test(cron),
+     'e o `if (!dia) continue` seco nao voltou por copiar e colar');
+
+  /* A RÉGUA DO BANCO. O robô que escreve sobre banco atrasado grava no lugar
+     errado em silêncio — medido em 21/09 com o banco na 60.
+
+     A PRIMEIRA VERSÃO DESTES DOIS CASOS ERA VAZIA, e eu só descobri sabotando:
+     renomeei a DECLARAÇÃO de `VERSAO_MINIMA_DO_BANCO` e o teste passou, porque
+     os USOS ainda tinham a palavra e o regex só procurava a palavra.
+
+     SÃO TRÊS CAMADAS, E CADA UMA PEGA UMA COISA — dito assim para ninguém
+     confiar demais nesta:
+       · a tabela-verdade lá embaixo é onde a DECISÃO está testada de verdade,
+         sem regex nenhum;
+       · estes dois regex pinam o FIO: que o route.ts chama a função em vez de
+         decidir sozinho de novo;
+       · e `tsc --noEmit`, que roda no `npm run build`, é quem pega a renomeação
+         quebrada — medido: três erros TS2304 naquele mesmo arquivo.
+     Texto não vira verificador de tipo, e este arquivo não vai fingir que
+     vira. */
+  ok(/bancoAtrasado\(noBanco, VERSAO_MINIMA_DO_BANCO\)/.test(cron),
+     'o robo confere a versao do banco antes de escrever, chamando bancoAtrasado');
+  ok(/from\('schema_versao'\)/.test(cron),
+     'e a le de schema_versao, que e a regua que as migracoes mantem');
+
+  /* O MÊS PELA METADE PRECISA CHEGAR A QUEM CONSERTA. */
+  ok(/parcial: true/.test(cron),
+     'mes incompleto manda e-mail ao lider DAQUELE ministerio, nao so ao global');
+
+  /* E A HORA. `vercel.json` agenda 0 12 * * *, que e 09:00 em Brasilia.
+     "3 da manha" era o argumento implicito de que a corrida do robo com o
+     lider nao acontece — e as 9h do dia 26 ela acontece. */
+  const vercel = readFileSync(join(raiz, 'vercel.json'), 'utf8');
+  ok(/"0 12 \* \* \*"/.test(vercel), 'o agendamento continua 0 12 * * * (09:00 BRT)');
+  ok(!/rob[oô] das 3h|3 da manh/.test(cron), 'o route.ts nao diz mais "3h"');
+}
+
+/* a tabela-verdade da régua, que é onde a decisão de verdade mora */
+{
+  ok(bancoAtrasado(65, 66) === true,  'banco na 65, codigo pede 66: ATRASADO');
+  ok(bancoAtrasado(66, 66) === false, 'banco na 66, codigo pede 66: em dia');
+  ok(bancoAtrasado(70, 66) === false, 'banco ADIANTE do codigo nao e erro: migrar antes do deploy e a ordem certa');
+  ok(bancoAtrasado(null, 66) === true,      'banco sem regua nenhuma conta como atrasado');
+  ok(bancoAtrasado(undefined, 66) === true, 'leitura vazia tambem');
+  ok(bancoAtrasado(0, 66) === true,         'e zero tambem');
 }
 
 console.log(falhas ? `\ncron-guarda: ${falhas} falha(s) em ${feitas}` : `\ncron-guarda: ${feitas}/${feitas} ok`);

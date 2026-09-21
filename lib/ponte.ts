@@ -302,7 +302,7 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
    responde "posso" a cada domingo. Hoje isso é inofensivo, porque o sorteio só
    lê `indisponivel` (o "não posso"); no dia em que alguém usar o "posso" para
    ordenar candidatos, o botão do líder passa a honrar a resposta e o robô das
-   3h do dia 26 não — e ninguém está olhando quando ele roda.
+   9h do dia 26 não — e o líder pode estar no app bem nessa hora.
 
    O jeito de essa divergência não voltar não é conferir de novo: é existir uma
    função só. O cliente entra por parâmetro; a lista de colunas, a janela de
@@ -485,7 +485,7 @@ export const DIAS_DE_HISTORICO = -200;
 
    E O ERRO CONTINUA SUBINDO: se QUALQUER lote falhar, a função devolve o
    erro, porque meio resultado é pior que nenhum — lista parcial de escalação
-   faz o robô das 3h achar que o líder não montou o mês.
+   faz o robô das 9h achar que o líder não montou o mês.
    ============================================================================= */
 const POR_LOTE = 100;
 
@@ -734,7 +734,7 @@ export async function linhasDaEquipe(
      padrão, jogando fora `limitePadrao`, `janelaCarga`, `plantaoQtd` e
      `horasTardio` da equipe.
 
-     O estrago não é de tela: é do robô das 3h. Medido com o Connect, que usa
+     O estrago não é de tela: é do robô das 9h. Medido com o Connect, que usa
      `limitePadrao: 4` e `plantaoQtd: 3` — com a leitura de `config` falhando,
      o mês sai sorteado com teto 2 e um plantão só, e o e-mail diz que está
      montado. Indistinguível de um mês legitimamente apertado.

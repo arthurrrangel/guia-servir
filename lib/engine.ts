@@ -354,6 +354,60 @@ export function decisaoDoRobo(diasMontados: number, diasNoMes: number): DecisaoD
   return 'parcial';
 }
 
+/* A COBRANÇA DE QUINTA ENCONTROU UM DIA SEM NADA DESTA EQUIPE: AVISA OU CALA?
+   21/09/2026, auditoria do robô.
+
+   `app/api/cron/route.ts` tinha um `if (!dia) continue` e nada mais, com um
+   motivo legítimo escrito acima dele: dia que OUTRO ministério montou (um
+   evento do Connect, digamos) não é problema do Louvor, e cobrar seria ruído.
+
+   Só que `montarEstado` (lib/ponte.ts) também não materializa um domingo
+   REGULAR quando a equipe não tem nada nele — e essa é uma decisão de TELA,
+   escrita lá com todas as letras ("materializar um domingo só porque outro
+   ministério montou nele fazia o app mostrar 7 funções sem ninguém e sumir
+   com o botão de montar o mês"). O cron herdou a decisão como SILÊNCIO.
+
+   O efeito, medido: um domingo em que o robô do dia 26 falhou ao gravar não
+   aparecia em lugar nenhum da cobrança de quinta. A cobrança existe para
+   ninguém descobrir o furo no sábado de manhã, e ela era muda exatamente
+   sobre "ninguém escalado", que é o furo inteiro.
+
+   Os dois casos são diferentes e a diferença cabe numa pergunta: o dia é um
+   culto REGULAR (domingo ou Follow, pelo mesmo calendário que `diasDoMes`
+   usa) ou está na lista só por ser evento de algum ministério? Regular sem
+   nada é alarme; evento alheio é silêncio.
+
+   `temTime` repete a condição que o bloco do dia 26 já usa para pular equipe
+   sem gente ou sem função ativa: quem não tem time não tem o que montar, e
+   cobrar isso toda quinta é o jeito mais rápido de ensinar alguém a ignorar
+   o e-mail do robô.
+
+   Esta regra sai de dentro do `if` pelo mesmo motivo que `decisaoDoRobo`
+   saiu: aqui ela tem nome, motivo escrito e teste. */
+export function avisarDiaSemNinguem(regular: boolean, temTime: boolean): boolean {
+  return regular && temTime;
+}
+
+/* O BANCO ESTÁ ATRÁS DO QUE ESTE CÓDIGO PRECISA? 21/09/2026.
+
+   `schema_versao` existe desde a 55 e, até hoje, só as MIGRAÇÕES a liam, uma
+   à outra: nenhuma linha de `app/` ou `lib/` consultava a régua. Só que
+   `PUBLICAR.md` diz que os dois atos são separados — o `vercel --prod` é meu,
+   o `psql` é do Arthur — e entre um e outro o robô roda com o código novo
+   sobre o banco velho.
+
+   Medido: código de hoje sobre banco na 60 (`salvar_dia` ainda na versão da
+   54) criou um culto fantasma numa quinta de evento, gravou dez pessoas nele,
+   deixou o evento vazio e respondeu HTTP 200 com zero falhas.
+
+   Banco À FRENTE do código não é erro: aplicar a migração antes do deploy é a
+   ordem recomendada. Por isso `>=` e não `=`. E `noBanco` nulo ou zero conta
+   como atrasado: banco sem régua nenhuma é banco de antes da 55, e o robô de
+   hoje não tem o que fazer lá. */
+export function bancoAtrasado(noBanco: number | null | undefined, minimo: number): boolean {
+  return (noBanco ?? 0) < minimo;
+}
+
 export function domingosDoMes(ano: number, mes: number): string[] {
   const out: string[] = [];
   const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
