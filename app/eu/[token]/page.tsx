@@ -243,7 +243,7 @@ export default function Eu() {
      de quem pode cobrir — o pedido não some ao fechar a página. */
   useEffect(() => {
     const abertos = itens.filter(i => !i.plantao && i.status === 'recusado'
-      && horasAte(i.data) < TARDIO && horasAte(i.data) > -12 && !cobrem[i.culto_id]);
+      && horasAte(i.data, i.inicio) < TARDIO && horasAte(i.data, i.inicio) > -12 && !cobrem[i.culto_id]);
     if (!abertos.length) return;
     let vivo = true;
     void (async () => {
@@ -283,15 +283,36 @@ export default function Eu() {
 
   /* horas entre agora e o culto (domingo, 18h). Serve para saber se o
      "não posso" veio com antecedência ou em cima da hora. */
-  const horasAte = (data: string) =>
-    Math.round((Date.parse(`${data}T18:00:00-03:00`) - Date.now()) / 3600000);
+  /* 79 · `inicio` ENTRA NA CONTA, e antes não entrava.
+
+     A 76 pôs a janela de 48h dentro de `eu_quem_cobre` e escreveu que as
+     duas pontas passavam a usar a mesma expressão. Não passavam: o banco
+     lê `cultos.inicio` e cai em 18h só quando ele é nulo; esta função
+     cravava 18h SEMPRE, mesmo tendo `inicio` em mãos (`eu_dados` traz desde
+     a 71, e o `.ics` logo abaixo já usava).
+
+     Divergiam nos dois sentidos, e o que importa é o primeiro:
+
+       · evento das 08h, faltando 46h reais -> a função devolvia os
+         TELEFONES e a tela nem chamava. Quer dizer: quem chamasse a rota
+         direto colhia a lista fora da regra de produto.
+       · evento das 20h, faltando 48,5h -> a tela chamava e a função devolvia
+         vazio, e o bloco sumia sem explicação.
+
+     Agora a conta é a mesma dos dois lados. O `-03:00` fixo continua aqui
+     porque é o que o JavaScript do navegador sabe fazer sem biblioteca; o
+     lado SQL usa a zona `America/Sao_Paulo`, que é o que sobrevive a uma
+     volta do horário de verão. Hoje dá no mesmo, e está escrito para o dia
+     em que não der. */
+  const horasAte = (data: string, inicio?: string | null) =>
+    Math.round((Date.parse(`${data}T${(inicio || '18:00:00').slice(0, 8)}-03:00`) - Date.now()) / 3600000);
   const TARDIO = 48;
 
   /* 71 · `funcaoId` é o parâmetro que faltava. Ele vem de cada cartão, porque
      é por cartão que a pessoa decide. Nulo quer dizer "respondo pelo dia
      inteiro", que é o que a grade de disponibilidade manda. */
   async function responder(cultoId: string, status: 'confirmado' | 'recusado',
-                           data?: string, funcaoId?: string | null) {
+                           data?: string, funcaoId?: string | null, inicio?: string | null) {
     setOcupado(cultoId); setErro('');
     const { data: volta, error } = await sb()!.rpc('eu_responder',
       { p_token: token, p_culto_id: cultoId, p_status: status, p_funcao_id: funcaoId ?? null });
@@ -323,7 +344,7 @@ export default function Eu() {
     setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
     await carregar(false);
     /* desmarcou em cima da hora: quem abriu o buraco ajuda a fechar */
-    if (status === 'recusado' && data && horasAte(data) < TARDIO) {
+    if (status === 'recusado' && data && horasAte(data, inicio) < TARDIO) {
       const { data: lista } = await sb()!.rpc('eu_quem_cobre', { p_token: token, p_culto_id: cultoId });
       setCobrem(prev => ({ ...prev, [cultoId]: (lista || []) as Cobre[] }));
     }
@@ -661,7 +682,7 @@ export default function Eu() {
                   <IcCheck /> Eu vou
                 </button>
                 <button className="vol-bt nao" disabled={ocupado === i.culto_id}
-                  onClick={() => responder(i.culto_id, 'recusado', i.data, i.funcao_id)}>
+                  onClick={() => responder(i.culto_id, 'recusado', i.data, i.funcao_id, i.inicio)}>
                   Não posso
                 </button>
               </div>
@@ -782,7 +803,7 @@ export default function Eu() {
                       existe: "Plano muda; o sistema tem que deixar." */}
                   {est(proxima).txt !== 'confirmar' && (
                     <button type="button" className="ingresso-cal" disabled={ocupado === proxima.culto_id}
-                      onClick={() => responder(proxima.culto_id, 'recusado', proxima.data, proxima.funcao_id)}>
+                      onClick={() => responder(proxima.culto_id, 'recusado', proxima.data, proxima.funcao_id, proxima.inicio)}>
                       Não vou mais poder
                     </button>
                   )}

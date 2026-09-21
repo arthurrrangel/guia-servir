@@ -954,6 +954,13 @@ begin
   delete from onboarding_etapas where id = v_onb_t;
   delete from candidatura_respostas where pergunta_id = v_perg_t;
   delete from perguntas where id = v_perg_t;
+  /* 79 · C7 e C8 criam coisa FORA do cenário, e a limpeza não levava.
+     C7 tenta inserir `funcoes` no Louvor e C8 tenta inserir em `pessoas`;
+     nos dois o esperado é recusa, mas no dia em que a política se abrir —
+     que é o que esses casos existem para detectar — as duas linhas ficavam.
+     Limpar por nome do sufixo é preciso: o sufixo é sorteado por execução. */
+  delete from funcoes where nome like '%' || v_suf and equipe_id <> v_eq_t;
+  delete from pessoas where nome like '%' || v_suf and id <> v_p_t;
   delete from funcoes where equipe_id = v_eq_t;
   delete from equipes where id = v_eq_t;
   delete from pessoas where id = v_p_t;
@@ -1132,6 +1139,26 @@ begin
     v_falhas := v_falhas || E'\n  8b. `onbf_ler` nao foi criada: onboarding_feito ficou sem leitura';
   end if;
 
+  /* 8c · E `testar_permissoes` NÃO DEIXA NADA PARA TRÁS.
+     Ela cria uma área inteira de teste e escreve em quinze tabelas. A
+     limpeza dela é por id, mas C7 e C8 escrevem FORA do cenário — e a
+     conferência nunca tinha olhado. Rodar duas vezes e contar o que sobrou é
+     a única forma de saber. */
+  select count(*) into v_n from equipes where slug like 'perm-%';
+  if v_n > 0 then
+    v_falhas := v_falhas || format(E'\n  8c. %s equipe(s) de teste sobraram de execucoes anteriores', v_n);
+  end if;
+  perform count(*) from testar_permissoes();
+  perform count(*) from testar_permissoes();
+  select count(*) into v_n from equipes where slug like 'perm-%';
+  if v_n > 0 then
+    v_falhas := v_falhas || format(E'\n  8d. depois de rodar duas vezes, %s equipe(s) de teste ficaram', v_n);
+  end if;
+  select count(*) into v_n from funcoes where nome like 'POSTO %';
+  if v_n > 0 then
+    v_falhas := v_falhas || format(E'\n  8e. e %s posto(s) de teste ficaram soltos em outra area', v_n);
+  end if;
+
   -- 9 · `testar_permissoes` cresceu e continua inteiro
   select count(*) into v_n from testar_permissoes();
   if v_n < 68 then
@@ -1146,7 +1173,7 @@ begin
   if v_falhas <> '' then
     raise exception E'CONFERENCIA DA 74 REPROVOU:%s', v_falhas;
   end if;
-  raise notice 'CONFERENCIA DA 74: 9/9. Os quatro ataques recusados, e decidir_candidatura faz o trabalho inteiro.';
+  raise notice 'CONFERENCIA DA 74: 10/10. Os quatro ataques recusados, e decidir_candidatura faz o trabalho inteiro.';
 
   /* desfaz o cenário: a conferência aprovou uma candidatura de verdade */
   delete from historico_candidatura where candidatura_id in (v_c, v_c2);
