@@ -8,6 +8,47 @@ import { Aviso } from '@/components/Ui';
 import { aviseHumano } from '@/lib/erros';
 import { sugerirEmail } from '@/lib/email';
 
+/* PARA ONDE O LOGIN DEVOLVE A PESSOA — 82d.
+
+   Eram três `location.href = '/painel'` escritos à mão. `/painel` é o painel
+   das ESCALAS, e quem chegava das DEMANDAS fazia login e era despejado noutro
+   sistema, sem volta. Medido em produção por quem usa: "to entrando no sistema
+   de demandas e ta direcionando pro painel das escalas".
+
+   A porta de login é UMA no site inteiro, de propósito: duas criariam dois
+   clientes de sessão disputando a mesma chave no localStorage, e é assim que
+   se derruba o login do líder (o motivo inteiro está em `lib/demandas/api.ts`).
+   O que ela não pode é decidir sozinha em que sistema a pessoa vai parar.
+
+   `?volta=` resolve, e a validação NÃO é zelo: sem ela isto vira
+   redirecionamento aberto, e um link `/entrar?volta=https://site-falso` levaria
+   alguém que acabou de digitar a senha para fora do site logo depois de
+   digitá-la. Por isso só passa caminho interno:
+
+     · precisa começar com UMA barra   -> bloqueia `https://...`
+     · não pode começar com `//`       -> bloqueia `//site-falso`, que o
+                                          navegador lê como protocolo-relativo
+     · não pode ter `\`                -> alguns navegadores normalizam para `/`
+     · qualquer outra coisa            -> cai no padrão, o painel das escalas */
+/* e o link que chega por e-mail precisa CARREGAR o destino, senão ele traz a
+   pessoa de volta para `/entrar` sem `?volta=` e o padrão a joga no painel
+   das escalas — o mesmo defeito, um passo adiante. */
+function voltaNaUrl(): string {
+  const d = destinoDoLogin();
+  return d === '/painel' ? '' : '?volta=' + encodeURIComponent(d);
+}
+
+function destinoDoLogin(): string {
+  const PADRAO = '/painel';
+  if (typeof window === 'undefined') return PADRAO;
+  try {
+    const v = new URL(window.location.href).searchParams.get('volta') || '';
+    if (!v.startsWith('/')) return PADRAO;
+    if (v.startsWith('//') || v.includes('\\')) return PADRAO;
+    return v;
+  } catch { return PADRAO; }
+}
+
 export default function Entrar() {
   const [pronto, setPronto] = useState(false);
   const [temConexao, setTem] = useState(false);
@@ -70,7 +111,7 @@ export default function Entrar() {
       .then(({ data }) => {
         clearTimeout(teto);
         if (data.session && eRecuperacao) { setEntrando(false); setRecuperando(true); return; }
-        if (data.session) { location.href = '/painel'; return; }
+        if (data.session) { location.href = destinoDoLogin(); return; }
         /* chegou com token e mesmo assim não virou sessão: falhar calado aqui
            seria o pior dos mundos, porque a pessoa acabou de fazer tudo certo. */
         if (temToken) {
@@ -118,7 +159,7 @@ export default function Entrar() {
        única tela que cria o cliente do líder, que persiste sessão e lê o
        fragmento. O link tem que voltar para cá. */
     const { error } = await sb()!.auth.signInWithOtp({
-      email: alvo, options: { emailRedirectTo: window.location.origin + '/entrar' },
+      email: alvo, options: { emailRedirectTo: window.location.origin + '/entrar' + voltaNaUrl() },
     });
     setCarregando(false);
     setTom(error ? 'erro' : 'bom');
@@ -130,7 +171,7 @@ export default function Entrar() {
     e.preventDefault(); setCarregando(true); setMsg('');
     const { error } = await sb()!.auth.signInWithPassword({ email: email.trim(), password: senha });
     setCarregando(false);
-    if (error) { setTom('erro'); setMsg(aviseHumano(error, 'entrar')); } else location.href = '/painel';
+    if (error) { setTom('erro'); setMsg(aviseHumano(error, 'entrar')); } else location.href = destinoDoLogin();
   }
 
   /* pede o link que volta para cá com type=recovery. É o mesmo canal do link
@@ -144,7 +185,7 @@ export default function Entrar() {
     if (sug) setEmail(sug);
     setCarregando(true);
     const { error } = await sb()!.auth.resetPasswordForEmail(alvo, {
-      redirectTo: window.location.origin + '/entrar',
+      redirectTo: window.location.origin + '/entrar' + voltaNaUrl(),
     });
     setCarregando(false);
     setTom(error ? 'erro' : 'bom');
@@ -160,7 +201,7 @@ export default function Entrar() {
     const { error } = await sb()!.auth.updateUser({ password: novaSenha });
     setCarregando(false);
     if (error) { setTom('erro'); setMsg(aviseHumano(error, 'salvar a senha')); return; }
-    location.href = '/painel';
+    location.href = destinoDoLogin();
   }
 
   if (recuperando) return (

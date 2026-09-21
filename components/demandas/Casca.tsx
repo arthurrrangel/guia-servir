@@ -5,7 +5,30 @@
    a decisão inteira: a barra do líder tem as abas dele (Painel, Entradas,
    Escala, Time, Ajustes), e pendurar "Demandas" ali seria misturar as duas
    interfaces exatamente onde a pessoa olha para se localizar. Aqui as abas
-   são as de demandas, e há UM link de volta para o painel.
+   são as de demandas, e MAIS NADA.
+
+   ====================================================== 82d ================
+   NENHUM LINK PARA AS ESCALAS. A REGRA É DO ARTHUR, EM 21/09:
+   "sistema de demanda tem que ser um sistema totalmente desconectado com
+   sistema de escalas".
+
+   Eram SEIS pontos de vazamento, todos neste arquivo (nenhum outro lugar do
+   sistema de demandas tocava nas escalas, e as escalas nunca linkaram para
+   cá):
+
+     · "Escalas >" no canto do topo, em toda tela;
+     · "· escalas" no rodapé, em toda tela;
+     · "Voltar para as escalas" no estado SEM_SISTEMA;
+     · "Voltar para as escalas" no estado "não está cadastrado";
+     · o botão Entrar, que caía no login das escalas e não voltava;
+     · a frase "é o mesmo e-mail e a mesma senha do GUIA Servir", que
+       ensinava a conexão em palavras mesmo sem link.
+
+   Os cinco primeiros saíram. O sexto virou `/entrar?volta=/demandas`, porque
+   a porta de login é UMA no site inteiro e duplicá-la criaria dois clientes
+   de sessão brigando pela mesma chave (o motivo está escrito em
+   `lib/demandas/api.ts`, e derrubaria o login do líder). O que não pode é ela
+   despejar a pessoa noutro sistema, e agora ela devolve para cá.
 
    O `<div className="dm">` não é enfeite: é onde nascem todas as variáveis de
    cor e espaçamento desta folha. Fora dele, nada deste sistema existe. Ver o
@@ -143,7 +166,6 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
                 Se você administra o sistema, aplique <b>supabase/50-demandas.sql</b> e as
                 migrações seguintes no banco deste ambiente.
               </p>
-              <Link className="dm-btn" href="/painel">Voltar para as escalas</Link>
             </>
           ) : email === undefined ? <Esqueleto linhas={2} /> : email ? (
             <>
@@ -159,17 +181,24 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
                 Se você recebeu um link pessoal pelo WhatsApp, abra por ele: o link já identifica
                 você sem precisar de cadastro novo.
               </p>
-              <Link className="dm-btn" href="/painel">Voltar para as escalas</Link>
             </>
           ) : (
             <>
               <div className="dm-rot">{'>'} entrar</div>
               <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Entre para ver as demandas.</h1>
               <p className="dm-peq dm-mudo">
-                É o mesmo e-mail e a mesma senha do GUIA Servir. Se você recebeu um link pessoal
-                pelo WhatsApp, abra por ele e não precisa de senha nenhuma.
+                Se você recebeu um link pessoal pelo WhatsApp, abra por ele e não precisa de
+                senha nenhuma.
               </p>
-              <Link className="dm-btn dm-pri" href="/entrar">Entrar</Link>
+              {/* 82d · O `?volta=` É A CORREÇÃO DE UM DEFEITO MEDIDO.
+
+                  Era `href="/entrar"` seco, e `app/entrar/page.tsx` mandava
+                  todo mundo para `/painel` — o painel das ESCALAS — em três
+                  pontos, com o caminho escrito à mão. Quem vinha das demandas
+                  fazia login e era despejado noutro sistema, sem volta.
+
+                  Agora o login sabe de onde a pessoa veio e a devolve para cá. */}
+              <Link className="dm-btn dm-pri" href="/entrar?volta=%2Fdemandas">Entrar</Link>
             </>
           )}
         </div>
@@ -187,9 +216,6 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
             Demandas · <b>{eu.primeiro_nome}</b>
             {eu.setor ? <span className="dm-mudo dm-setor"> · {eu.setor}</span> : null}
           </div>
-          <Link href="/painel" className="dm-peq dm-mudo" style={{ textDecoration: 'none' }}>
-            Escalas {'>'}
-          </Link>
         </div>
         <nav className="dm-abas" aria-label="Seções de demandas">
           {ABAS(eu).map(a => (
@@ -219,7 +245,6 @@ function Rodape() {
   return (
     <footer className="dm-rodape">
       GUIA Church · operacional e demandas. Toda demanda tem um setor, um prazo e um responsável.
-      {' · '}<Link href="/painel">escalas</Link>
     </footer>
   );
 }
