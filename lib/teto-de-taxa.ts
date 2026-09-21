@@ -111,6 +111,29 @@ function podar(agora: number) {
 /** O IP de quem chamou, como a Vercel o entrega. Sem cabeçalho, todo mundo
  *  cai no mesmo balde 'sem-ip' — que é o comportamento certo: quem não se
  *  identifica compartilha o teto com os outros que não se identificam. */
+/* O QUE ESTA FUNÇÃO SABE, E O QUE ELA NÃO SABE — anotado em 21/09/2026.
+
+   Ela lê um CABEÇALHO, e cabeçalho é escrito por quem chama. Medido com o
+   servidor local: 1.000 pedidos do mesmo cliente, cada um com um
+   `x-forwarded-for` diferente, passaram todos — mil baldes, mil passes.
+   `nao-e-um-ip`, `<script>` e `__proto__` viram nomes de balde do mesmo jeito.
+
+   ○ NÃO OBSERVADO: se a borda da Vercel SOBRESCREVE `x-forwarded-for` antes
+   de a rota ver, ou apenas acrescenta. Se sobrescreve, o teto funciona; se
+   acrescenta, ele é decorativo contra quem quer burlar. Isso não dá para
+   medir daqui — precisa de uma requisição de fora contra o domínio de
+   produção, com o cabeçalho forjado, e comparar com o log.
+
+   O QUE MUDOU O TAMANHO DO PROBLEMA: em 21/09 o teto da oferta passou de 6
+   para 60 por minuto, porque 6 derrubava a congregação inteira atrás de um
+   NAT. Com 60, o que um cabeçalho forjado compra é passar de 60 para
+   ilimitado numa rota que, do outro lado, tem o adquirente com os limites
+   dele. O teto continua valendo a pena — ele fecha o laço de `for` de quem
+   não está tentando burlar, que é o caso comum — mas ninguém deve tratá-lo
+   como autenticação.
+
+   `x-real-ip` fica como segundo, e não primeiro, porque nem todo provedor o
+   define; trocar a ordem sem medir só mudaria o palpite de lugar. */
 export function deQuem(req: Request): string {
   const h = req.headers;
   const xff = h.get('x-forwarded-for') || '';
