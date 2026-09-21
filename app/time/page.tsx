@@ -3,7 +3,7 @@ import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { Fragment, useState } from 'react';
 import {
-  atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, removerVoluntario,
+  atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, limparPinDe, removerVoluntario,
 } from '@/lib/db';
 import { Faixa } from '@/components/Faixa';
 import { cont } from '@/lib/plural';
@@ -153,6 +153,51 @@ function Time() {
     })) return;
     try { await removerVoluntario(vid); await recarregar(); aviso('Removido'); }
     catch (e) { aviso(aviseHumano(e)); }
+  }
+
+  /* ===================================================================== 76
+     DESTRAVAR O PIN DE ALGUÉM DA PRÓPRIA ÁREA.
+
+     O PIN existe para quem NÃO guardou o link: a pessoa vai em
+     /servir/<ministério>, escolhe o nome, prova os quatro últimos dígitos do
+     telefone e cria um PIN que vale dali em diante. Só que `eu_trocar_pin`,
+     na tela pessoal, não pede o PIN antigo — e isso está certo, porque quem
+     abriu aquela tela já tem o link, que é a credencial mais forte.
+
+     O que não existia era a volta. Medido em 21/09: alguém abre o link da
+     Maria (ela mostrou a escala no celular, mandou no grupo da família) e
+     toca "Criar meu PIN". Meses depois a Maria perde o link, vai em
+     /servir/louvor, digita os quatro dígitos DELA e recebe:
+
+         "Você já criou seu PIN. Entre com ele."
+
+     Ela nunca criou. E nada no sistema limpava `pin_hash`: nem o GRANT do
+     organizador (a coluna é credencial e está fora de tudo desde a 52), nem
+     função nenhuma. A pessoa ficava trancada para sempre.
+
+     Não é só o caso do engano: é qualquer um que esqueceu o PIN.
+
+     `pin_limpar` (migração 76) não devolve o link — quem quiser mandar o
+     link manda pelo botão ao lado, que é outro ato e já existia. Ela só
+     devolve à pessoa a porta de /servir/<ministério>. */
+  async function limparPin(vid: string, nome: string) {
+    if (!await confirmar({
+      titulo: `Apagar o PIN de ${nome}?`,
+      texto: 'Use quando a pessoa não consegue entrar por /servir e diz que nunca criou PIN, ou esqueceu. Ela vai poder criar outro na hora, provando os quatro últimos dígitos do telefone dela. O link pessoal não muda.',
+      acao: 'Apagar o PIN',
+    })) return;
+    try {
+      const r = await limparPinDe(vid);
+      if (!r.ok) { aviso(r.erro === 'SEM_PERMISSAO' ? 'Essa pessoa não é da sua área.' : 'Não consegui apagar agora.'); return; }
+      /* a frase diz o que ACONTECEU, e os dois casos são diferentes: quem não
+         tinha PIN nenhum não foi destravado de nada, e dizer "PIN apagado"
+         ali faria o organizador achar que resolveu um problema que continua
+         de pé. */
+      aviso(r.tinha_pin
+        ? `PIN de ${nome} apagado. Ela já pode criar outro em /servir.`
+        : `${nome} não tinha PIN. O problema dela é outro: confira o telefone cadastrado.`);
+      await recarregar();
+    } catch (e) { aviso(aviseHumano(e)); }
   }
 
   /* quem se cadastrou sozinho já entra valendo; isto só tira o destaque
@@ -417,6 +462,7 @@ function Time() {
                     {novo && <button className="lid-bt" onClick={() => conferir(v.id, v.nome)}>Conferi, está certo</button>}
                     {link}
                     {zap && <button className="lid-bt-txt" onClick={copiarLink}>Copiar link</button>}
+                    <button className="lid-bt-txt" onClick={() => limparPin(v.id, v.nome)}>Apagar PIN</button>
                     <button className="lid-bt-txt" onClick={() => mudar(v.id, { ativo: false })}>Pausar</button>
                     <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
                   </div>

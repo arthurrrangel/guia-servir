@@ -278,6 +278,21 @@ export async function atualizarVoluntario(id: string, campos: Record<string, any
   if (error) throw error;
 }
 
+/* 76 · APAGAR O PIN DE ALGUÉM DA PRÓPRIA ÁREA.
+
+   `pin_hash` não tem GRANT de UPDATE para `authenticated` e não vai ter: é
+   credencial, e a 52 a tirou de tudo. Por isso é RPC `security definer`, com
+   `lidera_equipe` escrito no corpo da função.
+
+   O porquê deste botão existir está em `app/time/page.tsx`, junto do lugar
+   onde o organizador o vê. */
+export type PinLimpo = { ok: boolean; erro?: string; nome?: string; tinha_pin?: boolean };
+export async function limparPinDe(id: string): Promise<PinLimpo> {
+  const { data, error } = await sb()!.rpc('pin_limpar', { p_voluntario: id });
+  if (error) throw error;
+  return (data || { ok: false, erro: 'SEM_RESPOSTA' }) as PinLimpo;
+}
+
 export async function removerVoluntario(id: string) {
   const { error } = await sb()!.from('voluntarios').delete().eq('id', id);
   if (error) throw error;
