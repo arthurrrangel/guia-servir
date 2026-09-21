@@ -41,7 +41,7 @@ function Painel() {
     if (so === 'abertas') f.abertas = true;
     if (so === 'atrasadas') f.atrasadas = true;
     const r = await lista(f);
-    if (!r.ok) { setErro(recadoDoErro(r)); setItens([]); setSobraram(0); return; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'carregar a lista')); setItens([]); setSobraram(0); return; }
     setErro(''); setItens(r.itens);
     setSobraram(r.tem_mais ? Math.max((r.total || 0) - r.itens.length, 0) : 0);
   }, [aba, so, busca]);
@@ -99,7 +99,18 @@ function Painel() {
         </label>
       </div>
 
-      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
+      {/* A TELA MAIS USADA DO SISTEMA NÃO TINHA COMO TENTAR DE NOVO.
+          Medido, derrubando todas as RPCs menos `dem_quem_sou`: `/demandas` e
+          `/demandas/d/[n]` mostravam o erro e nenhuma saída; as outras três já
+          ofereciam. Falha de rede no 4G da igreja é o caso comum. */}
+      {erro ? (
+        <>
+          <Aviso tom="bad">{erro}</Aviso>
+          <button className="dm-btn" style={{ marginBottom: 'var(--dm-e3)' }} onClick={buscar}>
+            Tentar de novo
+          </button>
+        </>
+      ) : null}
 
       {itens === null ? <Esqueleto /> : itens.length === 0 ? (
         <Vazio titulo={vazioDe(aba, so)}>
@@ -158,7 +169,15 @@ function Resumão({ itens, eu }: { itens: Resumo[]; eu: Eu }) {
   if (atrasadas) partes.push(`${atrasadas} ${atrasadas === 1 ? 'passou do prazo' : 'passaram do prazo'}`);
   if (paradas) partes.push(`${paradas} sem movimento há mais de uma semana`);
   if (esperando && manda) partes.push(`${esperando} ${esperando === 1 ? 'espera' : 'esperam'} a sua aprovação`);
-  return <Aviso tom={atrasadas ? 'bad' : 'warn'}><div>{partes.join(' · ')}.</div></Aviso>;
+  /* `tom="bad"` dava `role="alert"` a este resumo, e alerta INTERROMPE o
+     leitor de tela — a cada troca de filtro. Alerta é para o que não pode
+     esperar; um resumo pode. A cor continua vermelha, que é o que importa
+     para quem vê; só o anúncio deixa de atropelar. */
+  return (
+    <div className={`dm-aviso dm-${atrasadas ? 'bad' : 'warn'}`} role="status">
+      <div>{partes.join(' · ')}.</div>
+    </div>
+  );
 }
 
 function Linha({ d }: { d: Resumo }) {

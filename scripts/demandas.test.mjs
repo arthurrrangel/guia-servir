@@ -56,13 +56,24 @@ const COMBINADAS = [
   },
   {
     acao: 'assumir',
-    /* 18 casos. A demanda já está em EXECUÇÃO, ou seja, alguém do setor já
-       assumiu. O servidor deixa outro tomar por cima; a tela esconde.
+    /* A demanda já está em EXECUÇÃO: alguém do setor já assumiu. A tela
+       esconde.
 
-       Esta é a única das três que é discutível, e está anotada como pergunta
-       para o Arthur: quando quem assumiu some, o colega de setor hoje precisa
-       chamar um gestor em vez de simplesmente assumir. Enquanto a resposta não
-       vem, o combinado é o de hoje, escrito. */
+       ESTE COMBINADO ENCOLHEU EM 21/09/2026. Ele dizia "o servidor deixa
+       outro tomar por cima" — e esse era justamente o defeito. Medido: duas
+       pessoas tocando em "assumir" no mesmo segundo, as duas passam, e a
+       segunda rouba a demanda da primeira sem nenhum aviso. A migração 86 pôs
+       a guarda `JA_TEM_DONO` no servidor.
+
+       Sobra o caso legítimo: a demanda em execução SEM dono, que a migração
+       84 provou existir (reabrir gravava `execucao` fixo mesmo quando
+       ninguém era responsável). Aí o servidor aceita, e a tela esconde
+       porque `status === 'execucao'` — o que deixava a demanda inalcançável.
+       A 84 consertou a origem; este combinado cobre o que já está no banco.
+
+       A pergunta para o Arthur continua de pé, e agora ela é outra: quando
+       quem assumiu some, o colega deveria poder assumir? Hoje precisa de um
+       gestor para redirecionar. */
     quando: (d) => d.status === 'execucao',
   },
 ];
@@ -74,21 +85,30 @@ function servidorAceita(acao, d, eu) {
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
   const pendente = d.aprovacao === 'pendente';
 
-  // guarda do topo: fechada só aceita comentar, anexar e reabrir
-  if (fechada && !['comentar', 'anexar', 'reabrir'].includes(acao)) return false;
+  // guarda do topo: fechada só aceita comentar, anexar, desanexar e reabrir
+  if (fechada && !['comentar', 'anexar', 'desanexar', 'reabrir'].includes(acao)) return false;
 
   switch (acao) {
-    case 'comentar':
-    case 'anexar':      return true;                                   // basta pode_ver
-    case 'assumir':     return eu.atende && !pendente;
+    case 'comentar':    return true;                                   // basta pode_ver
+    /* 85 · ERA `return true`, ou seja, todo mundo do setor. Medido: uma
+       solicitante rasa pregou um "boleto atualizado.pdf" numa compra alheia.
+       O servidor exige o mesmo par que `destravar` já exigia. */
+    case 'anexar':
+    case 'desanexar':   return eu.atende || eu.abriu;
+    /* 86 · a guarda de dono. `!d.responsavel` no modelo é o que o servidor
+       faz com `d.responsavel_id is not null and <> m.id`. */
+    case 'assumir':     return eu.atende && !pendente && !d.responsavel;
     case 'travar':      return eu.atende;
     case 'destravar':   return (eu.atende || eu.abriu) && d.status === 'travada'
                              && !(d.travada_por === 'aprovacao' && pendente);
     case 'aprovar':
     case 'rejeitar':    return manda && pendente;
     case 'prazo':
-    case 'prioridade':
-    case 'concluir':    return eu.atende;
+    case 'prioridade':  return eu.atende;
+    /* 67 no servidor, 21/09 aqui: `concluir` nunca passou com o portão
+       aberto, e este modelo dizia que passava. Era o modelo que estava
+       errado, não a tela — e por isso o espelho aprovava um botão morto. */
+    case 'concluir':    return eu.atende && !pendente;
     case 'redirecionar':return manda || eu.atende;
     case 'cancelar':    return eu.atende || eu.abriu || manda;
     case 'reabrir':     return (eu.abriu || manda || eu.atende) && fechada;
@@ -102,7 +122,8 @@ function servidorAceita(acao, d, eu) {
   const TRAVAS = [null, 'informacao', 'aprovacao', 'terceiros'];
   const APROV = [null, 'pendente', 'aprovada', 'rejeitada'];
   const TODAS = ['assumir', 'travar', 'destravar', 'aprovar', 'rejeitar', 'prazo',
-    'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'comentar', 'anexar'];
+    'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'comentar',
+    'anexar', 'desanexar'];
 
   let casos = 0, oferecidasDemais = 0, escondidas = 0;
   const exemplos = [];

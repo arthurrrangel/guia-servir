@@ -50,8 +50,8 @@ function Ajustes() {
        pessoa ficava olhando três barras cinza animadas, sem texto, sem botão
        e sem saber que recarregar é o único gesto possível. */
     if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
-    else setErro(recadoDoErro(x));
-    if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p));
+    else setErro(recadoDoErro(x, 'carregar os ajustes'));
+    if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p, 'carregar as pessoas'));
   }, []);
   useEffect(() => { recarregar(); }, [recarregar]);
 
@@ -59,7 +59,7 @@ function Ajustes() {
     setIndo(true); setErro('');
     const r = await ajustar(o, d);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r)); return false; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'salvar')); return false; }
     await recarregar();
     return true;
   }

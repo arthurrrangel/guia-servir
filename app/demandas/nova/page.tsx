@@ -14,7 +14,7 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
-import { Aviso, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
+import { Aviso, Bloco, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
   PRIORIDADES, dataCheia, linkZap, oQueFalta, prazoSugerido, rascunhoVazio,
@@ -55,7 +55,7 @@ function Nova() {
     setErroBase('');
     bases().then(x => {
       if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
-      else setErroBase(recadoDoErro(x));
+      else setErroBase(recadoDoErro(x, 'carregar os setores e categorias'));
     });
   }, []);
   useEffect(() => { carregar(); }, [carregar]);
@@ -89,7 +89,7 @@ function Nova() {
     setIndo(true); setErro('');
     const x = await abrir({ ...r, sem_prazo_porque: semData ? r.sem_prazo_porque : '' }, anexos);
     setIndo(false);
-    if (!x.ok) { setErro(recadoDoErro(x)); return; }
+    if (!x.ok) { setErro(recadoDoErro(x, 'abrir a demanda')); return; }
     setPronta(x as unknown as Pronta);
   }
 
@@ -167,7 +167,19 @@ function Nova() {
 
       <div className="dm-card">
         <Campo rot="Título" ajuda="Uma linha que já diga do que se trata.">
-          <input value={r.titulo} onChange={e => setR(v => ({ ...v, titulo: e.target.value }))}
+          {/* OS TETOS APARECEM ANTES DO TOQUE, E NÃO DEPOIS.
+
+              O banco cobra 200 no título, 20 mil na descrição e 120 no evento
+              desde a migração 52, e a tela só dizia isso DEPOIS de tocar em
+              "Enviar" — `tentou` só vira `true` dentro de `enviar()`. Digita-se
+              300 letras, toca-se, e só aí o sistema conta que o limite era 200.
+              `maxLength` faz o navegador parar no limite, que é a forma mais
+              barata de a regra existir para quem está digitando.
+
+              Os campos sem teto no banco ganham teto aqui pelo mesmo motivo da
+              `CaixaDeAcao`: texto colado sem limite pesa em toda abertura
+              daquela ficha, para sempre. */}
+          <input maxLength={200} value={r.titulo} onChange={e => setR(v => ({ ...v, titulo: e.target.value }))}
             placeholder="Arte para o culto de celebração" />
         </Campo>
 
@@ -187,7 +199,7 @@ function Nova() {
 
         <Campo rot="O que precisa ser feito"
           ajuda="Quanto mais claro aqui, menos ida e volta depois.">
-          <textarea value={r.descricao} onChange={e => setR(v => ({ ...v, descricao: e.target.value }))} />
+          <textarea maxLength={20000} value={r.descricao} onChange={e => setR(v => ({ ...v, descricao: e.target.value }))} />
         </Campo>
 
         {!semData ? (
@@ -198,7 +210,7 @@ function Nova() {
         ) : (
           <Campo rot="Por que não tem data"
             ajuda="Toda demanda precisa de uma data ou de um porquê. Sem isso ela some no meio das outras.">
-            <input value={r.sem_prazo_porque}
+            <input maxLength={500} value={r.sem_prazo_porque}
               onChange={e => setR(v => ({ ...v, sem_prazo_porque: e.target.value }))}
               placeholder="Depende da agenda do pastor" />
           </Campo>
@@ -208,16 +220,29 @@ function Nova() {
           {semData ? 'Tenho uma data' : 'Não tenho data'}
         </button>
 
-        <Campo rot="Prioridade" ajuda={PRIORIDADES.find(p => p.v === r.prioridade)?.explica}>
+        {/* `Bloco` E NÃO `Campo`, E ISSO É UM CONSERTO, NÃO ESTILO.
+
+            `Campo` é um `<label>`, e um `<label>` ativa o primeiro descendente
+            rotulável. Com quatro `<button>` dentro, tocar na palavra
+            "Prioridade" marcava "Baixa". Medido, clicando no pixel do rótulo:
+
+              ANTES : Baixa:false Normal:true
+              DEPOIS: Baixa:true  Normal:false
+
+            A pessoa encosta o polegar na palavra enquanto rola e a demanda
+            urgente sai como Baixa, sem aviso nenhum — e a prioridade errada
+            muda a ordem da fila. `Opcoes` já traz `role="group"` e
+            `aria-label`, então o rótulo continua anunciado. */}
+        <Bloco rot="Prioridade" ajuda={PRIORIDADES.find(p => p.v === r.prioridade)?.explica}>
           <Opcoes rot="Prioridade" valor={r.prioridade}
             opcoes={PRIORIDADES.map(p => ({ v: p.v as Prioridade, rot: p.rot }))}
             aoMudar={v => setR(x => ({ ...x, prioridade: v }))} />
-        </Campo>
+        </Bloco>
 
         {r.prioridade === 'urgente' ? (
           <Campo rot="O que acontece se não for feito"
             ajuda="Urgente sem impacto escrito é só ansiedade. Com o impacto, a liderança consegue comparar.">
-            <input value={r.impacto} onChange={e => setR(v => ({ ...v, impacto: e.target.value }))}
+            <input maxLength={2000} value={r.impacto} onChange={e => setR(v => ({ ...v, impacto: e.target.value }))}
               placeholder="Sem isso o culto de domingo não tem som" />
           </Campo>
         ) : null}
@@ -241,22 +266,22 @@ function Nova() {
 
           <div className="dm-dupla">
             <Campo rot="Evento relacionado" ajuda="Se tiver evento, a data dele é obrigatória.">
-              <input value={r.evento} onChange={e => setR(v => ({ ...v, evento: e.target.value }))} />
+              <input maxLength={120} value={r.evento} onChange={e => setR(v => ({ ...v, evento: e.target.value }))} />
             </Campo>
             <Campo rot="Data do evento">
               <input type="date" value={r.evento_data}
                 onChange={e => setR(v => ({ ...v, evento_data: e.target.value }))} />
             </Campo>
             <Campo rot="Onde vai acontecer">
-              <input value={r.local} onChange={e => setR(v => ({ ...v, local: e.target.value }))} />
+              <input maxLength={200} value={r.local} onChange={e => setR(v => ({ ...v, local: e.target.value }))} />
             </Campo>
             <Campo rot="Público ou ministério envolvido">
-              <input value={r.publico} onChange={e => setR(v => ({ ...v, publico: e.target.value }))} />
+              <input maxLength={200} value={r.publico} onChange={e => setR(v => ({ ...v, publico: e.target.value }))} />
             </Campo>
           </div>
 
           <Campo rot="Objetivo" ajuda="O para quê, quando não é óbvio pela descrição.">
-            <input value={r.objetivo} onChange={e => setR(v => ({ ...v, objetivo: e.target.value }))} />
+            <input maxLength={4000} value={r.objetivo} onChange={e => setR(v => ({ ...v, objetivo: e.target.value }))} />
           </Campo>
 
           {cat?.exige_orcamento ? (

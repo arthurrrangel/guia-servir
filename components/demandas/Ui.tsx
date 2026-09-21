@@ -31,6 +31,37 @@ export function Campo({ rot, ajuda, children }: {
   );
 }
 
+/** O mesmo desenho do `Campo`, SEM o `<label>`.
+
+    UM `<label>` ROTULA O PRIMEIRO DESCENDENTE ROTULAVEL, E ISSO E UM
+    DEFEITO QUANDO O CONTEUDO E UM GRUPO — 21/09/2026.
+
+    `<Campo rot="Prioridade"><Opcoes …/></Campo>` punha quatro `<button>`
+    dentro de um `<label>`. Tocar na palavra "Prioridade" ativava o PRIMEIRO
+    deles. Medido, clicando no pixel do rotulo e em nenhum botao:
+
+      prioridade ANTES : Baixa:false Normal:true Alta:false Urgente:false
+      rotulo achado    : {"x":38,"y":828,"txt":"Prioridade"}
+      prioridade DEPOIS: Baixa:true  Normal:false …
+
+    A pessoa encosta o polegar na palavra enquanto rola, e a demanda urgente
+    que ela ia abrir sai como "Baixa". Nada avisa, e a prioridade errada muda
+    a ordem da fila.
+
+    `Opcoes` ja traz `role="group"` e `aria-label`, entao o grupo se rotula
+    sozinho: o `<label>` nao estava fazendo falta nenhuma, so estrago. */
+export function Bloco({ rot, ajuda, children }: {
+  rot: string; ajuda?: string; children: React.ReactNode;
+}) {
+  return (
+    <div className="dm-campo">
+      <span>{rot}</span>
+      {children}
+      {ajuda ? <small>{ajuda}</small> : null}
+    </div>
+  );
+}
+
 /** Escolha de poucas opções: botão em vez de select. Um toque, não dois. */
 export function Opcoes<T extends string>({ valor, opcoes, aoMudar, rot }: {
   valor: T; opcoes: { v: T; rot: string }[]; aoMudar: (v: T) => void; rot: string;
@@ -46,13 +77,24 @@ export function Opcoes<T extends string>({ valor, opcoes, aoMudar, rot }: {
   );
 }
 
-export function Esqueleto({ linhas = 4 }: { linhas?: number }) {
+/* O esqueleto e `aria-hidden` de proposito: forma piscando nao tem o que
+   dizer a quem nao ve. So que ele era a UNICA coisa na tela enquanto a lista
+   carregava, e com a rede lenta isso dava 2,5 segundos de silencio absoluto
+   para quem usa leitor de tela. Medido: `aria-live`, `role=status`,
+   `role=alert` e `aria-busy` — nenhum, em nenhum momento.
+
+   Uma linha visualmente escondida e anunciada resolve. Ela e `status` e nao
+   `alert`: carregar nao interrompe ninguem. */
+export function Esqueleto({ linhas = 4, oQue = 'Carregando' }: { linhas?: number; oQue?: string }) {
   return (
+    <>
+    <span role="status" className="dm-so-leitor">{oQue}…</span>
     <div className="dm-esqueleto" aria-hidden="true">
       {Array.from({ length: linhas }).map((_, i) => (
         <div key={i} style={{ height: i === 0 ? 92 : 64, marginBottom: 10, width: i === linhas - 1 ? '70%' : '100%' }} />
       ))}
     </div>
+    </>
   );
 }
 
@@ -69,17 +111,34 @@ export function Vazio({ titulo, children }: { titulo: string; children?: React.R
 /* Caixa de texto que vira ação: o padrão de "concluir", "travar", "cancelar".
    O botão só liga quando há texto, porque o banco vai recusar vazio de
    qualquer jeito e é melhor a pessoa ver isso antes de tocar. */
-export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando, aoEnviar, extra }: {
+export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando, aoEnviar, extra,
+                             teto = 4000 }: {
   rot: string; dica?: string; botao: string;
   tom?: 'pri' | 'perigo'; exigeTexto?: boolean; salvando?: boolean;
-  aoEnviar: (texto: string) => void; extra?: React.ReactNode;
+  aoEnviar: (texto: string) => void; extra?: React.ReactNode; teto?: number;
 }) {
   const [t, setT] = useState('');
+  /* O TETO NAO E ZELO, E O QUE IMPEDE A FICHA DE FICAR PESADA PARA SEMPRE.
+
+     Esta peca e uma so e serve sete usos: comentar, concluir, travar,
+     cancelar, reabrir, aprovar e recusar. Nenhum deles tinha limite, e
+     medido: um comentario de 49.600 letras entrou pela porta de verdade, e
+     outro de 200.000 pela RPC. Dali em diante `dem_ver` desce isso para
+     TODA pessoa que abrir aquela demanda, no 4G da igreja, para sempre, e
+     ninguem liga o lento ao comentario.
+
+     A migracao 86 pos o teto no banco. Aqui ele aparece ANTES do toque: o
+     contador so surge perto do fim, porque um contador sempre visivel numa
+     caixa de comentario e ruido que ninguem pediu. */
+  const sobra = teto - t.length;
   return (
     <div className="dm-card">
       <Campo rot={rot} ajuda={dica}>
-        <textarea value={t} onChange={e => setT(e.target.value)} />
+        <textarea value={t} maxLength={teto} onChange={e => setT(e.target.value)} />
       </Campo>
+      {sobra < 300
+        ? <div className="dm-peq dm-mudo" role="status">{sobra} letra{sobra === 1 ? '' : 's'} restante{sobra === 1 ? '' : 's'}</div>
+        : null}
       {extra}
       <button className={`dm-btn dm-${tom || 'pri'} dm-larga`} disabled={salvando || (exigeTexto && !t.trim())}
         onClick={() => { aoEnviar(t.trim()); setT(''); }}>

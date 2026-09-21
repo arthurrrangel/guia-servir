@@ -27,7 +27,7 @@ import { sb } from '@/lib/supabase';
 import type { Bases, Eu, Membro, Numeros, Resumo, Vista } from './tipos';
 import type { Acao, Rascunho } from './regras';
 
-type Resposta<T> = ({ ok: true } & T) | { ok: false; erro: string; regra?: string };
+type Resposta<T> = ({ ok: true } & T) | { ok: false; erro: string; regra?: string; codigo?: string };
 
 /* "A FUNÇÃO NÃO EXISTE" NÃO É "VOCÊ NÃO ESTÁ CADASTRADO" — 20/09/2026.
 
@@ -84,9 +84,18 @@ export async function rpcCom<T>(
   if (!c) return { ok: false, erro: 'SEM_CONFIG' };
   const { data, error } = await c.rpc(nome, args);
   if (error) {
-    if (ehSemSistema(error)) return { ok: false, erro: 'SEM_SISTEMA', regra: error.message };
-    /* erro de rede ou de permissão no próprio Postgres, não regra de negócio */
-    return { ok: false, erro: 'REDE', regra: error.message };
+    if (ehSemSistema(error)) return { ok: false, erro: 'SEM_SISTEMA', regra: error.message, codigo: error.code };
+    /* erro de rede ou de permissão no próprio Postgres, não regra de negócio.
+
+       O `codigo` VIAJA JUNTO — 21/09/2026.
+
+       Guardar só `error.message` jogava fora `error.code`, e com isso o ramo
+       `codigo === 'P0001'` de `lib/erros.ts:289` nunca disparava do lado das
+       demandas. Uma frase em português que nós mesmos escrevemos num `raise
+       exception` era trocada pela genérica de quatro palavras. É exatamente o
+       defeito que `lib/erros.ts:31-50` conta ter matado em 16/09 do lado das
+       escalas, de volta inteiro do lado de cá. */
+    return { ok: false, erro: 'REDE', regra: error.message, codigo: error.code };
   }
   return (data as Resposta<T>) ?? { ok: false, erro: 'VAZIO' };
 }

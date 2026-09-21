@@ -11,7 +11,7 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca from '@/components/demandas/Casca';
 import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Pill } from '@/components/demandas/Ui';
 import { bases, mover, ver } from '@/lib/demandas/api';
@@ -38,7 +38,7 @@ function Uma() {
 
   const carregar = useCallback(async () => {
     const r = await ver(numero);
-    if (!r.ok) { setErro(recadoDoErro(r)); setV(null); return; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'abrir a demanda')); setV(null); return; }
     setErro(''); setV({ demanda: r.demanda, eu: r.eu, eventos: r.eventos, anexos: r.anexos });
   }, [numero]);
 
@@ -49,7 +49,7 @@ function Uma() {
     setIndo(true); setErro('');
     const r = await mover(numero, acao, dados);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r)); return; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'gravar')); return; }
     setAberto('');
     await carregar();
   }
@@ -58,11 +58,57 @@ function Uma() {
     () => (v ? acoesDe(v.demanda, v.eu) : []),
     [v]);
 
+  /* TOCAR EM "CONCLUIR" NAO MUDAVA NADA DO QUE A PESSOA ESTAVA VENDO.
+
+     Os botoes abrem um formulario no fim de um cartao IRMAO. Nada rolava,
+     nada recebia foco, nada piscava. Medido, rolando ate o botao como a
+     pessoa faria e tocando:
+
+       [Concluir]                 rolagem 887->887 | 0px de 327px visiveis (  0%)
+       [Travar]                   rolagem 943->943 | 47px de 469px ( 10%)
+       [Mudar o prazo]            rolagem 999->999 | 103px de 177px ( 58%)
+       [Mandar para outro setor]  ...              | 196px de 196px (100%)
+
+     A pagina nao se mexe em nenhum, e o foco fica no BODY em todos. E quanto
+     mais ALTO o botao na pilha, MENOS se ve — entao "Concluir" e "Travar",
+     que sao as duas acoes do dia a dia de quem atende, sao as duas piores.
+
+     A pessoa toca em Concluir, a tela fica igual, ela toca de novo (o React
+     re-renderiza o mesmo estado: igual), conclui que o botao esta morto e
+     manda mensagem para quem administra. */
+  const cxForm = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!aberto) return;
+    const n = cxForm.current;
+    if (!n) return;
+    n.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    n.querySelector<HTMLElement>('textarea,input,select')?.focus({ preventScroll: true });
+  }, [aberto]);
+
+  /* e Escape fecha, porque o unico jeito de desistir era achar o "Deixa pra
+     la" la embaixo */
+  useEffect(() => {
+    if (!aberto) return;
+    const f = (e: KeyboardEvent) => { if (e.key === 'Escape') setAberto(''); };
+    window.addEventListener('keydown', f);
+    return () => window.removeEventListener('keydown', f);
+  }, [aberto]);
+
   if (erro && !v) {
+    /* A UNICA SAIDA OFERECIDA ERA SAIR DA TELA.
+
+       Tres das cinco telas deste sistema ja aprenderam isto (`nova`,
+       `ajustes` e `numeros`, cada uma com o comentario contando quando). As
+       duas mais usadas nao tinham. Uma falha de rede no 4G da igreja e o caso
+       comum, nao o excepcional, e a resposta certa para ela e "tente de
+       novo", nao "volte para a lista" — que vai falhar igual. */
     return (
       <>
         <Aviso tom="bad">{erro}</Aviso>
-        <Link className="dm-btn" href="/demandas">Voltar para a lista</Link>
+        <div className="dm-linha">
+          <button className="dm-btn dm-pri" onClick={carregar}>Tentar de novo</button>
+          <Link className="dm-btn" href="/demandas">Voltar para a lista</Link>
+        </div>
       </>
     );
   }
@@ -124,7 +170,11 @@ function Uma() {
         <div>
           <div className="dm-card">
             <h3 style={{ marginBottom: 8 }}>O que foi pedido</h3>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{d.descricao}</p>
+            {/* `pre-wrap` sozinho nao quebra um link colado: ele e uma
+                "palavra" de 139 letras e atravessa a tela. Medido: o cartao
+                cresceu para 853px dentro de 320px, e a pagina NAO rolava para
+                alcancar o resto. */}
+            <p className="dm-texto-livre">{d.descricao}</p>
             {d.objetivo ? <p className="dm-peq dm-mudo">Objetivo: {d.objetivo}</p> : null}
             {d.impacto ? <p className="dm-peq"><b>Impacto:</b> {d.impacto}</p> : null}
 
@@ -146,9 +196,40 @@ function Uma() {
           {v.anexos.length ? (
             <div className="dm-card">
               <h3 style={{ marginBottom: 8 }}>Anexos</h3>
+              {/* O QUE MUDOU AQUI, E POR QUE CADA COISA.
+
+                  O anexo deste sistema e um LINK para a conta de alguem, nao
+                  um arquivo guardado pela igreja. Entao o unico jeito de a
+                  pessoa saber para onde vai e antes de clicar. O servidor
+                  (migracao 85) passou a guardar o rotulo com o host junto, e
+                  aqui aparecem as outras tres respostas que a ficha nao dava:
+
+                  - QUEM colou. Medido: qualquer pessoa do setor podia pregar
+                    um "boleto atualizado.pdf" numa compra de outra. Hoje so
+                    quem atende ou quem abriu consegue, mas a ficha continuar
+                    anonima seria esconder metade do conserto.
+                  - SE chegou depois de a demanda fechar. Prestacao de contas
+                    fechada em marco que recebe "nota fiscal REAL.pdf" em
+                    setembro nao pode parecer igual ao que estava la quando a
+                    decisao foi tomada.
+                  - E como TIRAR. Antes nao havia nenhum caminho: nem pela
+                    tela nem pelo banco. */}
               <ul className="dm-peq" style={{ margin: 0, paddingLeft: 18 }}>
                 {v.anexos.map((a, i) => (
-                  <li key={i}><a href={a.url} target="_blank" rel="noopener noreferrer">{a.nome}</a></li>
+                  <li key={a.id || i} style={{ marginBottom: 6 }}>
+                    <a className="dm-texto-livre" href={a.url} target="_blank" rel="noopener noreferrer">{a.nome}</a>
+                    <div className="dm-mudo" style={{ fontSize: 12 }}>
+                      {a.quem ? `${a.quem} · ` : ''}{dataCurta(a.em)}
+                      {a.depois_de_fechar ? <b> · juntado depois de concluída</b> : null}
+                      {v.eu.atende || v.eu.abriu ? (
+                        <>
+                          {' · '}
+                          <button className="dm-btn dm-mini" disabled={indo}
+                            onClick={() => agir('desanexar', { anexo_id: a.id })}>tirar</button>
+                        </>
+                      ) : null}
+                    </div>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -204,8 +285,10 @@ function Uma() {
             </div>
           </div>
 
-          <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo}
-            fechar={() => setAberto('')} agir={agir} />
+          <div ref={cxForm}>
+            <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo}
+              fechar={() => setAberto('')} agir={agir} />
+          </div>
 
           <CaixaDeAcao rot="Escrever alguma coisa" botao="Comentar" salvando={indo}
             dica={v.eu.atende ? 'Marque como interno o que for combinação da equipe.' : undefined}

@@ -53,12 +53,34 @@ const ok = (c, rot, extra = '') => {
 };
 
 /* ------------------------------------------------- lê a folha em blocos */
+/* VIRGULA DENTRO DE PARENTESE NAO SEPARA SELETOR.
+
+   `sel.split(',')` quebrava `.dm :where(button,input,select,textarea)` em
+   quatro pedacos, tres deles sem `.dm` nenhum, e a trava de escopo reprovava
+   um seletor que nunca existiu. Um instrumento que acusa o que nao existe
+   custa duas vezes: a primeira agora, e a segunda no dia em que alguem
+   afrouxar a regra para calar o falso positivo e ela deixar passar o
+   verdadeiro. E o mesmo tropeco que a migracao 69 registrou com "comentario
+   nao e guarda". */
+function virgulasDeFora(sel) {
+  const fora = [];
+  let nivel = 0, atual = '';
+  for (const c of sel) {
+    if (c === '(') nivel++;
+    else if (c === ')') nivel--;
+    if (c === ',' && nivel === 0) { fora.push(atual); atual = ''; continue; }
+    atual += c;
+  }
+  fora.push(atual);
+  return fora.filter(x => x.trim());
+}
+
 const blocos = [];
 for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
   const sel = m[1].trim();
   if (!sel || sel.startsWith('@')) continue;
   const props = [...m[2].matchAll(/(^|;)\s*([a-z-]+)\s*:/g)].map(x => x[2]);
-  for (const parte of sel.split(',')) blocos.push({ sel: parte.trim(), props });
+  for (const parte of virgulasDeFora(sel)) blocos.push({ sel: parte.trim(), props });
 }
 
 /* o que cada classe `.dm-*` pinta, quando ela está sozinha no seletor */

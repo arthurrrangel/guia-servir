@@ -96,7 +96,17 @@ function montar(): HTMLDialogElement {
      .dlg-corpo). Fora = cancelar, igual ao Escape. */
   d.addEventListener('click', e => { if (e.target === d) fechar(false); });
 
-  document.body.appendChild(d);
+  /* O DIÁLOGO NASCIA FORA DA CASCA DO SISTEMA DE DEMANDAS.
+
+     `document.body` fica fora do `<div className="dm">`, então o diálogo
+     herdava `globals.css` — o do outro sistema. Medido: corpo 17px contra
+     16px, botão 45px de altura contra 44, e duas variáveis de raio
+     diferentes. Duas escalas tipográficas na mesma tela.
+
+     O COMPORTAMENTO dele está certo e fica: `showModal()` dá prisão de foco,
+     Escape e `inert` de graça, e o foco nasce no "Cancelar". Só a roupa era
+     de outra casa. */
+    (document.querySelector('.dm') ?? document.body).appendChild(d);
   return d;
 }
 

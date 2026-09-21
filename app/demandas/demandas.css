@@ -135,7 +135,20 @@
 :where(.dm a){color:inherit}
 
 .dm :focus-visible{outline:2px solid var(--dm-ink); outline-offset:2px}
-.dm button,.dm input,.dm select,.dm textarea{font:inherit;color:inherit}
+.dm :where(button,input,select,textarea){font:inherit;color:inherit}
+/* `:where()` AQUI PELA QUINTA VEZ, E ELE FALTAVA.
+
+   `.dm button{font:inherit}` pesa 0-1-1 e ganha de `.dm-btn{font-size:15px}`,
+   que pesa 0-1-0. Medido, com os dois lado a lado na mesma `.dm-linha`:
+
+     <a  class="dm-btn"> "Mandar para Maria" -> 15px / peso 550
+     <button class="dm-btn"> "Copiar o recado" -> 16px / peso 400
+
+   O mesmo botao sai de dois tamanhos, e num `<a>` nada acontece porque `<a>`
+   nao esta na lista. A folha ja tinha consertado exatamente esta armadilha
+   quatro vezes (em `label`, `a`, `p` e `textarea`, esta ultima com o
+   comentario escrito), e deixou a principal de fora. Ninguem nomeia isso ao
+   ver; le-se como acabamento de prototipo. */
 
 /* 16px NOS CAMPOS, E O MOTIVO NÃO É ESTÉTICO.
 
@@ -269,9 +282,38 @@
 .dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
 .dm-linha > *{min-width:0}
 .dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
+/* A MESMA GUARDA DE CIMA, E ELA FALTAVA NESTAS DUAS.
+
+   Medido em 21/09, com um link do YouTube colado na descricao (139 letras):
+   o cartao "O que foi pedido" cresceu para 853px dentro de uma tela de 320px,
+   e `window.scrollX` ficou em 0 depois de mandar rolar para a direita — ou
+   seja, o conteudo foi CORTADO sem nenhuma forma de recuperar. Quem pediu, quem
+   atende e o prazo sumiram na borda.
+
+   Injetando so `min-width:0` em `.dm-dupla > *`: 853px -> 288px. */
+.dm-dupla > *{min-width:0}
 @media (min-width:760px){ .dm-dupla{grid-template-columns:1fr 1fr} }
 .dm-tres{display:grid;gap:var(--dm-e2);grid-template-columns:repeat(2,1fr)}
+.dm-tres > *{min-width:0}
 @media (min-width:760px){ .dm-tres{grid-template-columns:repeat(4,1fr)} }
+
+/* TEXTO QUE A PESSOA COLOU, E QUE NAO TEM COMO QUEBRAR SOZINHO.
+
+   `pre-wrap` guarda as quebras de linha que ela digitou. Nao resolve um link
+   de 134 letras sem espaco: isso e uma "palavra" so, e ela atravessa a tela.
+   `overflow-wrap:anywhere` deixa quebrar no meio. Fica feio num link;
+   ilegivel e pior que feio. */
+.dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* SO PARA QUEM OUVE.
+
+   `display:none` e `visibility:hidden` escondem do leitor de tela tambem, que
+   e o oposto do que se quer aqui. `clip-path:inset(50%)` num elemento de 1px
+   tira da tela e mantem na arvore de acessibilidade. */
+.dm-so-leitor{
+  position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0;
+}
 
 .dm-btn{
   display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -281,14 +323,41 @@
   transition:background var(--dm-t),border-color var(--dm-t),opacity var(--dm-t);
 }
 .dm-btn:hover:not(:disabled){background:var(--dm-card3);border-color:var(--dm-linha3)}
-.dm-btn:disabled{opacity:.45;cursor:not-allowed}
+/* 2,75:1 MEDIDO NOS PIXELS, E ESSE E O ESTADO INICIAL DA TELA.
+
+   `opacity:.45` punha o rotulo de "Comentar" em 2,75:1 (o mesmo botao
+   habilitado da 15,33:1). A WCAG isenta controle inativo, entao nao e
+   reprovacao — mas `CaixaDeAcao` nasce com o botao desabilitado, e essa e a
+   unica acao visivel da coluna enquanto ninguem digitou. No sol da porta da
+   igreja, a unica coisa na tela e a que nao se le.
+
+   Apagar o botao sem apagar o rotulo: fundo e borda recuam, o texto fica. */
+.dm-btn:disabled{
+  cursor:not-allowed;opacity:1;
+  background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha);
+}
+.dm-btn.dm-pri:disabled{background:var(--dm-linha3);color:#fff;border-color:transparent}
 .dm-btn.dm-pri{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
 .dm-btn.dm-pri:hover:not(:disabled){background:var(--dm-preto-toque);border-color:var(--dm-preto-toque)}
 .dm-btn.dm-zap{color:var(--dm-ok);border-color:var(--dm-ok-ln)}
 .dm-btn.dm-zap:hover{background:var(--dm-ok-bg)}
 .dm-btn.dm-perigo{color:var(--dm-bad);border-color:var(--dm-bad-ln)}
 .dm-btn.dm-perigo:hover{background:var(--dm-bad-bg)}
-.dm-btn.dm-mini{min-height:36px;padding:0 var(--dm-e2);font-size:13px}
+/* 36px NUM GESTO DE CORRECAO, E ELE JA TINHA SIDO 26.
+
+   O alvo de "tirar" um anexo mede 50x36, abaixo dos 44 da WCAG 2.5.5. Errar
+   o toque para TIRAR alguma coisa e, na melhor hipotese, nada acontecer; na
+   pior, acertar o anexo de cima. E o pior lugar possivel para um alvo
+   pequeno.
+
+   O `::after` cresce a AREA DE TOQUE sem crescer o desenho: o botao continua
+   discreto na lista e o dedo acerta. `pointer-events` fica no padrao de
+   proposito — o pseudo-elemento faz parte do botao e recebe o toque por ele. */
+.dm-btn.dm-mini{min-height:36px;padding:0 var(--dm-e2);font-size:13px;position:relative}
+.dm-btn.dm-mini::after{
+  content:'';position:absolute;left:0;right:0;top:50%;
+  transform:translateY(-50%);height:44px;
+}
 .dm-btn.dm-larga{width:100%}
 
 /* A PÍLULA NÃO PODE EMPURRAR A TELA DE LADO.
@@ -548,7 +617,12 @@
 }
 .dm-hist li.dm-marco::before{background:var(--dm-ink)}
 .dm-hist .dm-q{font-size:13px;color:var(--dm-mudo)}
-.dm-hist .dm-t{white-space:pre-wrap;margin-top:3px}
+/* MEDIDO: um link do Drive colado num comentario (134 letras) fica com 880px
+   de conteudo numa caixa de 266px em 320px de tela. A pessoa tenta selecionar
+   com o dedo, pega so o comeco, cola no navegador e da erro — e volta a pedir
+   a arte pelo WhatsApp, que e o sistema de demandas perdendo a razao de
+   existir. */
+.dm-hist .dm-t{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px}
 .dm-hist .dm-interno{
   border-left:3px solid var(--dm-warn);padding-left:var(--dm-e2);
   background:var(--dm-warn-bg);

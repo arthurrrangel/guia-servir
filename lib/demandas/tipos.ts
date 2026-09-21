@@ -66,7 +66,14 @@ export type Evento = {
   texto: string | null; interno: boolean; quem: string | null;
 };
 
-export type Anexo = { nome: string; url: string; em: string };
+/* `id`, `quem` e `depois_de_fechar` entraram com a migracao 85: sem o id a
+   tela nao tem como oferecer "tirar", e sem os outros dois a ficha nao
+   responde as duas perguntas que se faz depois de um boleto trocado — quem
+   pos isso aqui, e quando. */
+export type Anexo = {
+  id: string; nome: string; url: string; em: string;
+  quem: string | null; depois_de_fechar: boolean;
+};
 
 export type Vista = {
   demanda: Detalhe;
@@ -81,6 +88,10 @@ export type Numeros = {
   atrasadas: number; reabertas: number; paradas: number;
   horas_ate_concluir: number | null; horas_ate_resposta: number | null;
   no_prazo_pct: number | null;
+  /* sobre QUANTAS demandas a conta foi feita. O indicador sozinho dizia 90%
+     quando o real era 50%, porque contava como pontual toda demanda que nunca
+     teve prazo. Ver a migração 87. */
+  no_prazo_base?: number;
   por_setor: { nome: string; pediu: number; atendeu: number; abertas: number; atrasadas: number }[];
   por_categoria: { grupo: string; nome: string; n: number }[];
   por_prioridade: Partial<Record<Prioridade, number>>;

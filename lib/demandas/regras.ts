@@ -236,10 +236,10 @@ export function oQueFalta(r: Rascunho, temSetor: boolean): string[] {
 export type Acao =
   | 'assumir' | 'travar' | 'destravar' | 'aprovar' | 'rejeitar'
   | 'prazo' | 'prioridade' | 'redirecionar' | 'concluir' | 'cancelar' | 'reabrir'
-  | 'comentar' | 'anexar';
+  | 'comentar' | 'anexar' | 'desanexar';
 
 /** Quem está olhando, do ponto de vista de UMA demanda. Vem de `dem_ver`. */
-export type Quem = { papel: string; atende: boolean; abriu: boolean };
+export type Quem = { id?: string; papel: string; atende: boolean; abriu: boolean };
 
 /* QUEM MANDA, EM UM LUGAR SÓ — 20/09/2026.
 
@@ -255,7 +255,8 @@ export const quemManda = (p: Papel | string | null | undefined) =>
   p === 'gestor' || p === 'admin';
 
 export function acoesDe(
-  d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'> & { responsavel?: string | null },
+  d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'>
+     & { responsavel?: string | null; responsavel_id?: string | null },
   eu: Quem,
 ): Acao[] {
   const manda = quemManda(eu.papel);
@@ -263,9 +264,22 @@ export function acoesDe(
   const esperandoAprovacao = d.aprovacao === 'pendente';
   const a: Acao[] = [];
 
-  /* comentar e anexar valem sempre, inclusive depois de fechada: é como se
-     pede revisão sem reabrir de cara. */
-  a.push('comentar', 'anexar');
+  /* Comentar vale sempre, inclusive depois de fechada: é como se pede revisão
+     sem reabrir de cara.
+
+     ANEXAR SAIU DAQUI E VIROU CONDICIONAL — 21/09/2026, migração 85.
+     Ela era oferecida a todo mundo que enxerga a demanda, e o servidor
+     aceitava: medido, uma solicitante rasa do setor pregou um "boleto
+     atualizado.pdf" numa compra que não era dela. Hoje o servidor exige
+     `pode_atender or aberta_por`, e este espelho precisa dizer o mesmo —
+     senão a tela oferece um botão que o banco recusa, que é a outra metade
+     do mesmo defeito. */
+  a.push('comentar');
+  /* `eu.atende` e nao `manda`: no servidor `pode_atender` ja devolve
+     verdadeiro para gestor e admin, entao acrescentar `manda` aqui so
+     produziria divergencia com a matriz do espelho em estados que o sistema
+     real nao gera (gestor com atende=false nao existe). */
+  if (eu.atende || eu.abriu) a.push('anexar', 'desanexar');
 
   if (fechada) {
     if (eu.abriu || manda || eu.atende) a.push('reabrir');
@@ -275,13 +289,24 @@ export function acoesDe(
   if (esperandoAprovacao && manda) a.push('aprovar', 'rejeitar');
 
   if (eu.atende) {
-    if (!esperandoAprovacao && d.status !== 'execucao') a.push('assumir');
+    /* `assumir`: o servidor (migração 86) passou a recusar quando a demanda
+       JÁ TEM outro dono. Duas pessoas tocando no mesmo segundo faziam a
+       segunda roubar a demanda da primeira sem nenhum aviso. Oferecer aqui o
+       botão que o servidor recusa transforma um conserto num botão morto. */
+    const deOutraPessoa = !!d.responsavel_id && !!eu.id && d.responsavel_id !== eu.id;
+    if (!esperandoAprovacao && d.status !== 'execucao' && !deOutraPessoa) a.push('assumir');
     if (d.status === 'travada') {
       if (!(d.travada_por === 'aprovacao' && esperandoAprovacao)) a.push('destravar');
     } else {
       a.push('travar');
     }
-    a.push('prazo', 'prioridade', 'concluir');
+    a.push('prazo', 'prioridade');
+    /* `concluir` NÃO é oferecida com o portão aberto. A migração 67 fechou a
+       porta no servidor e esta função não acompanhou: o botão continuava na
+       tela, e tocar nele dava FALTA_APROVACAO. Um botão que sempre recusa é
+       pior que botão nenhum, porque a pessoa tenta, lê um erro, e conclui que
+       o sistema está quebrado em vez de que falta a aprovação. */
+    if (!esperandoAprovacao) a.push('concluir');
   } else if (d.status === 'travada' && d.travada_por === 'informacao' && eu.abriu) {
     /* quem pediu responde e destrava: é o caminho que tira a demanda do limbo
        sem depender do setor lembrar de voltar nela. */
@@ -397,6 +422,12 @@ const PORBANCO: Record<string, string> = {
   CATEGORIA_INVALIDA: 'Escolha uma categoria.',
   NAO_E_SEU_SETOR: 'Quem atende esta demanda é outro setor.',
   SEM_PERMISSAO: 'Você não tem permissão para isso.',
+  /* `humano()` sem código cai nas tabelas das ESCALAS e responde "Você não tem
+     permissão para isso neste MINISTÉRIO". Aqui a palavra é SETOR, e a regra
+     do Arthur de 21/09 é que os dois sistemas não se encostam. Essa frase
+     encostava. Com `PORBANCO` tendo precedência, ela não chega mais lá. */
+  SEM_PERMISSAO_DB: 'Você não tem permissão para isso neste setor. Fale com quem administra as demandas.',
+  SEM_SISTEMA: 'O sistema de demandas ainda não foi instalado neste ambiente.',
   SO_GESTOR: 'Só a liderança aprova ou recusa.',
   SO_ADMIN: 'Só quem administra o sistema mexe aqui.',
   FALTA_APROVACAO: 'Esta demanda ainda espera aprovação.',
@@ -413,6 +444,27 @@ const PORBANCO: Record<string, string> = {
   URL_VAZIA: 'Cole o endereço do arquivo.',
   JA_EXISTE: 'Já existe um com esse nome.',
   ALVO_DESCONHECIDO: 'Não sei ajustar isso.',
+  /* ---- o vocabulário que nasceu nas migrações 84 a 87 ------------------
+     Cada uma destas linhas é a diferença entre a pessoa saber o que fazer e
+     a pessoa ver uma palavra em MAIÚSCULA que não quer dizer nada para ela. */
+  SO_GESTOR_REABRE_APROVACAO: 'Esta demanda já foi aprovada. Devolver para aprovação é decisão da liderança.',
+  JA_TEM_DONO: 'Outra pessoa assumiu esta demanda primeiro.',
+  PRAZO_NAO_VEIO: 'Escolha a nova data, ou diga que não vai ter data.',
+  PRAZO_INVALIDO: 'Essa data não existe. Use o seletor de data.',
+  SEM_PRAZO_PRECISA_MOTIVO: 'Para tirar o prazo, diga por quê. "Não sei quando" serve.',
+  ATRASO_PRECISA_MOTIVO: 'Esta demanda passou do prazo. Diga o que atrasou antes de concluir.',
+  PRAZO_NO_PASSADO: 'Essa data já passou. A demanda nasceria atrasada.',
+  EVENTO_DATA_INVALIDA: 'Essa data de evento não existe.',
+  ORCAMENTO_OBRIGATORIO: 'Esta categoria precisa de um valor estimado.',
+  ORCAMENTO_INVALIDO: 'Escreva só o valor, em números. Exemplo: 1234,56.',
+  URL_INVALIDA: 'Esse link não serve como anexo: precisa começar com https:// e apontar para um site.',
+  ANEXOS_DEMAIS: 'Já são 20 anexos nesta demanda. Tire um antes de juntar outro.',
+  ANEXO_NAO_ENCONTRADO: 'Esse anexo não está mais aqui, ou não é seu para tirar.',
+  SETOR_INVALIDO: 'Escolha um setor da lista.',
+  ABA_INVALIDA: 'Essa aba não existe.',
+  CURSOR_INVALIDO: 'Perdi o lugar da lista. Recarregue a página.',
+  FILTRO_INVALIDO: 'Um dos filtros veio errado. Recarregue a página.',
+  LIMITE_INVALIDO: 'Não entendi quantas linhas mostrar.',
   ACAO_DESCONHECIDA: 'Não sei fazer isso.',
   FALTA_CAMPO: 'Falta preencher um campo obrigatório.',
 };
@@ -437,6 +489,13 @@ const PORCHECK: [RegExp, string][] = [
   [/demandas_descricao_tam_ck/, 'A descrição passou de 20 mil letras. Anexe o arquivo por link em vez de colar o texto inteiro.'],
   [/demandas_evento_tam_ck/,    'O nome do evento precisa ter até 120 letras.'],
   [/anexos_url_http_ck/,        'O anexo precisa ser um endereço que comece com http:// ou https://.'],
+  /* as que nasceram nas migrações 84 a 86 */
+  [/anexos_url_ck/,             'Esse link não serve como anexo: precisa começar com https:// e apontar para um site.'],
+  [/anexos_nome_tam_ck/,        'O nome do anexo precisa ter até 200 letras.'],
+  [/ck_orcamento/,              'O valor não pode ser negativo.'],
+  [/ck_tam_texto/,              'Esse texto passou de 4 mil letras. Resuma, ou anexe o arquivo por link.'],
+  [/ck_tam_conclusao/,          'A conclusão passou de 4 mil letras.'],
+  [/ck_tam_/,                   'Esse texto ficou longo demais para o campo.'],
 ];
 
 /* O `ok?` na assinatura não é decoração. Sem ele, o tipo é "fraco" para o
@@ -444,7 +503,14 @@ const PORCHECK: [RegExp, string][] = [
    da RPC (a união de ok:true e ok:false) vira erro de compilação por não ter
    nenhuma propriedade em comum com o ramo de sucesso. Com `ok?`, a união
    sempre tem ao menos uma. */
-export function recadoDoErro(r: { ok?: boolean; erro?: string; regra?: string } | null | undefined): string {
+export function recadoDoErro(
+  r: { ok?: boolean; erro?: string; regra?: string; codigo?: string } | null | undefined,
+  /* O VERBO VEM DE QUEM CHAMA — 21/09/2026.
+
+     Era `humano(…, 'salvar')` fixo. Falhar ao CARREGAR a lista dizia "Não
+     consegui salvar", sobre uma tela onde ninguém salvou nada. */
+  oQueFazia = 'completar',
+): string {
   if (!r?.erro) return 'Não consegui. Tente de novo.';
   if (r.erro === 'REGRA' && r.regra) {
     for (const [re, txt] of PORCHECK) if (re.test(r.regra)) return txt;
@@ -467,6 +533,13 @@ export function recadoDoErro(r: { ok?: boolean; erro?: string; regra?: string } 
      precedência. O chão de transporte passa a ser compartilhado. */
   const doNegocio = PORBANCO[r.erro];
   if (doNegocio) return doNegocio;
-  if (r.regra) return humano(new Error(r.regra), 'salvar').texto;
+  if (r.regra) {
+    /* e o código vai junto: sem ele, `humano()` não tem como distinguir um
+       `raise exception` nosso (P0001, já em português) de um erro de
+       transporte, e traduz os dois para a mesma frase genérica. */
+    const e = new Error(r.regra) as Error & { code?: string };
+    if (r.codigo) e.code = r.codigo;
+    return humano(e, oQueFazia).texto;
+  }
   return 'Não consegui. Tente de novo.';
 }

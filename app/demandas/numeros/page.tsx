@@ -30,7 +30,7 @@ function Painel() {
     setN(null);
     const hoje = new Date().toISOString().slice(0, 10);
     const r = await numeros(somaDias(hoje, -Number(janela)), hoje);
-    if (!r.ok) { setErro(recadoDoErro(r)); return; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'carregar os números')); return; }
     setErro(''); setN(r.numeros);
   }, [janela]);
 
@@ -64,7 +64,11 @@ function Painel() {
           opcoes={[{ v: '30' as Janela, rot: '30 dias' }, { v: '90' as Janela, rot: '90 dias' }, { v: '365' as Janela, rot: '1 ano' }]} />
       </div>
 
-      {!n ? <Esqueleto /> : (
+      {/* `!n` SOZINHO DEIXAVA UM ESQUELETO ANIMADO PARA SEMPRE.
+          Quando a carga falha, `n` fica nulo e a tela mostrava ao mesmo tempo
+          o erro, o "Tentar de novo" E uma forma piscando que nunca ia virar
+          conteúdo. Piscar é promessa de que algo está a caminho. */}
+      {!n && !erro ? <Esqueleto oQue="Carregando os números" /> : !n ? null : (
         <>
           {/* -------------------------------------------- o que pede ação hoje */}
           <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Precisa de atenção</h2>
@@ -81,7 +85,12 @@ function Painel() {
             <Num v={n.total} r="demandas abertas" />
             <Num v={n.concluidas} r="concluídas" />
             <Num v={n.canceladas} r="canceladas" />
-            <Num v={n.no_prazo_pct === null ? '—' : `${n.no_prazo_pct}%`} r="concluídas dentro do prazo" />
+            {/* O NÚMERO DIZ A BASE. Antes ele dizia 90% contando como pontual
+                toda demanda que nunca teve prazo — ou seja, inflava
+                exatamente onde o sistema menos sabe. Hoje a conta é só sobre
+                quem tinha prazo, e o rótulo diz sobre quantas. */}
+            <Num v={n.no_prazo_pct === null ? '—' : `${n.no_prazo_pct}%`}
+              r={n.no_prazo_base ? `dentro do prazo (de ${n.no_prazo_base} com prazo)` : 'concluídas dentro do prazo'} />
           </div>
 
           {/* -------------------------------------------------------- tempo */}
