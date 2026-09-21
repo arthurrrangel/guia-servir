@@ -146,6 +146,26 @@ export const MEDIR = (largura) => {
        instrumento que nao separa os dois vira barulho, e barulho se
        desliga. */
     if (cs.textOverflow === 'ellipsis') continue;
+    /* O PADRAO "SO PARA QUEM OUVE" NAO E CONTEUDO CORTADO.
+
+       `position:absolute; width:1px; height:1px; overflow:hidden;
+       clip-path:inset(50%)` e como se poe texto na arvore de
+       acessibilidade sem por na tela. Ele casa com a regra de cima por
+       construcao: 1px de largura mostrando 566px de conteudo.
+
+       Medido em 21/09: a medida nova reprovou `escala`, `time` e `ajustes`
+       das ESCALAS, cinco vezes, sem que nenhuma tela das escalas tivesse
+       mudado. Sao 10 desses numa tela so. O instrumento passou de 176/176
+       para 5 falhas por conta propria, e instrumento que acusa o que nao
+       existe e instrumento que as pessoas desligam.
+
+       A isencao e pelo MECANISMO e nao pelo nome da classe: qualquer coisa
+       de 1px com recorte esta escondida de proposito. */
+    const r1 = e.getBoundingClientRect();
+    if (cs.clipPath !== 'none' && r1.width <= 2 && r1.height <= 2) continue;
+    /* campo de texto rola com o cursor: quem usa entra nele e alcanca o
+       resto. Nao e conteudo inalcancavel. */
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName)) continue;
     /* um filho que rola por conta propria ja resolve o caso */
     if ([...e.querySelectorAll('*')].some(f => /auto|scroll/.test(getComputedStyle(f).overflowX))) continue;
     cortadoSemSaida.push(nome(e) + ` mostra ${e.clientWidth}px de ${e.scrollWidth}px`);

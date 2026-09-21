@@ -46,6 +46,15 @@ export type Resumo = {
   solicitante: string; responsavel_setor: string; responsavel: string | null; abriu: string;
   prazo: string | null; evento: string | null; evento_data: string | null;
   aprovacao: Aprovacao;
+  /* O VEREDITO DO PORTÃO, E NÃO SÓ A COLUNA — migração 88.
+
+     `aprovacao` é o que foi gravado quando a demanda nasceu; `falta_aprovacao`
+     é o que o servidor vai cobrar AGORA, lendo a categoria. Os dois divergem
+     no dia em que alguém liga "exige aprovação" numa categoria que já tem
+     demanda andando, e foi assim que a tela passou a mostrar botão morto para
+     quem atende e a esconder "Aprovar" de quem decide. */
+  falta_aprovacao: boolean;
+  responsavel_id: string | null;
   criada_em: string; mexida_em: string; parada_dias: number;
   atrasada: boolean; reaberturas: number;
 };

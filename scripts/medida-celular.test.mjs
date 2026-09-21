@@ -87,11 +87,46 @@ try {
          então ele não empurra a página. Recortado não desliza, e a medida
          pergunta exatamente isso. Um elemento solto no `body` é que empurra
          de verdade, e é esse que tem que ser pego. */
+      /* 21/09/2026 · ESTE ESTRAGO MUDOU DE BALDE, E ISSO NÃO É AFROUXAMENTO.
+
+         Ele estava no balde `estoura`, que é medido por `larguraDoc`. Naquela
+         época `larguraDoc` era `Math.max(html.scrollWidth, body.scrollWidth)`.
+         Essa conta foi corrigida para só `html.scrollWidth`, porque quem faz
+         a JANELA rolar é o `documentElement` — e a conta antiga reprovava como
+         "desliza de lado" um defeito que é outro: conteúdo cortado sem
+         recuperação, com `window.scrollX` parado em 0.
+
+         O `body` destas telas tem `overflow-x: clip`, então este bloco de
+         900px não faz a janela andar: ele é RECORTADO. Medido:
+
+           {"htmlScrollW":390,"bodyScrollW":900,"bodyOverflowX":"clip",
+            "rolouDeFato":0}
+
+         Ou seja, ele sempre foi um caso de `cortadoSemSaida` e estava sendo
+         cobrado no balde errado. A medida nova o pega, e o pega pelo motivo
+         certo. Quem ainda cobra o deslizamento de verdade é o estrago abaixo,
+         que rola a janela de fato. */
       por: 'bloco de 900px solto no corpo da página',
       js: () => {
         const d = document.createElement('div');
         d.style.cssText = 'width:900px;height:30px;background:#ccc';
         document.body.appendChild(d);
+      },
+      balde: 'cortadoSemSaida', rota: '/acessar',
+    },
+    {
+      /* E A PÁGINA ANDANDO DE VERDADE, que é o que `larguraDoc` mede.
+
+         Sem este caso, a troca de `Math.max` por `html.scrollWidth` teria
+         deixado o balde `estoura` sem nenhum estrago que o exercite, e uma
+         medida que nunca é cobrada é uma medida que se pode apagar sem
+         ninguém notar. O bloco vai no `documentElement`, acima do `body` e
+         do `overflow-x: clip` dele. */
+      por: 'bloco de 900px acima do body, que faz a janela rolar mesmo',
+      js: () => {
+        const d = document.createElement('div');
+        d.style.cssText = 'width:900px;height:30px;background:#ccc;position:absolute;top:0;left:0';
+        document.documentElement.appendChild(d);
       },
       balde: 'estoura', rota: '/acessar',
     },

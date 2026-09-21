@@ -162,10 +162,22 @@
 .dm input,.dm select,.dm textarea{font-size:16px}
 
 /* ------------------------------------------------------------------ texto */
-.dm h1,.dm h2,.dm h3{margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
-.dm h1{font-size:clamp(26px,5vw,34px)}
-.dm h2{font-size:20px}
-.dm h3{font-size:16px}
+/* `:where()` PELA SEXTA VEZ, E AGORA PELO DIÁLOGO.
+
+   `.dm h2` pesa 0-1-1 e ganhava de `.dlg-titulo` (0-1-0). Desde que
+   `confirmar()` pendura o diálogo dentro da casca, o título dele passou a ser
+   pintado por esta regra: medido, 20px/650 dentro de `.dm` contra 17px/600
+   fora, e os dois botões da mesma caixa com pesos diferentes (Cancelar em
+   400, Apagar em 600), porque `.btn.pri` pesa 0-2-0 e resiste enquanto `.btn`
+   pesa 0-1-0 e perde.
+
+   É a mesma armadilha que esta folha já desarma em `label`, `a`, `p`,
+   `textarea` e `button`. A regra continua valendo como padrão e para de
+   ganhar de quem vem depois. */
+.dm :where(h1,h2,h3){margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+.dm :where(h1){font-size:clamp(26px,5vw,34px)}
+.dm :where(h2){font-size:20px}
+.dm :where(h3){font-size:16px}
 /* `:where(p)` E NÃO `p`: o teste de CSS pegou isto na hora, que é para o que
    ele existe. `.dm p` pesa 0-1-1 e ganha de qualquer classe de 0-1-0, então
    toda classe nova aplicada num <p> nascia sem poder escolher a própria

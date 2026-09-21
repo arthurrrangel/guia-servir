@@ -210,7 +210,7 @@ export const rascunhoVazio = (): Rascunho => ({
   orcamento: '', objetivo: '', local: '', publico: '',
 });
 
-export function oQueFalta(r: Rascunho, temSetor: boolean): string[] {
+export function oQueFalta(r: Rascunho, temSetor: boolean, cat?: Categoria | null): string[] {
   const f: string[] = [];
   if (r.titulo.trim().length < 4) f.push('um título que diga o que é');
   if (r.descricao.trim().length < 10) f.push('a descrição do que precisa ser feito');
@@ -227,6 +227,21 @@ export function oQueFalta(r: Rascunho, temSetor: boolean): string[] {
   if (r.titulo.trim().length > 200) f.push('um título mais curto (o limite é 200 letras; o texto longo cabe na descrição)');
   if (r.descricao.trim().length > 20000) f.push('uma descrição menor (o limite é 20 mil letras)');
   if (r.evento.trim().length > 120) f.push('um nome de evento mais curto (o limite é 120 letras)');
+  /* 21/09/2026 — E ACONTECEU DE NOVO, EM DOBRO.
+
+     O comentário de 19/09 aí em cima conta que esta função ficou para trás da
+     migração 52 e que a promessa virou mentira. A migração 86 acrescentou
+     `ORCAMENTO_OBRIGATORIO` e esta função ficou para trás outra vez. Doze das
+     43 categorias exigem orçamento (todas as de Compras, Reembolso, Reserva
+     financeira, Solicitação de pagamento, Alimentação, Transporte): a pessoa
+     preenchia o formulário inteiro, tocava em Enviar, e só então lia que
+     faltava um valor.
+
+     Por isso a função passa a receber a CATEGORIA. Sem ela não havia como
+     checar, e "não havia como" é a forma que este defeito usa para voltar. */
+  if (cat?.exige_orcamento && !r.orcamento.trim()) {
+    f.push('o valor estimado (esta categoria pede)');
+  }
   return f;
 }
 
@@ -256,12 +271,23 @@ export const quemManda = (p: Papel | string | null | undefined) =>
 
 export function acoesDe(
   d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'>
-     & { responsavel?: string | null; responsavel_id?: string | null },
+     & { falta_aprovacao?: boolean; responsavel?: string | null; responsavel_id?: string | null },
   eu: Quem,
 ): Acao[] {
   const manda = quemManda(eu.papel);
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
-  const esperandoAprovacao = d.aprovacao === 'pendente';
+  /* O SERVIDOR DECIDE O PORTÃO, NÃO ESTA FUNÇÃO — migração 88.
+
+     Era `d.aprovacao === 'pendente'`, que é a COLUNA. O servidor cobra
+     `demandas.falta_aprovacao(d)`, que lê a categoria agora. No dia em que o
+     administrador liga "exige aprovação" numa categoria com demanda andando,
+     os dois discordam: medido, a tela escondia "Aprovar" do gestor enquanto o
+     servidor aceitava aprovar, e oferecia "Concluir" a quem atende enquanto o
+     servidor recusava. A demanda ficava congelada sem ninguém entender.
+
+     `dem_ver` e `dem_lista` passaram a devolver o veredito calculado. O
+     `??` cobre uma carga antiga que ainda não tenha o campo. */
+  const esperandoAprovacao = d.falta_aprovacao ?? (d.aprovacao === 'pendente');
   const a: Acao[] = [];
 
   /* Comentar vale sempre, inclusive depois de fechada: é como se pede revisão
@@ -296,7 +322,12 @@ export function acoesDe(
     const deOutraPessoa = !!d.responsavel_id && !!eu.id && d.responsavel_id !== eu.id;
     if (!esperandoAprovacao && d.status !== 'execucao' && !deOutraPessoa) a.push('assumir');
     if (d.status === 'travada') {
-      if (!(d.travada_por === 'aprovacao' && esperandoAprovacao)) a.push('destravar');
+      /* SEM `travada_por` NA CONDIÇÃO — 21/09/2026.
+         A migração 67 tirou o rótulo da guarda do servidor com o comentário
+         "o portão é a APROVAÇÃO; a trava é só como ela aparece na tela", e foi
+         exatamente ler o rótulo que abriu a porta dos fundos de duas ações.
+         Esta função continuou lendo o rótulo por mais quatro migrações. */
+      if (!esperandoAprovacao) a.push('destravar');
     } else {
       a.push('travar');
     }
@@ -307,9 +338,18 @@ export function acoesDe(
        pior que botão nenhum, porque a pessoa tenta, lê um erro, e conclui que
        o sistema está quebrado em vez de que falta a aprovação. */
     if (!esperandoAprovacao) a.push('concluir');
-  } else if (d.status === 'travada' && d.travada_por === 'informacao' && eu.abriu) {
+  } else if (d.status === 'travada' && d.travada_por === 'informacao' && eu.abriu
+             && !esperandoAprovacao) {
     /* quem pediu responde e destrava: é o caminho que tira a demanda do limbo
-       sem depender do setor lembrar de voltar nela. */
+       sem depender do setor lembrar de voltar nela.
+
+       `&& !esperandoAprovacao` entrou em 21/09. O servidor recusa desde a
+       migração 67, que parou de ler o rótulo da trava e passou a ler só o
+       portão; esta função continuou lendo o rótulo. A matriz de 84 casos não
+       pegava porque o MODELO dela também estava na versão de antes da 67.
+       Hoje o estado não deveria existir (a cura da 88 marca a trava como
+       `aprovacao`), e mesmo assim o botão tem que sumir: espelho que depende
+       de o estado não acontecer não é espelho. */
     a.push('destravar');
   }
 
@@ -465,6 +505,13 @@ const PORBANCO: Record<string, string> = {
   CURSOR_INVALIDO: 'Perdi o lugar da lista. Recarregue a página.',
   FILTRO_INVALIDO: 'Um dos filtros veio errado. Recarregue a página.',
   LIMITE_INVALIDO: 'Não entendi quantas linhas mostrar.',
+  /* ---- migração 88 ---------------------------------------------------- */
+  PERIODO_INVERTIDO: 'A data inicial está depois da final. Troque as duas.',
+  NUMERO_INVALIDO: 'Esse campo só aceita número.',
+  SIM_OU_NAO: 'Esse campo só aceita sim ou não.',
+  /* `depois_de` saiu de `dem_lista` na 88 junto com o vazamento que ele
+     tinha. Se uma aba velha ainda mandar a chave, isto é o que ela lê. */
+  CURSOR_SAIU: 'Esta página está desatualizada. Recarregue.',
   ACAO_DESCONHECIDA: 'Não sei fazer isso.',
   FALTA_CAMPO: 'Falta preencher um campo obrigatório.',
 };
@@ -488,7 +535,9 @@ const PORCHECK: [RegExp, string][] = [
   [/demandas_titulo_tam_ck/,    'O título precisa ter entre 3 e 200 letras. Se o texto é longo, ele cabe na descrição.'],
   [/demandas_descricao_tam_ck/, 'A descrição passou de 20 mil letras. Anexe o arquivo por link em vez de colar o texto inteiro.'],
   [/demandas_evento_tam_ck/,    'O nome do evento precisa ter até 120 letras.'],
-  [/anexos_url_http_ck/,        'O anexo precisa ser um endereço que comece com http:// ou https://.'],
+  /* `anexos_url_http_ck` SAIU DAQUI: a migração 85 apagou essa constraint, e
+     a frase ainda dizia "http:// ou https://" sobre uma regra que hoje recusa
+     `http://`. Regex que nunca casa é armadilha de leitura, e esta mentia. */
   /* as que nasceram nas migrações 84 a 86 */
   [/anexos_url_ck/,             'Esse link não serve como anexo: precisa começar com https:// e apontar para um site.'],
   [/anexos_nome_tam_ck/,        'O nome do anexo precisa ter até 200 letras.'],

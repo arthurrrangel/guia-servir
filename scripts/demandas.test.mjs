@@ -83,7 +83,23 @@ const combinado = (acao, d, eu) =>
 function servidorAceita(acao, d, eu) {
   const manda = eu.papel === 'gestor' || eu.papel === 'admin';
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
-  const pendente = d.aprovacao === 'pendente';
+  /* O PORTAO DO SERVIDOR E `demandas.falta_aprovacao(d)`, NAO A COLUNA.
+
+     Este modelo dizia `d.aprovacao === 'pendente'`, que e o SQL de antes da
+     migracao 84. Duas auditorias independentes mostraram o preco disso: a
+     matriz de 84 casos ficava 84/84 e mesmo assim nao pegava dois defeitos
+     reais, porque ela estava espelhando a versao errada do servidor.
+
+       - `destravar`: o modelo olhava `travada_por === 'aprovacao'`. O servidor
+         nao olha o rotulo desde a 67 — foi assim que a porta dos fundos
+         nasceu. No estado que a cura produz, o modelo dizia "aceita" e o
+         servidor recusava.
+       - `aprovar`: o modelo dizia "nao esta pendente" num estado em que o
+         servidor devolve {"ok": true}, porque ele cura antes de despachar.
+
+     `falta_aprovacao` chega no caso vindo de `dem_ver`, e a matriz o varre
+     junto com `aprovacao` para cobrir o dia em que os dois divergem. */
+  const pendente = d.falta_aprovacao ?? (d.aprovacao === 'pendente');
 
   // guarda do topo: fechada só aceita comentar, anexar, desanexar e reabrir
   if (fechada && !['comentar', 'anexar', 'desanexar', 'reabrir'].includes(acao)) return false;
@@ -99,8 +115,8 @@ function servidorAceita(acao, d, eu) {
        faz com `d.responsavel_id is not null and <> m.id`. */
     case 'assumir':     return eu.atende && !pendente && !d.responsavel;
     case 'travar':      return eu.atende;
-    case 'destravar':   return (eu.atende || eu.abriu) && d.status === 'travada'
-                             && !(d.travada_por === 'aprovacao' && pendente);
+    /* sem `travada_por` na condicao: o servidor le so o portao (67) */
+    case 'destravar':   return (eu.atende || eu.abriu) && d.status === 'travada' && !pendente;
     case 'aprovar':
     case 'rejeitar':    return manda && pendente;
     case 'prazo':
@@ -121,6 +137,9 @@ function servidorAceita(acao, d, eu) {
   const STATUS = ['aberta', 'execucao', 'travada', 'concluida', 'cancelada'];
   const TRAVAS = [null, 'informacao', 'aprovacao', 'terceiros'];
   const APROV = [null, 'pendente', 'aprovada', 'rejeitada'];
+  /* o veredito do portao varre SEPARADO da coluna: e justamente quando os
+     dois discordam que a tela e o servidor se desencontram */
+  const FALTA = [false, true];
   const TODAS = ['assumir', 'travar', 'destravar', 'aprovar', 'rejeitar', 'prazo',
     'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'comentar',
     'anexar', 'desanexar'];
@@ -132,11 +151,12 @@ function servidorAceita(acao, d, eu) {
       for (const abriu of [false, true])
         for (const status of STATUS)
           for (const travada_por of TRAVAS)
-            for (const aprovacao of APROV) {
+            for (const aprovacao of APROV)
+            for (const falta_aprovacao of FALTA) {
               if (status !== 'travada' && travada_por !== null) continue;   // estado impossível
               if (status === 'travada' && travada_por === null) continue;
               if (papel === 'solicitante' && atende) continue;              // solicitante não atende
-              const d = { status, travada_por, aprovacao, responsavel: null };
+              const d = { status, travada_por, aprovacao, falta_aprovacao, responsavel: null };
               const eu = { papel, atende, abriu };
               const dadas = acoesDe(d, eu);
               casos++;
@@ -189,7 +209,7 @@ function servidorAceita(acao, d, eu) {
      impossíveis (travada sem motivo, motivo sem travada, solicitante que
      atende). O número está fixo de propósito: se ele mudar, alguém mexeu na
      matriz e tem que olhar por quê. */
-  ok(casos === 392, 'a matriz cobre a combinação inteira', 'casos=' + casos);
+  ok(casos === 784, 'a matriz cobre a combinação inteira', 'casos=' + casos);
   ok(oferecidasDemais === 0, 'nenhum botão oferecido que o servidor recusa', 'sobras=' + oferecidasDemais);
   if (escondidas) exemplos.forEach(e => console.log('  botão que o servidor aceita e a tela esconde:', e));
   ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os três combinados',

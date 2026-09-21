@@ -121,6 +121,28 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
   caixa ??= montar();
   const d = caixa;
 
+  /* REANCORAR A CADA CHAMADA — 21/09/2026.
+
+     `caixa` é de módulo: ela nasce uma vez e vive enquanto a aba viver. Desde
+     que o diálogo passou a ser pendurado em `.dm`, isso virou um defeito: o
+     `<div className="dm">` é renderizado POR PÁGINA (cada tela de demandas
+     chama `<Casca>`, o `layout.tsx` só repassa), então toda navegação entre
+     telas destrói o nó que segura o diálogo. Medido no Chromium:
+
+       dialogoAindaConectado: false
+       depoisDeDesmontar: "InvalidStateError: Failed to execute 'showModal'
+                           on 'HTMLDialogElement': The element is not in a
+                           Document."
+
+     Um `confirmar()` que levanta deixa a promessa pendurada e o botão travado
+     para sempre, sem mensagem nenhuma.
+
+     `appendChild` de um nó que já existe MOVE, não duplica: reancorar é uma
+     linha e cobre também o caminho de ir de uma tela das escalas para uma de
+     demandas e voltar. */
+  const pai = document.querySelector('.dm') ?? document.body;
+  if (d.parentNode !== pai) pai.appendChild(d);
+
   d.classList.toggle('perigo', !!c.perigo);
   d.querySelector('.dlg-rot')!.textContent = c.perigo ? 'Isto apaga' : 'Confirmar';
   d.querySelector('.dlg-titulo')!.textContent = c.titulo;

@@ -16,3 +16,9 @@ s-*.png
 
 # 19/09/2026: saida de build de sessoes anteriores (167 MB). Nao e fonte.
 tmp/
+
+# 21/09/2026: bytecode do Python. O `scripts/sabotar-migracao.py` importa
+# `scripts/sabotagens/NN.py`, e o import deixa .pyc. Nao e fonte, e entrou
+# no repositorio por descuido.
+__pycache__/
+*.pyc

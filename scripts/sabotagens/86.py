@@ -1,4 +1,12 @@
-RESTAURA = [84, 85, 86, 87]
+# A CADEIA PARA NO PROPRIO NUMERO, E ISSO NAO E DESCUIDO.
+#
+# Uma conferencia testa o estado logo DEPOIS do arquivo dela. A migracao 88
+# reverteu duas decisoes desta rodada (o cursor de `dem_lista` e a recusa de
+# prazo no passado), entao rodar esta conferencia contra um banco ja na 88
+# reprova com razao. A regua protege isso em producao: `exige_versao_ate`
+# recusa reaplicar a 86 num banco na 88 com "MIGRACAO SUPERADA".
+
+RESTAURA = [84, 85, 86]
 CASOS = [
  {"nome": "dem_ver volta a diferenciar alheia de inexistente",
   "sql": troca('dem_ver',
@@ -35,7 +43,9 @@ CASOS = [
 
  {"nome": "concluir atrasada volta a nao pedir nada",
   "sql": troca('dem_mover',
-    "if d.prazo is not null and d.prazo < demandas.hoje() and demandas.limpo(p_d->>'atraso') is null then "
+    # `current_date` e nao `demandas.hoje()`: no estado da 86, `hoje()` ainda
+  # nao existe (ela nasce na 87). A bateria roda contra a cadeia ate a 86.
+  "if d.prazo is not null and d.prazo < current_date and demandas.limpo(p_d->>'atraso') is null then "
     "return jsonb_build_object('ok', false, 'erro', 'ATRASO_PRECISA_MOTIVO'); end if;", ""),
   "espera": "5: concluiu 51 dias depois do prazo"},
 
@@ -51,12 +61,9 @@ CASOS = [
     "return jsonb_build_object('ok', false, 'erro', 'ORCAMENTO_INVALIDO'); end if;", ""),
   "espera": "6: aceitou uma compra de menos oito mil reais"},
 
- {"nome": "prazo no passado volta a ser aceito na abertura",
-  "sql": troca('dem_abrir',
-    "if v_prazo is not null and v_prazo < demandas.hoje() then "
-    "return jsonb_build_object('ok', false, 'erro', 'PRAZO_NO_PASSADO'); end if;", ""),
-  "espera": "7: a demanda nasceu ja atrasada"},
-
+# A sabotagem de "prazo no passado" SAIU: a migracao 88 tirou essa guarda,
+# porque o repositorio ja tinha decidido o contrario por escrito e eu revertí
+# a decisao sem ler o motivo. Sabotar o que nao existe mais nao mede nada.
  {"nome": "o cast de categoria volta a ser cego",
   "sql": troca('dem_abrir',
     "if coalesce(p_d->>'categoria_id','') !~* "

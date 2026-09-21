@@ -128,7 +128,13 @@ select chk('gestor aprova e a demanda destrava', 'aberta/aprovada',
 select chk('quem pediu nao assume o atendimento', 'NAO_E_SEU_SETOR',
   public.dem_mover('tk-jovem', nd('Divulgação do Culto de Celebração'), 'assumir')->>'erro');
 /* quem nem ve: setor que nao e nem solicitante nem responsavel */
-select chk('setor de fora nem enxerga', 'SEM_ACESSO',
+-- 'NAO_EXISTE' E NAO 'SEM_ACESSO', DESDE A MIGRACAO 86.
+-- A diferenca entre as duas respostas contava, para quem tivesse qualquer
+-- token valido, quantas demandas a igreja tem e em que ritmo nascem, porque
+-- `numero` e sequencial. Medido: varrendo de 1 a 22 com um token de outro
+-- setor, 21 vazios e 1 'SEM_ACESSO', e a contagem real do banco era
+-- exatamente 1. As duas portas passaram a responder igual.
+select chk('setor de fora nem enxerga', 'NAO_EXISTE',
   public.dem_mover('tk-compras', nd('Divulgação do Culto de Celebração'), 'assumir')->>'erro');
 
 select public.dem_mover('tk-com', nd('Divulgação do Culto de Celebração'), 'assumir');
@@ -170,7 +176,8 @@ select chk('o gestor ve tudo', '4',
   jsonb_array_length(public.dem_lista('tk-gestor','{}'::jsonb)->'itens')::text);
 select chk('a fila do meu setor', '1',
   jsonb_array_length(public.dem_lista('tk-com','{"aba":"setor"}'::jsonb)->'itens')::text);
-select chk('demanda que nao e minha: sem acesso', 'SEM_ACESSO',
+-- idem: ver o comentario do caso "setor de fora nem enxerga"
+select chk('demanda que nao e minha: sem acesso', 'NAO_EXISTE',
   public.dem_ver('tk-kids', nd('Divulgação do Culto de Celebração'))->>'erro');
 
 -- 10 --------------------------------- o tempo até a primeira resposta ---
@@ -305,15 +312,29 @@ select chk('e a resposta dele entrou no historico', 'sim',
       and texto like '%sala 3%'));
 
 -- 17 --------------------------------- travada por aprovacao nao destrava ---
+-- O ORCAMENTO ENTROU AQUI, E NAO E ENFEITE.
+-- `Reembolso` tem `exige_orcamento = true` desde a migracao 50, e ate a 86
+-- NENHUMA linha do banco olhava para essa coluna. Desde a 86 ela e cobrada, e
+-- esta demanda simplesmente nao nascia — derrubando este caso e os tres
+-- seguintes em cadeia, sem que nenhum deles fosse sobre orcamento.
 select public.dem_abrir('tk-jovem', jsonb_build_object(
   'titulo','Reembolso do combustivel', 'descricao','x', 'prazo',(current_date + 17)::text,
+  'orcamento','180.00',
   'categoria_id',(select id from demandas.categorias where nome='Reembolso')));
 select chk('reembolso tambem nasce esperando aprovacao', 'travada/aprovacao',
   (select status||'/'||travada_por from demandas.demandas where titulo='Reembolso do combustivel'));
+-- O GESTOR ENXERGA TUDO, entao para ele a resposta continua sendo a guarda de
+-- aprovacao e nao o oraculo: `pode_ver` devolve verdadeiro para gestor e admin
+-- em qualquer setor, por desenho. Eu supus o contrario ao atualizar este
+-- arquivo e o proprio teste me corrigiu, que e para isso que ele existe.
 select chk('ninguem destrava por fora o que espera aprovacao', 'FALTA_APROVACAO',
   public.dem_mover('tk-gestor', nd('Reembolso do combustivel'), 'destravar',
     '{"texto":"vamos tocar"}'::jsonb)->>'erro');
-select public.dem_mover('tk-gestor', nd('Reembolso do combustivel'), 'rejeitar',
+select chk('e quem ATENDE tambem nao destrava o que espera aprovacao', 'FALTA_APROVACAO',
+  public.dem_mover('tk-jovem', nd('Reembolso do combustivel'), 'destravar',
+    '{"texto":"vamos tocar"}'::jsonb)->>'erro');
+-- quem recusa tem que ENXERGAR a demanda: o gestor do setor dela
+select public.dem_mover('tk-admin', nd('Reembolso do combustivel'), 'rejeitar',
   '{"texto":"Falta a nota fiscal."}'::jsonb);
 select chk('rejeitar encerra com motivo', 'cancelada',  st('Reembolso do combustivel'));
 

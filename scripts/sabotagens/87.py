@@ -1,4 +1,17 @@
+# A CADEIA PARA NO PROPRIO NUMERO, E ISSO NAO E DESCUIDO.
+#
+# Uma conferencia testa o estado logo DEPOIS do arquivo dela. A migracao 88
+# reverteu duas decisoes desta rodada (o cursor de `dem_lista` e a recusa de
+# prazo no passado), entao rodar esta conferencia contra um banco ja na 88
+# reprova com razao. A regua protege isso em producao: `exige_versao_ate`
+# recusa reaplicar a 87 num banco na 88 com "MIGRACAO SUPERADA".
+
 RESTAURA = [84, 85, 86, 87]
+# As duas sabotagens do CURSOR sairam: a migracao 88 tirou `depois_de` de
+# `dem_lista` porque ele lia a linha ancora sem `pode_ver` e vazava prioridade,
+# prazo e situacao de demanda de outro setor, alem de perder e duplicar linhas
+# quando a ordem mudava entre paginas. O que ele resolvia agora e resolvido
+# pelos filtros.
 CASOS = [
  {"nome": "hoje() volta a ser o dia de UTC",
   "sql": "create or replace function demandas.hoje() returns date language sql stable "
@@ -37,21 +50,6 @@ CASOS = [
     "'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' then "
     "raise exception 'SETOR_INVALIDO' using errcode = 'raise_exception'; end if;"),
   "espera": "5: {\"setor\":\"x\"} LEVANTOU"},
-
- {"nome": "o cursor some e alem do teto volta a ser inalcancavel",
-  "sql": troca('dem_lista',
-    "'proximo', case when jsonb_array_length(v) >= v_lim then "
-    "(v -> (jsonb_array_length(v)-1) ->> 'numero')::int else null end,",
-    "'proximo', null,"),
-  "espera": "6: a primeira pagina nao devolveu o cursor"},
-
- {"nome": "o cursor perde o desempate total e repete linhas",
-  "sql": troca('dem_lista',
-    "or (f.k_fechada, f.k_atraso, f.k_prio, coalesce(f.prazo, 'infinity'::date), -f.numero) "
-    "> (v_ck_f, v_ck_a, v_ck_p, v_ck_prazo, -v_depois)",
-    "or (f.k_fechada, f.k_atraso, f.k_prio, coalesce(f.prazo, 'infinity'::date)) "
-    ">= (v_ck_f, v_ck_a, v_ck_p, v_ck_prazo)"),
-  "espera": "6: a segunda pagina REPETE linhas"},
 
  {"nome": "no_prazo_pct volta a contar quem nunca teve prazo",
   "sql": troca('dem_numeros',

@@ -57,7 +57,7 @@ const PAPEIS = [
    Medido: com as tres rotas apontando para o vazio, apagar `min-width:0` de
    `.dm-dupla` e o `overflow-wrap` do historico nao reprovava nada. */
 const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
-for (const k of ['execucao', 'travada', 'concluida', 'comLink']) {
+for (const k of ['execucao', 'travada', 'concluida', 'comLink', 'atrasada']) {
   if (!N[k]) {
     console.error(`sem demanda "${k}" na semente: rode scripts/demandas-celular-subir.sh`);
     process.exit(1);
@@ -76,6 +76,11 @@ const PAGINAS = [
      LARGURA. A semente nao tinha nenhuma ate 21/09, e por isso 252
      conferencias ficaram verdes com um cartao de 853px dentro de 320px. */
   { rota: `/demandas/d/${N.comLink}`,   nome: 'detalhe-com-link-colado' },
+  /* A ATRASADA, que a semente publica desde 21/09 e que nenhuma rota usava.
+     Ela e a unica que exercita a pilula vermelha, o "51 dias de atraso" e a
+     ordem da lista com atraso primeiro. Chave calculada e nao lida e peso
+     sem medida. */
+  { rota: `/demandas/d/${N.atrasada}`,  nome: 'detalhe-atrasada' },
 ];
 
 const { estado, ok } = criaContador();

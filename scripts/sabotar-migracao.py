@@ -21,8 +21,40 @@ i = src.index('do $conf$'); j = src.index('end $conf$;') + len('end $conf$;')
 open(CONF, 'w', encoding='utf-8').write(src[i:j] + '\n')
 
 
+# O BANCO DA SABOTAGEM E DESCARTAVEL, E CONSTRUIDO DO ZERO.
+#
+# Esta bateria rodava contra o banco de trabalho, e isso quebrou no dia em que
+# a 88 operou por cima do que a 86 e a 87 tinham operado. Migracao CIRURGICA
+# nao se desfaz reaplicando: `troca_unica_ou_ja` ve o texto novo, diz "ja
+# estava feita" e devolve a versao mais recente. Resultado: a sabotagem da 86
+# procurava `demandas.hoje()` num corpo que na 86 ainda dizia `current_date`, e
+# a da 87 procurava um bloco que a 88 tinha reescrito. Duas sabotagens
+# silenciadas por deriva do alvo, nao por defeito da correcao.
+#
+# Com um banco proprio, montado prep + cadeia, a conferencia de cada arquivo
+# volta a ver exatamente o estado que ela julga, e o banco de trabalho nao e
+# tocado.
+BANCO = f'sab{sys.argv[1]}'
+PREP = f'''
+create schema if not exists extensions;
+create extension if not exists pgcrypto with schema extensions;
+do $$ begin execute format('alter database %I set search_path to public, extensions', current_database()); end $$;
+do $$ begin create role anon;          exception when duplicate_object then null; end $$;
+do $$ begin create role authenticated; exception when duplicate_object then null; end $$;
+do $$ begin create role service_role;  exception when duplicate_object then null; end $$;
+create schema if not exists auth;
+create or replace function auth.jwt() returns jsonb language sql stable as $$
+  select coalesce(nullif(current_setting('teste.jwt', true), '')::jsonb, '{{}}'::jsonb);
+$$;
+create table if not exists public.schema_versao (
+  n int primary key, arquivo text, aplicada_em timestamptz not null default now());
+'''
+BASE = ['50-demandas', '52-o-que-a-auditoria-de-arquitetura-provou',
+        '57-dem-lista-com-teto', '58-membro-novo-nasce-em-producao']
+
+
 def psql(*args, tx=False):
-    cmd = ['psql', '-h', '/tmp', '-p', '5439', '-U', 'postgres', '-d', 'guia', '-q',
+    cmd = ['psql', '-h', '/tmp', '-p', '5439', '-U', 'postgres', '-d', BANCO, '-q',
            '-v', 'ON_ERROR_STOP=1']
     if tx:
         cmd.append('--single-transaction')
@@ -71,7 +103,26 @@ spec.loader.exec_module(mod)
 # reescreve `dem_mover` inteira por cima da 84, entao restaurar so a 84
 # deixaria o banco numa versao que nao existe em lugar nenhum. O modulo de
 # casos diz quais arquivos, em ordem.
-RESTAURA = [glob.glob(f'{RAIZ}/supabase/{n}-*.sql')[0] for n in getattr(mod, 'RESTAURA', [N])]
+CADEIA = ([glob.glob(f'{RAIZ}/supabase/{f}.sql')[0] for f in BASE]
+          + [glob.glob(f'{RAIZ}/supabase/{n}-*.sql')[0] for n in getattr(mod, 'RESTAURA', [N])])
+
+open(f'{S}/prep.sql', 'w').write(PREP)
+subprocess.run(['psql', '-h', '/tmp', '-p', '5439', '-U', 'postgres', '-d', 'postgres', '-q',
+                '-c', f'drop database if exists {BANCO};', '-c', f'create database {BANCO};'],
+               capture_output=True, text=True)
+
+
+def montar():
+    saida = psql(f'{S}/prep.sql', *CADEIA)
+    if 'ERROR' in saida:
+        print('NAO CONSEGUI MONTAR O BANCO DA SABOTAGEM:')
+        for l in saida.splitlines():
+            if 'ERROR' in l:
+                print('  ' + l)
+        sys.exit(2)
+
+
+montar()
 
 print(f'SABOTAGENS DA {N}\n')
 falhas = 0
@@ -94,7 +145,7 @@ for c in mod.CASOS:
         for l in out.strip().splitlines()[-3:]:
             print('        ' + l.strip())
         falhas += 1
-    psql(*RESTAURA)
+    montar()
 
 open(f'{S}/nada.sql', 'w').write('select 1;\n')
 out = psql(f'{S}/nada.sql', CONF, tx=True)

@@ -31,9 +31,36 @@ create schema if not exists auth;
 create or replace function auth.jwt() returns jsonb language sql stable as $$
   select coalesce(nullif(current_setting('teste.jwt', true), '')::jsonb, '{}'::jsonb);
 $$;
+-- A REGUA, porque as migracoes da 84 em diante escrevem nela na ultima linha.
+-- Ela nasce na 55, que e do sistema de escalas e nao entra aqui. Sem esta
+-- tabela, cada uma delas morre DEPOIS de a conferencia ter passado, que e o
+-- pior lugar possivel para falhar: o log mostra OK e o banco fica pela metade.
+create table if not exists public.schema_versao (
+  n int primary key, arquivo text, aplicada_em timestamptz not null default now());
 SQL
 B=$(cd "$(dirname "$0")/.." && pwd)
-cat "$B/supabase/50-demandas.sql" "$B/supabase/52-o-que-a-auditoria-de-arquitetura-provou.sql" "$B/supabase/57-dem-lista-com-teto.sql" "$B/supabase/58-membro-novo-nasce-em-producao.sql" "$B/supabase/67-o-portao-de-aprovacao-tinha-tres-portas-dos-fundos.sql" "$B/supabase/68-dem-lista-devolvia-o-erro-cru-do-postgres.sql" > /tmp/_mig.sql
+
+# TODAS AS MIGRACOES DE DEMANDAS, E NAO SEIS DELAS.
+#
+# 21/09/2026. Esta lista era 50/52/57/58/67/68 e ficou assim enquanto o banco
+# andava ate a 88. Os 62 casos passavam 62/62 contra um esquema SEIS MIGRACOES
+# ATRAS do repositorio — mediam um sistema que nao existe em lugar nenhum.
+# Medido por uma auditoria independente: trazendo o harness para o dia, oito
+# casos reprovavam.
+#
+# A 67 e a 68 saem da lista porque a 84, a 85 e a 87 reescrevem `dem_mover` e
+# `dem_lista` por inteiro; a 80 nunca esteve aqui porque mexe em
+# `public.pessoas`, que esta base nao tem de proposito.
+for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com-teto \
+         58-membro-novo-nasce-em-producao \
+         84-o-portao-congelava-no-nascimento-e-um-tab-passava-por-texto \
+         85-o-anexo-nao-era-anexo-era-um-link-sem-dono \
+         86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada \
+         87-a-lista-escondia-a-atrasada-e-o-indicador-contava-quem-nao-tinha-prazo \
+         88-a-segunda-auditoria-achou-o-que-a-primeira-deixou; do
+  echo "-- ===== $f ====="
+  cat "$B/supabase/$f.sql"
+done > /tmp/_mig.sql
 cp "$B/scripts/demandas-banco.test.sql"   /tmp/_test.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_test.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -f /tmp/_prep.sql"

@@ -17,7 +17,7 @@ import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
-  PRIORIDADES, dataCheia, linkZap, oQueFalta, prazoSugerido, rascunhoVazio,
+  HOJE, PRIORIDADES, dataCheia, linkZap, oQueFalta, prazoSugerido, rascunhoVazio,
   recadoDoErro, quemManda, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
@@ -72,7 +72,7 @@ function Nova() {
 
   const manda = quemManda(eu?.papel);
   const temSetor = !!(r.setor_solicitante || eu?.setor_id);
-  const falta = oQueFalta(r, temSetor);
+  const falta = oQueFalta(r, temSetor, cat);
 
   /* a categoria sugere a data; se a pessoa já mexeu no campo, não atropela */
   function escolherCategoria(id: string) {
@@ -205,7 +205,20 @@ function Nova() {
         {!semData ? (
           <Campo rot="Para quando"
             ajuda={cat?.prazo_padrao_dias ? `${setorDaCat} costuma levar ${cat.prazo_padrao_dias} dias.` : undefined}>
-            <input type="date" value={r.prazo} onChange={e => setR(v => ({ ...v, prazo: e.target.value }))} />
+            {/* `min` AQUI, E NÃO UMA GUARDA NO SERVIDOR.
+
+                A migração 86 pôs uma recusa de prazo no passado no banco, e a
+                88 tirou: o repositório já tinha decidido o contrário, por
+                escrito, porque "demanda registrada depois do fato existe" —
+                a lâmpada queimou semana passada e alguém põe no sistema hoje.
+
+                O que aquela guarda realmente queria pegar era erro de
+                digitação, e erro de digitação se pega ONDE SE DIGITA. O
+                seletor do navegador passa a não oferecer o passado; quem
+                precisa registrar o retroativo digita a data e o servidor
+                aceita, que é o comportamento certo para os dois casos. */}
+            <input type="date" min={HOJE()} value={r.prazo}
+              onChange={e => setR(v => ({ ...v, prazo: e.target.value }))} />
           </Campo>
         ) : (
           <Campo rot="Por que não tem data"
