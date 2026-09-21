@@ -4,7 +4,7 @@ import qrcode from 'qrcode-generator';
 import { pixCopiaECola } from '@/lib/pix';
 import {
   TIPOS, TEM_PIX, PIX_CHAVE, PIX_NOME, PIX_CIDADE,
-  txidDe, valorDeDigitos, emReais, valorInvalido, type TipoOferta,
+  txidDe, valorDeDigitos, emReais, valorInvalido, fraseDoFim, MIN, MAX, type TipoOferta,
 } from '@/lib/oferta';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
 import { IcCheck, IcSeta } from '@/components/Icones';
@@ -68,14 +68,24 @@ function QR({ texto, rotulo }: { texto: string; rotulo: string }) {
  *  Lido no navegador e não no servidor de propósito: `searchParams` numa página
  *  de servidor a tornaria dinâmica, e esta precisa sair do CDN (ver a nota em
  *  app/ofertar/page.tsx). */
-function lerVolta(): { tipo: TipoOferta; valor: number; pendente: boolean } | null {
+function lerVolta(): { tipo: TipoOferta; valor: number; pendente: boolean; origem: 'cartao' } | null {
   if (typeof window === 'undefined') return null;
   const q = new URLSearchParams(window.location.search);
   if (q.get('fim') !== '1') return null;
   const t = q.get('t');
   if (t !== 'dizimo' && t !== 'oferta') return null;
+  /* O VALOR VEM PRESO NA FAIXA QUE A PRÓPRIA TELA ACEITA — 21/09/2026.
+     Era `v < 1e6`, e a tela recusa acima de `MAX` (R$ 100.000). Medido:
+     `?fim=1&t=oferta&v=999999` escrevia "Oferta de R$ 999.999,00. Que Deus
+     multiplique o que você semeou." numa tela cujo próprio teto é cem mil. */
   const v = Number(q.get('v'));
-  return { tipo: t, valor: Number.isFinite(v) && v > 0 && v < 1e6 ? v : 0, pendente: q.get('p') === '1' };
+  return {
+    tipo: t,
+    valor: Number.isFinite(v) && v >= MIN && v <= MAX ? v : 0,
+    pendente: q.get('p') === '1',
+    /* de onde veio: só o adquirente redireciona para cá com `fim=1`. */
+    origem: 'cartao' as const,
+  };
 }
 
 /** `temCartao` vem do SERVIDOR (app/ofertar/page.tsx), não de uma variável de
@@ -170,7 +180,20 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
     if (!conferir()) return;
     /* o txid nasce AQUI e não a cada tecla: se ele mudasse enquanto a pessoa
        digita, o código copiado poderia não ser o código do QR na tela */
-    setTxid(txidDe(tipo!));
+    const id = txidDe(tipo!);
+    /* NÃO AVANÇAR SEM CÓDIGO — 21/09/2026.
+       O passo do Pix era desenhado antes de alguém saber se havia código, e o
+       `catch` do memo devolvia string vazia sem dizer nada. Resultado medido:
+       QR da string vazia, botão dizendo "Código copiado", nada na área de
+       transferência. Aqui o código é montado ANTES de trocar de passo, e um
+       erro vira frase em vez de tela vazia. */
+    try {
+      pixCopiaECola({ chave: PIX_CHAVE, nome: PIX_NOME, cidade: PIX_CIDADE, valor, txid: id });
+    } catch {
+      setErro('O Pix não está disponível agora. Use o cartão, ou fale com a tesouraria da igreja.');
+      return;
+    }
+    setTxid(id);
     setCopiou(false);
     setFase('pix');
   }
@@ -230,7 +253,8 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
     return (
       <div className="of of-fim" ref={caixa}>
         {vivo}
-        <Fim tipo={tipo} valor={valor} pendente={!!volta?.pendente} />
+        <Fim tipo={tipo} valor={valor} pendente={!!volta?.pendente}
+             origem={volta?.origem ?? 'pix'} />
       </div>
     );
   }
@@ -356,8 +380,8 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
    hoje. Enquanto não existirem, o pedido vai para uma pessoa, não para uma
    tabela.
    ============================================================================= */
-function Fim({ tipo, valor, pendente = false }:
-  { tipo: TipoOferta | null; valor: number; pendente?: boolean }) {
+function Fim({ tipo, valor, pendente = false, origem = 'cartao' }:
+  { tipo: TipoOferta | null; valor: number; pendente?: boolean; origem?: 'cartao' | 'pix' }) {
   const [causa, setCausa] = useState('');
   const rot = TIPOS.find(t => t.id === tipo)?.rot ?? 'Oferta';
   const canal = canalDeConversa(
@@ -367,12 +391,28 @@ function Fim({ tipo, valor, pendente = false }:
     <>
       {/* PENDENTE NÃO É PAGO. Boleto e alguns cartões voltam como "em
           análise", e escrever "recebemos" ali seria a tela mentir para a
-          pessoa sobre o dinheiro dela. */}
+          pessoa sobre o dinheiro dela.
+
+          E PELO PIX A IGREJA NÃO SABE DE NADA — 21/09/2026.
+
+          O raciocínio de cima estava certo e não tinha sido aplicado ao Pix.
+          "Recebemos" é a igreja, em primeira pessoa do plural, afirmando que o
+          dinheiro chegou. No caminho do cartão, quem redirecionou para cá foi
+          o adquirente, então há a palavra de alguém além da pessoa. No caminho
+          do Pix, o que existe é ela ter tocado em "Já ofertei": o site não
+          fala com banco nenhum, não grava nada e não confere nada.
+
+          Medido: quem copiou o código, falhou no app do banco e voltou para
+          tocar no botão saía da igreja lendo "Recebemos. Obrigado. Dízimo de
+          R$ 350,75." — e não tinha dizimado. A frase passa a ser dela, não
+          nossa, e a tela diz onde conferir. */}
       <p className="of-selo" aria-hidden="true"><IcCheck /></p>
-      <h2 className="g-h2">{pendente ? 'Estamos aguardando a confirmação.' : 'Recebemos. Obrigado.'}</h2>
+      <h2 className="g-h2">{fraseDoFim(origem, pendente).titulo}</h2>
       <p className="g-ed">
         {pendente
           ? `Seu ${rot.toLowerCase()}${valor ? ` de ${emReais(valor)}` : ''} foi enviado e o banco ainda está confirmando. Assim que cair, está tudo certo.`
+          : origem === 'pix'
+          ? `${rot}${valor ? ` de ${emReais(valor)}` : ''}. Confira no app do seu banco que o Pix saiu. Que Deus multiplique o que você semeou.`
           : `${rot}${valor ? ` de ${emReais(valor)}` : ''}. Que Deus multiplique o que você semeou.`}
       </p>
 

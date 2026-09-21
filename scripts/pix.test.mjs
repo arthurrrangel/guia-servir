@@ -11,7 +11,7 @@
         pessoa digitar, o outro trava) — foi aqui que eu errei na primeira
         versão, tratando 0 como "sem valor" mas escrevendo o campo;
      4. acento e símbolo somem do nome, porque é o que faz o app recusar.      */
-import { pixCopiaECola, pixValido, pixCampos } from '../lib/pix.ts';
+import { pixCopiaECola, pixValido, pixCampos, paraTeste } from '../lib/pix.ts';
 
 /* Chave de teste. É um CNPJ de exemplo, não é de ninguém: o teste nunca toca
    em rede, só monta texto. */
@@ -136,6 +136,99 @@ const completo = pixCopiaECola({ ...BASE, valor: 100, txid: 'OFERTA20260913A7' }
 const semChave = completo.length - BASE.chave.length;
 ok(semChave < 130, `o código acrescenta ${semChave} caracteres à chave: gordo demais para o QR`);
 ok(completo.length < 200, `código com ${completo.length} caracteres: QR fica denso demais para projetar`);
+
+/* ===========================================================================
+   OS CASOS QUE FALTAVAM — 21/09/2026
+
+   Esta suíte testava só chave ASCII de 14 dígitos, e é exatamente por isso que
+   três defeitos passaram por baixo dela por nove dias: o CRC somava
+   `charCodeAt` em vez de bytes, o TLV declarava tamanho em unidades UTF-16, e
+   a chave era o único campo que não passava por validação nenhuma.
+
+   O caso 1 é o mais importante de todos: um CRC conferido pela MESMA função
+   que o gerou concorda consigo mesmo e nunca acusa nada. O vetor canônico é a
+   única coisa que prende essa função à realidade.
+   =========================================================================== */
+
+/* 1) O VETOR CANÔNICO DO CRC-16/CCITT-FALSE.
+      crc16("123456789") = 0x29B1. Está em toda especificação do algoritmo, e é
+      independente deste repositório. */
+{
+  /* não há como chamar `crc16` direto (é interna), então o vetor é conferido
+     pelo caminho que existe: um campo cujo conteúdo é "123456789" e cujo CRC
+     precisa fechar contra um cálculo feito AQUI, byte a byte, do zero. */
+  const cruCRC = (str) => {
+    let crc = 0xffff;
+    for (const b of new TextEncoder().encode(str)) {
+      crc ^= b << 8;
+      for (let i = 0; i < 8; i++) crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
+    }
+    return crc.toString(16).toUpperCase().padStart(4, '0');
+  };
+  ok(cruCRC('123456789') === '29B1', 'o CRC deste teste bate com o vetor canonico (29B1)');
+  ok(paraTeste.crc16('123456789') === '29B1',
+     'e o CRC de lib/pix.ts tambem bate com o vetor canonico', paraTeste.crc16('123456789'));
+  /* o caso que separa bytes de unidades UTF-16: "é" e 1 caractere e 2 bytes */
+  ok(paraTeste.crc16('é') === cruCRC('é'),
+     'o CRC roda sobre BYTES: com multibyte, ele bate com o calculo por fora',
+     `${paraTeste.crc16('é')} vs ${cruCRC('é')}`);
+  ok(paraTeste.tlv('01', 'é') === '0102é',
+     'o TLV declara o tamanho em BYTES: "é" e 02, nao 01', paraTeste.tlv('01', 'é'));
+  ok(paraTeste.tlv('26', 'joão@ig.com.br') === '26' + '15' + 'joão@ig.com.br',
+     'e um e-mail acentuado declara 15 bytes, nao 14', paraTeste.tlv('26', 'joão@ig.com.br'));
+
+  const cod = pixCopiaECola({ ...BASE, valor: 350.75, txid: 'GUIAD2609211ABC' });
+  ok(cruCRC(cod.slice(0, -4)) === cod.slice(-4),
+     'o CRC do codigo gerado bate com um CRC calculado por fora, sobre BYTES');
+  ok(pixValido(cod), 'e pixValido concorda');
+}
+
+/* 2) CHAVE COM CARACTERE FORA DO ASCII: recusa, não normaliza.
+      Normalizar em silêncio trocaria a conta que recebe o dinheiro. */
+for (const ruim of ['tesouraria@igrejasãojoão.com.br', 'GUIA-CHÚRCH-CHAVE', 'chave\u00a0com\u00a0nbsp']) {
+  let jogou = false;
+  try { pixCopiaECola({ ...BASE, chave: ruim, valor: 10 }); } catch { jogou = true; }
+  ok(jogou, `chave fora do ASCII deveria ser recusada, e nao normalizada: ${JSON.stringify(ruim)}`);
+}
+
+/* 3) ESPAÇO DE LARGURA ZERO: limpa, porque é sujeira de copiar-e-colar do site
+      do banco e não escolha de ninguém. `.trim()` do JavaScript não o remove. */
+{
+  const cod = pixCopiaECola({ ...BASE, chave: BASE.chave + '\u200B', valor: 10 });
+  ok(pixValido(cod), 'chave com espaco-zero colado no fim ainda gera codigo valido');
+  ok(pixCampos(cod)['26'].includes(BASE.chave),
+     'e a chave que sai e a chave limpa, sem o caractere invisivel');
+  ok(!pixCampos(cod)['26'].includes('\u200B'), 'o caractere invisivel nao foi para o codigo');
+}
+
+/* 4) TAMANHO DECLARADO EM BYTES, e não em unidades UTF-16.
+      O nome passa por `ascii()`, então para chegar num campo com byte
+      multibyte é preciso... não dar: `ascii()` tira tudo. O que se cobra aqui
+      é o contrário — que `ascii()` continue tirando, porque é ele que garante
+      que 59 e 60 nunca tenham multibyte. */
+{
+  const cod = pixCopiaECola({ ...BASE, nome: 'IGREJA SÃO JOÃO DA BARRA', cidade: 'SÃO GONÇALO', valor: 10 });
+  const c = pixCampos(cod);
+  ok(/^[\x20-\x7E]*$/.test(c['59']), 'o nome no codigo e ASCII puro', c['59']);
+  ok(/^[\x20-\x7E]*$/.test(c['60']), 'a cidade no codigo e ASCII pura', c['60']);
+  for (const [id, val] of Object.entries(c)) {
+    ok(new TextEncoder().encode(val).length === val.length,
+       `campo ${id}: bytes e caracteres batem (so ASCII entra no codigo)`);
+  }
+  ok(pixValido(cod), 'e o codigo com nome acentuado na ENTRADA continua valido');
+}
+
+/* 5) O TETO DE 77 CARACTERES DA CHAVE, e a faixa entre "tem chave" e "gera
+      codigo". A tela usava `PIX_CHAVE.length > 0` para decidir se mostra o
+      botao do Pix, e esta funcao recusa acima de 77: no meio havia uma faixa
+      em que o botao aparecia e o codigo saia vazio. */
+{
+  let jogou = false;
+  try { pixCopiaECola({ ...BASE, chave: 'A'.repeat(78), valor: 10 }); } catch { jogou = true; }
+  ok(jogou, 'chave de 78 caracteres e recusada');
+  ok(pixValido(pixCopiaECola({ ...BASE, chave: 'A'.repeat(77), valor: 10 })),
+     'e a de 77 ainda gera codigo valido');
+}
 
 if (mal) { console.error(`\npix.test: ${mal} falharam`); process.exit(1); }
 console.log('pix.test: todas passaram');

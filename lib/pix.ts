@@ -27,10 +27,26 @@
    CRC-16/CCITT-FALSE: polinômio 0x1021, valor inicial 0xFFFF, sem reflexão de
    entrada nem de saída, sem xor final. É o único jeito de o app do banco
    aceitar o código: errar o CRC devolve "QR Code inválido" e mais nada. */
+/* O CRC RODA SOBRE BYTES UTF-8, E NÃO SOBRE `charCodeAt` — 21/09/2026.
+
+   `charCodeAt` devolve unidades UTF-16. Para ASCII puro é a mesma coisa que o
+   byte, e foi por isso que isto passou despercebido por nove dias: a chave da
+   igreja é um CNPJ. Para qualquer caractere fora do ASCII são coisas
+   diferentes, e o app do banco lê BYTES.
+
+   Medido: com a chave `tesouraria@igrejasãojoão.com.br`, o CRC calculado aqui
+   não fecha com o CRC que o app do banco calcula, e o código é recusado com
+   "QR Code inválido" — sem dizer por quê. E `pixValido()` conferia com ESTA
+   mesma função, então ele concordava consigo mesmo e nunca acusava nada.
+
+   O vetor canônico do CRC-16/CCITT-FALSE é crc16("123456789") = 0x29B1, e
+   `scripts/pix.test.mjs` passou a cobrá-lo. */
+const bytesDe = (s: string) => new TextEncoder().encode(s);
+
 function crc16(s: string): string {
   let crc = 0xffff;
-  for (let i = 0; i < s.length; i++) {
-    crc ^= s.charCodeAt(i) << 8;
+  for (const byte of bytesDe(s)) {
+    crc ^= byte << 8;
     for (let b = 0; b < 8; b++) {
       crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff;
     }
@@ -43,8 +59,13 @@ function crc16(s: string): string {
    cabe, e nenhum campo nosso chega perto — mas se um dia chegar, é melhor
    estourar aqui do que gerar um código que o banco recusa em silêncio. */
 function tlv(id: string, valor: string): string {
-  if (valor.length > 99) throw new Error(`pix: campo ${id} tem ${valor.length} caracteres (máximo 99)`);
-  return id + String(valor.length).padStart(2, '0') + valor;
+  /* EM BYTES, pelo mesmo motivo do CRC (21/09/2026): o padrão conta bytes e o
+     app do banco também. Declarar 31 num valor de 33 bytes faz o parser ler 31
+     bytes e PARAR NO MEIO — medido com uma chave de e-mail acentuada, o
+     `.com.br` virou `.com.` e os dois últimos bytes ficaram órfãos. */
+  const n = bytesDe(valor).length;
+  if (n > 99) throw new Error(`pix: campo ${id} tem ${n} bytes (máximo 99)`);
+  return id + String(n).padStart(2, '0') + valor;
 }
 
 /** Texto que o padrão aceita: sem acento, sem símbolo, cortado no limite.
@@ -89,8 +110,25 @@ const MAX = 512;
  * como QR. São a mesma coisa — o QR é só este texto em forma de imagem.
  */
 export function pixCopiaECola({ chave, nome, cidade, valor, txid }: CodigoPix): string {
-  const k = (chave || '').trim();
+  /* A CHAVE É O ÚNICO CAMPO QUE NÃO PASSA POR `ascii()`, E ISSO ESTÁ CERTO:
+     ela não é texto para uma pessoa ler, é a conta que recebe o dinheiro.
+     Limpar acento dela em silêncio seria trocar a conta de destino.
+
+     Então a regra é o contrário: caractere invisível de copiar-e-colar sai,
+     porque é sujeira e não escolha de ninguém; qualquer outra coisa fora do
+     ASCII imprimível faz o código NÃO SER GERADO. Chave Pix é CPF, CNPJ,
+     telefone, e-mail ou UUID — nenhum deles tem acento, e uma que tenha é
+     erro de digitação em algo que decide para onde o dízimo vai.
+
+     `\u200B` (espaço de largura zero) sobrevive ao `.trim()` do JavaScript e
+     é o que vem junto quando se copia a chave do site do banco. Medido: com
+     ele colado no fim, o código saía com a chave errada e o CRC quebrado, e
+     `pixValido()` dizia que estava tudo bem. */
+  const k = (chave || '').replace(/[\u200B-\u200D\u2060\uFEFF]/g, '').trim();
   if (!k) throw new Error('pix: chave vazia');
+  if (!/^[\x20-\x7E]+$/.test(k)) {
+    throw new Error('pix: a chave tem caractere fora do ASCII. Chave Pix e CPF, CNPJ, telefone, e-mail ou UUID — confira NEXT_PUBLIC_PIX_CHAVE.');
+  }
   if (k.length > 77) throw new Error('pix: chave com mais de 77 caracteres');
 
   const n = ascii(nome, 25) || 'RECEBEDOR';
@@ -142,6 +180,24 @@ export function pixValido(cod: string): boolean {
   if (!corpo.endsWith('6304')) return false;
   return crc16(corpo) === cod.slice(-4).toUpperCase();
 }
+
+/** EXPOSTO SÓ PARA O TESTE, E COM MOTIVO ESCRITO — 21/09/2026.
+ *
+ *  `crc16` e `tlv` passaram a trabalhar em BYTES. Só que, depois que a chave
+ *  passou a ser recusada quando tem caractere fora do ASCII, NADA que chega ao
+ *  código é multibyte: `ascii()` limpa nome e cidade, o txid é alfanumérico, e
+ *  o resto são constantes. Ou seja, byte e caractere passaram a dar sempre o
+ *  mesmo número pelo caminho público.
+ *
+ *  Medido: sabotando `crc16` de volta para `charCodeAt` e `tlv` de volta para
+ *  `.length`, a suíte continuava verde. Correção que a suíte não consegue ver
+ *  é correção que a próxima pessoa desfaz sem saber.
+ *
+ *  Então as duas ficam alcançáveis por aqui. Elas continuam sendo detalhe
+ *  interno — quem usa este módulo usa `pixCopiaECola` —, e o que este par
+ *  prende é a conformidade com o padrão, que precisa valer mesmo no dia em que
+ *  algum campo voltar a aceitar multibyte. */
+export const paraTeste = { crc16, tlv };
 
 /** Lê um BR Code de volta para pares id→valor. Usado só pelo teste: é assim
  *  que se prova que o valor que entrou é o valor que saiu, sem confiar na

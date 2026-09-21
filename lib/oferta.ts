@@ -52,6 +52,7 @@
    ============================================================================= */
 
 import { IGREJA } from './igreja';
+import { pixCopiaECola } from './pix';
 
 export type TipoOferta = 'dizimo' | 'oferta';
 
@@ -85,7 +86,48 @@ export const PIX_CIDADE = process.env.NEXT_PUBLIC_PIX_CIDADE || IGREJA.pixCidade
 
 /** A página existe mesmo sem chave configurada: ela explica em vez de quebrar.
  *  Enquanto for false, a perna do Pix mostra o aviso e não desenha QR nenhum. */
-export const TEM_PIX = PIX_CHAVE.trim().length > 0;
+/* TEM_PIX FAZ A MESMA PERGUNTA QUE `pixCopiaECola` FAZ — 21/09/2026.
+
+   Era `PIX_CHAVE.trim().length > 0`, e `pixCopiaECola` recusa chave acima de
+   77 caracteres ou com caractere fora do ASCII. Entre as duas havia uma faixa
+   em que a tela DESENHAVA o botão do Pix e o código saía vazio: a pessoa lia
+   "Dízimo · R$ 350,75", via um QR (válido, da string vazia), tocava em copiar,
+   lia "Código copiado" e chegava no app do banco sem nada.
+
+   Agora a pergunta é uma só, feita uma vez na carga do módulo, tentando montar
+   um código de verdade. Se não monta, não existe Pix nesta configuração e a
+   tela nem oferece — que é muito melhor que oferecer e falhar no meio do
+   culto. */
+export function pixDisponivel(chave: string): boolean {
+  if (!chave) return false;
+  try {
+    pixCopiaECola({ chave, nome: PIX_NOME, cidade: PIX_CIDADE, valor: 10, txid: 'TESTE' });
+    return true;
+  } catch (e) {
+    /* o motivo precisa aparecer em algum lugar: uma chave mal colada no painel
+       da Vercel some sem isto, e o Pix simplesmente não existe no site sem
+       ninguém saber por quê. */
+    if (typeof console !== 'undefined') {
+      console.warn('[oferta] o Pix esta DESLIGADO:', String((e as Error)?.message || e));
+    }
+    return false;
+  }
+}
+
+/* A REGRA E A FIAÇÃO SÃO TESTADAS EM LUGARES DIFERENTES, E ISSO ESTÁ ESCRITO
+   PORQUE UMA DELAS É MAIS FRACA.
+
+   `pixDisponivel` é uma função pura de uma chave: `scripts/ofertar-nao-mente.
+   test.mjs` a chama com chave boa, vazia, longa demais, acentuada e com
+   espaço-zero, então a REGRA está presa em qualquer máquina.
+
+   `TEM_PIX` é a fiação: a regra aplicada à chave DESTE ambiente. Um teste só
+   consegue ver a fiação quebrar quando o ambiente tem uma chave que as duas
+   perguntas respondem diferente — medido: com `NEXT_PUBLIC_PIX_CHAVE` de 78
+   caracteres, o caso do invariante reprova; com a chave vazia da máquina de
+   desenvolvimento, as duas dizem `false` e ele fica quieto, porque aí não há
+   divergência nenhuma para ver. */
+export const TEM_PIX = pixDisponivel(PIX_CHAVE);
 
 /* O cartão, o Apple Pay e o Google Pay NÃO têm constante aqui, e isso é uma
    decisão de segurança, não de organização: a credencial do adquirente mora em
@@ -147,6 +189,30 @@ export function emReais(v: number): string {
  *  Pix de um centavo sem querer gera tarifa e linha no extrato para a igreja
  *  conciliar. O máximo existe só para pegar dedo escorregado: quem for dar
  *  mais que isso fala com a tesouraria, não com um formulário. */
+/* O QUE A TELA DO FIM PODE AFIRMAR — 21/09/2026.
+
+   Esta regra saiu de dentro do JSX pelo mesmo motivo que `decisaoDoRobo` saiu
+   de dentro de um `if`: ela decide se a igreja AFIRMA ter recebido dinheiro, e
+   isso é grande demais para viver numa expressão ternária no meio de um
+   componente, sem nome e sem teste.
+
+   Três estados, e a diferença entre eles é QUEM disse que o dinheiro andou:
+
+     'cartao'  o adquirente redirecionou para cá. Há a palavra de um terceiro,
+               então "Recebemos" é defensável.
+     'pix'     a pessoa tocou em "Já ofertei". O site não falou com banco
+               nenhum, não gravou nada, não conferiu nada. A única coisa
+               verdadeira é o que ELA disse.
+     pendente  o adquirente disse "em análise". Já estava certo desde o começo,
+               e é o precedente que faltava aplicar ao Pix. */
+export type OrigemDoFim = 'cartao' | 'pix';
+
+export function fraseDoFim(origem: OrigemDoFim, pendente: boolean): { titulo: string; afirma: boolean } {
+  if (pendente) return { titulo: 'Estamos aguardando a confirmação.', afirma: false };
+  if (origem === 'pix') return { titulo: 'Você marcou que já ofertou.', afirma: false };
+  return { titulo: 'Recebemos. Obrigado.', afirma: true };
+}
+
 export const MIN = 1;
 export const MAX = 100000;
 
