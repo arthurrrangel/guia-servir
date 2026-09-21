@@ -410,11 +410,22 @@ begin
 
      Apagar por DATA foi o defeito da primeira versão deste arquivo. `v_ev` e
      `v_reg` são os ids que ESTE bloco criou, e são os únicos que ele tem o
-     direito de apagar. Se `v_reg` for nulo (o caso 2 explodiu antes de
-     devolver), a linha regular daquela data fica para trás — e ficar para
-     trás é o erro certo de cometer aqui.
+     direito de apagar. O comentário antigo já dizia "por id"; o código é que
+     não fazia.
 
-     O comentário antigo já dizia "por id". O código é que não fazia. */
+     E UMA FRASE QUE ESTAVA AQUI E ERA FALSA (21/09, 3ª auditoria): ela dizia
+     que, com `v_reg` nulo, "a linha regular daquela data fica para trás".
+     Não fica. `v_reg` nulo implica o caso 2 contado como falha, implica o
+     `raise exception` do fim deste bloco, implica o Postgres desfazer o `do`
+     inteiro — inclusive a linha que `salvar_dia` criou. Comprovado sabotando
+     o caso 2 para explodir: resíduo zero em `equipes`, `cultos`,
+     `voluntarios`, `funcoes` e `escalacoes`.
+
+     O `if v_reg is not null` fica porque `delete ... where id = null` não
+     apaga nada mas também não é o que se quer escrever. É guarda de nulo,
+     não de resíduo. Num arquivo em que o comentário É a documentação, dizer
+     "fica para trás" onde nada fica é o mesmo pecado do item 6 do commit que
+     o trouxe. */
   delete from escalacoes where funcao_id = v_fn;
   delete from plantoes  where voluntario_id = v_vol;
   delete from culto_obs where equipe_id = v_eq;

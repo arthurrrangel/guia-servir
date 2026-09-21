@@ -340,6 +340,36 @@ function Escala() {
       return;
     }
     setOcupado(true);
+
+    /* GRAVAR UM RECADO PODIA APAGAR A ESCALA DO DIA — 21/09/2026, 3ª auditoria.
+
+       `salvarDia` grava o DIA INTEIRO por diferença: ele lê as escalações que
+       estão no banco e apaga tudo que não estiver em `p_slots`. E `p_slots`
+       sai de `S.escalas[d].slots`, que para um dia AUSENTE do estado local é
+       vazio, porque `garantirDia` acabou de criar o dia do zero.
+
+       Ou seja: escrever o recado num dia que esta aba ainda não carregou
+       mandava `p_slots: []` e apagava a escala daquele dia. Reproduzido com as
+       funções puras: `plano.apagar` com todas as linhas, `inserir` vazio.
+
+       O dia existir no banco e não no estado local não é hipótese: o robô das
+       3h monta o mês, outro líder do mesmo ministério grava, e a aba aberta
+       desde ontem não sabe. E o campo de recado é renderizado nesses dias,
+       porque a lista de dias vem do calendário, não de `S.escalas`.
+
+       Recarregar antes é o conserto barato e certo: a gravação passa a
+       enxergar o que existe, e o recado entra ao lado da escala em vez de por
+       cima dela. Custa uma ida ao banco no único caso em que ela é
+       necessária. */
+    if (!S.escalas[d]) {
+      const est = await recarregar();
+      if (!est) {
+        aviso('Não consegui carregar esse dia para salvar o recado sem apagar a escala. Tente de novo.');
+        setOcupado(false);
+        return;
+      }
+    }
+
     const snap = retrato([d]);
     garantirDia(S, d).obs = txt;
     try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso('Recado salvo'); }

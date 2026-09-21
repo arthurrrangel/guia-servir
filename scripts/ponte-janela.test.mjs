@@ -178,5 +178,50 @@ const DESDE = '2026-03-03';
     JSON.stringify(Object.keys(a.escalas)));
 }
 
+/* ------------------------------ 3. DUAS LINHAS NA MESMA DATA: QUEM GANHA
+
+   21/09/2026, 3ª auditoria. `idDoCulto` chaveia por DATA, e desde a migração
+   54 uma data pode ter DUAS linhas nesta lista: a do culto regular e a do
+   evento DESTA equipe (a consulta já filtra os de outras equipes).
+
+   Com `new Map(pares)`, vencia a última, e a última é a ordem em que o banco
+   devolveu — que muda sozinha. Isso importa porque `salvar_dia` (migração 61)
+   e `salvarDia` (lib/db.ts) gravam SEMPRE no evento: se `d.cultoId` apontasse
+   para a linha regular, a tela escreveria num id e gravaria em outro, e
+   `mudarStatus` casaria zero linhas dizendo `ESCALA_MUDOU_NO_POSTO` sem nada
+   ter mudado.
+
+   A correção foi feita num commit e ficou SEM TESTE, o que a auditoria provou
+   desfazendo-a e rodando a suíte inteira: exit 0, zero falhas. Este bloco é
+   o teste que faltava, e ele roda `montarEstado` de verdade, nas duas ordens
+   possíveis de leitura. */
+{
+  const linhas = (cultos) => ({
+    funcoes: [{ id: 'f1', nome: 'FOTO', simultanea: true, ordem: 1, ativa: true, equipe_id: 'e1', tipos: ['domingo'] }],
+    voluntarios: [{ id: 'v1', nome: 'Ana', telefone: null, ativo: true, limite_mes: null, token: 't1', equipe_id: 'e1', conferido: true }],
+    habilidades: [], indisponibilidades: [], cultos,
+    escalacoes: [], plantoes: [], config: null,
+  });
+  const REG = { id: 'c-regular', data: '2026-10-04' };
+  const EVE = { id: 'c-evento', data: '2026-10-04', evento: 'GUIA Empreendedor', equipe_id: 'e1', inicio: null };
+
+  for (const [rot, cs] of [['regular primeiro', [REG, EVE]], ['evento primeiro', [EVE, REG]]]) {
+    const S = montarEstado(linhas(cs));
+    ok(S.escalas['2026-10-04']?.cultoId === 'c-evento',
+       `com as duas linhas (${rot}), o dia aponta para o EVENTO`,
+       String(S.escalas['2026-10-04']?.cultoId));
+  }
+
+  /* e sem evento nenhum, continua apontando para o regular */
+  const so = montarEstado(linhas([REG]));
+  ok(!so.escalas['2026-10-04'], 'domingo regular sozinho não é materializado (regra de sempre)');
+
+  /* o evento sozinho materializa o dia e leva o id dele */
+  const ev = montarEstado(linhas([EVE]));
+  ok(ev.escalas['2026-10-04']?.cultoId === 'c-evento', 'evento sozinho materializa o dia com o id dele',
+     String(ev.escalas['2026-10-04']?.cultoId));
+  ok(ev.escalas['2026-10-04']?.evento === 'GUIA Empreendedor', 'e com o nome dele');
+}
+
 console.log(falhas ? `\nponte-janela: ${falhas} falha(s) em ${feitas}` : `\nponte-janela: ${feitas}/${feitas} ok`);
 process.exit(falhas ? 1 : 0);

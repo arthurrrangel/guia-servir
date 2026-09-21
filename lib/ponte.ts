@@ -196,7 +196,20 @@ export function montarEstado(l: LinhasDoBanco): Estado {
      descrito na 61, e ele sobreviveu à correção dela porque esta linha é um
      quarto lado que ninguém tinha olhado.
 
-     A regra é a mesma dos outros três: evento da própria equipe ganha. */
+     A regra é a mesma dos outros três: evento da própria equipe ganha.
+
+     O QUE ESTA ESCOLHA PIORA, E POR QUE MESMO ASSIM É ELA (21/09):
+     num banco LEGADO em que o robô já criou o fantasma e gravou a escala
+     NELE — o caso que a faxina da 61 se recusa a apagar, porque tem gente
+     dentro, e só avisa — `d.cultoId` passa a apontar sempre para o evento,
+     enquanto a escala vive na linha regular. Antes era cara ou coroa; agora
+     `mudarStatus` falha SEMPRE naquele dia.
+
+     A escolha continua sendo esta porque ela é a certa para o estado normal
+     depois da 61, e porque `apagarEvento(dia.cultoId)` e `salvarDia` já
+     decidem assim. O estado legado é finito, a 61 avisa quais datas são, e
+     falhar sempre é mais fácil de perceber que falhar às vezes. Mas é uma
+     piora real naquele estado, e ela não pode ficar sem estar escrita. */
   const idDoCulto = new Map<string, string>();
   for (const c of l.cultos || []) {
     if (!idDoCulto.has(c.data) || c.evento) idDoCulto.set(c.data, c.id);
