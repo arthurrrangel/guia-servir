@@ -165,6 +165,21 @@ const PORBANCO: Tradutor[] = [
   /* eu_dados e companhia */
   [/^Link invalido/i,
    () => 'Esse link não é válido. Peça o seu link de novo para quem organiza a igreja.'],
+  /* 75 · PAUSADO NÃO É LINK INVÁLIDO.
+
+     Antes da 75, `eu_dados` buscava `where token = ? and ativo`, então quem
+     tinha sido pausado pela própria líder caía na frase de cima e saía
+     pedindo um link novo — que ia dar na mesma, porque o link está perfeito.
+     Pausar é rotina: é um botão na tela do time, para quem vai viajar.
+
+     A frase diz o que é, diz que o link continua valendo, e diz com quem
+     falar. O artigo ("no Louvor", "na Mídia") vem do banco, de
+     `equipes.artigo`, porque é a igreja falando o nome do próprio
+     ministério. */
+  [/^VINCULO_PAUSADO:\s*seu lugar (n[oa] .+?) esta pausado/i,
+   m => `Seu lugar ${m[1]} está pausado no momento. Seu link continua valendo: quem organiza a sua área pode te reativar quando você voltar.`],
+  [/^VINCULO_PAUSADO/i,
+   () => 'Seu lugar está pausado no momento. Seu link continua valendo: quem organiza a sua área pode te reativar quando você voltar.'],
 
   /* ---- 20/09/2026: CINCO MENSAGENS QUE CHEGAVAM CRUAS NA TELA ----------
 

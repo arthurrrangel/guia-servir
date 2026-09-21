@@ -371,6 +371,52 @@ export const diaLongo = (s: string, evento?: string | null) => {
 export const paraTesteDeDia = { noMeioDia };
 
 /* =============================================================================
+   QUEM SERVE COM VOCÊ: GENTE, E NÃO LINHA — 75, 21/09/2026
+
+   `eu_quem_serve` devolve UMA LINHA POR POSTO, e isso está certo: a lista
+   quer mostrar quem faz o quê. A tela do voluntário então escrevia
+   `juntos.length - 1` como "mais N pessoas" e listava o mesmo nome uma vez
+   por posto.
+
+   Medido em 21/09, num banco nascido do repositório: um culto com UMA pessoa
+   escalada em DOIS postos. A tela escreveu "Quem serve com você — mais 1
+   pessoa" e listou "Você" duas vezes. A pessoa está sozinha naquele dia e a
+   tela diz que tem companhia; se for a primeira vez dela, ela chega
+   procurando alguém que não existe.
+
+   Esta função mora aqui, e não dentro do componente, pelo motivo de sempre
+   neste repositório: regra que decide o que a pessoa lê não pode viver solta
+   num `.tsx` onde nenhum teste alcança. É o mesmo caminho de `diaLongo`.
+
+   DUAS DECISÕES QUE PRECISAM ESTAR ESCRITAS:
+
+   · o agrupamento é pelo NOME, porque é o que `eu_quem_serve` devolve. Dois
+     voluntários homônimos na mesma área viram uma linha só — e isso é menos
+     errado que a contagem inflada, porque a lista serve para a pessoa achar
+     alguém quando chegar, e dois nomes iguais já não resolviam isso. O dia
+     em que `eu_quem_serve` devolver id, este agrupamento passa a ser por id.
+
+   · o status que sobra é o MAIS ABERTO. Quem tem um posto pendente ainda
+     está confirmando o dia, mesmo já tendo confirmado o outro — dizer
+     "confirmado" ali seria a tela afirmando mais do que sabe. */
+export type ServeCom = { nome: string; funcao: string; eu: boolean; status: string };
+export type ServeComAgrupado = { nome: string; funcoes: string[]; eu: boolean; status: string };
+export function agruparQuemServe(linhas: ServeCom[]): ServeComAgrupado[] {
+  const mapa = new Map<string, ServeComAgrupado>();
+  for (const j of linhas) {
+    const atual = mapa.get(j.nome);
+    if (!atual) {
+      mapa.set(j.nome, { nome: j.nome, funcoes: [j.funcao], eu: j.eu, status: j.status });
+      continue;
+    }
+    if (!atual.funcoes.includes(j.funcao)) atual.funcoes.push(j.funcao);
+    atual.eu = atual.eu || j.eu;
+    if (j.status === 'pendente') atual.status = 'pendente';
+  }
+  return [...mapa.values()];
+}
+
+/* =============================================================================
    O QUE O ROBÔ DAS 3H PODE FAZER SOZINHO
 
    19/09/2026. Esta decisão morava dentro de dois `if` no meio do laço de

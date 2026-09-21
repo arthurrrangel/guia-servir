@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES, fmtDia, diaLongo } from '@/lib/engine';
+import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -293,9 +293,31 @@ export default function Eu() {
   async function responder(cultoId: string, status: 'confirmado' | 'recusado',
                            data?: string, funcaoId?: string | null) {
     setOcupado(cultoId); setErro('');
-    const { error } = await sb()!.rpc('eu_responder',
+    const { data: volta, error } = await sb()!.rpc('eu_responder',
       { p_token: token, p_culto_id: cultoId, p_status: status, p_funcao_id: funcaoId ?? null });
     if (error) { setErro(aviseHumano(error, 'salvar')); setOcupado(''); return; }
+
+    /* ============================================================== 75 ===
+       A TELA AGRADECIA MESMO QUANDO NADA TINHA SIDO GRAVADO.
+
+       `eu_responder` devolvia `void`, e voltava em silêncio quando não havia
+       posto daquela pessoa naquele culto — tela velha aberta numa aba, link
+       antigo mandado no grupo, a líder tirou ela do posto entre a tela
+       carregar e ela responder. A pessoa lia "Confirmado. Obrigado!" e
+       fechava o celular achando que tinha confirmado.
+
+       Desde a 75 a função devolve `{ok, mudou, motivo}`. Deploy antigo
+       contra banco novo continua funcionando: `volta` vem indefinido e a
+       tela cai na frase de sempre — por isso o teste é `=== 0` e não
+       `!mudou`. */
+    const mudou = (volta as { mudou?: number } | null)?.mudou;
+    if (mudou === 0) {
+      setFlash('');
+      setErro('Esse posto não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.');
+      await carregar(false);
+      setOcupado('');
+      return;
+    }
     /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia a
        pessoa não avisar por fora, achando que já estava resolvido. */
     setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
@@ -448,7 +470,18 @@ export default function Eu() {
   const primeiro = (nome || '').trim();
   const agenda = itens.filter(i => !i.plantao);
   const plantoes = itens.filter(i => i.plantao);
-  const pendentes = agenda.filter(i => (i.status || 'pendente') === 'pendente');
+  /* 75 · `i.data >= hoje` JUNTO, e é o que faltava.
+
+     `eu_dados` devolve a partir de `current_date - 1` de propósito: na
+     segunda de manhã a pessoa ainda precisa ver o domingo, para relatar e
+     para entender o que aconteceu. Mas `pendentes` é o que enche o bloco
+     preto do topo com o título "Precisa de você" e os botões "Eu vou" /
+     "Não posso" — e um domingo que já passou não precisa mais dela.
+
+     Medido: na segunda, quem não respondeu no domingo abre a tela e é
+     cobrada por um culto que terminou ontem. */
+  const pendentes = agenda.filter(i =>
+    (i.status || 'pendente') === 'pendente' && i.data >= hoje);
   const ordenada = [...agenda].sort((a, b) => a.data.localeCompare(b.data));
   /* só o que ainda vai acontecer. Sem este filtro, "sua próxima escala"
      mostrava um domingo que já passou, com "você está confirmado" embaixo. */
@@ -459,11 +492,47 @@ export default function Eu() {
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
   const restantes = futuras.filter(i =>
     !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
+  /* ================================================================ 75 ===
+     "QUEM SERVE COM VOCÊ" CONTAVA LINHA ACHANDO QUE CONTAVA GENTE.
+
+     `eu_quem_serve` devolve UMA LINHA POR POSTO, e isso está certo: a lista
+     quer mostrar quem faz o quê. A tela então escrevia `juntos.length - 1`
+     como "mais N pessoas", e listava o mesmo nome uma vez por posto.
+
+     Medido em 21/09, num banco nascido do repositório: um culto com UMA
+     pessoa escalada em DOIS postos. A tela escreveu "Quem serve com você —
+     mais 1 pessoa" e listou "Você" duas vezes. A pessoa está sozinha no dia
+     e a tela diz que tem companhia; se for a primeira vez dela, ela chega
+     procurando alguém que não existe.
+
+     Agrupar por nome resolve os dois de uma vez: a contagem passa a ser de
+     gente, e cada pessoa aparece uma vez com os postos dela juntos. O
+     `status` mantido é o mais "aberto" dos postos — quem tem um posto
+     pendente ainda está confirmando, mesmo já tendo confirmado o outro. */
+  const gente = agruparQuemServe(juntos);
+
   const semResposta = domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d));
-  /* nunca foi escalado para nada, nem no passado: é alguém que acabou de
-     entrar no time. Não é o mesmo que "não tem escala este mês", e as duas
-     situações pedem frases diferentes. */
-  const novo = agenda.length === 0 && plantoes.length === 0;
+  /* Alguém que acabou de entrar no time. Não é o mesmo que "não tem escala
+     este mês", e as duas situações pedem frases diferentes.
+
+     75 · O COMENTÁRIO DIZIA "nem no passado" E ISSO NÃO ERA VERDADE.
+     `agenda` vem de `eu_dados`, que devolve `c.data >= current_date - 1`:
+     escala de agosto não está aí. Quem serve desde março e está sem nada
+     marcado para as próximas semanas — férias do time, mês sem escala —
+     abria a tela e era recebida com "Bem-vindo".
+
+     Quem sabe se a pessoa é nova é o vínculo, não a agenda: `escalado_em`
+     nulo em tudo E nenhuma escalação passada. Como `eu_dados` não traz o
+     passado, a pergunta possível aqui é outra e é mais simples: a pessoa é
+     nova quando o VÍNCULO dela é recente. `eu_espaco` já traz `desde`. */
+  const desde = (espaco?.voluntario?.desde as string | undefined)?.slice(0, 10);
+  const diasDeCasa = desde ? diffDias(desde, hoje) : null;
+  /* `diasDeCasa === null` cai FORA de `novo` de propósito, e não dentro.
+     `espaco` chega numa segunda requisição, então nos primeiros milissegundos
+     `desde` é indefinido. Errar para "Olá, Maria" numa pessoa nova é nada;
+     errar para "Bem-vindo" em quem serve há um ano é o defeito. */
+  const novo = agenda.length === 0 && plantoes.length === 0
+            && diasDeCasa !== null && diasDeCasa <= 30;
   /* relatório só quando é posto de relato E o dia já passou: escrever o
      relatório do culto antes do culto não faz sentido, e mostrar dois campos
      de texto abertos em toda visita empurrava o resto da tela para baixo. */
@@ -736,12 +805,12 @@ export default function Eu() {
             ninguém, precisa saber com quem vai trabalhar. */}
         <Instalar token={token} />
 
-        {juntos.length > 1 && (
+        {gente.length > 1 && (
           <section className="vol-secao">
             <div className="vol-secao-cab">
               <span className="rot">Quem serve com você</span>
               <span className="vol-secao-nota">
-                {juntos.length - 1 === 1 ? 'mais 1 pessoa' : `mais ${juntos.length - 1} pessoas`}
+                {gente.length - 1 === 1 ? 'mais 1 pessoa' : `mais ${gente.length - 1} pessoas`}
               </span>
             </div>
             {/* SEM CLASSE DE ESTADO NESTAS LINHAS. A primeira versão marcava
@@ -750,12 +819,12 @@ export default function Eu() {
                 estado; usar cor de estado como enfeite de identidade é
                 exatamente o que a direção visual proíbe. Quem é você já está
                 dito pela palavra "Você" e pelo primeiro lugar na lista. */}
-            {juntos.map(j => (
-              <div className="vol-linha" key={j.nome + j.funcao}>
+            {gente.map(j => (
+              <div className="vol-linha" key={j.nome}>
                 <span className="vol-marca" aria-hidden="true" />
                 <span>
                   <span className="vol-linha-dia">{j.eu ? 'Você' : j.nome}</span>
-                  <span className="vol-linha-fn">{j.funcao}</span>
+                  <span className="vol-linha-fn">{j.funcoes.join(' · ')}</span>
                 </span>
                 {/* quem ainda não respondeu não é problema DESTA pessoa: o
                     estado aparece sem cobrança, e só quando não é ela. */}

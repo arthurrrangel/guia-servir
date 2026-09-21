@@ -201,7 +201,57 @@ for (const [message, esperado] of CRUAS) {
   ok(!/exige_sexo|_id\b/.test(r.texto), `"${message}" não vaza nome de coluna`, r.texto);
 }
 
-const EXTRA = CODIGOS_DO_EVENTO.length * 2 + DO_GATILHO.length * 3 + 2 + CRUAS.length * 3;
+/* ===================================================================== 75
+   PAUSADO NÃO PODE VIRAR "SEU LINK NÃO PRESTA".
+
+   `eu_dados` levantava `Link invalido` para quem tinha sido pausado pela
+   própria líder, e o padrão acima traduz isso para "Esse link não é válido.
+   Peça o seu link de novo" — conselho errado: o link está perfeito, o que
+   está pausado é o lugar.
+
+   A 75 passou a levantar `VINCULO_PAUSADO`. Estes casos cobram três coisas
+   que a frase precisa ter, porque uma delas sozinha não resolve: dizer que
+   está PAUSADO, dizer que o LINK CONTINUA VALENDO (senão a pessoa pede um
+   novo do mesmo jeito) e NÃO mandar pedir link.
+
+   O artigo vem do banco (`equipes.artigo`), e é por isso que há um caso com
+   "na Mídia": a igreja escrevendo "no Mídia" na tela de alguém é a igreja
+   falando errado o nome do próprio ministério. */
+{
+  const PAUSADOS = [
+    'VINCULO_PAUSADO: seu lugar no Louvor esta pausado.',
+    'VINCULO_PAUSADO: seu lugar na Mídia esta pausado.',
+    'VINCULO_PAUSADO',
+  ];
+  for (const message of PAUSADOS) {
+    const r = humano({ code: 'P0001', message }, 'carregar');
+    ok(/pausad/i.test(r.texto), `"${message}" diz que esta PAUSADO`, r.texto);
+    ok(/link continua valendo/i.test(r.texto),
+       `"${message}" diz que o link continua valendo`, r.texto);
+    ok(!/peça o seu link|peca o seu link/i.test(r.texto),
+       `"${message}" NAO manda pedir link de novo`, r.texto);
+    ok(r.texto !== message && !r.texto.startsWith('VINCULO_PAUSADO'),
+       `"${message}" nao e repassada crua`, r.texto);
+  }
+  /* e o ARTIGO atravessa inteiro, sem virar "no Mídia" */
+  ok(/na Mídia/.test(humano({ code: 'P0001', message: PAUSADOS[1] }, 'carregar').texto),
+     'o artigo do ministerio atravessa: "na Mídia", nao "no Mídia"',
+     humano({ code: 'P0001', message: PAUSADOS[1] }, 'carregar').texto);
+  ok(/no Louvor/.test(humano({ code: 'P0001', message: PAUSADOS[0] }, 'carregar').texto),
+     'e "no Louvor"');
+
+  /* O CASO QUE SEPARA OS DOIS ESTADOS, e sem ele os de cima são decorativos:
+     token inventado TEM que continuar dizendo que o link não presta. */
+  const invalido = humano({ code: 'P0001', message: 'Link invalido' }, 'carregar');
+  ok(!/pausad/i.test(invalido.texto),
+     'token inventado NAO diz que esta pausado — sao dois estados diferentes',
+     invalido.texto);
+  ok(/link/i.test(invalido.texto) && /não é válido|nao e valido/i.test(invalido.texto),
+     'token inventado continua dizendo que o link nao e valido', invalido.texto);
+}
+const PAUSADOS_N = 3 * 4 + 2 + 2;
+
+const EXTRA = CODIGOS_DO_EVENTO.length * 2 + DO_GATILHO.length * 3 + 2 + CRUAS.length * 3 + PAUSADOS_N;
 
 const total = 31 + 6 + EMAILS.length + EXTRA;
 if (falhas) { console.log(`erros: ${falhas} falha(s) em ${total}`); process.exit(1); }
