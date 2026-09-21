@@ -561,9 +561,103 @@ export function decisaoDoRobo(diasMontados: number, diasNoMes: number): DecisaoD
    o e-mail do robô.
 
    Esta regra sai de dentro do `if` pelo mesmo motivo que `decisaoDoRobo`
-   saiu: aqui ela tem nome, motivo escrito e teste. */
-export function avisarDiaSemNinguem(regular: boolean, temTime: boolean): boolean {
-  return regular && temTime;
+   saiu: aqui ela tem nome, motivo escrito e teste.
+
+   ========================================================= 82 =============
+   E `temTime` OLHAVA O MINISTÉRIO INTEIRO, NÃO O DIA.
+
+   A chamada no cron era `!!funcoesAtivas(S).length` — TODOS os postos ativos
+   do ministério, de qualquer tipo de culto. Mas `funcoes.tipos` existe
+   justamente para dizer em qual culto recorrente cada posto existe, e
+   `funcoesDoDia` é quem lê isso. Um ministério pode ter dezoito postos
+   ativos e NENHUM no sábado de Follow.
+
+   MEDIDO em 21/09, no banco que o repositório constrói:
+
+       ministério    postos ativos   postos no Follow
+       GUIA Kids           9                0
+       Connect            18                0
+       Livraria            2                0
+
+   Esses três não servem no Follow, e isso é o produto, não um furo. Com o
+   `temTime` velho, toda quinta-feira o sábado de Follow entra na janela de 4
+   dias e cada um deles recebe "NINGUÉM ESTÁ ESCALADO neste culto. Abra o app
+   e monte a escala deste dia." Toda semana. Para um dia em que eles não
+   servem.
+
+   E pior: essa linha ia para `falhas`, e `falhas.length` é o que faz a rota
+   devolver HTTP 500. O robô ficaria VERMELHO toda quinta, para sempre, por
+   um estado perfeitamente normal — que é exatamente o que o comentário no
+   fim de `app/api/cron/route.ts` diz para não fazer ("um cron que fica
+   vermelho todo dia por estado normal é um cron que ninguém olha mais em
+   duas semanas").
+
+   Hoje só o Louvor tem voluntário ativo, então o alarme ainda não dispara.
+   A 58 existe para membro novo nascer em produção: no dia em que o Connect
+   ganhar um voluntário ativo, dispara.
+
+   O parâmetro passa a ser `temPostosNesteDia`, e o nome é a correção: quem
+   chamar isto tem que ter olhado para o DIA. */
+export function avisarDiaSemNinguem(regular: boolean, temPostosNesteDia: boolean): boolean {
+  return regular && temPostosNesteDia;
+}
+
+/* ===========================================================================
+   O QUE A COBRANÇA DE QUINTA PRECISA DIZER SOBRE UM DIA — 21/09/2026.
+
+   A cobrança lia só isto:
+
+       const pend = Object.entries(dia.slots)
+         .filter(([, sl]) => sl?.vid && (sl.status || 'pendente') === 'pendente');
+       const vagas = vagasDe(S, data);
+
+   E `vagasDe` é `funcoesDoDia(...).filter(f => !slots[f.nome]?.vid)`: posto
+   SEM NINGUÉM. Então um posto cujo ocupante apertou "não posso" cai no vão
+   entre as duas: tem `vid` (não é vaga) e não está `pendente` (não é
+   pendência).
+
+   É INVISÍVEL. E é o pior estado dos três, porque os outros dois ainda podem
+   se resolver sozinhos — o pendente confirma, a vaga é preenchida pelo robô
+   do dia 26 — enquanto este já foi respondido: a pessoa avisou que não vem,
+   o posto está ocupado por ela, e ninguém está sendo procurado.
+
+   `furou` é o mesmo buraco com um dia a mais de estrago: quem furou o
+   domingo passado continua escalado no próximo enquanto ninguém mexer.
+
+   Os três estados precisam de mensagens DIFERENTES, e é por isso que esta
+   função devolve três listas em vez de uma soma:
+
+     · `pendentes` → cobrança à PESSOA ("confirma?"), com link de WhatsApp;
+     · `vagou`     → recado ao LÍDER ("troque"), porque não há o que cobrar
+                     de quem já respondeu que não vem;
+     · `vagas`     → recado ao LÍDER ("resolva no app").
+   =========================================================================== */
+export type CobrancaDoDia = {
+  pendentes: { funcao: string; vid: string }[];
+  vagou: { funcao: string; vid: string; status: Status }[];
+  vagas: string[];
+};
+export function cobrarDoDia(S: Estado, data: string): CobrancaDoDia {
+  const slots = S.escalas[data]?.slots || {};
+  const pendentes: CobrancaDoDia['pendentes'] = [];
+  const vagou: CobrancaDoDia['vagou'] = [];
+  /* só os postos que ESTE dia tem. Um slot gravado numa função que não existe
+     mais no dia (o líder mudou `tipos` depois de montar) não vira cobrança:
+     o caminho dele é a tela, não o e-mail. */
+  const doDia = new Set(funcoesDoDia(S, data).map(f => f.nome));
+  for (const [funcao, sl] of Object.entries(slots)) {
+    if (!sl?.vid || !doDia.has(funcao)) continue;
+    const st = (sl.status || 'pendente') as Status;
+    if (st === 'pendente') pendentes.push({ funcao, vid: sl.vid });
+    else if (st === 'recusado' || st === 'furou') vagou.push({ funcao, vid: sl.vid, status: st });
+  }
+  const porNomeDoPosto = (a: { funcao: string }, b: { funcao: string }) =>
+    a.funcao < b.funcao ? -1 : a.funcao > b.funcao ? 1 : 0;
+  return {
+    pendentes: pendentes.sort(porNomeDoPosto),
+    vagou: vagou.sort(porNomeDoPosto),
+    vagas: vagasDe(S, data),
+  };
 }
 
 /* O BANCO ESTÁ ATRÁS DO QUE ESTE CÓDIGO PRECISA? 21/09/2026.

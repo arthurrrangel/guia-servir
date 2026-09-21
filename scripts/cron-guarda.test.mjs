@@ -130,8 +130,15 @@ for (const [m, n, esperado, porque] of casos) {
   const { dirname, join } = await import('node:path');
   const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
   const cron = readFileSync(join(raiz, 'app/api/cron/route.ts'), 'utf8');
-  ok(/avisarDiaSemNinguem\(regular, temTime\)/.test(cron),
+  /* 82 · `temTime` virou `temPostosNesteDia`, e a renomeacao e a correcao:
+     o argumento saia de `funcoesAtivas(S)` (o ministerio inteiro) quando a
+     pergunta e sobre O DIA. Medido: Connect tem 18 postos ativos e ZERO no
+     Follow, entao todo sabado de Follow ele ouvia "monte a escala deste
+     dia" — e aquilo caia em `falhas`, que faz a rota devolver 500. */
+  ok(/avisarDiaSemNinguem\(regular, temPostosNesteDia\)/.test(cron),
      'a cobranca chama avisarDiaSemNinguem em vez de um `continue` seco');
+  ok(/funcoesDoDia\(S, data\)\.length/.test(cron),
+     'e o argumento sai de funcoesDoDia(S, data), nao de funcoesAtivas(S)');
   ok(!/const dia = S\.escalas\[data\];\s*\n\s*if \(!dia\) continue;/.test(cron),
      'e o `if (!dia) continue` seco nao voltou por copiar e colar');
 

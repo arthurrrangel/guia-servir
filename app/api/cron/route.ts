@@ -13,8 +13,9 @@ import { cont } from '@/lib/plural';
    ============================================================================= */
 import { createClient } from '@supabase/supabase-js';
 import {
-  addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
-  tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado, proxMes,
+  addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, funcoesDoDia, gerarMes, msgColeta, msgEscala,
+  tipoDoDia, nomeDe, MESES, Estado, decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado, proxMes,
+  cobrarDoDia,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
@@ -195,6 +196,18 @@ async function rodar(req: Request) {
 
      QUANDO MEXER AQUI: subiu uma migração de que o robô depende? Este número
      sobe no mesmo commit. */
+  /* QUE DIA É HOJE, E O QUE HOJE PEDE — 82.
+
+     Estas cinco linhas moravam DEPOIS da conferência da régua. Subiram porque
+     o aviso de "banco atrasado" precisa saber qual trabalho está sendo
+     perdido hoje para poder dizer como recuperá-lo, e porque são cálculo
+     puro: não leem o banco, não escrevem nada, e não podem falhar. */
+  const { iso, diaMes, diaSemana } = dataSP();
+  const forcar = url.searchParams.get('forcar'); // teste: coleta | mes | cobranca
+  const fazColeta = forcar === 'coleta' || (!forcar && diaMes === 20);
+  const fazMes = forcar === 'mes' || (!forcar && diaMes === 26);
+  const fazCobranca = forcar === 'cobranca' || (!forcar && diaSemana === 4);
+
   const VERSAO_MINIMA_DO_BANCO = 66;
   {
     const { data: regua, error: erroRegua } = await s
@@ -206,9 +219,34 @@ async function rodar(req: Request) {
     }
     const noBanco = regua?.[0]?.n as number | undefined;
     if (bancoAtrasado(noBanco, VERSAO_MINIMA_DO_BANCO)) {
+      /* ================================================== 82 ================
+         "O ROBÔ VOLTA SOZINHO NA PRÓXIMA EXECUÇÃO" ERA FALSO.
+
+         O cron roda UMA VEZ POR DIA (vercel.json: `0 12 * * *`), e o que ele
+         faz depende do dia: coleta no dia 20, escala do mês no dia 26,
+         cobrança na quinta. A próxima execução é AMANHÃ — e amanhã não é dia
+         20, nem dia 26, nem quinta.
+
+         Então: banco atrasado no dia 26 e consertado no dia 27 significa que
+         o mês NÃO FOI MONTADO e não será. A execução seguinte roda, não
+         encontra nada agendado para o dia, e devolve 200 dizendo "nada
+         agendado para hoje" — o mais parecido com sucesso que existe.
+
+         A mensagem dizia o contrário e mandava o organizador esperar. Agora
+         ela nomeia o trabalho perdido e o caminho de mão para recuperá-lo. */
+      const perdido = [
+        fazColeta   && ['a coleta de disponibilidade do dia 20', 'coleta'],
+        fazMes      && ['a montagem da escala do mês (dia 26)', 'mes'],
+        fazCobranca && ['a cobrança de quinta', 'cobranca'],
+      ].filter(Boolean) as [string, string][];
       const m = `O banco está na migração ${noBanco ?? 0} e este código precisa da ${VERSAO_MINIMA_DO_BANCO}. `
               + `Não escrevi nada: rodar sobre banco atrasado grava escala no lugar errado, em silêncio. `
-              + `Aplique as migrações que faltam no Supabase e o robô volta sozinho na próxima execução.`;
+              + `Aplique as migrações que faltam no Supabase.`
+              + (perdido.length
+                  ? ` ATENÇÃO: hoje era dia de ${perdido.map(([r]) => r).join(' e ')}, e isso NÃO volta sozinho — `
+                    + `o robô roda uma vez por dia e amanhã não é este dia. Depois de aplicar, abra à mão: `
+                    + perdido.map(([, q]) => `${SITE}/api/cron?forcar=${q}`).join(' e ') + '.'
+                  : ` Hoje não havia trabalho agendado, então nada se perdeu.`);
       /* o aviso é melhor-esforço: se a leitura de `lideres` também falhar
          (e ela LANÇA de propósito), o que não pode acontecer é a mensagem
          específica virar um 500 genérico e a causa se perder no log. */
@@ -219,11 +257,6 @@ async function rodar(req: Request) {
     }
   }
 
-  const { iso, diaMes, diaSemana } = dataSP();
-  const forcar = url.searchParams.get('forcar'); // teste: coleta | mes | cobranca
-  const fazColeta = forcar === 'coleta' || (!forcar && diaMes === 20);
-  const fazMes = forcar === 'mes' || (!forcar && diaMes === 26);
-  const fazCobranca = forcar === 'cobranca' || (!forcar && diaSemana === 4);
 
   /* SEM ESTAS DUAS LEITURAS NÃO HÁ TRABALHO POSSÍVEL, E FALHAR CALADO É PIOR
      QUE NÃO RODAR.
@@ -444,7 +477,27 @@ async function rodar(req: Request) {
   if (fazCobranca) {
     const porEquipe: Record<string, { nome: string; partes: string[] }> = {};
     const resumo: any[] = [];
+    /* ==================================================== 82 ===============
+       DUAS COISAS DIFERENTES DIVIDIAM UM ARRAY SÓ.
+
+       `falhas` recebia as duas: "não carreguei o estado do Connect" e
+       "ninguém está escalado no Follow". E `falhas.length` é o que faz a
+       rota devolver HTTP 500 (última linha do arquivo).
+
+       São estados opostos. O primeiro é o robô falhando: aquele ministério
+       ficou SEM cobrança, e ninguém sabe o que tem lá. O segundo é o robô
+       funcionando: ele olhou, viu que não tem ninguém, e AVISOU — a cobrança
+       saiu, com o aviso dentro.
+
+       Juntos, o segundo levava o cron para vermelho por estado normal, e o
+       e-mail de alerta dizia "Não consegui carregar estes ministérios, e
+       eles ficaram SEM cobrança" sobre ministérios que receberam a cobrança
+       inteira. O organizador que fosse conferir encontraria o e-mail no
+       lugar e não entenderia o alarme.
+
+       Agora são dois. `falhas` derruba o status; `semNinguem` não. */
     const falhas: string[] = [];
+    const semNinguem: string[] = [];
     /* 14/09/2026: o estado de cada equipe é carregado UMA vez, não uma vez por
        data. Eram 5 datas × 5 equipes = 25 cargas de ~10 consultas cada, para um
        dado que só depende da equipe. E a carga que falha vira linha em
@@ -512,29 +565,64 @@ async function rodar(req: Request) {
              Este aviso não carrega nome nem link de ninguém, então ele pode
              ir também para o organizador global — ao contrário da lista de
              pendentes logo abaixo. */
-          const temTime = !!S.voluntarios.filter(v => v.ativo).length && !!funcoesAtivas(S).length;
-          if (!avisarDiaSemNinguem(regular, temTime)) continue;
+          /* 82 · `funcoesAtivas` era o ministério INTEIRO; `funcoesDoDia` é
+             este dia. Medido: Connect tem 18 postos ativos e ZERO no Follow,
+             Kids 9 e zero, Livraria 2 e zero. Com a conta velha, os três
+             recebiam "monte a escala deste dia" todo sábado de Follow, para
+             sempre, e o cron ficava 500 por causa disso. */
+          const temPostosNesteDia =
+            !!S.voluntarios.filter(v => v.ativo).length && !!funcoesDoDia(S, data).length;
+          if (!avisarDiaSemNinguem(regular, temPostosNesteDia)) continue;
           resumo.push({ equipe: e.nome, culto: rotulo, ninguem: true });
-          falhas.push(`${e.nome}: NINGUÉM está escalado em ${rotulo}.`);
+          semNinguem.push(`${e.nome}: NINGUÉM está escalado em ${rotulo}.`);
           porEquipe[e.id] = porEquipe[e.id] || { nome: e.nome, partes: [] };
           porEquipe[e.id].partes.push(
             `### ${rotulo} ###\nNINGUÉM ESTÁ ESCALADO neste culto. Abra o app (${SITE}) e monte a escala deste dia.`);
           continue;
         }
-        const pend = Object.entries(dia.slots).filter(([, sl]: any) => sl?.vid && (sl.status || 'pendente') === 'pendente');
-        const vagas = vagasDe(S, data);
-        if (!pend.length && !vagas.length) { resumo.push({ equipe: e.nome, culto: rotulo, ok: true }); continue; }
-        resumo.push({ equipe: e.nome, culto: rotulo, pendentes: pend.length, vagas: vagas.length });
-        const linhas = pend.map(([fn, sl]: any) => {
-          const v = S.voluntarios.find(x => x.id === sl.vid);
+        /* ==================================================== 82 =============
+           QUEM DISSE "NÃO POSSO" SUMIA DA COBRANÇA.
+
+           Era `pend = slots com vid e status 'pendente'` mais
+           `vagas = vagasDe(...)`, que é posto SEM ninguém. Um posto cujo
+           ocupante apertou "não posso" tem `vid` (não é vaga) e não está
+           `pendente` (não é pendência): caía no vão entre as duas e não
+           aparecia em lugar nenhum da cobrança de quinta.
+
+           É o PIOR dos três estados. O pendente ainda pode confirmar, a vaga
+           ainda pode ser preenchida — este já foi respondido: a pessoa avisou
+           que não vem, o posto continua no nome dela, e ninguém está sendo
+           procurado. `furou` é o mesmo buraco com o domingo passado dentro.
+
+           `cobrarDoDia` (lib/engine.ts) separa os três, porque eles pedem
+           recados diferentes: pendente é cobrança À PESSOA, recusado e vaga
+           são recado AO LÍDER — não há o que cobrar de quem já respondeu. */
+        const { pendentes, vagou, vagas } = cobrarDoDia(S, data);
+        if (!pendentes.length && !vagou.length && !vagas.length) {
+          resumo.push({ equipe: e.nome, culto: rotulo, ok: true }); continue;
+        }
+        resumo.push({ equipe: e.nome, culto: rotulo,
+                      pendentes: pendentes.length, vagou: vagou.length, vagas: vagas.length });
+        const linhas = pendentes.map(({ funcao: fn, vid }) => {
+          const v = S.voluntarios.find(x => x.id === vid);
           const onde = nomeEvento ? `o ${nomeEvento}`
             : tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo';
           const texto = `${(v?.nome || '').trim()}, você está na escala d${onde} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
           const zap = linkZap(v?.tel, texto);
-          return `• ${nomeDe(S, sl.vid)} — ${fn}\n  ${zap ? `1 toque: ${zap}` : `sem telefone: ${SITE}/eu/${v?.token}`}`;
+          return `• ${nomeDe(S, vid)} — ${fn}\n  ${zap ? `1 toque: ${zap}` : `sem telefone: ${SITE}/eu/${v?.token}`}`;
         }).join('\n\n');
+        /* o bloco de quem já respondeu que não vem. Sem link de cobrança de
+           propósito: mandar "confirma?" para quem acabou de dizer que não
+           pode é o robô não ter lido a resposta. */
+        const saiu = vagou.map(({ funcao: fn, vid, status }) =>
+          `• ${fn} — ${nomeDe(S, vid)} ${status === 'furou' ? 'FUROU' : 'disse que NÃO PODE'}, e o posto continua no nome dela.`
+        ).join('\n');
         porEquipe[e.id] = porEquipe[e.id] || { nome: e.nome, partes: [] };
-        porEquipe[e.id].partes.push(`### ${rotulo} ###\n${linhas}${vagas.length ? `\n\nVAGA sem ninguém: ${vagas.join(', ')} — resolva no app.` : ''}`);
+        porEquipe[e.id].partes.push(
+          `### ${rotulo} ###`
+          + (linhas ? `\n${linhas}` : '')
+          + (saiu ? `\n\nPRECISA DE TROCA (já responderam, ninguém está procurando):\n${saiu}` : '')
+          + (vagas.length ? `\n\nVAGA sem ninguém: ${vagas.join(', ')} — resolva no app.` : ''));
       }
     }
     /* um email por ministério: a lista de pendentes carrega NOME e LINK PESSOAL
@@ -547,12 +635,27 @@ async function rodar(req: Request) {
           `${b.nome} · pendentes de ${alvos.map(d => fmtDia(d)).join(' e ')}`,
           `Cada link abre o WhatsApp da pessoa com a cobrança digitada. Só apertar enviar.\n\n${b.partes.join('\n\n' + '='.repeat(34) + '\n\n')}`) });
     }
-    /* falha de carga vai para o organizador global, como no dia 26 */
+    /* falha de carga vai para o organizador global, como no dia 26.
+
+       82 · e diz só o que é verdade. Antes este e-mail levava junto as linhas
+       de "ninguém está escalado", com o texto "ficaram SEM cobrança" por
+       cima — sobre ministérios que tinham recebido a cobrança inteira, com o
+       aviso dentro dela. O alarme contradizia o e-mail que estava na caixa
+       ao lado. */
     const alertaCob = falhas.length
       ? await enviar(soGlobais(lideres), `[ATENÇÃO] cobrança de quinta incompleta`,
           `\u26a0 Não consegui carregar estes ministérios, e eles ficaram SEM cobrança:\n${falhas.map(f => '• ' + f).join('\n')}`)
       : { enviado: false, motivo: 'nenhuma falha' };
-    rel.acoes.push({ acao: 'cobranca', cultos: alvos, resumo, envios, falhas, alerta: alertaCob });
+    /* "ninguém escalado" é o robô FUNCIONANDO, e por isso tem e-mail próprio
+       e não derruba o status. O aviso já foi para o líder do ministério junto
+       com a cobrança dele; este é o resumo para quem organiza o geral. */
+    const alertaVazio = semNinguem.length
+      ? await enviar(soGlobais(lideres), `[ATENÇÃO] culto sem ninguém escalado`,
+          `\u26a0 A cobrança saiu normalmente. Estes cultos estão SEM NINGUÉM, e cada líder recebeu o aviso no e-mail dele:\n${semNinguem.map(f => '• ' + f).join('\n')}`)
+      : { enviado: false, motivo: 'nenhum culto vazio' };
+    rel.acoes.push({ acao: 'cobranca', cultos: alvos, resumo, envios,
+                     falhas, alerta: alertaCob,
+                     semNinguem, alertaVazio });
   }
 
   if (!rel.acoes.length) rel.acoes = 'nada agendado para hoje';
@@ -564,7 +667,17 @@ async function rodar(req: Request) {
 
      Conta só `falhas`, NUNCA `pulado`: "sem time/funções ativas" e "já tinha
      escala" são estados normais, e um cron que fica vermelho todo dia por
-     estado normal é um cron que ninguém olha mais em duas semanas. */
+     estado normal é um cron que ninguém olha mais em duas semanas.
+
+     82 · E NUNCA `semNinguem`, pelo mesmo motivo. Ele morava dentro de
+     `falhas`, e com a conta de postos errada (ver `avisarDiaSemNinguem`)
+     isso deixava o cron VERMELHO toda quinta-feira, para sempre, porque o
+     Connect não serve no sábado de Follow. Duas semanas disso e o 500 vira
+     papel de parede — e aí o 500 de verdade, o do dia 26 que não montou a
+     escala do mês, chega e ninguém olha.
+
+     A régua: 500 é "o robô não fez o trabalho". "Ninguém está escalado" é o
+     robô tendo feito o trabalho e contado o que viu. */
   const falhou = Array.isArray(rel.acoes)
     && rel.acoes.some((a: any) => Array.isArray(a?.falhas) && a.falhas.length);
   return Response.json(rel, { status: falhou ? 500 : 200 });
