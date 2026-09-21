@@ -183,6 +183,27 @@ for fn in testar_permissoes testar_identidade testar_porta_publica schema_versao
   fi
 done
 
+# 82 · O GRANT DE `voluntarios`, COLUNA A COLUNA.
+# A 52 fez o grant ser lido do catálogo "para que coluna nova nao repita o
+# apagao de 18/09". Funcionou uma vez: a 81 criou `identidade_reivindicada`
+# sem grant e o apagão voltou, desligando a regra do prédio junto. Um bloco
+# que roda uma vez não é regra; esta pergunta é.
+echo
+echo "4. C · o GRANT de voluntarios cobre toda coluna que a tela le"
+if [ "$(pergunta "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='voluntarios_grant_conferir'")" = "1" ]; then
+  gp=$(pergunta "select count(*) from voluntarios_grant_conferir();")
+  if [ "$gp" = "0" ]; then
+    echo "   ✓ voluntarios_grant_conferir(): nenhuma coluna com grant errado"
+  else
+    echo "   ✗ voluntarios_grant_conferir(): $gp coluna(s) com grant errado"
+    su postgres -c "$PG/psql -h /tmp -p $PORTA -U postgres -d $BANCO -c 'select coluna, problema from voluntarios_grant_conferir();'" | sed 's/^/      /'
+    falhas=$((falhas+1))
+  fi
+else
+  echo "   ✗ voluntarios_grant_conferir() nao existe (falta a migracao 82)"
+  falhas=$((falhas+1))
+fi
+
 echo
 echo "5. os tipos de lib/ponte.ts batem com o catalogo deste banco"
 # Ate 20/09 `LinhasDoBanco` era `any[]` nos nove campos: entre o `select` e o

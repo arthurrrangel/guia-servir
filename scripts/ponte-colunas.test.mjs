@@ -84,10 +84,41 @@ function fingeBanco({ recusa = [], erroDuro = null } = {}) {
   const aVoluntarios = pedidos.filter(p => p.tabela === 'voluntarios');
   ok(!erro, 'a carga NÃO estoura quando o banco recusa uma coluna opcional',
     erro ? String(erro.message || erro) : '');
-  ok(aVoluntarios.length === 2, 'tenta de novo, uma vez', String(aVoluntarios.length));
+  /* 82 · A DEGRADAÇÃO DEIXOU DE SER TUDO OU NADA, E ESTES DOIS CASOS
+     DESCREVIAM O DEFEITO.
+
+     Eles exigiam exatamente DUAS consultas e que a segunda fosse a lista
+     essencial. Era o desenho de então: qualquer opcional recusada derrubava
+     todas. A 81 criou `identidade_reivindicada` sem GRANT e isso custou o
+     `sexo` junto — a regra do prédio inteira desligada por uma coluna que
+     nada tem a ver com ela.
+
+     Agora a segunda fase PERGUNTA, uma opcional por vez, e leva o que passa.
+     São N+1 consultas, e só no caminho ruim. O que se cobra aqui é o
+     resultado: a recusada some, as outras ficam. */
+  ok(aVoluntarios.length > 1, 'degrada em vez de estourar', String(aVoluntarios.length));
   ok(/sexo/.test(aVoluntarios[0].cols), 'a primeira tentativa pede a opcional');
-  ok(!/sexo/.test(aVoluntarios[1].cols), 'a segunda vai sem ela', aVoluntarios[1].cols);
+  const ultima = aVoluntarios[aVoluntarios.length - 1].cols;
+  ok(!/sexo/.test(ultima), 'e a consulta que vale nao pede a recusada', ultima);
+  ok(/identidade_reivindicada/.test(ultima),
+     'mas CONTINUA pedindo as outras opcionais: uma coluna sem grant nao leva as outras junto', ultima);
   ok(r && (r.voluntarios || []).length === 1, 'e a tela recebe o time mesmo assim');
+}
+
+/* 2b. 82 · e o caso ao contrário, que é o que aconteceu de verdade: o banco
+       recusa `identidade_reivindicada` (a coluna nova da 81) e o `sexo`
+       TEM que sobreviver. */
+{
+  const { cliente, pedidos } = fingeBanco({ recusa: ['identidade_reivindicada'] });
+  let erro = null; let r = null;
+  try { r = await linhasDaEquipe(cliente, 'e1', '2026-01-01'); } catch (e) { erro = e; }
+  const aVols = pedidos.filter(p => p.tabela === 'voluntarios');
+  const ultima = aVols[aVols.length - 1].cols;
+  ok(!erro, 'a carga nao estoura', erro ? String(erro.message || erro) : '');
+  ok(/sexo/.test(ultima),
+     'o `sexo` SOBREVIVE — era isto que se perdia, e com ele a regra do predio', ultima);
+  ok(!/identidade_reivindicada/.test(ultima), 'e so a recusada some', ultima);
+  ok(r && (r.voluntarios || []).length === 1, 'e o time chega');
 }
 
 /* 3. tabela realmente fechada: aí o erro SOBE. Esconder isso seria pior —

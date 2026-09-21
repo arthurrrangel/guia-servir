@@ -156,6 +156,35 @@ for fn in testar_permissoes testar_identidade testar_porta_publica; do
   fi
 done
 
+# ---------------------------------------------------------------------------
+# 4 · O GRANT DE `voluntarios`, COLUNA A COLUNA — 21/09/2026, migração 82
+#
+# `voluntarios` não tem GRANT de SELECT em nível de tabela desde a 52: é
+# coluna a coluna, lido do catálogo com `pin_hash` de fora. A 52 escreveu
+# "para que coluna nova nao repita o apagao de 18/09" — e funcionou uma vez.
+# A 81 criou `identidade_reivindicada` quatro dias depois, sem grant, e o
+# apagão voltou com a mesma forma: `lib/ponte.ts` degradava tudo ou nada,
+# então a coluna sem grant levava o `sexo` junto e a regra do prédio (os
+# postos que só aceitam homem ou só mulher) ficava desligada.
+#
+# Um `do $$` que roda uma vez não é uma regra, é um evento. Isto aqui é a
+# pergunta, e ela passa a ser feita em todo rebuild.
+# ---------------------------------------------------------------------------
+if $P -d guia -tAc "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                     where n.nspname='public' and p.proname='voluntarios_grant_conferir'" | grep -q 1; then
+  problemas=$($P -d guia -tAc "select count(*) from voluntarios_grant_conferir()")
+  if [ "$problemas" = "0" ]; then
+    echo "  ✓ GRANT de voluntarios: todas as colunas legíveis, e pin_hash fora"
+  else
+    echo "  ✗ GRANT de voluntarios: $problemas coluna(s) com grant errado"
+    $P -d guia -c "select coluna, problema from voluntarios_grant_conferir();" | sed 's/^/      /'
+    reprova=$((reprova+1))
+  fi
+else
+  echo "  ✗ voluntarios_grant_conferir() não existe (falta a migração 82)"
+  reprova=$((reprova+1))
+fi
+
 su postgres -c "$PGBIN/pg_ctl -D $DIR/data stop" >/dev/null 2>&1
 
 echo

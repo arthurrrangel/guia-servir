@@ -48,17 +48,66 @@ const arquivos = readdirSync(DIR)
   .filter((f) => /^\d{2}-.*\.sql$/.test(f))
   .sort((a, b) => (Number(a.slice(0, 2)) - Number(b.slice(0, 2))) || a.localeCompare(b))
 
-/* O que cada arquivo REESCREVE. Só entra o que `create or replace` pode
-   sobrescrever sem erro — função e gatilho. Tabela, índice e constraint usam
-   `if not exists` e não têm esse problema. Política entra porque
-   `drop policy` + `create policy` é o mesmo efeito. */
+/* O que cada arquivo REESCREVE.
+
+   ======================================================= 82 ================
+   A PRIMEIRA VERSÃO SÓ VIA `create or replace function`, E ISSO DEIXOU
+   PASSAR A FORMA MAIS PERIGOSA DAS DUAS.
+
+   `drop function if exists X; create function X` passa por cima até de
+   MUDANÇA DE TIPO DE RETORNO, que o `create or replace` recusa. Quatro
+   arquivos do repositório usam essa forma, e dois deles revertem de verdade
+   num banco na 81. Medido:
+
+     reaplicando 09-culto-follow.sql num banco na 81 ....... aplicou, exit 0
+       equipe_funcoes antes  TABLE(nome, ordem, tipos, relata, descricao,
+                                   descricao_familia)
+       equipe_funcoes depois TABLE(nome, ordem, tipos)
+     reaplicando 14-postos-explicados.sql .................. aplicou, exit 0
+     e a bateria depois do estrago: 68/68, 27/27, 6/6 — toda verde.
+
+   `equipe_funcoes` é chamada por quatro telas públicas (`/servir/[slug]`,
+   `/servir/[slug]/cadastro`, `/servir/onde-me-encaixo`, `equipe/[slug]`).
+   Perder `relata`, `descricao` e `descricao_familia` quebra a porta pública
+   inteira, em silêncio, e o teste que existe para impedir exatamente isso
+   dizia "ok".
+
+   Então o extrator passou a ver:
+     · `create or replace function`  (o que via antes)
+     · `drop function` + `create function`  (o buraco)
+     · `create or replace trigger`  (o comentário antigo dizia que via; não via)
+     · `create or replace view`
+     · política com `drop policy` + `create policy`
+
+   E o schema entrou na chave. Antes, `create or replace function
+   demandas.dem_algo` virava a chave `"funcao demandas"` — as seis funções de
+   `50-demandas.sql` colidiam todas numa chave só. Não dava falso positivo
+   hoje, mas era uma bomba de relógio: bastava um arquivo posterior mexer em
+   qualquer `demandas.*` para o teste acusar os cinco outros. */
 function objetos(sql) {
   const o = new Set()
-  for (const m of sql.matchAll(/create\s+or\s+replace\s+function\s+(?:public\.)?([a-z0-9_]+)/gi)) {
-    o.add('funcao ' + m[1].toLowerCase())
+  const fn = (schema, nome) =>
+    'funcao ' + (schema ? schema.replace(/["\s]/g, '').toLowerCase() : 'public') + '.' + nome.toLowerCase()
+
+  /* `create [or replace] function [schema.]nome` — o `or replace` é
+     opcional de propósito: sem ele, o arquivo ou tem um `drop` antes (e aí é
+     o caso perigoso) ou falha ao reaplicar (e aí não há o que trancar, mas
+     listar é inofensivo). */
+  for (const m of sql.matchAll(
+      /create\s+(?:or\s+replace\s+)?function\s+(?:("?[a-z0-9_]+"?)\s*\.\s*)?"?([a-z0-9_]+)"?\s*\(/gi)) {
+    o.add(fn(m[1], m[2]))
   }
-  for (const m of sql.matchAll(/create\s+policy\s+"?([a-z0-9_]+)"?\s+on\s+(?:public\.)?([a-z0-9_.]+)/gi)) {
-    o.add('politica ' + m[2].toLowerCase() + '.' + m[1].toLowerCase())
+  for (const m of sql.matchAll(
+      /drop\s+function\s+(?:if\s+exists\s+)?(?:("?[a-z0-9_]+"?)\s*\.\s*)?"?([a-z0-9_]+)"?/gi)) {
+    o.add(fn(m[1], m[2]))
+  }
+  for (const m of sql.matchAll(
+      /create\s+or\s+replace\s+(?:view|trigger)\s+(?:("?[a-z0-9_]+"?)\s*\.\s*)?"?([a-z0-9_]+)"?/gi)) {
+    o.add('objeto ' + (m[1] || 'public').replace(/["\s]/g, '').toLowerCase() + '.' + m[2].toLowerCase())
+  }
+  for (const m of sql.matchAll(
+      /(?:create|drop)\s+policy\s+(?:if\s+exists\s+)?"?([a-z0-9_ -]+?)"?\s+on\s+(?:public\.)?"?([a-z0-9_.]+)"?/gi)) {
+    o.add('politica ' + m[2].toLowerCase() + '.' + m[1].trim().toLowerCase())
   }
   return o
 }
@@ -97,10 +146,44 @@ for (let i = 0; i < arquivos.length; i++) {
    olhar para nada. */
 const semTranca = arquivos.filter((f) => !temTranca(f))
 const comTranca = arquivos.filter((f) => temTranca(f))
-const plantado = objetos(`create or replace function public.eu_dados(p text)`)
-if (!plantado.has('funcao eu_dados')) {
-  console.error('FALHOU — o extrator de objetos nao reconhece nem um `create or replace function`.')
+/* Uma forma por linha, e todas TÊM que ser reconhecidas. A primeira versão
+   deste teste só via a primeira, e foi assim que `drop function` + `create
+   function` passou. Cada linha aqui é um buraco que já existiu ou que
+   existiria na próxima migração que usasse a forma. */
+const FORMAS = [
+  ['create or replace', 'create or replace function public.eu_dados(p text)', 'funcao public.eu_dados'],
+  ['sem o schema', 'create or replace function eu_dados(p text)', 'funcao public.eu_dados'],
+  ['MAIUSCULAS', 'CREATE OR REPLACE FUNCTION public.eu_dados(p text)', 'funcao public.eu_dados'],
+  ['quebra de linha', 'create or replace function\n  public.eu_dados(p text)', 'funcao public.eu_dados'],
+  ['schema entre aspas', 'create or replace function "public".eu_dados(p text)', 'funcao public.eu_dados'],
+  ['nome entre aspas', 'create or replace function public."eu_dados"(p text)', 'funcao public.eu_dados'],
+  ['outro schema', 'create or replace function demandas.dem_lista(p text)', 'funcao demandas.dem_lista'],
+  ['drop function if exists', 'drop function if exists equipe_funcoes(text);', 'funcao public.equipe_funcoes'],
+  ['create function sem replace', 'create function equipe_funcoes(p text) returns setof record', 'funcao public.equipe_funcoes'],
+  ['create or replace trigger', 'create or replace trigger culto_guarda_tg on cultos', 'objeto public.culto_guarda_tg'],
+  ['create or replace view', 'create or replace view vw_escala as select 1', 'objeto public.vw_escala'],
+  ['create policy', 'create policy cultos_ler on cultos for select', 'politica cultos.cultos_ler'],
+  ['drop policy', 'drop policy if exists cultos_ler on cultos;', 'politica cultos.cultos_ler'],
+]
+const cegueiras = FORMAS.filter(([, sql, esperado]) => !objetos(sql).has(esperado))
+if (cegueiras.length) {
+  console.error('\nFALHOU — o extrator nao reconhece forma(s) de redefinicao:\n')
+  for (const [rotulo, sql, esperado] of cegueiras) {
+    console.error(`  ${rotulo.padEnd(28)} esperava "${esperado}", extraiu ${JSON.stringify([...objetos(sql)])}`)
+  }
+  console.error('\n  Extrator cego = teste verde por nao olhar. Conserte `objetos()`.\n')
   process.exit(1)
+}
+/* e o extrator nao pode ver o que NAO e redefinicao */
+for (const inocente of ['create table if not exists cultos (id uuid)',
+                        'create unique index if not exists ux_cultos on cultos (data)',
+                        'alter table cultos add column if not exists evento text',
+                        'comment on function eu_dados(text) is \'x\'']) {
+  if (objetos(inocente).size) {
+    console.error('FALHOU — o extrator viu redefinicao onde nao ha:', inocente,
+                  '->', JSON.stringify([...objetos(inocente)]))
+    process.exit(1)
+  }
 }
 if (comTranca.length === 0) {
   console.error('FALHOU — nenhum arquivo tem tranca; o teste esta lendo o diretorio errado.')

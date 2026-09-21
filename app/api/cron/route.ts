@@ -234,18 +234,43 @@ async function rodar(req: Request) {
 
          A mensagem dizia o contrário e mandava o organizador esperar. Agora
          ela nomeia o trabalho perdido e o caminho de mão para recuperá-lo. */
+      /* 82b · o que hoje pedia, pela DATA, e não pelo `?forcar=`.
+         Com `?forcar=lixo` (ou qualquer valor que não seja um dos três), os
+         três `faz*` ficam falsos porque `forcar` é truthy — e a mensagem
+         afirmava "hoje não havia trabalho agendado" num dia 26. O calendário
+         não muda porque alguém digitou errado na query string. */
       const perdido = [
-        fazColeta   && ['a coleta de disponibilidade do dia 20', 'coleta'],
-        fazMes      && ['a montagem da escala do mês (dia 26)', 'mes'],
-        fazCobranca && ['a cobrança de quinta', 'cobranca'],
+        (fazColeta   || diaMes === 20) && ['a coleta de disponibilidade do dia 20', 'coleta'],
+        (fazMes      || diaMes === 26) && ['a montagem da escala do mês (dia 26)', 'mes'],
+        (fazCobranca || diaSemana === 4) && ['a cobrança de quinta', 'cobranca'],
       ].filter(Boolean) as [string, string][];
       const m = `O banco está na migração ${noBanco ?? 0} e este código precisa da ${VERSAO_MINIMA_DO_BANCO}. `
               + `Não escrevi nada: rodar sobre banco atrasado grava escala no lugar errado, em silêncio. `
               + `Aplique as migrações que faltam no Supabase.`
               + (perdido.length
                   ? ` ATENÇÃO: hoje era dia de ${perdido.map(([r]) => r).join(' e ')}, e isso NÃO volta sozinho — `
-                    + `o robô roda uma vez por dia e amanhã não é este dia. Depois de aplicar, abra à mão: `
-                    + perdido.map(([, q]) => `${SITE}/api/cron?forcar=${q}`).join(' e ') + '.'
+                    + `o robô roda uma vez por dia e amanhã não é este dia.\n\n`
+                    /* ============================================ 82b ======
+                       E A INSTRUÇÃO PRECISA SER EXECUTÁVEL.
+                       A primeira versão mandava "abra à mão:
+                       <SITE>/api/cron?forcar=coleta". Essa URL devolve
+                       `{"erro":"não autorizado"}` com HTTP 401: a rota exige
+                       `Authorization: Bearer $CRON_SECRET`, e o `?secret=` foi
+                       removido de propósito (o comentário 80 linhas acima
+                       explica: segredo que aparece numa URL entra no log da
+                       Vercel, no histórico do navegador e no Referer).
+                       Ou seja, trocamos uma promessa falsa por uma instrução
+                       impossível: o organizador clica, vê "não autorizado", e
+                       conclui que o robô quebrou.
+                       Este e-mail vai para pessoas que não têm o segredo. A
+                       instrução honesta é a que elas podem seguir: avisar
+                       quem cuida do sistema, e o comando que essa pessoa roda.
+                       ===================================================== */
+                    + `Depois de aplicar as migrações, alguém com acesso ao painel da Vercel precisa rodar, `
+                    + `uma vez, no terminal (a rota não abre pelo navegador, de propósito):\n`
+                    + perdido.map(([, q]) =>
+                        `  curl -H "Authorization: Bearer $CRON_SECRET" ${SITE}/api/cron?forcar=${q}`).join('\n')
+                    + `\n\nSem isso, este trabalho não acontece: o robô de amanhã não repete o de hoje.`
                   : ` Hoje não havia trabalho agendado, então nada se perdeu.`);
       /* o aviso é melhor-esforço: se a leitura de `lideres` também falhar
          (e ela LANÇA de propósito), o que não pode acontecer é a mensagem

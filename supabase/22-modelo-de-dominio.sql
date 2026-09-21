@@ -1,3 +1,29 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO, e `drop function`
+   + `create function` e pior: passa por cima ate de mudanca de tipo de
+   retorno. Os dois gravam a versao deste arquivo por cima da que estiver la,
+   seja ela mais nova ou nao, e sem um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     as cinco politicas de ESCRITA que a 74 apagou: cand_editar, onbf_tudo,
+     perg_criar, perg_editar e perg_apagar. MEDIDO em 21/09 num banco na 82:
+     reaplicar este arquivo recria as cinco, com zero erro. `testar_permissoes`
+     pega (cai para 67/68 e nomeia as cinco), mas so se alguem rodar; a tranca
+     impede que aconteca
+
+   Por isso ele se recusa a rodar num banco que ja passou da 22. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(22);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    22 — O MODELO DE DOMÍNIO: PESSOA, CANDIDATURA, VÍNCULO
 

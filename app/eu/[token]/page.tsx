@@ -160,6 +160,9 @@ export default function Eu() {
   const [disponivel, setDisponivel] = useState<string[]>([]);
   const [cobrem, setCobrem] = useState<Record<string, Cobre[]>>({});
   const [domingos, setDomingos] = useState<string[]>([]);
+  /* 82 · a leitura dos domingos falhou?  sozinho e indistinguivel de
+     "nao ha domingos", e a secao sumia calada. */
+  const [domingosFalhou, setDomingosFalhou] = useState(false);
   /* QUEM SERVE COM VOCÊ — fase 7. Chega depois da tela, e some sozinho se a
      função ainda não existir no banco: nenhuma tela quebra por causa disto. */
   const [juntos, setJuntos] = useState<Junto[]>([]);
@@ -219,7 +222,35 @@ export default function Eu() {
     setItens((data[0].escalas || []) as Item[]);
     setIndisp((data[0].indisponivel || []) as string[]);
     setDisponivel((data[0].disponivel || []) as string[]);
-    setDomingos(((dom.data || []) as any[]).map(d => (typeof d === 'string' ? d : d.data)));
+    /* 82 · O ERRO DESTA SEGUNDA CHAMADA NÃO ERA OLHADO.
+
+       Era `setDomingos(((dom.data || []) as any[])...)`, e `dom.error` nunca
+       foi lido. Numa falha, `domingos` virava `[]`, e `[]` é indistinguível
+       de "não há domingos": a seção "Quando você pode" e o botão "Dizer
+       quando eu posso" simplesmente NÃO APARECIAM, sem uma palavra.
+
+       Medido em 21/09, falhando só esta RPC:
+
+         fase da tela ......................... ok
+         domingos ............................. 0
+         seção "Quando você pode" ............. NÃO APARECE
+         botão "Dizer quando eu posso" ........ NÃO APARECE
+         algum aviso de erro na tela .......... NENHUM
+
+       É a única coisa que a pessoa nova é instruída a fazer, e é o dado que
+       alimenta o sorteio. Uma falha de rede de um segundo tirava a seção até
+       alguém recarregar.
+
+       A escala continua aparecendo — ela é o que a pessoa veio ver, e
+       derrubar a tela inteira por causa da grade seria pior. O que muda é
+       que a ausência passa a ter MOTIVO, e a tela o diz. */
+    if (dom.error) {
+      setDomingosFalhou(true);
+      setDomingos([]);
+    } else {
+      setDomingosFalhou(false);
+      setDomingos(((dom.data || []) as any[]).map(d => (typeof d === 'string' ? d : d.data)));
+    }
     /* identidade única: uma chamada, e a tela passa a saber tudo que a
        pessoa é. Sem await para não segurar a escala, que é o que ela veio ver. */
     void quemSou(token).then(i => { if (i?.ok) setEu(i); }).catch(() => {});
@@ -248,8 +279,21 @@ export default function Eu() {
     let vivo = true;
     void (async () => {
       for (const i of abertos) {
-        const { data } = await sb()!.rpc('eu_quem_cobre', { p_token: token, p_culto_id: i.culto_id });
+        const { data, error } = await sb()!.rpc('eu_quem_cobre', { p_token: token, p_culto_id: i.culto_id });
         if (!vivo) return;
+        /* 82 · FALHA NÃO VIRA LISTA VAZIA, E NÃO TRANCA A PRÓXIMA TENTATIVA.
+
+           Era `const { data } = await ...` e `setCobrem(... (data || []))`.
+           Em falha isso gravava `[]` — e o guarda deste efeito é
+           `!cobrem[i.culto_id]`, que passa a ser FALSO. Ou seja: uma falha de
+           rede de um segundo deixava a pessoa que acabou de desmarcar em cima
+           da hora sem a lista de quem pode cobrir, para sempre naquela visita,
+           sem a tela dizer que tentou.
+
+           Não gravar nada mantém o guarda aberto: a próxima repintura (a
+           resposta a qualquer botão, ou a volta do foco) tenta de novo
+           sozinha, que é o comportamento que a lista vazia impedia. */
+        if (error) continue;
         setCobrem(prev => ({ ...prev, [i.culto_id]: (data || []) as Cobre[] }));
       }
     })();
@@ -503,6 +547,8 @@ export default function Eu() {
      cobrada por um culto que terminou ontem. */
   const pendentes = agenda.filter(i =>
     (i.status || 'pendente') === 'pendente' && i.data >= hoje);
+  /* 82 · quantos DIAS, não quantas linhas. Ver o título logo abaixo. */
+  const diasPendentes = new Set(pendentes.map(i => i.data)).size;
   const ordenada = [...agenda].sort((a, b) => a.data.localeCompare(b.data));
   /* só o que ainda vai acontecer. Sem este filtro, "sua próxima escala"
      mostrava um domingo que já passou, com "você está confirmado" embaixo. */
@@ -617,7 +663,18 @@ export default function Eu() {
           </span>
           <h1>
             {pendentes.length
-              ? (pendentes.length === 1 ? 'Confirme se você vai' : `Confirme ${pendentes.length} dias`)
+              /* 82 · CONTA DIAS, e não linhas. `agenda` tem uma linha por
+                 POSTO: quem está em EDIÇÃO e PROJEÇÃO no mesmo domingo
+                 gerava duas. Medido com o dado real de `eu_dados`:
+
+                   linhas devolvidas ... 2 (2 postos, 1 domingo)
+                   dias distintos ...... 1
+                   a tela escrevia ..... "Confirme 2 dias"
+
+                 A pessoa confirmava os dois cartões do mesmo domingo achando
+                 que tinha respondido por dois compromissos — e quem tivesse
+                 combinado outra coisa para "o outro dia" descobria errado. */
+              ? (diasPendentes === 1 ? 'Confirme se você vai' : `Confirme ${diasPendentes} dias`)
               : proxima ? 'Tudo certo por aqui'
               : novo ? `${primeiro}, você está no time`
               : 'Você não tem escala agora'}
@@ -774,7 +831,24 @@ export default function Eu() {
                 <div className="vol-prox-est">
                   {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
                   {novidade(proxima) ? ` Você ${novidade(proxima)} nessa escala.` : ''}
-                  {juntos.length > 1 && ` Com ${juntos.filter(j => !j.eu).slice(0, 3).map(j => j.nome.split(' ')[0]).join(', ')}${juntos.length > 4 ? ` e mais ${juntos.length - 4}` : ''}.`}
+                  {/* 82 · a frase passa por `agruparQuemServe`, como a seção
+                      de baixo já fazia desde a 75. Antes ela contava LINHAS
+                      (`juntos`), e `eu_quem_serve` devolve uma por posto.
+                      Medido com o dado real:
+
+                        sozinha em 2 postos ..... a tela escrevia " Com ."
+                        3 pessoas em 5 postos ... " Com Caio, Caio, Ana e mais 1."
+                                                   (são 2 companheiros)
+
+                      No cartão mais nobre da tela, para alguém que ela mesma
+                      manda "procurar qualquer um desses nomes quando chegar". */}
+                  {(() => {
+                    const outros = agruparQuemServe(juntos).filter(j => !j.eu);
+                    if (!outros.length) return '';
+                    const nomes = outros.slice(0, 3).map(j => j.nome.split(' ')[0]).join(', ');
+                    const resto = outros.length - 3;
+                    return ` Com ${nomes}${resto > 0 ? ` e mais ${resto}` : ''}.`;
+                  })()}
                 </div>
                 {proxima.obs && <p className="vol-pede-obs claro">{proxima.obs}</p>}
                 <div className="ingresso-acoes">
@@ -912,6 +986,18 @@ export default function Eu() {
 
         {/* 3. QUANDO EU POSSO. Eram dez linhas com dois botões cada, depois de
             três mil pixels. Agora é grade, e o que falta responder vem no topo. */}
+        {/* 82 · a grade não some calada: se a leitura falhou, a tela diz isso
+            em vez de parecer que não há domingos. */}
+        {!domingos.length && domingosFalhou && (
+          <section className="vol-bloco">
+            <div className="vol-bloco-topo"><span className="rot">Quando você pode</span></div>
+            <p className="dim" style={{ margin: '8px 0 12px' }}>
+              Não consegui carregar os próximos domingos agora. Sua escala acima está certa;
+              é só esta parte que não veio.
+            </p>
+            <button className="sec" onClick={() => carregar(false)}>Tentar de novo</button>
+          </section>
+        )}
         {!!domingos.length && (
           <section className="vol-secao" id="quando-posso">
             <div className="vol-secao-cab">

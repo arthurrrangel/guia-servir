@@ -122,6 +122,39 @@ caso('slot numa funcao que este dia nao tem e ignorado', () => {
   assert.ok(!c.vagas.includes('HEAD'))
 })
 
+caso('posto OCULTADO da escala nao apaga a pendencia de quem ja estava nele', () => {
+  /* 82b · o botao "Ocultar da escala" (app/ajustes) poe `ativa = false`. A
+     primeira versao de `cobrarDoDia` filtrava so por `funcoesDoDia`, que
+     passa por `funcoesAtivas`, e a pessoa escalada sumia da cobranca — com o
+     cron declarando o domingo "ok". Antes desta rodada ela era cobrada. */
+  const comOculto = [
+    { nome: 'PROJEÇÃO', ativa: false, tipos: ['domingo', 'follow'] },
+    { nome: 'CÂMERA',   ativa: true,  tipos: ['domingo', 'follow'] },
+  ]
+  const s = estado({
+    'PROJEÇÃO': S({ vid: 'v1', status: 'pendente' }),
+    'CÂMERA':   S({ vid: 'v2', status: 'recusado' }),
+  }, comOculto)
+  assert.equal(funcoesDoDia(s, DOMINGO).length, 1, 'so CÂMERA esta ativa')
+
+  const c = cobrarDoDia(s, DOMINGO)
+  assert.deepEqual(c.pendentes.map(p => p.funcao), ['PROJEÇÃO'],
+    'quem ja estava escalado no posto oculto continua sendo cobrado')
+  assert.deepEqual(c.vagou.map(p => p.funcao), ['CÂMERA'])
+  assert.ok(!c.vagas.includes('PROJEÇÃO'),
+    'mas posto oculto e VAZIO nao vira vaga a preencher: ocultar quer dizer nao monte mais')
+})
+
+caso('posto oculto e VAZIO nao aparece em lista nenhuma', () => {
+  const s = estado({}, [
+    { nome: 'PROJEÇÃO', ativa: false, tipos: ['domingo'] },
+    { nome: 'CÂMERA',   ativa: true,  tipos: ['domingo'] },
+  ])
+  const c = cobrarDoDia(s, DOMINGO)
+  assert.equal(c.pendentes.length + c.vagou.length, 0)
+  assert.deepEqual(c.vagas, ['CÂMERA'], 'so o ativo vira vaga')
+})
+
 caso('as listas saem ordenadas, para o email nao mudar de ordem a cada rodada', () => {
   const c = cobrarDoDia(estado({
     'SOM':      S({ vid: 'v3', status: 'pendente' }),
@@ -235,7 +268,25 @@ caso('o aviso de banco atrasado nao promete mais que o robo volta sozinho', () =
     'a promessa falsa saiu')
   assert.ok(/NÃO volta sozinho/.test(bloco), 'e o texto diz o contrario')
   assert.ok(/forcar=\$\{q\}/.test(bloco), 'e entrega o caminho de mao')
-  assert.ok(/fazColeta\s+&&/.test(bloco) && /fazMes\s+&&/.test(bloco) && /fazCobranca && /.test(bloco),
+  /* 82b · e esse caminho tem que ser EXECUTAVEL. A rota exige
+     `Authorization: Bearer $CRON_SECRET` e o `?secret=` foi removido de
+     proposito, entao uma URL solta devolve 401. Mandar o organizador
+     "abrir" essa URL e trocar uma promessa falsa por uma instrucao
+     impossivel. */
+  assert.ok(/Authorization: Bearer \$CRON_SECRET/.test(bloco),
+    'a instrucao carrega o cabecalho que a rota exige')
+  assert.ok(!/abra à mão: \$\{SITE\}\/api\/cron/.test(bloco),
+    'e nao manda mais "abrir" uma URL que devolve 401')
+  const porta = rota.slice(rota.indexOf('const segredo'), rota.indexOf('const segredo') + 400)
+  assert.ok(/auth !== `Bearer \$\{segredo\}`/.test(porta) && /status: 401/.test(porta),
+    'e a rota de fato so aceita o cabecalho (se isso mudar, o texto do e-mail muda junto)')
+  assert.ok(!/searchParams\.get\('secret'\)/.test(rota),
+    'o `?secret=` continua fora: segredo em URL entra em log, historico e Referer')
+  /* e o calendario nao depende do `?forcar=`: com um valor invalido, os tres
+     `faz*` ficam falsos e a mensagem afirmava que nada se perdeu num dia 26 */
+  assert.ok(/diaMes === 20\) && \[/.test(bloco) && /diaMes === 26\) && \[/.test(bloco),
+    'o que se perdeu sai da DATA, nao do `?forcar=`')
+  assert.ok(/fazColeta/.test(bloco) && /fazMes/.test(bloco) && /fazCobranca/.test(bloco),
     'nomeando qual trabalho se perdeu hoje')
   /* e o robô roda uma vez por dia — é disso que a falsidade vinha */
   const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))

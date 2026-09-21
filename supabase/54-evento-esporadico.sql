@@ -583,6 +583,10 @@ declare
   v_d5 uuid; v_meu_d5 boolean := false;
   /* 82 · e o placar deixa de ser um número escrito à mão */
   v_casos int := 0;
+  /* 82b · o que se pulou, e quanto valia. Bloco que se pula em silêncio é a
+     forma mais barata de um teste passar sem testar, e o piso sozinho não
+     pega isso: pular baixa numerador e denominador juntos. */
+  v_pulados int := 0; v_pulei text := '';
   /* ==================================================== 82 ================
      A IMPRESSÃO DIGITAL DO CALENDÁRIO, ANTES E DEPOIS.
 
@@ -705,6 +709,8 @@ begin
       returning id into v_id2;
     if v_id2 is null then v_erros := v_erros || '4) outro ministerio nao pode marcar no mesmo dia; '; end if;
     v_casos := v_casos + 1;
+  else
+    v_pulados := v_pulados + 1; v_pulei := v_pulei || '4 (so ha um ministerio no banco); ';
   end if;
 
   /* 5) evento sem dono e culto regular com dono: os dois proibidos */
@@ -869,34 +875,132 @@ begin
       v_erros := v_erros || '11c) salvar_dia criou um culto novo em vez de reusar; ';
     end if;
 
-    /* 12) e `salvar_dia` continua PRESERVANDO quem ja confirmou — a regra da
-       05 que a primeira versao desta migracao tinha apagado ao reescrever a
-       funcao em vez de copiar */
-    declare v_f uuid; v_v uuid; v_st text; v_resp timestamptz;
+    /* 12) e `salvar_dia` NAO PASSA POR CIMA de um dia que ja tem gente.
+
+       ================================================= 82 ==================
+       ESTE CASO TESTAVA UM CONTRATO QUE A 66 SUBSTITUIU, E NINGUEM VIU
+       PORQUE ELE NUNCA RODOU.
+
+       Ele dizia: "`salvar_dia` continua PRESERVANDO quem ja confirmou".
+       Gravava uma escalacao, marcava `confirmado` na mao, gravava de novo, e
+       cobrava que o `confirmado` tivesse sobrevivido.
+
+       Era `select v.id into v_v from voluntarios where equipe_id = v_eq`, e
+       `v_eq` e o PRIMEIRO ministerio por `ordem, criado_em` — a Midia, que
+       tem 7 postos e ZERO voluntarios no banco do repositorio. Com `v_v`
+       nulo, o `if` inteiro era pulado, e o `v_casos := v_casos + 4` contava
+       assim mesmo. Medido, instrumentando a 54 no ponto do rebuild:
+
+           Midia | ordem 10 | vols 0   -> CASO 12 NAO RODOU
+           e a conferencia imprimiu OK — 28/28
+
+       SABOTAGEM, medida: quebrei a preservacao dentro de `salvar_dia` (troquei
+       o `case ... else escalacoes.status end` por `status = excluded.status,
+       respondido_em = null`) e a conferencia continuou imprimindo
+       "OK — 28/28 ... salvar_dia continua gravando e PRESERVA quem ja
+       confirmou". A frase era impressa por um bloco que nao chegou nela.
+
+       -----------------------------------------------------------------------
+       E QUANDO O CASO FINALMENTE RODOU, ELE REPROVOU — COM RAZAO.
+
+       Montando a gente por conta propria, o segundo `salvar_dia` devolveu:
+
+           Alguem montou 2026-10-30 enquanto eu trabalhava, e eu nao passo
+           por cima: o dia ficou como essa pessoa deixou.  (P0001)
+
+       Isso e a migracao 66. Ela pos, DENTRO de `salvar_dia`, uma guarda que
+       recusa o dia inteiro quando aquela equipe ja tem escalacao com gente
+       ali. O robo do dia 26 passou a recusar em vez de sobrescrever.
+
+       Ou seja: sob a 66, o ramo de preservacao de `salvar_dia` e inalcancavel
+       POR `salvar_dia` — a guarda dispara antes. O caso 12 velho cobrava uma
+       promessa que deixou de existir doze migracoes atras, e ninguem
+       descobriu porque ele se pulava sozinho.
+
+       O que este caso cobra agora e a regra que EXISTE, e que e a mais cara
+       de perder: o robo nao apaga o trabalho manual do lider. A 66 tem o
+       teste fundo disso; aqui fica a amarra de que a 54 nao a desfaz. */
+    declare v_f uuid; v_v uuid; v_erro text := ''; v_quantas int; v_tem_guarda66 boolean;
     begin
       select f.id into v_f from funcoes f where f.equipe_id = v_eq and f.ativa limit 1;
-      select v.id into v_v from voluntarios v where v.equipe_id = v_eq limit 1;
-      if v_f is not null and v_v is not null then
+      if v_f is null then
+        v_erros := v_erros || '12) o ministerio do teste nao tem posto ativo: o caso nao tem como rodar; ';
+      else
+        /* o teste cria a propria gente. Depender do dado que existe foi
+           exatamente o que fez este caso nunca rodar. */
+        insert into voluntarios (nome, telefone, equipe_id, ativo)
+          values ('Confirmado Cinquentaequatro',
+                  '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0'),
+                  v_eq, true)
+          returning id into v_v;
         perform salvar_dia(v_eq, v_data, '', jsonb_build_array(jsonb_build_object(
           'funcao_id', v_f, 'voluntario_id', v_v, 'status', 'pendente')), '{}'::uuid[]);
         update escalacoes set status='confirmado', respondido_em=now()
          where culto_id = v_culto and funcao_id = v_f;
-        perform salvar_dia(v_eq, v_data, '', jsonb_build_array(jsonb_build_object(
-          'funcao_id', v_f, 'voluntario_id', v_v, 'status', 'pendente')), '{}'::uuid[]);
-        select status::text, respondido_em into v_st, v_resp
-          from escalacoes where culto_id = v_culto and funcao_id = v_f;
-        if v_st is distinct from 'confirmado' or v_resp is null then
-          v_erros := v_erros || format('12) salvar_dia apagou a confirmacao: status=%s respondido_em=%s; ', v_st, v_resp);
+        /* o cenario tem que estar MONTADO antes de cobrar: sem esta linha, um
+           `salvar_dia` que nem gravou passaria como "sobreviveu" */
+        if not exists (select 1 from escalacoes
+                        where culto_id = v_culto and funcao_id = v_f and status = 'confirmado') then
+          v_erros := v_erros || '12a) o cenario nao montou: nao ha escalacao confirmada para proteger; ';
+        end if;
+
+        /* ---------------------------------------------------------------
+           QUAL CONTRATO ESTE BANCO TEM? LIDO DO CATALOGO, NAO SUPOSTO.
+
+           Aplicada em ORDEM, do zero, a 54 roda ANTES da 66: ali `salvar_dia`
+           ainda preserva (a regra da 05) e nao existe guarda nenhuma. Num
+           banco ja na 66 ou adiante, ela RECUSA o dia inteiro.
+
+           Os dois sao corretos no seu tempo, e escolher um e cravar seria o
+           teste mentir em metade das vidas deste arquivo. Entao ele pergunta
+           ao catalogo qual esta instalado e cobra o que aquele promete. Foi
+           assim que se descobriu que o caso velho cobrava, desde a 66, uma
+           promessa que nao existia mais — e ninguem viu porque ele se pulava
+           sozinho. */
+        select (position('enquanto eu trabalhava' in prosrc) > 0) into v_tem_guarda66
+          from pg_proc where proname = 'salvar_dia' limit 1;
+
+        begin
+          perform salvar_dia(v_eq, v_data, '', jsonb_build_array(jsonb_build_object(
+            'funcao_id', v_f, 'voluntario_id', v_v, 'status', 'pendente')), '{}'::uuid[]);
+          if coalesce(v_tem_guarda66, false) then
+            v_erros := v_erros || '12) salvar_dia PASSOU POR CIMA de um dia que ja tinha gente: a guarda da 66 esta no catalogo e nao segurou; ';
+          end if;
+        exception when others then
+          v_erro := sqlerrm;
+          if not coalesce(v_tem_guarda66, false) then
+            v_erros := v_erros || format('12) salvar_dia recusou num banco SEM a guarda da 66: %s; ', v_erro);
+          elsif v_erro not like 'Alguem montou%' then
+            v_erros := v_erros || format('12b) salvar_dia recusou, mas por OUTRO motivo (esperava a guarda da 66): %s; ', v_erro);
+          end if;
+        end;
+
+        /* E OS DOIS CONTRATOS PROMETEM A MESMA COISA NO FIM: a confirmacao do
+           lider continua de pe. Um por recusar o dia, o outro por preservar a
+           linha. Esta checagem vale para os dois, e e ela que carrega o peso —
+           a de cima diz COMO, esta diz SE. */
+        select count(*) into v_quantas from escalacoes
+         where culto_id = v_culto and funcao_id = v_f
+           and status = 'confirmado' and respondido_em is not null;
+        if v_quantas <> 1 then
+          v_erros := v_erros || format(
+            '12c) A CONFIRMACAO DO LIDER SUMIU (%s linha(s) confirmada(s), esperava 1). Guarda da 66 no catalogo: %s; ',
+            v_quantas, coalesce(v_tem_guarda66, false));
         end if;
       end if;
     end;
     /* 82 · e leva embora o que este caso criou. Por id: `v_data` foi escolhida
-       livre logo acima, entao este culto e deste bloco, e so dele. */
+       livre logo acima, entao este culto e deste bloco, e so dele. O
+       voluntario do caso 12 sai pelo nome+equipe, que so este bloco usa
+       (`escalacoes` cai junto com o culto, por `on delete cascade`). */
     if v_culto is not null then delete from cultos where id = v_culto; end if;
+    delete from escalacoes e using voluntarios v
+      where e.voluntario_id = v.id and v.nome = 'Confirmado Cinquentaequatro' and v.equipe_id = v_eq;
+    delete from voluntarios where nome = 'Confirmado Cinquentaequatro' and equipe_id = v_eq;
   exception when others then
     v_erros := v_erros || format('11) salvar_dia QUEBROU: %s (%s); ', SQLERRM, SQLSTATE);
   end;
-  v_casos := v_casos + 4;
+  v_casos := v_casos + 5;
 
   /* ---- 13. A BATERIA DE ATAQUE ----------------------------------------
 
@@ -926,6 +1030,8 @@ begin
 
     if v_jwt is null or v_outro is null then
       raise notice 'PULEI 13: nenhum organizador preso a um ministerio para atacar com.';
+      v_pulados := v_pulados + 7;
+      v_pulei := v_pulei || '13 inteiro, 7 casos (nenhum organizador preso a um ministerio para atacar com); ';
     else
       /* ========================================================= 82 ======
          REUSA o culto que já existe. O `on conflict do update` fazia `v_dom`
@@ -1050,10 +1156,32 @@ begin
      domingo (o sábado de Follow nunca foi exercido) e o 22 não mudou; o
      bloco 13 inteiro podia virar `PULEI` e o 22 não mudava também.
 
-     Agora o número é contado, e existe um piso: menos de 20 casos significa
-     que a conferência pulou coisa e não tem direito de dizer OK. */
-  if v_casos < 20 then
-    v_erros := v_erros || format('0) a conferencia so rodou %s casos, e o piso e 20; ', v_casos);
+     Agora o número é contado, e existe um piso.
+
+     ====================================================== 82b =============
+     O PISO ERA 20, E O BLOCO 13 CABIA POR BAIXO DELE.
+
+     São 29 casos com tudo rodando. O bloco 13 vale 7, e ele tem um `PULEI`
+     legítimo ("nenhum organizador preso a um ministerio para atacar com").
+     29 menos 7 é 22, que passa folgado num piso de 20 — ou seja, o piso não
+     pegava exatamente o bloco que o comentário acima diz que ele pega.
+
+     Medido em 21/09, tirando o único líder preso a ministério do banco:
+
+         PULEI 13: nenhum organizador preso a um ministerio para atacar com.
+         OK — 22/22
+
+     O piso não é mais um número solto: cada bloco que pode se pular ANUNCIA
+     que se pulou, e o piso é o total menos o que foi anunciado. Assim ele
+     continua cobrando o resto e não vira um número que se ajusta sozinho
+     para caber. */
+  if v_pulei <> '' then
+    raise notice 'A CONFERENCIA DA 54 SE PULOU EM: %', v_pulei;
+  end if;
+  if v_casos + v_pulados < 29 then
+    v_erros := v_erros || format(
+      '0) a conferencia rodou %s casos e anunciou %s pulados, e sao 29 no total: %s sumiram sem dizer; ',
+      v_casos, v_pulados, 29 - v_casos - v_pulados);
   end if;
 
   /* 82 · e a foto de saída. Compara id E data: apagar e recriar o mesmo
@@ -1071,7 +1199,7 @@ begin
   end if;
 
   if v_erros = '' then
-    raise notice 'OK — %/% casos: evento recusa domingo E sabado de Follow (datas conferidas pela regra dow=6 e dia>7), nao duplica, exige dono, outro ministerio pode no mesmo dia, estranho nao cria, passado nao entra, o caminho feliz grava data+hora+dono, apagar_evento so encosta em evento, salvar_dia continua gravando e PRESERVA quem ja confirmou, e a bateria de ataque (escalada pelo UPDATE, roubo de evento, insert direto) bate na porta e volta. Nenhum culto regular preexistente foi apagado: tudo que este bloco criou saiu por id.', v_casos, v_casos;
+    raise notice 'OK — % de 29 casos (% pulados, e anunciados): evento recusa domingo E sabado de Follow (datas conferidas pela regra dow=6 e dia>7), nao duplica, exige dono, outro ministerio pode no mesmo dia, estranho nao cria, passado nao entra, o caminho feliz grava data+hora+dono, apagar_evento so encosta em evento, salvar_dia grava num dia livre e a confirmacao do lider sobrevive ao segundo salvamento (pela guarda da 66 onde ela ja existe, pela preservacao da 05 antes dela: o caso le o catalogo para saber qual cobrar), e a bateria de ataque (escalada pelo UPDATE, roubo de evento, insert direto) bate na porta e volta. Nenhum culto regular preexistente foi apagado: tudo que este bloco criou saiu por id.', v_casos, v_pulados;
   else
     raise exception 'FALHOU (% casos rodados) — %', v_casos, v_erros;
   end if;

@@ -591,10 +591,34 @@ begin
   -- A data é calculada para cair numa QUINTA (dow 4), que não é dia de culto
   -- em nenhum calendário, então "recusou por causa do dia" deixa de ser uma
   -- desculpa possível.
+  --
+  -- ======================================================= 82b =============
+  -- MAS "NÃO É DIA DE CULTO NO CALENDÁRIO" NÃO É "NÃO TEM CULTO".
+  --
+  -- A quinta era FIXA: `current_date + 7` arredondado para o dow 4. Só que
+  -- `salvar_dia` cria culto regular em QUALQUER data que um líder salve, e
+  -- `ux_cultos_data_regular` é um culto regular por data. Um culto naquela
+  -- quinta faz `criar_evento` devolver `JA_TEM_CULTO`, e a migração inteira
+  -- se recusa a aplicar. Medido em 21/09, plantando um culto regular ali:
+  --
+  --   ERROR: A CONFERENCIA DA 56 REPROVOU: 2 de 6 casos
+  --     ✗ criar_evento RECUSOU um evento legitimo numa quinta (2026-10-01):
+  --       JA_TEM_CULTO
+  --     ✗ sem o primeiro evento, os casos 5 e 5b nao puderam rodar
+  --
+  -- É a mesma classe de defeito que a 82 consertou no bloco de cima deste
+  -- mesmo arquivo, pelo mesmo raciocínio, e eu deixei este passar. Agora ela
+  -- anda para a frente até uma quinta que esteja mesmo livre.
   declare v_quinta date := current_date + 7 +
     ((4 - extract(dow from current_date + 7)::int + 7) % 7);
           v_r jsonb;
   begin
+    while exists (select 1 from cultos c where c.data = v_quinta) loop
+      v_quinta := v_quinta + 7;   -- de quinta em quinta: o dow importa aqui
+      if v_quinta > current_date + 400 then
+        raise exception 'A CONFERENCIA DA 56 NAO ACHOU QUINTA LIVRE em mais de um ano a partir de %. Nao vou testar em cima de um culto de verdade.', current_date + 7;
+      end if;
+    end loop;
     set local role authenticated;
     perform set_config('request.jwt.claims', '{"email":"conf56@teste.local"}', true);
     v_r := criar_evento(v_eq, v_quinta, 'Conf 56 Primeiro', '19:00');

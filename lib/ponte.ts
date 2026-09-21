@@ -364,7 +364,37 @@ const COLUNAS_ESSENCIAIS =
 
    OPCIONAIS e não essenciais porque o banco só ganha a coluna na 81: até lá
    a consulta degrada e a tela funciona sem o aviso, em vez de o Time inteiro
-   cair. É a mesma decisão do `sexo`, pelo mesmo motivo. */
+   cair. É a mesma decisão do `sexo`, pelo mesmo motivo.
+
+   ====================================================== 82 ================
+   E A DEGRADAÇÃO ERA TUDO OU NADA, O QUE CUSTOU O `sexo`.
+
+   Era uma lista só: se QUALQUER opcional fosse recusada, a segunda tentativa
+   pedia apenas `COLUNAS_ESSENCIAIS`, e `sexo` não é essencial. Ou seja, uma
+   coluna sem GRANT desligava as outras duas junto.
+
+   Aconteceu. A 81 criou `identidade_reivindicada` e esqueceu o `grant
+   select`. Medido, com o GRANT real do banco e quatro pessoas com sexo
+   F, F, M, M:
+
+     pedido 1 · ...,conferido,sexo,identidade_reivindicada,pessoas(nome) -> 42501
+     pedido 2 · ...,conferido                                            -> sem sexo
+     sexo depois de montarEstado ...................... todos NULL
+     quem entra em BANHEIRO FEMININO .................. NINGUÉM (havia 2)
+     quem entra em GABINETE E BANHEIRO MASCULINO ...... NINGUÉM (havia 2)
+     e a tela do Time: "4 pessoas estão sem informar se é homem ou mulher"
+
+   A regra do prédio (48, 49, 63) ficou desligada por uma linha de GRANT que
+   ninguém escreveu, e a tela explicou pelo motivo errado.
+
+   Agora a degradação é POR COLUNA: a segunda tentativa remove só a opcional
+   que o banco recusou e tenta de novo, uma de cada vez. O custo de esquecer
+   um GRANT passa a ser exatamente a coluna esquecida.
+
+   A `82-a-coluna-da-81-nasceu-sem-grant...sql` fecha o outro lado: o GRANT
+   de `voluntarios` é relido do catálogo e `voluntarios_grant_conferir()`
+   responde, em todo `banco-do-zero.sh`, se alguma coluna ficou de fora. Este
+   código aqui é a rede; aquilo é a regra. */
 const COLUNAS_OPCIONAIS = ['sexo', 'identidade_reivindicada', 'pessoas(nome)'];
 const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
 
@@ -441,21 +471,49 @@ async function lerCultos(s: any, equipeId: string, desde: string) {
 }
 
 async function lerVoluntarios(s: any, equipeId: string) {
-  const pede = (cols: string) =>
-    s.from('voluntarios').select(cols, CONTA).eq('equipe_id', equipeId).order('nome');
+  const pede = (cols: string[]) =>
+    s.from('voluntarios').select([COLUNAS_ESSENCIAIS, ...cols].join(','), CONTA)
+      .eq('equipe_id', equipeId).order('nome');
 
-  const r = await pede(COLUNAS_VOLUNTARIO);
+  /* CAMINHO NORMAL: uma consulta, com tudo. É o de todo dia. */
+  const r = await pede(COLUNAS_OPCIONAIS);
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
 
-  /* segunda tentativa sem as opcionais. Se ESTA falhar, o erro sobe: aí não é
-     coluna nova sem grant, é a tabela fechada, e esconder isso seria pior. */
-  const r2 = await pede(COLUNAS_ESSENCIAIS);
-  if (r2?.error) return r2;
-  if (typeof console !== 'undefined') {
-    console.warn('[ponte] o banco recusou', COLUNAS_OPCIONAIS.join(', '),
-      '— segui sem essa(s) coluna(s). Falta um GRANT.');
+  /* 82 · CAMINHO RUIM: descobre QUAIS, em vez de desistir de todas.
+     O PostgREST não diz qual coluna recusou de um jeito em que se possa
+     confiar (o código varia entre 42501 e PGRST204, e o nome nem sempre vem
+     na mensagem), então em vez de ler a mensagem, pergunta uma por uma:
+     essenciais + UMA opcional. O que passa, passa.
+
+     São N+1 consultas, e só aqui — quando o banco já está errado e a
+     alternativa era perder as três. Com três opcionais, quatro idas. */
+  const boas: string[] = [];
+  const caidas: string[] = [];
+  for (const c of COLUNAS_OPCIONAIS) {
+    const teste = await pede([c]);
+    if (teste?.error && bancoRecusouColuna(teste.error)) caidas.push(c);
+    else if (teste?.error) return teste;   /* não é coluna: é a tabela fechada */
+    else boas.push(c);
   }
+  if (!boas.length) {
+    /* nem as essenciais sozinhas? então o erro não era de coluna opcional, e
+       esconder isso faria a tela do líder mentir. O erro sobe. */
+    const so = await pede([]);
+    if (so?.error) return so;
+    avisarGrant(caidas);
+    return so;
+  }
+  const r2 = await pede(boas);
+  if (r2?.error) return r2;
+  avisarGrant(caidas);
   return r2;
+}
+
+function avisarGrant(caidas: string[]) {
+  if (!caidas.length || typeof console === 'undefined') return;
+  console.warn('[ponte] o banco recusou', caidas.join(', '),
+    '— segui sem essa(s) coluna(s), e COM as outras. Falta um GRANT:'
+    + ' rode a migracao 82, ou `select * from voluntarios_grant_conferir()` para ver quais.');
 }
 
 /* A carga olha no máximo 200 dias para trás. Sem a janela, cada troca de

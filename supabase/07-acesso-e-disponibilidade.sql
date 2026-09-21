@@ -1,3 +1,26 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   `create or replace function` nao e idempotente NO TEMPO, e `drop function`
+   + `create function` e pior: passa por cima ate de mudanca de tipo de
+   retorno. Os dois gravam a versao deste arquivo por cima da que estiver la,
+   seja ela mais nova ou nao, e sem um aviso.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     equipe_publica (a 14 refez com `drop function` + `create function`, que passa
+     por cima ate de mudanca de tipo de retorno)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 7. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada — e e assim que tem que ser, senao o rebuild do
+   repositorio parava aqui.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(7);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    07 — ACESSO (fecha a brecha dos 4 dígitos)
 

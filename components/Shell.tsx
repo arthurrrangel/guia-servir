@@ -68,8 +68,13 @@ let _cacheEquipes: Equipe[] = [];
 let _cacheAtiva = '';
 
 export default function Shell({ children }: { children: React.ReactNode }) {
-  const [fase, setFase] = useState<'carregando' | 'sem-conexao' | 'sem-login' | 'sem-acesso' | 'sem-equipe' | 'pronto'>(
+  /* 'sem-carga' (82): a carga FRIA falhou. Sem esta fase, o Shell seguia para
+     'pronto' com `estadoVazio()`, e a tela do líder escrevia "Ainda não tem
+     time" para um ministério com doze pessoas no banco. Ver o bloco em
+     `recarregar`. */
+  const [fase, setFase] = useState<'carregando' | 'sem-conexao' | 'sem-login' | 'sem-acesso' | 'sem-equipe' | 'sem-carga' | 'pronto'>(
     _cacheAtiva && _cacheEstado.has(_cacheAtiva) ? 'pronto' : 'carregando');
+  const [erroCarga, setErroCarga] = useState('');
   const [S, setS] = useState<Estado>(() => _cacheEstado.get(_cacheAtiva) || estadoVazio());
   const [equipes, setEquipes] = useState<Equipe[]>(_cacheEquipes);
   const [equipeId, setEquipeId] = useState<string>(_cacheAtiva);
@@ -100,6 +105,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   /* nova referência do mesmo Estado: força o React a repintar com o que a ação
      acabou de mudar em memória, sem esperar o servidor. */
   const pinta = useCallback(() => setS(s => ({ ...s })), []);
+  /* a última falha de carga, em texto já humano. Existe porque `aviso()` é
+     passageiro e a carga fria precisa de algo que fique. */
+  const falhaDaCarga = useRef('');
 
   /* IMPORTANTE: entre o await e o setS, o líder pode ter trocado de ministério.
      Sem revalidar, o estado da equipe A caía dentro da equipe B — e o próximo
@@ -117,7 +125,36 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     } catch (e: any) {
       if (idAtivo.current !== id) return null;
       if (String(e?.message || e).includes('JWT') || e?.code === 'PGRST301') setFase('sem-login');
-      else aviso(aviseHumano(e, 'carregar esta tela'));
+      else {
+        /* 82 · a falha fica REGISTRADA, e não só piscando.
+
+           `aviso()` some sozinho em 2,2 a 8 segundos (a conta está logo
+           acima). Numa RECARGA isso basta: a tela anterior continua na frente
+           do usuário e ele sabe que algo não atualizou. Na carga FRIA não
+           basta, porque não há tela anterior — o `S` continua sendo
+           `estadoVazio()` e, oito segundos depois, não sobra nenhuma pista.
+
+           Medido em 21/09, com três falhas reais (5xx do PostgREST em
+           `funcoes`, leitura cortada em `cultos`, RLS em `habilidades`):
+
+             fase da tela ....... 'pronto'
+             Estado que sobra ... voluntarios=0 funcoes=0 escalas=0
+             /time escreve ...... "Ainda não tem time"
+                                  "Sem saber quem sabe fazer o quê, não existe rodízio"
+             /escala escreve .... "Time vazio. Cadastre as pessoas na aba Time"
+             o seletor do topo .. "Louvor · 0"
+             e o aviso some em .. 4,6 a 8 segundos
+
+           Palavra por palavra a tela de um ministério recém-criado, com as
+           doze pessoas intactas no banco. `app/equipe/[slug]/Lista.tsx` já
+           tinha nomeado e consertado esta classe ("vazio e falha eram o mesmo
+           desenho"); o Shell não foi junto.
+
+           O erro fica aqui, e quem chama decide: recarga mostra o aviso
+           passageiro, carga fria vira a fase 'sem-carga'. */
+        falhaDaCarga.current = aviseHumano(e, 'carregar esta tela');
+        aviso(falhaDaCarga.current);
+      }
       return null;
     }
   }, [aviso]);
@@ -222,8 +259,17 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           idAtivo.current = alvo; _cacheAtiva = alvo;
           nomeAtivo.current = lista.find(e => e.id === alvo)?.nome || '';
           setEquipeId(alvo);
-          await recarregar();
-          if (vivo) setFase('pronto');
+          falhaDaCarga.current = '';
+          const carregou = await recarregar();
+          if (!vivo) return;
+          if (!carregou && falhaDaCarga.current) {
+            /* 82 · carga fria falhou: NÃO segue para 'pronto' com o estado
+               vazio. Ver o bloco em `recarregar`. */
+            setErroCarga(falhaDaCarga.current);
+            setFase('sem-carga');
+            return;
+          }
+          setFase('pronto');
           /* os vínculos da própria pessoa. Falha aqui não atrapalha nada: é
              um atalho a mais, não um requisito da tela. O erro vem no objeto
              de resposta do supabase-js, não como rejeição, então não há
@@ -272,6 +318,19 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     </main>
   );
   if (fase === 'sem-equipe') return <PrimeiraEquipe aoCriar={async (id) => { const l = await recarregarEquipes(); trocarEquipe(id, l); }} />;
+  /* 82 · a carga falhou, e isto NÃO é "não tem nada". A diferença entre as
+     duas é a diferença entre "cadastre seu time" e "seu time está lá, eu é
+     que não consegui ler". */
+  if (fase === 'sem-carga') return (
+    <main style={{ maxWidth: 460, paddingTop: 80 }} className="centro">
+      <h1>Não consegui carregar</h1>
+      <p className="dim" style={{ margin: '10px 0 6px' }}>{erroCarga}</p>
+      <p className="dim" style={{ margin: '0 0 20px', fontSize: 14 }}>
+        Seus dados continuam no lugar. Isto é uma falha de leitura, não um ministério vazio.
+      </p>
+      <button className="pri" onClick={() => location.reload()}>Tentar de novo</button>
+    </main>
+  );
 
   const equipe = equipes.find(e => e.id === equipeId) || null;
   const navItens = ABAS.map(a => ({ ...a, on: caminho === a.href }));

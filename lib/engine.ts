@@ -647,10 +647,38 @@ export function cobrarDoDia(S: Estado, data: string): CobrancaDoDia {
   const slots = S.escalas[data]?.slots || {};
   const pendentes: CobrancaDoDia['pendentes'] = [];
   const vagou: CobrancaDoDia['vagou'] = [];
-  /* só os postos que ESTE dia tem. Um slot gravado numa função que não existe
-     mais no dia (o líder mudou `tipos` depois de montar) não vira cobrança:
-     o caminho dele é a tela, não o e-mail. */
+  /* Um slot gravado numa função que não existe mais NESTE DIA (o líder mudou
+     `tipos` depois de montar) não vira cobrança: o caminho dele é a tela, não
+     o e-mail.
+
+     ======================================================= 82b =============
+     MAS "NÃO EXISTE NESTE DIA" NÃO É "FOI OCULTADO DA ESCALA".
+
+     A primeira versão usava só `funcoesDoDia`, que passa por `funcoesAtivas`
+     e filtra `ativa`. Com isso, um posto que o líder OCULTOU depois de montar
+     o mês levava junto a pendência de quem estava escalado nele. Medido:
+
+       posto desativado com alguém pendente ..... {pendentes:[], vagou:[], vagas:[]}
+       a conta velha (todo slot com vid) ........ ['PROJEÇÃO']
+
+     E com as três listas vazias o cron cai em `ok: true` e o domingo é
+     reportado como resolvido. Antes desta rodada, aquela pessoa era cobrada.
+
+     Não é hipótese: `app/ajustes/page.tsx` tem um botão de um toque,
+     "Ocultar da escala", e `lerFuncoes` não filtra `ativa`, então a
+     escalação continua existindo no estado.
+
+     Ocultar um posto é dizer "não monte mais este daqui", e não "esqueça
+     quem já está escalado nele". Quem já está escalado ou vai servir, e
+     precisa confirmar, ou vai ser tirado por alguém — as duas coisas passam
+     por ALGUÉM SABER. Então a lista de postos cobráveis é a do dia MAIS os
+     inativos que já têm gente. `vagas` continua saindo de `vagasDe`, que usa
+     só os ativos: posto oculto e VAZIO não é vaga a preencher, e aí o filtro
+     está certo. */
   const doDia = new Set(funcoesDoDia(S, data).map(f => f.nome));
+  for (const f of S.funcoes) {
+    if (f.ativa === false && slots[f.nome]?.vid) doDia.add(f.nome);
+  }
   for (const [funcao, sl] of Object.entries(slots)) {
     if (!sl?.vid || !doDia.has(funcao)) continue;
     const st = (sl.status || 'pendente') as Status;
