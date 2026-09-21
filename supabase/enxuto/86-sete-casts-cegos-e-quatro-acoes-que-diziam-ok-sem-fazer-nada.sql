@@ -1,0 +1,576 @@
+do $tranca$begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(86);
+  end if;
+end
+$tranca$;
+
+begin;
+
+do $tetos$declare
+  v_col text; v_teto int;
+  COLUNAS text[][] := array[
+    ['conclusao','4000'], ['cancelada_motivo','2000'], ['travada_nota','2000'],
+    ['impacto','2000'], ['objetivo','4000'], ['local','200'], ['publico','200'],
+    ['sem_prazo_porque','500'], ['atraso_motivo','2000'], ['aprovacao_nota','2000']];
+  i int;
+begin
+  for i in 1 .. array_length(COLUNAS, 1) loop
+    v_col := COLUNAS[i][1]; v_teto := COLUNAS[i][2]::int;
+    execute format('alter table demandas.demandas drop constraint if exists %I', 'ck_tam_'||v_col);
+    execute format('alter table demandas.demandas add constraint %I check (%I is null or length(%I) <= %s) not valid',
+                   'ck_tam_'||v_col, v_col, v_col, v_teto);
+  end loop;
+end
+$tetos$;
+
+alter table demandas.eventos drop constraint if exists ck_tam_texto;
+alter table demandas.eventos add constraint ck_tam_texto
+  check (texto is null or length(texto) <= 4000) not valid;
+
+create or replace function demandas.fn_historico() returns trigger
+language plpgsql as $function$
+declare
+  v_m uuid := nullif(current_setting('demandas.membro', true), '')::uuid;
+begin
+  if new.status is distinct from old.status then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para, texto)
+      values (new.id, v_m, 'status', old.status, new.status,
+              case new.status
+                when 'travada'   then new.travada_nota
+                when 'concluida' then new.conclusao
+                when 'cancelada' then new.cancelada_motivo
+                else null end);
+  end if;
+  if new.responsavel_id is distinct from old.responsavel_id then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'responsavel',
+              (select nome from demandas.membros where id = old.responsavel_id),
+              (select nome from demandas.membros where id = new.responsavel_id));
+  end if;
+  if new.setor_responsavel is distinct from old.setor_responsavel then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'setor',
+              (select nome from demandas.setores where id = old.setor_responsavel),
+              (select nome from demandas.setores where id = new.setor_responsavel));
+  end if;
+  if new.prazo is distinct from old.prazo then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'prazo', old.prazo::text, new.prazo::text);
+  end if;
+  if new.prioridade is distinct from old.prioridade then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'prioridade', old.prioridade, new.prioridade);
+  end if;
+  if new.aprovacao is distinct from old.aprovacao then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para, texto)
+      values (new.id, v_m, 'aprovacao', old.aprovacao, new.aprovacao, new.aprovacao_nota);
+  end if;
+  if new.reaberturas > old.reaberturas then
+    insert into demandas.eventos (demanda_id, membro_id, tipo)
+      values (new.id, v_m, 'reabertura');
+  end if;
+
+  /* ---- 86 · O QUE ELE NAO OLHAVA ------------------------------------
+     `orcamento` e o mais caro: mudar o valor de uma compra JA APROVADA nao
+     deixava rastro nenhum, e a ficha ficava igual nos dois casos. */
+  if new.orcamento is distinct from old.orcamento then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'orcamento',
+              to_char(old.orcamento, 'FM999G999G990D00'),
+              to_char(new.orcamento, 'FM999G999G990D00'));
+  end if;
+  if new.titulo is distinct from old.titulo then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'titulo', old.titulo, new.titulo);
+  end if;
+  /* descricao pode ter 20 mil letras: o evento guarda que MUDOU, nao o texto
+     inteiro duas vezes. O historico e para saber que mexeram, e quem. */
+  if new.descricao is distinct from old.descricao then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, texto)
+      values (new.id, v_m, 'descricao', 'A descrição foi reescrita.');
+  end if;
+  /* o motivo do atraso sumia sem rastro no `reabrir` */
+  if old.atraso_motivo is not null and new.atraso_motivo is null then
+    insert into demandas.eventos (demanda_id, membro_id, tipo, de, para)
+      values (new.id, v_m, 'atraso', old.atraso_motivo, null);
+  end if;
+  return null;
+end $function$;
+
+create or replace function public.troca_unica(s text, antes text, depois text, etiqueta text)
+returns text language plpgsql immutable as $fn$
+declare v_n int;
+begin
+  v_n := (length(s) - length(replace(s, antes, ''))) / nullif(length(antes), 0);
+  if v_n is distinct from 1 then
+    raise exception E'TROCA "%" casou % vez(es), e precisa casar exatamente 1.\n'
+      '  O banco nao esta onde este arquivo pensa que esta. Nada foi gravado.\n'
+      '  A CAUSA MAIS PROVAVEL e este arquivo ja ter sido aplicado: uma migracao\n'
+      '  cirurgica procura o texto ANTIGO, e depois de aplicada ele nao existe\n'
+      '  mais. Confira com: select max(n) from schema_versao;', etiqueta, coalesce(v_n, 0);
+  end if;
+  return replace(s, antes, depois);
+end $fn$;
+
+comment on function public.troca_unica(text,text,text,text) is
+  'Troca um trecho de um corpo de funcao lido por pg_get_functiondef, exigindo '
+  'que o trecho exista exatamente uma vez. Ver a migracao 86.';
+
+do $cirurgia$declare
+  src text; novo text;
+begin
+
+  select pg_get_functiondef('public.dem_mover(text,integer,text,jsonb)'::regprocedure) into src;
+  novo := src;
+
+  novo := public.troca_unica(novo,
+    'if not demandas.pode_ver(m, d) then return jsonb_build_object(''ok'', false, ''erro'', ''SEM_ACESSO''); end if;
+',
+    'if not demandas.pode_ver(m, d) then
+    /* 86 · ERA ''SEM_ACESSO''. A diferenca entre as duas respostas contava,
+       para quem tivesse qualquer token valido, quantas demandas a igreja tem
+       e em que ritmo nascem: `numero` e sequencial. Nao vaza conteudo; vaza
+       volume. */
+    return jsonb_build_object(''ok'', false, ''erro'', ''NAO_EXISTE''); end if;
+', 'dem_mover: oraculo');
+
+  novo := public.troca_unica(novo,
+    'coalesce((p_d->>''interno'')::boolean, false) and demandas.pode_atender(m, d));',
+    'coalesce(nullif(p_d->>''interno'','''') in (''true'',''t''), false) and demandas.pode_atender(m, d));',
+    'dem_mover: cast de interno');
+
+  novo := public.troca_unica(novo,
+    'if demandas.falta_aprovacao(d) then return jsonb_build_object(''ok'', false, ''erro'', ''FALTA_APROVACAO''); end if;
+    update demandas.demandas
+       set responsavel_id = m.id, status = ''execucao'', travada_por = null, travada_nota = null',
+    'if demandas.falta_aprovacao(d) then return jsonb_build_object(''ok'', false, ''erro'', ''FALTA_APROVACAO''); end if;
+    /* 86 · Duas pessoas tocando em "assumir" no mesmo segundo: o `for update`
+       serializa, mas serializar nao decide. Sem esta guarda as duas escritas
+       acontecem em ordem e vence a ultima, e a primeira nao fica sabendo que
+       perdeu a demanda. */
+    if d.responsavel_id is not null and d.responsavel_id <> m.id then
+      return jsonb_build_object(''ok'', false, ''erro'', ''JA_TEM_DONO'',
+        ''quem'', (select x.nome from demandas.membros x where x.id = d.responsavel_id)); end if;
+    update demandas.demandas
+       set responsavel_id = m.id, status = ''execucao'', travada_por = null, travada_nota = null',
+    'dem_mover: assumir sem dono');
+
+  novo := public.troca_unica(novo,
+    'update demandas.demandas set prazo = nullif(p_d->>''prazo'','''')::date,
+      sem_prazo_porque = case when nullif(p_d->>''prazo'','''') is null
+                              then coalesce(v_txt, sem_prazo_porque) else sem_prazo_porque end
+     where id = d.id;',
+    '/* 86 · TRES COISAS AQUI.
+       1. cast cego: "amanha" virava `22P02 invalid input syntax for type
+          date`, e a tela imprimia isso.
+       2. `{}` (a tela manda isso quando o campo volta vazio) APAGAVA o prazo
+          e respondia ok. Agora sem a chave nao mexe em nada, e apagar e um
+          pedido explicito.
+       3. apagar o prazo sem dizer por que deixava `ck_prazo` satisfeita pelo
+          texto que ja estava la, de outra vez. */
+    if not (p_d ? ''prazo'') then return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_NAO_VEIO''); end if;
+    if nullif(p_d->>''prazo'','''') is not null
+       and p_d->>''prazo'' !~ ''^[0-9]{4}-[0-9]{2}-[0-9]{2}$'' then
+      return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_INVALIDO''); end if;
+    if nullif(p_d->>''prazo'','''') is null and v_txt is null then
+      return jsonb_build_object(''ok'', false, ''erro'', ''SEM_PRAZO_PRECISA_MOTIVO''); end if;
+    begin
+      update demandas.demandas set prazo = nullif(p_d->>''prazo'','''')::date,
+        sem_prazo_porque = case when nullif(p_d->>''prazo'','''') is null
+                                then v_txt else sem_prazo_porque end
+       where id = d.id;
+    exception when invalid_datetime_format or datetime_field_overflow then
+      return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_INVALIDO'');
+    end;',
+    'dem_mover: prazo');
+
+  novo := public.troca_unica(novo,
+    'update demandas.demandas
+       set setor_responsavel = (p_d->>''setor'')::uuid, responsavel_id = null,
+           status = case when status = ''execucao'' then ''aberta'' else status end
+     where id = d.id;',
+    '/* 86 · a trava NAO vai junto. A demanda chegava no setor novo travada por
+       "esperando informacao" de uma conversa que aconteceu no setor antigo, e
+       quem recebe nao tem como saber do que se trata. A trava de APROVACAO
+       fica, porque essa nao e do setor: e do dinheiro. */
+    update demandas.demandas
+       set setor_responsavel = (p_d->>''setor'')::uuid, responsavel_id = null,
+           status = case when demandas.falta_aprovacao(d) then ''travada''
+                         when status in (''execucao'',''travada'') then ''aberta''
+                         else status end,
+           travada_por = case when demandas.falta_aprovacao(d) then ''aprovacao'' else null end,
+           travada_nota = case when demandas.falta_aprovacao(d) then travada_nota else null end
+     where id = d.id;',
+    'dem_mover: redirecionar leva a trava');
+
+  novo := public.troca_unica(novo,
+    'if v_txt is null then return jsonb_build_object(''ok'', false, ''erro'', ''CONCLUSAO_VAZIA''); end if;
+    update demandas.demandas
+       set status = ''concluida'', conclusao = v_txt, concluida_em = now(),',
+    'if v_txt is null then return jsonb_build_object(''ok'', false, ''erro'', ''CONCLUSAO_VAZIA''); end if;
+    /* 86 · A coluna existe, a tela tem o campo, e o servidor aceitava concluir
+       51 dias depois do prazo sem uma palavra. Qualquer indicador de
+       pontualidade calculado em cima disso e ficcao. */
+    if d.prazo is not null and d.prazo < current_date
+       and demandas.limpo(p_d->>''atraso'') is null then
+      return jsonb_build_object(''ok'', false, ''erro'', ''ATRASO_PRECISA_MOTIVO''); end if;
+    update demandas.demandas
+       set status = ''concluida'', conclusao = v_txt, concluida_em = now(),',
+    'dem_mover: concluir atrasada');
+
+  novo := public.troca_unica(novo,
+    'if not exists (select 1 from demandas.setores
+                    where id = nullif(p_d->>''setor'','''')::uuid and ativo and atende) then',
+    'if nullif(p_d->>''setor'','''') is null
+       or p_d->>''setor'' !~* ''^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'' then
+      return jsonb_build_object(''ok'', false, ''erro'', ''SETOR_INVALIDO''); end if;
+    if not exists (select 1 from demandas.setores
+                    where id = (p_d->>''setor'')::uuid and ativo and atende) then',
+    'dem_mover: cast de setor');
+
+  execute novo;
+
+  select pg_get_functiondef('public.dem_abrir(text,jsonb)'::regprocedure) into src;
+  novo := src;
+
+  novo := public.troca_unica(novo,
+    'select * into c from demandas.categorias where id = (p_d->>''categoria_id'')::uuid and ativa;',
+    '/* 86 · cast cego. Uma categoria que nao e uuid (link velho no celular,
+       bug de tela) virava `22P02 invalid input syntax for type uuid` e a
+       tela imprimia o nome do tipo do Postgres para uma pessoa da igreja. */
+  if coalesce(p_d->>''categoria_id'','''') !~* ''^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'' then
+    return jsonb_build_object(''ok'', false, ''erro'', ''CATEGORIA_INVALIDA''); end if;
+  select * into c from demandas.categorias where id = (p_d->>''categoria_id'')::uuid and ativa;',
+    'dem_abrir: cast de categoria');
+
+  novo := public.troca_unica(novo,
+    'v_prazo := nullif(p_d->>''prazo'','''')::date;
+  v_evd   := nullif(p_d->>''evento_data'','''')::date;',
+    '/* 86 · os outros tres casts cegos, e as duas regras que faltavam */
+  if nullif(p_d->>''prazo'','''') is not null and p_d->>''prazo'' !~ ''^[0-9]{4}-[0-9]{2}-[0-9]{2}$'' then
+    return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_INVALIDO''); end if;
+  if nullif(p_d->>''evento_data'','''') is not null and p_d->>''evento_data'' !~ ''^[0-9]{4}-[0-9]{2}-[0-9]{2}$'' then
+    return jsonb_build_object(''ok'', false, ''erro'', ''EVENTO_DATA_INVALIDA''); end if;
+  if nullif(p_d->>''orcamento'','''') is not null then
+    if p_d->>''orcamento'' !~ ''^[0-9]+([.,][0-9]{1,2})?$'' then
+      return jsonb_build_object(''ok'', false, ''erro'', ''ORCAMENTO_INVALIDO''); end if;
+  end if;
+  /* `exige_orcamento` existe desde a 50, a tela de Ajustes deixa ligar, e
+     nenhuma linha do banco olhava para ela. */
+  if c.exige_orcamento and nullif(p_d->>''orcamento'','''') is null then
+    return jsonb_build_object(''ok'', false, ''erro'', ''ORCAMENTO_OBRIGATORIO''); end if;
+  begin
+    v_prazo := nullif(p_d->>''prazo'','''')::date;
+    v_evd   := nullif(p_d->>''evento_data'','''')::date;
+  exception when invalid_datetime_format or datetime_field_overflow then
+    return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_INVALIDO'');
+  end;
+  /* prazo no passado no momento da abertura e sempre engano de digitacao: a
+     demanda nasceria ja atrasada, e a fila de quem atende passaria a mentir
+     no primeiro dia. */
+  if v_prazo is not null and v_prazo < current_date then
+    return jsonb_build_object(''ok'', false, ''erro'', ''PRAZO_NO_PASSADO''); end if;',
+    'dem_abrir: casts de data e orcamento');
+
+  novo := public.troca_unica(novo,
+    'nullif(p_d->>''orcamento'','''')::numeric,',
+    'replace(nullif(p_d->>''orcamento'',''''), '','', ''.'')::numeric,',
+    'dem_abrir: orcamento com virgula');
+
+  execute novo;
+
+  select pg_get_functiondef('public.dem_ver(text,integer)'::regprocedure) into src;
+  novo := src;
+  novo := public.troca_unica(novo,
+    'if not demandas.pode_ver(m, d) then return jsonb_build_object(''ok'', false, ''erro'', ''SEM_ACESSO''); end if;',
+    'if not demandas.pode_ver(m, d) then return jsonb_build_object(''ok'', false, ''erro'', ''NAO_EXISTE''); end if;',
+    'dem_ver: oraculo');
+  execute novo;
+end
+$cirurgia$;
+
+alter table demandas.demandas drop constraint if exists ck_orcamento;
+alter table demandas.demandas add constraint ck_orcamento
+  check (orcamento is null or orcamento >= 0) not valid;
+
+do $conf$declare
+  falhas text[] := '{}'; avisos text[] := '{}';
+  v_set uuid; v_set2 uuid; v_cat uuid; v_cat_orc uuid;
+  v_ana uuid; v_bia uuid; v_ges uuid;
+  r jsonb; n int; v_i int; v_ch text; v_d date; base jsonb; v_q int; v_json text;
+begin
+  insert into demandas.setores (nome, slug, ativo, atende, ordem)
+    values ('CONF 86 setor', 'conf-86-setor', true, true, 94) returning id into v_set;
+  insert into demandas.setores (nome, slug, ativo, atende, ordem)
+    values ('CONF 86 outro', 'conf-86-outro', true, true, 95) returning id into v_set2;
+  insert into demandas.categorias (grupo, nome, setor_id, exige_aprovacao, exige_orcamento, ativa)
+    values ('CONF 86', 'livre', v_set, false, false, true) returning id into v_cat;
+  insert into demandas.categorias (grupo, nome, setor_id, exige_aprovacao, exige_orcamento, ativa)
+    values ('CONF 86', 'com orcamento', v_set, false, true, true) returning id into v_cat_orc;
+  insert into demandas.membros (nome, token, papel, setor_id, ativo)
+    values ('CONF86 Ana', 'conf86-ana', 'responsavel', v_set, true) returning id into v_ana;
+  insert into demandas.membros (nome, token, papel, setor_id, ativo)
+    values ('CONF86 Bia', 'conf86-bia', 'responsavel', v_set, true) returning id into v_bia;
+  insert into demandas.membros (nome, token, papel, setor_id, ativo)
+    values ('CONF86 Fora', 'conf86-fora', 'responsavel', v_set2, true);
+
+  base := jsonb_build_object('descricao','Pedido da conferencia da migracao 86.',
+                             'setor_solicitante', v_set, 'prazo', (current_date + 30)::text,
+                             'categoria_id', v_cat);
+
+  for v_ch in select unnest(array[
+      '{"categoria_id":"nao-e-uuid"}',
+      '{"prazo":"amanha"}',
+      '{"evento_data":"32/13/2026"}',
+      '{"orcamento":"mil reais"}']) loop
+    begin
+      r := public.dem_abrir('conf86-ana', base || v_ch::jsonb);
+      if coalesce((r->>'ok')::boolean, false) then
+        falhas := falhas || format('1: dem_abrir aceitou %s', v_ch);
+      elsif r->>'erro' = 'REGRA' or coalesce(r->>'regra','') ~* 'invalid input syntax' then
+        falhas := falhas || format('1: %s vazou o erro cru do Postgres: %s', v_ch, r::text);
+      end if;
+    exception when others then
+      falhas := falhas || format('1: %s LEVANTOU em vez de devolver erro: %s', v_ch, SQLERRM);
+    end;
+  end loop;
+
+  r := public.dem_abrir('conf86-ana', base || '{"titulo":"Base boa"}'::jsonb);
+  n := (r->>'numero')::int;
+  for v_ch in select unnest(array[
+      '{"prazo":"amanha"}', '{"prazo":"2026-99-99"}']) loop
+    begin
+      r := public.dem_mover('conf86-ana', n, 'prazo', v_ch::jsonb);
+      if coalesce((r->>'ok')::boolean, false) then
+        falhas := falhas || format('1: dem_mover prazo aceitou %s', v_ch);
+      elsif coalesce(r->>'regra','') ~* 'invalid input syntax' then
+        falhas := falhas || format('1: dem_mover prazo vazou o erro cru: %s', r::text);
+      end if;
+    exception when others then
+      falhas := falhas || format('1: dem_mover prazo %s LEVANTOU: %s', v_ch, SQLERRM);
+    end;
+  end loop;
+  begin
+    r := public.dem_mover('conf86-ana', n, 'redirecionar', '{"setor":"x"}'::jsonb);
+    if coalesce(r->>'erro','') <> 'SETOR_INVALIDO' then
+      falhas := falhas || format('1: redirecionar com setor invalido devolveu %s', r::text);
+    end if;
+  exception when others then
+    falhas := falhas || format('1: redirecionar com setor invalido LEVANTOU: %s', SQLERRM);
+  end;
+  begin
+    r := public.dem_mover('conf86-ana', n, 'comentar', '{"texto":"a","interno":"talvez"}'::jsonb);
+    if not coalesce((r->>'ok')::boolean, false) then
+      falhas := falhas || format('1: comentar com interno="talvez" devia tratar como falso, e deu %s', r::text);
+    end if;
+  exception when others then
+    falhas := falhas || format('1: comentar com interno="talvez" LEVANTOU: %s', SQLERRM);
+  end;
+
+  select prazo into v_d from demandas.demandas where numero = n;
+
+  for v_json in select unnest(array['{}', '{"texto":"so fechei o formulario"}']) loop
+    r := public.dem_mover('conf86-ana', n, 'prazo', v_json::jsonb);
+    if coalesce((r->>'ok')::boolean, false) then
+      falhas := falhas || format('2: `prazo` sem a chave respondeu OK para %s', v_json);
+    end if;
+    if (select prazo from demandas.demandas where numero = n) is distinct from v_d then
+      falhas := falhas || format('2: `prazo` sem a chave APAGOU a data que estava la (%s)', v_json);
+    end if;
+  end loop;
+  r := public.dem_mover('conf86-ana', n, 'prazo', '{"prazo":null}'::jsonb);
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '2: apagou o prazo sem exigir o motivo'::text;
+  elsif r->>'erro' <> 'SEM_PRAZO_PRECISA_MOTIVO' then
+
+    falhas := falhas || format('2: apagar o prazo sem motivo foi barrado pela CHECK e nao pelo guarda: %s', r::text);
+  end if;
+  r := public.dem_mover('conf86-ana', n, 'prazo', '{"prazo":null,"texto":"o fornecedor ainda nao respondeu"}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('2: apagar o prazo COM motivo foi recusado: %s', r::text);
+  end if;
+  if (select sem_prazo_porque from demandas.demandas where numero = n)
+     <> 'o fornecedor ainda nao respondeu' then
+    falhas := falhas || '2: o motivo de nao ter prazo nao foi gravado'::text;
+  end if;
+  r := public.dem_mover('conf86-ana', n, 'prazo', jsonb_build_object('prazo',(current_date+10)::text));
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('2: por uma data nova parou de funcionar: %s', r::text);
+  end if;
+
+  r := public.dem_mover('conf86-ana', n, 'assumir', '{}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('3: a primeira pessoa nao conseguiu assumir: %s', r::text);
+  end if;
+  r := public.dem_mover('conf86-bia', n, 'assumir', '{}'::jsonb);
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '3: a segunda pessoa roubou a demanda sem nenhum aviso'::text;
+  elsif r->>'quem' is null then
+    falhas := falhas || '3: recusou sem dizer de quem a demanda ja e'::text;
+  end if;
+
+  r := public.dem_mover('conf86-ana', n, 'assumir', '{}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '3: quem ja e dono nao consegue mais tocar em assumir'::text;
+  end if;
+
+  perform public.dem_mover('conf86-ana', n, 'travar',
+    '{"motivo":"informacao","texto":"esperando o orcamento do fornecedor de Compras"}'::jsonb);
+  r := public.dem_mover('conf86-ana', n, 'redirecionar', jsonb_build_object('setor', v_set2));
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('4: redirecionar parou de funcionar: %s', r::text);
+  end if;
+  select status, coalesce(travada_por,'-') into v_ch, v_json from demandas.demandas where numero = n;
+  if v_ch = 'travada' or v_json <> '-' then
+    falhas := falhas || format('4: a demanda chegou no setor novo TRAVADA (status=%s, travada_por=%s) '
+      'por uma conversa do setor antigo', v_ch, v_json);
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || '{"titulo":"Vai atrasar"}'::jsonb);
+  v_i := (r->>'numero')::int;
+  update demandas.demandas set prazo = current_date - 51 where numero = v_i;
+  r := public.dem_mover('conf86-ana', v_i, 'concluir', '{"texto":"feito"}'::jsonb);
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '5: concluiu 51 dias depois do prazo sem uma palavra sobre o atraso'::text;
+  end if;
+  r := public.dem_mover('conf86-ana', v_i, 'concluir',
+        '{"texto":"feito","atraso":"o fornecedor sumiu"}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('5: concluir COM o motivo do atraso foi recusado: %s', r::text);
+  end if;
+  if (select atraso_motivo from demandas.demandas where numero = v_i) <> 'o fornecedor sumiu' then
+    falhas := falhas || '5: o motivo do atraso nao foi gravado'::text;
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || '{"titulo":"No prazo"}'::jsonb);
+  v_i := (r->>'numero')::int;
+  r := public.dem_mover('conf86-ana', v_i, 'concluir', '{"texto":"feito"}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('5: concluir NO PRAZO passou a pedir motivo de atraso: %s', r::text);
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || jsonb_build_object('titulo','Sem orcamento','categoria_id', v_cat_orc));
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '6: a categoria exige orcamento e a demanda nasceu sem'::text;
+  end if;
+  r := public.dem_abrir('conf86-ana', base || jsonb_build_object('titulo','Negativo','orcamento','-8000'));
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '6: aceitou uma compra de menos oito mil reais'::text;
+  end if;
+  r := public.dem_abrir('conf86-ana', base || jsonb_build_object('titulo','Com virgula',
+        'categoria_id', v_cat_orc, 'orcamento','1234,56'));
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('6: orcamento com virgula (o teclado brasileiro) foi recusado: %s', r::text);
+  end if;
+  if (select orcamento from demandas.demandas where numero = (r->>'numero')::int) <> 1234.56 then
+    falhas := falhas || '6: o orcamento com virgula nao virou o numero certo'::text;
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || jsonb_build_object('titulo','Ja nasce atrasada',
+        'prazo', (current_date - 5)::text));
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '7: a demanda nasceu ja atrasada; a fila de quem atende mente no primeiro dia'::text;
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || '{"titulo":"Demanda alheia para o oraculo"}'::jsonb);
+  v_i := (r->>'numero')::int;
+  if public.dem_ver('conf86-fora', v_i)->>'ok' = 'true' then
+    falhas := falhas || '8: quem e de outro setor ENXERGA a demanda; o caso nao mede oraculo nenhum'::text;
+  end if;
+  if (public.dem_ver('conf86-fora', v_i)->>'erro') is distinct from 'NAO_EXISTE' then
+    falhas := falhas || format('8: dem_ver diferencia demanda alheia de numero vazio: %s',
+                               coalesce(public.dem_ver('conf86-fora', v_i)->>'erro','<sem erro>'));
+  end if;
+  if (public.dem_ver('conf86-fora', 999999)->>'erro') is distinct from 'NAO_EXISTE' then
+    falhas := falhas || '8: dem_ver mudou a resposta para numero que nao existe'::text;
+  end if;
+  if (public.dem_mover('conf86-fora', v_i, 'comentar', '{"texto":"oi"}'::jsonb)->>'erro')
+       is distinct from 'NAO_EXISTE' then
+    falhas := falhas || '8: dem_mover ainda diferencia alheia de vazia'::text;
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || jsonb_build_object('titulo','Para o historico','orcamento','1000'));
+  v_i := (r->>'numero')::int;
+  update demandas.demandas set orcamento = 9000 where numero = v_i;
+  if not exists (select 1 from demandas.eventos e join demandas.demandas d on d.id = e.demanda_id
+                  where d.numero = v_i and e.tipo = 'orcamento') then
+    falhas := falhas || '9: mudar o orcamento de uma compra nao deixou rastro nenhum'::text;
+  end if;
+  update demandas.demandas set titulo = 'Titulo trocado' where numero = v_i;
+  if not exists (select 1 from demandas.eventos e join demandas.demandas d on d.id = e.demanda_id
+                  where d.numero = v_i and e.tipo = 'titulo') then
+    falhas := falhas || '9: trocar o titulo nao deixou rastro'::text;
+  end if;
+  update demandas.demandas set atraso_motivo = 'sumiu' where numero = v_i;
+  update demandas.demandas set atraso_motivo = null where numero = v_i;
+  if not exists (select 1 from demandas.eventos e join demandas.demandas d on d.id = e.demanda_id
+                  where d.numero = v_i and e.tipo = 'atraso') then
+    falhas := falhas || '9: apagar o motivo do atraso nao deixou rastro'::text;
+  end if;
+
+  r := public.dem_mover('conf86-ana', n, 'comentar', jsonb_build_object('texto', repeat('x', 200000)));
+  if coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || '10: um comentario de 200 mil letras entrou'::text;
+  end if;
+  select coalesce(max(length(e.texto)),0) into v_q from demandas.eventos e
+    join demandas.demandas d on d.id = e.demanda_id where d.setor_solicitante = v_set;
+  if v_q > 4000 then
+    falhas := falhas || format('10: o maior evento gravado tem %s letras', v_q);
+  end if;
+
+  r := public.dem_mover('conf86-ana', n, 'comentar', jsonb_build_object('texto', repeat('a', 3000)));
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('10: um comentario de 3 mil letras foi recusado: %s', r::text);
+  end if;
+
+  r := public.dem_abrir('conf86-ana', base || '{"titulo":"Caminho normal completo"}'::jsonb);
+  if not coalesce((r->>'ok')::boolean, false) then
+    falhas := falhas || format('11: abrir parou de funcionar: %s', r::text);
+  end if;
+  v_i := (r->>'numero')::int;
+  for v_ch, v_json in select * from (values
+      ('assumir','{}'), ('comentar','{"texto":"andando"}'),
+      ('prioridade','{"prioridade":"alta"}'),
+      ('travar','{"motivo":"terceiros","texto":"esperando"}'),
+      ('destravar','{"texto":"chegou"}'),
+      ('concluir','{"texto":"feito"}'),
+      ('reabrir','{"texto":"voltou"}')) x(a,b) loop
+    r := public.dem_mover('conf86-ana', v_i, v_ch, v_json::jsonb);
+    if not coalesce((r->>'ok')::boolean, false) then
+      falhas := falhas || format('11: %s parou de funcionar: %s', v_ch, r::text);
+    end if;
+  end loop;
+
+  select count(*) into v_q from demandas.eventos where length(texto) > 4000;
+  if v_q > 0 then
+    avisos := avisos || format('%s evento(s) ja gravado(s) passam de 4000 letras. A CHECK entrou '
+      'NOT VALID: eles continuam la e pesam em toda abertura daquelas fichas.', v_q);
+  end if;
+  select count(*) into v_q from demandas.demandas where orcamento < 0;
+  if v_q > 0 then
+    avisos := avisos || format('%s demanda(s) com orcamento negativo, de antes desta migracao.', v_q);
+  end if;
+
+  delete from demandas.eventos where demanda_id in
+    (select id from demandas.demandas where setor_solicitante in (v_set, v_set2));
+  delete from demandas.anexos where demanda_id in
+    (select id from demandas.demandas where setor_solicitante in (v_set, v_set2));
+  delete from demandas.demandas where setor_solicitante in (v_set, v_set2);
+  delete from demandas.membros where token like 'conf86-%';
+  delete from demandas.categorias where grupo = 'CONF 86';
+  delete from demandas.setores where slug in ('conf-86-setor','conf-86-outro');
+
+  foreach v_ch in array avisos loop raise notice '86 · AVISO: %', v_ch; end loop;
+  if array_length(falhas, 1) > 0 then
+    raise exception E'86 REPROVOU:\n  - %', array_to_string(falhas, E'\n  - ');
+  end if;
+  raise notice 'OK 86 · conferencia: 12 blocos. Nenhum cast cego vaza o Postgres, prazo nao apaga sozinho, assumir nao rouba, redirecionar nao leva a trava, concluir atrasada pede uma palavra, orcamento e obrigatorio quando a categoria pede e nunca negativo, o numero nao vira oraculo, o historico olha orcamento e titulo, e texto tem teto.';
+end
+$conf$;
+
+insert into schema_versao (n, arquivo)
+     values (86, '86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada.sql')
+on conflict (n) do update set arquivo = excluded.arquivo, aplicada_em = now();
+
+commit;
