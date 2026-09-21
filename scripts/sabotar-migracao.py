@@ -41,7 +41,12 @@ def troca(fn, antes, depois, schema='public'):
     casa e pior que sabotagem nenhuma, porque parece que a correcao esta
     testada. Por isso o `raise` quando nao casa.
     """
-    pat = r'\s+'.join(re.escape(t) for t in antes.split())
+    # Espaco NENHUM conta: o pattern permite qualquer arranjo de espaco entre
+    # dois caracteres quaisquer. Juntar por token nao basta, porque
+    # `pg_get_functiondef` quebra linha dentro de `filter (` e o token vira
+    # `(where` de um lado e `(` + `where` do outro. Isso silenciou duas
+    # sabotagens antes de eu perceber.
+    pat = r'\s*'.join(re.escape(c) for c in ''.join(antes.split()))
     return f"""do $sab$
 declare src text; novo text;
 begin

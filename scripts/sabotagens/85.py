@@ -1,4 +1,4 @@
-RESTAURA = [84, 85, 86]
+RESTAURA = [84, 85, 86, 87]
 CASOS = [
  {"nome": "url_boa volta a aceitar qualquer http(s)",
   "sql": "create or replace function demandas.url_boa(u text) returns boolean "

@@ -1,4 +1,4 @@
-RESTAURA = [84, 85, 86]
+RESTAURA = [84, 85, 86, 87]
 CASOS = [
  {"nome": "dem_ver volta a diferenciar alheia de inexistente",
   "sql": troca('dem_ver',
@@ -35,7 +35,7 @@ CASOS = [
 
  {"nome": "concluir atrasada volta a nao pedir nada",
   "sql": troca('dem_mover',
-    "if d.prazo is not null and d.prazo < current_date and demandas.limpo(p_d->>'atraso') is null then "
+    "if d.prazo is not null and d.prazo < demandas.hoje() and demandas.limpo(p_d->>'atraso') is null then "
     "return jsonb_build_object('ok', false, 'erro', 'ATRASO_PRECISA_MOTIVO'); end if;", ""),
   "espera": "5: concluiu 51 dias depois do prazo"},
 
@@ -53,7 +53,7 @@ CASOS = [
 
  {"nome": "prazo no passado volta a ser aceito na abertura",
   "sql": troca('dem_abrir',
-    "if v_prazo is not null and v_prazo < current_date then "
+    "if v_prazo is not null and v_prazo < demandas.hoje() then "
     "return jsonb_build_object('ok', false, 'erro', 'PRAZO_NO_PASSADO'); end if;", ""),
   "espera": "7: a demanda nasceu ja atrasada"},
 
