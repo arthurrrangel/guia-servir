@@ -222,7 +222,19 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
     return () => { vivo = false; };
   }, [aberta, c.id]);
 
+  /* DUAS GRAFIAS, E A DIFERENÇA IMPORTA. 21/09/2026, migração 64.
+     `nome` é o de quem TEM aquele telefone; `digitado` é o que a pessoa
+     escreveu na porta. Quando divergem, quem está aprovando precisa saber:
+     medido, um anônimo que sabe um telefone abre candidatura em nome de
+     terceiro, e a fila mostrava só o nome verdadeiro — a líder aprovava
+     achando que era alguém da casa, e a aprovação criava um vínculo no
+     cadastro daquela pessoa. O aviso não bloqueia nada: nome diferente tem
+     explicação banal (apelido, nome de casada, a mãe cadastrando pelo
+     telefone da família). Quem decide é quem conhece as pessoas. */
   const nome = c.pessoas?.nome?.trim() || 'Sem nome';
+  const digitado = (c.nome_informado || '').trim();
+  const outroNome = !!digitado && !!c.pessoas?.nome
+    && digitado.toLowerCase() !== c.pessoas.nome.trim().toLowerCase();
   const tel = c.pessoas?.telefone || '';
   const funcoes = (c.candidatura_funcoes || []).map(x => x.funcoes?.nome).filter(Boolean) as string[];
   const dias = diasAtras(c.criado_em);
@@ -259,7 +271,7 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
       <summary onClick={e => { e.preventDefault(); abrir(c.id); }}>
         <span className="lid-marca" aria-hidden="true" />
         <span>
-          <span className="lid-cand-nome">{nome}</span>
+          <span className="lid-cand-nome">{outroNome ? digitado : nome}</span>
           <span className="lid-cand-sub">
             {funcoes.length ? funcoes.join(' · ') : 'sem função marcada'}
           </span>
@@ -337,10 +349,24 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
           </>
         )}
 
+        {/* ESTE TELEFONE JÁ ESTÁ NO SISTEMA COM OUTRO NOME.
+            A frase é factual e não acusa ninguém: na maioria das vezes é
+            apelido ou nome de casada. Mas é a única coisa que separa isso de
+            uma candidatura aberta em nome de terceiro, e sem ela a aprovação
+            é às cegas. */}
+        {outroNome && (
+          <p className="lid-cand-alerta" role="note">
+            O nome escrito no cadastro foi <strong>{digitado}</strong>, mas este WhatsApp já
+            está no sistema como <strong>{nome}</strong>. Confirme com a pessoa antes de
+            aprovar: aprovar liga esta candidatura ao cadastro de {nomeInteiro(nome)}.
+          </p>
+        )}
+
         {/* O QUE ELA MANDOU */}
-        <span className="lid-cand-mini">O que {nomeInteiro(nome)} mandou</span>
+        <span className="lid-cand-mini">O que {nomeInteiro(outroNome ? digitado : nome)} mandou</span>
         <dl className="lid-cand-dl">
           <dt>Chegou</dt><dd>{dia(c.criado_em)} · {espera(dias)}</dd>
+          {outroNome && <><dt>Nome no sistema</dt><dd>{nome}</dd></>}
           <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>
           {c.pessoas?.email && <><dt>E-mail</dt><dd>{c.pessoas.email}</dd></>}
           <dt>Quer fazer</dt>

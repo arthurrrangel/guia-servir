@@ -111,10 +111,17 @@ export default function Candidatura() {
 
   const encerrada = d.etapa === 0;
   const na = d.artigo === 'a' ? 'na' : 'no';
+  /* O NOME PODE VIR NULO, DESDE A MIGRAÇÃO 64.
+     Ela parou de devolver o nome de QUEM TEM AQUELE TELEFONE para quem só
+     digitou o número, e candidatura antiga de pessoa que já existia não tem o
+     nome digitado gravado — naquela época ninguém guardava. Nesses casos a
+     tela fala sem nome em vez de falar com um vazio no meio da frase. */
   const primeiro = (d.nome || '').trim();
   const zap = d.whatsapp
     ? `https://wa.me/${d.whatsapp.length <= 11 ? '55' + d.whatsapp : d.whatsapp}` +
-      `?text=${encodeURIComponent(`Oi! Sou ${d.nome}, me cadastrei ${na} ${d.equipe} pelo site da GUIA.`)}`
+      `?text=${encodeURIComponent(primeiro
+        ? `Oi! Sou ${primeiro}, me cadastrei ${na} ${d.equipe} pelo site da GUIA.`
+        : `Oi! Me cadastrei ${na} ${d.equipe} pelo site da GUIA.`)}`
     : null;
 
   return (
@@ -127,7 +134,7 @@ export default function Candidatura() {
           style={{ objectPosition: focoDaArea(d.equipe_slug) }} alt="" />
         <div className="porta-hero-in">
           <span className="rot" style={{ color: 'rgba(255,255,255,.6)' }}>
-            {primeiro}, seu caminho {na} {d.equipe}
+            {primeiro ? `${primeiro}, seu` : 'Seu'} caminho {na} {d.equipe}
           </span>
           <h1 style={{ marginTop: 18 }}>{d.titulo}</h1>
           <p className="porta-hero-sub">{d.texto}</p>
@@ -224,10 +231,12 @@ export default function Candidatura() {
               <span className="vol-eq-rot">Onde quer servir</span>
               <span className="vol-eq-val">{d.funcoes?.length ? d.funcoes.join(' · ') : 'A definir na conversa'}</span>
             </div>
-            <div className="vol-eq-linha">
-              <span className="vol-eq-rot">Seu nome</span>
-              <span className="vol-eq-val">{d.nome}</span>
-            </div>
+            {primeiro && (
+              <div className="vol-eq-linha">
+                <span className="vol-eq-rot">Seu nome</span>
+                <span className="vol-eq-val">{primeiro}</span>
+              </div>
+            )}
           </div>
         </section>
 

@@ -97,6 +97,13 @@ export type Candidatura = {
   observacao: string | null; nota_interna: string | null;
   decidido_por: string | null; decidido_em: string | null;
   voluntario_id: string | null;
+  /* migração 64. `nome_informado` é o nome DIGITADO na porta; `pessoas.nome` é
+     o nome de quem tem aquele telefone. Eram a mesma coisa até a 51 parar de
+     sobrescrever `pessoas.nome` pela porta anônima — desde então a fila
+     mostrava sempre o segundo, e era por isso que uma candidatura aberta com
+     o telefone de outra pessoa chegava aqui parecendo gente da casa. */
+  nome_informado: string | null;
+  identidade_nova: boolean | null;
   pessoas: { id: string; nome: string; telefone: string; email: string | null } | null;
   candidatura_funcoes: { funcoes: { nome: string } | null }[];
 };
@@ -114,6 +121,7 @@ export async function listarCandidaturas(equipeId: string): Promise<Candidatura[
   const { data, error } = await sb()!
     .from('candidaturas')
     .select(`id,status,criado_em,atualizado_em,observacao,nota_interna,decidido_por,decidido_em,voluntario_id,
+             nome_informado,identidade_nova,
              pessoas(id,nome,telefone,email),
              candidatura_funcoes(funcoes(nome))`)
     .eq('equipe_id', equipeId)

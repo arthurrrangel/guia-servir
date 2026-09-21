@@ -3748,6 +3748,17 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   color:var(--cinza); border-bottom:1px solid var(--linha);
 }
 
+/* ESTE TELEFONE JÁ ESTÁ NO SISTEMA COM OUTRO NOME. 21/09/2026, migração 64.
+   Tom de atenção, não de erro: na maioria das vezes é apelido ou nome de
+   casada, e pintar de vermelho ensinaria a líder a ignorar. --warn sobre
+   --warn-bg é o par já medido do sistema. */
+.lid-cand-alerta{
+  margin:var(--e4) 0 0; padding:var(--e3) var(--e4);
+  background:var(--warn-bg); border:1px solid var(--warn-ln);
+  color:var(--warn); font-size:var(--t-apoio); line-height:1.6;
+}
+.lid-cand-alerta strong{ font-weight:var(--p-forte); color:var(--warn) }
+
 /* =============================================================================
    A ESCALA  (.esc-*)
 
