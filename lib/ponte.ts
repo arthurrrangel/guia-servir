@@ -409,14 +409,14 @@ async function lerCultos(s: any, equipeId: string, desde: string) {
      heap, e ela muda sozinha. Quem escolhe entre as duas é o `idDoCulto` lá
      em cima, mas uma leitura que muda de ordem sem motivo é sempre a semente
      do próximo defeito difícil. */
-  const r = await s.from('cultos').select(CULTOS_COM_EVENTO)
+  const r = await s.from('cultos').select(CULTOS_COM_EVENTO, CONTA)
     .or(`equipe_id.is.null,equipe_id.eq.${equipeId}`)
     .gte('data', desde).order('data').order('id');
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
 
   /* segunda tentativa sem nada da 54. Se ESTA falhar, o erro sobe: aí não é
      migração que falta, é a tabela fechada, e esconder isso seria pior. */
-  const r2 = await s.from('cultos').select(CULTOS_ESSENCIAL)
+  const r2 = await s.from('cultos').select(CULTOS_ESSENCIAL, CONTA)
     .gte('data', desde).order('data');
   if (r2?.error) return r2;
   if (typeof console !== 'undefined') {
@@ -428,7 +428,7 @@ async function lerCultos(s: any, equipeId: string, desde: string) {
 
 async function lerVoluntarios(s: any, equipeId: string) {
   const pede = (cols: string) =>
-    s.from('voluntarios').select(cols).eq('equipe_id', equipeId).order('nome');
+    s.from('voluntarios').select(cols, CONTA).eq('equipe_id', equipeId).order('nome');
 
   const r = await pede(COLUNAS_VOLUNTARIO);
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
@@ -561,7 +561,7 @@ async function lerFuncoes(s: any, equipeId: string) {
        tela consegue criar dois postos com a mesma ordem. Sem isso a ordem
        vinha do heap do Postgres e o sorteio mudava de resultado entre duas
        execuções com os mesmos dados (ver `funcoesAtivas` em lib/engine.ts). */
-    s.from('funcoes').select(cols).eq('equipe_id', equipeId).order('ordem').order('nome');
+    s.from('funcoes').select(cols, CONTA).eq('equipe_id', equipeId).order('ordem').order('nome');
   const r = await pede(FUNCOES_COMPLETAS);
   if (!r?.error || !bancoRecusouColuna(r.error)) return r;
   const r2 = await pede(FUNCOES_ESSENCIAIS);
@@ -697,6 +697,28 @@ export async function emLotes2(
    Com `count: 'exact'`, o PostgREST informa o total no cabeçalho
    Content-Range. Se chegou menos do que o total, a leitura está incompleta e
    isso vira erro — porque toda decisão feita em cima dela estaria errada. */
+/* `count: 'exact'` É O QUE TORNA `inteira()` POSSÍVEL — 21/09/2026.
+
+   Sem ele a resposta não diz quantas linhas EXISTEM, só quantas vieram, e
+   `inteira()` não tem com o que comparar: ela deixa passar. Seis leituras do
+   caminho do robô pediam sem contagem (`equipes`, `lideres`, `config`,
+   `funcoes`, `voluntarios`, `cultos`) enquanto as outras seis pediam com ela.
+
+   Medido: cortando SÓ a leitura de `cultos`, com todo o resto intacto, o robô
+   leu `cultoIds` curto, leu `escalacoes` de menos cultos, concluiu
+   `montados = 0`, decidiu 'monta' e REESCREVEU um mês já montado — HTTP 200,
+   zero falhas, o DIRIGENTE do dia 15 trocado. É exatamente o defeito que
+   `inteira()` existe para matar, voltando inteiro pela porta sem tranca.
+
+   SOBRE A DISTÂNCIA, DITO SEM MAQUIAGEM: hoje não dá. A janela real tem 17
+   cultos contra um teto de 1000, e `voluntarios`, `funcoes`, `equipes` e
+   `lideres` estão ordens de grandeza abaixo. O termo que cresce sozinho é
+   `cultos` (200 dias de histórico mais o futuro, sem teto superior), e
+   precisaria de anos de meses montados à frente. Isto é risco estrutural, e o
+   motivo de fechar agora é que o estrago, quando chegar, é invisível: mês
+   reescrito com HTTP 200. */
+export const CONTA = { count: 'exact' as const };
+
 export function inteira(r: any, oQue: string) {
   if (r?.error) return r;
   const veio = (r?.data || []).length;
@@ -716,9 +738,13 @@ export async function linhasDaEquipe(
   s: any, equipeId: string, desde: string, nomeEquipe = '',
 ): Promise<LinhasDoBanco> {
   const [funcoes, vols, cultos, cfg] = await Promise.all([
-    lerFuncoes(s, equipeId),
-    lerVoluntarios(s, equipeId),
-    lerCultos(s, equipeId, desde),
+    /* as tres passam por `inteira()` desde 21/09: pedir a contagem nao serve
+       de nada se ninguem comparar. `config` fica de fora porque e
+       `.maybeSingle()` — uma linha, nao uma lista, e o teto de linhas do
+       PostgREST nao se aplica a ela. */
+    lerFuncoes(s, equipeId).then((r: any) => inteira(r, 'funcoes')),
+    lerVoluntarios(s, equipeId).then((r: any) => inteira(r, 'voluntarios')),
+    lerCultos(s, equipeId, desde).then((r: any) => inteira(r, 'cultos')),
     s.from('config').select('*').eq('equipe_id', equipeId).maybeSingle(),
   ]);
   /* config pode vir nula por RLS (quem logou sem estar na allowlist) — isso é
@@ -766,7 +792,7 @@ export async function linhasDaEquipe(
      não cresce com o tempo, e é o que diz quem PODE fazer o quê. */
   /* `{ count: 'exact' }` nas seis: é o que permite `inteira()` saber se a
      resposta veio completa. Ver o comentário de `inteira` logo acima. */
-  const C = { count: 'exact' as const };
+  const C = CONTA;
   const [habs, indis, escs, plants, recados, disp] = (await Promise.all([
     emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids), 'habilidades'),
     emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde), 'indisponibilidades'),

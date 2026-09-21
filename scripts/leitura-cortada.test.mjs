@@ -154,5 +154,65 @@ function fingeBanco({ corta = false } = {}) {
      String(subiu?.message).slice(0, 110));
 }
 
+/* ===========================================================================
+   4) AS TRÊS LEITURAS QUE FICARAM DE FORA ATÉ 21/09
+
+   `linhasDaEquipe` protegia seis leituras e deixava seis sem rede. Três delas
+   são as de cima — `funcoes`, `voluntarios`, `cultos` — e as outras três
+   moram na rota do cron (`equipes`, `lideres`) e em `config`, que é
+   `.maybeSingle()` e não tem teto de lista.
+
+   O que cortar SÓ `cultos` fazia, medido com a rota de verdade: `cultoIds`
+   curto -> `escalacoes` lida para menos cultos -> `montados = 0` ->
+   `decisaoDoRobo` diz 'monta' -> um mês já montado é REESCRITO, com HTTP 200
+   e zero falhas. O dirigente do domingo trocado, e nada no relatório.
+
+   Cada caso aqui corta UMA tabela e deixa as outras inteiras: se o teste
+   cortasse todas de uma vez, ele passaria mesmo com duas das três leituras
+   ainda desprotegidas. */
+{
+  const bancoQueCortaUma = (qual) => ({
+    from: (nome) => {
+      let pediuCount = false;
+      const eu = {
+        select(_c, o) { pediuCount = o?.count === 'exact'; return eu; },
+        eq: () => eu, gte: () => eu, or: () => eu, order: () => eu, in: () => eu,
+        maybeSingle: () => ({ data: null, error: null }),
+        then(res) { return Promise.resolve(resp()).then(res); },
+      };
+      const cortada = (linhas, total) => ({ data: linhas, error: null, ...(pediuCount ? { count: total } : {}) });
+      const resp = () => {
+        if (nome === 'funcoes') return cortada(
+          [{ id: 'f1', nome: 'P', equipe_id: 'e1', ativa: true, ordem: 1, simultanea: true, tipos: ['domingo'] }],
+          qual === 'funcoes' ? 900 : 1);
+        if (nome === 'voluntarios') return cortada(
+          [{ id: 'v1', nome: 'V', ativo: true, equipe_id: 'e1', telefone: null, limite_mes: null, token: 't1', conferido: true }],
+          qual === 'voluntarios' ? 900 : 1);
+        if (nome === 'cultos') return cortada([{ id: 'c1', data: '2026-10-04' }], qual === 'cultos' ? 900 : 1);
+        return cortada([], 0);
+      };
+      return eu;
+    },
+  });
+
+  for (const qual of ['cultos', 'voluntarios', 'funcoes']) {
+    let subiu = null;
+    try { await linhasDaEquipe(bancoQueCortaUma(qual), 'e1', '2026-01-01'); }
+    catch (e) { subiu = e; }
+    ok(subiu !== null, `leitura cortada de ${qual} vira erro, em vez de virar decisao`);
+    ok(/veio cortada/.test(String(subiu?.message || '')),
+       `e o erro de ${qual} diz que a lista veio pela metade`,
+       String(subiu?.message || '').slice(0, 90));
+  }
+
+  /* e com as tres inteiras a carga passa, para o teste acima nao estar
+     medindo "qualquer banco falso quebra" */
+  let explodiu = null;
+  try { await linhasDaEquipe(bancoQueCortaUma('nenhuma'), 'e1', '2026-01-01'); }
+  catch (e) { explodiu = e; }
+  ok(explodiu === null, 'com as tres leituras inteiras, a carga passa',
+     String(explodiu?.message || '').slice(0, 90));
+}
+
 if (falhas) { console.log(`leitura-cortada: ${falhas} falha(s) em ${feitas}`); process.exit(1); }
 console.log(`leitura-cortada: ${feitas}/${feitas} ok`);

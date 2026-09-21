@@ -16,7 +16,7 @@ import {
   addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, gerarMes, msgColeta, msgEscala,
   tipoDoDia, vagasDe, nomeDe, MESES, Estado, decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado, proxMes,
 } from '@/lib/engine';
-import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
+import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,9 +90,9 @@ type Lider = { email: string; equipe_id: string | null };
    ninguém decide nada com um vazio que mente." A lição estava aplicada lá
    dentro e não aqui, na rota que roda sozinha às 9h sem ninguém olhando. */
 async function lideresTodos(s: any): Promise<Lider[]> {
-  const { data, error } = await s.from('lideres').select('email,equipe_id');
-  if (error) throw error;
-  return (data || []) as Lider[];
+  const r = inteira(await s.from('lideres').select('email,equipe_id', CONTA), 'lideres');
+  if (r.error) throw r.error;
+  return (r.data || []) as Lider[];
 }
 const paraEquipe = (ls: Lider[], equipeId: string) =>
   ls.filter(l => l.equipe_id === null || l.equipe_id === equipeId).map(l => l.email);
@@ -234,7 +234,8 @@ async function rodar(req: Request) {
      Vercel registrando sucesso. O líder descobria no dia 1º, olhando o app
      vazio. Agora isso estoura, vira 500 no `catch` lá embaixo, e 500 é o
      único sinal que a plataforma já sabe ler sem instalar nada. */
-  const { data: equipes, error: erroEquipes } = await s.from('equipes').select('*').order('ordem');
+  const { data: equipes, error: erroEquipes } =
+    inteira(await s.from('equipes').select('*', CONTA).order('ordem'), 'equipes');
   if (erroEquipes) throw erroEquipes;
   const lideres = await lideresTodos(s);
   const rel: any = { hoje: iso, equipes: (equipes || []).length, acoes: [] };
