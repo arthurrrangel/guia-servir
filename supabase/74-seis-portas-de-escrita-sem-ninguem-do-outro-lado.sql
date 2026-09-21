@@ -831,23 +831,57 @@ begin
   return query select 'escrita'::text, 'nem pausa voluntário de outra área'::text,
     '0'::text, n::text, n = 0;
 
-  /* C7 · e quem não lidera nada não escreve em lugar nenhum */
+  /* C7 · e quem não lidera nada não escreve em lugar nenhum.
+
+     ============================================================== 79 ======
+     O ATAQUE ESCREVIA FORA DO CENÁRIO, E A LIMPEZA NÃO LEVAVA.
+
+     `v_louvor` é o Louvor de VERDADE, e o nome era `'DE FORA'`, sem sufixo.
+     `funcoes.tipos` tem default `{domingo,follow}` e a linha nasce `ativa`:
+     no dia em que a política se abrisse — que é o que este caso existe para
+     detectar — 'DE FORA' viraria uma vaga vazia permanente em todo domingo e
+     todo Follow do Louvor, para sempre, e a limpeza por id do cenário não a
+     alcançava.
+
+     Agora: savepoint que sempre volta, e o nome leva o sufixo sorteado, para
+     que uma linha que escape possa ser achada e apagada. */
   begin
     set local role authenticated; perform set_config('request.jwt.claims', jwt_zé, true);
-    insert into funcoes (equipe_id, nome, ordem, ativa) values (v_louvor, 'DE FORA', 98, true);
+    insert into funcoes (equipe_id, nome, ordem, ativa)
+         values (v_louvor, 'DE FORA ' || v_suf, 98, true);
     get diagnostics n = row_count;
     reset role;
-  exception when others then reset role; n := 0; end;
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception', detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+    when others then reset role; n := 0;
+  end;
   return query select 'escrita'::text, 'quem não lidera nada não cria posto em lugar nenhum'::text,
     '0'::text, n::text, n = 0;
 
   /* C8 · `anon` não escreve nada, em tabela nenhuma */
+  /* 79 · savepoint aqui também, e telefone SORTEADO: o fixo '21900000000'
+     colide com `pessoas.telefone unique` se alguém de verdade tiver esse
+     número, e aí o caso passa por 23505 em vez de por falta de permissão. */
   begin
     set local role anon;
-    insert into pessoas (nome, telefone) values ('Anon ' || v_suf, '21900000000');
+    insert into pessoas (nome, telefone)
+         values ('Anon ' || v_suf, '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0'));
     get diagnostics n = row_count;
     reset role;
-  exception when others then reset role; n := 0; end;
+    raise exception 'desfazendo' using errcode = 'triggered_action_exception', detail = n::text;
+  exception
+    when triggered_action_exception then
+      declare v_det text; begin
+        get stacked diagnostics v_det = pg_exception_detail;
+        n := coalesce(nullif(v_det,'')::int, 0);
+      end;
+    when others then reset role; n := 0;
+  end;
   return query select 'escrita'::text, 'anon não escreve em `pessoas`'::text,
     '0'::text, n::text, n = 0;
 
@@ -960,7 +994,7 @@ begin
      que é o que esses casos existem para detectar — as duas linhas ficavam.
      Limpar por nome do sufixo é preciso: o sufixo é sorteado por execução. */
   delete from funcoes where nome like '%' || v_suf and equipe_id <> v_eq_t;
-  delete from pessoas where nome like '%' || v_suf and id <> v_p_t;
+  delete from pessoas where nome like 'Anon ' || v_suf;
   delete from funcoes where equipe_id = v_eq_t;
   delete from equipes where id = v_eq_t;
   delete from pessoas where id = v_p_t;
@@ -1154,9 +1188,13 @@ begin
   if v_n > 0 then
     v_falhas := v_falhas || format(E'\n  8d. depois de rodar duas vezes, %s equipe(s) de teste ficaram', v_n);
   end if;
-  select count(*) into v_n from funcoes where nome like 'POSTO %';
+  select count(*) into v_n from funcoes where nome like 'POSTO %' or nome like 'DE FORA%';
   if v_n > 0 then
     v_falhas := v_falhas || format(E'\n  8e. e %s posto(s) de teste ficaram soltos em outra area', v_n);
+  end if;
+  select count(*) into v_n from pessoas where nome like 'Anon %';
+  if v_n > 0 then
+    v_falhas := v_falhas || format(E'\n  8f. e %s pessoa(s) de teste ficaram', v_n);
   end if;
 
   -- 9 · `testar_permissoes` cresceu e continua inteiro

@@ -214,7 +214,7 @@ end $function$;
 
 revoke all on function public.salvar_dia(uuid, date, text, jsonb, uuid[]) from public;
 comment on function public.salvar_dia(uuid, date, text, jsonb, uuid[]) is
-  'Grava o dia inteiro de UMA equipe, apagando e regravando. Unico chamador: o robo (app/api/cron/route.ts). Desde a 66 RECUSA o dia que ja tem escalacao com voluntario daquela equipe: a decisao de que o dia estava vazio e tomada segundos antes, e a janela entre as duas ja apagou linha travada e confirmada.';
+  'Grava o dia inteiro de UMA equipe, apagando e regravando. Desde a 66 RECUSA o dia que ja tem escalacao com voluntario daquela equipe: a decisao de que o dia estava vazio e tomada segundos antes, e a janela entre as duas ja apagou linha travada e confirmada. QUEM CHAMA: o robo, com SUPABASE_SERVICE_ROLE (app/api/cron/route.ts:379). A tela da lidera NAO usa esta RPC — ela escreve direto pelas tabelas (lib/db.ts). O `grant execute ... to authenticated` de 05:95 continua de pe e nao foi revogado: ele e a saida de emergencia que o proprio comentario do cron aponta na linha 373. Conferido em 21/09: o app de hoje nao tem chamador `authenticated`.';
 
 
 -- =========================================================================
@@ -251,8 +251,51 @@ declare
   v_eq uuid; v_eq2 uuid; v_f1 uuid; v_f2 uuid; v_v1 uuid; v_v2 uuid;
   v_p1 uuid; v_p2 uuid; v_dia date; v_culto uuid; v_n int; v_id uuid;
   ok int := 0; falhou int := 0; msg text := '';
+  /* 79 · quais das duas datas ESTA conferencia criou. Ver o bloco de limpeza. */
+  v_dia2 date; v_meu_dia boolean := false; v_meu_dia2 boolean := false;
 begin
-  v_dia := (current_date + 40)::date;
+  v_dia  := (current_date + 40)::date;
+  v_dia2 := (current_date + 41)::date;
+
+  /* ============================================================== 79 ======
+     ESTA CONFERENCIA APAGAVA CULTO DE PRODUCAO, E COMMITAVA AO DAR CERTO.
+
+     A limpeza dizia "POR ID" e apagava POR DATA:
+
+         delete from cultos where data in (v_dia, (current_date + 41)::date);
+
+     `escalacoes`, `plantoes` e `culto_obs` tem `on delete cascade` em
+     `culto_id`. Entao essa linha nao apagava so o culto: levava junto a
+     escala de TODOS os ministerios daquela data, os plantoes e a anotacao
+     da lider.
+
+     E `v_culto` podia ser um culto real: o caso 1 chama `salvar_dia`, que
+     faz `on conflict (data) where evento is null do update` — quando a data
+     ja tem culto regular, ele REUSA a linha existente.
+
+     Medido em 21/09: `current_date + 41` e 01/11/2026, um DOMINGO. Plantei a
+     escala do Louvor e a anotacao "Ensaio as 8h, todo mundo de preto." nesse
+     dia e rodei as duas linhas de limpeza:
+
+         ANTES  -> escalacoes=1  anotacao="Ensaio as 8h, todo mundo de preto."
+         DEPOIS -> culto existe? NAO, APAGADO  anotacao: SUMIU por cascade
+
+     E o caminho destrutivo e o de SUCESSO: se a conferencia levantasse, o
+     bloco inteiro voltaria atras e nada se perderia. Ela destruia dado real
+     exatamente quando anunciava 6/6.
+
+     A 61, citada como dependencia deste arquivo, ja tinha escrito a licao:
+     "Apagar por DATA foi o defeito da primeira versao deste arquivo". A 66 e
+     a unica das tres que voltou a apagar por data.
+
+     Agora as duas datas sao REUSADAS quando ja existem, e so sai o que esta
+     conferencia criou. */
+  select id into v_culto from cultos where data = v_dia and evento is null;
+  if v_culto is null then v_meu_dia := true; end if;
+  if not exists (select 1 from cultos where data = v_dia2 and evento is null) then
+    v_meu_dia2 := true;
+  end if;
+  v_culto := null;
 
   insert into equipes (nome, slug, ordem) values ('Conf66 A','conf66a',9980) returning id into v_eq;
   insert into equipes (nome, slug, ordem) values ('Conf66 B','conf66b',9981) returning id into v_eq2;
@@ -301,7 +344,10 @@ begin
   /* ---- 4. VAGA (escalação sem voluntário) NÃO bloqueia ----------------
      `montados`, na rota, exige `x?.vid`. Se a guarda contasse vaga, as duas
      condições divergiriam e o robô recusaria dia que ele deve montar. */
-  delete from escalacoes where culto_id = v_culto;
+  /* 79 · `and funcao_id in (v_f1, v_f2)`: sem isso, este delete limpava a
+     escala de TODOS os ministerios daquele domingo — e `v_culto` pode ser o
+     domingo de verdade, porque `salvar_dia` reusa a linha que ja existe. */
+  delete from escalacoes where culto_id = v_culto and funcao_id in (v_f1, v_f2);
   insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
        values (v_culto, v_f1, null, 'pendente', false, false);
   begin
@@ -332,31 +378,52 @@ begin
      acabado de inserir a linha em `cultos`. Como a funcao inteira e uma
      instrucao so, o `raise` desfaz o insert junto. Se nao desfizesse, cada
      recusa criaria um domingo orfao. */
-  delete from escalacoes where culto_id = v_culto;
+  delete from escalacoes where culto_id = v_culto and funcao_id in (v_f1, v_f2);
   insert into escalacoes (culto_id, funcao_id, voluntario_id, status, fixo, primeira_vez)
        values (v_culto, v_f1, v_v1, 'pendente', false, false);
-  select count(*) into v_n from cultos where data = (current_date + 41)::date;
+  /* 79 · ESTE CASO PASSAVA COM O DEFEITO DE VOLTA.
+
+     Ele conferia `count(*) from cultos where data = v_dia` = 1 — e esse 1 e
+     garantido pelo indice `ux_cultos_data_regular`, nao pela guarda que este
+     arquivo acrescenta. Tirando as sete linhas da guarda, ele continuava
+     verde. E reprovava sem motivo num dia que tivesse culto E evento, porque
+     o indice e parcial e os dois sao legitimos desde a 54.
+
+     O que ele tem que medir e o que a guarda faz: `salvar_dia` no dia 40
+     RECUSA (porque o caso 6 acabou de plantar uma escalacao da equipe la), e
+     recusando nao deixa culto novo para tras. */
   begin
-    perform salvar_dia(v_eq, (current_date + 41)::date, '', '[]'::jsonb, '{}'::uuid[]);
-  exception when others then null;
+    perform salvar_dia(v_eq, v_dia, '',
+      jsonb_build_array(jsonb_build_object('funcao_id', v_f1, 'voluntario_id', v_v1,
+                                           'status','pendente','fixo',false,'primeira_vez',false)),
+      '{}'::uuid[]);
+    falhou := falhou + 1;
+    msg := msg || E'\n  x o robo gravou por cima da escala que a equipe ja tinha no dia 40';
+  exception when others then
+    if sqlerrm like 'Alguem montou%' then ok := ok + 1;
+    else
+      falhou := falhou + 1;
+      msg := msg || E'\n  x o dia 40 foi recusado pelo motivo ERRADO: ' || sqlerrm;
+    end if;
   end;
-  select count(*) into v_n from cultos where data = (current_date + 41)::date;
-  /* aqui a gravacao do dia 41 DEVE ter funcionado (dia vazio), entao o culto
-     existe: o caso que importa e o de cima, e este so confere que a funcao
-     nao deixou lixo quando recusou o dia 40 */
-  select count(*) into v_n from cultos where data = v_dia;
+  /* e o dia 40 continua com UM culto regular: a recusa nao criou fantasma.
+     `evento is null` no filtro porque culto e evento na mesma data sao
+     legitimos desde a 54, e contar os dois faria este caso reprovar sozinho. */
+  select count(*) into v_n from cultos where data = v_dia and evento is null;
   if v_n = 1 then ok := ok + 1;
   else
     falhou := falhou + 1;
     msg := msg || format(E'\n  x sobraram %s linha(s) de culto na data recusada', v_n);
   end if;
 
-  /* ---- limpeza, POR ID ------------------------------------------------ */
+  /* ---- limpeza, POR ID e SO O QUE ESTE BLOCO CRIOU (79) --------------- */
   delete from escalacoes e using cultos c
-   where c.id = e.culto_id and c.data in (v_dia, (current_date + 41)::date);
+   where c.id = e.culto_id and c.data in (v_dia, v_dia2)
+     and e.funcao_id in (v_f1, v_f2);
   delete from culto_obs o where o.equipe_id in (v_eq, v_eq2);
   delete from plantoes p using voluntarios v where v.id = p.voluntario_id and v.equipe_id in (v_eq, v_eq2);
-  delete from cultos where data in (v_dia, (current_date + 41)::date);
+  if v_meu_dia  then delete from cultos where data = v_dia  and evento is null; end if;
+  if v_meu_dia2 then delete from cultos where data = v_dia2 and evento is null; end if;
   delete from voluntarios where id in (v_v1, v_v2);
   delete from pessoas where id in (v_p1, v_p2);
   delete from funcoes where id in (v_f1, v_f2);

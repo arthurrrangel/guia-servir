@@ -448,7 +448,10 @@ begin
   /* ---- porta 1: concluir sem passar pelo portão ----------------------- */
   v_r := dem_abrir(v_ped, jsonb_build_object('titulo','Conf67 projetor','descricao','x',
            'prazo',(current_date + 20)::text,'orcamento','9000','categoria_id',v_cat));
-  select numero into v_num from demandas.demandas where titulo = 'Conf67 projetor';
+  /* 79 · `order by` e `limit`: sem eles, título repetido escolhe linha
+     arbitrária em silêncio, e a conferência passa a medir outra demanda. */
+  select numero into v_num from demandas.demandas where titulo = 'Conf67 projetor'
+   order by numero desc limit 1;
   select status, aprovacao into v_st, v_apr from demandas.demandas where numero = v_num;
   if v_st = 'travada' and v_apr = 'pendente' then ok := ok + 1;
   else
@@ -463,10 +466,55 @@ begin
     msg := msg || E'\n  x PORTA 1 ABERTA: concluir fechou o gasto sem aprovacao. ' || v_r::text;
   end if;
 
-  /* ---- porta 2: cancelar + reabrir ------------------------------------ */
-  perform dem_mover(v_ped, v_num, 'cancelar', jsonb_build_object('texto','deixa pra la'));
-  perform dem_mover(v_ped, v_num, 'reabrir',  jsonb_build_object('texto','mudei de ideia'));
+  /* ---- porta 2: cancelar + reabrir ------------------------------------
+
+     79 · ESTE CASO ASSERIA O ESTADO QUE JÁ VALIA ANTES DELE.
+
+     A demanda chega aqui em `travada/pendente` — o caso anterior acabou de
+     conferir isso. O bloco rodava as duas ações com `perform`, que joga fora
+     o `{ok:false, erro:...}` que `dem_mover` devolve em vez de levantar, e
+     então assertava `travada/pendente` de novo: o MESMO predicado. Ele ficava
+     verde sempre que nenhuma das duas ações rodasse — inclusive quando as
+     duas eram recusadas pelo motivo errado.
+
+     Medido: tirando `d.aberta_por = m.id` da permissão do `cancelar`, o
+     cancelar devolve SEM_PERMISSAO, o reabrir devolve NAO_ESTA_FECHADA, a
+     demanda não se move, e a conferência anunciava "as três portas dos
+     fundos estão fechadas".
+
+     As portas 1 e 3, no mesmo bloco, já capturam `v_r` e conferem o código do
+     erro. Esta agora faz o mesmo. */
+  /* As duas ações SÃO legítimas e têm que ser aceitas: cancelar a própria
+     demanda travada e reabrir depois é o que qualquer pessoa faz. O que não
+     pode é a volta trazer a demanda para `execucao` carregando
+     `aprovacao = 'pendente'` — essa era a porta dos fundos.
+
+     Primeira versão deste conserto: eu assertei que as duas seriam
+     RECUSADAS, e o teste me contou que não. Era eu que estava errado sobre o
+     produto, e o caso original estava certo sobre o estado final; o que
+     faltava nele era não ser vácuo. */
+  v_r := dem_mover(v_ped, v_num, 'cancelar', jsonb_build_object('texto','deixa pra la'));
+  if not coalesce((v_r->>'ok')::boolean, false) then
+    falhou := falhou + 1;
+    msg := msg || format(E'\n  x PORTA 2: cancelar a propria demanda travada foi recusado: %s', v_r::text);
+  else ok := ok + 1; end if;
+  /* e ela REALMENTE se moveu — sem isto, o estado final abaixo é o mesmo de
+     antes do bloco e o caso volta a ser vácuo */
+  select status into v_st from demandas.demandas where numero = v_num;
+  if v_st <> 'cancelada' then
+    falhou := falhou + 1;
+    msg := msg || format(E'\n  x PORTA 2: depois de cancelar, a demanda esta %s (esperava cancelada)', v_st);
+  else ok := ok + 1; end if;
+
+  v_r := dem_mover(v_ped, v_num, 'reabrir', jsonb_build_object('texto','mudei de ideia'));
+  if not coalesce((v_r->>'ok')::boolean, false) then
+    falhou := falhou + 1;
+    msg := msg || format(E'\n  x PORTA 2: reabrir a propria demanda cancelada foi recusado: %s', v_r::text);
+  else ok := ok + 1; end if;
+
   select status, aprovacao into v_st, v_apr from demandas.demandas where numero = v_num;
+  /* E AQUI ESTÁ A PORTA: depois da volta inteira, a demanda tem que estar de
+     novo DIANTE do portão, e não passada por ele. */
   if v_st = 'travada' and v_apr = 'pendente' then ok := ok + 1;
   else
     falhou := falhou + 1;

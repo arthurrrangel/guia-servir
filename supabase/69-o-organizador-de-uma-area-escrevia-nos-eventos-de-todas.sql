@@ -348,6 +348,7 @@ end $reg$;
 
 do $conf$
 declare
+  v_ensaio_antes timestamptz;
   v_lv uuid; v_md uuid; v_pessoa uuid; v_ev_lv uuid; v_ev_md uuid; v_reg uuid;
   v_dia_lv date; v_dia_md date; v_dom date;
   v_n int; v_email text := 'conf69@teste.local';
@@ -488,6 +489,10 @@ begin
     msg := msg || E'\n  x A CORRECAO TRANCOU O DONO (levantou): ' || sqlerrm;
   end;
 
+  /* 79 · o valor de `ensaio_em` e LIDO antes do ataque, para a limpeza
+     poder repor em vez de assumir que era nulo. */
+  select ensaio_em into v_ensaio_antes from cultos where id = v_reg;
+
   /* ---- 5. o culto regular e vigiado pela LINHA INTEIRA ----------------
      `ensaio_em` nao estava na lista de quatro colunas da 56. */
   begin
@@ -541,8 +546,24 @@ begin
   update cultos set obs = 'anotacao do louvor' where id = v_ev_lv;
   delete from culto_obs where culto_id in (v_ev_lv, v_ev_md);
   delete from cultos where id in (v_ev_lv, v_ev_md);
-  delete from cultos where data in (v_dia_lv, v_dia_md) and evento is null;
-  update cultos set ensaio_em = null where id = v_reg and ensaio_em is not null;
+  /* 79 · e este delete POR DATA some. As duas datas sao escolhidas para NAO
+     ter culto regular (o laco pula domingo e sabado), mas se tiver, o
+     `on delete cascade` leva escalacoes, plantoes e culto_obs de todo mundo
+     — e o caso 6 continua verde, porque o gatilho levanta antes do indice.
+     Esta conferencia nao cria culto regular em lugar nenhum, entao ela
+     tambem nao tem o que apagar aqui. */
+  /* 79 · ESTA LINHA ZERAVA UMA COLUNA DE PRODUCAO SEM TER LIDO O VALOR.
+
+     `v_reg` e o culto regular mais ANTIGO do banco — linha real. O caso 5
+     roda dentro de `begin ... exception`, que ja e savepoint e ja devolveu
+     `ensaio_em` ao valor original; esta linha vinha depois e zerava de novo,
+     agora para valer, porque `falhou = 0` e o bloco commita.
+
+     `ensaio_em` guarda quando a banda ensaia PARA aquele culto (17). Nenhuma
+     tela escreve nela hoje, entao o dano e improvavel — mas o padrao e o
+     mesmo do `culto_obs` da 66: limpeza que ASSUME o estado em vez de
+     restaurar o que leu. */
+  update cultos set ensaio_em = v_ensaio_antes where id = v_reg;
   delete from papeis where pessoa_id = v_pessoa;
   delete from pessoas where id = v_pessoa;
 

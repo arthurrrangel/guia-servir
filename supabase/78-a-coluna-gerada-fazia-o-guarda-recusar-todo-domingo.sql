@@ -3,10 +3,10 @@
 --
 -- 21/09/2026. Reauditoria das migrações 71 a 77, que encontrou um defeito na
 -- 69 — escrita por mim, nesta mesma rodada, e AINDA NÃO APLICADA em
--- produção. É o defeito mais grave desta auditoria inteira, e é meu.
+-- produção. O defeito é meu, e o alcance dele está medido mais abaixo.
 --
 -- -------------------------------------------------------------------------
--- O QUE A 69 QUEBROU
+-- O QUE A 69 QUEBROU, E ATÉ ONDE ISSO CHEGA
 --
 -- A 69 trocou, dentro de `culto_guarda`, a lista de quatro colunas por uma
 -- comparação da linha inteira:

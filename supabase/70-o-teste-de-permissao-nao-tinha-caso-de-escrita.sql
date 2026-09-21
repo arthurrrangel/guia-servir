@@ -111,8 +111,16 @@
         onde esse par tem que ser medido.
 
      pessoas_editar (1)
-        Quem protege `auth_email` de verdade é o GRANT por coluna, não a
-        política. Abrir a política não abre a escrita.
+        ESTA JUSTIFICATIVA ERA FALSA, e a migração 80 a corrigiu duas vezes:
+        no texto e no banco. Estava escrito que "quem protege `auth_email` de
+        verdade é o GRANT por coluna, não a política; abrir a política não
+        abre a escrita". Não existia GRANT por coluna em `pessoas` — medido
+        em 21/09, `authenticated` tinha UPDATE em TODAS as colunas, inclusive
+        `auth_email`, que é a credencial com que `lidera_tudo()` decide quem
+        é admin. Quem afrouxasse `pessoas_editar` entregaria a conta do admin,
+        com este arquivo garantindo que o GRANT pegava. A 80 criou o GRANT
+        por coluna de verdade, e o caso C2 continua sendo o que mede a
+        política.
 
      perg_criar, perg_editar, perg_apagar, onbf_tudo, hist_criar,
      cand_editar (6)
