@@ -118,7 +118,7 @@ reprova=0
 # some, derruba. Se um dia um caso for removido por bom motivo, baixar o piso
 # e uma decisao consciente, escrita no commit — que e exatamente o que se
 # quer que aconteca.
-declare -A PISO=( [testar_permissoes]=64 [testar_identidade]=27 )
+declare -A PISO=( [testar_permissoes]=68 [testar_identidade]=27 )
 for fn in testar_permissoes testar_identidade; do
   if ! $P -d guia -tAc "select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
                          where n.nspname='public' and p.proname='$fn'" | grep -q 1; then
