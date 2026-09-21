@@ -470,6 +470,40 @@ function Time() {
               })()}
             </div>
 
+            {/* ================================================================ 81
+                O QUE A LÍDER ESTÁ LIBERANDO.
+
+                Este cadastro veio pelo formulário público com um telefone que
+                o sistema JÁ conhecia, então o vínculo nasceu colado na
+                identidade dessa pessoa — e quem digitou o nome foi quem
+                preencheu o formulário.
+
+                Quase sempre é a própria pessoa entrando numa segunda área, e
+                aí não há nada a fazer além de conferir. Mas foi por aqui que
+                a cadeia medida na migração 81 passou: anônimo se inscreve com
+                o telefone de alguém, a líder clica "Liberar" sem nada na tela
+                dizer que o nome diverge, e o link pessoal da vítima sai pela
+                porta do PIN.
+
+                O banco já segura o passo seguinte (o PIN espera alguém
+                conferir). Este aviso existe para que a líder saiba o que está
+                olhando ANTES de conferir, que é o momento em que a decisão é
+                dela. Os dois nomes aparecem lado a lado quando divergem,
+                porque é a divergência que ela precisa julgar. */}
+            {v.identidadeReivindicada && (
+              <p className="postos-falta" role="note" style={{ marginTop: 12 }}>
+                {v.nomeDaPessoa && v.nomeDaPessoa.trim().toLowerCase() !== v.nome.trim().toLowerCase() ? (
+                  <>Este cadastro usou o WhatsApp de <b>{v.nomeDaPessoa}</b>, que já está no sistema,
+                  mas o nome digitado foi <b>{v.nome}</b>. Confirme com {v.nomeDaPessoa.split(' ')[0]} antes
+                  de conferir: conferir é o que libera o acesso dela ao link pessoal.</>
+                ) : (
+                  <>Este cadastro veio pelo formulário público com um WhatsApp que o sistema já
+                  conhecia. Se for a mesma pessoa entrando nesta área, toque em &ldquo;Conferi, está
+                  certo&rdquo;: é isso que libera o acesso dela pelo PIN.</>
+                )}
+              </p>
+            )}
+
             <div className="chips" style={{ marginTop: 14 }}>
               {funcoes.map(f => {
                 const n = v.funcoes[f.nome];

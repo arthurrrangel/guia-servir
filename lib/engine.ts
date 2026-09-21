@@ -73,6 +73,14 @@ export type Voluntario = {
   /* false = a pessoa se cadastrou sozinha pelo link e o líder ainda não
      conferiu o nível que ela declarou. Não bloqueia nada: só destaca. */
   conferido?: boolean;
+  /* 81 · true quando este vínculo nasceu pelo formulário público COLADO numa
+     pessoa que JÁ existia (o telefone digitado já era de alguém). Enquanto
+     for true, o banco recusa criar PIN por aqui: os quatro dígitos não
+     provam identidade quando foi o próprio inscrito que os digitou.
+     `nomeDaPessoa` é o nome que a identidade tem, para a tela poder mostrar
+     os dois lado a lado — foi a divergência entre eles que ninguém via. */
+  identidadeReivindicada?: boolean;
+  nomeDaPessoa?: string | null;
   /* por área: true quando alguém do time conferiu o nível, false quando é só
      o que a pessoa declarou no cadastro. Área que não está aqui vale como
      conferida (é cadastro antigo, feito pelo líder). */

@@ -376,6 +376,17 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     if (codigo === 'SEM_TELEFONE')
       return 'Seu WhatsApp ainda não está cadastrado. Peça o link pessoal a quem organiza a escala.';
     if (codigo === 'PIN_INVALIDO') return 'O PIN precisa ter 4 números.';
+    /* 81 · a frase diz o que a pessoa faz, e não o que o sistema pensa.
+
+       `PRECISA_CONFERIR` só acontece quando o vínculo nasceu pelo formulário
+       público COLADO numa pessoa que já existia — o telefone digitado já era
+       de alguém. Pode ser ela mesma entrando numa segunda área (o caso
+       comum), e pode ser alguém usando o telefone dela (a cadeia que a 81
+       mediu). Os dois estados são indistinguíveis daqui, então a frase não
+       acusa ninguém: manda falar com quem organiza, que é quem resolve os
+       dois. */
+    if (codigo === 'PRECISA_CONFERIR')
+      return 'Quem organiza a sua área precisa confirmar o seu cadastro antes de você criar o PIN. Fale com ela; leva um toque.';
     if (codigo === 'JA_TEM_PIN') return 'Você já criou seu PIN. Entre com ele.';
     if (codigo === 'SEM_PIN') return 'Você ainda não criou seu PIN.';
     if (codigo === 'NOME_INCOMPLETO') return 'Escreva seu nome e sobrenome.';

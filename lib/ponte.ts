@@ -172,6 +172,10 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     /* undefined de propósito quando ninguém informou: o motor trata "não sei"
        diferente de "tanto faz". */
     sexo: v.sexo === 'M' || v.sexo === 'F' ? v.sexo : undefined,
+    /* 81 · `!== false` e não `=== true`: banco anterior à 81 não tem a
+       coluna, e "não sei" ali não pode virar alarme na tela do Time. */
+    identidadeReivindicada: (v as any).identidade_reivindicada === true,
+    nomeDaPessoa: (v as any).pessoas?.nome ?? null,
     funcoes: habPorVol.get(v.id) || {}, confirmadas: okPorVol.get(v.id) || {},
     indisponivel: indisPorVol.get(v.id) || [],
     disponivel: dispPorVol.get(v.id) || [],
@@ -351,7 +355,17 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
    então sem ela a consulta não existe. */
 const COLUNAS_ESSENCIAIS =
   'id,nome,telefone,ativo,limite_mes,token,equipe_id,conferido';
-const COLUNAS_OPCIONAIS = ['sexo'];
+/* `identidade_reivindicada` e `pessoas(nome)` entram como OPCIONAIS (81).
+
+   A tela do Time precisa dos dois para dizer à líder o que ela está
+   liberando: o vínculo nasceu colado numa pessoa que já existia, e o nome
+   que o formulário digitou pode não ser o nome dessa pessoa. Foi assim que a
+   cadeia medida na 81 chegou até o passo 2 sem ninguém reparar.
+
+   OPCIONAIS e não essenciais porque o banco só ganha a coluna na 81: até lá
+   a consulta degrada e a tela funciona sem o aviso, em vez de o Time inteiro
+   cair. É a mesma decisão do `sexo`, pelo mesmo motivo. */
+const COLUNAS_OPCIONAIS = ['sexo', 'identidade_reivindicada', 'pessoas(nome)'];
 const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
 
 /** Permissão negada em alguma coluna. 42501 é o código do Postgres. */
