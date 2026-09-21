@@ -437,7 +437,22 @@ begin
 
   /* ---- 2. mirando só o evento alheio, sem a linha do culto regular no
             caminho: aqui a única coisa entre o atacante e o dado são as
-            guardas de EVENTO, e o estado depois é o que se cobra ------- */
+            guardas de EVENTO, e o estado depois é o que se cobra -------
+
+     82 · E ESTE CASO MEDE MENOS DO QUE PARECE, ENTÃO ESTÁ ESCRITO.
+
+     O ataque é `update ... where evento is not null and equipe_id = v_md`,
+     sem id. Se `cultos_ler` não deixar o atacante ENXERGAR a linha da Mídia,
+     o `where` não casa nada, zero linhas mudam, e o caso fica verde sem que
+     `cultos_editar` nem o gatilho tenham sido consultados. Ou seja: ele pode
+     estar medindo a política de LEITURA, que é anterior à correção desta
+     migração e não é o que ela conserta.
+
+     Isso não o torna inútil — um caminho fechado é um caminho fechado, e se
+     um dia `cultos_ler` abrir, este caso passa a medir o que promete. Mas
+     quem for julgar se a correção da 69 está de pé olha os casos 3 (as duas
+     camadas, lidas do catálogo) e 1. Este é reforço, e reforço que se
+     apresenta como prova é pior que caso nenhum. */
   begin
     set local role authenticated;
     perform set_config('request.jwt.claims',
@@ -529,8 +544,22 @@ begin
       falhou := falhou + 1;
       msg := msg || E'\n  x coluna fora da lista de quatro ainda passa: ensaio_em foi escrita no culto da igreja';
     end if;
+  /* 82 · ERA `when others then ok := ok + 1`: QUALQUER excecao contava como
+     recusa. Um erro de digitacao no nome da coluna, um tipo errado, um
+     gatilho que morre por outro motivo — tudo virava verde, e o caso dizia
+     "o guarda segurou" sem ter chegado no guarda.
+
+     O guarda deste caminho e `CULTO_REGULAR_SO_ORGANIZADOR_GERAL` (ramo
+     UPDATE de `culto_guarda`). Zero linha tambem e recusa legitima, e ja esta
+     tratada acima: a politica simplesmente nao enxerga a linha. Qualquer
+     outra coisa e o caso reprovando a si mesmo, e agora diz isso. */
   exception when others then
-    reset role; ok := ok + 1;
+    reset role;
+    if sqlerrm like 'CULTO_REGULAR_SO_ORGANIZADOR_GERAL%' then ok := ok + 1;
+    else
+      falhou := falhou + 1;
+      msg := msg || E'\n  x caso 5 recusou, mas por OUTRO motivo (nao foi o guarda): ' || sqlerrm;
+    end if;
   end;
 
   /* ---- 6. o RECIPROCO: culto regular nao nasce em dia de evento ------- */
@@ -560,8 +589,18 @@ begin
     reset role;
     falhou := falhou + 1;
     msg := msg || E'\n  x evento em dia de culto voltou a passar';
+  /* 82 · mesmo conserto do caso 5. O caso 6, aqui ao lado, ja fazia certo
+     (`if sqlerrm like 'DIA_TEM_EVENTO%'`) — este tinha ficado para tras.
+     O erro esperado e `DIA_DE_CULTO`, e nao serve outro: se a insercao for
+     recusada por `JA_TEM_EVENTO` ou por permissao, o que a 56 fechou pode
+     ter aberto sem ninguem ver. */
   exception when others then
-    reset role; ok := ok + 1;
+    reset role;
+    if sqlerrm like 'DIA_DE_CULTO%' then ok := ok + 1;
+    else
+      falhou := falhou + 1;
+      msg := msg || E'\n  x caso 7 recusou, mas por OUTRO motivo (esperava DIA_DE_CULTO): ' || sqlerrm;
+    end if;
   end;
 
   /* ---- limpeza, POR ID ------------------------------------------------ */

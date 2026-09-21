@@ -522,8 +522,14 @@ export function agruparQuemServe(linhas: ServeCom[]): ServeComAgrupado[] {
        só respeita o que está travado ou confirmado)
 
    ⚠️  SE UM DIA 'parcial' PASSAR A MONTAR, a gravação do robô tem que virar
-   `salvarDia` ANTES — senão o robô apaga o trabalho manual do líder às 3h da
-   manhã, sem ninguém olhando. */
+   `salvarDia` ANTES — senão o robô apaga o trabalho manual do líder por cima
+   do ombro dele.
+
+   82 · "às 3h da manhã, sem ninguém olhando" saiu daqui, e o motivo é o
+   assunto inteiro da migração 66: `vercel.json` agenda `0 12 * * *`, ou seja
+   MEIO-DIA UTC — 9h da manhã no Rio. O robô roda na hora em que o líder
+   também está no app, e era exatamente esse erro de leitura que fazia a
+   gravação por cima parecer inofensiva. */
 export type DecisaoDoRobo = 'monta' | 'ja-tem' | 'parcial';
 export function decisaoDoRobo(diasMontados: number, diasNoMes: number): DecisaoDoRobo {
   if (diasNoMes <= 0) return 'ja-tem';          // mês sem culto: nada a fazer

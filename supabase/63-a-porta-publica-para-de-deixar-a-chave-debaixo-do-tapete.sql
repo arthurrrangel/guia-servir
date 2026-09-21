@@ -348,12 +348,50 @@ begin
     msg := msg || E'\n  x equipe_time ainda lista o vinculo: o degrau 3 da cadeia esta aberto';
   end if;
 
-  /* ---- 4. e a criação de PIN recusa, que é onde o token saía ----------- */
+  /* ---- 4. e a criação de PIN recusa, que é onde o token saía -----------
+
+     82 · E RECUSA PELO MOTIVO CERTO.
+
+     Era só `if (v_r ->> 'token') is null then ok := ok + 1`. Token nulo é o
+     que sai de QUALQUER erro desta função — `LINK_INVALIDO`, `SEM_TELEFONE`,
+     `MUITAS_TENTATIVAS`, `JA_TEM_PIN`, `PIN_INVALIDO`. Um slug errado no
+     teste, um `v_id` que não existe, um limite de taxa herdado de um caso
+     anterior: tudo devolvia token nulo e tudo ficava verde, sem que a porta
+     que esta migração fecha tivesse sido encostada.
+
+     -----------------------------------------------------------------------
+     E EU ERREI QUAL ERA O MOTIVO CERTO. FICA ESCRITO.
+
+     Escrevi `DIGITOS_NAO_CONFEREM`, raciocinando que o degrau da 63 era o
+     dos quatro dígitos. Rodei, e a conferência me corrigiu:
+
+         x equipe_pin_criar recusou, mas por OUTRO motivo
+           (esperava DIGITOS_NAO_CONFEREM): {"ok": false, "erro": "LINK_INVALIDO"}
+
+     `LINK_INVALIDO` é o certo, e é MELHOR notícia do que a que eu esperava.
+     O vínculo existe (o caso 2 acabou de provar que ele foi criado), mas
+     nasceu `ativo = false` — que é exatamente a correção desta migração. Com
+     ele inativo, `equipe_pin_criar` nem chega a comparar dígito nenhum: não
+     encontra link para reivindicar.
+
+     Então a inversão importa: ver `DIGITOS_NAO_CONFEREM` AQUI seria sinal de
+     que a correção caiu, porque significaria que a função encontrou um
+     vínculo ATIVO e parou só no último degrau — com o telefone certo, o
+     atacante passaria. Por isso o caso exige `LINK_INVALIDO` e trata os
+     outros, inclusive o dos dígitos, como reprovação. */
   v_r := equipe_pin_criar('conf63-aberta', v_id, right(v_tel_vitima, 4), '4321');
-  if (v_r ->> 'token') is null then ok := ok + 1;
-  else
+  if (v_r ->> 'token') is not null then
     falhou := falhou + 1;
     msg := msg || E'\n  x equipe_pin_criar ENTREGOU O TOKEN: a cadeia inteira continua de pe';
+  elsif coalesce(v_r ->> 'erro','') = 'LINK_INVALIDO' then ok := ok + 1;
+  elsif coalesce(v_r ->> 'erro','') = 'DIGITOS_NAO_CONFEREM' then
+    falhou := falhou + 1;
+    msg := msg || E'\n  x A CORRECAO CAIU: equipe_pin_criar ACHOU um vinculo ativo e parou so nos digitos. '
+               || 'Com o telefone certo (que e o que o atacante tem), ele passaria.';
+  else
+    falhou := falhou + 1;
+    msg := msg || E'\n  x equipe_pin_criar recusou, mas por OUTRO motivo (esperava LINK_INVALIDO): '
+               || v_r::text || E' — o degrau da 63 nao foi testado.';
   end if;
 
   /* ---- 4b. a prova de que a cadeia morre: nada foi escrito na vítima ---

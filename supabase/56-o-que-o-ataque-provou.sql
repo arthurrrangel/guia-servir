@@ -510,9 +510,32 @@ begin
      Migração que deixa linha ou mexe em dado real não é conferência, é
      efeito colateral. O `returning` diz se a linha é MINHA; se não for, o
      teste procura outra data em vez de encostar no que é da igreja. */
+  /* ==================================================== 82 ================
+     A BUSCA PULAVA DE DOMINGO EM DOMINGO, E POR ISSO TINHA COMO ACABAR.
+
+     Era `date_trunc('week', current_date + 40 + v_i * 7)::date + 6`, treze
+     vezes: treze DOMINGOS, de hoje+40 a hoje+131. Num banco com o calendário
+     montado à frente, os treze têm culto, e a migração se recusa a aplicar.
+
+     MEDIDO em 21/09, com os domingos dos próximos 200 dias plantados:
+
+       ERROR: A CONFERENCIA DA 56 NAO ACHOU DATA LIVRE: os 13 domingos a
+              partir de 2026-11-01 ja tem culto.
+
+     Recusar era CERTO — a alternativa é mexer num domingo de verdade, que é
+     o defeito que este mesmo bloco existe para não repetir. Errada era a
+     busca: os dois ataques deste bloco são "líder de área mudou a DATA do
+     culto da igreja" e "mudou o HORÁRIO". Nenhum dos dois depende do dia da
+     semana. A escolha de domingo era estética, e custava a aplicação.
+
+     Agora anda DIA A DIA. `ux_cultos_data_regular` é um culto regular por
+     data, em qualquer dia da semana, então qualquer dia livre serve — e num
+     ano inteiro a partir de hoje+40 não existe calendário de igreja que não
+     tenha um. Se um dia não tiver, a recusa continua de pé, e a mensagem diz
+     quantos dias foram olhados. */
   v_culto := null;
-  for v_i in 0..12 loop
-    v_data_teste := date_trunc('week', current_date + 40 + v_i * 7)::date + 6;
+  for v_i in 0..364 loop
+    v_data_teste := (current_date + 40 + v_i)::date;
     if not exists (select 1 from cultos c where c.data = v_data_teste) then
       insert into cultos (data) values (v_data_teste) returning id into v_culto;
       v_culto_meu := true;
@@ -520,7 +543,7 @@ begin
     end if;
   end loop;
   if v_culto is null then
-    raise exception 'A CONFERENCIA DA 56 NAO ACHOU DATA LIVRE: os 13 domingos a partir de % ja tem culto. Nao vou mexer num culto de verdade para testar.', date_trunc('week', current_date + 40)::date + 6;
+    raise exception 'A CONFERENCIA DA 56 NAO ACHOU DATA LIVRE: os 365 dias a partir de % ja tem culto. Nao vou mexer num culto de verdade para testar.', (current_date + 40)::date;
   end if;
 
   -- ------------------------------------------------- 1. o ataque da data
