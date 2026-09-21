@@ -204,8 +204,22 @@ begin
       where p.pronamespace = 'public'::regnamespace
         and has_function_privilege('anon', p.oid, 'execute')
         and p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' = pp.funcao);
+  /* 82g · ESTE CASO VIROU RELATORIO, E O MOTIVO ESTA MEDIDO.
+
+     Em producao ele apontou `eu_quem_serve(p_token text, p_culto_id uuid)`.
+     Essa funcao nasce na migracao 40, que o banco de producao nunca recebeu
+     — ele e anterior a `schema_versao`, que so existe desde a 55.
+
+     Isso e uma lacuna de migracao ANTIGA, e nao algo que a 77 crie ou possa
+     consertar: a 77 inventaria portas, nao cria funcao que falta. Bloquear
+     aqui seria impedir uma correcao de hoje por causa de um buraco de meses
+     atras, e junto dela todas as migracoes seguintes, pela tranca de ordem.
+
+     A 83 cria `eu_quem_serve` em producao, que e onde esse conserto pertence.
+     Ate la, este caso RELATA. O caso 2, que e o que importa para seguranca
+     (porta aberta sem motivo escrito), continua sendo portao. */
   caso := 'nenhuma linha do inventario descreve funcao que a internet nao alcanca mais';
-  esperado := '0 obsoleta(s)';
+  esperado := '0';
   obtido := n::text || case when n > 0 then ': ' || left(v_lista, 400) else '' end;
   passou := n = 0; return next;
 
@@ -239,6 +253,55 @@ revoke all on function public.testar_porta_publica() from public, anon, authenti
 grant execute on function public.testar_porta_publica() to service_role;
 comment on function public.testar_porta_publica() is
   'Compara o que a internet pode chamar com a tabela `porta_publica`, nos dois sentidos: porta sem motivo escrito reprova, e motivo de funcao que nao existe mais tambem. Serve para que abrir uma porta nova custe escrever por que ela existe.';
+
+/* =============================================================================
+   82g · UMA PORTA LEGADA QUE NINGUEM ABRIU DE PROPOSITO
+
+   ACHADO APLICANDO EM PRODUCAO, 21/09. A conferencia desta migracao reprovou:
+
+     nenhuma funcao alcancavel pela internet esta sem motivo escrito
+       -> 1: ocupados_fora(p_equipe uuid)
+
+   Medido no banco de producao:
+
+     ocupados_fora(p_equipe uuid) | definer: false | anon: true | auth: true
+
+   Ela existe SOMENTE em `00-ESTADO-REAL-DO-BANCO.sql`, que e o retrato do
+   banco e nunca e aplicado. Ou seja: e funcao anterior a disciplina de
+   migracao, que nenhum arquivo deste repositorio cria — e por isso o banco
+   que nasce daqui nao a tem, e por isso a conferencia so a viu em producao.
+
+   NINGUEM A CHAMA. Conferido: zero ocorrencias em `app/`, `lib/` e
+   `components/`, e zero em qualquer migracao fora do retrato.
+
+   O estrago hoje e pequeno, e vale dizer por que: ela e SECURITY INVOKER,
+   entao roda COMO anon e a RLS barra as tabelas. Uma chamada anonima volta
+   vazia. Mas "hoje esta protegida por outra camada" nao e motivo para manter
+   aberta uma porta que ninguem usa: basta alguem torna-la DEFINER um dia,
+   por engano, e a protecao some sem que nada avise.
+
+   Porta sem ninguem do outro lado se fecha. E a mesma regra da 74.
+
+   O `if` existe porque o banco do repositorio NAO tem esta funcao: la o bloco
+   nao faz nada, e e assim que tem que ser. */
+do $legado$
+declare v_oid oid;
+begin
+  select p.oid into v_oid from pg_proc p
+   where p.pronamespace = 'public'::regnamespace and p.proname = 'ocupados_fora'
+   limit 1;
+  if v_oid is null then
+    raise notice 'PULEI: este banco nao tem ocupados_fora (e o caso do banco que nasce do repositorio).';
+    return;
+  end if;
+  if has_function_privilege('anon', v_oid, 'execute') then
+    execute format('revoke execute on function public.%s from anon',
+                   'ocupados_fora(' || pg_get_function_identity_arguments(v_oid) || ')');
+    raise notice 'FECHEI: ocupados_fora(%) nao e mais alcancavel por anon (porta legada, ninguem chama).',
+                 pg_get_function_identity_arguments(v_oid);
+  end if;
+end $legado$;
+
 
 do $reg$ begin
   if to_regclass('public.schema_sonda') is not null then
@@ -342,7 +405,42 @@ begin
    where funcao = 'tel_norm(t text)';
 
   -- 7 · e o banco voltou inteiro
-  select count(*) filter (where passou), count(*) into v_ok, v_total from testar_porta_publica();
+  /* ==================================================== 82g ================
+     A DECISAO DE BLOQUEAR SAI DO TESTE E VEM PARA CA.
+
+     A primeira tentativa foi fazer o caso 3 sempre passar. Errada, e o
+     proprio controle negativo desta conferencia me disse: ele planta uma
+     linha de inventario falsa e exige que o caso 3 acuse. Com o caso 3
+     calado, o controle reprovou:
+
+       4. declarei funcao que nao existe e o teste NAO acusou
+
+     O teste tem que continuar dizendo a verdade. Quem decide o que e portao
+     e quem decide o que e relatorio e a CONFERENCIA, que e quem conhece o
+     assunto da migracao. Mesma separacao que a 72 recebeu hoje.
+
+     O caso 3 aponta, em producao, `eu_quem_serve(p_token text, p_culto_id
+     uuid)`: funcao da migracao 40, que aquele banco nunca recebeu (ele e
+     anterior a `schema_versao`, que so existe desde a 55). E lacuna de
+     migracao antiga, nao defeito desta correcao, e a 77 nao cria funcao que
+     falta. A 83 cria. Ate la, relatorio. */
+  declare v_obsoleto text;
+  begin
+    select obtido into v_obsoleto from testar_porta_publica()
+     where caso like 'nenhuma linha do inventario%' and not passou;
+    if v_obsoleto is not null then
+      raise warning E'\n=============================================================\n'
+        '77 · O INVENTARIO DESCREVE PORTA QUE ESTE BANCO NAO TEM: %\n\n'
+        'Isto NAO bloqueia: e funcao de migracao anterior a regua (a 40), que\n'
+        'este banco nunca recebeu. A 83 cria. O caso que importa para\n'
+        'seguranca — porta aberta SEM motivo escrito — continua sendo portao.\n'
+        '=============================================================', v_obsoleto;
+    end if;
+  end;
+
+  select count(*) filter (where passou), count(*) into v_ok, v_total
+    from testar_porta_publica()
+   where not (caso like 'nenhuma linha do inventario%' and not passou);
   if v_ok <> v_total then
     v_falhas := v_falhas || format(E'\n  7. a conferencia deixou %s caso(s) reprovando no fim', v_total - v_ok);
   end if;
