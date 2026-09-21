@@ -244,20 +244,80 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     d.evento = c.evento;
     d.inicio = c.inicio || null;
   }
+  /* ===================================================== 82b ===============
+     O MESMO DIA COM DUAS LINHAS EM `cultos`: QUEM GANHA O POSTO?
+
+     O banco chaveia escalação por CULTO (`unique (culto_id, funcao_id)`); este
+     arquivo chaveia por DATA e nome de posto. Como `ux_cultos_data_regular` é
+     único só `where evento is null`, uma data pode ter a linha regular E o
+     evento desta equipe, e as duas chegam na carga. Duas escalações do mesmo
+     posto viravam UM slot, e vencia a última linha do array.
+
+     A ordem não era estável: `escalacoes` era a única consulta da carga sem
+     `.order()`. Medido em 21/09, com a forma exata da consulta:
+
+       1a leitura .............. evento (Bianca) depois regular (Alexandre)
+       o líder marca "furou" na linha regular
+       a MESMA consulta .......  regular (Alexandre) depois evento (Bianca)
+
+     Um `update` comum move a linha no heap e inverte a resposta. Para a
+     líder: o posto mostra Ana, ela mexe em qualquer coisa, recarrega, e o
+     posto mostra Bruno — sem ninguém ter trocado nada.
+
+     A regra é a MESMA que `idDoCulto` já usa trinta linhas acima, e agora ela
+     vale para os três: quem ganha é a linha que `idDoCulto` escolheu (evento
+     da própria equipe, quando há um), porque é nela que `salvar_dia` e
+     `salvarDia` gravam. Empate entre duas linhas que não são a escolhida cai
+     no `culto_id` menor, que é arbitrário mas ESTÁVEL — e estável é o que
+     faltava. */
+  const donoDoDia = (data: string, cultoId: string) =>
+    idDoCulto.get(data) === cultoId;
+  const deQuemVeio = new Map<string, string>();   // `${data}\u0000${fn}` -> culto_id
   for (const e of l.escalacoes || []) {
     const data = dataDoCulto.get(e.culto_id); const fn = nomeFuncao.get(e.funcao_id);
     if (!data || !fn) continue;
+    const chave = `${data}\u0000${fn}`;
+    const jaVeioDe = deQuemVeio.get(chave);
+    if (jaVeioDe !== undefined) {
+      /* já tem alguém neste posto neste dia, vindo de outra linha de `cultos` */
+      if (donoDoDia(data, jaVeioDe)) continue;                       // o que está vale mais
+      if (!donoDoDia(data, e.culto_id) && jaVeioDe < e.culto_id) continue;  // desempate estável
+    }
+    deQuemVeio.set(chave, e.culto_id);
     abrir(data).slots[fn] = { vid: e.voluntario_id, status: e.status as Status, fixo: e.fixo,
       primeiraVez: !!e.primeira_vez, respondidoEm: e.respondido_em || null,
       escaladoEm: e.escalado_em || null };
   }
+  /* 82b · e o plantão vira CONJUNTO. `plantoes` tem `primary key (culto_id,
+     voluntario_id)`: a mesma pessoa em duas linhas de `cultos` na mesma data
+     entrava duas vezes aqui, `paraSalvarDia` repassava, `planoDoPlantao`
+     preservava, e o INSERT violava a própria chave primária. Medido:
+
+       S.escalas[data].plantao ... ["v2","v2"]
+       chaves distintas .......... 1 de 2 -> plantoes_pkey (23505)
+
+     E `aviseHumano` traduz 23505 como "Isso já está cadastrado. Confira se a
+     pessoa não está na lista com outro nome" — ou seja, a líder tentava
+     salvar o dia, não conseguia, e a frase falava de cadastro de pessoa. */
   for (const p of l.plantoes || []) {
     const data = dataDoCulto.get(p.culto_id);
-    if (data) abrir(data).plantao.push(p.voluntario_id);
+    if (!data) continue;
+    const d = abrir(data);
+    if (!d.plantao.includes(p.voluntario_id)) d.plantao.push(p.voluntario_id);
   }
+  /* 82b · o recado segue a MESMA regra dos slots: a linha que `idDoCulto`
+     escolheu ganha. Antes, o recado do evento sobrescrevia o do domingo (ou
+     o contrário) pela ordem em que o banco devolveu. */
+  const recadoVeioDe = new Map<string, string>();
   for (const r of l.recados || []) {
     const data = dataDoCulto.get(r.culto_id);
     if (!data) continue;
+    const jaVeioDe = recadoVeioDe.get(data);
+    if (jaVeioDe !== undefined) {
+      if (donoDoDia(data, jaVeioDe)) continue;
+      if (!donoDoDia(data, r.culto_id) && jaVeioDe < r.culto_id) continue;
+    }
+    recadoVeioDe.set(data, r.culto_id);
     if ((r.obs || '').trim()) abrir(data).obs = r.obs;
     /* relatório do fim do culto: mora na mesma linha do recado */
     if (r.relatorio || r.problemas) {
@@ -869,7 +929,12 @@ export async function linhasDaEquipe(
     emLotes(volIds, ids => s.from('habilidades').select('*', C).in('voluntario_id', ids), 'habilidades'),
     emLotes(volIds, ids => s.from('indisponibilidades').select('*', C).in('voluntario_id', ids).gte('data', desde), 'indisponibilidades'),
     emLotes2(funcaoIds, cultoIds, (ids, cs) =>
-      s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cs), 'escalacoes'),
+      /* 82b · `.order('culto_id')`: era a UNICA leitura da carga sem ordem, e
+         num dia com duas linhas de `cultos` a resposta invertia sozinha a cada
+         `update` (o Postgres devolve na ordem do heap). O desempate de
+         `montarEstado` ja e estavel sem isto; a ordem torna a propria resposta
+         reproduzivel, que e o que se quer quando alguem for depurar. */
+      s.from('escalacoes').select('*', C).in('funcao_id', ids).in('culto_id', cs).order('culto_id'), 'escalacoes'),
     emLotes2(volIds, cultoIds, (ids, cs) =>
       s.from('plantoes').select('*', C).in('voluntario_id', ids).in('culto_id', cs), 'plantoes'),
     /* `culto_obs` não passava por lote nenhum: a lista inteira de cultos ia
