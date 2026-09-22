@@ -113,22 +113,44 @@ const EMAIL = /^[^\s@,;<>"]+@[^\s@,;<>"]+\.[^\s@,;<>"]+$/;
    `text:` e nunca `html:`. Título e nota são texto que o usuário digita; num
    corpo HTML interpolado sem escapar, `<img src=x onerror=...>` e um `<a>`
    para outro domínio viajam dentro de um e-mail que parece ser do sistema. */
+/* O REMETENTE — 22/09/2026.
+
+   Era `onboarding@resend.dev`, o endereço de TESTE da Resend, e ela só
+   entrega o que sai dele para o dono da conta. Ou seja: nenhum aviso chegava
+   em ninguém do setor, e a fila marcava como enviado.
+
+   O domínio `avisos.guiaservir.com` foi cadastrado na Resend em 22/09
+   (região sa-east-1). Enquanto os registros de DNS não validam, a Resend
+   recusa esse remetente com 403 e uma frase sobre o domínio não verificado —
+   e SÓ nesse caso o envio tenta de novo pelo endereço de teste. Assim, subir
+   este código antes ou depois de o DNS validar dá no mesmo, e o dia em que
+   validar ninguém precisa voltar aqui. Qualquer outra recusa (chave errada,
+   limite, e-mail inválido) não ganha segunda tentativa: repetir não conserta. */
+const REMETENTE = 'Demandas GUIA <demandas@avisos.guiaservir.com>';
+const REMETENTE_DE_TESTE = 'Demandas GUIA <onboarding@resend.dev>';
+
 async function enviar(para: string, assunto: string, corpo: string) {
   const chave = process.env.RESEND_API_KEY;
   if (!chave) return { enviado: false, motivo: 'sem RESEND_API_KEY' };
+  const tentar = (from: string) => fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from, to: [para], subject: assunto, text: corpo }),
+    /* sem prazo, um Resend pendurado segura a varredura até o timeout da
+       Vercel e os avisos seguintes nem chegam a ser tentados */
+    signal: AbortSignal.timeout(15_000),
+  });
   try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'Demandas GUIA <onboarding@resend.dev>',
-        to: [para], subject: assunto, text: corpo,
-      }),
-      /* sem prazo, um Resend pendurado segura a varredura até o timeout da
-         Vercel e os avisos seguintes nem chegam a ser tentados */
-      signal: AbortSignal.timeout(15_000),
-    });
-    return { enviado: r.ok, motivo: r.ok ? 'ok' : `resend ${r.status}` };
+    const r = await tentar(REMETENTE);
+    if (r.ok) return { enviado: true, motivo: 'ok' };
+    if (r.status === 403) {
+      const porque = await r.text().catch(() => '');
+      if (/domain|verif/i.test(porque)) {
+        const t = await tentar(REMETENTE_DE_TESTE);
+        return { enviado: t.ok, motivo: t.ok ? 'ok (dominio sem verificar: remetente de teste)' : `resend ${t.status}` };
+      }
+    }
+    return { enviado: false, motivo: `resend ${r.status}` };
   } catch (e) {
     return { enviado: false, motivo: `rede: ${String((e as Error)?.message || e).slice(0, 80)}` };
   }

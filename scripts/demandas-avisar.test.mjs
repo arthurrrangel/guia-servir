@@ -157,8 +157,13 @@ globalThis.fetch = async (entrada, init = {}) => {
 
   if (url === 'https://api.resend.com/emails') {
     cena.emails.push({ corpo, autorizacao: h.get('authorization'), sinal: init?.signal ?? null });
+    /* número = só o status; objeto = status e a frase que a Resend manda.
+       A frase importa desde que o remetente tem volta: só a recusa por
+       domínio não verificado ganha segunda tentativa. */
     const st = cena.resend(cena.emails.length);
-    return st === 200 ? resposta({ id: 'msg_de_mentira' }) : resposta({ message: 'estourou' }, st);
+    const s = typeof st === 'object' ? st.status : st;
+    const frase = typeof st === 'object' ? st.message : 'estourou';
+    return s === 200 ? resposta({ id: 'msg_de_mentira' }) : resposta({ message: frase }, s);
   }
 
   /* qualquer outro host é falha de teste, não resultado: a rota só pode falar
@@ -634,6 +639,50 @@ const assuntoDe = (e) => String(emailDe(e).subject ?? '');
   const r = await chamar({ headers: comToken });
   ok(r.status === 500, 'fila que o banco recusa vira 500, não 200 mudo', `veio ${r.status}`);
   ok(cena.emails.length === 0, 'e nenhum e-mail sai');
+}
+
+/* ==========================================================================
+   O REMETENTE — 22/09/2026. `onboarding@resend.dev` só entrega para o dono
+   da conta Resend. O remetente de verdade é o domínio da igreja, e a volta
+   para o de teste acontece só quando a Resend diz que o domínio não está
+   verificado. As frases abaixo são as da Resend.
+   ========================================================================== */
+{
+  const de = (e) => String(emailDe(e).from ?? '');
+  const NAO_VERIFICADO = { status: 403,
+    message: 'The avisos.guiaservir.com domain is not verified. Please, add and verify your domain on https://resend.com/domains' };
+
+  montar({ fila: [avisoBase(0)] });
+  await chamar({ headers: comToken });
+  ok(cena.emails.length === 1, 'com o domínio aceito, sai UM e-mail', `saíram ${cena.emails.length}`);
+  ok(/<demandas@avisos\.guiaservir\.com>$/.test(de(cena.emails[0] || {})),
+    'e ele sai do domínio da igreja, não do endereço de teste', de(cena.emails[0] || {}));
+  ok(!/resend\.dev/.test(de(cena.emails[0] || {})), 'e onboarding@resend.dev não é o primeiro remetente');
+
+  montar({ fila: [avisoBase(0)], resend: (n) => (n === 1 ? NAO_VERIFICADO : 200) });
+  await chamar({ headers: comToken });
+  ok(cena.emails.length === 2, 'domínio ainda não verificado: tenta de novo, uma vez', `saíram ${cena.emails.length}`);
+  ok(/onboarding@resend\.dev/.test(de(cena.emails[1] || {})),
+    'e a segunda tentativa usa o endereço de teste', de(cena.emails[1] || {}));
+  ok(cena.rpcs.some(c => c.fn === 'dem_aviso_enviado'),
+    'e o aviso conta como enviado quando a segunda passa',
+    cena.rpcs.map(c => c.fn).join(' '));
+
+  for (const [rot, resend] of [
+    ['chave errada (401)', () => 401],
+    ['limite da Resend (429)', () => 429],
+    ['403 por outro motivo', () => ({ status: 403, message: 'You do not have access to this resource' })],
+  ]) {
+    montar({ fila: [avisoBase(0)], resend });
+    await chamar({ headers: comToken });
+    ok(cena.emails.length === 1, `${rot}: não ganha segunda tentativa`, `saíram ${cena.emails.length}`);
+  }
+
+  montar({ fila: [avisoBase(0)], resend: (n) => (n === 1 ? NAO_VERIFICADO : 403) });
+  await chamar({ headers: comToken });
+  ok(cena.rpcs.some(c => c.fn === 'dem_aviso_falhou'),
+    'se as duas recusam, o aviso volta para a fila em vez de sumir',
+    cena.rpcs.map(c => c.fn).join(' '));
 }
 
 console.__real.log(falhas
