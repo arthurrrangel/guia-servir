@@ -15,7 +15,15 @@
      · os cinco papéis, o participante e o pedido de papel, para ver o
        menu de abas e o portal de cada um.
 
-   Roda depois das migrações do Demandas, até a 94. */
+   Roda depois das migrações do Demandas, até a 95. */
+
+-- ------------------------------------------------------- a lista de anexo --
+/* 95 · a lista nasce desligada no banco (a migração explica por quê). Aqui
+   ela fica LIGADA, porque é o estado que a igreja vai usar e o que a tela tem
+   que mostrar: a dica "Aceita links de…" no campo de anexo, o seletor em "Só
+   os da lista" e os sites na administração. O anexo semeado abaixo é do
+   Google Drive, que está na lista. */
+update demandas.regras_gerais set anexo_restrito = true where id;
 
 -- ------------------------------------------------------------------ gente --
 insert into demandas.membros (nome, email, telefone, setor_id, papel, token) values

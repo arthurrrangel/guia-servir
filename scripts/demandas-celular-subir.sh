@@ -107,7 +107,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia \
          92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio \
          93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb \
-         94-a-base-central-de-pessoas-e-o-escopo-que-o-banco-cobra; do
+         94-a-base-central-de-pessoas-e-o-escopo-que-o-banco-cobra \
+         95-o-anexo-vem-de-site-que-a-igreja-conhece; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql
