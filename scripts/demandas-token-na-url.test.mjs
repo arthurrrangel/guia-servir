@@ -77,19 +77,32 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
    a pessoa recebe a credencial pela primeira vez. O que não pode é aparecer
    um segundo lugar montando isso, porque aí a limpeza de `meuToken` deixa de
    cobrir todos os caminhos. Este teste conta: um, e só um. */
+/* 94 · O LUGAR MUDOU, E A CONTAGEM PASSOU A VARRER TUDO.
+
+   O link pessoal saiu dos Ajustes e foi para a ficha da pessoa na
+   administração (`app/demandas/admin/pessoas/[id]/page.tsx`). Com a lista
+   de arquivos escrita à mão, a mudança deu "achei 0": o teste dizia que
+   NINGUÉM montava o link, e um segundo lugar novo, num arquivo fora da
+   lista, passaria sem ser contado. Agora ele varre as duas pastas inteiras. */
 {
-  const arquivos = [
-    'app/demandas/ajustes/page.tsx', 'app/demandas/page.tsx',
-    'lib/demandas/api.ts', 'lib/demandas/regras.ts',
-    'components/demandas/Casca.tsx', 'components/demandas/Ui.tsx',
-  ];
-  let n = 0;
+  const { readdirSync, statSync } = await import('node:fs');
+  const arquivos = [];
+  const anda = d => {
+    for (const nome of readdirSync(join(raiz, d))) {
+      const rel = `${d}/${nome}`;
+      if (statSync(join(raiz, rel)).isDirectory()) anda(rel);
+      else if (/\.tsx?$/.test(nome)) arquivos.push(rel);
+    }
+  };
+  anda('app/demandas'); anda('components/demandas'); anda('lib/demandas');
+  let n = 0; const onde = [];
   for (const f of arquivos) {
-    let txt = '';
-    try { txt = ler(f); } catch { continue; }
-    n += (txt.match(/\?t=\$\{/g) || []).length;
+    const achou = (ler(f).match(/\?t=\$\{/g) || []).length;
+    if (achou) { n += achou; onde.push(f); }
   }
-  ok(n === 1, 'existe UM único lugar que monta o link com ?t= (o de Ajustes)', `achei ${n}`);
+  ok(n === 1, 'existe UM único lugar que monta o link com ?t= (a ficha da pessoa)', `achei ${n}: ${onde.join(', ')}`);
+  ok(onde[0] === 'app/demandas/admin/pessoas/[id]/page.tsx',
+    'e ele é a ficha da pessoa, na administração', onde.join(', '));
 }
 
 console.log(falhas ? `\ndemandas-token-na-url: ${falhas} falha(s) em ${feitas}` : `\ndemandas-token-na-url: ${feitas}/${feitas} ok`);

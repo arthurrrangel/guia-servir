@@ -24,7 +24,7 @@
    --------------------------------------------------------------------------- */
 
 import { sb } from '@/lib/supabase';
-import type { Bases, Eu, Membro, Numeros, Resumo, Vista } from './tipos';
+import type { AvisoDentro, Bases, Cadastro, Eu, FichaPessoa, Membro, Numeros, Portal, Resumo, Vista } from './tipos';
 import type { Acao, Rascunho } from './regras';
 
 type Resposta<T> = ({ ok: true } & T) | { ok: false; erro: string; regra?: string; codigo?: string };
@@ -281,9 +281,13 @@ export const abrir = async (r: Rascunho, anexos: { nome: string; url: string }[]
   return resposta;
 };
 
+/* 94 · os recortes dos dois portais. Todos são filtros DENTRO do que a
+   pessoa pode ver: pedir `ministerio` sem ser líder devolve lista vazia, e
+   não a lista dos outros. Quem decide é `dem_lista`, não esta linha. */
+export type Aba = 'tudo' | 'minhas' | 'setor' | 'comigo' | 'participo' | 'ministerio' | 'responder' | 'agir';
 export type Filtro = {
-  aba?: 'tudo' | 'minhas' | 'setor' | 'comigo';
-  status?: string; abertas?: boolean; atrasadas?: boolean;
+  aba?: Aba;
+  status?: string; abertas?: boolean; atrasadas?: boolean; urgentes?: boolean;
   setor?: string; busca?: string;
 };
 
@@ -320,8 +324,39 @@ export const numeros = (de?: string, ate?: string) =>
 export const pessoas = () =>
   rpc<{ membros: Membro[] }>('dem_pessoas', { p_token: t() });
 
-export const ajustar = (oQue: 'setor' | 'categoria' | 'membro', d: Record<string, unknown>) =>
-  rpc<{ id: string }>('dem_ajustar', { p_token: t(), p_o_que: oQue, p_d: d });
+export const pessoa = (id: string) =>
+  rpc<FichaPessoa>('dem_pessoa', { p_token: t(), p_id: id });
+
+export const ajustar = (oQue: 'setor' | 'categoria' | 'membro' | 'pedido' | 'link', d: Record<string, unknown>) =>
+  rpc<{ id: string; quem?: { id: string; nome: string; setor: string | null; ativo: boolean }[] }>(
+    'dem_ajustar', { p_token: t(), p_o_que: oQue, p_d: d });
+
+/* ------------------------------------------------ migração 94: os portais */
+
+export const portal = () =>
+  rpc<Portal>('dem_portal', { p_token: t() });
+
+/* `marcar` diz ao servidor que a pessoa ABRIU os avisos: o contador da casca
+   volta a zero dali em diante. Só a tela de avisos marca. */
+export const avisos = (marcar = false) =>
+  rpc<{ itens: AvisoDentro[]; novos: number; vistos_em: string }>(
+    'dem_avisos', { p_token: t(), p_marcar: marcar });
+
+export const perfil = (d: { nome?: string; telefone?: string; funcao?: string; papel_pedido?: string }) =>
+  rpc<Omit<Eu, 'ok'>>('dem_perfil', { p_token: t(), p_d: d });
+
+/* O CADASTRO NÃO MANDA TOKEN, DE PROPÓSITO.
+
+   Quem tem link pessoal já está cadastrado. A identidade aqui é a sessão do
+   login por e-mail, que o Supabase só abre depois de a pessoa tocar no link
+   que chegou na caixa dela: é o e-mail confirmado que vira a pessoa. As duas
+   funções do banco nem aceitam `p_token`. */
+export const cadastro = () =>
+  rpc<Cadastro>('dem_cadastro', {});
+
+export const cadastrar = (d: { nome: string; telefone: string; setor_id: string;
+                               funcao?: string; papel_pedido?: string }) =>
+  rpc<Omit<Eu, 'ok'> & { novo?: boolean }>('dem_cadastrar', { p_d: d });
 
 /* NÃO EXISTE LOGIN AQUI, DE PROPÓSITO.
 

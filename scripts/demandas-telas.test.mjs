@@ -694,61 +694,150 @@ function mundoNovo() {
 montarMundo();
 await ligarReact();
 
-const Painel = (await import('@/app/demandas/page.tsx')).default;
+const Inicio = (await import('@/app/demandas/page.tsx')).default;
+const Atendimento = (await import('@/app/demandas/atendimento/page.tsx')).default;
 const Nova = (await import('@/app/demandas/nova/page.tsx')).default;
 const Numeros = (await import('@/app/demandas/numeros/page.tsx')).default;
-const Ajustes = (await import('@/app/demandas/ajustes/page.tsx')).default;
+const Admin = (await import('@/app/demandas/admin/page.tsx')).default;
+const FichaPessoa = (await import('@/app/demandas/admin/pessoas/[id]/page.tsx')).default;
+const Perfil = (await import('@/app/demandas/perfil/page.tsx')).default;
+const Avisos = (await import('@/app/demandas/avisos/page.tsx')).default;
+const CadastroPagina = (await import('@/app/demandas/cadastro/page.tsx')).default;
 const Ficha = (await import('@/app/demandas/d/[numero]/page.tsx')).default;
+
+/* A LISTA, SOZINHA, COM OS QUATRO RECORTES DE SEMPRE · migração 94.
+
+   Até a 93 `/demandas` ERA a lista, e os blocos 2, 3, 4 e 10 abaixo mediam o
+   comportamento dela montando a página. Na 94 a lista virou uma peça
+   (`components/demandas/Lista.tsx`) que os dois portais montam, cada um com
+   os seus recortes. O que aqueles blocos medem (resposta atrasada, espera da
+   busca, lista que não pisca, vocabulário da pílula, aviso de corte) é da
+   PEÇA, e é a peça que eles passam a montar, pela mesma casca, com os
+   quatro recortes que ela sempre teve.
+
+   O que é de cada PÁGINA (quais recortes ela oferece, qual aba abre por
+   padrão, que o Início nunca pede "tudo") tem bloco próprio, o 1 e o 17. */
+const { default: Casca, useEu } = await import('@/components/demandas/Casca.tsx');
+const { default: Lista } = await import('@/components/demandas/Lista.tsx');
+function ListaDeTeste() {
+  const { eu } = useEu();
+  if (!eu) return null;
+  return React.createElement(Lista, {
+    eu,
+    abas: [{ v: 'minhas', rot: 'Eu pedi' }, { v: 'setor', rot: 'Meu setor' }, { v: 'tudo', rot: 'Tudo' }],
+    abaInicial: 'tudo',
+    recortes: [{ v: 'abertas', rot: 'Em aberto' }, { v: 'atrasadas', rot: 'Atrasadas' },
+               { v: 'concluidas', rot: 'Concluídas' }, { v: 'tudo', rot: 'Todas' }],
+    vazio: (_a, so) => ({ titulo: so === 'concluidas' ? 'Nada concluído.' : 'Nada em aberto.' }),
+  });
+}
+const Painel = () => React.createElement(Casca, null, React.createElement(ListaDeTeste));
+
+/* o que a primeira tela devolve quando não há nada: as contas zeradas */
+const N_ZERO = {
+  responder: 0, minhas_andamento: 0, minhas_concluidas: 0, minhas_todas: 0, participo: 0, ministerio: 0,
+  agir: 0, aprovar: 0, fila: 0, comigo: 0, atrasadas: 0, urgentes: 0, setor_abertas: 0, concluidas: 0,
+  avisos: 0, pedidos: 0,
+};
+const portalDe = (eu, n = {}, precisa = []) => ({ ok: true, eu, n: { ...N_ZERO, ...n }, precisa });
+const EU_MEMBRO = {
+  ok: true, id: 'm1', nome: 'Lara Souza', primeiro_nome: 'Lara', papel: 'solicitante',
+  setor_id: 's9', setor: 'Louvor', setor_atende: false, tem_login: true,
+  atende: false, permissoes: ['pedir', 'acompanhar'], avisos: 0,
+};
+const EU_EQUIPE = {
+  ...EU_MEMBRO, id: 'r1', nome: 'Monik Ribeiro', primeiro_nome: 'Monik', papel: 'responsavel',
+  setor_id: 's1', setor: 'Comunicação', setor_atende: true, atende: true,
+  permissoes: ['pedir', 'acompanhar', 'atender_setor', 'ver_numeros'],
+};
 
 /* ===========================================================================
    1 · O QUARTO RECORTE, E O QUE ELE MANDA PARA O BANCO
    =========================================================================== */
-console.log('\n1. O painel tem o recorte de concluídas, e ele vira `status: concluida`');
+console.log('\n1. Os dois portais têm o recorte de concluídas, e ele vira `status: concluida`');
+/* O ESCOPO DA PRIMEIRA VERSÃO PEDE "painel com demandas abertas, atrasadas e
+   concluídas", e isso continua valendo para os DOIS portais da 94: o Início
+   de quem pede tem "Abertas / Concluídas / Histórico", e o Atendimento
+   tem os seis atalhos do pedido do Arthur, entre eles Atrasadas e
+   Concluídas. Aqui se mede o que cada toque manda para o banco. */
 {
   mundoNovo();
   const b = banco({
-    dem_quem_sou: EU_GESTOR,
+    dem_quem_sou: EU_MEMBRO,
+    dem_portal: portalDe(EU_MEMBRO),
     dem_lista: { ok: true, itens: [demanda(1)], total: 1, tem_mais: false },
   });
   globalThis.__banco = b;
-  const { alvo, desmontar } = await montar(Painel);
+  const { alvo, desmontar } = await montar(Inicio);
 
   const tira = porAria(alvo, 'aria-label', 'Em que estado');
   const rotulos = porTag(tira, 'BUTTON').map(texto);
-  ok(rotulos.length === 4, 'a tira de estado tem quatro botões', rotulos.join(' | '));
-  ok(rotulos.includes('Concluídas'), 'um deles é "Concluídas"', rotulos.join(' | '));
+  ok(rotulos.join('|') === 'Abertas|Concluídas|Histórico',
+    'o Início tem os três estados de quem pede', rotulos.join(' | '));
 
   const primeira = b.ultima('dem_lista');
   ok(primeira.args.p_f.abertas === true && primeira.args.p_f.status === undefined,
-    'a carga inicial continua pedindo só as abertas', JSON.stringify(primeira.args.p_f));
+    'a carga inicial pede só as que estão andando', JSON.stringify(primeira.args.p_f));
+  ok(primeira.args.p_f.aba === 'minhas',
+    'e pede as MINHAS, nunca "tudo": o Início não abre na base inteira', JSON.stringify(primeira.args.p_f));
+  ok(!b.chamadas.some(c => c.nome === 'dem_lista' && c.args.p_f.aba === 'tudo'),
+    'nenhuma chamada da lista do Início pediu a aba "tudo"');
 
   await clicar(botao(tira, 'Concluídas'));
   const f = b.ultima('dem_lista').args.p_f;
   ok(f.status === 'concluida', 'tocar em Concluídas manda status: "concluida"', JSON.stringify(f));
   ok(f.abertas === undefined && f.atrasadas === undefined,
     'e não manda abertas nem atrasadas junto', JSON.stringify(f));
-  ok(porAria(alvo, 'aria-pressed', 'true') && texto(botao(tira, 'Concluídas')) === 'Concluídas'
-     && botao(tira, 'Concluídas').getAttribute('aria-pressed') === 'true',
+  ok(botao(tira, 'Concluídas').getAttribute('aria-pressed') === 'true',
     'o botão fica marcado como o recorte ativo');
 
-  await clicar(botao(tira, 'Todas'));
+  await clicar(botao(tira, 'Histórico'));
   const g = b.ultima('dem_lista').args.p_f;
-  ok(g.status === undefined && g.abertas === undefined && g.atrasadas === undefined,
-    'voltar para Todas tira o filtro de status', JSON.stringify(g));
+  ok(g.status === undefined && g.abertas === undefined && g.atrasadas === undefined && g.aba === 'minhas',
+    'Histórico tira o filtro de estado e continua nas minhas', JSON.stringify(g));
   await desmontar();
 }
 {
-  /* o vazio do quarto recorte não pode falar a frase de outro recorte */
+  /* o vazio do recorte de concluídas não pode falar a frase de outro recorte */
   mundoNovo();
   globalThis.__banco = banco({
-    dem_quem_sou: EU_GESTOR,
+    dem_quem_sou: EU_MEMBRO,
+    dem_portal: portalDe(EU_MEMBRO),
     dem_lista: { ok: true, itens: [], total: 0, tem_mais: false },
   });
-  const { alvo, desmontar } = await montar(Painel);
+  const { alvo, desmontar } = await montar(Inicio);
   await clicar(botao(porAria(alvo, 'aria-label', 'Em que estado'), 'Concluídas'));
-  ok(/concluí/i.test(texto(alvo)) && !/Nenhuma demanda em aberto/.test(texto(alvo)),
-    'a lista vazia em Concluídas fala de concluídas, não de abertas',
-    texto(alvo).slice(0, 220));
+  ok(/concluído/i.test(texto(alvo)) && !/em andamento\./i.test(texto(alvo)),
+    'a lista vazia em Concluídas fala de concluídas, não de andamento',
+    texto(alvo).slice(0, 260));
+  await desmontar();
+}
+{
+  /* e o Atendimento: os seis atalhos, e o que cada um pede */
+  mundoNovo();
+  const b = banco({
+    dem_quem_sou: EU_EQUIPE,
+    dem_portal: portalDe(EU_EQUIPE, { agir: 3, comigo: 2, setor_abertas: 9, atrasadas: 1, urgentes: 4, concluidas: 12 }),
+    dem_lista: { ok: true, itens: [demanda(1)], total: 1, tem_mais: false },
+  });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Atendimento);
+  const atalhos = porTag(porAria(alvo, 'aria-label', 'O que ver'), 'BUTTON');
+  ok(atalhos.map(x => texto(x)).join('|') === '3esperando você|2com você|9do setor|1atrasadas|4urgentes|12concluídas',
+    'os seis atalhos do pedido, cada um com a sua conta', atalhos.map(texto).join(' | '));
+  ok(b.ultima('dem_lista').args.p_f.aba === 'agir',
+    'o Atendimento abre em "esperando você"', JSON.stringify(b.ultima('dem_lista').args.p_f));
+  await clicar(atalhos[3]);
+  const f = b.ultima('dem_lista').args.p_f;
+  ok(f.aba === 'setor' && f.atrasadas === true, 'Atrasadas pede a fila do setor, só as atrasadas', JSON.stringify(f));
+  await clicar(atalhos[4]);
+  const u = b.ultima('dem_lista').args.p_f;
+  ok(u.aba === 'setor' && u.urgentes === true, 'Urgentes pede a fila do setor, só as urgentes', JSON.stringify(u));
+  await clicar(atalhos[5]);
+  const c = b.ultima('dem_lista').args.p_f;
+  ok(c.aba === 'setor' && c.status === 'concluida', 'Concluídas pede a fila do setor, status concluída', JSON.stringify(c));
+  ok(!porAria(alvo, 'aria-label', 'Em que estado'),
+    'e a lista não desenha tira própria: os atalhos são o único seletor');
   await desmontar();
 }
 
@@ -976,7 +1065,7 @@ console.log('\n5. O campo de orçamento não depende da categoria exigir orçame
 /* ===========================================================================
    6 · O ADMINISTRADOR CRIA CATEGORIA PELA TELA
    =========================================================================== */
-console.log('\n6. Ajustes cria categoria, no grupo que já está aberto');
+console.log('\n6. A administração cria categoria, no grupo que já está aberto');
 {
   mundoNovo();
   const cats = [
@@ -990,7 +1079,7 @@ console.log('\n6. Ajustes cria categoria, no grupo que já está aberto');
     dem_ajustar: { ok: true, id: 'novo' },
   });
   globalThis.__banco = b;
-  const { alvo, desmontar } = await montar(Ajustes);
+  const { alvo, desmontar } = await montar(Admin);
   await clicar(porTag(alvo, 'BUTTON').find(x => texto(x).startsWith('Categorias')));
 
   const nome = porAria(alvo, 'aria-label', 'Nome da categoria nova em Comunicação');
@@ -1198,14 +1287,16 @@ console.log('\n8. localStorage indisponível não derruba a tela');
   const arm = mundoNovo();
   arm.explode = true;
   globalThis.__banco = banco({
-    dem_quem_sou: EU_GESTOR,
+    dem_quem_sou: EU_MEMBRO,
+    dem_portal: portalDe(EU_MEMBRO),
     dem_lista: { ok: true, itens: [demanda(1)], total: 1, tem_mais: false },
   });
   let caiu = '';
   try {
-    const t = await montar(Painel);
-    ok(/O que a igreja está pedindo/.test(texto(t.alvo)),
-      'o painel monta com o armário explodindo (o token guardado é lido dali)');
+    /* 94 · a primeira tela é o Início, e é ela que tem que montar */
+    const t = await montar(Inicio);
+    ok(/Olá, Lara/.test(texto(t.alvo)),
+      'o Início monta com o armário explodindo (o token guardado é lido dali)', texto(t.alvo).slice(0, 200));
     await t.desmontar();
   } catch (e) { caiu = String(e && e.message); }
   ok(!caiu, 'nenhuma exceção escapou do painel', caiu);
@@ -1808,15 +1899,27 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
      então a aba "Demandas" fica a um toque em qualquer ponto da rolagem, e o
      "< todas as demandas" abre a ficha. Três saídas para o mesmo lugar eram
      duas a mais. O que não pode faltar é UMA, e ela tem que ir para a lista. */
-  const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
-  const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
-    && /todas as demandas/.test(texto(x)))[0];
-  ok(!!saida, 'a ficha tem a saída do topo, "todas as demandas"');
-  ok(saida && saida.getAttribute('href') === '/demandas',
-    'e ela leva para a lista de demandas', saida ? saida.getAttribute('href') : '(sem link)');
-  ok(!botao(alvo, 'Voltar para a lista'),
-    'e o botão repetido do fim não voltou');
-  await desmontar();
+  /* 94 · e ela volta para o PORTAL de quem olha: quem atende, para o
+     Atendimento (onde estava a fila); quem pede, para as suas. */
+  {
+    const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+    const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
+      && /atendimento/.test(texto(x)))[0];
+    ok(!!saida, 'quem atende tem a saída do topo, "atendimento"');
+    ok(saida && saida.getAttribute('href') === '/demandas/atendimento',
+      'e ela leva para o Atendimento', saida ? saida.getAttribute('href') : '(sem link)');
+    ok(!botao(alvo, 'Voltar para a lista'),
+      'e o botão repetido do fim não voltou');
+    await desmontar();
+  }
+  {
+    const { alvo, desmontar } = await comFicha(vista({}, QUEM.pediu));
+    const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
+      && /minhas demandas/.test(texto(x)))[0];
+    ok(saida && saida.getAttribute('href') === '/demandas',
+      'quem pediu volta para as suas, no Início', saida ? saida.getAttribute('href') : '(sem link)');
+    await desmontar();
+  }
 }
 {
   /* UM GESTO, UMA LINHA — 22/09/2026.
@@ -1854,6 +1957,261 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
     'mas uma mudança de status que não veio de assumir continua inteira', t.slice(-700));
   ok(/Ana passou para José Carlos de Oliveira Nascimento/.test(t),
     'e passar para outra pessoa continua sendo "passou para"', t.slice(-700));
+  await desmontar();
+}
+
+/* ===========================================================================
+   17 · MIGRAÇÃO 94: QUEM SOU, ONDE ESTOU, O QUE ESPERA POR MIM
+
+   Os dois portais, o cadastro, o perfil, os avisos e a administração. O que
+   estes blocos cobram é o que só a TELA decide; o que o banco decide (quem vê
+   o quê) está provado na conferência da 94 e em `demandas-banco.test.sql`,
+   com os quatro ataques do pedido.
+   =========================================================================== */
+console.log('\n17. A barra: as abas de cada papel, e o número de avisos');
+const rotulosDaBarra = alvo =>
+  porTag(porAria(alvo, 'aria-label', 'Seções de demandas'), 'A').map(a => a.childNodes[0] ? texto(a).replace(/\d+\+?$/, '').trim() : '');
+{
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: { ...EU_MEMBRO, avisos: 3 }, dem_portal: portalDe(EU_MEMBRO),
+                               dem_lista: { ok: true, itens: [], total: 0, tem_mais: false } });
+  const { alvo, desmontar } = await montar(Inicio);
+  ok(rotulosDaBarra(alvo).join('|') === 'Início|Nova|Avisos|Perfil',
+    'quem só pede vê Início, Nova, Avisos e Perfil, e não vê Atendimento', rotulosDaBarra(alvo).join(' | '));
+  const aba = porTag(porAria(alvo, 'aria-label', 'Seções de demandas'), 'A').find(x => /Avisos/.test(texto(x)));
+  ok(aba && /3/.test(texto(aba)), 'e a aba Avisos carrega o número do que chegou', aba ? texto(aba) : '(sem aba)');
+  ok(!/Administra/.test(rotulosDaBarra(alvo).join(' ')), 'a administração não está na barra de ninguém');
+  await desmontar();
+}
+{
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_EQUIPE, dem_portal: portalDe(EU_EQUIPE),
+                               dem_lista: { ok: true, itens: [], total: 0, tem_mais: false } });
+  const { alvo, desmontar } = await montar(Inicio);
+  ok(rotulosDaBarra(alvo).join('|') === 'Início|Atender|Nova|Avisos|Perfil',
+    'quem atende ganha a aba Atender', rotulosDaBarra(alvo).join(' | '));
+  await desmontar();
+}
+
+console.log('\n18. O Início: o que espera por mim, e as portas dos outros portais');
+{
+  mundoNovo();
+  const b = banco({
+    dem_quem_sou: EU_MEMBRO,
+    dem_portal: portalDe(EU_MEMBRO, { responder: 1 }, [
+      { ...demanda(41, { titulo: 'Arte do retiro', status: 'travada', travada_por: 'informacao' }), motivo: 'responder' },
+    ]),
+    dem_lista: { ok: true, itens: [], total: 0, tem_mais: false },
+  });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Inicio);
+  const t = texto(alvo);
+  ok(/Olá, Lara/.test(t) && /Membro/.test(t) && /Louvor/.test(t), 'quem sou: nome, papel e setor', t.slice(0, 200));
+  ok(/Precisa de você/.test(t) && /Arte do retiro/.test(t), 'o que espera por mim vem primeiro', t.slice(0, 400));
+  ok(/Responder/.test(t), 'com o nome do botão que resolve', t.slice(0, 400));
+  ok(!/Atendimento/.test(t.replace(/Seções de demandas/, '')) || !/esperando você/.test(t),
+    'quem só pede não vê as contas do atendimento', t.slice(0, 400));
+  ok(!/Administração/.test(t), 'nem a porta da administração');
+  await desmontar();
+}
+{
+  mundoNovo();
+  globalThis.__banco = banco({
+    dem_quem_sou: { ...EU_EQUIPE, papel: 'admin' },
+    dem_portal: portalDe({ ...EU_EQUIPE, papel: 'admin' }, { agir: 2, pedidos: 3 }),
+    dem_lista: { ok: true, itens: [], total: 0, tem_mais: false },
+  });
+  const { alvo, desmontar } = await montar(Inicio);
+  const t = texto(alvo);
+  ok(/esperando você/.test(t), 'quem atende vê as contas do atendimento no Início', t.slice(0, 500));
+  ok(/3 pedidos de papel esperam você/.test(t), 'e quem administra vê quantos pedidos esperam decisão', t.slice(0, 600));
+  const porta = porTag(alvo, 'A').find(x => x.getAttribute('href') === '/demandas/admin');
+  ok(!!porta, 'com a porta para a administração');
+  await desmontar();
+}
+
+console.log('\n19. O Atendimento é de quem atende, e a administração é de quem administra');
+{
+  mundoNovo();
+  const b = banco({ dem_quem_sou: EU_MEMBRO, dem_portal: portalDe(EU_MEMBRO),
+                    dem_lista: { ok: true, itens: [demanda(1)], total: 1, tem_mais: false } });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Atendimento);
+  ok(/O atendimento é de quem faz parte de uma equipe/.test(texto(alvo)),
+    'quem só pede lê que o atendimento não é dele, e para onde ir', texto(alvo).slice(0, 300));
+  ok(b.quantas('dem_lista') === 0, 'e a tela nem pede a lista', String(b.quantas('dem_lista')));
+  await desmontar();
+}
+{
+  mundoNovo();
+  const b = banco({ dem_quem_sou: EU_EQUIPE, dem_pessoas: { ok: false, erro: 'SO_ADMIN' },
+                    dem_bases: { ok: true, setores: [], categorias: [] } });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Admin);
+  ok(/Esta área é de quem administra o sistema/.test(texto(alvo)),
+    'quem não administra lê que a área é restrita', texto(alvo).slice(0, 300));
+  ok(b.quantas('dem_pessoas') === 0, 'e a tela não pede a lista de pessoas', String(b.quantas('dem_pessoas')));
+  await desmontar();
+}
+{
+  /* os pedidos de papel no topo das Pessoas, e o que "Aceitar" manda */
+  mundoNovo();
+  const b = banco({
+    dem_quem_sou: EU_ADMIN,
+    dem_bases: { ok: true, setores: [{ id: 's1', nome: 'Comunicação', slug: 'com', atende: true }], categorias: [] },
+    dem_pessoas: { ok: true, membros: [
+      { id: 'p1', nome: 'Caio Lima', papel: 'solicitante', setor_id: 's1', telefone: null, ativo: true,
+        papel_pedido: 'responsavel', funcao: 'Designer', origem: 'cadastro' },
+      { id: 'p2', nome: 'Ana Souza', papel: 'lider', setor_id: 's1', telefone: null, ativo: false },
+    ] },
+    dem_ajustar: { ok: true, id: 'p1' },
+  });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Admin);
+  const t = texto(alvo);
+  ok(/Pedidos de papel/.test(t) && /Quer ser Equipe/.test(t), 'o pedido aparece com o papel pedido', t.slice(0, 500));
+  ok(!/Ana Souza/.test(t), 'a lista abre nas ativas: a inativa não aparece de cara', t.slice(0, 700));
+  await clicar(botao(alvo, 'Aceitar'));
+  const c = b.ultima('dem_ajustar');
+  ok(c && c.args.p_o_que === 'pedido' && c.args.p_d.decisao === 'aceitar' && c.args.p_d.id === 'p1',
+    'Aceitar decide o pedido daquela pessoa, e nada além', JSON.stringify(c && c.args));
+  await desmontar();
+}
+
+console.log('\n20. O perfil muda o que é da pessoa, e só isso');
+{
+  mundoNovo();
+  const b = banco({ dem_quem_sou: { ...EU_MEMBRO, telefone: '5521999990000', funcao: '' },
+                    dem_perfil: { ...EU_MEMBRO, funcao: 'Baterista' } });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Perfil);
+  ok(/Abrir demandas/.test(texto(alvo)), 'o que a pessoa pode, em frase', texto(alvo).slice(0, 400));
+  await teclar(campo(alvo, 'Função'), 'Baterista');
+  await assentar();
+  await clicar(botao(alvo, 'Salvar'));
+  const c = b.ultima('dem_perfil');
+  ok(c && Object.keys(c.args.p_d).sort().join(',') === 'funcao,nome,telefone',
+    'salvar manda nome, telefone e função, e mais nada', JSON.stringify(c && c.args.p_d));
+  await clicar(botao(alvo, 'Lidero um ministério'));
+  const d = b.ultima('dem_perfil');
+  ok(d && d.args.p_d.papel_pedido === 'lider' && !('papel' in d.args.p_d),
+    'pedir outro papel manda o PEDIDO, nunca o papel', JSON.stringify(d && d.args.p_d));
+  await desmontar();
+}
+
+console.log('\n21. O cadastro: o e-mail primeiro, e depois só o que é da pessoa');
+{
+  mundoNovo();
+  const b = banco({});
+  let otp = null;
+  b.auth = {
+    getSession: async () => ({ data: { session: null } }),
+    signInWithOtp: async a => { otp = a; return { error: null }; },
+  };
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(CadastroPagina);
+  ok(/Mandamos um link/.test(texto(alvo)), 'sem sessão, o cadastro começa pelo e-mail', texto(alvo).slice(0, 300));
+  await teclar(campo(alvo, 'Seu e-mail'), 'lara@exemplo.com');
+  await assentar();
+  const form = porTag(alvo, 'FORM')[0];
+  await act(async () => { form.dispatchEvent(evento('submit')); });
+  await assentar();
+  ok(otp && otp.email === 'lara@exemplo.com', 'pede o link para o e-mail digitado', JSON.stringify(otp));
+  ok(otp && /\/demandas\/entrar\?volta=%2Fdemandas%2Fcadastro$/.test(otp.options.emailRedirectTo),
+    'e o link volta pela porta das demandas, direto para o cadastro', otp && otp.options.emailRedirectTo);
+  ok(b.chamadas.length === 0, 'e nenhuma função do banco foi chamada sem login', JSON.stringify(b.chamadas));
+  await desmontar();
+}
+{
+  mundoNovo();
+  const b = banco({
+    dem_cadastro: { ok: true, situacao: 'novo', email: 'lara@exemplo.com',
+                    setores: [{ id: 's9', nome: 'Louvor', atende: false }, { id: 's1', nome: 'Comunicação', atende: true }] },
+    dem_cadastrar: { ok: true, ...EU_MEMBRO, novo: true },
+  });
+  b.auth = { getSession: async () => ({ data: { session: { user: { email: 'lara@exemplo.com' } } } }) };
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(CadastroPagina);
+  ok(/Você entrou como lara@exemplo.com/.test(texto(alvo)), 'com sessão, o cadastro mostra com que e-mail', texto(alvo).slice(0, 300));
+  await teclar(campo(alvo, 'Nome completo'), 'Lara Souza');
+  await teclar(campo(alvo, 'WhatsApp'), '(21) 99999-0000');
+  await escolher(campo(alvo, 'Setor'), 's9');
+  await clicar(botao(alvo, 'Lidero um ministério'));
+  const form = porTag(alvo, 'FORM')[0];
+  await act(async () => { form.dispatchEvent(evento('submit')); });
+  await assentar();
+  const c = b.ultima('dem_cadastrar');
+  ok(c && !('p_token' in c.args), 'o cadastro não manda token: a identidade é o login', JSON.stringify(c && c.args));
+  const chaves = c ? Object.keys(c.args.p_d).filter(k => c.args.p_d[k] !== undefined).sort().join(',') : '';
+  ok(chaves === 'nome,papel_pedido,setor_id,telefone', 'e manda só nome, telefone, setor e o PEDIDO de papel', chaves);
+  ok(c && c.args.p_d.telefone === '21999990000', 'o telefone vai só com os dígitos', c && c.args.p_d.telefone);
+  await desmontar();
+}
+
+console.log('\n22. A ficha: quem acompanha');
+{
+  const { b, alvo, desmontar } = await comFicha(
+    { ...vista({}, { ...QUEM.pediu, pede: true, inclui: true }), participantes: [{ id: 'x2', nome: 'Beto Reis', eu: false }] },
+    { dem_mover: { ok: true, nome: 'Carla' } });
+  const t = texto(alvo);
+  ok(/Quem acompanha/.test(t) && /Beto Reis/.test(t), 'a ficha diz quem acompanha, pelo nome', t.slice(0, 900));
+  /* o dublê de DOM não transforma toque em botão de formulário em `submit`
+     (quem faz isso é o navegador); o envio é disparado no formulário que
+     contém a caixa, que é o caminho do Enter e do toque */
+  const enviar = async caixa => {
+    const form = porTag(alvo, 'FORM').find(f => todos(f, x => x === caixa).length > 0);
+    await act(async () => { form.dispatchEvent(evento('submit')); });
+    await assentar();
+  };
+  /* 22/09/2026 · WhatsApp primeiro, com o teclado de telefone; e-mail com o
+     de e-mail. Era um campo só, de texto, e o medidor de celular acusou o
+     teclado de letras para quem ia digitar número. */
+  const tel = campo(alvo, 'WhatsApp da pessoa');
+  /* o dublê de DOM guarda o atributo com o nome que o React escreveu
+     (`inputMode`); o navegador o guarda em minúsculas. Os dois valem. */
+  const modo = x => x && (x.getAttribute('inputmode') ?? x.getAttribute('inputMode'));
+  ok(tel && tel.getAttribute('type') === 'tel' && modo(tel) === 'tel',
+    'o campo começa pelo WhatsApp, com o teclado de telefone',
+    tel ? `type=${tel.getAttribute('type')} inputmode=${modo(tel)}` : '(sem campo)');
+  await teclar(tel, '(21) 99999-0007');
+  await enviar(tel);
+  let c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'incluir' && c.args.p_d.quem === '(21) 99999-0007',
+    'incluir pelo WhatsApp manda o número como foi digitado (quem normaliza é o banco)', JSON.stringify(c && c.args));
+  await clicar(botao(alvo, 'E-mail'));
+  const em = campo(alvo, 'E-mail da pessoa');
+  ok(em && em.getAttribute('type') === 'email', 'trocar para e-mail troca o campo e o teclado', em ? em.getAttribute('type') : '(sem campo)');
+  ok(em && em.value === '', 'e o que estava escrito no outro não passa para este', em && em.value);
+  await teclar(em, 'carla@exemplo.com');
+  await enviar(em);
+  c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'incluir' && c.args.p_d.quem === 'carla@exemplo.com',
+    'incluir manda o e-mail exato, e não um nome para procurar', JSON.stringify(c && c.args));
+  await desmontar();
+}
+{
+  const { alvo, desmontar } = await comFicha(vista({}, { ...QUEM.soEnxerga, participa: true, inclui: false }));
+  ok(!campo(alvo, 'WhatsApp da pessoa') && !campo(alvo, 'E-mail da pessoa') && !botao(alvo, 'Incluir'),
+    'quem só acompanha não inclui ninguém');
+  await desmontar();
+}
+
+console.log('\n23. Os avisos: a mesma frase da ficha, e abrir zera o número');
+{
+  mundoNovo();
+  const b = banco({
+    dem_quem_sou: { ...EU_MEMBRO, avisos: 2 },
+    dem_avisos: { ok: true, novos: 1, vistos_em: '2026-09-01T00:00:00Z', itens: [
+      { em: '2026-09-20T10:00:00Z', tipo: 'responsavel', de: null, para: 'Maria Aparecida', quem: 'Maria Aparecida',
+        texto: null, numero: 41, titulo: 'Arte do retiro', motivo: 'pedi', novo: true },
+    ] },
+  });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Avisos);
+  ok(/Maria assumiu/.test(texto(alvo)), 'o aviso usa a frase da ficha', texto(alvo).slice(0, 400));
+  ok(b.ultima('dem_avisos').args.p_marcar === true, 'abrir os avisos os marca como vistos');
+  const aba = porTag(porAria(alvo, 'aria-label', 'Seções de demandas'), 'A').find(x => /Avisos/.test(texto(x)));
+  ok(aba && !/\d/.test(texto(aba)), 'e o número da aba some', aba ? texto(aba) : '(sem aba)');
   await desmontar();
 }
 

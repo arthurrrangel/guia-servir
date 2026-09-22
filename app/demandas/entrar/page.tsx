@@ -325,6 +325,14 @@ export default function EntrarNasDemandas() {
             </button>
           : null}
       </div>
+      {/* 94 · A PORTA DE QUEM AINDA NÃO EXISTE AQUI.
+
+          Até a 93 esta tela só servia a quem já estava cadastrado, e quem não
+          estava entrava, lia "quem administra cadastra em Ajustes" e parava.
+          O cadastro é da própria pessoa agora, e a entrada aponta para ele. */}
+      <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e3)' }}>
+        Primeira vez aqui? <Link href="/demandas/cadastro">Faça seu cadastro</Link>
+      </p>
     </>,
   );
 }

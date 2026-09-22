@@ -326,10 +326,34 @@ export type Acao =
   | 'assumir' | 'travar' | 'destravar' | 'aprovar' | 'rejeitar'
   | 'prazo' | 'prioridade' | 'redirecionar' | 'concluir' | 'cancelar' | 'reabrir'
   | 'validar'
-  | 'comentar' | 'anexar' | 'desanexar';
+  | 'comentar' | 'anexar' | 'desanexar'
+  /* 94 · quem acompanha. Não saem de `acoesDe`: quem decide é `eu.inclui`,
+     calculado pelo servidor, e a ficha mostra o cartão por ele. */
+  | 'incluir' | 'tirar';
 
-/** Quem está olhando, do ponto de vista de UMA demanda. Vem de `dem_ver`. */
-export type Quem = { id?: string; papel: string; atende: boolean; abriu: boolean };
+/** Quem está olhando, do ponto de vista de UMA demanda. Vem de `dem_ver`.
+
+    OS QUATRO OPCIONAIS SÃO DA MIGRAÇÃO 94, E ELES MANDAM QUANDO VÊM.
+
+    Até a 93 esta função adivinhava pelo nome do papel: gestor aprovava tudo,
+    quem abriu confirmava. Com escopo de gestor e com o líder do ministério,
+    o nome do papel não responde mais: o gestor da Comunicação é `gestor` e
+    NÃO aprova a compra do Financeiro. Só o servidor sabe o escopo, então
+    `dem_ver` passou a mandar a resposta pronta, e a tela usa a resposta.
+
+    Sem eles (carga de um banco na 93), vale a regra antiga, byte a byte: é o
+    que os 108 casos da matriz de `demandas.test.mjs` continuam medindo. */
+export type Quem = {
+  id?: string; papel: string; atende: boolean; abriu: boolean;
+  /** o lado de quem pede: quem abriu, ou o líder do ministério que pediu */
+  pede?: boolean;
+  /** foi incluído para acompanhar */
+  participa?: boolean;
+  /** pode aprovar ou recusar ESTA demanda (escopo do setor que atende) */
+  aprova?: boolean;
+  /** gestão que alcança esta demanda por qualquer um dos dois lados */
+  gere?: boolean;
+};
 
 /* QUEM MANDA, EM UM LUGAR SÓ — 20/09/2026.
 
@@ -353,6 +377,15 @@ export function acoesDe(
   eu: Quem,
 ): Acao[] {
   const manda = quemManda(eu.papel);
+  /* 94 · a resposta do servidor quando ela vem; a adivinhação de antes quando
+     não vem. Ver o comentário de `Quem`. */
+  const pede = eu.pede ?? eu.abriu;
+  const aprova = eu.aprova ?? manda;
+  const gere = eu.gere ?? manda;
+  /* redirecionar: o servidor da 94 exige `pode_atender`, que para admin e
+     gestor de todos os setores é sempre verdadeiro. O `manda ||` de antes só
+     vale enquanto o servidor não disse nada. */
+  const redireciona = eu.gere === undefined ? (manda || eu.atende) : eu.atende;
   const fechada = d.status === 'concluida' || d.status === 'cancelada';
   /* O SERVIDOR DECIDE O PORTÃO, NÃO ESTA FUNÇÃO — migração 88.
 
@@ -397,10 +430,10 @@ export function acoesDe(
      Enquanto `acoesDe` também respondia, havia duas respostas para a mesma
      pergunta e a errada era a que a matriz conferia: o espelho concordava com
      o defeito, e a suíte passava verde sobre um botão que o banco recusa. */
-  if (eu.atende || eu.abriu) a.push('anexar');
+  if (eu.atende || pede || eu.participa) a.push('anexar');
 
   if (fechada) {
-    if (eu.abriu || manda || eu.atende) a.push('reabrir');
+    if (pede || gere || eu.atende) a.push('reabrir');
     /* A ETAPA 5 DO PDF, QUE NÃO EXISTIA — migração 91.
 
        "Depois da execução, o setor solicitante ou responsável pela gestão
@@ -418,11 +451,11 @@ export function acoesDe(
        A guarda é a do servidor: `d.aberta_por = m.id or m.papel in
        ('gestor','admin')`, só sobre `concluida`, e uma vez só. `cancelada`
        fica de fora de propósito: não há execução para validar. */
-    if (d.status === 'concluida' && !d.validada_em && (eu.abriu || manda)) a.push('validar');
+    if (d.status === 'concluida' && !d.validada_em && (pede || gere)) a.push('validar');
     return a;
   }
 
-  if (esperandoAprovacao && manda) a.push('aprovar', 'rejeitar');
+  if (esperandoAprovacao && aprova) a.push('aprovar', 'rejeitar');
 
   if (eu.atende) {
     /* `assumir`: o servidor (migração 86) passou a recusar quando a demanda
@@ -468,7 +501,7 @@ export function acoesDe(
        pior que botão nenhum, porque a pessoa tenta, lê um erro, e conclui que
        o sistema está quebrado em vez de que falta a aprovação. */
     if (!esperandoAprovacao) a.push('concluir');
-  } else if (d.status === 'travada' && d.travada_por === 'informacao' && eu.abriu
+  } else if (d.status === 'travada' && d.travada_por === 'informacao' && pede
              && !esperandoAprovacao) {
     /* quem pediu responde e destrava: é o caminho que tira a demanda do limbo
        sem depender do setor lembrar de voltar nela.
@@ -483,8 +516,8 @@ export function acoesDe(
     a.push('destravar');
   }
 
-  if (manda || eu.atende) a.push('redirecionar');
-  if (manda || eu.atende || eu.abriu) a.push('cancelar');
+  if (redireciona) a.push('redirecionar');
+  if (eu.atende || pede || gere) a.push('cancelar');
 
   return a;
 }
@@ -526,6 +559,30 @@ export function linkZap(telefone: string | null | undefined, texto: string): str
   if (n.length < 10) return '';
   const cheio = n.length <= 11 ? '55' + n : n;
   return `https://wa.me/${cheio}?text=${encodeURIComponent(texto)}`;
+}
+
+/* O WHATSAPP COMO A PESSOA ESCREVE, E COMO O BANCO GUARDA · 22/09/2026.
+
+   Desde a 94 o banco guarda o número com o DDI (`demandas.tel`: 10 ou 11
+   dígitos ganham o 55 na frente), para a mesma pessoa não existir duas vezes
+   com o número escrito de dois jeitos. O Perfil e a ficha da administração
+   passaram a mostrar "5521999990005" no campo, e o botão Salvar do Perfil
+   ligava sem mudança nenhuma, porque comparava o digitado sem DDI com o
+   guardado com DDI.
+
+   `telDoBanco` é a MESMA regra de `demandas.tel`, pelo comprimento (ver
+   `linkZap` logo acima, sobre o DDD 55); `telVisivel` devolve o que a pessoa
+   reconhece: (21) 99999-0005. */
+export function telDoBanco(t: string | null | undefined): string {
+  const d = soDigitos(t);
+  return d.length === 10 || d.length === 11 ? '55' + d : d;
+}
+export function telVisivel(t: string | null | undefined): string {
+  let d = soDigitos(t);
+  if ((d.length === 12 || d.length === 13) && d.startsWith('55')) d = d.slice(2);
+  if (d.length === 11) return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+  if (d.length === 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return t || '';
 }
 
 export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta' | 'pronta'): string {
@@ -717,6 +774,35 @@ const PORBANCO: Record<string, string> = {
      A regra do dono é que os dois sistemas não se encostam; o chão de
      transporte é compartilhado, o VOCABULÁRIO não. */
   VINCULO_EM_USO: 'Ainda há demanda ou cadastro ligado a este item. Desligue o vínculo antes de apagar, ou desative em vez de apagar.',
+  /* ---- migração 94: a base de pessoas, o cadastro e o escopo ------------
+     Frase curta e com o próximo passo. Quem lê isto está no meio de um
+     cadastro ou de uma permissão, e o que precisa é saber o que fazer. */
+  SEM_LOGIN: 'Entre com o seu e-mail antes de fazer o cadastro.',
+  JA_CADASTRADO: 'Este e-mail já tem cadastro. É só entrar.',
+  DESATIVADO: 'Este cadastro está desativado. Fale com quem administra as demandas.',
+  DADOS_INVALIDOS: 'Os dados chegaram num formato que eu não entendo. Recarregue a página.',
+  CAMPO_NAO_PERMITIDO: 'Esse dado não se muda por aqui. Quem administra as demandas muda para você.',
+  NOME_INVALIDO: 'Escreva o nome completo, com pelo menos 3 letras.',
+  TELEFONE_INVALIDO: 'Escreva o WhatsApp com DDD. Exemplo: 21 99999-8888.',
+  TELEFONE_EM_USO: 'Esse telefone já é de outra pessoa cadastrada. Se for você, entre com o e-mail que já usa.',
+  EMAIL_INVALIDO: 'Esse e-mail parece incompleto. Confira o que vem antes e depois do @.',
+  EMAIL_EM_USO: 'Esse e-mail já é de outra pessoa cadastrada.',
+  FUNCAO_LONGA: 'A função pode ter até 80 letras.',
+  PEDIDO_INVALIDO: 'Escolha uma das opções.',
+  NADA_A_PEDIR: 'Você já tem esse papel, ou um que faz mais.',
+  PAPEL_INVALIDO: 'Escolha um dos papéis da lista.',
+  ULTIMO_ADMIN: 'Esta é a única pessoa que administra. Dê esse papel a outra pessoa antes de tirar dela.',
+  ESCOPO_VAZIO: 'Gestor precisa acompanhar todos os setores, ou pelo menos um. Escolha antes de salvar.',
+  ESCOPO_INVALIDO: 'Um dos setores escolhidos não existe mais. Recarregue a página.',
+  HOMONIMO: 'Já existe alguém com esse nome. Confira se não é a mesma pessoa.',
+  SEM_PEDIDO: 'Essa pessoa não tem pedido esperando.',
+  DECISAO_INVALIDA: 'Escolha aceitar ou recusar.',
+  SETOR_FORA_DO_ESCOPO: 'Esse setor está fora dos que você acompanha.',
+  MUITAS_DE_UMA_VEZ: 'Você abriu 10 demandas na última hora. Espere um pouco para abrir a próxima.',
+  PESSOA_NAO_ENCONTRADA: 'Não achei ninguém ativo com esse e-mail ou telefone.',
+  JA_E_QUEM_PEDIU: 'Essa pessoa é quem pediu. Ela já acompanha.',
+  PARTICIPANTES_DEMAIS: 'Já são 20 pessoas acompanhando. Tire alguém antes de incluir outra.',
+  NAO_PARTICIPA: 'Essa pessoa já não acompanha esta demanda.',
 };
 
 /* O SEGUNDO CADEADO DA MESMA PORTA, 22/09/2026.
@@ -890,4 +976,93 @@ export function recadoDoErro(
     return humano(e, oQueFazia).texto;
   }
   return 'Não consegui. Tente de novo.';
+}
+
+/* =========================================================================
+   MIGRAÇÃO 94: PESSOAS, PAPÉIS E O QUE CADA UM PODE
+
+   As palavras de papel, de permissão e de "o que falta fazer" moram aqui, e
+   não em cada tela, pelo mesmo motivo do cabeçalho de `tipos.ts`: duas
+   grafias para o mesmo conceito é como se perde uma regra. A administração, o
+   perfil e o portal leem esta lista.
+   ========================================================================= */
+
+/* Rótulo curto (cabe numa pílula e numa coluna de 320px) e a explicação de
+   uma linha. A ordem é a do alcance, do menor para o maior. */
+export const PAPEIS: { v: Papel; rot: string; explica: string }[] = [
+  { v: 'solicitante', rot: 'Membro',        explica: 'Abre demandas e acompanha as próprias.' },
+  { v: 'lider',       rot: 'Líder',         explica: 'Pede pelo ministério: vê e confirma o que o ministério pediu.' },
+  { v: 'responsavel', rot: 'Equipe',        explica: 'Atende a fila do próprio setor: assume, ajusta o prazo e conclui.' },
+  { v: 'gestor',      rot: 'Gestão',        explica: 'Acompanha os setores do escopo: vê, aprova gastos e redistribui.' },
+  { v: 'admin',       rot: 'Administração', explica: 'Tudo isso, mais pessoas, setores e categorias.' },
+];
+export const rotPapel = (p: Papel | string | null | undefined) =>
+  PAPEIS.find(x => x.v === p)?.rot ?? String(p || '');
+
+/* O que a pessoa pode, em frase. As chaves vêm de `demandas.permissoes(m)`,
+   que é derivada do papel e do escopo pelo servidor: a tela não calcula
+   permissão nenhuma, só traduz a lista que chega. Chave sem frase aparece
+   crua, e o teste de telas cobra que isso não aconteça. */
+export const PERMISSOES: Record<string, string> = {
+  pedir: 'Abrir demandas',
+  acompanhar: 'Acompanhar as que abriu e as que foi incluído',
+  ver_ministerio: 'Ver o que o ministério pediu',
+  validar_ministerio: 'Confirmar a entrega do que o ministério pediu',
+  atender_setor: 'Atender a fila do setor',
+  ver_escopo: 'Ver as demandas dos setores que acompanha',
+  ver_tudo: 'Ver todas as demandas',
+  atender_escopo: 'Atender nos setores que acompanha',
+  aprovar_escopo: 'Aprovar ou recusar gastos nos setores que acompanha',
+  atender_tudo: 'Atender em qualquer setor',
+  aprovar_tudo: 'Aprovar ou recusar gastos de qualquer setor',
+  ver_numeros: 'Ver os números',
+  gerir_pessoas: 'Cadastrar pessoas e definir papéis',
+  gerir_setores: 'Configurar setores e categorias',
+};
+
+/* O que falta fazer, dito como o botão que resolve. */
+export const MOTIVOS: Record<string, string> = {
+  responder: 'Responder',
+  validar: 'Confirmar se resolveu',
+  aprovar: 'Aprovar ou recusar',
+  assumir: 'Assumir',
+  concluir: 'Concluir',
+};
+
+/* UMA FRASE POR FATO DO HISTÓRICO, PARA A FICHA E PARA OS AVISOS.
+
+   Morava dentro da ficha. Os avisos contam os MESMOS fatos (vêm da mesma
+   tabela), e uma segunda cópia desta função discordaria da primeira no dia em
+   que alguém corrigisse só uma: a ficha diria "Maria assumiu" e o aviso
+   "Maria passou para Maria Aparecida Gonçalves da Silva", que é exatamente o
+   defeito que o ramo `responsavel` existe para matar. */
+export function fraseDoEvento(e: { tipo: string; de: string | null; para: string | null; quem: string | null }): string {
+  const q = e.quem ? e.quem.split(' ')[0] : 'alguém';
+  switch (e.tipo) {
+    case 'abertura':    return `${q} abriu a demanda`;
+    case 'status':      return `${q} mudou de ${rotStatus((e.de || 'aberta') as never)} para ${rotStatus((e.para || 'aberta') as never)}`;
+    case 'responsavel':
+      /* assumir grava "Maria" como quem mexeu e "Maria Aparecida Gonçalves da
+         Silva" como o novo responsável. Quando quem mexeu e quem recebeu são a
+         mesma pessoa, o nome do gesto é "assumiu". */
+      if (e.para && e.quem && e.para === e.quem) return `${q} assumiu`;
+      return e.para ? `${q} passou para ${e.para}` : `${q} soltou o responsável`;
+    case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
+    case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
+    case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
+    case 'aprovacao':   return `${q} marcou a aprovação como ${e.para}`;
+    case 'reabertura':  return `${q} reabriu`;
+    case 'anexo':       return `${q} juntou um anexo`;
+    case 'comentario':  return `${q} escreveu`;
+    /* "confirmou que resolveu" e não "validou": a palavra do PDF é de
+       processo, e quem lê esta linha é a pessoa que pediu. */
+    case 'validacao':   return `${q} confirmou que resolveu`;
+    /* 94 · quem acompanha. `para` é quem entrou; `de` é quem saiu. Sair por
+       conta própria e ser tirado são gestos diferentes, e a frase diz qual. */
+    case 'participante':
+      if (e.para) return `${q} incluiu ${e.para.split(' ')[0]}`;
+      if (e.de && e.quem && e.de === e.quem) return `${q} saiu`;
+      return `${q} tirou ${(e.de || 'alguém').split(' ')[0]}`;
+    default:            return `${q}: ${e.tipo}`;
+  }
 }

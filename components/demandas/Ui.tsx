@@ -63,11 +63,14 @@ export function Bloco({ rot, ajuda, children }: {
 }
 
 /** Escolha de poucas opções: botão em vez de select. Um toque, não dois. */
-export function Opcoes<T extends string>({ valor, opcoes, aoMudar, rot }: {
+export function Opcoes<T extends string>({ valor, opcoes, aoMudar, rot, empilhadas }: {
   valor: T; opcoes: { v: T; rot: string }[]; aoMudar: (v: T) => void; rot: string;
+  /** uma por linha: para rótulos que são frase ("Lidero um ministério"), que
+      em três colunas de 80px quebram em duas linhas dentro do botão */
+  empilhadas?: boolean;
 }) {
   return (
-    <div className="dm-opcoes" role="group" aria-label={rot}>
+    <div className={empilhadas ? 'dm-opcoes dm-empilhadas' : 'dm-opcoes'} role="group" aria-label={rot}>
       {opcoes.map(o => (
         <button key={o.v} type="button" aria-pressed={valor === o.v} onClick={() => aoMudar(o.v)}>
           {o.rot}

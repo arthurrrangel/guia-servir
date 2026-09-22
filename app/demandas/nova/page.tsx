@@ -416,7 +416,15 @@ function Nova() {
             <Campo rot="Quem está pedindo" ajuda="Como liderança, você pode abrir em nome de outro setor.">
               <select value={r.setor_solicitante || eu?.setor_id || ''}
                 onChange={e => setR(v => ({ ...v, setor_solicitante: e.target.value }))}>
-                {b.setores.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                {/* 94 · gestor com escopo pede em nome dos setores que acompanha
+                    (e do próprio); o banco recusa os outros com
+                    SETOR_FORA_DO_ESCOPO, então a lista não os oferece.
+                    `escopo` vem com o NOME dos setores, que é o que o servidor
+                    manda em `dem_quem_sou`. */}
+                {b.setores
+                  .filter(s => eu?.papel !== 'gestor' || eu?.escopo_total !== false
+                    || s.id === eu?.setor_id || (eu?.escopo || []).includes(s.nome))
+                  .map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
               </select>
             </Campo>
           ) : null}

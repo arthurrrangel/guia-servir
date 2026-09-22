@@ -5,7 +5,9 @@
    procura nesta lista. Duas grafias para o mesmo conceito é como se perde uma
    regra sem ninguém ver. */
 
-export type Papel = 'solicitante' | 'responsavel' | 'gestor' | 'admin';
+/* `lider` entrou na migração 94: é o lado de QUEM PEDE, para o ministério
+   inteiro (vê e confirma o que o ministério pediu). Não atende nada. */
+export type Papel = 'solicitante' | 'lider' | 'responsavel' | 'gestor' | 'admin';
 export type Status = 'aberta' | 'execucao' | 'travada' | 'concluida' | 'cancelada';
 export type Trava = 'informacao' | 'aprovacao' | 'terceiros';
 export type Prioridade = 'baixa' | 'normal' | 'alta' | 'urgente';
@@ -15,7 +17,59 @@ export type Eu = {
   ok: boolean; id: string; nome: string; primeiro_nome: string;
   papel: Papel; setor_id: string | null; setor: string | null;
   setor_atende: boolean; tem_login: boolean;
+  /* ---- migração 94. Opcionais porque um banco na 93 não manda nenhum
+     destes, e a casca precisa continuar de pé nessa janela. ---- */
+  funcao?: string | null;
+  email?: string | null;
+  telefone?: string | null;
+  criado_em?: string;
+  origem?: 'admin' | 'cadastro';
+  /** o papel que a pessoa PEDIU e ainda não foi decidido */
+  papel_pedido?: 'lider' | 'responsavel' | null;
+  /** gestor: todos os setores, ou só os de `escopo` */
+  escopo_total?: boolean;
+  escopo?: string[];
+  /** responsavel, gestor ou admin: tem fila para atender */
+  atende?: boolean;
+  /** derivadas do papel e do escopo pelo servidor; a tela só traduz */
+  permissoes?: string[];
+  /** quantos avisos chegaram desde a última vez que a pessoa abriu os avisos */
+  avisos?: number;
 };
+
+/** O que `dem_portal` devolve: a primeira tela, numa ida ao banco. */
+export type Portal = {
+  eu: Eu;
+  n: {
+    responder: number; minhas_andamento: number; minhas_concluidas: number; minhas_todas: number;
+    participo: number; ministerio: number;
+    agir: number; aprovar: number; fila: number; comigo: number; atrasadas: number; urgentes: number;
+    setor_abertas: number; concluidas: number;
+    avisos: number;
+    /** só para quem administra: pedidos de papel esperando decisão */
+    pedidos?: number;
+  };
+  precisa: (Resumo & { motivo: Motivo })[];
+};
+
+/** Por que uma demanda espera por esta pessoa. Vem do servidor, nunca é
+    calculado na tela: depende de escopo, e a tela não sabe o escopo. */
+export type Motivo = 'responder' | 'validar' | 'aprovar' | 'assumir' | 'concluir';
+
+/** Um aviso dentro do sistema: um fato do histórico, feito por outra pessoa. */
+export type AvisoDentro = {
+  em: string; tipo: string; de: string | null; para: string | null; texto: string | null;
+  quem: string | null; numero: number; titulo: string;
+  motivo: 'pedi' | 'comigo' | 'acompanho' | 'ministerio' | 'fila' | 'aprovar';
+  novo: boolean;
+};
+
+/** A situação de quem está no cadastro, pelo e-mail do login. */
+export type Cadastro =
+  | { situacao: 'sem_login' }
+  | { situacao: 'ativo'; primeiro_nome: string }
+  | { situacao: 'inativo' }
+  | { situacao: 'novo'; email: string; setores: { id: string; nome: string; atende: boolean }[] };
 
 export type Setor = {
   id: string; nome: string; slug: string; atende: boolean;
@@ -40,6 +94,29 @@ export type Membro = {
   id: string; nome: string; setor_id: string | null; papel: Papel;
   telefone: string | null;
   email?: string | null; auth_email?: string | null; token?: string | null; ativo?: boolean;
+  /* ---- migração 94 ---- */
+  funcao?: string | null;
+  origem?: 'admin' | 'cadastro';
+  criado_em?: string;
+  papel_pedido?: 'lider' | 'responsavel' | null;
+  papel_pedido_em?: string | null;
+  escopo_total?: boolean;
+  escopo?: string[];
+  pediu?: number;
+  com_ela?: number;
+};
+
+/** A ficha de uma pessoa, para quem administra (`dem_pessoa`). */
+export type FichaPessoa = {
+  /* na lista (`dem_pessoas`) o escopo vem como ids; na ficha, com o nome */
+  pessoa: Omit<Membro, 'escopo'> & {
+    setor: string | null; atualizado_em: string;
+    escopo: { id: string; nome: string }[];
+  };
+  permissoes: string[];
+  atividade: { pediu: number; pediu_abertas: number; com_ela: number; concluiu: number;
+               acompanha: number; ultima: string | null };
+  historico: { em: string; tipo: string; de: string | null; para: string | null; por: string | null }[];
 };
 
 /* SEM `membros` DESDE A MIGRAÇÃO 67. `dem_bases` entregava nome, telefone,
@@ -81,6 +158,8 @@ export type Resumo = {
      Vem na lista, e não só na ficha, porque a pergunta que ele responde é de
      painel: quantas concluídas ninguém confirmou. */
   validada_em: string | null;
+  /** 94 · nas abas `responder` e `agir`, por que a demanda espera por quem pergunta */
+  motivo?: Motivo;
 };
 
 /** O que a tela de uma demanda devolve a mais. */
@@ -126,9 +205,16 @@ export type Anexo = {
 
 export type Vista = {
   demanda: Detalhe;
-  eu: { id: string; papel: Papel; atende: boolean; abriu: boolean };
+  eu: {
+    id: string; papel: Papel; atende: boolean; abriu: boolean;
+    /* ---- migração 94: decididos pelo servidor, porque dependem de escopo e
+       de participação, que a tela não tem como saber ---- */
+    pede?: boolean; participa?: boolean; aprova?: boolean; gere?: boolean; inclui?: boolean;
+  };
   eventos: Evento[];
   anexos: Anexo[];
+  /** quem foi incluído para acompanhar. Só o nome: contato não sai daqui. */
+  participantes?: { id: string; nome: string; eu: boolean }[];
 };
 
 export type Numeros = {

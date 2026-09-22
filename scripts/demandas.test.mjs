@@ -12,7 +12,7 @@
 
 import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
-  somaDias, linkZap, soDigitos, recadoDoErro, recado, diasDeAtraso,
+  somaDias, linkZap, soDigitos, telDoBanco, telVisivel, recadoDoErro, recado, diasDeAtraso,
   horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
@@ -692,6 +692,22 @@ function servidorAceita(acao, d, eu) {
   ok(linkZap('123', 'oi') === '', 'telefone curto não vira link');
   ok(linkZap('31999998888', 'a b&c').includes('a%20b%26c'), 'escapa o texto');
 
+  /* 22/09/2026 · o número como o banco guarda (com o 55, pelo COMPRIMENTO,
+     igual a `demandas.tel`) e como a pessoa reconhece. O DDD 55 é o caso que
+     um teste de prefixo erraria, e por isso está aqui pelo nome. */
+  ok(telDoBanco('(21) 99999-0005') === '5521999990005', 'o banco guarda com o 55', telDoBanco('(21) 99999-0005'));
+  ok(telDoBanco('5521999990005') === '5521999990005', 'o 55 não dobra');
+  ok(telDoBanco('+55 (21) 99999-0005') === telDoBanco('21999990005'), 'escrito de dois jeitos, o mesmo número');
+  ok(telDoBanco('55999998888') === '5555999998888', 'DDD 55 com onze dígitos ganha o DDI', telDoBanco('55999998888'));
+  ok(telVisivel('5521999990005') === '(21) 99999-0005', 'mostra como a pessoa escreve', telVisivel('5521999990005'));
+  ok(telVisivel('552133334444') === '(21) 3333-4444', 'fixo de dez dígitos também', telVisivel('552133334444'));
+  ok(telVisivel('5555999998888') === '(55) 99999-8888', 'e o DDD 55 continua sendo DDD', telVisivel('5555999998888'));
+  ok(telVisivel(null) === '' && telVisivel('') === '', 'sem número, campo vazio');
+  /* o sistema é brasileiro, igual ao banco: "+1 415 555 0100" tem onze
+     dígitos e seria lido como DDD 14 pelos DOIS lados, o que ao menos é
+     coerente. O caso que não se formata é o número incompleto. */
+  ok(telVisivel('99999-0005') === '99999-0005', 'número incompleto fica como veio', telVisivel('99999-0005'));
+
   const d = {
     numero: 7, titulo: 'Arte do culto', status: 'aberta', travada_por: null,
     prioridade: 'alta', solicitante: 'Jovens', responsavel_setor: 'Comunicação',
@@ -1168,6 +1184,53 @@ function servidorAceita(acao, d, eu) {
   for (const [acao, n] of Object.entries(TETO)) {
     ok(n > 0 && n <= 4000, `o teto de "${acao}" cabe em alguma coluna`, String(n));
   }
+}
+
+/* 1d. MIGRAÇÃO 94: O ESPELHO OBEDECE AO QUE O SERVIDOR DIZ POR DEMANDA.
+
+   Com escopo de gestor, líder de ministério e participante, o nome do papel
+   deixou de responder "pode ou não pode". `dem_ver` passou a mandar `pede`,
+   `participa`, `aprova` e `gere`, e `acoesDe` usa esses quando vêm. Sem eles
+   (banco na 93), a regra antiga continua byte a byte, e é isso que a matriz
+   de 4704 acima mede. Aqui, os casos que só existem com os quatro: */
+{
+  const aberta = { status: 'aberta', travada_por: null, aprovacao: null };
+  const pronta = { status: 'concluida', travada_por: null, aprovacao: null, validada_em: null };
+  const esperando = { status: 'travada', travada_por: 'aprovacao', aprovacao: 'pendente', falta_aprovacao: true };
+  const pergunta = { status: 'travada', travada_por: 'informacao', aprovacao: null };
+
+  /* o líder do ministério que pediu: fala por quem pediu, sem ter aberto */
+  const lider = { papel: 'lider', atende: false, abriu: false, pede: true, participa: false, aprova: false, gere: false };
+  ok(acoesDe(pronta, lider).includes('validar'), 'o líder confirma a entrega do que o ministério pediu');
+  ok(acoesDe(pronta, lider).includes('reabrir'), 'e reabre o que não resolveu');
+  ok(acoesDe(pergunta, lider).includes('destravar'), 'e responde a pergunta feita ao ministério');
+  ok(acoesDe(aberta, lider).includes('cancelar'), 'e cancela o pedido do ministério');
+  ok(!acoesDe(aberta, lider).includes('assumir'), 'mas não atende nada');
+
+  /* quem foi incluído: vê, conversa, junta documento; não decide */
+  const incluido = { papel: 'solicitante', atende: false, abriu: false, pede: false, participa: true, aprova: false, gere: false };
+  const dele = acoesDe(aberta, incluido);
+  ok(dele.includes('comentar') && dele.includes('anexar'), 'o participante comenta e anexa', dele.join(','));
+  ok(!dele.includes('cancelar') && !dele.includes('redirecionar') && !dele.includes('assumir'),
+    'e não cancela, não redireciona, não assume', dele.join(','));
+  ok(!acoesDe(pronta, incluido).includes('validar') && !acoesDe(pronta, incluido).includes('reabrir'),
+    'nem confirma nem reabre: isso é de quem pediu');
+
+  /* o gestor de OUTRO setor: é `gestor` e não aprova, não redistribui */
+  const deFora = { papel: 'gestor', atende: false, abriu: false, pede: false, participa: false, aprova: false, gere: false };
+  const fora = acoesDe(esperando, deFora);
+  ok(!fora.includes('aprovar') && !fora.includes('rejeitar'), 'gestor fora do escopo não aprova', fora.join(','));
+  ok(!acoesDe(aberta, deFora).includes('redirecionar'), 'nem manda para outro setor');
+  ok(!acoesDe(aberta, deFora).includes('cancelar'), 'nem cancela');
+
+  /* o gestor do setor que atende: aprova, e só porque o servidor disse */
+  const doSetor = { papel: 'gestor', atende: true, abriu: false, pede: false, participa: false, aprova: true, gere: true };
+  ok(acoesDe(esperando, doSetor).includes('aprovar'), 'gestor com escopo no setor que atende aprova');
+  ok(acoesDe(aberta, doSetor).includes('redirecionar'), 'e redistribui');
+
+  /* e a regra antiga, quando o servidor não manda os quatro */
+  const velho = { papel: 'gestor', atende: false, abriu: false };
+  ok(acoesDe(esperando, velho).includes('aprovar'), 'sem as respostas da 94, gestor aprova como antes');
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

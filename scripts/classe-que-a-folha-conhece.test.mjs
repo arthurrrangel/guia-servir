@@ -36,7 +36,21 @@ const arquivos = [];
     else if (/\.tsx?$/.test(n)) arquivos.push(p);
   }
 })('app/demandas');
-arquivos.push('components/demandas/Ui.tsx', 'components/demandas/Casca.tsx');
+/* TODA a pasta de peças, e não uma lista escrita à mão · 22/09/2026.
+
+   Esta linha era `arquivos.push('components/demandas/Ui.tsx',
+   'components/demandas/Casca.tsx')`. A migração 94 trouxe `Lista.tsx` (a
+   lista dos dois portais) e `Configuracao.tsx` (setores e categorias), e as
+   classes que elas escrevem (`dm-item`, `dm-prazo`...) passaram a parecer
+   "regra da folha sem ninguém que a escreva". Lista à mão envelhece calada;
+   a pasta inteira não. */
+(function anda(d) {
+  for (const n of readdirSync(d)) {
+    const p = join(d, n);
+    if (statSync(p).isDirectory()) anda(p);
+    else if (/\.tsx?$/.test(n)) arquivos.push(p);
+  }
+})('components/demandas');
 
 /* 1) toda classe dm- escrita no JSX existe na folha */
 const faltando = [];

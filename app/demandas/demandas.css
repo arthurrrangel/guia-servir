@@ -265,6 +265,9 @@
   max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-e3);
 }
 .dm-abas::-webkit-scrollbar{display:none}
+/* no celular, as abas se espalham pela largura e o respiro entre elas cai
+   para 12px: com 24 a barra de quem atende pedia 362px e escondia "Perfil" */
+@media (max-width:440px){ .dm-abas{gap:var(--dm-e2);justify-content:space-between} }
 .dm-abas a{
   padding:10px 0 12px;font-size:14px;color:var(--dm-mudo);text-decoration:none;
   border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--dm-t);
@@ -632,6 +635,24 @@
    própria coluna, e em 320px saía 87/87/97. Medido. Com as colunas presas
    iguais, "Categorias" precisa de menos respiro lateral para caber. */
 .dm-opcoes:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
+/* CINCO OPÇÕES, TRÊS EM CIMA E DUAS EMBAIXO · 22/09/2026. Os cinco papéis da
+   ficha de pessoa (migração 94) caíam em 2+2+1 no celular e em 4+1 no
+   computador: "Administração" sozinha na última linha, com cara de sobra.
+   Numa grade de seis, as três de cima ocupam duas colunas cada e as duas de
+   baixo, três: a palavra mais comprida fica embaixo, onde a célula é maior.
+   As cinco lado a lado só quando cabem. */
+.dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(6,minmax(0,1fr))}
+.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3){grid-column:span 2}
+.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:span 3}
+.dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
+@media (min-width:760px){
+  .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
+  .dm-opcoes:has(> :last-child:nth-child(5)) > *{grid-column:auto}
+}
+/* UMA POR LINHA quando o rótulo é frase. O segundo seletor existe por
+   peso: a regra das três colunas logo acima pesa 0-3-0 e ganharia. */
+.dm-opcoes.dm-empilhadas,
+.dm-opcoes.dm-empilhadas:has(> :last-child:nth-child(3)){grid-template-columns:1fr}
 .dm-opcoes button{
   min-height:44px;padding:0 var(--dm-e2);
   border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
@@ -828,3 +849,106 @@
   font-size:14px; line-height:1.5; color:var(--dm-mudo);
   border-top:1px solid var(--dm-linha, rgba(37,37,37,.12));
 }
+
+/* ============================================================ migração 94
+   OS DOIS PORTAIS, O CADASTRO E A ADMINISTRAÇÃO
+
+   Poucas peças novas, e todas pelo mesmo motivo: dizer "quantos" e "o que
+   falta fazer" sem virar painel de gráfico. */
+
+/* O SELO: o número de avisos na aba, e de itens em cada recorte. Pequeno,
+   escuro, redondo (marca é círculo), e com o número em algarismos de largura
+   fixa para "9" e "12" não mudarem o tamanho da aba. */
+/* o nome da pessoa no cartão de pedidos é link, e a linha dela tem os dois
+   botões embaixo: o alvo é o nome, e ele precisa dos 44px (medido: 24) */
+.dm-pessoa a.dm-item-tit{display:flex;align-items:center;min-height:44px}
+
+/* 12px, e não 11 · 22/09/2026. O medidor de celular acusou o selo nas
+   abas e nos cartões de todos os papéis: é número que a pessoa LÊ ("3
+   avisos"), não etiqueta em caixa alta, e o piso da casa para leitura é 12. */
+.dm-selo{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;margin-left:6px;
+  border-radius:10px;background:var(--dm-preto);color:#fff;
+  font-size:12px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums;
+  vertical-align:1px;
+}
+.dm-seg button[aria-pressed="true"] .dm-selo{background:var(--dm-preto)}
+
+/* QUEM SOU: o nome grande, e embaixo setor, papel e função numa linha só. */
+.dm-quem{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
+  font-size:14px;color:var(--dm-ink2);margin-top:4px}
+.dm-quem > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
+
+/* O QUE ESPERA POR VOCÊ: o cartão que abre o Início. A borda da esquerda diz
+   "isto é com você" sem precisar de cor de alarme. */
+.dm-precisa{border-left:3px solid var(--dm-ink)}
+.dm-precisa .dm-fila{border-top:0}
+.dm-precisa .dm-item:last-child{border-bottom:0}
+
+/* AS CONTAS DO ATENDIMENTO: quatro números que também são atalhos. Grade de
+   duas no celular, quatro a partir de 520px, como `.dm-opcoes`. */
+.dm-contas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
+@media (min-width:520px){ .dm-contas{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.dm-contas > *{
+  display:block;min-width:0;min-height:64px;padding:10px var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
+  text-decoration:none;color:inherit;text-align:left;
+}
+.dm-contas b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;
+  line-height:1.1;font-variant-numeric:tabular-nums}
+.dm-contas small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:2px}
+.dm-contas > .dm-bad b{color:var(--dm-bad)}
+
+/* OS AVISOS: uma linha por fato, a mais nova em cima, e o que é novo com o
+   ponto escuro. */
+.dm-avisos{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
+.dm-avisos li{border-bottom:1px solid var(--dm-linha)}
+.dm-avisos a{display:block;padding:var(--dm-e2) 0 var(--dm-e2) var(--dm-e3);
+  text-decoration:none;color:inherit;position:relative}
+.dm-avisos a::before{content:'';position:absolute;left:2px;top:22px;width:7px;height:7px;
+  border-radius:50%;background:var(--dm-linha2)}
+.dm-avisos li.dm-novo a::before{background:var(--dm-ink)}
+.dm-avisos li.dm-novo .dm-aviso-o-que{font-weight:650}
+.dm-aviso-o-que{overflow-wrap:anywhere}
+.dm-aviso-de{font-size:13px;color:var(--dm-mudo);overflow-wrap:anywhere}
+
+/* A LISTA DE PERMISSÕES: frase curta, com o traço na frente. */
+.dm-pode{list-style:none;margin:0;padding:0}
+.dm-pode li{padding:6px 0 6px 18px;position:relative;font-size:14px}
+.dm-pode li::before{content:'';position:absolute;left:2px;top:14px;width:8px;height:2px;background:var(--dm-ink)}
+
+/* A ADMINISTRAÇÃO TEM TOPO PRÓPRIO: o pedido foi "não misture isso com a
+   interface do usuário comum". A faixa escura diz, antes de qualquer
+   palavra, que esta é outra sala. */
+.dm-adm-faixa{background:var(--dm-preto);color:#fff}
+.dm-adm-faixa .dm-topo-in{color:#fff}
+.dm-adm-faixa :where(a){color:#fff}
+/* a logo e um quadrado preto: na faixa preta ela some, entao inverte */
+.dm-adm-faixa .dm-logo{background:#fff;color:var(--dm-preto)}
+.dm-adm-faixa .dm-abas a{color:rgba(255,255,255,.72)}
+.dm-adm-faixa .dm-abas a:hover{color:#fff}
+.dm-adm-faixa .dm-abas a[aria-current="page"]{color:#fff;border-bottom-color:#fff}
+
+/* A PESSOA NA LISTA DA ADMINISTRAÇÃO: nome, e embaixo o que importa decidir. */
+.dm-pessoa{display:block;padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
+  text-decoration:none;color:inherit}
+.dm-pessoa:hover{background:var(--dm-card3)}
+.dm-pessoa.dm-inativa{opacity:.62}
+
+/* os seis atalhos do Atendimento: duas colunas no celular, três a partir de
+   520px (seis em duas linhas de três, e nenhum sobra sozinho), seis numa
+   linha a partir de 960px. Botão, e não link: eles escolhem a lista de baixo. */
+.dm-contas.dm-seis{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (min-width:520px){ .dm-contas.dm-seis{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (min-width:960px){ .dm-contas.dm-seis{grid-template-columns:repeat(6,minmax(0,1fr))} }
+.dm-contas > button{cursor:pointer;font:inherit;transition:background var(--dm-t),border-color var(--dm-t)}
+.dm-contas > button:hover{background:var(--dm-card3);border-color:var(--dm-linha3)}
+.dm-contas > button[aria-pressed="true"]{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
+.dm-contas > button[aria-pressed="true"] small{color:rgba(255,255,255,.78)}
+.dm-contas > button[aria-pressed="true"].dm-bad b{color:#fff}
+.dm-adm-faixa .dm-onde{color:rgba(255,255,255,.78)}
+.dm-adm-faixa .dm-onde b{color:#fff}
+/* os seletores de filtro da administração: o mesmo desenho do campo */
+.dm-filtro{width:100%;min-height:46px;padding:0 var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card3);border-radius:var(--dm-r)}

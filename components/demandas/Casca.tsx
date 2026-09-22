@@ -61,10 +61,20 @@ import { Aviso, Esqueleto } from './Ui';
    O lado das escalas já tinha resolvido isso com contexto (`Shell.tsx`). Aqui
    é a mesma solução: a casca pergunta, o contexto distribui, e `useEu()`
    continua com a mesma assinatura — nenhuma tela precisou mudar. */
-const Contexto = createContext<{ eu: Eu | null; carregando: boolean; semSistema?: boolean } | null>(null);
+type Ctx = {
+  eu: Eu | null; carregando: boolean; semSistema?: boolean;
+  /* 94 · a tela de avisos zera o contador da casca quando a pessoa os abre.
+     Sem isto o número continuava no topo até a próxima carga, dizendo que
+     havia coisa nova sobre o que ela acabou de ler. */
+  zerarAvisos?: () => void;
+  /* o perfil salva nome e telefone; sem isto o topo continuava com o nome
+     antigo até recarregar */
+  ajustarEu?: (p: Partial<Eu>) => void;
+};
+const Contexto = createContext<Ctx | null>(null);
 
 
-export function useEu() {
+export function useEu(): Ctx {
   const doContexto = useContext(Contexto);
   /* dentro da casca (o caso normal) o contexto responde; fora dela — um teste,
      uma tela solta — o gancho ainda funciona sozinho. */
@@ -105,15 +115,42 @@ export function useEu() {
   return doContexto ?? { eu, carregando };
 }
 
-const ABAS = (eu: Eu) => {
-  const a = [{ href: '/demandas', rot: 'Demandas' }, { href: '/demandas/nova', rot: 'Nova' }];
-  if (eu.papel !== 'solicitante') a.push({ href: '/demandas/numeros', rot: 'Números' });
-  if (eu.papel === 'admin') a.push({ href: '/demandas/ajustes', rot: 'Ajustes' });
+/* AS ABAS, DESDE A MIGRAÇÃO 94.
+
+   "Quem sou, onde estou, minhas demandas, o que precisa da minha atenção,
+   qual é o próximo passo." Cada aba é uma dessas respostas:
+
+     Início        quem sou, o que espera por mim, minhas demandas
+     Atendimento   só para quem atende: a fila, o que está comigo
+     Nova          o próximo passo mais comum
+     Avisos        o que mudou desde a última vez (com o número)
+     Perfil        meus dados, o que posso fazer, sair
+
+   Números saiu da barra e mora dentro do Atendimento: é pergunta de quem
+   atende, e cinco abas é o que cabe em 320px sem rolar (com "Atender" no
+   lugar de "Atendimento", e isso é medido: `demandas-celular.mjs` reprova
+   a barra que rola).
+
+   A ADMINISTRAÇÃO NÃO ESTÁ AQUI, DE PROPÓSITO. O pedido foi "não misture
+   isso com a interface do usuário comum". Quem administra chega lá por um
+   cartão no Início e pelo Perfil; a barra é a mesma para todo mundo. */
+type AbaCasca = { href: string; rot: string; n?: number };
+const ABAS = (eu: Eu): AbaCasca[] => {
+  const a: AbaCasca[] = [{ href: '/demandas', rot: 'Início' }];
+  /* `atende` vem do servidor desde a 94; num banco na 93, vale a regra antiga */
+  /* "Atender", e não "Atendimento": medido em 22/09 com a Inter, a barra de
+     quem atende media 362px e escondia "Perfil" (onde mora o Sair) em 320 e
+     em 360, os dois celulares mais comuns da igreja. A página continua se
+     chamando Atendimento no título; a aba diz o que se faz lá. */
+  if (eu.atende ?? eu.papel !== 'solicitante') a.push({ href: '/demandas/atendimento', rot: 'Atender' });
+  a.push({ href: '/demandas/nova', rot: 'Nova' });
+  a.push({ href: '/demandas/avisos', rot: 'Avisos', n: eu.avisos || 0 });
+  a.push({ href: '/demandas/perfil', rot: 'Perfil' });
   return a;
 };
 
-function CascaInterna({ children }: { children: React.ReactNode }) {
-  const ctx = useEu() as { eu: Eu | null; carregando: boolean; semSistema?: boolean };
+function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: boolean }) {
+  const ctx = useEu() as Ctx;
   const { eu, carregando } = ctx;
   const semSistema = !!ctx.semSistema;
   const caminho = usePathname();
@@ -168,27 +205,26 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
               </p>
             </>
           ) : email === undefined ? <Esqueleto linhas={2} /> : email ? (
+            /* 94 · A FRASE MANDAVA PROCURAR O ADMINISTRADOR, E AGORA HÁ UMA PORTA.
+
+               Até a 93 isto dizia "Quem administra o sistema de demandas
+               cadastra em Ajustes": o único jeito de existir aqui era alguém
+               digitar a pessoa. Agora o cadastro é da própria pessoa, com o
+               e-mail com que ela ACABOU de entrar, e a tela aponta para ele. */
             <>
-              <div className="dm-rot">{'>'} ainda não</div>
-              <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Você não está no sistema de demandas.</h1>
-              <Aviso tom="info">
-                <div>
-                  Você está logado como <b>{email}</b>, mas esse e-mail ainda não foi cadastrado
-                  aqui. Quem administra o sistema de demandas cadastra em Ajustes, e leva um minuto.
-                </div>
-              </Aviso>
-              <p className="dm-peq dm-mudo">
-                Se você recebeu um link pessoal pelo WhatsApp, abra por ele: o link já identifica
-                você sem precisar de cadastro novo.
+              <div className="dm-rot">{'>'} falta o cadastro</div>
+              <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Falta só o seu cadastro.</h1>
+              <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
+                Você entrou como <b>{email}</b>. Leva um minuto: nome, WhatsApp e setor.
               </p>
+              <Link className="dm-btn dm-pri dm-larga" href="/demandas/cadastro">Fazer meu cadastro</Link>
             </>
           ) : (
             <>
               <div className="dm-rot">{'>'} entrar</div>
-              <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Entre para ver as demandas.</h1>
+              <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Entre para ver as suas demandas.</h1>
               <p className="dm-peq dm-mudo">
-                Se você recebeu um link pessoal pelo WhatsApp, abra por ele e não precisa de
-                senha nenhuma.
+                Recebeu um link pessoal pelo WhatsApp? Abra por ele e não precisa de senha.
               </p>
               {/* A PORTA PRÓPRIA — 22/09/2026, e o `?volta=` não bastava.
 
@@ -206,8 +242,48 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
 
                   `/demandas/entrar` não tem a string `/painel` em lugar
                   nenhum, e só aceita `?volta=` que comece com `/demandas`. */}
-              <Link className="dm-btn dm-pri" href="/demandas/entrar">Entrar</Link>
+              <div className="dm-grade" style={{ marginTop: 'var(--dm-e3)' }}>
+                <Link className="dm-btn dm-pri" href="/demandas/entrar">Entrar</Link>
+                <Link className="dm-btn" href="/demandas/cadastro">Primeira vez? Cadastre-se</Link>
+              </div>
             </>
+          )}
+        </div>
+        <Rodape />
+      </div>
+    );
+  }
+
+  /* 94 · A ADMINISTRAÇÃO É OUTRA SALA.
+
+     Mesmo portão (quem não entrou vai para o login; quem não tem cadastro vai
+     para o cadastro), outro topo: a faixa escura, o nome da sala e a saída
+     para o portal. E quem não administra nem vê o conteúdo: a tela diz que a
+     área é restrita. Isso é CLAREZA; a tranca de verdade é do banco, e cada
+     função da administração (`dem_pessoas`, `dem_pessoa`, `dem_ajustar`)
+     responde `SO_ADMIN` para qualquer outro papel, com ou sem esta tela. */
+  if (admin) {
+    return (
+      <div className="dm">
+        <header className="dm-topo dm-adm-faixa">
+          <div className="dm-topo-in">
+            <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
+            <div className="dm-onde dm-cresce dm-corta"><b>Administração</b></div>
+            {/* "Portal", e não "Voltar ao portal": em 320px a frase comia o
+                nome da sala, que saía "Administr…" */}
+            <Link href="/demandas">Portal</Link>
+          </div>
+        </header>
+        <div className="dm-corpo">
+          {eu.papel === 'admin' ? children : (
+            <div className="dm-card dm-centro" style={{ padding: 'var(--dm-e5) var(--dm-e3)' }}>
+              <div className="dm-rot" style={{ marginBottom: 6 }}>{'>'} área restrita</div>
+              <h3 style={{ marginBottom: 8 }}>Esta área é de quem administra o sistema.</h3>
+              <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
+                Seu acesso no portal continua o mesmo.
+              </p>
+              <Link className="dm-btn" href="/demandas">Voltar ao portal</Link>
+            </div>
           )}
         </div>
         <Rodape />
@@ -228,7 +304,12 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
         <nav className="dm-abas" aria-label="Seções de demandas">
           {ABAS(eu).map(a => (
             <Link key={a.href} href={a.href}
-              aria-current={caminho === a.href ? 'page' : undefined}>{a.rot}</Link>
+              aria-current={caminho === a.href ? 'page' : undefined}>
+              {a.rot}
+              {/* o número é contado pelo servidor (`dem_quem_sou.avisos`) e
+                  lido por leitor de tela como frase, não como "3" solto */}
+              {a.n ? <span className="dm-selo" aria-label={`${a.n} ${a.n === 1 ? 'novo' : 'novos'}`}>{a.n > 99 ? '99+' : a.n}</span> : null}
+            </Link>
           ))}
         </nav>
       </header>
@@ -262,7 +343,7 @@ function Rodape() {
    Ele precisa estar por FORA de `CascaInterna` porque a casca também consome
    o contexto — quem pergunta não pode ser quem responde. O gancho continua
    funcionando sem provedor (ver `useEu`), então nada que já existia quebra. */
-export default function Casca({ children }: { children: React.ReactNode }) {
+export default function Casca({ children, admin }: { children: React.ReactNode; admin?: boolean }) {
   const [eu, setEu] = useState<Eu | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [semSistema, setSemSistema] = useState(false);
@@ -289,9 +370,11 @@ export default function Casca({ children }: { children: React.ReactNode }) {
     });
     return () => { vivo = false; };
   }, []);
+  const zerarAvisos = () => setEu(e => (e ? { ...e, avisos: 0 } : e));
+  const ajustarEu = (p: Partial<Eu>) => setEu(e => (e ? { ...e, ...p } : e));
   return (
-    <Contexto.Provider value={{ eu, carregando, semSistema }}>
-      <CascaInterna>{children}</CascaInterna>
+    <Contexto.Provider value={{ eu, carregando, semSistema, zerarAvisos, ajustarEu }}>
+      <CascaInterna admin={admin}>{children}</CascaInterna>
     </Contexto.Provider>
   );
 }

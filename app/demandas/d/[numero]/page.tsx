@@ -13,12 +13,13 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca from '@/components/demandas/Casca';
-import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Pill } from '@/components/demandas/Ui';
+import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Opcoes, Pill } from '@/components/demandas/Ui';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
   HOJE, PRIORIDADES, TRAVAS, acoesDe, carimbo, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
   dinheiro, linkZap, quando, quemManda, recado, recadoDoErro, rotPrioridade, rotStatus,
   rotTrava, situacao, tetoDe, tomPill, tomPrioridade, type Acao,
+  fraseDoEvento,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
 
@@ -88,6 +89,10 @@ function Uma() {
     setErro('');
     setV({
       demanda: r.demanda, eu: r.eu, eventos: r.eventos, anexos: r.anexos,
+      /* 94 · quem acompanha. Esta montagem campo a campo JOGAVA FORA o que não
+         estivesse listado aqui: sem esta linha, `participantes` chegava do
+         banco e sumia antes da tela. */
+      participantes: r.participantes,
       /* leitura defensiva: o campo é da migração 93, que ainda não foi
          aplicada. Com o banco na 92 isto é `undefined` e some na diferença. */
       eventos_total: (r as Partial<{ eventos_total: number }>).eventos_total,
@@ -308,7 +313,7 @@ function Uma() {
       case 'travar':       return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('travar')}>Travar</button>;
       case 'destravar':    return (
         <button key={a} className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('destravar')}>
-          {v.eu.abriu && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar'}
+          {(v.eu.pede ?? v.eu.abriu) && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar'}
         </button>);
       case 'reabrir':      return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('reabrir')}>Reabrir</button>;
       case 'prazo':        return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('prazo')}>Mudar o prazo</button>;
@@ -322,7 +327,14 @@ function Uma() {
 
   return (
     <>
-      <Link className="dm-peq dm-mudo dm-voltar" href="/demandas">{'<'} todas as demandas</Link>
+      {/* 94 · A SAÍDA VOLTA PARA O PORTAL DE QUEM OLHA.
+
+          Era "< todas as demandas" para /demandas, e desde a 94 /demandas é
+          o Início de quem pede, e não "todas". Quem atende volta para o
+          Atendimento, onde estava a fila; quem pede, para as suas. */}
+      {v.eu.atende
+        ? <Link className="dm-peq dm-mudo dm-voltar" href="/demandas/atendimento">{'<'} atendimento</Link>
+        : <Link className="dm-peq dm-mudo dm-voltar" href="/demandas">{'<'} minhas demandas</Link>}
 
       <div style={{ margin: 'var(--dm-e2) 0 var(--dm-e3)' }}>
         <div className="dm-rot">{'>'} demanda #{d.numero} · {d.categoria}</div>
@@ -369,7 +381,10 @@ function Uma() {
                 pediu quando a aprovação sai. Quem lia isso ficava com a aba
                 aberta esperando uma coisa que não ia acontecer. Dizer o que
                 falta e ir embora é mais honesto que prometer um aviso. */}
-            {quemManda(v.eu.papel)
+            {/* 94 · `aprova` vem do servidor: com escopo, o gestor de outro
+                setor é `gestor` e NÃO aprova esta. O nome do papel só vale
+                quando o banco ainda não manda a resposta. */}
+            {(v.eu.aprova ?? quemManda(v.eu.papel))
               ? <> Você pode aprovar ou recusar aqui ao lado.</>
               : <> Quem decide é a liderança. Não há o que fazer aqui enquanto isso.</>}
           </div>
@@ -379,7 +394,7 @@ function Uma() {
         <Aviso tom="warn">
           <div>
             <b>{rotTrava(d.travada_por)}.</b>{d.travada_nota ? ` ${d.travada_nota}` : ''}
-            {d.travada_por === 'informacao' && v.eu.abriu && acoes.includes('destravar')
+            {d.travada_por === 'informacao' && (v.eu.pede ?? v.eu.abriu) && acoes.includes('destravar')
               ? <> Responda aqui embaixo e a demanda volta a andar.</>
               : null}
           </div>
@@ -531,6 +546,8 @@ function Uma() {
               </ul>
             </div>
           ) : null}
+
+          <Acompanham v={v} numero={numero} indo={indo} agir={agir} sair={() => router.push('/demandas')} />
         </div>
 
         {/* ------------------------------------------------------- as ações */}
@@ -680,32 +697,9 @@ const marco = (t: string) =>
   t === 'abertura' || t === 'status' || t === 'aprovacao' || t === 'reabertura'
   || t === 'validacao';
 
-function frase(e: { tipo: string; de: string | null; para: string | null; quem: string | null }): string {
-  const q = e.quem ? e.quem.split(' ')[0] : 'alguém';
-  switch (e.tipo) {
-    case 'abertura':    return `${q} abriu a demanda`;
-    case 'status':      return `${q} mudou de ${rotStatus((e.de || 'aberta') as never)} para ${rotStatus((e.para || 'aberta') as never)}`;
-    case 'responsavel':
-      /* assumir grava "Maria" como quem mexeu e "Maria Aparecida
-         Gonçalves da Silva" como o novo responsável, e a linha saía
-         "Maria passou para Maria Aparecida Gonçalves da Silva" — que se
-         lê como defeito. Quando quem mexeu e quem recebeu são a mesma
-         pessoa, o nome do gesto é "assumiu". */
-      if (e.para && e.quem && e.para === e.quem) return `${q} assumiu`;
-      return e.para ? `${q} passou para ${e.para}` : `${q} soltou o responsável`;
-    case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
-    case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
-    case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
-    case 'aprovacao':   return `${q} marcou a aprovação como ${e.para}`;
-    case 'reabertura':  return `${q} reabriu`;
-    case 'anexo':       return `${q} juntou um anexo`;
-    case 'comentario':  return `${q} escreveu`;
-    /* "confirmou que resolveu" e nao "validou": a palavra do PDF e de
-       processo, e quem le esta linha e a pessoa que pediu. */
-    case 'validacao':   return `${q} confirmou que resolveu`;
-    default:            return `${q}: ${e.tipo}`;
-  }
-}
+/* a frase de cada fato mora em `lib/demandas/regras.ts` desde a 94: os avisos
+   contam os mesmos fatos e precisam da mesma frase */
+const frase = fraseDoEvento;
 
 /* ---------------------------------------------------------------- recados */
 function Recados({ d, base, eu }: {
@@ -947,4 +941,84 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
     );
   }
   return null;
+}
+
+/* ------------------------------------------------------ quem acompanha
+
+   94 · "demandas em que ele seja explicitamente participante". A pessoa
+   incluída passa a ver a demanda e a conversar nela, e só nela; não decide
+   nada que seja de quem pediu ou de quem atende.
+
+   QUEM INCLUI é decidido pelo servidor (`eu.inclui`: quem pede, quem atende e
+   quem gere) e a pessoa é achada pelo E-MAIL ou pelo WHATSAPP exatos, nunca
+   por nome: busca por nome seria a lista de gente da igreja aberta para
+   qualquer membro. Do participante só sai o nome; contato não.
+
+   Sair é sempre possível para o próprio participante, e ao sair ele deixa de
+   ver a demanda na hora: a tela o leva para o Início em vez de mostrar uma
+   ficha que o banco já não entrega. */
+function Acompanham({ v, numero, indo, agir, sair }: {
+  v: Vista; numero: number; indo: boolean;
+  agir: (a: Acao, d?: Record<string, unknown>) => Promise<boolean>;
+  sair: () => void;
+}) {
+  const [quem, setQuem] = useState('');
+  /* WHATSAPP OU E-MAIL, E O TECLADO CERTO PARA CADA UM · 22/09/2026.
+
+     Era um campo só, "E-mail ou WhatsApp", de texto: no celular abria o
+     teclado de letras para quem ia digitar um número (o medidor acusou em
+     todas as fichas de quem pode incluir). O banco aceita os dois, e cada um
+     tem o seu teclado. WhatsApp primeiro, porque é o que a igreja sabe de
+     cor. */
+  const [por, setPor] = useState<'tel' | 'email'>('tel');
+  const ps = v.participantes || [];
+  const pode = !!v.eu.inclui;
+  if (!ps.length && !pode) return null;
+  return (
+    <div className="dm-card">
+      <h3 style={{ marginBottom: 8 }}>Quem acompanha</h3>
+      {ps.length ? (
+        <ul className="dm-peq" style={{ margin: '0 0 var(--dm-e2)', paddingLeft: 18 }}>
+          {ps.map(p => (
+            <li key={p.id} style={{ marginBottom: 6 }}>
+              {p.nome}{p.eu ? ' (você)' : ''}
+              {pode || p.eu ? (
+                <>
+                  {' · '}
+                  <button className="dm-btn dm-mini" disabled={indo}
+                    onClick={async () => {
+                      const deu = await agir('tirar', { membro_id: p.id });
+                      if (deu && p.eu && !v.eu.abriu && !v.eu.atende) sair();
+                    }}>{p.eu ? 'sair' : 'tirar'}</button>
+                </>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+          Só quem pediu e quem atende.
+        </p>
+      )}
+      {pode ? (
+        <form onSubmit={async e => {
+          e.preventDefault();
+          if (await agir('incluir', { quem: quem.trim() })) setQuem('');
+        }}>
+          <Opcoes rot="Incluir pelo" valor={por}
+            opcoes={[{ v: 'tel', rot: 'WhatsApp' }, { v: 'email', rot: 'E-mail' }]}
+            aoMudar={x => { setPor(x); setQuem(''); }} />
+          <div style={{ marginTop: 'var(--dm-e2)' }}>
+            <Campo rot={por === 'tel' ? 'WhatsApp da pessoa' : 'E-mail da pessoa'}
+              ajuda="Só quem já tem cadastro. Ela passa a ver esta demanda.">
+              {por === 'tel'
+                ? <input key="tel" type="tel" inputMode="tel" value={quem} onChange={e => setQuem(e.target.value)} autoComplete="off" />
+                : <input key="email" type="email" inputMode="email" value={quem} onChange={e => setQuem(e.target.value)} autoComplete="off" />}
+            </Campo>
+          </div>
+          <button className="dm-btn dm-larga" disabled={indo || !quem.trim()}>Incluir</button>
+        </form>
+      ) : null}
+    </div>
+  );
 }
