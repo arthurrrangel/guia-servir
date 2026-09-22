@@ -289,10 +289,25 @@ caso('o aviso de banco atrasado nao promete mais que o robo volta sozinho', () =
   assert.ok(/fazColeta/.test(bloco) && /fazMes/.test(bloco) && /fazCobranca/.test(bloco),
     'nomeando qual trabalho se perdeu hoje')
   /* e o robô roda uma vez por dia — é disso que a falsidade vinha */
+  /* ISTO CONTAVA `crons.length === 1` — 22/09/2026.
+
+     A afirmacao que importa aqui e sobre O CRON DAS ESCALAS: ele roda uma vez
+     por dia, e por isso "a proxima execucao" e amanha. Contar o total fazia o
+     teste reprovar no dia em que o sistema de DEMANDAS ganhou a varredura de
+     aviso dele — uma mudanca que nao tem nada a ver com o que este caso mede.
+
+     Teste que reprova por motivo alheio ao que ele afirma ensina a mexer no
+     teste em vez de olhar o defeito, e um dia alguem mexe no errado. */
   const vercel = JSON.parse(readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'))
-  assert.equal(vercel.crons.length, 1)
-  assert.equal(vercel.crons[0].schedule, '0 12 * * *',
+  const daEscala = vercel.crons.filter(c => c.path === '/api/cron')
+  assert.equal(daEscala.length, 1, 'ha exatamente um cron para /api/cron')
+  assert.equal(daEscala[0].schedule, '0 12 * * *',
     'uma execucao por dia: a "proxima" e amanha, e amanha nao e dia 20 nem 26 nem quinta')
+  /* e nenhum cron do outro sistema aponta para dentro das escalas */
+  for (const c of vercel.crons.filter(c => c.path !== '/api/cron')) {
+    assert.ok(c.path.startsWith('/api/demandas/'),
+      `cron inesperado em ${c.path}: so /api/cron e os do sistema de demandas`)
+  }
 })
 
 /* ---- controle negativo ------------------------------------------------------

@@ -181,8 +181,32 @@ export const quemSou = () =>
 export const bases = () =>
   rpc<Bases>('dem_bases', { p_token: t() });
 
-export const abrir = (r: Rascunho, anexos: { nome: string; url: string }[] = []) =>
-  rpc<{ numero: number; precisa_aprovacao: boolean; setor_responsavel: string;
+/* O AVISO SAI DEPOIS QUE A DEMANDA JA EXISTE, E NUNCA SEGURA A TELA.
+
+   `void` e `catch` vazio de propósito, e esta é a única vez neste arquivo em
+   que engolir a falha é o certo: a demanda JÁ ESTÁ NO BANCO quando isto roda.
+   Se o aviso falhar, quem abriu não pode ver um erro vermelho sobre uma coisa
+   que deu certo — e o aviso não se perde, porque o carimbo é do banco e a
+   varredura do cron pega o que ficou para trás (migração 90).
+
+   Sem `await` pelo mesmo motivo: o Resend leva de 200 ms a 15 s, e ninguém
+   deve olhar "Enviando…" esperando o servidor de e-mail de terceiro. */
+function avisarEmSegundoPlano() {
+  try {
+    const tok = t();
+    if (!tok) return;
+    void fetch('/api/demandas/avisar', {
+      method: 'POST',
+      /* o token vai no CABEÇALHO, nunca na URL: URL entra em log de servidor,
+         em Referer e no histórico do navegador, e este token é uma senha */
+      headers: { 'x-demandas-token': tok },
+      keepalive: true,
+    }).catch(() => {});
+  } catch { /* nada aqui pode derrubar a abertura da demanda */ }
+}
+
+export const abrir = async (r: Rascunho, anexos: { nome: string; url: string }[] = []) => {
+  const resposta = await rpc<{ numero: number; precisa_aprovacao: boolean; setor_responsavel: string;
         contato: { nome: string; telefone: string | null } | null }>('dem_abrir', {
     p_token: t(),
     p_d: {
@@ -196,6 +220,9 @@ export const abrir = (r: Rascunho, anexos: { nome: string; url: string }[] = [])
       anexos,
     },
   });
+  if (resposta.ok) avisarEmSegundoPlano();
+  return resposta;
+};
 
 export type Filtro = {
   aba?: 'tudo' | 'minhas' | 'setor' | 'comigo';
