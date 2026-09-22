@@ -44,6 +44,19 @@ begin
     ('Pedro Jovens',   null,            '5531900000005', 'solicitante',  s_jov, 'tk-jovem'),
     ('Ana Kids',       null,            '5531900000006', 'solicitante',
        (select id from demandas.setores where slug = 'kids'), 'tk-kids');
+  /* A 94 DEU ESCOPO AO GESTOR, E ESTA LINHA DIZ QUAL E O DA JOICE.
+
+     Ate a 93, gestor via e aprovava tudo, sempre, e por isso este arquivo
+     nunca precisou dizer o escopo dela. Na 94 o gestor nasce SEM escopo
+     (`escopo_total = false`, nenhum setor em `demandas.gestao`), porque
+     "gestor de tudo" passou a ser uma decisao de quem administra, e nao um
+     efeito colateral do papel. Sem esta linha, 15 casos daqui reprovam, todos
+     do gestor: ela deixa de ver, aprovar, redirecionar e contar.
+
+     Os gestores que JA EXISTIAM quando a 94 entrou recebem `escopo_total =
+     true` na propria migracao; esta fixture nasce depois dela, por isso diz
+     por escrito. */
+  update demandas.membros set escopo_total = true where token = 'tk-gestor';
 end $$;
 
 -- 1 ------------------------------------------ as duas portas de entrada ---
@@ -509,6 +522,109 @@ select chk('e quem estoura e o motivo do cancelamento, por causa do prefixo', 's
 select chk('a recusa que passou gravou o prefixo junto', '2000',
   (select length(cancelada_motivo)::text from demandas.demandas
     where titulo = 'Recusa de 1980 letras'));
+
+
+-- 23 --------------------------- a base de pessoas e o escopo (migracao 94) ---
+/* A conferencia da 94 prova os quatro ataques do pedido dentro da propria
+   migracao. Aqui ficam os que dependem de um banco com gente de verdade em
+   volta: o ultimo administrador (a conferencia roda em producao, onde o Arthur
+   e admin, e nao tem como ser a unica), a decisao de um pedido de papel, a
+   troca de link, e o escopo de gestor mexido pela porta do administrador. */
+do $$
+declare s_jov uuid; s_com uuid;
+begin
+  select id into s_jov from demandas.setores where slug = 'jovens';
+  select id into s_com from demandas.setores where slug = 'comunicacao';
+  insert into demandas.membros (nome, auth_email, telefone, papel, setor_id, token) values
+    ('Lara Jovens',  'lara@teste',  '5531900000011', 'solicitante', s_jov, 'tk-lara'),
+    ('Caio Lider',   'caio@teste',  '5531900000012', 'lider',       s_jov, 'tk-lider'),
+    ('Gil Gestor',   'gil@teste',   '5531900000013', 'gestor',      s_com, 'tk-gil');
+  insert into demandas.gestao (membro_id, setor_id)
+    select id, s_com from demandas.membros where token = 'tk-gil';
+end $$;
+/* A: o colega do MESMO setor. Pedro e Lara sao os dois do Jovens. Ate a 93
+   a Lara via, comentava e anexava em tudo que o Pedro abriu. */
+select chk('94: colega do mesmo setor nao ve a demanda', 'NAO_EXISTE',
+  public.dem_ver('tk-lara', nd('Limpeza da sala'))->>'erro');
+select chk('94: e a lista Tudo dela fica vazia', '0',
+  jsonb_array_length(public.dem_lista('tk-lara','{}'::jsonb)->'itens')::text);
+select chk('94: o lider do Jovens ve o que o Jovens pediu', 'true',
+  public.dem_ver('tk-lider', nd('Limpeza da sala'))->>'ok');
+select chk('94: o lider nao ve o que outro ministerio pediu', 'NAO_EXISTE',
+  public.dem_ver('tk-lider', (select numero from demandas.demandas
+    where aberta_por = (select id from demandas.membros where token='tk-gestor') limit 1))->>'erro');
+/* B: o gestor com escopo so na Comunicacao nao alcanca Compras */
+select chk('94: gestor de um setor nao alcanca a compra de outro', 'NAO_EXISTE',
+  public.dem_mover('tk-gil', nd('Comprar cadeiras'), 'comentar', '{"texto":"x"}'::jsonb)->>'erro');
+select chk('94: e o gestor de todos continua vendo', 'true',
+  (public.dem_ver('tk-gestor', nd('Comprar cadeiras'))->>'ok'));
+/* a ficha diz o que a pessoa pode, decidido pelo servidor */
+select chk('94: a ficha diz que o lider fala por quem pediu', 'true',
+  (public.dem_ver('tk-lider', nd('Limpeza da sala'))->'eu')->>'pede');
+select chk('94: e que ele nao atende', 'false',
+  (public.dem_ver('tk-lider', nd('Limpeza da sala'))->'eu')->>'atende');
+/* C e D: area administrativa e o proprio papel */
+select chk('94: o lider nao abre a base de pessoas', 'SO_ADMIN',
+  public.dem_pessoas('tk-lider')->>'erro');
+select chk('94: o perfil recusa papel', 'CAMPO_NAO_PERMITIDO',
+  public.dem_perfil('tk-lara', '{"papel":"admin"}'::jsonb)->>'erro');
+select chk('94: e o papel continua o mesmo', 'solicitante',
+  (select papel from demandas.membros where token = 'tk-lara'));
+/* o pedido de papel: registra, espera, e so o administrador decide */
+select public.dem_perfil('tk-lara', '{"papel_pedido":"responsavel"}'::jsonb);
+select chk('94: pedir nao muda o papel', 'solicitante/responsavel',
+  (select papel || '/' || coalesce(papel_pedido,'-') from demandas.membros where token = 'tk-lara'));
+select chk('94: aceitar equipe num setor que nao atende e recusado', 'SETOR_NAO_ATENDE',
+  public.dem_ajustar('tk-admin', 'pedido', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-lara'), 'decisao', 'aceitar'))->>'erro');
+select public.dem_ajustar('tk-admin', 'membro', jsonb_build_object(
+  'id', (select id from demandas.membros where token='tk-lara'),
+  'setor_id', (select id from demandas.setores where slug='comunicacao')));
+select chk('94: com o setor certo, aceitar vira o papel', 'true',
+  public.dem_ajustar('tk-admin', 'pedido', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-lara'), 'decisao', 'aceitar'))->>'ok');
+select chk('94: e o pedido sai', 'responsavel/-',
+  (select papel || '/' || coalesce(papel_pedido,'-') from demandas.membros where token = 'tk-lara'));
+select chk('94: o historico conta quem decidiu', 'Arthur Rangel',
+  (select y.nome from demandas.pessoas_historico h join demandas.membros y on y.id = h.por
+    where h.membro_id = (select id from demandas.membros where token='tk-lara')
+      and h.tipo = 'papel' order by h.id desc limit 1));
+/* o ultimo administrador */
+select chk('94: o unico admin nao deixa de ser admin', 'ULTIMO_ADMIN',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-admin'), 'papel', 'gestor',
+    'escopo_total', true))->>'erro');
+select chk('94: nem e desativado', 'ULTIMO_ADMIN',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-admin'), 'ativo', false))->>'erro');
+/* o escopo pela porta do administrador */
+select chk('94: gestor sem escopo e recusado', 'ESCOPO_VAZIO',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-gil'), 'escopo', '[]'::jsonb))->>'erro');
+select chk('94: trocar o escopo inteiro', 'true',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object(
+    'id', (select id from demandas.membros where token='tk-gil'),
+    'escopo', jsonb_build_array((select id from demandas.setores where slug='compras'))))->>'ok');
+select chk('94: e agora ele alcanca Compras', 'true',
+  public.dem_ver('tk-gil', nd('Comprar cadeiras'))->>'ok');
+select chk('94: e deixou de alcancar a Comunicacao', 'NAO_EXISTE',
+  public.dem_ver('tk-gil', nd('Divulgação do Culto de Celebração'))->>'erro');
+/* o link pessoal trocado invalida o antigo */
+select public.dem_ajustar('tk-admin', 'link', jsonb_build_object(
+  'id', (select id from demandas.membros where token='tk-lider')));
+select chk('94: o link antigo deixa de entrar', 'SEM_ACESSO',
+  public.dem_quem_sou('tk-lider')->>'erro');
+select chk('94: e a pessoa continua la, com link novo', 'sim',
+  (select case when token ~ '^[0-9a-f]{24}$' then 'sim' else 'nao' end
+     from demandas.membros where nome = 'Caio Lider'));
+/* o mesmo nome entra so confirmando */
+select chk('94: homonimo precisa confirmar', 'HOMONIMO',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object('nome', 'Pedro Jovens',
+    'setor_id', (select id from demandas.setores where slug='kids')))->>'erro');
+select chk('94: confirmando, entra', 'true',
+  public.dem_ajustar('tk-admin', 'membro', jsonb_build_object('nome', 'Pedro Jovens',
+    'setor_id', (select id from demandas.setores where slug='kids'),
+    'confirmar_homonimo', true))->>'ok');
 
 \t off
 select n, caso, esperado, deu, case when deu = esperado then 'ok' else 'FALHOU' end as v from res order by n;
