@@ -533,11 +533,54 @@ function banco(respostas) {
 let React, act, createRoot;
 
 async function ligarReact() {
+  /* ESTE ARQUIVO DERRUBOU O DEPLOY, E A CAUSA É UMA LINHA — 22/09/2026.
+
+     `act` não existe no React de produção. O `react/index.js` escolhe qual
+     build carregar OLHANDO `process.env.NODE_ENV` no momento do import:
+
+       if (process.env.NODE_ENV === 'production') require('./cjs/react.production.min.js')
+       else                                       require('./cjs/react.development.js')
+
+     E a produção é onde este teste roda. `package.json` tem
+     `"build": "npm test && next build"`, então a Vercel executa a suíte
+     INTEIRA dentro do build — e o build da Vercel roda com
+     `NODE_ENV=production`. Resultado medido no deploy do commit 7fbea0c:
+
+       Error: act(...) is not supported in production builds of React.
+       npm run build exited with 1   ·   35s (o build que passa leva 72s)
+
+     O código do app estava certo. O push estava certo. Quem quebrou foi este
+     arquivo de teste, escrito ontem, e o defeito não aparecia aqui porque o
+     terminal deste container não tem `NODE_ENV=production`. Verde local não é
+     verde da produção: é verde de UM ambiente.
+
+     Para reproduzir o build da Vercel antes de empurrar:
+
+       CI=1 NODE_ENV=production VERCEL=1 npm test     (com Node 24)
+
+     O conserto é decidir a MODALIDADE aqui, em vez de herdá-la do ambiente.
+     Funciona porque, até esta linha, NADA importou `react`: os imports deste
+     arquivo são dinâmicos justamente por causa da ordem (ver a nota de
+     `montarMundo`). E não enfraquece a medida: dev e produção renderizam
+     igual, mudam só os avisos — e `act`, que só existe em dev, é a única
+     forma de esperar o React terminar de montar. */
+  process.env.NODE_ENV = 'development';
+
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
   globalThis.fetch = async () => ({ ok: true, json: async () => ({}) });
   React = (await import('react')).default;
   act = (await import('react')).act;
   createRoot = (await import('react-dom/client')).createRoot;
+
+  /* E se um dia alguém importar `react` antes desta função, o `act` volta a
+     vir indefinido e cada `await act(...)` estoura com "act is not a
+     function" — mensagem que não diz a causa. Então a checagem é aqui, com a
+     causa escrita por extenso. */
+  if (typeof act !== 'function') {
+    console.error('O React carregado não tem `act`: veio o build de produção.');
+    console.error('Alguma coisa importou `react` antes de ligarReact().');
+    process.exit(1);
+  }
 }
 
 async function montar(Componente) {
