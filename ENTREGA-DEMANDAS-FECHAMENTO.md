@@ -87,8 +87,8 @@ O número que importa mais não é nenhum desses: **onze testes ficavam verdes c
 **Três migrações novas**, cada uma com conferência própria e bateria de sabotagem:
 
 - **91** (em produção): fila de avisos de verdade, as três funções em `public`, ação `validar`, e as 21 funções do schema fechadas para PUBLIC.
-- **92** (provada, não aplicada): teto por setor, classe de invisíveis inteira, `url_boa` julgando a autoridade decodificada, 17 CHECKs que nunca tinham sido conferidas nas linhas antigas, `pode_ver`/`pode_atender` sem NULL, UNIQUE em nome de setor, `dem_numeros` sem cast cego.
-- **93** (provada, não aplicada): `reabrir` limpa o carimbo, teto de 200 no histórico, valor de onze dígitos vira recusa em vez de erro cru, re-travar entra no histórico, toque duplo em `dem_abrir`, colunas mortas da 90 removidas, inventário da porta pública corrigido.
+- **92** (em produção): teto por setor, classe de invisíveis inteira, `url_boa` julgando a autoridade decodificada, 17 CHECKs que nunca tinham sido conferidas nas linhas antigas, `pode_ver`/`pode_atender` sem NULL, UNIQUE em nome de setor, `dem_numeros` sem cast cego.
+- **93** (em produção): `reabrir` limpa o carimbo, teto de 200 no histórico, valor de onze dígitos vira recusa em vez de erro cru, re-travar entra no histórico, toque duplo em `dem_abrir`, colunas mortas da 90 removidas, inventário da porta pública corrigido.
 
 **Na tela**, sempre dentro de controle que já existia, nunca com caixa nova: validação no cartão verde, caixinha de comentário interno, filtro de concluídas, criação de categoria, orçamento sempre alcançável, rascunho que sobrevive a recarregar, data e hora da abertura, prazo pedido versus prometido, vocabulário do PDF na lista, ranking de setores, teto do setor em Ajustes, e o aviso de quantas categorias não couberam.
 
