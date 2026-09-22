@@ -638,6 +638,16 @@ const PORBANCO: Record<string, string> = {
   LIMITE_INVALIDO: 'Não entendi quantas linhas mostrar.',
   /* ---- migração 88 ---------------------------------------------------- */
   PERIODO_INVERTIDO: 'A data inicial está depois da final. Troque as duas.',
+  /* 92 · `dem_numeros` recebia os dois parâmetros como `date` e o cast
+     acontecia ANTES do corpo da função: `2026-13-45` estourava um `22008`
+     cru do Postgres, que chegava aqui como a frase genérica "Não consegui.
+     Tente de novo." A assinatura virou `text`, a função decide sozinha, e
+     este é o recado. */
+  PERIODO_INVALIDO: 'Essa data não existe. Confira o dia e o mês.',
+  /* 92 · a triagem passou a poder pedir o valor depois da abertura, junto
+     com a resposta da trava. Sem esta linha, um valor mal escrito voltava
+     como "Não consegui", e a pessoa não tinha como saber o que corrigir. */
+  VALOR_INVALIDO: 'Escreva só o valor, em números. Exemplo: 1234,56.',
   NUMERO_INVALIDO: 'Esse campo só aceita número.',
   SIM_OU_NAO: 'Esse campo só aceita sim ou não.',
   /* `depois_de` saiu de `dem_lista` na 88 junto com o vazamento que ele

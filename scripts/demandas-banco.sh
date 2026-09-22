@@ -71,7 +71,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          88-a-segunda-auditoria-achou-o-que-a-primeira-deixou \
          89-a-terceira-auditoria-e-a-lista-de-invisiveis-que-so-uma-copia-cresceu \
          90-o-setor-nao-ficava-sabendo-que-chegou-demanda \
-         91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia; do
+         91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia \
+         92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql

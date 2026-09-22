@@ -19,7 +19,7 @@ import { Aviso, Campo, Copiar, Esqueleto } from '@/components/demandas/Ui';
 import { ajustar, bases, pessoas } from '@/lib/demandas/api';
 import { recadoDoErro, soDigitos } from '@/lib/demandas/regras';
 import { confirmar } from '@/lib/confirmar';
-import type { Bases, Membro, Papel } from '@/lib/demandas/tipos';
+import type { Bases, Membro, Papel, Setor } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
   return <Casca><Ajustes /></Casca>;
@@ -200,6 +200,46 @@ function Gente({ ms, b, indo, salvar }: {
   );
 }
 
+/* O TETO DE GASTO POR SETOR, QUE ATE A 92 NAO EXISTIA.
+
+   A quarta auditoria mediu o furo: `exige_aprovacao` mora na CATEGORIA, e
+   quem pede escolhe a categoria. Um pedido de R$ 999.999,99 numa categoria
+   que não exige aprovação nasce aberto, é assumido e concluído por uma
+   pessoa só, e o histórico não registra aprovação nenhuma. O rastro fica
+   perfeito, e não há nada para rastrear.
+
+   Vazio quer dizer SEM TETO, que é o comportamento de sempre. Quem escolhe
+   o número é quem administra, e por isso ele mora aqui e não no código.
+
+   Setor que não recebe demanda não tem teto de gasto para aplicar: a célula
+   fica muda em vez de oferecer um campo que não decide nada. */
+function Teto({ s, indo, salvar }: {
+  s: Setor; indo: boolean;
+  salvar: (o: 'setor', d: Record<string, unknown>) => Promise<boolean>;
+}) {
+  const guardado = s.teto_sem_aprovacao == null ? '' : String(s.teto_sem_aprovacao).replace('.', ',');
+  const [v, setV] = useState(guardado);
+  /* o valor do servidor manda: sem isto, salvar e recarregar deixava a
+     célula mostrando o que a pessoa digitou mesmo quando o banco recusou */
+  useEffect(() => { setV(guardado); }, [guardado]);
+  if (!s.atende) return <span className="dm-peq dm-mudo">—</span>;
+  return (
+    <div className="dm-linha">
+      <span className="dm-peq dm-mudo">R$</span>
+      <input inputMode="decimal" aria-label={`Aprovar acima de, em ${s.nome}`}
+        placeholder="sem teto" value={v} onChange={e => setV(e.target.value)}
+        disabled={indo}
+        style={{ width: 96, minHeight: 44, padding: '0 8px', border: '1px solid var(--dm-linha2)', borderRadius: 'var(--dm-r)', background: 'var(--dm-card3)' }} />
+      {v !== guardado ? (
+        <button className="dm-btn dm-peq dm-pri" disabled={indo}
+          onClick={() => salvar('setor', { id: s.id, teto_sem_aprovacao: v.trim() })}>
+          Salvar
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 /* ---------------------------------------------------------------- setores */
 function Setores({ b, indo, salvar }: {
   b: Bases; indo: boolean; salvar: (o: 'setor', d: Record<string, unknown>) => Promise<boolean>;
@@ -211,7 +251,10 @@ function Setores({ b, indo, salvar }: {
       <Aviso tom="info">
         <div>
           <b>Atende</b> quer dizer que o setor pode RECEBER demanda. Ministério que só pede fica
-          com isso desligado — assim ninguém manda uma demanda para um lugar que não vai olhar.
+          com isso desligado, assim ninguém manda uma demanda para um lugar que não vai olhar.
+          <br />
+          <b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo
+          que a categoria não exija. Em branco: sem teto.
         </div>
       </Aviso>
       <div className="dm-card">
@@ -230,7 +273,7 @@ function Setores({ b, indo, salvar }: {
       </div>
       <div className="dm-card">
         <table className="dm-tab">
-          <thead><tr><th>Setor</th><th>Recebe demanda</th><th>Ativo</th></tr></thead>
+          <thead><tr><th>Setor</th><th>Recebe demanda</th><th>Aprovar acima de</th><th>Ativo</th></tr></thead>
           <tbody>
             {b.setores.map(s => (
               <tr key={s.id}>
@@ -241,6 +284,7 @@ function Setores({ b, indo, salvar }: {
                     {s.atende ? 'Sim' : 'Não'}
                   </button>
                 </td>
+                <td><Teto s={s} indo={indo} salvar={salvar} /></td>
                 <td>
                   {/* DESATIVAR SETOR PEDE CONFIRMAÇÃO — 20/09/2026.
 

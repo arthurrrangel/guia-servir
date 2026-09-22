@@ -89,9 +89,20 @@ echo "avisos na fila antes: $FILA"
 # Entao as duas varreduras aqui rodam em autocommit, uma logo depois da outra,
 # que e exatamente o que dois processos da Vercel fazem quando duas demandas
 # nascem com segundos de diferenca.
+# E A CONTA SO VALE SE OS DOIS LADOS OLHAREM A MESMA COISA.
+#
+# A primeira versao contava `FILA` filtrando por `DV91%` e depois lia a fila
+# INTEIRA. No banco recem-criado dava certo; no harness completo,
+# `demandas-banco.test.sql` deixa aviso pendente de outra demanda, a varredura
+# trazia 11 e o script reprovava com "sumiu aviso" por um motivo que nao era o
+# que ele existe para medir. E o proprio repositorio proibe isto: conferencia
+# que depende de o banco estar vazio mede o banco, nao a regra.
 cat > /tmp/_dv_scan.sql <<'SQL'
 select coalesce(string_agg(x->>'aviso_id', ','), '(nada)')
-  from jsonb_array_elements(public.dem_avisos_pendentes(50)) x;
+  from jsonb_array_elements(public.dem_avisos_pendentes(50)) x
+  join demandas.avisos   a on a.id = (x->>'aviso_id')::uuid
+  join demandas.demandas d on d.id = a.demanda_id
+ where d.titulo like 'DV91%';
 SQL
 chmod 644 /tmp/_dv_scan.sql
 

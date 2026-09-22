@@ -17,7 +17,19 @@ export type Eu = {
   setor_atende: boolean; tem_login: boolean;
 };
 
-export type Setor = { id: string; nome: string; slug: string; atende: boolean };
+export type Setor = {
+  id: string; nome: string; slug: string; atende: boolean;
+  /* 92 · O PORTÃO DEIXOU DE SER ESCOLHIDO POR QUEM PEDE.
+
+     Medido pela quarta auditoria, contra o banco real: R$ 999.999,99 numa
+     categoria que não exige aprovação nasce aberta, é assumida e concluída
+     por uma pessoa só, e o histórico não tem um único evento de aprovação.
+     `exige_aprovacao` é flag da CATEGORIA, e nada olhava o valor.
+
+     `null` é o padrão e quer dizer SEM TETO: o comportamento de hoje,
+     preservado. Quem escolhe o número é quem administra, na aba Setores. */
+  teto_sem_aprovacao: number | null;
+};
 
 export type Categoria = {
   id: string; grupo: string; nome: string; setor_id: string | null;
