@@ -174,7 +174,18 @@
    É a mesma armadilha que esta folha já desarma em `label`, `a`, `p`,
    `textarea` e `button`. A regra continua valendo como padrão e para de
    ganhar de quem vem depois. */
-.dm :where(h1,h2,h3){margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15}
+.dm :where(h1,h2,h3){margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15;display:block}
+/* `display:block` ENTROU EM 22/09/2026, visto em produção pelo Arthur.
+
+   `globals.css:250` (escalas) declara `h3{display:flex;align-items:center}`,
+   para alinhar a setinha do `::before` ao texto. A setinha já era desligada
+   aqui dentro, mas o `flex` passava: o texto do título vira um item flexível,
+   encosta na esquerda e IGNORA o `text-align:center` do pai. Resultado, no
+   aviso de lista vazia (`Vazio`, que é `.dm-centro`): "> NADA AQUI" e a frase
+   de baixo centralizados, e o título entre eles colado na margem esquerda.
+
+   Fora de bloco centralizado, flex e block desenham igual (um item só, sem a
+   setinha), então nada mais muda. */
 .dm :where(h1){font-size:clamp(26px,5vw,34px)}
 .dm :where(h2){font-size:20px}
 .dm :where(h3){font-size:16px}

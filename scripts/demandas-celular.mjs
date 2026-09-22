@@ -89,6 +89,11 @@ const paginasDe = (quem) => [
   { rota: '/demandas/nova',      nome: 'nova' },
   { rota: '/demandas/numeros',   nome: 'numeros', so: ['admin', 'responsavel'] },
   { rota: '/demandas/ajustes',   nome: 'ajustes', so: ['admin'] },
+  /* A LISTA VAZIA — 22/09/2026. A semente dá demanda a todo papel, então o
+     aviso de "nada aqui" nunca era aberto, e foi nele que o Arthur viu, em
+     produção, o título colado na esquerda entre duas linhas centralizadas.
+     O administrador não tem nada atribuído a ele: "Comigo" fica vazio. */
+  { rota: '/demandas',           nome: 'lista-vazia', so: ['admin'], clicar: 'Comigo' },
   { rota: `/demandas/d/${N[quem].execucao}`,  nome: 'detalhe-execucao' },
   { rota: `/demandas/d/${N[quem].travada}`,   nome: 'detalhe-travada' },
   { rota: `/demandas/d/${N[quem].concluida}`, nome: 'detalhe-concluida' },
@@ -220,6 +225,15 @@ try {
            mas a folha do site inteiro está carregada junto. */
         await pag.addStyleTag({ content: '*,*::before,*::after{transition:none!important}' });
         await pag.waitForTimeout(600);
+        if (p.clicar) {
+          await pag.getByRole('button', { name: p.clicar, exact: true }).click();
+          await pag.waitForTimeout(600);
+          const temVazio = await pag.evaluate(() => !!document.querySelector('.dm-centro'));
+          if (!temVazio) {
+            ok(false, `${tela.nome}px · ${papel.quem} · ${p.nome} — o aviso de vazio apareceu`);
+            continue;
+          }
+        }
 
         /* A TERCEIRA GUARDA: A FICHA CHEGOU? — 22/09/2026.
 
@@ -344,6 +358,33 @@ try {
         });
         ok(sozinhos.length === 0, `${etiqueta} — nenhuma opção sobra sozinha na última linha`,
           sozinhos.slice(0, 2).join(' | '));
+
+        /* O QUE ESTÁ NUM BLOCO CENTRALIZADO FICA NO CENTRO — 22/09/2026.
+
+           `globals.css` (escalas) dá `display:flex` a todo `h3`, e com isso o
+           texto do título ignora o `text-align:center` do pai. Medido: 41px
+           para a esquerda em 390, 386px em 1280. Mede o centro do TEXTO de
+           cada filho de `.dm-centro` contra o centro do bloco. */
+        const descentrados = await pag.evaluate(() => {
+          const achou = [];
+          for (const bloco of document.querySelectorAll('.dm-centro')) {
+            const cb = bloco.getBoundingClientRect();
+            if (!cb.width) continue;
+            for (const f of bloco.children) {
+              if (!(f.textContent || '').trim()) continue;
+              const faixa = document.createRange(); faixa.selectNodeContents(f);
+              const t = faixa.getBoundingClientRect();
+              if (!t.width) continue;
+              const desvio = (t.left + t.width / 2) - (cb.left + cb.width / 2);
+              if (Math.abs(desvio) > 3) {
+                achou.push(`${f.tagName.toLowerCase()} «${f.textContent.trim().slice(0, 28)}» ${Math.round(desvio)}px`);
+              }
+            }
+          }
+          return achou;
+        });
+        ok(descentrados.length === 0, `${etiqueta} — o que está num bloco centralizado fica no centro`,
+          descentrados.slice(0, 2).join(' | '));
 
         if (m.estoura.length || m.pequenos.length || m.miudos.length || m.zoomIos.length ||
             m.teclado.length || m.fracos.length) {
