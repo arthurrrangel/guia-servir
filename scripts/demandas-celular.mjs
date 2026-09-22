@@ -38,7 +38,7 @@ const TELAS = [{ nome: '320', width: 320, height: 640 }, { nome: '390', width: 3
 
 /* um token por papel: o menu de abas e os botões mudam com o papel, então
    auditar só como admin esconderia metade da interface */
-/* E DESDE A MIGRAÇÃO 94 SÃO SETE JEITOS DE ENTRAR · 22/09/2026.
+/* E DESDE A MIGRAÇÃO 94 SÃO OITO JEITOS DE ENTRAR · 22/09/2026.
 
    A 94 trouxe o líder de ministério, a gestão com escopo, quem acompanha uma
    demanda sem tê-la pedido, quem pediu outro papel e quem acabou de fazer
