@@ -144,8 +144,7 @@ function Painel() {
             <Num v={horas(n.horas_ate_concluir)} r="até concluir" />
           </div>
           <p className="dm-peq dm-mudo" style={{ marginTop: -12, marginBottom: 'var(--dm-e4)' }}>
-            “Primeira resposta” é a primeira vez que alguém que não abriu a demanda mexeu nela.
-            É o número que mostra se um setor está deixando pedido parado sem ninguém olhar.
+            Primeira resposta: a primeira vez que outra pessoa mexeu na demanda.
           </p>
 
           {/* ------------------------------------------------------- setores */}
@@ -217,7 +216,9 @@ function Painel() {
               <p className="dm-peq" style={{ margin: 0 }}>
                 Todo o período cabe em <b>{mesPorExtenso(n.por_mes[0].mes)}</b>: {n.por_mes[0].n}{' '}
                 {n.por_mes[0].n === 1 ? 'demanda' : 'demandas'}.
-                <span className="dm-mudo"> Escolha 90 dias ou 1 ano ali em cima para comparar meses.</span>
+                {/* o único caminho para ver um gráfico aqui é o seletor lá de
+                    cima, e nada na tela dizia isso */}
+                <span className="dm-mudo"> Para comparar meses, escolha 90 dias ou 1 ano.</span>
               </p>
             ) : (
               <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nada no período.</p>
@@ -225,9 +226,8 @@ function Painel() {
           </div>
 
           <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e4)' }}>
-            De {n.de.split('-').reverse().join('/')} a {n.ate.split('-').reverse().join('/')}.
-            Você vê os números das demandas que consegue ver: a liderança vê tudo, um setor vê o que
-            pediu e o que atende.
+            De {n.de.split('-').reverse().join('/')} a {n.ate.split('-').reverse().join('/')},
+            nas demandas que você vê.
           </p>
         </>
       )}

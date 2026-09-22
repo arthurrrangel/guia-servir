@@ -295,7 +295,7 @@ function Nova() {
       ) : null}
 
       <div className="dm-card">
-        <Campo rot="Título" ajuda="Uma linha que já diga do que se trata.">
+        <Campo rot="Título">
           {/* OS TETOS APARECEM ANTES DO TOQUE, E NÃO DEPOIS.
 
               O banco cobra 200 no título, 20 mil na descrição e 120 no evento
@@ -315,7 +315,7 @@ function Nova() {
         <Campo rot="Categoria"
           ajuda={cat
             ? `Vai para ${setorDaCat}${cat.exige_aprovacao ? ' e precisa de aprovação antes de começar' : ''}.`
-            : 'A categoria decide qual setor atende. Ninguém precisa triar.'}>
+            : 'Define qual setor vai atender.'}>
           <select value={r.categoria_id} onChange={e => escolherCategoria(e.target.value)}>
             <option value="">Escolha</option>
             {grupos.map(([g, cs]) => (
@@ -326,8 +326,7 @@ function Nova() {
           </select>
         </Campo>
 
-        <Campo rot="O que precisa ser feito"
-          ajuda="Quanto mais claro aqui, menos ida e volta depois.">
+        <Campo rot="O que precisa ser feito">
           <textarea maxLength={20000} value={r.descricao} onChange={e => setR(v => ({ ...v, descricao: e.target.value }))} />
         </Campo>
 
@@ -393,7 +392,7 @@ function Nova() {
 
         {r.prioridade === 'urgente' ? (
           <Campo rot="O que acontece se não for feito"
-            ajuda="Urgente sem impacto escrito é só ansiedade. Com o impacto, a liderança consegue comparar.">
+            ajuda="Obrigatório quando é urgente.">
             <input maxLength={2000} value={r.impacto} onChange={e => setR(v => ({ ...v, impacto: e.target.value }))}
               placeholder="Sem isso o culto de domingo não tem som" />
           </Campo>

@@ -506,10 +506,22 @@ async function abrirFicha(numero = 7) {
    que se acha. */
 const grade = (alvo) =>
   todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-grade')[0];
-const botoesDaGrade = (alvo) => {
+/* "MAIS OPÇÕES" — 22/09/2026. O que só ajusta a demanda saiu da grade e foi
+   para um `<details class="dm-mais">` logo abaixo. Os botões continuam sendo
+   da grade para efeito de regra (o conjunto tem que ser o de `acoesDe`); o
+   que mudou é ONDE cada um mora, e isso é conferido à parte, no bloco 11. */
+const mais = (alvo) =>
+  todos(alvo, x => x.nodeType === 1 && x.tagName === 'DETAILS'
+    && (x.getAttribute('class') || '') === 'dm-mais')[0];
+const botoesPrincipais = (alvo) => {
   const g = grade(alvo);
   return g ? porTag(g, 'BUTTON').map(texto) : [];
 };
+const botoesDeMais = (alvo) => {
+  const m = mais(alvo);
+  return m ? porTag(m, 'BUTTON').map(texto) : [];
+};
+const botoesDaGrade = (alvo) => [...botoesPrincipais(alvo), ...botoesDeMais(alvo)];
 
 function banco(respostas) {
   const chamadas = [];
@@ -1370,6 +1382,26 @@ function gradeEsperada(d, quem) {
       ? 'Responder e destravar' : ROTULO[a]));
 }
 
+/* A DIVISÃO É DECISÃO DE TELA, E NÃO TEM FONTE ACIMA DELA.
+
+   O conjunto vem do SQL; qual botão fica na grade e qual vai para "Mais
+   opções" não vem de lugar nenhum além da ficha. Então aqui ele é escrito, e
+   a sabotagem é o que prova que ele cobra: mover `travar` para as
+   secundárias na ficha tem que reprovar este bloco. */
+const SECUNDARIAS = ['prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
+function divisaoEsperada(d, quem) {
+  const todas = acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a));
+  const rot = a => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
+    ? 'Responder e destravar' : ROTULO[a]);
+  const princ = todas.filter(a => !SECUNDARIAS.includes(a));
+  const outras = todas.filter(a => SECUNDARIAS.includes(a));
+  return princ.length && outras.length
+    ? { grade: princ.map(rot), mais: outras.map(rot), acaoPrimeiro: true }
+    : { grade: todas.map(rot), mais: null, acaoPrimeiro: princ.length > 0 };
+}
+const dupla = (alvo) =>
+  todos(alvo, x => x.nodeType === 1 && /(^| )dm-dupla( |$)/.test(x.getAttribute('class') || ''))[0];
+
 async function comFicha(carga, extra = {}) {
   mundoNovo();
   const b = banco({
@@ -1419,6 +1451,19 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
     ok(conjunto(veio) === conjunto(devia),
       `${nome}: a grade é exatamente o que \`acoesDe\` permite`,
       `na tela: [${veio.join(' | ')}]\n           no espelho: [${devia.join(' | ')}]`);
+
+    const div = divisaoEsperada(carga.demanda, quem);
+    const na = botoesPrincipais(alvo), em = botoesDeMais(alvo);
+    ok(conjunto(na) === conjunto(div.grade)
+       && (div.mais ? !!mais(alvo) && conjunto(em) === conjunto(div.mais) : !mais(alvo)),
+      `${nome}: o que anda fica na grade, o que ajusta vai para "Mais opções"`,
+      `grade: [${na.join(' | ')}]  mais: ${mais(alvo) ? '[' + em.join(' | ') + ']' : '(não existe)'}\n` +
+      `           devia: [${div.grade.join(' | ')}]  mais: ${div.mais ? '[' + div.mais.join(' | ') + ']' : '(não existe)'}`);
+
+    const cls = (dupla(alvo) && dupla(alvo).getAttribute('class')) || '';
+    ok(/dm-acao-primeiro/.test(cls) === div.acaoPrimeiro,
+      `${nome}: no celular, ${div.acaoPrimeiro ? 'as ações sobem' : 'o pedido fica em cima'}`,
+      `classe: "${cls}"`);
     await desmontar();
   }
 }
@@ -1695,10 +1740,10 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
   const { alvo, desmontar } = await comFicha(vista({}, QUEM.soEnxerga));
   ok(botoesDaGrade(alvo).length === 0, 'quem só enxerga não tem botão na grade',
     botoesDaGrade(alvo).join(' | '));
-  ok(/Quem toca esta demanda é o setor responsável/.test(texto(alvo)),
+  ok(/Quem toca é o setor responsável/.test(texto(alvo)),
     'e o cartão explica por que está vazio, em vez de ficar mudo',
     texto(alvo).slice(0, 600));
-  ok(/pode escrever aqui embaixo/.test(texto(alvo)),
+  ok(/escreva aqui embaixo/.test(texto(alvo)),
     'e aponta o que ela ainda pode fazer', texto(alvo).slice(0, 600));
   await desmontar();
 }
@@ -1710,7 +1755,7 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
     QUEM.soEnxerga));
   ok(botoesDaGrade(alvo).length === 0, 'grade vazia numa concluída que ela só enxerga',
     botoesDaGrade(alvo).join(' | '));
-  ok(/já foi encerrada/.test(texto(alvo)),
+  ok(/Já encerrada/.test(texto(alvo)),
     'e a frase do cartão vazio é a do estado certo', texto(alvo).slice(0, 600));
   await desmontar();
 }
@@ -1723,7 +1768,7 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
     { status: 'aberta', falta_aprovacao: true }, QUEM.soEnxerga));
   ok(botoesDaGrade(alvo).length === 0, 'grade vazia com o portão aberto',
     botoesDaGrade(alvo).join(' | '));
-  ok(/esperando a liderança aprovar/.test(texto(alvo)),
+  ok(/até a liderança aprovar/.test(texto(alvo)),
     'e a frase do cartão vazio é a do portão, e não a de "o setor é que toca"',
     texto(alvo).slice(0, 700));
   await desmontar();
@@ -1756,11 +1801,59 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
   await desmontar();
 }
 {
-  /* o botão de voltar é o único que sai da tela, e ele vai para a lista */
+  /* A SAÍDA DA FICHA É O LINK DO TOPO — 22/09/2026.
+
+     Havia um botão "Voltar para a lista" no fim da ficha, depois do
+     histórico. Saiu: a barra de cima é fixa (`.dm-topo{position:sticky}`),
+     então a aba "Demandas" fica a um toque em qualquer ponto da rolagem, e o
+     "< todas as demandas" abre a ficha. Três saídas para o mesmo lugar eram
+     duas a mais. O que não pode faltar é UMA, e ela tem que ir para a lista. */
   const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
-  await clicar(botao(alvo, 'Voltar para a lista'), 'o botão de voltar');
-  ok(JSON.stringify(globalThis.__idas) === JSON.stringify(['/demandas']),
-    'voltar leva para a lista de demandas', JSON.stringify(globalThis.__idas));
+  const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
+    && /todas as demandas/.test(texto(x)))[0];
+  ok(!!saida, 'a ficha tem a saída do topo, "todas as demandas"');
+  ok(saida && saida.getAttribute('href') === '/demandas',
+    'e ela leva para a lista de demandas', saida ? saida.getAttribute('href') : '(sem link)');
+  ok(!botao(alvo, 'Voltar para a lista'),
+    'e o botão repetido do fim não voltou');
+  await desmontar();
+}
+{
+  /* UM GESTO, UMA LINHA — 22/09/2026.
+
+     `assumir` grava dois eventos no mesmo instante, e a ficha escrevia os
+     dois: "Maria mudou de Aberta para Em execução" e "Maria passou para Maria
+     Aparecida Gonçalves da Silva". A segunda se lê como defeito, e a primeira
+     repete o que "assumiu" já diz.
+
+     Os eventos abaixo têm o FORMATO QUE `dem_ver` DEVOLVE, copiado do banco
+     semeado: `para` e `quem` com o mesmo nome completo, o mesmo carimbo. E
+     os dois casos que a fusão NÃO pode engolir estão juntos: uma mudança de
+     status que não veio de assumir, e alguém passando a demanda para OUTRA
+     pessoa. */
+  const MARIA = 'Maria Aparecida Gonçalves da Silva';
+  const t0 = '2026-09-10T10:00:00.614434+00:00';
+  const eventos = [
+    { tipo: 'abertura', de: null, para: 'aberta', quem: 'Pedro Henrique Almeida Vasconcelos',
+      em: '2026-09-10T09:00:00+00:00', texto: null, interno: false },
+    { tipo: 'status', de: 'aberta', para: 'execucao', quem: MARIA, em: t0, texto: null, interno: false },
+    { tipo: 'responsavel', de: null, para: MARIA, quem: MARIA, em: t0, texto: null, interno: false },
+    { tipo: 'status', de: 'execucao', para: 'travada', quem: MARIA,
+      em: '2026-09-11T10:00:00+00:00', texto: null, interno: false },
+    { tipo: 'responsavel', de: null, para: 'José Carlos de Oliveira Nascimento',
+      quem: 'Ana Beatriz Rodrigues dos Santos', em: '2026-09-12T10:00:00+00:00', texto: null, interno: false },
+  ];
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'travada', travada_por: 'informacao', travada_nota: 'Qual a medida?' }, QUEM.atende, eventos));
+  const t = texto(alvo);
+  ok(/Maria assumiu/.test(t), 'assumir aparece como "Maria assumiu"', t.slice(-700));
+  ok(!/Maria passou para Maria/.test(t), 'e não como "Maria passou para Maria Aparecida…"', t.slice(-700));
+  ok(!/mudou de Aberta para Em execução/.test(t),
+    'e a linha de status do mesmo gesto não aparece duas vezes', t.slice(-700));
+  ok(/Maria mudou de Em execução para/.test(t),
+    'mas uma mudança de status que não veio de assumir continua inteira', t.slice(-700));
+  ok(/Ana passou para José Carlos de Oliveira Nascimento/.test(t),
+    'e passar para outra pessoa continua sendo "passou para"', t.slice(-700));
   await desmontar();
 }
 

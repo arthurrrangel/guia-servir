@@ -36,6 +36,22 @@ export default function Pagina() {
    Serve para o ramo de "cartão vazio" saber contar. Ver o comentário dele. */
 const FORA_DA_GRADE: Acao[] = ['comentar', 'validar'];
 
+/* A GRADE TINHA ATÉ SETE BOTÕES DO MESMO TAMANHO — 22/09/2026.
+
+   Quem atende, numa demanda em execução, via Concluir, Travar, Mudar o prazo,
+   Rever a prioridade, Mandar para outro setor, Juntar um anexo e Cancelar,
+   lado a lado. O próximo passo não se destacava de nada.
+
+   Agora a grade mostra o que ANDA com a demanda, e o que só a ajusta fica em
+   "Mais opções", a um toque. Se a pessoa só tem ajustes (quem pediu, numa
+   demanda que outro setor toca), eles ficam na grade mesmo: um cartão só com
+   "Mais opções" seria esconder tudo atrás de uma porta.
+
+   A ordem é a mesma de antes, e é a de ORDEM, não a de `acoesDe`. */
+const ORDEM: Acao[] = ['aprovar', 'rejeitar', 'assumir', 'concluir', 'travar', 'destravar',
+  'reabrir', 'prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
+const SECUNDARIAS: Acao[] = ['prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
+
 /* O TETO DE EVENTOS DA MIGRAÇÃO 93.
 
    Medido por quem escreveu a 93, contra a 92, com eventos no teto da CHECK:
@@ -137,6 +153,35 @@ function Uma() {
      recorte), então este número nunca diz a quem pediu quantos comentários
      internos a equipe escreveu. */
   const eventosDeFora = Math.max(0, (v?.eventos_total ?? 0) - eventos.length);
+
+  /* UM GESTO, UMA LINHA — 22/09/2026.
+
+     `assumir` grava dois eventos no mesmo instante: o status (Aberta -> Em
+     execução) e o responsável. A pessoa lia duas linhas para um toque só, e
+     a segunda era a que parecia defeito. "Maria assumiu" já diz as duas
+     coisas, então a de status some quando está colada nela: mesma pessoa,
+     mesmo gesto, menos de cinco segundos. Uma mudança de status que não veio
+     de assumir continua aparecendo inteira.
+
+     `eventosDeFora` acima continua contando sobre `eventos`, e não sobre esta
+     lista: ele diz quantos o servidor NÃO mandou, não quantos a tela juntou. */
+  const linhas = useMemo(() => {
+    const ms = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
+    const assumiu = (e: typeof eventos[number]) =>
+      e.tipo === 'responsavel' && !!e.para && e.para === e.quem;
+    const abriuExecucao = (e: typeof eventos[number]) =>
+      e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao';
+    const fora = new Set<number>();
+    for (let i = 0; i < eventos.length; i++) {
+      if (!abriuExecucao(eventos[i])) continue;
+      for (const j of [i - 1, i + 1]) {
+        const o = eventos[j];
+        if (o && assumiu(o) && o.quem === eventos[i].quem
+            && Math.abs(ms(o) - ms(eventos[i])) < 5000) { fora.add(i); break; }
+      }
+    }
+    return eventos.filter((_, i) => !fora.has(i));
+  }, [eventos]);
 
   /* O PDF PEDE DUAS DATAS DE PRAZO, E EXISTE UMA COLUNA SÓ — 22/09/2026.
 
@@ -250,12 +295,37 @@ function Uma() {
      precisam cair em /demandas, e não na home da igreja */
   const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
 
+  const naGrade = ORDEM.filter(a => acoes.includes(a));
+  const principais = naGrade.filter(a => !SECUNDARIAS.includes(a));
+  const outras = naGrade.filter(a => SECUNDARIAS.includes(a));
+  const dobrar = principais.length > 0 && outras.length > 0;
+  const botao = (a: Acao) => {
+    switch (a) {
+      case 'aprovar':      return <button key={a} className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('aprovar')}>Aprovar</button>;
+      case 'rejeitar':     return <button key={a} className="dm-btn dm-perigo" disabled={indo} onClick={() => setAberto('rejeitar')}>Recusar</button>;
+      case 'assumir':      return <button key={a} className="dm-btn dm-pri" disabled={indo} onClick={() => agir('assumir')}>Assumir e começar</button>;
+      case 'concluir':     return <button key={a} className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('concluir')}>Concluir</button>;
+      case 'travar':       return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('travar')}>Travar</button>;
+      case 'destravar':    return (
+        <button key={a} className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('destravar')}>
+          {v.eu.abriu && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar'}
+        </button>);
+      case 'reabrir':      return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('reabrir')}>Reabrir</button>;
+      case 'prazo':        return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('prazo')}>Mudar o prazo</button>;
+      case 'prioridade':   return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('prioridade')}>Rever a prioridade</button>;
+      case 'redirecionar': return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('redirecionar')}>Mandar para outro setor</button>;
+      case 'anexar':       return <button key={a} className="dm-btn" disabled={indo} onClick={() => setAberto('anexar')}>Juntar um anexo</button>;
+      case 'cancelar':     return <button key={a} className="dm-btn dm-perigo" disabled={indo} onClick={() => setAberto('cancelar')}>Cancelar</button>;
+      default:             return null;
+    }
+  };
+
   return (
     <>
       <Link className="dm-peq dm-mudo dm-voltar" href="/demandas">{'<'} todas as demandas</Link>
 
       <div style={{ margin: 'var(--dm-e2) 0 var(--dm-e3)' }}>
-        <div className="dm-rot">{'>'} demanda #{d.numero} · {d.grupo} · {d.categoria}</div>
+        <div className="dm-rot">{'>'} demanda #{d.numero} · {d.categoria}</div>
         <h1 style={{ marginTop: 6 }}>{d.titulo}</h1>
         <div className="dm-linha" style={{ marginTop: 'var(--dm-e2)' }}>
           <Pill tom={tomPill(d.status)}>
@@ -359,7 +429,15 @@ function Uma() {
         <Aviso tom="bad"><div><b>Cancelada.</b> {d.cancelada_motivo}</div></Aviso>
       ) : null}
 
-      <div className="dm-dupla">
+      {/* QUEM ABRE A FICHA PARA AGIR ACHAVA O BOTÃO DEPOIS DE UMA TELA INTEIRA.
+
+          No celular as duas colunas empilham, e a de ações era a segunda:
+          quem atende rolava por "O que foi pedido" inteiro, que ele já sabe,
+          para achar "Concluir". Com botão para apertar, as ações sobem. Sem
+          nenhum (quem acompanha a demanda de outro setor), o pedido fica em
+          cima, que é o que essa pessoa veio ver. No computador nada muda: as
+          duas colunas continuam lado a lado. */}
+      <div className={principais.length ? 'dm-dupla dm-acao-primeiro' : 'dm-dupla'}>
         {/* ------------------------------------------------------- o pedido */}
         <div>
           <div className="dm-card">
@@ -453,9 +531,6 @@ function Uma() {
               </ul>
             </div>
           ) : null}
-
-          {/* --------------------------------------------------- o WhatsApp */}
-          <Recados d={d} base={base} eu={v.eu} />
         </div>
 
         {/* ------------------------------------------------------- as ações */}
@@ -481,58 +556,30 @@ function Uma() {
             {acoes.filter(a => !FORA_DA_GRADE.includes(a)).length === 0 ? (
               <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
                 {d.status === 'concluida' || d.status === 'cancelada'
-                  ? 'Esta demanda já foi encerrada. Você pode escrever aqui embaixo.'
+                  ? 'Já encerrada. Se precisar, escreva aqui embaixo.'
                   : d.falta_aprovacao
-                    ? 'Esta demanda está parada esperando a liderança aprovar. Você pode escrever aqui embaixo.'
-                    : 'Quem toca esta demanda é o setor responsável. Você acompanha e pode escrever aqui embaixo.'}
+                    ? 'Parada até a liderança aprovar. Se precisar, escreva aqui embaixo.'
+                    : 'Quem toca é o setor responsável. Se precisar, escreva aqui embaixo.'}
               </p>
             ) : null}
             <div className="dm-grade">
-              {acoes.includes('aprovar') ? (
-                <button className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('aprovar')}>Aprovar</button>
-              ) : null}
-              {acoes.includes('rejeitar') ? (
-                <button className="dm-btn dm-perigo" disabled={indo} onClick={() => setAberto('rejeitar')}>Recusar</button>
-              ) : null}
-              {acoes.includes('assumir') ? (
-                <button className="dm-btn dm-pri" disabled={indo} onClick={() => agir('assumir')}>Assumir e começar</button>
-              ) : null}
-              {acoes.includes('concluir') ? (
-                <button className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('concluir')}>Concluir</button>
-              ) : null}
-              {acoes.includes('travar') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('travar')}>Travar</button>
-              ) : null}
-              {acoes.includes('destravar') ? (
-                <button className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('destravar')}>
-                  {v.eu.abriu && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar'}
-                </button>
-              ) : null}
-              {acoes.includes('reabrir') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('reabrir')}>Reabrir</button>
-              ) : null}
-              {acoes.includes('prazo') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('prazo')}>Mudar o prazo</button>
-              ) : null}
-              {acoes.includes('prioridade') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('prioridade')}>Rever a prioridade</button>
-              ) : null}
-              {acoes.includes('redirecionar') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('redirecionar')}>Mandar para outro setor</button>
-              ) : null}
-              {acoes.includes('anexar') ? (
-                <button className="dm-btn" disabled={indo} onClick={() => setAberto('anexar')}>Juntar um anexo</button>
-              ) : null}
-              {acoes.includes('cancelar') ? (
-                <button className="dm-btn dm-perigo" disabled={indo} onClick={() => setAberto('cancelar')}>Cancelar</button>
-              ) : null}
+              {(dobrar ? principais : naGrade).map(botao)}
             </div>
+            {dobrar ? (
+              <details className="dm-mais">
+                <summary>Mais opções</summary>
+                <div className="dm-grade">{outras.map(botao)}</div>
+              </details>
+            ) : null}
           </div>
 
           <div ref={cxForm}>
             <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo}
               fechar={() => setAberto('')} agir={agir} />
           </div>
+          {/* o WhatsApp mora com o que se faz, e não com o que foi pedido:
+              é o passo seguinte a concluir, travar ou responder */}
+          <Recados d={d} base={base} eu={v.eu} />
 
           {/* A DICA MANDAVA MARCAR UMA COISA QUE NÃO HAVIA COMO MARCAR.
 
@@ -556,7 +603,6 @@ function Uma() {
               pediu sem ninguém perceber. */}
           <CaixaDeAcao rot="Escrever alguma coisa" botao="Comentar" salvando={indo}
             teto={tetoDe('comentar')}
-            dica={v.eu.atende ? 'O que for combinação da equipe, marque aqui embaixo: quem pediu não vê.' : undefined}
             extra={v.eu.atende ? (
               /* `dm-caixinha` é o alvo de toque, e ele faltava: a régua de
                  celular media este rótulo em 324×20 e reprovava sete vezes,
@@ -579,7 +625,7 @@ function Uma() {
       {/* --------------------------------------------------------- histórico */}
       <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que já aconteceu</h2>
       <ul className="dm-hist">
-        {eventos.map((e, i) => (
+        {linhas.map((e, i) => (
           <li key={i} className={marco(e.tipo) ? 'dm-marco' : ''}>
             {/* COR SOZINHA NÃO INFORMA — 22/09/2026.
 
@@ -601,7 +647,7 @@ function Uma() {
           </li>
         ))}
       </ul>
-      {eventos.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
+      {linhas.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
       {/* HISTÓRICO CORTADO TEM QUE DIZER QUE FOI CORTADO: a mesma regra, a
           mesma classe e as mesmas palavras do corte da lista em
           `app/demandas/page.tsx:213` ("Mostrando as N… Outras N não
@@ -620,9 +666,6 @@ function Uma() {
         </p>
       ) : null}
 
-      <button className="dm-btn" style={{ marginTop: 'var(--dm-e3)' }} onClick={() => router.push('/demandas')}>
-        Voltar para a lista
-      </button>
     </>
   );
 }
@@ -642,7 +685,14 @@ function frase(e: { tipo: string; de: string | null; para: string | null; quem: 
   switch (e.tipo) {
     case 'abertura':    return `${q} abriu a demanda`;
     case 'status':      return `${q} mudou de ${rotStatus((e.de || 'aberta') as never)} para ${rotStatus((e.para || 'aberta') as never)}`;
-    case 'responsavel': return e.para ? `${q} passou para ${e.para}` : `${q} soltou o responsável`;
+    case 'responsavel':
+      /* assumir grava "Maria" como quem mexeu e "Maria Aparecida
+         Gonçalves da Silva" como o novo responsável, e a linha saía
+         "Maria passou para Maria Aparecida Gonçalves da Silva" — que se
+         lê como defeito. Quando quem mexeu e quem recebeu são a mesma
+         pessoa, o nome do gesto é "assumiu". */
+      if (e.para && e.quem && e.para === e.quem) return `${q} assumiu`;
+      return e.para ? `${q} passou para ${e.para}` : `${q} soltou o responsável`;
     case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
     case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
     case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
@@ -672,9 +722,12 @@ function Recados({ d, base, eu }: {
   if (!zap && !alvo.nome) return null;
   return (
     <div className="dm-card">
-      <h3 style={{ marginBottom: 6 }}>Avisar {alvo.quem}</h3>
-      <p className="dm-peq dm-mudo">O recado já vem escrito, com o link direto desta demanda.</p>
-      <div className="dm-linha">
+      <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Avisar {alvo.quem}</h3>
+      {/* `dm-grade`, e não `dm-linha`: logo acima, a grade de ações ocupa a
+          largura inteira, e aqui os dois botões quebravam de linha com
+          larguras diferentes, encostados à esquerda. Mesmo cartão, mesma
+          borda, mesma largura de botão. */}
+      <div className="dm-grade">
         {zap
           ? <a className="dm-btn dm-zap" href={zap} target="_blank" rel="noopener noreferrer">
               Mandar para {alvo.nome.split(' ')[0]}

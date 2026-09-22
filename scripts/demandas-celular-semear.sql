@@ -52,7 +52,7 @@ begin
     'descricao','Precisamos de uma arte para o feed e para o story, no padrão da igreja.',
     'objetivo','Divulgar o culto de domingo para quem acompanha pelo Instagram.',
     'local','Instagram e grupo do WhatsApp', 'publico','Membros e visitantes',
-    'categoria_id', c_divul, 'prioridade','normal', 'impacto','medio',
+    'categoria_id', c_divul, 'prioridade','normal',
     'prazo', (current_date + 5)::text));
   n1 := (r->>'numero')::int;
 
@@ -62,7 +62,7 @@ begin
     'descricao','As caixas de retorno do palco estão com chiado desde o último domingo, e dois refletores da frente não acendem. Antes da conferência precisamos de uma revisão completa, com troca do que estiver no fim da vida útil e um relatório do que foi feito.',
     'objetivo','Não correr risco de ficar sem som no meio da conferência, que é o maior evento do ano.',
     'local','Templo principal', 'publico','Toda a igreja e os visitantes da conferência',
-    'categoria_id', c_manut, 'prioridade','alta', 'impacto','alto',
+    'categoria_id', c_manut, 'prioridade','alta',
     'prazo', (current_date + 20)::text, 'evento', true,
     'evento_data', (current_date + 30)::text));
   n2 := (r->>'numero')::int;
@@ -73,7 +73,7 @@ begin
     'descricao','As cadeiras atuais estão quebrando. Orçamento já levantado com dois fornecedores.',
     'objetivo','Sala do GUIA Kids segura para as crianças.',
     'local','Sala 2 do GUIA Kids', 'publico','Crianças de 4 a 10 anos',
-    'categoria_id', c_compra, 'prioridade','normal', 'impacto','medio',
+    'categoria_id', c_compra, 'prioridade','normal',
     'prazo', (current_date + 12)::text, 'orcamento', 14750.90));
   n3 := (r->>'numero')::int;
 
@@ -83,7 +83,7 @@ begin
     'descricao','Um corte de 40 segundos com os melhores momentos do último Follow.',
     'objetivo','Puxar mais jovens para o sábado.',
     'local','Instagram', 'publico','Jovens de 15 a 24',
-    'categoria_id', c_divul, 'prioridade','alta', 'impacto','medio',
+    'categoria_id', c_divul, 'prioridade','alta',
     'prazo', (current_date + 3)::text));
   n4 := (r->>'numero')::int;
   perform public.dem_mover(t_com, n4, 'assumir', '{}'::jsonb);
@@ -100,7 +100,7 @@ begin
     'descricao','Um banner grande para a porta.',
     'objetivo','Sinalizar a entrada.',
     'local','Entrada', 'publico','Visitantes',
-    'categoria_id', c_divul, 'prioridade','baixa', 'impacto','baixo',
+    'categoria_id', c_divul, 'prioridade','baixa',
     'sem_prazo_porque','Não tem data fechada ainda, depende da reforma da entrada.'));
   n5 := (r->>'numero')::int;
   perform public.dem_mover(t_com, n5, 'assumir', '{}'::jsonb);
@@ -113,7 +113,7 @@ begin
     'descricao','Três lâmpadas queimadas no corredor da secretaria.',
     'objetivo','Corredor iluminado.',
     'local','Corredor da secretaria', 'publico','Equipe',
-    'categoria_id', c_manut, 'prioridade','normal', 'impacto','baixo',
+    'categoria_id', c_manut, 'prioridade','normal',
     'prazo', (current_date + 5)::text));
   n6 := (r->>'numero')::int;
   /* O PRAZO NASCE NO FUTURO E DEPOIS ANDA PARA TRAS, porque e assim que
@@ -192,7 +192,7 @@ begin
     'descricao','Cem cartoes de visitante para o balcao da recepcao, no papel de sempre.',
     'objetivo','Recepcao com material para o domingo.',
     'local','Recepcao', 'publico','Visitantes',
-    'categoria_id', c_manut, 'prioridade','normal', 'impacto','baixo',
+    'categoria_id', c_manut, 'prioridade','normal',
     'prazo', (current_date + 6)::text));
   n9 := (r->>'numero')::int;
   perform public.dem_mover(t_ges, n9, 'assumir', '{}'::jsonb);
@@ -231,7 +231,7 @@ begin
     'descricao','Um card para o feed agradecendo quem ficou ate o fim no mutirao de sabado.',
     'objetivo','Reconhecer publicamente quem trabalhou.',
     'local','Instagram', 'publico','Igreja toda',
-    'categoria_id', c_divul, 'prioridade','normal', 'impacto','baixo',
+    'categoria_id', c_divul, 'prioridade','normal',
     'prazo', (current_date + 4)::text));
   n10 := (r->>'numero')::int;
   perform public.dem_mover(t_com, n10, 'assumir', '{}'::jsonb);
@@ -245,7 +245,7 @@ begin
     'descricao','Precisa sair antes de domingo para a igreja toda ficar sabendo.',
     'objetivo','Ninguem chegar no horario velho.',
     'local','Instagram e WhatsApp', 'publico','Membros',
-    'categoria_id', c_divul, 'prioridade','alta', 'impacto','medio',
+    'categoria_id', c_divul, 'prioridade','alta',
     'prazo', (current_date + 7)::text));
   n11 := (r->>'numero')::int;
   perform public.dem_mover(t_com, n11, 'assumir', '{}'::jsonb);
@@ -260,7 +260,7 @@ begin
     'descricao','A capa ainda e a da conferencia do ano passado.',
     'objetivo','Canal com a cara certa para quem chega pelo YouTube.',
     'local','YouTube', 'publico','Visitantes',
-    'categoria_id', c_divul, 'prioridade','baixa', 'impacto','baixo',
+    'categoria_id', c_divul, 'prioridade','baixa',
     'prazo', (current_date + 5)::text));
   n12 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 18 where numero = n12;

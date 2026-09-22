@@ -117,7 +117,7 @@ function Gente({ ms, b, indo, salvar }: {
         <h3 style={{ marginBottom: 10 }}>Cadastrar alguém</h3>
         <div className="dm-dupla">
           <Campo rot="Nome"><input value={novo.nome} onChange={e => setNovo(v => ({ ...v, nome: e.target.value }))} /></Campo>
-          <Campo rot="WhatsApp" ajuda="Com DDD. É por onde os avisos saem.">
+          <Campo rot="WhatsApp" ajuda="Com DDD.">
             <input inputMode="tel" value={novo.telefone}
               onChange={e => setNovo(v => ({ ...v, telefone: e.target.value }))} />
           </Campo>
@@ -151,11 +151,17 @@ function Gente({ ms, b, indo, salvar }: {
 
             Sem campo novo e sem tornar obrigatório: quem não tem e-mail
             continua entrando pelo link, e isso segue sendo um cadastro
-            válido. O que muda é o rótulo e a ajuda dizerem o preço ANTES,
-            que é o mesmo remédio que "WhatsApp · É por onde os avisos saem"
-            já usa no campo ao lado. */}
-        <Campo rot="E-mail (é por onde os avisos chegam)"
-          ajuda="Sem e-mail, a pessoa não recebe aviso nenhum: nem de demanda nova no setor dela, nem de resposta na que ela pediu. Serve também para entrar com senha, e aí tem que ser o mesmo e-mail do GUIA Servir. Quem ficar sem entra pelo link pessoal, e só descobre a novidade abrindo o sistema.">
+            válido. O que muda é a ajuda dizer o preço ANTES.
+
+            E O CAMPO AO LADO MENTIA — 22/09/2026. O WhatsApp dizia "É por
+            onde os avisos saem", e desde a migração 90 os avisos saem por
+            E-MAIL (`demandas.avisos`, `app/api/demandas/avisar`). O WhatsApp
+            é por onde o administrador manda o link pessoal, e a ficha usa o
+            número para o botão "Mandar para Fulano". Os dois campos, um
+            embaixo do outro, diziam ser o caminho do aviso. Ficou "Com DDD.",
+            que é a única instrução que a pessoa precisa para preencher. */}
+        <Campo rot="E-mail"
+          ajuda="Sem e-mail, a pessoa não recebe aviso. Para entrar com senha, use o mesmo do GUIA Servir.">
           <input type="email" value={novo.auth_email}
             onChange={e => setNovo(v => ({ ...v, auth_email: e.target.value }))} />
         </Campo>
@@ -169,8 +175,7 @@ function Gente({ ms, b, indo, salvar }: {
 
       <Aviso tom="warn">
         <div>
-          O link pessoal é uma <b>senha</b>: quem tiver o link entra como aquela pessoa.
-          Mande no privado, nunca em grupo.
+          O link pessoal vale como <b>senha</b>. Mande só no privado.
         </div>
       </Aviso>
 

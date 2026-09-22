@@ -252,7 +252,7 @@ function Topo() {
 function Rodape() {
   return (
     <footer className="dm-rodape">
-      GUIA Church · operacional e demandas. Toda demanda tem um setor, um prazo e um responsável.
+      GUIA Church
     </footer>
   );
 }

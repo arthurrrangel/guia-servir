@@ -239,7 +239,7 @@ export default function EntrarNasDemandas() {
       </div>
       <footer className="dm-rodape">
         <div className="dm-peq dm-mudo">
-          GUIA Church · operacional e demandas. Toda demanda tem um setor, um prazo e um responsável.
+          GUIA Church
         </div>
       </footer>
     </div>

@@ -289,6 +289,30 @@
    `min-width:0` devolve a permissão de encolher. As reticências continuam. */
 .dm-grade{display:grid;gap:var(--dm-e2)}
 .dm-grade > *{min-width:0}
+
+/* "MAIS OPÇÕES" — 22/09/2026. O que só ajusta a demanda (prazo, prioridade,
+   setor, anexo, cancelar) sai da grade e fica a um toque. O resumo é um alvo
+   de 44px como qualquer botão, e a seta vira quando abre. */
+.dm-mais{margin-top:var(--dm-e2)}
+.dm-mais > summary{
+  list-style:none;cursor:pointer;user-select:none;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 var(--dm-e3);border-radius:var(--dm-r);
+  color:var(--dm-ink2);font-size:14px;font-weight:550;
+  transition:background var(--dm-t),color var(--dm-t);
+}
+.dm-mais > summary::-webkit-details-marker{display:none}
+.dm-mais > summary::after{
+  content:"";width:6px;height:6px;
+  border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);transition:transform var(--dm-t);
+}
+.dm-mais[open] > summary::after{transform:translateY(2px) rotate(-135deg)}
+.dm-mais > summary:hover{color:var(--dm-ink);background:var(--dm-card2)}
+.dm-mais > .dm-grade{margin-top:var(--dm-e1)}
+
+/* no celular, quem tem o que fazer vê as ações antes do pedido */
+@media (max-width:759px){ .dm-acao-primeiro > :nth-child(2){order:-1} }
 .dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
 .dm-entre > *{min-width:0}
 .dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
@@ -541,7 +565,17 @@
    fatias continuam do mesmo tamanho, e ninguém precisa descobrir que
    aquilo rolava. Vale para as duas tiras desde que a de estado também tem
    quatro. */
-@media (max-width:370px){
+/* E NÃO ERA SÓ EM 320 — 22/09/2026. Medido com as larguras reais:
+
+     320 e 360 ... grade, os quatro inteiros
+     375 e 390 ... trilho, "Todas" CORTADO na borda e a tira rolando
+     412 ....... trilho, inteiro por um fio
+
+   375 e 390 são os dois iPhones mais comuns. O corte acontecia exatamente
+   no celular que mais gente tem, e parecia defeito. Todo celular em pé fica
+   abaixo de 440, então a grade vale até lá, e as duas tiras ganham o mesmo
+   formato em vez de uma inteira e outra cortada. */
+@media (max-width:440px){
   .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
 }
 
