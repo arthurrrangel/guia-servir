@@ -24,7 +24,8 @@ MIGS="50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com-te
       85-o-anexo-nao-era-anexo-era-um-link-sem-dono
       86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada
       87-a-lista-escondia-a-atrasada-e-o-indicador-contava-quem-nao-tinha-prazo
-      88-a-segunda-auditoria-achou-o-que-a-primeira-deixou"
+      88-a-segunda-auditoria-achou-o-que-a-primeira-deixou
+      89-a-terceira-auditoria-e-a-lista-de-invisiveis-que-so-uma-copia-cresceu"
 
 cat > "$S/prep.sql" <<'SQL'
 create schema if not exists extensions;

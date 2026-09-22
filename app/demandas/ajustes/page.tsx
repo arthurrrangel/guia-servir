@@ -165,9 +165,17 @@ function Gente({ ms, b, indo, salvar }: {
                   {m.telefone ? <div className="dm-peq dm-mudo">{m.telefone}</div> : null}
                 </td>
                 <td>
+                  {/* SEM `<option value="">`, O NAVEGADOR MOSTRA O PRIMEIRO.
+
+                      Membro sem setor aparecia exibindo o primeiro setor da
+                      lista, que não é o dele. Quem administra lê a tela e
+                      conclui que o cadastro está certo, e o `SEM_SETOR` que o
+                      servidor devolve na hora de abrir demanda fica sem
+                      explicação. */}
                   <select value={m.setor_id || ''} disabled={indo}
                     onChange={e => salvar('membro', { id: m.id, setor_id: e.target.value })}
                     style={{ maxWidth: 150 }}>
+                    <option value="">— sem setor —</option>
                     {b.setores.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
                   </select>
                 </td>
@@ -289,7 +297,7 @@ function Categorias({ b, indo, salvar }: {
       <div className="dm-card">
         <table className="dm-tab">
           <thead><tr>
-            <th>Categoria</th><th>Vai para</th><th>Aprovação</th><th>Prazo</th>
+            <th>Categoria</th><th>Vai para</th><th>Aprovação</th><th>Orçamento</th><th>Prazo</th>
           </tr></thead>
           <tbody>
             {doGrupo.map(c => (
@@ -299,6 +307,7 @@ function Categorias({ b, indo, salvar }: {
                   <select value={c.setor_id || ''} disabled={indo}
                     onChange={e => salvar('categoria', { id: c.id, setor_id: e.target.value })}
                     style={{ maxWidth: 170 }}>
+                    <option value="">— nenhum —</option>
                     {b.setores.filter(s => s.atende).map(s => (
                       <option key={s.id} value={s.id}>{s.nome}</option>
                     ))}
@@ -309,6 +318,23 @@ function Categorias({ b, indo, salvar }: {
                   <button className="dm-btn dm-peq" disabled={indo}
                     onClick={() => salvar('categoria', { id: c.id, exige_aprovacao: !c.exige_aprovacao })}>
                     {c.exige_aprovacao ? 'Exige' : 'Não exige'}
+                  </button>
+                </td>
+                {/* A COLUNA QUE FALTAVA, E TRES CAMADAS DEPENDIAM DELA — 22/09/2026.
+
+                    `exige_orcamento` existe desde a migração 50, `dem_ajustar`
+                    aceita o campo, `/demandas/nova` exige o valor quando ele
+                    está ligado e a migração 86 passou a cobrar no banco. Esta
+                    tela não tinha controle nenhum: as categorias que exigem
+                    orçamento só podiam ter sido marcadas por SQL direto, e não
+                    havia como desmarcar.
+
+                    O comentário da 86 dizia "a tela de Ajustes deixa ligar".
+                    Não deixava. */}
+                <td>
+                  <button className="dm-btn dm-peq" disabled={indo}
+                    onClick={() => salvar('categoria', { id: c.id, exige_orcamento: !c.exige_orcamento })}>
+                    {c.exige_orcamento ? 'Exige' : 'Não exige'}
                   </button>
                 </td>
                 <td className="dm-n">

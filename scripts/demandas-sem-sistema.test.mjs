@@ -30,6 +30,7 @@
    Este arquivo fecha as duas classes. Roda com `npm test`. */
 
 import { ehSemSistema, ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
+import { recadoDoErro } from '../lib/demandas/regras.ts';
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -90,8 +91,28 @@ const dubleQueResponde = (data) => ({ rpc: async () => ({ data, error: null }) }
   const r2 = await rpcCom(dubleQueFalha({ code: '500', message: 'boom' }), 'dem_quem_sou', {});
   ok(r2.erro === 'REDE', '5xx continua sendo REDE, e não vira "não instalado"', JSON.stringify(r2));
 
+  /* 42501 DEIXOU DE SER `REDE` — 22/09/2026.
+
+     Este caso guardava o comportamento antigo, e o comportamento antigo tinha
+     um buraco: `PORBANCO['REDE']` não existe, então a tradução caía em
+     `humano()` de `lib/erros.ts`, que responde "Você não tem permissão para
+     isso neste MINISTÉRIO" — a palavra das ESCALAS, dentro do sistema de
+     Demandas, que é justamente o que a regra de 21/09 proíbe.
+
+     `SEM_PERMISSAO_DB` já existia em `regras.ts` escrita para bloquear essa
+     frase, e nada nunca produzia o código. Uma chave morta que parece cobrir
+     um buraco é pior do que buraco nenhum.
+
+     O 5xx acima continua `REDE`, e tem que continuar: aquele é de fato um
+     problema de rede, e a frase genérica é a certa. */
   const r3 = await rpcCom(dubleQueFalha({ code: '42501', message: 'permission denied' }), 'dem_lista', {});
-  ok(r3.erro === 'REDE', 'permissão negada continua REDE', JSON.stringify(r3));
+  ok(r3.erro === 'SEM_PERMISSAO_DB', 'permissão negada tem nome próprio e não cai na tabela das escalas',
+     JSON.stringify(r3));
+  /* `\bminist[eé]rio\b` e nao `minist`: a frase certa contem "administra as
+     demandas", e `/minist/` casa dentro de "administra". Um teste que reprova
+     a resposta certa e tao ruim quanto um que aprova a errada. */
+  ok(!/\bminist[eé]rio/i.test(recadoDoErro(r3)),
+     'e a frase que chega na tela não fala em ministério', recadoDoErro(r3));
 
   const r4 = await rpcCom(null, 'dem_quem_sou', {});
   ok(r4.erro === 'SEM_CONFIG', 'sem cliente configurado dá SEM_CONFIG');

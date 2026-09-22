@@ -16,9 +16,9 @@ import Casca from '@/components/demandas/Casca';
 import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Pill } from '@/components/demandas/Ui';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
-  PRIORIDADES, TRAVAS, acoesDe, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
-  dinheiro, linkZap, quando, recado, recadoDoErro, rotPrioridade, rotStatus, rotTrava,
-  situacao, tomPill, tomPrioridade, type Acao,
+  HOJE, PRIORIDADES, TRAVAS, acoesDe, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
+  dinheiro, linkZap, quando, quemManda, recado, recadoDoErro, rotPrioridade, rotStatus,
+  rotTrava, situacao, tetoDe, tomPill, tomPrioridade, type Acao,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
 
@@ -142,12 +142,38 @@ function Uma() {
 
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
-      {/* ---------------------------------------------------- o que acontece */}
-      {d.status === 'travada' ? (
+      {/* ---------------------------------------------------- o que acontece
+
+          O PORTAO NAO TINHA UMA PALAVRA NA TELA — 22/09/2026.
+
+          Este aviso so aparecia com `status === 'travada'`. Quando o
+          administrador liga "exige aprovacao" numa categoria que ja tem
+          demanda andando, o servidor passa a cobrar a aprovacao na hora
+          (`falta_aprovacao`), mas a demanda continua com status `aberta` ate
+          alguem mexer nela. Resultado medido: "Concluir" e "Assumir" somem da
+          grade, a linha "Aprovacao" da tabela tambem some (ela so aparecia com
+          `d.aprovacao` preenchido, e aqui e nulo), e NADA na tela diz por que.
+
+          Agora o portao fala primeiro, em qualquer status, e diz de quem e a
+          vez. */}
+      {d.falta_aprovacao ? (
+        <Aviso tom="warn">
+          <div>
+            <b>Esperando aprovação.</b>{' '}
+            {d.aprovacao === 'pendente'
+              ? 'A liderança precisa decidir antes de esta demanda andar.'
+              : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a liderança decidir.'}
+            {quemManda(v.eu.papel)
+              ? <> Você pode aprovar ou recusar aqui ao lado.</>
+              : <> Quem decide é a liderança; você será avisado aqui mesmo.</>}
+          </div>
+        </Aviso>
+      ) : null}
+      {d.status === 'travada' && !d.falta_aprovacao ? (
         <Aviso tom="warn">
           <div>
             <b>{rotTrava(d.travada_por)}.</b>{d.travada_nota ? ` ${d.travada_nota}` : ''}
-            {d.travada_por === 'informacao' && v.eu.abriu
+            {d.travada_por === 'informacao' && v.eu.abriu && acoes.includes('destravar')
               ? <> Responda aqui embaixo e a demanda volta a andar.</>
               : null}
           </div>
@@ -187,7 +213,11 @@ function Uma() {
                 {d.local ? <Li rot="Onde" v={d.local} /> : null}
                 {d.publico ? <Li rot="Público" v={d.publico} /> : null}
                 {d.orcamento !== null ? <Li rot="Orçamento" v={dinheiro(d.orcamento)} /> : null}
-                {d.aprovacao ? <Li rot="Aprovação" v={`${d.aprovacao}${d.aprovacao_nota ? ` — ${d.aprovacao_nota}` : ''}`} /> : null}
+                {d.aprovacao
+                  ? <Li rot="Aprovação" v={`${d.aprovacao}${d.aprovacao_nota ? ` — ${d.aprovacao_nota}` : ''}`} />
+                  : d.falta_aprovacao
+                    ? <Li rot="Aprovação" v="esperando a liderança decidir" />
+                    : null}
                 <Li rot="Aberta" v={quando(d.criada_em)} />
               </tbody>
             </table>
@@ -221,7 +251,20 @@ function Uma() {
                     <div className="dm-mudo" style={{ fontSize: 12 }}>
                       {a.quem ? `${a.quem} · ` : ''}{dataCurta(a.em)}
                       {a.depois_de_fechar ? <b> · juntado depois de concluída</b> : null}
-                      {v.eu.atende || v.eu.abriu ? (
+                      {/* QUEM PODE TIRAR QUEM DIZ E O SERVIDOR — 22/09/2026.
+
+                          Era `v.eu.atende || v.eu.abriu`, em TODO anexo. Mas o
+                          servidor aceita `pode_atender OR o anexo e meu`: quem
+                          abriu e nao atende so tira o que ele mesmo colou. A
+                          solicitante tocava em "tirar" no boleto que Compras
+                          pregou e lia "Esse anexo nao esta mais aqui, ou nao e
+                          seu para tirar."
+
+                          A tela nao tinha como acertar sozinha: o payload
+                          trazia `quem` (o NOME) e nunca o id. A migracao 89 faz
+                          `dem_ver` decidir por anexo, com a MESMA expressao do
+                          `desanexar`, e aqui so se obedece. */}
+                      {a.posso_tirar ? (
                         <>
                           {' · '}
                           <button className="dm-btn dm-mini" disabled={indo}
@@ -243,6 +286,23 @@ function Uma() {
         <div>
           <div className="dm-card">
             <h3 style={{ marginBottom: 10 }}>O que dá para fazer</h3>
+            {/* O CARTAO RENDERIZAVA VAZIO, SEM UMA PALAVRA — 22/09/2026.
+
+                Doze `{acoes.includes(...) ? <button/> : null}` e nenhum ramo
+                de saida. `comentar` e `desanexar` nao tem botao na grade,
+                entao quem so pode comentar via um cartao com titulo e nada
+                dentro. E nao e caso exotico: `pode_ver` da visao a TODO o
+                setor solicitante, e `pode_atender` nao. Qualquer pessoa do
+                setor que pediu, que nao abriu aquela demanda, caia nisso. */}
+            {acoes.filter(a => a !== 'comentar' && a !== 'desanexar').length === 0 ? (
+              <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
+                {d.status === 'concluida' || d.status === 'cancelada'
+                  ? 'Esta demanda já foi encerrada. Você pode escrever aqui embaixo.'
+                  : d.falta_aprovacao
+                    ? 'Esta demanda está parada esperando a liderança aprovar. Você pode escrever aqui embaixo.'
+                    : 'Quem toca esta demanda é o setor responsável. Você acompanha e pode escrever aqui embaixo.'}
+              </p>
+            ) : null}
             <div className="dm-grade">
               {acoes.includes('aprovar') ? (
                 <button className="dm-btn dm-pri" disabled={indo} onClick={() => setAberto('aprovar')}>Aprovar</button>
@@ -291,6 +351,7 @@ function Uma() {
           </div>
 
           <CaixaDeAcao rot="Escrever alguma coisa" botao="Comentar" salvando={indo}
+            teto={tetoDe('comentar')}
             dica={v.eu.atende ? 'Marque como interno o que for combinação da equipe.' : undefined}
             aoEnviar={t => agir('comentar', { texto: t })} />
         </div>
@@ -385,14 +446,35 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
   const fecha = <button className="dm-btn dm-peq" onClick={fechar}>Deixa pra lá</button>;
 
   if (aberto === 'concluir') {
-    const tarde = !!d.prazo && d.prazo < new Date().toISOString().slice(0, 10);
+    /* `HOJE()` E NAO `toISOString()` — 22/09/2026.
+
+       `new Date().toISOString()` e SEMPRE UTC. Das 21h do Rio a meia-noite a
+       tela pedia motivo de atraso de uma demanda que vence HOJE. O servidor
+       usa `demandas.hoje()`, que e o dia do Rio; `HOJE()` e o mesmo remedio
+       deste lado, e ja estava neste arquivo para outras contas. */
+    const tarde = !!d.prazo && d.prazo < HOJE();
+    /* "OPCIONAL" ERA MENTIRA, E RECUSAVA TODA CONCLUSAO ATRASADA.
+
+       `supabase/86` recusa concluir sem `atraso` quando o prazo ja passou:
+       `ATRASO_PRECISA_MOTIVO`. O campo aparecia JUSTAMENTE porque a demanda
+       esta atrasada, dizia "Opcional", e o botao ficava habilitado so com a
+       conclusao preenchida. Toda conclusao atrasada era recusada uma vez.
+
+       O "Deixa pra la" tambem sumia quando `tarde`, porque o `extra` e um so:
+       era ou o campo ou o botao de fechar. Agora sao os dois. */
     return (
-      <CaixaDeAcao rot="O que foi feito" botao="Concluir" salvando={indo}
+      <CaixaDeAcao rot="O que foi feito" botao="Concluir" salvando={indo} teto={tetoDe('concluir')}
         dica="A conclusão precisa dizer o que foi realizado. É o que quem pediu vai ler."
+        podeEnviar={!tarde || !!atraso.trim()}
         extra={tarde ? (
-          <Campo rot="Por que atrasou" ajuda="Opcional, e é o que faz o relatório de atrasos servir para alguma coisa.">
-            <input value={atraso} onChange={e => setAtraso(e.target.value)} />
-          </Campo>
+          <>
+            <Campo rot="Por que atrasou"
+              ajuda="Obrigatório: esta demanda passou do prazo, e o servidor não conclui sem isto.">
+              <input value={atraso} maxLength={tetoDe('atraso')}
+                onChange={e => setAtraso(e.target.value)} />
+            </Campo>
+            {fecha}
+          </>
         ) : fecha}
         aoEnviar={t => agir('concluir', { texto: t, atraso })} />
     );
@@ -400,12 +482,23 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
   if (aberto === 'travar') {
     return (
       <div className="dm-card">
+        {/* O SELETOR OFERECIA UMA TRAVA QUE O SERVIDOR RECUSA — 22/09/2026.
+
+            `supabase/85` recusa `motivo = 'aprovacao'` quando a demanda JA foi
+            aprovada e quem pede nao e lideranca: `SO_GESTOR_REABRE_APROVACAO`.
+            Estado normalissimo — demanda aprovada, em execucao, quem atende
+            quer devolver para a lideranca. `acoesDe` nao tem como cobrir, ela
+            decide por ACAO e nunca por motivo. Quem cobre e o seletor. */}
         <Campo rot="Por que está travada">
           <select value={motivo} onChange={e => setMotivo(e.target.value as never)}>
-            {TRAVAS.map(t => <option key={t.v} value={t.v}>{t.rot}</option>)}
+            {TRAVAS.filter(t => t.v !== 'aprovacao'
+                             || d.aprovacao !== 'aprovada'
+                             || quemManda(eu.papel))
+                   .map(t => <option key={t.v} value={t.v}>{t.rot}</option>)}
           </select>
         </Campo>
         <CaixaDeAcao rot="O que falta, exatamente" botao="Travar" salvando={indo}
+          teto={tetoDe('travar')}
           dica="Quem pediu vai ler isto. Seja específico: “qual sala?” resolve; “falta informação” não."
           extra={fecha}
           aoEnviar={t => agir('travar', { motivo, texto: t })} />
@@ -415,48 +508,74 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
   if (aberto === 'destravar') {
     return (
       <CaixaDeAcao rot={eu.abriu ? 'A sua resposta' : 'O que destravou'} botao="Destravar"
-        salvando={indo} exigeTexto={false} extra={fecha}
+        salvando={indo} exigeTexto={false} extra={fecha} teto={tetoDe('destravar')}
         aoEnviar={t => agir('destravar', { texto: t })} />
     );
   }
   if (aberto === 'cancelar') {
     return (
-      <CaixaDeAcao rot="Por que cancelar" botao="Cancelar a demanda" tom="perigo" salvando={indo}
+      <CaixaDeAcao rot="Por que cancelar" botao="Cancelar a demanda" tom="perigo" salvando={indo} teto={tetoDe('cancelar')}
         dica="Fica no histórico. Cancelar sem motivo é perder a informação de por que não foi feito."
         extra={fecha} aoEnviar={t => agir('cancelar', { texto: t })} />
     );
   }
   if (aberto === 'reabrir') {
     return (
-      <CaixaDeAcao rot="O que não ficou resolvido" botao="Reabrir" salvando={indo}
+      <CaixaDeAcao rot="O que não ficou resolvido" botao="Reabrir" salvando={indo} teto={tetoDe('reabrir')}
         dica="A demanda volta para execução com o histórico inteiro." extra={fecha}
         aoEnviar={t => agir('reabrir', { texto: t })} />
     );
   }
   if (aberto === 'aprovar') {
     return (
-      <CaixaDeAcao rot="Observação da aprovação" botao="Aprovar" salvando={indo} exigeTexto={false}
+      <CaixaDeAcao rot="Observação da aprovação" botao="Aprovar" salvando={indo} exigeTexto={false} teto={tetoDe('aprovar')}
         dica="Depois disto o setor responsável pode começar." extra={fecha}
         aoEnviar={t => agir('aprovar', { texto: t })} />
     );
   }
   if (aberto === 'rejeitar') {
     return (
-      <CaixaDeAcao rot="Por que não aprovar" botao="Recusar" tom="perigo" salvando={indo}
+      <CaixaDeAcao rot="Por que não aprovar" botao="Recusar" tom="perigo" salvando={indo} teto={tetoDe('rejeitar')}
         dica="A demanda é encerrada com este motivo, e quem pediu lê." extra={fecha}
         aoEnviar={t => agir('rejeitar', { texto: t })} />
     );
   }
   if (aberto === 'prazo') {
+    /* BECO SEM SAIDA GARANTIDO — 22/09/2026.
+
+       `supabase/86` recusa tirar o prazo sem motivo: `SEM_PRAZO_PRECISA_MOTIVO`,
+       que a tela traduz como "Para tirar o prazo, diga por que". So que aqui
+       nao havia NENHUM campo de texto, entao nao havia onde dizer.
+
+       E nao era caso de borda: `prazo` nasce com `d.prazo || ''`, entao numa
+       demanda SEM prazo bastava abrir o formulario e tocar em Gravar, sem ter
+       mexido em nada, para cair no erro sem saida.
+
+       `/demandas/nova` ja tinha o par "Nao tenho data" + "Por que nao tem
+       data". Esta tela nao tinha recebido o par. */
+    const tirando = !prazo;
     return (
       <div className="dm-card">
-        <Campo rot="Novo prazo">
+        <Campo rot="Novo prazo"
+          ajuda="Deixe em branco para tirar a data. O registro retroativo é aceito: data no passado vale.">
+          {/* SEM `min`: a 89 deixou registrado por que. O servidor aceita data
+              no passado DE PROPOSITO ("a lampada queimou semana passada, poe
+              ai"), e no seletor nativo do celular a roda nao desce abaixo do
+              `min` — nao existe "digitar". */}
           <input type="date" value={prazo} onChange={e => setPrazo(e.target.value)} />
         </Campo>
-        <div className="dm-linha">
-          <button className="dm-btn dm-pri dm-cresce" disabled={indo} onClick={() => agir('prazo', { prazo })}>Gravar</button>
-          {fecha}
-        </div>
+        {tirando ? (
+          <CaixaDeAcao rot="Por que fica sem data" botao="Gravar sem data" salvando={indo}
+            teto={tetoDe('sem_prazo')} extra={fecha}
+            dica="“Não sei quando” serve. O que não serve é sumir com a data sem dizer nada."
+            aoEnviar={t => agir('prazo', { prazo: '', texto: t })} />
+        ) : (
+          <div className="dm-linha">
+            <button className="dm-btn dm-pri dm-cresce" disabled={indo}
+              onClick={() => agir('prazo', { prazo })}>Gravar</button>
+            {fecha}
+          </div>
+        )}
       </div>
     );
   }
@@ -470,6 +589,7 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
         </Campo>
         {prio === 'urgente' ? (
           <CaixaDeAcao rot="O que acontece se não for feito" botao="Gravar" salvando={indo} extra={fecha}
+            teto={tetoDe('prioridade')}
             aoEnviar={t => agir('prioridade', { prioridade: prio, texto: t })} />
         ) : (
           <div className="dm-linha">

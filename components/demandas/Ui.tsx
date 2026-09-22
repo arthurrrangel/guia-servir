@@ -112,10 +112,17 @@ export function Vazio({ titulo, children }: { titulo: string; children?: React.R
    O botão só liga quando há texto, porque o banco vai recusar vazio de
    qualquer jeito e é melhor a pessoa ver isso antes de tocar. */
 export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando, aoEnviar, extra,
-                             teto = 4000 }: {
+                             teto = 4000, podeEnviar = true }: {
   rot: string; dica?: string; botao: string;
   tom?: 'pri' | 'perigo'; exigeTexto?: boolean; salvando?: boolean;
   aoEnviar: (texto: string) => void; extra?: React.ReactNode; teto?: number;
+  /* O BOTAO SO OLHAVA O TEXTAREA, E HAVIA CAMPO OBRIGATORIO FORA DELE.
+
+     "Concluir" numa demanda atrasada precisa do motivo do atraso, que mora no
+     `extra`. O botao ficava habilitado so com a conclusao preenchida, a pessoa
+     tocava, e o servidor recusava com ATRASO_PRECISA_MOTIVO. Quem monta a
+     caixa sabe o que mais e obrigatorio; esta porta e para ele dizer. */
+  podeEnviar?: boolean;
 }) {
   const [t, setT] = useState('');
   /* O TETO NAO E ZELO, E O QUE IMPEDE A FICHA DE FICAR PESADA PARA SEMPRE.
@@ -140,7 +147,8 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
         ? <div className="dm-peq dm-mudo" role="status">{sobra} letra{sobra === 1 ? '' : 's'} restante{sobra === 1 ? '' : 's'}</div>
         : null}
       {extra}
-      <button className={`dm-btn dm-${tom || 'pri'} dm-larga`} disabled={salvando || (exigeTexto && !t.trim())}
+      <button className={`dm-btn dm-${tom || 'pri'} dm-larga`}
+        disabled={salvando || !podeEnviar || (exigeTexto && !t.trim())}
         onClick={() => { aoEnviar(t.trim()); setT(''); }}>
         {salvando ? 'Salvando…' : botao}
       </button>

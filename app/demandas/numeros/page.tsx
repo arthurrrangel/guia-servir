@@ -9,10 +9,10 @@
    escrito ao lado — é o que se lê no celular sem apertar os olhos. */
 
 import { useCallback, useEffect, useState } from 'react';
-import Casca from '@/components/demandas/Casca';
+import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { numeros } from '@/lib/demandas/api';
-import { horas, recadoDoErro, somaDias } from '@/lib/demandas/regras';
+import { HOJE, horas, recadoDoErro, somaDias } from '@/lib/demandas/regras';
 import type { Numeros } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
@@ -22,19 +22,48 @@ export default function Pagina() {
 type Janela = '30' | '90' | '365';
 
 function Painel() {
+  /* A GUARDA DE PAPEL QUE ESTA TELA NAO TINHA — 22/09/2026.
+
+     A aba "Números" só aparece para quem não é `solicitante` (ver `ABAS` em
+     `Casca.tsx`), mas esconder a aba não protege a rota: bastava digitar
+     `/demandas/numeros`. O servidor recusa com `SEM_PERMISSAO`, e a pessoa
+     lia um erro vermelho em vez de uma frase. `/demandas/ajustes` já tinha a
+     guarda; esta não recebeu.
+
+     Continua sendo o servidor quem decide — isto aqui é só a frase educada
+     para quem chegou onde não devia. */
+  const { eu } = useEu();
   const [n, setN] = useState<Numeros | null>(null);
   const [erro, setErro] = useState('');
   const [janela, setJanela] = useState<Janela>('90');
 
   const buscar = useCallback(async () => {
     setN(null);
-    const hoje = new Date().toISOString().slice(0, 10);
+    /* `HOJE()` E NAO `toISOString()` — 22/09/2026.
+
+       `toISOString()` e SEMPRE UTC. Das 21h do Rio a meia-noite esta tela
+       PEDIA e IMPRIMIA um periodo que termina amanha, enquanto o servidor
+       recorta pelo dia do Rio. O arquivo ja importava `somaDias` e `horas`
+       daqui; faltava `HOJE`, que existe para isto desde 20/09. */
+    const hoje = HOJE();
     const r = await numeros(somaDias(hoje, -Number(janela)), hoje);
     if (!r.ok) { setErro(recadoDoErro(r, 'carregar os números')); return; }
     setErro(''); setN(r.numeros);
   }, [janela]);
 
   useEffect(() => { buscar(); }, [buscar]);
+
+  if (eu && eu.papel === 'solicitante') {
+    return (
+      <>
+        <div className="dm-rot">{'>'} números</div>
+        <Aviso tom="info">
+          Esta tela mostra os números de todos os setores, e por isso é de quem coordena.
+          As suas demandas estão em <b>Demandas</b>.
+        </Aviso>
+      </>
+    );
+  }
 
   /* O ERRO NÃO PODE ENGOLIR O ÚNICO CONTROLE DA TELA — 20/09/2026.
 

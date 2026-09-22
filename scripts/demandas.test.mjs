@@ -109,11 +109,28 @@ function servidorAceita(acao, d, eu) {
     /* 85 · ERA `return true`, ou seja, todo mundo do setor. Medido: uma
        solicitante rasa pregou um "boleto atualizado.pdf" numa compra alheia.
        O servidor exige o mesmo par que `destravar` já exigia. */
-    case 'anexar':
+    case 'anexar':      return eu.atende || eu.abriu;
+    /* `desanexar` NAO E `anexar` — 22/09/2026.
+       O servidor e `pode_atender(m,d) OR a.membro_id = m.id`: quem abriu e
+       nao atende so tira o que ELE colou. Este modelo dizia `atende || abriu`
+       para as duas, entao ele CONCORDAVA com o defeito da tela e a suite
+       passava verde sobre um botao que o banco recusa.
+
+       Aqui `desanexar` significa "o botao pode aparecer em algum anexo desta
+       ficha", que e verdade para quem abriu (nos anexos dele). Quem decide
+       anexo a anexo e o `posso_tirar` que a migracao 89 poe em `dem_ver`. */
     case 'desanexar':   return eu.atende || eu.abriu;
-    /* 86 · a guarda de dono. `!d.responsavel` no modelo é o que o servidor
-       faz com `d.responsavel_id is not null and <> m.id`. */
-    case 'assumir':     return eu.atende && !pendente && !d.responsavel;
+    /* 86 · a guarda de dono, e ela e sobre OUTRA pessoa.
+
+       Isto dizia `!d.responsavel`, ou seja "recusa quando ha dono". O servidor
+       recusa quando o dono e OUTRO: `d.responsavel_id is not null and <> m.id`.
+       A propria conferencia da 86 prova que reassumir a PROPRIA demanda e
+       aceito. E a matriz nunca punha `responsavel_id` no caso nem `id` em
+       `eu`, entao a guarda `JA_TEM_DONO` de `acoesDe` nunca era exercitada:
+       apagar a linha dela do `regras.ts` NAO reprovava a suite. Medido em
+       22/09/2026. */
+    case 'assumir':     return eu.atende && !pendente
+                            && !(d.responsavel_id && eu.id && d.responsavel_id !== eu.id);
     case 'travar':      return eu.atende;
     /* sem `travada_por` na condicao: o servidor le so o portao (67) */
     case 'destravar':   return (eu.atende || eu.abriu) && d.status === 'travada' && !pendente;
@@ -156,8 +173,17 @@ function servidorAceita(acao, d, eu) {
               if (status !== 'travada' && travada_por !== null) continue;   // estado impossível
               if (status === 'travada' && travada_por === null) continue;
               if (papel === 'solicitante' && atende) continue;              // solicitante não atende
-              const d = { status, travada_por, aprovacao, falta_aprovacao, responsavel: null };
-              const eu = { papel, atende, abriu };
+              /* DONO E IDENTIDADE ENTRARAM NA VARREDURA — 22/09/2026.
+
+                 A matriz montava `responsavel: null` e um `eu` sem `id`. Com
+                 isso `deOutraPessoa` em `acoesDe` era sempre falso e a guarda
+                 de dono nunca rodava em caso nenhum dos 784. Tres donos
+                 possiveis: ninguem, eu, outra pessoa. */
+              for (const dono of [null, 'eu-1', 'outra-2']) {
+              const d = { status, travada_por, aprovacao, falta_aprovacao,
+                          responsavel: dono ? 'Alguem' : null,
+                          responsavel_id: dono === 'eu-1' ? 'eu-1' : dono };
+              const eu = { papel, atende, abriu, id: 'eu-1' };
               const dadas = acoesDe(d, eu);
               casos++;
               for (const a of dadas) {
@@ -204,12 +230,16 @@ function servidorAceita(acao, d, eu) {
                   console.log('  ação fora do vocabulário:', a);
                 }
               }
+              }
             }
-  /* 392 = 4 papéis x atende x abriu x os estados possíveis, tirando os
-     impossíveis (travada sem motivo, motivo sem travada, solicitante que
-     atende). O número está fixo de propósito: se ele mudar, alguém mexeu na
-     matriz e tem que olhar por quê. */
-  ok(casos === 784, 'a matriz cobre a combinação inteira', 'casos=' + casos);
+  /* 4 papéis x atende x abriu x estados possíveis x veredito x TRÊS DONOS
+     (ninguém, eu, outra pessoa), tirando os impossíveis: travada sem motivo,
+     motivo sem travada, solicitante que atende.
+
+     Era 784 antes de 22/09/2026, quando o dono entrou na varredura. O número
+     está fixo de propósito: se ele mudar, alguém mexeu na matriz e tem que
+     olhar por quê. */
+  ok(casos === 2352, 'a matriz cobre a combinação inteira', 'casos=' + casos);
   ok(oferecidasDemais === 0, 'nenhum botão oferecido que o servidor recusa', 'sobras=' + oferecidasDemais);
   if (escondidas) exemplos.forEach(e => console.log('  botão que o servidor aceita e a tela esconde:', e));
   ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os três combinados',

@@ -17,6 +17,27 @@ ARQ = glob.glob(f'{RAIZ}/supabase/{N}-*.sql')[0]
 CONF = f'{S}/conf{N}.sql'
 
 src = open(ARQ, encoding='utf-8').read()
+
+# O EXTRATOR PEGAVA O PRIMEIRO `$conf$` E CALAVA SOBRE O RESTO — 22/09/2026.
+#
+# A 89 nasceu com DOIS blocos `do $conf$`: um pequeno, que so confere se a
+# classe de invisiveis e um regex valido, e o grande, com os onze casos. O
+# `index()` pegou o pequeno. Resultado: as 27 sabotagens "passaram", porque
+# nenhuma delas mexe no que o bloco pequeno mede, e a saida dizia
+#
+#   SABOTAGENS DA 89: 27 falha(s).
+#
+# o que, lido rapido, parece a bateria acusando — e era a bateria medindo a
+# coisa errada. Um extrator que escolhe em silencio entre duas possibilidades
+# e a mesma familia de defeito que esta bateria existe para achar.
+#
+# Agora ele recusa. Se houver mais de um, o arquivo diz qual e a conferencia
+# usando outra etiqueta para os blocos auxiliares.
+if src.count('do $conf$') != 1:
+    print(f'O ARQUIVO {N} TEM {src.count("do $conf$")} BLOCOS `do $conf$`.')
+    print('A bateria nao escolhe: renomeie a etiqueta dos blocos auxiliares')
+    print('(por exemplo `do $classe$`) e deixe `$conf$` so na conferencia.')
+    sys.exit(2)
 i = src.index('do $conf$'); j = src.index('end $conf$;') + len('end $conf$;')
 open(CONF, 'w', encoding='utf-8').write(src[i:j] + '\n')
 

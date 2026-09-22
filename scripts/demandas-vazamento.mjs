@@ -39,7 +39,21 @@
    Roda com `node scripts/demandas-vazamento.mjs`. */
 
 import { chromium } from 'playwright';
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+
+/* A ROTA ESTAVA ESCRITA À MÃO, E MEDIA A TELA DE "NÃO EXISTE" — 22/09/2026.
+
+   Este arquivo pedia `/demandas/d/4`. As conferências das migrações queimam
+   números da sequência a cada aplicação, e a semente hoje começa no 40: a
+   demanda 4 não existe, a página responde "essa demanda não existe", e o
+   caso do chevron media um `h3` que não estava lá — quando estava, porque
+   agora nem isso.
+
+   `demandas-celular.mjs` já tinha recebido esse conserto em 21/09, lendo os
+   números reais do arquivo que a semente escreve. Este irmão não recebeu, e
+   ficou verde medindo nada. Instrumento que não acusa é pior que instrumento
+   que falta, porque ninguém vai procurar. */
+const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
 
 const BASE = process.env.BASE || 'http://127.0.0.1:3400';
 
@@ -89,7 +103,7 @@ const ESPERADO = [
   { rota: '/demandas/nova', onde: '.dm-campo textarea', prop: 'fontSize', minimo: 16, por: 'textarea com 16px ou mais' },
 
   // títulos: o chevron do globals não entra
-  { rota: '/demandas/d/4',  onde: '.dm h3', pseudo: '::before', prop: 'content', vale: 'none', por: 'h3 sem o chevron do outro sistema' },
+  { rota: `/demandas/d/${N.execucao}`, onde: '.dm h3', pseudo: '::before', prop: 'content', vale: 'none', por: 'h3 sem o chevron do outro sistema' },
 
   // a logo continua branca no preto (o defeito de 18/09, agora com trava)
   { rota: '/demandas',      onde: '.dm-logo', prop: 'color', vale: 'rgb(255, 255, 255)', por: 'logo legível' },

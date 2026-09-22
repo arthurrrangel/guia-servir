@@ -108,10 +108,30 @@ export type EstadoDoPDF =
 
 export function comoOPdfChama(d: {
   status: Status; travada_por?: Trava | null; aprovacao?: Aprovacao;
+  falta_aprovacao?: boolean;
   responsavel?: string | null; reaberturas?: number;
 }): EstadoDoPDF {
   if (d.status === 'cancelada') return 'Cancelada';
   if (d.status === 'concluida') return 'Concluída';
+  /* A PÍLULA LIA A COLUNA ENQUANTO `acoesDe` JÁ LIA O VEREDITO — 22/09/2026.
+
+     A migração 88 fez o servidor devolver `falta_aprovacao`, e `acoesDe`
+     passou a usá-lo. Esta função ficou para trás, e o resultado medido é o
+     pior dos dois mundos: com a categoria passando a exigir aprovação depois
+     que a demanda nasceu, `acoesDe` (certo) tira "Concluir" e "Assumir", e a
+     pílula (errada) continua escrita "Aberta".
+
+       quem atende  -> grade sem Concluir, sem Assumir, pílula "Aberta"
+       gestor       -> grade com "Aprovar",            pílula "Aberta"
+
+     A demanda congela e a tela não tem uma palavra sobre o porquê. Tirar o
+     botão certo sem dizer o motivo não é meio conserto: é o mesmo defeito
+     com outra cara, porque a pessoa conclui que o sistema quebrou.
+
+     Vem ANTES do teste de `travada` de propósito: o portão é o fato mais
+     importante sobre a demanda enquanto estiver fechado, qualquer que seja o
+     rótulo da trava. */
+  if (d.falta_aprovacao) return 'Aguardando aprovação';
   if (d.status === 'travada') {
     if (d.travada_por === 'aprovacao') return 'Aguardando aprovação';
     if (d.travada_por === 'terceiros') return 'Aguardando terceiros';
@@ -493,7 +513,6 @@ const PORBANCO: Record<string, string> = {
   PRAZO_INVALIDO: 'Essa data não existe. Use o seletor de data.',
   SEM_PRAZO_PRECISA_MOTIVO: 'Para tirar o prazo, diga por quê. "Não sei quando" serve.',
   ATRASO_PRECISA_MOTIVO: 'Esta demanda passou do prazo. Diga o que atrasou antes de concluir.',
-  PRAZO_NO_PASSADO: 'Essa data já passou. A demanda nasceria atrasada.',
   EVENTO_DATA_INVALIDA: 'Essa data de evento não existe.',
   ORCAMENTO_OBRIGATORIO: 'Esta categoria precisa de um valor estimado.',
   ORCAMENTO_INVALIDO: 'Escreva só o valor, em números. Exemplo: 1234,56.',
@@ -502,7 +521,6 @@ const PORBANCO: Record<string, string> = {
   ANEXO_NAO_ENCONTRADO: 'Esse anexo não está mais aqui, ou não é seu para tirar.',
   SETOR_INVALIDO: 'Escolha um setor da lista.',
   ABA_INVALIDA: 'Essa aba não existe.',
-  CURSOR_INVALIDO: 'Perdi o lugar da lista. Recarregue a página.',
   FILTRO_INVALIDO: 'Um dos filtros veio errado. Recarregue a página.',
   LIMITE_INVALIDO: 'Não entendi quantas linhas mostrar.',
   /* ---- migração 88 ---------------------------------------------------- */
@@ -542,10 +560,56 @@ const PORCHECK: [RegExp, string][] = [
   [/anexos_url_ck/,             'Esse link não serve como anexo: precisa começar com https:// e apontar para um site.'],
   [/anexos_nome_tam_ck/,        'O nome do anexo precisa ter até 200 letras.'],
   [/ck_orcamento/,              'O valor não pode ser negativo.'],
+  /* 19/09 esta lista tinha DUAS linhas e um coringa, e o coringa comia nove
+     restrições: `cancelada_motivo`, `travada_nota`, `impacto`, `objetivo`,
+     `local`, `publico`, `sem_prazo_porque`, `atraso_motivo` e
+     `aprovacao_nota`. Todas caíam em "Esse texto ficou longo demais para o
+     campo." — sem dizer QUAL campo nem QUANTO cabe, que é a queixa que o
+     comentário logo acima diz ter consertado. Cada uma tem nome e número
+     agora, e o número é o da CHECK, conferido contra o catálogo. */
   [/ck_tam_texto/,              'Esse texto passou de 4 mil letras. Resuma, ou anexe o arquivo por link.'],
   [/ck_tam_conclusao/,          'A conclusão passou de 4 mil letras.'],
+  [/ck_tam_objetivo/,           'O objetivo passou de 4 mil letras.'],
+  [/ck_tam_travada_nota/,       'O motivo da trava passou de 2 mil letras.'],
+  [/ck_tam_cancelada_motivo/,   'O motivo do cancelamento passou de 2 mil letras.'],
+  [/ck_tam_aprovacao_nota/,     'O recado da aprovação passou de 2 mil letras.'],
+  [/ck_tam_atraso_motivo/,      'O motivo do atraso passou de 2 mil letras.'],
+  [/ck_tam_impacto/,            'O que acontece se não for feito passou de 2 mil letras.'],
+  [/ck_tam_sem_prazo_porque/,   'O porquê de não ter data passou de 500 letras.'],
+  [/ck_tam_local/,              'O local passou de 200 letras.'],
+  [/ck_tam_publico/,            'O público passou de 200 letras.'],
   [/ck_tam_/,                   'Esse texto ficou longo demais para o campo.'],
+  /* `ck_aprovacao` não tinha linha, e por isso um valor inválido de aprovação
+     virava "Falta alguma coisa obrigatória nesta demanda", que é a frase de
+     OUTRA coisa. */
+  [/ck_aprovacao/,              'Esse valor de aprovação não existe.'],
 ];
+
+/* ------------------------------------------------- o teto de cada caixa
+
+   O CONTADOR PROMETIA 4000 EM QUATRO DAS SETE CAIXAS — 22/09/2026.
+
+   `CaixaDeAcao` nasceu com `teto = 4000` e NENHUMA das sete chamadas passava
+   o valor. Só que as colunas de destino não são todas de 4000: medido no
+   catálogo, `travada_nota`, `cancelada_motivo`, `aprovacao_nota`, `impacto`
+   e `atraso_motivo` são 2000, e `sem_prazo_porque` é 500.
+
+   Entre 2001 e 4000 letras o navegador deixava digitar, o contador dizia que
+   ainda sobrava, e o banco devolvia `check_violation`. Isto é exatamente o
+   defeito que o comentário acima conta ter matado em 19/09 do outro lado.
+
+   `rejeitar` é o menor de todos: o texto vai para `aprovacao_nota` (2000) E,
+   prefixado com "Aprovação recusada: ", para `cancelada_motivo` (2000). O
+   prefixo tem 20 letras, então o teto real é 1980. */
+export const TETO: Record<string, number> = {
+  comentar: 4000, concluir: 4000, destravar: 4000, reabrir: 4000,
+  travar: 2000, cancelar: 2000, aprovar: 2000,
+  rejeitar: 2000 - 'Aprovação recusada: '.length,
+  prioridade: 2000, atraso: 2000, sem_prazo: 500,
+};
+
+/** O teto da caixa de uma ação. 4000 é o padrão das colunas de texto longo. */
+export const tetoDe = (acao: string) => TETO[acao] ?? 4000;
 
 /* O `ok?` na assinatura não é decoração. Sem ele, o tipo é "fraco" para o
    TypeScript — todas as propriedades opcionais — e passar a resposta INTEIRA

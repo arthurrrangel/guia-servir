@@ -161,8 +161,19 @@ function Resumão({ itens, eu }: { itens: Resumo[]; eu: Eu }) {
      sobre quatro demandas encerradas — e nenhuma delas abre, porque
      `JA_FECHADA` barra `aprovar` e `rejeitar` em demanda fechada, com razão.
      Um contador que nunca zera é um contador que ensina a ignorar o painel. */
+  /* E CONTAVA A COLUNA, NAO O VEREDITO — 22/09/2026.
+
+     `aprovacao === 'pendente'` e o que foi gravado quando a demanda nasceu. O
+     servidor cobra `falta_aprovacao`, que le a categoria AGORA. Quando o
+     administrador liga "exige aprovacao" numa categoria que ja tem demanda
+     andando, o servidor cobra a aprovacao e este numero diz ZERO: o gestor so
+     descobre abrindo ficha por ficha. E o mesmo defeito da pilula de estado,
+     no outro sentido — la a tela mostrava demais, aqui de menos.
+
+     O `??` cobre carga antiga que ainda nao traga o campo. */
   const esperando = itens.filter(d =>
-    d.aprovacao === 'pendente' && d.status !== 'concluida' && d.status !== 'cancelada').length;
+    (d.falta_aprovacao ?? (d.aprovacao === 'pendente'))
+    && d.status !== 'concluida' && d.status !== 'cancelada').length;
   const manda = quemManda(eu.papel);
   if (!atrasadas && !paradas && !(esperando && manda)) return null;
   const partes: string[] = [];

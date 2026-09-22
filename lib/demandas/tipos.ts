@@ -82,6 +82,17 @@ export type Evento = {
 export type Anexo = {
   id: string; nome: string; url: string; em: string;
   quem: string | null; depois_de_fechar: boolean;
+  /* QUEM PODE TIRAR, DECIDIDO PELO SERVIDOR — migração 89.
+
+     `desanexar` aceita `pode_atender(m,d) OR o anexo é meu`. A tela oferecia
+     "tirar" em TODO anexo para quem atende ou quem abriu, e não tinha como
+     acertar: o payload trazia `quem` (o NOME) e nunca o `membro_id`. Medido, a
+     solicitante tocava em "tirar" no boleto que Compras pregou e lia "Esse
+     anexo não está mais aqui, ou não é seu para tirar."
+
+     `dem_ver` passa a decidir por anexo, com a MESMA expressão do `desanexar`.
+     A regra mora num lugar só, e é do lado que manda. */
+  posso_tirar: boolean;
 };
 
 export type Vista = {

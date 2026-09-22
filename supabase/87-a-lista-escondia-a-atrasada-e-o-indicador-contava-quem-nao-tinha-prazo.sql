@@ -554,7 +554,23 @@ begin
      NULO, o `if` nao dispara, e o bloco 7 passava sem medir nada. Foi trocar
      por `is distinct from` para o teste falar. Dois bugs meus no mesmo lugar,
      e o segundo escondia o primeiro. */
-  r := public.dem_numeros('conf87-ana', demandas.hoje() - 30, demandas.hoje())->'numeros';
+  /* `+ 1` NO TETO, E NAO E FOLGA: E O PROPRIO DEFEITO QUE A 88 CONSERTOU,
+     DENTRO DESTE TESTE — achado em 22/09/2026, as 21:04 do Rio.
+
+     Quando esta conferencia roda, a 88 ainda nao entrou: `dem_numeros` ainda
+     recorta por `criada_em::date`, que e o dia do FUSO DA SESSAO. Entre as
+     21h do Rio e a meia-noite, `now()` ja e o dia seguinte em UTC, entao a
+     demanda que este bloco acabou de abrir cai FORA de uma janela que
+     termina em `demandas.hoje()`. A base fica vazia, `no_prazo_base` diz 0 e
+     o bloco 7 reprova — 3 horas por dia, todo dia, sem nada de errado no
+     sistema.
+
+     Este bloco mede o indicador, nao a fronteira do dia. O teto vai para
+     `hoje() + 1` para que ele meça o que se propôs a medir em qualquer hora.
+     Quem mede a fronteira e o bloco 4 daqui, que compara `demandas.hoje()`
+     com o dia do Rio, e a conferencia da 88, que compara dois fusos a 26
+     horas de distancia. */
+  r := public.dem_numeros('conf87-ana', demandas.hoje() - 30, demandas.hoje() + 1)->'numeros';
   if r is null then
     falhas := falhas || '7: dem_numeros nao devolveu `numeros`; o bloco 7 nao mede nada'::text;
   end if;

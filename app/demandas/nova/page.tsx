@@ -205,20 +205,30 @@ function Nova() {
         {!semData ? (
           <Campo rot="Para quando"
             ajuda={cat?.prazo_padrao_dias ? `${setorDaCat} costuma levar ${cat.prazo_padrao_dias} dias.` : undefined}>
-            {/* `min` AQUI, E NÃO UMA GUARDA NO SERVIDOR.
+            {/* O `min` SAIU: NO CELULAR ELE NÃO ERA UM AVISO, ERA UMA PORTA
+                TRANCADA — 22/09/2026.
 
-                A migração 86 pôs uma recusa de prazo no passado no banco, e a
-                88 tirou: o repositório já tinha decidido o contrário, por
-                escrito, porque "demanda registrada depois do fato existe" —
-                a lâmpada queimou semana passada e alguém põe no sistema hoje.
+                A versão anterior deste comentário dizia que "quem precisa
+                registrar o retroativo digita a data e o servidor aceita". No
+                seletor nativo de iOS e Android NÃO EXISTE digitar: a roda
+                simplesmente não desce abaixo do `min`. A igreja usa celular.
 
-                O que aquela guarda realmente queria pegar era erro de
-                digitação, e erro de digitação se pega ONDE SE DIGITA. O
-                seletor do navegador passa a não oferecer o passado; quem
-                precisa registrar o retroativo digita a data e o servidor
-                aceita, que é o comportamento certo para os dois casos. */}
-            <input type="date" min={HOJE()} value={r.prazo}
+                Ou seja: a migração 88 tirou a guarda do banco justamente
+                porque "a lâmpada do corredor queimou semana passada, põe aí no
+                sistema" é o caso normal, e a tela continuou impedindo. O banco
+                aceita e a tela recusa é a mesma família de defeito de botão
+                morto, virada do avesso.
+
+                O erro de digitação que o `min` queria pegar continua pego, e
+                agora de um jeito que não tranca ninguém: a tela AVISA que a
+                data escolhida já passou, e deixa seguir. */}
+            <input type="date" value={r.prazo}
               onChange={e => setR(v => ({ ...v, prazo: e.target.value }))} />
+            {r.prazo && r.prazo < HOJE() ? (
+              <small style={{ color: 'var(--dm-warn, inherit)' }}>
+                Essa data já passou. Se for um registro do que já aconteceu, pode seguir.
+              </small>
+            ) : null}
           </Campo>
         ) : (
           <Campo rot="Por que não tem data"
@@ -261,12 +271,18 @@ function Nova() {
         ) : null}
       </div>
 
-      <button type="button" className="dm-gaveta" aria-expanded={mais}
+      {/* O CAMPO OBRIGATÓRIO MORAVA DENTRO DA GAVETA FECHADA — 22/09/2026.
+
+          Quem escolhe uma categoria de Compras preenche tudo, toca em Enviar e
+          lê "Falta preencher: o valor estimado" sobre um campo que não está na
+          tela, e nada abre a gaveta. Quando a categoria EXIGE orçamento, a
+          gaveta abre sozinha: o campo obrigatório não pode estar escondido. */}
+      <button type="button" className="dm-gaveta" aria-expanded={mais || !!cat?.exige_orcamento}
         onClick={() => setMais(x => !x)} style={{ marginBottom: 'var(--dm-e2)' }}>
-        {mais ? 'Esconder os detalhes' : 'Evento, local, orçamento e anexos'}
+        {mais || cat?.exige_orcamento ? 'Esconder os detalhes' : 'Evento, local, orçamento e anexos'}
       </button>
 
-      {mais ? (
+      {mais || cat?.exige_orcamento ? (
         <div className="dm-card">
           {manda ? (
             <Campo rot="Quem está pedindo" ajuda="Como liderança, você pode abrir em nome de outro setor.">

@@ -95,6 +95,20 @@ export async function rpcCom<T>(
        exception` era trocada pela genérica de quatro palavras. É exatamente o
        defeito que `lib/erros.ts:31-50` conta ter matado em 16/09 do lado das
        escalas, de volta inteiro do lado de cá. */
+    /* 42501 TEM NOME PRÓPRIO, E SEM ELE A FRASE DAS ESCALAS VAZAVA — 22/09/2026.
+
+       `SEM_PERMISSAO_DB` foi escrita em `regras.ts` justamente para impedir
+       que um 42501 do Postgres caísse na tabela das ESCALAS e respondesse
+       "Você não tem permissão para isso neste MINISTÉRIO" dentro do sistema
+       de Demandas. Só que nada nunca produzia esse código: aqui todo 42501
+       virava `REDE`, `PORBANCO['REDE']` não existe, e a tradução ia parar em
+       `humano()` — exatamente na frase que a chave existia para bloquear.
+
+       Uma chave morta que dá a impressão de cobrir um buraco é pior do que
+       não ter chave nenhuma, porque ninguém volta a olhar. */
+    if (error.code === '42501') {
+      return { ok: false, erro: 'SEM_PERMISSAO_DB', regra: error.message, codigo: error.code };
+    }
     return { ok: false, erro: 'REDE', regra: error.message, codigo: error.code };
   }
   return (data as Resposta<T>) ?? { ok: false, erro: 'VAZIO' };
