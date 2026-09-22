@@ -13,6 +13,7 @@
 import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
   somaDias, linkZap, soDigitos, telDoBanco, telVisivel, recadoDoErro, recado, diasDeAtraso,
+  siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
   horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
@@ -1231,6 +1232,47 @@ function servidorAceita(acao, d, eu) {
   /* e a regra antiga, quando o servidor não manda os quatro */
   const velho = { papel: 'gestor', atende: false, abriu: false };
   ok(acoesDe(esperando, velho).includes('aprovar'), 'sem as respostas da 94, gestor aprova como antes');
+}
+
+/* ============ migração 95: de que site vem o anexo =====================
+   A tela avisa com a MESMA regra do banco. O que se mede aqui é que ela lê o
+   site que o NAVEGADOR visitaria (a barra invertida, o ponto final, as
+   maiúsculas) e que a fronteira do subdomínio é o ponto. */
+{
+  const lista = ['drive.google.com', 'dropbox.com', 'a.co'];
+  const ligada = { restrito: true, sites: lista };
+  ok(siteDoLink('https://evil.org\\.drive.google.com/x') === 'evil.org',
+    'a barra invertida acaba o site, como no navegador', siteDoLink('https://evil.org\\.drive.google.com/x'));
+  ok(siteDoLink('https://DRIVE.Google.com./file') === 'drive.google.com', 'maiúsculas e ponto final viram o mesmo site');
+  ok(siteDoLink('http://drive.google.com/x') === null, 'http sem s não é link de anexo');
+  ok(siteDoLink('drive.google.com/x') === null && siteDoLink('') === null && siteDoLink(null) === null,
+    'texto sem https:// não é link');
+  ok(siteNaLista('abc.drive.google.com', lista), 'subdomínio de site da lista passa');
+  ok(!siteNaLista('evildrive.google.com', lista), 'evildrive.google.com NÃO é drive.google.com');
+  ok(!siteNaLista('drive.google.com.evil.org', lista), 'site que só começa com um da lista não passa');
+  ok(!siteNaLista('pa.co', lista), '"pa.co" não é subdomínio de "a.co"');
+  ok(siteRecusado('https://drive.google.com/file/d/1', ligada) === null, 'site da lista: pode');
+  ok(siteRecusado('https://evil.org\\.drive.google.com/x', ligada) === 'evil.org',
+    'a barra invertida não esconde site de fora');
+  ok(siteRecusado('https://golpe.example/x.pdf', { restrito: false, sites: lista }) === null,
+    'lista desligada: a tela não recusa nada');
+  ok(siteRecusado('https://golpe.example/x.pdf', undefined) === null, 'banco anterior à 95: a tela não inventa regra');
+  ok(siteRecusado('nao e link', ligada) === null, 'link torto tem recado próprio, não o de site');
+  ok(nomesDosSites(['drive.google.com', '1drv.ms', 'onedrive.live.com', 'x.example']).join('|')
+     === 'Google Drive|OneDrive|x.example', 'o encurtador leva o nome do serviço, sem repetir',
+     nomesDosSites(['drive.google.com', '1drv.ms', 'onedrive.live.com', 'x.example']).join('|'));
+  const dica = dicaDeAnexo({ restrito: true, sites: ['canva.com', 'dropbox.com', 'drive.google.com', 'icloud.com', 'onedrive.live.com', 'youtube.com'] });
+  ok(dica === 'Aceita links de Google Drive, Dropbox, OneDrive, iCloud e mais 2.', 'a dica põe os quatro de arquivo na frente', dica);
+  ok(dicaDeAnexo({ restrito: true, sites: [] }).includes('nenhum site'), 'lista ligada e vazia diz que nada entra');
+  ok(!/Aceita/.test(dicaDeAnexo({ restrito: false, sites: lista })), 'lista desligada não promete lista');
+  ok(recadoDoErro({ ok: false, erro: 'SITE_NAO_PERMITIDO', site: 'golpe.example' }) === recadoDeSite('golpe.example'),
+    'a recusa do banco diz QUAL site');
+  ok(/^Esse site não é aceito como anexo/.test(recadoDoErro({ ok: false, erro: 'SITE_NAO_PERMITIDO' })),
+    'sem o site, a frase geral', recadoDoErro({ ok: false, erro: 'SITE_NAO_PERMITIDO' }));
+  ok(/Exemplo: drive.google.com/.test(recadoDoErro({ ok: false, erro: 'SITE_INVALIDO' })), 'SITE_INVALIDO tem frase');
+  ok(/endereço exato/.test(recadoDoErro({ ok: false, erro: 'SITE_ABERTO' })), 'SITE_ABERTO tem frase');
+  ok(!/—/.test(recadoDeSite('x.example') + recadoDoErro({ ok: false, erro: 'SITE_INVALIDO' })
+              + recadoDoErro({ ok: false, erro: 'SITE_ABERTO' })), 'sem travessão nas frases novas');
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

@@ -172,6 +172,10 @@ const paginasDe = (quem) => [
     exige: '.dm-adm-faixa', proibe: 'área restrita' },
   { rota: '/demandas/admin?secao=categorias', nome: 'admin-categorias', so: ['admin'],
     exige: '.dm-adm-faixa', proibe: 'área restrita' },
+  /* 95 · a lista de sites de anexo: a semente liga a lista, então a seção tem
+     que mostrar os sites e o seletor no estado "Só os da lista" */
+  { rota: '/demandas/admin?secao=anexos', nome: 'admin-anexos', so: ['admin'],
+    exige: '.dm-sites li', texto: 'sites na lista', proibe: 'área restrita' },
   { rota: `/demandas/admin/pessoas/${N._pessoa}`, nome: 'admin-pessoa', so: ['admin'],
     exige: '.dm-hist', texto: 'Pediu para ser' },
   { rota: '/demandas/admin/pessoas/nova', nome: 'admin-pessoa-nova', so: ['admin'],

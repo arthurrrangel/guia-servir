@@ -124,7 +124,14 @@ export type FichaPessoa = {
    chamam `bases()` guardavam a lista e nunca a liam — a lista de gente dos
    Ajustes vem de `dem_pessoas`, que é SÓ_ADMIN. O campo sai do tipo para o
    tsc cobrar quem tentar voltar a lê-lo de graça. */
-export type Bases = { setores: Setor[]; categorias: Categoria[] };
+export type Bases = { setores: Setor[]; categorias: Categoria[]; anexos?: RegraDeAnexo };
+
+/* A LISTA DE SITES DE ANEXO · migração 95.
+
+   `restrito` ligado: só passa anexo de site da lista (ou subdomínio dele). O
+   banco decide sempre; a tela lê isto para avisar ANTES de a pessoa tocar em
+   Juntar. Opcional porque um banco anterior à 95 não manda o campo. */
+export type RegraDeAnexo = { restrito: boolean; sites: string[] };
 
 /** O que a lista devolve por demanda. */
 export type Resumo = {

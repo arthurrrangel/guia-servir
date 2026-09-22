@@ -2,7 +2,8 @@
 /* A ADMINISTRAÇÃO · migração 94.
 
    Separada da interface comum, com topo próprio (a faixa escura de
-   `Casca admin`), e com três seções: Pessoas, Setores e Categorias.
+   `Casca admin`), e com quatro seções: Pessoas, Setores, Categorias e
+   Anexos (a lista de sites aceitos, migração 95).
 
    PESSOAS é a base central que o pedido cobrou: "uma pessoa deve existir uma
    única vez na base". A lista mostra todo mundo, ativo e inativo, com papel,
@@ -18,16 +19,19 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Categorias, Setores } from '@/components/demandas/Configuracao';
-import { Aviso, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
-import { ajustar, bases, pessoas } from '@/lib/demandas/api';
-import { PAPEIS, recadoDoErro, rotPapel } from '@/lib/demandas/regras';
-import type { Bases, Membro } from '@/lib/demandas/tipos';
+import { Aviso, Campo, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
+import { ajustar, ajustarAnexos, bases, pessoas } from '@/lib/demandas/api';
+import { PAPEIS, nomeDoSite, recadoDoErro, rotPapel } from '@/lib/demandas/regras';
+import type { Bases, Membro, RegraDeAnexo } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
   return <Casca admin><Administracao /></Casca>;
 }
 
-type Secao = 'pessoas' | 'setores' | 'categorias';
+type Secao = 'pessoas' | 'setores' | 'categorias' | 'anexos';
+const SECOES: [Secao, string][] = [
+  ['pessoas', 'Pessoas'], ['setores', 'Setores'], ['categorias', 'Categorias'], ['anexos', 'Anexos'],
+];
 
 function Administracao() {
   const { eu } = useEu();
@@ -40,7 +44,7 @@ function Administracao() {
   useEffect(() => {
     try {
       const s = new URLSearchParams(window.location.search).get('secao') as Secao | null;
-      if (s === 'setores' || s === 'categorias' || s === 'pessoas') setSecao(s);
+      if (s && SECOES.some(([v]) => v === s)) setSecao(s);
     } catch { /* fica em Pessoas */ }
   }, []);
 
@@ -49,7 +53,7 @@ function Administracao() {
     /* o erro de cada chamada aparece: sem isto a tela ficava em esqueleto
        eterno quando uma das duas falhava (a mesma armadilha que os Ajustes
        antigos pagaram em 20/09) */
-    if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
+    if (x.ok) setB({ setores: x.setores, categorias: x.categorias, anexos: x.anexos });
     else setErro(recadoDoErro(x, 'carregar os setores'));
     if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p, 'carregar as pessoas'));
   }, []);
@@ -80,12 +84,12 @@ function Administracao() {
     <>
       <div className="dm-rot">{'>'} administração</div>
       <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>
-        {secao === 'pessoas' ? 'Pessoas' : secao === 'setores' ? 'Setores' : 'Categorias'}
+        {SECOES.find(([v]) => v === secao)?.[1]}
       </h1>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       <div className="dm-opcoes" role="group" aria-label="Seção" style={{ marginBottom: 'var(--dm-e3)' }}>
-        {([['pessoas', 'Pessoas'], ['setores', 'Setores'], ['categorias', 'Categorias']] as const).map(([v, r]) => (
+        {SECOES.map(([v, r]) => (
           <button key={v} type="button" aria-pressed={secao === v} onClick={() => setSecao(v)}>{r}</button>
         ))}
       </div>
@@ -93,6 +97,116 @@ function Administracao() {
       {secao === 'pessoas' ? <Pessoas ms={ms} b={b} recarregar={recarregar} /> : null}
       {secao === 'setores' ? <Setores b={b} indo={indo} salvar={salvar} /> : null}
       {secao === 'categorias' ? <Categorias b={b} indo={indo} salvar={salvar} /> : null}
+      {secao === 'anexos'
+        ? <Anexos regra={b.anexos} trocar={anexos => setB(x => (x ? { ...x, anexos } : x))} />
+        : null}
+    </>
+  );
+}
+
+/* ------------------------------------------------------------------ anexos
+
+   A LISTA DE SITES · migração 95. Ligada, só entra anexo de site da lista (e
+   dos subdomínios dele); quem pede vê a lista antes de colar o link. O banco
+   limpa o que se cola (`https://www.site.com/x` vira `site.com`) e recusa
+   o que não é site, o domínio de país inteiro e o site onde qualquer pessoa
+   publica página. Tirar é reversível: o recado traz "Desfazer". */
+function Anexos({ regra, trocar }: { regra?: RegraDeAnexo; trocar: (r: RegraDeAnexo) => void }) {
+  const [site, setSite] = useState('');
+  const [indo, setIndo] = useState(false);
+  const [erro, setErro] = useState('');
+  const [feito, setFeito] = useState<{ txt: string; desfaz?: string } | null>(null);
+
+  if (!regra) {
+    return <Aviso tom="warn">A lista de sites chega com a atualização do banco. Recarregue daqui a pouco.</Aviso>;
+  }
+
+  async function pedir(d: { restrito?: boolean; incluir?: string; tirar?: string },
+                       ok: { txt: string; desfaz?: string }) {
+    setIndo(true); setErro(''); setFeito(null);
+    const r = await ajustarAnexos(d);
+    setIndo(false);
+    if (!r.ok) {
+      setErro(r.erro === 'SITE_ABERTO' && r.site
+        ? `Em ${r.site} qualquer pessoa publica página. Inclua o endereço exato, como igreja.${r.site}.`
+        : recadoDoErro(r, 'salvar'));
+      return false;
+    }
+    trocar({ restrito: r.restrito, sites: r.sites });
+    setFeito(ok);
+    return true;
+  }
+
+  return (
+    <>
+      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
+      {feito ? (
+        <Aviso tom="ok">
+          <div className="dm-entre">
+            <span>{feito.txt}</span>
+            {feito.desfaz ? (
+              <button type="button" className="dm-btn dm-mini" disabled={indo}
+                onClick={() => pedir({ incluir: feito.desfaz }, { txt: `${feito.desfaz} voltou para a lista.` })}>
+                Desfazer
+              </button>
+            ) : null}
+          </div>
+        </Aviso>
+      ) : null}
+
+      <div className="dm-card">
+        <h3 style={{ marginBottom: 'var(--dm-e1)' }}>Quais links entram como anexo</h3>
+        <div className="dm-seg" role="group" aria-label="Quais links entram como anexo">
+          <button type="button" aria-pressed={!regra.restrito} disabled={indo}
+            onClick={() => { if (regra.restrito) pedir({ restrito: false }, { txt: 'Qualquer site entra de novo.' }); }}>
+            Qualquer site
+          </button>
+          <button type="button" aria-pressed={regra.restrito} disabled={indo}
+            onClick={() => { if (!regra.restrito) pedir({ restrito: true }, { txt: 'Agora só entram os sites da lista.' }); }}>
+            Só os da lista
+          </button>
+        </div>
+        <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e2)' }}>
+          {regra.restrito
+            ? 'Link de outro site é recusado, e quem pede vê os sites aceitos antes de colar.'
+            : 'Qualquer link https entra como anexo.'}
+        </p>
+      </div>
+
+      <form className="dm-card" onSubmit={async e => {
+        e.preventDefault();
+        const v = site.trim();
+        if (!v) return;
+        if (await pedir({ incluir: v }, { txt: 'Site incluído.' })) setSite('');
+      }}>
+        <Campo rot="Incluir site" ajuda="Pode colar o link inteiro: fica só o site. Vale também para os subdomínios dele.">
+          <input value={site} placeholder="drive.google.com" inputMode="url" autoCapitalize="none"
+            autoCorrect="off" spellCheck={false} onChange={e => setSite(e.target.value)} />
+        </Campo>
+        <button type="submit" className="dm-btn dm-pri" disabled={indo || !site.trim()}>Incluir</button>
+      </form>
+
+      <div className="dm-card">
+        <h3 style={{ marginBottom: 'var(--dm-e1)' }}>{contar(regra.sites.length, 'site na lista', 'sites na lista')}</h3>
+        {regra.sites.length === 0 ? (
+          <Vazio titulo="Nenhum site na lista.">
+            {regra.restrito ? 'Com a lista ligada e vazia, nenhum anexo entra.' : 'Inclua os sites antes de ligar a lista.'}
+          </Vazio>
+        ) : (
+          <ul className="dm-sites">
+            {regra.sites.map(x => (
+              <li key={x}>
+                <span className="dm-cresce">
+                  {nomeDoSite(x) !== x ? <><b>{nomeDoSite(x)}</b> <span className="dm-mudo">{x}</span></> : <b>{x}</b>}
+                </span>
+                <button type="button" className="dm-btn dm-mini" disabled={indo}
+                  aria-label={`Tirar ${x} da lista`}
+                  onClick={() => pedir({ tirar: x }, { txt: `${x} saiu da lista.`, desfaz: x })}>Tirar</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </>
   );
 }

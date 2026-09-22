@@ -19,7 +19,7 @@ import {
   HOJE, PRIORIDADES, TRAVAS, acoesDe, carimbo, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
   dinheiro, linkZap, quando, quemManda, recado, recadoDoErro, rotPrioridade, rotStatus,
   rotTrava, situacao, tetoDe, tomPill, tomPrioridade, type Acao,
-  fraseDoEvento,
+  fraseDoEvento, dicaDeAnexo, recadoDeSite, siteDoLink, siteRecusado,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
 
@@ -100,7 +100,7 @@ function Uma() {
   }, [numero]);
 
   useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
-  useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias }); }); }, []);
+  useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias, anexos: x.anexos }); }); }, []);
 
   /* DEVOLVE SE DEU CERTO, E ISSO É O QUE SEGURA O TEXTO DA PESSOA.
 
@@ -746,6 +746,7 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
   const [prio, setPrio] = useState(d.prioridade);
   const [setor, setSetor] = useState(d.setor_responsavel_id);
   const [url, setUrl] = useState('');
+  const [urlErro, setUrlErro] = useState('');
   const [atraso, setAtraso] = useState('');
 
   if (!aberto || aberto === 'comentar') return null;
@@ -927,14 +928,26 @@ function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
     );
   }
   if (aberto === 'anexar') {
+    /* 95 · a mesma regra do banco, lida antes: o site fora da lista é dito
+       aqui, com o nome dele, e o toque em Juntar nem sai. Quem decide
+       continua sendo `dem_mover`, que responde SITE_NAO_PERMITIDO igual. */
+    const juntar = () => {
+      const u = url.trim();
+      if (!siteDoLink(u)) { setUrlErro('Cole o link inteiro, começando com https://'); return; }
+      const recusado = siteRecusado(u, b?.anexos);
+      if (recusado) { setUrlErro(recadoDeSite(recusado)); return; }
+      agir('anexar', { url: u, nome: u.split('/').pop() });
+    };
     return (
       <div className="dm-card">
-        <Campo rot="Link do arquivo">
-          <input value={url} placeholder="https://…" onChange={e => setUrl(e.target.value)} />
+        <Campo rot="Link do arquivo" ajuda={dicaDeAnexo(b?.anexos)}>
+          <input value={url} placeholder="https://…" inputMode="url"
+            aria-invalid={urlErro ? true : undefined}
+            onChange={e => { setUrl(e.target.value); setUrlErro(''); }} />
         </Campo>
+        {urlErro ? <p className="dm-peq dm-erro-campo" role="alert">{urlErro}</p> : null}
         <div className="dm-linha">
-          <button className="dm-btn dm-pri dm-cresce" disabled={indo || !url.trim()}
-            onClick={() => agir('anexar', { url: url.trim(), nome: url.trim().split('/').pop() })}>Juntar</button>
+          <button className="dm-btn dm-pri dm-cresce" disabled={indo || !url.trim()} onClick={juntar}>Juntar</button>
           {fecha}
         </div>
       </div>

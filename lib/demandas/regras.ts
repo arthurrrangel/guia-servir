@@ -72,7 +72,7 @@
    última vez. */
 
 import type {
-  Aprovacao, Categoria, Papel, Prioridade, Resumo, Status, Trava,
+  Aprovacao, Categoria, Papel, Prioridade, RegraDeAnexo, Resumo, Status, Trava,
 } from './tipos';
 /* o chão de transporte é o mesmo dos dois sistemas: mesmo Postgres, mesmo
    PostgREST, mesma rede. Ver a nota em `recadoDoErro`. `lib/erros.ts` é puro
@@ -803,6 +803,10 @@ const PORBANCO: Record<string, string> = {
   JA_E_QUEM_PEDIU: 'Essa pessoa é quem pediu. Ela já acompanha.',
   PARTICIPANTES_DEMAIS: 'Já são 20 pessoas acompanhando. Tire alguém antes de incluir outra.',
   NAO_PARTICIPA: 'Essa pessoa já não acompanha esta demanda.',
+  /* ---- migração 95: a lista de sites de anexo ------------------------- */
+  SITE_NAO_PERMITIDO: 'Esse site não é aceito como anexo. Use Google Drive, Dropbox, OneDrive ou iCloud.',
+  SITE_INVALIDO: 'Isso não é um site. Exemplo: drive.google.com',
+  SITE_ABERTO: 'Nesse site qualquer pessoa publica página. Inclua o endereço exato, como igreja.github.io.',
 };
 
 /* O SEGUNDO CADEADO DA MESMA PORTA, 22/09/2026.
@@ -933,7 +937,7 @@ export const tetoDe = (acao: string) => TETO[acao] ?? 4000;
    nenhuma propriedade em comum com o ramo de sucesso. Com `ok?`, a união
    sempre tem ao menos uma. */
 export function recadoDoErro(
-  r: { ok?: boolean; erro?: string; regra?: string; codigo?: string } | null | undefined,
+  r: { ok?: boolean; erro?: string; regra?: string; codigo?: string; site?: string } | null | undefined,
   /* O VERBO VEM DE QUEM CHAMA — 21/09/2026.
 
      Era `humano(…, 'salvar')` fixo. Falhar ao CARREGAR a lista dizia "Não
@@ -960,6 +964,9 @@ export function recadoDoErro(
      legitimamente próprio daqui é o vocabulário de NEGÓCIO — `SEM_ACESSO`,
      `JA_FECHADA`, `SO_QUEM_ATENDE` —, e esse continua em `PORBANCO`, com
      precedência. O chão de transporte passa a ser compartilhado. */
+  /* 95 · a recusa diz QUAL site, e a frase também: "esse site" sobre um link
+     com três domínios na mesma linha deixa a pessoa adivinhando. */
+  if (r.erro === 'SITE_NAO_PERMITIDO' && r.site) return recadoDeSite(r.site);
   const doNegocio = PORBANCO[r.erro];
   if (doNegocio) return doNegocio;
   /* o segundo cadeado, antes de `humano()`. Ver `DO_TRANSPORTE` acima: é aqui
@@ -1066,3 +1073,76 @@ export function fraseDoEvento(e: { tipo: string; de: string | null; para: string
     default:            return `${q}: ${e.tipo}`;
   }
 }
+
+/* =========================================================================
+   MIGRAÇÃO 95: DE QUE SITE VEM O ANEXO
+
+   Quem decide é o banco (`demandas.anexo_permitido`). A tela usa a MESMA regra
+   só para avisar antes, e não depois de a pessoa tocar em Juntar.
+
+   O site é o que o NAVEGADOR visitaria, lido pelo parser de URL do próprio
+   navegador (`new URL`), e não o que um regex acha que é. Medido em 22/09:
+   `https://evil.org\.drive.google.com/x` termina em `.drive.google.com` para
+   quem lê o texto e vai para `evil.org` para quem clica. A 95 ensinou isso ao
+   banco; aqui o navegador já sabe.
+   ========================================================================= */
+
+/** O site de um link `https`, em minúsculas e sem o ponto final. Nulo se não for link `https`. */
+export function siteDoLink(url: string | null | undefined): string | null {
+  try {
+    const u = new URL(String(url ?? '').trim());
+    if (u.protocol !== 'https:') return null;
+    return u.hostname.toLowerCase().replace(/\.$/, '') || null;
+  } catch { return null; }
+}
+
+/** O site é um da lista, ou subdomínio dele. A fronteira é o ponto: `evildrive.google.com` não é `drive.google.com`. */
+export function siteNaLista(site: string, sites: readonly string[]): boolean {
+  return sites.some(s => site === s || site.endsWith('.' + s));
+}
+
+/** O site que a lista recusaria, ou nulo se pode (lista desligada, site aceito, ou link torto, que tem recado próprio). */
+export function siteRecusado(url: string, regra: RegraDeAnexo | null | undefined): string | null {
+  if (!regra?.restrito) return null;
+  const site = siteDoLink(url);
+  if (!site) return null;
+  return siteNaLista(site, regra.sites) ? null : site;
+}
+
+/* O nome que a pessoa reconhece. Os encurtadores de cada serviço levam o
+   nome do serviço, para a lista mostrar "OneDrive" uma vez e não `1drv.ms`. */
+const NOME_DO_SITE: Record<string, string> = {
+  'drive.google.com': 'Google Drive', 'docs.google.com': 'Google Docs',
+  'photos.google.com': 'Google Fotos', 'photos.app.goo.gl': 'Google Fotos',
+  'dropbox.com': 'Dropbox', 'onedrive.live.com': 'OneDrive', '1drv.ms': 'OneDrive',
+  'icloud.com': 'iCloud', 'wetransfer.com': 'WeTransfer', 'we.tl': 'WeTransfer',
+  'canva.com': 'Canva', 'figma.com': 'Figma', 'pinterest.com': 'Pinterest', 'pin.it': 'Pinterest',
+  'youtube.com': 'YouTube', 'youtu.be': 'YouTube', 'vimeo.com': 'Vimeo',
+  'instagram.com': 'Instagram', 'tiktok.com': 'TikTok', 'spotify.com': 'Spotify',
+  'mercadolivre.com.br': 'Mercado Livre', 'mercadolivre.com': 'Mercado Livre',
+  'amazon.com.br': 'Amazon', 'a.co': 'Amazon', 'amzn.to': 'Amazon',
+  'magazineluiza.com.br': 'Magalu', 'shopee.com.br': 'Shopee', 'shope.ee': 'Shopee',
+  'kabum.com.br': 'KaBuM', 'leroymerlin.com.br': 'Leroy Merlin', 'guiaservir.com': 'GUIA Servir',
+};
+export const nomeDoSite = (site: string) => NOME_DO_SITE[site] ?? site;
+
+/** Os nomes da lista, sem repetir serviço, na ordem em que a lista vem. */
+export function nomesDosSites(sites: readonly string[]): string[] {
+  return [...new Set(sites.map(nomeDoSite))];
+}
+
+/** A dica curta do campo de anexo: os mais usados primeiro, e quantos mais. */
+export function dicaDeAnexo(regra: RegraDeAnexo | null | undefined): string {
+  if (!regra?.restrito) return 'Cole o link do arquivo: Drive, Dropbox, Fotos.';
+  const nomes = nomesDosSites(regra.sites);
+  if (!nomes.length) return 'A administração ainda não liberou nenhum site para anexo.';
+  const preferidos = ['Google Drive', 'Dropbox', 'OneDrive', 'iCloud'];
+  const frente = [...preferidos.filter(n => nomes.includes(n)),
+                  ...nomes.filter(n => !preferidos.includes(n))].slice(0, 4);
+  const mais = nomes.length - frente.length;
+  return `Aceita links de ${frente.join(', ')}${mais > 0 ? ` e mais ${mais}` : ''}.`;
+}
+
+/** O recado de quando a tela já sabe que o site vai ser recusado. */
+export const recadoDeSite = (site: string) =>
+  `Links de ${site} não são aceitos como anexo. Use Google Drive, Dropbox, OneDrive ou iCloud.`;

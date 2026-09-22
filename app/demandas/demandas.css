@@ -505,6 +505,8 @@
 /* 24px entre campos, não 16: com 16 o texto de ajuda de um campo encostava
    no rótulo do campo seguinte, e a ajuda parecia pertencer ao próximo. */
 .dm-campo{display:block;margin-bottom:var(--dm-e4)}
+/* 95 · o recado do campo que a tela recusou antes de enviar (o site do anexo) */
+.dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
 .dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
 .dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
 .dm-campo input,.dm-campo select,.dm-campo textarea{
@@ -952,3 +954,8 @@
 /* os seletores de filtro da administração: o mesmo desenho do campo */
 .dm-filtro{width:100%;min-height:46px;padding:0 var(--dm-e2);
   border:1px solid var(--dm-linha2);background:var(--dm-card3);border-radius:var(--dm-r)}
+
+/* 95 · a lista de sites de anexo, na administracao */
+.dm-sites{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
+.dm-sites li{display:flex;align-items:center;gap:var(--dm-e2);min-height:48px;padding:6px 0;
+  border-bottom:1px solid var(--dm-linha);overflow-wrap:anywhere}

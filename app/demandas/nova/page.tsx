@@ -17,8 +17,8 @@ import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, dataCheia, linkZap, oQueFalta, prazoSugerido, rascunhoVazio,
-  recadoDoErro, quemManda, type Rascunho,
+  HOJE, PRIORIDADES, dataCheia, dicaDeAnexo, linkZap, nomesDosSites, oQueFalta, prazoSugerido,
+  rascunhoVazio, recadoDeSite, recadoDoErro, quemManda, siteDoLink, siteRecusado, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
 
@@ -110,6 +110,7 @@ function Nova() {
   const [r, setR] = useState<Rascunho>(rascunhoVazio());
   const [anexos, setAnexos] = useState<{ nome: string; url: string }[]>([]);
   const [anexoUrl, setAnexoUrl] = useState('');
+  const [anexoErro, setAnexoErro] = useState('');
   const [mais, setMais] = useState(false);
   const [semData, setSemData] = useState(false);
   const [erro, setErro] = useState('');
@@ -166,7 +167,7 @@ function Nova() {
   const carregar = useCallback(() => {
     setErroBase('');
     bases().then(x => {
-      if (x.ok) setB({ setores: x.setores, categorias: x.categorias });
+      if (x.ok) setB({ setores: x.setores, categorias: x.categorias, anexos: x.anexos });
       else setErroBase(recadoDoErro(x, 'carregar os setores e categorias'));
     });
   }, []);
@@ -475,18 +476,36 @@ function Nova() {
               onChange={e => setR(v => ({ ...v, orcamento: e.target.value.replace(',', '.') }))} />
           </Campo>
 
-          <Campo rot="Anexos"
-            ajuda="Cole o link do arquivo (Drive, Fotos, o que for). Guardar arquivo aqui fica para depois; link resolve hoje.">
+          {/* 95 · A LISTA DE SITES AVISA AQUI, E NÃO DEPOIS DE ENVIAR.
+
+              O banco recusa a demanda inteira quando um anexo é de site fora
+              da lista (`SITE_NAO_PERMITIDO`, antes de a demanda nascer). Sem o
+              aviso na hora de juntar, a pessoa descobriria só no fim, com o
+              formulário todo preenchido. A regra é a mesma do banco, lida por
+              `dem_bases`; quem decide continua sendo ele. */}
+          <Campo rot="Anexos" ajuda={dicaDeAnexo(b?.anexos)}>
             <div className="dm-linha">
-              <input className="dm-cresce" value={anexoUrl} placeholder="https://…"
-                onChange={e => setAnexoUrl(e.target.value)}
+              <input className="dm-cresce" value={anexoUrl} placeholder="https://…" inputMode="url"
+                aria-invalid={anexoErro ? true : undefined}
+                onChange={e => { setAnexoUrl(e.target.value); setAnexoErro(''); }}
                 style={{ minHeight: 46, padding: '10px 12px', border: '1px solid var(--dm-linha2)', borderRadius: 'var(--dm-r)', background: 'var(--dm-card3)' }} />
               <button className="dm-btn" disabled={!anexoUrl.trim()} onClick={() => {
-                setAnexos(a => [...a, { nome: nomeDoLink(anexoUrl), url: anexoUrl.trim() }]);
-                setAnexoUrl('');
+                const url = anexoUrl.trim();
+                if (!siteDoLink(url)) { setAnexoErro('Cole o link inteiro, começando com https://'); return; }
+                const recusado = siteRecusado(url, b?.anexos);
+                if (recusado) { setAnexoErro(recadoDeSite(recusado)); return; }
+                setAnexos(a => [...a, { nome: nomeDoLink(url), url }]);
+                setAnexoUrl(''); setAnexoErro('');
               }}>Juntar</button>
             </div>
           </Campo>
+          {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
+          {b?.anexos?.restrito && b.anexos.sites.length ? (
+            <details className="dm-peq dm-mudo">
+              <summary>Ver os sites aceitos</summary>
+              <p style={{ margin: '6px 0 0' }}>{nomesDosSites(b.anexos.sites).join(', ')}.</p>
+            </details>
+          ) : null}
           {anexos.length ? (
             <ul className="dm-peq" style={{ margin: 0, paddingLeft: 18 }}>
               {anexos.map((a, i) => (
