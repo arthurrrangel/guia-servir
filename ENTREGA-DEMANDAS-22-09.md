@@ -1,7 +1,7 @@
 # Sistema de Demandas · entrega de 22/09/2026
 
-Estado: **produção na migração 89**. A 90 está escrita, testada e no GitHub, e
-**não aplicada** — falta um clique seu, e explico no fim por quê.
+Estado: **produção na migração 90**, conferida campo por campo. Nada pendente
+do meu lado; o que resta são quatro decisões suas, e a primeira é urgente.
 
 ---
 
@@ -143,24 +143,38 @@ conferência passou a medir o que dizia medir.
 ## 4 · ESTADO REAL DA PRODUÇÃO
 
 ```
-✓ COMPROVADO   schema_versao = 89  (marca M89-APLICADA, 22/09 01:0x)
-✓ COMPROVADO   sonda de ataque, 8 blocos, dentro de transação com rollback:
-               fora_do_portao 0 · curadas 0 · fechadas_sem_texto 0
-               anexos_fora_da_regra 0 · eventos_gigantes 0 · VALIDADO
-✓ COMPROVADO   o banco está VAZIO: 0 demandas, 0 anexos
-✓ COMPROVADO   /demandas em guiaservir.com responde 200 e identifica quem
-               tem sessão: "Demandas · Arthur · Secretaria"
-✓ COMPROVADO   GitHub master = 3248535, com 88, 89, 90 e a porta própria
+✓ COMPROVADO   schema_versao = 90        (marcas M89-APLICADA e M90-APLICADA)
+✓ COMPROVADO   funcoes_90_de_3 ......... 3   invisiveis, a_avisar, marcar_avisado
+✓ COMPROVADO   colunas_90_de_2 ......... 2   avisado_em, aviso_motivo
+✓ COMPROVADO   checks_validas_de_3 ..... 3   as tres CHECKs VALIDADAS, nao mais not valid
+✓ COMPROVADO   url_boa_nula ............ false   o defeito 1 esta morto
+✓ COMPROVADO   host_legitimo_passa ..... true    1.bp.blogspot.com volta a passar
+✓ COMPROVADO   trojan_source_aparado ... true    U+202E aparado
+✓ COMPROVADO   anon_alcanca_email ...... false   a porta publica nao le email de gente
+✓ COMPROVADO   na_fila_de_aviso ........ 0
+✓ COMPROVADO   marca ................... CONFERIDO
 
-○ NÃO APLICADA migração 90. O arquivo está pronto, testado e no GitHub.
-               Os dois Chromes que este chat alcança agora estão DESLOGADOS
-               no Supabase, e eu não entro com a sua credencial.
+✓ COMPROVADO   sonda de ataque, 8 blocos, dentro de transacao com rollback:
+               rodou na MESMA execucao, antes da linha de conferencia. Se
+               tivesse reprovado, teria levantado excecao e nada depois dela
+               apareceria. Nao houve ERROR nem REPROVOU.
 
-≈ INFERIDO     o deploy da Vercel do commit 3248535 (porta própria + rota do
-               e-mail) sai automático do master. Não vi o build terminar.
+✓ COMPROVADO   o banco esta VAZIO: 0 demandas, 0 anexos
+✓ COMPROVADO   /demandas em guiaservir.com responde 200 e identifica quem tem
+               sessao: "Demandas · Arthur · Secretaria"
+✓ COMPROVADO   GitHub master = 66917a2, com 88, 89, 90, a porta propria e a
+               rota do aviso
+
+≈ INFERIDO     o deploy da Vercel do master sai automatico. Nao vi o build
+               terminar.
 ```
 
----
+### Como as tres migracoes entraram
+
+A 89 e a 90 sao cada uma uma transacao unica (`begin; ... commit;`), com
+conferencia dentro. Ou entram inteiras, com todos os blocos passando, ou nao
+entram — nao existe estado meio-aplicado. Foi por isso que a tentativa que
+travou no meio da noite nao deixou estrago: o Postgres desfez.
 
 ## 5 · RISCOS RESIDUAIS
 
@@ -199,19 +213,15 @@ migração precisa delas.
 spam. Verificar `guiaservir.com` no Resend é uma configuração de DNS que só
 você pode fazer, e depois eu troco o remetente numa linha.
 
-**2. Aplicar a 90.** Duas saídas: você abre o editor do Supabase e cola
-`supabase/enxuto/90-o-setor-nao-ficava-sabendo-que-chegou-demanda.sql`, ou
-libera no chat o Chrome que está logado no Supabase e eu faço.
-
-**3. "Membro atuando em algum ministério" para poder pedir.** Isso **reacopla**
+**2. "Membro atuando em algum ministério" para poder pedir.** Isso **reacopla**
 os dois sistemas: "ministério" é vocabulário das escalas, e `dem_abrir`
 passaria a depender da tabela delas. A saída sem acoplar é o Demandas ter o
 cadastro dele, com setor próprio, e quem administra marcar quem pode pedir —
 mesma regra, sem um sistema lendo o outro. Preciso do seu aval.
 
-**4. Lista de domínios permitidos para anexo.** Sua decisão desde a 85.
+**3. Lista de domínios permitidos para anexo.** Sua decisão desde a 85.
 
-**5. CPF: você já decidiu tirar.** Nada foi gravado, e não vou gravar.
+**4. CPF: você já decidiu tirar.** Nada foi gravado, e não vou gravar.
 
 ---
 
