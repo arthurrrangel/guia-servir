@@ -101,15 +101,41 @@ export const tomPrioridade = (p: Prioridade): 'warn' | 'bad' | undefined =>
    Foi escrita aqui, e não num documento à parte, porque documento à parte
    ninguém abre quando muda o código.                                         */
 
+/* DOIS DOS ONZE NÃO SÃO ESTADO, E UM DELES ERA UM RAMO MORTO — 22/09/2026.
+
+   O tipo listava os onze nomes do documento. Dois nunca são devolvidos, e a
+   diferença entre eles é o que este comentário existe para registrar:
+
+   · "Em triagem" era um RAMO MORTO com cara de estado. A última linha da
+     função pedia `status='aberta'` COM responsável, e NENHUMA ação do
+     servidor produz esse par: `assumir` grava `responsavel_id` e
+     `status='execucao'` na MESMA instrução (85:331), e `redirecionar` zera o
+     responsável (50:745). Medido: não há caminho no `dem_mover` que deixe
+     responsável em demanda aberta. A triagem do PDF ("qual setor atende,
+     qual a prioridade, precisa de aprovação") foi resolvida na CATEGORIA, no
+     nascimento — `dem_abrir` já escolhe o setor, o prazo padrão e o portão de
+     aprovação pela categoria. Ela não é um estado por onde a demanda passa:
+     ela já aconteceu quando a demanda existe. O estado colapsa em "Aberta".
+
+   · "Rascunho" nunca existiu no banco de propósito: no documento é "ainda
+     não enviada", e aqui uma demanda só existe depois de enviada. O rascunho
+     mora no `localStorage` da tela de abertura, que é onde ele deve morar —
+     linha de tabela para uma coisa que a pessoa ainda não mandou é lixo que
+     alguém vai ter que limpar, e é a origem clássica do "sistema tem 4 mil
+     demandas e 300 de verdade".
+
+   Os dois saem do TIPO, e não só do corpo: tipo que promete um valor que
+   nunca chega faz o `tsc` aceitar `if (x === 'Em triagem')` calado, que é
+   como um ramo morto vira dois. */
 export type EstadoDoPDF =
-  | 'Rascunho' | 'Aberta' | 'Em triagem' | 'Aguardando aprovação' | 'Aprovada'
+  | 'Aberta' | 'Aguardando aprovação' | 'Aprovada'
   | 'Em execução' | 'Aguardando informações' | 'Aguardando terceiros'
   | 'Concluída' | 'Cancelada' | 'Reaberta';
 
 export function comoOPdfChama(d: {
   status: Status; travada_por?: Trava | null; aprovacao?: Aprovacao;
   falta_aprovacao?: boolean;
-  responsavel?: string | null; reaberturas?: number;
+  reaberturas?: number;
 }): EstadoDoPDF {
   if (d.status === 'cancelada') return 'Cancelada';
   if (d.status === 'concluida') return 'Concluída';
@@ -140,7 +166,7 @@ export function comoOPdfChama(d: {
   if (d.status === 'execucao') return (d.reaberturas ?? 0) > 0 ? 'Reaberta' : 'Em execução';
   /* aberta */
   if (d.aprovacao === 'aprovada') return 'Aprovada';
-  return d.responsavel ? 'Em triagem' : 'Aberta';
+  return 'Aberta';
 }
 
 /* ------------------------------------------------------------------ prazos */
@@ -271,6 +297,7 @@ export function oQueFalta(r: Rascunho, temSetor: boolean, cat?: Categoria | null
 export type Acao =
   | 'assumir' | 'travar' | 'destravar' | 'aprovar' | 'rejeitar'
   | 'prazo' | 'prioridade' | 'redirecionar' | 'concluir' | 'cancelar' | 'reabrir'
+  | 'validar'
   | 'comentar' | 'anexar' | 'desanexar';
 
 /** Quem está olhando, do ponto de vista de UMA demanda. Vem de `dem_ver`. */
@@ -291,7 +318,10 @@ export const quemManda = (p: Papel | string | null | undefined) =>
 
 export function acoesDe(
   d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'>
-     & { falta_aprovacao?: boolean; responsavel?: string | null; responsavel_id?: string | null },
+     & { falta_aprovacao?: boolean; responsavel?: string | null; responsavel_id?: string | null;
+         /* opcional porque a migração 91 é nova: carga velha não traz o campo,
+            e `undefined` aqui vale "ainda não validada", que é a verdade. */
+         validada_em?: string | null },
   eu: Quem,
 ): Acao[] {
   const manda = quemManda(eu.papel);
@@ -324,11 +354,43 @@ export function acoesDe(
   /* `eu.atende` e nao `manda`: no servidor `pode_atender` ja devolve
      verdadeiro para gestor e admin, entao acrescentar `manda` aqui so
      produziria divergencia com a matriz do espelho em estados que o sistema
-     real nao gera (gestor com atende=false nao existe). */
-  if (eu.atende || eu.abriu) a.push('anexar', 'desanexar');
+     real nao gera (gestor com atende=false nao existe).
+
+     `desanexar` SAIU DAQUI — 22/09/2026.
+
+     Ele vinha junto com `anexar`, e as duas não têm a mesma porta. O servidor
+     é `pode_atender(m,d) OR a.membro_id = m.id` (85:322): quem abriu e não
+     atende só tira o que ELE colou. Esta função decide por DEMANDA e nunca
+     vai saber de quem é o anexo — a resposta é por ANEXO, e quem a dá é o
+     `posso_tirar` que a migração 89 pôs em `dem_ver`, com a MESMA expressão
+     do `desanexar`. A ficha já lê `a.posso_tirar` em cada linha da lista de
+     anexos desde 22/09.
+
+     Enquanto `acoesDe` também respondia, havia duas respostas para a mesma
+     pergunta e a errada era a que a matriz conferia: o espelho concordava com
+     o defeito, e a suíte passava verde sobre um botão que o banco recusa. */
+  if (eu.atende || eu.abriu) a.push('anexar');
 
   if (fechada) {
     if (eu.abriu || manda || eu.atende) a.push('reabrir');
+    /* A ETAPA 5 DO PDF, QUE NÃO EXISTIA — migração 91.
+
+       "Depois da execução, o setor solicitante ou responsável pela gestão
+       valida se a demanda foi atendida corretamente", e entre as capacidades
+       do Solicitante: "Confirmar a conclusão". O modelo resumido do documento
+       é `Solicitar → Triar → Aprovar → Executar → VALIDAR → Concluir`, e o
+       fluxo de insatisfação termina em "Validar novamente".
+
+       Até aqui quem EXECUTA era quem fechava, e o sistema registrava a
+       discordância (`reabrir`) sem registrar a concordância. Quem pediu não
+       tinha como dizer "resolveu" — só como dizer "não resolveu" —, então a
+       ausência de reabertura era lida como sucesso, o que não é a mesma
+       coisa: também é lida assim a demanda que a pessoa desistiu de cobrar.
+
+       A guarda é a do servidor: `d.aberta_por = m.id or m.papel in
+       ('gestor','admin')`, só sobre `concluida`, e uma vez só. `cancelada`
+       fica de fora de propósito: não há execução para validar. */
+    if (d.status === 'concluida' && !d.validada_em && (eu.abriu || manda)) a.push('validar');
     return a;
   }
 
@@ -348,9 +410,29 @@ export function acoesDe(
          exatamente ler o rótulo que abriu a porta dos fundos de duas ações.
          Esta função continuou lendo o rótulo por mais quatro migrações. */
       if (!esperandoAprovacao) a.push('destravar');
-    } else {
-      a.push('travar');
     }
+    /* DUAS CORREÇÕES NA MESMA LINHA, E AS DUAS VINHAM DO `else` QUE SAIU.
+
+       1 · `travar` ERA OFERECIDO COM O PORTÃO ABERTO. Este `if` empurrava
+       `travar` sempre que `eu.atende` e o status não fosse `travada`, sem
+       olhar `esperandoAprovacao` — enquanto `assumir`, `destravar` e
+       `concluir`, logo aqui em volta, todos olham. Medido em 108 células da
+       matriz. O servidor (85:340) recusa com `FALTA_APROVACAO` qualquer
+       motivo que não seja `aprovacao`, e o motivo que o seletor da ficha abre
+       por PADRÃO é `informacao`: ou seja, o caminho normal do dedo dava erro.
+       E travar como `aprovacao` uma demanda que JÁ está esperando aprovação
+       não muda nada — o aviso amarelo do topo da ficha já diz isso com todas
+       as letras. Com o portão aberto não existe trava útil.
+
+       2 · `travar` SUMIA QUANDO JÁ ESTAVA TRAVADA, com uma justificativa que
+       o teste carregava como verdade: "o servidor é idempotente para
+       re-travar". Não é. Re-travar com outro motivo TROCA `travada_por` e
+       `travada_nota` (85:349). O que a tela fazia era obrigar quem atende a
+       destravar e travar de novo para mudar "esperando informação" para
+       "esperando terceiros" — dois eventos no histórico para uma coisa que
+       não aconteceu: a demanda nunca voltou a andar no meio. O combinado saiu
+       da lista do teste em vez de ganhar redação nova. */
+    if (!esperandoAprovacao) a.push('travar');
     a.push('prazo', 'prioridade');
     /* `concluir` NÃO é oferecida com o portão aberto. A migração 67 fechou a
        porta no servidor e esta função não acompanhou: o botão continuava na
@@ -462,6 +544,37 @@ export function quando(iso: string | null): string {
   return dataCheia(iso.slice(0, 10));
 }
 
+/* O PDF PEDE "DATA E HORÁRIO DA ABERTURA", E O HORÁRIO NUNCA APARECIA.
+
+   22/09/2026. A ficha imprimia só `quando()`, que é a frase relativa. Nos
+   primeiros 30 dias ela nem mostra data: "Aberta — há 3 dias". Quem precisa
+   responder "quando isso chegou?" numa reunião, ou conferir se o pedido
+   entrou antes ou depois da decisão, não tem o dado. Passados 30 dias
+   aparece a data, e nunca a hora.
+
+   A frase relativa não sai: ela é a que responde rápido ("há 3 dias" é lido
+   sem contar nos dedos). As três coisas cabem na mesma linha, e é o mesmo
+   lugar de antes — nenhum elemento novo.
+
+   O fuso é o do Rio, pelo mesmo motivo de `HOJE()`: `Date` formata no fuso
+   do APARELHO, e carimbo de hora que muda conforme o celular de quem olha
+   não serve para conferir nada.
+
+   Depois de 30 dias a frase relativa É a data (`quando` devolve
+   `dataCheia`), então o parêntese é suprimido: "22/08/2026 às 14:35
+   (22/08/2026)" é ruído. */
+export function carimbo(iso: string | null): string {
+  if (!iso) return '';
+  const t = Date.parse(iso);
+  if (Number.isNaN(t)) return '';
+  const dh = new Intl.DateTimeFormat('pt-BR', {
+    timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(new Date(t)).replace(', ', ' às ');
+  const rel = quando(iso);
+  return rel && rel !== dataCheia(iso.slice(0, 10)) ? `${dh} · ${rel}` : dh;
+}
+
 export function dinheiro(v: number | null): string {
   if (v === null || v === undefined) return '';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -532,7 +645,49 @@ const PORBANCO: Record<string, string> = {
   CURSOR_SAIU: 'Esta página está desatualizada. Recarregue.',
   ACAO_DESCONHECIDA: 'Não sei fazer isso.',
   FALTA_CAMPO: 'Falta preencher um campo obrigatório.',
+  /* ---- migração 91: a etapa 5 do PDF ----------------------------------- */
+  SO_QUEM_PEDIU: 'Quem confirma que resolveu é quem pediu, ou a liderança.',
+  NAO_ESTA_CONCLUIDA: 'Só dá para confirmar depois que a demanda for concluída.',
+  JA_VALIDADA: 'Esta demanda já foi confirmada.',
+  /* ---- os dois que o próprio `api.ts` produz e ninguém traduzia --------
+
+     `SEM_CONFIG` e `VAZIO` nascem em `rpcCom` (`api.ts:84` e `:114`) e nunca
+     tiveram linha aqui. Medido: os dois caíam em "Não consegui. Tente de
+     novo." — que manda a pessoa repetir uma coisa que NUNCA vai funcionar.
+
+     `SEM_CONFIG` é o app sem as chaves do Supabase: tentar de novo no mesmo
+     aparelho dá o mesmo nada, mil vezes. `VAZIO` é a RPC respondendo 200 com
+     corpo nulo, que é defeito de servidor e não de quem toca o botão. Os dois
+     têm o mesmo destino — avisar quem cuida do sistema —, e é isso que as
+     frases dizem, em vez de convidar para a décima tentativa. */
+  SEM_CONFIG: 'Este app está sem a configuração de acesso ao banco. Tentar de novo não resolve: avise quem cuida do sistema.',
+  VAZIO: 'O servidor respondeu sem conteúdo. Isso é defeito daqui, não do que você fez: avise quem cuida do sistema.',
+  /* ---- 23503, o irmão do 42501 que ficou para trás — 22/09/2026 --------
+
+     `SEM_PERMISSAO_DB` ganhou nome próprio para o 42501 não cair na tabela
+     das ESCALAS e responder "neste MINISTÉRIO" dentro das Demandas. A
+     violação de chave estrangeira ficou de fora, e `PORCODIGO['23503']` de
+     `lib/erros.ts:210` é, literalmente:
+
+       "Não dá para fazer isso enquanto houver escala ou cadastro ligado a
+        este item."
+
+     A palavra ESCALA, no sistema que não pode encostar no outro. E o código
+     não é hipotético: ele sai de `dem_ajustar` quando alguém tenta apagar um
+     setor, uma categoria ou uma pessoa que já tem demanda pendurada.
+
+     A regra do dono é que os dois sistemas não se encostam; o chão de
+     transporte é compartilhado, o VOCABULÁRIO não. */
+  VINCULO_EM_USO: 'Ainda há demanda ou cadastro ligado a este item. Desligue o vínculo antes de apagar, ou desative em vez de apagar.',
 };
+
+/* A LISTA, PARA O TESTE PODER VARRER TODA ELA.
+
+   Sem isto, um teste que quisesse conferir a SAÍDA de `recadoDoErro` para
+   todos os códigos teria que repetir a lista à mão — e uma lista repetida à
+   mão envelhece calada: o código novo entra em `PORBANCO`, ninguém lembra do
+   teste, e a varredura passa a varrer menos do que existe. */
+export const CODIGOS = Object.keys(PORBANCO);
 
 /* As mensagens dos CHECK chegam sem acento, direto do Postgres. Traduzir aqui
    é o que impede a tela de mostrar "new row violates check constraint". */

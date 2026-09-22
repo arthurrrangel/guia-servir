@@ -13,8 +13,9 @@
 import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
   somaDias, linkZap, soDigitos, recadoDoErro, recado, diasDeAtraso,
-  horas, dinheiro, dataCheia, rotStatus,
+  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS,
 } from '../lib/demandas/regras.ts';
+import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
 let falhas = 0, feitas = 0;
 const ok = (cond, rotulo, extra = '') => {
@@ -27,24 +28,42 @@ const ok = (cond, rotulo, extra = '') => {
    O que `supabase/50-demandas.sql` aceita, transcrito. Se você mudar o SQL,
    mude aqui e veja o teste apontar a divergência.
    ============================================================================= */
-/* AS TRÊS DIVERGÊNCIAS QUE SÃO DE PROPÓSITO — 20/09/2026.
+/* AS DIVERGÊNCIAS QUE SÃO DE PROPÓSITO — 20/09/2026.
 
    Rodando o espelho nos dois sentidos pela primeira vez, apareceram 118
-   combinações em que o servidor aceita e a tela não oferece. Todas caem em
-   três ações, e as três são decisão, não esquecimento. Ficam escritas aqui,
-   uma a uma, para que QUALQUER divergência nova reprove — que é o ponto.
+   combinações em que o servidor aceita e a tela não oferece. Elas caíam em
+   três ações, e cada uma ficou escrita aqui, uma a uma, para que QUALQUER
+   divergência nova reprove — que é o ponto.
 
    Deixar o teste exigir zero seria mentir do outro lado: ele passaria a
-   reprovar por três escolhas conscientes, alguém relaxaria o teste, e aí nada
-   mais seria pego. */
+   reprovar por escolhas conscientes, alguém relaxaria o teste, e aí nada mais
+   seria pego.
+
+   Eram três; são duas desde 22/09/2026, quando a de "travar" foi medida e se
+   revelou falsa. O comentário logo abaixo conta o caso inteiro, e ele é o
+   motivo de esta lista existir num lugar que dá para conferir: um combinado é
+   uma afirmação sobre o SERVIDOR, e afirmação sobre o servidor envelhece. */
+/* O COMBINADO DE "TRAVAR" SAIU DAQUI — 22/09/2026, E ELE ERA FALSO.
+
+   Ele dizia, sobre a demanda já travada: "o servidor aceita re-travar (é
+   idempotente); a tela esconde porque oferecer travar no que está travado é
+   oferecer um botão que não muda nada."
+
+   Medido no SQL que está no ar (85:337-353): re-travar NÃO é idempotente. O
+   `update` grava `travada_por = v_motivo` e `travada_nota = v_txt`, ou seja,
+   re-travar com outro motivo TROCA os dois. É a operação normal de quem
+   atende: a demanda estava "esperando informação", a informação chegou, mas
+   agora depende do fornecedor — isso é "esperando terceiros".
+
+   Com o botão escondido, o único caminho pela tela era destravar e travar de
+   novo: dois eventos no histórico para uma coisa que não aconteceu (a demanda
+   nunca voltou a andar no meio), e um `status` intermediário gravado em
+   `mexida_em`. O combinado não era uma escolha de produto: era uma descrição
+   errada do servidor, sustentando uma tela errada.
+
+   Combinado que vira falso SAI da lista. Não ganha redação nova — a redação
+   nova é justamente como um combinado errado sobrevive à auditoria seguinte. */
 const COMBINADAS = [
-  {
-    acao: 'travar',
-    /* 72 casos. A demanda JÁ está travada. O servidor aceita re-travar (é
-       idempotente); a tela esconde porque oferecer "travar" no que está
-       travado é oferecer um botão que não muda nada. */
-    quando: (d) => d.status === 'travada',
-  },
   {
     acao: 'destravar',
     /* 28 casos. Quem ABRIU a demanda destrava quando a trava é de INFORMAÇÃO:
@@ -101,8 +120,9 @@ function servidorAceita(acao, d, eu) {
      junto com `aprovacao` para cobrir o dia em que os dois divergem. */
   const pendente = d.falta_aprovacao ?? (d.aprovacao === 'pendente');
 
-  // guarda do topo: fechada só aceita comentar, anexar, desanexar e reabrir
-  if (fechada && !['comentar', 'anexar', 'desanexar', 'reabrir'].includes(acao)) return false;
+  /* guarda do topo: fechada só aceita comentar, anexar, desanexar, reabrir e,
+     desde a migração 91, validar. */
+  if (fechada && !['comentar', 'anexar', 'desanexar', 'reabrir', 'validar'].includes(acao)) return false;
 
   switch (acao) {
     case 'comentar':    return true;                                   // basta pode_ver
@@ -110,16 +130,18 @@ function servidorAceita(acao, d, eu) {
        solicitante rasa pregou um "boleto atualizado.pdf" numa compra alheia.
        O servidor exige o mesmo par que `destravar` já exigia. */
     case 'anexar':      return eu.atende || eu.abriu;
-    /* `desanexar` NAO E `anexar` — 22/09/2026.
-       O servidor e `pode_atender(m,d) OR a.membro_id = m.id`: quem abriu e
-       nao atende so tira o que ELE colou. Este modelo dizia `atende || abriu`
-       para as duas, entao ele CONCORDAVA com o defeito da tela e a suite
-       passava verde sobre um botao que o banco recusa.
+    /* `desanexar` SAIU DE `TODAS` — 22/09/2026, e o modelo sai junto.
 
-       Aqui `desanexar` significa "o botao pode aparecer em algum anexo desta
-       ficha", que e verdade para quem abriu (nos anexos dele). Quem decide
-       anexo a anexo e o `posso_tirar` que a migracao 89 poe em `dem_ver`. */
-    case 'desanexar':   return eu.atende || eu.abriu;
+       O servidor e `pode_atender(m,d) OR a.membro_id = m.id`: quem abriu e
+       nao atende so tira o que ELE colou. Isto nao e uma pergunta sobre a
+       DEMANDA, e `acoesDe` so sabe responder sobre a demanda — por isso a
+       acao saiu de la, e por isso o modelo nao tem o que espelhar aqui.
+
+       Quem responde e `posso_tirar`, por ANEXO, calculado por `dem_ver` desde
+       a migracao 89 com a MESMA expressao do `desanexar`, e a ficha ja o le em
+       cada linha da lista de anexos. O modelo anterior dizia `atende || abriu`
+       para `anexar` e `desanexar` juntos: ele CONCORDAVA com o defeito da tela,
+       e a suite passava verde sobre um botao que o banco recusa. */
     /* 86 · a guarda de dono, e ela e sobre OUTRA pessoa.
 
        Isto dizia `!d.responsavel`, ou seja "recusa quando ha dono". O servidor
@@ -131,7 +153,23 @@ function servidorAceita(acao, d, eu) {
        22/09/2026. */
     case 'assumir':     return eu.atende && !pendente
                             && !(d.responsavel_id && eu.id && d.responsavel_id !== eu.id);
-    case 'travar':      return eu.atende;
+    /* `travar` COM O PORTAO ABERTO — 22/09/2026.
+
+       Isto dizia so `eu.atende`, e era o modelo que sustentava o defeito.
+       O servidor (85:340) recusa com FALTA_APROVACAO quando
+       `demandas.falta_aprovacao(d)` e o motivo NAO e `aprovacao`.
+
+       O modelo decide por ACAO, e o servidor por MOTIVO — entao a pergunta
+       honesta e: a chamada que A TELA faria passa? Nao. O seletor da ficha
+       abre em `informacao` por padrao (o primeiro item de `TRAVAS`), que e o
+       motivo recusado. E o unico motivo que passaria, `aprovacao`, nao muda
+       nada: a demanda JA esta esperando aprovacao, que e o que o portao
+       aberto significa, e o aviso amarelo do topo da ficha ja diz isso.
+
+       Com o portao aberto nao existe trava util. `!pendente` e o modelo
+       certo, e nao e "tela mais restritiva que o banco": e a tela deixando de
+       oferecer uma chamada que, do jeito que ela a faz, sempre deu erro. */
+    case 'travar':      return eu.atende && !pendente;
     /* sem `travada_por` na condicao: o servidor le so o portao (67) */
     case 'destravar':   return (eu.atende || eu.abriu) && d.status === 'travada' && !pendente;
     case 'aprovar':
@@ -145,6 +183,11 @@ function servidorAceita(acao, d, eu) {
     case 'redirecionar':return manda || eu.atende;
     case 'cancelar':    return eu.atende || eu.abriu || manda;
     case 'reabrir':     return (eu.abriu || manda || eu.atende) && fechada;
+    /* 91 · a etapa 5 do PDF. O contrato da migração, transcrito:
+       guarda `d.aberta_por = m.id or m.papel in ('gestor','admin')`, exige
+       `status = 'concluida'` (`NAO_ESTA_CONCLUIDA`) e ainda não validada
+       (`JA_VALIDADA`). `cancelada` não entra: não há execução para validar. */
+    case 'validar':     return (eu.abriu || manda) && d.status === 'concluida' && !d.validada_em;
     default:            return false;
   }
 }
@@ -157,9 +200,19 @@ function servidorAceita(acao, d, eu) {
   /* o veredito do portao varre SEPARADO da coluna: e justamente quando os
      dois discordam que a tela e o servidor se desencontram */
   const FALTA = [false, true];
+  /* ja validada ou nao: a celula nova da migracao 91. Varre em TODO status,
+     e nao so em `concluida`, porque o jeito de `validar` virar botao morto e
+     alguem esquecer a guarda de status — e isso so aparece se a matriz puser
+     `validada_em` em demanda aberta tambem. */
+  const VALIDADA = [null, '2026-09-22T12:00:00Z'];
+  /* `desanexar` SAIU DA LISTA — 22/09/2026. Ver o comentario em
+     `servidorAceita`: a pergunta e por ANEXO (`posso_tirar`, migracao 89), nao
+     por demanda, e `acoesDe` nao devolve mais a acao. Continuar na lista faria
+     o teste cobrar de `acoesDe` uma resposta que ela nao tem como dar certo.
+     `validar` entrou no lugar. */
   const TODAS = ['assumir', 'travar', 'destravar', 'aprovar', 'rejeitar', 'prazo',
-    'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'comentar',
-    'anexar', 'desanexar'];
+    'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'validar',
+    'comentar', 'anexar'];
 
   let casos = 0, oferecidasDemais = 0, escondidas = 0;
   const exemplos = [];
@@ -179,8 +232,9 @@ function servidorAceita(acao, d, eu) {
                  isso `deOutraPessoa` em `acoesDe` era sempre falso e a guarda
                  de dono nunca rodava em caso nenhum dos 784. Tres donos
                  possiveis: ninguem, eu, outra pessoa. */
-              for (const dono of [null, 'eu-1', 'outra-2']) {
-              const d = { status, travada_por, aprovacao, falta_aprovacao,
+              for (const dono of [null, 'eu-1', 'outra-2'])
+              for (const validada_em of VALIDADA) {
+              const d = { status, travada_por, aprovacao, falta_aprovacao, validada_em,
                           responsavel: dono ? 'Alguem' : null,
                           responsavel_id: dono === 'eu-1' ? 'eu-1' : dono };
               const eu = { papel, atende, abriu, id: 'eu-1' };
@@ -233,19 +287,20 @@ function servidorAceita(acao, d, eu) {
               }
             }
   /* 4 papéis x atende x abriu x estados possíveis x veredito x TRÊS DONOS
-     (ninguém, eu, outra pessoa), tirando os impossíveis: travada sem motivo,
-     motivo sem travada, solicitante que atende.
+     (ninguém, eu, outra pessoa) x VALIDADA OU NÃO, tirando os impossíveis:
+     travada sem motivo, motivo sem travada, solicitante que atende.
 
-     Era 784 antes de 22/09/2026, quando o dono entrou na varredura. O número
-     está fixo de propósito: se ele mudar, alguém mexeu na matriz e tem que
-     olhar por quê. */
-  ok(casos === 2352, 'a matriz cobre a combinação inteira', 'casos=' + casos);
+     Era 784 antes de 22/09/2026, quando o dono entrou na varredura; virou
+     2352 ali mesmo, e 4704 quando `validada_em` entrou, na mesma data. O
+     número está fixo de propósito: se ele mudar, alguém mexeu na matriz e tem
+     que olhar por quê. */
+  ok(casos === 4704, 'a matriz cobre a combinação inteira', 'casos=' + casos);
   ok(oferecidasDemais === 0, 'nenhum botão oferecido que o servidor recusa', 'sobras=' + oferecidasDemais);
   if (escondidas) exemplos.forEach(e => console.log('  botão que o servidor aceita e a tela esconde:', e));
-  ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os três combinados',
+  ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os combinados',
      'faltas=' + escondidas);
 
-  /* e as três combinadas TÊM que continuar acontecendo: se alguma sumir, ou o
+  /* e as combinadas TÊM que continuar acontecendo: se alguma sumir, ou o
      `acoesDe` mudou ou o espelho mudou, e nos dois casos a lista acima ficou
      velha. Um combinado que ninguém mais exercita é um comentário, não uma
      regra. */
@@ -300,13 +355,79 @@ function servidorAceita(acao, d, eu) {
     'comentar continua valendo depois de fechada: é como se pede revisão');
 }
 
+/* 1c. OS ESTADOS QUE MUDARAM EM 22/09/2026, cada um escrito à mão.
+
+   A matriz de 4704 pega tudo isso — e pega junto com 4703 outros casos, numa
+   contagem. Quando ela reprova, a linha que sai é "faltas=108", que diz que
+   algo quebrou e não diz o quê. Estes são os casos NOMEADOS: quem quebrar um
+   deles lê o nome do defeito que voltou, e não um número. */
+{
+  const atende = { papel: 'responsavel', atende: true, abriu: false, id: 'eu-1' };
+  const pediu = { papel: 'solicitante', atende: false, abriu: true, id: 'eu-1' };
+  const gestor = { papel: 'gestor', atende: false, abriu: false, id: 'eu-9' };
+
+  /* 1 · travar com o portão de aprovação ABERTO. O servidor só aceitaria com
+         motivo `aprovacao`, e o seletor da ficha abre em `informacao`. */
+  const portao = { status: 'aberta', travada_por: null, aprovacao: null, falta_aprovacao: true };
+  ok(!acoesDe(portao, atende).includes('travar'),
+    'travar NÃO aparece com o portão de aprovação aberto (o servidor recusa o motivo padrão)');
+  ok(!acoesDe({ ...portao, status: 'execucao' }, atende).includes('travar'),
+    'e nem em execução com o portão aberto');
+  ok(!acoesDe({ status: 'travada', travada_por: 'informacao', aprovacao: 'pendente',
+                falta_aprovacao: true }, atende).includes('travar'),
+    'nem sobre uma trava que já existe, se o portão está aberto');
+
+  /* 2 · travar sobre demanda JÁ TRAVADA, portão fechado: é como se muda o
+         motivo de "esperando informação" para "esperando terceiros" sem
+         gravar um destravar que não aconteceu. */
+  for (const t of ['informacao', 'aprovacao', 'terceiros']) {
+    ok(acoesDe({ status: 'travada', travada_por: t, aprovacao: null }, atende).includes('travar'),
+      `travar aparece sobre a trava de "${t}": re-travar TROCA o motivo, não é idempotente`);
+  }
+
+  /* 3 · desanexar não é mais resposta desta função. */
+  for (const quem of [atende, pediu, gestor]) {
+    ok(!acoesDe({ status: 'aberta', travada_por: null, aprovacao: null }, quem).includes('desanexar'),
+      'desanexar não sai de acoesDe: quem decide é o posso_tirar, por anexo');
+  }
+  ok(acoesDe({ status: 'aberta', travada_por: null, aprovacao: null }, pediu).includes('anexar'),
+    'mas anexar continua saindo: essa pergunta é sobre a demanda');
+
+  /* 4 · validar: a etapa 5 do PDF (migração 91). */
+  const pronta = { status: 'concluida', travada_por: null, aprovacao: null, validada_em: null };
+  ok(acoesDe(pronta, pediu).includes('validar'), 'quem pediu confirma que resolveu');
+  ok(acoesDe(pronta, gestor).includes('validar'), 'e a liderança também');
+  ok(!acoesDe(pronta, atende).includes('validar'),
+    'quem EXECUTOU não valida o próprio trabalho: é o ponto inteiro da etapa 5');
+  ok(!acoesDe({ ...pronta, validada_em: '2026-09-22T12:00:00Z' }, pediu).includes('validar'),
+    'e não valida duas vezes');
+  ok(!acoesDe({ status: 'cancelada', travada_por: null, aprovacao: null }, pediu).includes('validar'),
+    'cancelada não se valida: não houve execução para conferir');
+  ok(!acoesDe({ status: 'execucao', travada_por: null, aprovacao: null }, pediu).includes('validar'),
+    'nem o que ainda está sendo feito');
+  ok(acoesDe(pronta, pediu).includes('reabrir'),
+    'e reabrir continua ao lado: confirmar e discordar são as duas respostas');
+}
+
 /* =============================================================================
    2. Os 11 status do PDF continuam existindo como leitura
    ============================================================================= */
 {
   const casos = [
     [{ status: 'aberta', responsavel: null }, 'Aberta'],
-    [{ status: 'aberta', responsavel: 'Monik' }, 'Em triagem'],
+    /* "EM TRIAGEM" ERA UM RAMO MORTO — 22/09/2026.
+
+       O caso que estava aqui era `{ status:'aberta', responsavel:'Monik' }`, e
+       ele dava verde sobre um par que o servidor NÃO produz: `assumir` grava
+       responsável e `status='execucao'` na mesma instrução, e `redirecionar`
+       zera o responsável. O teste montava à mão um estado impossível e o
+       chamava de cobertura — é assim que um ramo morto ganha atestado de vivo.
+
+       A triagem do PDF acontece no NASCIMENTO, na categoria (setor, prazo
+       padrão e portão de aprovação saem dela em `dem_abrir`), e o estado
+       colapsa em "Aberta". O caso vira a prova disso: demanda aberta COM
+       responsável — se ela existisse — continua sendo "Aberta". */
+    [{ status: 'aberta', responsavel: 'Monik' }, 'Aberta'],
     [{ status: 'aberta', aprovacao: 'aprovada' }, 'Aprovada'],
     [{ status: 'travada', travada_por: 'aprovacao' }, 'Aguardando aprovação'],
     [{ status: 'travada', travada_por: 'informacao' }, 'Aguardando informações'],
@@ -320,10 +441,51 @@ function servidorAceita(acao, d, eu) {
     ok(comoOPdfChama(d) === esperado, `de-para: ${esperado}`, comoOPdfChama(d));
   }
   const vistos = new Set(casos.map(c => c[1]));
-  /* "Rascunho" é o único dos onze que não vira leitura de nada: no documento
-     ele é "ainda não enviada", e aqui uma demanda só existe depois de enviada.
-     Está anotado para ninguém procurar. */
-  ok(vistos.size === 10, 'dez dos onze nomes do PDF são alcançáveis', String(vistos.size));
+  /* DOIS DOS ONZE NÃO SÃO LEITURA DE NADA, e os dois estão certos assim:
+
+     · "Rascunho" — no documento é "ainda não enviada", e aqui uma demanda só
+       existe depois de enviada. O rascunho mora no `localStorage` da tela de
+       abertura, que é onde ele deve morar: linha de tabela para o que ainda
+       não foi mandado é lixo que alguém vai ter que limpar.
+     · "Em triagem" — a triagem acontece no nascimento, na categoria. Ver o
+       caso comentado acima e o de-para em `regras.ts`.
+
+     Era 10 até 22/09/2026, e o décimo era o ramo morto. O número baixou
+     porque o de-para ficou honesto, não porque alguma leitura se perdeu. */
+  ok(vistos.size === 9, 'nove dos onze nomes do PDF são alcançáveis', String(vistos.size));
+  /* e o ramo morto não volta pela porta dos fundos: nenhuma entrada devolve
+     o nome que saiu do tipo. */
+  ok(!casos.some(c => comoOPdfChama(c[0]) === 'Em triagem'),
+    'nenhum estado é lido como "Em triagem"');
+}
+
+/* =============================================================================
+   2b. DATA, HORA E A FRASE RELATIVA NA MESMA LINHA
+   O PDF pede "Data e horário da abertura" na Identificação, e a ficha mostrava
+   só a frase relativa — que nos primeiros 30 dias nem data tem.
+   ============================================================================= */
+{
+  const agora = Date.now();
+  const recente = new Date(agora - 3 * 86400000).toISOString();
+  const c = carimbo(recente);
+  ok(/\d{2}\/\d{2}\/\d{4}/.test(c), 'o carimbo tem a data', c);
+  ok(/\d{2}:\d{2}/.test(c), 'e a HORA, que é o que faltava', c);
+  ok(/há 3 dias/.test(c), 'e a frase relativa continua lá, que é a que se lê rápido', c);
+
+  /* passados 30 dias `quando()` já devolve a data: repeti-la seria ruído */
+  const velha = new Date(agora - 200 * 86400000).toISOString();
+  const cv = carimbo(velha);
+  ok((cv.match(/\d{2}\/\d{2}\/\d{4}/g) || []).length === 1,
+    'depois de 30 dias a data não aparece duas vezes', cv);
+  ok(/\d{2}:\d{2}/.test(cv), 'e a hora continua', cv);
+
+  ok(carimbo(null) === '', 'sem data não inventa carimbo');
+  ok(carimbo('nada disso') === '', 'data podre não vira "Invalid Date" na tela');
+  /* o fuso é o do Rio, como em `HOJE()`: às 22h30 do Rio ainda é o mesmo dia,
+     e um carimbo que muda de dia conforme o celular de quem olha não serve
+     para conferir nada. */
+  ok(carimbo('2026-09-23T01:30:00Z').startsWith('22/09/2026 às 22:30'),
+    'o carimbo é a hora do Rio, não a do aparelho', carimbo('2026-09-23T01:30:00Z'));
 }
 
 /* =============================================================================
@@ -422,6 +584,103 @@ function servidorAceita(acao, d, eu) {
     recadoDoErro({ erro: 'REGRA', regra: 'check constraint "ck_inventada"' }));
   ok(recadoDoErro(null).length > 0, 'sem erro nenhum ainda diz alguma coisa');
   ok(recadoDoErro({ erro: 'INVENTADO' }).length > 0, 'erro que eu não conheço não deixa a tela muda');
+
+  /* ---- 6b. O VOCABULÁRIO DO OUTRO SISTEMA NÃO ENTRA AQUI ------------------
+
+     A regra do dono, de 21/09/2026: Demandas e Escalas não se encostam. O
+     chão de TRANSPORTE é compartilhado de propósito (mesmo Postgres, mesmo
+     PostgREST, e `lib/erros.ts` é puro), mas o vocabulário não é: dentro de
+     Demandas não existe ministério, escala, voluntário, organizador, posto
+     nem culto — existe setor, demanda, categoria e prazo.
+
+     Cada vez que isso vazou, vazou pelo mesmo buraco: um código do Postgres
+     sem nome próprio em `PORBANCO` cai em `humano()`, e lá `PORCODIGO` tem
+     frase pronta com a palavra do outro sistema. Aconteceu com o 42501
+     ("neste MINISTÉRIO") e estava acontecendo com o 23503 ("enquanto houver
+     ESCALA ou cadastro ligado a este item").
+
+     Por isso a varredura é sobre a SAÍDA, e sobre a lista inteira: conferir
+     um código por vez é como o segundo buraco sobreviveu ao conserto do
+     primeiro. `CODIGOS` vem de `Object.keys(PORBANCO)`, então código novo
+     entra na varredura sozinho. */
+  const VAZAMENTO = /ministério|escala|voluntári|organizador|posto|culto/i;
+  ok(CODIGOS.length > 40, 'a lista de códigos conhecidos veio inteira', String(CODIGOS.length));
+  /* os códigos que nasceram em 22/09/2026, pelo nome: a varredura acima passa
+     a varrer MENOS se um deles for apagado, e varrer menos não reprova nada.
+     Código que a tela produz e não traduz vira palavra em MAIÚSCULA na cara
+     da pessoa — ou, pior, a frase do outro sistema. */
+  for (const c of ['SO_QUEM_PEDIU', 'NAO_ESTA_CONCLUIDA', 'JA_VALIDADA', 'VINCULO_EM_USO',
+                   'SEM_CONFIG', 'VAZIO']) {
+    ok(CODIGOS.includes(c), `"${c}" tem frase na tela`);
+    ok(recadoDoErro({ erro: c }) !== 'Não consegui. Tente de novo.',
+      `"${c}" não cai na frase genérica`, recadoDoErro({ erro: c }));
+  }
+  for (const c of CODIGOS) {
+    const nu = recadoDoErro({ erro: c });
+    ok(nu.length > 0 && !VAZAMENTO.test(nu), `"${c}" não fala a língua do outro sistema`, nu);
+    /* e com `regra`/`codigo` junto, que é como a resposta chega de verdade:
+       isto mede a PRECEDÊNCIA de `PORBANCO` sobre `humano()`. Se ela cair,
+       todo código conhecido passa a ser traduzido pela tabela das escalas. */
+    const cheio = recadoDoErro({ erro: c, regra: 'permission denied for schema demandas', codigo: '42501' });
+    ok(!VAZAMENTO.test(cheio), `"${c}" continua no vocabulário daqui mesmo com regra junto`, cheio);
+  }
+
+  /* ---- 6c. E PELO CAMINHO DE VERDADE: `rpcCom` -> `recadoDoErro` ----------
+
+     A varredura de cima mede a TABELA. Esta mede a TRADUÇÃO INTEIRA, do erro
+     cru do Postgres até a frase na tela, porque é `api.ts` quem decide se um
+     código ganha nome próprio ou vira `REDE` — e `REDE` é justamente o que
+     cai em `humano()` e pega a frase do outro sistema.
+
+     Sem este bloco, apagar a linha do 42501 ou a do 23503 de `rpcCom` não
+     reprovaria nada: a tabela continuaria certa e a tela voltaria a dizer
+     "ministério" / "escala". */
+  const MENSAGEM = {
+    '23505': 'duplicate key value violates unique constraint "demandas_numero_key"',
+    '23503': 'update or delete on table "setores" violates foreign key constraint "demandas_setor_responsavel_fkey" on table "demandas"',
+    '23514': 'new row for relation "demandas" violates check constraint "ck_prioridade"',
+    '42501': 'permission denied for schema demandas',
+    '22P02': 'invalid input syntax for type uuid: "amanha"',
+    'P0001': 'Essa demanda não existe.',
+    'PGRST301': 'JWT expired',
+    'PGRST116': 'The result contains 0 rows',
+    'XX000': 'internal error',
+    '08006': 'connection failure',
+  };
+  for (const [codigo, message] of Object.entries(MENSAGEM)) {
+    const r = await rpcCom({ rpc: async () => ({ data: null, error: { code: codigo, message } }) },
+                           'dem_mover', {});
+    const texto = recadoDoErro(r, 'gravar');
+    ok(!VAZAMENTO.test(texto), `${codigo} chega na tela no vocabulário das Demandas`, texto);
+    ok(texto.length > 0, `${codigo} não deixa a tela muda`);
+  }
+
+  /* os dois que ganharam nome próprio, pelo nome: um deles é o conserto de
+     22/09, o outro é o que já existia e serviu de modelo. */
+  const fk = await rpcCom({ rpc: async () => ({ data: null,
+    error: { code: '23503', message: MENSAGEM['23503'] } }) }, 'dem_ajustar', {});
+  ok(fk.erro === 'VINCULO_EM_USO', 'violação de chave estrangeira tem nome próprio', fk.erro);
+  const perm = await rpcCom({ rpc: async () => ({ data: null,
+    error: { code: '42501', message: MENSAGEM['42501'] } }) }, 'dem_mover', {});
+  ok(perm.erro === 'SEM_PERMISSAO_DB', 'permissão do Postgres tem nome próprio', perm.erro);
+  /* e nenhum dos dois queima o link da pessoa: são infraestrutura, não
+     "esse token não é de ninguém". O link só existe na mensagem do WhatsApp. */
+  ok(!ehRecusaDeIdentidade(fk), 'VINCULO_EM_USO não descarta o link guardado');
+  ok(!ehRecusaDeIdentidade(perm), 'SEM_PERMISSAO_DB não descarta o link guardado');
+
+  /* ---- 6d. OS DOIS QUE O PRÓPRIO `api.ts` PRODUZ E NINGUÉM TRADUZIA ------
+
+     `SEM_CONFIG` (app sem as chaves do Supabase) e `VAZIO` (RPC respondendo
+     200 com corpo nulo) caíam em "Não consegui. Tente de novo." — que manda a
+     pessoa repetir uma coisa que nunca vai funcionar naquele aparelho. */
+  for (const c of ['SEM_CONFIG', 'VAZIO']) {
+    const t = recadoDoErro({ erro: c });
+    ok(t !== 'Não consegui. Tente de novo.', `"${c}" tem frase própria`, t);
+    ok(/avise|configuração|servidor/i.test(t), `e "${c}" diz o que fazer em vez de "tente de novo"`, t);
+  }
+  const sc = await rpcCom(null, 'dem_quem_sou', {});
+  ok(recadoDoErro(sc) !== 'Não consegui. Tente de novo.',
+    'e pelo caminho de verdade: sem cliente, a frase é a própria', recadoDoErro(sc));
 }
 
 /* =============================================================================
@@ -436,6 +695,227 @@ function servidorAceita(acao, d, eu) {
   ok(dinheiro(4500).includes('4.500'), 'dinheiro em pt-BR', dinheiro(4500));
   ok(dinheiro(null) === '', 'sem orçamento não escreve R$ 0,00');
   ok(rotStatus('execucao') === 'Em execução', 'rótulo de status');
+}
+
+/* =============================================================================
+   8. O TEXTO DA PESSOA NÃO SE PERDE QUANDO O SERVIDOR RECUSA
+
+   `CaixaDeAcao` fazia `onClick={() => { aoEnviar(t.trim()); setT(''); }}`:
+   dispara e limpa, na mesma linha, sem esperar resposta nenhuma. Em QUALQUER
+   recusa — concluir, cancelar, reabrir, aprovar, recusar, destravar, travar —
+   a pessoa lê o aviso vermelho com a caixa vazia e redigita tudo.
+
+   Isto não dá para testar importando: é componente com `useState`, e este
+   repositório não tem renderizador de React. O jeito que a casa já usa está
+   em `scripts/demandas-porta-propria.test.mjs`: ARRANCA a função do arquivo e
+   a EXECUTA com um mundo de mentira. É o contrário de casar expressão regular
+   com a grafia da linha — se alguém reescrever o conserto de outro jeito que
+   funcione, passa; se voltar a limpar antes da hora, reprova.
+   ============================================================================= */
+{
+  const { readFileSync } = await import('node:fs');
+
+  /* Contador de chaves, e não expressão regular, porque o corpo tem chaves
+     dentro (objetos, blocos) e regex não conta.
+
+     O QUE SE ARRANCA É A EXPRESSÃO INTEIRA, e isso não é detalhe: a primeira
+     versão deste bloco procurava `onClick={async () => {` e arrancava só o
+     MIOLO. Sabotando o conserto de volta para a forma síncrona, o teste
+     reprovava — mas reprovava porque não ACHOU a marca, e não porque mediu o
+     comportamento. Teste que depende da grafia da linha que ele mede é o
+     defeito que `scripts/_ts.mjs` descreve no próprio cabeçalho, cometido
+     aqui dentro. Pegando a função inteira, síncrona ou `async`, quem reprova
+     é o comportamento. */
+  const bloco = (txt, i) => {
+    let n = 0;
+    for (let j = i; j < txt.length; j++) {
+      if (txt[j] === '{') n++;
+      else if (txt[j] === '}') { n--; if (n === 0) return txt.slice(i + 1, j); }
+    }
+    return null;
+  };
+  /* o que está entre as chaves de `marca` (que termina em `{`) */
+  const depoisDe = (txt, marca, de = 0) => {
+    const i = txt.indexOf(marca, de);
+    return i < 0 ? null : bloco(txt, i + marca.length - 1);
+  };
+  /* o corpo de `function nome(...)`, pulando os parênteses da assinatura —
+     que têm `{}` dentro, no valor padrão de `dados` */
+  const corpoDe = (txt, marca) => {
+    let i = txt.indexOf(marca);
+    if (i < 0) return null;
+    i = txt.indexOf('(', i);
+    let n = 0, j = i;
+    for (; j < txt.length; j++) {
+      if (txt[j] === '(') n++;
+      else if (txt[j] === ')') { n--; if (n === 0) break; }
+    }
+    return bloco(txt, txt.indexOf('{', j));
+  };
+
+  /* ---- 8a. a decisão de limpar, dentro da `CaixaDeAcao` ------------------ */
+  const ui = readFileSync('components/demandas/Ui.tsx', 'utf8');
+  /* âncora no `disabled` do botão: é a única ocorrência, e não depende de
+     como o `onClick` está escrito */
+  const corpoClique = depoisDe(ui, 'onClick={', ui.indexOf('disabled={salvando'));
+  ok(corpoClique !== null, 'achei o clique do botão da CaixaDeAcao para executar');
+  const fabricaClique = new Function('aoEnviar', 't', 'setT', `return (${corpoClique});`);
+
+  const roda = async (resposta, texto = '  oi  ') => {
+    const visto = { enviou: null, limpou: false };
+    await fabricaClique(x => { visto.enviou = x; return resposta; }, texto,
+                        () => { visto.limpou = true; })();
+    return visto;
+  };
+
+  ok((await roda(false)).limpou === false,
+    'servidor recusou (false): a caixa NÃO apaga o que a pessoa escreveu');
+  ok((await roda(Promise.resolve(false))).limpou === false,
+    'e recusa que chega por promessa também segura o texto');
+  ok((await roda(Promise.resolve(true))).limpou === true,
+    'deu certo: a caixa limpa, senão o próximo comentário nasce sujo');
+  ok((await roda(undefined)).limpou === true,
+    'quem não responde nada continua limpando, como antes');
+  ok((await roda(false)).enviou === 'oi', 'e o texto vai aparado, sem os espaços');
+
+  /* e ela ESPERA: limpar antes de a promessa voltar é o defeito com outra
+     cara, porque a recusa chega depois do sumiço do texto. */
+  {
+    let limpou = false, solta;
+    const espera = new Promise(r => { solta = r; });
+    const indo = fabricaClique(() => espera, 'texto', () => { limpou = true; })();
+    await Promise.resolve();
+    ok(limpou === false, 'não limpa enquanto o servidor ainda não respondeu');
+    solta(false);
+    await indo;
+    ok(limpou === false, 'e se a resposta for recusa, não limpa nunca');
+  }
+
+  /* ---- 8b. e a outra ponta: `agir`, na ficha, devolvendo `false` --------- */
+  const ficha = readFileSync('app/demandas/d/[numero]/page.tsx', 'utf8');
+  const corpoAgir = corpoDe(ficha, 'async function agir');
+  ok(corpoAgir !== null, 'achei o `agir` da ficha para executar');
+  const agir = new Function('acao', 'dados', 'setIndo', 'setErro', 'mover', 'numero',
+                            'recadoDoErro', 'setAberto', 'carregar',
+    `return (async () => {${corpoAgir}})();`);
+  const nada = () => {};
+  const recusa = await agir('concluir', {}, nada, nada,
+    async () => ({ ok: false, erro: 'ATRASO_PRECISA_MOTIVO' }), 7,
+    () => 'qualquer frase', nada, async () => {});
+  ok(recusa === false, 'recusa do servidor devolve false, que é o que segura o texto');
+  const passou = await agir('concluir', {}, nada, nada,
+    async () => ({ ok: true }), 7, () => '', nada, async () => {});
+  ok(passou === true, 'e o caminho bom devolve true');
+
+  /* ---- 8c. o comentário interno: a chave que ninguém mandava ------------- */
+  const iComentario = ficha.indexOf('rot="Escrever alguma coisa"');
+  ok(iComentario > 0, 'achei a caixa de comentário da ficha');
+  const corpoEnviar = depoisDe(ficha, 'aoEnviar={', iComentario);
+  ok(corpoEnviar !== null, 'achei o envio do comentário para executar');
+  const enviar = new Function('agir', 'interno', 'setInterno', `return (${corpoEnviar});`);
+  {
+    /* `null` e não `false` de propósito: começar em `false` faz "ninguém
+       chamou" parecer "chamou com false", e o teste passa a aprovar a
+       ausência do conserto. Medido sabotando: com `false` inicial, apagar o
+       `setInterno(false)` da ficha não reprovava nada. */
+    let mandou = null, desmarcou = null;
+    const f = enviar(async (a, d) => { mandou = { a, d }; return true; }, true,
+                     x => { desmarcou = x; });
+    await f('combinei com a Monik');
+    ok(mandou?.a === 'comentar', 'o comentário é gravado como comentário');
+    ok(mandou?.d.interno === true,
+      'e a chave `interno` VAI junto: sem ela a coluna do banco é inalcançável',
+      JSON.stringify(mandou?.d));
+    ok(desmarcou === false,
+      'e a caixinha volta para desmarcada, senão o PRÓXIMO comentário some sem ninguém ver',
+      String(desmarcou));
+  }
+  {
+    /* recusou: nem grava, nem desmarca — a pessoa tenta de novo com o mesmo
+       texto E a mesma marcação */
+    let desmarcou = null;
+    const f = enviar(async () => false, true, x => { desmarcou = x; });
+    ok(await f('x') === false, 'recusa do comentário devolve false para a caixa');
+    ok(desmarcou === null, 'e a marcação de interno não se perde na recusa');
+  }
+
+  /* ---- 8d. as duas datas de prazo do PDF, na mesma linha -----------------
+
+     O PDF pede "Data desejada para conclusão" (Detalhamento) E "Prazo
+     definido" (Acompanhamento), e existe uma coluna só: quando o setor muda o
+     prazo, o pedido original só sobrevive como evento no histórico.
+
+     São DOIS pedaços, e os dois precisam ser executados. O primeiro é qual
+     evento se lê — tem que ser o PRIMEIRO de tipo `prazo`, porque é o único
+     cujo `de` é a data que quem pediu escreveu; qualquer outro é uma data que
+     o setor já tinha trocado. Medido sabotando: trocar `find` por pegar o
+     último passava calado enquanto só a linha da tabela era testada. */
+  const corpoPedido = depoisDe(ficha, 'useMemo(() => {', ficha.indexOf('const prazoPedido'));
+  ok(corpoPedido !== null, 'achei a escolha do prazo pedido para executar');
+  const qualPrazo = new Function('v', corpoPedido);
+  const ev = (de, para) => ({ tipo: 'prazo', de, para });
+  ok(qualPrazo({ eventos: [{ tipo: 'abertura' }, ev('2026-09-22', '2026-09-25'),
+                            ev('2026-09-25', '2026-09-28')] }) === '2026-09-22',
+    'o prazo pedido é o `de` do PRIMEIRO evento de prazo, não o da última troca',
+    qualPrazo({ eventos: [{ tipo: 'abertura' }, ev('2026-09-22', '2026-09-25'),
+                           ev('2026-09-25', '2026-09-28')] }));
+  ok(qualPrazo({ eventos: [{ tipo: 'comentario' }] }) === '',
+    'demanda sem troca de prazo não inventa data pedida');
+  ok(qualPrazo({ eventos: [ev(null, '2026-09-28')] }) === '',
+    'demanda que NASCEU sem prazo também não: o `de` é nulo, e nulo não é pedido');
+  ok(qualPrazo(null) === '', 'e a ficha ainda carregando não quebra');
+
+  const iPrazo = ficha.indexOf('<Li rot="Prazo"');
+  ok(iPrazo > 0, 'achei a linha do prazo na ficha');
+  const expr = depoisDe(ficha, 'v={', iPrazo);
+  ok(expr !== null, 'achei o valor da linha do prazo para executar');
+  const linhaPrazo = new Function('d', 'prazoPedido', 'dataCheia', `return (${expr});`);
+  const dcheia = (i) => dataCheia(i);
+  ok(linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '2026-09-22', dcheia)
+      === '28/09/2026 (pedido para 22/09/2026)',
+    'prazo trocado mostra o que o setor assumiu E o que quem pediu tinha pedido',
+    linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '2026-09-22', dcheia));
+  ok(linhaPrazo({ prazo: '2026-09-22', sem_prazo_porque: '' }, '2026-09-22', dcheia)
+      === '22/09/2026',
+    'prazo que não mudou não ganha parêntese repetindo a mesma data');
+  ok(linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '', dcheia) === '28/09/2026',
+    'demanda que nunca teve o prazo mexido também não');
+  ok(linhaPrazo({ prazo: null, sem_prazo_porque: 'depende do pastor' }, '2026-09-22', dcheia)
+      === 'sem data — depende do pastor (pedido para 22/09/2026)',
+    'e o prazo tirado continua dizendo qual era a data pedida',
+    linhaPrazo({ prazo: null, sem_prazo_porque: 'depende do pastor' }, '2026-09-22', dcheia));
+
+  /* ---- 8d-bis. o botão da etapa 5, dentro do cartão verde ----------------
+     Ele é o único caminho de `validar` na tela, e mora fora da grade de
+     propósito (a grade já tem doze botões e a regra da casa é que ela não
+     engorde). Executado, e não lido: o que importa é a ação que ele chama. */
+  const cliqueValida = depoisDe(ficha, 'onClick={', ficha.indexOf('{d.validada_em ? ('));
+  ok(cliqueValida !== null, 'achei o botão "Resolveu, obrigado" para executar');
+  {
+    let pedida = null;
+    new Function('agir', `return (${cliqueValida});`)(a => { pedida = a; })();
+    ok(pedida === 'validar', 'o botão do cartão verde chama `validar`', String(pedida));
+  }
+
+  /* ---- 8e. as ações que NÃO viram botão na grade ------------------------- */
+  const fora = new Function(`return (${/FORA_DA_GRADE[^=]*=\s*(\[[^\]]*\])/.exec(ficha)[1]});`)();
+  ok(fora.includes('comentar') && fora.includes('validar'),
+    'a grade sabe que `comentar` e `validar` não têm botão nela', JSON.stringify(fora));
+  ok(!fora.includes('desanexar'),
+    '`desanexar` saiu da lista junto com a ação: ela não sai mais de acoesDe');
+  /* o ramo de "cartão vazio" tem que disparar para quem SÓ pode confirmar:
+     validar mora no cartão verde, então a grade fica sem nada. */
+  {
+    const so = acoesDe({ status: 'concluida', travada_por: null, aprovacao: null, validada_em: null },
+                       { papel: 'solicitante', atende: false, abriu: true, id: 'eu-1' });
+    ok(so.filter(a => !fora.includes(a)).length > 0,
+      'quem pode reabrir ainda vê botão na grade', JSON.stringify(so));
+    const validada = acoesDe({ status: 'concluida', travada_por: null, aprovacao: null,
+                               validada_em: '2026-09-22T12:00:00Z' },
+                             { papel: 'solicitante', atende: false, abriu: false, id: 'eu-1' });
+    ok(validada.filter(a => !fora.includes(a)).length === 0,
+      'e quem só enxerga cai no ramo do cartão vazio, que tem frase', JSON.stringify(validada));
+  }
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

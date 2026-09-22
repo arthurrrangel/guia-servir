@@ -57,6 +57,18 @@ export type Resumo = {
   responsavel_id: string | null;
   criada_em: string; mexida_em: string; parada_dias: number;
   atrasada: boolean; reaberturas: number;
+  /* A ETAPA 5 DO PDF, QUE NÃO TINHA COLUNA — migração 91.
+
+     "Depois da execução, o setor solicitante ou responsável pela gestão
+     valida se a demanda foi atendida corretamente." Até aqui o sistema
+     registrava a DISCORDÂNCIA (`reabrir`) e não registrava a concordância, e
+     as duas não são a mesma informação: sem este carimbo, "não foi reaberta"
+     conta a mesma história para a demanda que resolveu e para a que a pessoa
+     desistiu de cobrar.
+
+     Vem na lista, e não só na ficha, porque a pergunta que ele responde é de
+     painel: quantas concluídas ninguém confirmou. */
+  validada_em: string | null;
 };
 
 /** O que a tela de uma demanda devolve a mais. */
@@ -68,6 +80,11 @@ export type Detalhe = Resumo & {
   atraso_motivo: string | null; cancelada_motivo: string | null;
   categoria_id: string; setor_responsavel_id: string; responsavel_id: string | null;
   abriu_telefone: string | null; resp_telefone: string | null;
+  /* o NOME de quem confirmou. `validada_em` já vem do `Resumo`; aqui entra
+     quem, porque "Validada em 22/09" sem dono não fecha a etapa 5: o PDF diz
+     "o setor solicitante OU responsável pela gestão", e são decisões
+     diferentes. */
+  validada_por: string | null;
 };
 
 export type Evento = {

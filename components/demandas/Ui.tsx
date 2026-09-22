@@ -115,7 +115,11 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
                              teto = 4000, podeEnviar = true }: {
   rot: string; dica?: string; botao: string;
   tom?: 'pri' | 'perigo'; exigeTexto?: boolean; salvando?: boolean;
-  aoEnviar: (texto: string) => void; extra?: React.ReactNode; teto?: number;
+  /* DEVOLVE `false` QUANDO O SERVIDOR RECUSOU — e a caixa não apaga nada.
+     Ver o comentário do `onClick`. Quem não tem o que responder devolve
+     `void`, e aí a caixa limpa como antes. */
+  aoEnviar: (texto: string) => void | boolean | Promise<void | boolean>;
+  extra?: React.ReactNode; teto?: number;
   /* O BOTAO SO OLHAVA O TEXTAREA, E HAVIA CAMPO OBRIGATORIO FORA DELE.
 
      "Concluir" numa demanda atrasada precisa do motivo do atraso, que mora no
@@ -147,9 +151,27 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
         ? <div className="dm-peq dm-mudo" role="status">{sobra} letra{sobra === 1 ? '' : 's'} restante{sobra === 1 ? '' : 's'}</div>
         : null}
       {extra}
+      {/* A CAIXA APAGAVA O TEXTO ANTES DE SABER SE DEU CERTO — 22/09/2026.
+
+          Era `onClick={() => { aoEnviar(t.trim()); setT(''); }}`: dispara e
+          limpa, na mesma linha, sem esperar resposta nenhuma. Em QUALQUER
+          recusa do servidor — concluir, cancelar, reabrir, aprovar, recusar,
+          destravar, travar — a pessoa lê o aviso vermelho com a caixa VAZIA e
+          tem que redigitar o que já tinha escrito.
+
+          E não é caso raro: é justamente o caminho dos erros que esta entrega
+          está consertando. `ATRASO_PRECISA_MOTIVO` num texto de conclusão de
+          800 letras, `SO_GESTOR_REABRE_APROVACAO` numa trava, `FALTA_APROVACAO`
+          num concluir. Quanto mais a pessoa escreveu, mais caro sai o erro, e
+          a segunda tentativa vem pior que a primeira porque ninguém redigita
+          com o mesmo cuidado.
+
+          Agora a limpeza espera a promessa e só acontece quando não foi
+          recusa. `false` é o único valor que segura o texto: assim quem não
+          responde nada (`void`) continua limpando, como antes. */}
       <button className={`dm-btn dm-${tom || 'pri'} dm-larga`}
         disabled={salvando || !podeEnviar || (exigeTexto && !t.trim())}
-        onClick={() => { aoEnviar(t.trim()); setT(''); }}>
+        onClick={async () => { if (await aoEnviar(t.trim()) !== false) setT(''); }}>
         {salvando ? 'Salvando…' : botao}
       </button>
     </div>

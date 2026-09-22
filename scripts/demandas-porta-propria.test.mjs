@@ -21,8 +21,30 @@
         sistema ("ESPAÇO DO ORGANIZADOR")
      3. nada dentro de `app/demandas/` nem de `components/demandas/` importa
         peça de `components/Shell`, `components/Marca` ou `app/entrar`
-     4. `destino()` da porta só aceita caminho que comece com `/demandas` —
-        senão `?volta=/painel` refazia o defeito por fora
+     4. `destino()` da porta, EXECUTADA de verdade com cargas de ataque, nunca
+        devolve caminho fora de `/demandas`
+
+   O ITEM 4 MUDOU EM 22/09/2026, À NOITE, E A MUDANÇA É O ASSUNTO DESTE ARQUIVO
+
+   A versão anterior dele fazia isto:
+
+     ok(/startsWith\(\s*['"]\/demandas['"]\s*\)/.test(bruto),
+        'destino() só aceita volta que comece com /demandas');
+
+   Isso procura uma GRAFIA. Ficou verde por dois dias enquanto
+
+       ?volta=%2Fdemandas%2F..%2Fpainel
+
+   levava a pessoa para `/painel`, a tela do outro sistema: `destino()`
+   aprovava a string crua, e o navegador normalizava `..` depois. O teste media
+   que a linha estava escrita, não que a regra valia. É o defeito que o próprio
+   cabeçalho de `scripts/_ts.mjs` descreve: "Teste que lê código em vez de
+   executá-lo não testa comportamento, testa grafia."
+
+   Agora o teste ARRANCA `destino()` do arquivo e a EXECUTA com 24 cargas, com
+   um `window` de mentira. Se alguém reescrever a guarda de qualquer jeito que
+   deixe um caminho escapar, este arquivo reprova — mesmo que a grafia antiga
+   continue lá, e mesmo que a grafia antiga suma.
 
    Roda com `node scripts/demandas-porta-propria.test.mjs`, sem banco e sem
    navegador. */
@@ -72,11 +94,61 @@ function arquivos(dir, fim = /\.tsx?$/) {
   /* e a prosa PODE citar: é o defeito que a tela existe para matar */
   ok(/painel/.test(bruto), 'e o arquivo explica por que ela existe (a prosa cita o defeito)');
 
-  /* a guarda do `?volta=`: sem ela a porta vira a porta do outro sistema */
-  ok(/startsWith\(\s*['"]\/demandas['"]\s*\)/.test(bruto),
-     'destino() só aceita volta que comece com /demandas');
-  ok(/includes\(\s*['"]\\\\['"]\s*\)|includes\('\\\\'\)/.test(bruto) || /\\\\/.test(bruto),
-     'e continua barrando barra invertida (redirecionamento aberto)');
+  /* ---- a guarda do `?volta=`, EXECUTADA ------------------------------- */
+
+  /* arranca a função do arquivo de produção. Se ela sumir ou mudar de nome, o
+     teste reprova aqui em vez de medir outra coisa em silêncio. */
+  const corpo = (bruto.match(/function destino\(\)\s*:\s*string\s*\{[\s\S]*?\n\}/) || [])[0];
+  ok(!!corpo, 'achei destino() no arquivo da porta');
+
+  const ORIGEM = 'https://guiaservir.com';
+  const rodar = corpo
+    ? new Function('window', 'URL',
+        `const CASA = '/demandas';\n${corpo.replace(/\)\s*:\s*string\s*\{/, ') {')}\nreturn destino();`)
+    : null;
+
+  /* o que `location.href = <isto>` faz de verdade: o navegador normaliza antes
+     de navegar, e é essa string final que decide em que sistema a pessoa cai */
+  const ondeVaiParar = s => { try { return new URL(s, ORIGEM).href; } catch { return ORIGEM + '/demandas'; } };
+
+  const CARGAS = [
+    '/demandas/../painel', '/demandas/../../painel', '/demandas/./../painel',
+    '/demandas\t/../painel', '/demandas\n/../painel', '/demandas/..%2fpainel',
+    '/demandas/%2e%2e/painel', '/demandas/d/1/../../painel', '/demandas/../entrar',
+    '//malicioso.com', '/\\malicioso.com', '\\\\malicioso.com', '///malicioso.com',
+    'https://malicioso.com', 'http://malicioso.com/demandas', '//guiaservir.com@malicioso.com',
+    'javascript:alert(1)', 'data:text/html,<b>x', '/painel', '/entrar', '/demandasx',
+    '/demandas.evil.com', '', 'demandas',
+  ];
+
+  for (const carga of CARGAS) {
+    const win = {
+      location: { href: `${ORIGEM}/demandas/entrar?volta=${encodeURIComponent(carga)}`, origin: ORIGEM },
+    };
+    const saida = rodar ? rodar(win, URL) : '(sem função)';
+    const fim = ondeVaiParar(saida);
+    const seguro = fim === `${ORIGEM}/demandas` || fim.startsWith(`${ORIGEM}/demandas/`)
+                || fim.startsWith(`${ORIGEM}/demandas?`) || fim.startsWith(`${ORIGEM}/demandas#`);
+    ok(seguro, `?volta=${JSON.stringify(carga)} não sai do /demandas`,
+       `destino()=${JSON.stringify(saida)} → navegador vai para ${fim}`);
+  }
+
+  /* e o caminho legítimo continua funcionando: a porta não pode virar um muro */
+  for (const [carga, esperado] of [
+    ['/demandas', '/demandas'],
+    ['/demandas/d/42', '/demandas/d/42'],
+    ['/demandas/numeros?p=90', '/demandas/numeros?p=90'],
+    ['/demandas/d/42#hist', '/demandas/d/42#hist'],
+  ]) {
+    const win = {
+      location: { href: `${ORIGEM}/demandas/entrar?volta=${encodeURIComponent(carga)}`, origin: ORIGEM },
+    };
+    ok(rodar && rodar(win, URL) === esperado, `?volta=${carga} devolve a pessoa para lá`,
+       'devolveu ' + JSON.stringify(rodar ? rodar(win, URL) : null));
+  }
+
+  /* sem navegador (render no servidor) a função não pode explodir */
+  ok(rodar && rodar(undefined, URL) === '/demandas', 'sem window, destino() devolve a casa');
 }
 
 /* ---- 2 · a casca não manda ninguém para a tela do outro sistema --------- */

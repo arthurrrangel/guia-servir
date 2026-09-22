@@ -65,19 +65,43 @@ import { sugerirEmail } from '@/lib/email';
 /* PARA ONDE ESTA PORTA DEVOLVE
 
    `/demandas`, e so. O parametro existe para quem chegou de uma ficha
-   especifica voltar para ELA depois do login, e e validado com a mesma regra
-   da outra porta MAIS uma: tem que comecar com `/demandas`. Sem essa segunda
-   regra, `?volta=/painel` transformaria esta tela na porta do outro sistema
-   outra vez, so que por fora. */
+   especifica voltar para ELA depois do login.
+
+   A PRIMEIRA VERSAO JULGAVA A STRING CRUA, E ERA FURADA — 22/09/2026, noite.
+
+   Ela fazia `v.startsWith('/demandas')` e devolvia `v` inteiro. A quarta
+   auditoria mediu num navegador de verdade o que acontece com
+
+       /demandas/entrar?volta=%2Fdemandas%2F..%2Fpainel
+
+   `destino()` aprovava (comeca com `/demandas`), `location.href` recebia a
+   string, e o NAVEGADOR normalizava `..` antes de navegar: a pessoa caia em
+   `/painel`, que e a tela do outro sistema. Exatamente o defeito que esta tela
+   existe para matar, refeito por dentro. Tab e quebra de linha no meio
+   (`/demandas\t/../painel`) tambem passavam, porque o algoritmo WHATWG remove
+   esses caracteres ANTES de normalizar — entao nem filtrar `..` resolveria.
+
+   A REGRA AGORA: normalizar primeiro, julgar depois. `new URL(v, origem)` faz
+   exatamente o que o navegador vai fazer, e o que sobra e o caminho de
+   verdade. Se a origem mudou, nao e nosso. Se o caminho nao e `/demandas` nem
+   comeca com `/demandas/`, nao e nosso. E o que volta e o caminho JA
+   normalizado, nao a string que a pessoa mandou.
+
+   Quem prova isto nao e este comentario: `scripts/demandas-porta-propria.test.mjs`
+   ARRANCA esta funcao do arquivo e a EXECUTA com as cargas de ataque. A versao
+   anterior do teste procurava a grafia `startsWith('/demandas')` no arquivo, e
+   por isso ficou verde com o furo aberto por dois dias. */
 const CASA = '/demandas';
 
 function destino(): string {
   if (typeof window === 'undefined') return CASA;
   try {
     const v = new URL(window.location.href).searchParams.get('volta') || '';
-    if (!v.startsWith('/demandas')) return CASA;
-    if (v.startsWith('//') || v.includes('\\')) return CASA;
-    return v;
+    if (!v) return CASA;
+    const u = new URL(v, window.location.origin);
+    if (u.origin !== window.location.origin) return CASA;
+    if (u.pathname !== CASA && !u.pathname.startsWith(CASA + '/')) return CASA;
+    return u.pathname + u.search + u.hash;
   } catch { return CASA; }
 }
 

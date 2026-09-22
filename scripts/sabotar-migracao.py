@@ -82,7 +82,31 @@ def psql(*args, tx=False):
     for a in args:
         cmd += ['-f', a]
     p = subprocess.run(cmd, capture_output=True, text=True)
-    return p.stdout + p.stderr
+    saida = p.stdout + p.stderr
+    # BANCO MORTO NAO E SABOTAGEM QUE PASSOU.
+    #
+    # 22/09/2026. O Postgres da porta 5439 caiu no meio de uma bateria e este
+    # script imprimiu, uma por uma, 30 linhas dizendo "A SABOTAGEM PASSOU. A
+    # conferencia nao testa isto." -- e fechou com "controle negativo: sem
+    # sabotagem, passa". Todas as tres afirmacoes eram falsas pelo mesmo
+    # motivo: `psql` nem conectou, entao a string `REPROVOU` nao podia
+    # aparecer, e ausencia de REPROVOU estava sendo lida como prova de que a
+    # conferencia e cega.
+    #
+    # Um instrumento que declara verde sobre um cadaver e exatamente a familia
+    # de defeito que esta bateria existe para cacar. Falha de infraestrutura
+    # para a bateria INTEIRA, com codigo de saida proprio, em vez de virar
+    # resultado.
+    if 'could not connect' in saida or 'failed: No such file or directory' in saida \
+       or 'server closed the connection' in saida or 'connection to server' in saida:
+        print('\nO BANCO DA BATERIA NAO RESPONDE. Nada do que veio antes vale:')
+        for l in saida.strip().splitlines()[:4]:
+            print('  ' + l.strip())
+        print('\n  Suba o Postgres da porta 5439 e rode de novo:')
+        print("  su postgres -c \"/usr/lib/postgresql/16/bin/pg_ctl -D /tmp/pg-do-zero/data "
+              "-l /tmp/pg-do-zero/log -o '-k /tmp -p 5439 -c listen_addresses=' start\"")
+        sys.exit(2)
+    return saida
 
 
 def troca(fn, antes, depois, schema='public'):
@@ -171,10 +195,22 @@ for c in mod.CASOS:
 open(f'{S}/nada.sql', 'w').write('select 1;\n')
 out = psql(f'{S}/nada.sql', CONF, tx=True)
 if f'{N} REPROVOU' in out:
-    print('  FALHA controle negativo — a conferencia reprova SEM sabotagem nenhuma')
+    print('  FALHA controle negativo - a conferencia reprova SEM sabotagem nenhuma')
+    falhas += 1
+elif f'OK {N}' not in out:
+    # PROVA POSITIVA, E NAO AUSENCIA DE REPROVACAO.
+    #
+    # 22/09/2026. Este ramo dizia "ok, passa" sempre que `REPROVOU` nao
+    # aparecia -- inclusive quando a conferencia nao tinha rodado. Com o banco
+    # fora do ar, o controle negativo (que existe para provar que a bateria
+    # sabe distinguir verde de vermelho) foi a ultima linha a mentir.
+    print('  FALHA controle negativo - a conferencia nao chegou a rodar '
+          f'(faltou o aviso "OK {N}" na saida)')
+    for l in out.strip().splitlines()[-3:]:
+        print('        ' + l.strip())
     falhas += 1
 else:
-    print('  ok   controle negativo: sem sabotagem, passa')
+    print('  ok   controle negativo: sem sabotagem, a conferencia roda e passa')
 
 print()
 if falhas:

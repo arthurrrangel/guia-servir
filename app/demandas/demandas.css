@@ -460,13 +460,28 @@
    Quem abre isso no celular não lê um filtro, lê um amontoado. É o tal
    "visual de sistema inacabado".
 
-   Agora são dois controles segmentados, cada um com uma pergunta só:
+   Agora são dois controles segmentados, cada um com uma pergunta só, e os
+   dois com o MESMO desenho: uma linha que desliza na horizontal em vez de
+   quebrar, e duas por duas abaixo de 370px. Deslizar um trilho de filtro é
+   gesto conhecido; escada não é.
 
-     · `.dm-seg` para a pergunta de recorte, com rótulos compridos: UMA
-       linha que desliza na horizontal em vez de quebrar. Deslizar um trilho
-       de filtro é gesto conhecido; escada não é;
-     · `.dm-seg.dm-igual` para a pergunta de estado, com rótulos curtos:
-       três fatias iguais, sem rolagem, porque cabem.
+   HOUVE UMA VARIANTE `dm-igual` AQUI, E ELA MORREU COM O QUARTO RECORTE.
+
+   Ela desligava a rolagem ("três fatias iguais, sem rolagem, porque cabem")
+   para a pergunta de estado, que tinha três rótulos curtos, e de quebra
+   escapava da queda para duas colunas logo abaixo, porque a regra pedia
+   `dm-seg` SEM `dm-igual`. O escopo da primeira versão do documento pede o
+   painel com abertas, atrasadas E CONCLUÍDAS, e com quatro rótulos eles não
+   cabem mais. Medido no Chromium, recriando aquela geometria com os quatro:
+
+     360px: a tira mede 294px, os quatro botões precisam de 346, e "Todas"
+            termina em x=379 contra a borda do cartão em 327;
+     390px: a tira mede 324px, os mesmos 346, "Todas" em 379 contra 357.
+
+   Com `overflow:visible`, isso é o quarto recorte pendurado para fora do
+   cartão nos dois tamanhos de celular. Tirar a variante é o conserto; manter
+   uma regra de folha que ninguém escreve seria deixar a próxima pessoa achar
+   que ainda existe um caso de três.
 
    O texto nunca quebra dentro do botão (`white-space:nowrap`): era o que
    fazia "Em aberto" virar duas linhas dentro da própria pílula. */
@@ -491,13 +506,13 @@
   background:var(--dm-card);color:var(--dm-ink);font-weight:650;
   box-shadow:0 1px 2px rgba(37,37,37,.10),0 0 0 1px var(--dm-linha);
 }
-.dm-seg.dm-igual{overflow:visible}
 /* Em 320px os quatro recortes não cabem numa fita só, e o último fica
    espiando pela borda. Duas por duas: os quatro aparecem inteiros, as
    fatias continuam do mesmo tamanho, e ninguém precisa descobrir que
-   aquilo rolava. */
+   aquilo rolava. Vale para as duas tiras desde que a de estado também tem
+   quatro. */
 @media (max-width:370px){
-  .dm-seg:not(.dm-igual){display:grid;grid-template-columns:1fr 1fr;overflow:visible}
+  .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
 }
 
 /* a busca ganha a linha inteira: espremida entre botões ela ficava com 200px

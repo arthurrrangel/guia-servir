@@ -62,9 +62,23 @@ export const ehSemSistema = (e: { code?: string; message?: string }) =>
    e ele só existe naquela mensagem: é perda de acesso por um erro que ia
    passar em três segundos. Mora aqui, e não na casca, porque a pergunta é
    sobre o CÓDIGO da resposta — assunto deste arquivo. */
+/* A LISTA CRESCE JUNTO COM `rpcCom`, E ELA JÁ TINHA FICADO PARA TRÁS.
+
+   22/09/2026. Esta lista nasceu com os quatro erros que `rpcCom` produzia
+   quando ela foi escrita. Depois `rpcCom` ganhou `SEM_PERMISSAO_DB` (42501) e
+   agora `VINCULO_EM_USO` (23503) — os dois saídos de `REDE`, que ESTÁ na
+   lista. Ou seja: dar nome próprio ao erro de infraestrutura, sem tocar aqui,
+   transformava falha de grant em "esse token não é de ninguém" e QUEIMAVA o
+   link da pessoa. O link só existe na mensagem do WhatsApp.
+
+   Nenhum dos dois é recusa de IDENTIDADE: 42501 é permissão faltando no
+   Postgres e 23503 é vínculo de dado. Escrito como lista nomeada para a
+   próxima chave nova ser posta aqui junto. */
+const NAO_E_IDENTIDADE = ['REDE', 'SEM_SISTEMA', 'SEM_CONFIG', 'VAZIO',
+                          'SEM_PERMISSAO_DB', 'VINCULO_EM_USO'];
+
 export const ehRecusaDeIdentidade = (r: { ok: boolean; erro?: string }) =>
-  !r.ok && r.erro !== 'REDE' && r.erro !== 'SEM_SISTEMA' && r.erro !== 'SEM_CONFIG'
-       && r.erro !== 'VAZIO';
+  !r.ok && !NAO_E_IDENTIDADE.includes(r.erro || '');
 
 /* O CLIENTE ENTRA POR PARÂMETRO PARA O TESTE PODER SEGURAR ESTE CAMINHO.
 
@@ -108,6 +122,24 @@ export async function rpcCom<T>(
        não ter chave nenhuma, porque ninguém volta a olhar. */
     if (error.code === '42501') {
       return { ok: false, erro: 'SEM_PERMISSAO_DB', regra: error.message, codigo: error.code };
+    }
+    /* E O 23503 ERA A MESMA CHAVE MORTA, UM CÓDIGO ADIANTE — 22/09/2026.
+
+       O comentário acima conta que uma chave sem ninguém a produzindo é pior
+       que chave nenhuma. A linha do 42501 nasceu e o 23503 ficou de fora, e
+       ele é a violação de chave estrangeira: cai aqui quando `dem_ajustar`
+       tenta apagar setor, categoria ou pessoa que já tem demanda pendurada.
+
+       Virando `REDE`, a tradução ia parar em `PORCODIGO['23503']` de
+       `lib/erros.ts:210`, que responde, dentro do sistema de Demandas:
+
+         "Não dá para fazer isso enquanto houver ESCALA ou cadastro ligado a
+          este item."
+
+       O mesmo vazamento que a linha de cima existe para fechar, pela porta do
+       lado. `VINCULO_EM_USO` diz a mesma coisa no vocabulário daqui. */
+    if (error.code === '23503') {
+      return { ok: false, erro: 'VINCULO_EM_USO', regra: error.message, codigo: error.code };
     }
     return { ok: false, erro: 'REDE', regra: error.message, codigo: error.code };
   }

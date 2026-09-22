@@ -26,6 +26,17 @@ end $$;
 -- os dois papéis que o Supabase cria sozinho e um Postgres cru não tem
 do $$ begin create role anon;          exception when duplicate_object then null; end $$;
 do $$ begin create role authenticated; exception when duplicate_object then null; end $$;
+-- O TERCEIRO PAPEL, QUE FALTAVA E CUSTOU UMA MIGRACAO INTEIRA.
+--
+-- 22/09/2026. `service_role` e quem o SERVIDOR usa (a rota de avisos, o cron).
+-- Este harness nao o tinha, entao nenhuma conferencia conseguia perguntar "e
+-- quem precisa chamar, consegue chamar?" -- e a resposta, medida em producao
+-- pela quarta auditoria, era NAO: a migracao 90 inteira estava morta porque
+-- `service_role` nao tinha USAGE no schema `demandas`. O bloco `do $conf$` da
+-- 90 dava verde porque rodava como `postgres`, superusuario, que passa por
+-- qualquer grant. Harness que nao tem os papeis da producao mede um sistema
+-- que nao existe em lugar nenhum.
+do $$ begin create role service_role; exception when duplicate_object then null; end $$;
 create schema if not exists auth;
 -- o que o Supabase dá de graça e aqui precisa de dublê: quem está logado
 create or replace function auth.jwt() returns jsonb language sql stable as $$
@@ -59,7 +70,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          87-a-lista-escondia-a-atrasada-e-o-indicador-contava-quem-nao-tinha-prazo \
          88-a-segunda-auditoria-achou-o-que-a-primeira-deixou \
          89-a-terceira-auditoria-e-a-lista-de-invisiveis-que-so-uma-copia-cresceu \
-         90-o-setor-nao-ficava-sabendo-que-chegou-demanda; do
+         90-o-setor-nao-ficava-sabendo-que-chegou-demanda \
+         91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql

@@ -12,19 +12,49 @@
    para quem não atende nada seria uma aba sempre vazia. */
 
 import Link from 'next/link';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
 import { lista, type Filtro } from '@/lib/demandas/api';
 import {
-  dataCurta, diasDeAtraso, quando, recadoDoErro, rotPrioridade, rotStatus,
-  rotTrava, situacao, tomPill, tomPrioridade, quemManda,
+  comoOPdfChama, dataCurta, diasDeAtraso, recadoDoErro, rotPrioridade,
+  situacao, tomPill, tomPrioridade, quemManda,
 } from '@/lib/demandas/regras';
 import type { Eu, Resumo } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
   return <Casca><Painel /></Casca>;
 }
+
+/* OS QUATRO RECORTES DE ESTADO, E O QUARTO É O DO DOCUMENTO.
+
+   O escopo da primeira versão pede, com estas palavras, "painel com demandas
+   abertas, atrasadas e concluídas". A tira tinha três botões e nenhum deles
+   era "concluídas": quem quisesse ver o que já foi entregue precisava tocar
+   em "Todas" e rolar até o fim, porque `dem_lista` ordena por `k_fechada`
+   primeiro e empurra tudo que fechou para baixo das abertas. Com o teto de
+   300 da migração 57, numa casa com muito movimento a demanda concluída nem
+   chegava na resposta: a lista avisava que tinha cortado e o que ficou de
+   fora era justamente o recorte que o documento pede.
+
+   `dem_lista` já aceita: a migração 88 valida `p_f.status` contra a lista
+   ('aberta','execucao','travada','concluida','cancelada'), e `Filtro` já
+   declara o campo. Não houve controle novo: o quarto botão entra na tira que
+   já existia. */
+type Recorte = 'abertas' | 'atrasadas' | 'concluidas' | 'tudo';
+const RECORTES: [Recorte, string][] = [
+  ['abertas', 'Em aberto'], ['atrasadas', 'Atrasadas'],
+  ['concluidas', 'Concluídas'], ['tudo', 'Todas'],
+];
+
+/* UMA IDA AO BANCO POR TECLA, MEDIDA NO NAVEGADOR.
+
+   Digitar "arte do culto" disparava 13 chamadas a `dem_lista`, uma por
+   letra, cada uma podendo trazer 300 itens (174 kB medidos no teto). No 4G
+   da igreja isso é a lista sumindo e voltando treze vezes debaixo do dedo.
+   Aba e filtro continuam instantâneos, porque são um toque e não treze; só
+   o texto espera. */
+const ESPERA_DA_BUSCA = 300;
 
 function Painel() {
   const { eu } = useEu();
@@ -33,20 +63,54 @@ function Painel() {
   const [sobraram, setSobraram] = useState(0);
   const [erro, setErro] = useState('');
   const [aba, setAba] = useState<Filtro['aba']>('tudo');
-  const [so, setSo] = useState<'abertas' | 'atrasadas' | 'tudo'>('abertas');
+  const [so, setSo] = useState<Recorte>('abertas');
+  /* `busca` é o que está escrito no campo; `termo` é o que já virou consulta */
   const [busca, setBusca] = useState('');
+  const [termo, setTermo] = useState('');
+  const [ocupado, setOcupado] = useState(true);
+  /* A RESPOSTA ATRASADA SOBRESCREVIA A RECENTE.
+
+     Era `const r = await lista(f); setItens(r.itens)`, sem conferir se ainda
+     era a busca atual. Medido num navegador de verdade, atrasando a primeira
+     resposta em 4 segundos: a pessoa digitava "arte", a consulta de "arte"
+     voltava primeiro, e depois a resposta velha chegava e pintava por cima.
+     A lista mostrava o resultado de uma busca que ninguém pediu mais, e nada
+     na tela dizia isso.
+
+     `Casca.tsx` já tinha a guarda (`let vivo`) para a mesma classe de
+     defeito. Aqui a guarda é um contador: cada chamada carimba o número do
+     seu pedido e só escreve na tela se ainda for o último. */
+  const pedido = useRef(0);
+
+  useEffect(() => {
+    if (busca.trim() === termo) return;
+    const id = setTimeout(() => setTermo(busca.trim()), ESPERA_DA_BUSCA);
+    return () => clearTimeout(id);
+  }, [busca, termo]);
 
   const buscar = useCallback(async () => {
-    const f: Filtro = { aba, busca: busca.trim() || undefined };
+    const f: Filtro = { aba, busca: termo || undefined };
     if (so === 'abertas') f.abertas = true;
     if (so === 'atrasadas') f.atrasadas = true;
+    if (so === 'concluidas') f.status = 'concluida';
+    const meu = ++pedido.current;
+    setOcupado(true);
     const r = await lista(f);
+    if (meu !== pedido.current) return;   // chegou atrasada: já existe pedido mais novo
+    setOcupado(false);
     if (!r.ok) { setErro(recadoDoErro(r, 'carregar a lista')); setItens([]); setSobraram(0); return; }
     setErro(''); setItens(r.itens);
     setSobraram(r.tem_mais ? Math.max((r.total || 0) - r.itens.length, 0) : 0);
-  }, [aba, so, busca]);
+  }, [aba, so, termo]);
 
-  useEffect(() => { setItens(null); buscar(); }, [buscar]);
+  /* SEM `setItens(null)` AQUI, E ISSO É O CONSERTO.
+
+     Apagar a lista antes de a próxima chegar fazia a tela piscar em branco a
+     cada troca de filtro e a cada tecla. A lista anterior fica no lugar e o
+     bloco diz `aria-busy`, que é como se avisa "estou trocando isto" sem
+     tirar da frente o que a pessoa estava lendo. O esqueleto continua, mas só
+     na primeira carga, quando não há nada para segurar. */
+  useEffect(() => { buscar(); }, [buscar]);
 
   if (!eu) return null;
 
@@ -83,9 +147,25 @@ function Painel() {
             <button key={a.v} type="button" aria-pressed={aba === a.v} onClick={() => setAba(a.v)}>{a.rot}</button>
           ))}
         </div>
-        <div className="dm-seg dm-igual" role="group" aria-label="Em que estado"
+        {/* SEM `dm-igual` DESDE QUE SÃO QUATRO.
+
+            `dm-igual` existia para três rótulos curtos em fatias iguais, sem
+            rolagem, "porque cabem". Com o quarto recorte param de caber, e a
+            variante também desligava a regra de 370px (`.dm-seg:not(.dm-igual)`),
+            então não havia nem a queda para duas por duas. Medido no Chromium,
+            recriando aquela geometria com os quatro botões:
+
+              360px: a tira mede 294px, os quatro precisam de 346, e "Todas"
+                     termina em x=379 contra a borda do cartão em 327;
+              390px: a tira mede 324px, os mesmos 346, "Todas" em 379 contra 357.
+
+            Ou seja: o quarto recorte ficaria pendurado para fora do cartão nos
+            dois tamanhos de celular. Sem a variante vale a regra que a tira de
+            cima já usa com quatro botões: duas por duas abaixo de 370px, trilho
+            que desliza acima disso. Nenhuma linha de folha nova. */}
+        <div className="dm-seg" role="group" aria-label="Em que estado"
           style={{ marginTop: 'var(--dm-e1)' }}>
-          {([['abertas', 'Em aberto'], ['atrasadas', 'Atrasadas'], ['tudo', 'Todas']] as const).map(([v, r]) => (
+          {RECORTES.map(([v, r]) => (
             <button key={v} type="button" aria-pressed={so === v} onClick={() => setSo(v)}>{r}</button>
           ))}
         </div>
@@ -112,36 +192,49 @@ function Painel() {
         </>
       ) : null}
 
-      {itens === null ? <Esqueleto /> : itens.length === 0 ? (
-        <Vazio titulo={vazioDe(aba, so)}>
-          {so !== 'tudo'
-            ? <>Experimente “Todas” aqui em cima, ou <Link href="/demandas/nova">abrir uma demanda</Link>.</>
-            : <>Quando alguém pedir alguma coisa, aparece aqui.</>}
-        </Vazio>
-      ) : (
-        <>
-          <Resumão itens={itens} eu={eu} />
-          <div className="dm-fila">{itens.map(d => <Linha key={d.numero} d={d} />)}</div>
-          {/* LISTA CORTADA TEM QUE DIZER QUE FOI CORTADA.
+      <div aria-busy={ocupado}>
+        {itens === null ? <Esqueleto /> : itens.length === 0 ? (
+          <Vazio titulo={vazioDe(aba, so)}>
+            {so !== 'tudo'
+              ? <>Experimente “Todas” aqui em cima, ou <Link href="/demandas/nova">abrir uma demanda</Link>.</>
+              : <>Quando alguém pedir alguma coisa, aparece aqui.</>}
+          </Vazio>
+        ) : (
+          <>
+            <Resumão itens={itens} eu={eu} />
+            <div className="dm-fila">{itens.map(d => <Linha key={d.numero} d={d} />)}</div>
+            {/* LISTA CORTADA TEM QUE DIZER QUE FOI CORTADA.
 
-              A migração 57 pôs teto de 300 na consulta, porque sem teto a aba
-              "Tudo" descia 10 MB de JSON. Teto sem aviso é pior que o
-              problema que ele resolve: a pessoa olharia uma lista incompleta
-              achando que é a lista. */}
-          {sobraram > 0 && (
-            <p className="dm-corte" role="status">
-              Mostrando as {itens.length} mais urgentes. Outras {sobraram} não
-              couberam — use os filtros acima, ou busque pelo número da demanda.
-            </p>
-          )}
-        </>
-      )}
+                A migração 57 pôs teto de 300 na consulta, porque sem teto a
+                aba "Tudo" descia 10 MB de JSON. Teto sem aviso é pior que o
+                problema que ele resolve: a pessoa olharia uma lista incompleta
+                achando que é a lista. */}
+            {sobraram > 0 && (
+              <p className="dm-corte" role="status">
+                Mostrando as {itens.length} mais urgentes. Outras {sobraram} não
+                couberam. Use os filtros acima, ou busque pelo número da demanda.
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </>
   );
 }
 
-function vazioDe(aba: Filtro['aba'], so: string) {
+function vazioDe(aba: Filtro['aba'], so: Recorte) {
   if (so === 'atrasadas') return 'Nada atrasado.';
+  /* O QUARTO RECORTE PRECISAVA DO SEU PRÓPRIO VAZIO.
+
+     Sem esta linha, o setor que ainda não entregou nada lia "Nenhuma demanda
+     em aberto." dentro do filtro "Concluídas", que é a frase de outro
+     recorte e faz a pessoa achar que tocou no botão errado. */
+  if (so === 'concluidas') {
+    if (aba === 'minhas') return 'Nenhum pedido seu foi concluído ainda.';
+    if (aba === 'setor') return 'O seu setor ainda não concluiu nada.';
+    if (aba === 'comigo') return 'Você ainda não concluiu nada.';
+    return 'Nada concluído ainda.';
+  }
   if (aba === 'minhas') return 'Você não tem demanda aberta.';
   if (aba === 'setor') return 'O seu setor está em dia.';
   if (aba === 'comigo') return 'Nada está com você agora.';
@@ -202,10 +295,34 @@ function Linha({ d }: { d: Resumo }) {
         <span className="dm-item-tit dm-cresce">{d.titulo}</span>
       </div>
       <div className="dm-item-baixo">
+        {/* A LISTA FALAVA UM VOCABULÁRIO QUE O DOCUMENTO NÃO TEM.
+
+            A ficha já traduz os estados para os nomes do documento com
+            `comoOPdfChama`; a lista, que é a tela mais usada do sistema,
+            imprimia `rotStatus` mais `rotTrava` e saía com "Travada ·
+            esperando alguém de fora", "Travada · falta aprovação", "Aberta".
+            Cinco dos onze nomes do documento ("Aguardando aprovação",
+            "Aguardando informações", "Aguardando terceiros", "Aprovada",
+            "Reaberta") não apareciam em lugar nenhum daqui, e "Travada" é
+            exatamente a etiqueta genérica que o documento proíbe: "os status
+            devem refletir o que está acontecendo com a demanda, e não apenas
+            servir como etiquetas".
+
+            Pior que o vocabulário: `rotStatus` lê só a COLUNA `status`, e o
+            portão de aprovação que o servidor cobra agora mora em
+            `falta_aprovacao` (migração 88). Quando o administrador liga
+            "exige aprovação" numa categoria que já tem demanda andando, a
+            lista dizia "Aberta" sobre uma demanda congelada. A ficha dizia
+            "Aguardando aprovação" na mesma demanda, no mesmo minuto.
+
+            `dem_lista` já devolve tudo que `comoOPdfChama` consome
+            (`status`, `travada_por`, `aprovacao`, `falta_aprovacao`,
+            `reaberturas`) e `Resumo` já declara os cinco. O nome mais longo
+            que sai daqui é "Aguardando informações", mais curto que o
+            "Travada · esperando alguém de fora" que saía antes. */}
         <Pill tom={tomPill(d.status)}>
           <span className={`dm-ponto ${tomPill(d.status) ? 'dm-' + tomPill(d.status) : ''}`} />
-          {rotStatus(d.status)}
-          {d.travada_por ? ` · ${rotTrava(d.travada_por).toLowerCase()}` : ''}
+          {comoOPdfChama(d)}
         </Pill>
         {tomPrioridade(d.prioridade)
           ? <Pill tom={tomPrioridade(d.prioridade)}>{rotPrioridade(d.prioridade)}</Pill> : null}

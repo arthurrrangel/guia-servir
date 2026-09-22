@@ -16,7 +16,7 @@ import Casca from '@/components/demandas/Casca';
 import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Pill } from '@/components/demandas/Ui';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, TRAVAS, acoesDe, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
+  HOJE, PRIORIDADES, TRAVAS, acoesDe, carimbo, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
   dinheiro, linkZap, quando, quemManda, recado, recadoDoErro, rotPrioridade, rotStatus,
   rotTrava, situacao, tetoDe, tomPill, tomPrioridade, type Acao,
 } from '@/lib/demandas/regras';
@@ -25,6 +25,16 @@ import type { Bases, Vista } from '@/lib/demandas/tipos';
 export default function Pagina() {
   return <Casca><Uma /></Casca>;
 }
+
+/* As ações que `acoesDe` devolve e que NÃO viram botão na grade, cada uma por
+   um motivo próprio:
+
+     comentar  — a caixa de escrever é fixa, no fim da coluna;
+     validar   — mora dentro do cartão verde "Concluída" (migração 91), e a
+                 regra da casa é que a grade não engorde.
+
+   Serve para o ramo de "cartão vazio" saber contar. Ver o comentário dele. */
+const FORA_DA_GRADE: Acao[] = ['comentar', 'validar'];
 
 function Uma() {
   const params = useParams<{ numero: string }>();
@@ -35,6 +45,10 @@ function Uma() {
   const [erro, setErro] = useState('');
   const [aberto, setAberto] = useState<Acao | ''>('');
   const [indo, setIndo] = useState(false);
+  /* a caixinha "Só para a equipe" do comentário. Mora aqui e não dentro da
+     `CaixaDeAcao` porque o valor viaja no `agir`, e porque ela precisa voltar
+     para desmarcada depois de gravar. */
+  const [interno, setInterno] = useState(false);
 
   const carregar = useCallback(async () => {
     const r = await ver(numero);
@@ -45,18 +59,46 @@ function Uma() {
   useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
   useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias }); }); }, []);
 
-  async function agir(acao: Acao, dados: Record<string, unknown> = {}) {
+  /* DEVOLVE SE DEU CERTO, E ISSO É O QUE SEGURA O TEXTO DA PESSOA.
+
+     `CaixaDeAcao` apagava a caixa na mesma linha em que disparava a ação, sem
+     esperar resposta: toda recusa do servidor custava um texto redigitado.
+     Ver o comentário do `onClick` em `components/demandas/Ui.tsx`. O ramo de
+     erro devolve `false` e é o único que devolve. */
+  async function agir(acao: Acao, dados: Record<string, unknown> = {}): Promise<boolean> {
     setIndo(true); setErro('');
     const r = await mover(numero, acao, dados);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r, 'gravar')); return; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'gravar')); return false; }
     setAberto('');
     await carregar();
+    return true;
   }
 
   const acoes = useMemo(
     () => (v ? acoesDe(v.demanda, v.eu) : []),
     [v]);
+
+  /* O PDF PEDE DUAS DATAS DE PRAZO, E EXISTE UMA COLUNA SÓ — 22/09/2026.
+
+     No Detalhamento ele pede "Data desejada para conclusão" (o que QUEM PEDIU
+     quer) e no Acompanhamento "Prazo definido" (o que o SETOR assumiu). No
+     banco é a mesma coluna `prazo`: quando o setor muda o prazo, o pedido
+     original só sobrevive como evento no histórico, e a ficha passa a mostrar
+     a data do setor como se sempre tivesse sido aquela.
+
+     Medido no efeito: a demanda pedida para 22/09 e empurrada para 28/09
+     aparece igualzinha a uma pedida para 28/09. Quem pediu abre a ficha e não
+     tem como saber que a sua data foi trocada, nem por quanto.
+
+     Coluna nova para isso seria cara e redundante — o dado já desce, na mesma
+     carga de `dem_ver`. O PRIMEIRO evento de tipo `prazo` guarda em `de` o
+     prazo que existia antes da primeira mudança, que é exatamente a data
+     pedida no nascimento. Vira parêntese na linha que já existe. */
+  const prazoPedido = useMemo(() => {
+    const p = v?.eventos.find(e => e.tipo === 'prazo');
+    return p?.de || '';
+  }, [v]);
 
   /* TOCAR EM "CONCLUIR" NAO MUDAVA NADA DO QUE A PESSOA ESTAVA VENDO.
 
@@ -163,9 +205,16 @@ function Uma() {
             {d.aprovacao === 'pendente'
               ? 'A liderança precisa decidir antes de esta demanda andar.'
               : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a liderança decidir.'}
+            {/* "VOCÊ SERÁ AVISADO AQUI MESMO" ERA PROMESSA QUE A TELA NÃO
+                CUMPRE — 22/09/2026. Esta página não recarrega sozinha: não há
+                polling, não há assinatura de tempo real, e o aviso por fora
+                (migração 90) é do SETOR quando a demanda chega, não de quem
+                pediu quando a aprovação sai. Quem lia isso ficava com a aba
+                aberta esperando uma coisa que não ia acontecer. Dizer o que
+                falta e ir embora é mais honesto que prometer um aviso. */}
             {quemManda(v.eu.papel)
               ? <> Você pode aprovar ou recusar aqui ao lado.</>
-              : <> Quem decide é a liderança; você será avisado aqui mesmo.</>}
+              : <> Quem decide é a liderança. Não há o que fazer aqui enquanto isso.</>}
           </div>
         </Aviso>
       ) : null}
@@ -182,8 +231,40 @@ function Uma() {
       {d.status === 'concluida' ? (
         <Aviso tom="ok">
           <div>
-            <b>Concluída</b> {quando(d.concluida_em)}. {d.conclusao}
+            {/* `carimbo` e nao `quando`: o PDF pede a data de conclusao, e a
+                frase relativa sozinha ("ha 3 dias") nao e data. Mesmo remedio
+                da linha "Aberta" da tabela ao lado. */}
+            <b>Concluída</b> em {carimbo(d.concluida_em)}. {d.conclusao}
             {d.atraso_motivo ? <> <span className="dm-mudo">(atrasou: {d.atraso_motivo})</span></> : null}
+            {/* A ETAPA 5 DO PDF MORA AQUI DENTRO, E NÃO NA GRADE — 22/09/2026.
+
+                "Solicitar → Triar → Aprovar → Executar → VALIDAR → Concluir",
+                e entre as capacidades do Solicitante: "Confirmar a conclusão".
+                Quem executa era quem fechava, e o sistema só sabia registrar
+                discordância (`reabrir`) — a concordância não tinha onde ser
+                dita, então "ninguém reabriu" contava a mesma história para a
+                demanda que resolveu e para a que a pessoa desistiu de cobrar.
+
+                Botão novo na grade, não: a grade já tem doze e a regra da casa
+                é que ela não engorde. O cartão verde já é o lugar onde se lê o
+                que foi feito; é ali que se responde. Depois de confirmada o
+                botão some e vira a frase, que é o registro pedido.
+
+                `Reabrir` continua na grade, onde sempre esteve: mover os dois
+                para cá deixaria a grade VAZIA para quem só pode reabrir, e o
+                ramo de cartão vazio passaria a anunciar "você pode escrever
+                aqui embaixo" com um botão de reabrir logo acima. */}
+            {d.validada_em ? (
+              <div className="dm-peq dm-mudo" style={{ marginTop: 6 }}>
+                Validada{d.validada_por ? ` por ${d.validada_por}` : ''} em {dataCheia(d.validada_em.slice(0, 10))}.
+              </div>
+            ) : acoes.includes('validar') ? (
+              <div style={{ marginTop: 8 }}>
+                <button className="dm-btn dm-peq" disabled={indo} onClick={() => agir('validar')}>
+                  Resolveu, obrigado
+                </button>
+              </div>
+            ) : null}
           </div>
         </Aviso>
       ) : null}
@@ -208,7 +289,10 @@ function Uma() {
               <tbody>
                 <Li rot="Quem pediu" v={`${d.abriu} · ${d.solicitante}`} />
                 <Li rot="Quem atende" v={d.responsavel ? `${d.responsavel} · ${d.responsavel_setor}` : `${d.responsavel_setor} (ninguém assumiu)`} />
-                <Li rot="Prazo" v={d.prazo ? dataCheia(d.prazo) : `sem data — ${d.sem_prazo_porque || 'sem justificativa'}`} />
+                <Li rot="Prazo"
+                  v={(d.prazo ? dataCheia(d.prazo) : `sem data — ${d.sem_prazo_porque || 'sem justificativa'}`)
+                     + (prazoPedido && prazoPedido.slice(0, 10) !== (d.prazo || '').slice(0, 10)
+                        ? ` (pedido para ${dataCheia(prazoPedido)})` : '')} />
                 {d.evento ? <Li rot="Evento" v={`${d.evento} · ${dataCheia(d.evento_data)}`} /> : null}
                 {d.local ? <Li rot="Onde" v={d.local} /> : null}
                 {d.publico ? <Li rot="Público" v={d.publico} /> : null}
@@ -218,7 +302,12 @@ function Uma() {
                   : d.falta_aprovacao
                     ? <Li rot="Aprovação" v="esperando a liderança decidir" />
                     : null}
-                <Li rot="Aberta" v={quando(d.criada_em)} />
+                {/* "DATA E HORÁRIO DA ABERTURA" É O PRIMEIRO ITEM DE
+                    IDENTIFICAÇÃO NO PDF, e esta linha mostrava só a frase
+                    relativa — que nos primeiros 30 dias nem data tem. Ver
+                    `carimbo` em `regras.ts`: data, hora e a frase, na mesma
+                    linha, sem elemento novo. */}
+                <Li rot="Aberta" v={carimbo(d.criada_em)} />
               </tbody>
             </table>
           </div>
@@ -293,8 +382,16 @@ function Uma() {
                 entao quem so pode comentar via um cartao com titulo e nada
                 dentro. E nao e caso exotico: `pode_ver` da visao a TODO o
                 setor solicitante, e `pode_atender` nao. Qualquer pessoa do
-                setor que pediu, que nao abriu aquela demanda, caia nisso. */}
-            {acoes.filter(a => a !== 'comentar' && a !== 'desanexar').length === 0 ? (
+                setor que pediu, que nao abriu aquela demanda, caia nisso.
+
+                A LISTA VIROU CONSTANTE NOMEADA — 22/09/2026. Ela era
+                `a !== 'comentar' && a !== 'desanexar'` escrito no filtro, e
+                as duas metades envelheceram no mesmo dia: `desanexar` saiu de
+                `acoesDe` (quem decide e o `posso_tirar` por anexo) e `validar`
+                entrou SEM botao na grade, de proposito. Esquecer de por
+                `validar` aqui faria o cartao se achar cheio e nao escrever a
+                frase — cartao vazio de novo, pelo caminho novo. */}
+            {acoes.filter(a => !FORA_DA_GRADE.includes(a)).length === 0 ? (
               <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
                 {d.status === 'concluida' || d.status === 'cancelada'
                   ? 'Esta demanda já foi encerrada. Você pode escrever aqui embaixo.'
@@ -350,10 +447,41 @@ function Uma() {
               fechar={() => setAberto('')} agir={agir} />
           </div>
 
+          {/* A DICA MANDAVA MARCAR UMA COISA QUE NÃO HAVIA COMO MARCAR.
+
+              22/09/2026. A coluna `eventos.interno` existe desde a migração
+              50, `dem_mover` aceita a chave `interno` no `comentar` (50:657),
+              `dem_ver` esconde o interno de quem não atende (50:623) e a folha
+              tem `.dm-hist .dm-interno`. Faltava a única coisa que faz tudo
+              isso funcionar: um controle que mandasse a chave. NENHUM dos sete
+              usos de `CaixaDeAcao` mandava, e esta dica pedia para "marcar
+              como interno" — texto de tela apontando para um botão que não
+              existe é pior que não dizer nada, porque a pessoa procura.
+
+              Sem peça nova: `CaixaDeAcao` já aceita `extra`, que é onde o
+              "Por que atrasou" do concluir mora. Só para quem atende, porque
+              `dem_mover` faz `and demandas.pode_atender(m, d)` no gravar —
+              oferecer a caixinha a quem pediu seria oferecer um controle que
+              o servidor ignora em silêncio, que é a pior forma de recusa.
+
+              E ela volta para desmarcada depois de gravar: uma caixinha que
+              fica marcada faz o PRÓXIMO comentário sumir da vista de quem
+              pediu sem ninguém perceber. */}
           <CaixaDeAcao rot="Escrever alguma coisa" botao="Comentar" salvando={indo}
             teto={tetoDe('comentar')}
-            dica={v.eu.atende ? 'Marque como interno o que for combinação da equipe.' : undefined}
-            aoEnviar={t => agir('comentar', { texto: t })} />
+            dica={v.eu.atende ? 'O que for combinação da equipe, marque aqui embaixo: quem pediu não vê.' : undefined}
+            extra={v.eu.atende ? (
+              <label className="dm-linha dm-peq" style={{ marginBottom: 'var(--dm-e2)' }}>
+                <input type="checkbox" checked={interno} style={{ width: 'auto', minHeight: 0 }}
+                  onChange={e => setInterno(e.target.checked)} />
+                Só para a equipe (quem pediu não vê)
+              </label>
+            ) : undefined}
+            aoEnviar={async t => {
+              const deu = await agir('comentar', { texto: t, interno });
+              if (deu) setInterno(false);
+              return deu;
+            }} />
         </div>
       </div>
 
@@ -362,8 +490,21 @@ function Uma() {
       <ul className="dm-hist">
         {v.eventos.map((e, i) => (
           <li key={i} className={marco(e.tipo) ? 'dm-marco' : ''}>
+            {/* COR SOZINHA NÃO INFORMA — 22/09/2026.
+
+                O comentário interno se distinguia só pela tarja da folha
+                (`.dm-hist .dm-interno`: borda e fundo). Quem não enxerga cor,
+                quem usa leitor de tela e quem imprime a ficha lê o comentário
+                interno exatamente como lê um público — e interno é justamente
+                o que NÃO pode ser confundido com o que quem pediu vai ler.
+
+                A palavra vai ao lado do carimbo, que é onde o olho já vai
+                buscar "quem e quando". */}
             <div className={e.interno ? 'dm-interno' : ''}>
-              <div className="dm-q">{frase(e)} <span className="dm-mudo">· {quando(e.em)}</span></div>
+              <div className="dm-q">
+                {frase(e)} <span className="dm-mudo">· {quando(e.em)}</span>
+                {e.interno ? <span className="dm-mudo"> · interno (só a equipe vê)</span> : null}
+              </div>
               {e.texto ? <div className="dm-t">{e.texto}</div> : null}
             </div>
           </li>
@@ -382,7 +523,11 @@ function Li({ rot, v }: { rot: string; v: string }) {
   return <tr><th style={{ width: '38%', paddingTop: 10 }}>{rot}</th><td>{v}</td></tr>;
 }
 
-const marco = (t: string) => t === 'abertura' || t === 'status' || t === 'aprovacao' || t === 'reabertura';
+/* `validacao` entra como marco (migração 91): ela fecha a etapa 5 do PDF, que
+   é uma decisão de pessoa, não um recado. */
+const marco = (t: string) =>
+  t === 'abertura' || t === 'status' || t === 'aprovacao' || t === 'reabertura'
+  || t === 'validacao';
 
 function frase(e: { tipo: string; de: string | null; para: string | null; quem: string | null }): string {
   const q = e.quem ? e.quem.split(' ')[0] : 'alguém';
@@ -397,6 +542,9 @@ function frase(e: { tipo: string; de: string | null; para: string | null; quem: 
     case 'reabertura':  return `${q} reabriu`;
     case 'anexo':       return `${q} juntou um anexo`;
     case 'comentario':  return `${q} escreveu`;
+    /* "confirmou que resolveu" e nao "validou": a palavra do PDF e de
+       processo, e quem le esta linha e a pessoa que pediu. */
+    case 'validacao':   return `${q} confirmou que resolveu`;
     default:            return `${q}: ${e.tipo}`;
   }
 }
@@ -433,7 +581,10 @@ function Recados({ d, base, eu }: {
 /* -------------------------------------------- o formulário da ação aberta */
 function Formulario({ aberto, d, b, eu, indo, fechar, agir }: {
   aberto: Acao | ''; d: Vista['demanda']; b: Bases | null; eu: Vista['eu']; indo: boolean;
-  fechar: () => void; agir: (a: Acao, dados?: Record<string, unknown>) => void;
+  fechar: () => void;
+  /* devolve `false` quando o servidor recusou, e é assim que a `CaixaDeAcao`
+     sabe que NÃO pode apagar o que a pessoa escreveu */
+  agir: (a: Acao, dados?: Record<string, unknown>) => Promise<boolean>;
 }) {
   const [motivo, setMotivo] = useState<'informacao' | 'aprovacao' | 'terceiros'>('informacao');
   const [prazo, setPrazo] = useState(d.prazo || '');

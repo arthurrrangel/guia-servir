@@ -275,6 +275,7 @@ function Categorias({ b, indo, salvar }: {
 }) {
   const grupos = [...new Set(b.categorias.map(c => c.grupo))];
   const [g, setG] = useState(grupos[0] || '');
+  const [nova, setNova] = useState('');
   const doGrupo = b.categorias.filter(c => c.grupo === g);
   const nomeSetor = (id: string | null) => b.setores.find(s => s.id === id)?.nome || '—';
 
@@ -292,6 +293,50 @@ function Categorias({ b, indo, salvar }: {
         {grupos.map(x => (
           <button key={x} type="button" aria-pressed={g === x} onClick={() => setG(x)}>{x}</button>
         ))}
+      </div>
+
+      {/* O ADMINISTRADOR NÃO PODIA CRIAR CATEGORIA PELA TELA.
+
+          "Criar categorias" é a PRIMEIRA capacidade que o documento dá ao
+          Administrador, e esta tela só sabia editar: as quatro chamadas a
+          `salvar('categoria', …)` passavam sempre `{ id: c.id, … }`, não havia
+          campo de nome e não havia botão de criar. Categoria nova só nascia
+          por SQL direto no banco, o que significa que a igreja dependia de
+          alguém com acesso ao Supabase para registrar um tipo de pedido novo.
+
+          O banco sempre permitiu: `dem_ajustar('categoria', {…})` SEM `id` faz
+          insert, com `on conflict (grupo, nome) do update set ativa = true`,
+          ou seja, recriar uma categoria desativada a reativa em vez de
+          duplicar.
+
+          É a mesma linha de criação que a aba Setores já tem, copiada para
+          cá. Sem seletor de grupo: o grupo aberto é o que está no `aria-pressed`
+          logo acima, e a categoria nasce nele. Um seletor aqui repetiria, com
+          duas maneiras de responder, a pergunta que a tira de cima já
+          respondeu. */}
+      <div className="dm-card">
+        <div className="dm-linha">
+          <input className="dm-cresce" value={nova} placeholder={`Nome da categoria em ${g}`}
+            aria-label={`Nome da categoria nova em ${g}`}
+            onChange={e => setNova(e.target.value)}
+            style={{ minHeight: 46, padding: '0 12px', border: '1px solid var(--dm-linha2)', borderRadius: 'var(--dm-r)', background: 'var(--dm-card3)' }} />
+          <button className="dm-btn dm-pri" disabled={indo || !nova.trim() || !g}
+            onClick={async () => {
+              if (await salvar('categoria', { grupo: g, nome: nova.trim() })) setNova('');
+            }}>Criar</button>
+        </div>
+        {/* A FRASE DIZ O QUE ACONTECE SE ELA FICAR SEM SETOR, E ISSO É MEDIDO.
+
+            `dem_abrir` resolve o destino com
+            `coalesce(setor_responsavel, c.setor_id, v_setor)`: categoria sem
+            setor não recusa a demanda, ela DEVOLVE o pedido para o setor de
+            quem pediu. Criar a categoria e esquecer de apontar o destino não
+            dá erro nenhum, e o pedido fica dando voltas no próprio setor sem
+            ninguém entender por quê. */}
+        <p className="dm-peq dm-mudo" style={{ margin: '8px 0 0' }}>
+          Nasce em <b>{g || 'nenhum grupo'}</b>, sem setor e sem aprovação. Sem setor, a demanda
+          volta para quem pediu: aponte o destino na linha dela, aqui embaixo.
+        </p>
       </div>
 
       <div className="dm-card">

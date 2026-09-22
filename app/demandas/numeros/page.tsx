@@ -8,7 +8,7 @@
    Nada de gráfico de pizza. Uma barra por linha, comparável, e o número
    escrito ao lado — é o que se lê no celular sem apertar os olhos. */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { numeros } from '@/lib/demandas/api';
@@ -37,7 +37,21 @@ function Painel() {
   const [erro, setErro] = useState('');
   const [janela, setJanela] = useState<Janela>('90');
 
+  /* A RESPOSTA ATRASADA SOBRESCREVIA A RECENTE, AQUI TAMBÉM.
+
+     O mesmo buraco de `/demandas`: `const r = await numeros(…); setN(r.numeros)`
+     sem conferir se ainda é o período atual. Tocar "30 dias" e, antes de
+     chegar, "1 ano" mostrava os números de 1 ano e, quando a consulta de 30
+     dias enfim voltasse, trocava tudo por ela, com o seletor marcando "1 ano"
+     e o rodapé imprimindo outra janela. Aqui é pior que na lista: o número
+     errado com o rótulo certo é uma decisão tomada em cima de dado falso.
+
+     O contador é o mesmo remédio: cada chamada carimba o seu pedido e só
+     escreve se ainda for a última. */
+  const pedido = useRef(0);
+
   const buscar = useCallback(async () => {
+    const meu = ++pedido.current;
     setN(null);
     /* `HOJE()` E NAO `toISOString()` — 22/09/2026.
 
@@ -47,6 +61,7 @@ function Painel() {
        daqui; faltava `HOJE`, que existe para isto desde 20/09. */
     const hoje = HOJE();
     const r = await numeros(somaDias(hoje, -Number(janela)), hoje);
+    if (meu !== pedido.current) return;   // chegou atrasada: já existe pedido mais novo
     if (!r.ok) { setErro(recadoDoErro(r, 'carregar os números')); return; }
     setErro(''); setN(r.numeros);
   }, [janela]);
@@ -142,7 +157,7 @@ function Painel() {
                 <th className="dm-n">Em aberto</th><th className="dm-n">Atrasadas</th>
               </tr></thead>
               <tbody>
-                {n.por_setor.map(s => (
+                {porVolume(n.por_setor).map(s => (
                   <tr key={s.nome}>
                     <td>{s.nome}</td>
                     <td className="dm-n">{s.pediu}</td>
@@ -173,15 +188,40 @@ function Painel() {
               ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nenhum atraso no período.</p> : null}
           </div>
 
-          {/* --------------------------------------------------------- meses */}
-          {n.por_mes.length > 1 ? (
-            <>
-              <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>Mês a mês</h2>
-              <div className="dm-card">
-                <Barras itens={n.por_mes.map(m => ({ rot: mesPorExtenso(m.mes), n: m.n }))} />
-              </div>
-            </>
-          ) : null}
+          {/* --------------------------------------------------------- meses
+
+              O GRÁFICO SUMIA INTEIRO NA JANELA MAIS USADA.
+
+              Era `n.por_mes.length > 1 ? … : null`. Trinta dias caem dentro
+              de um mês quase sempre, então "volume de demandas por período",
+              que o documento pede entre os indicadores, simplesmente não
+              existia no recorte de 30 dias: nem seção, nem número, nem uma
+              palavra dizendo por quê. Quem olhava concluía que o sistema não
+              media aquilo.
+
+              Escolhi TEXTO em vez de barra única, e o motivo é o mesmo que
+              fez esta tela recusar gráfico de pizza: `Barras` desenha cada
+              barra como uma fração do MAIOR valor, então uma barra sozinha
+              sai sempre cheia, 100% da trilha. Barra cheia quer dizer "este é
+              o pico", e com um mês só não há pico nenhum, não há com o que
+              comparar. Seria desenho dizendo uma coisa que o dado não diz.
+
+              A frase ainda aponta o gesto que faz a comparação aparecer, que
+              é o seletor de período no topo desta mesma tela. */}
+          <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>Mês a mês</h2>
+          <div className="dm-card">
+            {n.por_mes.length > 1 ? (
+              <Barras itens={n.por_mes.map(m => ({ rot: mesPorExtenso(m.mes), n: m.n }))} />
+            ) : n.por_mes.length === 1 ? (
+              <p className="dm-peq" style={{ margin: 0 }}>
+                Todo o período cabe em <b>{mesPorExtenso(n.por_mes[0].mes)}</b>: {n.por_mes[0].n}{' '}
+                {n.por_mes[0].n === 1 ? 'demanda' : 'demandas'}.
+                <span className="dm-mudo"> Escolha 90 dias ou 1 ano ali em cima para comparar meses.</span>
+              </p>
+            ) : (
+              <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nada no período.</p>
+            )}
+          </div>
 
           <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e4)' }}>
             De {n.de.split('-').reverse().join('/')} a {n.ate.split('-').reverse().join('/')}.
@@ -192,6 +232,29 @@ function Painel() {
       )}
     </>
   );
+}
+
+/* A TABELA POR SETOR SAÍA EM ORDEM ALFABÉTICA.
+
+   O documento pede, entre os indicadores, "setores com maior volume de
+   solicitações". A tabela tinha os números certos e a ordem errada: `dem_numeros`
+   agrega `por_setor` e a tela imprimia na ordem em que veio, alfabética. Com
+   quinze setores, achar quem mais pede virava varrer a coluna "Pediu" com o
+   dedo e guardar o maior de cabeça, que é justamente a conta que o indicador
+   existia para não precisar fazer.
+
+   Ordena por "pediu", que é a palavra do documento ("solicitações"), e não
+   pela soma com "atendeu": setor que atende muito e pede pouco é outro fato,
+   e ele está na coluna ao lado. Empate cai em "atendeu" e depois no nome, para
+   a ordem não dançar entre duas cargas dos mesmos números.
+
+   `slice()` antes do `sort` porque `sort` ordena no lugar, e `n.por_setor` é o
+   objeto que veio do servidor e é lido de novo a cada render. Nada aqui toca
+   no banco: é a mesma resposta, lida na ordem que responde a pergunta. */
+type LinhaDeSetor = { nome: string; pediu: number; atendeu: number; abertas: number; atrasadas: number };
+function porVolume(setores: LinhaDeSetor[]): LinhaDeSetor[] {
+  return setores.slice().sort((a, b) =>
+    b.pediu - a.pediu || b.atendeu - a.atendeu || a.nome.localeCompare(b.nome, 'pt-BR'));
 }
 
 function Num({ v, r, destaque }: { v: number | string; r: string; destaque?: boolean }) {
