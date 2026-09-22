@@ -257,12 +257,58 @@ try {
           }
         }
 
+        /* O QUE ESTÁ DOBRADO TAMBÉM É TELA — 22/09/2026.
+
+           A ficha passou a guardar prazo, prioridade, setor, anexo e
+           cancelar dentro de `<details class="dm-mais">`. Eu escrevi aqui,
+           primeiro, que fechado o conteúdo "não tem caixa" e sairia da
+           medida. MEDIDO, no Chromium 141, é o contrário:
+
+             botão dentro do details fechado
+               checkVisibility() .... false
+               getBoundingClientRect  254 × 44
+               display / visibility . flex / visible
+
+           O conteúdo fica em `content-visibility: hidden`: sem pintura, com
+           caixa. O `vis()` de `medida-celular.mjs` olha estilo e caixa, então
+           o alvo de toque é medido nos dois estados.
+
+           E eu escrevi em seguida que o CONTRASTE precisaria da caixa aberta,
+           por ler pixel. Também medi, e também não: pintando de #e9e9e9 o
+           texto dos cinco botões dobrados, `medirContraste` acusou os cinco
+           com a caixa fechada e os cinco com ela aberta.
+
+           Então hoje abrir não muda o resultado, e fica por outro motivo:
+           as duas medidas enxergam o conteúdo fechado por causa de um
+           detalhe de como ESTE motor implementa `<details>`. Se o Chromium
+           mudar isso, ou se a auditoria rodar em outro navegador, os cinco
+           botões saem da medida sem nenhum aviso. Aberto, o que se mede é o
+           que a pessoa vê depois do toque, em qualquer motor.
+
+           Não mexi no `vis()`: medir a mais é o lado seguro, e trocar por
+           `checkVisibility()` faria a auditoria das escalas, que usa a mesma
+           medida, parar de ver o que ela hoje vê. A foto é tirada com tudo
+           fechado de novo, que é como a pessoa encontra a tela. */
+        const dobrados = await pag.evaluate(() => {
+          const ds = [...document.querySelectorAll('details:not([open])')];
+          ds.forEach(d => { d.open = true; });
+          return ds.length;
+        });
+        if (dobrados) await pag.waitForTimeout(150);
+
         /* medir primeiro, retratar depois: `fullPage` estica a janela e
            refaz o layout, e quem medir no rastro disso mede uma tela ainda
            se recompondo. Rendeu dois avisos fantasma antes de eu notar. */
         const m = await pag.evaluate(MEDIR, tela.width);
         const etiqueta = `${tela.nome}px · ${papel.quem} · ${p.nome}`;
+        /* o contraste também: ele lê PIXEL, e o botão dobrado não tem pixel */
         Object.assign(m, await medirContraste(pag));
+        if (dobrados) {
+          await pag.evaluate(() => {
+            document.querySelectorAll('details[open]').forEach(d => { d.open = false; });
+          });
+          await pag.waitForTimeout(150);
+        }
         await pag.screenshot({ path: `${FOTOS}/${tela.nome}-${papel.quem}-${p.nome}.png`, fullPage: true });
 
         julgar(ok, etiqueta, m, tela.width);

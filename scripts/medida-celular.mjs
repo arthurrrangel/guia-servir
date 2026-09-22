@@ -203,7 +203,12 @@ export const MEDIR = (largura) => {
   };
   const pequenos = [];
   const jaVistos = new Set();
-  for (const e of document.querySelectorAll('a[href], button, input, select, textarea, [role="button"], [tabindex]')) {
+  /* `summary` ENTROU EM 22/09/2026. A ficha ganhou "Mais opções", um
+     `<details>` cujo `<summary>` é o que a pessoa toca para abrir. Ele não é
+     botão, não é link e não tem `tabindex` (é focável por natureza), então
+     esta lista não o via: a altura dele podia cair para 20px e todas as
+     conferências continuariam verdes. */
+  for (const e of document.querySelectorAll('a[href], button, input, select, textarea, summary, [role="button"], [tabindex]')) {
     if (!vis(e)) continue;
     if (e.tagName === 'A' && dentroDeFrase(e)) continue;
     const alvo = alvoDeVerdade(e);
