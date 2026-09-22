@@ -293,6 +293,36 @@
 .dm-entre > *{min-width:0}
 .dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
 .dm-linha > *{min-width:0}
+
+/* A CAIXINHA É PEQUENA DE PROPÓSITO; QUEM RECEBE O TOQUE É O RÓTULO INTEIRO.
+
+   `node scripts/demandas-celular.mjs`, 22/09/2026: 7 reprovações em 384, e
+   as sete são a mesma linha, em cinco fichas e dois papéis:
+
+     390px · admin · detalhe-execucao: todo alvo de toque tem 44px
+       label.dm-linha.dm-peq «Só para a equipe (quem ped» 324×20
+
+   (no mesmo dia a semente ganhou a ficha validada e a régua passou a fazer
+   432 conferências; a mesma medida virou 8 reprovações, que é a mesma linha
+   numa ficha a mais. Com esta regra: 432/432.)
+
+   O medidor dispensa o `<input type="checkbox">` de propósito (inflar a
+   caixinha para 44px desalinharia a linha sem aumentar alvo nenhum) e mede o
+   `<label>`, que é o que de fato recebe o dedo. O rótulo tinha 20px: menos
+   da metade do mínimo da WCAG 2.5.5.
+
+   E ele passava em 320px, o que é o pior jeito de um defeito se esconder: lá
+   a frase não cabe numa linha, quebra em duas, e o conjunto atravessa os 44
+   por acidente. Nos dois tamanhos que são celular de verdade, 360 e 390, a
+   frase cabe numa linha só e o alvo encolhe. A régua mede 320 e 390, então
+   o único tamanho que reprovava era o certo.
+
+   `min-height` e não `padding`: a linha já é flex com `align-items:center`,
+   então a altura sobra em volta do texto e nada se desloca. O `display:flex`
+   e o `align-items` ficam repetidos aqui para a classe valer sozinha, sem
+   depender de estar sempre acompanhada de `.dm-linha`. */
+.dm-caixinha{display:flex;align-items:center;min-height:44px}
+
 .dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
 /* A MESMA GUARDA DE CIMA, E ELA FALTAVA NESTAS DUAS.
 

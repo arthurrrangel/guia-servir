@@ -66,19 +66,47 @@ SQL
 # As que nao sao do Demandas ficam de fora de proposito (esta base e isolada,
 # sem public.voluntarios), e as do Demandas trazem sozinhas a guarda de
 # "pulei o que depende das escalas".
-# A 67, a 68 e a 80 NAO entram: as tres mexem em `dem_mover` e `dem_lista`, e a
-# 84, a 85 e a 87 reescrevem as duas por inteiro. A 80 ainda mexe em
+# A 68 e a 80 NAO entram: as duas mexem em `dem_mover` e `dem_lista`, e a 84, a
+# 85 e a 87 reescrevem as duas por inteiro. A 80 ainda mexe em
 # `public.pessoas`, que esta base nao tem de proposito. Listar migracao
 # superada aqui so faria o arquivo morrer no meio.
+#
+# A 67 ENTRA, e o motivo e o mesmo que trouxe ela de volta para
+# `scripts/demandas-banco.sh` em 22/09/2026: o § 2 dela reescreve `dem_bases`,
+# e nenhuma migracao posterior reescreve essa funcao por inteiro (a 92 so a
+# remenda por dentro). Sem a 67, esta base sobe com um `dem_bases` que entrega
+# nome, papel, setor e TELEFONE de todo mundo a qualquer responsavel — coisa
+# que producao nao faz desde 21/09, e que `lib/demandas/tipos.ts` ja nem
+# declara.
+#
+# E A LISTA ESTAVA DUAS MIGRACOES ATRAS — 22/09/2026.
+#
+# Ela parava na 90, e o cabecalho logo acima conta que isso ja aconteceu uma
+# vez ("um instrumento apontado para o passado nao mede nada — pior, da
+# confianca"). Aconteceu de novo. Medido numa base montada com esta lista:
+#
+#   validada_em existe? .......... NAO
+#   teto_sem_aprovacao existe? ... NAO
+#   eventos_total em dem_ver? .... NAO
+#   dem_mover(..., 'validar') .... {"ok": false, "erro": "JA_FECHADA"}
+#
+# Ou seja: `npm run test:demandas` media um sistema SEM a etapa 5 do PDF. O
+# botao "Resolveu, obrigado" do cartao verde, a frase "Validada por X", o teto
+# por setor da aba Setores e o aviso de historico cortado da ficha nao existiam
+# na base, e nenhuma conferencia de tela podia ve-los.
 for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com-teto \
          58-membro-novo-nasce-em-producao \
+         67-o-portao-de-aprovacao-tinha-tres-portas-dos-fundos \
          84-o-portao-congelava-no-nascimento-e-um-tab-passava-por-texto \
          85-o-anexo-nao-era-anexo-era-um-link-sem-dono \
          86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada \
          87-a-lista-escondia-a-atrasada-e-o-indicador-contava-quem-nao-tinha-prazo \
          88-a-segunda-auditoria-achou-o-que-a-primeira-deixou \
          89-a-terceira-auditoria-e-a-lista-de-invisiveis-que-so-uma-copia-cresceu \
-         90-o-setor-nao-ficava-sabendo-que-chegou-demanda; do
+         90-o-setor-nao-ficava-sabendo-que-chegou-demanda \
+         91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia \
+         92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio \
+         93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql
@@ -109,11 +137,23 @@ su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f 
 # Medido: com as tres rotas de detalhe apontando para o vazio, apagar
 # `min-width:0` de `.dm-dupla` e o `overflow-wrap` do historico nao reprovava
 # nada. O instrumento estava medindo a tela de erro.
+# `validada` E `concluida` SAO DUAS TELAS, E NAO UMA — 22/09/2026.
+#
+# No cartao verde da ficha, a migracao 91 poe um BOTAO enquanto a demanda nao
+# foi confirmada e uma FRASE depois que foi. Caixas diferentes, alturas
+# diferentes, alvo de toque so numa das duas. Pedir so `concluida` mediria
+# metade do cartao — e a metade que some primeiro, porque a frase e a que
+# ninguem lembra de olhar.
+#
+# `concluida` continua sendo a NAO validada (a semente nao valida a demanda 6
+# de proposito) e `validada` e a nona, confirmada por quem pediu.
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
   select jsonb_pretty(jsonb_build_object(
     'execucao', (select min(numero) from demandas.demandas where status = 'execucao'),
     'travada',  (select min(numero) from demandas.demandas where status = 'travada'),
-    'concluida',(select min(numero) from demandas.demandas where status = 'concluida'),
+    'concluida',(select min(numero) from demandas.demandas
+                  where status = 'concluida' and validada_em is null),
+    'validada', (select min(numero) from demandas.demandas where validada_em is not null),
     'comLink',  (select min(numero) from demandas.demandas where descricao like '%http%'),
     'atrasada', (select min(numero) from demandas.demandas where prazo < current_date
                                        and status in ('aberta','execucao','travada'))))\"" \

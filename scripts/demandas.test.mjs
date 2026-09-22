@@ -13,7 +13,7 @@
 import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
   somaDias, linkZap, soDigitos, recadoDoErro, recado, diasDeAtraso,
-  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS,
+  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -515,6 +515,51 @@ function servidorAceita(acao, d, eu) {
   /* o texto tem que dizer O QUE fazer, não "campo obrigatório" */
   ok(oQueFalta({ ...cheio(), prazo: '' }, true)[0].includes('data'), 'a frase diz qual dado falta',
     oQueFalta({ ...cheio(), prazo: '' }, true)[0]);
+
+  /* ---- 3b. O ORÇAMENTO DA CATEGORIA QUE EXIGE ORÇAMENTO -------------------
+
+     Até 22/09/2026 NENHUM caso deste arquivo chamava `oQueFalta` com uma
+     categoria. O terceiro parâmetro existia, o corpo da função tinha o ramo
+     escrito, e apagar o ramo inteiro deixava a suíte verde.
+
+     O defeito que o ramo mata está escrito no próprio `regras.ts`: doze das
+     43 categorias exigem orçamento (todas as de Compras, Reembolso, Reserva
+     financeira, Solicitação de pagamento, Alimentação, Transporte), e a
+     pessoa preenchia o formulário inteiro, tocava em Enviar, e só então lia
+     que faltava um valor — porque quem cobrava era o banco, com
+     `ORCAMENTO_OBRIGATORIO`, depois da ida.
+
+     `oQueFalta` promete, no comentário logo acima dela, ser "as mesmas regras
+     que o banco impõe como CHECK, aqui só para a pessoa saber ANTES". Sem
+     este bloco a promessa não tem quem cobre. */
+  const exige = { id: 'c1', exige_orcamento: true, exige_aprovacao: false, prazo_padrao_dias: null };
+  const naoExige = { ...exige, exige_orcamento: false };
+
+  ok(oQueFalta(cheio(), true, exige).length === 1,
+    'categoria que exige orçamento reclama quando o valor não veio',
+    JSON.stringify(oQueFalta(cheio(), true, exige)));
+  /* `?? ''` e não `[0].includes(...)`: com o ramo do orçamento apagado a
+     lista volta vazia, e ler `[0]` derruba o processo no primeiro tropeço —
+     os casos seguintes nunca rodariam e o estrago pareceria menor do que é. */
+  ok((oQueFalta(cheio(), true, exige)[0] ?? '').includes('valor'),
+    'e a frase diz que é o VALOR que falta, não "campo obrigatório"',
+    String(oQueFalta(cheio(), true, exige)[0]));
+  ok(oQueFalta({ ...cheio(), orcamento: '180,00' }, true, exige).length === 0,
+    'com o valor preenchido, ela deixa passar',
+    JSON.stringify(oQueFalta({ ...cheio(), orcamento: '180,00' }, true, exige)));
+  /* espaço em branco não é valor: o banco cobra `orcamento is not null`, e
+     " " passaria num `!r.orcamento` mal escrito */
+  ok(oQueFalta({ ...cheio(), orcamento: '   ' }, true, exige).length === 1,
+    'e espaço em branco não conta como valor');
+  /* e a cobrança é da CATEGORIA, não de todo mundo: 31 das 43 não exigem, e
+     cobrar de quem não deve é a outra metade do mesmo defeito */
+  ok(oQueFalta(cheio(), true, naoExige).length === 0,
+    'categoria que NÃO exige orçamento não cobra valor nenhum',
+    JSON.stringify(oQueFalta(cheio(), true, naoExige)));
+  ok(oQueFalta(cheio(), true, null).length === 0,
+    'e sem categoria em mãos (carga ainda não chegou) a função não inventa cobrança');
+  ok(oQueFalta(cheio(), true).length === 0,
+    'nem quando ninguém passa o terceiro parâmetro');
 }
 
 /* =============================================================================
@@ -542,6 +587,96 @@ function servidorAceita(acao, d, eu) {
   ok(diasDeAtraso('2026-09-13', H) === 5, 'conta os dias de atraso', String(diasDeAtraso('2026-09-13', H)));
   ok(diasDeAtraso('2026-09-30', H) === 0, 'prazo no futuro não tem atraso');
   ok(diasDeAtraso(null, H) === 0, 'sem prazo não tem atraso');
+}
+
+/* =============================================================================
+   4b. O "HOJE" DO SISTEMA, NO FUSO DO RIO E NÃO NO DO SERVIDOR
+
+   TODO caso do bloco acima passa `hoje` explicitamente (`H`), e é por isso que
+   eles são casos de aritmética de datas e não de fuso. NENHUM deles chama
+   `HOJE()`. Medido em 22/09/2026: trocar `America/Sao_Paulo` por `UTC` dentro
+   de `HOJE()` deixava `npm test` inteiro verde.
+
+   E o defeito está descrito, em trinta linhas, no comentário da própria
+   função — medido com o instante 05/10/2026 21h30 no Rio:
+
+       HOJE() respondia ......... 2026-10-06
+       a data real no Rio era ... 2026-10-05
+       demanda com prazo para HOJE (05/10):
+         situacao()     -> 'atrasada'   (devia ser 'hoje')
+         diasDeAtraso() -> 1            (o prazo só vence à meia-noite)
+         prazo sugerido (categoria de 3 dias) -> 09/10 em vez de 08/10
+
+   Ou seja: das 21h às 23h59, todo dia, o painel ficava vermelho três horas
+   antes da hora. Quem abrisse o app depois do culto de domingo à noite via as
+   próprias demandas como atrasadas.
+
+   O RELÓGIO É DE MENTIRA, E ELE PRECISA SER. Esperar dar 21h para medir é um
+   teste que passa vinte e uma horas por dia e reprova três — que é a forma
+   mais cara possível de não medir nada. `Date` é trocado pelo tempo do caso e
+   devolvido no fim, dentro de `finally`: um relógio parado que vaza para os
+   blocos seguintes faria este arquivo medir a ordem em que foi escrito.
+   ============================================================================= */
+{
+  const Real = Date;
+  /* só o construtor SEM argumento vira mentira. `somaDias` faz
+     `new Date(iso + 'T12:00:00Z')` e `carimbo` faz `new Date(t)`: os dois
+     precisam continuar sendo o `Date` de verdade, senão o relógio parado
+     responderia por eles também e o teste mediria a si mesmo. */
+  const congelar = (iso) => {
+    const fixo = Real.parse(iso);
+    function Mentira(...a) { return a.length ? new Real(...a) : new Real(fixo); }
+    Mentira.now = () => fixo;
+    Mentira.parse = Real.parse;
+    Mentira.UTC = Real.UTC;
+    Mentira.prototype = Real.prototype;
+    globalThis.Date = Mentira;
+  };
+  const devolver = () => { globalThis.Date = Real; };
+
+  try {
+    /* 05/10/2026, 21h30 no Rio (UTC-03) é 06/10/2026 00h30 em UTC. É o
+       instante exato do comentário de `HOJE()`. */
+    congelar('2026-10-06T00:30:00Z');
+    ok(HOJE() === '2026-10-05',
+      'às 21h30 no Rio, HOJE() ainda é o dia 05 (e não o 06 do fuso do servidor)', HOJE());
+
+    /* e as três consequências, cada uma pela função que as sofria. Elas usam
+       `HOJE()` como PADRÃO do parâmetro, então chamá-las sem o segundo
+       argumento é exatamente como a tela as chama. */
+    ok(situacao({ status: 'aberta', prazo: '2026-10-05', parada_dias: 0 }) === 'hoje',
+      'a demanda com prazo para hoje não vira "atrasada" às 21h',
+      situacao({ status: 'aberta', prazo: '2026-10-05', parada_dias: 0 }));
+    ok(diasDeAtraso('2026-10-05') === 0,
+      'e ela não ganha um dia de atraso que não existe (o prazo vence à meia-noite)',
+      String(diasDeAtraso('2026-10-05')));
+    ok(prazoSugerido({ prazo_padrao_dias: 3 }) === '2026-10-08',
+      'e o prazo sugerido de uma categoria de 3 dias é 08/10, não 09/10',
+      prazoSugerido({ prazo_padrao_dias: 3 }));
+
+    /* a virada de MÊS pelo mesmo caminho: 31/10 às 22h no Rio é 01/11 em UTC,
+       e aí o erro não é de um dia, é de mês no rótulo de "Mês a mês". */
+    congelar('2026-11-01T01:00:00Z');
+    ok(HOJE() === '2026-10-31', 'e a virada de mês também espera a meia-noite do Rio', HOJE());
+
+    /* o outro lado, para o teste não passar com um fuso fixo qualquer
+       chumbado: de madrugada no Rio a data é a mesma dos dois lados, e às
+       21h de um horário de verão do Norte o Rio continua no mesmo dia. */
+    congelar('2026-10-05T13:00:00Z');
+    ok(HOJE() === '2026-10-05', 'às 10h da manhã no Rio a data é o dia corrente', HOJE());
+    congelar('2026-10-05T02:00:00Z');
+    ok(HOJE() === '2026-10-04',
+      'e às 23h do dia 4 no Rio ainda é dia 4, mesmo já sendo dia 5 em UTC', HOJE());
+
+    /* e o carimbo de hora, que tem o mesmo fuso pelo mesmo motivo escrito:
+       hora que muda conforme o celular de quem olha não confere nada */
+    ok(/^05\/10\/2026 às 21:30/.test(carimbo('2026-10-06T00:30:00Z')),
+      'o carimbo de hora também fala no fuso do Rio', carimbo('2026-10-06T00:30:00Z'));
+  } finally {
+    devolver();
+  }
+  ok(new Date().getTime() > Date.parse('2026-01-01'),
+    'e o relógio de verdade voltou para os blocos seguintes');
 }
 
 /* =============================================================================
@@ -915,6 +1050,123 @@ function servidorAceita(acao, d, eu) {
                              { papel: 'solicitante', atende: false, abriu: false, id: 'eu-1' });
     ok(validada.filter(a => !fora.includes(a)).length === 0,
       'e quem só enxerga cai no ramo do cartão vazio, que tem frase', JSON.stringify(validada));
+  }
+}
+
+/* =============================================================================
+   9. O TETO DE CADA CAIXA, CONTRA A CHECK QUE ELE PROMETE ESPELHAR
+
+   `TETO` e `tetoDe` existem para o contador da caixa dizer a verdade: entre
+   2001 e 4000 letras o navegador deixava digitar, o contador dizia que ainda
+   sobrava, e o banco devolvia `check_violation` com o texto inteiro perdido.
+
+   Medido em 22/09/2026: NENHUM teste da suíte lia `TETO` nem chamava
+   `tetoDe`. Trocar `rejeitar: 2000 - 'Aprovação recusada: '.length` por
+   `rejeitar: 4000` ficava verde — e 4000 é o DOBRO do que a coluna aceita.
+
+   COMO ESTE BLOCO SABE O NÚMERO CERTO. Ele não repete 2000 e 4000 à mão: os
+   limites saem do SQL da migração 86, que é quem cria as onze restrições
+   `ck_tam_*`, e a única coisa escrita aqui é PARA ONDE cada caixa escreve —
+   que é afirmação sobre `dem_mover`, não sobre o número. Se a 86 (ou uma
+   migração futura) mudar um limite e `regras.ts` não acompanhar, isto reprova
+   sozinho.
+
+   O número de `rejeitar` é o mais delicado e é o que a auditoria mediu no
+   banco: 1980 letras passam, 1981 devolve `ck_tam_cancelada_motivo`. O texto
+   vai para DUAS colunas, e numa delas prefixado com "Aprovação recusada: ",
+   que tem 20 letras. Quem manda é a mais apertada das duas.
+   `scripts/demandas-banco.test.sql` mede esses 1980/1981 contra o Postgres.
+   ============================================================================= */
+{
+  const { readFileSync } = await import('node:fs');
+  const { join, dirname } = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const sql86 = readFileSync(join(raiz,
+    'supabase/86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada.sql'), 'utf8');
+
+  /* os dez tetos de `demandas.demandas` vêm do array que a migração percorre,
+     e o de `eventos.texto` da linha própria dele */
+  const LIMITE = {};
+  const arr = sql86.slice(sql86.indexOf('COLUNAS text[][] := array['));
+  for (const m of arr.slice(0, arr.indexOf('];')).matchAll(/\['(\w+)'\s*,\s*'(\d+)'\]/g)) {
+    LIMITE[m[1]] = Number(m[2]);
+  }
+  const mTexto = /add constraint ck_tam_texto\s+check \(texto is null or length\(texto\) <= (\d+)\)/
+    .exec(sql86);
+  if (mTexto) LIMITE.texto = Number(mTexto[1]);
+
+  ok(Object.keys(LIMITE).length === 11,
+    'os onze tetos de coluna foram lidos do SQL', JSON.stringify(LIMITE));
+
+  /* E NENHUMA OUTRA MIGRAÇÃO MEXE NESSES NÚMEROS.
+
+     Ler só a 86 seria certo hoje e errado no dia em que a 93 reapertar uma
+     coluna. A varredura conta: se um `ck_tam_*` nascer fora da 86, este teste
+     reprova pedindo que o leitor acima seja atualizado, em vez de continuar
+     lendo o número velho em silêncio. */
+  {
+    const { readdirSync } = await import('node:fs');
+    const foraDa86 = readdirSync(join(raiz, 'supabase'))
+      .filter(f => f.endsWith('.sql') && !f.startsWith('86-'))
+      .filter(f => /(add|drop)\s+constraint\s+(if exists\s+)?%?I?'?ck_tam_/i
+        .test(readFileSync(join(raiz, 'supabase', f), 'utf8')));
+    ok(foraDa86.length === 0,
+      'os tetos de coluna nascem só na 86, então ler a 86 é ler o limite vivo',
+      foraDa86.join(', '));
+  }
+
+  /* PARA ONDE CADA CAIXA ESCREVE, lido em `dem_mover` (85:378-402, 92:610).
+     Uma caixa pode ter mais de um destino: quem manda é o mais apertado. O
+     número que acompanha é o PREFIXO que o servidor gruda antes de gravar. */
+  const DESTINO = {
+    comentar:   [['texto', 0]],
+    concluir:   [['conclusao', 0]],
+    destravar:  [['texto', 0]],
+    reabrir:    [['texto', 0]],
+    travar:     [['travada_nota', 0]],
+    cancelar:   [['cancelada_motivo', 0]],
+    aprovar:    [['aprovacao_nota', 0]],
+    /* o texto vai inteiro para `aprovacao_nota` E, prefixado, para
+       `cancelada_motivo`: `cancelada_motivo = 'Aprovação recusada: ' || v_txt` */
+    rejeitar:   [['aprovacao_nota', 0], ['cancelada_motivo', 'Aprovação recusada: '.length]],
+    prioridade: [['impacto', 0]],
+    atraso:     [['atraso_motivo', 0]],
+    sem_prazo:  [['sem_prazo_porque', 0]],
+  };
+
+  ok(Object.keys(TETO).length === Object.keys(DESTINO).length,
+    'toda caixa do mapa TETO tem destino conhecido neste teste',
+    `TETO: ${Object.keys(TETO).join(',')} | destinos: ${Object.keys(DESTINO).join(',')}`);
+
+  for (const [acao, destinos] of Object.entries(DESTINO)) {
+    ok(Object.prototype.hasOwnProperty.call(TETO, acao),
+      `"${acao}" continua no mapa TETO`);
+    const cabe = Math.min(...destinos.map(([col, pre]) => LIMITE[col] - pre));
+    ok(Number.isFinite(cabe),
+      `os destinos de "${acao}" existem no catálogo de CHECKs`, JSON.stringify(destinos));
+    ok(TETO[acao] === cabe,
+      `o teto de "${acao}" é o que a CHECK aceita`,
+      `mapa diz ${TETO[acao]}, a coluna aceita ${cabe} ` +
+      `(${destinos.map(([c, p]) => `${c}=${LIMITE[c]}${p ? `-${p} de prefixo` : ''}`).join(' e ')})`);
+    /* e pela função, que é o que a tela chama de verdade */
+    ok(tetoDe(acao) === cabe, `e tetoDe("${acao}") devolve o mesmo`, String(tetoDe(acao)));
+  }
+
+  /* o número que a auditoria mediu no banco, escrito por extenso: se alguém
+     mudar o prefixo do servidor sem mexer aqui, os dois lados reprovam */
+  ok(TETO.rejeitar === 1980, 'e "rejeitar" é 1980, que é o que o banco aceita',
+    String(TETO.rejeitar));
+
+  /* o padrão de quem não está no mapa: 4000 é o teto das colunas de texto
+     longo, e devolver `undefined` faria o contador da caixa sumir */
+  ok(tetoDe('uma_acao_que_nao_existe') === 4000,
+    'ação sem teto próprio cai no padrão de 4000, e não em undefined',
+    String(tetoDe('uma_acao_que_nao_existe')));
+  /* e nenhum teto do mapa é maior que o padrão: se fosse, o contador
+     prometeria mais do que a coluna mais folgada aceita */
+  for (const [acao, n] of Object.entries(TETO)) {
+    ok(n > 0 && n <= 4000, `o teto de "${acao}" cabe em alguma coluna`, String(n));
   }
 }
 

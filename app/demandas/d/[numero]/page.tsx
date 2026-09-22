@@ -36,11 +36,27 @@ export default function Pagina() {
    Serve para o ramo de "cartão vazio" saber contar. Ver o comentário dele. */
 const FORA_DA_GRADE: Acao[] = ['comentar', 'validar'];
 
+/* O TETO DE EVENTOS DA MIGRAÇÃO 93.
+
+   Medido por quem escreveu a 93, contra a 92, com eventos no teto da CHECK:
+   50 eventos -> 203 kB, 300 -> 1213 kB, 1000 -> 4041 kB, 5000 -> 20202 kB.
+   Linear, numa porta que abre no celular de quem serve. A 93 põe teto de 200
+   e passa a devolver um campo novo, `eventos_total`, com quantos a pessoa
+   poderia ver.
+
+   `eventos_total` NÃO está em `Vista`, e este tipo existe para a ficha não
+   precisar de uma edição em `lib/demandas/tipos.ts`, que tem outro dono. O
+   `?` não é decoração: num banco ainda na 92 o campo não vem, `undefined`, e
+   nada na tela muda. O dono de `tipos.ts` pode acrescentar o campo em `Vista`
+   quando quiser: este tipo some no dia em que isso acontecer, e nada mais
+   muda. */
+type VistaComTeto = Vista & { eventos_total?: number };
+
 function Uma() {
   const params = useParams<{ numero: string }>();
   const router = useRouter();
   const numero = Number(params?.numero);
-  const [v, setV] = useState<Vista | null>(null);
+  const [v, setV] = useState<VistaComTeto | null>(null);
   const [b, setB] = useState<Bases | null>(null);
   const [erro, setErro] = useState('');
   const [aberto, setAberto] = useState<Acao | ''>('');
@@ -53,7 +69,13 @@ function Uma() {
   const carregar = useCallback(async () => {
     const r = await ver(numero);
     if (!r.ok) { setErro(recadoDoErro(r, 'abrir a demanda')); setV(null); return; }
-    setErro(''); setV({ demanda: r.demanda, eu: r.eu, eventos: r.eventos, anexos: r.anexos });
+    setErro('');
+    setV({
+      demanda: r.demanda, eu: r.eu, eventos: r.eventos, anexos: r.anexos,
+      /* leitura defensiva: o campo é da migração 93, que ainda não foi
+         aplicada. Com o banco na 92 isto é `undefined` e some na diferença. */
+      eventos_total: (r as Partial<{ eventos_total: number }>).eventos_total,
+    });
   }, [numero]);
 
   useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
@@ -79,6 +101,43 @@ function Uma() {
     () => (v ? acoesDe(v.demanda, v.eu) : []),
     [v]);
 
+  /* A ORDEM DO HISTÓRICO PASSA A SER DECIDIDA AQUI, 22/09/2026.
+
+     Esta tela imprimia `v.eventos` na ordem em que chegavam, e isso NÃO era
+     uma escolha: era uma dependência não escrita em `order by e.em, e.id`
+     dentro de `dem_ver` (85:609). Duas coisas quebram caladas no dia em que
+     essa cláusula virar:
+
+       · o histórico, que se lê de cima para baixo como linha do tempo;
+       · `prazoPedido` logo abaixo, que faz `find(tipo === 'prazo')` contando
+         que o PRIMEIRO da lista é o primeiro no tempo.
+
+     A migração 93, que recorta os 200 MAIS RECENTES, é exatamente o tipo de
+     mudança que vira essa cláusula: "os mais recentes" se escreve `order by
+     em desc`. Ela não virou: o recorte acontece numa subconsulta e o
+     `jsonb_agg` de fora continua devolvendo crescente, de propósito, com o
+     comentário dizendo que "devolver decrescente viraria a ficha do avesso
+     sem ninguem tocar numa linha de tela". Ou seja: a tela hoje está certa
+     porque alguém do outro lado se lembrou dela.
+
+     Ordenar aqui troca a lembrança por uma regra. Não custa nada em nenhum
+     dos casos que existem, porque com a 92 e com a 93 a lista já chega
+     crescente e o `sort` não move ninguém, e é o que faz a próxima migração
+     poder mexer na ordem sem derrubar esta tela. `Date.parse` e não
+     texto, porque o carimbo é `timestamptz` e o fuso vem junto. */
+  const eventos = useMemo(() => {
+    const q = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
+    return (v?.eventos ?? []).slice().sort((a, b) => q(a) - q(b));
+  }, [v]);
+
+  /* quantos o servidor TEM e não mandou. Zero enquanto o banco estiver na 92,
+     porque `eventos_total` não vem; zero também com a 93 numa demanda de
+     menos de 200 eventos, que é a esmagadora maioria delas. O `count` do lado
+     de lá conta só o que ESTA pessoa pode ver (mesmo filtro de `interno` do
+     recorte), então este número nunca diz a quem pediu quantos comentários
+     internos a equipe escreveu. */
+  const eventosDeFora = Math.max(0, (v?.eventos_total ?? 0) - eventos.length);
+
   /* O PDF PEDE DUAS DATAS DE PRAZO, E EXISTE UMA COLUNA SÓ — 22/09/2026.
 
      No Detalhamento ele pede "Data desejada para conclusão" (o que QUEM PEDIU
@@ -94,9 +153,37 @@ function Uma() {
      Coluna nova para isso seria cara e redundante — o dado já desce, na mesma
      carga de `dem_ver`. O PRIMEIRO evento de tipo `prazo` guarda em `de` o
      prazo que existia antes da primeira mudança, que é exatamente a data
-     pedida no nascimento. Vira parêntese na linha que já existe. */
+     pedida no nascimento. Vira parêntese na linha que já existe.
+
+     E ELE CALA QUANDO O HISTÓRICO VEIO CORTADO. 22/09/2026, com a 93.
+
+     Toda a conta acima depende de o primeiro evento `prazo` da lista ser o
+     primeiro que aconteceu. Com o teto de 200 pelos mais recentes, numa
+     demanda que passou disso o `abertura` já não chega, e o primeiro `prazo`
+     que chega é o primeiro DA JANELA: o `de` dele é o prazo de antes daquela
+     mudança, não o que foi pedido no nascimento. A ficha imprimiria "(pedido
+     para 28/09)" sobre uma demanda pedida para 22/09, com a mesma cara de
+     certeza que tem quando está certa.
+
+     Não dá para acertar com o que chega, então a linha volta a ser só o prazo
+     de hoje. Número errado com rótulo certo é pior que número ausente: a
+     ausência a pessoa percebe.
+
+     E ESTE BLOCO ORDENA POR CONTA PRÓPRIA EM VEZ DE LER `eventos`, DE
+     PROPÓSITO. `scripts/demandas.test.mjs` (8d) recorta o corpo deste
+     `useMemo` do arquivo e o EXECUTA com `new Function('v', corpo)`: a única
+     coisa que existe lá dentro é o `v`. Ler `eventos` daqui deixa o teste com
+     `ReferenceError`, medido, e um teste que não roda é pior que um teste
+     que falha. Duas linhas repetidas custam menos que perder os quatro casos
+     que ele cobre; pela mesma razão não há anotação de tipo nenhuma aqui
+     dentro, porque `new Function` recebe o texto cru e TypeScript não é
+     JavaScript. */
   const prazoPedido = useMemo(() => {
-    const p = v?.eventos.find(e => e.tipo === 'prazo');
+    const lista = v?.eventos ?? [];
+    if ((v?.eventos_total ?? 0) > lista.length) return '';
+    const p = lista.slice()
+      .sort((a, b) => (Date.parse(a.em) || 0) - (Date.parse(b.em) || 0))
+      .find(e => e.tipo === 'prazo');
     return p?.de || '';
   }, [v]);
 
@@ -471,7 +558,11 @@ function Uma() {
             teto={tetoDe('comentar')}
             dica={v.eu.atende ? 'O que for combinação da equipe, marque aqui embaixo: quem pediu não vê.' : undefined}
             extra={v.eu.atende ? (
-              <label className="dm-linha dm-peq" style={{ marginBottom: 'var(--dm-e2)' }}>
+              /* `dm-caixinha` é o alvo de toque, e ele faltava: a régua de
+                 celular media este rótulo em 324×20 e reprovava sete vezes,
+                 em cinco fichas e dois papéis. O porquê inteiro está na
+                 folha, em `.dm-caixinha`. */
+              <label className="dm-linha dm-peq dm-caixinha" style={{ marginBottom: 'var(--dm-e2)' }}>
                 <input type="checkbox" checked={interno} style={{ width: 'auto', minHeight: 0 }}
                   onChange={e => setInterno(e.target.checked)} />
                 Só para a equipe (quem pediu não vê)
@@ -488,7 +579,7 @@ function Uma() {
       {/* --------------------------------------------------------- histórico */}
       <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que já aconteceu</h2>
       <ul className="dm-hist">
-        {v.eventos.map((e, i) => (
+        {eventos.map((e, i) => (
           <li key={i} className={marco(e.tipo) ? 'dm-marco' : ''}>
             {/* COR SOZINHA NÃO INFORMA — 22/09/2026.
 
@@ -510,7 +601,24 @@ function Uma() {
           </li>
         ))}
       </ul>
-      {v.eventos.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
+      {eventos.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
+      {/* HISTÓRICO CORTADO TEM QUE DIZER QUE FOI CORTADO: a mesma regra, a
+          mesma classe e as mesmas palavras do corte da lista em
+          `app/demandas/page.tsx:213` ("Mostrando as N… Outras N não
+          couberam"), que existe desde a migração 57 pelo mesmo motivo: teto
+          sem aviso é pior que o problema que ele resolve, porque a pessoa lê
+          um pedaço achando que é o todo.
+
+          Fica no FIM e não no começo porque é ali que a linha do tempo
+          termina de ser lida, e a frase diz quais faltam (os mais antigos),
+          então ela se lê certo de onde está. Com o banco na 92, ou com menos
+          de 200 eventos, `eventosDeFora` é zero e esta linha não existe. */}
+      {eventosDeFora > 0 ? (
+        <p className="dm-corte" role="status">
+          Mostrando os {eventos.length} mais recentes. Outros {eventosDeFora} mais
+          antigos não couberam.
+        </p>
+      ) : null}
 
       <button className="dm-btn" style={{ marginTop: 'var(--dm-e3)' }} onClick={() => router.push('/demandas')}>
         Voltar para a lista

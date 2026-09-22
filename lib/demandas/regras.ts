@@ -9,39 +9,67 @@
    quebrado. Se você mexer numa das duas pontas, mexa na outra e rode os
    testes: eles conferem a matriz inteira de papel × setor × status.
 
-   ---- 21/09/2026: ISTO DIZIA "ESPELHO EXATO", E NÃO ERA ------------------
+   ---- 22/09/2026: A LISTA DE ONTEM ENVELHECEU, COMO ELA MESMA AVISOU -----
 
-   Uma auditoria comparou as 360 células (9 estados × 4 papéis × 10 ações)
-   chamando `dem_mover` de verdade para cada uma. Deu NOVE divergências, e
-   todas na mesma direção: a tela ESCONDE, o banco ACEITA.
+   A versão anterior deste cabeçalho listava NOVE divergências em cinco
+   linhas e terminava dizendo, sobre si mesma, "esta lista é o que temos, e
+   ela envelhece". Envelheceu em um dia.
 
-     execucao                  atende / manda  ->  assumir
-     travada/informacao        atende / manda  ->  travar
-     travada/terceiros         atende / manda  ->  travar
-     travada/terceiros         quem abriu      ->  destravar
-     travada/aprovacao         atende / manda  ->  travar
+   Uma auditoria nova varreu as 720 células de hoje (48 combinações de
+   estado e papel × as 15 ações de `Acao`), chamando `dem_mover` de verdade
+   em cada uma. Das cinco linhas que estavam escritas aqui, TRÊS já não
+   divergem: as três de `travar` sobre demanda travada. Elas caíram sozinhas
+   quando `acoesDe` parou de esconder `travar` do que já está travado (o
+   porquê está lá embaixo, na própria linha: re-travar com outro motivo TROCA
+   o motivo, e obrigar a destravar antes gravava dois eventos no histórico
+   para uma coisa que não aconteceu).
 
-   Nenhum botão morto, então nenhuma delas produz o sintoma que este arquivo
-   existe para evitar. O que elas produziam era pior de achar: duas delas
-   eram a METADE DE UM DEFEITO. `destravar` por quem abriu, sobre trava de
-   terceiros, era o segundo passo da porta dos fundos que a migração 67
-   fechou — a tela escondia o botão, e por isso ninguém tinha visto que o
-   banco aceitava a chamada direta.
+   E a MAIOR classe de divergência de hoje não estava mencionada em lugar
+   nenhum: `desanexar`, sozinha, é 48 das 720 células.
+
+   O que diverge hoje são três, e todas na mesma direção de sempre: a tela
+   ESCONDE, o banco ACEITA:
+
+     assumir · demanda em execução cujo dono já é VOCÊ MESMO
+       DECISÃO. O servidor (85:330, com a guarda de dono da 86) exige
+       `pode_atender`, portão aberto e `responsavel_id is null or = m.id`; e
+       não olha o status. Ou seja: aceita, e o efeito é reescrever o que já
+       está escrito. A tela some com o botão porque "Assumir e começar" numa
+       demanda que você já assumiu e já começou não oferece nada, e botão
+       que não faz nada é como uma grade de doze fica ilegível.
+
+     destravar · trava de TERCEIROS, por quem abriu
+       DÍVIDA, e é a mesma de 21/09 com um dia a mais. A migração 67 tirou o
+       rótulo da trava do guarda de propósito ("o portão é a APROVAÇÃO; a
+       trava é só como ela aparece na tela"), então o servidor (85:354) aceita
+       `pode_atender OR aberta_por` sobre QUALQUER rótulo. A tela só oferece
+       sobre `informacao`, que é o único caso em que quem pediu tem a resposta
+       na mão. Enquanto o banco não ler o rótulo, quem abriu destrava por
+       chamada direta uma demanda que ainda espera alguém de fora, e a tela
+       escondendo o botão é justamente o que faz ninguém descobrir.
+
+     desanexar · as 48 células, em todo estado e todo papel
+       DECISÃO, e a única das três que é divergência por CONSTRUÇÃO.
+       `acoesDe` decide por DEMANDA; o servidor (85:314) decide por ANEXO:
+       `pode_atender(m,d) OR a.membro_id = m.id`. Quem abriu e não atende só
+       tira o que ele mesmo colou, e esta função nunca vai saber de quem é o
+       anexo. Por isso `desanexar` saiu daqui em 22/09 e quem responde é o
+       `posso_tirar` que a migração 89 pôs em `dem_ver`, com a MESMA expressão
+       do `desanexar`, linha a linha da lista de anexos. A matriz conta as 48
+       como divergência porque ela pergunta por demanda; a pergunta é que não
+       cabe.
 
    A LIÇÃO, escrita para a próxima pessoa: tela mais restritiva que o banco
    NÃO é segurança, é um defeito escondido. A regra tem que existir no banco;
-   esconder o botão só adia a descoberta.
+   esconder o botão só adia a descoberta. É por isso que as duas DECISÕES
+   acima dizem o que a tela ganha em esconder, e a DÍVIDA diz o que se perde:
+   a diferença entre as duas coisas é essa frase, e não o tamanho do desvio.
 
-   O que mudou agora: as três regras do PORTÃO DE APROVAÇÃO passaram a existir
-   no banco (migração 67), que era onde faltavam. As outras seis continuam
-   sendo só-da-tela, de propósito: são escolhas de produto (não oferecer
-   "travar" o que já está travado, não oferecer "assumir" o que já está em
-   execução) que não protegem nada e não fazem mal.
-
-   DÍVIDA ANOTADA: não existe teste que compare estas duas pontas
-   automaticamente — o comparador da auditoria era um script de uma vez só,
-   em JS, contra o banco. Enquanto ele não existir, esta lista é o que temos,
-   e ela envelhece. */
+   DÍVIDA ANOTADA, E ELA É A RAIZ DAS OUTRAS: não existe teste que compare
+   estas duas pontas automaticamente: o comparador da auditoria continua
+   sendo um script de uma vez só, em JS, contra o banco. Enquanto ele não
+   existir, esta lista é o que temos, e ela envelhece de novo. Em um dia, da
+   última vez. */
 
 import type {
   Aprovacao, Categoria, Papel, Prioridade, Resumo, Status, Trava,
@@ -691,6 +719,43 @@ const PORBANCO: Record<string, string> = {
   VINCULO_EM_USO: 'Ainda há demanda ou cadastro ligado a este item. Desligue o vínculo antes de apagar, ou desative em vez de apagar.',
 };
 
+/* O SEGUNDO CADEADO DA MESMA PORTA, 22/09/2026.
+
+   Uma varredura das 371 saídas de `recadoDoErro` achou QUATRO com palavra de
+   Escalas dentro do sistema de Demandas, e as quatro pelo mesmo caminho: um
+   erro chegando como `erro:'REDE'` com `codigo` 42501 ou 23503, caindo no
+   `humano()` do fim da função e sendo traduzido por `PORCODIGO` de
+   `lib/erros.ts:210-212`:
+
+     42501 -> "Você não tem permissão para isso neste MINISTÉRIO. Fale com
+               quem organiza a IGREJA."
+     23503 -> "Não dá para fazer isso enquanto houver ESCALA ou cadastro
+               ligado a este item."
+
+   Hoje isso não acontece, e é justamente esse o problema. `rpcCom`
+   (`api.ts:123` e `:141`) intercepta os dois códigos ANTES e devolve
+   `SEM_PERMISSAO_DB` e `VINCULO_EM_USO`, que `PORBANCO` já traduz no
+   vocabulário daqui. A porta está fechada, com UM cadeado, do lado de lá, e
+   `recadoDoErro` é exportada: qualquer chamada que não passe por `rpcCom`
+   (um teste, uma tela nova, um ajudante que colapse erro em `REDE` por conta
+   própria) reabre a porta sem que nada acuse.
+
+   O repositório já pagou exatamente essa conta: `api.ts:65-76` conta que a
+   lista `NAO_E_IDENTIDADE` ficou para trás quando `rpcCom` ganhou os dois
+   códigos novos, e a consequência foi QUEIMAR o link pessoal de quem tomasse
+   um 42501. Proteção inteira de um lado só é proteção que depende de duas
+   pessoas lembrarem da mesma coisa.
+
+   O segundo cadeado reusa as MESMAS frases de `PORBANCO`, e não cópias
+   delas: duas grafias para o mesmo recado é como se perde uma regra sem
+   ninguém ver, que é o que o cabeçalho de `tipos.ts` diz na primeira linha. E
+   como o caminho normal bate em `PORBANCO[r.erro]` primeiro, e as frases são
+   as mesmas, ninguém lê nada diferente enquanto tudo funciona. */
+const DO_TRANSPORTE: Record<string, string> = {
+  '42501': PORBANCO.SEM_PERMISSAO_DB,
+  '23503': PORBANCO.VINCULO_EM_USO,
+};
+
 /* A LISTA, PARA O TESTE PODER VARRER TODA ELA.
 
    Sem isto, um teste que quisesse conferir a SAÍDA de `recadoDoErro` para
@@ -811,6 +876,11 @@ export function recadoDoErro(
      precedência. O chão de transporte passa a ser compartilhado. */
   const doNegocio = PORBANCO[r.erro];
   if (doNegocio) return doNegocio;
+  /* o segundo cadeado, antes de `humano()`. Ver `DO_TRANSPORTE` acima: é aqui
+     que os dois códigos que carregam vocabulário de Escalas param, venha o
+     erro por `rpcCom` ou por qualquer outro caminho. */
+  const doTransporte = r.codigo ? DO_TRANSPORTE[r.codigo] : undefined;
+  if (doTransporte) return doTransporte;
   if (r.regra) {
     /* e o código vai junto: sem ele, `humano()` não tem como distinguir um
        `raise exception` nosso (P0001, já em português) de um erro de

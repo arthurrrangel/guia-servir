@@ -59,11 +59,33 @@ B=$(cd "$(dirname "$0")/.." && pwd)
 # Medido por uma auditoria independente: trazendo o harness para o dia, oito
 # casos reprovavam.
 #
-# A 67 e a 68 saem da lista porque a 84, a 85 e a 87 reescrevem `dem_mover` e
+# A 68 sai da lista porque a 84, a 85 e a 87 reescrevem `dem_mover` e
 # `dem_lista` por inteiro; a 80 nunca esteve aqui porque mexe em
 # `public.pessoas`, que esta base nao tem de proposito.
+#
+# A 67 VOLTOU — 22/09/2026, E ELA NAO ERA SO `dem_mover` E `dem_lista`.
+#
+# A justificativa de tirar a 67 valia para as duas funcoes que a 84/85/87
+# reescrevem por inteiro. So que a 67 tem um § 2, e nele ela reescreve
+# `dem_bases` — e NENHUMA migracao posterior reescreve `dem_bases` por
+# inteiro: a 92 so a remenda por dentro, com `troca_se_faltar`, para
+# acrescentar o teto do setor.
+#
+# Medido neste harness, com a 67 fora, chamando `dem_bases` com o token de um
+# `responsavel`:
+#
+#   VAZA: dem_bases devolve membros
+#   { "id": "...", "nome": "Ana Kids", "papel": "solicitante",
+#     "setor_id": "...", "telefone": "5531900000006" }
+#
+# Ou seja: nome, papel, setor e TELEFONE de todo mundo, para qualquer
+# responsavel — exatamente o vazamento que a 67 existe para fechar, e que
+# `lib/demandas/tipos.ts` ja nem declara (`Bases` perdeu o campo `membros` no
+# mesmo commit da 67). Os 63 casos e as nove conferencias rodavam contra uma
+# `dem_bases` que nao existe em producao desde 21/09.
 for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com-teto \
          58-membro-novo-nasce-em-producao \
+         67-o-portao-de-aprovacao-tinha-tres-portas-dos-fundos \
          84-o-portao-congelava-no-nascimento-e-um-tab-passava-por-texto \
          85-o-anexo-nao-era-anexo-era-um-link-sem-dono \
          86-sete-casts-cegos-e-quatro-acoes-que-diziam-ok-sem-fazer-nada \
@@ -72,7 +94,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          89-a-terceira-auditoria-e-a-lista-de-invisiveis-que-so-uma-copia-cresceu \
          90-o-setor-nao-ficava-sabendo-que-chegou-demanda \
          91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia \
-         92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio; do
+         92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio \
+         93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql
@@ -103,5 +126,40 @@ if [ "$st" != 0 ]; then
   echo "FALHOU — demandas-banco reprovou (psql saiu $st). O detalhe está acima."
   exit 1
 fi
+
+# ===========================================================================
+# OS CODIGOS DO BANCO CONTRA AS FRASES DA TELA
+#
+# 22/09/2026. Renomear uma chave de `PORBANCO` em `lib/demandas/regras.ts` --
+# `ATRASO_PRECISA_MOTIVO`, por exemplo -- deixava ESTE harness verde do comeco
+# ao fim e `npm test` verde tambem: o harness nao conhece o TypeScript, e a
+# varredura de `demandas.test.mjs` percorre `Object.keys(PORBANCO)`, ou seja,
+# varre justamente a lista que acabou de ser estragada.
+#
+# O unico lugar do repositorio onde as duas listas podem ser cruzadas e aqui,
+# porque so aqui existe o banco MONTADO -- com todas as migracoes aplicadas em
+# ordem, que e o que decide qual versao de cada funcao esta viva. Ler os
+# arquivos de migracao daria orfaos inventados: um codigo escrito na 52 e
+# apagado pela 85 continua no disco.
+cat > /tmp/_codigos.sql <<'SQL'
+with f as (
+  select pg_get_functiondef(p.oid) as src
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'demandas'
+      or (n.nspname = 'public' and p.proname like 'dem\_%')
+)
+select distinct m[1] from f, regexp_matches(f.src, '''erro''\s*,\s*''([A-Z][A-Z0-9_]*)''', 'g') m
+order by 1;
+SQL
+chmod 644 /tmp/_codigos.sql
+su postgres -c "$PG/psql -h /tmp -U postgres -d dem -tAq -v ON_ERROR_STOP=1 -f /tmp/_codigos.sql" \
+  > /tmp/_codigos-do-banco.txt
+chmod 644 /tmp/_codigos-do-banco.txt
+( cd "$B" && node --import ./scripts/_ts.mjs scripts/demandas-codigos.test.mjs /tmp/_codigos-do-banco.txt ) || {
+  echo
+  echo "FALHOU — os codigos que o banco devolve e as frases da tela divergem."
+  exit 1
+}
+
 echo
 echo "OK — demandas: as regras do PDF valem no banco, e a suite agora reprova quando nao valem."

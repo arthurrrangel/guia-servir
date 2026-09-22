@@ -176,8 +176,9 @@ function Painel() {
           {/* ----------------------------------------------------- categorias */}
           <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que mais se pede</h2>
           <div className="dm-card">
-            <Barras itens={n.por_categoria.slice(0, 10).map(c => ({ rot: c.nome, n: c.n, sub: c.grupo }))} />
+            <Barras itens={n.por_categoria.slice(0, TETO_BARRAS).map(c => ({ rot: c.nome, n: c.n, sub: c.grupo }))} />
             {!n.por_categoria.length ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nada no período.</p> : null}
+            <SobraDeCategorias cs={n.por_categoria} />
           </div>
 
           {/* ------------------------------------------------------- atrasos */}
@@ -255,6 +256,47 @@ type LinhaDeSetor = { nome: string; pediu: number; atendeu: number; abertas: num
 function porVolume(setores: LinhaDeSetor[]): LinhaDeSetor[] {
   return setores.slice().sort((a, b) =>
     b.pediu - a.pediu || b.atendeu - a.atendeu || a.nome.localeCompare(b.nome, 'pt-BR'));
+}
+
+/* O CORTE DE 10 DESCARTAVA AS OUTRAS 34 EM SILÊNCIO, 22/09/2026.
+
+   O documento pede DOIS indicadores com a palavra categoria, e eles não são
+   o mesmo: "Demandas por categoria" e "Categorias com maior recorrência". O
+   `.slice(0, 10)` atende o segundo com folga, porque dez é mais do que se
+   olha de uma vez, e deixa o primeiro sem resposta nenhuma: medido, 44
+   categorias com demanda no período, 10 barras na tela, 34 jogadas fora sem
+   uma palavra. Quem lê conta as barras e conclui que a igreja pede dez tipos
+   de coisa.
+
+   O mesmo defeito, e o mesmo conserto, que `/demandas` já pagou na migração
+   57: teto sem aviso é pior que o problema que ele resolve, porque a pessoa
+   olha uma lista incompleta achando que é a lista. Lá a frase é "Mostrando
+   as N mais urgentes. Outras N não couberam"; aqui é a mesma frase, com a
+   mesma classe `.dm-corte` e o mesmo `role="status"`.
+
+   A SOMA VAI JUNTO, E É ELA QUE RESPONDE O INDICADOR. "Outras 34 não
+   couberam" diz quantas fatias faltam, e não quanto elas pesam: 34
+   categorias de uma demanda cada é cauda longa, e 34 somando 300 é a maior
+   parte do volume escondida embaixo das dez barras. O número que muda a
+   leitura do gráfico é o segundo.
+
+   E a frase PARA aí, sem oferecer gesto. Em `/demandas` o corte termina em
+   "use os filtros acima", porque lá existe filtro que faz a demanda aparecer.
+   Aqui não existe: nem o seletor de período nem nada nesta tela mostra a
+   décima primeira categoria. Apontar um gesto que não existe é o defeito que
+   a dica do comentário interno já custou nesta casa. */
+const TETO_BARRAS = 10;
+
+function SobraDeCategorias({ cs }: { cs: Numeros['por_categoria'] }) {
+  const fora = cs.slice(TETO_BARRAS);
+  if (!fora.length) return null;
+  const soma = fora.reduce((s, c) => s + c.n, 0);
+  return (
+    <p className="dm-corte" role="status">
+      Mostrando as {TETO_BARRAS} mais pedidas. Outras {fora.length} não couberam,
+      e somam {soma} {soma === 1 ? 'demanda' : 'demandas'}.
+    </p>
+  );
 }
 
 function Num({ v, r, destaque }: { v: number | string; r: string; destaque?: boolean }) {

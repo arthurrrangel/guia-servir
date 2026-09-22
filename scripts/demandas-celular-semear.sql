@@ -37,7 +37,7 @@ declare
   t_com   text := 'tok-comunica';
   t_ges   text := 'tok-gestor';
   c_divul uuid; c_compra uuid; c_manut uuid; c_reemb uuid;
-  r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int; n7 int; n8 int;
+  r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int; n7 int; n8 int; n9 int;
 begin
   select id into c_divul  from demandas.categorias where nome = 'Divulgação de culto' limit 1;
   select id into c_compra from demandas.categorias where nome = 'Compra de equipamentos' limit 1;
@@ -170,5 +170,34 @@ begin
   n8 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 51 where numero = n8;
 
-  raise notice 'semeado: % % % % % % % %', n1, n2, n3, n4, n5, n6, n7, n8;
+  /* 9. A ETAPA 5 DO PDF PRECISA DOS DOIS LADOS NA SEMENTE — 22/09/2026.
+
+     A migracao 91 pos no cartao verde da ficha um botao ("Resolveu,
+     obrigado") e, no lugar dele depois de confirmada, uma frase ("Validada
+     por X em dd/mm/aaaa"). Sao duas caixas diferentes, com alturas e alvos de
+     toque diferentes, e so uma delas existia aqui: a demanda 6 e concluida e
+     NAO validada de proposito (nenhuma linha a valida, e e assim que tem que
+     ficar — ela e a que exercita o BOTAO).
+
+     Esta nona e a outra metade: concluida E confirmada por quem pediu, para a
+     FRASE ter uma tela onde ser medida. Sem ela, apagar a frase inteira nao
+     mudaria uma unica conferencia de celular.
+
+     Quem valida e `t_pede`, que foi quem abriu: e o caminho do PDF
+     ("Confirmar a conclusao" esta entre as capacidades do Solicitante), e nao
+     o atalho da lideranca. */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Impressao dos cartoes de visitante',
+    'descricao','Cem cartoes de visitante para o balcao da recepcao, no papel de sempre.',
+    'objetivo','Recepcao com material para o domingo.',
+    'local','Recepcao', 'publico','Visitantes',
+    'categoria_id', c_manut, 'prioridade','normal', 'impacto','baixo',
+    'prazo', (current_date + 6)::text));
+  n9 := (r->>'numero')::int;
+  perform public.dem_mover(t_ges, n9, 'assumir', '{}'::jsonb);
+  perform public.dem_mover(t_ges, n9, 'concluir',
+    jsonb_build_object('texto','Cem cartoes impressos e entregues no balcao da recepcao.'));
+  perform public.dem_mover(t_pede, n9, 'validar', '{}'::jsonb);
+
+  raise notice 'semeado: % % % % % % % % %', n1, n2, n3, n4, n5, n6, n7, n8, n9;
 end $$;

@@ -133,8 +133,29 @@ function Gente({ ms, b, indo, salvar }: {
             </select>
           </Campo>
         </div>
-        <Campo rot="E-mail do login (opcional)"
-          ajuda="Só para quem vai entrar com senha. Tem que ser o mesmo e-mail do GUIA Servir, senão a senha não confere. Quem não tiver entra pelo link pessoal.">
+        {/* O CAMPO DIZIA "OPCIONAL" E COBRAVA O PREÇO CALADO, 22/09/2026.
+
+            Medido: `fn_enfileirar_aviso` (91:258) só enfileira aviso para
+            quem tem `coalesce(auth_email, email)` preenchido, nas TRÊS
+            entradas da fila (demanda nova para o setor, setor trocado, e
+            mudança de estado ou pedido de informação para quem pediu). Sem
+            e-mail, a pessoa não entra em nenhuma delas, nunca. No banco da
+            auditoria, 4 dos 7 membros estavam assim.
+
+            E a tela dizia exatamente o contrário: o rótulo era "E-mail do
+            login (opcional)" e a ajuda terminava em "Quem não tiver entra
+            pelo link pessoal", que é verdade sobre ENTRAR e silêncio sobre
+            RECEBER. Quem cadastra lê "opcional", pula o campo, e acabou de
+            decidir, sem saber, que aquela pessoa nunca vai ser avisada de
+            nada.
+
+            Sem campo novo e sem tornar obrigatório: quem não tem e-mail
+            continua entrando pelo link, e isso segue sendo um cadastro
+            válido. O que muda é o rótulo e a ajuda dizerem o preço ANTES,
+            que é o mesmo remédio que "WhatsApp · É por onde os avisos saem"
+            já usa no campo ao lado. */}
+        <Campo rot="E-mail (é por onde os avisos chegam)"
+          ajuda="Sem e-mail, a pessoa não recebe aviso nenhum: nem de demanda nova no setor dela, nem de resposta na que ela pediu. Serve também para entrar com senha, e aí tem que ser o mesmo e-mail do GUIA Servir. Quem ficar sem entra pelo link pessoal, e só descobre a novidade abrindo o sistema.">
           <input type="email" value={novo.auth_email}
             onChange={e => setNovo(v => ({ ...v, auth_email: e.target.value }))} />
         </Campo>
@@ -248,9 +269,24 @@ function Setores({ b, indo, salvar }: {
   const [atende, setAtende] = useState(false);
   return (
     <>
+      {/* "MINISTÉRIO" É A PALAVRA DO OUTRO SISTEMA, E ELA ESTAVA EXPLICANDO
+          UM SETOR, 22/09/2026.
+
+          A frase era "Ministério que só pede fica com isso desligado", dentro
+          da aba SETORES, para explicar o que é um setor que não atende.
+          Ministério é o vocabulário do GUIA Servir; aqui a unidade se chama
+          setor, e é o que está escrito no cabeçalho da coluna, no seletor de
+          cadastro, no "Vai para" das categorias e em `SEM_PERMISSAO_DB`.
+
+          A regra do dono é que os dois sistemas não se encostam, e o
+          vocabulário é justamente onde eles se encostam sem ninguém notar:
+          `regras.ts:598` conta que a mesma palavra já tinha vazado uma vez,
+          pela tradução de erro. Uma explicação que usa a palavra do outro
+          sistema para definir a deste ensina o nome errado a quem está
+          montando o cadastro. */}
       <Aviso tom="info">
         <div>
-          <b>Atende</b> quer dizer que o setor pode RECEBER demanda. Ministério que só pede fica
+          <b>Atende</b> quer dizer que o setor pode RECEBER demanda. Setor que só pede fica
           com isso desligado, assim ninguém manda uma demanda para um lugar que não vai olhar.
           <br />
           <b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo

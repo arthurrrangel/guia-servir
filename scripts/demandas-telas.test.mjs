@@ -1,4 +1,4 @@
-/* AS QUATRO TELAS DE DEMANDAS, EXECUTADAS DE VERDADE.
+/* AS CINCO TELAS DE DEMANDAS, EXECUTADAS DE VERDADE.
 
    ===========================================================================
    POR QUE ESTE ARQUIVO EXISTE
@@ -56,8 +56,24 @@
      responde.
    · SSR E HIDRATAÇÃO. Os componentes montam só do lado do cliente. Se uma
      tela passar a divergir entre servidor e cliente, este arquivo não vê.
-   · `app/demandas/d/[numero]/page.tsx`. A ficha tem dono diferente do desta
-     rodada e não entra aqui.
+
+   ===========================================================================
+   A FICHA ENTROU — 22/09/2026, E ELA ERA O MAIOR BURACO DA SUÍTE
+
+   Até aqui esta linha dizia: "`app/demandas/d/[numero]/page.tsx`. A ficha tem
+   dono diferente do desta rodada e não entra aqui." Escrita assim ela parecia
+   um recorte de escopo; medida, era o maior buraco de cobertura do sistema.
+
+   São 873 linhas e 33 elementos interativos — a grade de doze botões, sete
+   caixas de ação, o cartão verde da etapa 5 do PDF, o aviso do portão de
+   aprovação, o "tirar" de cada anexo, a caixinha de comentário interno — e os
+   outros dois arquivos que citam esse caminho (`demandas-css`,
+   `demandas-porta-propria`) o abrem com `readFileSync` e passam expressão
+   regular. Medido por uma auditoria independente: trocar `{a.posso_tirar ? (`
+   por `{true ? (` — ou seja, devolver a "tirar" para TODO anexo, que é
+   exatamente o defeito que a migração 89 conserta — deixava `npm test` verde.
+
+   Agora ela monta aqui, com o mesmo maquinário das outras quatro.
 
    Uso: node --import ./scripts/_ts.mjs scripts/demandas-telas.test.mjs
 */
@@ -76,10 +92,16 @@ const DUBLES = {
     export default function Link({ href, children, ...r }) {
       return createElement('a', { href: String(href), ...r }, children);
     }`,
+  /* `useParams` e o registro do `push` entraram com a ficha: ela é a única
+     tela que lê o número da rota e a única que manda o navegador embora. */
   'next/navigation': `
-    export const usePathname = () => '/demandas';
-    export const useRouter = () => ({ push() {}, replace() {}, refresh() {} });
-    export const useSearchParams = () => new URLSearchParams('');`,
+    export const usePathname = () => globalThis.__caminho || '/demandas';
+    export const useRouter = () => ({
+      push(u) { (globalThis.__idas = globalThis.__idas || []).push(String(u)); },
+      replace() {}, refresh() {},
+    });
+    export const useSearchParams = () => new URLSearchParams('');
+    export const useParams = () => globalThis.__params || { numero: '1' };`,
   /* o único dublê que muda o comportamento medido: ele devolve o cliente que
      este arquivo controla. Tudo o que vem depois (api.ts, rpcCom, regras.ts)
      é o código de produção. */
@@ -278,6 +300,39 @@ class Elemento extends No {
   focus() { this.ownerDocument._foco = this; }
   blur() {} select() {}
   remove() { if (this.parentNode) this.parentNode.removeChild(this); }
+  /* AS DUAS QUE A FICHA PRECISA, E NENHUMA A MAIS — 22/09/2026.
+
+     Tocar em "Concluir" abre um formulário no fim de um cartão IRMÃO, e até
+     22/09 nada rolava e nada recebia foco: a pessoa tocava, a tela ficava
+     igual, e ela concluía que o botão estava morto. O conserto é um
+     `scrollIntoView` mais um `querySelector('textarea,input,select')?.focus()`
+     no efeito de abrir, e sem estes dois métodos a montagem da ficha morria
+     em "n.scrollIntoView is not a function" — ou seja, o teste não rodava por
+     causa do CONSERTO.
+
+     `_rolouAte` guarda quem foi rolado, para o caso poder cobrar que rolou.
+     Rolagem de verdade não existe aqui (o DOM não calcula caixa), então o que
+     se mede é a CHAMADA, que é o que a tela decide.
+
+     O seletor entende uma lista de NOMES DE TAG separados por vírgula, que é
+     a única forma que este produto usa. Fingir um seletor CSS completo seria
+     escrever um motor de seletor dentro de um teste. */
+  scrollIntoView() { this.ownerDocument._rolouAte = this; }
+  querySelector(sel) {
+    const tags = String(sel).split(',').map(s => s.trim().toUpperCase());
+    if (tags.some(t => !/^[A-Z]+$/.test(t))) {
+      throw new Error(`o DOM de mentira só entende lista de tags, e veio: ${sel}`);
+    }
+    let achado = null;
+    (function anda(x) {
+      for (const c of x.childNodes) {
+        if (achado) return;
+        if (c.nodeType === 1 && tags.includes(c.tagName)) { achado = c; return; }
+        anda(c);
+      }
+    })(this);
+    return achado;
+  }
 }
 class Opcao extends Elemento {
   constructor(doc) { super(doc, 'option'); this.selected = false; this.defaultSelected = false; this.disabled = false; }
@@ -395,6 +450,67 @@ const demanda = (numero, extra = {}) => ({
 /* Cada resposta pode ser um valor (volta na hora) ou uma função que devolve
    promessa; o caso da resposta fora de ordem usa a segunda forma para segurar
    duas consultas no ar ao mesmo tempo. */
+/* ------------------------------------------------- a carga da ficha
+
+   `dem_ver` devolve quatro coisas: a demanda CHEIA (o `Detalhe`, que é o
+   `Resumo` mais dezoito campos), quem está olhando do ponto de vista DAQUELA
+   demanda, os eventos e os anexos.
+
+   `eu` vem do servidor e NÃO é o mesmo `eu` da casca: `atende` e `abriu` são
+   respostas sobre esta demanda, calculadas por `pode_atender` e
+   `aberta_por = m.id`. É por isso que os casos abaixo montam os dois lados —
+   trocar um pelo outro é como a ficha passaria a oferecer botão de quem
+   atende para quem só pediu. */
+const detalhe = (extra = {}) => ({
+  ...demanda(7),
+  descricao: 'Criar a arte do culto de celebração, 1080x1080, com o tema do mês.',
+  objetivo: null, local: null, publico: null, impacto: null, orcamento: null,
+  sem_prazo_porque: null, travada_nota: null, aprovacao_nota: null,
+  conclusao: null, concluida_em: null, atraso_motivo: null, cancelada_motivo: null,
+  categoria_id: 'c1', setor_responsavel_id: 's1', responsavel_id: null,
+  abriu_telefone: '5531900000001', resp_telefone: null,
+  validada_em: null, validada_por: null,
+  ...extra,
+});
+
+/* `atende`/`abriu` são do ponto de vista da demanda; `papel` é o da pessoa */
+const QUEM = {
+  atende:      { id: 'u9', papel: 'responsavel', atende: true,  abriu: false },
+  pediu:       { id: 'u1', papel: 'solicitante', atende: false, abriu: true },
+  soEnxerga:   { id: 'u2', papel: 'solicitante', atende: false, abriu: false },
+  gestor:      { id: 'u3', papel: 'gestor',      atende: true,  abriu: false },
+  gestorDeFora:{ id: 'u3', papel: 'gestor',      atende: false, abriu: false },
+};
+
+const vista = (d = {}, quem = QUEM.atende, eventos = [], anexos = []) =>
+  ({ ok: true, demanda: detalhe(d), eu: quem, eventos, anexos });
+
+const anexo = (extra = {}) => ({
+  id: 'a1', nome: 'arte-final.png (drive.google.com)', url: 'https://drive.google.com/x',
+  em: '2026-09-10T10:00:00Z', quem: 'Monik', depois_de_fechar: false, posso_tirar: false,
+  ...extra,
+});
+
+/* A ficha é sempre montada com a rota apontando para ela: `useParams` é a
+   única fonte do número, e um `undefined` ali faz `Number(undefined)` virar
+   `NaN` e o efeito de carregar nunca rodar. */
+async function abrirFicha(numero = 7) {
+  globalThis.__params = { numero: String(numero) };
+  globalThis.__caminho = `/demandas/d/${numero}`;
+  globalThis.__idas = [];
+  return montar(Ficha);
+}
+
+/* os rótulos dos doze botões da grade, na ordem em que a ficha os escreve.
+   A grade é lida por `aria-label`? Não: ela é um `div.dm-grade`, e é assim
+   que se acha. */
+const grade = (alvo) =>
+  todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-grade')[0];
+const botoesDaGrade = (alvo) => {
+  const g = grade(alvo);
+  return g ? porTag(g, 'BUTTON').map(texto) : [];
+};
+
 function banco(respostas) {
   const chamadas = [];
   return {
@@ -527,6 +643,7 @@ const Painel = (await import('@/app/demandas/page.tsx')).default;
 const Nova = (await import('@/app/demandas/nova/page.tsx')).default;
 const Numeros = (await import('@/app/demandas/numeros/page.tsx')).default;
 const Ajustes = (await import('@/app/demandas/ajustes/page.tsx')).default;
+const Ficha = (await import('@/app/demandas/d/[numero]/page.tsx')).default;
 
 /* ===========================================================================
    1 · O QUARTO RECORTE, E O QUE ELE MANDA PARA O BANCO
@@ -1111,6 +1228,496 @@ console.log('\n9. Números: a tabela por setor sai por volume, e o mês único v
   const { alvo, desmontar } = await montar(Numeros);
   ok(/Mês a mês/.test(texto(alvo)) && /Nada no período/.test(texto(alvo)),
     'sem nenhum mês, a seção diz que não houve nada em vez de sumir');
+  await desmontar();
+}
+
+/* ===========================================================================
+   10 · A LISTA CORTADA DIZ QUE FOI CORTADA
+   =========================================================================== */
+
+/* A migração 57 pôs teto de 300 em `dem_lista` porque a aba "Tudo" com 20 mil
+   demandas descia 10 MB de JSON. O comentário dela diz, com todas as letras:
+   "com teto e SEM aviso, a lista passaria a mentir em silêncio".
+
+   O aviso é uma linha só — `setSobraram(r.tem_mais ? Math.max(total - itens, 0)
+   : 0)` — e até 22/09/2026 NENHUM dublê deste repositório devolvia
+   `tem_mais: true`. Trocar a linha inteira por `setSobraram(0)` ficava verde:
+   a pessoa olharia 300 de 1204 achando que são todas. */
+console.log('\n10. A lista cortada diz quantas ficaram de fora');
+{
+  mundoNovo();
+  const muitas = Array.from({ length: 300 }, (_, i) => demanda(i + 1));
+  globalThis.__banco = banco({
+    dem_quem_sou: EU_GESTOR,
+    dem_lista: { ok: true, itens: muitas, total: 1204, tem_mais: true, limite: 300 },
+  });
+  const { alvo, desmontar } = await montar(Painel);
+  const t = texto(alvo);
+  ok(/Mostrando as 300 mais urgentes/.test(t),
+    'a lista diz quantas está mostrando', t.slice(-320));
+  ok(/Outras 904 não couberam/.test(t),
+    'e quantas ficaram de fora: 1204 menos as 300 que vieram', t.slice(-320));
+  const aviso = todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-corte')[0];
+  ok(existe(aviso, 'o aviso de lista cortada') && aviso.getAttribute('role') === 'status',
+    'e ele é anunciado como estado, para quem usa leitor de tela',
+    aviso ? String(aviso.getAttribute('role')) : '(ausente)');
+  ok(/filtros|número/i.test(t), 'e diz o que fazer para achar o que falta', t.slice(-200));
+  await desmontar();
+}
+{
+  /* o outro lado: sem corte não pode haver aviso, senão a frase vira ruído
+     fixo e ninguém mais a lê quando ela importa */
+  mundoNovo();
+  globalThis.__banco = banco({
+    dem_quem_sou: EU_GESTOR,
+    dem_lista: { ok: true, itens: [demanda(1), demanda(2)], total: 2, tem_mais: false, limite: 300 },
+  });
+  const { alvo, desmontar } = await montar(Painel);
+  ok(!/não couberam/.test(texto(alvo)),
+    'lista inteira não inventa aviso de corte', texto(alvo).slice(-200));
+  await desmontar();
+}
+{
+  /* e o número não é o do teto: com `total` menor que os itens (carga velha,
+     contagem defasada) o aviso não pode dizer "Outras -3 não couberam" */
+  mundoNovo();
+  globalThis.__banco = banco({
+    dem_quem_sou: EU_GESTOR,
+    dem_lista: { ok: true, itens: [demanda(1), demanda(2)], total: 1, tem_mais: true, limite: 300 },
+  });
+  const { alvo, desmontar } = await montar(Painel);
+  ok(!/-\d/.test(texto(alvo)), 'e nunca aparece um número negativo de sobra', texto(alvo).slice(-200));
+  await desmontar();
+}
+
+/* ===========================================================================
+   11 · A FICHA DE UMA DEMANDA
+
+   As 873 linhas que nenhum teste da suíte executava. Ver o cabeçalho.
+   =========================================================================== */
+
+/* A GRADE É CONFERIDA CONTRA `acoesDe`, E NÃO CONTRA UMA LISTA ESCRITA AQUI.
+
+   `acoesDe` é o espelho de `dem_mover`, e `scripts/demandas.test.mjs` já
+   confere esse espelho célula por célula contra o SQL. Cobrando que a grade
+   renderize EXATAMENTE `acoesDe` menos as que moram fora dela, a corrente
+   fecha: SQL -> acoesDe -> botão na tela. Uma lista de rótulos escrita à mão
+   aqui só concordaria comigo mesmo.
+
+   O que sobra para este arquivo é o que só a tela sabe: qual rótulo cada ação
+   ganha, e que a lista de fora da grade é `['comentar','validar']` — as duas
+   têm lugar próprio (a caixa fixa do fim e o cartão verde). */
+const { acoesDe } = await import('@/lib/demandas/regras.ts');
+
+const ROTULO = {
+  aprovar: 'Aprovar', rejeitar: 'Recusar', assumir: 'Assumir e começar',
+  concluir: 'Concluir', travar: 'Travar', destravar: 'Destravar',
+  reabrir: 'Reabrir', prazo: 'Mudar o prazo', prioridade: 'Rever a prioridade',
+  redirecionar: 'Mandar para outro setor', anexar: 'Juntar um anexo',
+  cancelar: 'Cancelar',
+};
+const FORA_DA_GRADE = ['comentar', 'validar'];
+
+/* o que a grade DEVIA ter, calculado pelo espelho. `destravar` muda de rótulo
+   quando quem abriu vai responder, e a ficha escreve isso de propósito. */
+function gradeEsperada(d, quem) {
+  return acoesDe(d, quem)
+    .filter(a => !FORA_DA_GRADE.includes(a))
+    .map(a => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
+      ? 'Responder e destravar' : ROTULO[a]));
+}
+
+async function comFicha(carga, extra = {}) {
+  mundoNovo();
+  const b = banco({
+    dem_quem_sou: EU_GESTOR,
+    dem_bases: { ok: true, setores: [], categorias: [] },
+    dem_ver: carga,
+    dem_mover: { ok: true },
+    ...extra,
+  });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await abrirFicha(carga.demanda ? carga.demanda.numero : 7);
+  return { b, alvo, desmontar };
+}
+
+console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel e estado por estado');
+{
+  /* dez combinações de estado × quem está olhando. Cada uma monta a ficha de
+     verdade e compara o conjunto de botões com o do espelho. */
+  const CASOS = [
+    ['aberta · quem atende',        {}, QUEM.atende],
+    ['aberta · quem pediu',         {}, QUEM.pediu],
+    ['aberta · quem só enxerga',    {}, QUEM.soEnxerga],
+    ['execução · quem atende',      { status: 'execucao', responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.atende],
+    ['travada por informação · quem pediu',
+      { status: 'travada', travada_por: 'informacao', travada_nota: 'Qual sala?' }, QUEM.pediu],
+    ['travada por informação · quem atende',
+      { status: 'travada', travada_por: 'informacao', travada_nota: 'Qual sala?' }, QUEM.atende],
+    ['esperando aprovação · gestor',
+      { aprovacao: 'pendente', falta_aprovacao: true, status: 'travada', travada_por: 'aprovacao' }, QUEM.gestor],
+    ['esperando aprovação · quem atende',
+      { aprovacao: 'pendente', falta_aprovacao: true, status: 'travada', travada_por: 'aprovacao' }, QUEM.atende],
+    ['concluída · quem pediu',
+      { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z' }, QUEM.pediu],
+    ['cancelada · quem atende',
+      { status: 'cancelada', cancelada_motivo: 'O evento saiu do calendário.' }, QUEM.atende],
+  ];
+  /* comparados como CONJUNTO: a ordem da grade é decisão de layout (o que se
+     usa mais fica em cima), e cobrar a ordem aqui faria este teste reprovar
+     no dia em que alguém reordenar dois botões sem mudar regra nenhuma. O que
+     não pode variar é QUAIS. */
+  const conjunto = (xs) => [...xs].sort().join(' | ');
+  for (const [nome, d, quem] of CASOS) {
+    const carga = vista(d, quem);
+    const { alvo, desmontar } = await comFicha(carga);
+    const veio = botoesDaGrade(alvo);
+    const devia = gradeEsperada(carga.demanda, quem);
+    ok(conjunto(veio) === conjunto(devia),
+      `${nome}: a grade é exatamente o que \`acoesDe\` permite`,
+      `na tela: [${veio.join(' | ')}]\n           no espelho: [${devia.join(' | ')}]`);
+    await desmontar();
+  }
+}
+{
+  /* e o botão faz o que promete: tocar em "Assumir e começar" manda `assumir`
+     para o servidor, e não abre formulário nenhum. */
+  const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  await clicar(botao(grade(alvo), 'Assumir e começar'), 'o botão Assumir');
+  const c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'assumir', 'tocar em Assumir manda a ação `assumir`',
+    JSON.stringify(c && c.args));
+  ok(c && c.args.p_numero === 7, 'e sobre o número que veio da rota',
+    JSON.stringify(c && c.args));
+  ok(b.quantas('dem_ver') >= 2, 'e a ficha recarrega depois de gravar',
+    String(b.quantas('dem_ver')));
+  await desmontar();
+}
+{
+  /* e "Concluir" NÃO grava na hora: ele abre a caixa de "O que foi feito",
+     porque concluir sem dizer o que foi feito é o que o banco recusa */
+  const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  await clicar(botao(grade(alvo), 'Concluir'), 'o botão Concluir');
+  ok(!b.ultima('dem_mover'), 'tocar em Concluir não grava nada sozinho');
+  ok(/O que foi feito/.test(texto(alvo)), 'ele abre a caixa que pede o texto',
+    texto(alvo).slice(0, 200));
+  /* E A TELA TEM QUE SE MEXER. O formulário abre no fim de um cartão IRMÃO:
+     medido no navegador, "Concluir" abria 0px de 327px visíveis, a rolagem
+     ficava em 887 e o foco no BODY. A pessoa tocava, nada mudava, tocava de
+     novo e concluía que o botão estava morto. */
+  ok(document._rolouAte, 'a página rola até o formulário que abriu');
+  ok(document.activeElement && document.activeElement.tagName === 'TEXTAREA',
+    'e o foco cai no primeiro campo dele, sem a pessoa procurar',
+    String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+
+console.log('\n12. A ficha: "tirar" o anexo é decidido por anexo, e não pela pessoa');
+{
+  /* O DEFEITO DA MIGRAÇÃO 89, INTEIRO.
+
+     Era `v.eu.atende || v.eu.abriu` em TODO anexo. O servidor aceita
+     `pode_atender(m,d) OR o anexo é meu`: quem abriu e não atende só tira o
+     que ELE colou. A solicitante tocava em "tirar" no boleto que Compras
+     pregou e lia "Esse anexo não está mais aqui, ou não é seu para tirar."
+
+     Hoje quem responde é `posso_tirar`, por anexo, calculado pelo servidor
+     com a MESMA expressão do `desanexar`. Aqui a carga traz os dois tipos na
+     mesma lista: se a tela voltar a decidir sozinha, os dois ficam iguais. */
+  const meu = anexo({ id: 'a-meu', nome: 'recibo-meu.pdf (drive.google.com)',
+                      quem: 'Ana', posso_tirar: true });
+  const doOutro = anexo({ id: 'a-outro', nome: 'boleto-atualizado.pdf (drive.google.com)',
+                          quem: 'Jander', posso_tirar: false });
+  const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.pediu, [], [meu, doOutro]));
+
+  const linhas = porTag(alvo, 'LI').filter(li => /drive\.google\.com/.test(texto(li)));
+  ok(linhas.length === 2, 'os dois anexos aparecem na ficha', String(linhas.length));
+  const daPessoa = linhas.find(li => /recibo-meu/.test(texto(li)));
+  const doColega = linhas.find(li => /boleto-atualizado/.test(texto(li)));
+  ok(existe(daPessoa, 'a linha do anexo que a pessoa colou'), 'achei o anexo dela');
+  ok(existe(doColega, 'a linha do anexo do colega'), 'achei o anexo do colega');
+
+  const tirarDela = daPessoa && porTag(daPessoa, 'BUTTON').find(x => texto(x) === 'tirar');
+  const tirarDele = doColega && porTag(doColega, 'BUTTON').find(x => texto(x) === 'tirar');
+  ok(!!tirarDela, 'o anexo com `posso_tirar` tem o botão de tirar');
+  ok(!tirarDele,
+    'e o que NÃO é dela não tem: quem decide é o servidor, anexo por anexo',
+    doColega ? texto(doColega) : '(linha ausente)');
+
+  /* e o botão manda o id DAQUELE anexo, não o primeiro da lista */
+  await clicar(tirarDela, 'o botão tirar do anexo dela');
+  const c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'desanexar' && c.args.p_d && c.args.p_d.anexo_id === 'a-meu',
+    'tirar manda `desanexar` com o id do anexo tocado', JSON.stringify(c && c.args));
+  await desmontar();
+}
+{
+  /* e a ficha conta as outras duas respostas que o anexo precisa dar */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'concluida', conclusao: 'x', concluida_em: '2026-03-02T10:00:00Z' },
+    QUEM.atende, [],
+    [anexo({ quem: 'Jander', depois_de_fechar: true, posso_tirar: true })]));
+  const t = texto(alvo);
+  ok(/Jander/.test(t), 'a ficha diz QUEM colou o anexo', t.slice(0, 400));
+  ok(/juntado depois de concluída/.test(t),
+    'e avisa quando ele chegou depois de a demanda fechar', t.slice(0, 400));
+  await desmontar();
+}
+{
+  /* sem anexo nenhum, o cartão inteiro não existe — e não um cartão vazio
+     com título */
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende, [], []));
+  ok(!/Anexos/.test(texto(alvo)), 'sem anexo, o cartão de anexos não aparece');
+  await desmontar();
+}
+
+console.log('\n13. A ficha: o cartão verde de concluída e a etapa 5 do PDF');
+{
+  const concluida = { status: 'concluida', conclusao: 'Arte publicada no feed e no stories.',
+                      concluida_em: '2026-09-12T18:00:00Z' };
+  const { b, alvo, desmontar } = await comFicha(vista(concluida, QUEM.pediu));
+  const t = texto(alvo);
+  ok(/Concluída/.test(t) && /Arte publicada no feed/.test(t),
+    'o cartão verde diz que concluiu e o que foi feito', t.slice(0, 400));
+  ok(/12\/09\/2026/.test(t), 'com a DATA da conclusão, e não só "há 10 dias"', t.slice(0, 400));
+
+  const confirmar = botao(alvo, 'Resolveu, obrigado');
+  ok(!!confirmar, 'e quem pediu tem o botão de confirmar que resolveu');
+  ok(!botoesDaGrade(alvo).includes('Resolveu, obrigado'),
+    'que NÃO está na grade: ele mora dentro do cartão verde', botoesDaGrade(alvo).join(' | '));
+
+  await clicar(confirmar, 'o botão de confirmar');
+  const c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'validar', 'tocar nele manda a ação `validar`',
+    JSON.stringify(c && c.args));
+  await desmontar();
+}
+{
+  /* JÁ VALIDADA: o botão some e vira a frase, que é o registro que o PDF pede */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'concluida', conclusao: 'Arte publicada.', concluida_em: '2026-09-12T18:00:00Z',
+      validada_em: '2026-09-14T09:30:00Z', validada_por: 'Pedro Jovens' },
+    QUEM.pediu));
+  const t = texto(alvo);
+  ok(/Validada por Pedro Jovens em 14\/09\/2026/.test(t),
+    'demanda já confirmada diz quem confirmou e quando', t.slice(0, 400));
+  ok(!botao(alvo, 'Resolveu, obrigado'),
+    'e o botão de confirmar some: confirmar duas vezes o servidor recusa');
+  await desmontar();
+}
+{
+  /* e quem NÃO pediu nem manda não ganha o botão, mesmo com a demanda
+     concluída e não validada: a guarda é a do servidor */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'concluida', conclusao: 'Arte publicada.', concluida_em: '2026-09-12T18:00:00Z' },
+    QUEM.atende));
+  ok(!botao(alvo, 'Resolveu, obrigado'),
+    'quem executou não confirma a própria entrega');
+  await desmontar();
+}
+{
+  /* cancelada NÃO tem o que validar: não houve execução */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'cancelada', cancelada_motivo: 'O evento saiu do calendário.' }, QUEM.pediu));
+  const t = texto(alvo);
+  ok(/Cancelada/.test(t) && /saiu do calendário/.test(t), 'cancelada diz o motivo', t.slice(0, 300));
+  ok(!botao(alvo, 'Resolveu, obrigado'), 'e não oferece confirmar o que não foi feito');
+  await desmontar();
+}
+
+console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
+{
+  /* O DEFEITO: o aviso só aparecia com `status === 'travada'`. Quando o
+     administrador liga "exige aprovação" numa categoria que já tem demanda
+     andando, o servidor passa a cobrar na hora (`falta_aprovacao`) e a
+     demanda continua `aberta` até alguém mexer nela. "Concluir" e "Assumir"
+     somem da grade, a linha "Aprovação" da tabela também some, e NADA na tela
+     diz por quê. */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'aberta', aprovacao: null, falta_aprovacao: true }, QUEM.atende));
+  const t = texto(alvo);
+  ok(/Esperando aprovação/.test(t),
+    'demanda ABERTA que passou a exigir aprovação diz isso na tela', t.slice(0, 400));
+  ok(/passou a exigir aprovação/.test(t),
+    'e conta que foi a categoria que mudou, e não que o pedido nasceu assim', t.slice(0, 500));
+  ok(/Quem decide é a liderança/.test(t),
+    'e diz de quem é a vez, para quem não decide', t.slice(0, 600));
+  ok(!botoesDaGrade(alvo).includes('Concluir'),
+    'com o portão aberto, Concluir não é oferecido', botoesDaGrade(alvo).join(' | '));
+  ok(!botoesDaGrade(alvo).includes('Travar'),
+    'nem Travar: o servidor recusa todo motivo que não seja `aprovacao`',
+    botoesDaGrade(alvo).join(' | '));
+  /* a linha da tabela também não pode sumir: era o segundo sintoma */
+  ok(/Aprovação/.test(t) && /esperando a liderança decidir/.test(t),
+    'e a tabela do pedido mostra a linha de aprovação mesmo sem valor gravado',
+    t.slice(0, 900));
+  await desmontar();
+}
+{
+  /* e para quem DECIDE a frase é outra, e os dois botões aparecem */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'travada', travada_por: 'aprovacao', aprovacao: 'pendente', falta_aprovacao: true },
+    QUEM.gestor));
+  const t = texto(alvo);
+  ok(/Você pode aprovar ou recusar aqui ao lado/.test(t),
+    'quem manda lê que a decisão é dele', t.slice(0, 500));
+  ok(botoesDaGrade(alvo).includes('Aprovar') && botoesDaGrade(alvo).includes('Recusar'),
+    'e os dois botões estão na grade', botoesDaGrade(alvo).join(' | '));
+  /* o aviso do PORTÃO substitui o da trava: dois avisos amarelos dizendo a
+     mesma coisa em palavras diferentes é ruído */
+  ok(!/Esperando aprovação\./.test(t.replace(/Esperando aprovação\./, '')),
+    'e o aviso do portão aparece uma vez só', t.slice(0, 500));
+  await desmontar();
+}
+{
+  /* a trava que NÃO é de aprovação continua com o aviso dela */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'travada', travada_por: 'informacao', travada_nota: 'Qual sala precisa de limpeza?' },
+    QUEM.pediu));
+  const t = texto(alvo);
+  ok(/Qual sala precisa de limpeza\?/.test(t), 'a trava por informação mostra a pergunta',
+    t.slice(0, 400));
+  ok(!/Esperando aprovação/.test(t), 'e não fala de aprovação nenhuma');
+  ok(/Responda aqui embaixo/.test(t),
+    'e diz a quem pediu que responder destrava', t.slice(0, 400));
+  ok(botoesDaGrade(alvo).includes('Responder e destravar'),
+    'com o botão escrito na língua de quem vai tocar nele', botoesDaGrade(alvo).join(' | '));
+  await desmontar();
+}
+
+console.log('\n15. A ficha: a caixinha "Só para a equipe" é só de quem atende');
+{
+  /* `dem_mover` faz `and demandas.pode_atender(m, d)` no gravar do comentário
+     interno: oferecer a caixinha a quem pediu seria oferecer um controle que
+     o servidor ignora em silêncio, que é a pior forma de recusa. */
+  const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  const caixa = todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
+    && x.getAttribute('type') === 'checkbox')[0];
+  ok(!!caixa, 'quem atende tem a caixinha de comentário interno');
+  ok(/Só para a equipe \(quem pediu não vê\)/.test(texto(alvo)),
+    'e ela diz o que faz, sem jargão', texto(alvo).slice(-400));
+
+  /* marcada, o comentário viaja com `interno: true` */
+  await act(async () => { caixa.checked = true; caixa.dispatchEvent(evento('click', { button: 0 })); });
+  await assentar();
+  const escrever = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
+  await teclar(escrever, 'Combinado: a Monik fecha o post no sábado.', 'a caixa de comentário');
+  await assentar();
+  await clicar(botao(alvo, 'Comentar'), 'o botão Comentar');
+  const c = b.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'comentar' && c.args.p_d.interno === true,
+    'comentário marcado viaja com `interno: true`', JSON.stringify(c && c.args.p_d));
+
+  /* E ELA VOLTA PARA DESMARCADA. Uma caixinha que fica marcada faz o PRÓXIMO
+     comentário sumir da vista de quem pediu sem ninguém perceber. */
+  const depois = todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
+    && x.getAttribute('type') === 'checkbox')[0];
+  ok(depois && depois.checked !== true,
+    'e depois de gravar ela volta para desmarcada', String(depois && depois.checked));
+  await desmontar();
+}
+{
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.pediu));
+  ok(!todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
+      && x.getAttribute('type') === 'checkbox')[0],
+    'quem só pediu não recebe a caixinha de interno');
+  ok(!/Só para a equipe/.test(texto(alvo)),
+    'nem a dica que manda marcá-la', texto(alvo).slice(-300));
+  await desmontar();
+}
+{
+  /* e o comentário interno se lê como interno no histórico: cor sozinha não
+     informa, e interno é justamente o que não pode ser confundido */
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende, [
+    { em: '2026-09-11T10:00:00Z', tipo: 'comentario', de: null, para: null,
+      texto: 'O cliente é o pastor.', interno: true, quem: 'Monik Ribeiro' },
+    { em: '2026-09-10T10:00:00Z', tipo: 'abertura', de: null, para: null,
+      texto: null, interno: false, quem: 'Ana Silva' },
+  ]));
+  const t = texto(alvo);
+  ok(/interno \(só a equipe vê\)/.test(t),
+    'o comentário interno diz por escrito que é interno', t.slice(-500));
+  ok(/Ana abriu a demanda/.test(t) && /Monik escreveu/.test(t),
+    'e o histórico vira frase, e não nome de tipo', t.slice(-500));
+  await desmontar();
+}
+
+console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe errar');
+{
+  /* O CARTÃO RENDERIZAVA VAZIO, SEM UMA PALAVRA. Doze
+     `{acoes.includes(...) ? <button/> : null}` e nenhum ramo de saída.
+     `pode_ver` dá visão a TODO o setor solicitante e `pode_atender` não:
+     qualquer pessoa do setor que pediu, que não abriu aquela demanda, caía
+     nisso. */
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.soEnxerga));
+  ok(botoesDaGrade(alvo).length === 0, 'quem só enxerga não tem botão na grade',
+    botoesDaGrade(alvo).join(' | '));
+  ok(/Quem toca esta demanda é o setor responsável/.test(texto(alvo)),
+    'e o cartão explica por que está vazio, em vez de ficar mudo',
+    texto(alvo).slice(0, 600));
+  ok(/pode escrever aqui embaixo/.test(texto(alvo)),
+    'e aponta o que ela ainda pode fazer', texto(alvo).slice(0, 600));
+  await desmontar();
+}
+{
+  /* o mesmo ramo, com a frase de outro motivo: demanda encerrada */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'concluida', conclusao: 'Feito.', concluida_em: '2026-09-12T18:00:00Z',
+      validada_em: '2026-09-13T10:00:00Z', validada_por: 'Ana' },
+    QUEM.soEnxerga));
+  ok(botoesDaGrade(alvo).length === 0, 'grade vazia numa concluída que ela só enxerga',
+    botoesDaGrade(alvo).join(' | '));
+  ok(/já foi encerrada/.test(texto(alvo)),
+    'e a frase do cartão vazio é a do estado certo', texto(alvo).slice(0, 600));
+  await desmontar();
+}
+{
+  /* e a terceira frase: parada no portão. Quem PEDIU ainda tem "Cancelar" e
+     "Juntar um anexo", então quem cai neste ramo com o portão aberto é o
+     colega de setor que só enxerga — e é justamente ele que não tem como
+     adivinhar por que a demanda não anda. */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'aberta', falta_aprovacao: true }, QUEM.soEnxerga));
+  ok(botoesDaGrade(alvo).length === 0, 'grade vazia com o portão aberto',
+    botoesDaGrade(alvo).join(' | '));
+  ok(/esperando a liderança aprovar/.test(texto(alvo)),
+    'e a frase do cartão vazio é a do portão, e não a de "o setor é que toca"',
+    texto(alvo).slice(0, 700));
+  await desmontar();
+}
+{
+  /* a ficha de uma demanda que não é sua: o erro do servidor vira frase, e a
+     tela não fica em branco */
+  const { alvo, desmontar } = await comFicha({ ok: false, erro: 'NAO_EXISTE' });
+  const t = texto(alvo);
+  ok(/Essa demanda não existe/.test(t), 'demanda que não é sua vira recado, não tela branca',
+    t.slice(0, 300));
+  ok(!/NAO_EXISTE/.test(t), 'e o código do banco não aparece para a pessoa', t.slice(0, 300));
+  await desmontar();
+}
+{
+  /* e o que a recusa de UMA AÇÃO faz: o texto da pessoa não se perde */
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende), {
+    dem_mover: { ok: false, erro: 'ATRASO_PRECISA_MOTIVO' },
+  });
+  const escrever = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
+  await teclar(escrever, 'Fiz a arte e mandei no grupo.', 'a caixa de comentário');
+  await assentar();
+  await clicar(botao(alvo, 'Comentar'), 'o botão Comentar');
+  const t = texto(alvo);
+  ok(/passou do prazo/.test(t), 'a recusa do servidor vira frase em português', t.slice(0, 400));
+  const depois = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
+  ok(depois && depois.value === 'Fiz a arte e mandei no grupo.',
+    'e o texto continua na caixa: recusa não custa uma redigitação',
+    String(depois && depois.value));
+  await desmontar();
+}
+{
+  /* o botão de voltar é o único que sai da tela, e ele vai para a lista */
+  const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  await clicar(botao(alvo, 'Voltar para a lista'), 'o botão de voltar');
+  ok(JSON.stringify(globalThis.__idas) === JSON.stringify(['/demandas']),
+    'voltar leva para a lista de demandas', JSON.stringify(globalThis.__idas));
   await desmontar();
 }
 

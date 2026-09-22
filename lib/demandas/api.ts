@@ -223,6 +223,31 @@ export const bases = () =>
 
    Sem `await` pelo mesmo motivo: o Resend leva de 200 ms a 15 s, e ninguém
    deve olhar "Enviando…" esperando o servidor de e-mail de terceiro. */
+/* E QUEM CHAMAVA ERA SÓ O `abrir`, 22/09/2026.
+
+   A regra 10 do documento é "o solicitante deve receber notificações QUANDO
+   HOUVER mudança de status ou necessidade de informação". Medido, as duas
+   metades dela estavam no banco e nenhuma saía na hora:
+
+     · `fn_enfileirar_aviso` (91:258) enfileira na hora, em `after update`,
+       tanto o `status` quanto o `informacao`;
+     · quem ESVAZIA a fila eram duas coisas, e só duas: esta função, chamada
+       depois de `abrir()`, e o cron `0 11 * * *` do `vercel.json`.
+
+   `mover()` não chamava. Ou seja: a trava por falta de informação, que é o
+   único caso em que a demanda PARA até quem pediu responder e ele não tem
+   como saber disso sem abrir o sistema por conta própria, ficava até 24
+   horas na fila esperando o robô da manhã seguinte.
+
+   O cabeçalho de `app/api/demandas/avisar/route.ts` já tinha escrito a regra
+   inteira ("um aviso que chega 23 horas depois nao e aviso, e arquivo") e
+   aplicado só à abertura. O conserto é a outra ponta da mesma frase: toda
+   resposta `ok` de `dem_mover` esvazia a fila, igual à abertura.
+
+   Custa o mesmo nada: é `void fetch` com `keepalive`, não segura a tela, não
+   mostra erro, e a varredura é idempotente porque quem reserva as linhas é o
+   banco (`public.dem_avisos_pendentes`). Mover uma demanda que não gerou
+   aviso nenhum manda uma requisição que volta "0". */
 function avisarEmSegundoPlano() {
   try {
     const tok = t();
@@ -277,10 +302,17 @@ export const lista = (f: Filtro = {}) =>
 export const ver = (numero: number) =>
   rpc<Vista>('dem_ver', { p_token: t(), p_numero: numero });
 
-export const mover = (numero: number, acao: Acao, dados: Record<string, unknown> = {}) =>
-  rpc<Record<string, never>>('dem_mover', {
+export const mover = async (numero: number, acao: Acao, dados: Record<string, unknown> = {}) => {
+  const resposta = await rpc<Record<string, never>>('dem_mover', {
     p_token: t(), p_numero: numero, p_acao: acao, p_d: dados,
   });
+  /* a mesma linha que `abrir()` tem, pelo motivo que o comentário de
+     `avisarEmSegundoPlano` conta. Só quando a resposta é `ok`: recusa do
+     servidor não gerou evento nenhum, e chamar a varredura ali seria pedir
+     e-mail sobre uma coisa que não aconteceu. */
+  if (resposta.ok) avisarEmSegundoPlano();
+  return resposta;
+};
 
 export const numeros = (de?: string, ate?: string) =>
   rpc<{ numeros: Numeros }>('dem_numeros', { p_token: t(), p_de: de || null, p_ate: ate || null });

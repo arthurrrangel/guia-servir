@@ -57,7 +57,7 @@ const PAPEIS = [
    Medido: com as tres rotas apontando para o vazio, apagar `min-width:0` de
    `.dm-dupla` e o `overflow-wrap` do historico nao reprovava nada. */
 const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
-for (const k of ['execucao', 'travada', 'concluida', 'comLink', 'atrasada']) {
+for (const k of ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atrasada']) {
   if (!N[k]) {
     console.error(`sem demanda "${k}" na semente: rode scripts/demandas-celular-subir.sh`);
     process.exit(1);
@@ -72,6 +72,13 @@ const PAGINAS = [
   { rota: `/demandas/d/${N.execucao}`,  nome: 'detalhe-execucao' },
   { rota: `/demandas/d/${N.travada}`,   nome: 'detalhe-travada' },
   { rota: `/demandas/d/${N.concluida}`, nome: 'detalhe-concluida' },
+  /* A CONCLUIDA JA CONFIRMADA, QUE E OUTRA CAIXA — 22/09/2026.
+
+     No cartao verde, a etapa 5 do PDF (migracao 91) aparece como BOTAO
+     enquanto ninguem confirmou e como FRASE depois de confirmada. A rota
+     acima so ve o botao; esta ve a frase. Sao alturas diferentes dentro do
+     mesmo `Aviso`, e so uma das duas tem alvo de toque para medir. */
+  { rota: `/demandas/d/${N.validada}`,  nome: 'detalhe-validada' },
   /* A DEMANDA COM LINK COLADO E COM ANEXO, QUE E ONDE MORAM OS DEFEITOS DE
      LARGURA. A semente nao tinha nenhuma ate 21/09, e por isso 252
      conferencias ficaram verdes com um cartao de 853px dentro de 320px. */

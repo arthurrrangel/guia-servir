@@ -338,6 +338,178 @@ select public.dem_mover('tk-admin', nd('Reembolso do combustivel'), 'rejeitar',
   '{"texto":"Falta a nota fiscal."}'::jsonb);
 select chk('rejeitar encerra com motivo', 'cancelada',  st('Reembolso do combustivel'));
 
+-- 18 ------------------------------------- o token de todo mundo, e a porta ---
+/* `dem_pessoas` E A FUNCAO QUE DEVOLVE O TOKEN DE CADA MEMBRO, E O TOKEN E A
+   CREDENCIAL INTEIRA: `demandas.quem()` aceita qualquer um e devolve a pessoa.
+   Uma unica linha separa isso de qualquer `responsavel` --
+
+     if m.papel <> 'admin' then return ... 'SO_ADMIN'; end if;
+
+   -- e ate 22/09/2026 NENHUM caso deste arquivo a exercitava. Medido: apagar
+   essa linha deixava o harness inteiro verde, com a lista de tokens saindo
+   para solicitante, responsavel e gestor. A migracao 50 nunca teve bateria
+   propria, entao este e o unico lugar que pode cobrar. */
+select chk('dem_pessoas: solicitante nao ve a lista', 'SO_ADMIN',
+  public.dem_pessoas('tk-jovem')->>'erro');
+select chk('dem_pessoas: responsavel nao ve a lista', 'SO_ADMIN',
+  public.dem_pessoas('tk-com')->>'erro');
+/* o GESTOR tambem nao: `dem_ajustar` e `dem_pessoas` usam a porta estreita
+   (`m.papel <> 'admin'`), e nao a larga (`in ('gestor','admin')`). As duas
+   expressoes existem no arquivo e sao parecidas o bastante para trocar uma
+   pela outra sem ninguem ver. */
+select chk('dem_pessoas: nem o gestor ve a lista', 'SO_ADMIN',
+  public.dem_pessoas('tk-gestor')->>'erro');
+select chk('dem_pessoas: e quem nao e ninguem toma SEM_ACESSO', 'SEM_ACESSO',
+  public.dem_pessoas('tk-inventado')->>'erro');
+/* e nao basta recusar: o corpo recusado nao pode trazer a lista junto */
+select chk('dem_pessoas: a recusa vem sem a chave membros', 'sim',
+  case when public.dem_pessoas('tk-com') ? 'membros' then 'nao' else 'sim' end);
+select chk('dem_pessoas: o admin recebe a lista', 'true',
+  public.dem_pessoas('tk-admin')->>'ok');
+select chk('dem_pessoas: e a lista tem gente de verdade', 'sim',
+  case when jsonb_array_length(public.dem_pessoas('tk-admin')->'membros') >= 6
+       then 'sim' else 'nao' end);
+select chk('dem_pessoas: e o token vem junto, que e o que precisa ser guardado', 'sim',
+  case when (select count(*) from jsonb_array_elements(public.dem_pessoas('tk-admin')->'membros') x
+              where x->>'token' = 'tk-gestor') = 1 then 'sim' else 'nao' end);
+
+-- 19 -------------------------------------------- o teto de 300 da lista ---
+/* A GARANTIA EXISTIA UMA VEZ SO, NA CONFERENCIA DA 57, E DEPOIS DISSO A 87 E
+   A 88 REESCREVERAM `dem_lista` POR INTEIRO SEM REAFIRMAR O NUMERO.
+
+   O teto e o que impede a aba "Tudo" de descer 10 MB de JSON; o `tem_mais` e
+   o que impede a lista de MENTIR em silencio sobre o que ficou de fora. Os
+   dois moram na mesma linha (`least(greatest(coalesce(...,300),1),300)`) e
+   nada neste arquivo passava de quatro demandas -- entao trocar 300 por 30000
+   ficava verde. */
+do $$
+declare v_cat uuid; v_set uuid; v_quem uuid;
+begin
+  select id into v_cat from demandas.categorias where nome = 'Limpeza';
+  select setor_id into v_set from demandas.categorias where id = v_cat;
+  if v_set is null then select id into v_set from demandas.setores where slug = 'zeladoria'; end if;
+  select id into v_quem from demandas.membros where nome = 'Joice Bianca';
+  /* insert direto, e nao 320 `dem_abrir`: os gatilhos da tabela sao de
+     UPDATE, entao a lista ve exatamente o mesmo que veria pela porta, e o
+     caso roda em um piscar em vez de 320 idas. */
+  insert into demandas.demandas
+    (titulo, descricao, categoria_id, setor_solicitante, setor_responsavel,
+     aberta_por, prazo)
+  select 'Teto 300 · ' || i, 'enchendo a lista para medir o teto duro',
+         v_cat, v_set, v_set, v_quem, current_date + 30
+    from generate_series(1, 320) i;
+end $$;
+select chk('a lista para em 300, mesmo com 320 visiveis', '300',
+  jsonb_array_length(public.dem_lista('tk-gestor','{}'::jsonb)->'itens')::text);
+select chk('e pedir mais que o teto nao levanta o teto', '300',
+  jsonb_array_length(public.dem_lista('tk-gestor','{"limite":5000}'::jsonb)->'itens')::text);
+select chk('o teto devolvido e o mesmo 300', '300',
+  public.dem_lista('tk-gestor','{"limite":5000}'::jsonb)->>'limite');
+select chk('e ela DIZ que cortou', 'true',
+  public.dem_lista('tk-gestor','{}'::jsonb)->>'tem_mais');
+select chk('e o total e o de verdade, nao o da pagina', 'sim',
+  case when (public.dem_lista('tk-gestor','{}'::jsonb)->>'total')::int >= 320
+       then 'sim' else 'nao' end);
+/* e a lista curta continua dizendo a verdade do outro lado: `tem_mais` falso
+   quando nao sobrou nada. Sem este caso, `tem_mais := true` fixo passaria. */
+select chk('pedindo o que cabe, nao ha aviso de corte', 'false',
+  public.dem_lista('tk-kids','{}'::jsonb)->>'tem_mais');
+
+-- 20 ------------------------------------------ desativado nao entra mais ---
+/* `demandas.quem` FILTRA POR `ativo`, E NENHUM CASO DESTE ARQUIVO TINHA UM
+   MEMBRO DESATIVADO.
+
+   Tirar o `and ativo` das duas linhas de `demandas.quem` deixava os 63 casos
+   verdes -- e em producao significa que a pessoa desligada da equipe volta a
+   entrar pelo link que ainda esta na conversa dela no WhatsApp. Desativar e
+   a UNICA forma de tirar acesso que a tela Ajustes oferece: nao ha "apagar
+   pessoa" com demanda pendurada (a 23503 existe por isso). */
+do $$ begin
+  insert into demandas.membros (nome, auth_email, telefone, papel, setor_id, token, ativo)
+  values ('Saiu da Equipe', 'saiu@teste', '5531900000099', 'responsavel',
+          (select id from demandas.setores where slug = 'comunicacao'), 'tk-saiu', true);
+end $$;
+select chk('enquanto ativo, o link entra', 'Saiu da Equipe',
+  public.dem_quem_sou('tk-saiu')->>'nome');
+update demandas.membros set ativo = false where token = 'tk-saiu';
+select chk('desativado, o mesmo link nao entra mais', 'SEM_ACESSO',
+  public.dem_quem_sou('tk-saiu')->>'erro');
+/* a outra porta, a do e-mail do login, tem a MESMA linha e ela e uma copia:
+   consertar uma e esquecer a outra e como este defeito volta */
+select set_config('teste.jwt', '{"email":"saiu@teste"}', false);
+select chk('e o login por e-mail dele tambem nao', 'SEM_ACESSO',
+  public.dem_quem_sou(null)->>'erro');
+select set_config('teste.jwt', '', false);
+/* e desativado nao enxerga nem abre nada: a porta e uma so, mas quem confia
+   nela sao todas as funcoes */
+select chk('desativado nao lista', 'SEM_ACESSO',
+  public.dem_lista('tk-saiu','{}'::jsonb)->>'erro');
+select chk('desativado nao abre demanda', 'SEM_ACESSO',
+  public.dem_abrir('tk-saiu', jsonb_build_object(
+    'titulo','Nao devia nascer','descricao','x','prazo',(current_date+3)::text,
+    'categoria_id',(select id from demandas.categorias where nome='Limpeza')))->>'erro');
+
+-- 21 --------------------------------- dem_bases nao entrega a agenda ---
+/* A MIGRACAO 67 TIROU A CHAVE `membros` DAQUI, E ATE 22/09/2026 O HARNESS
+   RODAVA SEM A 67 -- ou seja, contra uma `dem_bases` que nao existe em
+   producao desde 21/09. Medido antes do conserto, com o token de um
+   `responsavel`: nome, papel, setor e TELEFONE de todo mundo.
+
+   `lib/demandas/tipos.ts` ja nem declara o campo (`Bases` perdeu `membros` no
+   mesmo commit), entao nenhuma tela quebra -- e e justamente por nenhuma tela
+   ler que o vazamento podia voltar calado. */
+select chk('dem_bases nao entrega a lista de membros a quem atende', 'sim',
+  case when public.dem_bases('tk-com') ? 'membros' then 'nao' else 'sim' end);
+select chk('nem ao gestor', 'sim',
+  case when public.dem_bases('tk-gestor') ? 'membros' then 'nao' else 'sim' end);
+select chk('nem ao admin', 'sim',
+  case when public.dem_bases('tk-admin') ? 'membros' then 'nao' else 'sim' end);
+/* e continua entregando o que os formularios precisam: guarda que apaga o
+   dado util nao e guarda, e a 67 tinha essa conferencia no corpo dela */
+select chk('e continua entregando setores e categorias', 'sim',
+  case when jsonb_array_length(public.dem_bases('tk-jovem')->'setores') > 0
+        and jsonb_array_length(public.dem_bases('tk-jovem')->'categorias') > 0
+       then 'sim' else 'nao' end);
+
+-- 22 ------------------------------------- 1980 letras na recusa, e 1981 nao ---
+/* O TETO MAIS APERTADO DE TODOS, MEDIDO AQUI PARA O NUMERO NAO SER PALPITE.
+   `TETO.rejeitar`, em `lib/demandas/regras.ts`, e `2000 - 'Aprovação
+   recusada: '.length` = 1980, e e o contador da caixa "Por que nao aprovar".
+   O motivo do numero: o texto da recusa vai INTEIRO para `aprovacao_nota`
+   (2000) e, PREFIXADO, para `cancelada_motivo` (2000) --
+   `cancelada_motivo = 'Aprovação recusada: ' || v_txt`. Quem manda e a mais
+   apertada das duas.
+   `scripts/demandas.test.mjs` cruza esse 1980 com a CHECK da migracao 86; o
+   que falta e a unica pergunta que so o Postgres responde: o banco aceita
+   mesmo 1980 e recusa mesmo 1981? */
+do $$ begin
+  perform public.dem_abrir('tk-jovem', jsonb_build_object(
+    'titulo','Recusa de 1980 letras','descricao','x','prazo',(current_date + 9)::text,
+    'orcamento','10.00',
+    'categoria_id',(select id from demandas.categorias where nome='Reembolso')));
+  perform public.dem_abrir('tk-jovem', jsonb_build_object(
+    'titulo','Recusa de 1981 letras','descricao','x','prazo',(current_date + 9)::text,
+    'orcamento','10.00',
+    'categoria_id',(select id from demandas.categorias where nome='Reembolso')));
+end $$;
+select chk('recusar com 1980 letras: passa', 'true',
+  public.dem_mover('tk-admin', nd('Recusa de 1980 letras'), 'rejeitar',
+    jsonb_build_object('texto', repeat('a', 1980)))->>'ok');
+select chk('e com 1981 o banco recusa', 'REGRA',
+  public.dem_mover('tk-admin', nd('Recusa de 1981 letras'), 'rejeitar',
+    jsonb_build_object('texto', repeat('a', 1981)))->>'erro');
+/* e a restricao que estoura e a do PREFIXO, e nao a do campo da aprovacao:
+   1981 cabe em `aprovacao_nota` e 1981+20 nao cabe em `cancelada_motivo`.
+   Sem este caso, o teto certo por um motivo errado passaria igual. */
+select chk('e quem estoura e o motivo do cancelamento, por causa do prefixo', 'sim',
+  case when public.dem_mover('tk-admin', nd('Recusa de 1981 letras'), 'rejeitar',
+         jsonb_build_object('texto', repeat('a', 1981)))->>'regra'
+         like '%ck_tam_cancelada_motivo%' then 'sim' else 'nao' end);
+/* e a recusa de 1980 gravou os dois campos, o curto e o prefixado */
+select chk('a recusa que passou gravou o prefixo junto', '2000',
+  (select length(cancelada_motivo)::text from demandas.demandas
+    where titulo = 'Recusa de 1980 letras'));
+
 \t off
 select n, caso, esperado, deu, case when deu = esperado then 'ok' else 'FALHOU' end as v from res order by n;
 select count(*) filter (where deu is distinct from esperado) as falhas, count(*) as total from res;
