@@ -87,8 +87,11 @@ function Ajustes() {
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       <div className="dm-opcoes" role="group" aria-label="Seção" style={{ marginBottom: 'var(--dm-e3)' }}>
-        {([['gente', `Gente (${ms.length})`], ['setores', `Setores (${b.setores.length})`],
-           ['categorias', `Categorias (${b.categorias.length})`]] as const).map(([v, r]) => (
+        {/* sem a contagem entre parênteses desde 22/09/2026: com ela,
+            "Categorias (43)" não cabia na terceira coluna em 320px, e a lista
+            logo abaixo já mostra quantos são */}
+        {([['gente', 'Gente'], ['setores', 'Setores'],
+           ['categorias', 'Categorias']] as const).map(([v, r]) => (
           <button key={v} type="button" aria-pressed={aba === v} onClick={() => setAba(v)}>{r}</button>
         ))}
       </div>

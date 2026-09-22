@@ -313,6 +313,38 @@ try {
 
         julgar(ok, etiqueta, m, tela.width);
 
+        /* NADA SOBRA SOZINHO NUMA LINHA — 22/09/2026.
+
+           `.dm-opcoes` é uma grade de duas colunas feita para as quatro
+           prioridades. Recebendo três opções (as seções de Ajustes, os
+           períodos de Números), a terceira caía sozinha na segunda linha,
+           com metade da largura, e parecia sobra. Nenhuma das conferências
+           acima via isso: não é rolagem, não é alvo pequeno, não é contraste.
+           É composição, e composição também se mede.
+
+           Conta, em cada grade de opções da tela, quantos itens caem em cada
+           linha. Reprova quando a última linha tem UM item e as outras têm
+           mais de um. */
+        const sozinhos = await pag.evaluate(() => {
+          const achou = [];
+          for (const g of document.querySelectorAll('.dm-opcoes, .dm-seg')) {
+            const itens = [...g.children].filter(e => e.getBoundingClientRect().width > 0);
+            if (itens.length < 3) continue;
+            const linhas = new Map();
+            for (const e of itens) {
+              const y = Math.round(e.getBoundingClientRect().top);
+              linhas.set(y, (linhas.get(y) || 0) + 1);
+            }
+            const qs = [...linhas.values()];
+            if (qs.length > 1 && qs[qs.length - 1] === 1 && Math.max(...qs) > 1) {
+              achou.push(`${g.className} [${itens.map(e => (e.textContent || '').trim()).join(' · ')}]`);
+            }
+          }
+          return achou;
+        });
+        ok(sozinhos.length === 0, `${etiqueta} — nenhuma opção sobra sozinha na última linha`,
+          sozinhos.slice(0, 2).join(' | '));
+
         if (m.estoura.length || m.pequenos.length || m.miudos.length || m.zoomIos.length ||
             m.teclado.length || m.fracos.length) {
           achados.push({ etiqueta, ...m });

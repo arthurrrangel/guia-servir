@@ -577,6 +577,12 @@
    formato em vez de uma inteira e outra cortada. */
 @media (max-width:440px){
   .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
+  /* e com TRÊS, três colunas. "De quem" muda com o papel: quem só pede, num
+     setor que atende, tem "Eu pedi / Meu setor / Tudo", e o 2x2 deixava
+     "Tudo" sozinho embaixo. Achado pela conferência de composição de
+     `demandas-celular.mjs`, na primeira rodada dela. */
+  .dm-seg:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dm-seg:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
 }
 
 /* a busca ganha a linha inteira: espremida entre botões ela ficava com 200px
@@ -606,6 +612,15 @@
    lado. Nenhuma opção ganha destaque por acidente de quebra de linha. */
 .dm-opcoes{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--dm-e1)}
 @media (min-width:520px){ .dm-opcoes{grid-template-columns:repeat(4,1fr)} }
+/* TRÊS OPÇÕES, TRÊS COLUNAS — 22/09/2026. A grade de duas foi feita para as
+   quatro prioridades. Recebendo três (as seções de Ajustes, os períodos de
+   Números), a terceira caía sozinha na segunda linha, com metade da largura,
+   e parecia sobra. */
+.dm-opcoes:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
+/* `minmax(0,1fr)` e não `1fr`: com `1fr` a palavra mais longa alarga a
+   própria coluna, e em 320px saía 87/87/97. Medido. Com as colunas presas
+   iguais, "Categorias" precisa de menos respiro lateral para caber. */
+.dm-opcoes:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
 .dm-opcoes button{
   min-height:44px;padding:0 var(--dm-e2);
   border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
