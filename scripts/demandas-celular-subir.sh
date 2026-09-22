@@ -147,16 +147,54 @@ su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f 
 #
 # `concluida` continua sendo a NAO validada (a semente nao valida a demanda 6
 # de proposito) e `validada` e a nona, confirmada por quem pediu.
+#
+# E OS NUMEROS SAO POR PAPEL, PORQUE `min(numero)` MEDIA A TELA DE ERRO —
+# 22/09/2026.
+#
+# Ate hoje esta consulta escolhia um numero so, o menor do banco inteiro, e o
+# entregava aos tres papeis. Mas cada papel enxerga um pedaco diferente:
+#
+#   dem_ver('tok-comunica', 79) -> {"ok": false, "erro": "NAO_EXISTE"}
+#   dem_ver('tok-comunica', 81) -> {"ok": true, ...}
+#
+# Maria atende comunicacao; 79 e de compras, 82/84/85 sao de manutencao. A
+# regra esta CERTA — ela nao deve mesmo ver demanda de outro setor. Errado
+# estava o instrumento, que a mandava para la assim mesmo e fotografava o
+# cartao "Essa demanda nao existe" com o nome de `detalhe-travada`.
+#
+# Quatro das seis fichas do responsavel eram esse cartao. Ele passa em
+# contraste, em alvo de toque e em rolagem lateral — nao tem quase nada
+# dentro. Entao o medidor somava seis conferencias verdes por largura sem
+# nunca ter aberto a ficha. O que ficou sem medida, em concreto: o botao
+# "Destravar", que so existe para quem atende e so aparece na ficha travada.
+#
+# A pergunta certa nao e "qual o menor numero deste estado", e sim "qual o
+# menor numero deste estado QUE ESTE PAPEL ENXERGA". Quem responde isso sem
+# eu supor nada e `public.dem_ver`, a mesma funcao que a tela chama.
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
-  select jsonb_pretty(jsonb_build_object(
-    'execucao', (select min(numero) from demandas.demandas where status = 'execucao'),
-    'travada',  (select min(numero) from demandas.demandas where status = 'travada'),
-    'concluida',(select min(numero) from demandas.demandas
-                  where status = 'concluida' and validada_em is null),
-    'validada', (select min(numero) from demandas.demandas where validada_em is not null),
-    'comLink',  (select min(numero) from demandas.demandas where descricao like '%http%'),
-    'atrasada', (select min(numero) from demandas.demandas where prazo < current_date
-                                       and status in ('aberta','execucao','travada'))))\"" \
+  select jsonb_pretty(jsonb_object_agg(p.quem, jsonb_build_object(
+    'execucao',  (select min(d.numero) from demandas.demandas d
+                   where d.status = 'execucao'
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'travada',   (select min(d.numero) from demandas.demandas d
+                   where d.status = 'travada'
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'concluida', (select min(d.numero) from demandas.demandas d
+                   where d.status = 'concluida' and d.validada_em is null
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'validada',  (select min(d.numero) from demandas.demandas d
+                   where d.validada_em is not null
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'comLink',   (select min(d.numero) from demandas.demandas d
+                   where d.descricao like '%http%'
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'atrasada',  (select min(d.numero) from demandas.demandas d
+                   where d.prazo < current_date
+                     and d.status in ('aberta','execucao','travada')
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean))))
+  from (values ('admin','tok-admin'),
+               ('responsavel','tok-comunica'),
+               ('solicitante','tok-pede')) p(quem, tok)\"" \
   > /tmp/celular-numeros.json
 chmod 644 /tmp/celular-numeros.json
 

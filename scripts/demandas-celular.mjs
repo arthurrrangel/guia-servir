@@ -56,38 +56,58 @@ const PAPEIS = [
 
    Medido: com as tres rotas apontando para o vazio, apagar `min-width:0` de
    `.dm-dupla` e o `overflow-wrap` do historico nao reprovava nada. */
+/* E O NUMERO E POR PAPEL, PORQUE CADA PAPEL ENXERGA UM PEDACO — 22/09/2026.
+
+   Depois de resolvido o "numero escrito a mao", sobrou um numero SO para os
+   tres papeis. E `dem_ver` recusa por setor:
+
+     dem_ver('tok-comunica', 79) -> {"ok": false, "erro": "NAO_EXISTE"}
+     dem_ver('tok-comunica', 81) -> {"ok": true, ...}
+
+   Maria atende comunicacao; 79 e de compras. A regra esta certa. Errado
+   estava isto aqui, que mandava os tres papeis para o mesmo numero e
+   fotografava, para quatro das seis fichas do responsavel, o cartao "Essa
+   demanda nao existe" — que passa em contraste, em alvo de toque e em
+   rolagem lateral, porque nao tem quase nada dentro.
+
+   `demandas-celular-subir.sh` agora escolhe por papel, perguntando a
+   `dem_ver`. Aqui so exijo que os dezoito numeros existam. */
 const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
-for (const k of ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atrasada']) {
-  if (!N[k]) {
-    console.error(`sem demanda "${k}" na semente: rode scripts/demandas-celular-subir.sh`);
-    process.exit(1);
+const ESTADOS = ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atrasada'];
+for (const quem of ['admin', 'responsavel', 'solicitante']) {
+  for (const k of ESTADOS) {
+    if (!N[quem] || !N[quem][k]) {
+      console.error(`sem demanda "${k}" que o papel "${quem}" enxergue: ` +
+                    'rode scripts/demandas-celular-subir.sh');
+      process.exit(1);
+    }
   }
 }
 
-const PAGINAS = [
+const paginasDe = (quem) => [
   { rota: '/demandas',           nome: 'lista' },
   { rota: '/demandas/nova',      nome: 'nova' },
   { rota: '/demandas/numeros',   nome: 'numeros', so: ['admin', 'responsavel'] },
   { rota: '/demandas/ajustes',   nome: 'ajustes', so: ['admin'] },
-  { rota: `/demandas/d/${N.execucao}`,  nome: 'detalhe-execucao' },
-  { rota: `/demandas/d/${N.travada}`,   nome: 'detalhe-travada' },
-  { rota: `/demandas/d/${N.concluida}`, nome: 'detalhe-concluida' },
+  { rota: `/demandas/d/${N[quem].execucao}`,  nome: 'detalhe-execucao' },
+  { rota: `/demandas/d/${N[quem].travada}`,   nome: 'detalhe-travada' },
+  { rota: `/demandas/d/${N[quem].concluida}`, nome: 'detalhe-concluida' },
   /* A CONCLUIDA JA CONFIRMADA, QUE E OUTRA CAIXA — 22/09/2026.
 
      No cartao verde, a etapa 5 do PDF (migracao 91) aparece como BOTAO
      enquanto ninguem confirmou e como FRASE depois de confirmada. A rota
      acima so ve o botao; esta ve a frase. Sao alturas diferentes dentro do
      mesmo `Aviso`, e so uma das duas tem alvo de toque para medir. */
-  { rota: `/demandas/d/${N.validada}`,  nome: 'detalhe-validada' },
+  { rota: `/demandas/d/${N[quem].validada}`,  nome: 'detalhe-validada' },
   /* A DEMANDA COM LINK COLADO E COM ANEXO, QUE E ONDE MORAM OS DEFEITOS DE
      LARGURA. A semente nao tinha nenhuma ate 21/09, e por isso 252
      conferencias ficaram verdes com um cartao de 853px dentro de 320px. */
-  { rota: `/demandas/d/${N.comLink}`,   nome: 'detalhe-com-link-colado' },
+  { rota: `/demandas/d/${N[quem].comLink}`,   nome: 'detalhe-com-link-colado' },
   /* A ATRASADA, que a semente publica desde 21/09 e que nenhuma rota usava.
      Ela e a unica que exercita a pilula vermelha, o "51 dias de atraso" e a
      ordem da lista com atraso primeiro. Chave calculada e nao lida e peso
      sem medida. */
-  { rota: `/demandas/d/${N.atrasada}`,  nome: 'detalhe-atrasada' },
+  { rota: `/demandas/d/${N[quem].atrasada}`,  nome: 'detalhe-atrasada' },
 ];
 
 const { estado, ok } = criaContador();
@@ -191,7 +211,7 @@ try {
         continue;
       }
 
-      for (const p of PAGINAS) {
+      for (const p of paginasDe(papel.quem)) {
         if (p.so && !p.so.includes(papel.quem)) continue;
         await pag.goto(BASE + p.rota, { waitUntil: 'networkidle' });
         /* transição desligada, animação NÃO: desligar a animação congela
@@ -200,6 +220,42 @@ try {
            mas a folha do site inteiro está carregada junto. */
         await pag.addStyleTag({ content: '*,*::before,*::after{transition:none!important}' });
         await pag.waitForTimeout(600);
+
+        /* A TERCEIRA GUARDA: A FICHA CHEGOU? — 22/09/2026.
+
+           As duas de cima nasceram da mesma lição, com um ano de distância
+           entre elas: a folha que não chegou e a sessão que não pegou. Esta
+           nasce da terceira forma de medir a tela errada, e foi a mais
+           difícil de ver, porque nada estava quebrado: a folha chegou, a
+           sessão pegou, as abas apareceram, e a rota simplesmente respondeu
+           "Essa demanda não existe" — com razão, porque o número era de
+           outro setor.
+
+           Medido em 22/09: das seis fichas do responsável, QUATRO eram esse
+           cartão, nas três larguras. Dezoito conferências verdes por rodada
+           sobre uma tela com um aviso, dois botões e mais nada.
+
+           A guarda é POSITIVA de propósito: em vez de procurar o texto do
+           erro (que muda), exijo o que só a ficha de verdade tem — a tarja
+           `> demanda #N`. Assim ela também pega o esqueleto que não resolveu
+           e a página que morreu no meio. */
+        if (p.nome.startsWith('detalhe')) {
+          const ficha = await pag.evaluate(() => {
+            const rot = document.querySelector('.dm-rot');
+            if (rot && /demanda\s*#\s*\d+/i.test(rot.textContent || '')) return { ok: true };
+            const av = document.querySelector('.dm-aviso');
+            const dito = av ? (av.textContent || '').trim().slice(0, 90) : '';
+            return { ok: false, por: dito || 'a ficha não renderizou (sem a tarja "demanda #N")' };
+          });
+          if (!ficha.ok) {
+            console.log(`  PAREI em ${tela.nome}px · ${papel.quem} · ${p.nome}: ${ficha.por}`);
+            console.log(`    A rota ${p.rota} não abriu a ficha para este papel.`);
+            console.log('    Medir o cartão de erro com o nome da ficha é relatório falso.');
+            console.log('    Rode scripts/demandas-celular-subir.sh para refazer os números por papel.');
+            ok(false, `${tela.nome}px · ${papel.quem} · ${p.nome} — a ficha chegou`);
+            continue;
+          }
+        }
 
         /* medir primeiro, retratar depois: `fullPage` estica a janela e
            refaz o layout, e quem medir no rastro disso mede uma tela ainda

@@ -38,6 +38,7 @@ declare
   t_ges   text := 'tok-gestor';
   c_divul uuid; c_compra uuid; c_manut uuid; c_reemb uuid;
   r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int; n7 int; n8 int; n9 int;
+  n10 int; n11 int; n12 int;
 begin
   select id into c_divul  from demandas.categorias where nome = 'Divulgação de culto' limit 1;
   select id into c_compra from demandas.categorias where nome = 'Compra de equipamentos' limit 1;
@@ -199,5 +200,71 @@ begin
     jsonb_build_object('texto','Cem cartoes impressos e entregues no balcao da recepcao.'));
   perform public.dem_mover(t_pede, n9, 'validar', '{}'::jsonb);
 
-  raise notice 'semeado: % % % % % % % % %', n1, n2, n3, n4, n5, n6, n7, n8, n9;
+  /* 10, 11 e 12. O SETOR DE QUEM ATENDE PRECISA DOS SEIS ESTADOS — 22/09/2026.
+
+     Medido hoje, montando a pagina que mostra o sistema: das seis telas de
+     detalhe do RESPONSAVEL, quatro eram o cartao "Essa demanda nao existe".
+
+     A causa nao era defeito do app. A regra esta certa: Maria atende
+     comunicacao, e `dem_ver` recusa 79 (compras), 82, 84 e 85 (manutencao).
+     O defeito era do INSTRUMENTO: `demandas-celular-subir.sh` escolhia as
+     rotas com `min(numero)` sobre o banco inteiro, sem perguntar se o papel
+     daquela volta enxergava aquele numero. Maria era mandada para a demanda
+     de outro setor e o medidor fotografava, media e aprovava o cartao de
+     erro — que passa em contraste, em alvo de toque e em rolagem lateral,
+     porque nao tem quase nada dentro.
+
+     Consequencia concreta do que ficou sem medida: o botao "Destravar" so
+     existe para quem atende, e so aparece na ficha travada. Como a ficha
+     travada de Maria nunca abria, esse botao nunca foi medido em 320px.
+
+     O conserto tem tres partes, e esta e a primeira: dar ao setor de quem
+     atende (comunicacao) os tres estados que faltavam. As outras duas estao
+     em `demandas-celular-subir.sh` (numeros por papel, via `dem_ver`) e em
+     `demandas-celular.mjs` (a guarda que reprova quando a ficha nao chega). */
+
+  /* 10. concluida e NAO validada, no setor de quem atende: e a que exercita o
+         BOTAO "Resolveu, obrigado" da etapa 5 vendo pelos olhos de quem fez o
+         trabalho e NAO pode confirmar o proprio servico. */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Post de agradecimento aos voluntarios do mutirao',
+    'descricao','Um card para o feed agradecendo quem ficou ate o fim no mutirao de sabado.',
+    'objetivo','Reconhecer publicamente quem trabalhou.',
+    'local','Instagram', 'publico','Igreja toda',
+    'categoria_id', c_divul, 'prioridade','normal', 'impacto','baixo',
+    'prazo', (current_date + 4)::text));
+  n10 := (r->>'numero')::int;
+  perform public.dem_mover(t_com, n10, 'assumir', '{}'::jsonb);
+  perform public.dem_mover(t_com, n10, 'concluir',
+    jsonb_build_object('texto','Card publicado no feed e no story, com as fotos que o Pedro mandou.'));
+
+  /* 11. concluida E confirmada, no mesmo setor: e a FRASE "Validada por X",
+         que e outra caixa e outra altura. */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Arte do aviso de mudanca de horario do culto de quarta',
+    'descricao','Precisa sair antes de domingo para a igreja toda ficar sabendo.',
+    'objetivo','Ninguem chegar no horario velho.',
+    'local','Instagram e WhatsApp', 'publico','Membros',
+    'categoria_id', c_divul, 'prioridade','alta', 'impacto','medio',
+    'prazo', (current_date + 7)::text));
+  n11 := (r->>'numero')::int;
+  perform public.dem_mover(t_com, n11, 'assumir', '{}'::jsonb);
+  perform public.dem_mover(t_com, n11, 'concluir',
+    jsonb_build_object('texto','Arte pronta, publicada nos dois canais na quinta de manha.'));
+  perform public.dem_mover(t_pede, n11, 'validar', '{}'::jsonb);
+
+  /* 12. atrasada no setor de quem atende: a pilula vermelha e o "N dias de
+         atraso" so foram medidos pelos olhos de quem pede e do admin. */
+  r := public.dem_abrir(t_pede, jsonb_build_object(
+    'titulo','Atualizar a capa do canal do YouTube',
+    'descricao','A capa ainda e a da conferencia do ano passado.',
+    'objetivo','Canal com a cara certa para quem chega pelo YouTube.',
+    'local','YouTube', 'publico','Visitantes',
+    'categoria_id', c_divul, 'prioridade','baixa', 'impacto','baixo',
+    'prazo', (current_date + 5)::text));
+  n12 := (r->>'numero')::int;
+  update demandas.demandas set prazo = current_date - 18 where numero = n12;
+
+  raise notice 'semeado: % % % % % % % % % % % %',
+    n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12;
 end $$;
