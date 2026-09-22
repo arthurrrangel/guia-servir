@@ -38,11 +38,44 @@ const TELAS = [{ nome: '320', width: 320, height: 640 }, { nome: '390', width: 3
 
 /* um token por papel: o menu de abas e os botões mudam com o papel, então
    auditar só como admin esconderia metade da interface */
+/* E DESDE A MIGRAÇÃO 94 SÃO SETE JEITOS DE ENTRAR · 22/09/2026.
+
+   A 94 trouxe o líder de ministério, a gestão com escopo, quem acompanha uma
+   demanda sem tê-la pedido, quem pediu outro papel e quem acabou de fazer
+   login e ainda não tem cadastro. Cada um vê uma tela diferente no mesmo
+   endereço, e a tela que ninguém abre no medidor é a que chega quebrada.
+
+   `fichas` diz quem enxerga as seis situações da semente (a ficha de cada
+   uma é medida). `novo` entra sem link pessoal, só com a sessão do login por
+   e-mail, que é como chega quem vai se cadastrar. */
 const PAPEIS = [
-  { tok: 'tok-admin',    quem: 'admin' },
-  { tok: 'tok-comunica', quem: 'responsavel' },
-  { tok: 'tok-pede',     quem: 'solicitante' },
+  { tok: 'tok-admin',      quem: 'admin',       fichas: true },
+  { tok: 'tok-comunica',   quem: 'responsavel', fichas: true },
+  { tok: 'tok-pede',       quem: 'solicitante', fichas: true },
+  { tok: 'tok-lider',      quem: 'lider',       fichas: true },
+  { tok: 'tok-gestor-com', quem: 'gestor',      fichas: true },
+  { tok: 'tok-colega',     quem: 'colega' },
+  { tok: 'tok-pedido',     quem: 'pedido' },
+  { jwt: 'novo@exemplo.org', quem: 'novo' },
 ];
+
+/* A SESSÃO DO LOGIN POR E-MAIL, MONTADA AQUI.
+
+   É o que o Supabase grava no navegador depois que a pessoa toca no link do
+   e-mail. A ponte de teste lê as claims do token e as entrega ao banco como
+   `auth.jwt()`; ela não confere a assinatura (ver `ponte-teste.mjs`), porque
+   quem confere em produção é o PostgREST. A chave do armazenamento é a que o
+   supabase-js calcula para `http://127.0.0.1:54321`. */
+const b64 = o => Buffer.from(JSON.stringify(o)).toString('base64url');
+function sessaoDe(email) {
+  const agora = Math.floor(Date.now() / 1000);
+  const claims = { sub: '00000000-0000-4000-8000-' + Buffer.from(email).toString('hex').slice(0, 12).padEnd(12, '0'),
+                   email, role: 'authenticated', aud: 'authenticated', iat: agora, exp: agora + 3600 };
+  const token = `${b64({ alg: 'HS256', typ: 'JWT' })}.${b64(claims)}.teste`;
+  return { access_token: token, token_type: 'bearer', expires_in: 3600, expires_at: agora + 3600,
+           refresh_token: 'teste', user: { id: claims.sub, email, aud: 'authenticated', role: 'authenticated' } };
+}
+const CHAVE_DA_SESSAO = 'sb-127-auth-token';
 
 /* OS NUMEROS VEM DA SEMENTE, NAO DA MEMORIA.
 
@@ -74,7 +107,7 @@ const PAPEIS = [
    `dem_ver`. Aqui so exijo que os dezoito numeros existam. */
 const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
 const ESTADOS = ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atrasada'];
-for (const quem of ['admin', 'responsavel', 'solicitante']) {
+for (const { quem } of PAPEIS.filter(p => p.fichas)) {
   for (const k of ESTADOS) {
     if (!N[quem] || !N[quem][k]) {
       console.error(`sem demanda "${k}" que o papel "${quem}" enxergue: ` +
@@ -83,37 +116,85 @@ for (const quem of ['admin', 'responsavel', 'solicitante']) {
     }
   }
 }
+if (!N.colega?.deOutro || !N._pessoa) {
+  console.error('sem a demanda que Rafael acompanha ou sem a ficha de Carla: rode scripts/demandas-celular-subir.sh');
+  process.exit(1);
+}
 
+/* AS ROTAS, POR PAPEL, COM A PROVA DE QUE A TELA CERTA CHEGOU.
+
+   `so` limita a rota aos papéis que a veem. `exige` (seletor), `texto` e
+   `proibe` (expressões sobre o texto da página) são a guarda POSITIVA de cada
+   rota, na mesma lição da ficha logo abaixo: a administração tem que mostrar
+   a faixa da administração e não "área restrita"; o Início do admin tem que
+   mostrar o aviso de lista vazia; a lista do ministério tem que ter itens.
+   Sem guarda, uma tela de erro bem desenhada passa em todas as medidas. */
+/* AS SEIS FICHAS, E POR QUE CADA UMA (a história inteira está nos
+   comentários de `demandas-celular-subir.sh` e da semente):
+
+     execucao ... a ficha comum, com histórico comprido
+     travada .... o botão "Destravar", que só quem atende vê
+     concluida .. o BOTÃO "Resolveu, obrigado" da etapa 5 (migração 91)
+     validada ... a FRASE "Validada por X": outra caixa, outra altura
+     comLink .... link colado e anexo, onde moram os defeitos de largura
+                  (252 conferências verdes com um cartão de 853px em 320)
+     atrasada ... a pílula vermelha, o "N dias de atraso" e a ordem da lista */
+const FICHAS = ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atrasada'];
+const NOME_DA_FICHA = { execucao: 'detalhe-execucao', travada: 'detalhe-travada',
+  concluida: 'detalhe-concluida', validada: 'detalhe-validada',
+  comLink: 'detalhe-com-link-colado', atrasada: 'detalhe-atrasada' };
+const TODOS = ['admin', 'responsavel', 'solicitante', 'lider', 'gestor'];
+const ATENDE = ['admin', 'responsavel', 'gestor'];
 const paginasDe = (quem) => [
-  { rota: '/demandas',           nome: 'lista' },
-  { rota: '/demandas/nova',      nome: 'nova' },
-  { rota: '/demandas/numeros',   nome: 'numeros', so: ['admin', 'responsavel'] },
-  { rota: '/demandas/ajustes',   nome: 'ajustes', so: ['admin'] },
-  /* A LISTA VAZIA — 22/09/2026. A semente dá demanda a todo papel, então o
-     aviso de "nada aqui" nunca era aberto, e foi nele que o Arthur viu, em
-     produção, o título colado na esquerda entre duas linhas centralizadas.
-     O administrador não tem nada atribuído a ele: "Comigo" fica vazio. */
-  { rota: '/demandas',           nome: 'lista-vazia', so: ['admin'], clicar: 'Comigo' },
-  { rota: `/demandas/d/${N[quem].execucao}`,  nome: 'detalhe-execucao' },
-  { rota: `/demandas/d/${N[quem].travada}`,   nome: 'detalhe-travada' },
-  { rota: `/demandas/d/${N[quem].concluida}`, nome: 'detalhe-concluida' },
-  /* A CONCLUIDA JA CONFIRMADA, QUE E OUTRA CAIXA — 22/09/2026.
-
-     No cartao verde, a etapa 5 do PDF (migracao 91) aparece como BOTAO
-     enquanto ninguem confirmou e como FRASE depois de confirmada. A rota
-     acima so ve o botao; esta ve a frase. Sao alturas diferentes dentro do
-     mesmo `Aviso`, e so uma das duas tem alvo de toque para medir. */
-  { rota: `/demandas/d/${N[quem].validada}`,  nome: 'detalhe-validada' },
-  /* A DEMANDA COM LINK COLADO E COM ANEXO, QUE E ONDE MORAM OS DEFEITOS DE
-     LARGURA. A semente nao tinha nenhuma ate 21/09, e por isso 252
-     conferencias ficaram verdes com um cartao de 853px dentro de 320px. */
-  { rota: `/demandas/d/${N[quem].comLink}`,   nome: 'detalhe-com-link-colado' },
-  /* A ATRASADA, que a semente publica desde 21/09 e que nenhuma rota usava.
-     Ela e a unica que exercita a pilula vermelha, o "51 dias de atraso" e a
-     ordem da lista com atraso primeiro. Chave calculada e nao lida e peso
-     sem medida. */
-  { rota: `/demandas/d/${N[quem].atrasada}`,  nome: 'detalhe-atrasada' },
+  { rota: '/demandas',           nome: 'inicio', so: [...TODOS, 'colega', 'pedido'] },
+  /* A LISTA VAZIA · 22/09/2026. Foi nela que o Arthur viu, em produção, o
+     título colado na esquerda entre duas linhas centralizadas. Desde a 94 o
+     Início do administrador é o portal de quem pede, e ele não pediu nada:
+     "Minhas demandas" é o aviso de vazio, sem precisar de toque. */
+  { rota: '/demandas',           nome: 'inicio-lista-vazia', so: ['admin'], exige: '.dm-centro' },
+  { rota: '/demandas',           nome: 'inicio-do-ministerio', so: ['lider'],
+    clicar: 'Ministério', exige: '.dm-fila .dm-item' },
+  { rota: '/demandas',           nome: 'inicio-acompanho', so: ['colega'],
+    clicar: 'Acompanho', exige: '.dm-fila .dm-item' },
+  { rota: '/demandas',           nome: 'inicio-com-pedido', so: ['pedido'], texto: 'está com a administração' },
+  { rota: '/demandas/nova',      nome: 'nova', so: TODOS },
+  { rota: '/demandas/avisos',    nome: 'avisos', so: TODOS },
+  { rota: '/demandas/perfil',    nome: 'perfil', so: [...TODOS, 'colega', 'pedido'], texto: 'O que você pode' },
+  { rota: '/demandas/atendimento', nome: 'atendimento', so: ATENDE, exige: '.dm-contas.dm-seis' },
+  { rota: '/demandas/atendimento?ver=atrasadas', nome: 'atendimento-atrasadas', so: ['responsavel'],
+    exige: '.dm-fila .dm-item.dm-atrasada' },
+  { rota: '/demandas/atendimento', nome: 'atendimento-sem-equipe', so: ['solicitante'],
+    texto: 'de quem faz parte de uma equipe' },
+  { rota: '/demandas/numeros',   nome: 'numeros', so: ATENDE },
+  { rota: '/demandas/admin',     nome: 'admin-pessoas', so: ['admin'],
+    exige: '.dm-adm-faixa', texto: 'Pedidos de papel', proibe: 'área restrita' },
+  { rota: '/demandas/admin?secao=setores',    nome: 'admin-setores', so: ['admin'],
+    exige: '.dm-adm-faixa', proibe: 'área restrita' },
+  { rota: '/demandas/admin?secao=categorias', nome: 'admin-categorias', so: ['admin'],
+    exige: '.dm-adm-faixa', proibe: 'área restrita' },
+  { rota: `/demandas/admin/pessoas/${N._pessoa}`, nome: 'admin-pessoa', so: ['admin'],
+    exige: '.dm-hist', texto: 'Pediu para ser' },
+  { rota: '/demandas/admin/pessoas/nova', nome: 'admin-pessoa-nova', so: ['admin'],
+    texto: 'Cadastrar pessoa' },
+  { rota: '/demandas/admin',     nome: 'admin-restrita', so: ['solicitante'], texto: 'área restrita' },
+  { rota: '/demandas/entrar',    nome: 'entrar', so: ['solicitante'] },
+  { rota: '/demandas/cadastro',  nome: 'cadastro-email', so: ['solicitante'], texto: 'Receber o link' },
+  { rota: '/demandas',           nome: 'falta-cadastro', so: ['novo'], texto: 'Falta só o seu cadastro' },
+  { rota: '/demandas/cadastro',  nome: 'cadastro-dados', so: ['novo'], texto: 'Concluir cadastro' },
+  { rota: `/demandas/d/${N.colega.deOutro}`, nome: 'detalhe-participante', so: ['colega'] },
+  ...(PAPEIS.find(p => p.quem === quem)?.fichas
+    ? FICHAS.map(k => ({ rota: `/demandas/d/${N[quem][k]}`, nome: NOME_DA_FICHA[k] }))
+    : []),
 ];
+
+/* recorte para repetir uma conferência sem esperar as sete voltas:
+   SO_PAPEIS=responsavel,lider SO_ROTAS=inicio,atendimento SO_TELAS=320.
+   A rodada que vale para "pronto" é SEM recorte. */
+const recorte = v => (process.env[v] || '').split(',').map(x => x.trim()).filter(Boolean);
+const SO_PAPEIS = recorte('SO_PAPEIS'), SO_ROTAS = recorte('SO_ROTAS'), SO_TELAS = recorte('SO_TELAS');
+if (SO_PAPEIS.length || SO_ROTAS.length || SO_TELAS.length) {
+  console.log(`(rodada com recorte: ${[SO_PAPEIS, SO_ROTAS, SO_TELAS].map(x => x.join(',') || 'tudo').join(' · ')})`);
+}
 
 const { estado, ok } = criaContador();
 const achados = [];
@@ -137,7 +218,9 @@ const nav = await chromium.launch({ executablePath: chromeDoContainer() });
 
 try {
   for (const tela of TELAS) {
+    if (SO_TELAS.length && !SO_TELAS.includes(tela.nome)) continue;
     for (const papel of PAPEIS) {
+      if (SO_PAPEIS.length && !SO_PAPEIS.includes(papel.quem)) continue;
       const ctx = await nav.newContext({
         viewport: { width: tela.width, height: tela.height },
         deviceScaleFactor: 2, isMobile: true, hasTouch: true, reducedMotion: 'reduce',
@@ -149,8 +232,17 @@ try {
           recusas.push(m.text().slice(0, 140));
         }
       });
-      /* entra pelo link pessoal uma vez; o token fica guardado */
-      await pag.goto(`${BASE}/demandas?t=${papel.tok}`, { waitUntil: 'networkidle' });
+      /* entra pelo link pessoal uma vez; o token fica guardado. Quem vai se
+         cadastrar não tem link: chega com a sessão do login por e-mail, que
+         é posta no armazenamento antes de cada página, como o Supabase
+         deixaria depois do toque no link. */
+      if (papel.jwt) {
+        await ctx.addInitScript(([k, v]) => { try { localStorage.setItem(k, v); } catch {} },
+          [CHAVE_DA_SESSAO, JSON.stringify(sessaoDe(papel.jwt))]);
+        await pag.goto(`${BASE}/demandas`, { waitUntil: 'networkidle' });
+      } else {
+        await pag.goto(`${BASE}/demandas?t=${papel.tok}`, { waitUntil: 'networkidle' });
+      }
       await pag.waitForTimeout(700);
 
       /* A FOLHA CHEGOU? SE NÃO, TUDO ABAIXO É MENTIRA.
@@ -201,7 +293,9 @@ try {
          Relatório verde sobre a tela errada é pior que relatório vermelho.
          Daqui em diante, se a casca não mostra as abas de quem entrou,
          para. */
-      const dentro = await pag.evaluate(() => {
+      /* quem ainda não tem cadastro não tem abas: a casca dele é a porta do
+         cadastro, e a guarda dele é a frase dela (na rota `falta-cadastro`) */
+      const dentro = papel.jwt ? { ok: true } : await pag.evaluate(() => {
         const abas = document.querySelector('.dm-abas');
         if (!abas) return { ok: false, por: 'sem as abas: a sessão não foi reconhecida (o portão está na tela)' };
         const quantas = abas.querySelectorAll('a').length;
@@ -218,6 +312,7 @@ try {
 
       for (const p of paginasDe(papel.quem)) {
         if (p.so && !p.so.includes(papel.quem)) continue;
+        if (SO_ROTAS.length && !SO_ROTAS.includes(p.nome)) continue;
         await pag.goto(BASE + p.rota, { waitUntil: 'networkidle' });
         /* transição desligada, animação NÃO: desligar a animação congela
            qualquer cortina de abertura por cima da tela. Ver a nota em
@@ -228,9 +323,21 @@ try {
         if (p.clicar) {
           await pag.getByRole('button', { name: p.clicar, exact: true }).click();
           await pag.waitForTimeout(600);
-          const temVazio = await pag.evaluate(() => !!document.querySelector('.dm-centro'));
-          if (!temVazio) {
-            ok(false, `${tela.nome}px · ${papel.quem} · ${p.nome} — o aviso de vazio apareceu`);
+        }
+
+        /* A GUARDA DE CADA ROTA · 22/09/2026. Ver o comentário de
+           `paginasDe`: a tela certa chegou, ou nada abaixo vale. */
+        if (p.exige || p.texto || p.proibe) {
+          const g = await pag.evaluate(({ exige, texto, proibe }) => {
+            const t = (document.querySelector('.dm') || document.body).innerText || '';
+            if (exige && !document.querySelector(exige)) return { ok: false, por: `sem ${exige}` };
+            if (texto && !new RegExp(texto, 'i').test(t)) return { ok: false, por: `sem o texto "${texto}"` };
+            if (proibe && new RegExp(proibe, 'i').test(t)) return { ok: false, por: `apareceu "${proibe}"` };
+            return { ok: true };
+          }, { exige: p.exige, texto: p.texto, proibe: p.proibe });
+          if (!g.ok) {
+            console.log(`  PAREI em ${tela.nome}px · ${papel.quem} · ${p.nome}: ${g.por}`);
+            ok(false, `${tela.nome}px · ${papel.quem} · ${p.nome} · a tela certa chegou`, g.por);
             continue;
           }
         }
@@ -341,7 +448,9 @@ try {
            mais de um. */
         const sozinhos = await pag.evaluate(() => {
           const achou = [];
-          for (const g of document.querySelectorAll('.dm-opcoes, .dm-seg')) {
+          /* `.dm-contas` entrou com a 94: as quatro contas do Início e os
+             seis atalhos do Atendimento são grades do mesmo tipo */
+          for (const g of document.querySelectorAll('.dm-opcoes, .dm-seg, .dm-contas')) {
             const itens = [...g.children].filter(e => e.getBoundingClientRect().width > 0);
             if (itens.length < 3) continue;
             const linhas = new Map();
@@ -385,6 +494,40 @@ try {
         });
         ok(descentrados.length === 0, `${etiqueta} — o que está num bloco centralizado fica no centro`,
           descentrados.slice(0, 2).join(' | '));
+
+        /* O TEXTO CABE NO PRÓPRIO BOTÃO, E AS ABAS CABEM NA BARRA · 22/09/2026.
+
+           Duas coisas que nenhuma conferência acima via, e que eu vi nas
+           fotos da primeira rodada da 94:
+
+             · "Em andamento" precisava de 90px numa fatia de 80 e ENCOSTAVA
+               em "Concluídas" (em 320 e em 360). Não é rolagem da página, não
+               é alvo pequeno: o texto sai da caixa por cima da vizinha;
+             · a barra de quem atende media 362px e escondia "Perfil", onde
+               mora o Sair, em 320 e em 360. A barra rola, então a página não
+               desliza e a medida de rolagem lateral não acusava.
+
+           `scrollWidth` maior que `clientWidth` é exatamente "o conteúdo não
+           cabe na caixa", com ou sem `overflow` visível. */
+        const transborda = await pag.evaluate(() => {
+          const achou = [];
+          const sel = '.dm-seg button, .dm-opcoes button, .dm-contas > *, .dm .dm-btn';
+          for (const e of document.querySelectorAll(sel)) {
+            const r = e.getBoundingClientRect();
+            if (!r.width || !r.height) continue;
+            if (e.scrollWidth > e.clientWidth + 1) {
+              achou.push(`«${(e.textContent || '').trim().slice(0, 24)}» ${e.scrollWidth}/${e.clientWidth}px`);
+            }
+          }
+          for (const n of document.querySelectorAll('.dm-abas')) {
+            if (n.scrollWidth > n.clientWidth + 1) {
+              achou.push(`a barra de abas rola: ${n.scrollWidth}/${n.clientWidth}px`);
+            }
+          }
+          return achou;
+        });
+        ok(transborda.length === 0, `${etiqueta} · o texto cabe no próprio botão e as abas cabem na barra`,
+          transborda.slice(0, 3).join(' | '));
 
         if (m.estoura.length || m.pequenos.length || m.miudos.length || m.zoomIos.length ||
             m.teclado.length || m.fracos.length) {

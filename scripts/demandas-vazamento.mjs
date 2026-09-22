@@ -53,7 +53,19 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
    números reais do arquivo que a semente escreve. Este irmão não recebeu, e
    ficou verde medindo nada. Instrumento que não acusa é pior que instrumento
    que falta, porque ninguém vai procurar. */
-const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
+/* E O ARQUIVO MUDOU DE FORMATO SEM ESTE IRMÃO SABER · 22/09/2026.
+
+   Desde que os números passaram a ser POR PAPEL (`{admin: {execucao: 81}}`),
+   `N.execucao` é `undefined`, e a rota abaixo virava `/demandas/d/undefined`.
+   A página respondia "essa demanda não existe", o cartão de erro tem um `h3`,
+   o `h3` não tem o chevron, e o caso passava: verde, medindo a tela errada
+   pela segunda vez no mesmo arquivo. Agora o número é o do papel que entra
+   (admin), e a ficha tem que ter chegado antes de qualquer medida nela. */
+const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8')).admin || {};
+if (!N.execucao) {
+  console.error('sem demanda em execução para o admin: rode scripts/demandas-celular-subir.sh');
+  process.exit(1);
+}
 
 const BASE = process.env.BASE || 'http://127.0.0.1:3400';
 
@@ -127,6 +139,11 @@ try {
       await pag.goto(BASE + e.rota, { waitUntil: 'networkidle' });
       await pag.waitForTimeout(450);
       rotaAtual = e.rota;
+      if (e.rota.startsWith('/demandas/d/')) {
+        const ficha = await pag.evaluate(() =>
+          /demanda\s*#\s*\d+/i.test(document.querySelector('.dm-rot')?.textContent || ''));
+        ok(ficha, `${e.rota} · a ficha chegou (senão o caso mede o cartão de erro)`);
+      }
     }
     const obtido = await pag.evaluate(({ onde, prop, pseudo }) => {
       const el = document.querySelector(onde);

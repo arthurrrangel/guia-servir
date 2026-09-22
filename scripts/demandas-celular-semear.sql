@@ -12,9 +12,10 @@
        motivos diferentes;
      · uma demanda com histórico comprido, que é onde a tela de detalhe
        costuma estourar;
-     · os quatro papéis, para ver o menu de abas de cada um.
+     · os cinco papéis, o participante e o pedido de papel, para ver o
+       menu de abas e o portal de cada um.
 
-   Roda depois de `supabase/50-demandas.sql`. */
+   Roda depois das migrações do Demandas, até a 94. */
 
 -- ------------------------------------------------------------------ gente --
 insert into demandas.membros (nome, email, telefone, setor_id, papel, token) values
@@ -29,6 +30,70 @@ insert into demandas.membros (nome, email, telefone, setor_id, papel, token) val
   ('Pedro Henrique Almeida Vasconcelos',  'pedro@exemplo.org',  '21999990005',
      (select id from demandas.setores where slug='eventos'),       'solicitante',  'tok-pede')
 on conflict (token) do nothing;
+
+/* OS PAPÉIS DA MIGRAÇÃO 94 · 22/09/2026.
+
+   Até a 93 eram quatro papéis, e o medidor olhava três. A 94 trouxe o líder
+   de ministério, o escopo da gestão, o participante e o pedido de papel, e
+   cada um muda a tela: o líder tem a aba "Ministério", quem acompanha tem
+   "Acompanho", a gestão tem o título com os setores do escopo, e o pedido
+   aparece no Início de quem pediu e na administração.
+
+   E OS QUATRO NOVOS SÃO TAMBÉM O TESTE DE ISOLAMENTO: Rafael e Pedro servem
+   no MESMO ministério (eventos), e Rafael não pode ver o que Pedro pediu, a
+   não ser a demanda em que Pedro o incluiu. Carla está num setor que atende
+   (comunicação) sem papel de equipe, e setor sem papel não é credencial: ela
+   não vê a fila da comunicação. Bruno é gestor só da comunicação, e não
+   alcança compras nem manutenção. `demandas-isolamento.mjs` cobra os três. */
+insert into demandas.membros (nome, email, telefone, setor_id, papel, token, funcao) values
+  ('Luciana Ferreira de Albuquerque Moura', 'luciana@exemplo.org', '21999990006',
+     (select id from demandas.setores where slug='eventos'),       'lider',        'tok-lider',
+     'Líder do ministério de eventos'),
+  ('Rafael Augusto Pereira Nogueira',       'rafael@exemplo.org',  '21999990007',
+     (select id from demandas.setores where slug='eventos'),       'solicitante',  'tok-colega',
+     'Recepção'),
+  ('Carla Simone Duarte Bittencourt',       'carla@exemplo.org',   '21999990008',
+     (select id from demandas.setores where slug='comunicacao'),   'solicitante',  'tok-pedido',
+     'Fotografia'),
+  ('Bruno Tavares de Menezes Filho',        'bruno@exemplo.org',   '21999990009',
+     (select id from demandas.setores where slug='pastoral'),      'gestor',       'tok-gestor-com',
+     'Coordenação de mídia')
+on conflict (token) do nothing;
+
+/* A GESTORA DA SEMENTE ACOMPANHA TUDO, E ISSO AGORA É UMA DECISÃO ESCRITA.
+
+   Desde a 94 o gestor nasce sem escopo (`escopo_total = false`) e não vê
+   nada além do que é dele. A semente usa Ana para assumir e concluir as
+   demandas 6 e 9, de manutenção: sem esta linha as duas ações seriam
+   recusadas, e antes do `exige` abaixo a recusa passava calada. */
+update demandas.membros set escopo_total = true where token = 'tok-gestor';
+insert into demandas.gestao (membro_id, setor_id)
+  select m.id, s.id from demandas.membros m, demandas.setores s
+   where m.token = 'tok-gestor-com' and s.slug = 'comunicacao'
+on conflict do nothing;
+/* o pedido de papel, como o cadastro deixa: a pessoa já é membro e pediu mais */
+update demandas.membros set papel_pedido = 'responsavel', papel_pedido_em = now() - interval '2 days',
+       origem = 'cadastro'
+ where token = 'tok-pedido';
+
+/* NENHUMA CHAMADA DESTA SEMENTE FALHA CALADA · 22/09/2026.
+
+   O cabeçalho da demanda 6 conta duas vezes a mesma história: `perform`
+   joga fora a resposta, a função devolve `{"ok": false}` em vez de levantar
+   erro, e a tela que dependia daquela demanda some da medição sem aviso. Com
+   a 94 havia um terceiro jeito de cair nisso: o teto de dez demandas por hora
+   para quem pede, e esta semente abre doze de uma vez.
+
+   Toda chamada passa por aqui. Resposta sem `ok` vira ERRO, e o
+   `demandas-celular-subir.sh` para. */
+create or replace function pg_temp.exige(r jsonb, o_que text) returns jsonb
+language plpgsql as $f$
+begin
+  if not coalesce((r->>'ok')::boolean, false) then
+    raise exception 'semente: "%" falhou: %', o_que, r;
+  end if;
+  return r;
+end $f$;
 
 -- ------------------------------------------------------------------ pedidos --
 do $$
@@ -47,74 +112,74 @@ begin
   select id into c_reemb  from demandas.categorias where nome = 'Manutenção predial' limit 1;
 
   /* 1. aberta, título curto */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Arte para o culto de domingo',
     'descricao','Precisamos de uma arte para o feed e para o story, no padrão da igreja.',
     'objetivo','Divulgar o culto de domingo para quem acompanha pelo Instagram.',
     'local','Instagram e grupo do WhatsApp', 'publico','Membros e visitantes',
     'categoria_id', c_divul, 'prioridade','normal',
-    'prazo', (current_date + 5)::text));
+    'prazo', (current_date + 5)::text)), 'dem_abrir: Arte para o culto de domingo');
   n1 := (r->>'numero')::int;
 
   /* 2. TÍTULO LONGO DE PROPÓSITO: é o que estoura a tela estreita */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Revisão completa do sistema de som e iluminação do templo antes da conferência de novembro',
     'descricao','As caixas de retorno do palco estão com chiado desde o último domingo, e dois refletores da frente não acendem. Antes da conferência precisamos de uma revisão completa, com troca do que estiver no fim da vida útil e um relatório do que foi feito.',
     'objetivo','Não correr risco de ficar sem som no meio da conferência, que é o maior evento do ano.',
     'local','Templo principal', 'publico','Toda a igreja e os visitantes da conferência',
     'categoria_id', c_manut, 'prioridade','alta',
     'prazo', (current_date + 20)::text, 'evento', true,
-    'evento_data', (current_date + 30)::text));
+    'evento_data', (current_date + 30)::text)), 'dem_abrir: Revisão completa do sistema de som e iluminação do templo antes da conferência de novembro');
   n2 := (r->>'numero')::int;
 
   /* 3. compra: nasce travada esperando aprovação, com orçamento de 5 dígitos */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Compra de 12 cadeiras para a sala das crianças',
     'descricao','As cadeiras atuais estão quebrando. Orçamento já levantado com dois fornecedores.',
     'objetivo','Sala do GUIA Kids segura para as crianças.',
     'local','Sala 2 do GUIA Kids', 'publico','Crianças de 4 a 10 anos',
     'categoria_id', c_compra, 'prioridade','normal',
-    'prazo', (current_date + 12)::text, 'orcamento', 14750.90));
+    'prazo', (current_date + 12)::text, 'orcamento', 14750.90)), 'dem_abrir: Compra de 12 cadeiras para a sala das crianças');
   n3 := (r->>'numero')::int;
 
   /* 4. em execução, com histórico comprido */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Vídeo de chamada para o Follow',
     'descricao','Um corte de 40 segundos com os melhores momentos do último Follow.',
     'objetivo','Puxar mais jovens para o sábado.',
     'local','Instagram', 'publico','Jovens de 15 a 24',
     'categoria_id', c_divul, 'prioridade','alta',
-    'prazo', (current_date + 3)::text));
+    'prazo', (current_date + 3)::text)), 'dem_abrir: Vídeo de chamada para o Follow');
   n4 := (r->>'numero')::int;
-  perform public.dem_mover(t_com, n4, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_com, n4, 'comentar',
-    jsonb_build_object('texto','Separei o material bruto do último Follow, são 3 horas de gravação. Começo a decupagem amanhã.'));
-  perform public.dem_mover(t_com, n4, 'comentar',
-    jsonb_build_object('texto','Decupagem feita. Tenho 6 trechos bons, vou montar duas versões para a liderança escolher.'));
-  perform public.dem_mover(t_com, n4, 'comentar',
-    jsonb_build_object('texto','Primeira versão pronta, mandei no grupo da mídia para conferir o áudio.'));
+  perform pg_temp.exige(public.dem_mover(t_com, n4, 'assumir', '{}'::jsonb), 'dem_mover(t_com, n4, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n4, 'comentar',
+    jsonb_build_object('texto','Separei o material bruto do último Follow, são 3 horas de gravação. Começo a decupagem amanhã.')), 'dem_mover(t_com, n4, ''comentar'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n4, 'comentar',
+    jsonb_build_object('texto','Decupagem feita. Tenho 6 trechos bons, vou montar duas versões para a liderança escolher.')), 'dem_mover(t_com, n4, ''comentar'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n4, 'comentar',
+    jsonb_build_object('texto','Primeira versão pronta, mandei no grupo da mídia para conferir o áudio.')), 'dem_mover(t_com, n4, ''comentar'')');
 
   /* 5. travada por falta de informação: o pedido volta para quem abriu */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Banner para a entrada do templo',
     'descricao','Um banner grande para a porta.',
     'objetivo','Sinalizar a entrada.',
     'local','Entrada', 'publico','Visitantes',
     'categoria_id', c_divul, 'prioridade','baixa',
-    'sem_prazo_porque','Não tem data fechada ainda, depende da reforma da entrada.'));
+    'sem_prazo_porque','Não tem data fechada ainda, depende da reforma da entrada.')), 'dem_abrir: Banner para a entrada do templo');
   n5 := (r->>'numero')::int;
-  perform public.dem_mover(t_com, n5, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_com, n5, 'travar',
-    jsonb_build_object('motivo','informacao','texto','Qual a medida do banner e o texto que tem que estar nele? Sem isso não dá para orçar a impressão.'));
+  perform pg_temp.exige(public.dem_mover(t_com, n5, 'assumir', '{}'::jsonb), 'dem_mover(t_com, n5, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n5, 'travar',
+    jsonb_build_object('motivo','informacao','texto','Qual a medida do banner e o texto que tem que estar nele? Sem isso não dá para orçar a impressão.')), 'dem_mover(t_com, n5, ''travar'')');
 
   /* 6. concluída, para a tela de números não ficar toda zerada */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Troca das lâmpadas do corredor',
     'descricao','Três lâmpadas queimadas no corredor da secretaria.',
     'objetivo','Corredor iluminado.',
     'local','Corredor da secretaria', 'publico','Equipe',
     'categoria_id', c_manut, 'prioridade','normal',
-    'prazo', (current_date + 5)::text));
+    'prazo', (current_date + 5)::text)), 'dem_abrir: Troca das lâmpadas do corredor');
   n6 := (r->>'numero')::int;
   /* O PRAZO NASCE NO FUTURO E DEPOIS ANDA PARA TRAS, porque e assim que
      acontece de verdade: ninguem abre uma demanda com prazo que ja passou, e
@@ -123,16 +188,16 @@ begin
      6 simplesmente NAO NASCIA — em silencio, porque `perform` nao le a
      resposta. A tela de detalhe-concluida deixou de ter o que medir. */
   update demandas.demandas set prazo = current_date - 2 where numero = n6;
-  perform public.dem_mover(t_ges, n6, 'assumir', '{}'::jsonb);
+  perform pg_temp.exige(public.dem_mover(t_ges, n6, 'assumir', '{}'::jsonb), 'dem_mover(t_ges, n6, ''assumir'')');
   /* O `atraso` NAO E ENFEITE AQUI: esta demanda vence dois dias antes de ser
      concluida, e desde a migracao 86 o servidor recusa concluir depois do
      prazo sem uma palavra sobre o atraso. Sem esta chave a semente falhava em
      SILENCIO e a tela de detalhe-concluida deixava de existir — foi assim que
      eu descobri, com o medidor pedindo uma demanda concluida e nao achando
      nenhuma. */
-  perform public.dem_mover(t_ges, n6, 'concluir',
+  perform pg_temp.exige(public.dem_mover(t_ges, n6, 'concluir',
     jsonb_build_object('texto','Trocadas as três lâmpadas por LED. Sobrou uma de reserva, ficou no armário da secretaria.',
-                       'atraso','A loja ficou sem LED de 9W e a gente esperou a reposição.'));
+                       'atraso','A loja ficou sem LED de 9W e a gente esperou a reposição.')), 'dem_mover(t_ges, n6, ''concluir'')');
 
   /* 7. O QUE FALTAVA NESTA SEMENTE, E POR QUE 252/252 FICOU VERDE COM TRES
         DEFEITOS GRAVES DENTRO — 21/09/2026.
@@ -144,7 +209,7 @@ begin
 
      As tres linhas abaixo poem no banco o que a igreja realmente cola, e o
      instrumento passa a pegar sozinho o que eu tive que abrir na mao. */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Arte do Follow para o Instagram',
     'descricao','Segue a referencia que a gente gostou: ' ||
       'https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=PLxxxxxxxxxxxxxxxxxxxxxxxx&index=7&t=142s',
@@ -154,20 +219,20 @@ begin
     'prazo', (current_date + 12)::text,
     'anexos', jsonb_build_array(
       jsonb_build_object('nome','referencia',
-        'url','https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/view?usp=sharing_eip_se_dm'))));
+        'url','https://drive.google.com/file/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/view?usp=sharing_eip_se_dm')))), 'dem_abrir: Arte do Follow para o Instagram');
   n7 := (r->>'numero')::int;
-  perform public.dem_mover(t_com, n7, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_com, n7, 'comentar', jsonb_build_object('texto',
-    'Primeira versao aqui: https://drive.google.com/file/d/1ZyXwVuTsRqPoNmLkJiHgFeDcBa9876543210/view?usp=sharing'));
+  perform pg_temp.exige(public.dem_mover(t_com, n7, 'assumir', '{}'::jsonb), 'dem_mover(t_com, n7, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n7, 'comentar', jsonb_build_object('texto',
+    'Primeira versao aqui: https://drive.google.com/file/d/1ZyXwVuTsRqPoNmLkJiHgFeDcBa9876543210/view?usp=sharing')), 'dem_mover(t_com, n7, ''comentar'')');
 
   /* 8. e uma ATRASADA de verdade, para a ordem da lista ter o que provar */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Consertar o ar da sala do Kids',
     'descricao','O ar da sala grande do Kids parou de gelar.',
     'objetivo','Sala utilizavel no domingo.',
     'local','Kids', 'publico','Criancas',
     'categoria_id', c_manut, 'prioridade','baixa',
-    'prazo', (current_date + 5)::text));
+    'prazo', (current_date + 5)::text)), 'dem_abrir: Consertar o ar da sala do Kids');
   n8 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 51 where numero = n8;
 
@@ -187,18 +252,18 @@ begin
      Quem valida e `t_pede`, que foi quem abriu: e o caminho do PDF
      ("Confirmar a conclusao" esta entre as capacidades do Solicitante), e nao
      o atalho da lideranca. */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Impressao dos cartoes de visitante',
     'descricao','Cem cartoes de visitante para o balcao da recepcao, no papel de sempre.',
     'objetivo','Recepcao com material para o domingo.',
     'local','Recepcao', 'publico','Visitantes',
     'categoria_id', c_manut, 'prioridade','normal',
-    'prazo', (current_date + 6)::text));
+    'prazo', (current_date + 6)::text)), 'dem_abrir: Impressao dos cartoes de visitante');
   n9 := (r->>'numero')::int;
-  perform public.dem_mover(t_ges, n9, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_ges, n9, 'concluir',
-    jsonb_build_object('texto','Cem cartoes impressos e entregues no balcao da recepcao.'));
-  perform public.dem_mover(t_pede, n9, 'validar', '{}'::jsonb);
+  perform pg_temp.exige(public.dem_mover(t_ges, n9, 'assumir', '{}'::jsonb), 'dem_mover(t_ges, n9, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_ges, n9, 'concluir',
+    jsonb_build_object('texto','Cem cartoes impressos e entregues no balcao da recepcao.')), 'dem_mover(t_ges, n9, ''concluir'')');
+  perform pg_temp.exige(public.dem_mover(t_pede, n9, 'validar', '{}'::jsonb), 'dem_mover(t_pede, n9, ''validar'')');
 
   /* 10, 11 e 12. O SETOR DE QUEM ATENDE PRECISA DOS SEIS ESTADOS — 22/09/2026.
 
@@ -223,48 +288,78 @@ begin
      em `demandas-celular-subir.sh` (numeros por papel, via `dem_ver`) e em
      `demandas-celular.mjs` (a guarda que reprova quando a ficha nao chega). */
 
+  /* O TETO DE DEZ POR HORA DA 94 VALE PARA ESTA SEMENTE TAMBEM.
+
+     Pedro e quem pede, e quem pede tem teto: dez demandas por hora
+     (`MUITAS_DE_UMA_VEZ`). Dentro de uma transacao `now()` nao anda, entao as
+     nove de cima contam como abertas agora e a 11a seria recusada. Recuar a
+     abertura das nove em tres horas e contar a historia como ela seria na
+     igreja: ninguem abre doze pedidos no mesmo minuto. O teto em si tem
+     conferencia propria na 94 (bloco 13) e em `demandas-banco.test.sql`. */
+  update demandas.demandas set criada_em = criada_em - interval '3 hours'
+   where aberta_por = (select id from demandas.membros where token = t_pede);
+
   /* 10. concluida e NAO validada, no setor de quem atende: e a que exercita o
          BOTAO "Resolveu, obrigado" da etapa 5 vendo pelos olhos de quem fez o
          trabalho e NAO pode confirmar o proprio servico. */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Post de agradecimento aos voluntarios do mutirao',
     'descricao','Um card para o feed agradecendo quem ficou ate o fim no mutirao de sabado.',
     'objetivo','Reconhecer publicamente quem trabalhou.',
     'local','Instagram', 'publico','Igreja toda',
     'categoria_id', c_divul, 'prioridade','normal',
-    'prazo', (current_date + 4)::text));
+    'prazo', (current_date + 4)::text)), 'dem_abrir: Post de agradecimento aos voluntarios do mutirao');
   n10 := (r->>'numero')::int;
-  perform public.dem_mover(t_com, n10, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_com, n10, 'concluir',
-    jsonb_build_object('texto','Card publicado no feed e no story, com as fotos que o Pedro mandou.'));
+  perform pg_temp.exige(public.dem_mover(t_com, n10, 'assumir', '{}'::jsonb), 'dem_mover(t_com, n10, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n10, 'concluir',
+    jsonb_build_object('texto','Card publicado no feed e no story, com as fotos que o Pedro mandou.')), 'dem_mover(t_com, n10, ''concluir'')');
 
   /* 11. concluida E confirmada, no mesmo setor: e a FRASE "Validada por X",
          que e outra caixa e outra altura. */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Arte do aviso de mudanca de horario do culto de quarta',
     'descricao','Precisa sair antes de domingo para a igreja toda ficar sabendo.',
     'objetivo','Ninguem chegar no horario velho.',
     'local','Instagram e WhatsApp', 'publico','Membros',
     'categoria_id', c_divul, 'prioridade','alta',
-    'prazo', (current_date + 7)::text));
+    'prazo', (current_date + 7)::text)), 'dem_abrir: Arte do aviso de mudanca de horario do culto de quarta');
   n11 := (r->>'numero')::int;
-  perform public.dem_mover(t_com, n11, 'assumir', '{}'::jsonb);
-  perform public.dem_mover(t_com, n11, 'concluir',
-    jsonb_build_object('texto','Arte pronta, publicada nos dois canais na quinta de manha.'));
-  perform public.dem_mover(t_pede, n11, 'validar', '{}'::jsonb);
+  perform pg_temp.exige(public.dem_mover(t_com, n11, 'assumir', '{}'::jsonb), 'dem_mover(t_com, n11, ''assumir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n11, 'concluir',
+    jsonb_build_object('texto','Arte pronta, publicada nos dois canais na quinta de manha.')), 'dem_mover(t_com, n11, ''concluir'')');
+  perform pg_temp.exige(public.dem_mover(t_pede, n11, 'validar', '{}'::jsonb), 'dem_mover(t_pede, n11, ''validar'')');
 
   /* 12. atrasada no setor de quem atende: a pilula vermelha e o "N dias de
          atraso" so foram medidos pelos olhos de quem pede e do admin. */
-  r := public.dem_abrir(t_pede, jsonb_build_object(
+  r := pg_temp.exige(public.dem_abrir(t_pede, jsonb_build_object(
     'titulo','Atualizar a capa do canal do YouTube',
     'descricao','A capa ainda e a da conferencia do ano passado.',
     'objetivo','Canal com a cara certa para quem chega pelo YouTube.',
     'local','YouTube', 'publico','Visitantes',
     'categoria_id', c_divul, 'prioridade','baixa',
-    'prazo', (current_date + 5)::text));
+    'prazo', (current_date + 5)::text)), 'dem_abrir: Atualizar a capa do canal do YouTube');
   n12 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 18 where numero = n12;
 
-  raise notice 'semeado: % % % % % % % % % % % %',
-    n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12;
+  /* 13. QUEM ACOMPANHA SEM TER PEDIDO · migração 94.
+
+     Pedro inclui Rafael na demanda 1, pelo e-mail (a 94 nunca acha pessoa
+     por nome: seria uma lista telefonica da igreja aberta a qualquer membro).
+     Rafael e do mesmo ministerio e passa a ver a 1, e SO a 1 das de Pedro. E
+     ele tem o proprio pedido, para o Inicio dele ter "Minhas" e "Acompanho". */
+  perform pg_temp.exige(public.dem_mover(t_pede, n1, 'incluir',
+    jsonb_build_object('quem', 'rafael@exemplo.org')), 'dem_mover(t_pede, n1, ''incluir'')');
+  perform pg_temp.exige(public.dem_mover(t_com, n1, 'comentar',
+    jsonb_build_object('texto', 'Vou usar a paleta nova. Rafael, me manda as fotos da recepcao ate quinta?')),
+    'dem_mover(t_com, n1, ''comentar'')');
+  r := pg_temp.exige(public.dem_abrir('tok-colega', jsonb_build_object(
+    'titulo','Placas de sinalizacao para a recepcao',
+    'descricao','Placas indicando banheiro, Kids e auditorio, no padrao visual da igreja.',
+    'objetivo','Visitante achar sozinho onde ir.',
+    'local','Recepcao', 'publico','Visitantes',
+    'categoria_id', c_divul, 'prioridade','normal',
+    'prazo', (current_date + 15)::text)), 'dem_abrir: Placas de sinalizacao para a recepcao');
+
+  raise notice 'semeado: % % % % % % % % % % % % e a de Rafael: %',
+    n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11, n12, (r->>'numero');
 end $$;

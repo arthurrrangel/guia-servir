@@ -265,6 +265,15 @@ export const MEDIR = (largura) => {
     const rot = ((e.labels && e.labels[0]?.textContent) || e.placeholder ||
                  e.getAttribute('aria-label') || e.name || '').toLowerCase();
     const tipo = (e.getAttribute('type') || 'text').toLowerCase();
+    /* CAMPO DE BUSCA NÃO É CAMPO DE TELEFONE · 22/09/2026.
+
+       A busca de pessoas da administração de Demandas diz "Nome, e-mail ou
+       telefone" e foi acusada duas vezes, como telefone E como e-mail, que
+       nenhum `type` satisfaz ao mesmo tempo. Ela procura texto livre, e o
+       teclado certo para isso é o de texto, com a tecla "buscar": é o que
+       `type="search"` dá. A exceção vale só para quem DECLARA ser busca; um
+       campo de texto com a mesma frase continua acusado (ver o teste). */
+    if (tipo === 'search') continue;
     const modo = (e.getAttribute('inputmode') || '').toLowerCase();
     const numerico = tipo === 'number' || tipo === 'tel' || modo === 'numeric' || modo === 'decimal' || modo === 'tel';
     if (/telefone|whatsapp|celular|fone/.test(rot) && tipo !== 'tel' && modo !== 'tel')

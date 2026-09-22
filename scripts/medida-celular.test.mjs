@@ -52,6 +52,23 @@ try {
   ok(m.pequenos.length === 0, 'a tela de escala não tem alvo menor que 44px',
     m.pequenos.slice(0, 4).join(' | '));
 
+  /* A BUSCA QUE DECLARA SER BUSCA, E A QUE NÃO DECLARA · 22/09/2026.
+     Os dois campos entram na mesma página, com a mesma frase. Só o que é
+     `type="search"` fica dispensado; o de texto continua acusado duas vezes
+     (telefone e e-mail), senão a exceção teria aberto uma porta. */
+  await pag.evaluate(() => {
+    const caixa = document.createElement('div');
+    caixa.id = 'teste-busca';
+    caixa.innerHTML = '<input type="search" placeholder="Nome, e-mail ou telefone" style="font-size:16px">'
+                    + '<input placeholder="Nome, e-mail ou telefone" style="font-size:16px">';
+    document.body.prepend(caixa);
+  });
+  m = await medir(pag, 390);
+  ok(m.teclado.length === 2 && m.teclado.every(t => /type=text/.test(t)),
+    'a busca declarada passa, e o mesmo texto num campo comum continua acusado',
+    m.teclado.join(' | '));
+  await pag.evaluate(() => document.getElementById('teste-busca')?.remove());
+
   /* ------------------------------------------------ 2. o que está errado cai */
   const estragos = [
     {

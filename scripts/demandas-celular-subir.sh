@@ -106,7 +106,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          90-o-setor-nao-ficava-sabendo-que-chegou-demanda \
          91-o-aviso-nunca-saiu-e-a-etapa-5-do-pdf-nao-existia \
          92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio \
-         93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb; do
+         93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb \
+         94-a-base-central-de-pessoas-e-o-escopo-que-o-banco-cobra; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql
@@ -122,7 +123,14 @@ cp "$B/scripts/demandas-celular-semear.sql" /tmp/_seed.sql
 chmod 644 /tmp/_prep.sql /tmp/_mig.sql /tmp/_seed.sql
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -f /tmp/_prep.sql"
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f /tmp/_mig.sql" >/dev/null
-su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f /tmp/_seed.sql" 2>&1 | grep -E "^ERROR" || true
+# A SEMENTE QUE FALHA PARA TUDO · 22/09/2026. Era `| grep -E "^ERROR" || true`:
+# o erro aparecia na tela e o roteiro seguia, subia o app e o medidor media
+# uma base pela metade. Desde a 94 a semente levanta ERRO em toda chamada que
+# nao volta `ok` (`pg_temp.exige`), e o erro aqui interrompe.
+if ! saida=$(su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f /tmp/_seed.sql" 2>&1); then
+  echo "$saida" | grep -E "ERROR|semente" | head -5
+  echo "   FALHOU: a semente nao entrou inteira"; exit 1
+fi
 
 # OS NUMEROS DA SEMENTE, PARA O MEDIDOR NAO ADIVINHAR — 21/09/2026.
 #
@@ -171,6 +179,12 @@ su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -q -v ON_ERROR_STOP=1 -f 
 # A pergunta certa nao e "qual o menor numero deste estado", e sim "qual o
 # menor numero deste estado QUE ESTE PAPEL ENXERGA". Quem responde isso sem
 # eu supor nada e `public.dem_ver`, a mesma funcao que a tela chama.
+#
+# E OS PAPEIS DA 94 ENTRAM NA MESMA PERGUNTA. Lider, gestao com escopo, quem
+# acompanha e quem pediu papel veem pedacos diferentes da base, e cada um ganha
+# os seus numeros. `deOutro` e a menor demanda que o papel ve SEM ter aberto:
+# para Rafael, e a demanda em que Pedro o incluiu. `_pessoa` e a ficha que a
+# administracao abre (Carla, que tem pedido de papel esperando).
 su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
   select jsonb_pretty(jsonb_object_agg(p.quem, jsonb_build_object(
     'execucao',  (select min(d.numero) from demandas.demandas d
@@ -191,10 +205,18 @@ su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
     'atrasada',  (select min(d.numero) from demandas.demandas d
                    where d.prazo < current_date
                      and d.status in ('aberta','execucao','travada')
-                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean))))
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean),
+    'deOutro',   (select min(d.numero) from demandas.demandas d
+                   where d.aberta_por <> (select x.id from demandas.membros x where x.token = p.tok)
+                     and (public.dem_ver(p.tok, d.numero)->>'ok')::boolean)))
+    || jsonb_build_object('_pessoa', (select x.id from demandas.membros x where x.token = 'tok-pedido')))
   from (values ('admin','tok-admin'),
                ('responsavel','tok-comunica'),
-               ('solicitante','tok-pede')) p(quem, tok)\"" \
+               ('solicitante','tok-pede'),
+               ('lider','tok-lider'),
+               ('gestor','tok-gestor-com'),
+               ('colega','tok-colega'),
+               ('pedido','tok-pedido')) p(quem, tok)\"" \
   > /tmp/celular-numeros.json
 chmod 644 /tmp/celular-numeros.json
 
