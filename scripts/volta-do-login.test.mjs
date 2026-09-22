@@ -143,8 +143,26 @@ caso('a casca das demandas nao tem NENHUM link para as escalas', () => {
   for (const alvo of ['href="/painel"', 'href="/escala"', 'href="/time"', 'href="/ajustes"']) {
     assert.ok(!semComentarios.includes(alvo), `ainda linka para as escalas: ${alvo}`)
   }
-  assert.ok(semComentarios.includes('href="/entrar?volta=%2Fdemandas"'),
-    'e o unico caminho para fora e o login, que devolve para as demandas')
+  /* ISTO EXIGIA `href="/entrar?volta=%2Fdemandas"` ATE 22/09/2026.
+
+     Era a solucao de 82d, e ela funciona: medi em producao, o `?volta=`
+     sobrevive e o login devolve a pessoa para as demandas. So que `/entrar` E
+     A TELA DAS ESCALAS ("ESPACO DO ORGANIZADOR", "voluntario nao entra por
+     aqui"), entao quem tocava no botao JA tinha entrado no outro sistema,
+     mesmo voltando dois segundos depois.
+
+     A frase dele, depois de repetir o dia inteiro: "nesse entrar eu entro
+     diretamente pro sistema de escalas cara". Tinha razao. O botao passa a
+     apontar para `/demandas/entrar`, porta propria, e este caso passa a
+     exigir o contrario do que exigia: a casca NAO pode ter a rota do outro
+     sistema.
+
+     Quem cuida do resto e `scripts/demandas-porta-propria.test.mjs`, que
+     varre `app/demandas/` e `components/demandas/` inteiros. */
+  assert.ok(semComentarios.includes('href="/demandas/entrar"'),
+    'o caminho para fora e a porta PROPRIA do demandas')
+  assert.ok(!/href=\{?["'`]\/entrar/.test(semComentarios),
+    'e a casca nao aponta mais para a porta das escalas')
 })
 
 console.log(`\nvolta-do-login: ${ok}/${ok} casos.`)

@@ -190,15 +190,23 @@ function CascaInterna({ children }: { children: React.ReactNode }) {
                 Se você recebeu um link pessoal pelo WhatsApp, abra por ele e não precisa de
                 senha nenhuma.
               </p>
-              {/* 82d · O `?volta=` É A CORREÇÃO DE UM DEFEITO MEDIDO.
+              {/* A PORTA PRÓPRIA — 22/09/2026, e o `?volta=` não bastava.
 
-                  Era `href="/entrar"` seco, e `app/entrar/page.tsx` mandava
-                  todo mundo para `/painel` — o painel das ESCALAS — em três
-                  pontos, com o caminho escrito à mão. Quem vinha das demandas
-                  fazia login e era despejado noutro sistema, sem volta.
+                  Em 82d isto virou `/entrar?volta=%2Fdemandas`, e o login
+                  passou a devolver a pessoa para cá. Medido em produção:
+                  funciona. E não resolveu o problema, porque `/entrar` É A
+                  TELA DO OUTRO SISTEMA — "ESPAÇO DO ORGANIZADOR", "voluntário
+                  não entra por aqui". Quem tocava neste botão já tinha
+                  entrado no sistema de escalas, mesmo voltando depois.
 
-                  Agora o login sabe de onde a pessoa veio e a devolve para cá. */}
-              <Link className="dm-btn dm-pri" href="/entrar?volta=%2Fdemandas">Entrar</Link>
+                  A frase que fechou a questão, depois de um dia inteiro
+                  repetindo: "nesse entrar eu entro diretamente pro sistema de
+                  escalas cara". Ele estava certo e eu estava consertando o
+                  destino do login em vez da porta.
+
+                  `/demandas/entrar` não tem a string `/painel` em lugar
+                  nenhum, e só aceita `?volta=` que comece com `/demandas`. */}
+              <Link className="dm-btn dm-pri" href="/demandas/entrar">Entrar</Link>
             </>
           )}
         </div>
