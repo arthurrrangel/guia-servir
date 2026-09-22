@@ -97,6 +97,8 @@ function Administracao() {
   );
 }
 
+const contar = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
+
 /* ------------------------------------------------------------------ pessoas */
 function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: () => Promise<void> }) {
   const [busca, setBusca] = useState('');
@@ -122,7 +124,8 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
     <>
       <div className="dm-entre" style={{ marginBottom: 'var(--dm-e2)' }}>
         <p className="dm-peq dm-mudo">
-          {ms.filter(m => m.ativo !== false).length} ativas · {ms.filter(m => m.ativo === false).length} inativas
+          {/* "1 ativa", e não "1 ativas": visto em produção, com a base de uma pessoa só */}
+          {contar(ms.filter(m => m.ativo !== false).length, 'ativa', 'ativas')} · {contar(ms.filter(m => m.ativo === false).length, 'inativa', 'inativas')}
         </p>
         <Link className="dm-btn dm-pri" href="/demandas/admin/pessoas/nova">Nova pessoa</Link>
       </div>

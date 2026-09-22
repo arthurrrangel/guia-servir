@@ -2071,6 +2071,9 @@ console.log('\n19. O Atendimento é de quem atende, e a administração é de qu
   const t = texto(alvo);
   ok(/Pedidos de papel/.test(t) && /Quer ser Equipe/.test(t), 'o pedido aparece com o papel pedido', t.slice(0, 500));
   ok(!/Ana Souza/.test(t), 'a lista abre nas ativas: a inativa não aparece de cara', t.slice(0, 700));
+  /* 22/09/2026 · "1 ativas" apareceu em produção, com a base de uma pessoa só */
+  ok(/1 ativa · 1 inativa/.test(t) && !/1 ativas|1 inativas/.test(t),
+    'uma pessoa é "1 ativa", no singular', (t.match(/\d+ ativas? · \d+ inativas?/) || [''])[0]);
   await clicar(botao(alvo, 'Aceitar'));
   const c = b.ultima('dem_ajustar');
   ok(c && c.args.p_o_que === 'pedido' && c.args.p_d.decisao === 'aceitar' && c.args.p_d.id === 'p1',
