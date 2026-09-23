@@ -14,7 +14,7 @@ import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
   somaDias, linkZap, soDigitos, telDoBanco, telVisivel, recadoDoErro, recado, diasDeAtraso,
   siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
-  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe,
+  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -215,8 +215,12 @@ function servidorAceita(acao, d, eu) {
     'prioridade', 'redirecionar', 'concluir', 'cancelar', 'reabrir', 'validar',
     'comentar', 'anexar'];
 
-  let casos = 0, oferecidasDemais = 0, escondidas = 0;
+  let casos = 0, oferecidasDemais = 0, escondidas = 0, primFora = 0, primSumiu = 0;
   const exemplos = [];
+  /* as ações que tiram a demanda do estado em que ela está (o resto é ajuste
+     ou conversa). `reabrir` fica de fora de propósito: é a exceção, não o
+     gesto comum, e por isso nunca é primário. */
+  const ANDAM = ['assumir', 'destravar', 'aprovar', 'concluir', 'validar'];
   for (const papel of PAPEIS)
     for (const atende of [false, true])
       for (const abriu of [false, true])
@@ -285,6 +289,25 @@ function servidorAceita(acao, d, eu) {
                   console.log('  ação fora do vocabulário:', a);
                 }
               }
+              /* O PRIMÁRIO, UM SÓ POR VISTA — 23/09/2026 (risco 4 da
+                 recomendação do Fable). `primariaDe` escolhe entre o que
+                 `acoesDe` deu; se ela escolher algo que a matriz não deu, o
+                 painel mostra um botão preto que o servidor recusa. E se
+                 há uma ação que ANDA com a demanda (das PRINCIPAIS) e ela
+                 devolve nulo, o gesto comum some do painel: o caso da
+                 recomendação, "um estado esquecido faria uma ação sumir". */
+              {
+                const prim = primariaDe(d, dadas);
+                if (prim !== null && !dadas.includes(prim)) {
+                  primFora++;
+                  if (primFora < 4) console.log('  primário que a matriz não deu:', prim, JSON.stringify({ ...d, ...eu }));
+                }
+                const anda = dadas.filter(a => ANDAM.includes(a));
+                if (prim === null && anda.length) {
+                  primSumiu++;
+                  if (primSumiu < 4) console.log('  ação que anda sem primário:', anda.join(','), JSON.stringify({ ...d, ...eu }));
+                }
+              }
               }
             }
   /* 4 papéis x atende x abriu x estados possíveis x veredito x TRÊS DONOS
@@ -296,6 +319,8 @@ function servidorAceita(acao, d, eu) {
      número está fixo de propósito: se ele mudar, alguém mexeu na matriz e tem
      que olhar por quê. */
   ok(casos === 4704, 'a matriz cobre a combinação inteira', 'casos=' + casos);
+  ok(primFora === 0, 'o primário é sempre uma ação que a matriz deu', 'fora=' + primFora);
+  ok(primSumiu === 0, 'e quando há ação que anda com a demanda, há um primário', 'sumiu=' + primSumiu);
   ok(oferecidasDemais === 0, 'nenhum botão oferecido que o servidor recusa', 'sobras=' + oferecidasDemais);
   if (escondidas) exemplos.forEach(e => console.log('  botão que o servidor aceita e a tela esconde:', e));
   ok(escondidas === 0, 'nenhum botão escondido que o servidor aceitaria, fora os combinados',
@@ -959,35 +984,48 @@ function servidorAceita(acao, d, eu) {
     async () => ({ ok: true }), 7, () => '', nada, async () => {});
   ok(passou === true, 'e o caminho bom devolve true');
 
-  /* ---- 8c. o comentário interno: a chave que ninguém mandava ------------- */
+  /* ---- 8c. o comentário interno: a chave que ninguém mandava -------------
+
+     Desde 23/09/2026 a caixa é a peça `Escrever`, no fim do histórico: a
+     ficha entrega `aoEnviar={(texto, interno) => agir('comentar', …)}` e o
+     clique do botão, dentro da peça, é quem limpa o texto e desmarca "só
+     para a equipe" quando o servidor aceitou. São dois pedaços, e os dois
+     são executados aqui, encaixados um no outro. */
+  const iChamada = ficha.indexOf('<Escrever ');
+  ok(iChamada > 0, 'achei a caixa de comentário da ficha');
+  const corpoChamada = depoisDe(ficha, 'aoEnviar={', iChamada);
+  ok(corpoChamada !== null, 'achei o envio do comentário para executar');
+  const chamada = new Function('agir', `return (${corpoChamada});`);
   const iComentario = ficha.indexOf('rot="Escrever alguma coisa"');
-  ok(iComentario > 0, 'achei a caixa de comentário da ficha');
-  const corpoEnviar = depoisDe(ficha, 'aoEnviar={', iComentario);
-  ok(corpoEnviar !== null, 'achei o envio do comentário para executar');
-  const enviar = new Function('agir', 'interno', 'setInterno', `return (${corpoEnviar});`);
+  ok(iComentario > 0, 'achei a peça Escrever');
+  const corpoClique2 = depoisDe(ficha, 'onClick={', iComentario);
+  ok(corpoClique2 !== null, 'achei o clique do botão Comentar para executar');
+  const clique = new Function('aoEnviar', 't', 'interno', 'setT', 'setInterno', `return (${corpoClique2});`);
   {
     /* `null` e não `false` de propósito: começar em `false` faz "ninguém
        chamou" parecer "chamou com false", e o teste passa a aprovar a
        ausência do conserto. Medido sabotando: com `false` inicial, apagar o
        `setInterno(false)` da ficha não reprovava nada. */
-    let mandou = null, desmarcou = null;
-    const f = enviar(async (a, d) => { mandou = { a, d }; return true; }, true,
-                     x => { desmarcou = x; });
-    await f('combinei com a Monik');
+    let mandou = null, desmarcou = null, limpou = null;
+    const enviar = chamada(async (a, d) => { mandou = { a, d }; return true; });
+    await clique(enviar, ' combinei com a Monik ', true, x => { limpou = x; }, x => { desmarcou = x; })();
     ok(mandou?.a === 'comentar', 'o comentário é gravado como comentário');
     ok(mandou?.d.interno === true,
       'e a chave `interno` VAI junto: sem ela a coluna do banco é inalcançável',
       JSON.stringify(mandou?.d));
+    ok(mandou?.d.texto === 'combinei com a Monik', 'o texto vai aparado');
+    ok(limpou === '', 'deu certo: a caixa limpa');
     ok(desmarcou === false,
       'e a caixinha volta para desmarcada, senão o PRÓXIMO comentário some sem ninguém ver',
       String(desmarcou));
   }
   {
-    /* recusou: nem grava, nem desmarca — a pessoa tenta de novo com o mesmo
-       texto E a mesma marcação */
-    let desmarcou = null;
-    const f = enviar(async () => false, true, x => { desmarcou = x; });
-    ok(await f('x') === false, 'recusa do comentário devolve false para a caixa');
+    /* recusou: nem grava, nem limpa, nem desmarca — a pessoa tenta de novo
+       com o mesmo texto E a mesma marcação */
+    let desmarcou = null, limpou = null;
+    const enviar = chamada(async () => false);
+    await clique(enviar, 'x', true, x => { limpou = x; }, x => { desmarcou = x; })();
+    ok(limpou === null, 'recusa do servidor: o texto fica na caixa');
     ok(desmarcou === null, 'e a marcação de interno não se perde na recusa');
   }
 
@@ -1017,56 +1055,71 @@ function servidorAceita(acao, d, eu) {
     'demanda que NASCEU sem prazo também não: o `de` é nulo, e nulo não é pedido');
   ok(qualPrazo(null) === '', 'e a ficha ainda carregando não quebra');
 
-  const iPrazo = ficha.indexOf('<Li rot="Prazo"');
-  ok(iPrazo > 0, 'achei a linha do prazo na ficha');
-  const expr = depoisDe(ficha, 'v={', iPrazo);
-  ok(expr !== null, 'achei o valor da linha do prazo para executar');
-  const linhaPrazo = new Function('d', 'prazoPedido', 'dataCheia', `return (${expr});`);
-  const dcheia = (i) => dataCheia(i);
-  ok(linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '2026-09-22', dcheia)
-      === '28/09/2026 (pedido para 22/09/2026)',
-    'prazo trocado mostra o que o setor assumiu E o que quem pediu tinha pedido',
-    linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '2026-09-22', dcheia));
-  ok(linhaPrazo({ prazo: '2026-09-22', sem_prazo_porque: '' }, '2026-09-22', dcheia)
-      === '22/09/2026',
+  /* A SEGUNDA LINHA DO FATO "PRAZO" (desde 23/09/2026 a ficha tem uma faixa
+     de fatos, e o prazo é um deles): a data em cima, e embaixo o prazo em
+     palavras mais, se for outra, a data que quem pediu tinha pedido. A parte
+     que decide é `pedidoPara`, em regras.ts, executada aqui; a ficha tem que
+     ser quem a chama, senão o teste mede uma função que ninguém usa. */
+  const iPrazo = ficha.indexOf('<span>Prazo</span>');
+  ok(iPrazo > 0, 'achei o fato do prazo na ficha');
+  ok(/pedidoPara\(d\.prazo, prazoPedido\)/.test(ficha.slice(iPrazo, iPrazo + 700)),
+    'e o fato chama `pedidoPara(d.prazo, prazoPedido)`, que é o que se executa abaixo');
+  ok(pedidoPara('2026-09-28', '2026-09-22') === ' (pedido para 22/09/2026)',
+    'prazo trocado mostra o que quem pediu tinha pedido',
+    pedidoPara('2026-09-28', '2026-09-22'));
+  ok(pedidoPara('2026-09-22', '2026-09-22') === '',
     'prazo que não mudou não ganha parêntese repetindo a mesma data');
-  ok(linhaPrazo({ prazo: '2026-09-28', sem_prazo_porque: '' }, '', dcheia) === '28/09/2026',
+  ok(pedidoPara('2026-09-28', '') === '',
     'demanda que nunca teve o prazo mexido também não');
-  ok(linhaPrazo({ prazo: null, sem_prazo_porque: 'depende do pastor' }, '2026-09-22', dcheia)
-      === 'sem data — depende do pastor (pedido para 22/09/2026)',
+  ok(pedidoPara(null, '2026-09-22') === ' (pedido para 22/09/2026)',
     'e o prazo tirado continua dizendo qual era a data pedida',
-    linhaPrazo({ prazo: null, sem_prazo_porque: 'depende do pastor' }, '2026-09-22', dcheia));
+    pedidoPara(null, '2026-09-22'));
 
-  /* ---- 8d-bis. o botão da etapa 5, dentro do cartão verde ----------------
-     Ele é o único caminho de `validar` na tela, e mora fora da grade de
-     propósito (a grade já tem doze botões e a regra da casa é que ela não
-     engorde). Executado, e não lido: o que importa é a ação que ele chama. */
-  const cliqueValida = depoisDe(ficha, 'onClick={', ficha.indexOf('{d.validada_em ? ('));
-  ok(cliqueValida !== null, 'achei o botão "Resolveu, obrigado" para executar');
+  /* ---- 8d-bis. "Resolveu, obrigado", que grava direto ---------------------
+     Desde 23/09/2026 `validar` é um botão do painel de ação (o primário de
+     quem pediu, na demanda concluída), e não mora mais no cartão verde. O
+     toque passa por `tocar`: `assumir` e `validar` gravam na hora, o resto
+     abre o formulário. Executado, e não lido. */
+  const iTocar = ficha.indexOf('const tocar = ');
+  ok(iTocar > 0, 'achei o `tocar` da ficha para executar');
+  const srcTocar = ficha.slice(iTocar + 'const tocar = '.length, ficha.indexOf(';\n', iTocar))
+    .replace('(a: Acao)', '(a)');
+  const tocar = new Function('agir', 'setAberto', `return (${srcTocar});`);
   {
-    let pedida = null;
-    new Function('agir', `return (${cliqueValida});`)(a => { pedida = a; })();
-    ok(pedida === 'validar', 'o botão do cartão verde chama `validar`', String(pedida));
+    const roda = (a) => {
+      let pedida = null, abriu = null;
+      tocar(x => { pedida = x; }, x => { abriu = x; })(a);
+      return { pedida, abriu };
+    };
+    ok(roda('validar').pedida === 'validar' && roda('validar').abriu === null,
+      '"Resolveu, obrigado" chama `validar` na hora, sem formulário', JSON.stringify(roda('validar')));
+    ok(roda('assumir').pedida === 'assumir' && roda('assumir').abriu === null,
+      '"Assumir e começar" também grava direto', JSON.stringify(roda('assumir')));
+    ok(roda('concluir').pedida === null && roda('concluir').abriu === 'concluir',
+      'e "Concluir" abre o formulário em vez de gravar', JSON.stringify(roda('concluir')));
   }
+  ok(/case 'validar':\s*return 'Resolveu, obrigado'/.test(ficha),
+    'o botão de validar se chama "Resolveu, obrigado"');
 
   /* ---- 8e. as ações que NÃO viram botão na grade ------------------------- */
   const fora = new Function(`return (${/FORA_DA_GRADE[^=]*=\s*(\[[^\]]*\])/.exec(ficha)[1]});`)();
-  ok(fora.includes('comentar') && fora.includes('validar'),
-    'a grade sabe que `comentar` e `validar` não têm botão nela', JSON.stringify(fora));
+  ok(fora.includes('comentar') && !fora.includes('validar'),
+    'o painel sabe que `comentar` não tem botão nele, e `validar` agora tem', JSON.stringify(fora));
   ok(!fora.includes('desanexar'),
     '`desanexar` saiu da lista junto com a ação: ela não sai mais de acoesDe');
-  /* o ramo de "cartão vazio" tem que disparar para quem SÓ pode confirmar:
-     validar mora no cartão verde, então a grade fica sem nada. */
+  /* quem pode reabrir vê botão; quem só enxerga a demanda validada cai no
+     painel sem ação ("Esta demanda"), que tem frase em vez de botão */
   {
     const so = acoesDe({ status: 'concluida', travada_por: null, aprovacao: null, validada_em: null },
                        { papel: 'solicitante', atende: false, abriu: true, id: 'eu-1' });
     ok(so.filter(a => !fora.includes(a)).length > 0,
-      'quem pode reabrir ainda vê botão na grade', JSON.stringify(so));
+      'quem pode reabrir ainda vê botão no painel', JSON.stringify(so));
+    ok(so.includes('validar'), 'e quem pediu vê "Resolveu, obrigado" na concluída', JSON.stringify(so));
     const validada = acoesDe({ status: 'concluida', travada_por: null, aprovacao: null,
                                validada_em: '2026-09-22T12:00:00Z' },
                              { papel: 'solicitante', atende: false, abriu: false, id: 'eu-1' });
     ok(validada.filter(a => !fora.includes(a)).length === 0,
-      'e quem só enxerga cai no ramo do cartão vazio, que tem frase', JSON.stringify(validada));
+      'e quem só enxerga cai no painel sem ação, que tem frase', JSON.stringify(validada));
   }
 }
 

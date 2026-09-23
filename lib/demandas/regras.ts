@@ -524,6 +524,29 @@ export function acoesDe(
 
 export const pode = (acoes: Acao[], x: Acao) => acoes.includes(x);
 
+/* A REGRA DO PRIMÁRIO — 23/09/2026.
+
+   A ação que tira a demanda do estado em que ela está. UMA só por vista: a
+   ficha travada mostrava três botões pretos ao mesmo tempo, e três primários
+   é nenhum primário. Estado sem primário (concluída vista por quem atende) é
+   "nada a fazer", e o painel diz isso. Os candidatos são por estado, na
+   ordem de preferência; o primeiro que `acoesDe` permitir é o primário.
+   `reabrir` nunca é primário: é a exceção, não o gesto comum. */
+export function primariaDe(d: { status: string; falta_aprovacao?: boolean; travada_por?: string | null },
+                           acoes: Acao[]): Acao | null {
+  /* a concluída vem antes da aprovação pendente: a matriz de `acoesDe` varre
+     os dois juntos e, olhando a aprovação primeiro, `validar` ficava sem
+     primário (medido pelo teste da matriz, 23/09/2026) */
+  const candidatas: Acao[] =
+    d.status === 'concluida' ? ['validar']
+    : d.falta_aprovacao ? ['aprovar', 'destravar']
+    : d.status === 'travada' ? ['destravar', 'concluir']
+    : d.status === 'execucao' ? ['concluir', 'assumir']
+    : d.status === 'aberta' ? ['assumir', 'concluir']
+    : [];
+  return candidatas.find(a => acoes.includes(a)) ?? null;
+}
+
 /* ------------------------------------------------------------- o WhatsApp
 
    O documento pede que "o solicitante receba notificações". Servidor não
@@ -613,6 +636,20 @@ export function dataCheia(iso: string | null): string {
   if (!iso) return '';
   const [a, m, d] = iso.slice(0, 10).split('-');
   return `${d}/${m}/${a}`;
+}
+
+/* AS DUAS DATAS DE PRAZO DO PDF, NA MESMA LINHA.
+
+   O PDF pede "Data desejada para conclusão" (Detalhamento) E "Prazo definido"
+   (Acompanhamento), e existe uma coluna só: quando o setor muda o prazo, o
+   pedido original só sobrevive como evento no histórico. `prazoPedido` é o
+   `de` do PRIMEIRO evento de prazo (a ficha o escolhe); esta função diz se
+   ele merece aparecer ao lado do prazo de hoje: só quando é outra data. A
+   demanda sem prazo (tirado, com justificativa) continua dizendo qual era a
+   data pedida. */
+export function pedidoPara(prazo: string | null, prazoPedido: string): string {
+  if (!prazoPedido) return '';
+  return prazoPedido.slice(0, 10) === (prazo || '').slice(0, 10) ? '' : ` (pedido para ${dataCheia(prazoPedido)})`;
 }
 
 export function quando(iso: string | null): string {

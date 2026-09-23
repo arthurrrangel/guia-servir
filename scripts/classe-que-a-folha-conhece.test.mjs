@@ -58,7 +58,7 @@ for (const a of arquivos) {
   const txt = readFileSync(a, 'utf8');
   for (const m of txt.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\}|\{[^}]*?'([^']*)'[^}]*?\})/g)) {
     const bruto = `${m[1] || ''} ${m[2] || ''} ${m[3] || ''}`;
-    for (const c of bruto.split(/[\s${}?:()|&]+/)) {
+    for (const c of bruto.split(/[\s${}?:()|&'"`]+/)) {
       if (/^dm-[a-z0-9-]+$/.test(c) && !naFolha.has(c)) faltando.push(`${a}: ${c}`);
     }
   }
@@ -109,13 +109,16 @@ const PERDOADAS = new Set([
   /* utilitária de cor, usada via composição em outras regras da própria
      folha (`.dm-x .dm-dim`), não pelo JSX */
   'dm-dim',
+  /* chegam ao <label> pela propriedade `classe` de Campo
+     (components/demandas/Ui.tsx), que só aceita esses dois valores */
+  'dm-curto', 'dm-data',
 ]);
 const usadasNoJsx = new Set();
 for (const a of arquivos) {
   const txt = readFileSync(a, 'utf8');
   for (const m of txt.matchAll(/className=(?:"([^"]*)"|\{`([^`]*)`\}|\{[^}]*?'([^']*)'[^}]*?\})/g)) {
     const bruto = `${m[1] || ''} ${m[2] || ''} ${m[3] || ''}`;
-    for (const c of bruto.split(/[\s${}?:()|&]+/)) if (/^dm-[a-z0-9-]+$/.test(c)) usadasNoJsx.add(c);
+    for (const c of bruto.split(/[\s${}?:()|&'"`]+/)) if (/^dm-[a-z0-9-]+$/.test(c)) usadasNoJsx.add(c);
   }
 }
 const sobrando = [...naFolha].filter(c => !usadasNoJsx.has(c) && !PERDOADAS.has(c)).sort();

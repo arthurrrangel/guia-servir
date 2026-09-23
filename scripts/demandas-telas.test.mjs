@@ -100,7 +100,7 @@ const DUBLES = {
       push(u) { (globalThis.__idas = globalThis.__idas || []).push(String(u)); },
       replace() {}, refresh() {},
     });
-    export const useSearchParams = () => new URLSearchParams('');
+    export const useSearchParams = () => new URLSearchParams(globalThis.__busca || '');
     export const useParams = () => globalThis.__params || { numero: '1' };`,
   /* o único dublê que muda o comportamento medido: ele devolve o cliente que
      este arquivo controla. Tudo o que vem depois (api.ts, rpcCom, regras.ts)
@@ -501,20 +501,21 @@ async function abrirFicha(numero = 7) {
   return montar(Ficha);
 }
 
-/* os rótulos dos doze botões da grade, na ordem em que a ficha os escreve.
-   A grade é lida por `aria-label`? Não: ela é um `div.dm-grade`, e é assim
-   que se acha. */
+/* O PAINEL DE AÇÃO — 23/09/2026. A grade (`div.dm-grade`) e o "Mais opções"
+   (`details.dm-mais`) viraram um painel: `aside.dm-painel`, com um primário
+   e os secundários em `dm-painel-acoes` e os ajustes como botões-texto em
+   `dm-painel-ajustes`. No celular a mesma decisão vira a barra fixa
+   (`dm-barra-acao`) e a folha. Os botões continuam sendo o conjunto de
+   `acoesDe` para efeito de regra; o que mudou é ONDE cada um mora, e isso é
+   conferido à parte, no bloco 11. */
 const grade = (alvo) =>
-  todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-grade')[0];
-/* "MAIS OPÇÕES" — 22/09/2026. O que só ajusta a demanda saiu da grade e foi
-   para um `<details class="dm-mais">` logo abaixo. Os botões continuam sendo
-   da grade para efeito de regra (o conjunto tem que ser o de `acoesDe`); o
-   que mudou é ONDE cada um mora, e isso é conferido à parte, no bloco 11. */
-const mais = (alvo) =>
-  todos(alvo, x => x.nodeType === 1 && x.tagName === 'DETAILS'
-    && (x.getAttribute('class') || '') === 'dm-mais')[0];
+  todos(alvo, x => x.nodeType === 1 && x.tagName === 'ASIDE'
+    && /(^| )dm-painel( |$)/.test(x.getAttribute('class') || ''))[0];
+const porClasse = (no, classe) =>
+  no ? todos(no, x => x.nodeType === 1 && (x.getAttribute('class') || '').split(' ').includes(classe))[0] : undefined;
+const mais = (alvo) => porClasse(grade(alvo), 'dm-painel-ajustes');
 const botoesPrincipais = (alvo) => {
-  const g = grade(alvo);
+  const g = porClasse(grade(alvo), 'dm-painel-acoes');
   return g ? porTag(g, 'BUTTON').map(texto) : [];
 };
 const botoesDeMais = (alvo) => {
@@ -679,6 +680,11 @@ const ok = (c, rot, extra = '') => {
    caso para o outro é como um teste passa a medir a ordem em que foi escrito */
 function mundoNovo() {
   montarMundo();
+  /* a parte da URL depois do `?`: desde 23/09/2026 a seção da administração
+     vem dela (`/demandas/admin?secao=categorias`), pelos links da faixa
+     preta, e não mais de um botão dentro da página */
+  globalThis.__busca = '';
+  globalThis.__caminho = undefined;
   const arm = armario();
   globalThis.localStorage = arm;
   globalThis.window.localStorage = arm;
@@ -823,7 +829,7 @@ console.log('\n1. Os dois portais têm o recorte de concluídas, e ele vira `sta
   globalThis.__banco = b;
   const { alvo, desmontar } = await montar(Atendimento);
   const atalhos = porTag(porAria(alvo, 'aria-label', 'O que ver'), 'BUTTON');
-  ok(atalhos.map(x => texto(x)).join('|') === '3esperando você|2com você|9do setor|1atrasadas|4urgentes|12concluídas',
+  ok(atalhos.map(x => texto(x)).join('|') === 'Esperando você3|Com você2|Do setor9|Atrasadas1|Urgentes4|Concluídas12',
     'os seis atalhos do pedido, cada um com a sua conta', atalhos.map(texto).join(' | '));
   ok(b.ultima('dem_lista').args.p_f.aba === 'agir',
     'o Atendimento abre em "esperando você"', JSON.stringify(b.ultima('dem_lista').args.p_f));
@@ -1079,8 +1085,12 @@ console.log('\n6. A administração cria categoria, no grupo que já está abert
     dem_ajustar: { ok: true, id: 'novo' },
   });
   globalThis.__banco = b;
+  globalThis.__busca = 'secao=categorias';
+  globalThis.__caminho = '/demandas/admin';
   const { alvo, desmontar } = await montar(Admin);
-  await clicar(porTag(alvo, 'BUTTON').find(x => texto(x).startsWith('Categorias')));
+  const faixa = porAria(alvo, 'aria-label', 'Seções da administração');
+  ok(!!faixa && porTag(faixa, 'A').find(x => texto(x) === 'Categorias')?.getAttribute('aria-current') === 'page',
+    'a faixa preta marca Categorias como a seção aberta');
 
   const nome = porAria(alvo, 'aria-label', 'Nome da categoria nova em Comunicação');
   ok(!!nome, 'a aba Categorias tem campo de nome, nascendo no grupo aberto');
@@ -1453,24 +1463,26 @@ console.log('\n10. A lista cortada diz quantas ficaram de fora');
    O que sobra para este arquivo é o que só a tela sabe: qual rótulo cada ação
    ganha, e que a lista de fora da grade é `['comentar','validar']` — as duas
    têm lugar próprio (a caixa fixa do fim e o cartão verde). */
-const { acoesDe } = await import('@/lib/demandas/regras.ts');
+const { acoesDe, primariaDe } = await import('@/lib/demandas/regras.ts');
 
 const ROTULO = {
   aprovar: 'Aprovar', rejeitar: 'Recusar', assumir: 'Assumir e começar',
   concluir: 'Concluir', travar: 'Travar', destravar: 'Destravar',
-  reabrir: 'Reabrir', prazo: 'Mudar o prazo', prioridade: 'Rever a prioridade',
+  reabrir: 'Reabrir', validar: 'Resolveu, obrigado',
+  prazo: 'Mudar o prazo', prioridade: 'Rever a prioridade',
   redirecionar: 'Mandar para outro setor', anexar: 'Juntar um anexo',
   cancelar: 'Cancelar',
 };
-const FORA_DA_GRADE = ['comentar', 'validar'];
+/* só `comentar` mora fora do painel (a caixa no fim do histórico); `validar`
+   entrou nele em 23/09/2026 como o primário de quem pediu na concluída */
+const FORA_DA_GRADE = ['comentar'];
 
-/* o que a grade DEVIA ter, calculado pelo espelho. `destravar` muda de rótulo
+/* o que o painel DEVIA ter, calculado pelo espelho. `destravar` muda de rótulo
    quando quem abriu vai responder, e a ficha escreve isso de propósito. */
+const rotDe = (a, d, quem) => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
+  ? 'Responder e destravar' : ROTULO[a]);
 function gradeEsperada(d, quem) {
-  return acoesDe(d, quem)
-    .filter(a => !FORA_DA_GRADE.includes(a))
-    .map(a => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
-      ? 'Responder e destravar' : ROTULO[a]));
+  return acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a)).map(a => rotDe(a, d, quem));
 }
 
 /* A DIVISÃO É DECISÃO DE TELA, E NÃO TEM FONTE ACIMA DELA.
@@ -1486,12 +1498,10 @@ function divisaoEsperada(d, quem) {
     ? 'Responder e destravar' : ROTULO[a]);
   const princ = todas.filter(a => !SECUNDARIAS.includes(a));
   const outras = todas.filter(a => SECUNDARIAS.includes(a));
-  return princ.length && outras.length
-    ? { grade: princ.map(rot), mais: outras.map(rot), acaoPrimeiro: true }
-    : { grade: todas.map(rot), mais: null, acaoPrimeiro: princ.length > 0 };
+  /* no painel os ajustes SEMPRE ficam na linha de botões-texto, mesmo quando
+     não há ação que ande (esperando aprovação, vista por quem atende) */
+  return { grade: princ.map(rot), mais: outras.length ? outras.map(rot) : null };
 }
-const dupla = (alvo) =>
-  todos(alvo, x => x.nodeType === 1 && /(^| )dm-dupla( |$)/.test(x.getAttribute('class') || ''))[0];
 
 async function comFicha(carga, extra = {}) {
   mundoNovo();
@@ -1551,10 +1561,29 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
       `grade: [${na.join(' | ')}]  mais: ${mais(alvo) ? '[' + em.join(' | ') + ']' : '(não existe)'}\n` +
       `           devia: [${div.grade.join(' | ')}]  mais: ${div.mais ? '[' + div.mais.join(' | ') + ']' : '(não existe)'}`);
 
-    const cls = (dupla(alvo) && dupla(alvo).getAttribute('class')) || '';
-    ok(/dm-acao-primeiro/.test(cls) === div.acaoPrimeiro,
-      `${nome}: no celular, ${div.acaoPrimeiro ? 'as ações sobem' : 'o pedido fica em cima'}`,
-      `classe: "${cls}"`);
+    /* UM PRIMÁRIO POR VISTA (a regra do Fable, 23/09/2026): no painel há no
+       máximo um botão preto, e ele é o que `primariaDe` escolheu; a barra do
+       celular repete esse mesmo botão como o seu último, à direita. Sem
+       ação nenhuma, não há barra: a página não carrega um rodapé vazio. */
+    const pretos = porTag(porClasse(grade(alvo), 'dm-painel-acoes') || grade(alvo), 'BUTTON')
+      .filter(x => /(^| )dm-pri( |$)/.test(x.getAttribute('class') || ''));
+    const prim = primariaDe(carga.demanda, acoesDe(carga.demanda, quem).filter(a => !FORA_DA_GRADE.includes(a)));
+    ok(pretos.length === (prim ? 1 : 0) && (!prim || texto(pretos[0]) === rotDe(prim, carga.demanda, quem)),
+      `${nome}: ${prim ? 'um primário só, e é "' + rotDe(prim, carga.demanda, quem) + '"' : 'nenhum primário'}`,
+      `pretos: [${pretos.map(texto).join(' | ')}]`);
+    const barra = porAria(alvo, 'aria-label', 'Ações');
+    const barraCel = todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-barra-acao')[0];
+    const temAcao = div.grade.length > 0 || !!div.mais;
+    ok(!!barraCel === temAcao, `${nome}: no celular, ${temAcao ? 'a barra fixa existe' : 'não há barra'}`,
+      String(!!barraCel));
+    if (barraCel && prim) {
+      const ultimo = porTag(barraCel, 'BUTTON').slice(-1)[0];
+      ok(ultimo && texto(ultimo) === rotDe(prim, carga.demanda, quem)
+         && /(^| )dm-pri( |$)/.test(ultimo.getAttribute('class') || ''),
+        `${nome}: e o primário é o último botão da barra, à direita`,
+        barraCel ? porTag(barraCel, 'BUTTON').map(texto).join(' | ') : '(sem barra)');
+    }
+    ok(!!barra, `${nome}: o painel tem nome para o leitor de tela`);
     await desmontar();
   }
 }
@@ -1660,10 +1689,14 @@ console.log('\n13. A ficha: o cartão verde de concluída e a etapa 5 do PDF');
     'o cartão verde diz que concluiu e o que foi feito', t.slice(0, 400));
   ok(/12\/09\/2026/.test(t), 'com a DATA da conclusão, e não só "há 10 dias"', t.slice(0, 400));
 
-  const confirmar = botao(alvo, 'Resolveu, obrigado');
+  const confirmar = botao(grade(alvo), 'Resolveu, obrigado');
   ok(!!confirmar, 'e quem pediu tem o botão de confirmar que resolveu');
-  ok(!botoesDaGrade(alvo).includes('Resolveu, obrigado'),
-    'que NÃO está na grade: ele mora dentro do cartão verde', botoesDaGrade(alvo).join(' | '));
+  /* desde 23/09/2026 ele é o PRIMÁRIO do painel (a regra estado→primário):
+     é o botão preto de quem pediu na concluída, e não um botão perdido dentro
+     do cartão verde */
+  ok(botoesPrincipais(alvo)[0] === 'Resolveu, obrigado'
+     && /(^| )dm-pri( |$)/.test(confirmar ? confirmar.getAttribute('class') || '' : ''),
+    'e ele é o primário do painel', botoesPrincipais(alvo).join(' | '));
 
   await clicar(confirmar, 'o botão de confirmar');
   const c = b.ultima('dem_mover');
@@ -1770,6 +1803,13 @@ console.log('\n15. A ficha: a caixinha "Só para a equipe" é só de quem atende
      interno: oferecer a caixinha a quem pediu seria oferecer um controle que
      o servidor ignora em silêncio, que é a pior forma de recusa. */
   const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  /* desde 23/09/2026 a caixa nasce numa linha só e a caixinha aparece quando
+     a pessoa começa a escrever: primeiro o texto, depois a marcação */
+  const escrever = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
+  ok(!todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT' && x.getAttribute('type') === 'checkbox')[0],
+    'antes de escrever, a caixinha não ocupa a tela');
+  await teclar(escrever, 'Combinado: a Monik fecha o post no sábado.', 'a caixa de comentário');
+  await assentar();
   const caixa = todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
     && x.getAttribute('type') === 'checkbox')[0];
   ok(!!caixa, 'quem atende tem a caixinha de comentário interno');
@@ -1777,10 +1817,7 @@ console.log('\n15. A ficha: a caixinha "Só para a equipe" é só de quem atende
     'e ela diz o que faz, sem jargão', texto(alvo).slice(-400));
 
   /* marcada, o comentário viaja com `interno: true` */
-  await act(async () => { caixa.checked = true; caixa.dispatchEvent(evento('click', { button: 0 })); });
-  await assentar();
-  const escrever = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
-  await teclar(escrever, 'Combinado: a Monik fecha o post no sábado.', 'a caixa de comentário');
+  if (caixa) await act(async () => { caixa.checked = true; caixa.dispatchEvent(evento('click', { button: 0 })); });
   await assentar();
   await clicar(botao(alvo, 'Comentar'), 'o botão Comentar');
   const c = b.ultima('dem_mover');
@@ -1789,17 +1826,25 @@ console.log('\n15. A ficha: a caixinha "Só para a equipe" é só de quem atende
 
   /* E ELA VOLTA PARA DESMARCADA. Uma caixinha que fica marcada faz o PRÓXIMO
      comentário sumir da vista de quem pediu sem ninguém perceber. */
+  /* gravou: a caixa esvazia e se recolhe (a caixinha some com ela); no
+     PRÓXIMO comentário ela tem que renascer desmarcada */
+  const caixaVazia = todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop();
+  ok(caixaVazia && caixaVazia.value === '', 'depois de gravar a caixa esvazia', String(caixaVazia && caixaVazia.value));
+  await teclar(caixaVazia, 'Segundo recado', 'a caixa de comentário');
+  await assentar();
   const depois = todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
     && x.getAttribute('type') === 'checkbox')[0];
   ok(depois && depois.checked !== true,
-    'e depois de gravar ela volta para desmarcada', String(depois && depois.checked));
+    'e no próximo comentário ela volta desmarcada', String(depois && depois.checked));
   await desmontar();
 }
 {
   const { alvo, desmontar } = await comFicha(vista({}, QUEM.pediu));
+  await teclar(todos(alvo, x => x.nodeType === 1 && x.tagName === 'TEXTAREA').pop(), 'Obrigada!', 'a caixa de comentário');
+  await assentar();
   ok(!todos(alvo, x => x.nodeType === 1 && x.tagName === 'INPUT'
       && x.getAttribute('type') === 'checkbox')[0],
-    'quem só pediu não recebe a caixinha de interno');
+    'quem só pediu não recebe a caixinha de interno, nem escrevendo');
   ok(!/Só para a equipe/.test(texto(alvo)),
     'nem a dica que manda marcá-la', texto(alvo).slice(-300));
   await desmontar();
@@ -1901,11 +1946,15 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
      duas a mais. O que não pode faltar é UMA, e ela tem que ir para a lista. */
   /* 94 · e ela volta para o PORTAL de quem olha: quem atende, para o
      Atendimento (onde estava a fila); quem pede, para as suas. */
+  /* 23/09/2026 · a saída é o "‹ Atender" / "‹ Minhas demandas" acima do
+     título (`a.dm-volta`), com o nome da aba de onde a pessoa veio */
+  const volta = (alvo) => todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
+    && (x.getAttribute('class') || '') === 'dm-volta')[0];
   {
     const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
-    const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
-      && /atendimento/.test(texto(x)))[0];
-    ok(!!saida, 'quem atende tem a saída do topo, "atendimento"');
+    const saida = volta(alvo);
+    ok(!!saida && texto(saida) === 'Atender', 'quem atende tem a saída do topo, "Atender"',
+      saida ? texto(saida) : '(sem link)');
     ok(saida && saida.getAttribute('href') === '/demandas/atendimento',
       'e ela leva para o Atendimento', saida ? saida.getAttribute('href') : '(sem link)');
     ok(!botao(alvo, 'Voltar para a lista'),
@@ -1914,10 +1963,9 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
   }
   {
     const { alvo, desmontar } = await comFicha(vista({}, QUEM.pediu));
-    const saida = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
-      && /minhas demandas/.test(texto(x)))[0];
-    ok(saida && saida.getAttribute('href') === '/demandas',
-      'quem pediu volta para as suas, no Início', saida ? saida.getAttribute('href') : '(sem link)');
+    const saida = volta(alvo);
+    ok(saida && texto(saida) === 'Minhas demandas' && saida.getAttribute('href') === '/demandas',
+      'quem pediu volta para as suas, no Início', saida ? `${texto(saida)} → ${saida.getAttribute('href')}` : '(sem link)');
     await desmontar();
   }
 }
@@ -2166,6 +2214,11 @@ console.log('\n22. A ficha: quem acompanha');
     await act(async () => { form.dispatchEvent(evento('submit')); });
     await assentar();
   };
+  /* 23/09/2026 · o formulário de incluir fica atrás de "Incluir alguém ›":
+     a linha de quem acompanha é uma só, e o campo só ocupa a tela quando a
+     pessoa pede */
+  ok(!campo(alvo, 'WhatsApp da pessoa'), 'o campo de incluir não ocupa a tela antes do toque');
+  await clicar(botao(alvo, 'Incluir alguém ›'), 'o botão de incluir alguém');
   /* 22/09/2026 · WhatsApp primeiro, com o teclado de telefone; e-mail com o
      de e-mail. Era um campo só, de texto, e o medidor de celular acusou o
      teclado de letras para quem ia digitar número. */
@@ -2181,6 +2234,11 @@ console.log('\n22. A ficha: quem acompanha');
   let c = b.ultima('dem_mover');
   ok(c && c.args.p_acao === 'incluir' && c.args.p_d.quem === '(21) 99999-0007',
     'incluir pelo WhatsApp manda o número como foi digitado (quem normaliza é o banco)', JSON.stringify(c && c.args));
+  /* incluiu: o formulário se fecha (a linha volta a ser uma só) e a pessoa
+     reabre para incluir a segunda */
+  ok(!campo(alvo, 'WhatsApp da pessoa'), 'depois de incluir, o formulário se recolhe');
+  await clicar(botao(alvo, 'Incluir alguém ›'), 'o botão de incluir alguém, de novo');
+  await teclar(campo(alvo, 'WhatsApp da pessoa'), '(21) 9');
   await clicar(botao(alvo, 'E-mail'));
   const em = campo(alvo, 'E-mail da pessoa');
   ok(em && em.getAttribute('type') === 'email', 'trocar para e-mail troca o campo e o teclado', em ? em.getAttribute('type') : '(sem campo)');
@@ -2194,7 +2252,8 @@ console.log('\n22. A ficha: quem acompanha');
 }
 {
   const { alvo, desmontar } = await comFicha(vista({}, { ...QUEM.soEnxerga, participa: true, inclui: false }));
-  ok(!campo(alvo, 'WhatsApp da pessoa') && !campo(alvo, 'E-mail da pessoa') && !botao(alvo, 'Incluir'),
+  ok(!campo(alvo, 'WhatsApp da pessoa') && !campo(alvo, 'E-mail da pessoa') && !botao(alvo, 'Incluir')
+     && !botao(alvo, 'Incluir alguém ›'),
     'quem só acompanha não inclui ninguém');
   await desmontar();
 }

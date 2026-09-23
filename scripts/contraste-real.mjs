@@ -367,7 +367,16 @@ export async function medirContraste(pag) {
        terceira linha continua a 38px do topo do parágrafo. */
     let png, rel;
     try {
-      await alvo.scrollIntoViewIfNeeded({ timeout: 3000 });
+      /* NO MEIO DA JANELA, E NAO "SE PRECISAR" · 23/09/2026.
+
+         `scrollIntoViewIfNeeded` deixava o elemento encostado na borda de
+         baixo, e a ficha de demandas ganhou uma barra de acao fixa no
+         rodape: a metade de baixo da linha ficava por tras da barra, o
+         centro da linha nao (a guarda de "tapado" olha o centro) e a foto
+         trazia a borda cinza do botao e o preto do primario como se fossem
+         o fundo do texto. No meio da janela nada fixo alcanca a linha. */
+      await alvo.evaluate(el => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+      await pag.waitForTimeout(80);
       rel = await pag.evaluate(LINHAS_RELATIVAS, it.id);
       if (!rel || !rel.linhas.length) { await alvo.dispose(); continue; }
       png = await alvo.screenshot({ timeout: 5000 });

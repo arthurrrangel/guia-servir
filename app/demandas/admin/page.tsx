@@ -16,7 +16,8 @@
    respondem SO_ADMIN para qualquer outro papel, com ou sem esta tela. */
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Categorias, Setores } from '@/components/demandas/Configuracao';
 import { Aviso, Campo, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
@@ -25,7 +26,8 @@ import { PAPEIS, nomeDoSite, recadoDoErro, rotPapel } from '@/lib/demandas/regra
 import type { Bases, Membro, RegraDeAnexo } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
-  return <Casca admin><Administracao /></Casca>;
+  /* `useSearchParams` na casca e aqui pede o Suspense na pré-renderização */
+  return <Suspense fallback={null}><Casca admin><Administracao /></Casca></Suspense>;
 }
 
 type Secao = 'pessoas' | 'setores' | 'categorias' | 'anexos';
@@ -34,19 +36,17 @@ const SECOES: [Secao, string][] = [
 ];
 
 function Administracao() {
-  const { eu } = useEu();
+  const ctx = useEu();
+  const eu = ctx.eu;
   const [b, setB] = useState<Bases | null>(null);
   const [ms, setMs] = useState<Membro[] | null>(null);
-  const [secao, setSecao] = useState<Secao>('pessoas');
+  const busca = useSearchParams();
+  /* a seção vem da URL: as abas da faixa preta são links, e "Portal" também.
+     Fora da lista, fica em Pessoas. */
+  const pedida = busca?.get('secao') as Secao | null;
+  const secao: Secao = pedida && SECOES.some(([v]) => v === pedida) ? pedida : 'pessoas';
   const [erro, setErro] = useState('');
   const [indo, setIndo] = useState(false);
-
-  useEffect(() => {
-    try {
-      const s = new URLSearchParams(window.location.search).get('secao') as Secao | null;
-      if (s && SECOES.some(([v]) => v === s)) setSecao(s);
-    } catch { /* fica em Pessoas */ }
-  }, []);
 
   const recarregar = useCallback(async () => {
     const [x, p] = await Promise.all([bases(), pessoas()]);
@@ -80,25 +80,34 @@ function Administracao() {
   }
   if (!b || !ms) return <Esqueleto />;
 
+  const ativas = ms.filter(m => m.ativo !== false).length, inativas = ms.filter(m => m.ativo === false).length;
   return (
     <>
-      <div className="dm-rot">{'>'} administração</div>
-      <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>
-        {SECOES.find(([v]) => v === secao)?.[1]}
-      </h1>
-      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
-
-      <div className="dm-opcoes" role="group" aria-label="Seção" style={{ marginBottom: 'var(--dm-e3)' }}>
-        {SECOES.map(([v, r]) => (
-          <button key={v} type="button" aria-pressed={secao === v} onClick={() => setSecao(v)}>{r}</button>
-        ))}
+      <div className="dm-cab">
+        <div>
+          <div className="dm-rot">{'>'} administração · {SECOES.find(([v]) => v === secao)?.[1].toLowerCase()}</div>
+          <h1 style={{ marginTop: 4 }}>{SECOES.find(([v]) => v === secao)?.[1]}</h1>
+          {secao === 'pessoas' ? (
+            <p className="dm-peq dm-mudo" style={{ margin: '6px 0 0' }}>
+              {/* "1 ativa", e não "1 ativas": visto em produção, com a base de uma pessoa só */}
+              {contar(ativas, 'ativa', 'ativas')} · {contar(inativas, 'inativa', 'inativas')}
+            </p>
+          ) : null}
+        </div>
+        {secao === 'pessoas' ? (
+          <div className="dm-cab-acoes">
+            <Link className="dm-btn dm-pri" href="/demandas/admin/pessoas/nova">Nova pessoa</Link>
+          </div>
+        ) : null}
       </div>
+      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       {secao === 'pessoas' ? <Pessoas ms={ms} b={b} recarregar={recarregar} /> : null}
       {secao === 'setores' ? <Setores b={b} indo={indo} salvar={salvar} /> : null}
       {secao === 'categorias' ? <Categorias b={b} indo={indo} salvar={salvar} /> : null}
       {secao === 'anexos'
-        ? <Anexos regra={b.anexos} trocar={anexos => setB(x => (x ? { ...x, anexos } : x))} />
+        ? <Anexos regra={b.anexos} trocar={anexos => setB(x => (x ? { ...x, anexos } : x))}
+            toast={ctx.toast} />
         : null}
     </>
   );
@@ -111,7 +120,10 @@ function Administracao() {
    limpa o que se cola (`https://www.site.com/x` vira `site.com`) e recusa
    o que não é site, o domínio de país inteiro e o site onde qualquer pessoa
    publica página. Tirar é reversível: o recado traz "Desfazer". */
-function Anexos({ regra, trocar }: { regra?: RegraDeAnexo; trocar: (r: RegraDeAnexo) => void }) {
+function Anexos({ regra, trocar, toast }: {
+  regra?: RegraDeAnexo; trocar: (r: RegraDeAnexo) => void;
+  toast?: (t: { texto: string; desfazer?: () => void }) => void;
+}) {
   const [site, setSite] = useState('');
   const [indo, setIndo] = useState(false);
   const [erro, setErro] = useState('');
@@ -133,7 +145,11 @@ function Anexos({ regra, trocar }: { regra?: RegraDeAnexo; trocar: (r: RegraDeAn
       return false;
     }
     trocar({ restrito: r.restrito, sites: r.sites });
-    setFeito(ok);
+    /* o sucesso vira toast (com Desfazer quando é tirar um site); sem toast
+       (fora da casca, num teste), fica o aviso em linha */
+    if (toast) {
+      toast({ texto: ok.txt, desfazer: ok.desfaz ? () => { pedir({ incluir: ok.desfaz }, { txt: `${ok.desfaz} voltou para a lista.` }); } : undefined });
+    } else setFeito(ok);
     return true;
   }
 
@@ -236,23 +252,16 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
 
   return (
     <>
-      <div className="dm-entre" style={{ marginBottom: 'var(--dm-e2)' }}>
-        <p className="dm-peq dm-mudo">
-          {/* "1 ativa", e não "1 ativas": visto em produção, com a base de uma pessoa só */}
-          {contar(ms.filter(m => m.ativo !== false).length, 'ativa', 'ativas')} · {contar(ms.filter(m => m.ativo === false).length, 'inativa', 'inativas')}
-        </p>
-        <Link className="dm-btn dm-pri" href="/demandas/admin/pessoas/nova">Nova pessoa</Link>
-      </div>
-
       {pedidos.length ? <Pedidos pedidos={pedidos} nomeSetor={nomeSetor} recarregar={recarregar} /> : null}
 
-      <div className="dm-card">
+      {/* os filtros numa linha só: situação, papel, setor e a busca */}
+      <div className="dm-ferramentas">
         <div className="dm-seg" role="group" aria-label="Situação">
           {([['ativas', 'Ativas'], ['inativas', 'Inativas'], ['todas', 'Todas']] as const).map(([v, r]) => (
             <button key={v} type="button" aria-pressed={situ === v} onClick={() => setSitu(v)}>{r}</button>
           ))}
         </div>
-        <div className="dm-dupla" style={{ marginTop: 'var(--dm-e2)', gap: 'var(--dm-e1)' }}>
+        <div className="dm-ferramentas-dir">
           <select aria-label="Papel" value={papel} onChange={e => setPapel(e.target.value)} className="dm-filtro">
             <option value="">Todos os papéis</option>
             {PAPEIS.map(p => <option key={p.v} value={p.v}>{p.rot}</option>)}
@@ -261,36 +270,48 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
             <option value="">Todos os setores</option>
             {b.setores.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
           </select>
+          <label className="dm-busca dm-aberta">
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.6" />
+              <path d="M11 11l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            </svg>
+            <input type="search" aria-label="Procurar pessoa" placeholder="Nome, e-mail, telefone"
+              value={busca} onChange={e => setBusca(e.target.value)} />
+          </label>
         </div>
-        <label className="dm-busca">
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.6" />
-            <path d="M11 11l4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-          </svg>
-          <input type="search" aria-label="Procurar pessoa" placeholder="Nome, e-mail, telefone"
-            value={busca} onChange={e => setBusca(e.target.value)} />
-        </label>
       </div>
 
       {vistas.length === 0 ? (
-        <Vazio titulo="Ninguém com esse filtro.">Tire um filtro, ou cadastre a pessoa.</Vazio>
+        <Vazio titulo="Ninguém com esse filtro." tom="filtro">
+          Tire um filtro, ou cadastre a pessoa.
+          {busca || papel || setor || situ !== 'ativas' ? (
+            <div style={{ marginTop: 'var(--dm-e2)' }}>
+              <button type="button" className="dm-btn dm-mini"
+                onClick={() => { setBusca(''); setPapel(''); setSetor(''); setSitu('ativas'); }}>Tirar os filtros</button>
+            </div>
+          ) : null}
+        </Vazio>
       ) : (
-        <div className="dm-fila">
+        <div className="dm-pessoas">
+          <div className="dm-pessoa dm-pessoas-cab" aria-hidden="true">
+            <span className="dm-p-nome">Nome</span>
+            <span className="dm-p-papel">Papel</span>
+            <span className="dm-p-setor">Setor</span>
+            <span className="dm-p-funcao">Função</span>
+            <span className="dm-p-email">E-mail</span>
+          </div>
           {vistas.map(m => (
             <Link key={m.id} href={`/demandas/admin/pessoas/${m.id}`}
               className={m.ativo === false ? 'dm-pessoa dm-inativa' : 'dm-pessoa'}>
-              <div className="dm-item-topo">
-                <span className="dm-item-tit dm-cresce">{m.nome}</span>
-              </div>
-              <div className="dm-item-baixo">
+              <span className="dm-p-nome"><b>{m.nome}</b>{m.origem === 'cadastro' ? <small className="dm-mudo"> · cadastro próprio</small> : null}</span>
+              <span className="dm-p-papel">
                 <Pill>{rotPapel(m.papel)}</Pill>
                 {m.ativo === false ? <Pill tom="bad">Inativa</Pill> : null}
                 {m.papel_pedido ? <Pill tom="info">Pediu {rotPapel(m.papel_pedido)}</Pill> : null}
-                <span>{nomeSetor(m.setor_id)}</span>
-                {m.funcao ? <span>{m.funcao}</span> : null}
-                <span>{m.auth_email || m.email || 'sem e-mail'}</span>
-                {m.origem === 'cadastro' ? <span>cadastro próprio</span> : null}
-              </div>
+              </span>
+              <span className="dm-p-setor">{nomeSetor(m.setor_id)}</span>
+              <span className="dm-p-funcao">{m.funcao || ''}</span>
+              <span className="dm-p-email">{m.auth_email || m.email || 'sem e-mail'}</span>
             </Link>
           ))}
         </div>
@@ -334,9 +355,9 @@ function Pedidos({ pedidos, nomeSetor, recarregar }: {
               <span>{nomeSetor(m.setor_id)}</span>
               {m.funcao ? <span>{m.funcao}</span> : null}
             </div>
-            <div className="dm-grade" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="dm-linha">
               <button className="dm-btn dm-pri" disabled={!!indo} onClick={() => decidir(m, 'aceitar')}>Aceitar</button>
-              <button className="dm-btn" disabled={!!indo} onClick={() => decidir(m, 'recusar')}>Recusar</button>
+              <button className="dm-btn dm-txt" disabled={!!indo} onClick={() => decidir(m, 'recusar')}>Recusar</button>
             </div>
           </div>
         ))}

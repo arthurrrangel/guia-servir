@@ -25,7 +25,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import Lista, { type Recorte } from '@/components/demandas/Lista';
-import { Pill, Vazio } from '@/components/demandas/Ui';
+import { Pill, Subabas, Vazio } from '@/components/demandas/Ui';
 import { portal, type Aba } from '@/lib/demandas/api';
 import { rotPapel } from '@/lib/demandas/regras';
 import type { Eu, Portal } from '@/lib/demandas/tipos';
@@ -38,23 +38,26 @@ type Vista = 'agir' | 'comigo' | 'fila' | 'atrasadas' | 'urgentes' | 'concluidas
 
 const VISTAS: { v: Vista; aba: Aba; so: Recorte; conta: (n: Portal['n']) => number;
                 legenda: string }[] = [
-  { v: 'agir',       aba: 'agir',   so: 'abertas',    conta: n => n.agir,           legenda: 'esperando você' },
-  { v: 'comigo',     aba: 'comigo', so: 'abertas',    conta: n => n.comigo,         legenda: 'com você' },
-  { v: 'fila',       aba: 'setor',  so: 'abertas',    conta: n => n.setor_abertas,  legenda: 'do setor' },
-  { v: 'atrasadas',  aba: 'setor',  so: 'atrasadas',  conta: n => n.atrasadas,      legenda: 'atrasadas' },
-  { v: 'urgentes',   aba: 'setor',  so: 'urgentes',   conta: n => n.urgentes,       legenda: 'urgentes' },
-  { v: 'concluidas', aba: 'setor',  so: 'concluidas', conta: n => n.concluidas,     legenda: 'concluídas' },
+  { v: 'agir',       aba: 'agir',   so: 'abertas',    conta: n => n.agir,           legenda: 'Esperando você' },
+  { v: 'comigo',     aba: 'comigo', so: 'abertas',    conta: n => n.comigo,         legenda: 'Com você' },
+  { v: 'fila',       aba: 'setor',  so: 'abertas',    conta: n => n.setor_abertas,  legenda: 'Do setor' },
+  { v: 'atrasadas',  aba: 'setor',  so: 'atrasadas',  conta: n => n.atrasadas,      legenda: 'Atrasadas' },
+  { v: 'urgentes',   aba: 'setor',  so: 'urgentes',   conta: n => n.urgentes,       legenda: 'Urgentes' },
+  { v: 'concluidas', aba: 'setor',  so: 'concluidas', conta: n => n.concluidas,     legenda: 'Concluídas' },
 ];
 
-/* o que "do setor" quer dizer para cada papel, na legenda e no título */
-function alcance(eu: Eu): { titulo: string; legendaFila: string } {
-  if (eu.papel === 'admin') return { titulo: 'Todos os setores', legendaFila: 'em todos os setores' };
+/* o que "do setor" quer dizer para cada papel, na legenda e no título. A
+   gestão e a administração olham vários setores: o setor aparece em cada
+   linha. Quem atende um setor só vê a fila DELE, e "Comunicação" em toda
+   linha de "Fila da Comunicação" é ruído. */
+function alcance(eu: Eu): { titulo: string; legendaFila: string; varios: boolean } {
+  if (eu.papel === 'admin') return { titulo: 'Todos os setores', legendaFila: 'Em todos os setores', varios: true };
   if (eu.papel === 'gestor') {
-    if (eu.escopo_total) return { titulo: 'Todos os setores', legendaFila: 'em todos os setores' };
+    if (eu.escopo_total) return { titulo: 'Todos os setores', legendaFila: 'Em todos os setores', varios: true };
     const e = eu.escopo || [];
-    return { titulo: e.length ? e.join(', ') : 'Seu escopo', legendaFila: 'no seu escopo' };
+    return { titulo: e.length ? e.join(', ') : 'Seu escopo', legendaFila: 'No seu escopo', varios: e.length !== 1 };
   }
-  return { titulo: eu.setor || 'Seu setor', legendaFila: 'do setor' };
+  return { titulo: eu.setor ? `Fila da ${eu.setor}` : 'Sua fila', legendaFila: 'Do setor', varios: false };
 }
 
 function Atendimento() {
@@ -90,44 +93,40 @@ function Atendimento() {
 
   return (
     <>
-      <div className="dm-entre" style={{ marginBottom: 'var(--dm-e3)' }}>
+      <div className="dm-cab">
         <div>
-          <div className="dm-rot">{'>'} atendimento</div>
+          <div className="dm-rot">{'>'} atendimento{eu.papel === 'gestor' ? ' · gestão' : ''}</div>
           <h1 style={{ marginTop: 4 }}>{a.titulo}</h1>
-          {/* o nome já está no topo ("Demandas · Maria"); aqui fica o papel,
-              que é o que explica o alcance do título */}
+          {/* o nome já está no topo; aqui fica o papel, que é o que explica o
+              alcance do título */}
           <div className="dm-quem"><Pill>{rotPapel(eu.papel)}</Pill></div>
         </div>
-        <Link className="dm-btn" href="/demandas/numeros">Números</Link>
+        <div className="dm-cab-acoes">
+          <Link className="dm-btn dm-txt" href="/demandas/numeros">Números ›</Link>
+        </div>
       </div>
 
-      <div className="dm-contas dm-seis" role="group" aria-label="O que ver" style={{ marginBottom: 'var(--dm-e2)' }}>
-        {VISTAS.map(x => {
-          const n = p ? x.conta(p.n) : null;
-          return (
-            <button key={x.v} type="button" aria-pressed={vista === x.v}
-              className={x.v === 'atrasadas' && n ? 'dm-bad' : undefined}
-              onClick={() => setVista(x.v)}>
-              <b>{n === null ? '·' : n}</b>
-              <small>{x.v === 'fila' ? a.legendaFila : x.legenda}</small>
-            </button>
-          );
-        })}
-      </div>
+      {/* as seis vistas SÃO o seletor: sub-abas no desktop, fita de fichas no
+          celular, cada uma com a sua conta */}
+      <Subabas<Vista> rot="O que ver" valor={vista} aoMudar={setVista}
+        itens={VISTAS.map(x => ({
+          v: x.v, rot: x.v === 'fila' ? a.legendaFila : x.legenda,
+          n: p ? x.conta(p.n) : null, bad: x.v === 'atrasadas',
+        }))} />
 
       <Lista eu={eu} abas={[]} recortes={[]} controle={{ aba: atual.aba, so: atual.so }}
-        vazio={() => vazioDoAtendimento(vista)} />
+        mostrarSetor={a.varios} vazio={() => vazioDoAtendimento(vista)} />
     </>
   );
 }
 
-function vazioDoAtendimento(v: Vista): { titulo: string; dica?: React.ReactNode } {
+function vazioDoAtendimento(v: Vista): { titulo: string; dica?: React.ReactNode; tom?: 'bom' } {
   switch (v) {
-    case 'agir':       return { titulo: 'Nada esperando você.', dica: 'O que chegar na fila e o que estiver com você aparece aqui.' };
+    case 'agir':       return { titulo: 'Nada esperando você.', dica: 'O que chegar na fila e o que estiver com você aparece aqui.', tom: 'bom' };
     case 'comigo':     return { titulo: 'Nada está com você agora.' };
-    case 'fila':       return { titulo: 'O setor está em dia.' };
-    case 'atrasadas':  return { titulo: 'Nada atrasado.' };
-    case 'urgentes':   return { titulo: 'Nenhuma urgente.' };
+    case 'fila':       return { titulo: 'O setor está em dia.', tom: 'bom' };
+    case 'atrasadas':  return { titulo: 'Nada atrasado.', tom: 'bom' };
+    case 'urgentes':   return { titulo: 'Nenhuma urgente.', tom: 'bom' };
     case 'concluidas': return { titulo: 'Nada concluído ainda.' };
   }
 }

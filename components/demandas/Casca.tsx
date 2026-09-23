@@ -43,12 +43,13 @@
 */
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { Suspense, createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { ehRecusaDeIdentidade, esquecerToken, quemSou } from '@/lib/demandas/api';
+import { rotPapel } from '@/lib/demandas/regras';
 import { sb } from '@/lib/supabase';
 import type { Eu } from '@/lib/demandas/tipos';
-import { Aviso, Esqueleto } from './Ui';
+import { Aviso, Esqueleto, Toast, type ToastPedido } from './Ui';
 
 /* QUEM SOU EU, UMA VEZ POR TELA — NÃO DUAS.
 
@@ -70,6 +71,13 @@ type Ctx = {
   /* o perfil salva nome e telefone; sem isto o topo continuava com o nome
      antigo até recarregar */
   ajustarEu?: (p: Partial<Eu>) => void;
+  /* o toast: o sucesso que muda de tela ou some da tela. Quem mostra é a
+     casca, para ele sobreviver à troca de página que o motivou. */
+  toast?: (t: ToastPedido) => void;
+  /* o toast em cima da tela agora (a casca desenha dentro de `.dm`, para a
+     fonte e os tokens valerem nele) */
+  toastAtual?: ToastPedido | null;
+  fecharToast?: () => void;
 };
 const Contexto = createContext<Ctx | null>(null);
 
@@ -149,11 +157,73 @@ const ABAS = (eu: Eu): AbaCasca[] => {
   return a;
 };
 
+/* "ONDE ESTOU" NAS TELAS FILHAS — 23/09/2026.
+
+   A ficha e Números não tinham aba marcada: nenhuma das cinco palavras dizia
+   de onde a pessoa veio. A ficha é filha de Atender para quem atende e do
+   Início para quem pede; Números é filha de Atender. A aba mãe fica marcada. */
+function abaAtual(caminho: string, href: string, atende: boolean): boolean {
+  if (caminho === href) return true;
+  const filhaDeAtender = caminho.startsWith('/demandas/numeros') || (caminho.startsWith('/demandas/d/') && atende);
+  const filhaDoInicio = caminho.startsWith('/demandas/d/') && !atende;
+  if (href === '/demandas/atendimento') return filhaDeAtender;
+  if (href === '/demandas') return filhaDoInicio;
+  return false;
+}
+
+/* AS SEÇÕES DA ADMINISTRAÇÃO MORAM NA BARRA, e não no corpo como uma fileira
+   de botões com cara de campo. É a mesma casca em preto: a "outra sala" fica
+   dita sem outra estrutura. */
+const SECOES_ADMIN: { v: string; rot: string }[] = [
+  { v: 'pessoas', rot: 'Pessoas' }, { v: 'setores', rot: 'Setores' },
+  { v: 'categorias', rot: 'Categorias' }, { v: 'anexos', rot: 'Anexos' },
+];
+
+/* a faixa preta: as quatro seções, com a aberta marcada. A seção vem da URL
+   (`?secao=`), e `/demandas/admin` sem nada é "pessoas". */
+function SecoesDaAdministracao({ caminho, secaoAberta }: { caminho: string; secaoAberta: string | null }) {
+  const secao = caminho === '/demandas/admin' ? (secaoAberta || 'pessoas') : '';
+  return (
+    <nav className="dm-abas" aria-label="Seções da administração">
+      {SECOES_ADMIN.map(x => (
+        <Link key={x.v} href={x.v === 'pessoas' ? '/demandas/admin' : `/demandas/admin?secao=${x.v}`}
+          aria-current={secao === x.v ? 'page' : undefined}>{x.rot}</Link>
+      ))}
+    </nav>
+  );
+}
+function SecoesDaAdministracaoPelaUrl({ caminho }: { caminho: string }) {
+  const busca = useSearchParams();
+  return <SecoesDaAdministracao caminho={caminho} secaoAberta={busca?.get('secao') ?? null} />;
+}
+
+/* A LINHA DA LOGO SE RECOLHE AO ROLAR (celular). Enquanto a pessoa lê, ficam
+   só as abas: 44px de topo fixo em vez de 114. Rolar para cima devolve a
+   linha. Oito linhas de JavaScript, ouvinte passivo; no desktop a folha
+   ignora a classe. */
+function useRecolhida(): boolean {
+  const [recolhida, setRecolhida] = useState(false);
+  useEffect(() => {
+    let ultimo = window.scrollY;
+    const f = () => {
+      const y = window.scrollY;
+      const desce = y > ultimo + 2, sobe = y < ultimo - 2;
+      ultimo = y;
+      if (desce && y > 64) setRecolhida(true);
+      else if (sobe || y <= 8) setRecolhida(false);
+    };
+    window.addEventListener('scroll', f, { passive: true });
+    return () => window.removeEventListener('scroll', f);
+  }, []);
+  return recolhida;
+}
+
 function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: boolean }) {
   const ctx = useEu() as Ctx;
   const { eu, carregando } = ctx;
   const semSistema = !!ctx.semSistema;
   const caminho = usePathname();
+  const recolhida = useRecolhida();
   const [email, setEmail] = useState<string | null | undefined>(undefined);
 
   /* só perguntamos quem é a sessão quando o sistema NÃO reconheceu a pessoa:
@@ -167,7 +237,7 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
   }, [carregando, eu]);
 
   if (carregando) {
-    return <div className="dm"><div className="dm-corpo"><Esqueleto /></div></div>;
+    return <div className="dm"><Topo /><main className="dm-corpo"><Esqueleto /></main></div>;
   }
 
   if (!eu) {
@@ -262,59 +332,75 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
      área é restrita. Isso é CLAREZA; a tranca de verdade é do banco, e cada
      função da administração (`dem_pessoas`, `dem_pessoa`, `dem_ajustar`)
      responde `SO_ADMIN` para qualquer outro papel, com ou sem esta tela. */
+  const atende = eu.atende ?? eu.papel !== 'solicitante';
+
   if (admin) {
     return (
-      <div className="dm">
+      <div className={recolhida ? 'dm dm-recolhida' : 'dm'}>
         <header className="dm-topo dm-adm-faixa">
           <div className="dm-topo-in">
-            <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
-            <div className="dm-onde dm-cresce dm-corta"><b>Administração</b></div>
-            {/* "Portal", e não "Voltar ao portal": em 320px a frase comia o
-                nome da sala, que saía "Administr…" */}
-            <Link href="/demandas">Portal</Link>
+            <Link href="/demandas" className="dm-logo" aria-label="Portal de demandas"><span>GUI{'>'}</span></Link>
+            {/* `useSearchParams` (a seção aberta) pede o Suspense na
+                pré-renderização; sem ele o build reprova a página inteira.
+                Fica aqui, em volta só da faixa, para as outras telas não
+                pagarem por uma leitura que só a administração faz. */}
+            <Suspense fallback={<SecoesDaAdministracao caminho={caminho} secaoAberta={null} />}>
+              <SecoesDaAdministracaoPelaUrl caminho={caminho} />
+            </Suspense>
+            {/* "Portal", e não "Voltar ao portal": em 320px a frase comia a
+                barra */}
+            <div className="dm-quem-sou"><Link href="/demandas">Portal</Link></div>
           </div>
         </header>
-        <div className="dm-corpo">
+        <main className="dm-corpo">
           {eu.papel === 'admin' ? children : (
-            <div className="dm-card dm-centro" style={{ padding: 'var(--dm-e5) var(--dm-e3)' }}>
-              <div className="dm-rot" style={{ marginBottom: 6 }}>{'>'} área restrita</div>
-              <h3 style={{ marginBottom: 8 }}>Esta área é de quem administra o sistema.</h3>
+            <div className="dm-card dm-quieto dm-vazio dm-centro">
+              <div className="dm-rot">{'>'} área restrita</div>
+              <h3>Esta área é de quem administra o sistema.</h3>
               <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
                 Seu acesso no portal continua o mesmo.
               </p>
               <Link className="dm-btn" href="/demandas">Voltar ao portal</Link>
             </div>
           )}
-        </div>
-        <Rodape />
+        </main>
+        <Rodape links={[{ href: '/demandas', rot: 'Portal' }]} />
+        {ctx.toastAtual && ctx.fecharToast ? <Toast t={ctx.toastAtual} fechar={ctx.fecharToast} /> : null}
       </div>
     );
   }
 
+  const links: { href: string; rot: string }[] = [];
+  if (atende) links.push({ href: '/demandas/numeros', rot: 'Números' });
+  if (eu.papel === 'admin') links.push({ href: '/demandas/admin', rot: 'Administração' });
+
   return (
-    <div className="dm">
+    <div className={recolhida ? 'dm dm-recolhida' : 'dm'}>
       <header className="dm-topo">
         <div className="dm-topo-in">
-          <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
-          <div className="dm-onde dm-cresce dm-corta">
-            Demandas · <b>{eu.primeiro_nome}</b>
-            {eu.setor ? <span className="dm-mudo dm-setor"> · {eu.setor}</span> : null}
+          <Link href="/demandas" className="dm-logo" aria-label="Início"><span>GUI{'>'}</span></Link>
+          <nav className="dm-abas" aria-label="Seções de demandas">
+            {ABAS(eu).map(a => (
+              <Link key={a.href} href={a.href}
+                aria-current={abaAtual(caminho, a.href, atende) ? 'page' : undefined}>
+                {a.rot}
+                {/* o número é contado pelo servidor (`dem_quem_sou.avisos`) e
+                    lido por leitor de tela como frase, não como "3" solto */}
+                {a.n ? <span className="dm-selo" aria-label={`${a.n} ${a.n === 1 ? 'novo' : 'novos'}`}>{a.n > 99 ? '99+' : a.n}</span> : null}
+              </Link>
+            ))}
+          </nav>
+          {/* quem sou, num lugar fixo: nome, papel e setor. O nome do sistema
+              não aparece (a logo já diz). */}
+          <div className="dm-quem-sou">
+            <b>{eu.primeiro_nome}</b>
+            <span>{rotPapel(eu.papel)}{eu.setor ? ` · ${eu.setor}` : ''}</span>
           </div>
         </div>
-        <nav className="dm-abas" aria-label="Seções de demandas">
-          {ABAS(eu).map(a => (
-            <Link key={a.href} href={a.href}
-              aria-current={caminho === a.href ? 'page' : undefined}>
-              {a.rot}
-              {/* o número é contado pelo servidor (`dem_quem_sou.avisos`) e
-                  lido por leitor de tela como frase, não como "3" solto */}
-              {a.n ? <span className="dm-selo" aria-label={`${a.n} ${a.n === 1 ? 'novo' : 'novos'}`}>{a.n > 99 ? '99+' : a.n}</span> : null}
-            </Link>
-          ))}
-        </nav>
       </header>
-      <div className="dm-corpo">{children}</div>
-      <Rodape />
+      <main className="dm-corpo">{children}</main>
+      <Rodape links={links} />
+      {ctx.toastAtual && ctx.fecharToast ? <Toast t={ctx.toastAtual} fechar={ctx.fecharToast} /> : null}
     </div>
   );
 }
@@ -323,17 +409,24 @@ function Topo() {
   return (
     <header className="dm-topo">
       <div className="dm-topo-in">
-        <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
-        <div className="dm-onde dm-cresce">Demandas</div>
+        <Link href="/demandas" className="dm-logo" aria-label="Demandas"><span>GUI{'>'}</span></Link>
+        <div className="dm-quem-sou"><span>Demandas</span></div>
       </div>
     </header>
   );
 }
 
-function Rodape() {
+/* o rodapé é o único lugar do desktop que repete as portas de Números e da
+   Administração; no celular elas moram no Início e no Perfil */
+function Rodape({ links = [] }: { links?: { href: string; rot: string }[] }) {
   return (
     <footer className="dm-rodape">
-      GUIA Church
+      <span>GUIA Church</span>
+      {links.length ? (
+        <span className="dm-rodape-links">
+          {links.map(l => <Link key={l.href} href={l.href}>{l.rot}</Link>)}
+        </span>
+      ) : null}
     </footer>
   );
 }
@@ -372,8 +465,12 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
   }, []);
   const zerarAvisos = () => setEu(e => (e ? { ...e, avisos: 0 } : e));
   const ajustarEu = (p: Partial<Eu>) => setEu(e => (e ? { ...e, ...p } : e));
+  const [toast, setToast] = useState<ToastPedido | null>(null);
+  const pedirToast = useCallback((t: ToastPedido) => setToast(t), []);
+  const fecharToast = useCallback(() => setToast(null), []);
   return (
-    <Contexto.Provider value={{ eu, carregando, semSistema, zerarAvisos, ajustarEu }}>
+    <Contexto.Provider value={{ eu, carregando, semSistema, zerarAvisos, ajustarEu,
+                                toast: pedirToast, toastAtual: toast, fecharToast }}>
       <CascaInterna admin={admin}>{children}</CascaInterna>
     </Contexto.Provider>
   );

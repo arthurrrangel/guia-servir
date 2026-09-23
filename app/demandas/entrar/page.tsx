@@ -226,8 +226,8 @@ export default function EntrarNasDemandas() {
     <div className="dm">
       <header className="dm-topo">
         <div className="dm-topo-in">
-          <Link href="/demandas" className="dm-logo">GUI{'>'}</Link>
-          <div className="dm-onde dm-cresce dm-corta">Demandas</div>
+          <Link href="/demandas" className="dm-logo"><span>GUI{'>'}</span></Link>
+          <div className="dm-topo-nome">Demandas</div>
         </div>
       </header>
       <div className="dm-corpo" style={{ maxWidth: 460 }}>

@@ -6,26 +6,36 @@
    Este arquivo divide a mesma página com `globals.css`, que veste o sistema
    de escalas inteiro. O Next junta todo o CSS numa folha só, então importar
    este arquivo "só dentro de /demandas" não isola nada. Medido antes de
-   escrever uma linha:
-
-     · 20 das minhas 42 classes já existiam lá — `card`, `btn`, `pill`,
-       `aviso`, `abas`, `topo`, `logo`, `rot`, `peq`, `dim`;
-     · 21 das minhas variáveis já existiam lá — `--bg`, `--card`, `--preto`,
-       `--ink`, `--linha`, `--ok`, `--warn`, `--r`, `--t`, `--e1`, `--fonte`.
-
-   Qualquer uma delas solta reescreveria o botão, o cartão e o espaçamento de
-   TODA tela do líder. Por isso, três regras que não têm exceção aqui:
+   escrever a primeira versão: 20 das 42 classes e 21 das variáveis já
+   existiam lá (`card`, `btn`, `pill`, `--bg`, `--ink`, `--r`...). Qualquer
+   uma solta reescreveria toda tela do líder. Três regras sem exceção:
 
      1. toda classe começa com `dm-`;
-     2. toda variável começa com `--dm-`, e nasce em `.dm`, nunca em `:root`;
-     3. nenhum seletor de elemento solto. Nada de `body{}`, `a{}`, `h1{}`,
-        `*{}` — tudo pendurado em `.dm`, senão vale para a página inteira.
+     2. toda variável começa com `--dm-` e nasce em `.dm`, nunca em `:root`;
+     3. nenhum seletor de elemento solto (`body{}`, `a{}`, `h1{}`, `*{}`).
 
-   A identidade é a mesma do sistema de escalas, de propósito: é a mesma
-   igreja e a mesma pessoa usando os dois. Monocromático, cor só para estado,
-   o tipo como interface, e o chevron como único ornamento. Os valores foram
-   copiados do `globals.css` — se a marca mudar lá, muda aqui na mão, que é o
-   preço de não deixar os dois sistemas se tocarem.
+   A identidade é a mesma do sistema de escalas: monocromático, cor só para
+   estado, o tipo como interface, e o chevron como único ornamento.
+
+   A REFORMA DE 23/09/2026 (a segunda versão desta folha) segue a
+   especificação de `sistema.md` da rodada com o Fable: cinco decisões que
+   valem para tudo.
+
+     · Preto sólido é AÇÃO, e uma só por vista. Seleção é contorno; alarme é
+       texto vermelho; leitura é fio de 1px.
+     · Três degraus de título, todos em caixa baixa e tinta. Caixa alta só na
+       etiqueta de 12px com o chevron.
+     · A largura muda a COMPOSIÇÃO, não o tamanho das coisas: do celular ao
+       ultra o texto é o mesmo; o que muda é quantas colunas e o que vira
+       tabela.
+     · Progressive disclosure em dois níveis, nunca três: visível, e a um
+       toque.
+     · Movimento só para dizer o que mudou: 100 a 320ms, tudo desligável.
+
+   O que custou auditoria e NÃO muda: 44px de alvo em tudo que se toca, 16px
+   em todo campo (o Safari dá zoom abaixo disso), 12px de piso em todo texto,
+   as quatro cores de estado medidas sobre o próprio fundo, a área segura do
+   celular nas barras, `:where()` em toda regra de elemento.
    ========================================================================== */
 
 .dm{
@@ -41,31 +51,52 @@
   --dm-linha:rgba(37,37,37,.11);
   --dm-linha2:rgba(37,37,37,.18);
   --dm-linha3:rgba(37,37,37,.33);
+  --dm-linha-forte:var(--dm-ink);
 
   /* ---- tinta */
   --dm-ink:#252525;
   --dm-ink2:rgba(37,37,37,.70);
   --dm-mudo:rgba(37,37,37,.68);   /* 6,1:1 no branco, medido */
   --dm-marca:rgba(37,37,37,.34);  /* NÃO é cor de texto: ponto, chevron, seta */
+  --dm-foco:var(--dm-ink);
+  --dm-foco-invertido:#ffffff;
+  --dm-scrim:rgba(37,37,37,.40);
 
-  /* ---- estado. Medidos sobre o próprio fundo de 10%, não sobre o branco:
-         a pílula verde é texto verde em cima de verde a 10%, e é ali que o
-         contraste aperta. */
+  /* ---- estado. Medidos sobre o próprio fundo de 10%: é ali que o
+         contraste aperta (5,7:1 a 6,4:1). */
   --dm-ok:#0a6b3f;   --dm-ok-bg:rgba(10,107,63,.10);   --dm-ok-ln:rgba(10,107,63,.30);
   --dm-warn:#7a5005; --dm-warn-bg:rgba(170,112,10,.13);--dm-warn-ln:rgba(170,112,10,.34);
   --dm-bad:#a82e24;  --dm-bad-bg:rgba(168,46,36,.09);  --dm-bad-ln:rgba(168,46,36,.28);
   --dm-info:#1b53ad; --dm-info-bg:rgba(27,83,173,.08); --dm-info-ln:rgba(27,83,173,.26);
 
-  /* ---- ritmo */
-  --dm-e1:8px; --dm-e2:12px; --dm-e3:16px; --dm-e4:24px; --dm-e5:36px; --dm-e6:56px;
+  /* ---- ritmo (base 4) */
+  --dm-e0:4px; --dm-e1:8px; --dm-e2:12px; --dm-e3:16px; --dm-e4:24px; --dm-e5:36px; --dm-e6:56px;
+  --dm-calha:16px;          /* margem lateral do corpo, por faixa */
+  --dm-gap:8px;
+  --dm-largura:100%;        /* largura máxima do corpo, por faixa */
+  --dm-card-pad:16px;
 
-  /* CAIXA NÃO TEM CANTO, MARCA É CÍRCULO — a mesma regra do outro sistema.
-     Só o botão e o campo têm raio, porque são alvo de toque e o raio ajuda a
-     ler a área clicável. Cartão é fio de 1px, sem sombra. */
+  /* CAIXA NÃO TEM CANTO, ALVO DE TOQUE TEM. Cartão, pílula, aviso e tabela
+     são fio de 1px sem canto e sem sombra; botão, campo e ficha de filtro
+     têm raio, porque o raio ajuda a ler a área que se toca. A única sombra
+     do sistema é a de peça que FLUTUA sobre conteúdo rolável (toast, folha,
+     menu), que o fio não separa. */
   --dm-r:10px;
-  --dm-t:140ms cubic-bezier(.22,.61,.36,1);
-  --dm-largura:1080px;
+  --dm-r-seg:14px;
+  --dm-sombra-flutua:0 8px 24px rgba(37,37,37,.14),0 0 0 1px var(--dm-linha);
+
+  /* ---- movimento */
+  --dm-curva:cubic-bezier(.22,.61,.36,1);
+  --dm-curva-entra:cubic-bezier(.2,.8,.2,1);
+  --dm-t-toque:100ms cubic-bezier(.2,0,0,1);
+  --dm-t:140ms var(--dm-curva);
+  --dm-t-abre:200ms var(--dm-curva-entra);
+  --dm-t-painel:260ms var(--dm-curva-entra);
+
+  /* ---- tipo: o display é o único tamanho que muda com a largura */
   --dm-fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --dm-t-display:24px; --dm-lh-display:30px;
+  --dm-topo-altura:92px;    /* 48 (logo) + 44 (abas) no celular; 56 no desktop */
 
   background:var(--dm-bg);
   color:var(--dm-ink);
@@ -75,238 +106,836 @@
   min-height:100dvh;
   display:flex;
   flex-direction:column;
+  -webkit-font-smoothing:antialiased;
 }
+@media (min-width:720px){ .dm{ --dm-calha:24px; --dm-gap:16px; --dm-card-pad:20px; --dm-t-display:28px; --dm-lh-display:34px } }
+@media (min-width:1024px){ .dm{ --dm-calha:32px; --dm-gap:24px; --dm-card-pad:24px; --dm-largura:1120px; --dm-topo-altura:56px } }
+@media (min-width:1280px){ .dm{ --dm-largura:1200px; --dm-t-display:32px; --dm-lh-display:38px } }
+@media (min-width:1680px){ .dm{ --dm-largura:1320px; --dm-calha:40px; --dm-gap:32px } }
 
 .dm *,.dm *::before,.dm *::after{box-sizing:border-box}
 
-/* O VAZAMENTO QUE EU TINHA MEDIDO SÓ NUMA DIREÇÃO.
+/* O VAZAMENTO DO OUTRO SISTEMA ENTRA POR BAIXO DA CASCA.
 
-   A trava lá em cima impede que ESTA folha alcance o sistema de escalas, e
-   isso está provado: nas dez rotas do painel e do site, zero regras daqui.
-   Só que a porta tem dois lados, e eu nunca tinha medido o outro.
-
-   `globals.css` tem 91 seletores SEM CLASSE — os mesmos que eu proibi aqui.
-   Dois deles entram por baixo da casca e mudam telas inteiras de demandas:
-
-     · `label{text-transform:uppercase;letter-spacing:.12em;font-size:…}`
-       Todo campo do formulário é um `<label>`. Resultado: rótulo E texto de
-       ajuda saíam em CAIXA ALTA ESPAÇADA. "UMA LINHA QUE JÁ DIGA DO QUE SE
-       TRATA." gritava mais que o próprio campo, e caixa alta com
-       espaçamento é justamente o que menos se lê no celular;
-     · `h3::before{content:"›"}` pendurava um chevron em todo h3 daqui.
-
-   Consertar em `globals.css` seria mexer no sistema que não pode ser
-   afetado. Então a casca se defende: devolve os valores ao que ESTA folha
-   diz, e a partir daqui rótulo é rótulo e ajuda é ajuda.
-
-   E a defesa vai dentro de `:where()` pelo mesmo motivo do link ali em
-   cima — o meu próprio teste de CSS pegou isto antes de eu publicar:
-   escrita como `.dm label{}`, ela pesa 0-1-1 e passaria a ganhar de
-   `.dm-busca{display:flex}` e `.dm-campo{}`, que são classes minhas em cima
-   de `<label>`. Eu teria consertado o vazamento de fora criando um
-   vazamento meu, de dentro.
-
-   `.dm :where(label)` pesa 0-1-0: ganha do `label{}` do outro sistema, que
-   é 0-0-1, e perde de qualquer classe daqui. Que é a ordem certa. */
+   `globals.css` tem 91 seletores sem classe. Três deles mudavam telas inteiras
+   daqui: `label{text-transform:uppercase;letter-spacing:.12em}` (todo campo é
+   um label), `h3::before{content:"›"}` e, o pior, `h3{text-transform:uppercase;
+   color:mudo;display:flex}`: todo título de cartão saía em caixa alta cinza
+   com tracking negativo, um híbrido que não existe no sistema (medido pelo
+   Fable em 23/09). A casca se defende dentro de `:where()`, que pesa 0-1-0:
+   ganha do elemento do outro sistema (0-0-1) e perde de qualquer classe daqui.
+   `.dm label{}` pesaria 0-1-1 e ganharia de `.dm-campo`, que é classe minha
+   em cima de `<label>`: seria consertar um vazamento criando outro. */
 .dm :where(label){
   text-transform:none;letter-spacing:normal;font-size:inherit;
   font-weight:inherit;color:inherit;display:block;margin:0;
 }
+.dm :where(h1,h2,h3){
+  margin:0;font-family:inherit;text-transform:none;letter-spacing:-.02em;
+  color:inherit;display:block;line-height:1.2;font-weight:650;
+}
 .dm :where(h3)::before{content:none}
-
-/* O `:where()` AQUI NÃO É ENFEITE, É O CONSERTO DE UM DEFEITO REAL.
-
-   Escrito assim, `.dm a{color:inherit}` pesa 0-1-1: uma classe mais um
-   elemento. E `.dm-logo{color:#fff}` pesa 0-1-0: só a classe. Ou seja, a
-   regra genérica GANHA de qualquer classe minha aplicada num link — e foi
-   exatamente o que aconteceu: a logo do topo, que é um link, ficou com
-   texto #252525 sobre fundo #252525. Preto no preto. Uma caixa escura e
-   vazia no canto da tela.
-
-   Repare que a culpa é da própria disciplina de escopo: como TUDO aqui tem
-   que estar pendurado em `.dm`, toda regra de elemento vira classe+elemento
-   e passa a ganhar das classes. Consertar só a `.dm-logo` seria remendo: a
-   próxima classe que pintar cor num link cairia no mesmo buraco calada.
-
-   `:where()` zera o peso do que está dentro dele. A regra continua valendo
-   para todo link da casca, continua ganhando do estilo padrão do navegador
-   (regra de autor sempre ganha da do agente), e perde de qualquer classe —
-   que é o certo. */
+.dm :where(h1){font-size:var(--dm-t-display);line-height:var(--dm-lh-display);text-wrap:balance}
+.dm :where(h2){font-size:20px;line-height:26px;letter-spacing:-.015em}
+.dm :where(h3){font-size:15px;line-height:20px;letter-spacing:-.01em}
+.dm :where(p){margin:0 0 var(--dm-e2)}
+/* `:where(.dm a)`: `.dm a{}` pesaria 0-1-1 e ganharia de `.dm-logo{color:#fff}`.
+   Aconteceu: a logo saiu preto no preto. Dentro de :where() a regra vale como
+   padrão e perde de qualquer classe. */
 :where(.dm a){color:inherit}
-
-.dm :focus-visible{outline:2px solid var(--dm-ink); outline-offset:2px}
 .dm :where(button,input,select,textarea){font:inherit;color:inherit}
-/* `:where()` AQUI PELA QUINTA VEZ, E ELE FALTAVA.
-
-   `.dm button{font:inherit}` pesa 0-1-1 e ganha de `.dm-btn{font-size:15px}`,
-   que pesa 0-1-0. Medido, com os dois lado a lado na mesma `.dm-linha`:
-
-     <a  class="dm-btn"> "Mandar para Maria" -> 15px / peso 550
-     <button class="dm-btn"> "Copiar o recado" -> 16px / peso 400
-
-   O mesmo botao sai de dois tamanhos, e num `<a>` nada acontece porque `<a>`
-   nao esta na lista. A folha ja tinha consertado exatamente esta armadilha
-   quatro vezes (em `label`, `a`, `p` e `textarea`, esta ultima com o
-   comentario escrito), e deixou a principal de fora. Ninguem nomeia isso ao
-   ver; le-se como acabamento de prototipo. */
-
-/* 16px NOS CAMPOS, E O MOTIVO NÃO É ESTÉTICO.
-
-   O Safari do iPhone dá zoom sozinho quando a pessoa toca num campo com
-   fonte menor que 16px. A tela salta, a coluna do formulário sai de
-   enquadramento, e a pessoa tem que pinçar para voltar — a cada campo. Era
-   13px aqui, então isso acontecia em TODO campo de TODA tela.
-
-   16px é o limiar exato em que o Safari para de fazer isso. Não é
-   recomendação de tipografia, é o número que desarma o comportamento. */
-.dm input,.dm select,.dm textarea{font-size:16px}
+/* 16px NOS CAMPOS: o Safari do iPhone dá zoom sozinho abaixo disso. */
+.dm :where(input,select,textarea){font-size:16px}
+.dm :focus-visible{outline:2px solid var(--dm-foco);outline-offset:2px}
+/* sobre superfície escura o anel preto some: aqui ele é branco */
+.dm-pri:focus-visible,.dm-adm-faixa :focus-visible,.dm-toast :focus-visible{outline-color:var(--dm-foco-invertido)}
 
 /* ------------------------------------------------------------------ texto */
-/* `:where()` PELA SEXTA VEZ, E AGORA PELO DIÁLOGO.
-
-   `.dm h2` pesa 0-1-1 e ganhava de `.dlg-titulo` (0-1-0). Desde que
-   `confirmar()` pendura o diálogo dentro da casca, o título dele passou a ser
-   pintado por esta regra: medido, 20px/650 dentro de `.dm` contra 17px/600
-   fora, e os dois botões da mesma caixa com pesos diferentes (Cancelar em
-   400, Apagar em 600), porque `.btn.pri` pesa 0-2-0 e resiste enquanto `.btn`
-   pesa 0-1-0 e perde.
-
-   É a mesma armadilha que esta folha já desarma em `label`, `a`, `p`,
-   `textarea` e `button`. A regra continua valendo como padrão e para de
-   ganhar de quem vem depois. */
-.dm :where(h1,h2,h3){margin:0;font-weight:650;letter-spacing:-.02em;line-height:1.15;display:block}
-/* `display:block` ENTROU EM 22/09/2026, visto em produção pelo Arthur.
-
-   `globals.css:250` (escalas) declara `h3{display:flex;align-items:center}`,
-   para alinhar a setinha do `::before` ao texto. A setinha já era desligada
-   aqui dentro, mas o `flex` passava: o texto do título vira um item flexível,
-   encosta na esquerda e IGNORA o `text-align:center` do pai. Resultado, no
-   aviso de lista vazia (`Vazio`, que é `.dm-centro`): "> NADA AQUI" e a frase
-   de baixo centralizados, e o título entre eles colado na margem esquerda.
-
-   Fora de bloco centralizado, flex e block desenham igual (um item só, sem a
-   setinha), então nada mais muda. */
-.dm :where(h1){font-size:clamp(26px,5vw,34px)}
-.dm :where(h2){font-size:20px}
-.dm :where(h3){font-size:16px}
-/* `:where(p)` E NÃO `p`: o teste de CSS pegou isto na hora, que é para o que
-   ele existe. `.dm p` pesa 0-1-1 e ganha de qualquer classe de 0-1-0, então
-   toda classe nova aplicada num <p> nascia sem poder escolher a própria
-   margem — foi assim que `.dm-corte` chegou com `margin:12px 0 0` e recebeu
-   a margem de baixo do parágrafo genérico. Dentro de `:where()` a regra
-   continua valendo como padrão e para de ganhar de quem vem depois. */
-.dm :where(p){margin:0 0 var(--dm-e2)}
-/* 12px É O CHÃO, NÃO UMA SUGESTÃO.
-
-   Estava 11px. No monitor parece elegante; no ônibus, com o celular a meio
-   braço de distância, some. 12px é o menor tamanho que ainda se lê em
-   movimento, e caixa alta com espaçamento de letra come legibilidade, então
-   justamente aqui não dá para economizar. */
+/* 12px É O CHÃO: no ônibus, com o celular a meio braço, 11 some. */
 .dm-rot{
-  font-size:12px;letter-spacing:.12em;text-transform:uppercase;
+  font-size:12px;line-height:16px;letter-spacing:.12em;text-transform:uppercase;
   color:var(--dm-mudo);font-weight:600;
 }
-.dm-peq{font-size:13px}
+.dm-peq{font-size:13px;line-height:18px}
 .dm-dim{color:var(--dm-ink2)}
 .dm-mudo{color:var(--dm-mudo)}
 .dm-centro{text-align:center}
 .dm-cresce{flex:1;min-width:0}
 .dm-corta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:68ch}
+.dm-so-leitor{
+  position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0;
+}
 
-/* --------------------------------------------------------------- estrutura */
-/* A BARRA DO TOPO TAMBÉM RESPEITA O RELÓGIO DO CELULAR — 20/09/2026.
-
-   Auditoria de tela. `app/globals.css` já dá `env(safe-area-inset-top)` a
-   todas as barras de topo do lado das escalas (`.casa-barra`, `.menu`,
-   `.tela-topo`, `.topo`, `.vol-barra`...), depois da captura de 16/09. Esta
-   folha nasceu DEPOIS daquela correção e ficou de fora da lista: com o app
-   instalado (`statusBarStyle: black-translucent` + `viewportFit: cover`, e o
-   manifest com `scope: '/'`), a hora, o wi-fi e a bateria ficavam por cima de
-   "GUI>", de "Demandas · Nome" e do link "Escalas >". */
+/* --------------------------------------------------------------- a casca */
+/* A BARRA. Celular: duas linhas (logo + quem sou, 48px; abas, 44px), a de
+   cima se recolhe ao rolar para baixo e volta ao rolar para cima
+   (`dm-recolhida`, posta por um ouvinte de rolagem na Casca): enquanto a
+   pessoa lê, ficam só as abas. Desktop: uma barra de 56px com as abas em
+   linha e quem sou à direita. A área segura do celular continua no topo, em
+   qualquer estado. */
 .dm-topo{
   position:sticky;top:0;z-index:30;background:var(--dm-bg);
   border-bottom:1px solid var(--dm-linha);
   padding-top:env(safe-area-inset-top, 0px);
 }
 .dm-topo-in{
-  max-width:var(--dm-largura);margin:0 auto;padding:var(--dm-e2) var(--dm-e3);
-  display:flex;align-items:center;gap:var(--dm-e3);
+  max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-calha);
+  display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo quem" "abas abas";
+  align-items:center;column-gap:var(--dm-e2);
 }
-/* 44px DE ALVO NO TOPO, PORQUE POLEGAR NÃO É PONTEIRO.
-
-   A logo tinha 34px de altura e o link "Escalas >" tinha 20. O dedo cobre
-   mais ou menos 9mm, que dá perto de 44px na densidade de um celular comum,
-   e é daí que vem o mínimo de 44 da WCAG 2.5.5 e do guia da Apple. Abaixo
-   disso a pessoa erra, tenta de novo, erra, e conclui que "o sistema não
-   responde" — quando o sistema só era pequeno demais para ser acertado.
-
-   Ganha altura sem ganhar peso visual: o alvo cresce, o desenho não. */
-.dm-topo-in a,.dm-topo-in button{
-  min-height:44px;display:inline-flex;align-items:center;
-}
-/* o link de voltar, que fica sozinho no topo do conteúdo e é o caminho de
-   saída mais usado no celular: 16px de altura não se acerta com o polegar */
-.dm-voltar{
-  min-height:44px;display:inline-flex;align-items:center;
-  text-decoration:none;
-}
+/* o link tem 44px de alvo; a caixa preta da marca, 36px, e o <span> de
+   dentro. A cor e o fundo ficam declarados no link tambem, para um nunca
+   virar o outro (o defeito de 18/09) */
 .dm-logo{
-  background:var(--dm-preto);color:#fff;font-weight:700;
-  letter-spacing:.26em;font-size:12px;padding:0 10px 0 14px;
-  text-decoration:none;flex:none;
+  grid-area:logo;
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:44px;min-width:44px;margin:2px 0;padding:0;
+  background:transparent;color:#fff;text-decoration:none;flex:none;
 }
-.dm-onde{font-size:13px;color:var(--dm-mudo);min-width:0}
-.dm-onde b{color:var(--dm-ink);font-weight:600}
-/* "Tecnologi…" não informa nada e ainda suja o topo. Num celular estreito o
-   setor sai inteiro de cena; o nome, que é o que localiza a pessoa, fica. */
-@media (max-width:520px){ .dm-onde .dm-setor{display:none} }
+.dm-logo > span{
+  display:inline-flex;align-items:center;justify-content:center;
+  height:36px;padding:0 8px 0 11px;border-radius:2px;
+  background:var(--dm-preto);color:#fff;font-weight:700;
+  letter-spacing:.26em;font-size:12px;line-height:1;
+}
+/* `justify-self:stretch` (e nao `end`): com `end` o Chrome media a caixa
+   pelo texto inteiro (302px numa coluna de 218) e ela vazava por cima da
+   logo em 320px; esticada na coluna, o excesso e cortado com reticencias */
+.dm-quem-sou{
+  grid-area:quem;justify-self:stretch;min-width:0;
+  display:flex;align-items:baseline;justify-content:flex-end;gap:8px;font-size:13px;color:var(--dm-mudo);
+  white-space:nowrap;overflow:hidden;min-height:44px;
+}
+.dm-quem-sou b{flex:none}
+/* o link "Portal" da faixa da administracao mora aqui: alvo de 44 */
+.dm-quem-sou a{display:inline-flex;align-items:center;min-height:44px}
+.dm-quem-sou b{color:var(--dm-ink);font-weight:600;font-size:14px}
+/* entrar e cadastro nao tem abas nem pessoa: so o nome do sistema ao lado da
+   logo, na mesma linha, em qualquer largura */
+.dm-topo-nome{grid-column:2 / -1;grid-row:1;display:flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--dm-ink)}
+.dm-quem-sou span{overflow:hidden;text-overflow:ellipsis}
 .dm-abas{
-  display:flex;gap:var(--dm-e4);overflow-x:auto;scrollbar-width:none;
-  max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-e3);
+  grid-area:abas;
+  display:flex;justify-content:space-between;gap:var(--dm-e2);
+  overflow-x:auto;scrollbar-width:none;
 }
 .dm-abas::-webkit-scrollbar{display:none}
-/* no celular, as abas se espalham pela largura e o respiro entre elas cai
-   para 12px: com 24 a barra de quem atende pedia 362px e escondia "Perfil" */
-@media (max-width:440px){ .dm-abas{gap:var(--dm-e2);justify-content:space-between} }
+/* cabe em 320 sem rolar: "Início Atender Nova Avisos Perfil" em 14px 550
+   mede 262px de texto (medido) */
 .dm-abas a{
-  padding:10px 0 12px;font-size:14px;color:var(--dm-mudo);text-decoration:none;
-  border-bottom:2px solid transparent;white-space:nowrap;transition:color var(--dm-t);
+  display:inline-flex;align-items:center;gap:4px;
+  min-height:44px;padding:0 2px;font-size:14px;font-weight:550;
+  color:var(--dm-mudo);text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color var(--dm-t),border-color var(--dm-t);
 }
 .dm-abas a:hover{color:var(--dm-ink2)}
-.dm-abas a[aria-current="page"]{color:var(--dm-ink);border-bottom-color:var(--dm-ink);font-weight:600}
-.dm-corpo{flex:1;max-width:var(--dm-largura);margin:0 auto;width:100%;padding:var(--dm-e4) var(--dm-e3) var(--dm-e6)}
+.dm-abas a[aria-current="page"]{color:var(--dm-ink);border-bottom-color:var(--dm-ink);font-weight:650}
+.dm-abas a:focus-visible{outline-offset:-2px}
+/* a linha da logo se recolhe: só as abas ficam (44px em vez de 92) */
+.dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
+  height:0;min-height:0;margin:0;overflow:hidden;opacity:0;pointer-events:none;
+}
+.dm-recolhida .dm-logo{border:0;padding:0}
+.dm-recolhida .dm-logo > span{height:0;overflow:hidden}
+@media (min-width:1024px){
+  .dm-topo-in{
+    grid-template-columns:auto 1fr auto;grid-template-areas:"logo abas quem";
+    column-gap:var(--dm-e4);min-height:56px;
+  }
+  .dm-logo{margin:0}
+  .dm-abas{justify-content:flex-start;gap:var(--dm-e4)}
+  .dm-abas a{min-height:56px;padding:0 2px}
+  .dm-quem-sou{min-height:56px;align-items:center}
+  .dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
+    height:auto;min-height:0;opacity:1;pointer-events:auto;overflow:visible;
+  }
+  .dm-recolhida .dm-logo{height:auto;min-height:44px;min-width:44px}
+  .dm-recolhida .dm-logo > span{height:36px;overflow:visible}
+  .dm-recolhida .dm-quem-sou{min-height:56px}
+}
+/* a administração é a mesma barra em preto: a "outra sala" dita sem outra
+   estrutura. As abas viram as seções; "Portal" fica à direita. */
+.dm-adm-faixa{background:var(--dm-preto);color:#fff;border-bottom-color:rgba(255,255,255,.14)}
+.dm-adm-faixa .dm-logo > span{background:#fff;color:var(--dm-preto)}
+.dm-adm-faixa .dm-abas a{color:rgba(255,255,255,.72)}
+.dm-adm-faixa .dm-abas a:hover{color:#fff}
+.dm-adm-faixa .dm-abas a[aria-current="page"]{color:#fff;border-bottom-color:#fff}
+.dm-adm-faixa .dm-quem-sou,.dm-adm-faixa .dm-quem-sou b{color:#fff}
+.dm-adm-faixa .dm-quem-sou{color:rgba(255,255,255,.78)}
+.dm-adm-faixa :where(a){color:#fff}
+
+/* `text-align:left` e `position:static` de proposito: o corpo e um <main>,
+   e o globals.css das escalas manda `main{text-align:center}` abaixo de
+   760px e `main{position:relative;z-index:1}`. Os dois sistemas nao se
+   encostam, entao quem se protege e esta folha (medido em 23/09/2026: a
+   ficha inteira centralizada em 320px). */
+.dm-corpo{
+  flex:1;max-width:var(--dm-largura);margin:0 auto;width:100%;
+  padding:var(--dm-e3) var(--dm-calha) var(--dm-e6);
+  text-align:left;position:static;
+}
+@media (min-width:1024px){ .dm-corpo{padding-top:var(--dm-e4)} }
+/* a barra de ação fixa do celular precisa de chão para a última linha do
+   histórico não ficar embaixo dela: a ficha põe este espaçador no fim */
+.dm-barra-espaco{height:calc(88px + env(safe-area-inset-bottom, 0px))}
+@media (min-width:1024px){ .dm-barra-espaco{display:none} }
 .dm-rodape{
   max-width:var(--dm-largura);margin:0 auto;width:100%;
-  padding:var(--dm-e4) var(--dm-e3);font-size:12px;color:var(--dm-mudo);
+  padding:var(--dm-e4) var(--dm-calha);font-size:12px;color:var(--dm-mudo);
   border-top:1px solid var(--dm-linha);
+  display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap;
 }
-.dm-rodape a{color:var(--dm-ink2)}
+.dm-rodape-links{display:flex;gap:var(--dm-e3)}
+.dm-rodape-links a{font-size:13px;color:var(--dm-ink2);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
+.dm-rodape-links a:hover{color:var(--dm-ink)}
 
-/* ------------------------------------------------------------------ peças */
-.dm-card{
-  background:var(--dm-card);border:1px solid var(--dm-linha);
-  padding:var(--dm-e3);margin-bottom:var(--dm-e2);
+/* O CABEÇALHO DE TELA: etiqueta "> ONDE", o display, a linha de contexto e a
+   ação primária (à direita no desktop, abaixo em largura inteira no celular). */
+.dm-cab{display:grid;gap:var(--dm-e2);margin-bottom:var(--dm-e3);align-items:end}
+.dm-cab > .dm-cab-acoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
+.dm-cab > .dm-cab-acoes > *{flex:1 1 auto}
+@media (min-width:720px){
+  .dm-cab{grid-template-columns:1fr auto;gap:var(--dm-e3)}
+  .dm-cab > .dm-cab-acoes{justify-content:flex-end}
+  .dm-cab > .dm-cab-acoes > *{flex:0 0 auto}
 }
-/* O `min-width:0` AQUI É O QUE IMPEDE A PÁGINA DE ANDAR DE LADO.
+.dm-volta{
+  display:inline-flex;align-items:center;gap:4px;min-height:44px;
+  font-size:13px;color:var(--dm-ink2);text-decoration:none;
+}
+.dm-volta:hover{color:var(--dm-ink)}
+.dm-volta::before{content:"‹";color:var(--dm-marca);font-size:17px;line-height:1}
+.dm-quem{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
+  font-size:14px;color:var(--dm-ink2);margin-top:6px}
+.dm-quem > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
 
-   Filho de grid e filho de flex nascem com `min-width:auto`, que quer dizer
-   "não encolho abaixo do meu conteúdo". Se dentro dele houver um texto que
-   não quebra — e `.dm-corta` usa `white-space:nowrap` de propósito, para
-   cortar com reticências — o conteúdo mínimo vira a linha inteira, o item
-   se recusa a encolher, e empurra o pai, que empurra a página.
-
-   O sintoma é traiçoeiro porque o texto APARECE cortado, bonitinho, com as
-   reticências no lugar: a tela parece certa e mesmo assim desliza. Foi o que
-   aconteceu na tela de Números, em 320px: documento de 350px, e o culpado
-   era um rótulo de categoria que já estava visualmente truncado.
-
-   `min-width:0` devolve a permissão de encolher. As reticências continuam. */
+/* ------------------------------------------------------------- composição */
+/* Duas colunas a partir de 1024: principal (8) e lateral (4). A lateral fica
+   fixa sob a barra quando cabe (`dm-fixa`). Abaixo disso, uma coluna, na
+   ordem do DOM, que é a ordem de leitura. */
+.dm-duas{display:grid;gap:var(--dm-e3);grid-template-columns:minmax(0,1fr);align-items:start}
+.dm-duas > *{min-width:0}
+@media (min-width:1024px){
+  .dm-duas{grid-template-columns:minmax(0,8fr) minmax(300px,4fr);gap:var(--dm-gap)}
+  .dm-duas.dm-7-5{grid-template-columns:minmax(0,7fr) minmax(300px,5fr)}
+  .dm-fixa{position:sticky;top:calc(var(--dm-topo-altura) + var(--dm-e3))}
+}
+@media (min-width:1680px){ .dm-duas{grid-template-columns:minmax(0,8fr) minmax(320px,4fr)} }
+.dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
+.dm-dupla > *{min-width:0}
+@media (min-width:720px){ .dm-dupla{grid-template-columns:1fr 1fr} }
 .dm-grade{display:grid;gap:var(--dm-e2)}
 .dm-grade > *{min-width:0}
+.dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-entre > *{min-width:0}
+.dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-linha > *{min-width:0}
+.dm-caixinha{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
+.dm-caixinha input{width:18px;height:18px;min-height:0;margin:0;accent-color:var(--dm-preto)}
+/* o corpo de leitura não passa de 68 letras por linha no desktop */
+.dm-leitura-larga{max-width:68ch}
 
-/* "MAIS OPÇÕES" — 22/09/2026. O que só ajusta a demanda (prazo, prioridade,
-   setor, anexo, cancelar) sai da grade e fica a um toque. O resumo é um alvo
-   de 44px como qualquer botão, e a seta vira quando abre. */
+/* ------------------------------------------------------------------ cartão */
+.dm-card{
+  background:var(--dm-card);border:1px solid var(--dm-linha);
+  padding:var(--dm-card-pad);margin-bottom:var(--dm-e2);
+}
+.dm-card > h3{margin-bottom:var(--dm-e2)}
+/* quieto: para o que não compete com conteúdo (vazio, resumo, contexto) */
+.dm-card.dm-quieto{background:var(--dm-card3)}
+/* "isto é com você": a barra de 3px só quando há itens */
+.dm-precisa{border-left:3px solid var(--dm-ink)}
+.dm-precisa .dm-fila{border-top:0}
+.dm-precisa .dm-item:last-child{border-bottom:0}
+
+/* ------------------------------------------------------------------ botões */
+.dm-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;padding:0 var(--dm-e3);border:1px solid var(--dm-linha2);
+  background:var(--dm-card);color:var(--dm-ink);border-radius:var(--dm-r);cursor:pointer;
+  font-size:15px;font-weight:550;letter-spacing:-.005em;text-decoration:none;
+  min-width:0;
+  transition:background var(--dm-t),border-color var(--dm-t),color var(--dm-t),transform var(--dm-t-toque);
+}
+@media (hover:hover){ .dm-btn:hover:not(:disabled){background:var(--dm-card3);border-color:var(--dm-linha3)} }
+.dm-btn:active:not(:disabled){transform:scale(.985)}
+/* desabilitado: o mesmo desenho quieto em qualquer variante. Quando habilita,
+   escurece: a mudança é o feedback. Nada de cinza escuro com texto branco
+   (2,0:1) como primeiro estado visível de toda caixa de ação. */
+.dm-btn:disabled{cursor:not-allowed;background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha)}
+.dm-btn.dm-pri{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
+@media (hover:hover){ .dm-btn.dm-pri:hover:not(:disabled){background:var(--dm-preto-toque);border-color:var(--dm-preto-toque)} }
+.dm-btn.dm-pri:disabled{background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha)}
+.dm-btn.dm-zap{color:var(--dm-ok);border-color:var(--dm-ok-ln)}
+@media (hover:hover){ .dm-btn.dm-zap:hover:not(:disabled){background:var(--dm-ok-bg)} }
+.dm-btn.dm-perigo{color:var(--dm-bad);border-color:var(--dm-bad-ln)}
+@media (hover:hover){ .dm-btn.dm-perigo:hover:not(:disabled){background:var(--dm-bad-bg)} }
+.dm-btn.dm-mini,.dm-btn.dm-peq{min-height:44px;padding:0 var(--dm-e2);font-size:13px;font-weight:500}
+.dm-btn.dm-larga{width:100%}
+/* o botão-texto: sem borda, para ajustes e saídas discretas ("Sair",
+   "Mudar o prazo", "Copiar o recado"). 44px de alvo, com padding pequeno. */
+.dm-btn.dm-txt{border-color:transparent;background:transparent;color:var(--dm-ink2);padding:0 8px;font-size:14px}
+@media (hover:hover){ .dm-btn.dm-txt:hover:not(:disabled){background:var(--dm-card3);color:var(--dm-ink);border-color:transparent} }
+.dm-btn.dm-txt:disabled{background:transparent;border-color:transparent}
+.dm-btn.dm-txt.dm-perigo{color:var(--dm-bad)}
+/* ocupado: o texto muda ("Salvando…") e a largura não pula */
+.dm-btn[aria-busy="true"]{cursor:progress}
+
+/* ------------------------------------------------------------------ campos */
+.dm-campo{display:block;margin-bottom:var(--dm-e4)}
+.dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
+.dm-campo input,.dm-campo select,.dm-campo textarea,.dm-filtro,.dm-campo-solto{
+  width:100%;min-height:46px;padding:10px var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);transition:border-color var(--dm-t),background var(--dm-t);
+}
+@media (hover:hover){ .dm-campo input:hover,.dm-campo select:hover,.dm-campo textarea:hover,.dm-filtro:hover{border-color:var(--dm-linha3)} }
+.dm-campo textarea{min-height:110px;resize:vertical;line-height:1.5}
+.dm-campo input:focus,.dm-campo select:focus,.dm-campo textarea:focus,.dm-filtro:focus,.dm-campo-solto:focus{
+  outline:2px solid var(--dm-foco);outline-offset:-1px;background:var(--dm-card);
+}
+.dm-campo input:disabled,.dm-campo select:disabled,.dm-campo textarea:disabled{background:var(--dm-card2);color:var(--dm-mudo);cursor:not-allowed}
+.dm-campo input[aria-invalid="true"],.dm-campo-solto[aria-invalid="true"]{border-color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad)}
+/* o select ganha a seta da folha (chevron), em vez da do sistema, que some
+   sobre o fundo claro e faz o campo parecer um campo de texto */
+.dm-campo select,.dm-filtro{
+  appearance:none;-webkit-appearance:none;padding-right:36px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23252525' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
+}
+.dm-campo input[type="date"]{min-height:46px;-webkit-appearance:none;appearance:none}
+.dm-campo input[type="date"]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer;width:22px;height:22px}
+/* largura por tipo fora do celular: campo de 1000px para um e-mail é ruído */
+@media (min-width:720px){
+  .dm-campo.dm-curto input,.dm-campo.dm-curto select{max-width:420px}
+  .dm-campo.dm-data input{max-width:220px}
+}
+/* o recado do campo que a tela recusou antes de enviar */
+.dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
+.dm-campo > .dm-erro-campo{color:var(--dm-bad);margin:6px 0 0;font-size:13px}
+.dm-filtro{width:auto;min-width:0}
+/* o campo solto curto: teto em reais, prazo em dias */
+.dm-campo-solto.dm-estreito{width:112px;flex:none}
+.dm-campo-solto[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
+
+/* a caixa de comentário no fim do histórico: uma linha de 46px que cresce
+   ao focar ou quando já tem texto */
+.dm-escrever .dm-campo{margin-bottom:0}
+.dm-escrever .dm-entre{margin-top:var(--dm-e2)}
+.dm-escrever textarea{min-height:46px;transition:min-height var(--dm-t-abre)}
+.dm-escrever.dm-aberta textarea,.dm-escrever textarea:focus{min-height:110px}
+
+/* o interruptor: 44×24 de alvo com o rótulo do que ele controla ao lado */
+.dm-interruptor{
+  display:inline-flex;align-items:center;gap:10px;min-height:44px;
+  border:0;background:transparent;padding:0;cursor:pointer;font-size:14px;color:var(--dm-ink);text-align:left;
+}
+.dm-interruptor::before{
+  content:"";flex:none;width:40px;height:24px;border-radius:12px;background:var(--dm-linha2);
+  box-shadow:inset 0 0 0 1px var(--dm-linha3);
+  transition:background var(--dm-t),box-shadow var(--dm-t);
+  /* a bolinha */
+  background-image:radial-gradient(circle at 12px 12px,#fff 0 8px,transparent 8.5px);
+  background-repeat:no-repeat;background-position:0 0;
+}
+.dm-interruptor[aria-checked="true"]::before{background-color:var(--dm-preto);box-shadow:none;background-position:16px 0}
+.dm-interruptor:disabled{cursor:not-allowed;color:var(--dm-mudo)}
+
+/* ----------------------------------------------------------------- busca */
+.dm-busca{
+  display:flex;align-items:center;gap:8px;width:100%;min-height:46px;
+  padding:0 12px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);
+}
+.dm-busca:focus-within{outline:2px solid var(--dm-foco);outline-offset:-1px;background:var(--dm-card)}
+.dm-busca svg{flex:none;opacity:.5}
+.dm-busca input{flex:1;min-width:0;border:0;background:transparent;outline:0;min-height:44px;padding:0}
+@media (min-width:720px){ .dm-busca{max-width:360px} }
+
+/* ---------------------------------------------------------- segmentado */
+.dm-seg{
+  display:flex;gap:4px;padding:3px;background:var(--dm-card2);
+  border-radius:var(--dm-r-seg);
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.dm-seg::-webkit-scrollbar{display:none}
+.dm-seg button{
+  flex:1 1 0;min-height:44px;padding:0 10px;white-space:nowrap;
+  border:0;background:transparent;color:var(--dm-ink2);
+  border-radius:var(--dm-r);cursor:pointer;font-size:14px;font-weight:550;text-align:center;
+  transition:background var(--dm-t),color var(--dm-t),box-shadow var(--dm-t);
+}
+.dm-seg button:hover{color:var(--dm-ink)}
+.dm-seg button[aria-pressed="true"]{
+  background:var(--dm-card);color:var(--dm-ink);font-weight:650;
+  box-shadow:0 1px 2px rgba(37,37,37,.10),0 0 0 1px var(--dm-linha);
+}
+.dm-seg button:focus-visible{outline-offset:-2px}
+@media (max-width:440px){
+  .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
+  .dm-seg:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
+  .dm-seg:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
+}
+@media (min-width:720px){ .dm-seg{display:inline-flex;width:auto} .dm-seg button{flex:0 0 auto;padding:0 14px} }
+
+/* ------------------------------------------------------------- opções */
+/* Escolha de poucas opções (prioridade, papel): botão em vez de select. */
+.dm-opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
+@media (min-width:520px){ .dm-opcoes{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.dm-opcoes:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
+.dm-opcoes:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
+/* cinco opções: três em cima e duas embaixo no celular, cinco em linha
+   quando cabem (a regra da largura vem depois e pesa mais: `> *` dentro de
+   `:has()` empata com o span e ganha pela ordem) */
+.dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(6,minmax(0,1fr))}
+.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3){grid-column:span 2}
+.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:span 3}
+.dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
+@media (min-width:760px){
+  .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
+  .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3),
+  .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:auto}
+}
+.dm-opcoes.dm-empilhadas,
+.dm-opcoes.dm-empilhadas:has(> :last-child:nth-child(3)){grid-template-columns:1fr}
+.dm-opcoes button{
+  min-height:44px;padding:0 var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
+  cursor:pointer;font-size:14px;transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t),box-shadow var(--dm-t);
+}
+/* seleção é CONTORNO, não preto: preto é ação */
+.dm-opcoes button[aria-pressed="true"]{
+  background:var(--dm-card);color:var(--dm-ink);border-color:var(--dm-ink);
+  box-shadow:inset 0 0 0 1px var(--dm-ink);font-weight:650;
+}
+
+/* ----------------------------------------------------------- sub-abas */
+/* As vistas de uma tela (Atender: esperando você, com você...; a
+   administração: Pessoas, Setores...). No desktop, abas de 14px fixas sob a
+   barra; no celular e no tablet, uma fita de fichas de 44px que rola de
+   lado, sangrando até a borda, com uma máscara no fim que diz que rola. */
+.dm-subabas{
+  display:flex;gap:var(--dm-e1);overflow-x:auto;scrollbar-width:none;
+  margin:0 calc(-1 * var(--dm-calha)) var(--dm-e3);padding:2px var(--dm-calha);
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+}
+.dm-subabas::-webkit-scrollbar{display:none}
+.dm-subabas button{
+  flex:none;scroll-snap-align:start;
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;
+  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
+  font-size:14px;font-weight:550;color:var(--dm-ink2);cursor:pointer;white-space:nowrap;
+  transition:border-color var(--dm-t),box-shadow var(--dm-t),color var(--dm-t);
+}
+.dm-subabas button[aria-pressed="true"]{color:var(--dm-ink);border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink);font-weight:650}
+.dm-subabas button:focus-visible{outline-offset:-2px}
+/* o número de cada ficha: preto quando há, cinza quando é zero, vermelho
+   quando é atrasada e há. `dm-quantos`, e não `dm-n`: `dm-n` já é a célula
+   numérica das tabelas, e a mesma classe pintava o cabeçalho de preto. */
+.dm-quantos{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;padding:0 7px;border-radius:11px;
+  background:var(--dm-preto);color:#fff;font-size:12px;font-weight:650;
+  font-variant-numeric:tabular-nums;line-height:1;
+}
+.dm-quantos.dm-zero{background:var(--dm-card2);color:var(--dm-mudo)}
+.dm-quantos.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
+@media (min-width:1024px){
+  .dm-subabas{
+    margin:0 0 var(--dm-e2);padding:0;gap:var(--dm-e4);mask-image:none;-webkit-mask-image:none;
+    border-bottom:1px solid var(--dm-linha);overflow:visible;
+    position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:5;
+  }
+  .dm-subabas button{
+    border:0;border-radius:0;padding:0 2px;min-height:48px;box-shadow:none;
+    border-bottom:2px solid transparent;margin-bottom:-1px;
+  }
+  .dm-subabas button[aria-pressed="true"]{box-shadow:none;border-bottom-color:var(--dm-ink)}
+  .dm-subabas .dm-quantos{background:transparent;color:var(--dm-mudo);padding:0;min-width:0;height:auto;font-size:14px;font-weight:600}
+  .dm-subabas .dm-quantos::before{content:"("}
+  .dm-subabas .dm-quantos::after{content:")"}
+  .dm-subabas .dm-quantos.dm-bad{color:var(--dm-bad);box-shadow:none}
+  .dm-subabas button[aria-pressed="true"] .dm-quantos{color:var(--dm-ink)}
+  .dm-subabas button[aria-pressed="true"] .dm-quantos.dm-bad{color:var(--dm-bad)}
+}
+
+/* a linha de ferramentas da lista: resumo à esquerda, busca e ordem à
+   direita. No celular a busca é um ícone de 44px que abre o campo por cima da
+   linha: o cartão de 95px só com a busca saiu. */
+.dm-ferramentas{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);
+  flex-wrap:wrap;margin-bottom:var(--dm-e2);min-height:44px;
+}
+.dm-ferramentas-dir{display:flex;align-items:center;gap:var(--dm-e2);flex:1 1 auto;justify-content:flex-end;min-width:0;flex-wrap:wrap}
+.dm-ferramentas-dir > .dm-busca{flex:1 1 220px;max-width:360px;margin:0}
+.dm-busca-toggle{display:none;padding:0 12px}
+@media (max-width:719px){
+  .dm-busca-toggle{display:inline-flex}
+  .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:none}
+  .dm-ferramentas-dir > .dm-busca.dm-aberta{flex:1 1 100%;max-width:none}
+}
+.dm-ordem{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--dm-mudo)}
+.dm-ordem select{min-height:44px;padding:0 32px 0 10px;font-size:14px;width:auto}
+/* o que só existe no desktop (a ordem da lista, o painel de ação, a coluna
+   de resumo) e o que só existe no celular (as contas no fim do Início) */
+@media (max-width:1023px){ .dm-so-desktop{display:none} }
+@media (min-width:1024px){ .dm-so-celular{display:none} }
+
+/* ------------------------------------------------------------------ pílula */
+.dm-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:3px 9px;border:1px solid var(--dm-linha2);background:var(--dm-card2);
+  border-radius:2px;font-size:12px;line-height:16px;font-weight:600;color:var(--dm-ink2);
+  max-width:100%;overflow-wrap:anywhere;text-align:left;
+}
+.dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);border-color:var(--dm-ok-ln)}
+.dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);border-color:var(--dm-warn-ln)}
+.dm-pill.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);border-color:var(--dm-bad-ln)}
+.dm-pill.dm-info{background:var(--dm-info-bg);color:var(--dm-info);border-color:var(--dm-info-ln)}
+.dm-ponto{width:6px;height:6px;border-radius:50%;background:var(--dm-marca);flex:none}
+.dm-ponto.dm-ok{background:var(--dm-ok)}
+.dm-ponto.dm-warn{background:var(--dm-warn)}
+.dm-ponto.dm-bad{background:var(--dm-bad)}
+.dm-selo{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;margin-left:6px;
+  border-radius:10px;background:var(--dm-preto);color:#fff;
+  font-size:12px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums;
+  vertical-align:1px;
+}
+.dm-adm-faixa .dm-selo{background:#fff;color:var(--dm-preto)}
+
+/* ------------------------------------------------------------------ avisos */
+.dm-aviso{
+  display:flex;gap:var(--dm-e2);align-items:flex-start;
+  padding:var(--dm-e2) var(--dm-e3);border:1px solid var(--dm-linha2);
+  background:var(--dm-card2);font-size:14px;margin-bottom:var(--dm-e2);
+  overflow-wrap:anywhere;
+}
+.dm-aviso > *{min-width:0}
+.dm-aviso.dm-ok{background:var(--dm-ok-bg);border-color:var(--dm-ok-ln);color:var(--dm-ok)}
+.dm-aviso.dm-warn{background:var(--dm-warn-bg);border-color:var(--dm-warn-ln);color:var(--dm-warn)}
+.dm-aviso.dm-bad{background:var(--dm-bad-bg);border-color:var(--dm-bad-ln);color:var(--dm-bad)}
+.dm-aviso.dm-info{background:var(--dm-info-bg);border-color:var(--dm-info-ln);color:var(--dm-info)}
+.dm-aviso b{font-weight:650}
+/* o resumo de uma lista ("2 passaram do prazo") é uma linha com o ponto do
+   tom, e não um bloco de 55px de largura inteira em toda carga */
+.dm-aviso-linha{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;min-height:44px}
+.dm-aviso-linha.dm-bad{color:var(--dm-bad)}
+.dm-aviso-linha.dm-warn{color:var(--dm-warn)}
+.dm-aviso-linha.dm-ok{color:var(--dm-ok)}
+.dm-aviso-linha .dm-ponto{background:currentColor}
+
+/* o toast: para o sucesso que muda de tela ou some da tela. Um só; o
+   segundo substitui o primeiro. Erro nunca é toast, porque toast some. */
+.dm-toast{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:60;
+  max-width:min(420px,calc(100% - 32px));width:max-content;
+  display:flex;align-items:center;gap:var(--dm-e2);
+  padding:10px var(--dm-e3);background:var(--dm-preto);color:#fff;
+  border-radius:var(--dm-r);box-shadow:var(--dm-sombra-flutua);font-size:14px;font-weight:500;
+  animation:dm-toast-entra 320ms var(--dm-curva-entra);
+}
+.dm-toast > span{min-width:0;overflow-wrap:anywhere}
+.dm-toast a,.dm-toast button{
+  color:#fff;background:transparent;border:0;padding:0 4px;min-height:44px;
+  font:inherit;font-weight:650;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap;
+}
+@media (min-width:1024px){ .dm-toast{left:auto;right:32px;transform:none} }
+@keyframes dm-toast-entra{0%{opacity:0;transform:translate(-50%,8px)}100%{opacity:1;transform:translate(-50%,0)}}
+@media (min-width:1024px){ @keyframes dm-toast-entra{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}} }
+
+/* ------------------------------------------------------------------ lista */
+/* A MESMA DEMANDA EM QUATRO FORMAS, UMA PEÇA SÓ.
+
+   `.dm-fila` é um contêiner (`container-type:inline-size`), e a linha decide
+   a própria forma pela largura DELE, não pela do viewport: a mesma lista
+   mora numa coluna de 700px no Início e em 1136px em Atender.
+
+     lista    (< 560)     duas linhas: número + título; pílula e fatos
+     compacta (560..959)  colunas: número · título+contexto · estado · prazo · passo
+     larga    (960..1099) + coluna "com"
+     inteira  (≥ 1100)    + categoria e quem pediu em coluna própria
+
+   Sem suporte a container query (Chromium < 105), fica a forma de lista em
+   qualquer largura: continua usável. */
+.dm-fila{border-top:1px solid var(--dm-linha);container-type:inline-size}
+.dm-fila-cab{display:none}
+.dm-item{
+  display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"num tit" "meta meta";
+  column-gap:var(--dm-e2);row-gap:5px;align-items:baseline;
+  text-decoration:none;color:inherit;
+  padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
+  transition:background var(--dm-t);
+}
+.dm-item:hover{background:var(--dm-card3);box-shadow:0 0 0 12px var(--dm-card3)}
+.dm-item:focus-visible{outline-offset:-2px}
+.dm-c-num{grid-area:num;font-size:13px;font-weight:700;color:var(--dm-ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dm-c-tit{grid-area:tit;min-width:0}
+.dm-c-tit b{font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere;display:block;line-height:1.35}
+.dm-c-ctx{display:block;font-size:13px;color:var(--dm-mudo);margin-top:2px;overflow-wrap:anywhere}
+.dm-c-meta{
+  grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
+  font-size:13px;color:var(--dm-mudo);min-width:0;
+}
+.dm-c-meta > *{min-width:0;overflow-wrap:anywhere}
+.dm-c-estado{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center}
+/* o separador vai no fato ANTERIOR, com espaço que não quebra: nunca abre
+   uma linha sozinho */
+.dm-c-meta > .dm-c-fato:not(:last-child)::after{content:"\00a0·";opacity:.5}
+.dm-c-prazo.dm-bad{color:var(--dm-bad);font-weight:600}
+.dm-c-com b{font-weight:600;color:var(--dm-ink2)}
+.dm-c-passo{
+  margin-left:auto;font-size:13px;font-weight:600;color:var(--dm-info);white-space:nowrap;
+}
+.dm-c-passo::after{content:"›";margin-left:3px;color:var(--dm-marca)}
+.dm-item.dm-urgente{box-shadow:inset 3px 0 0 var(--dm-bad);padding-left:var(--dm-e2)}
+.dm-item.dm-urgente:hover{box-shadow:inset 3px 0 0 var(--dm-bad),0 0 0 12px var(--dm-card3)}
+.dm-item.dm-atrasada .dm-c-prazo{color:var(--dm-bad);font-weight:600}
+/* entrada de lista: as oito primeiras linhas escalonadas em 20ms */
+.dm-fila > .dm-item{animation:dm-entra 160ms var(--dm-curva-entra) both}
+.dm-fila > .dm-item:nth-child(2){animation-delay:20ms}
+.dm-fila > .dm-item:nth-child(3){animation-delay:40ms}
+.dm-fila > .dm-item:nth-child(4){animation-delay:60ms}
+.dm-fila > .dm-item:nth-child(5){animation-delay:80ms}
+.dm-fila > .dm-item:nth-child(6){animation-delay:100ms}
+.dm-fila > .dm-item:nth-child(7){animation-delay:120ms}
+.dm-fila > .dm-item:nth-child(8){animation-delay:140ms}
+@keyframes dm-entra{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:none}}
+[aria-busy="true"] > .dm-fila{opacity:.6;transition:opacity 120ms}
+
+@container (min-width:560px){
+  .dm-fila-cab{
+    display:grid;grid-template-columns:52px minmax(0,1fr) 150px 110px 150px;
+    column-gap:var(--dm-e2);align-items:end;
+    padding:0 0 var(--dm-e1);border-bottom:1px solid var(--dm-linha);
+    font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
+    position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:4;
+  }
+  .dm-fila-cab > .dm-c-com,.dm-fila-cab > .dm-c-cat{display:none}
+  .dm-item{
+    grid-template-columns:52px minmax(0,1fr) 150px 110px 150px;
+    grid-template-areas:"num tit estado prazo passo";
+    align-items:center;padding:10px 0;min-height:56px;
+  }
+  .dm-c-meta{display:contents}
+  .dm-c-meta > .dm-c-fato:not(:last-child)::after{content:none}
+  .dm-c-estado{grid-area:estado}
+  .dm-c-prazo{grid-area:prazo;white-space:nowrap}
+  .dm-c-passo{grid-area:passo;text-align:right;margin-left:0}
+  .dm-c-com,.dm-c-cat{display:none}
+  .dm-c-tit b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .dm-pre{display:none}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px}
+  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit estado prazo"}
+}
+@container (min-width:960px){
+  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px 120px 150px}
+  .dm-item{grid-template-areas:"num tit estado prazo com passo"}
+  .dm-fila-cab > .dm-c-com,.dm-c-com{display:block}
+  .dm-c-com{grid-area:com;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px 120px}
+  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit estado prazo com"}
+}
+@container (min-width:1100px){
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) 220px 170px 110px 120px 150px}
+  .dm-item{grid-template-areas:"num tit cat estado prazo com passo";min-height:48px}
+  .dm-fila-cab > .dm-c-cat,.dm-c-cat{display:block}
+  .dm-c-cat{grid-area:cat;font-size:13px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dm-c-ctx{display:none}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) 220px 170px 110px 120px}
+  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit cat estado prazo com"}
+}
+.dm-corte{
+  margin:12px 0 0;padding:10px 12px;
+  font-size:14px;line-height:1.5;color:var(--dm-mudo);
+  border-top:1px solid var(--dm-linha);
+}
+
+/* -------------------------------------------------------------- contagens */
+/* Um componente só de "número com legenda", em duas variantes: atalho (é
+   botão ou link, tem canto) e leitura (fio, sem canto). Selecionado é
+   contorno de 2px, não fundo preto; alarme é número vermelho, não fundo
+   preto. */
+.dm-contas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
+@media (min-width:520px){ .dm-contas{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.dm-contas.dm-duas-colunas{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dm-conta{
+  display:block;min-width:0;min-height:64px;padding:10px var(--dm-e2);
+  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
+  text-decoration:none;color:inherit;text-align:left;font:inherit;cursor:pointer;
+  transition:background var(--dm-t),border-color var(--dm-t),box-shadow var(--dm-t);
+}
+@media (hover:hover){ .dm-conta:hover{background:var(--dm-card3);border-color:var(--dm-linha3)} }
+.dm-conta[aria-pressed="true"]{border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink)}
+.dm-conta b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
+.dm-conta small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:2px;line-height:1.35}
+.dm-conta.dm-bad b{color:var(--dm-bad)}
+.dm-conta.dm-zero b{color:var(--dm-mudo)}
+.dm-conta.dm-leitura{border-color:var(--dm-linha);border-radius:0;cursor:default}
+@media (hover:hover){ .dm-conta.dm-leitura:hover{background:var(--dm-card);border-color:var(--dm-linha)} }
+.dm-conta.dm-kpi b{font-size:30px;letter-spacing:-.03em}
+.dm-barra{height:6px;background:var(--dm-card2);margin-top:8px}
+.dm-barra i{display:block;height:100%;background:var(--dm-ink)}
+
+/* ------------------------------------------------------------------ tabela */
+.dm-tab{width:100%;border-collapse:collapse;font-size:14px}
+.dm-tab th{
+  text-align:left;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
+  border-bottom:1px solid var(--dm-linha);vertical-align:bottom;
+}
+.dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha);vertical-align:middle}
+.dm-tab tr:last-child td{border-bottom:0}
+.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
+.dm-tab select,.dm-tab input{
+  min-height:44px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
+  border-radius:var(--dm-r);padding:0 8px;max-width:100%;
+}
+.dm-tab select{appearance:none;-webkit-appearance:none;padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23252525' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center}
+.dm-tab td.dm-primeira{position:sticky;left:0;background:var(--dm-card);z-index:1}
+/* o campo solto dentro da tabela não ocupa a célula inteira */
+.dm-tab .dm-campo-solto{width:auto;min-width:150px;max-width:100%}
+.dm-tab .dm-campo-solto.dm-estreito{min-width:0}
+/* a tabela de rótulo/valor (a ficha) vira duas colunas no celular */
+/* a tabela de LEITURA rola de lado dentro do cartão, com a primeira coluna
+   fixa e um sinal de que rola; a EDITÁVEL vira cartões (ver `dm-cartoes`) */
+.dm-rola{overflow-x:auto;-webkit-overflow-scrolling:touch;
+  mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
+.dm-rola .dm-tab{min-width:max-content}
+@media (min-width:720px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
+/* a tabela editável abaixo de 720: um cartão por linha, controles rotulados */
+.dm-cartoes{display:grid;gap:var(--dm-e2)}
+.dm-cartao-linha{border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2)}
+.dm-cartao-linha > h3{margin:0}
+.dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2)}
+@media (min-width:480px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} }
+.dm-cartao-campo > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:4px}
+/* quem decide entre tabela e cartões é `useEstreito(719)` no componente,
+   para a página não carregar os dois e duplicar cada controle */
+
+/* ------------------------------------------------------------------ ficha */
+/* a faixa de fatos sob o título: os quatro que decidem a ação */
+.dm-fatos{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  border:1px solid var(--dm-linha);margin-bottom:var(--dm-e3);
+}
+.dm-fato{padding:10px var(--dm-e2);border-bottom:1px solid var(--dm-linha);border-right:1px solid var(--dm-linha);min-width:0}
+.dm-fato:nth-child(2n){border-right:0}
+.dm-fato:nth-last-child(-n+2){border-bottom:0}
+.dm-fato > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:3px}
+.dm-fato > div{font-size:14px;font-weight:500;overflow-wrap:anywhere}
+.dm-fato > div small{display:block;font-size:13px;font-weight:400;color:var(--dm-mudo)}
+@media (min-width:720px){
+  .dm-fatos{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .dm-fato{border-bottom:0}
+  .dm-fato:nth-child(2n){border-right:1px solid var(--dm-linha)}
+  .dm-fato:last-child{border-right:0}
+  .dm-fato > div small{display:inline;margin-left:4px}
+  .dm-fato > div small::before{content:"· "}
+}
+/* rótulo/valor em duas colunas dentro de "O que foi pedido" */
+.dm-pares{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e2) var(--dm-e3);
+  border-top:1px solid var(--dm-linha);padding-top:var(--dm-e2);margin-top:var(--dm-e2)}
+.dm-pares > div > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:2px}
+.dm-pares > div{min-width:0;font-size:14px;overflow-wrap:anywhere}
+.dm-pares.dm-uma-coluna{grid-template-columns:1fr;border-top:0;padding-top:0;margin-top:0}
+/* a barra de enviar da Nova: a frase-resumo à esquerda, o botão à direita */
+.dm-barra-acao.dm-barra-enviar,.dm-barra-acao.dm-barra-enviar:has(> :last-child:nth-child(2)){grid-template-columns:1fr auto;align-items:center}
+/* o painel de ação: no desktop, coluna fixa; no celular, a barra fixa */
+.dm-painel{padding:var(--dm-card-pad)}
+.dm-painel-titulo{margin-bottom:2px}
+.dm-painel-estado{font-size:13px;color:var(--dm-mudo);margin-bottom:var(--dm-e2)}
+.dm-painel-acoes{display:grid;gap:var(--dm-e1)}
+.dm-painel-ajustes{display:flex;flex-wrap:wrap;gap:4px var(--dm-e1);margin-top:var(--dm-e2)}
+.dm-painel-secao{border-top:1px solid var(--dm-linha);margin-top:var(--dm-e3);padding-top:var(--dm-e3)}
+.dm-barra-acao{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--dm-e1);
+  padding:8px var(--dm-e3) calc(8px + env(safe-area-inset-bottom, 0px));
+  background:var(--dm-bg);border-top:1px solid var(--dm-linha);
+  animation:dm-sobe 200ms var(--dm-curva-entra);
+}
+.dm-barra-acao:has(> :only-child){grid-template-columns:1fr}
+.dm-barra-acao > .dm-btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:44px;padding-top:0;padding-bottom:0}
+@keyframes dm-sobe{0%{transform:translateY(100%)}100%{transform:none}}
+@media (min-width:1024px){ .dm-barra-acao{display:none} }
+/* a folha que sobe do rodapé no celular, com o formulário da ação; no
+   desktop o mesmo <dialog> abre como caixa centralizada */
+.dm-folha{
+  border:0;padding:0;margin:0;max-width:100%;max-height:100dvh;width:100%;
+  position:fixed;left:0;right:0;bottom:0;top:auto;
+  background:var(--dm-card);color:var(--dm-ink);
+  border-radius:16px 16px 0 0;box-shadow:var(--dm-sombra-flutua);
+  animation:dm-sobe var(--dm-t-painel);
+}
+.dm-folha::backdrop{background:rgba(37,37,37,.40)}
+.dm-folha-in{padding:8px var(--dm-e3) calc(var(--dm-e3) + env(safe-area-inset-bottom, 0px));max-height:calc(100dvh - 48px);overflow:auto}
+.dm-folha-alca{width:36px;height:4px;border-radius:2px;background:var(--dm-linha2);margin:4px auto var(--dm-e2)}
+.dm-folha-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);margin-bottom:var(--dm-e1)}
+@media (min-width:1024px){
+  .dm-folha{
+    position:fixed;inset:0;margin:auto;width:min(480px,calc(100% - 32px));max-height:min(90dvh,720px);height:fit-content;
+    border-radius:var(--dm-r);animation:dm-toast-entra 200ms var(--dm-curva-entra);
+  }
+  .dm-folha-alca{display:none}
+}
+/* quem acompanha, em uma linha; o formulário de incluir a um toque */
+.dm-acompanha-bloco{margin:var(--dm-e2) 0}
+.dm-acompanha{display:flex;flex-wrap:wrap;align-items:center;gap:4px var(--dm-e1);font-size:14px;color:var(--dm-ink2);min-height:44px}
+.dm-acompanha .dm-rot{margin-right:4px}
+/* o formulário da ação dentro do painel ou da folha: os cartões de dentro
+   perdem a moldura, senão é caixa dentro de caixa */
+.dm-painel .dm-card,.dm-folha .dm-card{border:0;padding:0;margin-bottom:var(--dm-e2);background:transparent}
+/* anexos: uma linha por link, com quem colou */
+.dm-anexos{list-style:none;margin:0;padding:0}
+.dm-anexos li{display:flex;align-items:center;gap:var(--dm-e2);padding:6px 0;border-bottom:1px solid var(--dm-linha);flex-wrap:wrap}
+.dm-anexos li:last-child{border-bottom:0}
+.dm-anexo-link{flex:1 1 200px;min-width:0;padding:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:3px}
+.dm-anexo-de{font-size:12px;color:var(--dm-mudo);white-space:nowrap}
+/* o histórico: o fio termina no último ponto */
+.dm-hist{list-style:none;margin:0;padding:0}
+.dm-hist li{position:relative;padding:0 0 var(--dm-e3) 20px}
+.dm-hist li::before{
+  content:'';position:absolute;left:0;top:6px;width:7px;height:7px;
+  border-radius:50%;background:var(--dm-linha3);
+}
+.dm-hist li::after{content:'';position:absolute;left:3px;top:17px;bottom:-4px;width:1px;background:var(--dm-linha)}
+.dm-hist li:last-child::after{content:none}
+.dm-hist li.dm-marco::before{background:var(--dm-ink)}
+.dm-hist .dm-q{font-size:13px;color:var(--dm-mudo)}
+.dm-hist .dm-q b{font-weight:500;color:var(--dm-ink2)}
+.dm-hist .dm-t{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px;font-size:15px;line-height:1.5;max-width:68ch}
+.dm-hist .dm-interno{
+  border-left:3px solid var(--dm-warn);padding:8px var(--dm-e2);
+  background:var(--dm-warn-bg);
+}
+
+/* --------------------------------------------------------------- avisos */
+.dm-avisos{list-style:none;margin:0;padding:0}
+.dm-aviso-grupo{border-top:1px solid var(--dm-linha);padding:var(--dm-e2) 0}
+.dm-aviso-grupo > a{display:block;font-size:15px;font-weight:650;letter-spacing:-.01em;text-decoration:none;min-height:44px;padding:8px 0;overflow-wrap:anywhere}
+.dm-aviso-grupo > a:hover{text-decoration:underline;text-underline-offset:3px}
+.dm-aviso-grupo ul{list-style:none;margin:0;padding:0}
+.dm-aviso-grupo li{position:relative;padding:4px 0 4px 18px;font-size:14px}
+.dm-aviso-grupo li::before{content:'';position:absolute;left:2px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--dm-linha2)}
+.dm-aviso-grupo li.dm-novo::before{background:var(--dm-ink)}
+.dm-aviso-grupo li.dm-novo .dm-aviso-o-que{font-weight:600}
+.dm-aviso-o-que{overflow-wrap:anywhere}
+.dm-aviso-de{font-size:13px;color:var(--dm-mudo);overflow-wrap:anywhere}
+.dm-avisos-dia{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin:var(--dm-e3) 0 var(--dm-e1)}
+
+/* ------------------------------------------------------------------ outros */
 .dm-mais{margin-top:var(--dm-e2)}
 .dm-mais > summary{
   list-style:none;cursor:pointer;user-select:none;
@@ -324,494 +953,10 @@
 .dm-mais[open] > summary::after{transform:translateY(2px) rotate(-135deg)}
 .dm-mais > summary:hover{color:var(--dm-ink);background:var(--dm-card2)}
 .dm-mais > .dm-grade{margin-top:var(--dm-e1)}
-
-/* no celular, quem tem o que fazer vê as ações antes do pedido */
-@media (max-width:759px){ .dm-acao-primeiro > :nth-child(2){order:-1} }
-.dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
-.dm-entre > *{min-width:0}
-.dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
-.dm-linha > *{min-width:0}
-
-/* A CAIXINHA É PEQUENA DE PROPÓSITO; QUEM RECEBE O TOQUE É O RÓTULO INTEIRO.
-
-   `node scripts/demandas-celular.mjs`, 22/09/2026: 7 reprovações em 384, e
-   as sete são a mesma linha, em cinco fichas e dois papéis:
-
-     390px · admin · detalhe-execucao: todo alvo de toque tem 44px
-       label.dm-linha.dm-peq «Só para a equipe (quem ped» 324×20
-
-   (no mesmo dia a semente ganhou a ficha validada e a régua passou a fazer
-   432 conferências; a mesma medida virou 8 reprovações, que é a mesma linha
-   numa ficha a mais. Com esta regra: 432/432.)
-
-   O medidor dispensa o `<input type="checkbox">` de propósito (inflar a
-   caixinha para 44px desalinharia a linha sem aumentar alvo nenhum) e mede o
-   `<label>`, que é o que de fato recebe o dedo. O rótulo tinha 20px: menos
-   da metade do mínimo da WCAG 2.5.5.
-
-   E ele passava em 320px, o que é o pior jeito de um defeito se esconder: lá
-   a frase não cabe numa linha, quebra em duas, e o conjunto atravessa os 44
-   por acidente. Nos dois tamanhos que são celular de verdade, 360 e 390, a
-   frase cabe numa linha só e o alvo encolhe. A régua mede 320 e 390, então
-   o único tamanho que reprovava era o certo.
-
-   `min-height` e não `padding`: a linha já é flex com `align-items:center`,
-   então a altura sobra em volta do texto e nada se desloca. O `display:flex`
-   e o `align-items` ficam repetidos aqui para a classe valer sozinha, sem
-   depender de estar sempre acompanhada de `.dm-linha`. */
-.dm-caixinha{display:flex;align-items:center;min-height:44px}
-
-.dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
-/* A MESMA GUARDA DE CIMA, E ELA FALTAVA NESTAS DUAS.
-
-   Medido em 21/09, com um link do YouTube colado na descricao (139 letras):
-   o cartao "O que foi pedido" cresceu para 853px dentro de uma tela de 320px,
-   e `window.scrollX` ficou em 0 depois de mandar rolar para a direita — ou
-   seja, o conteudo foi CORTADO sem nenhuma forma de recuperar. Quem pediu, quem
-   atende e o prazo sumiram na borda.
-
-   Injetando so `min-width:0` em `.dm-dupla > *`: 853px -> 288px. */
-.dm-dupla > *{min-width:0}
-@media (min-width:760px){ .dm-dupla{grid-template-columns:1fr 1fr} }
-.dm-tres{display:grid;gap:var(--dm-e2);grid-template-columns:repeat(2,1fr)}
-.dm-tres > *{min-width:0}
-@media (min-width:760px){ .dm-tres{grid-template-columns:repeat(4,1fr)} }
-
-/* TEXTO QUE A PESSOA COLOU, E QUE NAO TEM COMO QUEBRAR SOZINHO.
-
-   `pre-wrap` guarda as quebras de linha que ela digitou. Nao resolve um link
-   de 134 letras sem espaco: isso e uma "palavra" so, e ela atravessa a tela.
-   `overflow-wrap:anywhere` deixa quebrar no meio. Fica feio num link;
-   ilegivel e pior que feio. */
-.dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere}
-
-/* O LINK DO ANEXO E UM ALVO SOZINHO, NAO UM LINK NO MEIO DE UMA FRASE.
-
-   A WCAG 2.5.5 dispensa link dentro de parágrafo — inflar uma palavra no meio
-   do texto estragaria o espaçamento. Mas este mora sozinho numa lista, é a
-   única coisa clicável da linha, e media 16px de altura. Quem erra o toque
-   num anexo, na melhor hipótese não abre nada.
-
-   `padding` vertical em vez de `min-height` porque o link quebra em várias
-   linhas quando a URL é comprida: altura fixa cortaria o texto. */
-.dm-anexo-link{
-  display:inline-block;padding:14px 0;
-  white-space:pre-wrap;overflow-wrap:anywhere;
-}
-
-/* SO PARA QUEM OUVE.
-
-   `display:none` e `visibility:hidden` escondem do leitor de tela tambem, que
-   e o oposto do que se quer aqui. `clip-path:inset(50%)` num elemento de 1px
-   tira da tela e mantem na arvore de acessibilidade. */
-.dm-so-leitor{
-  position:absolute;width:1px;height:1px;overflow:hidden;
-  clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0;
-}
-
-.dm-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:44px;padding:0 var(--dm-e3);border:1px solid var(--dm-linha2);
-  background:var(--dm-card);border-radius:var(--dm-r);cursor:pointer;
-  font-size:15px;font-weight:550;text-decoration:none;
-  transition:background var(--dm-t),border-color var(--dm-t),opacity var(--dm-t);
-}
-.dm-btn:hover:not(:disabled){background:var(--dm-card3);border-color:var(--dm-linha3)}
-/* 2,75:1 MEDIDO NOS PIXELS, E ESSE E O ESTADO INICIAL DA TELA.
-
-   `opacity:.45` punha o rotulo de "Comentar" em 2,75:1 (o mesmo botao
-   habilitado da 15,33:1). A WCAG isenta controle inativo, entao nao e
-   reprovacao — mas `CaixaDeAcao` nasce com o botao desabilitado, e essa e a
-   unica acao visivel da coluna enquanto ninguem digitou. No sol da porta da
-   igreja, a unica coisa na tela e a que nao se le.
-
-   Apagar o botao sem apagar o rotulo: fundo e borda recuam, o texto fica. */
-.dm-btn:disabled{
-  cursor:not-allowed;opacity:1;
-  background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha);
-}
-.dm-btn.dm-pri:disabled{background:var(--dm-linha3);color:#fff;border-color:transparent}
-.dm-btn.dm-pri{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
-.dm-btn.dm-pri:hover:not(:disabled){background:var(--dm-preto-toque);border-color:var(--dm-preto-toque)}
-.dm-btn.dm-zap{color:var(--dm-ok);border-color:var(--dm-ok-ln)}
-.dm-btn.dm-zap:hover{background:var(--dm-ok-bg)}
-.dm-btn.dm-perigo{color:var(--dm-bad);border-color:var(--dm-bad-ln)}
-.dm-btn.dm-perigo:hover{background:var(--dm-bad-bg)}
-/* 36px NUM GESTO DE CORRECAO, E ELE JA TINHA SIDO 26.
-
-   O alvo de "tirar" um anexo mede 50x36, abaixo dos 44 da WCAG 2.5.5. Errar
-   o toque para TIRAR alguma coisa e, na melhor hipotese, nada acontecer; na
-   pior, acertar o anexo de cima. E o pior lugar possivel para um alvo
-   pequeno.
-
-   O `::after` cresce a AREA DE TOQUE sem crescer o desenho: o botao continua
-   discreto na lista e o dedo acerta. `pointer-events` fica no padrao de
-   proposito — o pseudo-elemento faz parte do botao e recebe o toque por ele. */
-.dm-btn.dm-mini{min-height:44px;padding:0 var(--dm-e2);font-size:13px;font-weight:500}
-
-/* A PRIMEIRA TENTATIVA DISTO FOI UM `::after` DE 44px SOBRE UM BOTAO DE 36,
-   PARA CRESCER O ALVO SEM CRESCER O DESENHO. Duas coisas derrubaram a ideia:
-
-   1. O medidor le `getBoundingClientRect()` e continuava vendo 36. Uma regra
-      que o instrumento nao consegue conferir e uma regra que ninguem cobra.
-   2. Pior: numa LISTA de anexos com 6px entre as linhas, uma area invisivel
-      de 44px transborda para a linha de cima e de baixo. Eu estaria criando
-      exatamente o "acertar o anexo de cima" que a auditoria descreveu como o
-      dano de errar este toque.
-
-   Entao o botao tem 44px de verdade, e a discricao vem da letra e do peso,
-   nao da altura. */
-.dm-btn.dm-larga{width:100%}
-
-/* A PÍLULA NÃO PODE EMPURRAR A TELA DE LADO.
-
-   Com `white-space:nowrap` fixo, "Travada · esperando informação" virava uma
-   pílula de 325px dentro de uma tela de 320px, e a PÁGINA INTEIRA passava a
-   deslizar na horizontal. Um texto comprido num canto e o documento todo
-   anda junto: é o defeito de celular mais comum e o mais invisível no
-   monitor, onde sempre sobra largura.
-
-   A regra agora é: não quebra enquanto couber, quebra quando não couber.
-   `max-width:100%` prende a pílula na largura disponível e
-   `overflow-wrap:anywhere` deixa o texto virar duas linhas em vez de
-   arrastar a tela. */
-.dm-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:3px 9px;border:1px solid var(--dm-linha2);background:var(--dm-card2);
-  font-size:12px;font-weight:600;
-  max-width:100%;overflow-wrap:anywhere;text-align:left;
-}
-.dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);border-color:var(--dm-ok-ln)}
-.dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);border-color:var(--dm-warn-ln)}
-.dm-pill.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);border-color:var(--dm-bad-ln)}
-.dm-pill.dm-info{background:var(--dm-info-bg);color:var(--dm-info);border-color:var(--dm-info-ln)}
-.dm-ponto{width:6px;height:6px;border-radius:50%;background:var(--dm-marca);flex:none}
-.dm-ponto.dm-ok{background:var(--dm-ok)}
-.dm-ponto.dm-warn{background:var(--dm-warn)}
-.dm-ponto.dm-bad{background:var(--dm-bad)}
-
-.dm-aviso{
-  display:flex;gap:var(--dm-e2);align-items:flex-start;
-  padding:var(--dm-e2) var(--dm-e3);border:1px solid var(--dm-linha2);
-  background:var(--dm-card2);font-size:14px;margin-bottom:var(--dm-e2);
-}
-.dm-aviso.dm-ok{background:var(--dm-ok-bg);border-color:var(--dm-ok-ln);color:var(--dm-ok)}
-.dm-aviso.dm-warn{background:var(--dm-warn-bg);border-color:var(--dm-warn-ln);color:var(--dm-warn)}
-.dm-aviso.dm-bad{background:var(--dm-bad-bg);border-color:var(--dm-bad-ln);color:var(--dm-bad)}
-.dm-aviso.dm-info{background:var(--dm-info-bg);border-color:var(--dm-info-ln);color:var(--dm-info)}
-.dm-aviso b{font-weight:650}
-
-/* ------------------------------------------------------------------ campos */
-/* 24px entre campos, não 16: com 16 o texto de ajuda de um campo encostava
-   no rótulo do campo seguinte, e a ajuda parecia pertencer ao próximo. */
-.dm-campo{display:block;margin-bottom:var(--dm-e4)}
-/* 95 · o recado do campo que a tela recusou antes de enviar (o site do anexo) */
-.dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
-.dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
-.dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
-.dm-campo input,.dm-campo select,.dm-campo textarea{
-  width:100%;min-height:46px;padding:10px var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);
-}
-.dm-campo textarea{min-height:110px;resize:vertical;line-height:1.5}
-.dm-campo input:focus,.dm-campo select:focus,.dm-campo textarea:focus{
-  outline:2px solid var(--dm-ink);outline-offset:-1px;background:var(--dm-card);
-}
-/* FILTRO NÃO PODE VIRAR ESCADA.
-
-   Era `flex-wrap:wrap` com `flex:1 1 auto` e `min-width:80px`. Como os
-   rótulos têm comprimentos diferentes ("Comigo" e "Tudo que eu vejo"), as
-   opções quebravam em degraus irregulares: duas numa linha, uma sozinha na
-   seguinte, outra grudada no campo de busca. Sete controles empilhados sem
-   ordem, e as DUAS perguntas diferentes que eles fazem — "de quem?" e "em
-   que estado?" — misturadas no mesmo monte.
-
-   Quem abre isso no celular não lê um filtro, lê um amontoado. É o tal
-   "visual de sistema inacabado".
-
-   Agora são dois controles segmentados, cada um com uma pergunta só, e os
-   dois com o MESMO desenho: uma linha que desliza na horizontal em vez de
-   quebrar, e duas por duas abaixo de 370px. Deslizar um trilho de filtro é
-   gesto conhecido; escada não é.
-
-   HOUVE UMA VARIANTE `dm-igual` AQUI, E ELA MORREU COM O QUARTO RECORTE.
-
-   Ela desligava a rolagem ("três fatias iguais, sem rolagem, porque cabem")
-   para a pergunta de estado, que tinha três rótulos curtos, e de quebra
-   escapava da queda para duas colunas logo abaixo, porque a regra pedia
-   `dm-seg` SEM `dm-igual`. O escopo da primeira versão do documento pede o
-   painel com abertas, atrasadas E CONCLUÍDAS, e com quatro rótulos eles não
-   cabem mais. Medido no Chromium, recriando aquela geometria com os quatro:
-
-     360px: a tira mede 294px, os quatro botões precisam de 346, e "Todas"
-            termina em x=379 contra a borda do cartão em 327;
-     390px: a tira mede 324px, os mesmos 346, "Todas" em 379 contra 357.
-
-   Com `overflow:visible`, isso é o quarto recorte pendurado para fora do
-   cartão nos dois tamanhos de celular. Tirar a variante é o conserto; manter
-   uma regra de folha que ninguém escreve seria deixar a próxima pessoa achar
-   que ainda existe um caso de três.
-
-   O texto nunca quebra dentro do botão (`white-space:nowrap`): era o que
-   fazia "Em aberto" virar duas linhas dentro da própria pílula. */
-.dm-seg{
-  display:flex;gap:4px;padding:3px;background:var(--dm-card2);
-  border-radius:calc(var(--dm-r) + 4px);
-  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
-}
-.dm-seg::-webkit-scrollbar{display:none}
-.dm-seg button{
-  flex:1 1 0;min-height:44px;padding:0 10px;
-  /* sem isto "Meu setor" quebra em duas linhas dentro da própria fatia e o
-     trilho fica com altura de dois andares */
-  white-space:nowrap;
-  border:0;background:transparent;color:var(--dm-ink2);
-  border-radius:var(--dm-r);cursor:pointer;font-size:14px;font-weight:550;
-  text-align:center;
-  transition:background var(--dm-t),color var(--dm-t),box-shadow var(--dm-t);
-}
-.dm-seg button:hover{color:var(--dm-ink)}
-.dm-seg button[aria-pressed="true"]{
-  background:var(--dm-card);color:var(--dm-ink);font-weight:650;
-  box-shadow:0 1px 2px rgba(37,37,37,.10),0 0 0 1px var(--dm-linha);
-}
-/* Em 320px os quatro recortes não cabem numa fita só, e o último fica
-   espiando pela borda. Duas por duas: os quatro aparecem inteiros, as
-   fatias continuam do mesmo tamanho, e ninguém precisa descobrir que
-   aquilo rolava. Vale para as duas tiras desde que a de estado também tem
-   quatro. */
-/* E NÃO ERA SÓ EM 320 — 22/09/2026. Medido com as larguras reais:
-
-     320 e 360 ... grade, os quatro inteiros
-     375 e 390 ... trilho, "Todas" CORTADO na borda e a tira rolando
-     412 ....... trilho, inteiro por um fio
-
-   375 e 390 são os dois iPhones mais comuns. O corte acontecia exatamente
-   no celular que mais gente tem, e parecia defeito. Todo celular em pé fica
-   abaixo de 440, então a grade vale até lá, e as duas tiras ganham o mesmo
-   formato em vez de uma inteira e outra cortada. */
-@media (max-width:440px){
-  .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
-  /* e com TRÊS, três colunas. "De quem" muda com o papel: quem só pede, num
-     setor que atende, tem "Eu pedi / Meu setor / Tudo", e o 2x2 deixava
-     "Tudo" sozinho embaixo. Achado pela conferência de composição de
-     `demandas-celular.mjs`, na primeira rodada dela. */
-  .dm-seg:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
-  .dm-seg:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
-}
-
-/* a busca ganha a linha inteira: espremida entre botões ela ficava com 200px
-   e o texto do placeholder saía cortado no meio da palavra */
-.dm-busca{
-  display:flex;align-items:center;gap:8px;width:100%;min-height:46px;
-  margin-top:var(--dm-e2);padding:0 12px;
-  border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);
-}
-.dm-busca:focus-within{outline:2px solid var(--dm-ink);outline-offset:-1px;background:var(--dm-card)}
-.dm-busca svg{flex:none;opacity:.5}
-.dm-busca input{
-  flex:1;min-width:0;border:0;background:transparent;outline:0;
-  min-height:44px;padding:0;
-}
-
-/* GRADE, NÃO FILA QUE QUEBRA.
-
-   Com `flex-wrap`, quatro opções de larguras diferentes viravam três numa
-   linha e "Urgente" sozinha, ocupando a largura inteira na linha de baixo —
-   como se fosse mais importante que as outras três, quando é só a última da
-   lista. O mesmo degrau do filtro da lista, em outro lugar.
-
-   Duas colunas no celular resolve sem pensar: quatro opções viram 2×2, com
-   todas as células do mesmo tamanho. Acima de 520px cabem as quatro lado a
-   lado. Nenhuma opção ganha destaque por acidente de quebra de linha. */
-.dm-opcoes{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--dm-e1)}
-@media (min-width:520px){ .dm-opcoes{grid-template-columns:repeat(4,1fr)} }
-/* TRÊS OPÇÕES, TRÊS COLUNAS — 22/09/2026. A grade de duas foi feita para as
-   quatro prioridades. Recebendo três (as seções de Ajustes, os períodos de
-   Números), a terceira caía sozinha na segunda linha, com metade da largura,
-   e parecia sobra. */
-.dm-opcoes:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
-/* `minmax(0,1fr)` e não `1fr`: com `1fr` a palavra mais longa alarga a
-   própria coluna, e em 320px saía 87/87/97. Medido. Com as colunas presas
-   iguais, "Categorias" precisa de menos respiro lateral para caber. */
-.dm-opcoes:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
-/* CINCO OPÇÕES, TRÊS EM CIMA E DUAS EMBAIXO · 22/09/2026. Os cinco papéis da
-   ficha de pessoa (migração 94) caíam em 2+2+1 no celular e em 4+1 no
-   computador: "Administração" sozinha na última linha, com cara de sobra.
-   Numa grade de seis, as três de cima ocupam duas colunas cada e as duas de
-   baixo, três: a palavra mais comprida fica embaixo, onde a célula é maior.
-   As cinco lado a lado só quando cabem. */
-.dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(6,minmax(0,1fr))}
-.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3){grid-column:span 2}
-.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:span 3}
-.dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
-@media (min-width:760px){
-  .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
-  .dm-opcoes:has(> :last-child:nth-child(5)) > *{grid-column:auto}
-}
-/* UMA POR LINHA quando o rótulo é frase. O segundo seletor existe por
-   peso: a regra das três colunas logo acima pesa 0-3-0 e ganharia. */
-.dm-opcoes.dm-empilhadas,
-.dm-opcoes.dm-empilhadas:has(> :last-child:nth-child(3)){grid-template-columns:1fr}
-.dm-opcoes button{
-  min-height:44px;padding:0 var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
-  cursor:pointer;font-size:14px;transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t);
-}
-.dm-opcoes button[aria-pressed="true"]{
-  background:var(--dm-preto);color:#fff;border-color:var(--dm-preto);font-weight:600;
-}
-
-/* ------------------------------------------------------------------ lista */
-.dm-fila{border-top:1px solid var(--dm-linha)}
-.dm-item{
-  display:block;text-decoration:none;color:inherit;
-  padding:var(--dm-e3) 0;border-bottom:1px solid var(--dm-linha);
-  transition:background var(--dm-t);
-}
-.dm-item:hover{background:var(--dm-card3)}
-.dm-item-topo{display:flex;align-items:baseline;gap:var(--dm-e2);margin-bottom:5px}
-/* O NÚMERO DA DEMANDA É TEXTO, E ESTAVA PINTADO COM A COR DE MARCA.
-
-   19/09/2026, achado medindo. `--dm-marca` é rgba(37,37,37,.34) e o
-   comentário dela, três linhas acima na declaração, já dizia: "NÃO é cor de
-   texto: ponto, chevron, seta". Este seletor usava mesmo assim.
-
-   Medido em 320px e 390px, nos três papéis: 2,05:1 sobre o branco. O mínimo
-   de AA para texto é 4,5:1. E não é um texto qualquer — "#4" é COMO A PESSOA
-   ACHA A DEMANDA DELA na lista e como ela se refere ao pedido no WhatsApp.
-
-   `--dm-mudo` é rgba(37,37,37,.68), medido em 6,1:1: continua discreto ao
-   lado do título em peso 600, e dá para ler. */
-.dm-item-num{font-size:12px;color:var(--dm-mudo);font-weight:700;flex:none}
-.dm-item-tit{font-weight:600;letter-spacing:-.01em;min-width:0}
-/* NOME COMPRIDO NÃO PODE ARRASTAR A LINHA.
-
-   "Pedro Henrique Almeida Vasconcelos > Comunicação e divulgação" é um nome
-   real de igreja, não um caso de laboratório, e num item de lista ele saía
-   pela direita da tela em 320px. Um filho de flex tem `min-width:auto` por
-   padrão, ou seja, ele se recusa a encolher abaixo do próprio conteúdo — e
-   arrasta o pai junto.
-
-   `min-width:0` devolve a permissão de encolher; `overflow-wrap:anywhere`
-   deixa o nome virar duas linhas em vez de empurrar a página. */
-.dm-item-baixo{
-  display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;
-  font-size:12px;color:var(--dm-mudo);
-}
-.dm-item-baixo > *{min-width:0;overflow-wrap:anywhere}
-/* quatro fatos seguidos separados só por espaço viram uma frase só:
-   "Eventos e logística > Comunicação para 22/09 há 21 min com Maria".
-   Um ponto entre eles devolve a leitura em pedaços. Entre pílulas não vai
-   ponto: a borda delas já separa. */
-.dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{
-  content:'·';margin-right:6px;opacity:.5;
-}
-.dm-item.dm-urgente{border-left:3px solid var(--dm-bad);padding-left:var(--dm-e2)}
-.dm-item.dm-atrasada .dm-prazo{color:var(--dm-bad);font-weight:600}
-
-/* --------------------------------------------------------------- números */
-.dm-num{border:1px solid var(--dm-linha);padding:var(--dm-e3)}
-.dm-num .dm-v{font-size:30px;font-weight:650;letter-spacing:-.03em;line-height:1.05}
-.dm-num .dm-r{font-size:12px;color:var(--dm-mudo);margin-top:4px}
-.dm-num.dm-destaque{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
-.dm-num.dm-destaque .dm-r{color:rgba(255,255,255,.72)}
-.dm-barra{height:6px;background:var(--dm-card2);margin-top:8px}
-.dm-barra i{display:block;height:100%;background:var(--dm-ink)}
-
-.dm-tab{width:100%;border-collapse:collapse;font-size:14px}
-.dm-tab th{
-  text-align:left;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
-  border-bottom:1px solid var(--dm-linha);
-}
-.dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha)}
-.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
-.dm-tab select,.dm-tab input{
-  min-height:44px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);padding:0 8px;max-width:100%;
-}
-
-/* DUAS TABELAS DIFERENTES PEDEM DUAS SAÍDAS DIFERENTES NO CELULAR.
-
-   Aqui `.dm-tab` cobre duas coisas que só por fora se parecem:
-
-     · a da tela de uma demanda é rótulo e valor, sem cabeçalho. Não é uma
-       grade, é uma ficha. Em 320px ela saía 48px pela direita e levava a
-       página junto. Vira lista empilhada: o rótulo em cima, o valor
-       embaixo, cada par respirando. Fica melhor no celular do que a tabela
-       era no monitor;
-
-     · a de Números e a de Ajustes têm cabeçalho e são grade de verdade.
-       Empilhar uma grade de cinco colunas destrói a comparação, que é a
-       única razão de ela existir. Então a grade continua grade e quem passa
-       a rolar é o CARTÃO, não a página. A diferença importa: página que
-       desliza de lado desorienta, cartão que desliza é um gesto local e
-       esperado.
-
-   O `:has(thead)` é o que separa os dois casos sem precisar de classe nova
-   no JSX, porque cabeçalho é exatamente o que distingue ficha de grade. */
-@media (max-width:460px){
-  .dm-tab:not(:has(thead)),
-  .dm-tab:not(:has(thead)) tbody,
-  .dm-tab:not(:has(thead)) tr,
-  .dm-tab:not(:has(thead)) th,
-  .dm-tab:not(:has(thead)) td{display:block;width:auto}
-  .dm-tab:not(:has(thead)) tr{
-    padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
-  }
-  .dm-tab:not(:has(thead)) tr:last-child{border-bottom:0}
-  .dm-tab:not(:has(thead)) th{border:0;padding:0 0 3px}
-  .dm-tab:not(:has(thead)) td{border:0;padding:0;overflow-wrap:anywhere}
-}
-@media (max-width:560px){
-  .dm-card:has(.dm-tab thead){overflow-x:auto}
-  .dm-tab:has(thead){min-width:max-content}
-}
-
-/* -------------------------------------------------------------- histórico */
-.dm-hist{list-style:none;margin:0;padding:0;border-left:1px solid var(--dm-linha);margin-left:5px}
-.dm-hist li{position:relative;padding:0 0 var(--dm-e3) var(--dm-e3)}
-.dm-hist li::before{
-  content:'';position:absolute;left:-4px;top:7px;width:7px;height:7px;
-  border-radius:50%;background:var(--dm-marca);
-}
-.dm-hist li.dm-marco::before{background:var(--dm-ink)}
-.dm-hist .dm-q{font-size:13px;color:var(--dm-mudo)}
-/* MEDIDO: um link do Drive colado num comentario (134 letras) fica com 880px
-   de conteudo numa caixa de 266px em 320px de tela. A pessoa tenta selecionar
-   com o dedo, pega so o comeco, cola no navegador e da erro — e volta a pedir
-   a arte pelo WhatsApp, que e o sistema de demandas perdendo a razao de
-   existir. */
-.dm-hist .dm-t{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px}
-.dm-hist .dm-interno{
-  border-left:3px solid var(--dm-warn);padding-left:var(--dm-e2);
-  background:var(--dm-warn-bg);
-}
-
-/* O nome do @keyframes é global, como o da classe. `pulso` sozinho brigaria
-   com os vinte do outro sistema no dia em que um deles se chamasse assim. */
-.dm-esqueleto div{background:var(--dm-card2);animation:dm-pulso 1.4s ease-in-out infinite}
-@keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
-@media (prefers-reduced-motion:reduce){
-  .dm *{animation:none!important;transition:none!important}
-}
-
-/* O "MAIS DETALHES" NÃO É UMA AÇÃO, É UMA GAVETA.
-
-   Desenhado como botão de largura inteira e texto centralizado, ele
-   competia com "Enviar a demanda", que é a única ação de verdade da tela —
-   e ainda quebrava em duas linhas centralizadas, parecendo defeito.
-
-   Gaveta se abre pela borda esquerda, com um sinal de direção e sem moldura
-   de botão. Assim o olho encontra uma ação só embaixo do formulário. */
 .dm .dm-gaveta{
   display:inline-flex;align-items:center;gap:8px;
   min-height:44px;padding:0;border:0;background:transparent;
-  color:var(--dm-ink2);font-size:14px;font-weight:600;cursor:pointer;
-  text-align:left;
+  color:var(--dm-ink2);font-size:14px;font-weight:600;cursor:pointer;text-align:left;
 }
 .dm .dm-gaveta:hover{color:var(--dm-ink)}
 .dm .dm-gaveta::before{
@@ -819,143 +964,76 @@
   transition:transform var(--dm-t);
 }
 .dm .dm-gaveta[aria-expanded="true"]::before{transform:rotate(90deg)}
-
-/* O BOTÃO DE COPIAR QUANDO O NAVEGADOR NÃO DEIXA COPIAR.
-
-   `navigator.clipboard` exige contexto seguro e, em parte dos navegadores,
-   um gesto ainda "quente" — dentro de um `async` que já cedeu a vez, ele
-   pode ter esfriado. O plano B com `execCommand` cobre quase tudo; quando
-   nem ele vai, a saída honesta é pôr o texto na tela para a pessoa
-   selecionar com o dedo, em vez de deixar um botão que não faz nada.
-
-   16px no campo porque abaixo disso o Safari do iPhone dá zoom ao focar, e
-   focar aqui é justamente o que a pessoa vai fazer. */
-.dm-copiar-falhou{ display:block }
-/* `.dm .dm-copiar-cru` e não `.dm-copiar-cru` sozinho: a folha já tem
-   `.dm textarea{font,color}`, que pesa 0-1-1 e ganharia de uma classe solta
-   (0-1-0). Foi o `scripts/demandas-css.test.mjs` que pegou — a mesma
-   armadilha que apagou a logo em 18/09, agora contra mim. */
+.dm-esqueleto div{background:var(--dm-card2);animation:dm-pulso 1.4s ease-in-out infinite}
+@keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
+.dm-vazio{padding:var(--dm-e5) var(--dm-e3);text-align:center}
+.dm-vazio > .dm-rot{margin-bottom:6px}
+.dm-vazio > h3{margin-bottom:8px}
+@media (min-width:1024px){ .dm-vazio{text-align:left;max-width:520px} }
+.dm-copiar-falhou{display:block}
 .dm .dm-copiar-cru{
-  display:block; width:100%; margin-top:var(--dm-e1);
-  padding:var(--dm-e2); border:1px solid var(--dm-linha); border-radius:var(--dm-r);
-  background:var(--dm-card2); color:var(--dm-ink);
-  font:inherit; font-size:max(16px,1rem); line-height:1.5; resize:vertical;
+  display:block;width:100%;margin-top:var(--dm-e1);
+  padding:var(--dm-e2);border:1px solid var(--dm-linha);border-radius:var(--dm-r);
+  background:var(--dm-card2);color:var(--dm-ink);
+  font:inherit;font-size:max(16px,1rem);line-height:1.5;resize:vertical;
 }
-
-/* A LISTA FOI CORTADA, E ISSO PRECISA APARECER.
-   Migração 57: `dem_lista` passou a ter teto de 300. `--dm-mudo` tem 6,1:1
-   no branco (medido), então serve para texto de apoio sem cair abaixo do
-   4,5:1 que a regra da casa cobra. */
-.dm-corte{
-  margin:12px 0 0; padding:10px 12px;
-  font-size:14px; line-height:1.5; color:var(--dm-mudo);
-  border-top:1px solid var(--dm-linha, rgba(37,37,37,.12));
-}
-
-/* ============================================================ migração 94
-   OS DOIS PORTAIS, O CADASTRO E A ADMINISTRAÇÃO
-
-   Poucas peças novas, e todas pelo mesmo motivo: dizer "quantos" e "o que
-   falta fazer" sem virar painel de gráfico. */
-
-/* O SELO: o número de avisos na aba, e de itens em cada recorte. Pequeno,
-   escuro, redondo (marca é círculo), e com o número em algarismos de largura
-   fixa para "9" e "12" não mudarem o tamanho da aba. */
-/* o nome da pessoa no cartão de pedidos é link, e a linha dela tem os dois
-   botões embaixo: o alvo é o nome, e ele precisa dos 44px (medido: 24) */
-.dm-pessoa a.dm-item-tit{display:flex;align-items:center;min-height:44px}
-
-/* 12px, e não 11 · 22/09/2026. O medidor de celular acusou o selo nas
-   abas e nos cartões de todos os papéis: é número que a pessoa LÊ ("3
-   avisos"), não etiqueta em caixa alta, e o piso da casa para leitura é 12. */
-.dm-selo{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:20px;height:20px;padding:0 6px;margin-left:6px;
-  border-radius:10px;background:var(--dm-preto);color:#fff;
-  font-size:12px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums;
-  vertical-align:1px;
-}
-.dm-seg button[aria-pressed="true"] .dm-selo{background:var(--dm-preto)}
-
-/* QUEM SOU: o nome grande, e embaixo setor, papel e função numa linha só. */
-.dm-quem{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
-  font-size:14px;color:var(--dm-ink2);margin-top:4px}
-.dm-quem > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
-
-/* O QUE ESPERA POR VOCÊ: o cartão que abre o Início. A borda da esquerda diz
-   "isto é com você" sem precisar de cor de alarme. */
-.dm-precisa{border-left:3px solid var(--dm-ink)}
-.dm-precisa .dm-fila{border-top:0}
-.dm-precisa .dm-item:last-child{border-bottom:0}
-
-/* AS CONTAS DO ATENDIMENTO: quatro números que também são atalhos. Grade de
-   duas no celular, quatro a partir de 520px, como `.dm-opcoes`. */
-.dm-contas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
-@media (min-width:520px){ .dm-contas{grid-template-columns:repeat(4,minmax(0,1fr))} }
-.dm-contas > *{
-  display:block;min-width:0;min-height:64px;padding:10px var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
-  text-decoration:none;color:inherit;text-align:left;
-}
-.dm-contas b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;
-  line-height:1.1;font-variant-numeric:tabular-nums}
-.dm-contas small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:2px}
-.dm-contas > .dm-bad b{color:var(--dm-bad)}
-
-/* OS AVISOS: uma linha por fato, a mais nova em cima, e o que é novo com o
-   ponto escuro. */
-.dm-avisos{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
-.dm-avisos li{border-bottom:1px solid var(--dm-linha)}
-.dm-avisos a{display:block;padding:var(--dm-e2) 0 var(--dm-e2) var(--dm-e3);
-  text-decoration:none;color:inherit;position:relative}
-.dm-avisos a::before{content:'';position:absolute;left:2px;top:22px;width:7px;height:7px;
-  border-radius:50%;background:var(--dm-linha2)}
-.dm-avisos li.dm-novo a::before{background:var(--dm-ink)}
-.dm-avisos li.dm-novo .dm-aviso-o-que{font-weight:650}
-.dm-aviso-o-que{overflow-wrap:anywhere}
-.dm-aviso-de{font-size:13px;color:var(--dm-mudo);overflow-wrap:anywhere}
-
-/* A LISTA DE PERMISSÕES: frase curta, com o traço na frente. */
 .dm-pode{list-style:none;margin:0;padding:0}
 .dm-pode li{padding:6px 0 6px 18px;position:relative;font-size:14px}
 .dm-pode li::before{content:'';position:absolute;left:2px;top:14px;width:8px;height:2px;background:var(--dm-ink)}
-
-/* A ADMINISTRAÇÃO TEM TOPO PRÓPRIO: o pedido foi "não misture isso com a
-   interface do usuário comum". A faixa escura diz, antes de qualquer
-   palavra, que esta é outra sala. */
-.dm-adm-faixa{background:var(--dm-preto);color:#fff}
-.dm-adm-faixa .dm-topo-in{color:#fff}
-.dm-adm-faixa :where(a){color:#fff}
-/* a logo e um quadrado preto: na faixa preta ela some, entao inverte */
-.dm-adm-faixa .dm-logo{background:#fff;color:var(--dm-preto)}
-.dm-adm-faixa .dm-abas a{color:rgba(255,255,255,.72)}
-.dm-adm-faixa .dm-abas a:hover{color:#fff}
-.dm-adm-faixa .dm-abas a[aria-current="page"]{color:#fff;border-bottom-color:#fff}
-
-/* A PESSOA NA LISTA DA ADMINISTRAÇÃO: nome, e embaixo o que importa decidir. */
 .dm-pessoa{display:block;padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
-  text-decoration:none;color:inherit}
-.dm-pessoa:hover{background:var(--dm-card3)}
+  text-decoration:none;color:inherit;transition:background var(--dm-t)}
 .dm-pessoa.dm-inativa{opacity:.62}
-
-/* os seis atalhos do Atendimento: duas colunas no celular, três a partir de
-   520px (seis em duas linhas de três, e nenhum sobra sozinho), seis numa
-   linha a partir de 960px. Botão, e não link: eles escolhem a lista de baixo. */
-.dm-contas.dm-seis{grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (min-width:520px){ .dm-contas.dm-seis{grid-template-columns:repeat(3,minmax(0,1fr))} }
-@media (min-width:960px){ .dm-contas.dm-seis{grid-template-columns:repeat(6,minmax(0,1fr))} }
-.dm-contas > button{cursor:pointer;font:inherit;transition:background var(--dm-t),border-color var(--dm-t)}
-.dm-contas > button:hover{background:var(--dm-card3);border-color:var(--dm-linha3)}
-.dm-contas > button[aria-pressed="true"]{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
-.dm-contas > button[aria-pressed="true"] small{color:rgba(255,255,255,.78)}
-.dm-contas > button[aria-pressed="true"].dm-bad b{color:#fff}
-.dm-adm-faixa .dm-onde{color:rgba(255,255,255,.78)}
-.dm-adm-faixa .dm-onde b{color:#fff}
-/* os seletores de filtro da administração: o mesmo desenho do campo */
-.dm-filtro{width:100%;min-height:46px;padding:0 var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card3);border-radius:var(--dm-r)}
-
-/* 95 · a lista de sites de anexo, na administracao */
+.dm-pessoa a.dm-item-tit{display:flex;align-items:center;min-height:44px}
+.dm-item-tit{font-weight:600;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
+.dm-item-topo{display:flex;align-items:baseline;gap:var(--dm-e2);margin-bottom:5px}
+.dm-item-baixo{display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;font-size:13px;color:var(--dm-mudo)}
+.dm-item-baixo > *{min-width:0;overflow-wrap:anywhere}
+.dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
+/* a lista de pessoas da administracao: no celular, um bloco por pessoa
+   (nome, papeis, setor e funcao, e-mail); a partir de 1024 vira uma tabela
+   de cinco colunas com cabecalho, sem <table>, para a linha inteira
+   continuar sendo um link */
+.dm-pessoas{border-top:1px solid var(--dm-linha)}
+.dm-pessoas .dm-pessoa{display:block;min-height:44px}
+.dm-pessoas .dm-pessoa:hover{background:var(--dm-card3);box-shadow:0 0 0 12px var(--dm-card3)}
+.dm-pessoas-cab{display:none}
+.dm-p-nome{display:block;font-size:15px;line-height:1.35;min-width:0;overflow-wrap:anywhere}
+.dm-p-nome small{font-weight:400;font-size:13px}
+.dm-p-papel{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.dm-p-papel:empty{display:none}
+.dm-p-setor,.dm-p-funcao,.dm-p-email{font-size:13px;color:var(--dm-mudo);min-width:0;overflow-wrap:anywhere}
+.dm-p-setor,.dm-p-funcao{display:inline}
+.dm-p-setor:empty,.dm-p-funcao:empty{display:none}
+.dm-p-setor:not(:empty){margin-top:6px;display:inline-block}
+.dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:'·';margin:0 6px;opacity:.5}
+.dm-p-email{display:block;margin-top:2px}
+@media (min-width:1024px){
+  .dm-pessoas{border-top:0}
+  .dm-pessoas .dm-pessoa{
+    display:grid;align-items:center;column-gap:var(--dm-e3);
+    grid-template-columns:minmax(0,2.2fr) minmax(0,1.7fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.9fr);
+    min-height:52px;padding:8px 0;
+  }
+  .dm-pessoas .dm-pessoas-cab{
+    display:grid;min-height:36px;padding:0 0 6px;
+    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
+  }
+  .dm-pessoas .dm-pessoas-cab:hover{background:transparent;box-shadow:none}
+  .dm-pessoas .dm-pessoas-cab > span{font-size:12px;color:var(--dm-mudo);margin:0;display:block}
+  .dm-p-papel{margin-top:0}
+  .dm-p-setor:not(:empty){margin-top:0;display:block}
+  .dm-p-setor,.dm-p-funcao,.dm-p-email{display:block;margin-top:0}
+  .dm-p-setor:empty,.dm-p-funcao:empty{display:block}
+  .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:none}
+}
+/* 95 · a lista de sites de anexo, na administração: duas colunas quando cabe */
 .dm-sites{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
 .dm-sites li{display:flex;align-items:center;gap:var(--dm-e2);min-height:48px;padding:6px 0;
   border-bottom:1px solid var(--dm-linha);overflow-wrap:anywhere}
+@media (min-width:1024px){ .dm-sites{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--dm-e4);border-top:0} .dm-sites li{border-top:1px solid var(--dm-linha);border-bottom:0} }
+
+/* ---------------------------------------------------------------- movimento */
+@media (prefers-reduced-motion:reduce){
+  .dm *{animation:none!important;transition:none!important}
+  .dm-toast,.dm-folha,.dm-barra-acao{animation:none!important}
+}

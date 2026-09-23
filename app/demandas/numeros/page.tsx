@@ -10,7 +10,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
-import { Aviso, Esqueleto, Opcoes } from '@/components/demandas/Ui';
+import Link from 'next/link';
+import { Aviso, Esqueleto } from '@/components/demandas/Ui';
 import { numeros } from '@/lib/demandas/api';
 import { HOJE, horas, recadoDoErro, somaDias } from '@/lib/demandas/regras';
 import type { Numeros } from '@/lib/demandas/tipos';
@@ -71,7 +72,7 @@ function Painel() {
   if (eu && eu.papel === 'solicitante') {
     return (
       <>
-        <div className="dm-rot">{'>'} números</div>
+        <div className="dm-rot">{'>'} atendimento · números</div>
         <Aviso tom="info">
           Esta tela mostra os números de todos os setores, e por isso é de quem coordena.
           As suas demandas estão em <b>Demandas</b>.
@@ -91,8 +92,20 @@ function Painel() {
 
   return (
     <>
-      <div className="dm-rot">{'>'} números</div>
-      <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Como a operação está andando</h1>
+      <Link className="dm-volta" href="/demandas/atendimento">Atender</Link>
+      <div className="dm-cab">
+        <div>
+          <div className="dm-rot">{'>'} atendimento · números</div>
+          <h1 style={{ marginTop: 4 }}>Como a operação está andando</h1>
+        </div>
+        <div className="dm-cab-acoes">
+          <div className="dm-seg" role="group" aria-label="Período">
+            {([['30', '30 dias'], ['90', '90 dias'], ['365', '1 ano']] as const).map(([v, r]) => (
+              <button key={v} type="button" aria-pressed={janela === v} onClick={() => setJanela(v)}>{r}</button>
+            ))}
+          </div>
+        </div>
+      </div>
 
       {erro ? (
         <div style={{ marginBottom: 'var(--dm-e3)' }}>
@@ -103,10 +116,6 @@ function Painel() {
         </div>
       ) : null}
 
-      <div style={{ marginBottom: 'var(--dm-e3)', maxWidth: 380 }}>
-        <Opcoes<Janela> rot="Período" valor={janela} aoMudar={setJanela}
-          opcoes={[{ v: '30' as Janela, rot: '30 dias' }, { v: '90' as Janela, rot: '90 dias' }, { v: '365' as Janela, rot: '1 ano' }]} />
-      </div>
 
       {/* `!n` SOZINHO DEIXAVA UM ESQUELETO ANIMADO PARA SEMPRE.
           Quando a carga falha, `n` fica nulo e a tela mostrava ao mesmo tempo
@@ -116,98 +125,85 @@ function Painel() {
         <>
           {/* -------------------------------------------- o que pede ação hoje */}
           <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Precisa de atenção</h2>
-          <div className="dm-tres" style={{ marginBottom: 'var(--dm-e4)' }}>
-            <Num v={n.atrasadas} r="passaram do prazo" destaque={n.atrasadas > 0} />
+          <div className="dm-contas" style={{ marginBottom: 'var(--dm-e4)' }}>
+            <Num v={n.atrasadas} r="passaram do prazo" alarme={n.atrasadas > 0} />
             <Num v={n.paradas} r="sem movimento há 7 dias" />
             <Num v={n.reabertas} r="foram reabertas" />
             <Num v={n.abertas} r="em aberto agora" />
           </div>
 
-          {/* ------------------------------------------------------- volume */}
-          <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Volume no período</h2>
-          <div className="dm-tres" style={{ marginBottom: 'var(--dm-e4)' }}>
-            <Num v={n.total} r="demandas abertas" />
-            <Num v={n.concluidas} r="concluídas" />
-            <Num v={n.canceladas} r="canceladas" />
-            {/* O NÚMERO DIZ A BASE. Antes ele dizia 90% contando como pontual
-                toda demanda que nunca teve prazo — ou seja, inflava
-                exatamente onde o sistema menos sabe. Hoje a conta é só sobre
-                quem tinha prazo, e o rótulo diz sobre quantas. */}
-            <Num v={n.no_prazo_pct === null ? '—' : `${n.no_prazo_pct}%`}
-              r={n.no_prazo_base ? `dentro do prazo (de ${n.no_prazo_base} com prazo)` : 'concluídas dentro do prazo'} />
-          </div>
-
-          {/* -------------------------------------------------------- tempo */}
-          <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Tempo</h2>
           <div className="dm-dupla" style={{ marginBottom: 'var(--dm-e4)' }}>
-            <Num v={horas(n.horas_ate_resposta)} r="até a primeira resposta" />
-            <Num v={horas(n.horas_ate_concluir)} r="até concluir" />
-          </div>
-          <p className="dm-peq dm-mudo" style={{ marginTop: -12, marginBottom: 'var(--dm-e4)' }}>
-            Primeira resposta: a primeira vez que outra pessoa mexeu na demanda.
-          </p>
-
-          {/* ------------------------------------------------------- setores */}
-          <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Por setor</h2>
-          <div className="dm-card">
-            <table className="dm-tab">
-              <thead><tr>
-                <th>Setor</th><th className="dm-n">Pediu</th><th className="dm-n">Atendeu</th>
-                <th className="dm-n">Em aberto</th><th className="dm-n">Atrasadas</th>
-              </tr></thead>
-              <tbody>
-                {porVolume(n.por_setor).map(s => (
-                  <tr key={s.nome}>
-                    <td>{s.nome}</td>
-                    <td className="dm-n">{s.pediu}</td>
-                    <td className="dm-n">{s.atendeu}</td>
-                    <td className="dm-n">{s.abertas}</td>
-                    <td className="dm-n" style={{ color: s.atrasadas ? 'var(--dm-bad)' : undefined, fontWeight: s.atrasadas ? 600 : undefined }}>
-                      {s.atrasadas || '—'}
-                    </td>
-                  </tr>
-                ))}
-                {!n.por_setor.length ? <tr><td colSpan={5} className="dm-mudo">Nada no período.</td></tr> : null}
-              </tbody>
-            </table>
+            <div>
+              <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Volume no período</h2>
+              <div className="dm-contas dm-duas-colunas">
+                <Num v={n.total} r="demandas abertas" />
+                <Num v={n.concluidas} r="concluídas" />
+                <Num v={n.canceladas} r="canceladas" />
+                {/* O NÚMERO DIZ A BASE: a conta é só sobre quem tinha prazo,
+                    e o rótulo diz sobre quantas. Sem base, "0%" em mudo, e
+                    não um travessão. */}
+                <Num v={n.no_prazo_pct === null ? '0%' : `${n.no_prazo_pct}%`}
+                  r={n.no_prazo_base ? `dentro do prazo (de ${n.no_prazo_base} com prazo)` : 'concluídas dentro do prazo'} />
+              </div>
+            </div>
+            <div>
+              <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Tempo</h2>
+              <div className="dm-contas dm-duas-colunas">
+                <Num v={horas(n.horas_ate_resposta)} r="até a primeira resposta" />
+                <Num v={horas(n.horas_ate_concluir)} r="até concluir" />
+              </div>
+              <p className="dm-peq dm-mudo" style={{ margin: 'var(--dm-e1) 0 0' }}>
+                Primeira resposta: a primeira vez que outra pessoa mexeu na demanda.
+              </p>
+            </div>
           </div>
 
-          {/* ----------------------------------------------------- categorias */}
-          <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que mais se pede</h2>
-          <div className="dm-card">
-            <Barras itens={n.por_categoria.slice(0, TETO_BARRAS).map(c => ({ rot: c.nome, n: c.n, sub: c.grupo }))} />
-            {!n.por_categoria.length ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nada no período.</p> : null}
-            <SobraDeCategorias cs={n.por_categoria} />
+          <div className="dm-dupla">
+            <div>
+              <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Por setor</h2>
+              <div className="dm-card">
+                {/* a tabela de leitura rola de lado no celular, com a
+                    primeira coluna fixa e um sinal de que rola */}
+                <div className="dm-rola">
+                  <table className="dm-tab">
+                    <thead><tr>
+                      <th className="dm-primeira">Setor</th><th className="dm-n">Pediu</th><th className="dm-n">Atendeu</th>
+                      <th className="dm-n">Em aberto</th><th className="dm-n">Atrasadas</th>
+                    </tr></thead>
+                    <tbody>
+                      {porVolume(n.por_setor).map(s => (
+                        <tr key={s.nome}>
+                          <td className="dm-primeira">{s.nome}</td>
+                          <td className="dm-n">{s.pediu}</td>
+                          <td className="dm-n">{s.atendeu}</td>
+                          <td className="dm-n">{s.abertas}</td>
+                          <td className="dm-n" style={{ color: s.atrasadas ? 'var(--dm-bad)' : 'var(--dm-mudo)', fontWeight: s.atrasadas ? 600 : undefined }}>
+                            {s.atrasadas}
+                          </td>
+                        </tr>
+                      ))}
+                      {!n.por_setor.length ? <tr><td colSpan={5} className="dm-mudo">Nada no período.</td></tr> : null}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <div>
+              <h2 style={{ margin: '0 0 var(--dm-e2)' }}>O que mais se pede</h2>
+              <div className="dm-card">
+                <Barras itens={n.por_categoria.slice(0, TETO_BARRAS).map(c => ({ rot: c.nome, n: c.n, sub: c.grupo }))} />
+                {!n.por_categoria.length ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nada no período.</p> : null}
+                <SobraDeCategorias cs={n.por_categoria} />
+              </div>
+              <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>Por que atrasa</h2>
+              <div className="dm-card">
+                <Barras itens={n.motivos_de_atraso.map(m => ({ rot: m.motivo, n: m.n }))} />
+                {!n.motivos_de_atraso.length
+                  ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nenhum atraso no período.</p> : null}
+              </div>
+            </div>
           </div>
 
-          {/* ------------------------------------------------------- atrasos */}
-          <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>Por que atrasa</h2>
-          <div className="dm-card">
-            <Barras itens={n.motivos_de_atraso.map(m => ({ rot: m.motivo, n: m.n }))} />
-            {!n.motivos_de_atraso.length
-              ? <p className="dm-mudo dm-peq" style={{ margin: 0 }}>Nenhum atraso no período.</p> : null}
-          </div>
-
-          {/* --------------------------------------------------------- meses
-
-              O GRÁFICO SUMIA INTEIRO NA JANELA MAIS USADA.
-
-              Era `n.por_mes.length > 1 ? … : null`. Trinta dias caem dentro
-              de um mês quase sempre, então "volume de demandas por período",
-              que o documento pede entre os indicadores, simplesmente não
-              existia no recorte de 30 dias: nem seção, nem número, nem uma
-              palavra dizendo por quê. Quem olhava concluía que o sistema não
-              media aquilo.
-
-              Escolhi TEXTO em vez de barra única, e o motivo é o mesmo que
-              fez esta tela recusar gráfico de pizza: `Barras` desenha cada
-              barra como uma fração do MAIOR valor, então uma barra sozinha
-              sai sempre cheia, 100% da trilha. Barra cheia quer dizer "este é
-              o pico", e com um mês só não há pico nenhum, não há com o que
-              comparar. Seria desenho dizendo uma coisa que o dado não diz.
-
-              A frase ainda aponta o gesto que faz a comparação aparecer, que
-              é o seletor de período no topo desta mesma tela. */}
           <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>Mês a mês</h2>
           <div className="dm-card">
             {n.por_mes.length > 1 ? (
@@ -299,11 +295,14 @@ function SobraDeCategorias({ cs }: { cs: Numeros['por_categoria'] }) {
   );
 }
 
-function Num({ v, r, destaque }: { v: number | string; r: string; destaque?: boolean }) {
+/* o tile de LEITURA: fio, sem canto; alarme é o número em vermelho, e não um
+   fundo preto, que em Atender significa "vista escolhida" */
+function Num({ v, r, alarme }: { v: number | string; r: string; alarme?: boolean }) {
+  const zero = v === 0 || v === '0' || v === '0%';
   return (
-    <div className={`dm-num ${destaque ? 'dm-destaque' : ''}`}>
-      <div className="dm-v">{v}</div>
-      <div className="dm-r">{r}</div>
+    <div className={`dm-conta dm-leitura dm-kpi ${alarme ? 'dm-bad' : zero ? 'dm-zero' : ''}`}>
+      <b>{v}</b>
+      <small>{r}</small>
     </div>
   );
 }

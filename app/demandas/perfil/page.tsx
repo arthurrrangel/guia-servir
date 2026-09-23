@@ -50,7 +50,7 @@ function Perfil() {
     setIndo(false);
     if (!r.ok) { setMsg({ tom: 'bad', t: recadoDoErro(r, 'salvar') }); return; }
     ctx.ajustarEu?.(r as unknown as Partial<Eu>);
-    setMsg({ tom: 'ok', t: feito });
+    ctx.toast?.({ texto: feito });
   }
 
   async function sair() {
@@ -69,15 +69,43 @@ function Perfil() {
 
   return (
     <>
-      <div className="dm-rot">{'>'} perfil</div>
-      <h1 style={{ margin: '6px 0 var(--dm-e1)' }}>{eu.nome}</h1>
-      <div className="dm-quem" style={{ marginBottom: 'var(--dm-e3)' }}>
-        <Pill>{rotPapel(eu.papel)}</Pill>
-        {eu.setor ? <span>{eu.setor}</span> : null}
-        {eu.criado_em ? <span>desde {dataCheia(eu.criado_em.slice(0, 10))}</span> : null}
+      <div className="dm-cab">
+        <div>
+          <div className="dm-rot">{'>'} perfil</div>
+          <h1 style={{ marginTop: 4 }}>{eu.nome}</h1>
+          <div className="dm-quem">
+            <Pill>{rotPapel(eu.papel)}</Pill>
+            {eu.setor ? <span>{eu.setor}</span> : null}
+            {eu.criado_em ? <span>desde {dataCheia(eu.criado_em.slice(0, 10))}</span> : null}
+          </div>
+        </div>
       </div>
       {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
+      <div className="dm-duas dm-7-5">
+      <div>
 
+      <div className="dm-card">
+        <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Seus dados</h3>
+        <Campo rot="Nome" classe="dm-curto">
+          <input value={nome} autoComplete="name" onChange={e => setNome(e.target.value)} />
+        </Campo>
+        <Campo rot="WhatsApp" classe="dm-curto" ajuda="Com DDD. É por ele que a equipe fala com você.">
+          <input inputMode="tel" autoComplete="tel" value={tel} onChange={e => setTel(e.target.value)} />
+        </Campo>
+        <Campo rot="Função" classe="dm-curto" ajuda="O que você faz. Exemplo: baterista, designer, recepção.">
+          <input value={funcao} maxLength={80} onChange={e => setFuncao(e.target.value)} />
+        </Campo>
+        <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+          E-mail: <b>{eu.email || 'sem e-mail'}</b>. Setor, papel e e-mail quem muda é a administração.
+        </p>
+        <button className="dm-btn dm-pri" disabled={indo || !mudou || !nome.trim()} aria-busy={indo || undefined}
+          onClick={() => salvar({ nome: nome.trim(), telefone: soDigitos(tel), funcao: funcao.trim() }, 'Dados salvos.')}>
+          {indo ? 'Salvando…' : 'Salvar'}
+        </button>
+      </div>
+
+      </div>
+      <aside>
       <div className="dm-card">
         <h3 style={{ marginBottom: 'var(--dm-e1)' }}>O que você pode</h3>
         <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e1)' }}>
@@ -91,26 +119,6 @@ function Perfil() {
             Setores que você acompanha: {eu.escopo.join(', ')}.
           </p>
         ) : null}
-      </div>
-
-      <div className="dm-card">
-        <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Seus dados</h3>
-        <Campo rot="Nome">
-          <input value={nome} autoComplete="name" onChange={e => setNome(e.target.value)} />
-        </Campo>
-        <Campo rot="WhatsApp" ajuda="Com DDD. É por ele que a equipe fala com você.">
-          <input inputMode="tel" autoComplete="tel" value={tel} onChange={e => setTel(e.target.value)} />
-        </Campo>
-        <Campo rot="Função" ajuda="O que você faz. Exemplo: baterista, designer, recepção.">
-          <input value={funcao} maxLength={80} onChange={e => setFuncao(e.target.value)} />
-        </Campo>
-        <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
-          E-mail: <b>{eu.email || 'sem e-mail'}</b>. Setor, papel e e-mail quem muda é a administração.
-        </p>
-        <button className="dm-btn dm-pri dm-larga" disabled={indo || !mudou || !nome.trim()}
-          onClick={() => salvar({ nome: nome.trim(), telefone: soDigitos(tel), funcao: funcao.trim() }, 'Dados salvos.')}>
-          Salvar
-        </button>
       </div>
 
       {eu.papel_pedido ? (
@@ -148,12 +156,14 @@ function Perfil() {
               <h3>Administração</h3>
               <p className="dm-peq dm-mudo" style={{ marginTop: 2 }}>Pessoas, setores e categorias.</p>
             </div>
-            <Link className="dm-btn" href="/demandas/admin">Abrir</Link>
+            <Link className="dm-btn dm-txt" href="/demandas/admin">Abrir ›</Link>
           </div>
         </div>
       ) : null}
 
-      <button className="dm-btn dm-larga" style={{ marginTop: 'var(--dm-e2)' }} onClick={sair}>Sair</button>
+      </aside>
+      </div>
+      <button className="dm-btn dm-txt" style={{ marginTop: 'var(--dm-e2)' }} onClick={sair}>Sair do sistema</button>
     </>
   );
 }

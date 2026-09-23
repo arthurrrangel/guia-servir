@@ -19,13 +19,20 @@ export function Pill({ tom, children }: {
   return <span className={`dm-pill ${tom ? 'dm-' + tom : ''}`}>{children}</span>;
 }
 
-export function Campo({ rot, ajuda, children }: {
+export function Campo({ rot, ajuda, erro, classe, children }: {
   rot: string; ajuda?: string; children: React.ReactNode;
+  /* o recado de recusa da própria tela (site fora da lista, link torto):
+     abaixo do campo, em vermelho, anunciado */
+  erro?: string;
+  /* `dm-curto` e `dm-data` limitam a largura fora do celular: um campo de
+     e-mail com 1000px é ruído */
+  classe?: 'dm-curto' | 'dm-data';
 }) {
   return (
-    <label className="dm-campo">
+    <label className={classe ? `dm-campo ${classe}` : 'dm-campo'}>
       <span>{rot}</span>
       {children}
+      {erro ? <small className="dm-erro-campo" role="alert">{erro}</small> : null}
       {ajuda ? <small>{ajuda}</small> : null}
     </label>
   );
@@ -101,12 +108,101 @@ export function Esqueleto({ linhas = 4, oQue = 'Carregando' }: { linhas?: number
   );
 }
 
-export function Vazio({ titulo, children }: { titulo: string; children?: React.ReactNode }) {
+/* O ESTADO VAZIO É QUIETO, E DIZ SE É BOA NOTÍCIA.
+
+   "O setor está em dia." recebia a etiqueta "> nada aqui", a mesma de "Você
+   ainda não abriu nenhuma demanda". A etiqueta agora diz o tom: `bom` é
+   "tudo em dia", `filtro` é "ninguém com esse filtro", e o padrão continua
+   "nada aqui". O cartão é quieto (fundo card3) para não competir com os
+   cartões de conteúdo. */
+export function Vazio({ titulo, tom, children }: {
+  titulo: string; tom?: 'bom' | 'filtro'; children?: React.ReactNode;
+}) {
   return (
-    <div className="dm-card dm-centro" style={{ padding: 'var(--dm-e5) var(--dm-e3)' }}>
-      <div className="dm-rot" style={{ marginBottom: 6 }}>{'>'} nada aqui</div>
-      <h3 style={{ marginBottom: 8 }}>{titulo}</h3>
-      <div className="dm-peq dm-mudo">{children}</div>
+    <div className="dm-card dm-quieto dm-vazio dm-centro">
+      <div className="dm-rot">{'>'} {tom === 'bom' ? 'tudo em dia' : tom === 'filtro' ? 'ninguém com esse filtro' : 'nada aqui'}</div>
+      <h3>{titulo}</h3>
+      {children ? <div className="dm-peq dm-mudo">{children}</div> : null}
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- sub-abas
+
+   As vistas de UMA tela (Atender: esperando você, com você...). No desktop,
+   abas de 14px fixas sob a barra; no celular, uma fita de fichas de 44px que
+   rola de lado. O número entra num selo: preto quando há, cinza quando é
+   zero, vermelho quando é a vista de atrasadas e há. `null` no número é
+   "ainda não sei" e sai como um ponto. */
+export function Subabas<T extends string>({ rot, valor, itens, aoMudar }: {
+  rot: string; valor: T;
+  itens: { v: T; rot: string; n?: number | null; bad?: boolean }[];
+  aoMudar: (v: T) => void;
+}) {
+  return (
+    <div className="dm-subabas" role="group" aria-label={rot}>
+      {itens.map(i => (
+        <button key={i.v} type="button" aria-pressed={valor === i.v} onClick={() => aoMudar(i.v)}>
+          {i.rot}
+          {i.n !== undefined ? (
+            <span className={`dm-quantos ${i.n === null ? '' : i.n === 0 ? 'dm-zero' : i.bad ? 'dm-bad' : ''}`}
+              aria-label={i.n === null ? 'carregando' : `${i.n}`}>
+              {i.n === null ? '·' : i.n}
+            </span>
+          ) : null}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/* O interruptor: 44px de alvo e o rótulo do que ele CONTROLA ("Exige
+   aprovação"), e não do valor atual ("Não exige"), que se lê como estado e
+   não como toque. */
+export function Interruptor({ ligado, rot, aoMudar, disabled, aria }: {
+  ligado: boolean; rot: string; aoMudar: (v: boolean) => void; disabled?: boolean;
+  /* numa tabela o texto visível é curto ("Exige"); o leitor de tela precisa
+     do nome completo do que o interruptor controla e de qual linha é */
+  aria?: string;
+}) {
+  return (
+    <button type="button" role="switch" aria-checked={ligado} className="dm-interruptor"
+      aria-label={aria} disabled={disabled} onClick={() => aoMudar(!ligado)}>
+      {rot}
+    </button>
+  );
+}
+
+/* a tela é estreita? Decide o que se monta (folha em vez de painel na
+   ficha; cartões em vez de tabela na configuração), e não só como se pinta.
+   Sem `matchMedia` (o teste de telas, o servidor), vale largo. */
+export function useEstreito(maxPx: number): boolean {
+  const [estreito, setEstreito] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia(`(max-width: ${maxPx}px)`);
+    const f = () => setEstreito(mq.matches);
+    f();
+    mq.addEventListener?.('change', f);
+    return () => mq.removeEventListener?.('change', f);
+  }, [maxPx]);
+  return estreito;
+}
+
+/* O toast: o sucesso que muda de tela ou some da tela ("Demanda #113
+   assumida", "Dados salvos"). Um só; fica 4s (6 com botão); erro nunca é
+   toast, porque toast some. Quem mostra é a Casca; quem pede é `useEu().toast`. */
+export type ToastPedido = { texto: string; ver?: string; desfazer?: () => void; rotDesfazer?: string };
+export function Toast({ t, fechar }: { t: ToastPedido; fechar: () => void }) {
+  useEffect(() => {
+    const i = setTimeout(fechar, t.ver || t.desfazer ? 6000 : 4000);
+    return () => clearTimeout(i);
+  }, [t, fechar]);
+  return (
+    <div className="dm-toast" role="status" aria-live="polite">
+      <span>{t.texto}</span>
+      {t.ver ? <a href={t.ver}>Ver</a> : null}
+      {t.desfazer ? <button type="button" onClick={() => { t.desfazer?.(); fechar(); }}>{t.rotDesfazer || 'Desfazer'}</button> : null}
     </div>
   );
 }

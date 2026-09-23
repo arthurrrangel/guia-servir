@@ -160,7 +160,7 @@ const paginasDe = (quem) => [
   { rota: '/demandas/nova',      nome: 'nova', so: TODOS },
   { rota: '/demandas/avisos',    nome: 'avisos', so: TODOS },
   { rota: '/demandas/perfil',    nome: 'perfil', so: [...TODOS, 'colega', 'pedido'], texto: 'O que você pode' },
-  { rota: '/demandas/atendimento', nome: 'atendimento', so: ATENDE, exige: '.dm-contas.dm-seis' },
+  { rota: '/demandas/atendimento', nome: 'atendimento', so: ATENDE, exige: '.dm-subabas' },
   { rota: '/demandas/atendimento?ver=atrasadas', nome: 'atendimento-atrasadas', so: ['responsavel'],
     exige: '.dm-fila .dm-item.dm-atrasada' },
   { rota: '/demandas/atendimento', nome: 'atendimento-sem-equipe', so: ['solicitante'],

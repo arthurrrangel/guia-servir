@@ -112,22 +112,36 @@ function Ficha() {
 
   const p = f?.pessoa;
   const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
+  /* "Salvar" só existe habilitado quando mudou: a mesma regra do Perfil */
+  const mudouDados = !!p && (
+    r.nome.trim() !== p.nome || r.auth_email.trim() !== (p.auth_email || p.email || '')
+    || soDigitos(r.telefone) !== soDigitos(telVisivel(p.telefone)) || r.setor_id !== (p.setor_id || '')
+    || r.funcao.trim() !== (p.funcao || ''));
+  const mudouPapel = !!p && (
+    r.papel !== p.papel || (r.papel === 'gestor' && (r.escopo_total !== !!p.escopo_total
+      || (!r.escopo_total && r.escopo.slice().sort().join() !== (p.escopo || []).map(e => e.id).sort().join()))));
 
   return (
     <>
-      <Link className="dm-voltar dm-peq" href="/demandas/admin">{'<'} Pessoas</Link>
-      <div className="dm-rot" style={{ marginTop: 'var(--dm-e1)' }}>{'>'} {nova ? 'pessoa nova' : 'pessoa'}</div>
-      <h1 style={{ margin: '6px 0 var(--dm-e1)' }}>{nova ? 'Cadastrar pessoa' : p!.nome}</h1>
-      {p ? (
-        <div className="dm-quem" style={{ marginBottom: 'var(--dm-e3)' }}>
-          <Pill>{rotPapel(p.papel)}</Pill>
-          {p.ativo === false ? <Pill tom="bad">Inativa</Pill> : <Pill tom="ok">Ativa</Pill>}
-          <span>{p.origem === 'cadastro' ? 'Cadastrou-se' : 'Cadastrada pela administração'} em {dataCheia((p.criado_em || '').slice(0, 10))}</span>
+      <Link className="dm-volta" href="/demandas/admin">Pessoas</Link>
+      <div className="dm-cab">
+        <div>
+          <div className="dm-rot">{'>'} administração · {nova ? 'pessoa nova' : 'pessoa'}</div>
+          <h1 style={{ marginTop: 4 }}>{nova ? 'Cadastrar pessoa' : p!.nome}</h1>
+          {p ? (
+            <div className="dm-quem">
+              <Pill>{rotPapel(p.papel)}</Pill>
+              {p.ativo === false ? <Pill tom="bad">Inativa</Pill> : <Pill tom="ok">Ativa</Pill>}
+              <span>{p.origem === 'cadastro' ? 'Cadastrou-se' : 'Cadastrada pela administração'} em {dataCheia((p.criado_em || '').slice(0, 10))}</span>
+            </div>
+          ) : null}
         </div>
-      ) : <div style={{ marginBottom: 'var(--dm-e3)' }} />}
-
+      </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       {ok ? <Aviso tom="ok">{ok}</Aviso> : null}
+
+      <div className="dm-duas dm-7-5">
+      <div>
 
       {/* o pedido de papel, antes de tudo: é o que a pessoa está esperando */}
       {p?.papel_pedido ? (
@@ -205,7 +219,8 @@ function Ficha() {
           </Aviso>
         ) : null}
 
-        <button className="dm-btn dm-pri dm-larga" disabled={indo || !r.nome.trim() || !r.setor_id}
+        <button className="dm-btn dm-pri" disabled={indo || !r.nome.trim() || !r.setor_id || (!nova && !mudouDados)}
+          aria-busy={indo || undefined}
           onClick={() => nova
             ? enviar({ ...dadosDoRascunho(), ...(homonimos ? { confirmar_homonimo: true } : {}) }, 'Cadastrado.')
             : enviar({ id, nome: r.nome.trim(), auth_email: r.auth_email.trim(),
@@ -221,7 +236,7 @@ function Ficha() {
           <div className="dm-card">
             <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Papel e escopo</h3>
             <Papeis r={r} setR={setR} b={b} />
-            <button className="dm-btn dm-pri dm-larga" disabled={indo}
+            <button className="dm-btn dm-pri" disabled={indo || !mudouPapel} aria-busy={indo || undefined}
               onClick={() => {
                 const d: Record<string, unknown> = { id, papel: r.papel };
                 if (r.papel === 'gestor') {
@@ -230,6 +245,25 @@ function Ficha() {
                 }
                 enviar(d, 'Papel salvo.');
               }}>Salvar papel</button>
+          </div>
+        </>
+      ) : null}
+      </div>
+
+      {p ? (
+        <aside>
+          {/* ---------------------------------------------------- atividade */}
+          <div className="dm-card">
+            <h3>Atividade</h3>
+            <div className="dm-contas dm-duas-colunas">
+              <div className="dm-conta dm-leitura"><b>{f!.atividade.pediu}</b><small>pediu ({f!.atividade.pediu_abertas} em andamento)</small></div>
+              <div className="dm-conta dm-leitura"><b>{f!.atividade.com_ela}</b><small>com ela agora</small></div>
+              <div className="dm-conta dm-leitura"><b>{f!.atividade.concluiu}</b><small>concluiu</small></div>
+              <div className="dm-conta dm-leitura"><b>{f!.atividade.acompanha}</b><small>acompanha</small></div>
+            </div>
+            <p className="dm-peq dm-mudo" style={{ margin: 'var(--dm-e2) 0 0' }}>
+              {f!.atividade.ultima ? `Última ação: ${carimbo(f!.atividade.ultima)}.` : 'Nenhuma ação registrada ainda.'}
+            </p>
           </div>
 
           {/* ---------------------------------------------- o que ela pode */}
@@ -240,27 +274,13 @@ function Ficha() {
             </ul>
           </div>
 
-          {/* ---------------------------------------------------- atividade */}
-          <div className="dm-card">
-            <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Atividade</h3>
-            <div className="dm-contas">
-              <div><b>{f!.atividade.pediu}</b><small>pediu ({f!.atividade.pediu_abertas} em andamento)</small></div>
-              <div><b>{f!.atividade.com_ela}</b><small>com ela agora</small></div>
-              <div><b>{f!.atividade.concluiu}</b><small>concluiu</small></div>
-              <div><b>{f!.atividade.acompanha}</b><small>acompanha</small></div>
-            </div>
-            <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e2)' }}>
-              {f!.atividade.ultima ? `Última ação: ${carimbo(f!.atividade.ultima)}.` : 'Nenhuma ação registrada ainda.'}
-            </p>
-          </div>
-
           {/* ------------------------------------------------ o link pessoal */}
           <div className="dm-card">
             <h3 style={{ marginBottom: 6 }}>Link pessoal</h3>
             <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
               Entra sem senha. Vale como <b>senha</b>: mande só no privado.
             </p>
-            <div className="dm-grade" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="dm-linha">
               {linkVisivel && p.token
                 ? <Copiar texto={`${base}?t=${p.token}`} rot="Copiar o link" />
                 : <button className="dm-btn" onClick={() => setLinkVisivel(true)}>Ver o link</button>}
@@ -289,10 +309,10 @@ function Ficha() {
                 : 'Ativa. Desativar tira o acesso na hora, e as demandas dela continuam no sistema.'}
             </p>
             {p.ativo === false ? (
-              <button className="dm-btn dm-larga" disabled={indo}
+              <button className="dm-btn" disabled={indo}
                 onClick={() => enviar({ id, ativo: true }, 'Reativada.')}>Reativar</button>
             ) : (
-              <button className="dm-btn dm-perigo dm-larga" disabled={indo} onClick={async () => {
+              <button className="dm-btn dm-txt dm-perigo" disabled={indo} onClick={async () => {
                 const sim = await confirmar({
                   titulo: `Desativar ${p.nome.split(' ')[0]}?`,
                   texto: 'Ela deixa de entrar, pelo e-mail e pelo link. Nada do que ela pediu ou atendeu é apagado.',
@@ -304,9 +324,9 @@ function Ficha() {
           </div>
 
           {/* ----------------------------------------------------- histórico */}
-          <div className="dm-card">
-            <h3 style={{ marginBottom: 'var(--dm-e2)' }}>Histórico do cadastro</h3>
-            <ol className="dm-hist">
+          <details className="dm-card dm-mais" style={{ marginTop: 0 }}>
+            <summary>Histórico do cadastro ({f!.historico.length})</summary>
+            <ol className="dm-hist" style={{ marginTop: 'var(--dm-e2)' }}>
               {f!.historico.map((h, i) => (
                 <li key={i}>
                   <div>{fraseDaPessoa(h)}</div>
@@ -314,9 +334,10 @@ function Ficha() {
                 </li>
               ))}
             </ol>
-          </div>
-        </>
-      ) : null}
+          </details>
+        </aside>
+      ) : <div />}
+      </div>
     </>
   );
 }

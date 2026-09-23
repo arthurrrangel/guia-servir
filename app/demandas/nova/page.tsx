@@ -119,6 +119,7 @@ function Nova() {
   const [tentou, setTentou] = useState(false);
   const [erroBase, setErroBase] = useState('');
   const [tinhaRascunho, setTinhaRascunho] = useState(false);
+  const [digitando, setDigitando] = useState(false);
 
   /* RESTAURAR NO EFEITO, E NÃO NO INICIALIZADOR DO `useState`.
 
@@ -278,9 +279,12 @@ function Nova() {
 
   return (
     <>
-      <div className="dm-rot">{'>'} nova demanda</div>
-      <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>O que você precisa?</h1>
-
+      <div className="dm-cab">
+        <div>
+          <div className="dm-rot">{'>'} nova demanda</div>
+          <h1 style={{ marginTop: 4 }}>O que você precisa?</h1>
+        </div>
+      </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       {/* UMA LINHA, E SÓ UMA. A tentação aqui é uma caixa com "Recuperar" e
@@ -295,6 +299,8 @@ function Nova() {
         </p>
       ) : null}
 
+      <div className="dm-duas dm-7-5" onFocus={() => setDigitando(true)} onBlur={() => setDigitando(false)}>
+      <div>
       <div className="dm-card">
         <Campo rot="Título">
           {/* OS TETOS APARECEM ANTES DO TOQUE, E NÃO DEPOIS.
@@ -332,7 +338,7 @@ function Nova() {
         </Campo>
 
         {!semData ? (
-          <Campo rot="Para quando"
+          <Campo rot="Para quando" classe="dm-data"
             ajuda={cat?.prazo_padrao_dias ? `${setorDaCat} costuma levar ${cat.prazo_padrao_dias} dias.` : undefined}>
             {/* O `min` SAIU: NO CELULAR ELE NÃO ERA UM AVISO, ERA UMA PORTA
                 TRANCADA — 22/09/2026.
@@ -367,7 +373,7 @@ function Nova() {
               placeholder="Depende da agenda do pastor" />
           </Campo>
         )}
-        <button className="dm-btn dm-peq" style={{ marginTop: -8, marginBottom: 'var(--dm-e3)' }}
+        <button type="button" className="dm-btn dm-txt" style={{ marginTop: -12, marginBottom: 'var(--dm-e3)' }}
           onClick={() => { setSemData(x => !x); setR(v => ({ ...v, prazo: '', sem_prazo_porque: '' })); }}>
           {semData ? 'Tenho uma data' : 'Não tenho data'}
         </button>
@@ -532,14 +538,49 @@ function Nova() {
         </Aviso>
       ) : null}
 
-      <button className="dm-btn dm-pri dm-larga" disabled={indo} onClick={enviar}>
-        {indo ? 'Enviando…' : 'Enviar a demanda'}
-      </button>
-      {r.prazo ? (
-        <p className="dm-peq dm-mudo dm-centro" style={{ marginTop: 'var(--dm-e2)' }}>
-          Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.
-        </p>
+      {/* no desktop o botão fecha a coluna do formulário; no celular ele vai
+          na barra fixa do rodapé, com a frase-resumo, e sai da frente
+          enquanto a pessoa digita (o teclado já cobre metade da tela) */}
+      <div className="dm-so-desktop dm-linha">
+        <button className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
+          {indo ? 'Enviando…' : 'Enviar a demanda'}
+        </button>
+        {r.prazo ? (
+          <span className="dm-peq dm-mudo">
+            Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.
+          </span>
+        ) : null}
+      </div>
+      </div>
+
+      {/* a coluna de contexto: o que a categoria decide, ao vivo */}
+      <aside className="dm-card dm-quieto dm-fixa dm-so-desktop" aria-label="O que acontece com este pedido">
+        <h3>O que acontece com este pedido</h3>
+        {cat ? (
+          <div className="dm-pares dm-uma-coluna">
+            <div><span>Vai para</span>{setorDaCat || 'nenhum setor ainda'}</div>
+            <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da liderança antes de começar' : 'não precisa'}</div>
+            <div><span>Prazo sugerido</span>{cat.prazo_padrao_dias ? `${dataCheia(prazoSugerido(cat))} (${cat.prazo_padrao_dias} dias)` : 'sem sugestão'}</div>
+            <div><span>Orçamento</span>{cat.exige_orcamento ? 'obrigatório nesta categoria' : 'quando der para estimar'}</div>
+            <div><span>Anexos</span>{dicaDeAnexo(b?.anexos)}</div>
+          </div>
+        ) : (
+          <p className="dm-peq dm-mudo" style={{ margin: 0 }}>Escolha a categoria e eu digo para onde vai, se precisa de aprovação e o prazo sugerido.</p>
+        )}
+      </aside>
+      </div>
+
+      {!digitando ? (
+        <div className="dm-barra-acao dm-barra-enviar">
+          <span className="dm-peq dm-mudo dm-cresce">
+            {r.prazo ? <>Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.</> : setorDaCat ? <>Para {setorDaCat}.</> : null}
+          </span>
+          <button className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
+            {indo ? 'Enviando…' : 'Enviar a demanda'}
+          </button>
+        </div>
       ) : null}
+      <div className="dm-barra-espaco" />
     </>
   );
 }
