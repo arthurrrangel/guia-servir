@@ -18,38 +18,14 @@ import { useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Esqueleto, Vazio } from '@/components/demandas/Ui';
 import { avisos } from '@/lib/demandas/api';
-import { carimbo, dataCheia, fraseDoEvento, quando, recadoDoErro } from '@/lib/demandas/regras';
+import { agruparAvisos, carimbo, dataCheia, fraseDoEvento, quando, recadoDoErro, semRepetir, type GrupoDeAvisos } from '@/lib/demandas/regras';
 import type { AvisoDentro } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
   return <Casca><Avisos /></Casca>;
 }
 
-type Grupo = { numero: number; titulo: string; itens: AvisoDentro[]; novo: boolean };
-
-/* agrupa por demanda, mantendo a ordem de chegada (do mais novo para o mais
-   antigo); dentro do grupo, os fatos na mesma ordem */
-function agrupar(itens: AvisoDentro[]): Grupo[] {
-  const m = new Map<number, Grupo>();
-  for (const a of itens) {
-    const g = m.get(a.numero) || { numero: a.numero, titulo: a.titulo, itens: [], novo: false };
-    g.itens.push(a);
-    if (a.novo) g.novo = true;
-    m.set(a.numero, g);
-  }
-  return [...m.values()];
-}
-
-/* "assumiu" e "mudou de Aberta para Em execução" no mesmo instante são um
-   gesto só: a segunda linha some quando está colada na primeira */
-function semRepetir(itens: AvisoDentro[]): AvisoDentro[] {
-  const ms = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
-  return itens.filter((e, i) => {
-    if (!(e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao')) return true;
-    return ![itens[i - 1], itens[i + 1]].some(o => o && o.tipo === 'responsavel' && o.quem === e.quem
-      && Math.abs(ms(o) - ms(e)) < 5000);
-  });
-}
+type Grupo = GrupoDeAvisos;
 
 const dia = (iso: string) => {
   const d = iso.slice(0, 10);
@@ -79,7 +55,7 @@ function Avisos() {
 
   const { novos, antigos } = useMemo(() => {
     const todos = itens || [];
-    return { novos: agrupar(todos.filter(a => a.novo)), antigos: agrupar(todos.filter(a => !a.novo)) };
+    return { novos: agruparAvisos(todos.filter(a => a.novo)), antigos: agruparAvisos(todos.filter(a => !a.novo)) };
   }, [itens]);
 
   const grupo = (g: Grupo, novoBloco: boolean) => (

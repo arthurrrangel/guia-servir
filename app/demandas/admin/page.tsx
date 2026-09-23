@@ -261,7 +261,7 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
       {pedidos.length ? <Pedidos pedidos={pedidos} nomeSetor={nomeSetor} recarregar={recarregar} /> : null}
 
       {/* os filtros numa linha só: situação, papel, setor e a busca */}
-      <div className="dm-ferramentas">
+      <div className="dm-ferramentas dm-filtros">
         <div className="dm-seg" role="group" aria-label="Situação">
           {([['ativas', 'Ativas'], ['inativas', 'Inativas'], ['todas', 'Todas']] as const).map(([v, r]) => (
             <button key={v} type="button" aria-pressed={situ === v} onClick={() => setSitu(v)}>{r}</button>
@@ -309,7 +309,7 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
           {vistas.map(m => (
             <Link key={m.id} href={`/demandas/admin/pessoas/${m.id}`}
               className={m.ativo === false ? 'dm-pessoa dm-inativa' : 'dm-pessoa'}>
-              <span className="dm-p-nome"><b>{m.nome}</b>{m.origem === 'cadastro' ? <small className="dm-mudo"> · cadastro próprio</small> : null}</span>
+              <span className="dm-p-nome"><b>{m.nome}</b>{m.origem === 'cadastro' ? <small className="dm-mudo dm-p-origem">cadastro próprio</small> : null}</span>
               <span className="dm-p-papel">
                 <Pill>{rotPapel(m.papel)}</Pill>
                 {m.ativo === false ? <Pill tom="bad">Inativa</Pill> : null}

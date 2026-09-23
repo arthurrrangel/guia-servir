@@ -25,7 +25,7 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Aviso, Esqueleto, Pill, Vazio } from './Ui';
+import { Aviso, Esqueleto, Pill, Vazio, useEstreito } from './Ui';
 import { lista, type Aba, type Filtro } from '@/lib/demandas/api';
 import {
   MOTIVOS, comoOPdfChama, dataCurta, diasDeAtraso, recadoDoErro, rotPrioridade,
@@ -80,6 +80,7 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
      do seu pedido e só escreve na tela se ainda for o último. */
   const pedido = useRef(0);
   const campoBusca = useRef<HTMLInputElement>(null);
+  const estreito = useEstreito(719);
 
   useEffect(() => {
     if (busca.trim() === termo) return;
@@ -148,9 +149,11 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
         const resumo = r ? (
           <span className={`dm-aviso-linha dm-${r.tom}`} role="status"><span className="dm-ponto" />{r.texto}.</span>
         ) : null;
-        /* quando a lista desenha as próprias tiras (Início), a busca mora na
-           linha delas, à direita, e o resumo só ocupa uma linha quando tem o
-           que dizer: a lupa sozinha numa linha de 44px era ruído */
+        /* quando a lista desenha as próprias tiras (Início): no celular a
+           lupa mora na linha delas, à direita, e o resumo só ocupa uma linha
+           quando tem o que dizer (a lupa sozinha numa linha de 44px era
+           ruído); a partir de 720 a linha de ferramentas é a mesma do
+           Atender, resumo à esquerda e busca e ordem à direita */
         if (!controle && (abas.length > 1 || recortes.length > 1)) {
           return (
             <>
@@ -169,9 +172,11 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
                     <button key={r.v} type="button" aria-pressed={so === r.v} onClick={() => setSo(r.v)}>{r.rot}</button>
                   ))}
                 </div>
-                {dir}
+                {estreito ? dir : null}
               </div>
-              {resumo ? <div className="dm-ferramentas">{resumo}</div> : null}
+              {estreito
+                ? (resumo ? <div className="dm-ferramentas">{resumo}</div> : null)
+                : <div className="dm-ferramentas">{resumo || <span />}{dir}</div>}
             </>
           );
         }

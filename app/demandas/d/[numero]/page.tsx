@@ -636,7 +636,7 @@ function Recados({ d, base, eu }: { d: Vista['demanda']; base: string; eu: Vista
               WhatsApp para {alvo.nome.split(' ')[0]}
             </a>
           : <span className="dm-peq dm-mudo">{alvo.nome || 'Essa pessoa'} não tem telefone cadastrado.</span>}
-        <Copiar texto={texto} rot="Copiar o recado" />
+        <Copiar texto={texto} rot="Copiar o recado" classe="dm-btn dm-txt dm-larga" />
       </div>
     </div>
   );

@@ -306,6 +306,9 @@
   .dm-linha.dm-par-cel > .dm-btn:first-child{flex:1 1 auto}
   .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%}
 }
+/* entre 1024 e 1279 a coluna do perfil tem 318px: os dois botões de papel
+   ficam um sob o outro, com a largura inteira, como no celular */
+@media (min-width:1024px) and (max-width:1279px){ .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%} }
 @media (min-width:720px){
   .dm-cab{grid-template-columns:1fr auto;gap:var(--dm-e3)}
   .dm-cab > .dm-cab-acoes{justify-content:flex-end}
@@ -333,12 +336,15 @@
   .dm-fixa{position:sticky;top:calc(var(--dm-topo-altura) + var(--dm-e3))}
 }
 @media (min-width:1680px){ .dm-duas{grid-template-columns:minmax(0,8fr) minmax(320px,4fr)} }
-.dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
+.dm-dupla{display:grid;gap:var(--dm-e4) var(--dm-e3);grid-template-columns:1fr;margin-bottom:var(--dm-e4)}
+.dm-dupla > .dm-campo{margin-bottom:0}
+.dm-card > .dm-dupla:last-child,.dm-dupla.dm-dupla-larga{margin-bottom:0}
 .dm-dupla > *{min-width:0}
 @media (min-width:720px){ .dm-dupla{grid-template-columns:1fr 1fr} }
 /* o par de tabelas dos Números só cabe lado a lado a partir de 1024 */
 .dm-dupla.dm-dupla-larga{grid-template-columns:1fr}
-@media (min-width:1024px){ .dm-dupla.dm-dupla-larga{grid-template-columns:1fr 1fr} }
+@media (min-width:1024px){ .dm-dupla.dm-dupla-larga{grid-template-columns:minmax(0,7fr) minmax(0,5fr)} }
+@media (min-width:1280px){ .dm-dupla.dm-dupla-larga{grid-template-columns:1fr 1fr} }
 .dm-grade{display:grid;gap:var(--dm-e2)}
 .dm-grade > *{min-width:0}
 .dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
@@ -404,12 +410,13 @@
 .dm-btn.dm-txt.dm-rente{margin-left:-8px}
 /* o chevron dos links de "ir para": um só desenho, na cor da marca */
 .dm-btn.dm-txt.dm-seta::after,.dm-seta::after{content:"›";margin-left:3px;color:var(--dm-marca)}
+.dm-btn.dm-txt.dm-seta{gap:0}
 /* ocupado: o texto muda ("Salvando…") e a largura não pula */
 .dm-btn[aria-busy="true"]{cursor:progress}
 
 /* ------------------------------------------------------------------ campos */
 .dm-campo{display:block;margin-bottom:var(--dm-e4)}
-.dm-card > .dm-campo:last-child,.dm-card > .dm-dupla:last-child,.dm-dupla > .dm-campo:last-child{margin-bottom:0}
+.dm-card > .dm-campo:last-child{margin-bottom:0}
 .dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
 .dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
 .dm-campo input,.dm-campo select,.dm-campo textarea,.dm-filtro,.dm-campo-solto{
@@ -426,7 +433,7 @@
 .dm-campo input[aria-invalid="true"],.dm-campo-solto[aria-invalid="true"]{border-color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad)}
 /* o select ganha a seta da folha (chevron), em vez da do sistema, que some
    sobre o fundo claro e faz o campo parecer um campo de texto */
-.dm-campo select,.dm-filtro{
+.dm-campo select,.dm-filtro,.dm-campo-solto:is(select){
   appearance:none;-webkit-appearance:none;padding-right:36px;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23252525' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 12px center;
@@ -521,7 +528,10 @@
 .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3){grid-column:span 2}
 .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:span 3}
 .dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
-@media (min-width:760px){
+/* cinco em linha só onde a coluna tem largura: no tablet (coluna inteira)
+   e a partir de 1280; entre 1024 e 1279 a coluna 7/12 tem 545px e
+   "Administração" encostava nas bordas do botão, então vale o 3+2 */
+@media (min-width:760px) and (max-width:1023px), (min-width:1280px){
   .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
   .dm-opcoes:has(> :last-child:nth-child(5)) > button{font-size:13px}
   .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3),
@@ -548,7 +558,7 @@
 .dm-subabas{
   display:flex;gap:var(--dm-e1);overflow-x:auto;scrollbar-width:none;
   margin:0 calc(-1 * var(--dm-calha)) var(--dm-e3);padding:2px var(--dm-calha);
-  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;
+  scroll-snap-type:x proximity;scroll-padding-inline:var(--dm-calha);-webkit-overflow-scrolling:touch;
   mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
   -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
 }
@@ -605,13 +615,16 @@
 .dm-tiras > .dm-ferramentas-dir{flex:1 1 auto;justify-content:flex-end}
 /* em 1024 a 1279 os filtros da administração não cabem ao lado do
    segmentado: a segunda linha começa à esquerda, como composição */
-@media (min-width:1024px) and (max-width:1279px){ .dm-ferramentas > .dm-ferramentas-dir{flex:1 1 100%;justify-content:flex-start} }
+.dm-ferramentas > .dm-ferramentas-dir{flex:1 1 0%;min-width:0}
+@media (min-width:720px) and (max-width:1279px){ .dm-ferramentas.dm-filtros > .dm-ferramentas-dir{flex:1 1 100%;justify-content:flex-start} }
 .dm-filtro{max-width:220px;text-overflow:ellipsis}
 .dm-ferramentas-dir > .dm-busca{flex:1 1 220px;max-width:360px;margin:0}
 .dm-busca-toggle{display:none;padding:0 12px}
 @media (max-width:719px){
-  /* os dois filtros da administração dividem a linha no celular */
+  /* os dois filtros da administração dividem a linha no celular largo e
+     ficam um por linha no estreito ("Todos os pap…" não é rótulo) */
   .dm-ferramentas-dir > .dm-filtro{flex:1 1 calc(50% - 6px);max-width:none}
+  @media (max-width:479px){ .dm-ferramentas-dir > .dm-filtro{flex:1 1 100%} }
   .dm-busca-toggle{display:inline-flex}
   .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:none}
   .dm-ferramentas-dir > .dm-busca.dm-aberta{flex:1 1 100%;max-width:none}
@@ -751,16 +764,20 @@
 @keyframes dm-entra{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:none}}
 [aria-busy="true"] > .dm-fila{opacity:.6;transition:opacity 120ms}
 
-/* 640 e não 560: com as colunas fixas (estado, prazo, passo) o título
-   ficava com 50px em 560. Entre 430 e 720 nenhuma tela monta a fila. */
-@container (min-width:640px){
+/* a forma compacta (576 a 959 de contêiner): duas linhas por demanda, o
+   título em cima e, embaixo, a pílula, o contexto e "com quem está"; prazo e
+   passo em colunas à direita. As colunas da segunda linha são `max-content`
+   (medidas pela pílula e pelo "com"); o contexto some com reticências. */
+@container (min-width:576px){
   .dm-fila-cab{
-    display:grid;grid-template-columns:48px minmax(0,1fr) 110px 150px;
+    display:grid;grid-template-columns:48px max-content minmax(0,1fr) max-content 110px 150px;
     column-gap:var(--dm-e2);align-items:end;
     padding:0 0 var(--dm-e1);border-bottom:1px solid var(--dm-linha);
     font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
     position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:4;
   }
+  /* sob as sub-abas fixas do desktop (48px), o cabeçalho gruda mais abaixo */
+  .dm-corpo:has(> .dm-subabas) .dm-fila-cab{top:calc(var(--dm-topo-altura) + 48px)}
   /* as células do cabeçalho têm os mesmos nomes de área das linhas: sem as
      áreas declaradas aqui também, todas caíam na mesma linha implícita, uma
      por cima da outra, no canto direito (medido em 1440, 23/09/2026) */
@@ -770,37 +787,42 @@
   /* a forma compacta (640 a 959) tem o estado SOB o título, e não numa
      coluna: com cinco colunas fixas o título ficava com 200px e a pílula
      "Aguardando informações" quebrava em duas linhas */
-  .dm-fila-cab,.dm-item{grid-template-areas:"num tit prazo passo" "num estado prazo passo"}
-  .dm-fila-cab > .dm-c-estado{display:none}
+  .dm-fila-cab,.dm-item{grid-template-areas:"num tit tit tit prazo passo" "num estado cat com prazo passo"}
+  .dm-fila-cab > .dm-c-estado,.dm-fila-cab > .dm-c-cat,.dm-fila-cab > .dm-c-com{display:none}
   .dm-item{
-    grid-template-columns:48px minmax(0,1fr) 110px 150px;
+    grid-template-columns:48px max-content minmax(0,1fr) max-content 110px 150px;
     align-items:center;row-gap:4px;padding:10px 0;min-height:56px;
   }
+  .dm-c-ctx{display:none}
+  .dm-c-cat{display:block;grid-area:cat;font-size:13px;color:var(--dm-mudo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:center}
+  .dm-c-com{display:block;grid-area:com;white-space:nowrap;align-self:center}
   .dm-c-meta{display:contents}
   .dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:none}
-  .dm-c-estado{grid-area:estado;align-self:start}
+  .dm-c-estado{grid-area:estado;align-self:center}
   .dm-c-prazo{grid-area:prazo;white-space:nowrap}
   .dm-c-passo{grid-area:passo;text-align:right;margin-left:0}
-  .dm-c-com,.dm-c-cat{display:none}
   .dm-c-tit b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .dm-pre{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:48px minmax(0,1fr) 110px;grid-template-areas:"num tit prazo" "num estado prazo"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:48px max-content minmax(0,1fr) max-content 110px;grid-template-areas:"num tit tit tit prazo" "num estado cat com prazo"}
 }
 @container (min-width:960px){
-  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 190px 100px 120px 140px;grid-template-areas:"num tit estado prazo com passo"}
+  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 190px 120px 110px 140px;grid-template-areas:"num tit estado prazo com passo"}
   .dm-fila-cab > .dm-c-estado{display:block}
   .dm-c-estado{align-self:center}
+  .dm-c-ctx{display:block}
+  .dm-c-cat{display:none}
+  .dm-c-prazo{overflow:hidden;text-overflow:ellipsis}
   .dm-fila-cab > .dm-c-com,.dm-c-com{display:block}
   .dm-c-com{grid-area:com;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 190px 100px 120px;grid-template-areas:"num tit estado prazo com"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 190px 120px 110px;grid-template-areas:"num tit estado prazo com"}
 }
 @container (min-width:1100px){
-  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 190px 100px 110px 140px;grid-template-areas:"num tit cat estado prazo com passo"}
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(120px,170px) 190px 120px 90px 140px;grid-template-areas:"num tit cat estado prazo com passo"}
   .dm-item{min-height:48px}
   .dm-fila-cab > .dm-c-cat,.dm-c-cat{display:block}
   .dm-c-cat{grid-area:cat;font-size:13px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dm-c-ctx{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 190px 100px 110px;grid-template-areas:"num tit cat estado prazo com"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(120px,170px) 190px 120px 90px;grid-template-areas:"num tit cat estado prazo com"}
 }
 /* as linhas somadas do "Precisa de você" ("5 demandas esperando você em
    Atender"): o número é uma contagem, não um identificador, e a linha tem
@@ -864,6 +886,8 @@
 /* o campo solto dentro da tabela não ocupa a célula inteira */
 .dm-tab .dm-campo-solto{width:auto;min-width:150px;max-width:200px}
 .dm-tab .dm-campo-solto.dm-estreito{width:64px;min-width:0;padding-inline:8px}
+.dm-tab .dm-campo-solto.dm-dinheiro{width:120px;padding-inline:10px}
+.dm-tab td > .dm-linha{flex-wrap:nowrap;white-space:nowrap}
 /* a tabela de rótulo/valor (a ficha) vira duas colunas no celular */
 /* a tabela de LEITURA rola de lado dentro do cartão, com a primeira coluna
    fixa e um sinal de que rola; a EDITÁVEL vira cartões (ver `dm-cartoes`) */
@@ -871,13 +895,17 @@
   mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);
   -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
 .dm-rola .dm-tab{min-width:max-content}
-@media (min-width:1024px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
+@media (min-width:720px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
+/* no celular o último número sai de baixo da máscara */
+@media (max-width:719px){ .dm-rola .dm-tab th:last-child,.dm-rola .dm-tab td:last-child{padding-right:var(--dm-e4)} }
 /* a tabela editável abaixo de 720: um cartão por linha, controles rotulados */
 .dm-cartoes{display:grid;gap:var(--dm-e2)}
 .dm-cartao-linha{border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2)}
 .dm-cartao-linha > h3{margin:0}
 .dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2)}
-@media (min-width:480px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} }
+/* duas colunas já em 380 (prazo e "dias", os dois interruptores); o select
+   de destino precisa da largura toda */
+@media (min-width:380px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} .dm-cartao-campo:has(> select){grid-column:1 / -1} }
 .dm-cartao-campo > span:first-child{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:4px}
 /* quem decide entre tabela e cartões é `useEstreito(719)` no componente,
    para a página não carregar os dois e duplicar cada controle */
@@ -899,6 +927,8 @@
   .dm-fato{border-bottom:0}
   .dm-fato:nth-child(2n){border-right:1px solid var(--dm-linha)}
   .dm-fato:last-child{border-right:0}
+}
+@media (min-width:1024px){
   .dm-fato > div small{display:inline;margin-left:4px;-webkit-line-clamp:none}
   .dm-fato > div small::before{content:"· "}
 }
@@ -954,6 +984,9 @@
 /* quem acompanha, em uma linha; o formulário de incluir a um toque */
 .dm-acompanha-bloco{margin:var(--dm-e2) 0}
 .dm-acompanha{display:flex;flex-wrap:wrap;align-items:center;gap:4px var(--dm-e1);font-size:14px;color:var(--dm-ink2);min-height:44px}
+/* quando "Incluir alguém" desce de linha, o padding de 8px o desalinha do
+   rótulo; na mesma linha o vão de 8px entre irmãos compensa */
+.dm-acompanha > .dm-btn.dm-txt{margin-left:-8px}
 .dm-acompanha .dm-rot{margin-right:4px}
 /* o formulário da ação dentro do painel ou da folha: os cartões de dentro
    perdem a moldura, senão é caixa dentro de caixa */
@@ -1063,6 +1096,7 @@
 .dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
 /* um pedido de papel por linha no desktop: nome e pílula à esquerda, o par
    Aceitar/Recusar à direita */
+@media (max-width:1023px){ .dm-pedido > .dm-linha{margin-top:var(--dm-e1)} }
 @media (min-width:1024px){
   .dm-pedido{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--dm-e3);align-items:center}
   .dm-pedido > .dm-item-topo,.dm-pedido > .dm-item-baixo{grid-column:1}
@@ -1079,6 +1113,8 @@
 .dm-pessoas > .dm-pessoas-cab{display:none}
 .dm-p-nome{display:block;font-size:15px;line-height:1.35;min-width:0;overflow-wrap:anywhere}
 .dm-p-nome small{font-weight:400;font-size:13px}
+.dm-p-origem{white-space:nowrap}
+.dm-p-origem::before{content:"\00a0· "}
 .dm-p-papel{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .dm-p-papel:empty{display:none}
 .dm-p-setor,.dm-p-funcao,.dm-p-email{font-size:13px;color:var(--dm-mudo);min-width:0;overflow-wrap:anywhere}
@@ -1098,6 +1134,7 @@
   .dm-p-setor:not(:empty){margin:0;display:block}
   .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:none}
   .dm-p-email{grid-column:3;grid-row:1 / span 3;margin:0}
+  .dm-pessoas > .dm-pessoas-cab{display:none}
 }
 @media (min-width:1024px){
   .dm-pessoas{border-top:0}
@@ -1122,7 +1159,7 @@
 .dm-sites{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
 .dm-sites li{display:flex;align-items:center;gap:var(--dm-e2);min-height:48px;padding:6px 0;
   border-bottom:1px solid var(--dm-linha);overflow-wrap:anywhere}
-@media (min-width:1024px){ .dm-sites{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--dm-e4);border-top:0} .dm-sites li{border-top:1px solid var(--dm-linha);border-bottom:0} }
+@media (min-width:720px){ .dm-sites{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--dm-e4);border-top:0} .dm-sites li{border-top:1px solid var(--dm-linha);border-bottom:0} }
 
 /* ---------------------------------------------------------------- movimento */
 @media (prefers-reduced-motion:reduce){

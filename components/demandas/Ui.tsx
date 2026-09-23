@@ -323,7 +323,7 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
 
     Três estados agora, e o terceiro é o que importa: copiou, não copiou, e
     o texto à mostra para a pessoa selecionar com o dedo. */
-export function Copiar({ texto, rot = 'Copiar' }: { texto: string; rot?: string }) {
+export function Copiar({ texto, rot = 'Copiar', classe = 'dm-btn dm-peq' }: { texto: string; rot?: string; classe?: string }) {
   const [fase, setFase] = useState<'' | 'feito' | 'falhou'>('');
   useEffect(() => {
     if (fase !== 'feito') return;
@@ -354,6 +354,6 @@ export function Copiar({ texto, rot = 'Copiar' }: { texto: string; rot?: string 
     );
   }
   return (
-    <button className="dm-btn dm-peq" onClick={tentar}>{fase === 'feito' ? 'Copiado' : rot}</button>
+    <button className={classe} onClick={tentar}>{fase === 'feito' ? 'Copiado' : rot}</button>
   );
 }

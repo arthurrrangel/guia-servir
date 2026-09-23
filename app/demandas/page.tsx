@@ -29,7 +29,7 @@ import Casca, { useEu } from '@/components/demandas/Casca';
 import Lista, { Fila } from '@/components/demandas/Lista';
 import { Aviso, Esqueleto, Pill } from '@/components/demandas/Ui';
 import { avisos, portal, type Aba } from '@/lib/demandas/api';
-import { fraseDoEvento, quando, recadoDoErro, rotPapel } from '@/lib/demandas/regras';
+import { agruparAvisos, fraseDoEvento, quando, recadoDoErro, rotPapel, semRepetir } from '@/lib/demandas/regras';
 import type { AvisoDentro, Eu, Portal } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
@@ -282,10 +282,12 @@ function Ultimos({ itens }: { itens: AvisoDentro[] }) {
       {/* a mesma anatomia da tela de Avisos: a demanda é o título (é o que a
           pessoa usa para decidir se abre), o fato fica embaixo */}
       <ul className="dm-avisos">
-        {itens.map((a, i) => (
-          <li key={`${a.numero}-${a.em}-${i}`} className="dm-aviso-grupo">
-            <Link href={`/demandas/d/${a.numero}`}>#{a.numero} {a.titulo}</Link>
-            <div className="dm-aviso-o-que">{fraseDoEvento(a)}<span className="dm-mudo"> · {quando(a.em)}</span></div>
+        {agruparAvisos(itens).map(g => (
+          <li key={g.numero} className="dm-aviso-grupo">
+            <Link href={`/demandas/d/${g.numero}`}>#{g.numero} {g.titulo}</Link>
+            {semRepetir(g.itens).map((a, i) => (
+              <div key={`${a.em}-${i}`} className="dm-aviso-o-que">{fraseDoEvento(a)}<span className="dm-mudo"> · {quando(a.em)}</span></div>
+            ))}
           </li>
         ))}
       </ul>

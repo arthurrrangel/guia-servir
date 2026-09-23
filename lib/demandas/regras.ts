@@ -72,7 +72,7 @@
    última vez. */
 
 import type {
-  Aprovacao, Categoria, Papel, Prioridade, RegraDeAnexo, Resumo, Status, Trava,
+  Aprovacao, AvisoDentro, Categoria, Papel, Prioridade, RegraDeAnexo, Resumo, Status, Trava,
 } from './tipos';
 /* o chão de transporte é o mesmo dos dois sistemas: mesmo Postgres, mesmo
    PostgREST, mesma rede. Ver a nota em `recadoDoErro`. `lib/erros.ts` é puro
@@ -650,6 +650,33 @@ export function dataCheia(iso: string | null): string {
 export function pedidoPara(prazo: string | null, prazoPedido: string): string {
   if (!prazoPedido) return '';
   return prazoPedido.slice(0, 10) === (prazo || '').slice(0, 10) ? '' : ` (pedido para ${dataCheia(prazoPedido)})`;
+}
+
+/* OS AVISOS AGRUPADOS POR DEMANDA (tela de Avisos e o cartão "Últimos
+   avisos" do Início usam a mesma forma). O grupo é a demanda, na ordem de
+   chegada do primeiro fato (do mais novo para o mais antigo); dentro do
+   grupo, os fatos na mesma ordem. */
+export type GrupoDeAvisos = { numero: number; titulo: string; itens: AvisoDentro[]; novo: boolean };
+export function agruparAvisos(itens: AvisoDentro[]): GrupoDeAvisos[] {
+  const m = new Map<number, GrupoDeAvisos>();
+  for (const a of itens) {
+    const g = m.get(a.numero) || { numero: a.numero, titulo: a.titulo, itens: [], novo: false };
+    g.itens.push(a);
+    if (a.novo) g.novo = true;
+    m.set(a.numero, g);
+  }
+  return [...m.values()];
+}
+
+/* "assumiu" e "mudou de Aberta para Em execução" no mesmo instante são um
+   gesto só: a segunda linha some quando está colada na primeira */
+export function semRepetir(itens: AvisoDentro[]): AvisoDentro[] {
+  const ms = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
+  return itens.filter((e, i) => {
+    if (!(e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao')) return true;
+    return ![itens[i - 1], itens[i + 1]].some(o => o && o.tipo === 'responsavel' && o.quem === e.quem
+      && Math.abs(ms(o) - ms(e)) < 5000);
+  });
 }
 
 export function quando(iso: string | null): string {

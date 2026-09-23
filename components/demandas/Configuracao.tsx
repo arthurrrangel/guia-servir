@@ -47,7 +47,7 @@ export function Teto({ s, indo, salvar }: {
   return (
     <div className="dm-linha">
       <span className="dm-peq dm-mudo">R$</span>
-      <input className="dm-campo-solto dm-estreito" inputMode="decimal"
+      <input className="dm-campo-solto dm-estreito dm-dinheiro" inputMode="decimal"
         aria-label={`Aprovar acima de, em ${s.nome}`}
         placeholder="sem teto" value={v} onChange={e => setV(e.target.value)}
         disabled={indo} />
@@ -133,11 +133,11 @@ export function Setores({ b, indo, salvar }: {
             <div key={s.id} className="dm-cartao-linha">
               <h3>{s.nome}</h3>
               <div className="dm-cartao-campos">
-                <div className="dm-cartao-campo">{recebe(s, s.atende ? 'Recebe demanda' : 'Só pede')}</div>
                 <div className="dm-cartao-campo"><span>Aprovar acima de</span><Teto s={s} indo={indo} salvar={salvar} /></div>
+                <div className="dm-cartao-campo">{recebe(s, 'Recebe demanda')}</div>
               </div>
               <div>
-                <button className="dm-btn dm-txt dm-perigo" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
+                <button className="dm-btn dm-txt dm-perigo dm-rente" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
               </div>
             </div>
           ))}
@@ -150,7 +150,7 @@ export function Setores({ b, indo, salvar }: {
               {b.setores.map(s => (
                 <tr key={s.id}>
                   <td><b>{s.nome}</b></td>
-                  <td>{recebe(s, s.atende ? 'Sim' : 'Não')}</td>
+                  <td>{recebe(s, '')}</td>
                   <td><Teto s={s} indo={indo} salvar={salvar} /></td>
                   <td className="dm-n">
                     <button className="dm-btn dm-txt dm-perigo dm-peq" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
