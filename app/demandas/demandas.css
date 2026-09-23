@@ -222,6 +222,13 @@
   overflow-x:auto;scrollbar-width:none;
 }
 .dm-abas::-webkit-scrollbar{display:none}
+/* em 320 as cinco abas com dois selos ("Atender 1", "Avisos 2") mediam
+   303px para 288 de barra: em 13px, sem padding e com selo menor cabem */
+@media (max-width:359px){
+  .dm-abas{gap:4px}
+  .dm-abas a{font-size:13px;padding:0}
+  .dm-abas .dm-selo{margin-left:4px;min-width:18px;height:18px;padding:0 5px;font-size:12px}
+}
 /* no tablet as cinco abas não se espalham pela largura toda: ficam à
    esquerda, com o mesmo passo do desktop */
 @media (min-width:600px){ .dm-abas{justify-content:flex-start;gap:var(--dm-e4)} }
@@ -300,6 +307,7 @@
 .dm-cab > .dm-cab-acoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
 .dm-cab > .dm-cab-acoes > *{flex:1 1 auto}
 .dm-cab > .dm-cab-acoes > .dm-txt{flex:0 0 auto;margin-left:auto}
+@media (max-width:719px){ .dm-cab:has(> .dm-cab-acoes > .dm-txt:only-child){grid-template-columns:minmax(0,1fr) auto;align-items:end} }
 /* pares de botões: no celular o primeiro (ou os dois, `dm-larga-cel`) toma a
    linha; fora dele ficam lado a lado, no tamanho do texto */
 @media (max-width:719px){
@@ -369,7 +377,17 @@
 .dm-card.dm-quieto{background:var(--dm-card3)}
 /* "isto é com você": a barra de 3px só quando há itens */
 .dm-precisa{border-left:3px solid var(--dm-ink)}
+/* no tablet a coluna lateral (perfil, ficha de pessoa) vira duas colunas,
+   em vez de cinco cartões de 720px empilhados */
+@media (min-width:720px) and (max-width:1023px){
+  .dm-duas > aside{display:grid;grid-template-columns:1fr 1fr;gap:var(--dm-e2);align-items:start}
+  .dm-duas > aside > .dm-card{margin-bottom:0}
+}
 .dm-precisa .dm-fila{border-top:0}
+/* o cartão é uma lista de "coisas com você", não uma tabela: sem contêiner,
+   as formas por largura não casam e o contexto sai inteiro em qualquer tela */
+.dm-precisa .dm-fila{container-type:normal}
+.dm-precisa .dm-pessoa:last-child{border-bottom:0}
 /* dentro de "Precisa de você" a fila não tem cabeçalho de colunas: são
    poucas linhas e o cartão já diz o que elas são */
 .dm-precisa .dm-fila > .dm-fila-cab{display:none}
@@ -447,6 +465,9 @@
   .dm-campo.dm-numero input{max-width:200px}
   .dm-linha.dm-criar{max-width:520px}
 }
+/* no celular, a linha de criar com interruptor (Novo setor) dá a linha
+   inteira ao campo; o interruptor e o Criar vêm embaixo */
+@media (max-width:719px){ .dm-linha.dm-criar:has(> .dm-interruptor) > .dm-cresce{flex:1 1 100%} }
 /* o recado do campo que a tela recusou antes de enviar */
 .dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
 .dm-campo > .dm-erro-campo{color:var(--dm-bad);margin:6px 0 0;font-size:13px}
@@ -459,7 +480,10 @@
    ao focar ou quando já tem texto */
 .dm-escrever .dm-campo{margin-bottom:0}
 .dm-escrever .dm-entre{margin-top:var(--dm-e2)}
-.dm-escrever textarea{min-height:46px;transition:min-height var(--dm-t-abre)}
+.dm-escrever textarea{min-height:46px;transition:min-height var(--dm-t-abre);resize:none}
+.dm-escrever.dm-aberta textarea{resize:vertical}
+.dm-escrever .dm-campo{position:relative}
+.dm-escrever .dm-campo > span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:-1px}
 .dm-escrever.dm-aberta textarea,.dm-escrever textarea:focus{min-height:110px}
 
 /* o interruptor: 44×24 de alvo com o rótulo do que ele controla ao lado */
@@ -487,6 +511,7 @@
 .dm-busca:focus-within{outline:2px solid var(--dm-foco);outline-offset:-1px;background:var(--dm-card)}
 .dm-busca svg{flex:none;opacity:.5}
 .dm-busca input{flex:1;min-width:0;border:0;background:transparent;outline:0;min-height:44px;padding:0}
+.dm-busca input:focus-visible{outline:0}
 @media (min-width:720px){ .dm-busca{max-width:360px} }
 
 /* ---------------------------------------------------------- segmentado */
@@ -584,16 +609,21 @@
 .dm-quantos.dm-zero{background:var(--dm-card2);color:var(--dm-mudo)}
 .dm-quantos.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
 @media (min-width:1024px){
+  /* o fio é de cada botão (e de um preenchedor até a margem): quando os
+     grupos quebram em duas linhas, cada linha tem o seu fio e o indicador
+     fica colado no fio da linha dele, em vez de sublinhar o ar */
   .dm-subabas{
-    margin:0 0 var(--dm-e2);padding:0;gap:0 var(--dm-e3);mask-image:none;-webkit-mask-image:none;
-    border-bottom:1px solid var(--dm-linha);overflow:visible;flex-wrap:wrap;
+    margin:0 0 var(--dm-e2);padding:0;gap:0;mask-image:none;-webkit-mask-image:none;
+    border-bottom:0;overflow:visible;flex-wrap:wrap;
     position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:5;
   }
   .dm-subabas button{
-    border:0;border-radius:0;padding:0 2px;min-height:48px;box-shadow:none;background:transparent;
-    border-bottom:2px solid transparent;margin-bottom:-1px;
+    border:0;border-radius:0;padding:0 8px;min-height:48px;background:transparent;
+    box-shadow:inset 0 -1px 0 var(--dm-linha);margin-bottom:0;
   }
-  .dm-subabas button[aria-pressed="true"]{box-shadow:none;border-bottom-color:var(--dm-ink)}
+  .dm-subabas button:first-child{padding-left:2px}
+  .dm-subabas button[aria-pressed="true"]{box-shadow:inset 0 -2px 0 var(--dm-ink)}
+  .dm-subabas::after{content:"";flex:1 1 auto;min-height:48px;box-shadow:inset 0 -1px 0 var(--dm-linha)}
   .dm-subabas .dm-quantos{background:transparent;color:var(--dm-mudo);padding:0;min-width:0;height:auto;font-size:14px;font-weight:600}
   .dm-subabas .dm-quantos::before{content:"("}
   .dm-subabas .dm-quantos::after{content:")"}
@@ -615,7 +645,19 @@
 .dm-tiras > .dm-ferramentas-dir{flex:1 1 auto;justify-content:flex-end}
 /* em 1024 a 1279 os filtros da administração não cabem ao lado do
    segmentado: a segunda linha começa à esquerda, como composição */
-.dm-ferramentas > .dm-ferramentas-dir{flex:1 1 0%;min-width:0}
+/* a partir de 720 a coluna da direita fica na linha do resumo quando cabe
+   (400px de base, sem quebra interna: a busca encolhe até 160 antes de
+   descer); no celular ela desce inteira quando são os filtros ou a busca
+   aberta. A versão sem trava de largura (`flex:1 1 0%` em toda largura)
+   espremia os filtros de Pessoas em 82px em 320. */
+@media (min-width:720px){
+  .dm-ferramentas > .dm-ferramentas-dir{flex:1 1 400px;min-width:0;flex-wrap:nowrap}
+  .dm-ferramentas-dir > .dm-busca{flex:1 1 160px}
+}
+@media (max-width:719px){
+  .dm-ferramentas.dm-filtros > .dm-ferramentas-dir,
+  .dm-ferramentas > .dm-ferramentas-dir:has(> .dm-busca.dm-aberta){flex:1 1 100%}
+}
 @media (min-width:720px) and (max-width:1279px){ .dm-ferramentas.dm-filtros > .dm-ferramentas-dir{flex:1 1 100%;justify-content:flex-start} }
 .dm-filtro{max-width:220px;text-overflow:ellipsis}
 .dm-ferramentas-dir > .dm-busca{flex:1 1 220px;max-width:360px;margin:0}
@@ -796,6 +838,7 @@
   .dm-c-ctx{display:none}
   .dm-c-cat{display:block;grid-area:cat;font-size:13px;color:var(--dm-mudo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:center}
   .dm-c-com{display:block;grid-area:com;white-space:nowrap;align-self:center}
+  .dm-fila-cab > .dm-c-passo,.dm-item .dm-c-passo{padding-right:4px}
   .dm-c-meta{display:contents}
   .dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:none}
   .dm-c-estado{grid-area:estado;align-self:center}
@@ -823,6 +866,13 @@
   .dm-c-cat{grid-area:cat;font-size:13px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dm-c-ctx{display:none}
   .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(120px,170px) 190px 120px 90px;grid-template-areas:"num tit cat estado prazo com"}
+  /* a categoria e quem pediu quebram em duas linhas de 18px em vez de
+     cortar o nome com reticências */
+  .dm-item .dm-c-cat{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:18px}
+}
+@container (min-width:1200px){
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,220px) 190px 120px 90px 140px}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,220px) 190px 120px 90px}
 }
 /* as linhas somadas do "Precisa de você" ("5 demandas esperando você em
    Atender"): o número é uma contagem, não um identificador, e a linha tem
@@ -846,6 +896,7 @@
 .dm-contas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
 @media (min-width:520px){ .dm-contas{grid-template-columns:repeat(4,minmax(0,1fr))} }
 .dm-contas.dm-duas-colunas{grid-template-columns:repeat(2,minmax(0,1fr))}
+.dm-contas.dm-duas-colunas > .dm-conta:nth-child(3):last-child{grid-column:1 / -1}
 .dm-conta{
   display:block;min-width:0;min-height:64px;padding:10px var(--dm-e2);
   border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
@@ -900,9 +951,16 @@
 @media (max-width:719px){ .dm-rola .dm-tab th:last-child,.dm-rola .dm-tab td:last-child{padding-right:var(--dm-e4)} }
 /* a tabela editável abaixo de 720: um cartão por linha, controles rotulados */
 .dm-cartoes{display:grid;gap:var(--dm-e2)}
-.dm-cartao-linha{border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2)}
-.dm-cartao-linha > h3{margin:0}
-.dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2)}
+.dm-cartao-linha{
+  border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2);
+  grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"tit acao" "campos campos";align-items:center;
+}
+.dm-cartao-linha > h3{margin:0;grid-area:tit}
+.dm-cartao-linha > .dm-cartao-campos{grid-area:campos}
+.dm-cartao-linha > .dm-cartao-campos + div{grid-area:acao}
+.dm-cartao-linha > .dm-cartao-campos + div > .dm-rente{margin:0 -8px 0 0}
+.dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2);align-items:end}
+.dm-cartao-campo:has(> .dm-linha){grid-column:1 / -1}
 /* duas colunas já em 380 (prazo e "dias", os dois interruptores); o select
    de destino precisa da largura toda */
 @media (min-width:380px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} .dm-cartao-campo:has(> select){grid-column:1 / -1} }
@@ -940,6 +998,12 @@
 .dm-pares.dm-uma-coluna{grid-template-columns:1fr;border-top:0;padding-top:0;margin-top:0}
 /* a barra de enviar da Nova: a frase-resumo à esquerda, o botão à direita */
 .dm-barra-acao.dm-barra-enviar,.dm-barra-acao.dm-barra-enviar:has(> :last-child:nth-child(2)){grid-template-columns:1fr auto;align-items:center}
+.dm-barra-enviar > .dm-cresce:empty{display:none}
+.dm-barra-acao.dm-barra-enviar:has(> .dm-cresce:empty){grid-template-columns:1fr}
+@media (min-width:720px) and (max-width:1023px){
+  .dm-barra-acao.dm-barra-enviar{grid-template-columns:minmax(0,1fr) minmax(220px,360px)}
+  .dm-barra-acao.dm-barra-enviar:has(> .dm-cresce:empty){grid-template-columns:minmax(220px,360px);justify-content:end}
+}
 /* o painel de ação: no desktop, coluna fixa; no celular, a barra fixa */
 .dm-painel{padding:var(--dm-card-pad)}
 .dm-painel-titulo{margin-bottom:2px}
@@ -948,6 +1012,7 @@
 .dm-painel-ajustes{display:grid;grid-template-columns:1fr;gap:0;margin:var(--dm-e2) 0 0 -8px}
 .dm-painel-ajustes > .dm-btn{justify-content:flex-start;min-height:44px}
 .dm-painel-ajustes > .dm-perigo{margin-top:var(--dm-e1)}
+.dm-folha .dm-painel-ajustes{margin-left:0}
 .dm-painel-secao{border-top:1px solid var(--dm-linha);margin-top:var(--dm-e3);padding-top:var(--dm-e3)}
 .dm-barra-acao{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -1041,6 +1106,7 @@
   transition:background var(--dm-t),color var(--dm-t);
 }
 .dm-mais > summary::-webkit-details-marker{display:none}
+.dm-card.dm-mais > summary{justify-content:flex-start;padding:0;font-size:15px;font-weight:650;color:var(--dm-ink)}
 .dm-mais > summary::after{
   content:"";width:6px;height:6px;
   border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;

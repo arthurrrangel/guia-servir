@@ -114,15 +114,18 @@ function Uma() {
     const abriuExecucao = (e: typeof eventos[number]) =>
       e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao';
     const fora = new Set<number>();
+    /* quem absorveu um status vira marco: "Maria assumiu" é a linha que muda
+       o estado da demanda, e o ponto dela tem que dizer isso */
+    const absorveu = new Set<number>();
     for (let i = 0; i < eventos.length; i++) {
       if (!abriuExecucao(eventos[i])) continue;
       for (const j of [i - 1, i + 1]) {
         const o = eventos[j];
         if (o && assumiu(o) && o.quem === eventos[i].quem
-            && Math.abs(ms(o) - ms(eventos[i])) < 5000) { fora.add(i); break; }
+            && Math.abs(ms(o) - ms(eventos[i])) < 5000) { fora.add(i); absorveu.add(j); break; }
       }
     }
-    return eventos.filter((_, i) => !fora.has(i));
+    return eventos.map((e, i) => ({ ...e, marcoAbsorvido: absorveu.has(i) })).filter((_, i) => !fora.has(i));
   }, [eventos]);
 
   /* O PRAZO PEDIDO NO NASCIMENTO, quando o setor mudou a data: o primeiro
@@ -431,7 +434,7 @@ function Uma() {
           <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que já aconteceu</h2>
           <ul className="dm-hist">
             {linhas.map((e, i) => (
-              <li key={i} className={marco(e.tipo) ? 'dm-marco' : ''}>
+              <li key={i} className={marco(e.tipo) || e.marcoAbsorvido ? 'dm-marco' : ''}>
                 {/* COR SOZINHA NÃO INFORMA: o comentário interno leva a
                     palavra ao lado do carimbo, além da tarja. */}
                 <div className={e.interno ? 'dm-interno' : ''}>
@@ -505,10 +508,16 @@ function Uma() {
           {aberto === 'mais' ? (
             <>
               {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
-              <div className="dm-painel-acoes">
-                {secundarias.map(a => botao(a, a === 'rejeitar' ? 'dm-btn dm-perigo dm-larga' : 'dm-btn dm-larga'))}
-                {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
-              </div>
+              {secundarias.length ? (
+                <div className="dm-painel-acoes">
+                  {secundarias.map(a => botao(a, a === 'rejeitar' ? 'dm-btn dm-perigo dm-larga' : 'dm-btn dm-larga'))}
+                </div>
+              ) : null}
+              {ajustes.length ? (
+                <div className="dm-painel-ajustes">
+                  {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+                </div>
+              ) : null}
               {podeAvisar ? <Recados d={d} base={base} eu={v.eu} /> : null}
             </>
           ) : (

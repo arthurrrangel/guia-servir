@@ -17,7 +17,7 @@
    cada controle FAZ não mudou. */
 
 import { useEffect, useState } from 'react';
-import { Aviso, Interruptor, Subabas, useEstreito } from './Ui';
+import { Interruptor, Subabas, useEstreito } from './Ui';
 import { confirmar } from '@/lib/confirmar';
 import type { Bases, Categoria, Setor } from '@/lib/demandas/tipos';
 
@@ -106,26 +106,28 @@ export function Setores({ b, indo, salvar }: {
           pela tradução de erro. Uma explicação que usa a palavra do outro
           sistema para definir a deste ensina o nome errado a quem está
           montando o cadastro. */}
-      <Aviso tom="info">
-        <div>
+      {/* "Como funciona" recolhido: a explicação existe para quem precisa
+          dela, e não como a maior coisa da tela em toda visita */}
+      <details className="dm-mais dm-esq dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+        <summary>Como funciona</summary>
+        <p style={{ margin: '6px 0 0' }}>
           <b>Recebe demanda</b> ligado quer dizer que o setor pode receber pedidos. Setor que só pede
           fica desligado, assim ninguém manda uma demanda para um lugar que não vai olhar.
-          <br />
-          <b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo
+          {' '}<b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo
           que a categoria não exija. Em branco: sem teto.
-        </div>
-      </Aviso>
+        </p>
+      </details>
       <div className="dm-card">
         <h3>Novo setor</h3>
         <div className="dm-linha dm-criar">
           <input className="dm-campo-solto dm-cresce" placeholder="Nome do setor" aria-label="Nome do setor novo"
             value={nome} onChange={e => setNome(e.target.value)} />
+          <Interruptor ligado={atende} rot="Recebe demanda" aoMudar={setAtende} />
           <button className="dm-btn dm-pri" disabled={indo || !nome.trim()}
             onClick={async () => { if (await salvar('setor', { nome, atende })) { setNome(''); setAtende(false); } }}>
             Criar
           </button>
         </div>
-        <div style={{ marginTop: 'var(--dm-e1)' }}><Interruptor ligado={atende} rot="Recebe demanda" aoMudar={setAtende} /></div>
       </div>
       {estreito ? (
         <div className="dm-cartoes">
@@ -219,13 +221,14 @@ export function Categorias({ b, indo, salvar }: {
 
   return (
     <>
-      <Aviso tom="info">
-        <div>
+      <details className="dm-mais dm-esq dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+        <summary>Como funciona</summary>
+        <p style={{ margin: '6px 0 0' }}>
           Aqui mora a <b>triagem</b>. A categoria decide sozinha qual setor atende, se precisa de
           aprovação e quantos dias sugerir de prazo. Mudar uma linha muda o destino de toda demanda
           futura daquele tipo, e não mexe nas que já existem.
-        </div>
-      </Aviso>
+        </p>
+      </details>
 
       <Subabas rot="Grupo" valor={g} itens={grupos.map(x => ({ v: x, rot: x }))} aoMudar={setG} />
 
