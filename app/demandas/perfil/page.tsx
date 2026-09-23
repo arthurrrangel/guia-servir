@@ -136,9 +136,9 @@ function Perfil() {
           <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
             A administração confirma. Até lá, nada muda.
           </p>
-          <div className="dm-grade">
+          <div className="dm-linha">
             {podePedir.map(p => (
-              <button key={p} className="dm-btn" disabled={indo}
+              <button key={p} className="dm-btn dm-larga-cel" disabled={indo}
                 onClick={() => salvar({ papel_pedido: p }, 'Pedido enviado para a administração.')}>
                 {/* as mesmas palavras do cadastro, e curtas o bastante para
                     uma linha em 320px */}
@@ -156,14 +156,14 @@ function Perfil() {
               <h3>Administração</h3>
               <p className="dm-peq dm-mudo" style={{ marginTop: 2 }}>Pessoas, setores e categorias.</p>
             </div>
-            <Link className="dm-btn dm-txt" href="/demandas/admin">Abrir ›</Link>
+            <Link className="dm-btn dm-txt dm-seta" href="/demandas/admin">Abrir</Link>
           </div>
         </div>
       ) : null}
 
       </aside>
       </div>
-      <button className="dm-btn dm-txt" style={{ marginTop: 'var(--dm-e2)' }} onClick={sair}>Sair do sistema</button>
+      <button className="dm-btn dm-txt dm-rente" style={{ marginTop: 'var(--dm-e2)' }} onClick={sair}>Sair do sistema</button>
     </>
   );
 }

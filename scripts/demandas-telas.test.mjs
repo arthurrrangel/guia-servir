@@ -1481,8 +1481,17 @@ const FORA_DA_GRADE = ['comentar'];
    quando quem abriu vai responder, e a ficha escreve isso de propósito. */
 const rotDe = (a, d, quem) => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
   ? 'Responder e destravar' : ROTULO[a]);
+/* O QUE CONTRADIZ A FICHA NÃO VIRA BOTÃO (23/09/2026, auditoria do Fable):
+   "Assumir e começar" quando a demanda já está com a pessoa, e "Travar" numa
+   demanda já travada. O servidor aceita os dois (troca de dono; re-travar
+   para trocar o motivo), então `acoesDe` os lista; a ficha os filtra, e o
+   espelho aqui aplica a mesma regra, escrita por extenso. */
+const contradiz = (a, d, quem) =>
+  (a === 'assumir' && !!d.responsavel_id && d.responsavel_id === quem.id)
+  || (a === 'travar' && d.status === 'travada');
+const noPainel = (d, quem) => acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a) && !contradiz(a, d, quem));
 function gradeEsperada(d, quem) {
-  return acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a)).map(a => rotDe(a, d, quem));
+  return noPainel(d, quem).map(a => rotDe(a, d, quem));
 }
 
 /* A DIVISÃO É DECISÃO DE TELA, E NÃO TEM FONTE ACIMA DELA.
@@ -1493,9 +1502,8 @@ function gradeEsperada(d, quem) {
    secundárias na ficha tem que reprovar este bloco. */
 const SECUNDARIAS = ['prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
 function divisaoEsperada(d, quem) {
-  const todas = acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a));
-  const rot = a => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
-    ? 'Responder e destravar' : ROTULO[a]);
+  const todas = noPainel(d, quem);
+  const rot = a => rotDe(a, d, quem);
   const princ = todas.filter(a => !SECUNDARIAS.includes(a));
   const outras = todas.filter(a => SECUNDARIAS.includes(a));
   /* no painel os ajustes SEMPRE ficam na linha de botões-texto, mesmo quando
@@ -1567,15 +1575,23 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
        ação nenhuma, não há barra: a página não carrega um rodapé vazio. */
     const pretos = porTag(porClasse(grade(alvo), 'dm-painel-acoes') || grade(alvo), 'BUTTON')
       .filter(x => /(^| )dm-pri( |$)/.test(x.getAttribute('class') || ''));
-    const prim = primariaDe(carga.demanda, acoesDe(carga.demanda, quem).filter(a => !FORA_DA_GRADE.includes(a)));
+    const prim = primariaDe(carga.demanda, noPainel(carga.demanda, quem));
     ok(pretos.length === (prim ? 1 : 0) && (!prim || texto(pretos[0]) === rotDe(prim, carga.demanda, quem)),
       `${nome}: ${prim ? 'um primário só, e é "' + rotDe(prim, carga.demanda, quem) + '"' : 'nenhum primário'}`,
       `pretos: [${pretos.map(texto).join(' | ')}]`);
     const barra = porAria(alvo, 'aria-label', 'Ações');
     const barraCel = todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-barra-acao')[0];
-    const temAcao = div.grade.length > 0 || !!div.mais;
-    ok(!!barraCel === temAcao, `${nome}: no celular, ${temAcao ? 'a barra fixa existe' : 'não há barra'}`,
+    /* a barra fixa só existe quando há ação que ANDA com a demanda (o
+       primário ou um secundário); só ajustes moram num cartão em linha */
+    const temBarra = div.grade.length > 0;
+    ok(!!barraCel === temBarra, `${nome}: no celular, ${temBarra ? 'a barra fixa existe' : 'não há barra'}`,
       String(!!barraCel));
+    if (!temBarra && div.mais) {
+      const cartao = porAria(alvo, 'aria-label', 'Esta demanda');
+      ok(!!cartao && porTag(cartao, 'BUTTON').length >= div.mais.length,
+        `${nome}: e os ajustes moram no cartão em linha do celular`,
+        cartao ? porTag(cartao, 'BUTTON').map(texto).join(' | ') : '(sem cartão)');
+    }
     if (barraCel && prim) {
       const ultimo = porTag(barraCel, 'BUTTON').slice(-1)[0];
       ok(ultimo && texto(ultimo) === rotDe(prim, carga.demanda, quem)
@@ -2214,11 +2230,11 @@ console.log('\n22. A ficha: quem acompanha');
     await act(async () => { form.dispatchEvent(evento('submit')); });
     await assentar();
   };
-  /* 23/09/2026 · o formulário de incluir fica atrás de "Incluir alguém ›":
+  /* 23/09/2026 · o formulário de incluir fica atrás de "Incluir alguém":
      a linha de quem acompanha é uma só, e o campo só ocupa a tela quando a
      pessoa pede */
   ok(!campo(alvo, 'WhatsApp da pessoa'), 'o campo de incluir não ocupa a tela antes do toque');
-  await clicar(botao(alvo, 'Incluir alguém ›'), 'o botão de incluir alguém');
+  await clicar(botao(alvo, 'Incluir alguém'), 'o botão de incluir alguém');
   /* 22/09/2026 · WhatsApp primeiro, com o teclado de telefone; e-mail com o
      de e-mail. Era um campo só, de texto, e o medidor de celular acusou o
      teclado de letras para quem ia digitar número. */
@@ -2237,7 +2253,7 @@ console.log('\n22. A ficha: quem acompanha');
   /* incluiu: o formulário se fecha (a linha volta a ser uma só) e a pessoa
      reabre para incluir a segunda */
   ok(!campo(alvo, 'WhatsApp da pessoa'), 'depois de incluir, o formulário se recolhe');
-  await clicar(botao(alvo, 'Incluir alguém ›'), 'o botão de incluir alguém, de novo');
+  await clicar(botao(alvo, 'Incluir alguém'), 'o botão de incluir alguém, de novo');
   await teclar(campo(alvo, 'WhatsApp da pessoa'), '(21) 9');
   await clicar(botao(alvo, 'E-mail'));
   const em = campo(alvo, 'E-mail da pessoa');
@@ -2253,7 +2269,7 @@ console.log('\n22. A ficha: quem acompanha');
 {
   const { alvo, desmontar } = await comFicha(vista({}, { ...QUEM.soEnxerga, participa: true, inclui: false }));
   ok(!campo(alvo, 'WhatsApp da pessoa') && !campo(alvo, 'E-mail da pessoa') && !botao(alvo, 'Incluir')
-     && !botao(alvo, 'Incluir alguém ›'),
+     && !botao(alvo, 'Incluir alguém'),
     'quem só acompanha não inclui ninguém');
   await desmontar();
 }

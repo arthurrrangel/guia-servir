@@ -151,7 +151,9 @@ function Ficha() {
             {PAPEIS.find(x => x.v === p.papel_pedido)?.explica}
             {p.papel_pedido_em ? ` Pedido em ${dataCheia(p.papel_pedido_em.slice(0, 10))}.` : ''}
           </p>
-          <div className="dm-grade" style={{ gridTemplateColumns: '1fr 1fr' }}>
+          {/* o mesmo par da lista de Pessoas: Aceitar primário, Recusar como
+              texto; no celular o primário toma a linha */}
+          <div className="dm-linha dm-par-cel">
             <button className="dm-btn dm-pri" disabled={indo} onClick={async () => {
               setIndo(true); setErro(''); setOk('');
               const x = await ajustar('pedido', { id: p.id, decisao: 'aceitar' });
@@ -164,7 +166,7 @@ function Ficha() {
               }
               setOk('Pedido aceito.'); await carregar();
             }}>Aceitar</button>
-            <button className="dm-btn" disabled={indo} onClick={async () => {
+            <button className="dm-btn dm-txt" disabled={indo} onClick={async () => {
               setIndo(true); setErro(''); setOk('');
               const x = await ajustar('pedido', { id: p.id, decisao: 'recusar' });
               setIndo(false);
@@ -256,10 +258,10 @@ function Ficha() {
           <div className="dm-card">
             <h3>Atividade</h3>
             <div className="dm-contas dm-duas-colunas">
-              <div className="dm-conta dm-leitura"><b>{f!.atividade.pediu}</b><small>pediu ({f!.atividade.pediu_abertas} em andamento)</small></div>
-              <div className="dm-conta dm-leitura"><b>{f!.atividade.com_ela}</b><small>com ela agora</small></div>
-              <div className="dm-conta dm-leitura"><b>{f!.atividade.concluiu}</b><small>concluiu</small></div>
-              <div className="dm-conta dm-leitura"><b>{f!.atividade.acompanha}</b><small>acompanha</small></div>
+              <div className={`dm-conta dm-leitura ${f!.atividade.pediu ? '' : 'dm-zero'}`}><b>{f!.atividade.pediu}</b><small>pediu ({f!.atividade.pediu_abertas} em andamento)</small></div>
+              <div className={`dm-conta dm-leitura ${f!.atividade.com_ela ? '' : 'dm-zero'}`}><b>{f!.atividade.com_ela}</b><small>com ela agora</small></div>
+              <div className={`dm-conta dm-leitura ${f!.atividade.concluiu ? '' : 'dm-zero'}`}><b>{f!.atividade.concluiu}</b><small>concluiu</small></div>
+              <div className={`dm-conta dm-leitura ${f!.atividade.acompanha ? '' : 'dm-zero'}`}><b>{f!.atividade.acompanha}</b><small>acompanha</small></div>
             </div>
             <p className="dm-peq dm-mudo" style={{ margin: 'var(--dm-e2) 0 0' }}>
               {f!.atividade.ultima ? `Última ação: ${carimbo(f!.atividade.ultima)}.` : 'Nenhuma ação registrada ainda.'}
@@ -312,7 +314,7 @@ function Ficha() {
               <button className="dm-btn" disabled={indo}
                 onClick={() => enviar({ id, ativo: true }, 'Reativada.')}>Reativar</button>
             ) : (
-              <button className="dm-btn dm-txt dm-perigo" disabled={indo} onClick={async () => {
+              <button className="dm-btn dm-txt dm-perigo dm-rente" disabled={indo} onClick={async () => {
                 const sim = await confirmar({
                   titulo: `Desativar ${p.nome.split(' ')[0]}?`,
                   texto: 'Ela deixa de entrar, pelo e-mail e pelo link. Nada do que ela pediu ou atendeu é apagado.',

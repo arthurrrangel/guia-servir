@@ -26,7 +26,7 @@ export function Campo({ rot, ajuda, erro, classe, children }: {
   erro?: string;
   /* `dm-curto` e `dm-data` limitam a largura fora do celular: um campo de
      e-mail com 1000px é ruído */
-  classe?: 'dm-curto' | 'dm-data';
+  classe?: 'dm-curto' | 'dm-data' | 'dm-numero';
 }) {
   return (
     <label className={classe ? `dm-campo ${classe}` : 'dm-campo'}>
@@ -95,18 +95,47 @@ export function Opcoes<T extends string>({ valor, opcoes, aoMudar, rot, empilhad
 
    Uma linha visualmente escondida e anunciada resolve. Ela e `status` e nao
    `alert`: carregar nao interrompe ninguem. */
-export function Esqueleto({ linhas = 4, oQue = 'Carregando' }: { linhas?: number; oQue?: string }) {
+export function Esqueleto({ linhas = 4, oQue = 'Carregando', forma = 'texto' }: {
+  linhas?: number; oQue?: string;
+  /* a forma do que vem: a lista carrega como linhas de lista, a ficha como
+     título, faixa de fatos e cartão, os números como tiles. Um esqueleto
+     genérico dizia "alguma coisa vem aí"; o da forma diz o quê. */
+  forma?: 'texto' | 'lista' | 'ficha' | 'numeros';
+}) {
+  let corpo: React.ReactNode;
+  if (forma === 'lista') {
+    corpo = Array.from({ length: linhas > 4 ? linhas : 5 }).map((_, i) => (
+      <div key={i} className="dm-esq-linha"><div style={{ width: 40 }} /><div style={{ width: `${62 - (i % 3) * 12}%` }} /><div style={{ width: 88, marginLeft: 'auto' }} /></div>
+    ));
+  } else if (forma === 'ficha') {
+    corpo = (
+      <>
+        <div style={{ height: 14, width: 180, marginBottom: 10 }} />
+        <div style={{ height: 30, width: '70%', marginBottom: 16 }} />
+        <div className="dm-esq-fatos"><div /><div /><div /><div /></div>
+        <div style={{ height: 160, marginTop: 16 }} />
+      </>
+    );
+  } else if (forma === 'numeros') {
+    corpo = (
+      <>
+        <div style={{ height: 30, width: 260, marginBottom: 16 }} />
+        <div className="dm-esq-fatos"><div /><div /><div /><div /></div>
+      </>
+    );
+  } else {
+    corpo = Array.from({ length: linhas }).map((_, i) => (
+      <div key={i} style={{ height: i === 0 ? 92 : 64, marginBottom: 10, width: i === linhas - 1 ? '70%' : '100%' }} />
+    ));
+  }
   return (
     <>
     <span role="status" className="dm-so-leitor">{oQue}…</span>
-    <div className="dm-esqueleto" aria-hidden="true">
-      {Array.from({ length: linhas }).map((_, i) => (
-        <div key={i} style={{ height: i === 0 ? 92 : 64, marginBottom: 10, width: i === linhas - 1 ? '70%' : '100%' }} />
-      ))}
-    </div>
+    <div className="dm-esqueleto" aria-hidden="true">{corpo}</div>
     </>
   );
 }
+
 
 /* O ESTADO VAZIO É QUIETO, E DIZ SE É BOA NOTÍCIA.
 

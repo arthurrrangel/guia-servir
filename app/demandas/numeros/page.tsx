@@ -121,7 +121,7 @@ function Painel() {
           Quando a carga falha, `n` fica nulo e a tela mostrava ao mesmo tempo
           o erro, o "Tentar de novo" E uma forma piscando que nunca ia virar
           conteúdo. Piscar é promessa de que algo está a caminho. */}
-      {!n && !erro ? <Esqueleto oQue="Carregando os números" /> : !n ? null : (
+      {!n && !erro ? <Esqueleto forma="numeros" oQue="Carregando os números" /> : !n ? null : (
         <>
           {/* -------------------------------------------- o que pede ação hoje */}
           <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Precisa de atenção</h2>
@@ -158,7 +158,7 @@ function Painel() {
             </div>
           </div>
 
-          <div className="dm-dupla">
+          <div className="dm-dupla dm-dupla-larga">
             <div>
               <h2 style={{ margin: '0 0 var(--dm-e2)' }}>Por setor</h2>
               <div className="dm-card">

@@ -20,7 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Categorias, Setores } from '@/components/demandas/Configuracao';
-import { Aviso, Campo, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
+import { Aviso, Esqueleto, Pill, Vazio } from '@/components/demandas/Ui';
 import { ajustar, ajustarAnexos, bases, pessoas } from '@/lib/demandas/api';
 import { PAPEIS, nomeDoSite, recadoDoErro, rotPapel } from '@/lib/demandas/regras';
 import type { Bases, Membro, RegraDeAnexo } from '@/lib/demandas/tipos';
@@ -78,7 +78,7 @@ function Administracao() {
       </>
     );
   }
-  if (!b || !ms) return <Esqueleto />;
+  if (!b || !ms) return <Esqueleto forma="lista" />;
 
   const ativas = ms.filter(m => m.ativo !== false).length, inativas = ms.filter(m => m.ativo === false).length;
   return (
@@ -96,7 +96,9 @@ function Administracao() {
         </div>
         {secao === 'pessoas' ? (
           <div className="dm-cab-acoes">
-            <Link className="dm-btn dm-pri" href="/demandas/admin/pessoas/nova">Nova pessoa</Link>
+            {/* um preto por tela: enquanto há pedido de papel esperando, o
+                primário é "Aceitar", e "Nova pessoa" fica em contorno */}
+            <Link className={ms.some(m => m.papel_pedido) ? 'dm-btn' : 'dm-btn dm-pri'} href="/demandas/admin/pessoas/nova">Nova pessoa</Link>
           </div>
         ) : null}
       </div>
@@ -195,11 +197,15 @@ function Anexos({ regra, trocar, toast }: {
         if (!v) return;
         if (await pedir({ incluir: v }, { txt: 'Site incluído.' })) setSite('');
       }}>
-        <Campo rot="Incluir site" ajuda="Pode colar o link inteiro: fica só o site. Vale também para os subdomínios dele.">
-          <input value={site} placeholder="drive.google.com" inputMode="url" autoCapitalize="none"
-            autoCorrect="off" spellCheck={false} onChange={e => setSite(e.target.value)} />
-        </Campo>
-        <button type="submit" className="dm-btn dm-pri" disabled={indo || !site.trim()}>Incluir</button>
+        <h3>Incluir site</h3>
+        <div className="dm-linha dm-criar">
+          <input className="dm-campo-solto dm-cresce" value={site} placeholder="drive.google.com" aria-label="Site a incluir"
+            inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={e => setSite(e.target.value)} />
+          <button type="submit" className="dm-btn dm-pri" disabled={indo || !site.trim()}>Incluir</button>
+        </div>
+        <p className="dm-peq dm-mudo" style={{ margin: '8px 0 0' }}>
+          Pode colar o link inteiro: fica só o site. Vale também para os subdomínios dele.
+        </p>
       </form>
 
       <div className="dm-card">
@@ -215,7 +221,7 @@ function Anexos({ regra, trocar, toast }: {
                 <span className="dm-cresce">
                   {nomeDoSite(x) !== x ? <><b>{nomeDoSite(x)}</b> <span className="dm-mudo">{x}</span></> : <b>{x}</b>}
                 </span>
-                <button type="button" className="dm-btn dm-mini" disabled={indo}
+                <button type="button" className="dm-btn dm-mini dm-txt" disabled={indo}
                   aria-label={`Tirar ${x} da lista`}
                   onClick={() => pedir({ tirar: x }, { txt: `${x} saiu da lista.`, desfaz: x })}>Tirar</button>
               </li>
@@ -346,16 +352,16 @@ function Pedidos({ pedidos, nomeSetor, recarregar }: {
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       <div className="dm-fila">
         {pedidos.map(m => (
-          <div key={m.id} className="dm-pessoa">
+          <div key={m.id} className="dm-pessoa dm-pedido">
             <div className="dm-item-topo">
               <Link className="dm-item-tit dm-cresce" href={`/demandas/admin/pessoas/${m.id}`}>{m.nome}</Link>
             </div>
-            <div className="dm-item-baixo" style={{ marginBottom: 'var(--dm-e1)' }}>
+            <div className="dm-item-baixo">
               <Pill tom="info">Quer ser {rotPapel(m.papel_pedido)}</Pill>
               <span>{nomeSetor(m.setor_id)}</span>
               {m.funcao ? <span>{m.funcao}</span> : null}
             </div>
-            <div className="dm-linha">
+            <div className="dm-linha dm-par-cel">
               <button className="dm-btn dm-pri" disabled={!!indo} onClick={() => decidir(m, 'aceitar')}>Aceitar</button>
               <button className="dm-btn dm-txt" disabled={!!indo} onClick={() => decidir(m, 'recusar')}>Recusar</button>
             </div>

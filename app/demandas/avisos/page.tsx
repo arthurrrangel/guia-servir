@@ -125,8 +125,9 @@ function Avisos() {
         </div>
       </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
+      <div className="dm-duas">
       <div className="dm-leitura-larga">
-        {itens === null ? <Esqueleto /> : itens.length === 0 && !erro ? (
+        {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 && !erro ? (
           <Vazio titulo="Nenhum aviso ainda.">Quando alguém mexer numa demanda sua, aparece aqui.</Vazio>
         ) : (
           <>
@@ -149,6 +150,16 @@ function Avisos() {
             ) : null}
           </>
         )}
+      </div>
+      {/* a coluna da direita no desktop: o que esta tela é, em duas linhas,
+          no lugar de 40% de tela vazia */}
+      <aside className="dm-card dm-quieto dm-fixa dm-so-desktop" aria-label="Como funciona">
+        <h3>Como funciona</h3>
+        <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
+          Aparece aqui o que outras pessoas fizeram nas suas demandas: assumiram, mudaram o prazo,
+          escreveram, concluíram. Abrir esta tela marca tudo como visto.
+        </p>
+      </aside>
       </div>
     </>
   );

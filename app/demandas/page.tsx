@@ -203,9 +203,12 @@ function Precisa({ p, eu, atende }: { p: Portal; eu: Eu; atende: boolean }) {
       </h3>
       {itens.length ? <Fila itens={itens} eu={eu} /> : null}
       {agir || pedidos ? (
-        <div className="dm-grade" style={{ marginTop: itens.length ? 'var(--dm-e2)' : 0 }}>
+        /* as linhas somadas ("2 demandas esperando você em Atender") moram
+           numa `dm-fila` como as outras, para ganharem a mesma forma por
+           largura (o passo à direita, na coluna dele, a partir de 560px) */
+        <div className="dm-fila" style={{ marginTop: itens.length ? 'var(--dm-e2)' : 0 }}>
           {agir ? (
-            <Link className="dm-item" href="/demandas/atendimento?ver=agir">
+            <Link className="dm-item dm-item-soma" href="/demandas/atendimento?ver=agir">
               <span className="dm-c-num">{agir}</span>
               <span className="dm-c-tit"><b>{agir === 1 ? 'demanda esperando você em Atender' : 'demandas esperando você em Atender'}</b>
                 {aprovar ? <span className="dm-c-ctx">{aprovar} {aprovar === 1 ? 'espera aprovação' : 'esperam aprovação'}</span> : null}
@@ -214,7 +217,7 @@ function Precisa({ p, eu, atende }: { p: Portal; eu: Eu; atende: boolean }) {
             </Link>
           ) : null}
           {pedidos ? (
-            <Link className="dm-item" href="/demandas/admin">
+            <Link className="dm-item dm-item-soma" href="/demandas/admin">
               <span className="dm-c-num">{pedidos}</span>
               <span className="dm-c-tit"><b>{pedidos === 1 ? 'pedido de papel espera você' : 'pedidos de papel esperam você'}</b></span>
               <span className="dm-c-meta"><span className="dm-c-passo">Decidir</span></span>
@@ -232,16 +235,17 @@ function Resumo({ n, eu, atende }: { n: Portal['n']; eu: Eu; atende: boolean }) 
     <div className="dm-card">
       <h3>Resumo</h3>
       <div className="dm-contas dm-duas-colunas">
-        <Link className={`dm-conta ${n.minhas_andamento ? '' : 'dm-zero'}`} href="/demandas"><b>{n.minhas_andamento}</b><small>{n.minhas_andamento === 1 ? 'sua em andamento' : 'suas em andamento'}</small></Link>
-        <Link className={`dm-conta ${n.minhas_concluidas ? '' : 'dm-zero'}`} href="/demandas"><b>{n.minhas_concluidas}</b><small>{n.minhas_concluidas === 1 ? 'sua concluída' : 'suas concluídas'}</small></Link>
-        {eu.papel === 'lider' ? <Link className={`dm-conta ${n.ministerio ? '' : 'dm-zero'}`} href="/demandas"><b>{n.ministerio}</b><small>do ministério</small></Link> : null}
-        {n.participo ? <Link className="dm-conta" href="/demandas"><b>{n.participo}</b><small>{n.participo === 1 ? 'que você acompanha' : 'que você acompanha'}</small></Link> : null}
+        {/* leitura, e não link: a lista dessas contas é a própria página */}
+        <div className={`dm-conta dm-leitura ${n.minhas_andamento ? '' : 'dm-zero'}`}><b>{n.minhas_andamento}</b><small>{n.minhas_andamento === 1 ? 'sua em andamento' : 'suas em andamento'}</small></div>
+        <div className={`dm-conta dm-leitura ${n.minhas_concluidas ? '' : 'dm-zero'}`}><b>{n.minhas_concluidas}</b><small>{n.minhas_concluidas === 1 ? 'sua concluída' : 'suas concluídas'}</small></div>
+        {eu.papel === 'lider' ? <div className={`dm-conta dm-leitura ${n.ministerio ? '' : 'dm-zero'}`}><b>{n.ministerio}</b><small>do ministério</small></div> : null}
+        {n.participo ? <div className="dm-conta dm-leitura"><b>{n.participo}</b><small>{n.participo === 1 ? 'que você acompanha' : 'que você acompanha'}</small></div> : null}
       </div>
       {atende ? (
         <>
           <div className="dm-entre" style={{ margin: 'var(--dm-e3) 0 var(--dm-e1)' }}>
             <h3 style={{ margin: 0 }}>Atendimento</h3>
-            <Link className="dm-btn dm-txt" href="/demandas/atendimento">Abrir ›</Link>
+            <Link className="dm-btn dm-txt dm-seta" href="/demandas/atendimento">Abrir</Link>
           </div>
           <div className="dm-contas dm-duas-colunas">
             <Link className={`dm-conta ${n.agir ? '' : 'dm-zero'}`} href="/demandas/atendimento?ver=agir"><b>{n.agir}</b><small>esperando você</small></Link>
@@ -261,7 +265,7 @@ function Resumo({ n, eu, atende }: { n: Portal['n']; eu: Eu; atende: boolean }) 
                 : 'Pessoas, setores e categorias.'}
             </p>
           </div>
-          <Link className="dm-btn dm-txt" href="/demandas/admin">Abrir ›</Link>
+          <Link className="dm-btn dm-txt dm-seta" href="/demandas/admin">Abrir</Link>
         </div>
       ) : null}
     </div>
@@ -273,13 +277,15 @@ function Ultimos({ itens }: { itens: AvisoDentro[] }) {
     <div className="dm-card">
       <div className="dm-entre" style={{ marginBottom: 'var(--dm-e1)' }}>
         <h3 style={{ margin: 0 }}>Últimos avisos</h3>
-        <Link className="dm-btn dm-txt" href="/demandas/avisos">Ver todos ›</Link>
+        <Link className="dm-btn dm-txt dm-seta" href="/demandas/avisos">Ver todos</Link>
       </div>
+      {/* a mesma anatomia da tela de Avisos: a demanda é o título (é o que a
+          pessoa usa para decidir se abre), o fato fica embaixo */}
       <ul className="dm-avisos">
         {itens.map((a, i) => (
           <li key={`${a.numero}-${a.em}-${i}`} className="dm-aviso-grupo">
-            <Link href={`/demandas/d/${a.numero}`}>{fraseDoEvento(a)}</Link>
-            <div className="dm-aviso-de">#{a.numero} {a.titulo} · {quando(a.em)}</div>
+            <Link href={`/demandas/d/${a.numero}`}>#{a.numero} {a.titulo}</Link>
+            <div className="dm-aviso-o-que">{fraseDoEvento(a)}<span className="dm-mudo"> · {quando(a.em)}</span></div>
           </li>
         ))}
       </ul>
@@ -295,7 +301,7 @@ function ContasNoCelular({ n, eu }: { n: Portal['n']; eu: Eu }) {
     <div className="dm-card dm-so-celular">
       <div className="dm-entre" style={{ marginBottom: 'var(--dm-e2)' }}>
         <h3 style={{ margin: 0 }}>Atendimento</h3>
-        <Link className="dm-btn dm-txt" href="/demandas/atendimento">Abrir ›</Link>
+        <Link className="dm-btn dm-txt dm-seta" href="/demandas/atendimento">Abrir</Link>
       </div>
       <div className="dm-contas">
         <Link className={`dm-conta ${n.agir ? '' : 'dm-zero'}`} href="/demandas/atendimento?ver=agir"><b>{n.agir}</b><small>esperando você</small></Link>
@@ -306,7 +312,7 @@ function ContasNoCelular({ n, eu }: { n: Portal['n']; eu: Eu }) {
       {eu.papel === 'admin' ? (
         <div className="dm-entre" style={{ marginTop: 'var(--dm-e2)' }}>
           <span className="dm-peq dm-mudo">Pessoas, setores e categorias.</span>
-          <Link className="dm-btn dm-txt" href="/demandas/admin">Administração ›</Link>
+          <Link className="dm-btn dm-txt dm-seta dm-rente" href="/demandas/admin">Administração</Link>
         </div>
       ) : null}
     </div>

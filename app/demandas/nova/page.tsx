@@ -120,6 +120,10 @@ function Nova() {
   const [erroBase, setErroBase] = useState('');
   const [tinhaRascunho, setTinhaRascunho] = useState(false);
   const [digitando, setDigitando] = useState(false);
+  const campoDeTexto = (el: EventTarget | null) => {
+    const t = (el as HTMLElement | null)?.tagName;
+    return t === 'INPUT' || t === 'TEXTAREA' || t === 'SELECT';
+  };
 
   /* RESTAURAR NO EFEITO, E NÃO NO INICIALIZADOR DO `useState`.
 
@@ -299,7 +303,12 @@ function Nova() {
         </p>
       ) : null}
 
-      <div className="dm-duas dm-7-5" onFocus={() => setDigitando(true)} onBlur={() => setDigitando(false)}>
+      {/* `digitando` só com campo de texto em foco: tocar num botão (a
+          prioridade, "Não tenho data", a gaveta) escondia a barra de enviar
+          (medido em 23/09/2026) */}
+      <div className="dm-duas dm-7-5"
+        onFocus={e => { if (campoDeTexto(e.target)) setDigitando(true); }}
+        onBlur={e => { if (campoDeTexto(e.target)) setDigitando(false); }}>
       <div>
       <div className="dm-card">
         <Campo rot="Título">
@@ -373,7 +382,7 @@ function Nova() {
               placeholder="Depende da agenda do pastor" />
           </Campo>
         )}
-        <button type="button" className="dm-btn dm-txt" style={{ marginTop: -12, marginBottom: 'var(--dm-e3)' }}
+        <button type="button" className="dm-btn dm-txt dm-rente" style={{ marginTop: -12, marginBottom: 'var(--dm-e3)' }}
           onClick={() => { setSemData(x => !x); setR(v => ({ ...v, prazo: '', sem_prazo_porque: '' })); }}>
           {semData ? 'Tenho uma data' : 'Não tenho data'}
         </button>
@@ -474,7 +483,7 @@ function Nova() {
               obrigatoriedade continua sendo da categoria, cobrada pelo
               servidor (`ORCAMENTO_OBRIGATORIO`, migração 86); aqui muda só a
               ajuda, que diz o que aquele valor faz naquela categoria. */}
-          <Campo rot="Orçamento estimado (R$)"
+          <Campo rot="Orçamento estimado (R$)" classe="dm-numero"
             ajuda={cat?.exige_orcamento
               ? 'Esta categoria exige o valor. Sem número, a aprovação trava esperando.'
               : 'Quando der para estimar. Ajuda quem decide a comparar pedidos.'}>
@@ -507,7 +516,7 @@ function Nova() {
           </Campo>
           {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
           {b?.anexos?.restrito && b.anexos.sites.length ? (
-            <details className="dm-peq dm-mudo">
+            <details className="dm-mais dm-esq dm-peq dm-mudo">
               <summary>Ver os sites aceitos</summary>
               <p style={{ margin: '6px 0 0' }}>{nomesDosSites(b.anexos.sites).join(', ')}.</p>
             </details>
@@ -541,7 +550,7 @@ function Nova() {
       {/* no desktop o botão fecha a coluna do formulário; no celular ele vai
           na barra fixa do rodapé, com a frase-resumo, e sai da frente
           enquanto a pessoa digita (o teclado já cobre metade da tela) */}
-      <div className="dm-so-desktop dm-linha">
+      <div className={digitando ? 'dm-linha' : 'dm-so-desktop dm-linha'}>
         <button className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
           {indo ? 'Enviando…' : 'Enviar a demanda'}
         </button>

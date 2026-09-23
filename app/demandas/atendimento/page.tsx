@@ -102,7 +102,7 @@ function Atendimento() {
           <div className="dm-quem"><Pill>{rotPapel(eu.papel)}</Pill></div>
         </div>
         <div className="dm-cab-acoes">
-          <Link className="dm-btn dm-txt" href="/demandas/numeros">Números ›</Link>
+          <Link className="dm-btn dm-txt dm-seta" href="/demandas/numeros">Números</Link>
         </div>
       </div>
 

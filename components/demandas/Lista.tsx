@@ -116,51 +116,74 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
   const temPasso = (itens || []).some(d => !!d.motivo);
   return (
     <>
-      {!controle && (abas.length > 1 || recortes.length > 1) ? (
-        <div className="dm-linha" style={{ marginBottom: 'var(--dm-e2)' }}>
-          {abas.length > 1 ? (
-            <div className="dm-seg" role="group" aria-label="De quem">
-              {abas.map(a => (
-                <button key={a.v} type="button" aria-pressed={aba === a.v} onClick={() => setAba(a.v)}>
-                  {a.rot}{contas && contas[a.v] ? <span className="dm-selo">{contas[a.v]}</span> : null}
-                </button>
-              ))}
-            </div>
-          ) : null}
-          <div className="dm-seg" role="group" aria-label="Em que estado">
-            {recortes.map(r => (
-              <button key={r.v} type="button" aria-pressed={so === r.v} onClick={() => setSo(r.v)}>{r.rot}</button>
-            ))}
+      {/* a busca, a ordem e (no celular) a lupa que abre a busca */}
+      {(() => {
+        const dir = (
+          <div className="dm-ferramentas-dir">
+            <button type="button" className="dm-btn dm-mini dm-busca-toggle"
+              aria-label={buscaAberta ? 'Fechar a busca' : 'Abrir a busca'} aria-expanded={buscaAberta}
+              onClick={() => { setBuscaAberta(x => !x); setTimeout(() => campoBusca.current?.focus(), 50); }}>
+              <Lupa />
+            </button>
+            <label className={buscaAberta ? 'dm-busca dm-aberta' : 'dm-busca'}>
+              <Lupa />
+              <input ref={campoBusca} type="search" aria-label="Procurar" placeholder="Título ou número"
+                value={busca} onChange={e => setBusca(e.target.value)} />
+            </label>
+            <label className="dm-ordem dm-so-desktop">
+              Ordem
+              <select className="dm-filtro" value={ordem} onChange={e => setOrdem(e.target.value as Ordem)}>
+                <option value="urgencia">Urgência</option>
+                <option value="prazo">Prazo mais próximo</option>
+                <option value="recente">Mexida por último</option>
+                <option value="numero">Número</option>
+              </select>
+            </label>
           </div>
-        </div>
-      ) : null}
-
-      {/* a linha de ferramentas: o resumo em palavras à esquerda; a busca e a
-          ordem à direita. No celular a busca é um ícone que abre o campo. */}
-      <div className="dm-ferramentas">
-        {itens ? <Resumao itens={itens} eu={eu} /> : <span />}
-        <div className="dm-ferramentas-dir">
-          <button type="button" className="dm-btn dm-mini dm-busca-toggle"
-            aria-label={buscaAberta ? 'Fechar a busca' : 'Abrir a busca'} aria-expanded={buscaAberta}
-            onClick={() => { setBuscaAberta(x => !x); setTimeout(() => campoBusca.current?.focus(), 50); }}>
-            <Lupa />
-          </button>
-          <label className={buscaAberta ? 'dm-busca dm-aberta' : 'dm-busca'}>
-            <Lupa />
-            <input ref={campoBusca} type="search" aria-label="Procurar" placeholder="Título ou número"
-              value={busca} onChange={e => setBusca(e.target.value)} />
-          </label>
-          <label className="dm-ordem dm-so-desktop">
-            Ordem
-            <select className="dm-filtro" value={ordem} onChange={e => setOrdem(e.target.value as Ordem)}>
-              <option value="urgencia">Urgência</option>
-              <option value="prazo">Prazo mais próximo</option>
-              <option value="recente">Mexida por último</option>
-              <option value="numero">Número</option>
-            </select>
-          </label>
-        </div>
-      </div>
+        );
+        const r = itens ? resumoDe(itens, eu) : null;
+        /* `role="status"` e não `alert`: alerta interrompe o leitor de tela a
+           cada troca de filtro. A cor continua vermelha, que é o que importa
+           para quem vê. */
+        const resumo = r ? (
+          <span className={`dm-aviso-linha dm-${r.tom}`} role="status"><span className="dm-ponto" />{r.texto}.</span>
+        ) : null;
+        /* quando a lista desenha as próprias tiras (Início), a busca mora na
+           linha delas, à direita, e o resumo só ocupa uma linha quando tem o
+           que dizer: a lupa sozinha numa linha de 44px era ruído */
+        if (!controle && (abas.length > 1 || recortes.length > 1)) {
+          return (
+            <>
+              <div className="dm-linha dm-tiras">
+                {abas.length > 1 ? (
+                  <div className="dm-seg" role="group" aria-label="De quem">
+                    {abas.map(a => (
+                      <button key={a.v} type="button" aria-pressed={aba === a.v} onClick={() => setAba(a.v)}>
+                        {a.rot}{contas && contas[a.v] ? <span className="dm-selo">{contas[a.v]}</span> : null}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                <div className="dm-seg" role="group" aria-label="Em que estado">
+                  {recortes.map(r => (
+                    <button key={r.v} type="button" aria-pressed={so === r.v} onClick={() => setSo(r.v)}>{r.rot}</button>
+                  ))}
+                </div>
+                {dir}
+              </div>
+              {resumo ? <div className="dm-ferramentas">{resumo}</div> : null}
+            </>
+          );
+        }
+        /* quando quem escolhe é a página (Atender): resumo à esquerda, busca
+           e ordem à direita */
+        return (
+          <div className="dm-ferramentas">
+            {resumo || <span />}
+            {dir}
+          </div>
+        );
+      })()}
 
       {/* falha de rede no 4G da igreja é o caso comum: a lista oferece a
           saída, em vez de mostrar o erro e nada mais */}
@@ -174,7 +197,7 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
       ) : null}
 
       <div aria-busy={ocupado}>
-        {itens === null ? <Esqueleto /> : itens.length === 0 ? (
+        {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 ? (
           <Vazio titulo={v.titulo} tom={v.tom ?? tomDoVazio}>{v.dica}</Vazio>
         ) : (
           <>
@@ -214,25 +237,19 @@ export function ordenar(itens: Resumo[], ordem: Ordem): Resumo[] {
 
 /* Uma linha de leitura antes da lista: o que precisa de atenção, em palavras.
    Só demanda viva, e o veredito do portão (`falta_aprovacao`), não a coluna. */
-function Resumao({ itens, eu }: { itens: Resumo[]; eu: Eu }) {
+function resumoDe(itens: Resumo[], eu: Eu): { texto: string; tom: 'bad' | 'warn' } | null {
   const atrasadas = itens.filter(d => situacao(d) === 'atrasada').length;
   const paradas = itens.filter(d => situacao(d) === 'parada').length;
   const esperando = itens.filter(d =>
     (d.falta_aprovacao ?? (d.aprovacao === 'pendente'))
     && d.status !== 'concluida' && d.status !== 'cancelada').length;
   const manda = quemManda(eu.papel);
-  if (!atrasadas && !paradas && !(esperando && manda)) return <span />;
+  if (!atrasadas && !paradas && !(esperando && manda)) return null;
   const partes: string[] = [];
   if (atrasadas) partes.push(`${atrasadas} ${atrasadas === 1 ? 'passou do prazo' : 'passaram do prazo'}`);
   if (paradas) partes.push(`${paradas} sem movimento há mais de uma semana`);
   if (esperando && manda) partes.push(`${esperando} ${esperando === 1 ? 'espera' : 'esperam'} aprovação`);
-  /* `role="status"` e não `alert`: alerta interrompe o leitor de tela a cada
-     troca de filtro. A cor continua vermelha, que é o que importa para quem vê. */
-  return (
-    <span className={`dm-aviso-linha dm-${atrasadas ? 'bad' : 'warn'}`} role="status">
-      <span className="dm-ponto" />{partes.join(' · ')}.
-    </span>
-  );
+  return { texto: partes.join(' · '), tom: atrasadas ? 'bad' : 'warn' };
 }
 
 /* A fila: o cabeçalho de tabela (a folha só o mostra nas formas com colunas)
@@ -245,7 +262,7 @@ export function Fila({ itens, eu, mostrarSetor = true, semPasso }: {
       <div className="dm-fila-cab" aria-hidden="true">
         <span className="dm-c-num">#</span>
         <span className="dm-c-tit">Demanda</span>
-        <span className="dm-c-cat">{mostrarSetor ? 'Setor · categoria' : 'Categoria · pediu'}</span>
+        <span className="dm-c-cat">{mostrarSetor ? 'Setor · pediu' : 'Categoria · pediu'}</span>
         <span className="dm-c-estado">Estado</span>
         <span className="dm-c-prazo">Prazo</span>
         <span className="dm-c-com">Com</span>
@@ -261,8 +278,14 @@ export function Linha({ d, eu, mostrarSetor = true }: { d: Resumo; eu?: Eu | nul
   const atraso = diasDeAtraso(d.prazo);
   const comigo = !!eu && !!d.responsavel_id && d.responsavel_id === eu.id;
   const prio = tomPrioridade(d.prioridade);
-  const ctx = [mostrarSetor ? d.responsavel_setor : d.categoria, d.abriu ? d.abriu.split(' ')[0] : null]
-    .filter(Boolean).join(' · ');
+  /* o contexto da linha: o setor (quando a lista cruza setores) ou a
+     categoria, e quem pediu. O próprio nome de quem olha não entra: na lista
+     "minhas" seria "· Pedro" em toda linha, e aí entra a categoria no lugar */
+  const quem = d.abriu ? d.abriu.split(' ')[0] : null;
+  const souEu = !!quem && !!eu && quem === (eu.primeiro_nome || eu.nome.split(' ')[0]);
+  const ctx = [...new Set([mostrarSetor ? d.responsavel_setor : d.categoria,
+                           souEu && mostrarSetor ? d.categoria : null,
+                           souEu ? null : quem].filter(Boolean))].join(' · ');
   const prazo = sit === 'atrasada' ? `${atraso} ${atraso === 1 ? 'dia' : 'dias'} de atraso`
     : sit === 'hoje' ? 'vence hoje'
     : d.prazo ? <><span className="dm-pre">para </span>{dataCurta(d.prazo)}</> : 'sem data';

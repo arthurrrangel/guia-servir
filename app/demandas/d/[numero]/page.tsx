@@ -171,7 +171,7 @@ function Uma() {
       </>
     );
   }
-  if (!v) return <Esqueleto />;
+  if (!v) return <Esqueleto forma="ficha" />;
 
   const d = v.demanda;
   const sit = situacao(d);
@@ -180,7 +180,14 @@ function Uma() {
      precisam cair em /demandas, e não na home da igreja */
   const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
 
-  const naGrade = acoes.filter(a => !FORA_DA_GRADE.includes(a));
+  /* o que contradiz a ficha não vira botão: "Assumir e começar" quando a
+     demanda já está com a pessoa (o servidor aceita, como troca de dono, mas
+     aqui é ruído), e "Travar" numa demanda já travada (re-travar existe para
+     trocar o motivo; o caminho é destravar e travar de novo) */
+  const contradiz = (a: Acao) =>
+    (a === 'assumir' && !!d.responsavel_id && d.responsavel_id === v.eu.id)
+    || (a === 'travar' && d.status === 'travada');
+  const naGrade = acoes.filter(a => !FORA_DA_GRADE.includes(a) && !contradiz(a));
   const primaria = primariaDe(d, naGrade);
   const secundarias = PRINCIPAIS.filter(a => naGrade.includes(a) && a !== primaria);
   const ajustes = AJUSTES.filter(a => naGrade.includes(a));
@@ -189,8 +196,11 @@ function Uma() {
   /* a folha "Mais" existe quando há mais do que um primário e um secundário
      para caber na barra: ajustes, dois ou mais secundários, ou os recados */
   const temMais = ajustes.length > 0 || secundarias.length > 1 || podeAvisar;
-  /* a barra existe enquanto houver algo a fazer, nem que seja avisar */
-  const temBarra = temAcao || podeAvisar;
+  /* a barra fixa só existe com uma ação que anda com a demanda; ajustes e
+     recados sozinhos moram num cartão em linha no celular (uma barra fixa só
+     com "Mais" era 56px de rodapé para esconder dois botões-texto) */
+  const temBarra = !!primaria || secundarias.length > 0;
+  const soAjustes = !temBarra && (ajustes.length > 0 || podeAvisar);
 
   const rotulo = (a: Acao) => {
     switch (a) {
@@ -216,7 +226,7 @@ function Uma() {
     <button key={a} type="button" className={classe} disabled={indo} onClick={() => tocar(a)}>{rotulo(a)}</button>
   );
   const estadoDoPainel =
-    d.status === 'concluida' ? `Concluída em ${dataCheia((d.concluida_em || '').slice(0, 10))}${primaria ? '' : '. Nada a fazer.'}`
+    d.status === 'concluida' ? `Concluída em ${carimbo(d.concluida_em).split(' ')[0]}${primaria ? '' : '. Nada a fazer.'}`
     : d.status === 'cancelada' ? 'Cancelada.'
     : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua.' : 'Parada até a liderança aprovar.')
     : d.status === 'travada' ? `${rotTrava(d.travada_por)}.`
@@ -237,7 +247,7 @@ function Uma() {
     </div>
   ) : (
     <>
-      <h3 className="dm-painel-titulo">{temAcao ? 'Próximo passo' : 'Esta demanda'}</h3>
+      <h3 className="dm-painel-titulo">{primaria || secundarias.length ? 'Próximo passo' : 'Esta demanda'}</h3>
       {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
       {!temAcao ? (
         <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
@@ -450,6 +460,22 @@ function Uma() {
               aoEnviar={(texto, interno) => agir('comentar', { texto, interno })} />
           ) : null}
         </div>
+
+        {/* no celular, quando não há ação que ande com a demanda, os ajustes e
+            os recados ficam num cartão em linha (o mesmo conteúdo do painel do
+            desktop), e não numa barra fixa só com "Mais" */}
+        {soAjustes ? (
+          <div className="dm-card dm-so-celular" aria-label="Esta demanda">
+            <h3 className="dm-painel-titulo">Esta demanda</h3>
+            {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
+            {ajustes.length ? (
+              <div className="dm-painel-ajustes">
+                {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+              </div>
+            ) : null}
+            {podeAvisar ? <Recados d={d} base={base} eu={v.eu} /> : null}
+          </div>
+        ) : null}
 
         {/* ------------------------------------------------- o painel (desktop) */}
         <aside className="dm-card dm-painel dm-fixa dm-so-desktop" aria-label="Ações" aria-live="polite">
@@ -881,7 +907,7 @@ function Acompanham({ v, indo, agir, sair }: {
         )) : <span className="dm-mudo">Só quem pediu e quem atende.</span>}
         {pode ? (
           <button type="button" className="dm-btn dm-txt dm-mini" aria-expanded={abrindo}
-            onClick={() => setAbrindo(x => !x)}>{abrindo ? 'Fechar' : 'Incluir alguém ›'}</button>
+            onClick={() => setAbrindo(x => !x)}>{abrindo ? 'Fechar' : <span className="dm-seta">Incluir alguém</span>}</button>
         ) : null}
       </div>
       {pode && abrindo ? (

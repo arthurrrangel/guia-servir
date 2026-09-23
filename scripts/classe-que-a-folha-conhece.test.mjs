@@ -110,8 +110,8 @@ const PERDOADAS = new Set([
      folha (`.dm-x .dm-dim`), não pelo JSX */
   'dm-dim',
   /* chegam ao <label> pela propriedade `classe` de Campo
-     (components/demandas/Ui.tsx), que só aceita esses dois valores */
-  'dm-curto', 'dm-data',
+     (components/demandas/Ui.tsx), que só aceita esses três valores */
+  'dm-curto', 'dm-data', 'dm-numero',
 ]);
 const usadasNoJsx = new Set();
 for (const a of arquivos) {

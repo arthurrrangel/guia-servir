@@ -222,6 +222,9 @@
   overflow-x:auto;scrollbar-width:none;
 }
 .dm-abas::-webkit-scrollbar{display:none}
+/* no tablet as cinco abas não se espalham pela largura toda: ficam à
+   esquerda, com o mesmo passo do desktop */
+@media (min-width:600px){ .dm-abas{justify-content:flex-start;gap:var(--dm-e4)} }
 /* cabe em 320 sem rolar: "Início Atender Nova Avisos Perfil" em 14px 550
    mede 262px de texto (medido) */
 .dm-abas a{
@@ -234,12 +237,15 @@
 .dm-abas a:hover{color:var(--dm-ink2)}
 .dm-abas a[aria-current="page"]{color:var(--dm-ink);border-bottom-color:var(--dm-ink);font-weight:650}
 .dm-abas a:focus-visible{outline-offset:-2px}
-/* a linha da logo se recolhe: só as abas ficam (44px em vez de 92) */
-.dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
-  height:0;min-height:0;margin:0;overflow:hidden;opacity:0;pointer-events:none;
+/* a linha da logo se recolhe ao rolar, só no celular: só as abas ficam
+   (44px em vez de 92). No tablet há altura de sobra e a linha fica. */
+@media (max-width:719px){
+  .dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
+    height:0;min-height:0;margin:0;overflow:hidden;opacity:0;pointer-events:none;
+  }
+  .dm-recolhida .dm-logo{border:0;padding:0}
+  .dm-recolhida .dm-logo > span{height:0;overflow:hidden}
 }
-.dm-recolhida .dm-logo{border:0;padding:0}
-.dm-recolhida .dm-logo > span{height:0;overflow:hidden}
 @media (min-width:1024px){
   .dm-topo-in{
     grid-template-columns:auto 1fr auto;grid-template-areas:"logo abas quem";
@@ -249,12 +255,6 @@
   .dm-abas{justify-content:flex-start;gap:var(--dm-e4)}
   .dm-abas a{min-height:56px;padding:0 2px}
   .dm-quem-sou{min-height:56px;align-items:center}
-  .dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
-    height:auto;min-height:0;opacity:1;pointer-events:auto;overflow:visible;
-  }
-  .dm-recolhida .dm-logo{height:auto;min-height:44px;min-width:44px}
-  .dm-recolhida .dm-logo > span{height:36px;overflow:visible}
-  .dm-recolhida .dm-quem-sou{min-height:56px}
 }
 /* a administração é a mesma barra em preto: a "outra sala" dita sem outra
    estrutura. As abas viram as seções; "Portal" fica à direita. */
@@ -282,12 +282,14 @@
    histórico não ficar embaixo dela: a ficha põe este espaçador no fim */
 .dm-barra-espaco{height:calc(88px + env(safe-area-inset-bottom, 0px))}
 @media (min-width:1024px){ .dm-barra-espaco{display:none} }
+/* o fio do rodapé alinha com o conteúdo, não com a calha: o traço vai no
+   pseudo-elemento, dentro do padding */
 .dm-rodape{
-  max-width:var(--dm-largura);margin:0 auto;width:100%;
+  position:relative;max-width:var(--dm-largura);margin:0 auto;width:100%;
   padding:var(--dm-e4) var(--dm-calha);font-size:12px;color:var(--dm-mudo);
-  border-top:1px solid var(--dm-linha);
   display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap;
 }
+.dm-rodape::before{content:'';position:absolute;left:var(--dm-calha);right:var(--dm-calha);top:0;height:1px;background:var(--dm-linha)}
 .dm-rodape-links{display:flex;gap:var(--dm-e3)}
 .dm-rodape-links a{font-size:13px;color:var(--dm-ink2);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
 .dm-rodape-links a:hover{color:var(--dm-ink)}
@@ -297,6 +299,13 @@
 .dm-cab{display:grid;gap:var(--dm-e2);margin-bottom:var(--dm-e3);align-items:end}
 .dm-cab > .dm-cab-acoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
 .dm-cab > .dm-cab-acoes > *{flex:1 1 auto}
+.dm-cab > .dm-cab-acoes > .dm-txt{flex:0 0 auto;margin-left:auto}
+/* pares de botões: no celular o primeiro (ou os dois, `dm-larga-cel`) toma a
+   linha; fora dele ficam lado a lado, no tamanho do texto */
+@media (max-width:719px){
+  .dm-linha.dm-par-cel > .dm-btn:first-child{flex:1 1 auto}
+  .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%}
+}
 @media (min-width:720px){
   .dm-cab{grid-template-columns:1fr auto;gap:var(--dm-e3)}
   .dm-cab > .dm-cab-acoes{justify-content:flex-end}
@@ -310,7 +319,7 @@
 .dm-volta::before{content:"‹";color:var(--dm-marca);font-size:17px;line-height:1}
 .dm-quem{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
   font-size:14px;color:var(--dm-ink2);margin-top:6px}
-.dm-quem > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
+.dm-quem > span:not(.dm-pill):has(+ span:not(.dm-pill))::after{content:"\00a0·";opacity:.5}
 
 /* ------------------------------------------------------------- composição */
 /* Duas colunas a partir de 1024: principal (8) e lateral (4). A lateral fica
@@ -327,6 +336,9 @@
 .dm-dupla{display:grid;gap:var(--dm-e3);grid-template-columns:1fr}
 .dm-dupla > *{min-width:0}
 @media (min-width:720px){ .dm-dupla{grid-template-columns:1fr 1fr} }
+/* o par de tabelas dos Números só cabe lado a lado a partir de 1024 */
+.dm-dupla.dm-dupla-larga{grid-template-columns:1fr}
+@media (min-width:1024px){ .dm-dupla.dm-dupla-larga{grid-template-columns:1fr 1fr} }
 .dm-grade{display:grid;gap:var(--dm-e2)}
 .dm-grade > *{min-width:0}
 .dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
@@ -336,7 +348,10 @@
 .dm-caixinha{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
 .dm-caixinha input{width:18px;height:18px;min-height:0;margin:0;accent-color:var(--dm-preto)}
 /* o corpo de leitura não passa de 68 letras por linha no desktop */
-.dm-leitura-larga{max-width:68ch}
+/* a coluna de leitura: no tablet ocupa a grade; no desktop, 68ch ao lado
+   da coluna de contexto */
+.dm-leitura-larga{max-width:none}
+@media (min-width:1024px){ .dm-leitura-larga{max-width:68ch} }
 
 /* ------------------------------------------------------------------ cartão */
 .dm-card{
@@ -349,6 +364,9 @@
 /* "isto é com você": a barra de 3px só quando há itens */
 .dm-precisa{border-left:3px solid var(--dm-ink)}
 .dm-precisa .dm-fila{border-top:0}
+/* dentro de "Precisa de você" a fila não tem cabeçalho de colunas: são
+   poucas linhas e o cartão já diz o que elas são */
+.dm-precisa .dm-fila > .dm-fila-cab{display:none}
 .dm-precisa .dm-item:last-child{border-bottom:0}
 
 /* ------------------------------------------------------------------ botões */
@@ -381,11 +399,17 @@
 @media (hover:hover){ .dm-btn.dm-txt:hover:not(:disabled){background:var(--dm-card3);color:var(--dm-ink);border-color:transparent} }
 .dm-btn.dm-txt:disabled{background:transparent;border-color:transparent}
 .dm-btn.dm-txt.dm-perigo{color:var(--dm-bad)}
+/* quando o botão-texto começa uma linha, o padding de 8px o desalinha do que
+   está acima: `dm-rente` devolve o texto à margem */
+.dm-btn.dm-txt.dm-rente{margin-left:-8px}
+/* o chevron dos links de "ir para": um só desenho, na cor da marca */
+.dm-btn.dm-txt.dm-seta::after,.dm-seta::after{content:"›";margin-left:3px;color:var(--dm-marca)}
 /* ocupado: o texto muda ("Salvando…") e a largura não pula */
 .dm-btn[aria-busy="true"]{cursor:progress}
 
 /* ------------------------------------------------------------------ campos */
 .dm-campo{display:block;margin-bottom:var(--dm-e4)}
+.dm-card > .dm-campo:last-child,.dm-card > .dm-dupla:last-child,.dm-dupla > .dm-campo:last-child{margin-bottom:0}
 .dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
 .dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
 .dm-campo input,.dm-campo select,.dm-campo textarea,.dm-filtro,.dm-campo-solto{
@@ -413,6 +437,8 @@
 @media (min-width:720px){
   .dm-campo.dm-curto input,.dm-campo.dm-curto select{max-width:420px}
   .dm-campo.dm-data input{max-width:220px}
+  .dm-campo.dm-numero input{max-width:200px}
+  .dm-linha.dm-criar{max-width:520px}
 }
 /* o recado do campo que a tela recusou antes de enviar */
 .dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
@@ -431,7 +457,7 @@
 
 /* o interruptor: 44×24 de alvo com o rótulo do que ele controla ao lado */
 .dm-interruptor{
-  display:inline-flex;align-items:center;gap:10px;min-height:44px;
+  display:inline-flex;align-items:center;gap:10px;min-height:44px;min-width:44px;white-space:nowrap;
   border:0;background:transparent;padding:0;cursor:pointer;font-size:14px;color:var(--dm-ink);text-align:left;
 }
 .dm-interruptor::before{
@@ -497,6 +523,7 @@
 .dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
 @media (min-width:760px){
   .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
+  .dm-opcoes:has(> :last-child:nth-child(5)) > button{font-size:13px}
   .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3),
   .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:auto}
 }
@@ -548,12 +575,12 @@
 .dm-quantos.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
 @media (min-width:1024px){
   .dm-subabas{
-    margin:0 0 var(--dm-e2);padding:0;gap:var(--dm-e4);mask-image:none;-webkit-mask-image:none;
-    border-bottom:1px solid var(--dm-linha);overflow:visible;
+    margin:0 0 var(--dm-e2);padding:0;gap:0 var(--dm-e3);mask-image:none;-webkit-mask-image:none;
+    border-bottom:1px solid var(--dm-linha);overflow:visible;flex-wrap:wrap;
     position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:5;
   }
   .dm-subabas button{
-    border:0;border-radius:0;padding:0 2px;min-height:48px;box-shadow:none;
+    border:0;border-radius:0;padding:0 2px;min-height:48px;box-shadow:none;background:transparent;
     border-bottom:2px solid transparent;margin-bottom:-1px;
   }
   .dm-subabas button[aria-pressed="true"]{box-shadow:none;border-bottom-color:var(--dm-ink)}
@@ -573,9 +600,18 @@
   flex-wrap:wrap;margin-bottom:var(--dm-e2);min-height:44px;
 }
 .dm-ferramentas-dir{display:flex;align-items:center;gap:var(--dm-e2);flex:1 1 auto;justify-content:flex-end;min-width:0;flex-wrap:wrap}
+/* a linha das tiras do Início leva a busca à direita */
+.dm-tiras{margin-bottom:var(--dm-e2)}
+.dm-tiras > .dm-ferramentas-dir{flex:1 1 auto;justify-content:flex-end}
+/* em 1024 a 1279 os filtros da administração não cabem ao lado do
+   segmentado: a segunda linha começa à esquerda, como composição */
+@media (min-width:1024px) and (max-width:1279px){ .dm-ferramentas > .dm-ferramentas-dir{flex:1 1 100%;justify-content:flex-start} }
+.dm-filtro{max-width:220px;text-overflow:ellipsis}
 .dm-ferramentas-dir > .dm-busca{flex:1 1 220px;max-width:360px;margin:0}
 .dm-busca-toggle{display:none;padding:0 12px}
 @media (max-width:719px){
+  /* os dois filtros da administração dividem a linha no celular */
+  .dm-ferramentas-dir > .dm-filtro{flex:1 1 calc(50% - 6px);max-width:none}
   .dm-busca-toggle{display:inline-flex}
   .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:none}
   .dm-ferramentas-dir > .dm-busca.dm-aberta{flex:1 1 100%;max-width:none}
@@ -681,6 +717,10 @@
 .dm-c-tit{grid-area:tit;min-width:0}
 .dm-c-tit b{font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere;display:block;line-height:1.35}
 .dm-c-ctx{display:block;font-size:13px;color:var(--dm-mudo);margin-top:2px;overflow-wrap:anywhere}
+/* a célula de categoria só existe na forma inteira (>=1100 de contêiner);
+   fora dela o contexto mora sob o título (`dm-c-ctx`). Sem esta linha os
+   dois apareciam juntos no celular, a 20px um do outro. */
+.dm-c-cat{display:none}
 .dm-c-meta{
   grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
   font-size:13px;color:var(--dm-mudo);min-width:0;
@@ -689,7 +729,7 @@
 .dm-c-estado{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center}
 /* o separador vai no fato ANTERIOR, com espaço que não quebra: nunca abre
    uma linha sozinho */
-.dm-c-meta > .dm-c-fato:not(:last-child)::after{content:"\00a0·";opacity:.5}
+.dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:"\00a0·";opacity:.5}
 .dm-c-prazo.dm-bad{color:var(--dm-bad);font-weight:600}
 .dm-c-com b{font-weight:600;color:var(--dm-ink2)}
 .dm-c-passo{
@@ -711,48 +751,65 @@
 @keyframes dm-entra{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:none}}
 [aria-busy="true"] > .dm-fila{opacity:.6;transition:opacity 120ms}
 
-@container (min-width:560px){
+/* 640 e não 560: com as colunas fixas (estado, prazo, passo) o título
+   ficava com 50px em 560. Entre 430 e 720 nenhuma tela monta a fila. */
+@container (min-width:640px){
   .dm-fila-cab{
-    display:grid;grid-template-columns:52px minmax(0,1fr) 150px 110px 150px;
+    display:grid;grid-template-columns:48px minmax(0,1fr) 110px 150px;
     column-gap:var(--dm-e2);align-items:end;
     padding:0 0 var(--dm-e1);border-bottom:1px solid var(--dm-linha);
     font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
     position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:4;
   }
+  /* as células do cabeçalho têm os mesmos nomes de área das linhas: sem as
+     áreas declaradas aqui também, todas caíam na mesma linha implícita, uma
+     por cima da outra, no canto direito (medido em 1440, 23/09/2026) */
+  .dm-fila-cab > *{font:inherit;color:inherit;letter-spacing:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-fila-cab > .dm-c-passo::after{content:none}
   .dm-fila-cab > .dm-c-com,.dm-fila-cab > .dm-c-cat{display:none}
+  /* a forma compacta (640 a 959) tem o estado SOB o título, e não numa
+     coluna: com cinco colunas fixas o título ficava com 200px e a pílula
+     "Aguardando informações" quebrava em duas linhas */
+  .dm-fila-cab,.dm-item{grid-template-areas:"num tit prazo passo" "num estado prazo passo"}
+  .dm-fila-cab > .dm-c-estado{display:none}
   .dm-item{
-    grid-template-columns:52px minmax(0,1fr) 150px 110px 150px;
-    grid-template-areas:"num tit estado prazo passo";
-    align-items:center;padding:10px 0;min-height:56px;
+    grid-template-columns:48px minmax(0,1fr) 110px 150px;
+    align-items:center;row-gap:4px;padding:10px 0;min-height:56px;
   }
   .dm-c-meta{display:contents}
-  .dm-c-meta > .dm-c-fato:not(:last-child)::after{content:none}
-  .dm-c-estado{grid-area:estado}
+  .dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:none}
+  .dm-c-estado{grid-area:estado;align-self:start}
   .dm-c-prazo{grid-area:prazo;white-space:nowrap}
   .dm-c-passo{grid-area:passo;text-align:right;margin-left:0}
   .dm-c-com,.dm-c-cat{display:none}
   .dm-c-tit b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .dm-pre{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px}
-  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit estado prazo"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:48px minmax(0,1fr) 110px;grid-template-areas:"num tit prazo" "num estado prazo"}
 }
 @container (min-width:960px){
-  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px 120px 150px}
-  .dm-item{grid-template-areas:"num tit estado prazo com passo"}
+  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 190px 100px 120px 140px;grid-template-areas:"num tit estado prazo com passo"}
+  .dm-fila-cab > .dm-c-estado{display:block}
+  .dm-c-estado{align-self:center}
   .dm-fila-cab > .dm-c-com,.dm-c-com{display:block}
   .dm-c-com{grid-area:com;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 150px 110px 120px}
-  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit estado prazo com"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 190px 100px 120px;grid-template-areas:"num tit estado prazo com"}
 }
 @container (min-width:1100px){
-  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) 220px 170px 110px 120px 150px}
-  .dm-item{grid-template-areas:"num tit cat estado prazo com passo";min-height:48px}
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 190px 100px 110px 140px;grid-template-areas:"num tit cat estado prazo com passo"}
+  .dm-item{min-height:48px}
   .dm-fila-cab > .dm-c-cat,.dm-c-cat{display:block}
   .dm-c-cat{grid-area:cat;font-size:13px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dm-c-ctx{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) 220px 170px 110px 120px}
-  .dm-fila.dm-sem-passo .dm-item{grid-template-areas:"num tit cat estado prazo com"}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 190px 100px 110px;grid-template-areas:"num tit cat estado prazo com"}
 }
+/* as linhas somadas do "Precisa de você" ("5 demandas esperando você em
+   Atender"): o número é uma contagem, não um identificador, e a linha tem
+   três partes em qualquer largura (classe dupla: ganha das formas de
+   contêiner) */
+.dm-item.dm-item-soma{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"num tit passo";align-items:center;row-gap:0}
+.dm-item-soma > .dm-c-num{font-size:22px;font-weight:650;color:var(--dm-ink);letter-spacing:-.02em;line-height:1;min-width:28px}
+.dm-item-soma > .dm-c-meta{display:contents}
+.dm-item-soma .dm-c-passo{grid-area:passo;margin-left:0}
 .dm-corte{
   margin:12px 0 0;padding:10px 12px;
   font-size:14px;line-height:1.5;color:var(--dm-mudo);
@@ -788,13 +845,14 @@
 /* ------------------------------------------------------------------ tabela */
 .dm-tab{width:100%;border-collapse:collapse;font-size:14px}
 .dm-tab th{
+  white-space:nowrap;
   text-align:left;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
   color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
   border-bottom:1px solid var(--dm-linha);vertical-align:bottom;
 }
 .dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha);vertical-align:middle}
 .dm-tab tr:last-child td{border-bottom:0}
-.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-right:0}
+.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-left:var(--dm-e3);padding-right:0}
 .dm-tab select,.dm-tab input{
   min-height:44px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
   border-radius:var(--dm-r);padding:0 8px;max-width:100%;
@@ -804,8 +862,8 @@
   background-repeat:no-repeat;background-position:right 10px center}
 .dm-tab td.dm-primeira{position:sticky;left:0;background:var(--dm-card);z-index:1}
 /* o campo solto dentro da tabela não ocupa a célula inteira */
-.dm-tab .dm-campo-solto{width:auto;min-width:150px;max-width:100%}
-.dm-tab .dm-campo-solto.dm-estreito{min-width:0}
+.dm-tab .dm-campo-solto{width:auto;min-width:150px;max-width:200px}
+.dm-tab .dm-campo-solto.dm-estreito{width:64px;min-width:0;padding-inline:8px}
 /* a tabela de rótulo/valor (a ficha) vira duas colunas no celular */
 /* a tabela de LEITURA rola de lado dentro do cartão, com a primeira coluna
    fixa e um sinal de que rola; a EDITÁVEL vira cartões (ver `dm-cartoes`) */
@@ -813,14 +871,14 @@
   mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);
   -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
 .dm-rola .dm-tab{min-width:max-content}
-@media (min-width:720px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
+@media (min-width:1024px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
 /* a tabela editável abaixo de 720: um cartão por linha, controles rotulados */
 .dm-cartoes{display:grid;gap:var(--dm-e2)}
 .dm-cartao-linha{border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2)}
 .dm-cartao-linha > h3{margin:0}
 .dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2)}
 @media (min-width:480px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} }
-.dm-cartao-campo > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:4px}
+.dm-cartao-campo > span:first-child{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:4px}
 /* quem decide entre tabela e cartões é `useEstreito(719)` no componente,
    para a página não carregar os dois e duplicar cada controle */
 
@@ -835,13 +893,13 @@
 .dm-fato:nth-last-child(-n+2){border-bottom:0}
 .dm-fato > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:3px}
 .dm-fato > div{font-size:14px;font-weight:500;overflow-wrap:anywhere}
-.dm-fato > div small{display:block;font-size:13px;font-weight:400;color:var(--dm-mudo)}
+.dm-fato > div small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;font-weight:400;color:var(--dm-mudo)}
 @media (min-width:720px){
   .dm-fatos{grid-template-columns:repeat(4,minmax(0,1fr))}
   .dm-fato{border-bottom:0}
   .dm-fato:nth-child(2n){border-right:1px solid var(--dm-linha)}
   .dm-fato:last-child{border-right:0}
-  .dm-fato > div small{display:inline;margin-left:4px}
+  .dm-fato > div small{display:inline;margin-left:4px;-webkit-line-clamp:none}
   .dm-fato > div small::before{content:"· "}
 }
 /* rótulo/valor em duas colunas dentro de "O que foi pedido" */
@@ -857,7 +915,9 @@
 .dm-painel-titulo{margin-bottom:2px}
 .dm-painel-estado{font-size:13px;color:var(--dm-mudo);margin-bottom:var(--dm-e2)}
 .dm-painel-acoes{display:grid;gap:var(--dm-e1)}
-.dm-painel-ajustes{display:flex;flex-wrap:wrap;gap:4px var(--dm-e1);margin-top:var(--dm-e2)}
+.dm-painel-ajustes{display:grid;grid-template-columns:1fr;gap:0;margin:var(--dm-e2) 0 0 -8px}
+.dm-painel-ajustes > .dm-btn{justify-content:flex-start;min-height:44px}
+.dm-painel-ajustes > .dm-perigo{margin-top:var(--dm-e1)}
 .dm-painel-secao{border-top:1px solid var(--dm-linha);margin-top:var(--dm-e3);padding-top:var(--dm-e3)}
 .dm-barra-acao{
   position:fixed;left:0;right:0;bottom:0;z-index:40;
@@ -869,6 +929,7 @@
 .dm-barra-acao:has(> :only-child){grid-template-columns:1fr}
 .dm-barra-acao > .dm-btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:44px;padding-top:0;padding-bottom:0}
 @keyframes dm-sobe{0%{transform:translateY(100%)}100%{transform:none}}
+@media (min-width:720px) and (max-width:1023px){ .dm-barra-acao{grid-template-columns:auto minmax(220px,360px);justify-content:end;padding-inline:var(--dm-calha)} }
 @media (min-width:1024px){ .dm-barra-acao{display:none} }
 /* a folha que sobe do rodapé no celular, com o formulário da ação; no
    desktop o mesmo <dialog> abre como caixa centralizada */
@@ -932,6 +993,8 @@
 .dm-aviso-grupo li.dm-novo::before{background:var(--dm-ink)}
 .dm-aviso-grupo li.dm-novo .dm-aviso-o-que{font-weight:600}
 .dm-aviso-o-que{overflow-wrap:anywhere}
+/* no cartão "Últimos avisos" do Início o fato fica logo sob o título */
+.dm-aviso-grupo > .dm-aviso-o-que{font-size:14px;padding:0 0 8px}
 .dm-aviso-de{font-size:13px;color:var(--dm-mudo);overflow-wrap:anywhere}
 .dm-avisos-dia{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin:var(--dm-e3) 0 var(--dm-e1)}
 
@@ -952,6 +1015,10 @@
 }
 .dm-mais[open] > summary::after{transform:translateY(2px) rotate(-135deg)}
 .dm-mais > summary:hover{color:var(--dm-ink);background:var(--dm-card2)}
+/* a gaveta pequena e à esquerda ("Ver os sites aceitos"), com o mesmo alvo */
+.dm-mais.dm-esq{margin-top:0}
+.dm-mais.dm-esq > summary{justify-content:flex-start;padding:0;font-size:13px;font-weight:500}
+.dm-mais.dm-esq > summary:hover{background:transparent}
 .dm-mais > .dm-grade{margin-top:var(--dm-e1)}
 .dm .dm-gaveta{
   display:inline-flex;align-items:center;gap:8px;
@@ -965,6 +1032,11 @@
 }
 .dm .dm-gaveta[aria-expanded="true"]::before{transform:rotate(90deg)}
 .dm-esqueleto div{background:var(--dm-card2);animation:dm-pulso 1.4s ease-in-out infinite}
+.dm-esqueleto .dm-esq-linha{display:flex;align-items:center;gap:var(--dm-e2);min-height:56px;background:transparent;animation:none;border-bottom:1px solid var(--dm-linha)}
+.dm-esqueleto .dm-esq-linha > div{height:14px;border-radius:2px}
+.dm-esqueleto .dm-esq-fatos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--dm-linha);animation:none;border:1px solid var(--dm-linha)}
+.dm-esqueleto .dm-esq-fatos > div{height:64px;animation:dm-pulso 1.4s ease-in-out infinite}
+@media (min-width:720px){ .dm-esqueleto .dm-esq-fatos{grid-template-columns:repeat(4,minmax(0,1fr))} }
 @keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
 .dm-vazio{padding:var(--dm-e5) var(--dm-e3);text-align:center}
 .dm-vazio > .dm-rot{margin-bottom:6px}
@@ -989,6 +1061,14 @@
 .dm-item-baixo{display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;font-size:13px;color:var(--dm-mudo)}
 .dm-item-baixo > *{min-width:0;overflow-wrap:anywhere}
 .dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
+/* um pedido de papel por linha no desktop: nome e pílula à esquerda, o par
+   Aceitar/Recusar à direita */
+@media (min-width:1024px){
+  .dm-pedido{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--dm-e3);align-items:center}
+  .dm-pedido > .dm-item-topo,.dm-pedido > .dm-item-baixo{grid-column:1}
+  .dm-pedido > .dm-item-topo{margin-bottom:2px}
+  .dm-pedido > .dm-linha{grid-column:2;grid-row:1 / span 2}
+}
 /* a lista de pessoas da administracao: no celular, um bloco por pessoa
    (nome, papeis, setor e funcao, e-mail); a partir de 1024 vira uma tabela
    de cinco colunas com cabecalho, sem <table>, para a linha inteira
@@ -996,7 +1076,7 @@
 .dm-pessoas{border-top:1px solid var(--dm-linha)}
 .dm-pessoas .dm-pessoa{display:block;min-height:44px}
 .dm-pessoas .dm-pessoa:hover{background:var(--dm-card3);box-shadow:0 0 0 12px var(--dm-card3)}
-.dm-pessoas-cab{display:none}
+.dm-pessoas > .dm-pessoas-cab{display:none}
 .dm-p-nome{display:block;font-size:15px;line-height:1.35;min-width:0;overflow-wrap:anywhere}
 .dm-p-nome small{font-weight:400;font-size:13px}
 .dm-p-papel{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
@@ -1007,6 +1087,18 @@
 .dm-p-setor:not(:empty){margin-top:6px;display:inline-block}
 .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:'·';margin:0 6px;opacity:.5}
 .dm-p-email{display:block;margin-top:2px}
+/* no tablet (720 a 1023) três colunas: nome e papéis, setor e função,
+   e-mail. O bloco de celular esticado a 720px era uma coluna de 110px por
+   pessoa. */
+@media (min-width:720px) and (max-width:1023px){
+  .dm-pessoas .dm-pessoa{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1.3fr);column-gap:var(--dm-e3);align-items:center;padding:8px 0;min-height:52px}
+  .dm-p-nome,.dm-p-papel{grid-column:1}
+  .dm-p-papel{margin-top:4px}
+  .dm-p-setor,.dm-p-funcao{grid-column:2;display:block;margin:0}
+  .dm-p-setor:not(:empty){margin:0;display:block}
+  .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:none}
+  .dm-p-email{grid-column:3;grid-row:1 / span 3;margin:0}
+}
 @media (min-width:1024px){
   .dm-pessoas{border-top:0}
   .dm-pessoas .dm-pessoa{

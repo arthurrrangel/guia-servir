@@ -117,7 +117,7 @@ export function Setores({ b, indo, salvar }: {
       </Aviso>
       <div className="dm-card">
         <h3>Novo setor</h3>
-        <div className="dm-linha">
+        <div className="dm-linha dm-criar">
           <input className="dm-campo-solto dm-cresce" placeholder="Nome do setor" aria-label="Nome do setor novo"
             value={nome} onChange={e => setNome(e.target.value)} />
           <button className="dm-btn dm-pri" disabled={indo || !nome.trim()}
@@ -203,7 +203,7 @@ export function Categorias({ b, indo, salvar }: {
       aoMudar={v => salvar('categoria', { id: c.id, exige_orcamento: v })} />
   );
   const prazo = (c: Categoria) => (
-    <span className="dm-linha">
+    <div className="dm-linha">
       <input className="dm-campo-solto dm-estreito" type="number" min={0} inputMode="numeric"
         aria-label={`Dias sugeridos, ${c.nome}`}
         defaultValue={c.prazo_padrao_dias ?? ''} disabled={indo}
@@ -214,7 +214,7 @@ export function Categorias({ b, indo, salvar }: {
           salvar('categoria', { id: c.id, prazo_padrao_dias: v });
         }} />
       <span className="dm-peq dm-mudo">dias</span>
-    </span>
+    </div>
   );
 
   return (
@@ -250,7 +250,7 @@ export function Categorias({ b, indo, salvar }: {
           respondeu. */}
       <div className="dm-card">
         <h3>Nova categoria em {g || 'nenhum grupo'}</h3>
-        <div className="dm-linha">
+        <div className="dm-linha dm-criar">
           <input className="dm-campo-solto dm-cresce" value={nova} placeholder="Nome da categoria"
             aria-label={`Nome da categoria nova em ${g}`}
             onChange={e => setNova(e.target.value)} />
@@ -298,8 +298,11 @@ export function Categorias({ b, indo, salvar }: {
                 <tr key={c.id}>
                   <td><b>{c.nome}</b></td>
                   <td>{destino(c)}</td>
-                  <td>{aprovacao(c, c.exige_aprovacao ? 'Exige' : 'Não exige')}</td>
-                  <td>{orcamento(c, c.exige_orcamento ? 'Exige' : 'Não exige')}</td>
+                  {/* na tabela o interruptor fica sem texto: o cabeçalho da
+                      coluna diz o que ele controla e `aria` leva o nome
+                      completo para o leitor de tela */}
+                  <td>{aprovacao(c, '')}</td>
+                  <td>{orcamento(c, '')}</td>
                   <td>{prazo(c)}</td>
                 </tr>
               ))}
