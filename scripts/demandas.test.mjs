@@ -15,6 +15,7 @@ import {
   somaDias, linkZap, soDigitos, telDoBanco, telVisivel, recadoDoErro, recado, diasDeAtraso,
   siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
   horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe,
+  chaveDoSetor, setorDoLink, pedidoDoLink, buscaDoLink,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -1326,6 +1327,47 @@ function servidorAceita(acao, d, eu) {
   ok(/endereço exato/.test(recadoDoErro({ ok: false, erro: 'SITE_ABERTO' })), 'SITE_ABERTO tem frase');
   ok(!/—/.test(recadoDeSite('x.example') + recadoDoErro({ ok: false, erro: 'SITE_INVALIDO' })
               + recadoDoErro({ ok: false, erro: 'SITE_ABERTO' })), 'sem travessão nas frases novas');
+}
+
+/* =============================================================================
+   O LINK DE CADASTRO DE CADA SETOR (23/09/2026)
+
+   Os treze setores de produção, pelo nome que o banco devolve. A primeira
+   palavra de cada um tem que achar um setor só; é o que vai no link do grupo
+   de cada setor na comunidade do WhatsApp.
+   ============================================================================= */
+{
+  const NOMES = ['Comunicação', 'Compras e suprimentos', 'Manutenção e infraestrutura',
+    'Tecnologia e audiovisual', 'Eventos e logística', 'Administrativo e financeiro',
+    'Pastoral', 'Louvor', 'Mídia', 'Connect', 'Jovens', 'Kids', 'Secretaria'];
+  const S = NOMES.map((nome, i) => ({ id: `0000000${i}-aaaa-4bbb-8ccc-00000000000${i}`.slice(0, 36), nome, atende: i < 6 }));
+  ok(chaveDoSetor('Manutenção e infraestrutura') === 'manutencao-e-infraestrutura', 'a chave tira acento e junta com hífen',
+    chaveDoSetor('Manutenção e infraestrutura'));
+  for (const s of S) {
+    const primeira = chaveDoSetor(s.nome).split('-')[0];
+    ok(setorDoLink(S, primeira) === s, `"${primeira}" acha ${s.nome}, e só ele`, String(setorDoLink(S, primeira)?.nome));
+  }
+  ok(setorDoLink(S, 'tecnologia-e-audiovisual')?.nome === 'Tecnologia e audiovisual', 'a chave inteira também acha');
+  ok(setorDoLink(S, 'Mídia')?.nome === 'Mídia', 'com acento e maiúscula também');
+  ok(setorDoLink(S, S[3].id) === S[3], 'o id do setor também acha');
+  ok(setorDoLink(S, 'e') === null, 'pedaço que não é começo de palavra não acha nada');
+  ok(setorDoLink(S, 'painel') === null, 'setor que não existe não acha nada');
+  ok(setorDoLink(S, '') === null && setorDoLink(S, undefined) === null, 'link sem setor não escolhe nada');
+  const dois = [{ id: 'a', nome: 'Kids manhã' }, { id: 'b', nome: 'Kids noite' }];
+  ok(setorDoLink(dois, 'kids') === null, 'dois setores que casam é nenhum: o link não escolhe por sorte');
+  ok(setorDoLink([...dois, { id: 'c', nome: 'Kids' }], 'kids')?.id === 'c', 'o nome exato ganha dos que só começam igual');
+
+  ok(JSON.stringify(pedidoDoLink('?equipe=Comunicação')) === '{"equipe":"comunicacao"}', 'o link de equipe chega limpo',
+    JSON.stringify(pedidoDoLink('?equipe=Comunicação')));
+  ok(JSON.stringify(pedidoDoLink('?setor=louvor&x=1')) === '{"setor":"louvor"}', 'só as duas chaves conhecidas',
+    JSON.stringify(pedidoDoLink('?setor=louvor&x=1')));
+  ok(JSON.stringify(pedidoDoLink('?equipe=kids&setor=louvor')) === '{"equipe":"kids"}', 'equipe manda quando vêm as duas');
+  ok(!/[./%]/.test(buscaDoLink(pedidoDoLink('?setor=..%2F..%2Fpainel'))),
+    'nada de barra, ponto ou escape sobrevive no que viaja no link do e-mail',
+    buscaDoLink(pedidoDoLink('?setor=..%2F..%2Fpainel')));
+  ok(JSON.stringify(pedidoDoLink('?equipe=' + 'x'.repeat(61))) === '{}', 'chave maior que 60 é descartada');
+  ok(buscaDoLink({}) === '' && buscaDoLink({ equipe: 'compras' }) === '?equipe=compras'
+     && buscaDoLink({ setor: 'kids' }) === '?setor=kids', 'o que viaja no link do e-mail');
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

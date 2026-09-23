@@ -2215,6 +2215,114 @@ console.log('\n21. O cadastro: o e-mail primeiro, e depois só o que é da pesso
   await desmontar();
 }
 
+/* O LINK DE CADASTRO DE CADA SETOR (23/09/2026): `?equipe=comunicacao` chega
+   com o setor e "Atendo demandas" marcados, `?setor=louvor` só com o setor,
+   o link de equipe de um ministério não vira pedido, e o setor do link
+   viaja no link do e-mail. */
+{
+  mundoNovo();
+  window.location.search = '?equipe=comunicacao';
+  const b = banco({});
+  let otp = null;
+  b.auth = {
+    getSession: async () => ({ data: { session: null } }),
+    signInWithOtp: async a => { otp = a; return { error: null }; },
+  };
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(CadastroPagina);
+  await teclar(campo(alvo, 'Seu e-mail'), 'monik@exemplo.com');
+  await assentar();
+  await act(async () => { porTag(alvo, 'FORM')[0].dispatchEvent(evento('submit')); });
+  await assentar();
+  ok(otp && /\/demandas\/entrar\?volta=%2Fdemandas%2Fcadastro%3Fequipe%3Dcomunicacao$/.test(otp.options.emailRedirectTo),
+    'o setor do link viaja no link do e-mail', otp && otp.options.emailRedirectTo);
+  await desmontar();
+}
+{
+  mundoNovo();
+  window.location.search = '?setor=..%2F..%2Fpainel&x=%3Cscript%3E';
+  const b = banco({});
+  let otp = null;
+  b.auth = {
+    getSession: async () => ({ data: { session: null } }),
+    signInWithOtp: async a => { otp = a; return { error: null }; },
+  };
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(CadastroPagina);
+  await teclar(campo(alvo, 'Seu e-mail'), 'x@exemplo.com');
+  await assentar();
+  await act(async () => { porTag(alvo, 'FORM')[0].dispatchEvent(evento('submit')); });
+  await assentar();
+  const volta = otp ? decodeURIComponent(otp.options.emailRedirectTo.split('volta=')[1] || '') : '';
+  ok(volta === '/demandas/cadastro?setor=painel', 'lixo no endereço não viaja no link do e-mail', volta);
+  await desmontar();
+}
+{
+  const cadastroCom = async (busca) => {
+    mundoNovo();
+    window.location.search = busca;
+    const b = banco({
+      dem_cadastro: { ok: true, situacao: 'novo', email: 'monik@exemplo.com',
+                      setores: [{ id: 's9', nome: 'Louvor', atende: false }, { id: 's1', nome: 'Comunicação', atende: true },
+                                { id: 's2', nome: 'Compras e suprimentos', atende: true }] },
+      dem_cadastrar: { ok: true, ...EU_MEMBRO, novo: true },
+    });
+    b.auth = { getSession: async () => ({ data: { session: { user: { email: 'monik@exemplo.com' } } } }) };
+    globalThis.__banco = b;
+    const m = await montar(CadastroPagina);
+    return { b, ...m };
+  };
+  const marcado = alvo => {
+    const bt = botao(alvo, 'Atendo demandas');
+    return bt ? bt.getAttribute('aria-pressed') : '(sem botão)';
+  };
+  /* o <select> controlado pelo React marca a <option> (`selected`), e não o
+     `value` do select, neste DOM de mentira */
+  const escolhido = alvo => {
+    const sel = campo(alvo, 'Setor');
+    if (!sel) return '(sem campo)';
+    const o = porTag(sel, 'OPTION').find(x => x.selected === true);
+    return o ? String(o.value ?? o.getAttribute('value') ?? '') : '';
+  };
+  {
+    const { b, alvo, desmontar } = await cadastroCom('?equipe=comunicacao');
+    ok(escolhido(alvo) === 's1', 'o link da equipe chega com o setor escolhido', escolhido(alvo));
+    ok(marcado(alvo) === 'true', 'e com "Atendo demandas" marcado', marcado(alvo));
+    await teclar(campo(alvo, 'Nome completo'), 'Monik Ribeiro');
+    await teclar(campo(alvo, 'WhatsApp'), '(21) 99999-0001');
+    await assentar();
+    await act(async () => { porTag(alvo, 'FORM')[0].dispatchEvent(evento('submit')); });
+    await assentar();
+    const c = b.ultima('dem_cadastrar');
+    ok(c && c.args.p_d.setor_id === 's1' && c.args.p_d.papel_pedido === 'responsavel',
+      'e o cadastro manda o setor e o PEDIDO de atender, que a administração decide', JSON.stringify(c && c.args.p_d));
+    await desmontar();
+  }
+  {
+    const { alvo, desmontar } = await cadastroCom('?equipe=compras');
+    ok(escolhido(alvo) === 's2', 'a primeira palavra basta ("compras")', escolhido(alvo));
+    await desmontar();
+  }
+  {
+    const { alvo, desmontar } = await cadastroCom('?setor=louvor');
+    ok(escolhido(alvo) === 's9', 'o link do ministério chega com o setor escolhido', escolhido(alvo));
+    ok(marcado(alvo) === 'false', 'e sem pedido nenhum', marcado(alvo));
+    await desmontar();
+  }
+  {
+    const { alvo, desmontar } = await cadastroCom('?equipe=louvor');
+    ok(escolhido(alvo) === 's9' && marcado(alvo) === 'false',
+      'link de equipe de um setor que não atende vira só o setor, sem pedido', `${escolhido(alvo)} ${marcado(alvo)}`);
+    await desmontar();
+  }
+  {
+    const { alvo, desmontar } = await cadastroCom('?equipe=nao-existe');
+    ok(escolhido(alvo) === '' && marcado(alvo) === 'false', 'setor que não existe não escolhe nada',
+      `${escolhido(alvo)} ${marcado(alvo)}`);
+    await desmontar();
+  }
+}
+
 console.log('\n22. A ficha: quem acompanha');
 {
   const { b, alvo, desmontar } = await comFicha(

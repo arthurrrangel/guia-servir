@@ -32,7 +32,7 @@ import { useEffect, useState } from 'react';
 import { sb } from '@/lib/supabase';
 import { cadastrar, cadastro } from '@/lib/demandas/api';
 import { Aviso, Bloco, Campo, Opcoes } from '@/components/demandas/Ui';
-import { recadoDoErro, soDigitos } from '@/lib/demandas/regras';
+import { buscaDoLink, pedidoDoLink, recadoDoErro, setorDoLink, soDigitos, type PedidoDoLink } from '@/lib/demandas/regras';
 import { aviseHumano } from '@/lib/erros';
 import { sugerirEmail } from '@/lib/email';
 import type { Cadastro as Situacao } from '@/lib/demandas/tipos';
@@ -52,8 +52,13 @@ export default function Cadastro() {
   const [pedido, setPedido] = useState<'' | 'lider' | 'responsavel'>('');
   const [indo, setIndo] = useState(false);
   const [msg, setMsg] = useState<{ tom: 'ok' | 'bad' | 'warn'; t: string } | null>(null);
+  /* o link do setor (`?equipe=comunicacao`, `?setor=louvor`): ver
+     `setorDoLink` em regras.ts */
+  const [doLink, setDoLink] = useState<PedidoDoLink>({});
 
   useEffect(() => {
+    const l = pedidoDoLink(window.location.search);
+    setDoLink(l);
     const c = sb();
     if (!c) { setPasso('erro'); setMsg({ tom: 'bad', t: 'Este ambiente está sem configuração de acesso.' }); return; }
     c.auth.getSession().then(async ({ data }) => {
@@ -61,7 +66,18 @@ export default function Cadastro() {
       const r = await cadastro();
       if (!r.ok) { setPasso('erro'); setMsg({ tom: 'bad', t: recadoDoErro(r, 'abrir o cadastro') }); return; }
       const s = r as unknown as Situacao;
-      if (s.situacao === 'novo') { setInfo(s); setPasso('dados'); return; }
+      if (s.situacao === 'novo') {
+        setInfo(s);
+        const alvo = setorDoLink(s.setores, l.equipe || l.setor);
+        if (alvo) {
+          setSetor(alvo.id);
+          /* "Atendo demandas" só para setor que atende: o link de equipe de
+             um ministério vira só o setor, sem pedido nenhum */
+          if (l.equipe && alvo.atende) setPedido('responsavel');
+        }
+        setPasso('dados');
+        return;
+      }
       if (s.situacao === 'ativo') { setPrimeiro(s.primeiro_nome); setPasso('ja'); return; }
       if (s.situacao === 'inativo') { setPasso('inativo'); return; }
       setPasso('email');
@@ -76,7 +92,9 @@ export default function Cadastro() {
     setIndo(true);
     const { error } = await sb()!.auth.signInWithOtp({
       email: alvo,
-      options: { emailRedirectTo: window.location.origin + '/demandas/entrar?volta=' + encodeURIComponent('/demandas/cadastro') },
+      /* o link do setor viaja no link do e-mail: quem abre o e-mail no
+         celular, em outro navegador, volta com o setor já marcado */
+      options: { emailRedirectTo: window.location.origin + '/demandas/entrar?volta=' + encodeURIComponent('/demandas/cadastro' + buscaDoLink(doLink)) },
     });
     setIndo(false);
     if (error) { setMsg({ tom: 'bad', t: aviseHumano(error, 'enviar o link') }); return; }
@@ -189,6 +207,11 @@ export default function Cadastro() {
         ) : passo === 'ja' ? (
           <>
             <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>{primeiro ? `${primeiro}, você já tem cadastro.` : 'Você já tem cadastro.'}</h1>
+            {doLink.equipe ? (
+              <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
+                Para atender demandas, peça em <Link href="/demandas/perfil">Perfil</Link>.
+              </p>
+            ) : null}
             <Link className="dm-btn dm-pri dm-larga" href="/demandas">Ir para as minhas demandas</Link>
           </>
         ) : passo === 'inativo' ? (

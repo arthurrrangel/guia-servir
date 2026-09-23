@@ -679,6 +679,56 @@ export function semRepetir(itens: AvisoDentro[]): AvisoDentro[] {
   });
 }
 
+/* O LINK DE CADASTRO DE CADA SETOR — 23/09/2026.
+
+   `/demandas/cadastro?equipe=comunicacao` abre o cadastro com o setor e
+   "Atendo demandas" já marcados; `?setor=louvor`, só o setor. É o link que
+   vai no grupo de cada setor da comunidade do WhatsApp.
+
+   O LINK NÃO ABRE NADA. Quem se cadastra continua nascendo membro, e
+   "Atendo demandas" continua sendo um PEDIDO que a administração decide
+   (`dem_cadastrar` grava `solicitante` por conta própria). O que o link
+   poupa é a pessoa achar o próprio setor numa lista de treze, e esquecer de
+   marcar que atende.
+
+   A chave é o nome sem acento, em minúsculas, com hífen: "Tecnologia e
+   audiovisual" é `tecnologia-e-audiovisual`, e a primeira palavra basta
+   (`tecnologia`) quando um setor só começa com ela. Dois setores que casam
+   é nenhum: o link não escolhe por sorte. */
+export function chaveDoSetor(nome: string): string {
+  return (nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+export function setorDoLink<T extends { id: string; nome: string }>(setores: T[], chave?: string): T | null {
+  const q = chaveDoSetor(chave || '');
+  if (!q) return null;
+  const exato = setores.filter(s => s.id === q || chaveDoSetor(s.nome) === q);
+  if (exato.length) return exato.length === 1 ? exato[0] : null;
+  const comeco = setores.filter(s => chaveDoSetor(s.nome).startsWith(q + '-'));
+  return comeco.length === 1 ? comeco[0] : null;
+}
+
+/* o que o link pede, limpo: só as duas chaves conhecidas, só letras
+   minúsculas, números e hífen, e no máximo 60. O que sobra do endereço não
+   viaja no link do e-mail. */
+export type PedidoDoLink = { equipe?: string; setor?: string };
+export function pedidoDoLink(busca: string): PedidoDoLink {
+  let p: URLSearchParams;
+  try { p = new URLSearchParams(busca || ''); } catch { return {}; }
+  const limpa = (v: string | null) => {
+    const c = chaveDoSetor(v || '');
+    return c && c.length <= 60 ? c : undefined;
+  };
+  const equipe = limpa(p.get('equipe'));
+  if (equipe) return { equipe };
+  const setor = limpa(p.get('setor'));
+  return setor ? { setor } : {};
+}
+export function buscaDoLink(l: PedidoDoLink): string {
+  return l.equipe ? `?equipe=${l.equipe}` : l.setor ? `?setor=${l.setor}` : '';
+}
+
 export function quando(iso: string | null): string {
   if (!iso) return '';
   const t = Date.parse(iso);

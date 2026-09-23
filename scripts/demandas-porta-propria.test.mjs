@@ -139,6 +139,8 @@ function arquivos(dir, fim = /\.tsx?$/) {
     ['/demandas/d/42', '/demandas/d/42'],
     ['/demandas/numeros?p=90', '/demandas/numeros?p=90'],
     ['/demandas/d/42#hist', '/demandas/d/42#hist'],
+    /* o link do setor viaja no link do e-mail do cadastro (23/09/2026) */
+    ['/demandas/cadastro?equipe=comunicacao', '/demandas/cadastro?equipe=comunicacao'],
   ]) {
     const win = {
       location: { href: `${ORIGEM}/demandas/entrar?volta=${encodeURIComponent(carga)}`, origin: ORIGEM },
