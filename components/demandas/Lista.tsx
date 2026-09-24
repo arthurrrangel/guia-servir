@@ -84,8 +84,11 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
   const campoBusca = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (busca.trim() === termo) return;
-    const id = setTimeout(() => setTermo(busca.trim()), ESPERA_DA_BUSCA);
+    /* "#113" acha a #113: é assim que o número aparece em toda tela (24/09/2026,
+       auditoria R13; só "113" achava) */
+    const limpa = busca.trim().replace(/^#\s*/, '');
+    if (limpa === termo) return;
+    const id = setTimeout(() => setTermo(limpa), ESPERA_DA_BUSCA);
     return () => clearTimeout(id);
   }, [busca, termo]);
 
@@ -109,6 +112,13 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
      a tela piscar em branco a cada troca de filtro. A anterior fica no lugar
      e o bloco diz `aria-busy`. */
   useEffect(() => { buscar(); }, [buscar]);
+  /* e ao voltar para a aba do navegador, a lista se atualiza: quem deixou o
+     Demandas aberto desde a manhã via a fila da manhã (24/09/2026, R13) */
+  useEffect(() => {
+    const f = () => { if (document.visibilityState === 'visible') buscar(); };
+    document.addEventListener('visibilitychange', f);
+    return () => document.removeEventListener('visibilitychange', f);
+  }, [buscar]);
 
   /* a ordem é decisão de leitura no desktop; o servidor manda por urgência e
      a tela reordena o que já tem, sem nova ida ao banco */

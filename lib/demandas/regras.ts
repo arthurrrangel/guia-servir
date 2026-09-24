@@ -316,7 +316,10 @@ export const rascunhoVazio = (): Rascunho => ({
    regra diz o campo e a frase, numa lista só: `oQueFalta` continua devolvendo
    as frases, e `camposQueFaltam` devolve os pares, na ordem da tela. */
 export type Falta = { campo: 'titulo' | 'descricao' | 'categoria_id' | 'setor' | 'prazo' | 'impacto'
-                          | 'evento' | 'evento_data' | 'orcamento'; texto: string };
+                          | 'evento' | 'evento_data' | 'orcamento'; texto: string;
+                      /* a frase do campo quando não é falta, e sim valor torto:
+                         "Falta o valor…" embaixo de um valor escrito não bate */
+                      frase?: string };
 /* O VALOR COMO SE ESCREVE NO BRASIL — 24/09/2026 (auditoria R12). O campo
    de orçamento trocava a vírgula por ponto enquanto se digitava: "1.500,00"
    virava "1.500.00", o banco recusava (a regra dele é a de `dem_abrir`: até
@@ -367,7 +370,8 @@ export function camposQueFaltam(r: Rascunho, temSetor: boolean, cat?: Categoria 
     f.push({ campo: 'orcamento', texto: 'o valor estimado (esta categoria pede)' });
   }
   if ((r.orcamento || '').trim() && !valorValido(r.orcamento)) {
-    f.push({ campo: 'orcamento', texto: 'o valor em reais, como 1.500,00' });
+    f.push({ campo: 'orcamento', texto: 'o valor em reais, como 1.500,00',
+             frase: 'Escreva o valor em reais, como 1.500,00.' });
   }
   return f;
 }
@@ -707,7 +711,7 @@ export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta
     return `${cab}\nPrecisamos de uma informação sua para continuar.\n${link}`;
   }
   if (o === 'pronta') {
-    return `${cab}\nFoi concluída. Se não resolveu, dá para reabrir na própria página.\n${link}`;
+    return `${cab}\nFoi concluída. Se resolveu, confirme na página (“Resolveu, obrigado”); se não, dá para reabrir lá.\n${link}`;
   }
   /* 24/09/2026 (auditoria R12): quem PEDE falando com quem atende. Mandava
      "Precisamos de uma informação sua" e "Se não resolveu, dá para reabrir",

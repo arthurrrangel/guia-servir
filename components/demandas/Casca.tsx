@@ -544,6 +544,16 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
     carregar();
     return () => { vivo.current = false; };
   }, [carregar]);
+  /* o selo de Avisos se atualiza ao voltar para a aba, sem esqueleto: só a
+     conta muda (24/09/2026, auditoria R13) */
+  useEffect(() => {
+    const f = () => {
+      if (document.visibilityState !== 'visible') return;
+      quemSou().then(r => { if (vivo.current && r.ok) setEu(r as unknown as Eu); });
+    };
+    document.addEventListener('visibilitychange', f);
+    return () => document.removeEventListener('visibilitychange', f);
+  }, []);
   const zerarAvisos = () => setEu(e => (e ? { ...e, avisos: 0 } : e));
   const ajustarEu = (p: Partial<Eu>) => setEu(e => (e ? { ...e, ...p } : e));
   const [toast, setToast] = useState<ToastPedido | null>(null);

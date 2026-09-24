@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react';
 import { Interruptor, Subabas, useEstreito } from './Ui';
 import { confirmar } from '@/components/demandas/Confirmar';
 import type { Bases, Categoria, Setor } from '@/lib/demandas/tipos';
+import { valorParaOBanco } from '@/lib/demandas/regras';
 
 /* O TETO DE GASTO POR SETOR, QUE ATE A 92 NAO EXISTIA.
 
@@ -38,7 +39,10 @@ export function Teto({ s, indo, salvar }: {
   s: Setor; indo: boolean;
   salvar: (o: 'setor', d: Record<string, unknown>) => Promise<boolean>;
 }) {
-  const guardado = s.teto_sem_aprovacao == null ? '' : String(s.teto_sem_aprovacao).replace('.', ',');
+  /* "14.750,90", e não "14750,9"; e o que se escreve do jeito brasileiro
+     vai traduzido, como na Nova (24/09/2026, auditoria R13) */
+  const guardado = s.teto_sem_aprovacao == null ? ''
+    : Number(s.teto_sem_aprovacao).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const [v, setV] = useState(guardado);
   /* o valor do servidor manda: sem isto, salvar e recarregar deixava a
      célula mostrando o que a pessoa digitou mesmo quando o banco recusou */
@@ -53,7 +57,7 @@ export function Teto({ s, indo, salvar }: {
         disabled={indo} />
       {v !== guardado ? (
         <button type="button" className="dm-btn dm-peq dm-pri" disabled={indo}
-          onClick={() => salvar('setor', { id: s.id, teto_sem_aprovacao: v.trim() })}>
+          onClick={() => salvar('setor', { id: s.id, teto_sem_aprovacao: valorParaOBanco(v) })}>
           Salvar
         </button>
       ) : null}

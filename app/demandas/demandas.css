@@ -575,6 +575,11 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
    baixo do "Criar" (visto de 768 a 1920 em Setores) */
 .dm-linha.dm-criar > .dm-ctl{flex:1 1 0%;min-width:160px}
 .dm-linha.dm-criar > .dm-interruptor,.dm-linha.dm-criar > .dm-btn{flex:none}
+/* o nome do anexo com o "Juntar" ao lado, alinhado pela caixa do campo */
+.dm-linha.dm-anexo-nome{align-items:flex-end;margin-top:var(--dm-e3)}
+.dm-linha.dm-anexo-nome > .dm-campo{flex:1 1 0%;min-width:0;margin:0}
+.dm-linha.dm-criar.dm-anexo-nome{flex-wrap:nowrap}
+.dm-linha.dm-criar.dm-anexo-nome > .dm-btn{flex:none}
 @media (max-width:719px){
   .dm-linha.dm-criar{flex-wrap:wrap}
   .dm-linha.dm-criar > .dm-ctl{flex:1 1 100%}
@@ -596,6 +601,12 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
    navegador que encolhe a página quando o teclado abre, ela cobria a caixa
    (a Nova já faz o mesmo com a barra de enviar) */
 .dm-casca:has(.dm-escrever textarea:focus) .dm-barra-acao{display:none}
+/* e a barra de abas também, escrevendo em qualquer campo do corpo: no
+   navegador que encolhe a página com o teclado, ela subia junto e cobria o
+   botão rente ao pé ("Comentar" em 390 e 360; auditoria R13) */
+@media (max-width:1023px){
+  .dm-casca:has(.dm-corpo :is(textarea, input:not([type="checkbox"]):not([type="radio"])):focus) > .dm-abas{display:none}
+}
 /* a recusa do comentário dentro da caixa: o espaço é o do grid */
 .dm-escrever > .dm-aviso{margin:0}
 .dm-escrever .dm-campo{margin:0}
@@ -1424,7 +1435,9 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 /* a coluna do "Tirar" existe mesmo na linha sem ele: quem juntou e quando
    ficam alinhados de uma linha para a outra (24/09/2026, auditoria R12) */
 @media (min-width:720px){
-  .dm-anexos:not(.dm-anexos-novos) li{display:grid;grid-template-columns:16px minmax(0,1fr) auto minmax(56px,auto);align-items:center}
+  /* quem juntou e quando: no máximo 40% da linha (o nome longo espremia em
+     quatro linhas ao lado de um nome de pessoa longo) */
+  .dm-anexos:not(.dm-anexos-novos) li{display:grid;grid-template-columns:16px minmax(0,1fr) fit-content(40%) minmax(56px,auto);align-items:center}
   .dm-anexos:not(.dm-anexos-novos) li > .dm-btn{justify-self:end}
 }
 .dm-anexos-novos{border:1px solid var(--dm-linha);border-radius:var(--dm-r3);margin-top:var(--dm-e3)}

@@ -993,6 +993,13 @@ console.log('\n3. Digitar agrupa as teclas; tocar num filtro continua instantân
     '"arte do culto" (13 teclas) vira 1 consulta, e não 13',
     `${b.quantas('dem_lista') - antesDeDigitarMuito} consulta(s)`);
 
+  /* "#113" acha a #113 (24/09/2026, auditoria R13): é como o número aparece */
+  await teclar(procurar, '#113');
+  await assentar();
+  await assentarDepoisDe(420);
+  ok(b.ultima('dem_lista').args.p_f.busca === '113', 'o "#" da frente sai da busca',
+    JSON.stringify(b.ultima('dem_lista').args.p_f));
+
   const antesDoToque = b.quantas('dem_lista');
   await clicar(botao(porAria(alvo, 'aria-label', 'Em que estado'), 'Atrasadas'));
   ok(b.quantas('dem_lista') === antesDoToque + 1,
@@ -1249,6 +1256,34 @@ const BASES_NOVA = {
   ok(/Falta a categoria\./.test(texto(alvo)), 'com a frase embaixo do campo', texto(alvo).slice(0, 400));
   ok(document.activeElement === campo(alvo, 'Categoria'), 'e o foco vai para o campo que falta',
     String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+{
+  /* A DATA SUGERIDA ACOMPANHA A CATEGORIA (24/09/2026, auditoria R13): a data
+     que a categoria anterior sugeriu ficava ao lado de "costuma levar 7 dias" */
+  const { prazoSugerido } = await import('@/lib/demandas/regras.ts');
+  const c3 = { id: 'c3', grupo: 'Comunicação', nome: 'Criação de vídeo', setor_id: 's1',
+               exige_aprovacao: false, exige_orcamento: false, prazo_padrao_dias: 7 };
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_GESTOR, dem_bases: { ...BASES_NOVA, categorias: [...BASES_NOVA.categorias, c3] } });
+  const { alvo, desmontar } = await montar(Nova);
+  await escolher(campo(alvo, 'Categoria'), 'c3');
+  const d7 = prazoSugerido(c3);
+  ok(valorDe(campo(alvo, 'Para quando')) === d7, 'a categoria de 7 dias sugere a data dela', valorDe(campo(alvo, 'Para quando')));
+  await escolher(campo(alvo, 'Categoria'), 'c1');
+  const d3 = prazoSugerido(BASES_NOVA.categorias[0]);
+  ok(valorDe(campo(alvo, 'Para quando')) === d3, 'trocar de categoria troca a data sugerida', valorDe(campo(alvo, 'Para quando')));
+  await teclar(campo(alvo, 'Para quando'), '2026-12-20');
+  await assentar();
+  await escolher(campo(alvo, 'Categoria'), 'c3');
+  ok(valorDe(campo(alvo, 'Para quando')) === '2026-12-20', 'e a data escolhida pela pessoa fica', valorDe(campo(alvo, 'Para quando')));
+  /* o "Enviar" em linha não tira o foco do campo ao ser tocado: o layout não
+     muda debaixo do dedo (o primeiro toque se perdia no Android) */
+  const envios = porTag(alvo, 'BUTTON').filter(x => texto(x) === 'Enviar a demanda');
+  const emLinha = envios.find(x => x.parentNode && /dm-enviar/.test(x.parentNode.getAttribute('class') || ''));
+  const ev = evento('mousedown', { button: 0 });
+  if (emLinha) await act(async () => { emLinha.dispatchEvent(ev); });
+  ok(!!emLinha && ev.defaultPrevented, 'o "Enviar" em linha segura o foco no toque', String(!!emLinha));
   await desmontar();
 }
 {
@@ -2483,6 +2518,18 @@ console.log('\n21. O cadastro: o e-mail primeiro, e depois só o que é da pesso
   ok(otp && /\/demandas\/entrar\?volta=%2Fdemandas%2Fcadastro$/.test(otp.options.emailRedirectTo),
     'e o link volta pela porta das demandas, direto para o cadastro', otp && otp.options.emailRedirectTo);
   ok(b.chamadas.length === 0, 'e nenhuma função do banco foi chamada sem login', JSON.stringify(b.chamadas));
+  await desmontar();
+}
+{
+  /* O PRIMEIRO ACESSO CONVIDA (24/09/2026, auditoria R13): quem nunca pediu
+     nada via o visto verde de "tudo em dia" */
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_MEMBRO, dem_portal: portalDe(EU_MEMBRO),
+                               dem_lista: { ok: true, itens: [], total: 0, tem_mais: false } });
+  const { alvo, desmontar } = await montar(Inicio);
+  const t = texto(alvo);
+  ok(/Você ainda não abriu nenhuma demanda/.test(t) && /Abrir a primeira demanda/.test(t),
+    'quem nunca pediu é convidado a abrir a primeira', t.slice(0, 600));
   await desmontar();
 }
 {

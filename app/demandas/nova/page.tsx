@@ -220,16 +220,23 @@ function Nova() {
   const faltaEm = (...campos: string[]) => {
     if (!tentou) return undefined;
     const x = faltas.find(f => campos.includes(f.campo));
-    return x ? `Falta ${x.texto}.` : undefined;
+    return x ? (x.frase ?? `Falta ${x.texto}.`) : undefined;
   };
 
   /* a categoria sugere a data; se a pessoa já mexeu no campo, não atropela */
+  /* A DATA SUGERIDA ACOMPANHA A CATEGORIA — 24/09/2026 (auditoria R13).
+     `v.prazo ||` não distinguia a data que a pessoa escolheu da que a
+     categoria anterior sugeriu: trocar "Criação de vídeo" (04/10) por
+     "Publicação nas redes" deixava 04/10 ao lado de "costuma levar 3
+     dias". A data que veio de sugestão troca com a categoria; a escolhida
+     pela pessoa fica. */
+  const prazoDaCategoria = useRef('');
   function escolherCategoria(id: string) {
     const c = b?.categorias.find(x => x.id === id);
-    setR(v => ({
-      ...v, categoria_id: id,
-      prazo: v.prazo || (semData ? '' : prazoSugerido(c)),
-    }));
+    const sugerido = semData ? '' : prazoSugerido(c);
+    const escolhida = !!r.prazo && r.prazo !== prazoDaCategoria.current;
+    if (!escolhida) prazoDaCategoria.current = sugerido;
+    setR(v => ({ ...v, categoria_id: id, prazo: escolhida ? v.prazo : sugerido }));
   }
 
   async function enviar() {
@@ -297,6 +304,16 @@ function Nova() {
         )}
 
         <div className="dm-caixa">
+          {/* com aprovação pendente, chamar a equipe é chamar quem ainda não
+              pode começar (24/09/2026, auditoria R13): o cartão diz o que vem */}
+          {pronta.precisa_aprovacao ? (
+            <div className="dm-caixa-corpo">
+              <h2 className="dm-caixa-titulo">O que vem agora</h2>
+              <p className="dm-peq dm-mudo">
+                Quando a gestão aprovar, a demanda vai para {pronta.setor_responsavel || setorDaCat || 'o setor responsável'}, e você recebe o aviso.
+              </p>
+            </div>
+          ) : (
           <div className="dm-caixa-corpo">
             <h2 className="dm-caixa-titulo">Avisar quem vai atender</h2>
             <p className="dm-peq dm-mudo dm-antes-do-botao">
@@ -311,6 +328,7 @@ function Nova() {
               <Copiar texto={texto} rot="Copiar o recado" classe="dm-btn" />
             </div>
           </div>
+          )}
           <div className="dm-caixa-pe">
             <button type="button" className="dm-btn" onClick={() => {
               setPronta(null); setR(rascunhoVazio()); setAnexos([]); setSemData(false); setTentou(false);
@@ -362,7 +380,15 @@ function Nova() {
           (medido em 23/09/2026) */}
       <div className="dm-duas dm-duas-form"
         onFocus={e => { if (campoDeTexto(e.target)) setDigitando(true); }}
-        onBlur={e => { if (campoDeTexto(e.target)) setDigitando(false); }}>
+        onBlur={e => {
+          /* O TOQUE EM "ENVIAR" SE PERDIA — 24/09/2026 (auditoria R13). Com um
+             campo em foco, a barra fixa some e o "Enviar" aparece no fim do
+             formulário; o toque nele tirava o foco, o bloco sumia, a página
+             encurtava 114px e o dedo terminava em outro lugar: no Android, o
+             primeiro toque nunca enviava. Trocar de um campo para outro não
+             muda nada, e sair para um botão espera o toque terminar. */
+          if (campoDeTexto(e.target) && !campoDeTexto(e.relatedTarget)) setTimeout(() => setDigitando(false), 0);
+        }}>
       <div>
       <div className="dm-caixa">
         <div className="dm-caixa-corpo">
@@ -523,12 +549,28 @@ function Nova() {
               recusa a demanda inteira quando um anexo é de site fora da lista
               (`SITE_NAO_PERMITIDO`). A regra é a mesma do banco, lida por
               `dem_bases`; quem decide continua sendo ele. */}
+          {/* O LINK, O NOME E SÓ ENTÃO "JUNTAR" — 24/09/2026 (auditoria R13): o
+              nome aparecia embaixo do botão que o consome. Sem link colado, o
+              "Juntar" fica ao lado do campo, como antes; com link, ele desce
+              para depois do nome (que só aparece aí: quem não quer nomear não
+              vê o campo). */}
           <Campo rot="Anexos" ajuda={dicaDeAnexo(b?.anexos)}>
             <div className="dm-linha dm-criar">
               <input className="dm-ctl dm-cresce" value={anexoUrl} placeholder="https://…" inputMode="url"
                 aria-invalid={anexoErro ? true : undefined}
                 onChange={e => { setAnexoUrl(e.target.value); setAnexoErro(''); }} />
-              <button type="button" className="dm-btn" disabled={!anexoUrl.trim()} onClick={() => {
+              {anexoUrl.trim() ? null : <button type="button" className="dm-btn" disabled>Juntar</button>}
+            </div>
+          </Campo>
+          {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
+          {anexoUrl.trim() ? (
+            <div className="dm-linha dm-criar dm-anexo-nome">
+              <Campo rot="Nome do anexo (opcional)">
+                <input value={anexoNome} maxLength={120}
+                  placeholder={siteDoLink(anexoUrl.trim()) ? nomeSemRepetir(nomeDoLink(anexoUrl.trim()), anexos.map(x => x.nome)) : 'Ex.: Orçamento da loja'}
+                  onChange={e => setAnexoNome(e.target.value)} />
+              </Campo>
+              <button type="button" className="dm-btn" onClick={() => {
                 const url = anexoUrl.trim();
                 if (!siteDoLink(url)) { setAnexoErro('Cole o link inteiro, começando com https://'); return; }
                 const recusado = siteRecusado(url, b?.anexos);
@@ -537,16 +579,6 @@ function Nova() {
                 setAnexoUrl(''); setAnexoNome(''); setAnexoErro('');
               }}>Juntar</button>
             </div>
-          </Campo>
-          {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
-          {/* o nome aparece só depois do link colado: quem não quer nomear não
-              vê o campo (24/09/2026, auditoria R12) */}
-          {anexoUrl.trim() ? (
-            <Campo rot="Nome do anexo (opcional)" ajuda="Como o anexo aparece na demanda.">
-              <input value={anexoNome} maxLength={120}
-                placeholder={siteDoLink(anexoUrl.trim()) ? nomeSemRepetir(nomeDoLink(anexoUrl.trim()), anexos.map(x => x.nome)) : 'Ex.: Orçamento da loja'}
-                onChange={e => setAnexoNome(e.target.value)} />
-            </Campo>
           ) : null}
           {b?.anexos?.restrito && b.anexos.sites.length ? (
             <details className="dm-mais">
@@ -591,7 +623,10 @@ function Nova() {
           formulário, com a frase-resumo antes dela */}
       <div className={digitando ? 'dm-enviar' : 'dm-so-desktop dm-enviar'}>
         {resumoDoPedido ? <span className="dm-peq dm-mudo dm-cresce">{resumoDoPedido}</span> : null}
-        <button type="button" className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
+        {/* e o botão em linha não tira o foco do campo ao ser tocado: o
+            layout não muda debaixo do dedo */}
+        <button type="button" className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}
+          onMouseDown={e => e.preventDefault()}>
           {indo ? 'Enviando…' : 'Enviar a demanda'}
         </button>
       </div>

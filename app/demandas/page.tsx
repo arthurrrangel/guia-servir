@@ -152,7 +152,8 @@ function Inicio() {
             { v: 'concluidas', rot: 'Concluídas' },
             { v: 'tudo', rot: 'Histórico' },
           ]}
-          vazio={(aba, so) => vazioDoInicio(aba, so, pendentesDoLado, atende)} />
+          vazio={(aba, so) => vazioDoInicio(aba, so, pendentesDoLado, atende,
+            !!n && !n.minhas_andamento && !n.minhas_concluidas)} />
       </Secao>
     </>
   );
@@ -180,7 +181,9 @@ function Numeros({ n, eu, atende, precisa }: { n: Portal['n']; eu: Eu; atende: b
             : n.aprovar === n.agir ? umOuVarios(n.agir, 'espera aprovação', 'todas esperam aprovação')
             : `${n.aprovar} ${umOuVarios(n.aprovar, 'espera aprovação', 'esperam aprovação')}`} />
         <Kpi rot={a.legendaFila} valor={abertas} href="/demandas/atendimento?ver=fila"
-          sub={!abertas ? 'nada em aberto' : !n.fila ? umOuVarios(abertas, 'com responsável', 'todas com responsável')
+          /* "nenhuma para assumir", e não "com responsável": a que espera
+             aprovação não tem dono e também não se assume (24/09/2026, R13) */
+          sub={!abertas ? 'nada em aberto' : !n.fila ? 'nenhuma para assumir'
             : `${n.fila} sem responsável`} />
         <Kpi rot="Com você" valor={n.comigo} href="/demandas/atendimento?ver=comigo"
           sub={umOuVarios(n.comigo, 'assumida por você', 'assumidas por você')} />
@@ -218,7 +221,7 @@ function Numeros({ n, eu, atende, precisa }: { n: Portal['n']; eu: Eu; atende: b
    sempre à vista. E o vazio da lista fala com quem tem pendências em cima:
    "Nada em andamento" a 200px de "Precisa de você 3" lia-se como
    contradição. */
-function vazioDoInicio(aba: Aba, so: string, pendentes: number, atende: boolean): { titulo: string; dica?: React.ReactNode; tom?: 'bom' } {
+function vazioDoInicio(aba: Aba, so: string, pendentes: number, atende: boolean, nunca = false): { titulo: string; dica?: React.ReactNode; tom?: 'bom' } {
   if (aba === 'participo') {
     return { titulo: 'Você não acompanha nenhuma demanda.',
              dica: 'Quem pede ou quem atende pode incluir você numa demanda.' };
@@ -234,6 +237,13 @@ function vazioDoInicio(aba: Aba, so: string, pendentes: number, atende: boolean)
      de "as 3 de cima esperam a sua resposta" se contradizia. E o título diz
      DE QUEM é o vazio: "Nada em aberto." embaixo de três demandas abertas
      do ministério (a líder responde por elas) se contradizia do mesmo jeito */
+  /* O PRIMEIRO ACESSO CONVIDA — 24/09/2026 (auditoria R13). Quem nunca pediu
+     nada via o visto verde de "tudo em dia", que é notícia para quem já
+     pediu; para quem acabou de chegar, é o convite para a primeira. */
+  if (nunca && pendentes === 0) {
+    return { titulo: 'Você ainda não abriu nenhuma demanda.',
+             dica: <Link className="dm-btn dm-peq" href="/demandas/nova">Abrir a primeira demanda</Link> };
+  }
   const titulo = atende ? 'Nada pedido por você em aberto.' : 'Nenhuma demanda sua em aberto.';
   if (pendentes > 0) {
     return { titulo,

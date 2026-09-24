@@ -125,7 +125,13 @@ function Ficha() {
       <>
         <Cabecalho volta={{ href: '/demandas/admin', rot: 'Pessoas' }} sobre="Administração" titulo="Pessoa" />
         <Aviso tom="bad">{erro}</Aviso>
-        <Link className="dm-btn" href="/demandas/admin">Voltar para Pessoas</Link>
+        {/* a pessoa que não existe não volta com outra tentativa; a falha de
+            rede volta (24/09/2026, auditoria R13) */}
+        <div className="dm-linha">
+          {erro === 'Essa pessoa não existe.' ? null
+            : <button type="button" className="dm-btn dm-pri" onClick={() => { setErro(''); carregar(); }}>Tentar de novo</button>}
+          <Link className="dm-btn" href="/demandas/admin">Voltar para Pessoas</Link>
+        </div>
       </>
     );
   }
@@ -329,7 +335,12 @@ function Ficha() {
                 setIndo(true); setErro(''); setOk('');
                 const x = await ajustar('link', { id });
                 setIndo(false);
-                if (!x.ok) { setErro(recadoDoErro(x, 'trocar o link')); return; }
+                if (!x.ok) {
+                  setErro(recadoDoErro(x, 'trocar o link'));
+                  requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+                    ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+                  return;
+                }
                 setOk('Link trocado. O antigo não entra mais.'); setLinkVisivel(false); await carregar();
               }}>Novo link</button>
             </div>

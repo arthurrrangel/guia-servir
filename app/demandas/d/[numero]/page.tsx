@@ -151,6 +151,16 @@ function Uma() {
 
   const acoes = useMemo(() => (v ? acoesDe(v.demanda, v.eu) : []), [v]);
 
+  /* a aba do navegador diz qual demanda é (eram todas "Demandas · GUIA
+     Church", e com três fichas abertas não havia como achar a certa) */
+  const tituloDaAba = v ? `#${v.demanda.numero} ${v.demanda.titulo} · Demandas` : '';
+  useEffect(() => {
+    if (!tituloDaAba) return;
+    const antes = document.title;
+    document.title = tituloDaAba;
+    return () => { document.title = antes; };
+  }, [tituloDaAba]);
+
   /* A ORDEM DO HISTÓRICO É DECIDIDA AQUI (`Date.parse`, e não texto: o
      carimbo é `timestamptz` e o fuso vem junto), e não herdada de um `order
      by` que a próxima migração pode virar. */
@@ -909,12 +919,17 @@ function Escrever({ atende, salvando, aoEnviar, erro }: {
       {aberta ? (
         <div className="dm-entre">
           {atende ? (
-            <label className="dm-caixinha dm-peq">
+            /* os dois alvos da caixa não tiram o foco do texto ao serem
+               tocados: tirar o foco recolhia a caixa (vazia) e sumia com a
+               caixinha antes de ela marcar, e fazia a barra de ação voltar
+               por cima do "Comentar" (24/09/2026, auditoria R13) */
+            <label className="dm-caixinha dm-peq" onMouseDown={e => e.preventDefault()}>
               <input type="checkbox" checked={interno} onChange={e => setInterno(e.target.checked)} />
               Só para a equipe (quem pediu não vê)
             </label>
           ) : <span />}
           <button type="button" className="dm-btn dm-pri" disabled={salvando || !t.trim()}
+            onMouseDown={e => e.preventDefault()}
             onClick={async () => { if (await aoEnviar(t.trim(), interno)) { setT(''); setInterno(false); } }}>
             {salvando ? 'Salvando…' : 'Comentar'}
           </button>

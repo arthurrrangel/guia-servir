@@ -562,6 +562,16 @@ const assuntoDe = (e) => String(emailDe(e).subject ?? '');
      'o de informação traz a pergunta no corpo (é ele que destrava)', corpos[2]);
   ok(!corpos[0].includes('Qual o tamanho do banner?'), 'e a pergunta não vaza para o aviso de demanda nova');
 
+  /* 24/09/2026 (auditoria R13): "está agora em Em execução" repetia a
+     preposição, e a concluída dizia "não precisa fazer nada" enquanto o
+     Início pedia "Confirmar" */
+  ok(/agora está: Em execução\./.test(corpos[1]) && !/em Em /.test(corpos[1] + assuntos[1]),
+     'o estado vem sem "em Em"', corpos[1].split('\n')[0] + ' || ' + assuntos[1]);
+  montar({ fila: [avisoBase(0, { tipo: 'status', numero: 44, estado: 'Concluída' })] });
+  await chamar({ headers: comToken });
+  ok(/confirme na ficha/.test(textoDe(cena.emails[0])) && !/não precisa fazer nada/.test(textoDe(cena.emails[0])),
+     'a concluída pede a confirmação, e não diz que não há nada a fazer', textoDe(cena.emails[0]));
+
   /* o portão continua sendo dito, senão quem atende abre a ficha, encontra
      todos os botões fora, e conclui que o sistema quebrou */
   montar({ fila: [avisoBase(0, { falta_aprovacao: true })] });

@@ -214,14 +214,22 @@ function texto(d: Aviso) {
   const rodape = ['', link, '', 'GUIA Church · sistema de demandas'];
   const setor = umaLinha(d.setor, 60) || 'o setor responsável';
 
+  /* 24/09/2026 (auditoria R13): "está agora em Em execução" repetia a
+     preposição, e o setor se repetia quando é o nome do grupo */
+  const estado = umaLinha(d.estado, 40) || 'outro estado';
+  const trilhaESetor = umaLinha(d.setor, 60) && umaLinha(d.setor, 60) !== umaLinha(d.grupo, 60) ? `${trilha} · ${setor}` : trilha;
   if (tipoDe(d) === 'status') {
     return [
-      `A sua demanda #${d.numero} está agora em ${umaLinha(d.estado, 40) || 'outro estado'}.`,
+      `A sua demanda #${d.numero} agora está: ${estado}.`,
       '',
       cabeca,
-      `${trilha} · ${setor}`,
+      trilhaESetor,
       '',
-      'Você não precisa fazer nada: este aviso existe para você não ficar conferindo. Se alguma coisa não bater, diga na própria ficha.',
+      /* a concluída espera uma palavra de quem pediu: "não precisa fazer
+         nada" contradizia o Início, que pede "Confirmar" */
+      d.estado === 'Concluída'
+        ? 'Se resolveu, confirme na ficha (“Resolveu, obrigado”). Se não resolveu, dá para reabrir lá.'
+        : 'Você não precisa fazer nada: este aviso existe para você não ficar conferindo. Se alguma coisa não bater, diga na própria ficha.',
       ...rodape,
     ].join('\n');
   }
@@ -248,7 +256,7 @@ function texto(d: Aviso) {
     `Prazo: ${quando(d.prazo)}${urgente ? `  ·  Prioridade ${umaLinha(d.prioridade, 20)}` : ''}`,
     '',
     d.falta_aprovacao
-      ? 'Esta demanda precisa de aprovação da liderança antes de andar. Você não precisa fazer nada ainda.'
+      ? 'Esta demanda precisa de aprovação da gestão antes de andar. Você não precisa fazer nada ainda.'
       : 'Abra para assumir, pedir informação ou mandar para outro setor.',
     ...rodape,
   ].join('\n');
@@ -257,7 +265,7 @@ function texto(d: Aviso) {
 function assunto(d: Aviso) {
   const titulo = umaLinha(d.titulo, 80);
   if (tipoDe(d) === 'status') {
-    return umaLinha(`Demanda #${d.numero} agora em ${umaLinha(d.estado, 40) || 'outro estado'}: ${titulo}`, 140);
+    return umaLinha(`Demanda #${d.numero}: ${umaLinha(d.estado, 40) || 'outro estado'} · ${titulo}`, 140);
   }
   if (tipoDe(d) === 'informacao') {
     return umaLinha(`Demanda #${d.numero} espera uma informação sua: ${titulo}`, 140);
