@@ -72,7 +72,7 @@
    última vez. */
 
 import type {
-  Aprovacao, AvisoDentro, Categoria, Papel, Prioridade, RegraDeAnexo, Resumo, Status, Trava,
+  Aprovacao, AvisoDentro, Categoria, Eu, Papel, Prioridade, RegraDeAnexo, Resumo, Status, Trava,
 } from './tipos';
 /* o chão de transporte é o mesmo dos dois sistemas: mesmo Postgres, mesmo
    PostgREST, mesma rede. Ver a nota em `recadoDoErro`. `lib/erros.ts` é puro
@@ -81,18 +81,30 @@ import { humano } from '../erros';
 
 /* ---------------------------------------------------------------- palavras */
 
+/* "TRAVADA" É A ETIQUETA GENÉRICA QUE O DOCUMENTO PROÍBE, E A FICHA AINDA A
+   ESCREVIA NO HISTÓRICO — 23/09/2026: "Maria mudou de Em execução para
+   Travada", logo abaixo da pílula "Aguardando informações". O evento do
+   histórico não guarda o motivo da trava, então o nome aqui é o da família,
+   com a mesma forma dos três do documento ("Aguardando informações /
+   aprovação / terceiros"): "Aguardando retorno". A ficha troca pelo nome
+   exato quando sabe qual é (a trava que ainda está valendo). */
 export const STATUS: { v: Status; rot: string; tom: 'neutro' | 'ok' | 'warn' | 'bad' }[] = [
   { v: 'aberta',    rot: 'Aberta',      tom: 'neutro' },
   { v: 'execucao',  rot: 'Em execução', tom: 'ok' },
-  { v: 'travada',   rot: 'Travada',     tom: 'warn' },
+  { v: 'travada',   rot: 'Aguardando retorno', tom: 'warn' },
   { v: 'concluida', rot: 'Concluída',   tom: 'ok' },
   { v: 'cancelada', rot: 'Cancelada',   tom: 'bad' },
 ];
 
+/* O NOME DA TRAVA É O DA PÍLULA — 23/09/2026. O aviso da ficha dizia
+   "Esperando informação de quem pediu" logo abaixo da pílula "Aguardando
+   informações": duas palavras para o mesmo estado, na mesma tela. Agora o
+   aviso, o seletor de "Travar" e o recado usam o nome do documento, e a
+   trava por informação diz de quem. */
 export const TRAVAS: { v: Trava; rot: string; curto: string }[] = [
-  { v: 'informacao', rot: 'Esperando informação de quem pediu', curto: 'falta informação' },
-  { v: 'aprovacao',  rot: 'Esperando aprovação',                curto: 'falta aprovação' },
-  { v: 'terceiros',  rot: 'Esperando alguém de fora',           curto: 'esperando terceiros' },
+  { v: 'informacao', rot: 'Aguardando informações de quem pediu', curto: 'falta informação' },
+  { v: 'aprovacao',  rot: 'Aguardando aprovação',                 curto: 'falta aprovação' },
+  { v: 'terceiros',  rot: 'Aguardando terceiros',                 curto: 'esperando terceiros' },
 ];
 
 export const PRIORIDADES: { v: Prioridade; rot: string; explica: string }[] = [
@@ -230,9 +242,23 @@ export function comoOPdfChama(d: {
    a próxima migração de Demandas; mexer neles é mexer em `dem_lista` e
    `dem_numeros`, que é cirurgia com conferência própria e não cabe de
    carona. Enquanto isso, a tela para de errar sozinha. */
-export const HOJE = () => new Intl.DateTimeFormat('en-CA', {
+const DIA_NO_RIO = new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit',
-}).format(new Date());
+});
+export const HOJE = () => DIA_NO_RIO.format(new Date());
+
+/* O DIA DE UM CARIMBO, NO RIO — 23/09/2026. `iso.slice(0, 10)` é o dia em
+   UTC: das 21h à meia-noite do Rio ele já é o dia seguinte, e os Avisos
+   punham "Ontem" em cima do que tinha acontecido seis horas antes; a data
+   de cadastro, de validação e de anexo andava um dia para a frente no mesmo
+   intervalo. Um dia puro ("2026-09-23", o prazo, a data do evento) passa
+   direto: ele não tem hora, então não tem fuso. */
+export function diaNoRio(iso: string | null | undefined): string {
+  if (!iso) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  const t = Date.parse(iso);
+  return Number.isNaN(t) ? iso.slice(0, 10) : DIA_NO_RIO.format(new Date(t));
+}
 
 export function somaDias(iso: string, dias: number): string {
   const d = new Date(iso + 'T12:00:00Z');
@@ -284,23 +310,30 @@ export const rascunhoVazio = (): Rascunho => ({
   orcamento: '', objetivo: '', local: '', publico: '',
 });
 
-export function oQueFalta(r: Rascunho, temSetor: boolean, cat?: Categoria | null): string[] {
-  const f: string[] = [];
-  if (r.titulo.trim().length < 4) f.push('um título que diga o que é');
-  if (r.descricao.trim().length < 10) f.push('a descrição do que precisa ser feito');
-  if (!r.categoria_id) f.push('a categoria');
-  if (!temSetor) f.push('o setor que está pedindo');
-  if (!r.prazo && !r.sem_prazo_porque.trim()) f.push('uma data desejada, ou o porquê de não ter data');
-  if (r.prioridade === 'urgente' && !r.impacto.trim()) f.push('o que acontece se não for feito (urgente pede isso)');
-  if (r.evento.trim() && !r.evento_data) f.push('a data do evento');
+/* CADA FALTA TEM O SEU CAMPO — 23/09/2026. A lista era só de frases, e a
+   Nova não tinha como marcar QUAL campo faltava: o aviso dizia "Falta : a
+   categoria." (com o espaço) e nenhum campo ficava vermelho. Agora cada
+   regra diz o campo e a frase, numa lista só: `oQueFalta` continua devolvendo
+   as frases, e `camposQueFaltam` devolve os pares, na ordem da tela. */
+export type Falta = { campo: 'titulo' | 'descricao' | 'categoria_id' | 'setor' | 'prazo' | 'impacto'
+                          | 'evento' | 'evento_data' | 'orcamento'; texto: string };
+export function camposQueFaltam(r: Rascunho, temSetor: boolean, cat?: Categoria | null): Falta[] {
+  const f: Falta[] = [];
+  if (r.titulo.trim().length < 4) f.push({ campo: 'titulo', texto: 'um título que diga o que é' });
+  if (r.descricao.trim().length < 10) f.push({ campo: 'descricao', texto: 'a descrição do que precisa ser feito' });
+  if (!r.categoria_id) f.push({ campo: 'categoria_id', texto: 'a categoria' });
+  if (!temSetor) f.push({ campo: 'setor', texto: 'o setor que está pedindo' });
+  if (!r.prazo && !r.sem_prazo_porque.trim()) f.push({ campo: 'prazo', texto: 'uma data desejada, ou o porquê de não ter data' });
+  if (r.prioridade === 'urgente' && !r.impacto.trim()) f.push({ campo: 'impacto', texto: 'o que acontece se não for feito (urgente pede isso)' });
+  if (r.evento.trim() && !r.evento_data) f.push({ campo: 'evento_data', texto: 'a data do evento' });
   /* 19/09/2026 — os tetos da migração 52, conferidos AQUI também.
      O comentário logo acima desta função promete "as mesmas regras que o
      banco impõe como CHECK, aqui só para a pessoa saber ANTES"; quando a 52
      acrescentou quatro CHECKs e esta função não acompanhou, a promessa virou
      mentira e o texto de 300 letras só era recusado depois de enviado. */
-  if (r.titulo.trim().length > 200) f.push('um título mais curto (o limite é 200 letras; o texto longo cabe na descrição)');
-  if (r.descricao.trim().length > 20000) f.push('uma descrição menor (o limite é 20 mil letras)');
-  if (r.evento.trim().length > 120) f.push('um nome de evento mais curto (o limite é 120 letras)');
+  if (r.titulo.trim().length > 200) f.push({ campo: 'titulo', texto: 'um título mais curto (o limite é 200 letras; o texto longo cabe na descrição)' });
+  if (r.descricao.trim().length > 20000) f.push({ campo: 'descricao', texto: 'uma descrição menor (o limite é 20 mil letras)' });
+  if (r.evento.trim().length > 120) f.push({ campo: 'evento', texto: 'um nome de evento mais curto (o limite é 120 letras)' });
   /* 21/09/2026 — E ACONTECEU DE NOVO, EM DOBRO.
 
      O comentário de 19/09 aí em cima conta que esta função ficou para trás da
@@ -314,9 +347,13 @@ export function oQueFalta(r: Rascunho, temSetor: boolean, cat?: Categoria | null
      Por isso a função passa a receber a CATEGORIA. Sem ela não havia como
      checar, e "não havia como" é a forma que este defeito usa para voltar. */
   if (cat?.exige_orcamento && !r.orcamento.trim()) {
-    f.push('o valor estimado (esta categoria pede)');
+    f.push({ campo: 'orcamento', texto: 'o valor estimado (esta categoria pede)' });
   }
   return f;
+}
+
+export function oQueFalta(r: Rascunho, temSetor: boolean, cat?: Categoria | null): string[] {
+  return camposQueFaltam(r, temSetor, cat).map(x => x.texto);
 }
 
 /* ------------------------------------------------------------- as ações ---
@@ -367,6 +404,36 @@ export type Quem = {
    propósito. */
 export const quemManda = (p: Papel | string | null | undefined) =>
   p === 'gestor' || p === 'admin';
+
+/* O QUE "DO SETOR" QUER DIZER PARA CADA PAPEL, na legenda e no título do
+   Atendimento, e na casa do Início que abre essa mesma vista. A gestão e a
+   administração olham vários setores: o setor aparece em cada linha. Quem
+   atende um setor só vê a fila DELE, e "Comunicação" em toda linha de "Fila
+   da Comunicação" é ruído (no Atendimento e no Início).
+
+   UM NOME POR CONCEITO: "EM ABERTO" (23/09/2026). A aba era "Todas" para
+   a administração ("Todas 9" ao lado de "Concluídas 4", deixando as
+   concluídas de fora), "Do setor" para quem atende e "No seu escopo" para
+   a gestão, e Números chamava o mesmo conjunto de "Em aberto". Agora é
+   "Em aberto" em todo lugar (o que não foi concluído nem cancelado);
+   "Aberta" fica só na pílula (ninguém assumiu), e o que chegou no período
+   é "Recebidas". O título da tela diz de onde ("Fila da Comunicação",
+   "Todos os setores"). Morava no Atendimento; veio para cá quando o Início
+   passou a usar a mesma legenda (a casa "Na fila 3" abria a aba "Do setor
+   6", e o número da porta não era o da sala). */
+export function alcanceDoAtendimento(eu: Pick<Eu, 'papel' | 'setor' | 'escopo' | 'escopo_total'>):
+  { titulo: string; legendaFila: string; varios: boolean } {
+  const legendaFila = 'Em aberto';
+  if (eu.papel === 'admin') return { titulo: 'Todos os setores', legendaFila, varios: true };
+  if (eu.papel === 'gestor') {
+    if (eu.escopo_total) return { titulo: 'Todos os setores', legendaFila, varios: true };
+    const e = eu.escopo || [];
+    return { titulo: e.length ? e.join(', ') : 'Seu escopo', legendaFila, varios: e.length !== 1 };
+  }
+  /* "de", e não "da": "Fila da Compras e suprimentos" errava em três dos
+     seis setores que atendem */
+  return { titulo: eu.setor ? `Fila de ${eu.setor}` : 'Sua fila', legendaFila, varios: false };
+}
 
 export function acoesDe(
   d: Pick<Resumo, 'status' | 'travada_por' | 'aprovacao'>
@@ -610,7 +677,8 @@ export function telVisivel(t: string | null | undefined): string {
 
 export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta' | 'pronta'): string {
   const link = `${base.replace(/\/$/, '')}/d/${d.numero}`;
-  const cab = `Demanda #${d.numero} — ${d.titulo}`;
+  /* sem travessão: "#105 · título", o mesmo separador das telas */
+  const cab = `Demanda #${d.numero} · ${d.titulo}`;
   if (o === 'abriu') {
     return `${cab}\n${d.solicitante} pediu para ${d.responsavel_setor}.\n` +
       `${rotPrioridade(d.prioridade)}${d.prazo ? `, para ${dataCurta(d.prazo)}` : ''}.\n${link}`;
@@ -621,20 +689,24 @@ export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta
   if (o === 'pronta') {
     return `${cab}\nFoi concluída. Se não resolveu, dá para reabrir na própria página.\n${link}`;
   }
-  return `${cab}\nAgora está: ${rotStatus(d.status)}${d.travada_por ? ` (${rotTrava(d.travada_por)})` : ''}.\n${link}`;
+  /* o nome da pílula ("Aguardando informações"), e não o da coluna com a
+     trava entre parênteses ("Aguardando retorno (Aguardando …)") */
+  return `${cab}\nAgora está: ${comoOPdfChama(d)}.\n${link}`;
 }
 
 /* ------------------------------------------------------------------ texto */
 
+/* as duas aceitam um dia puro ou um carimbo com hora; o carimbo vira o dia
+   do Rio (ver `diaNoRio`) */
 export function dataCurta(iso: string | null): string {
   if (!iso) return '';
-  const [, m, d] = iso.slice(0, 10).split('-');
+  const [, m, d] = diaNoRio(iso).split('-');
   return `${d}/${m}`;
 }
 
 export function dataCheia(iso: string | null): string {
   if (!iso) return '';
-  const [a, m, d] = iso.slice(0, 10).split('-');
+  const [a, m, d] = diaNoRio(iso).split('-');
   return `${d}/${m}/${a}`;
 }
 
@@ -740,7 +812,7 @@ export function quando(iso: string | null): string {
   if (h < 24) return `há ${h} h`;
   const dias = Math.round(h / 24);
   if (dias < 30) return `há ${dias} ${dias === 1 ? 'dia' : 'dias'}`;
-  return dataCheia(iso.slice(0, 10));
+  return dataCheia(iso);
 }
 
 /* O PDF PEDE "DATA E HORÁRIO DA ABERTURA", E O HORÁRIO NUNCA APARECIA.
@@ -762,27 +834,63 @@ export function quando(iso: string | null): string {
    Depois de 30 dias a frase relativa É a data (`quando` devolve
    `dataCheia`), então o parêntese é suprimido: "22/08/2026 às 14:35
    (22/08/2026)" é ruído. */
-export function carimbo(iso: string | null): string {
+/* só a data e a hora ("23/09/2026 às 15:31"), para quem põe a frase
+   relativa numa peça própria (o cartão verde da concluída: "há 15 min"
+   quebrava ao meio no celular) */
+export function dataHora(iso: string | null): string {
   if (!iso) return '';
   const t = Date.parse(iso);
   if (Number.isNaN(t)) return '';
-  const dh = new Intl.DateTimeFormat('pt-BR', {
+  return new Intl.DateTimeFormat('pt-BR', {
     timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   }).format(new Date(t)).replace(', ', ' às ');
-  const rel = quando(iso);
-  return rel && rel !== dataCheia(iso.slice(0, 10)) ? `${dh} · ${rel}` : dh;
 }
+
+export function carimbo(iso: string | null): string {
+  if (!iso) return '';
+  const dh = dataHora(iso);
+  if (!dh) return '';
+  const rel = quando(iso);
+  return rel && rel !== dataCheia(iso) ? `${dh} · ${rel}` : dh;
+}
+
+/* a palavra que concorda com o número: "1 passou do prazo", e não "1 /
+   passaram do prazo" (as casas de número diziam o plural para o 1) */
+export const umOuVarios = (n: number | null | undefined, um: string, varios: string) => (n === 1 ? um : varios);
 
 export function dinheiro(v: number | null): string {
   if (v === null || v === undefined) return '';
   return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+/* VÍRGULA, E NÃO PONTO — 23/09/2026: a faixa de Números mostrava "2.3 h"
+   (o número cru do banco com o ponto do inglês) ao lado de "1,5 dia". Uma
+   casa decimal, sem ",0" pendurado ("2 dias", e não "2,0 dias"). */
+function umaCasa(x: number): string {
+  return (Math.round(x * 10) / 10).toFixed(1).replace(/\.0$/, '').replace('.', ',');
+}
 export function horas(h: number | null): string {
-  if (h === null || h === undefined) return '—';
-  if (h < 24) return `${h} h`;
-  return `${(h / 24).toFixed(1).replace('.', ',')} dias`;
+  /* sem dado é "sem dados", e não um travessão solto na casa */
+  if (h === null || h === undefined) return 'sem dados';
+  /* abaixo de uma hora, minutos: "0,4 h" e "0 h" não se leem */
+  if (h < 1) { const m = Math.round(h * 60); return m < 1 ? 'menos de 1 min' : `${m} min`; }
+  if (h < 24) return `${umaCasa(h)} h`;
+  const d = umaCasa(h / 24);
+  return `${d} ${d === '1' ? 'dia' : 'dias'}`;
+}
+
+/* AS INICIAIS DO AVATAR: a primeira letra do primeiro nome e a do último
+   SOBRENOME, e não a do sufixo. "Paulo Souza Filho" era PF e "João Lima
+   Júnior" era JJ; agora PS e JL. Eram cinco cópias da mesma função (casca,
+   perfil, pessoas, ficha da pessoa, ficha da demanda); agora é esta. */
+const SUFIXOS = /^(filho|filha|neto|neta|sobrinho|sobrinha|j[uú]nior|jr\.?|segundo|terceiro|ii|iii)$/i;
+export function iniciais(nome: string | null | undefined): string {
+  const p = (nome || '').trim().split(/\s+/).filter(Boolean);
+  if (!p.length) return '?';
+  let fim = p.length - 1;
+  while (fim > 0 && SUFIXOS.test(p[fim])) fim--;
+  return ((p[0][0] || '') + (fim > 0 ? p[fim][0] : '')).toUpperCase();
 }
 
 /* --------------------------------------------------- recados do servidor */
@@ -1050,6 +1158,11 @@ export const tetoDe = (acao: string) => TETO[acao] ?? 4000;
    da RPC (a união de ok:true e ok:false) vira erro de compilação por não ter
    nenhuma propriedade em comum com o ramo de sucesso. Com `ok?`, a união
    sempre tem ao menos uma. */
+/* as frases de transporte moram em `lib/erros.ts`, que é das duas casas e
+   não muda por causa desta; nas telas de demandas elas saem sem travessão
+   (a regra do texto daqui). As portas (entrar, cadastro) usam esta também. */
+export const semTravessao = (t: string) => t.replace(/\s+—\s+/g, ': ');
+
 export function recadoDoErro(
   r: { ok?: boolean; erro?: string; regra?: string; codigo?: string; site?: string } | null | undefined,
   /* O VERBO VEM DE QUEM CHAMA — 21/09/2026.
@@ -1094,7 +1207,7 @@ export function recadoDoErro(
        transporte, e traduz os dois para a mesma frase genérica. */
     const e = new Error(r.regra) as Error & { code?: string };
     if (r.codigo) e.code = r.codigo;
-    return humano(e, oQueFazia).texto;
+    return semTravessao(humano(e, oQueFazia).texto);
   }
   return 'Não consegui. Tente de novo.';
 }
@@ -1115,7 +1228,7 @@ export const PAPEIS: { v: Papel; rot: string; explica: string }[] = [
   { v: 'lider',       rot: 'Líder',         explica: 'Pede pelo ministério: vê e confirma o que o ministério pediu.' },
   { v: 'responsavel', rot: 'Equipe',        explica: 'Atende a fila do próprio setor: assume, ajusta o prazo e conclui.' },
   { v: 'gestor',      rot: 'Gestão',        explica: 'Acompanha os setores do escopo: vê, aprova gastos e redistribui.' },
-  { v: 'admin',       rot: 'Administração', explica: 'Tudo isso, mais pessoas, setores e categorias.' },
+  { v: 'admin',       rot: 'Administração', explica: 'Tudo o que a Gestão faz, mais pessoas, setores, categorias e anexos.' },
 ];
 export const rotPapel = (p: Papel | string | null | undefined) =>
   PAPEIS.find(x => x.v === p)?.rot ?? String(p || '');
@@ -1126,7 +1239,7 @@ export const rotPapel = (p: Papel | string | null | undefined) =>
    crua, e o teste de telas cobra que isso não aconteça. */
 export const PERMISSOES: Record<string, string> = {
   pedir: 'Abrir demandas',
-  acompanhar: 'Acompanhar as que abriu e as que foi incluído',
+  acompanhar: 'Acompanhar as que abriu e aquelas em que foi incluído',
   ver_ministerio: 'Ver o que o ministério pediu',
   validar_ministerio: 'Confirmar a entrega do que o ministério pediu',
   atender_setor: 'Atender a fila do setor',
@@ -1138,14 +1251,16 @@ export const PERMISSOES: Record<string, string> = {
   aprovar_tudo: 'Aprovar ou recusar gastos de qualquer setor',
   ver_numeros: 'Ver os números',
   gerir_pessoas: 'Cadastrar pessoas e definir papéis',
-  gerir_setores: 'Configurar setores e categorias',
+  gerir_setores: 'Configurar setores, categorias e anexos',
 };
 
-/* O que falta fazer, dito como o botão que resolve. */
+/* O que falta fazer, dito como o botão que resolve. Uma palavra: é a última
+   coluna da tabela (120px), e "Confirmar se resolveu" transbordava para a
+   coluna do lado. A frase inteira está na ficha, no botão que resolve. */
 export const MOTIVOS: Record<string, string> = {
   responder: 'Responder',
-  validar: 'Confirmar se resolveu',
-  aprovar: 'Aprovar ou recusar',
+  validar: 'Confirmar',
+  aprovar: 'Decidir',
   assumir: 'Assumir',
   concluir: 'Concluir',
 };
@@ -1157,17 +1272,34 @@ export const MOTIVOS: Record<string, string> = {
    que alguém corrigisse só uma: a ficha diria "Maria assumiu" e o aviso
    "Maria passou para Maria Aparecida Gonçalves da Silva", que é exatamente o
    defeito que o ramo `responsavel` existe para matar. */
-export function fraseDoEvento(e: { tipo: string; de: string | null; para: string | null; quem: string | null }): string {
-  const q = e.quem ? e.quem.split(' ')[0] : 'alguém';
+/* `eu` é o nome de quem olha: a ficha dizia "Quem pediu: Você" na faixa e
+   "Pedro abriu a demanda" na atividade, para o próprio Pedro. Com o nome, o
+   gesto dele é "Você abriu a demanda", e o que fizeram com ele, "passou
+   para você". Os Avisos não passam `eu`: lá só entra o que OUTRA pessoa fez. */
+export function fraseDoEvento(e: { tipo: string; de: string | null; para: string | null; quem: string | null },
+                              eu?: string | null): string {
+  const souEu = (n: string | null) => !!eu && !!n && n === eu;
+  const q = souEu(e.quem) ? 'Você' : e.quem ? e.quem.split(' ')[0] : 'alguém';
+  const nome = (n: string | null) => (souEu(n) ? 'você' : (n || 'alguém').split(' ')[0]);
   switch (e.tipo) {
     case 'abertura':    return `${q} abriu a demanda`;
-    case 'status':      return `${q} mudou de ${rotStatus((e.de || 'aberta') as never)} para ${rotStatus((e.para || 'aberta') as never)}`;
+    /* OS GESTOS TÊM VERBO, OS MESMOS DOS BOTÕES — 23/09/2026. "mudou de Em
+       execução para Aguardando retorno" punha no histórico um quarto nome
+       para a trava ("Aguardando retorno" não é pílula, aba nem filtro). O
+       motivo da trava não fica no histórico; o que ainda vale está na
+       pílula e no aviso da ficha. */
+    case 'status':
+      if (e.para === 'travada') return `${q} travou a demanda`;
+      if (e.de === 'travada' && (e.para === 'execucao' || e.para === 'aberta')) return `${q} destravou a demanda`;
+      if (e.para === 'concluida') return `${q} concluiu`;
+      if (e.para === 'cancelada') return `${q} cancelou`;
+      return `${q} mudou de ${rotStatus((e.de || 'aberta') as never)} para ${rotStatus((e.para || 'aberta') as never)}`;
     case 'responsavel':
       /* assumir grava "Maria" como quem mexeu e "Maria Aparecida Gonçalves da
          Silva" como o novo responsável. Quando quem mexeu e quem recebeu são a
          mesma pessoa, o nome do gesto é "assumiu". */
       if (e.para && e.quem && e.para === e.quem) return `${q} assumiu`;
-      return e.para ? `${q} passou para ${e.para}` : `${q} soltou o responsável`;
+      return e.para ? `${q} passou para ${souEu(e.para) ? 'você' : e.para}` : `${q} soltou o responsável`;
     case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
     case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
     case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
@@ -1181,9 +1313,9 @@ export function fraseDoEvento(e: { tipo: string; de: string | null; para: string
     /* 94 · quem acompanha. `para` é quem entrou; `de` é quem saiu. Sair por
        conta própria e ser tirado são gestos diferentes, e a frase diz qual. */
     case 'participante':
-      if (e.para) return `${q} incluiu ${e.para.split(' ')[0]}`;
+      if (e.para) return `${q} incluiu ${nome(e.para)}`;
       if (e.de && e.quem && e.de === e.quem) return `${q} saiu`;
-      return `${q} tirou ${(e.de || 'alguém').split(' ')[0]}`;
+      return `${q} tirou ${nome(e.de)}`;
     default:            return `${q}: ${e.tipo}`;
   }
 }

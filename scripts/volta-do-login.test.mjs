@@ -159,8 +159,15 @@ caso('a casca das demandas nao tem NENHUM link para as escalas', () => {
 
      Quem cuida do resto e `scripts/demandas-porta-propria.test.mjs`, que
      varre `app/demandas/` e `components/demandas/` inteiros. */
+  /* 23/09/2026: a casca leva sozinha para a porta (`router.replace`, com o
+     `?volta=` de onde a pessoa estava) e o link fica como reserva; os dois
+     apontam para `/demandas/entrar` */
   assert.ok(semComentarios.includes('href="/demandas/entrar"'),
     'o caminho para fora e a porta PROPRIA do demandas')
+  assert.ok(/router\.replace\('\/demandas\/entrar'/.test(semComentarios),
+    'e a casca leva para ela sozinha, sem a tela do meio')
+  assert.ok(!/replace\(\s*['"`]\/entrar/.test(semComentarios),
+    'nunca para a porta das escalas')
   assert.ok(!/href=\{?["'`]\/entrar/.test(semComentarios),
     'e a casca nao aponta mais para a porta das escalas')
 })

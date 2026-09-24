@@ -14,8 +14,9 @@ import {
   acoesDe, comoOPdfChama, oQueFalta, rascunhoVazio, situacao, prazoSugerido,
   somaDias, linkZap, soDigitos, telDoBanco, telVisivel, recadoDoErro, recado, diasDeAtraso,
   siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
-  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe,
-  chaveDoSetor, setorDoLink, pedidoDoLink, buscaDoLink,
+  horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe, iniciais,
+  chaveDoSetor, setorDoLink, pedidoDoLink, buscaDoLink, diaNoRio, dataCurta, fraseDoEvento, umOuVarios,
+  alcanceDoAtendimento,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -746,6 +747,10 @@ function servidorAceita(acao, d, eu) {
   ok(t.includes('22/09'), 'e diz o prazo', t);
   ok(recado(d, 'https://x.com', 'pronta').includes('reabrir'),
     'o recado de conclusão já diz como pedir revisão');
+  ok(!recado(d, 'https://x.com', 'abriu').includes('—') && recado(d, 'https://x.com', 'abriu').startsWith('Demanda #7 · Arte do culto'),
+    'o recado não leva travessão', recado(d, 'https://x.com', 'abriu').split('\n')[0]);
+  ok(recado({ ...d, status: 'travada', travada_por: 'informacao' }, 'https://x.com', 'mudou').includes('Agora está: Aguardando informações.'),
+    'e diz o estado com o nome da pílula', recado({ ...d, status: 'travada', travada_por: 'informacao' }, 'https://x.com', 'mudou'));
 }
 
 /* =============================================================================
@@ -867,9 +872,52 @@ function servidorAceita(acao, d, eu) {
 {
   ok(dataCheia('2026-09-22') === '22/09/2026', 'data cheia');
   ok(dataCheia(null) === '', 'data nula não vira NaN');
+  /* 23/09/2026 · o dia de um carimbo é o do Rio, e não o de UTC */
+  ok(diaNoRio('2026-09-24T00:30:00Z') === '2026-09-23', '21h30 do Rio ainda é o mesmo dia', diaNoRio('2026-09-24T00:30:00Z'));
+  ok(diaNoRio('2026-09-24T02:59:00+00:00') === '2026-09-23' && diaNoRio('2026-09-24T03:00:00+00:00') === '2026-09-24',
+    'o dia vira à meia-noite do Rio, às 3h de UTC');
+  ok(diaNoRio('2026-09-23') === '2026-09-23', 'um dia puro passa direto: não tem hora, não tem fuso');
+  ok(dataCheia('2026-09-24T01:00:00Z') === '23/09/2026' && dataCurta('2026-09-24T01:00:00Z') === '23/09',
+    'a data de um carimbo é a do Rio', dataCheia('2026-09-24T01:00:00Z'));
+  ok(diaNoRio('') === '' && diaNoRio(null) === '', 'sem carimbo, sem dia');
   ok(horas(6) === '6 h', 'horas curtas');
-  ok(horas(48) === '2,0 dias', 'horas longas viram dias', horas(48));
-  ok(horas(null) === '—', 'sem medida ainda escreve alguma coisa');
+  /* 23/09/2026 · vírgula decimal, e sem ",0" pendurado */
+  ok(horas(48) === '2 dias', 'horas longas viram dias', horas(48));
+  ok(horas(36) === '1,5 dia' || horas(36) === '1,5 dias', 'dia e meio com vírgula', horas(36));
+  ok(horas(2.3) === '2,3 h', 'hora quebrada com vírgula, e não com ponto', horas(2.3));
+  ok(horas(24) === '1 dia', 'um dia no singular', horas(24));
+  ok(horas(0.4) === '24 min' && horas(0) === 'menos de 1 min', 'abaixo de uma hora, minutos', `${horas(0.4)} | ${horas(0)}`);
+  ok(iniciais('Paulo Souza Filho') === 'PS', 'o sufixo não vira inicial', iniciais('Paulo Souza Filho'));
+  ok(iniciais('João Lima Júnior') === 'JL' && iniciais('João Lima Jr.') === 'JL', 'Júnior e Jr. também não');
+  ok(iniciais('Ana Clara Mendes') === 'AM', 'primeiro nome e último sobrenome', iniciais('Ana Clara Mendes'));
+  ok(iniciais('Filho') === 'F' && iniciais('Marcos') === 'M', 'um nome só é uma letra, mesmo que seja "Filho"');
+  ok(iniciais('  ') === '?' && iniciais(null) === '?', 'sem nome, interrogação');
+  /* 23/09/2026 · quem olha é "Você" na atividade da ficha */
+  const PEDRO = 'Pedro Henrique Vasconcelos';
+  const ev = (tipo, quem, extra = {}) => ({ tipo, quem, de: null, para: null, ...extra });
+  ok(fraseDoEvento(ev('abertura', PEDRO), PEDRO) === 'Você abriu a demanda', 'o gesto de quem olha é "Você"',
+    fraseDoEvento(ev('abertura', PEDRO), PEDRO));
+  ok(fraseDoEvento(ev('abertura', PEDRO)) === 'Pedro abriu a demanda', 'sem o nome de quem olha (Avisos), o primeiro nome');
+  ok(fraseDoEvento(ev('responsavel', 'Ana Souza', { para: PEDRO }), PEDRO) === 'Ana passou para você',
+    'o que fizeram com quem olha também', fraseDoEvento(ev('responsavel', 'Ana Souza', { para: PEDRO }), PEDRO));
+  ok(fraseDoEvento(ev('participante', 'Ana Souza', { para: PEDRO }), PEDRO) === 'Ana incluiu você', 'incluiu você');
+  ok(fraseDoEvento(ev('responsavel', PEDRO, { para: PEDRO }), PEDRO) === 'Você assumiu', 'e "Você assumiu"');
+  ok(fraseDoEvento(ev('abertura', 'Pedro Lima'), PEDRO) === 'Pedro abriu a demanda', 'outro Pedro continua sendo o Pedro');
+  ok(fraseDoEvento(ev('status', 'Maria Silva', { de: 'execucao', para: 'travada' })) === 'Maria travou a demanda'
+     && fraseDoEvento(ev('status', 'Maria Silva', { de: 'travada', para: 'execucao' })) === 'Maria destravou a demanda',
+    'a trava tem os verbos dos botões, e não "Aguardando retorno"');
+  ok(!/Aguardando retorno/.test(fraseDoEvento(ev('status', 'Ana', { de: 'travada', para: 'aberta' })))
+     && fraseDoEvento(ev('status', 'Ana', { de: 'execucao', para: 'concluida' })) === 'Ana concluiu',
+    'nem na saída da trava, e a conclusão também tem verbo');
+  ok(umOuVarios(1, 'passou do prazo', 'passaram do prazo') === 'passou do prazo'
+     && umOuVarios(0, 'passou do prazo', 'passaram do prazo') === 'passaram do prazo', 'a legenda concorda com o número');
+  ok(alcanceDoAtendimento({ papel: 'responsavel', setor: 'Comunicação' }).legendaFila === 'Em aberto'
+     && alcanceDoAtendimento({ papel: 'admin', setor: null }).legendaFila === 'Em aberto'
+     && !alcanceDoAtendimento({ papel: 'responsavel', setor: 'Comunicação' }).varios
+     && alcanceDoAtendimento({ papel: 'gestor', setor: null, escopo: ['A', 'B'] }).varios,
+    'o alcance do atendimento: um setor não mostra o setor, vários mostram');
+  ok(rotStatus('travada') !== 'Travada', 'o histórico não escreve "Travada", a etiqueta que o documento proíbe', rotStatus('travada'));
+  ok(horas(null) === 'sem dados', 'sem medida ainda escreve alguma coisa, e sem travessão', horas(null));
   ok(dinheiro(4500).includes('4.500'), 'dinheiro em pt-BR', dinheiro(4500));
   ok(dinheiro(null) === '', 'sem orçamento não escreve R$ 0,00');
   ok(rotStatus('execucao') === 'Em execução', 'rótulo de status');

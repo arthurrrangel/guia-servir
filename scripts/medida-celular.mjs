@@ -274,6 +274,10 @@ export const MEDIR = (largura) => {
        `type="search"` dá. A exceção vale só para quem DECLARA ser busca; um
        campo de texto com a mesma frase continua acusado (ver o teste). */
     if (tipo === 'search') continue;
+    /* CAIXINHA NÃO ABRE TECLADO NENHUM · 23/09/2026. "Não tenho data" virou
+       caixinha na Nova demanda e foi acusada como "data com type=checkbox":
+       o rótulo tem "data", e caixinha não tem teclado para estar errado. */
+    if (tipo === 'checkbox' || tipo === 'radio') continue;
     const modo = (e.getAttribute('inputmode') || '').toLowerCase();
     const numerico = tipo === 'number' || tipo === 'tel' || modo === 'numeric' || modo === 'decimal' || modo === 'tel';
     if (/telefone|whatsapp|celular|fone/.test(rot) && tipo !== 'tel' && modo !== 'tel')

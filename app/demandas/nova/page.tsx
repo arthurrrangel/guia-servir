@@ -12,12 +12,13 @@
    regra, o CHECK recusa e a frase traduzida aparece igual. */
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
-import { Aviso, Bloco, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
+import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
+import { Icone } from '@/components/demandas/Icone';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, dataCheia, dicaDeAnexo, linkZap, nomesDosSites, oQueFalta, prazoSugerido,
+  HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomesDosSites, prazoSugerido,
   rascunhoVazio, recadoDeSite, recadoDoErro, quemManda, siteDoLink, siteRecusado, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
@@ -117,6 +118,27 @@ function Nova() {
   const [indo, setIndo] = useState(false);
   const [pronta, setPronta] = useState<Pronta | null>(null);
   const [tentou, setTentou] = useState(false);
+  /* ENVIAR COM CAMPO FALTANDO TEM QUE DAR RETORNO À VISTA — 23/09/2026.
+     Medido em 390: a página ficava no topo, o aviso nascia em 995px (abaixo
+     da dobra e atrás da barra fixa) e o foco ficava no botão; o toque
+     parecia não fazer nada. Cada tentativa leva o aviso para o meio da tela
+     e põe o foco nele, que o leitor de tela anuncia. */
+  const [tentativa, setTentativa] = useState(0);
+  const avisoFalta = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!tentativa) return;
+    /* o foco vai para o PRIMEIRO campo que falta, que é onde a pessoa vai
+       agir (em 390 o título e a categoria ficavam duas telas acima do
+       aviso); sem campo para apontar, vai para o aviso */
+    /* por lista de tags, e não por seletor de atributo (o dublê de DOM dos
+       testes de tela só entende a primeira forma) */
+    const primeiro = [...document.querySelectorAll<HTMLElement>('input,select,textarea')]
+      .find(c => c.getAttribute('aria-invalid') === 'true');
+    const alvo = primeiro || avisoFalta.current;
+    if (!alvo) return;
+    alvo.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    alvo.focus({ preventScroll: true });
+  }, [tentativa]);
   const [erroBase, setErroBase] = useState('');
   const [tinhaRascunho, setTinhaRascunho] = useState(false);
   const [digitando, setDigitando] = useState(false);
@@ -190,7 +212,15 @@ function Nova() {
 
   const manda = quemManda(eu?.papel);
   const temSetor = !!(r.setor_solicitante || eu?.setor_id);
-  const falta = oQueFalta(r, temSetor, cat);
+  const faltas = camposQueFaltam(r, temSetor, cat);
+  const falta = faltas.map(x => x.texto);
+  /* depois do primeiro "Enviar", cada campo que falta fica vermelho e diz o
+     que falta, e o aviso de baixo vira o resumo */
+  const faltaEm = (...campos: string[]) => {
+    if (!tentou) return undefined;
+    const x = faltas.find(f => campos.includes(f.campo));
+    return x ? `Falta ${x.texto}.` : undefined;
+  };
 
   /* a categoria sugere a data; se a pessoa já mexeu no campo, não atropela */
   function escolherCategoria(id: string) {
@@ -203,7 +233,14 @@ function Nova() {
 
   async function enviar() {
     setTentou(true);
-    if (falta.length) { setErro(''); return; }
+    if (falta.length) {
+      setErro('');
+      /* o que falta dentro da gaveta fechada (a data do evento, o valor)
+         abre a gaveta, para o campo poder ser marcado e receber o foco */
+      if (faltas.some(f => f.campo === 'evento' || f.campo === 'evento_data' || f.campo === 'orcamento')) setMais(true);
+      setTentativa(t => t + 1);
+      return;
+    }
     setIndo(true); setErro('');
     const x = await abrir({ ...r, sem_prazo_porque: semData ? r.sem_prazo_porque : '' }, anexos);
     setIndo(false);
@@ -219,11 +256,9 @@ function Nova() {
   if (erroBase && !b) {
     return (
       <>
-        <div className="dm-rot">{'>'} nova demanda</div>
+        <Cabecalho sobre="Nova demanda" titulo="O que você precisa?" />
         <Aviso tom="bad">{erroBase}</Aviso>
-        <button className="dm-btn" onClick={carregar} style={{ marginTop: 'var(--dm-e2)' }}>
-          Tentar de novo
-        </button>
+        <button type="button" className="dm-btn dm-tentar" onClick={carregar}>Tentar de novo</button>
       </>
     );
   }
@@ -231,64 +266,62 @@ function Nova() {
 
   if (pronta) {
     /* a raiz do SISTEMA, não do site: os links que saem daqui pelo WhatsApp
-     precisam cair em /demandas, e não na home da igreja */
-  const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
+       precisam cair em /demandas, e não na home da igreja */
+    const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
     const texto =
-      `Demanda #${pronta.numero} — ${r.titulo}\n` +
+      `Demanda #${pronta.numero} · ${r.titulo}\n` +
       `${eu?.setor || 'Um setor'} pediu para ${pronta.setor_responsavel || setorDaCat}.\n` +
       `${base}/d/${pronta.numero}`;
     const zap = linkZap(pronta.contato?.telefone, texto);
     return (
-      <>
-        <div className="dm-rot">{'>'} pronto</div>
-        <h1 style={{ margin: '6px 0 var(--dm-e3)' }}>Demanda #{pronta.numero} registrada.</h1>
+      <div className="dm-leitura dm-pronta">
+        <Cabecalho sobre="Pronto" titulo={`Demanda #${pronta.numero} registrada`} />
 
         {pronta.precisa_aprovacao ? (
           <Aviso tom="warn">
-            <div>
-              Esta categoria <b>precisa de aprovação</b> antes de alguém executar. Ela já está na
-              fila da liderança e ninguém consegue começar antes disso.
-            </div>
+            Esta categoria <b>precisa de aprovação</b> antes de alguém executar. Ela já está na
+            fila da liderança e ninguém consegue começar antes disso.
           </Aviso>
         ) : (
           <Aviso tom="ok">
-            <div>Foi para <b>{pronta.setor_responsavel || setorDaCat}</b>. Você acompanha pela lista.</div>
+            Foi para <b>{pronta.setor_responsavel || setorDaCat}</b>. Você acompanha pela lista.
           </Aviso>
         )}
 
-        <div className="dm-card">
-          <h3 style={{ marginBottom: 6 }}>Avisar quem vai atender</h3>
-          <p className="dm-peq dm-mudo">
-            O sistema não manda WhatsApp sozinho. Ele escreve o recado; você toca uma vez e envia.
-          </p>
-          <div className="dm-linha">
-            {zap
-              ? <a className="dm-btn dm-zap" href={zap} target="_blank" rel="noopener noreferrer">
-                  Mandar para {pronta.contato!.nome.split(' ')[0]}
-                </a>
-              : <span className="dm-peq dm-mudo">Ninguém desse setor tem telefone cadastrado ainda.</span>}
-            <Copiar texto={texto} rot="Copiar o recado" />
+        <div className="dm-caixa">
+          <div className="dm-caixa-corpo">
+            <h2 className="dm-caixa-titulo">Avisar quem vai atender</h2>
+            <p className="dm-peq dm-mudo dm-antes-do-botao">
+              O sistema não manda WhatsApp sozinho. Ele escreve o recado; você toca uma vez e envia.
+            </p>
+            <div className="dm-linha">
+              {zap
+                ? <a className="dm-btn dm-zap" href={zap} target="_blank" rel="noopener noreferrer">
+                    <Icone nome="mensagem" />Mandar para {pronta.contato!.nome.split(' ')[0]}
+                  </a>
+                : <span className="dm-peq dm-mudo">Ninguém desse setor tem telefone cadastrado ainda.</span>}
+              <Copiar texto={texto} rot="Copiar o recado" classe="dm-btn" />
+            </div>
+          </div>
+          <div className="dm-caixa-pe">
+            <button type="button" className="dm-btn" onClick={() => {
+              setPronta(null); setR(rascunhoVazio()); setAnexos([]); setSemData(false); setTentou(false);
+            }}>Abrir outra</button>
+            <Link className="dm-btn dm-pri" href={`/demandas/d/${pronta.numero}`}>Ver a demanda</Link>
           </div>
         </div>
-
-        <div className="dm-linha">
-          <Link className="dm-btn dm-pri" href={`/demandas/d/${pronta.numero}`}>Ver a demanda</Link>
-          <button className="dm-btn" onClick={() => {
-            setPronta(null); setR(rascunhoVazio()); setAnexos([]); setSemData(false); setTentou(false);
-          }}>Abrir outra</button>
-        </div>
-      </>
+      </div>
     );
   }
 
+  const resumoDoPedido = r.prazo
+    ? <>Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.</>
+    : setorDaCat ? <>Para {setorDaCat}.</> : null;
+
   return (
     <>
-      <div className="dm-cab">
-        <div>
-          <div className="dm-rot">{'>'} nova demanda</div>
-          <h1 style={{ marginTop: 4 }}>O que você precisa?</h1>
-        </div>
-      </div>
+      <Cabecalho volta={{ href: '/demandas', rot: 'Início' }} sobre="Nova demanda" titulo="O que você precisa?"
+        meta={<span>A categoria decide para qual setor vai, se precisa de aprovação e o prazo sugerido.</span>} />
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       {/* UMA LINHA, E SÓ UMA. A tentação aqui é uma caixa com "Recuperar" e
@@ -297,40 +330,44 @@ function Nova() {
           para a pessoa entender POR QUE eles estão preenchidos, e para ter
           como jogar fora o que ficou. */}
       {tinhaRascunho ? (
-        <p className="dm-peq dm-mudo" role="status" style={{ margin: '0 0 var(--dm-e2)' }}>
-          Você tinha um pedido começado. Continuei de onde você parou.{' '}
-          <button className="dm-btn dm-mini" onClick={descartarRascunho}>Descartar</button>
-        </p>
+        <Aviso tom="info">
+          <div className="dm-entre">
+            <span>Você tinha um pedido começado. Continuei de onde você parou.</span>
+            <button type="button" className="dm-btn dm-peq" onClick={descartarRascunho}>Descartar</button>
+          </div>
+        </Aviso>
       ) : null}
 
       {/* `digitando` só com campo de texto em foco: tocar num botão (a
           prioridade, "Não tenho data", a gaveta) escondia a barra de enviar
           (medido em 23/09/2026) */}
-      <div className="dm-duas dm-7-5"
+      <div className="dm-duas dm-duas-form"
         onFocus={e => { if (campoDeTexto(e.target)) setDigitando(true); }}
         onBlur={e => { if (campoDeTexto(e.target)) setDigitando(false); }}>
       <div>
-      <div className="dm-card">
-        <Campo rot="Título">
-          {/* OS TETOS APARECEM ANTES DO TOQUE, E NÃO DEPOIS.
-
-              O banco cobra 200 no título, 20 mil na descrição e 120 no evento
-              desde a migração 52, e a tela só dizia isso DEPOIS de tocar em
-              "Enviar" — `tentou` só vira `true` dentro de `enviar()`. Digita-se
-              300 letras, toca-se, e só aí o sistema conta que o limite era 200.
-              `maxLength` faz o navegador parar no limite, que é a forma mais
-              barata de a regra existir para quem está digitando.
-
-              Os campos sem teto no banco ganham teto aqui pelo mesmo motivo da
-              `CaixaDeAcao`: texto colado sem limite pesa em toda abertura
-              daquela ficha, para sempre. */}
+      <div className="dm-caixa">
+        <div className="dm-caixa-corpo">
+        <Campo rot="Título" falta={faltaEm('titulo')}>
+          {/* OS TETOS APARECEM ANTES DO TOQUE, E NÃO DEPOIS: `maxLength` faz
+              o navegador parar no limite do banco (200 no título, 20 mil na
+              descrição, 120 no evento), e os campos sem teto no banco ganham
+              teto aqui pelo mesmo motivo da `CaixaDeAcao`: texto colado sem
+              limite pesa em toda abertura daquela ficha, para sempre. */}
           <input maxLength={200} value={r.titulo} onChange={e => setR(v => ({ ...v, titulo: e.target.value }))}
-            placeholder="Arte para o culto de celebração" />
+            placeholder="Ex.: Arte para o culto de celebração" />
         </Campo>
 
-        <Campo rot="Categoria"
+        <Campo rot="Categoria" falta={faltaEm('categoria_id')}
+          /* no desktop o painel da direita já diz para onde vai (e o
+             rodapé repete): a ajuda do campo volta a dizer o que ele faz. No
+             celular, sem painel, é a ajuda que diz o destino */
           ajuda={cat
-            ? `Vai para ${setorDaCat}${cat.exige_aprovacao ? ' e precisa de aprovação antes de começar' : ''}.`
+            ? <>
+                <span className="dm-so-celular">
+                  Vai para {setorDaCat}{cat.exige_aprovacao ? ' e precisa de aprovação antes de começar' : ''}.
+                </span>
+                <span className="dm-so-desktop">Define qual setor vai atender.</span>
+              </>
             : 'Define qual setor vai atender.'}>
           <select value={r.categoria_id} onChange={e => escolherCategoria(e.target.value)}>
             <option value="">Escolha</option>
@@ -342,64 +379,50 @@ function Nova() {
           </select>
         </Campo>
 
-        <Campo rot="O que precisa ser feito">
+        <Campo rot="O que precisa ser feito" falta={faltaEm('descricao')}>
           <textarea maxLength={20000} value={r.descricao} onChange={e => setR(v => ({ ...v, descricao: e.target.value }))} />
         </Campo>
+        </div>
 
+        <div className="dm-caixa-corpo dm-caixa-divisa">
         {!semData ? (
-          <Campo rot="Para quando" classe="dm-data"
+          <Campo rot="Para quando" classe="dm-data" falta={faltaEm('prazo')}
             ajuda={cat?.prazo_padrao_dias ? `${setorDaCat} costuma levar ${cat.prazo_padrao_dias} dias.` : undefined}>
-            {/* O `min` SAIU: NO CELULAR ELE NÃO ERA UM AVISO, ERA UMA PORTA
-                TRANCADA — 22/09/2026.
-
-                A versão anterior deste comentário dizia que "quem precisa
-                registrar o retroativo digita a data e o servidor aceita". No
-                seletor nativo de iOS e Android NÃO EXISTE digitar: a roda
-                simplesmente não desce abaixo do `min`. A igreja usa celular.
-
-                Ou seja: a migração 88 tirou a guarda do banco justamente
-                porque "a lâmpada do corredor queimou semana passada, põe aí no
-                sistema" é o caso normal, e a tela continuou impedindo. O banco
-                aceita e a tela recusa é a mesma família de defeito de botão
-                morto, virada do avesso.
-
-                O erro de digitação que o `min` queria pegar continua pego, e
-                agora de um jeito que não tranca ninguém: a tela AVISA que a
-                data escolhida já passou, e deixa seguir. */}
+            {/* SEM `min`: NO CELULAR ELE NÃO ERA UM AVISO, ERA UMA PORTA
+                TRANCADA — 22/09/2026. No seletor nativo de iOS e Android não
+                existe digitar: a roda não desce abaixo do `min`, e "a lâmpada
+                queimou semana passada, põe aí" é o caso normal. A tela AVISA
+                que a data já passou, e deixa seguir. */}
             <input type="date" value={r.prazo}
               onChange={e => setR(v => ({ ...v, prazo: e.target.value }))} />
             {r.prazo && r.prazo < HOJE() ? (
-              <small style={{ color: 'var(--dm-warn, inherit)' }}>
+              <small className="dm-aviso-campo">
                 Essa data já passou. Se for um registro do que já aconteceu, pode seguir.
               </small>
             ) : null}
           </Campo>
         ) : (
-          <Campo rot="Por que não tem data"
+          <Campo rot="Por que não tem data" falta={faltaEm('prazo')}
             ajuda="Toda demanda precisa de uma data ou de um porquê. Sem isso ela some no meio das outras.">
             <input maxLength={500} value={r.sem_prazo_porque}
               onChange={e => setR(v => ({ ...v, sem_prazo_porque: e.target.value }))}
-              placeholder="Depende da agenda do pastor" />
+              placeholder="Ex.: Depende da agenda do pastor" />
           </Campo>
         )}
-        <button type="button" className="dm-btn dm-txt dm-rente" style={{ marginTop: -12, marginBottom: 'var(--dm-e3)' }}
-          onClick={() => { setSemData(x => !x); setR(v => ({ ...v, prazo: '', sem_prazo_porque: '' })); }}>
-          {semData ? 'Tenho uma data' : 'Não tenho data'}
-        </button>
+        {/* UMA CAIXINHA, E NÃO UM BOTÃO-TEXTO — 23/09/2026: "Não tenho data"
+            era texto solto entre o campo e o rótulo de baixo, sem borda,
+            ícone ou sublinhado, e ninguém adivinhava que era tocável. Marcada,
+            a data vira "Por que não tem data"; desmarcada, volta. */}
+        <label className="dm-caixinha dm-sem-data">
+          <input type="checkbox" checked={semData}
+            onChange={() => { setSemData(x => !x); setR(v => ({ ...v, prazo: '', sem_prazo_porque: '' })); }} />
+          Não tenho data
+        </label>
 
-        {/* `Bloco` E NÃO `Campo`, E ISSO É UM CONSERTO, NÃO ESTILO.
-
-            `Campo` é um `<label>`, e um `<label>` ativa o primeiro descendente
-            rotulável. Com quatro `<button>` dentro, tocar na palavra
-            "Prioridade" marcava "Baixa". Medido, clicando no pixel do rótulo:
-
-              ANTES : Baixa:false Normal:true
-              DEPOIS: Baixa:true  Normal:false
-
-            A pessoa encosta o polegar na palavra enquanto rola e a demanda
-            urgente sai como Baixa, sem aviso nenhum — e a prioridade errada
-            muda a ordem da fila. `Opcoes` já traz `role="group"` e
-            `aria-label`, então o rótulo continua anunciado. */}
+        {/* `Bloco` E NÃO `Campo`, E ISSO É UM CONSERTO, NÃO ESTILO: um
+            `<label>` com quatro `<button>` dentro fazia o toque na palavra
+            "Prioridade" marcar "Baixa" (medido). `Opcoes` já traz
+            `role="group"` e `aria-label`. */}
         <Bloco rot="Prioridade" ajuda={PRIORIDADES.find(p => p.v === r.prioridade)?.explica}>
           <Opcoes rot="Prioridade" valor={r.prioridade}
             opcoes={PRIORIDADES.map(p => ({ v: p.v as Prioridade, rot: p.rot }))}
@@ -407,36 +430,33 @@ function Nova() {
         </Bloco>
 
         {r.prioridade === 'urgente' ? (
-          <Campo rot="O que acontece se não for feito"
+          <Campo rot="O que acontece se não for feito" falta={faltaEm('impacto')}
             ajuda="Obrigatório quando é urgente.">
             <input maxLength={2000} value={r.impacto} onChange={e => setR(v => ({ ...v, impacto: e.target.value }))}
-              placeholder="Sem isso o culto de domingo não tem som" />
+              placeholder="Ex.: Sem isso o culto de domingo não tem som" />
           </Campo>
         ) : null}
+        </div>
       </div>
 
       {/* O CAMPO OBRIGATÓRIO MORAVA DENTRO DA GAVETA FECHADA — 22/09/2026.
-
-          Quem escolhe uma categoria de Compras preenche tudo, toca em Enviar e
-          lê "Falta preencher: o valor estimado" sobre um campo que não está na
-          tela, e nada abre a gaveta. Quando a categoria EXIGE orçamento, a
-          gaveta abre sozinha: o campo obrigatório não pode estar escondido. */}
+          Quando a categoria EXIGE orçamento, a gaveta abre sozinha: o campo
+          obrigatório não pode estar escondido. */}
       <button type="button" className="dm-gaveta" aria-expanded={mais || !!cat?.exige_orcamento}
-        onClick={() => setMais(x => !x)} style={{ marginBottom: 'var(--dm-e2)' }}>
+        onClick={() => setMais(x => !x)}>
         {mais || cat?.exige_orcamento ? 'Esconder os detalhes' : 'Evento, local, orçamento e anexos'}
       </button>
 
       {mais || cat?.exige_orcamento ? (
-        <div className="dm-card">
+        <div className="dm-caixa">
+          <div className="dm-caixa-corpo">
           {manda ? (
             <Campo rot="Quem está pedindo" ajuda="Como liderança, você pode abrir em nome de outro setor.">
               <select value={r.setor_solicitante || eu?.setor_id || ''}
                 onChange={e => setR(v => ({ ...v, setor_solicitante: e.target.value }))}>
                 {/* 94 · gestor com escopo pede em nome dos setores que acompanha
                     (e do próprio); o banco recusa os outros com
-                    SETOR_FORA_DO_ESCOPO, então a lista não os oferece.
-                    `escopo` vem com o NOME dos setores, que é o que o servidor
-                    manda em `dem_quem_sou`. */}
+                    SETOR_FORA_DO_ESCOPO, então a lista não os oferece. */}
                 {b.setores
                   .filter(s => eu?.papel !== 'gestor' || eu?.escopo_total !== false
                     || s.id === eu?.setor_id || (eu?.escopo || []).includes(s.nome))
@@ -446,17 +466,19 @@ function Nova() {
           ) : null}
 
           <div className="dm-dupla">
-            <Campo rot="Evento relacionado" ajuda="Se tiver evento, a data dele é obrigatória.">
+            <Campo rot="Evento relacionado" ajuda="Se tiver evento, a data dele é obrigatória." falta={faltaEm('evento')}>
               <input maxLength={120} value={r.evento} onChange={e => setR(v => ({ ...v, evento: e.target.value }))} />
             </Campo>
-            <Campo rot="Data do evento">
+            <Campo rot="Data do evento" classe="dm-data" falta={faltaEm('evento_data')}>
               <input type="date" value={r.evento_data}
                 onChange={e => setR(v => ({ ...v, evento_data: e.target.value }))} />
             </Campo>
             <Campo rot="Onde vai acontecer">
               <input maxLength={200} value={r.local} onChange={e => setR(v => ({ ...v, local: e.target.value }))} />
             </Campo>
-            <Campo rot="Público ou ministério envolvido">
+            {/* "…envolvido" quebrava em duas linhas na coluna de 187px (1024)
+                e descia o campo abaixo do vizinho */}
+            <Campo rot="Público ou ministério">
               <input maxLength={200} value={r.publico} onChange={e => setR(v => ({ ...v, publico: e.target.value }))} />
             </Campo>
           </div>
@@ -465,25 +487,12 @@ function Nova() {
             <input maxLength={4000} value={r.objetivo} onChange={e => setR(v => ({ ...v, objetivo: e.target.value }))} />
           </Campo>
 
-          {/* O ORÇAMENTO ERA INALCANÇÁVEL EM 31 DAS 43 CATEGORIAS.
-
-              O campo vivia dentro de `{cat?.exige_orcamento ? … : null}`, ou
-              seja: só existia nas 12 categorias que EXIGEM valor (Compras,
-              Reembolso, Reserva financeira, Solicitação de pagamento,
-              Alimentação, Transporte). Nas outras 31 não havia onde escrever
-              um número, mesmo quando havia número para escrever, e o
-              documento pede duas coisas que isso quebra: "anexos, imagens,
-              orçamentos ou documentos" no detalhamento, e a regra "demandas
-              de compra devem conter orçamento estimado, QUANDO POSSÍVEL".
-              "Quando possível" é decisão de quem pede, não de quem cadastrou
-              a categoria.
-
-              Tirar a condição não acrescenta nada à primeira tela: o campo já
-              morava dentro da gaveta de detalhes, que nasce fechada. A
-              obrigatoriedade continua sendo da categoria, cobrada pelo
-              servidor (`ORCAMENTO_OBRIGATORIO`, migração 86); aqui muda só a
-              ajuda, que diz o que aquele valor faz naquela categoria. */}
-          <Campo rot="Orçamento estimado (R$)" classe="dm-numero"
+          {/* O ORÇAMENTO ERA INALCANÇÁVEL EM 31 DAS 43 CATEGORIAS: o campo só
+              existia nas que EXIGEM valor, e o documento pede o orçamento
+              "quando possível", que é decisão de quem pede. A obrigatoriedade
+              continua sendo da categoria, cobrada pelo servidor
+              (`ORCAMENTO_OBRIGATORIO`, migração 86). */}
+          <Campo rot="Orçamento estimado (R$)" classe="dm-numero" falta={faltaEm('orcamento')}
             ajuda={cat?.exige_orcamento
               ? 'Esta categoria exige o valor. Sem número, a aprovação trava esperando.'
               : 'Quando der para estimar. Ajuda quem decide a comparar pedidos.'}>
@@ -491,20 +500,16 @@ function Nova() {
               onChange={e => setR(v => ({ ...v, orcamento: e.target.value.replace(',', '.') }))} />
           </Campo>
 
-          {/* 95 · A LISTA DE SITES AVISA AQUI, E NÃO DEPOIS DE ENVIAR.
-
-              O banco recusa a demanda inteira quando um anexo é de site fora
-              da lista (`SITE_NAO_PERMITIDO`, antes de a demanda nascer). Sem o
-              aviso na hora de juntar, a pessoa descobriria só no fim, com o
-              formulário todo preenchido. A regra é a mesma do banco, lida por
+          {/* 95 · A LISTA DE SITES AVISA AQUI, E NÃO DEPOIS DE ENVIAR: o banco
+              recusa a demanda inteira quando um anexo é de site fora da lista
+              (`SITE_NAO_PERMITIDO`). A regra é a mesma do banco, lida por
               `dem_bases`; quem decide continua sendo ele. */}
           <Campo rot="Anexos" ajuda={dicaDeAnexo(b?.anexos)}>
-            <div className="dm-linha">
-              <input className="dm-cresce" value={anexoUrl} placeholder="https://…" inputMode="url"
+            <div className="dm-linha dm-criar">
+              <input className="dm-ctl dm-cresce" value={anexoUrl} placeholder="https://…" inputMode="url"
                 aria-invalid={anexoErro ? true : undefined}
-                onChange={e => { setAnexoUrl(e.target.value); setAnexoErro(''); }}
-                style={{ minHeight: 46, padding: '10px 12px', border: '1px solid var(--dm-linha2)', borderRadius: 'var(--dm-r)', background: 'var(--dm-card3)' }} />
-              <button className="dm-btn" disabled={!anexoUrl.trim()} onClick={() => {
+                onChange={e => { setAnexoUrl(e.target.value); setAnexoErro(''); }} />
+              <button type="button" className="dm-btn" disabled={!anexoUrl.trim()} onClick={() => {
                 const url = anexoUrl.trim();
                 if (!siteDoLink(url)) { setAnexoErro('Cole o link inteiro, começando com https://'); return; }
                 const recusado = siteRecusado(url, b?.anexos);
@@ -516,75 +521,81 @@ function Nova() {
           </Campo>
           {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
           {b?.anexos?.restrito && b.anexos.sites.length ? (
-            <details className="dm-mais dm-esq dm-peq dm-mudo">
+            <details className="dm-mais">
               <summary>Ver os sites aceitos</summary>
-              <p style={{ margin: '6px 0 0' }}>{nomesDosSites(b.anexos.sites).join(', ')}.</p>
+              <p>{nomesDosSites(b.anexos.sites).join(', ')}.</p>
             </details>
           ) : null}
           {anexos.length ? (
-            <ul className="dm-peq" style={{ margin: 0, paddingLeft: 18 }}>
+            <ul className="dm-anexos dm-anexos-novos">
               {anexos.map((a, i) => (
                 <li key={i}>
-                  {a.nome}{' '}
-                  {/* `dm-mini` (36px) e não um `minHeight: 26` em linha:
-                      estilo em linha vencia o piso de 44px da folha e deixava
-                      o alvo em 26px, num gesto de CORREÇÃO — o pior lugar
-                      para errar o toque. 20/09/2026, auditoria de tela. */}
-                  <button className="dm-btn dm-mini"
-                    onClick={() => setAnexos(x => x.filter((_, j) => j !== i))}>tirar</button>
+                  <Icone nome="link" />
+                  <span className="dm-anexo-link">{a.nome}</span>
+                  {/* `dm-peq` e não um `minHeight: 26` em linha: estilo em
+                      linha vencia o piso de 44px da folha e deixava o alvo em
+                      26px, num gesto de CORREÇÃO. 20/09/2026. */}
+                  <button type="button" className="dm-btn dm-txt dm-peq"
+                    onClick={() => setAnexos(x => x.filter((_, j) => j !== i))}>Tirar</button>
                 </li>
               ))}
             </ul>
           ) : null}
+          </div>
         </div>
       ) : null}
 
-      {tentou && falta.length ? (
-        <Aviso tom="warn">
-          <div>
-            Falta {falta.length === 1 ? '' : 'preencher'}: {falta.join('; ')}.
-          </div>
-        </Aviso>
+      {/* o resumo, em vermelho como os campos: com uma falta só, o campo
+          marcado já diz tudo (e o foco está nele); o resumo fica para duas ou
+          mais, e para a que não tem campo na tela (o setor de quem pede) */}
+      {tentou && (falta.length > 1 || faltas.some(f => f.campo === 'setor')) ? (
+        <div ref={avisoFalta} tabIndex={-1}>
+          <Aviso tom="bad">
+            {falta.length === 1 ? 'Falta' : 'Falta preencher'}: {falta.join('; ')}.
+          </Aviso>
+        </div>
       ) : null}
 
       {/* no desktop o botão fecha a coluna do formulário; no celular ele vai
           na barra fixa do rodapé, com a frase-resumo, e sai da frente
           enquanto a pessoa digita (o teclado já cobre metade da tela) */}
-      <div className={digitando ? 'dm-linha' : 'dm-so-desktop dm-linha'}>
-        <button className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
+      {/* a ação primária à direita, como no rodapé de toda caixa de
+          formulário, com a frase-resumo antes dela */}
+      <div className={digitando ? 'dm-enviar' : 'dm-so-desktop dm-enviar'}>
+        {resumoDoPedido ? <span className="dm-peq dm-mudo dm-cresce">{resumoDoPedido}</span> : null}
+        <button type="button" className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
           {indo ? 'Enviando…' : 'Enviar a demanda'}
         </button>
-        {r.prazo ? (
-          <span className="dm-peq dm-mudo">
-            Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.
-          </span>
-        ) : null}
       </div>
       </div>
 
-      {/* a coluna de contexto: o que a categoria decide, ao vivo */}
-      <aside className="dm-card dm-quieto dm-fixa dm-so-desktop" aria-label="O que acontece com este pedido">
-        <h3>O que acontece com este pedido</h3>
-        {cat ? (
-          <div className="dm-pares dm-uma-coluna">
-            <div><span>Vai para</span>{setorDaCat || 'nenhum setor ainda'}</div>
-            <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da liderança antes de começar' : 'não precisa'}</div>
-            <div><span>Prazo sugerido</span>{cat.prazo_padrao_dias ? `${dataCheia(prazoSugerido(cat))} (${cat.prazo_padrao_dias} dias)` : 'sem sugestão'}</div>
-            <div><span>Orçamento</span>{cat.exige_orcamento ? 'obrigatório nesta categoria' : 'quando der para estimar'}</div>
-            <div><span>Anexos</span>{dicaDeAnexo(b?.anexos)}</div>
-          </div>
-        ) : (
-          <p className="dm-peq dm-mudo" style={{ margin: 0 }}>Escolha a categoria e eu digo para onde vai, se precisa de aprovação e o prazo sugerido.</p>
-        )}
+      {/* a coluna de contexto: o que a categoria decide, ao vivo. O mesmo
+          painel da coluna direita da ficha (rótulo pequeno em caixa alta,
+          sem faixa de cabeçalho): a coluna da direita é uma peça só no
+          produto inteiro */}
+      <aside className="dm-painel dm-fixa dm-so-desktop" aria-label="O que acontece com este pedido">
+        <div className="dm-painel-bloco">
+          <h3 className="dm-painel-titulo">O que acontece com este pedido</h3>
+          {cat ? (
+            <div className="dm-pares dm-uma-coluna">
+              <div><span>Vai para</span>{setorDaCat || 'nenhum setor ainda'}</div>
+              <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da liderança antes de começar' : 'não precisa'}</div>
+              <div><span>Prazo sugerido</span>{cat.prazo_padrao_dias ? `${dataCheia(prazoSugerido(cat))} (${cat.prazo_padrao_dias} dias)` : 'sem sugestão'}</div>
+              <div><span>Orçamento</span>{cat.exige_orcamento ? 'obrigatório nesta categoria' : 'quando der para estimar'}</div>
+              <div><span>Anexos</span>{dicaDeAnexo(b?.anexos)}</div>
+            </div>
+          ) : (
+            /* o subtítulo da tela já explica o que a categoria decide */
+            <p className="dm-peq dm-mudo">Aparece aqui assim que você escolher a categoria.</p>
+          )}
+        </div>
       </aside>
       </div>
 
       {!digitando ? (
         <div className="dm-barra-acao dm-barra-enviar">
-          <span className="dm-peq dm-mudo dm-cresce">
-            {r.prazo ? <>Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.</> : setorDaCat ? <>Para {setorDaCat}.</> : null}
-          </span>
-          <button className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
+          <span className="dm-cresce">{resumoDoPedido}</span>
+          <button type="button" className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
             {indo ? 'Enviando…' : 'Enviar a demanda'}
           </button>
         </div>

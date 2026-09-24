@@ -102,8 +102,10 @@ const PERDOADAS = new Set([
   /* `dm-pill dm-${tom}` em components/demandas/Ui.tsx, com `tom` vindo de
      quem chama: 'info' é usado na ficha da demanda. */
   'dm-info',
-  /* `dm-item dm-${situacao}` e `dm-num ${destaque ? 'dm-destaque' : ''}` */
-  'dm-atrasada', 'dm-urgente', 'dm-hoje', 'dm-aviso', 'dm-ruim', 'dm-destaque',
+  /* `dm-item dm-${situacao}` e `dm-num ${destaque ? 'dm-destaque' : ''}`;
+     `dm-sem-dado` nasce na mesma variável `mods` de `Kpi`
+     (components/demandas/Ui.tsx), quando o valor é "sem dados" */
+  'dm-atrasada', 'dm-urgente', 'dm-hoje', 'dm-aviso', 'dm-ruim', 'dm-destaque', 'dm-sem-dado',
   /* escritas à mão no JSX e conferidas pelo bloco 2, logo acima */
   'dm-interno', 'dm-marco',
   /* utilitária de cor, usada via composição em outras regras da própria
@@ -112,6 +114,10 @@ const PERDOADAS = new Set([
   /* chegam ao <label> pela propriedade `classe` de Campo
      (components/demandas/Ui.tsx), que só aceita esses três valores */
   'dm-curto', 'dm-data', 'dm-numero',
+  /* o diálogo de confirmação é montado por `createElement`, fora do JSX
+     (components/demandas/Confirmar.ts) */
+  'dm-dialogo', 'dm-dialogo-corpo', 'dm-dialogo-titulo', 'dm-dialogo-texto', 'dm-dialogo-sem-volta',
+  'dm-dialogo-btns',
 ]);
 const usadasNoJsx = new Set();
 for (const a of arquivos) {

@@ -79,9 +79,11 @@ insert into demandas.gestao (membro_id, setor_id)
   select m.id, s.id from demandas.membros m, demandas.setores s
    where m.token = 'tok-gestor-com' and s.slug = 'comunicacao'
 on conflict do nothing;
-/* o pedido de papel, como o cadastro deixa: a pessoa já é membro e pediu mais */
+/* o pedido de papel, como o cadastro deixa: a pessoa já é membro e pediu mais.
+   Cadastrou-se há três dias e pediu há dois: a ficha dizia "Pedido em 21/09"
+   embaixo de "Cadastrou-se em 23/09" (23/09/2026) */
 update demandas.membros set papel_pedido = 'responsavel', papel_pedido_em = now() - interval '2 days',
-       origem = 'cadastro'
+       origem = 'cadastro', criado_em = now() - interval '3 days'
  where token = 'tok-pedido';
 
 /* NENHUMA CHAMADA DESTA SEMENTE FALHA CALADA · 22/09/2026.
@@ -104,6 +106,33 @@ begin
 end $f$;
 
 -- ------------------------------------------------------------------ pedidos --
+
+/* UMA HISTÓRIA POSSÍVEL PARA AS DEMANDAS ATRASADAS · 23/09/2026.
+
+   O prazo destas nasce no futuro e anda para trás com um UPDATE cru (ver a
+   nota da demanda 6), e isso contava uma história impossível na tela: a #107
+   aberta às 19:57 com prazo de ontem, "Você mudou o prazo de 29/09 para
+   22/09" (o gatilho grava a mudança em nome da última pessoa que agiu, que
+   era quem pediu), "50 dias de atraso" numa demanda aberta há três horas, e
+   todos os gestos "há 18 min". Aqui a demanda nasce ANTES do prazo, o gesto
+   de assumir (quando há) acontece no dia seguinte, e a mudança crua de prazo
+   sai do histórico, porque ninguém a fez. */
+create or replace function pg_temp.historia_possivel(p_numero int, p_dias int, p_assumiu_dias int)
+returns void language plpgsql as $h$
+declare v_id uuid;
+begin
+  select id into v_id from demandas.demandas where numero = p_numero;
+  update demandas.demandas set criada_em = now() - make_interval(days => p_dias) where id = v_id;
+  update demandas.eventos set em = now() - make_interval(days => p_dias)
+   where demanda_id = v_id and tipo = 'abertura';
+  delete from demandas.eventos where demanda_id = v_id and tipo = 'prazo';
+  if p_assumiu_dias is not null then
+    update demandas.eventos set em = now() - make_interval(days => p_assumiu_dias)
+     where demanda_id = v_id
+       and (tipo = 'responsavel' or (tipo = 'status' and de = 'aberta' and para = 'execucao'));
+  end if;
+end $h$;
+
 do $$
 declare
   t_pede  text := 'tok-pede';
@@ -206,6 +235,7 @@ begin
   perform pg_temp.exige(public.dem_mover(t_ges, n6, 'concluir',
     jsonb_build_object('texto','Trocadas as três lâmpadas por LED. Sobrou uma de reserva, ficou no armário da secretaria.',
                        'atraso','A loja ficou sem LED de 9W e a gente esperou a reposição.')), 'dem_mover(t_ges, n6, ''concluir'')');
+  perform pg_temp.historia_possivel(n6, 9, 8);
 
   /* 7. O QUE FALTAVA NESTA SEMENTE, E POR QUE 252/252 FICOU VERDE COM TRES
         DEFEITOS GRAVES DENTRO — 21/09/2026.
@@ -243,6 +273,7 @@ begin
     'prazo', (current_date + 5)::text)), 'dem_abrir: Consertar o ar da sala do Kids');
   n8 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 51 where numero = n8;
+  perform pg_temp.historia_possivel(n8, 60, null);
 
   /* 9. A ETAPA 5 DO PDF PRECISA DOS DOIS LADOS NA SEMENTE — 22/09/2026.
 
@@ -306,6 +337,12 @@ begin
      conferencia propria na 94 (bloco 13) e em `demandas-banco.test.sql`. */
   update demandas.demandas set criada_em = criada_em - interval '3 hours'
    where aberta_por = (select id from demandas.membros where token = t_pede);
+  /* e a linha "abriu a demanda" do histórico anda junto: a ficha dizia
+     "Aberta em 12:31 · há 10 h" e, na atividade, "abriu a demanda · há 7 h" */
+  update demandas.eventos set em = em - interval '3 hours'
+   where tipo = 'abertura'
+     and demanda_id in (select id from demandas.demandas
+                         where aberta_por = (select id from demandas.membros where token = t_pede));
 
   /* 10. concluida e NAO validada, no setor de quem atende: e a que exercita o
          BOTAO "Resolveu, obrigado" da etapa 5 vendo pelos olhos de quem fez o
@@ -348,6 +385,7 @@ begin
     'prazo', (current_date + 5)::text)), 'dem_abrir: Atualizar a capa do canal do YouTube');
   n12 := (r->>'numero')::int;
   update demandas.demandas set prazo = current_date - 18 where numero = n12;
+  perform pg_temp.historia_possivel(n12, 25, null);
 
   /* 13. QUEM ACOMPANHA SEM TER PEDIDO · migração 94.
 

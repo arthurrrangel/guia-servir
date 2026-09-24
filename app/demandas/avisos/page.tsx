@@ -16,9 +16,12 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
-import { Aviso, Esqueleto, Vazio } from '@/components/demandas/Ui';
+import { Aviso, Cabecalho, Esqueleto, Secao, Vazio } from '@/components/demandas/Ui';
 import { avisos } from '@/lib/demandas/api';
-import { agruparAvisos, carimbo, dataCheia, fraseDoEvento, quando, recadoDoErro, semRepetir, type GrupoDeAvisos } from '@/lib/demandas/regras';
+import {
+  HOJE, agruparAvisos, carimbo, dataCheia, diaNoRio, fraseDoEvento, quando, recadoDoErro, semRepetir, somaDias,
+  type GrupoDeAvisos,
+} from '@/lib/demandas/regras';
 import type { AvisoDentro } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
@@ -27,12 +30,13 @@ export default function Pagina() {
 
 type Grupo = GrupoDeAvisos;
 
+/* o dia do Rio, e não o de UTC: das 21h à meia-noite o de UTC já é amanhã,
+   e o que tinha acontecido às 15h aparecia debaixo de "Ontem" */
 const dia = (iso: string) => {
-  const d = iso.slice(0, 10);
-  const hoje = new Date().toISOString().slice(0, 10);
+  const d = diaNoRio(iso);
+  const hoje = HOJE();
   if (d === hoje) return 'Hoje';
-  const ontem = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  if (d === ontem) return 'Ontem';
+  if (d === somaDias(hoje, -1)) return 'Ontem';
   return dataCheia(d);
 };
 
@@ -60,16 +64,24 @@ function Avisos() {
 
   const grupo = (g: Grupo, novoBloco: boolean) => (
     <li key={`${g.numero}-${novoBloco ? 'n' : 'a'}`} className="dm-aviso-grupo">
-      <Link href={`/demandas/d/${g.numero}`}>#{g.numero} {g.titulo}</Link>
+      <Link href={`/demandas/d/${g.numero}`}><span className="dm-num">#{g.numero}</span> {g.titulo}</Link>
       <ul>
         {semRepetir(g.itens).map((a, i) => (
           <li key={`${a.em}-${i}`} className={a.novo ? 'dm-novo' : undefined}>
-            <div className="dm-aviso-o-que">
-              {fraseDoEvento(a)}
-              {a.novo ? <span className="dm-so-leitor"> (novo)</span> : null}
-              <span className="dm-mudo" title={carimbo(a.em)}> · {quando(a.em)}</span>
+            {/* a frase e a hora como duas peças de `dm-sep`: o "·" antes da
+                hora nunca abre a linha quando a frase quebra */}
+            <div className="dm-aviso-o-que dm-sep">
+              <div className="dm-sep-in">
+                <span>
+                  {fraseDoEvento(a)}
+                  {a.novo ? <span className="dm-so-leitor"> (novo)</span> : null}
+                </span>
+                <span className="dm-quando" title={carimbo(a.em)}>{quando(a.em)}</span>
+              </div>
             </div>
-            {a.tipo === 'comentario' && a.texto
+            {/* o que foi escrito: o comentário, a pergunta da trava (quem pediu
+                precisa ler o que perguntaram) e o que foi feito, na conclusão */}
+            {a.texto && (a.tipo === 'comentario' || (a.tipo === 'status' && (a.para === 'travada' || a.para === 'concluida')))
               ? <div className="dm-aviso-de">“{a.texto.length > 140 ? a.texto.slice(0, 140) + '…' : a.texto}”</div>
               : null}
           </li>
@@ -78,65 +90,62 @@ function Avisos() {
     </li>
   );
 
-  /* os anteriores, separados por dia */
+  /* OS ANTERIORES, POR DIA E, DENTRO DO DIA, POR DEMANDA — 23/09/2026. Era
+     o contrário: a demanda inteira (60 dias de fatos) ia para o dia do fato
+     mais novo, e "Ana assumiu · há 8 dias" aparecia embaixo de "Ontem". Agora
+     cada fato mora no dia dele, e a demanda aparece em cada dia em que teve
+     fato. */
   const antigosPorDia = useMemo(() => {
-    const blocos: { dia: string; grupos: Grupo[] }[] = [];
-    for (const g of antigos) {
-      const d = dia(g.itens[0].em);
-      const ultimo = blocos[blocos.length - 1];
-      if (ultimo && ultimo.dia === d) ultimo.grupos.push(g); else blocos.push({ dia: d, grupos: [g] });
+    const porDia = new Map<string, AvisoDentro[]>();
+    for (const a of (itens || []).filter(x => !x.novo)) {
+      const d = diaNoRio(a.em);
+      const lista = porDia.get(d);
+      if (lista) lista.push(a); else porDia.set(d, [a]);
     }
-    return blocos;
-  }, [antigos]);
+    /* o dia mais novo em cima, pela data (a chave), e não pelo rótulo */
+    return [...porDia.entries()].sort((x, y) => (x[0] < y[0] ? 1 : -1))
+      .map(([d, xs]) => ({ dia: dia(d), grupos: agruparAvisos(xs) }));
+  }, [itens]);
+
+  const quantosNovos = novos.reduce((s, g) => s + g.itens.length, 0);
 
   return (
-    <>
-      <div className="dm-cab">
-        <div>
-          <div className="dm-rot">{'>'} avisos</div>
-          <h1 style={{ marginTop: 4 }}>Avisos</h1>
-          <p className="dm-peq dm-mudo" style={{ margin: '6px 0 0' }}>
-            O que outras pessoas fizeram nas suas demandas, nos últimos 60 dias.
-          </p>
-        </div>
-      </div>
+    <div className="dm-leitura">
+      {/* o mesmo desenho das outras telas: o nome da seção em cima (o mesmo
+          da aba) e a pergunta que ela responde no título */}
+      <Cabecalho sobre="Avisos" titulo="O que mudou nas suas demandas"
+        meta={<span>O que outras pessoas fizeram nos últimos 60 dias. Abrir esta tela marca tudo como visto.</span>} />
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
-      <div className="dm-duas">
-      <div className="dm-leitura-larga">
-        {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 && !erro ? (
+      {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 && !erro ? (
+        <div className="dm-tabela">
           <Vazio titulo="Nenhum aviso ainda.">Quando alguém mexer numa demanda sua, aparece aqui.</Vazio>
-        ) : (
-          <>
-            {novos.length ? (
-              <>
-                <h2 style={{ margin: '0 0 var(--dm-e1)' }}>Novos<span className="dm-selo">{novos.reduce((s, g) => s + g.itens.length, 0)}</span></h2>
-                <ul className="dm-avisos">{novos.map(g => grupo(g, true))}</ul>
-              </>
-            ) : null}
-            {antigos.length ? (
-              <>
-                <h2 style={{ margin: `${novos.length ? 'var(--dm-e4)' : '0'} 0 var(--dm-e1)` }}>Anteriores</h2>
-                {antigosPorDia.map(b => (
-                  <div key={b.dia}>
-                    <div className="dm-avisos-dia">{b.dia}</div>
-                    <ul className="dm-avisos">{b.grupos.map(g => grupo(g, false))}</ul>
-                  </div>
-                ))}
-              </>
-            ) : null}
-          </>
-        )}
-      </div>
-      {/* a coluna da direita no desktop: o que esta tela é, em duas linhas,
-          no lugar de 40% de tela vazia */}
-      <aside className="dm-card dm-quieto dm-fixa dm-so-desktop" aria-label="Como funciona">
-        <h3>Como funciona</h3>
-        <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
-          Aparece aqui o que outras pessoas fizeram nas suas demandas: assumiram, mudaram o prazo,
-          escreveram, concluíram. Abrir esta tela marca tudo como visto.
-        </p>
-      </aside>
-      </div>
-    </>
+        </div>
+      ) : (
+        <>
+          {novos.length ? (
+            <Secao titulo="Novos" n={quantosNovos} destaque>
+              <ul className="dm-avisos dm-tabela">{novos.map(g => grupo(g, true))}</ul>
+            </Secao>
+          ) : null}
+          {/* "Anteriores" só existe em contraste com "Novos": sem novos, a
+              lista vem direto, com os dias como cabeçalho */}
+          {antigos.length ? (
+            (() => {
+              const tabela = (
+                <div className="dm-tabela">
+                  {antigosPorDia.map(b => (
+                    <div key={b.dia}>
+                      <div className="dm-avisos-dia">{b.dia}</div>
+                      <ul className="dm-avisos">{b.grupos.map(g => grupo(g, false))}</ul>
+                    </div>
+                  ))}
+                </div>
+              );
+              return novos.length ? <Secao titulo="Anteriores">{tabela}</Secao> : tabela;
+            })()
+          ) : null}
+        </>
+      )}
+    </div>
   );
 }

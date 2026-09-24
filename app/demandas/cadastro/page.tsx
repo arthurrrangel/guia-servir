@@ -32,10 +32,14 @@ import { useEffect, useState } from 'react';
 import { sb } from '@/lib/supabase';
 import { cadastrar, cadastro } from '@/lib/demandas/api';
 import { Aviso, Bloco, Campo, Opcoes } from '@/components/demandas/Ui';
-import { buscaDoLink, pedidoDoLink, recadoDoErro, setorDoLink, soDigitos, type PedidoDoLink } from '@/lib/demandas/regras';
-import { aviseHumano } from '@/lib/erros';
+import { Porta } from '@/components/demandas/Porta';
+import { buscaDoLink, pedidoDoLink, recadoDoErro, semTravessao, setorDoLink, soDigitos, type PedidoDoLink } from '@/lib/demandas/regras';
+import { aviseHumano as aviseHumanoCru } from '@/lib/erros';
 import { sugerirEmail } from '@/lib/email';
 import type { Cadastro as Situacao } from '@/lib/demandas/tipos';
+
+/* as frases de `lib/erros.ts` são das duas casas; aqui saem sem travessão */
+const aviseHumano = (e: unknown, oQueFazia?: string) => semTravessao(aviseHumanoCru(e, oQueFazia));
 
 type Passo = 'carregando' | 'email' | 'dados' | 'ja' | 'inativo' | 'erro';
 
@@ -122,114 +126,112 @@ export default function Cadastro() {
   const ministerios = (info?.setores || []).filter(s => !s.atende);
   const equipes = (info?.setores || []).filter(s => s.atende);
 
-  return (
-    <div className="dm">
-      <header className="dm-topo">
-        <div className="dm-topo-in">
-          <Link href="/demandas" className="dm-logo"><span>GUI{'>'}</span></Link>
-          <div className="dm-topo-nome">Demandas</div>
-        </div>
-      </header>
-      <div className="dm-corpo" style={{ maxWidth: 520 }}>
-        <div className="dm-rot">{'>'} cadastro</div>
+  /* os dois passos de quem ainda não existe aqui: o e-mail e os dados */
+  const passos = (n: 1 | 2) => (
+    <>
+      <div className="dm-passos" aria-hidden="true"><span className="dm-feito" /><span className={n === 2 ? 'dm-feito' : undefined} /></div>
+      <div className="dm-passo-rot">Passo {n} de 2</div>
+    </>
+  );
 
-        {passo === 'carregando' ? (
-          <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>Um instante…</h1>
-        ) : passo === 'email' ? (
-          <>
-            <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>Cadastro</h1>
-            <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
-              Primeiro, o seu e-mail. Mandamos um link para confirmar que ele é seu.
-            </p>
-            {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
-            <form onSubmit={pedirLink} className="dm-card">
-              <Campo rot="Seu e-mail">
-                <input type="email" inputMode="email" autoComplete="email" required
-                  value={email} onChange={e => setEmail(e.target.value)} />
-              </Campo>
-              <button className="dm-btn dm-pri dm-larga" disabled={indo}>
-                {indo ? 'Enviando…' : enviado ? 'Mandar de novo' : 'Receber o link'}
-              </button>
-            </form>
-            <p className="dm-peq dm-mudo">
-              Já tem cadastro? <Link href="/demandas/entrar">Entrar</Link>
-            </p>
-          </>
-        ) : passo === 'dados' && info ? (
-          <>
-            <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>Seu cadastro</h1>
-            <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
-              Você entrou como <b>{info.email}</b>. Falta pouco.
-            </p>
-            {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
-            <form onSubmit={concluir} className="dm-card">
-              <Campo rot="Nome completo">
-                <input autoComplete="name" required value={nome} onChange={e => setNome(e.target.value)} />
-              </Campo>
-              <Campo rot="WhatsApp" ajuda="Com DDD. É por ele que a equipe fala com você.">
-                <input inputMode="tel" autoComplete="tel" required value={tel} onChange={e => setTel(e.target.value)} />
-              </Campo>
-              <Campo rot="Setor" ajuda="O ministério ou a área onde você serve.">
-                <select required value={setor} onChange={e => setSetor(e.target.value)}>
-                  <option value="">Escolha</option>
-                  {ministerios.length ? (
-                    <optgroup label="Ministérios e áreas">
-                      {ministerios.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
-                    </optgroup>
-                  ) : null}
-                  {equipes.length ? (
-                    <optgroup label="Equipes que atendem demandas">
-                      {equipes.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
-                    </optgroup>
-                  ) : null}
-                </select>
-              </Campo>
-              <Campo rot="Função (opcional)" ajuda="O que você faz. Exemplo: baterista, designer, recepção.">
-                <input maxLength={80} value={funcao} onChange={e => setFuncao(e.target.value)} />
-              </Campo>
-              <Bloco rot="Você também…"
-                ajuda={pedido
-                  ? 'A administração confirma. Até lá, você já pode abrir demandas.'
-                  : 'Quem só pede demandas não precisa marcar nada.'}>
-                <Opcoes rot="Você também" valor={pedido} empilhadas
-                  opcoes={[{ v: '', rot: 'Só vou pedir' }, { v: 'lider', rot: 'Lidero um ministério' },
-                           { v: 'responsavel', rot: 'Atendo demandas' }]}
-                  aoMudar={v => setPedido(v)} />
-              </Bloco>
-              <button className="dm-btn dm-pri dm-larga" disabled={indo || falta.length > 0}>
-                {indo ? 'Salvando…' : 'Concluir cadastro'}
-              </button>
-              {falta.length ? (
-                <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e1)' }}>Falta: {falta.join(', ')}.</p>
+  if (passo === 'carregando') {
+    return <Porta><h1>Um instante…</h1><p className="dm-auth-sub">Conferindo se você já entrou.</p></Porta>;
+  }
+  if (passo === 'email') {
+    return (
+      <Porta>
+        {passos(1)}
+        <h1>Cadastro</h1>
+        <p className="dm-auth-sub">Primeiro, o seu e-mail. Mandamos um link para confirmar que ele é seu.</p>
+        {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
+        <form onSubmit={pedirLink} className="dm-auth-form">
+          <Campo rot="Seu e-mail">
+            <input type="email" inputMode="email" autoComplete="email" required
+              value={email} onChange={e => setEmail(e.target.value)} />
+          </Campo>
+          <button className="dm-btn dm-pri dm-larga" disabled={indo}>
+            {indo ? 'Enviando…' : enviado ? 'Mandar de novo' : 'Receber o link'}
+          </button>
+        </form>
+        <p className="dm-auth-pe">Já tem cadastro? <Link href="/demandas/entrar">Entrar</Link></p>
+      </Porta>
+    );
+  }
+  if (passo === 'dados' && info) {
+    return (
+      <Porta>
+        {passos(2)}
+        <h1>Seu cadastro</h1>
+        <p className="dm-auth-sub">Você entrou como <b>{info.email}</b>. Falta pouco.</p>
+        {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
+        <form onSubmit={concluir} className="dm-auth-form">
+          <Campo rot="Nome completo">
+            <input autoComplete="name" required value={nome} onChange={e => setNome(e.target.value)} />
+          </Campo>
+          <Campo rot="WhatsApp" ajuda="Com DDD. É por ele que a equipe fala com você.">
+            <input type="tel" inputMode="tel" autoComplete="tel" required value={tel} onChange={e => setTel(e.target.value)} />
+          </Campo>
+          <Campo rot="Setor" ajuda="O ministério ou a área onde você serve.">
+            <select required value={setor} onChange={e => setSetor(e.target.value)}>
+              <option value="">Escolha</option>
+              {ministerios.length ? (
+                <optgroup label="Ministérios e áreas">
+                  {ministerios.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                </optgroup>
               ) : null}
-            </form>
-          </>
-        ) : passo === 'ja' ? (
-          <>
-            <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>{primeiro ? `${primeiro}, você já tem cadastro.` : 'Você já tem cadastro.'}</h1>
-            {doLink.equipe ? (
-              <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>
-                Para atender demandas, peça em <Link href="/demandas/perfil">Perfil</Link>.
-              </p>
-            ) : null}
-            <Link className="dm-btn dm-pri dm-larga" href="/demandas">Ir para as minhas demandas</Link>
-          </>
-        ) : passo === 'inativo' ? (
-          <>
-            <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>Este cadastro está desativado.</h1>
-            <p className="dm-peq dm-mudo">Fale com quem administra as demandas para reativar.</p>
-          </>
-        ) : (
-          <>
-            <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>Não deu para abrir o cadastro.</h1>
-            {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
-            <button className="dm-btn" onClick={() => location.reload()}>Tentar de novo</button>
-          </>
-        )}
-      </div>
-      <footer className="dm-rodape">
-        <div className="dm-peq dm-mudo">GUIA Church</div>
-      </footer>
-    </div>
+              {equipes.length ? (
+                <optgroup label="Equipes que atendem demandas">
+                  {equipes.map(s => <option key={s.id} value={s.id}>{s.nome}</option>)}
+                </optgroup>
+              ) : null}
+            </select>
+          </Campo>
+          <Campo rot="Função (opcional)" ajuda="O que você faz. Exemplo: baterista, designer, recepção.">
+            <input maxLength={80} value={funcao} onChange={e => setFuncao(e.target.value)} />
+          </Campo>
+          {/* o rótulo diz o que se escolhe, e a ajuda não contradiz a tela
+              ("não precisa marcar nada" ao lado de uma opção já marcada) */}
+          <Bloco rot="Seu papel"
+            ajuda={pedido
+              ? 'A administração confirma. Até lá, você já pode abrir demandas.'
+              : 'Quem só pede demandas deixa em “Só vou pedir”.'}>
+            <Opcoes rot="Você também" valor={pedido} empilhadas
+              opcoes={[{ v: '', rot: 'Só vou pedir' }, { v: 'lider', rot: 'Lidero um ministério' },
+                       { v: 'responsavel', rot: 'Atendo demandas' }]}
+              aoMudar={v => setPedido(v)} />
+          </Bloco>
+          <button className="dm-btn dm-pri dm-larga" disabled={indo || falta.length > 0}>
+            {indo ? 'Salvando…' : 'Concluir cadastro'}
+          </button>
+          {falta.length ? <p className="dm-auth-falta">Falta: {falta.join(', ')}.</p> : null}
+        </form>
+      </Porta>
+    );
+  }
+  if (passo === 'ja') {
+    return (
+      <Porta>
+        <h1>{primeiro ? `${primeiro}, você já tem cadastro` : 'Você já tem cadastro'}</h1>
+        {doLink.equipe ? (
+          <p className="dm-auth-sub">Para atender demandas, peça em <Link href="/demandas/perfil">Perfil</Link>.</p>
+        ) : <p className="dm-auth-sub">É só entrar e seguir de onde parou.</p>}
+        <Link className="dm-btn dm-pri dm-larga" href="/demandas">Ir para as minhas demandas</Link>
+      </Porta>
+    );
+  }
+  if (passo === 'inativo') {
+    return (
+      <Porta>
+        <h1>Este cadastro está desativado</h1>
+        <p className="dm-auth-sub">Fale com quem administra as demandas para reativar.</p>
+      </Porta>
+    );
+  }
+  return (
+    <Porta>
+      <h1>Não deu para abrir o cadastro</h1>
+      {msg ? <Aviso tom={msg.tom}>{msg.t}</Aviso> : null}
+      <button type="button" className="dm-btn dm-larga" onClick={() => location.reload()}>Tentar de novo</button>
+    </Porta>
   );
 }

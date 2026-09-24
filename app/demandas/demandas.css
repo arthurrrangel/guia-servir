@@ -1,1233 +1,1704 @@
 /* ==========================================================================
-   DEMANDAS — a folha de estilo do segundo sistema
+   DEMANDAS · a folha de estilo do segundo sistema (terceira versão, 23/09/2026)
 
    TUDO AQUI MORA DENTRO DE `.dm`, E ISSO NÃO É ESTILO: É A TRAVA.
 
-   Este arquivo divide a mesma página com `globals.css`, que veste o sistema
-   de escalas inteiro. O Next junta todo o CSS numa folha só, então importar
-   este arquivo "só dentro de /demandas" não isola nada. Medido antes de
-   escrever a primeira versão: 20 das 42 classes e 21 das variáveis já
-   existiam lá (`card`, `btn`, `pill`, `--bg`, `--ink`, `--r`...). Qualquer
-   uma solta reescreveria toda tela do líder. Três regras sem exceção:
+   Este arquivo divide a página com `globals.css`, que veste o sistema de
+   escalas inteiro, e o Next junta todo o CSS numa folha só. Três regras sem
+   exceção, conferidas por `scripts/demandas-css.test.mjs`:
 
      1. toda classe começa com `dm-`;
      2. toda variável começa com `--dm-` e nasce em `.dm`, nunca em `:root`;
-     3. nenhum seletor de elemento solto (`body{}`, `a{}`, `h1{}`, `*{}`).
+     3. nenhum seletor de elemento solto; regra de elemento só dentro de
+        `:where()`, que não pesa (ver "o vazamento", mais abaixo).
 
-   A identidade é a mesma do sistema de escalas: monocromático, cor só para
-   estado, o tipo como interface, e o chevron como único ornamento.
+   A LINGUAGEM DESTA VERSÃO. O pedido foi "um SaaS/ERP financeiro premium:
+   sério, confiável, sofisticado, extremamente organizado". Cinco decisões
+   valem para tudo:
 
-   A REFORMA DE 23/09/2026 (a segunda versão desta folha) segue a
-   especificação de `sistema.md` da rodada com o Fable: cinco decisões que
-   valem para tudo.
+     · CASCA DE PRODUTO. No desktop, barra lateral fixa com a navegação e
+       quem sou; o conteúdo ocupa o resto. No celular, a navegação desce
+       para uma barra de abas no rodapé, e o alto fica com a marca.
+     · HIERARQUIA POR TIPO E ALINHAMENTO, NÃO POR CAIXA. Seção é título e
+       espaço; caixa (`dm-caixa`, `dm-tabela`) só onde há superfície de
+       verdade: tabela, faixa de números, formulário, painel de ação.
+     · NÚMERO É DADO. Algarismos tabulares, alinhados à direita nas tabelas,
+       e em destaque só quando decidem alguma coisa.
+     · ESTADO SE LÊ DE LONGE. Pílulas com ponto em cinco tons medidos
+       (cinza, azul, âmbar, verde, vermelho), e o mesmo tom quer dizer a
+       mesma coisa em qualquer tela. Vermelho é atraso e urgência, e só.
+     · DENSIDADE SEM POLUIÇÃO. No desktop com mouse os controles têm 36px e
+       o corpo 14px; no toque, 44px em tudo que se toca e 16px nos campos.
 
-     · Preto sólido é AÇÃO, e uma só por vista. Seleção é contorno; alarme é
-       texto vermelho; leitura é fio de 1px.
-     · Três degraus de título, todos em caixa baixa e tinta. Caixa alta só na
-       etiqueta de 12px com o chevron.
-     · A largura muda a COMPOSIÇÃO, não o tamanho das coisas: do celular ao
-       ultra o texto é o mesmo; o que muda é quantas colunas e o que vira
-       tabela.
-     · Progressive disclosure em dois níveis, nunca três: visível, e a um
-       toque.
-     · Movimento só para dizer o que mudou: 100 a 320ms, tudo desligável.
-
-   O que custou auditoria e NÃO muda: 44px de alvo em tudo que se toca, 16px
-   em todo campo (o Safari dá zoom abaixo disso), 12px de piso em todo texto,
-   as quatro cores de estado medidas sobre o próprio fundo, a área segura do
-   celular nas barras, `:where()` em toda regra de elemento.
+   O que custou auditoria e NÃO muda: 44px de alvo no toque, 16px em todo
+   campo no celular (o Safari dá zoom abaixo disso), 12px de piso em todo
+   texto (11px só em rótulo de caixa alta espaçada), contraste AA medido
+   sobre o próprio fundo, a área segura do celular nas barras fixas.
    ========================================================================== */
 
 .dm{
-  /* ---- superfícies */
-  --dm-bg:#ffffff;
-  --dm-card:#ffffff;
-  --dm-card2:#f5f5f7;
-  --dm-card3:#fafafb;
-  --dm-preto:#252525;          /* o preto do manual da marca */
-  --dm-preto-toque:#3a3a3a;
+  /* ---- superfícies (zinco, levemente frio) */
+  --dm-sup:#ffffff;
+  --dm-sup-2:#fafafa;
+  --dm-sup-3:#f4f4f5;
+  --dm-sup-4:#ebebed;
+  --dm-fundo:#f5f5f6;
 
-  /* ---- traços: sombra do preto sobre o claro, nunca cinza opaco */
-  --dm-linha:rgba(37,37,37,.11);
-  --dm-linha2:rgba(37,37,37,.18);
-  --dm-linha3:rgba(37,37,37,.33);
-  --dm-linha-forte:var(--dm-ink);
+  /* ---- traços */
+  --dm-linha:#e4e4e7;
+  --dm-linha-2:#d4d4d8;
+  --dm-linha-3:#a1a1aa;
 
-  /* ---- tinta */
-  --dm-ink:#252525;
-  --dm-ink2:rgba(37,37,37,.70);
-  --dm-mudo:rgba(37,37,37,.68);   /* 6,1:1 no branco, medido */
-  --dm-marca:rgba(37,37,37,.34);  /* NÃO é cor de texto: ponto, chevron, seta */
-  --dm-foco:var(--dm-ink);
-  --dm-foco-invertido:#ffffff;
-  --dm-scrim:rgba(37,37,37,.40);
+  /* ---- tinta. `--dm-mudo` é o cinza de texto mais claro permitido:
+         5,3:1 no branco, 5,0:1 no `--dm-sup-2` e 4,8:1 no `--dm-sup-3`. */
+  --dm-ink:#18181b;
+  --dm-ink-2:#3f3f46;
+  --dm-mudo:#6b6b73;
+  --dm-icone:#8a8a93;          /* ícone e traço, nunca texto */
+  --dm-preto:#1c1c1f;          /* ação primária */
+  --dm-preto-toque:#34343a;
 
-  /* ---- estado. Medidos sobre o próprio fundo de 10%: é ali que o
-         contraste aperta (5,7:1 a 6,4:1). */
-  --dm-ok:#0a6b3f;   --dm-ok-bg:rgba(10,107,63,.10);   --dm-ok-ln:rgba(10,107,63,.30);
-  --dm-warn:#7a5005; --dm-warn-bg:rgba(170,112,10,.13);--dm-warn-ln:rgba(170,112,10,.34);
-  --dm-bad:#a82e24;  --dm-bad-bg:rgba(168,46,36,.09);  --dm-bad-ln:rgba(168,46,36,.28);
-  --dm-info:#1b53ad; --dm-info-bg:rgba(27,83,173,.08); --dm-info-ln:rgba(27,83,173,.26);
+  /* ---- foco: monocromático como a marca, com halo nos campos */
+  --dm-foco:#18181b;
+  --dm-halo:rgba(24,24,27,.12);
+
+  /* ---- estado. Texto medido sobre o próprio fundo claro (≥ 5,7:1). */
+  --dm-ok:#15703a;   --dm-ok-bg:#effaf3;  --dm-ok-ln:#bfe6cc;  --dm-ok-ponto:#16a34a;
+  --dm-warn:#9a4d05; --dm-warn-bg:#fff7eb;--dm-warn-ln:#f6d9a8;--dm-warn-ponto:#e08a0b;
+  --dm-bad:#b42318;  --dm-bad-bg:#fef3f2; --dm-bad-ln:#f9cfca; --dm-bad-ponto:#e0352b;
+  --dm-info:#1d4fd7; --dm-info-bg:#eff4ff;--dm-info-ln:#c9d8fb;--dm-info-ponto:#2e67f2;
+  --dm-neutro:#52525b;--dm-neutro-bg:#f4f4f5;--dm-neutro-ln:#e0e0e4;--dm-neutro-ponto:#a1a1aa;
+
+  /* ---- a sala da administração: a lateral escura */
+  --dm-adm-fundo:#18181b;
+  --dm-adm-linha:#2c2c31;
+  --dm-adm-ink:#f4f4f5;
+  --dm-adm-mudo:#a1a1aa;
+  --dm-adm-toque:#27272b;
 
   /* ---- ritmo (base 4) */
-  --dm-e0:4px; --dm-e1:8px; --dm-e2:12px; --dm-e3:16px; --dm-e4:24px; --dm-e5:36px; --dm-e6:56px;
-  --dm-calha:16px;          /* margem lateral do corpo, por faixa */
-  --dm-gap:8px;
-  --dm-largura:100%;        /* largura máxima do corpo, por faixa */
-  --dm-card-pad:16px;
+  --dm-e1:4px; --dm-e2:8px; --dm-e3:12px; --dm-e4:16px; --dm-e5:20px; --dm-e6:24px; --dm-e8:32px; --dm-e10:40px; --dm-e12:48px;
+  --dm-calha:16px;
 
-  /* CAIXA NÃO TEM CANTO, ALVO DE TOQUE TEM. Cartão, pílula, aviso e tabela
-     são fio de 1px sem canto e sem sombra; botão, campo e ficha de filtro
-     têm raio, porque o raio ajuda a ler a área que se toca. A única sombra
-     do sistema é a de peça que FLUTUA sobre conteúdo rolável (toast, folha,
-     menu), que o fio não separa. */
-  --dm-r:10px;
-  --dm-r-seg:14px;
-  --dm-sombra-flutua:0 8px 24px rgba(37,37,37,.14),0 0 0 1px var(--dm-linha);
+  /* ---- alturas: toque primeiro; o mouse ganha densidade mais abaixo */
+  --dm-h:44px;        /* controle */
+  --dm-h-peq:44px;    /* controle pequeno */
+  --dm-h-linha:44px;  /* item de navegação */
+
+  /* ---- cantos e sombras */
+  --dm-r1:4px; --dm-r2:6px; --dm-r3:8px; --dm-r4:12px;
+  --dm-sombra-btn:0 1px 1px rgba(16,16,20,.04);
+  --dm-sombra-dialogo:0 24px 64px rgba(16,16,20,.22),0 0 0 1px rgba(16,16,20,.06);
+
+  /* ---- casca */
+  --dm-lateral-l:0px;
+  --dm-abas-alt:60px;
+  --dm-topo-alt:56px;
+  --dm-largura:1360px;
+  --dm-trilho:288px;   /* a coluna da direita: painel da ficha, resumo da Nova */
 
   /* ---- movimento */
   --dm-curva:cubic-bezier(.22,.61,.36,1);
   --dm-curva-entra:cubic-bezier(.2,.8,.2,1);
-  --dm-t-toque:100ms cubic-bezier(.2,0,0,1);
   --dm-t:140ms var(--dm-curva);
-  --dm-t-abre:200ms var(--dm-curva-entra);
-  --dm-t-painel:260ms var(--dm-curva-entra);
+  --dm-t-abre:220ms var(--dm-curva-entra);
 
-  /* ---- tipo: o display é o único tamanho que muda com a largura */
+  /* ---- tipo */
   --dm-fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --dm-t-display:24px; --dm-lh-display:30px;
-  --dm-topo-altura:92px;    /* 48 (logo) + 44 (abas) no celular; 56 no desktop */
+  --dm-t-corpo:15px;
+  --dm-t-campo:16px;
+  --dm-t-titulo:22px; --dm-lh-titulo:28px;
 
-  background:var(--dm-bg);
+  background:var(--dm-sup);
   color:var(--dm-ink);
   font-family:var(--dm-fonte);
-  font-size:16px;
+  font-size:var(--dm-t-corpo);
   line-height:1.5;
   min-height:100dvh;
-  display:flex;
-  flex-direction:column;
   -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-align:left;
 }
-@media (min-width:720px){ .dm{ --dm-calha:24px; --dm-gap:16px; --dm-card-pad:20px; --dm-t-display:28px; --dm-lh-display:34px } }
-@media (min-width:1024px){ .dm{ --dm-calha:32px; --dm-gap:24px; --dm-card-pad:24px; --dm-largura:1120px; --dm-topo-altura:56px } }
-@media (min-width:1280px){ .dm{ --dm-largura:1200px; --dm-t-display:32px; --dm-lh-display:38px } }
-@media (min-width:1680px){ .dm{ --dm-largura:1320px; --dm-calha:40px; --dm-gap:32px } }
+@media (min-width:720px){ .dm{ --dm-calha:24px } }
+@media (min-width:1024px){ .dm{ --dm-t-titulo:24px; --dm-lh-titulo:32px; --dm-lateral-l:232px } }
+@media (min-width:1280px){ .dm{ --dm-calha:40px; --dm-lateral-l:248px; --dm-trilho:320px } }
+@media (min-width:1440px){ .dm{ --dm-trilho:340px } }
+/* densidade de desktop só com mouse de verdade: tablet deitado continua
+   com alvo de dedo */
+@media (min-width:1024px) and (hover:hover) and (pointer:fine){
+  .dm{ --dm-h:36px; --dm-h-peq:32px; --dm-h-linha:34px; --dm-t-corpo:14px; --dm-t-campo:14px }
+}
 
 .dm *,.dm *::before,.dm *::after{box-sizing:border-box}
+/* a borda da página no puxão do celular: branca no sistema, cinza na porta */
+html:has(.dm),body:has(.dm){background:#ffffff}
+html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 
 /* O VAZAMENTO DO OUTRO SISTEMA ENTRA POR BAIXO DA CASCA.
 
-   `globals.css` tem 91 seletores sem classe. Três deles mudavam telas inteiras
-   daqui: `label{text-transform:uppercase;letter-spacing:.12em}` (todo campo é
-   um label), `h3::before{content:"›"}` e, o pior, `h3{text-transform:uppercase;
-   color:mudo;display:flex}`: todo título de cartão saía em caixa alta cinza
-   com tracking negativo, um híbrido que não existe no sistema (medido pelo
-   Fable em 23/09). A casca se defende dentro de `:where()`, que pesa 0-1-0:
-   ganha do elemento do outro sistema (0-0-1) e perde de qualquer classe daqui.
-   `.dm label{}` pesaria 0-1-1 e ganharia de `.dm-campo`, que é classe minha
-   em cima de `<label>`: seria consertar um vazamento criando outro. */
+   `globals.css` pinta elemento solto: `label` em caixa alta, `h3` cinza com
+   chevron antes e fonte de título, `button` com 44px e fundo cinza no
+   toque, `input` com 52px e canto zero, `main` com largura e margem
+   próprias. Tudo aqui é zerado dentro de `:where()`, que pesa 0-1-0: ganha
+   do elemento do outro sistema (0-0-1) e perde de qualquer classe desta
+   folha. Os estados (`button:hover`, 0-1-1) pedem 0-2-0. */
 .dm :where(label){
-  text-transform:none;letter-spacing:normal;font-size:inherit;
+  text-transform:none;letter-spacing:normal;font-size:inherit;font-family:inherit;
   font-weight:inherit;color:inherit;display:block;margin:0;
 }
-.dm :where(h1,h2,h3){
-  margin:0;font-family:inherit;text-transform:none;letter-spacing:-.02em;
-  color:inherit;display:block;line-height:1.2;font-weight:650;
+.dm :where(h1,h2,h3,h4){
+  margin:0;font-family:inherit;text-transform:none;letter-spacing:-.01em;
+  color:inherit;display:block;line-height:1.3;font-weight:600;font-size:inherit;
 }
 .dm :where(h3)::before{content:none}
-.dm :where(h1){font-size:var(--dm-t-display);line-height:var(--dm-lh-display);text-wrap:balance}
-.dm :where(h2){font-size:20px;line-height:26px;letter-spacing:-.015em}
-.dm :where(h3){font-size:15px;line-height:20px;letter-spacing:-.01em}
-.dm :where(p){margin:0 0 var(--dm-e2)}
-/* `:where(.dm a)`: `.dm a{}` pesaria 0-1-1 e ganharia de `.dm-logo{color:#fff}`.
-   Aconteceu: a logo saiu preto no preto. Dentro de :where() a regra vale como
-   padrão e perde de qualquer classe. */
-:where(.dm a){color:inherit}
-.dm :where(button,input,select,textarea){font:inherit;color:inherit}
-/* 16px NOS CAMPOS: o Safari do iPhone dá zoom sozinho abaixo disso. */
-.dm :where(input,select,textarea){font-size:16px}
+.dm :where(p){margin:0}
+.dm :where(ul,ol){margin:0;padding:0;list-style:none}
+.dm :where(b,strong){font-weight:600}
+.dm :where(small){font-size:inherit}
+.dm :where(table){border-collapse:collapse;border-spacing:0}
+:where(.dm a){color:inherit;text-decoration:none}
+.dm :where(button){
+  font:inherit;color:inherit;background:none;border:0;border-radius:0;margin:0;padding:0;
+  min-height:0;max-width:none;text-transform:none;letter-spacing:normal;font-weight:inherit;
+  cursor:pointer;text-align:inherit;transition:none;display:inline-flex;align-items:center;
+}
+.dm :where(button):is(:hover,:active){transform:none;background-color:transparent}
+.dm :where(button):disabled{background-color:transparent;opacity:1}
+.dm :where(input,select,textarea){font:inherit;color:inherit;letter-spacing:normal;text-transform:none}
+.dm :where(main){max-width:none;margin:0;padding:0;position:static;z-index:auto;text-align:left}
 .dm :focus-visible{outline:2px solid var(--dm-foco);outline-offset:2px}
-/* sobre superfície escura o anel preto some: aqui ele é branco */
-.dm-pri:focus-visible,.dm-adm-faixa :focus-visible,.dm-toast :focus-visible{outline-color:var(--dm-foco-invertido)}
+.dm :where(svg){flex:none}
 
 /* ------------------------------------------------------------------ texto */
-/* 12px É O CHÃO: no ônibus, com o celular a meio braço, 11 some. */
-.dm-rot{
-  font-size:12px;line-height:16px;letter-spacing:.12em;text-transform:uppercase;
-  color:var(--dm-mudo);font-weight:600;
-}
-.dm-peq{font-size:13px;line-height:18px}
-.dm-dim{color:var(--dm-ink2)}
+/* o rótulo de cima do título: de onde é isto ("Atendimento", "Demanda #42") */
+.dm-rot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;line-height:18px;font-weight:500;color:var(--dm-mudo)}
+.dm-peq{font-size:13px;line-height:19px}
+.dm-dim{color:var(--dm-ink-2)}
 .dm-mudo{color:var(--dm-mudo)}
+.dm-num{font-variant-numeric:tabular-nums}
 .dm-centro{text-align:center}
-.dm-cresce{flex:1;min-width:0}
+.dm-cresce{flex:1 1 auto;min-width:0}
 .dm-corta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:68ch}
+.dm-texto-livre{white-space:pre-wrap;overflow-wrap:anywhere;max-width:72ch;font-size:var(--dm-t-corpo);line-height:1.6;color:var(--dm-ink)}
+.dm-depois-do-texto{margin-top:var(--dm-e3);max-width:72ch}
+.dm-antes-do-botao{margin-bottom:var(--dm-e3)}
+.dm-depois-da-lista{margin-top:var(--dm-e3)}
 .dm-so-leitor{
   position:absolute;width:1px;height:1px;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0;
 }
+@media (max-width:1023px){ .dm-so-desktop{display:none!important} }
+@media (min-width:1024px){ .dm-so-celular{display:none!important} }
 
-/* --------------------------------------------------------------- a casca */
-/* A BARRA. Celular: duas linhas (logo + quem sou, 48px; abas, 44px), a de
-   cima se recolhe ao rolar para baixo e volta ao rolar para cima
-   (`dm-recolhida`, posta por um ouvinte de rolagem na Casca): enquanto a
-   pessoa lê, ficam só as abas. Desktop: uma barra de 56px com as abas em
-   linha e quem sou à direita. A área segura do celular continua no topo, em
-   qualquer estado. */
-.dm-topo{
-  position:sticky;top:0;z-index:30;background:var(--dm-bg);
-  border-bottom:1px solid var(--dm-linha);
-  padding-top:env(safe-area-inset-top, 0px);
-}
-.dm-topo-in{
-  max-width:var(--dm-largura);margin:0 auto;padding:0 var(--dm-calha);
-  display:grid;grid-template-columns:auto 1fr;grid-template-areas:"logo quem" "abas abas";
-  align-items:center;column-gap:var(--dm-e2);
-}
-/* o link tem 44px de alvo; a caixa preta da marca, 36px, e o <span> de
-   dentro. A cor e o fundo ficam declarados no link tambem, para um nunca
-   virar o outro (o defeito de 18/09) */
-.dm-logo{
-  grid-area:logo;
-  display:inline-flex;align-items:center;justify-content:center;
-  min-height:44px;min-width:44px;margin:2px 0;padding:0;
-  background:transparent;color:#fff;text-decoration:none;flex:none;
-}
-.dm-logo > span{
-  display:inline-flex;align-items:center;justify-content:center;
-  height:36px;padding:0 8px 0 11px;border-radius:2px;
-  background:var(--dm-preto);color:#fff;font-weight:700;
-  letter-spacing:.26em;font-size:12px;line-height:1;
-}
-/* `justify-self:stretch` (e nao `end`): com `end` o Chrome media a caixa
-   pelo texto inteiro (302px numa coluna de 218) e ela vazava por cima da
-   logo em 320px; esticada na coluna, o excesso e cortado com reticencias */
-.dm-quem-sou{
-  grid-area:quem;justify-self:stretch;min-width:0;
-  display:flex;align-items:baseline;justify-content:flex-end;gap:8px;font-size:13px;color:var(--dm-mudo);
-  white-space:nowrap;overflow:hidden;min-height:44px;
-}
-.dm-quem-sou b{flex:none}
-/* o link "Portal" da faixa da administracao mora aqui: alvo de 44 */
-.dm-quem-sou a{display:inline-flex;align-items:center;min-height:44px}
-.dm-quem-sou b{color:var(--dm-ink);font-weight:600;font-size:14px}
-/* entrar e cadastro nao tem abas nem pessoa: so o nome do sistema ao lado da
-   logo, na mesma linha, em qualquer largura */
-.dm-topo-nome{grid-column:2 / -1;grid-row:1;display:flex;align-items:center;min-height:44px;font-size:14px;font-weight:600;color:var(--dm-ink)}
-.dm-quem-sou span{overflow:hidden;text-overflow:ellipsis}
-.dm-abas{
-  grid-area:abas;
-  display:flex;justify-content:space-between;gap:var(--dm-e2);
-  overflow-x:auto;scrollbar-width:none;
-}
-.dm-abas::-webkit-scrollbar{display:none}
-/* em 320 as cinco abas com dois selos ("Atender 1", "Avisos 2") mediam
-   303px para 288 de barra: em 13px, sem padding e com selo menor cabem */
-@media (max-width:359px){
-  .dm-abas{gap:4px}
-  .dm-abas a{font-size:13px;padding:0}
-  .dm-abas .dm-selo{margin-left:4px;min-width:18px;height:18px;padding:0 5px;font-size:12px}
-}
-/* no tablet as cinco abas não se espalham pela largura toda: ficam à
-   esquerda, com o mesmo passo do desktop */
-@media (min-width:600px){ .dm-abas{justify-content:flex-start;gap:var(--dm-e4)} }
-/* cabe em 320 sem rolar: "Início Atender Nova Avisos Perfil" em 14px 550
-   mede 262px de texto (medido) */
-.dm-abas a{
-  display:inline-flex;align-items:center;gap:4px;
-  min-height:44px;padding:0 2px;font-size:14px;font-weight:550;
-  color:var(--dm-mudo);text-decoration:none;white-space:nowrap;
-  border-bottom:2px solid transparent;margin-bottom:-1px;
-  transition:color var(--dm-t),border-color var(--dm-t);
-}
-.dm-abas a:hover{color:var(--dm-ink2)}
-.dm-abas a[aria-current="page"]{color:var(--dm-ink);border-bottom-color:var(--dm-ink);font-weight:650}
-.dm-abas a:focus-visible{outline-offset:-2px}
-/* a linha da logo se recolhe ao rolar, só no celular: só as abas ficam
-   (44px em vez de 92). No tablet há altura de sobra e a linha fica. */
-@media (max-width:719px){
-  .dm-recolhida .dm-logo,.dm-recolhida .dm-quem-sou{
-    height:0;min-height:0;margin:0;overflow:hidden;opacity:0;pointer-events:none;
-  }
-  .dm-recolhida .dm-logo{border:0;padding:0}
-  .dm-recolhida .dm-logo > span{height:0;overflow:hidden}
-}
+/* =============================================================== a casca */
+
+/* A RAIZ COM CASCA. No desktop a lateral é fixa e o conteúdo anda à
+   direita dela; no celular a navegação é a barra de abas do rodapé, e o
+   conteúdo ganha chão para ela não cobrir a última linha. */
+.dm-casca{display:block;padding-left:var(--dm-lateral-l)}
+.dm-casca.dm-com-abas{padding-bottom:calc(var(--dm-abas-alt) + env(safe-area-inset-bottom, 0px))}
+@media (min-width:1024px){ .dm-casca.dm-com-abas{padding-bottom:0} }
+/* a ficha só mostra as abas quando não tem barra de ação própria (ela
+   avisa com `.dm-sem-barra`); enquanto carrega, também não mostra, para as
+   abas não piscarem e sumirem quando a barra chega */
+.dm-casca.dm-na-ficha:not(:has(.dm-sem-barra)){padding-bottom:0}
+.dm-casca.dm-na-ficha:not(:has(.dm-sem-barra)) > .dm-abas{display:none}
+
+/* --------------------------------------------------------------- lateral */
+.dm-lateral{display:none}
 @media (min-width:1024px){
-  .dm-topo-in{
-    grid-template-columns:auto 1fr auto;grid-template-areas:"logo abas quem";
-    column-gap:var(--dm-e4);min-height:56px;
+  .dm-lateral{
+    display:flex;flex-direction:column;gap:var(--dm-e4);
+    position:fixed;inset:0 auto 0 0;width:var(--dm-lateral-l);z-index:30;
+    padding:var(--dm-e4) var(--dm-e3) var(--dm-e3);
+    background:var(--dm-sup-2);border-right:1px solid var(--dm-linha);
+    overflow-y:auto;scrollbar-width:thin;
   }
-  .dm-logo{margin:0}
-  .dm-abas{justify-content:flex-start;gap:var(--dm-e4)}
-  .dm-abas a{min-height:56px;padding:0 2px}
-  .dm-quem-sou{min-height:56px;align-items:center}
 }
-/* a administração é a mesma barra em preto: a "outra sala" dita sem outra
-   estrutura. As abas viram as seções; "Portal" fica à direita. */
-.dm-adm-faixa{background:var(--dm-preto);color:#fff;border-bottom-color:rgba(255,255,255,.14)}
-.dm-adm-faixa .dm-logo > span{background:#fff;color:var(--dm-preto)}
-.dm-adm-faixa .dm-abas a{color:rgba(255,255,255,.72)}
-.dm-adm-faixa .dm-abas a:hover{color:#fff}
-.dm-adm-faixa .dm-abas a[aria-current="page"]{color:#fff;border-bottom-color:#fff}
-.dm-adm-faixa .dm-quem-sou,.dm-adm-faixa .dm-quem-sou b{color:#fff}
-.dm-adm-faixa .dm-quem-sou{color:rgba(255,255,255,.78)}
-.dm-adm-faixa :where(a){color:#fff}
+.dm-lateral-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);padding:4px var(--dm-e2) 0;min-height:36px}
+.dm-marca{display:inline-flex;align-items:center;gap:10px;color:var(--dm-ink);text-decoration:none;min-width:0}
+.dm-marca:where(a){min-height:44px}
+/* a marca: a caixa preta diz as duas cores, para uma nunca virar a outra
+   (o defeito de 18/09: texto #252525 sobre fundo #252525). 11px em caixa
+   alta espaçada é rótulo, e o medidor de celular o aceita como tal. */
+.dm-logo{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  height:26px;padding:0 5px 0 8px;border-radius:6px;
+  background:var(--dm-preto);color:#fff;
+  font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;line-height:1;
+}
+.dm-marca-nome{font-size:15px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+.dm-lateral-nova .dm-btn{width:100%}
+.dm-nav{display:grid;gap:2px}
+.dm-nav-grupo{
+  font-size:11px;line-height:16px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--dm-mudo);padding:var(--dm-e2) var(--dm-e2) 6px;
+}
+.dm-nav-item{
+  display:flex;align-items:center;gap:10px;min-height:var(--dm-h-linha);
+  padding:0 var(--dm-e2);border-radius:var(--dm-r2);
+  font-size:14px;font-weight:500;color:var(--dm-ink-2);text-decoration:none;
+  transition:background var(--dm-t),color var(--dm-t);
+}
+.dm-nav-item svg{width:18px;height:18px;color:var(--dm-icone);transition:color var(--dm-t)}
+.dm-nav-item:hover{background:var(--dm-sup-3);color:var(--dm-ink)}
+.dm-nav-item:hover svg{color:var(--dm-ink-2)}
+.dm-nav-item[aria-current="page"]{background:var(--dm-sup);color:var(--dm-ink);font-weight:600;box-shadow:0 0 0 1px var(--dm-linha),0 1px 2px rgba(16,16,20,.05)}
+.dm-nav-item[aria-current="page"] svg{color:var(--dm-ink)}
+.dm-nav-item > span:first-of-type{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dm-nav-n{
+  display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:10px;background:var(--dm-preto);color:#fff;font-size:12px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.dm-lateral-pe{margin-top:auto;border-top:1px solid var(--dm-linha);padding-top:var(--dm-e3);display:grid;gap:2px}
+.dm-eu{
+  display:flex;align-items:center;gap:10px;padding:6px var(--dm-e2);border-radius:var(--dm-r2);
+  text-decoration:none;color:var(--dm-ink);min-width:0;transition:background var(--dm-t);
+}
+.dm-eu:hover,.dm-eu[aria-current="page"]{background:var(--dm-sup-3)}
+.dm-avatar{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--dm-sup-4);color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-linha-2);
+  font-size:12px;font-weight:600;letter-spacing:.02em;
+}
+.dm-avatar.dm-grande{width:52px;height:52px;font-size:18px}
+.dm-avatar.dm-mini{width:24px;height:24px;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.dm-eu-txt{display:grid;min-width:0;line-height:1.3}
+.dm-eu-txt b{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dm-eu-txt small{font-size:12px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* `text-align:left` e `position:static` de proposito: o corpo e um <main>,
-   e o globals.css das escalas manda `main{text-align:center}` abaixo de
-   760px e `main{position:relative;z-index:1}`. Os dois sistemas nao se
-   encostam, entao quem se protege e esta folha (medido em 23/09/2026: a
-   ficha inteira centralizada em 320px). */
+/* A SALA DA ADMINISTRAÇÃO: a mesma casca, com a lateral escura e o topo
+   escuro no celular. É outra sala, e a pessoa vê isso antes de ler. */
+.dm-adm-faixa{display:grid;gap:2px}
+.dm-adm .dm-lateral{background:var(--dm-adm-fundo);border-right-color:var(--dm-adm-fundo)}
+.dm-adm .dm-lateral .dm-marca-nome{color:var(--dm-adm-ink)}
+.dm-adm .dm-lateral .dm-logo{background:#fff;color:var(--dm-preto)}
+.dm-adm .dm-lateral .dm-nav-grupo{color:var(--dm-adm-mudo)}
+.dm-adm .dm-lateral .dm-nav-item{color:var(--dm-adm-mudo)}
+.dm-adm .dm-lateral .dm-nav-item svg{color:var(--dm-adm-mudo)}
+.dm-adm .dm-lateral .dm-nav-item:hover{background:var(--dm-adm-toque);color:var(--dm-adm-ink)}
+.dm-adm .dm-lateral .dm-nav-item:hover svg{color:var(--dm-adm-ink)}
+.dm-adm .dm-lateral .dm-nav-item[aria-current="page"]{background:var(--dm-adm-toque);color:#fff;box-shadow:inset 0 0 0 1px var(--dm-adm-linha)}
+.dm-adm .dm-lateral .dm-nav-item[aria-current="page"] svg{color:#fff}
+.dm-adm .dm-lateral .dm-lateral-pe{border-top-color:var(--dm-adm-linha)}
+.dm-adm .dm-lateral .dm-eu{color:var(--dm-adm-ink)}
+.dm-adm .dm-lateral .dm-eu:hover{background:var(--dm-adm-toque)}
+.dm-adm .dm-lateral .dm-eu-txt small{color:var(--dm-adm-mudo)}
+.dm-adm .dm-lateral .dm-avatar{background:var(--dm-adm-toque);color:var(--dm-adm-ink);box-shadow:inset 0 0 0 1px var(--dm-adm-linha)}
+.dm-adm .dm-lateral .dm-logo:focus-visible,.dm-adm .dm-lateral .dm-nav-item:focus-visible,.dm-adm .dm-lateral .dm-eu:focus-visible{outline-color:#fff}
+.dm-nav-voltar{margin-bottom:-4px}
+.dm-lateral-adm .dm-nav-voltar{border:1px solid var(--dm-adm-linha)}
+
+/* ----------------------------------------------------- topo (celular) */
+.dm-topo{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e3);
+  min-height:calc(var(--dm-topo-alt) + env(safe-area-inset-top, 0px));
+  padding:env(safe-area-inset-top, 0px) var(--dm-calha) 0;
+  background:rgba(255,255,255,.96);border-bottom:1px solid var(--dm-linha);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);
+  position:sticky;top:0;z-index:30;
+}
+@media (min-width:1024px){ .dm-casca > .dm-topo{display:none} }
+.dm-topo-eu{display:inline-flex;align-items:center;justify-content:center;min-width:44px;min-height:44px;margin-right:-6px;border-radius:50%}
+.dm-topo-eu .dm-avatar{width:32px;height:32px}
+.dm-topo-volta{
+  display:inline-flex;align-items:center;gap:4px;min-height:44px;margin-left:-8px;padding:0 8px 0 4px;
+  font-size:15px;font-weight:600;color:var(--dm-ink);text-decoration:none;border-radius:var(--dm-r2);
+}
+.dm-topo-volta svg{width:20px;height:20px}
+.dm-topo-sala{font-size:13px;font-weight:500;color:var(--dm-mudo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-adm .dm-topo{background:var(--dm-adm-fundo);border-bottom-color:var(--dm-adm-fundo)}
+.dm-adm .dm-topo-volta{color:#fff}
+.dm-adm .dm-topo-sala{color:var(--dm-adm-mudo)}
+.dm-adm .dm-topo :focus-visible{outline-color:#fff}
+
+/* ------------------------------------------ barra de abas (celular) */
+.dm-abas{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+  padding:0 max(env(safe-area-inset-right, 0px), 4px) env(safe-area-inset-bottom, 0px) max(env(safe-area-inset-left, 0px), 4px);
+  background:rgba(255,255,255,.97);border-top:1px solid var(--dm-linha);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);
+}
+@media (min-width:1024px){ .dm-abas{display:none} }
+.dm-aba{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:var(--dm-abas-alt);padding:6px 2px 4px;position:relative;min-width:0;
+  font-size:12px;line-height:14px;font-weight:500;color:var(--dm-mudo);text-decoration:none;white-space:nowrap;
+}
+.dm-aba > svg{width:22px;height:26px;color:var(--dm-icone)}
+.dm-aba[aria-current="page"]{color:var(--dm-ink);font-weight:600}
+.dm-aba[aria-current="page"] > svg{color:var(--dm-ink)}
+.dm-aba-nova{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:40px;height:26px;border-radius:8px;background:var(--dm-preto);
+}
+.dm-aba .dm-aba-nova svg{color:#fff;width:18px;height:18px}
+.dm-aba-n{
+  position:absolute;top:4px;left:calc(50% + 5px);
+  min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+  background:var(--dm-preto);color:#fff;box-shadow:0 0 0 2px var(--dm-sup);
+  font-size:12px;font-weight:600;line-height:18px;text-align:center;font-variant-numeric:tabular-nums;
+}
+
+/* ------------------------------------------------------------- o corpo */
 .dm-corpo{
-  flex:1;max-width:var(--dm-largura);margin:0 auto;width:100%;
-  padding:var(--dm-e3) var(--dm-calha) var(--dm-e6);
-  text-align:left;position:static;
+  display:block;max-width:var(--dm-largura);margin:0 auto;width:100%;
+  padding:var(--dm-e5) var(--dm-calha) var(--dm-e10);
 }
-@media (min-width:1024px){ .dm-corpo{padding-top:var(--dm-e4)} }
-/* a barra de ação fixa do celular precisa de chão para a última linha do
-   histórico não ficar embaixo dela: a ficha põe este espaçador no fim */
-.dm-barra-espaco{height:calc(88px + env(safe-area-inset-bottom, 0px))}
+@media (min-width:1024px){ .dm-corpo{padding-top:var(--dm-e8);padding-bottom:var(--dm-e12)} }
+/* a barra de ação fixa do celular precisa de chão para a última linha */
+.dm-barra-espaco{height:calc(80px + env(safe-area-inset-bottom, 0px))}
 @media (min-width:1024px){ .dm-barra-espaco{display:none} }
-/* o fio do rodapé alinha com o conteúdo, não com a calha: o traço vai no
-   pseudo-elemento, dentro do padding */
-.dm-rodape{
-  position:relative;max-width:var(--dm-largura);margin:0 auto;width:100%;
-  padding:var(--dm-e4) var(--dm-calha);font-size:12px;color:var(--dm-mudo);
-  display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap;
-}
-.dm-rodape::before{content:'';position:absolute;left:var(--dm-calha);right:var(--dm-calha);top:0;height:1px;background:var(--dm-linha)}
-.dm-rodape-links{display:flex;gap:var(--dm-e3)}
-.dm-rodape-links a{font-size:13px;color:var(--dm-ink2);text-decoration:none;min-height:44px;display:inline-flex;align-items:center}
-.dm-rodape-links a:hover{color:var(--dm-ink)}
+/* leitura (avisos, perfil): linha curta, sem esticar até 1360 */
+.dm-leitura{max-width:880px}
 
-/* O CABEÇALHO DE TELA: etiqueta "> ONDE", o display, a linha de contexto e a
-   ação primária (à direita no desktop, abaixo em largura inteira no celular). */
-.dm-cab{display:grid;gap:var(--dm-e2);margin-bottom:var(--dm-e3);align-items:end}
-.dm-cab > .dm-cab-acoes{display:flex;gap:var(--dm-e1);flex-wrap:wrap}
-.dm-cab > .dm-cab-acoes > *{flex:1 1 auto}
-.dm-cab > .dm-cab-acoes > .dm-txt{flex:0 0 auto;margin-left:auto}
-@media (max-width:719px){ .dm-cab:has(> .dm-cab-acoes > .dm-txt:only-child){grid-template-columns:minmax(0,1fr) auto;align-items:end} }
-/* pares de botões: no celular o primeiro (ou os dois, `dm-larga-cel`) toma a
-   linha; fora dele ficam lado a lado, no tamanho do texto */
+/* =========================================================== cabeçalho */
+.dm-cab{display:grid;gap:var(--dm-e2);margin-bottom:var(--dm-e6)}
+@media (min-width:1024px){ .dm-cab{margin-bottom:var(--dm-e8)} }
+.dm-cab-linha{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--dm-e4) var(--dm-e6)}
+.dm-cab-txt{flex:1 1 320px;min-width:0}
+.dm-cab-txt.dm-com-lado{display:flex;align-items:center;gap:var(--dm-e4)}
+.dm-cab .dm-rot{margin-bottom:4px}
+.dm-cab-titulo{font-size:var(--dm-t-titulo);line-height:var(--dm-lh-titulo);font-weight:600;letter-spacing:-.02em;text-wrap:balance;overflow-wrap:anywhere}
+.dm-cab-meta{margin-top:var(--dm-e2);font-size:13px;line-height:20px;color:var(--dm-mudo)}
+/* FATOS SEPARADOS POR PONTO, E O PONTO NUNCA SOZINHO NA QUEBRA.
+
+   "Membro · Eventos e logística · Líder do ministério de eventos" quebrava
+   no celular com o ponto no começo da segunda linha ("· Líder do…"). Aqui o
+   ponto mora à esquerda de cada fato, dentro do recuo; a linha de dentro
+   anda 16px para a esquerda e a de fora corta o que passou da borda. O
+   primeiro fato de CADA linha fica com o ponto do lado de fora, cortado.
+   Pílula não leva ponto: ela já é uma peça separada. */
+.dm-sep{display:block;overflow:hidden;min-width:0}
+.dm-sep-in{display:flex;flex-wrap:wrap;align-items:center;row-gap:6px;margin-left:-16px}
+.dm-sep-in > *{position:relative;margin-left:16px;min-width:0}
+.dm-sep-in > :not(.dm-pill) + :not(.dm-pill)::before{content:"·";position:absolute;left:-10px;top:0;color:var(--dm-linha-3)}
+.dm-cab-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--dm-e2)}
+/* a ação pequena (Números no Atendimento) fica na linha do título, à
+   direita, e não órfã embaixo da pílula */
+.dm-cab-linha:has(> .dm-cab-acoes > .dm-btn.dm-peq:only-child){flex-wrap:nowrap;align-items:flex-start}
+.dm-cab-linha:has(> .dm-cab-acoes > .dm-btn.dm-peq:only-child) > .dm-cab-txt{flex:1 1 0}
 @media (max-width:719px){
-  .dm-linha.dm-par-cel > .dm-btn:first-child{flex:1 1 auto}
-  .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%}
-}
-/* entre 1024 e 1279 a coluna do perfil tem 318px: os dois botões de papel
-   ficam um sob o outro, com a largura inteira, como no celular */
-@media (min-width:1024px) and (max-width:1279px){ .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%} }
-@media (min-width:720px){
-  .dm-cab{grid-template-columns:1fr auto;gap:var(--dm-e3)}
-  .dm-cab > .dm-cab-acoes{justify-content:flex-end}
-  .dm-cab > .dm-cab-acoes > *{flex:0 0 auto}
+  .dm-cab-acoes{width:100%}
+  .dm-cab-linha:has(> .dm-cab-acoes > .dm-btn.dm-peq:only-child) > .dm-cab-acoes{width:auto}
+  .dm-cab-acoes > .dm-btn:not(.dm-txt):not(.dm-peq){flex:1 1 auto}
+  .dm-cab-acoes > .dm-seg{width:100%;display:flex}
+  .dm-cab-acoes > .dm-seg button{flex:1 1 0}
 }
 .dm-volta{
-  display:inline-flex;align-items:center;gap:4px;min-height:44px;
-  font-size:13px;color:var(--dm-ink2);text-decoration:none;
+  display:inline-flex;align-items:center;gap:2px;min-height:var(--dm-h-peq);justify-self:start;
+  font-size:13px;font-weight:500;color:var(--dm-mudo);text-decoration:none;
+  border-radius:var(--dm-r2);padding:0 8px 0 2px;margin-left:-6px;transition:color var(--dm-t),background var(--dm-t);
 }
-.dm-volta:hover{color:var(--dm-ink)}
-.dm-volta::before{content:"‹";color:var(--dm-marca);font-size:17px;line-height:1}
-.dm-quem{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
-  font-size:14px;color:var(--dm-ink2);margin-top:6px}
-.dm-quem > span:not(.dm-pill):has(+ span:not(.dm-pill))::after{content:"\00a0·";opacity:.5}
+.dm-volta::before{
+  content:"";width:16px;height:16px;flex:none;background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10 3.5 5.5 8l4.5 4.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M10 3.5 5.5 8l4.5 4.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+}
+.dm-volta:hover{color:var(--dm-ink);background:var(--dm-sup-3)}
 
-/* ------------------------------------------------------------- composição */
-/* Duas colunas a partir de 1024: principal (8) e lateral (4). A lateral fica
-   fixa sob a barra quando cabe (`dm-fixa`). Abaixo disso, uma coluna, na
-   ordem do DOM, que é a ordem de leitura. */
-.dm-duas{display:grid;gap:var(--dm-e3);grid-template-columns:minmax(0,1fr);align-items:start}
+/* ================================================== seções e composição */
+.dm-secao{margin-top:var(--dm-e8)}
+.dm-secao:first-child,.dm-cab + .dm-secao{margin-top:0}
+.dm-kpis + .dm-secao,.dm-aviso + .dm-secao{margin-top:var(--dm-e8)}
+.dm-secao + .dm-ferramentas,.dm-secao + .dm-pessoas{margin-top:var(--dm-e8)}
+.dm-secao-cab{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--dm-e2) var(--dm-e4);margin-bottom:var(--dm-e3);min-height:32px}
+.dm-secao-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:var(--dm-e2)}
+.dm-secao-sub{font-size:13px;line-height:19px;color:var(--dm-mudo);margin-top:2px;max-width:72ch}
+
+/* duas colunas a partir de 1024: a principal e o trilho da direita. Abaixo,
+   uma coluna, na ordem do DOM, que é a ordem de leitura. */
+.dm-duas{display:grid;gap:var(--dm-e6);grid-template-columns:minmax(0,1fr);align-items:start}
 .dm-duas > *{min-width:0}
 @media (min-width:1024px){
-  .dm-duas{grid-template-columns:minmax(0,8fr) minmax(300px,4fr);gap:var(--dm-gap)}
-  .dm-duas.dm-7-5{grid-template-columns:minmax(0,7fr) minmax(300px,5fr)}
-  .dm-fixa{position:sticky;top:calc(var(--dm-topo-altura) + var(--dm-e3))}
+  .dm-duas{grid-template-columns:minmax(0,1fr) var(--dm-trilho);gap:var(--dm-e6)}
+  .dm-fixa{position:sticky;top:var(--dm-e6)}
 }
-@media (min-width:1680px){ .dm-duas{grid-template-columns:minmax(0,8fr) minmax(320px,4fr)} }
-.dm-dupla{display:grid;gap:var(--dm-e4) var(--dm-e3);grid-template-columns:1fr;margin-bottom:var(--dm-e4)}
-.dm-dupla > .dm-campo{margin-bottom:0}
-.dm-card > .dm-dupla:last-child,.dm-dupla.dm-dupla-larga{margin-bottom:0}
+@media (min-width:1280px){ .dm-duas{gap:var(--dm-e8)} }
+.dm-coluna-lado > .dm-secao:first-child{margin-top:0}
+@media (max-width:1023px){ .dm-coluna-lado{border-top:1px solid var(--dm-linha);padding-top:var(--dm-e6)} }
+.dm-dupla{display:grid;gap:0 var(--dm-e4);grid-template-columns:minmax(0,1fr)}
 .dm-dupla > *{min-width:0}
-@media (min-width:720px){ .dm-dupla{grid-template-columns:1fr 1fr} }
-/* o par de tabelas dos Números só cabe lado a lado a partir de 1024 */
-.dm-dupla.dm-dupla-larga{grid-template-columns:1fr}
-@media (min-width:1024px){ .dm-dupla.dm-dupla-larga{grid-template-columns:minmax(0,7fr) minmax(0,5fr)} }
-@media (min-width:1280px){ .dm-dupla.dm-dupla-larga{grid-template-columns:1fr 1fr} }
+/* os campos lado a lado decidem pela largura da CAIXA, e não da janela: em
+   1024 a ficha da pessoa e a Nova têm 392px por dentro, e dois campos de
+   187px cortavam o nome e o setor */
+.dm-caixa-corpo:has(> .dm-dupla){container-type:inline-size}
+@container (min-width:520px){ .dm-dupla{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.dm-dupla.dm-dupla-secoes{gap:var(--dm-e8);align-items:start;margin-top:var(--dm-e8)}
+.dm-dupla-secoes > .dm-secao,.dm-dupla-secoes > div > .dm-secao:first-child{margin-top:0}
+/* duas seções lado a lado só a partir de 1440: em 1024 a tabela por setor
+   ficava numa coluna de 355px e escondia "Atrasadas", e em 1280 os nomes
+   de setor ainda quebravam */
+@media (min-width:1440px){ .dm-dupla.dm-dupla-secoes{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .dm-grade{display:grid;gap:var(--dm-e2)}
 .dm-grade > *{min-width:0}
-.dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);flex-wrap:wrap}
+.dm-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e3);flex-wrap:wrap}
 .dm-entre > *{min-width:0}
 .dm-linha{display:flex;align-items:center;gap:var(--dm-e2);flex-wrap:wrap}
 .dm-linha > *{min-width:0}
-.dm-caixinha{display:flex;align-items:center;gap:8px;min-height:44px;cursor:pointer}
-.dm-caixinha input{width:18px;height:18px;min-height:0;margin:0;accent-color:var(--dm-preto)}
-/* o corpo de leitura não passa de 68 letras por linha no desktop */
-/* a coluna de leitura: no tablet ocupa a grade; no desktop, 68ch ao lado
-   da coluna de contexto */
-.dm-leitura-larga{max-width:none}
-@media (min-width:1024px){ .dm-leitura-larga{max-width:68ch} }
 
-/* ------------------------------------------------------------------ cartão */
-.dm-card{
-  background:var(--dm-card);border:1px solid var(--dm-linha);
-  padding:var(--dm-card-pad);margin-bottom:var(--dm-e2);
+/* ---------------------------------------------------------------- caixa */
+/* A superfície de verdade: tabela, formulário, painel. Fio de 1px, canto de
+   8, sem sombra. */
+.dm-caixa{background:var(--dm-sup);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);min-width:0}
+.dm-caixa-cab{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--dm-e2) var(--dm-e3);
+  padding:var(--dm-e3) var(--dm-e4);border-bottom:1px solid var(--dm-linha);min-height:48px;
 }
-.dm-card > h3{margin-bottom:var(--dm-e2)}
-/* quieto: para o que não compete com conteúdo (vazio, resumo, contexto) */
-.dm-card.dm-quieto{background:var(--dm-card3)}
-/* "isto é com você": a barra de 3px só quando há itens */
-.dm-precisa{border-left:3px solid var(--dm-ink)}
-/* no tablet a coluna lateral (perfil, ficha de pessoa) vira duas colunas,
-   em vez de cinco cartões de 720px empilhados */
-@media (min-width:720px) and (max-width:1023px){
-  .dm-duas > aside{display:grid;grid-template-columns:1fr 1fr;gap:var(--dm-e2);align-items:start}
-  .dm-duas > aside > .dm-card{margin-bottom:0}
+.dm-caixa-cab h3{font-size:14px;line-height:20px;font-weight:600}
+.dm-caixa-corpo{padding:var(--dm-e4)}
+@media (min-width:720px){ .dm-caixa-corpo{padding:var(--dm-e5)} }
+.dm-caixa-corpo + .dm-caixa-corpo,.dm-caixa-divisa{border-top:1px solid var(--dm-linha)}
+.dm-caixa-titulo{font-size:14px;line-height:20px;font-weight:600;margin-bottom:4px}
+.dm-caixa-pe{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:var(--dm-e2);
+  padding:var(--dm-e3) var(--dm-e4);border-top:1px solid var(--dm-linha);background:var(--dm-sup-2);
+  border-radius:0 0 var(--dm-r3) var(--dm-r3);
 }
-.dm-precisa .dm-fila{border-top:0}
-/* o cartão é uma lista de "coisas com você", não uma tabela: sem contêiner,
-   as formas por largura não casam e o contexto sai inteiro em qualquer tela */
-.dm-precisa .dm-fila{container-type:normal}
-.dm-precisa .dm-pessoa:last-child{border-bottom:0}
-/* dentro de "Precisa de você" a fila não tem cabeçalho de colunas: são
-   poucas linhas e o cartão já diz o que elas são */
-.dm-precisa .dm-fila > .dm-fila-cab{display:none}
-.dm-precisa .dm-item:last-child{border-bottom:0}
+.dm-caixa-pe > .dm-cresce{margin-right:auto}
+@media (max-width:479px){ .dm-caixa-pe > .dm-btn{flex:1 1 auto} }
+.dm-caixa + .dm-caixa,.dm-caixa + .dm-tabela,.dm-tabela + .dm-caixa{margin-top:var(--dm-e4)}
+.dm-criar-caixa{margin-bottom:var(--dm-e4)}
+.dm-bloco-pedido{margin-bottom:var(--dm-e6)}
+/* O FIO PRETO À ESQUERDA DO "PRECISA DE VOCÊ" SAIU (23/09/2026): era uma
+   sombra por dentro da caixa, e o cabeçalho e a linha em foco pintavam por
+   cima dele (começava abaixo do cabeçalho, com um talho a cada divisa). O
+   título da seção e a conta ao lado já dizem que aquilo é com você. */
+.dm-caixa-escrever{background:var(--dm-sup);justify-content:stretch;display:block}
 
-/* ------------------------------------------------------------------ botões */
+/* ============================================================== botões */
 .dm-btn{
-  display:inline-flex;align-items:center;justify-content:center;gap:8px;
-  min-height:44px;padding:0 var(--dm-e3);border:1px solid var(--dm-linha2);
-  background:var(--dm-card);color:var(--dm-ink);border-radius:var(--dm-r);cursor:pointer;
-  font-size:15px;font-weight:550;letter-spacing:-.005em;text-decoration:none;
-  min-width:0;
-  transition:background var(--dm-t),border-color var(--dm-t),color var(--dm-t),transform var(--dm-t-toque);
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--dm-e2);
+  min-height:var(--dm-h);padding:0 14px;min-width:0;
+  border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);
+  background:var(--dm-sup);color:var(--dm-ink);box-shadow:var(--dm-sombra-btn);
+  font-size:14px;line-height:20px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;
+  text-decoration:none;cursor:pointer;text-align:center;
+  transition:background var(--dm-t),border-color var(--dm-t),color var(--dm-t),box-shadow var(--dm-t);
 }
-@media (hover:hover){ .dm-btn:hover:not(:disabled){background:var(--dm-card3);border-color:var(--dm-linha3)} }
-.dm-btn:active:not(:disabled){transform:scale(.985)}
-/* desabilitado: o mesmo desenho quieto em qualquer variante. Quando habilita,
-   escurece: a mudança é o feedback. Nada de cinza escuro com texto branco
-   (2,0:1) como primeiro estado visível de toda caixa de ação. */
-.dm-btn:disabled{cursor:not-allowed;background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha)}
-.dm-btn.dm-pri{background:var(--dm-preto);color:#fff;border-color:var(--dm-preto)}
-@media (hover:hover){ .dm-btn.dm-pri:hover:not(:disabled){background:var(--dm-preto-toque);border-color:var(--dm-preto-toque)} }
-.dm-btn.dm-pri:disabled{background:var(--dm-card2);color:var(--dm-mudo);border-color:var(--dm-linha)}
-.dm-btn.dm-zap{color:var(--dm-ok);border-color:var(--dm-ok-ln)}
-@media (hover:hover){ .dm-btn.dm-zap:hover:not(:disabled){background:var(--dm-ok-bg)} }
+.dm-btn svg{width:16px;height:16px;flex:none}
+.dm-btn:hover{background:var(--dm-sup-2);border-color:var(--dm-linha-3);color:var(--dm-ink)}
+.dm-btn:active{transform:none;background:var(--dm-sup-3)}
+/* desabilitado: o mesmo desenho quieto em qualquer variante. Quando
+   habilita, escurece: a mudança é o feedback. */
+.dm-btn:disabled,.dm-btn:disabled:hover{cursor:not-allowed;background:var(--dm-sup-3);color:var(--dm-mudo);border-color:var(--dm-linha);box-shadow:none;opacity:1}
+.dm-btn.dm-pri{background:var(--dm-preto);border-color:var(--dm-preto);color:#fff;box-shadow:0 1px 2px rgba(16,16,20,.16)}
+.dm-btn.dm-pri:hover{background:var(--dm-preto-toque);border-color:var(--dm-preto-toque);color:#fff}
+.dm-btn.dm-pri:active{background:#000}
+.dm-btn.dm-pri:disabled,.dm-btn.dm-pri:disabled:hover{background:var(--dm-sup-3);color:var(--dm-mudo);border-color:var(--dm-linha);box-shadow:none}
 .dm-btn.dm-perigo{color:var(--dm-bad);border-color:var(--dm-bad-ln)}
-@media (hover:hover){ .dm-btn.dm-perigo:hover:not(:disabled){background:var(--dm-bad-bg)} }
-.dm-btn.dm-mini,.dm-btn.dm-peq{min-height:44px;padding:0 var(--dm-e2);font-size:13px;font-weight:500}
-.dm-btn.dm-larga{width:100%}
-/* o botão-texto: sem borda, para ajustes e saídas discretas ("Sair",
-   "Mudar o prazo", "Copiar o recado"). 44px de alvo, com padding pequeno. */
-.dm-btn.dm-txt{border-color:transparent;background:transparent;color:var(--dm-ink2);padding:0 8px;font-size:14px}
-@media (hover:hover){ .dm-btn.dm-txt:hover:not(:disabled){background:var(--dm-card3);color:var(--dm-ink);border-color:transparent} }
-.dm-btn.dm-txt:disabled{background:transparent;border-color:transparent}
+.dm-btn.dm-perigo:hover{background:var(--dm-bad-bg);border-color:var(--dm-bad);color:var(--dm-bad)}
+/* desligado, o botão de perigo é cinza como os outros ("Recusar" sem texto
+   ficava vermelho ao lado do "Concluir" cinza) */
+.dm-btn.dm-perigo:disabled,.dm-btn.dm-perigo:disabled:hover{color:var(--dm-mudo);border-color:var(--dm-linha);background:var(--dm-sup-3)}
+/* o WhatsApp é um botão comum com o ícone verde: o verde é de "Concluída",
+   e o botão verde era a peça mais saturada do painel */
+.dm-btn.dm-zap svg{color:var(--dm-ok-ponto)}
+/* o botão-texto: sem borda, para ajustes e saídas discretas */
+.dm-btn.dm-txt{border-color:transparent;background:transparent;box-shadow:none;color:var(--dm-ink-2);padding:0 10px}
+.dm-btn.dm-txt:hover{background:var(--dm-sup-3);color:var(--dm-ink);border-color:transparent}
+.dm-btn.dm-txt:disabled,.dm-btn.dm-txt:disabled:hover{background:transparent;border-color:transparent;color:var(--dm-mudo)}
 .dm-btn.dm-txt.dm-perigo{color:var(--dm-bad)}
-/* quando o botão-texto começa uma linha, o padding de 8px o desalinha do que
-   está acima: `dm-rente` devolve o texto à margem */
-.dm-btn.dm-txt.dm-rente{margin-left:-8px}
-/* o chevron dos links de "ir para": um só desenho, na cor da marca */
-.dm-btn.dm-txt.dm-seta::after,.dm-seta::after{content:"›";margin-left:3px;color:var(--dm-marca)}
-.dm-btn.dm-txt.dm-seta{gap:0}
-/* ocupado: o texto muda ("Salvando…") e a largura não pula */
+.dm-btn.dm-txt.dm-perigo:hover{background:var(--dm-bad-bg)}
+.dm-btn.dm-peq{min-height:var(--dm-h-peq);padding:0 10px;font-size:13px}
+.dm-btn.dm-larga{width:100%}
+.dm-btn.dm-icone{width:var(--dm-h);padding:0}
+.dm-btn.dm-tentar{margin-bottom:var(--dm-e4)}
 .dm-btn[aria-busy="true"]{cursor:progress}
+@media (max-width:719px){
+  .dm-linha.dm-par-cel > .dm-btn.dm-pri{flex:1 1 auto}
+  .dm-linha > .dm-btn.dm-larga-cel{flex:1 1 100%}
+}
 
-/* ------------------------------------------------------------------ campos */
-.dm-campo{display:block;margin-bottom:var(--dm-e4)}
-.dm-card > .dm-campo:last-child{margin-bottom:0}
-.dm-campo > span{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
-.dm-campo > small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:5px;line-height:1.45}
-.dm-campo input,.dm-campo select,.dm-campo textarea,.dm-filtro,.dm-campo-solto{
-  width:100%;min-height:46px;padding:10px var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);transition:border-color var(--dm-t),background var(--dm-t);
+/* =============================================================== campos */
+.dm-campo{display:grid;gap:6px;align-content:start;margin-bottom:var(--dm-e5);min-width:0}
+.dm-campo > span{font-size:13px;line-height:18px;font-weight:500;color:var(--dm-ink)}
+.dm-campo > small{font-size:12px;line-height:17px;color:var(--dm-mudo)}
+/* o que falta, e a recusa, em vermelho: `.dm-campo > small` (a ajuda, em
+   cinza) pesava mais que `.dm-erro-campo`, e "Falta a categoria." saía cinza
+   embaixo de uma caixa vermelha */
+.dm-campo > small.dm-erro-campo{color:var(--dm-bad);font-size:13px;line-height:18px}
+.dm-campo:last-child{margin-bottom:0}
+.dm-dupla > .dm-campo:last-child{margin-bottom:var(--dm-e5)}
+.dm .dm-ctl{
+  display:block;width:100%;min-height:var(--dm-h);margin:0;
+  padding:7px 12px;border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);
+  background:var(--dm-sup);color:var(--dm-ink);box-shadow:var(--dm-sombra-btn);
+  font-size:var(--dm-t-campo);line-height:20px;
+  transition:border-color var(--dm-t),box-shadow var(--dm-t),background var(--dm-t);
 }
-@media (hover:hover){ .dm-campo input:hover,.dm-campo select:hover,.dm-campo textarea:hover,.dm-filtro:hover{border-color:var(--dm-linha3)} }
-.dm-campo textarea{min-height:110px;resize:vertical;line-height:1.5}
-.dm-campo input:focus,.dm-campo select:focus,.dm-campo textarea:focus,.dm-filtro:focus,.dm-campo-solto:focus{
-  outline:2px solid var(--dm-foco);outline-offset:-1px;background:var(--dm-card);
+/* 16px no celular: o Safari dá zoom sozinho abaixo disso. O `.dm.dm` é para
+   ganhar da regra do outro sistema que pesa 0-2-1 */
+.dm.dm .dm-ctl{font-size:var(--dm-t-campo)}
+.dm .dm-ctl::placeholder{color:var(--dm-mudo);opacity:1}
+.dm .dm-ctl:hover{border-color:var(--dm-linha-3)}
+.dm .dm-ctl:focus{outline:none;border-color:var(--dm-foco);box-shadow:0 0 0 3px var(--dm-halo);background-color:var(--dm-sup)}
+.dm .dm-ctl:focus-visible{outline:none}
+.dm .dm-ctl:disabled{background:var(--dm-sup-3);color:var(--dm-mudo);cursor:not-allowed;box-shadow:none}
+.dm select.dm-ctl:has(option[value=""]:checked){color:var(--dm-mudo)}
+.dm .dm-ctl[aria-invalid="true"]{border-color:var(--dm-bad);box-shadow:0 0 0 3px rgba(224,53,43,.12)}
+.dm textarea.dm-ctl{min-height:112px;resize:vertical;line-height:1.55;padding-top:10px;padding-bottom:10px}
+.dm select.dm-ctl{
+  appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:16px;
 }
-.dm-campo input:disabled,.dm-campo select:disabled,.dm-campo textarea:disabled{background:var(--dm-card2);color:var(--dm-mudo);cursor:not-allowed}
-.dm-campo input[aria-invalid="true"],.dm-campo-solto[aria-invalid="true"]{border-color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad)}
-/* o select ganha a seta da folha (chevron), em vez da do sistema, que some
-   sobre o fundo claro e faz o campo parecer um campo de texto */
-.dm-campo select,.dm-filtro,.dm-campo-solto:is(select){
-  appearance:none;-webkit-appearance:none;padding-right:36px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23252525' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-}
-.dm-campo input[type="date"]{min-height:46px;-webkit-appearance:none;appearance:none}
-.dm-campo input[type="date"]::-webkit-calendar-picker-indicator{opacity:.55;cursor:pointer;width:22px;height:22px}
-/* largura por tipo fora do celular: campo de 1000px para um e-mail é ruído */
+.dm input[type="date"].dm-ctl{-webkit-appearance:none;appearance:none;min-height:var(--dm-h)}
+.dm input[type="date"].dm-ctl::-webkit-calendar-picker-indicator{opacity:.5;cursor:pointer}
+.dm input[type="number"].dm-ctl,.dm .dm-ctl.dm-dinheiro{text-align:right;font-variant-numeric:tabular-nums}
 @media (min-width:720px){
-  .dm-campo.dm-curto input,.dm-campo.dm-curto select{max-width:420px}
-  .dm-campo.dm-data input{max-width:220px}
-  .dm-campo.dm-numero input{max-width:200px}
-  .dm-linha.dm-criar{max-width:520px}
+  .dm-campo.dm-curto > .dm-ctl{max-width:440px}
+  .dm-campo.dm-data > .dm-ctl{max-width:220px}
+  .dm-campo.dm-numero > .dm-ctl{max-width:220px}
 }
-/* no celular, a linha de criar com interruptor (Novo setor) dá a linha
-   inteira ao campo; o interruptor e o Criar vêm embaixo */
-@media (max-width:719px){ .dm-linha.dm-criar:has(> .dm-interruptor) > .dm-cresce{flex:1 1 100%} }
-/* o recado do campo que a tela recusou antes de enviar */
-.dm-erro-campo{color:var(--dm-bad);margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);overflow-wrap:anywhere}
-.dm-campo > .dm-erro-campo{color:var(--dm-bad);margin:6px 0 0;font-size:13px}
-.dm-filtro{width:auto;min-width:0}
-/* o campo solto curto: teto em reais, prazo em dias */
-.dm-campo-solto.dm-estreito{width:112px;flex:none}
-.dm-campo-solto[type="number"]{text-align:right;font-variant-numeric:tabular-nums}
+.dm .dm-ctl.dm-estreito{width:88px;flex:none}
+.dm .dm-ctl.dm-dinheiro{width:120px;flex:none}
+.dm .dm-ctl.dm-filtro{width:auto;max-width:240px;min-width:0;flex:0 1 auto}
+.dm-erro-campo{color:var(--dm-bad);font-size:13px;line-height:18px;overflow-wrap:anywhere}
+.dm-erro-campo:where(p){margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e4)}
+.dm-aviso-campo{color:var(--dm-warn);font-size:12px;line-height:17px}
+.dm-caixinha{display:flex;align-items:center;gap:10px;min-height:var(--dm-h);cursor:pointer;font-size:14px}
+.dm .dm-caixinha input{width:18px;height:18px;min-height:0;margin:0;padding:0;accent-color:var(--dm-preto);flex:none;border:0}
+.dm-escopo{display:grid;gap:0;margin-top:var(--dm-e2);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);padding:2px var(--dm-e3)}
+@media (min-width:720px){ .dm-escopo{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--dm-e4)} }
+/* a linha de criar (Novo setor, Nova categoria, Incluir site, Juntar) */
+.dm-linha.dm-criar{flex-wrap:nowrap}
+/* a base 0 e não "auto": com "auto" o campo herdava `width:100%` como base,
+   engolia a linha inteira, e o interruptor "Recebe demanda" encolhia por
+   baixo do "Criar" (visto de 768 a 1920 em Setores) */
+.dm-linha.dm-criar > .dm-ctl{flex:1 1 0%;min-width:160px}
+.dm-linha.dm-criar > .dm-interruptor,.dm-linha.dm-criar > .dm-btn{flex:none}
+@media (max-width:719px){
+  .dm-linha.dm-criar{flex-wrap:wrap}
+  .dm-linha.dm-criar > .dm-ctl{flex:1 1 100%}
+  .dm-linha.dm-criar > .dm-btn{flex:1 1 auto}
+}
+.dm-teto{flex-wrap:nowrap}
+/* o formulário de uma ação (concluir, travar...): campos e o botão largo */
+.dm-acao-form{display:grid;gap:var(--dm-e3)}
+.dm-acao-form .dm-campo{margin-bottom:0}
 
-/* a caixa de comentário no fim do histórico: uma linha de 46px que cresce
-   ao focar ou quando já tem texto */
-.dm-escrever .dm-campo{margin-bottom:0}
-.dm-escrever .dm-entre{margin-top:var(--dm-e2)}
-.dm-escrever textarea{min-height:46px;transition:min-height var(--dm-t-abre);resize:none}
-.dm-escrever.dm-aberta textarea{resize:vertical}
-.dm-escrever .dm-campo{position:relative}
+/* a caixa de comentário no fim da atividade */
+.dm-escrever{display:grid;gap:var(--dm-e2)}
+.dm-escrever .dm-campo{margin:0}
 .dm-escrever .dm-campo > span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;margin:-1px}
-.dm-escrever.dm-aberta textarea,.dm-escrever textarea:focus{min-height:110px}
+.dm .dm-escrever textarea.dm-ctl{min-height:var(--dm-h);resize:none;transition:min-height var(--dm-t-abre),border-color var(--dm-t),box-shadow var(--dm-t)}
+.dm .dm-escrever.dm-aberta textarea.dm-ctl{min-height:112px;resize:vertical}
 
-/* o interruptor: 44×24 de alvo com o rótulo do que ele controla ao lado */
+/* ------------------------------------------------------------ interruptor */
 .dm-interruptor{
-  display:inline-flex;align-items:center;gap:10px;min-height:44px;min-width:44px;white-space:nowrap;
+  display:inline-flex;align-items:center;gap:10px;min-height:var(--dm-h);min-width:44px;white-space:nowrap;
   border:0;background:transparent;padding:0;cursor:pointer;font-size:14px;color:var(--dm-ink);text-align:left;
 }
 .dm-interruptor::before{
-  content:"";flex:none;width:40px;height:24px;border-radius:12px;background:var(--dm-linha2);
-  box-shadow:inset 0 0 0 1px var(--dm-linha3);
-  transition:background var(--dm-t),box-shadow var(--dm-t);
-  /* a bolinha */
-  background-image:radial-gradient(circle at 12px 12px,#fff 0 8px,transparent 8.5px);
+  content:"";flex:none;width:36px;height:20px;border-radius:10px;background-color:var(--dm-linha-2);
+  transition:background-color var(--dm-t),background-position var(--dm-t);
+  background-image:radial-gradient(circle at 10px 10px,#fff 0 7px,transparent 7.5px);
   background-repeat:no-repeat;background-position:0 0;
 }
-.dm-interruptor[aria-checked="true"]::before{background-color:var(--dm-preto);box-shadow:none;background-position:16px 0}
+.dm-interruptor:hover::before{background-color:var(--dm-linha-3)}
+.dm-interruptor[aria-checked="true"]::before{background-color:var(--dm-preto);background-position:16px 0}
 .dm-interruptor:disabled{cursor:not-allowed;color:var(--dm-mudo)}
+.dm-interruptor:disabled::before{opacity:.5}
 
-/* ----------------------------------------------------------------- busca */
+/* ------------------------------------------------------------------ busca */
 .dm-busca{
-  display:flex;align-items:center;gap:8px;width:100%;min-height:46px;
-  padding:0 12px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);
+  display:flex;align-items:center;gap:8px;min-height:var(--dm-h);width:100%;
+  padding:0 10px;border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);
+  background:var(--dm-sup);box-shadow:var(--dm-sombra-btn);color:var(--dm-icone);
+  transition:border-color var(--dm-t),box-shadow var(--dm-t);
 }
-.dm-busca:focus-within{outline:2px solid var(--dm-foco);outline-offset:-1px;background:var(--dm-card)}
-.dm-busca svg{flex:none;opacity:.5}
-.dm-busca input{flex:1;min-width:0;border:0;background:transparent;outline:0;min-height:44px;padding:0}
-.dm-busca input:focus-visible{outline:0}
-@media (min-width:720px){ .dm-busca{max-width:360px} }
+.dm-busca:hover{border-color:var(--dm-linha-3)}
+.dm-busca:focus-within{border-color:var(--dm-foco);box-shadow:0 0 0 3px var(--dm-halo)}
+.dm-busca svg{width:16px;height:16px}
+.dm .dm-busca input{flex:1 1 auto;min-width:0;min-height:calc(var(--dm-h) - 2px);border:0;background:transparent;outline:0;padding:0;margin:0;color:var(--dm-ink);box-shadow:none;width:auto}
+.dm.dm .dm-busca input{font-size:var(--dm-t-campo)}
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .dm .dm-busca input{min-height:44px} }
+.dm .dm-busca input::placeholder{color:var(--dm-mudo);opacity:1}
+.dm .dm-busca input:focus-visible{outline:0}
+/* o "×" azul que o Chrome desenha no campo de busca não é da paleta, e a
+   busca aberta do celular já tem o próprio "fechar" ao lado */
+.dm .dm-busca input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+@media (min-width:720px){ .dm-busca{width:264px} }
+/* entre 1024 e 1279 a tira, a busca e a ordem passavam 7px da linha, e
+   busca e ordem desciam sozinhas para a direita */
+@media (min-width:1024px) and (max-width:1279px){ .dm-busca{width:232px} }
+/* o rótulo da ficha ("Demanda #105 · Categoria") quebra entre as partes */
+.dm-rot .dm-sep-in{row-gap:0}
 
-/* ---------------------------------------------------------- segmentado */
+/* ------------------------------------------------------------- segmentado */
 .dm-seg{
-  display:flex;gap:4px;padding:3px;background:var(--dm-card2);
-  border-radius:var(--dm-r-seg);
-  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  display:inline-flex;gap:2px;padding:2px;max-width:100%;
+  background:var(--dm-sup-3);border-radius:var(--dm-r3);border:1px solid var(--dm-linha);
+  overflow-x:auto;scrollbar-width:none;
 }
 .dm-seg::-webkit-scrollbar{display:none}
 .dm-seg button{
-  flex:1 1 0;min-height:44px;padding:0 10px;white-space:nowrap;
-  border:0;background:transparent;color:var(--dm-ink2);
-  border-radius:var(--dm-r);cursor:pointer;font-size:14px;font-weight:550;text-align:center;
+  flex:1 0 auto;justify-content:center;min-height:calc(var(--dm-h) - 6px);padding:0 12px;white-space:nowrap;
+  border-radius:var(--dm-r2);color:var(--dm-mudo);font-size:13px;font-weight:500;
   transition:background var(--dm-t),color var(--dm-t),box-shadow var(--dm-t);
 }
-.dm-seg button:hover{color:var(--dm-ink)}
-.dm-seg button[aria-pressed="true"]{
-  background:var(--dm-card);color:var(--dm-ink);font-weight:650;
-  box-shadow:0 1px 2px rgba(37,37,37,.10),0 0 0 1px var(--dm-linha);
-}
+.dm-seg button:hover{color:var(--dm-ink);background:transparent}
+.dm-seg button[aria-pressed="true"]{background:var(--dm-sup);color:var(--dm-ink);font-weight:600;box-shadow:0 1px 2px rgba(16,16,20,.08),0 0 0 1px rgba(16,16,20,.06)}
+.dm-seg button:disabled{cursor:not-allowed;color:var(--dm-mudo)}
+.dm-seg button[aria-pressed="true"]:disabled{color:var(--dm-ink)}
 .dm-seg button:focus-visible{outline-offset:-2px}
-@media (max-width:440px){
-  .dm-seg{display:grid;grid-template-columns:1fr 1fr;overflow:visible}
-  .dm-seg:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
-  .dm-seg:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
-}
-@media (min-width:720px){ .dm-seg{display:inline-flex;width:auto} .dm-seg button{flex:0 0 auto;padding:0 14px} }
+.dm-seg .dm-selo{margin-left:6px}
+/* no toque o segmento precisa de 44px: o fundo cresce junto */
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .dm-seg button{min-height:44px} }
 
 /* ------------------------------------------------------------- opções */
-/* Escolha de poucas opções (prioridade, papel): botão em vez de select. */
-.dm-opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
-@media (min-width:520px){ .dm-opcoes{grid-template-columns:repeat(4,minmax(0,1fr))} }
+/* Escolha de poucas opções (prioridade, papel): botão em vez de select */
+/* A GRADE MEDE O LUGAR ONDE MORA (`dm-opcoes-caixa`), E NÃO A JANELA: os
+   cinco papéis viravam cinco colunas em qualquer janela acima de 760px, e na
+   coluna de 392px da ficha da pessoa (1024) "Administração" saía do botão */
+.dm-opcoes-caixa{container-type:inline-size;min-width:0}
+.dm-opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e2)}
+@container (min-width:360px){ .dm-opcoes{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.dm-opcoes:has(> :last-child:nth-child(2)){grid-template-columns:repeat(2,minmax(0,1fr))}
 .dm-opcoes:has(> :last-child:nth-child(3)){grid-template-columns:repeat(3,minmax(0,1fr))}
-.dm-opcoes:has(> :last-child:nth-child(3)) > button{padding-inline:4px}
-/* cinco opções: três em cima e duas embaixo no celular, cinco em linha
-   quando cabem (a regra da largura vem depois e pesa mais: `> *` dentro de
-   `:has()` empata com o span e ganha pela ordem) */
-.dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(6,minmax(0,1fr))}
-.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3){grid-column:span 2}
-.dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:span 3}
-.dm-opcoes:has(> :last-child:nth-child(5)) > button{padding-inline:4px}
-/* cinco em linha só onde a coluna tem largura: no tablet (coluna inteira)
-   e a partir de 1280; entre 1024 e 1279 a coluna 7/12 tem 545px e
-   "Administração" encostava nas bordas do botão, então vale o 3+2 */
-@media (min-width:760px) and (max-width:1023px), (min-width:1280px){
-  .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))}
-  .dm-opcoes:has(> :last-child:nth-child(5)) > button{font-size:13px}
-  .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(-n+3),
-  .dm-opcoes:has(> :last-child:nth-child(5)) > :nth-child(n+4){grid-column:auto}
-}
-.dm-opcoes.dm-empilhadas,
-.dm-opcoes.dm-empilhadas:has(> :last-child:nth-child(3)){grid-template-columns:1fr}
+/* cinco: uma por linha no estreito, três e duas a partir de 380, as cinco
+   numa linha a partir de 600 */
+.dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:1fr}
+@container (min-width:380px){ .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(3,minmax(0,1fr))} }
+@container (min-width:600px){ .dm-opcoes:has(> :last-child:nth-child(5)){grid-template-columns:repeat(5,minmax(0,1fr))} }
+.dm-opcoes.dm-empilhadas,.dm-opcoes.dm-empilhadas:has(> :last-child:nth-child(3)){grid-template-columns:1fr}
 .dm-opcoes button{
-  min-height:44px;padding:0 var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
-  cursor:pointer;font-size:14px;transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t),box-shadow var(--dm-t);
+  justify-content:center;min-height:var(--dm-h);padding:0 10px;
+  border:1px solid var(--dm-linha-2);background:var(--dm-sup);border-radius:var(--dm-r2);
+  font-size:14px;font-weight:500;color:var(--dm-ink-2);box-shadow:var(--dm-sombra-btn);
+  transition:background var(--dm-t),color var(--dm-t),border-color var(--dm-t),box-shadow var(--dm-t);
 }
+.dm-opcoes button:hover{border-color:var(--dm-linha-3);background:var(--dm-sup-2);color:var(--dm-ink)}
+.dm-opcoes.dm-empilhadas button{justify-content:flex-start;padding:8px 14px;line-height:20px;text-align:left}
 /* seleção é CONTORNO, não preto: preto é ação */
-.dm-opcoes button[aria-pressed="true"]{
-  background:var(--dm-card);color:var(--dm-ink);border-color:var(--dm-ink);
-  box-shadow:inset 0 0 0 1px var(--dm-ink);font-weight:650;
-}
+.dm-opcoes button[aria-pressed="true"]{border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink);color:var(--dm-ink);font-weight:600;background:var(--dm-sup)}
 
-/* ----------------------------------------------------------- sub-abas */
-/* As vistas de uma tela (Atender: esperando você, com você...; a
-   administração: Pessoas, Setores...). No desktop, abas de 14px fixas sob a
-   barra; no celular e no tablet, uma fita de fichas de 44px que rola de
-   lado, sangrando até a borda, com uma máscara no fim que diz que rola. */
+/* ====================================================== sub-abas */
+/* As vistas de uma tela (Atendimento; Categorias por grupo; a fita da
+   administração no celular): abas com fio embaixo, com a conta ao lado. No
+   celular a fita rola de lado e sangra até a borda. */
 .dm-subabas{
   display:flex;gap:var(--dm-e1);overflow-x:auto;scrollbar-width:none;
-  margin:0 calc(-1 * var(--dm-calha)) var(--dm-e3);padding:2px var(--dm-calha);
-  scroll-snap-type:x proximity;scroll-padding-inline:var(--dm-calha);-webkit-overflow-scrolling:touch;
-  mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
-  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);
+  margin:0 calc(-1 * var(--dm-calha)) var(--dm-e4);padding:0 var(--dm-calha);
+  box-shadow:inset 0 -1px 0 var(--dm-linha);
 }
 .dm-subabas::-webkit-scrollbar{display:none}
-.dm-subabas button{
-  flex:none;scroll-snap-align:start;
-  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px;
-  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
-  font-size:14px;font-weight:550;color:var(--dm-ink2);cursor:pointer;white-space:nowrap;
-  transition:border-color var(--dm-t),box-shadow var(--dm-t),color var(--dm-t);
+/* quando a fita não cabe, a borda que continua esmaece: é o sinal de que
+   há mais para o lado (quem liga os atributos é `Subabas`, medindo) */
+.dm-subabas[data-mais-depois]{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 40px),transparent)}
+.dm-subabas[data-mais-antes]{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to left,#000 calc(100% - 40px),transparent)}
+.dm-subabas[data-mais-antes][data-mais-depois]{-webkit-mask-image:linear-gradient(to right,transparent,#000 40px,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(to right,transparent,#000 40px,#000 calc(100% - 40px),transparent)}
+@media (min-width:1024px){ .dm-subabas{margin-left:0;margin-right:0;padding:0} }
+.dm-subabas button,.dm-subabas a{
+  flex:none;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 10px;
+  font-size:14px;font-weight:500;color:var(--dm-mudo);white-space:nowrap;text-decoration:none;
+  border-bottom:2px solid transparent;transition:color var(--dm-t),border-color var(--dm-t);
 }
-.dm-subabas button[aria-pressed="true"]{color:var(--dm-ink);border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink);font-weight:650}
-.dm-subabas button:focus-visible{outline-offset:-2px}
-/* o número de cada ficha: preto quando há, cinza quando é zero, vermelho
-   quando é atrasada e há. `dm-quantos`, e não `dm-n`: `dm-n` já é a célula
-   numérica das tabelas, e a mesma classe pintava o cabeçalho de preto. */
-.dm-quantos{
-  display:inline-flex;align-items:center;justify-content:center;
-  min-width:22px;height:22px;padding:0 7px;border-radius:11px;
-  background:var(--dm-preto);color:#fff;font-size:12px;font-weight:650;
-  font-variant-numeric:tabular-nums;line-height:1;
+.dm-subabas button:first-child,.dm-subabas a:first-child{padding-left:2px}
+.dm-subabas button:hover,.dm-subabas a:hover{color:var(--dm-ink);background:transparent;border-bottom-color:var(--dm-linha-2)}
+.dm-subabas button[aria-pressed="true"],.dm-subabas a[aria-current="page"]{color:var(--dm-ink);font-weight:600;border-bottom-color:var(--dm-ink)}
+.dm-subabas button:focus-visible,.dm-subabas a:focus-visible{outline-offset:-2px}
+.dm-adm-fita{margin-top:calc(-1 * var(--dm-e2));margin-bottom:var(--dm-e5)}
+/* entre 1024 e 1279 as seis vistas do Atendimento cabem numa linha com
+   menos respiro entre elas (com mouse ninguém rola a fita de lado) */
+@media (min-width:1024px) and (max-width:1279px){
+  .dm-subabas:not(.dm-fichas) button{padding:0 7px;gap:6px}
+  .dm-subabas:not(.dm-fichas) button:first-child{padding-left:2px}
 }
-.dm-quantos.dm-zero{background:var(--dm-card2);color:var(--dm-mudo)}
-.dm-quantos.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
+/* AS FICHAS: o mesmo seletor, quando ele é um FILTRO (os grupos de
+   categoria) e não as vistas de uma tela. Fichas em qualquer largura: no
+   celular a navegação da administração é uma fita de abas logo acima, e
+   duas fitas iguais se liam como duas navegações. Abaixo de 1024 a fileira
+   rola de lado, como a fita; a partir de 1024 quebra linha e fica toda à
+   vista. A seleção é contorno, como nas opções (preto é ação). */
+.dm-subabas.dm-fichas{gap:var(--dm-e2);box-shadow:none;padding-top:1px;padding-bottom:1px}
+.dm-subabas.dm-fichas button{
+  min-height:44px;padding:0 14px;border:1px solid var(--dm-linha-2);border-radius:999px;
+  background:var(--dm-sup);color:var(--dm-ink-2);font-size:13px;box-shadow:var(--dm-sombra-btn);
+}
+.dm-subabas.dm-fichas button:first-child{padding-left:14px}
+.dm-subabas.dm-fichas button:hover{border-color:var(--dm-linha-3);background:var(--dm-sup-2);color:var(--dm-ink)}
+.dm-subabas.dm-fichas button[aria-pressed="true"]{border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink);color:var(--dm-ink);font-weight:600;background:var(--dm-sup)}
 @media (min-width:1024px){
-  /* o fio é de cada botão (e de um preenchedor até a margem): quando os
-     grupos quebram em duas linhas, cada linha tem o seu fio e o indicador
-     fica colado no fio da linha dele, em vez de sublinhar o ar */
-  .dm-subabas{
-    margin:0 0 var(--dm-e2);padding:0;gap:0;mask-image:none;-webkit-mask-image:none;
-    border-bottom:0;overflow:visible;flex-wrap:wrap;
-    position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:5;
-  }
-  .dm-subabas button{
-    border:0;border-radius:0;padding:0 8px;min-height:48px;background:transparent;
-    box-shadow:inset 0 -1px 0 var(--dm-linha);margin-bottom:0;
-  }
-  .dm-subabas button:first-child{padding-left:2px}
-  .dm-subabas button[aria-pressed="true"]{box-shadow:inset 0 -2px 0 var(--dm-ink)}
-  .dm-subabas::after{content:"";flex:1 1 auto;min-height:48px;box-shadow:inset 0 -1px 0 var(--dm-linha)}
-  .dm-subabas .dm-quantos{background:transparent;color:var(--dm-mudo);padding:0;min-width:0;height:auto;font-size:14px;font-weight:600}
-  .dm-subabas .dm-quantos::before{content:"("}
-  .dm-subabas .dm-quantos::after{content:")"}
-  .dm-subabas .dm-quantos.dm-bad{color:var(--dm-bad);box-shadow:none}
-  .dm-subabas button[aria-pressed="true"] .dm-quantos{color:var(--dm-ink)}
-  .dm-subabas button[aria-pressed="true"] .dm-quantos.dm-bad{color:var(--dm-bad)}
+  .dm-subabas.dm-fichas{flex-wrap:wrap;overflow:visible;-webkit-mask-image:none;mask-image:none}
+  .dm-subabas.dm-fichas button{min-height:var(--dm-h)}
 }
+/* na administração do celular e do tablet, o alto da tela já diz
+   "Administração" e a fita já marca a seção: o rótulo em cima do título
+   era a terceira vez da mesma palavra em 210px */
+@media (max-width:1023px){ .dm-adm .dm-cab .dm-rot{display:none} }
+.dm-quantos{
+  display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:20px;padding:0 6px;
+  border-radius:10px;background:var(--dm-sup-3);color:var(--dm-ink-2);
+  font-size:12px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;
+}
+/* o selo preto é "isto espera você", e só; a aba escolhida não pinta o
+   selo (o fio e o peso da palavra já dizem qual é) */
+.dm-quantos.dm-destaque{background:var(--dm-preto);color:#fff}
+.dm-quantos.dm-zero{background:var(--dm-sup-3);color:var(--dm-mudo)}
+.dm-quantos.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
 
-/* a linha de ferramentas da lista: resumo à esquerda, busca e ordem à
-   direita. No celular a busca é um ícone de 44px que abre o campo por cima da
-   linha: o cartão de 95px só com a busca saiu. */
-.dm-ferramentas{
-  display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);
-  flex-wrap:wrap;margin-bottom:var(--dm-e2);min-height:44px;
-}
-.dm-ferramentas-dir{display:flex;align-items:center;gap:var(--dm-e2);flex:1 1 auto;justify-content:flex-end;min-width:0;flex-wrap:wrap}
-/* a linha das tiras do Início leva a busca à direita */
-.dm-tiras{margin-bottom:var(--dm-e2)}
-.dm-tiras > .dm-ferramentas-dir{flex:1 1 auto;justify-content:flex-end}
-/* em 1024 a 1279 os filtros da administração não cabem ao lado do
-   segmentado: a segunda linha começa à esquerda, como composição */
-/* a partir de 720 a coluna da direita fica na linha do resumo quando cabe
-   (400px de base, sem quebra interna: a busca encolhe até 160 antes de
-   descer); no celular ela desce inteira quando são os filtros ou a busca
-   aberta. A versão sem trava de largura (`flex:1 1 0%` em toda largura)
-   espremia os filtros de Pessoas em 82px em 320. */
-@media (min-width:720px){
-  .dm-ferramentas > .dm-ferramentas-dir{flex:1 1 400px;min-width:0;flex-wrap:nowrap}
-  .dm-ferramentas-dir > .dm-busca{flex:1 1 160px}
-}
+/* ============================================================ ferramentas */
+/* a linha de cima da tabela: os recortes (ou a contagem) à esquerda; a
+   busca e a ordem à direita. No celular a busca é uma lupa de 44px que abre
+   o campo numa linha própria. */
+.dm-ferramentas{display:flex;flex-wrap:wrap;align-items:center;gap:var(--dm-e2) var(--dm-e3);margin-bottom:var(--dm-e3);container:dm-ferramentas / inline-size}
+.dm-ferramentas-dir{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:var(--dm-e2);margin-left:auto;min-width:0}
+.dm-busca-toggle{display:none}
 @media (max-width:719px){
-  .dm-ferramentas.dm-filtros > .dm-ferramentas-dir,
-  .dm-ferramentas > .dm-ferramentas-dir:has(> .dm-busca.dm-aberta){flex:1 1 100%}
-}
-@media (min-width:720px) and (max-width:1279px){ .dm-ferramentas.dm-filtros > .dm-ferramentas-dir{flex:1 1 100%;justify-content:flex-start} }
-.dm-filtro{max-width:220px;text-overflow:ellipsis}
-.dm-ferramentas-dir > .dm-busca{flex:1 1 220px;max-width:360px;margin:0}
-.dm-busca-toggle{display:none;padding:0 12px}
-@media (max-width:719px){
-  /* os dois filtros da administração dividem a linha no celular largo e
-     ficam um por linha no estreito ("Todos os pap…" não é rótulo) */
-  .dm-ferramentas-dir > .dm-filtro{flex:1 1 calc(50% - 6px);max-width:none}
-  @media (max-width:479px){ .dm-ferramentas-dir > .dm-filtro{flex:1 1 100%} }
+  .dm-seg.dm-seg-de-quem{flex:1 1 100%}
+  /* sem a lupa (a lista vazia não tem o que procurar), a tira de estado
+     fica sozinha na linha: ocupa a linha, como a de cima, e não deixa um
+     buraco à direita */
+  .dm-ferramentas:not(:has(> .dm-ferramentas-dir)) > .dm-seg{flex:1 1 100%}
+  .dm-ferramentas:not(:has(> .dm-ferramentas-dir)) > .dm-seg button{flex:1 1 0}
   .dm-busca-toggle{display:inline-flex}
   .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:none}
-  .dm-ferramentas-dir > .dm-busca.dm-aberta{flex:1 1 100%;max-width:none}
+  /* a busca aberta e o "fechar" na mesma linha (o fechar caía sozinho
+     embaixo) */
+  .dm-ferramentas-dir > .dm-busca.dm-aberta{flex:1 1 0;order:2}
+  .dm-ferramentas.dm-buscando .dm-ferramentas-dir{flex:1 1 100%}
+  .dm-ferramentas.dm-buscando .dm-busca-toggle{order:3}
+  /* PESSOAS NO CELULAR: a busca em cima (é o que se usa), a situação e
+     "Filtros" na linha de baixo, e papel e setor só quando pedidos, cada um
+     numa linha inteira. A caixa do meio some (`contents`) para as quatro
+     peças poderem trocar de ordem. */
+  .dm-filtros .dm-ferramentas-dir{display:contents}
+  .dm .dm-filtros .dm-busca{order:-1;flex:1 1 100%;width:auto}
+  .dm-filtros > .dm-seg{order:0;flex:1 1 0;min-width:0}
+  .dm-filtros > .dm-seg button{flex:1 1 0}
+  .dm-filtros > .dm-filtros-toggle{order:1}
+  .dm .dm-filtros .dm-ctl.dm-filtro{order:2;flex:1 1 100%;max-width:none;width:auto;display:none}
+  .dm .dm-filtros.dm-filtrando .dm-ctl.dm-filtro{display:block}
 }
-.dm-ordem{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--dm-mudo)}
-.dm-ordem select{min-height:44px;padding:0 32px 0 10px;font-size:14px;width:auto}
-/* o que só existe no desktop (a ordem da lista, o painel de ação, a coluna
-   de resumo) e o que só existe no celular (as contas no fim do Início) */
-@media (max-width:1023px){ .dm-so-desktop{display:none} }
-@media (min-width:1024px){ .dm-so-celular{display:none} }
+/* o papel cabe em 200; o setor precisa de 240 ("Manutenção e infraestrutura"
+   saía cortado em 164px de texto) */
+@media (min-width:720px){
+  .dm .dm-filtros .dm-ctl.dm-filtro{width:200px}
+  .dm .dm-filtros .dm-ctl.dm-filtro.dm-filtro-setor{width:240px}
+}
+/* no tablet a letra do campo é 16 (toque), e o setor mais longo pede 264 */
+@media (min-width:720px) and (max-width:1023px){ .dm .dm-filtros .dm-ctl.dm-filtro.dm-filtro-setor{width:264px} }
+.dm-filtros-toggle{display:none}
+@media (max-width:719px){
+  .dm-filtros > .dm-filtros-toggle{display:inline-flex}
+  /* sem tiras de recorte (o Atendimento, onde as sub-abas escolhem), a
+     linha tinha só uma lupa de 44px à direita: a busca já vem aberta */
+  .dm-ferramentas:not(:has(> .dm-seg)) .dm-busca-toggle{display:none}
+  .dm .dm-ferramentas:not(:has(> .dm-seg)) .dm-ferramentas-dir{flex:1 1 100%}
+  .dm .dm-ferramentas:not(:has(> .dm-seg)) .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:flex;flex:1 1 100%}
+}
+@media (max-width:359px){
+  .dm-filtros > .dm-filtros-toggle{width:var(--dm-h);padding:0}
+  .dm-filtros > .dm-filtros-toggle > span:not(.dm-selo){display:none}
+}
+/* DUAS TIRAS DE RECORTE (líder, quem acompanha) NÃO CABEM COM A BUSCA E A
+   ORDEM NUMA LINHA ABAIXO DE ~920px: a busca e a ordem descem juntas, e a
+   busca cresce até a borda, em vez de ficarem penduradas à direita com o
+   vazio à esquerda */
+@media (min-width:720px){
+  @container dm-ferramentas (max-width:919px){
+    /* Pessoas: a situação numa linha; papel, setor e a busca na de baixo,
+       começando da borda, com a busca crescendo */
+    .dm-filtros .dm-ferramentas-dir{flex:1 1 100%;margin-left:0;justify-content:flex-start}
+    .dm-filtros .dm-ferramentas-dir > .dm-busca{flex:1 1 auto;width:auto}
+    .dm-seg-de-quem ~ .dm-ferramentas-dir{flex:1 1 100%;margin-left:0;justify-content:flex-start}
+    .dm-seg-de-quem ~ .dm-ferramentas-dir > .dm-busca{flex:1 1 auto;width:auto}
+  }
+}
+/* 320: a tira e a lupa não cabem na mesma linha, e a lupa caía sozinha
+   embaixo. Aqui a busca é um campo aberto numa linha própria, sem lupa */
+@media (max-width:359px){
+  .dm .dm-ferramentas:not(.dm-filtros) > .dm-seg{flex:1 1 100%}
+  .dm .dm-ferramentas:not(.dm-filtros) > .dm-seg button{flex:1 1 0;padding:0 6px}
+  .dm-ferramentas-dir{flex:1 1 100%}
+  .dm-ferramentas-dir > .dm-busca-toggle{display:none}
+  .dm .dm-ferramentas-dir > .dm-busca:not(.dm-aberta){display:flex;flex:1 1 100%}
+}
+/* a ordem se diz na opção ("Por urgência"), com o ícone de ordenar dentro
+   do controle, à esquerda, e a seta de abrir à direita */
+.dm .dm-ctl.dm-ordem{
+  padding-left:34px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M5 3.5v9M2.8 10.3 5 12.5l2.2-2.2M11 12.5v-9M8.8 5.7 11 3.5l2.2 2.2' fill='none' stroke='%2371717a' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat,no-repeat;background-position:left 11px center,right 10px center;background-size:16px,16px;
+}
+.dm-resumo{display:flex;align-items:center;gap:8px;font-size:13px;line-height:18px;font-weight:500;color:var(--dm-ink-2);margin:0 0 var(--dm-e3)}
+.dm-resumo.dm-bad{color:var(--dm-bad)}
+.dm-resumo.dm-warn{color:var(--dm-warn)}
+.dm-resumo .dm-ponto{background:currentColor}
+.dm-contagem{font-size:13px;font-weight:500;color:var(--dm-mudo);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dm-contagem:empty{display:none}
+/* o resumo na linha de ferramentas (sem tiras): no lugar vazio da esquerda */
+.dm-ferramentas > .dm-resumo{margin:0;min-width:0}
 
-/* ------------------------------------------------------------------ pílula */
+/* ============================================================= pílulas */
+/* O ESTADO: ponto e palavra, em cinco tons. Cor sozinha não informa: a
+   palavra está sempre lá. */
 .dm-pill{
-  display:inline-flex;align-items:center;gap:6px;
-  padding:3px 9px;border:1px solid var(--dm-linha2);background:var(--dm-card2);
-  border-radius:2px;font-size:12px;line-height:16px;font-weight:600;color:var(--dm-ink2);
-  max-width:100%;overflow-wrap:anywhere;text-align:left;
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  min-height:22px;padding:1px 8px;border-radius:var(--dm-r2);
+  background:var(--dm-neutro-bg);color:var(--dm-neutro);box-shadow:inset 0 0 0 1px var(--dm-neutro-ln);
+  font-size:12px;line-height:18px;font-weight:500;white-space:nowrap;
 }
-.dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);border-color:var(--dm-ok-ln)}
-.dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);border-color:var(--dm-warn-ln)}
-.dm-pill.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);border-color:var(--dm-bad-ln)}
-.dm-pill.dm-info{background:var(--dm-info-bg);color:var(--dm-info);border-color:var(--dm-info-ln)}
-.dm-ponto{width:6px;height:6px;border-radius:50%;background:var(--dm-marca);flex:none}
-.dm-ponto.dm-ok{background:var(--dm-ok)}
-.dm-ponto.dm-warn{background:var(--dm-warn)}
-.dm-ponto.dm-bad{background:var(--dm-bad)}
+.dm-pill.dm-ok{background:var(--dm-ok-bg);color:var(--dm-ok);box-shadow:inset 0 0 0 1px var(--dm-ok-ln)}
+.dm-pill.dm-warn{background:var(--dm-warn-bg);color:var(--dm-warn);box-shadow:inset 0 0 0 1px var(--dm-warn-ln)}
+.dm-pill.dm-bad{background:var(--dm-bad-bg);color:var(--dm-bad);box-shadow:inset 0 0 0 1px var(--dm-bad-ln)}
+.dm-pill.dm-info{background:var(--dm-info-bg);color:var(--dm-info);box-shadow:inset 0 0 0 1px var(--dm-info-ln)}
+.dm-ponto{width:6px;height:6px;border-radius:50%;background:var(--dm-neutro-ponto);flex:none}
+/* A PRIORIDADE: forma própria, sem fundo e sem a cor de estado. Uma seta
+   para alta, duas para urgente; só a urgente é vermelha. */
+.dm-prio{display:inline-flex;align-items:center;gap:1px;font-size:12px;line-height:18px;font-weight:600;color:var(--dm-ink-2);white-space:nowrap}
+.dm-prio svg{width:14px;height:14px;margin-left:-2px;stroke-width:2.25}
+.dm-prio.dm-prio-urgente{color:var(--dm-bad)}
+.dm-ponto.dm-ok{background:var(--dm-ok-ponto)}
+.dm-ponto.dm-warn{background:var(--dm-warn-ponto)}
+.dm-ponto.dm-bad{background:var(--dm-bad-ponto)}
+.dm-ponto.dm-info{background:var(--dm-info-ponto)}
 .dm-selo{
   display:inline-flex;align-items:center;justify-content:center;
-  min-width:20px;height:20px;padding:0 6px;margin-left:6px;
-  border-radius:10px;background:var(--dm-preto);color:#fff;
-  font-size:12px;font-weight:650;line-height:1;font-variant-numeric:tabular-nums;
-  vertical-align:1px;
+  min-width:20px;height:20px;padding:0 6px;border-radius:10px;
+  background:var(--dm-preto);color:#fff;font-size:12px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;
 }
-.dm-adm-faixa .dm-selo{background:#fff;color:var(--dm-preto)}
 
-/* ------------------------------------------------------------------ avisos */
+/* ============================================================== avisos */
 .dm-aviso{
-  display:flex;gap:var(--dm-e2);align-items:flex-start;
-  padding:var(--dm-e2) var(--dm-e3);border:1px solid var(--dm-linha2);
-  background:var(--dm-card2);font-size:14px;margin-bottom:var(--dm-e2);
-  overflow-wrap:anywhere;
+  display:flex;gap:10px;align-items:flex-start;
+  padding:var(--dm-e3) var(--dm-e4);border-radius:var(--dm-r3);
+  background:var(--dm-neutro-bg);color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-neutro-ln);
+  font-size:14px;line-height:20px;margin-bottom:var(--dm-e4);overflow-wrap:anywhere;
 }
-.dm-aviso > *{min-width:0}
-.dm-aviso.dm-ok{background:var(--dm-ok-bg);border-color:var(--dm-ok-ln);color:var(--dm-ok)}
-.dm-aviso.dm-warn{background:var(--dm-warn-bg);border-color:var(--dm-warn-ln);color:var(--dm-warn)}
-.dm-aviso.dm-bad{background:var(--dm-bad-bg);border-color:var(--dm-bad-ln);color:var(--dm-bad)}
-.dm-aviso.dm-info{background:var(--dm-info-bg);border-color:var(--dm-info-ln);color:var(--dm-info)}
-.dm-aviso b{font-weight:650}
-/* o resumo de uma lista ("2 passaram do prazo") é uma linha com o ponto do
-   tom, e não um bloco de 55px de largura inteira em toda carga */
-.dm-aviso-linha{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:500;min-height:44px}
-.dm-aviso-linha.dm-bad{color:var(--dm-bad)}
-.dm-aviso-linha.dm-warn{color:var(--dm-warn)}
-.dm-aviso-linha.dm-ok{color:var(--dm-ok)}
-.dm-aviso-linha .dm-ponto{background:currentColor}
+.dm-aviso > svg{width:18px;height:18px;margin-top:1px;color:var(--dm-neutro-ponto)}
+.dm-aviso > div{min-width:0;flex:1 1 auto}
+.dm-aviso.dm-ok{background:var(--dm-ok-bg);box-shadow:inset 0 0 0 1px var(--dm-ok-ln);color:var(--dm-ok)}
+.dm-aviso.dm-ok > svg{color:var(--dm-ok-ponto)}
+.dm-aviso.dm-warn{background:var(--dm-warn-bg);box-shadow:inset 0 0 0 1px var(--dm-warn-ln);color:var(--dm-warn)}
+.dm-aviso.dm-warn > svg{color:var(--dm-warn-ponto)}
+.dm-aviso.dm-bad{background:var(--dm-bad-bg);box-shadow:inset 0 0 0 1px var(--dm-bad-ln);color:var(--dm-bad)}
+.dm-aviso.dm-bad > svg{color:var(--dm-bad-ponto)}
+.dm-aviso.dm-info{background:var(--dm-info-bg);box-shadow:inset 0 0 0 1px var(--dm-info-ln);color:var(--dm-info)}
+.dm-aviso.dm-info > svg{color:var(--dm-info-ponto)}
+.dm-aviso b{font-weight:600}
+.dm-aviso .dm-mudo{color:inherit;opacity:.85}
+.dm-aviso .dm-entre{gap:var(--dm-e2) var(--dm-e3)}
+.dm-aviso a{text-decoration:underline;text-underline-offset:3px}
+.dm-aviso-mais{margin-top:6px;font-size:13px}
+.dm-caixa-corpo > .dm-aviso:last-child,.dm-auth-caixa > .dm-aviso:last-child{margin-bottom:0}
+.dm-caixa-corpo > .dm-aviso{margin-top:var(--dm-e4)}
 
-/* o toast: para o sucesso que muda de tela ou some da tela. Um só; o
-   segundo substitui o primeiro. Erro nunca é toast, porque toast some. */
+/* o toast: o sucesso que muda de tela ou some da tela. Erro nunca é toast */
 .dm-toast{
-  position:fixed;left:50%;transform:translateX(-50%);
-  bottom:calc(16px + env(safe-area-inset-bottom, 0px));z-index:60;
-  max-width:min(420px,calc(100% - 32px));width:max-content;
-  display:flex;align-items:center;gap:var(--dm-e2);
-  padding:10px var(--dm-e3);background:var(--dm-preto);color:#fff;
-  border-radius:var(--dm-r);box-shadow:var(--dm-sombra-flutua);font-size:14px;font-weight:500;
-  animation:dm-toast-entra 320ms var(--dm-curva-entra);
+  position:fixed;left:50%;transform:translateX(-50%);z-index:70;
+  bottom:calc(var(--dm-abas-alt) + 12px + env(safe-area-inset-bottom, 0px));
+  max-width:min(440px,calc(100% - 32px));width:max-content;
+  display:flex;align-items:center;gap:var(--dm-e3);
+  padding:6px 8px 6px 14px;min-height:48px;background:var(--dm-preto);color:#fff;
+  border-radius:var(--dm-r3);box-shadow:var(--dm-sombra-dialogo);font-size:14px;font-weight:500;line-height:20px;
+  animation:dm-toast-entra 260ms var(--dm-curva-entra);
 }
-.dm-toast > span{min-width:0;overflow-wrap:anywhere}
+.dm-toast > svg{width:16px;height:16px;color:#7ee2a8}
+.dm-toast > span{min-width:0;overflow-wrap:anywhere;padding:6px 0}
 .dm-toast a,.dm-toast button{
-  color:#fff;background:transparent;border:0;padding:0 4px;min-height:44px;
-  font:inherit;font-weight:650;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap;
+  color:#fff;background:transparent;border:0;padding:0 8px;min-height:44px;
+  font:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer;white-space:nowrap;
 }
-@media (min-width:1024px){ .dm-toast{left:auto;right:32px;transform:none} }
-@keyframes dm-toast-entra{0%{opacity:0;transform:translate(-50%,8px)}100%{opacity:1;transform:translate(-50%,0)}}
-@media (min-width:1024px){ @keyframes dm-toast-entra{0%{opacity:0;transform:translateY(8px)}100%{opacity:1;transform:none}} }
+.dm-toast :focus-visible{outline-color:#fff}
+@media (min-width:1024px){ .dm-toast{left:auto;right:32px;bottom:24px;transform:none} }
+@keyframes dm-toast-entra{0%{opacity:0;translate:0 8px}100%{opacity:1;translate:0 0}}
 
-/* ------------------------------------------------------------------ lista */
-/* A MESMA DEMANDA EM QUATRO FORMAS, UMA PEÇA SÓ.
+/* ============================================================== números */
+/* A FAIXA DE NÚMEROS. Uma superfície só, com fios de 1px entre as casas, em
+   vez de quatro cartões soltos. O fio é o FUNDO da faixa aparecendo no vão
+   de 1px entre as casas brancas.
 
-   `.dm-fila` é um contêiner (`container-type:inline-size`), e a linha decide
-   a própria forma pela largura DELE, não pela do viewport: a mesma lista
-   mora numa coluna de 700px no Início e em 1136px em Atender.
-
-     lista    (< 560)     duas linhas: número + título; pílula e fatos
-     compacta (560..959)  colunas: número · título+contexto · estado · prazo · passo
-     larga    (960..1099) + coluna "com"
-     inteira  (≥ 1100)    + categoria e quem pediu em coluna própria
-
-   Sem suporte a container query (Chromium < 105), fica a forma de lista em
-   qualquer largura: continua usável. */
-.dm-fila{border-top:1px solid var(--dm-linha);container-type:inline-size}
-.dm-fila-cab{display:none}
-.dm-item{
-  display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"num tit" "meta meta";
-  column-gap:var(--dm-e2);row-gap:5px;align-items:baseline;
-  text-decoration:none;color:inherit;
-  padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
+   23/09/2026 · era borda com margem de -1px, e a casa seguinte, pintada
+   depois com fundo branco, cobria a borda da anterior: medido, o "fio" entre
+   "Esperando você" e "Na fila" era branco puro, em toda tela e toda largura. */
+.dm-kpis{display:flex;flex-wrap:wrap;gap:1px;background:var(--dm-linha);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);overflow:hidden;margin-bottom:var(--dm-e2)}
+.dm-kpi{
+  flex:1 1 calc(50% - 1px);min-width:0;display:grid;align-content:start;gap:2px;
+  padding:var(--dm-e3) var(--dm-e4) 14px;min-height:92px;
+  background:var(--dm-sup);color:inherit;text-decoration:none;text-align:left;
   transition:background var(--dm-t);
 }
-.dm-item:hover{background:var(--dm-card3);box-shadow:0 0 0 12px var(--dm-card3)}
+@media (min-width:720px){ .dm-kpi{flex-basis:calc(100% / var(--dm-n-medio, var(--dm-n, 4)) - 1px)} }
+@media (min-width:1280px){ .dm-kpi{flex-basis:calc(100% / var(--dm-n, 4) - 1px)} }
+@media (min-width:1024px){ .dm-kpi{padding:var(--dm-e4) var(--dm-e5) var(--dm-e4)} }
+.dm-kpi:where(a):hover{background:var(--dm-sup-2)}
+.dm-kpi:where(a):focus-visible{outline-offset:-2px}
+.dm-kpi-rot{font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);display:flex;align-items:center;gap:6px}
+.dm-kpi-valor{font-size:26px;line-height:34px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums;color:var(--dm-ink)}
+@media (min-width:1024px){ .dm-kpi-valor{font-size:28px;line-height:36px} }
+.dm-kpi-sub{font-size:12px;line-height:16px;color:var(--dm-mudo)}
+.dm-kpi.dm-bad .dm-kpi-valor{color:var(--dm-bad)}
+.dm-kpi.dm-zero .dm-kpi-valor{color:var(--dm-mudo)}
+.dm-kpi.dm-sem-dado .dm-kpi-valor{font-size:15px;font-weight:500;letter-spacing:0}
+/* o ponto de "Esperando você" é preto, como o selo de "Precisa de você":
+   vermelho é atraso e urgência, e só (a casa "Atrasadas" fica ao lado) */
+.dm-kpi.dm-destaque .dm-kpi-rot::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--dm-ink)}
+.dm-secao .dm-kpis{margin-bottom:0}
+
+/* =============================================================== o diálogo
+   A confirmação do que não se desfaz direito (desativar um setor ou uma
+   pessoa, trocar o link pessoal). Montada por components/demandas/Confirmar.ts:
+   a pergunta em cima, o que acontece embaixo em cinza, e os dois botões à
+   direita, com o foco nascendo no "Voltar". No celular os botões
+   empilham, o que faz por baixo. */
+.dm-dialogo{
+  width:min(440px,calc(100vw - 32px));max-width:none;padding:0;margin:auto;border:0;
+  border-radius:var(--dm-r4);background:var(--dm-sup);color:var(--dm-ink);box-shadow:var(--dm-sombra-dialogo);
+}
+.dm-dialogo::backdrop{background:rgba(16,16,20,.44)}
+.dm-dialogo-corpo{display:grid;gap:8px;padding:var(--dm-e6)}
+.dm-dialogo-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;color:var(--dm-ink)}
+.dm-dialogo-texto{font-size:14px;line-height:21px;color:var(--dm-mudo)}
+.dm-dialogo-sem-volta{font-size:13px;line-height:18px;font-weight:500;color:var(--dm-bad)}
+.dm-dialogo-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:var(--dm-e4)}
+.dm-dialogo .dm-btn.dm-pri.dm-perigo{background:var(--dm-bad);border-color:var(--dm-bad);color:#fff}
+.dm-dialogo .dm-btn.dm-pri.dm-perigo:hover{background:var(--dm-bad);border-color:var(--dm-bad);color:#fff;filter:brightness(.92)}
+@media (max-width:479px){
+  .dm-dialogo-btns{flex-direction:column-reverse}
+  .dm-dialogo-btns > .dm-btn{width:100%}
+}
+
+/* ============================================================== tabela */
+/* A LISTA DE DEMANDAS, EM QUATRO FORMAS, UMA PEÇA SÓ.
+
+   `.dm-fila` é um contêiner, e a linha decide a própria forma pela largura
+   DELE, e não da janela (a mesma lista mora no Início, no Atendimento e no
+   "Precisa de você"):
+
+     < 640   LISTA     título e contexto; embaixo, estado, prazo, com quem
+                       e o próximo passo
+     640     TABELA A  nº · demanda · estado, com o prazo embaixo · uma
+                       coluna final: o próximo passo, ou o responsável
+     980     TABELA B  nº · demanda · estado · prazo · responsável · passo
+     1180    TABELA C  entra o setor (ou a categoria), com quem pediu embaixo
+
+   O responsável e o próximo passo têm a MESMA largura: é isso que faz o
+   "Precisa de você" (com passo, `dm-tarefas`) e "Minhas demandas" (sem),
+   uma em cima da outra, caírem nas mesmas colunas.
+
+   23/09/2026 · o limiar era 720, e o iPad em pé (718px de lista) caía na
+   forma de celular; e a coluna "Demanda" era a mais estreita da tabela em
+   1024 (166px). Por isso quatro formas, e não três. */
+.dm-tabela{background:var(--dm-sup);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);overflow:hidden}
+.dm-fila{container-type:inline-size}
+.dm-fila + .dm-fila{border-top:1px solid var(--dm-linha)}
+.dm-fila-cab{display:none}
+/* LISTA (celular): o título e o contexto à esquerda, o número à direita; a
+   linha de estado embaixo, com o próximo passo no fim. Sem ponto entre os
+   fatos: "para 05/10" e "com Maria" já se separam pela palavra, e o ponto
+   ficava pendurado no fim da linha quando o fato de trás quebrava. */
+.dm-item{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"tit num" "meta meta";
+  column-gap:var(--dm-e3);row-gap:8px;align-items:start;
+  padding:14px var(--dm-e4);border-top:1px solid var(--dm-linha);
+  text-decoration:none;color:inherit;position:relative;
+  transition:background var(--dm-t);
+}
+.dm-fila > .dm-item:first-child,.dm-fila-cab + .dm-item{border-top:0}
+.dm-item:hover{background:var(--dm-sup-2)}
 .dm-item:focus-visible{outline-offset:-2px}
-.dm-c-num{grid-area:num;font-size:13px;font-weight:700;color:var(--dm-ink2);font-variant-numeric:tabular-nums;white-space:nowrap}
-.dm-c-tit{grid-area:tit;min-width:0}
-.dm-c-tit b{font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere;display:block;line-height:1.35}
-.dm-c-ctx{display:block;font-size:13px;color:var(--dm-mudo);margin-top:2px;overflow-wrap:anywhere}
-/* a célula de categoria só existe na forma inteira (>=1100 de contêiner);
-   fora dela o contexto mora sob o título (`dm-c-ctx`). Sem esta linha os
-   dois apareciam juntos no celular, a 20px um do outro. */
+.dm-c-num{grid-area:num;font-size:13px;line-height:20px;font-weight:500;color:var(--dm-mudo);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* a caixa do título corta o que sai pela esquerda: é assim que o "·" da
+   parte que abre uma linha do contexto some (logo abaixo) */
+.dm-c-tit{grid-area:tit;min-width:0;overflow:hidden}
+.dm-c-tit > b{display:block;font-size:15px;line-height:21px;font-weight:600;letter-spacing:-.01em;overflow-wrap:anywhere;color:var(--dm-ink)}
+/* NA LISTA DO CELULAR, A LINHA DE CONTEXTO QUEBRA ENTRE AS PARTES, E NUNCA
+   NO MEIO DELAS — 23/09/2026. Era texto corrido: em 320 a linha terminava
+   em "Manutenção e infraestrutura ·" e, em 360 e 390, "Reparo elétrico"
+   partia ao meio. Agora cada parte é uma peça da fileira (a técnica de
+   `.dm-sep`): o "·" vai colado na parte que vem depois e, quando ela abre
+   uma linha, cai fora da caixa do título. */
+.dm-c-ctx{display:flex;flex-wrap:wrap;margin:2px 0 0 -16px;font-size:13px;line-height:18px;color:var(--dm-mudo);overflow-wrap:anywhere}
+.dm-c-ctx > *{position:relative;margin-left:16px;min-width:0}
+.dm-c-ctx > :empty{display:none}
+.dm-c-ctx-com{display:none}
+.dm-c-ctx-de:not(:empty) + .dm-c-ctx-quem:not(:empty)::before,
+.dm-c-ctx-de:not(:empty) ~ .dm-c-ctx-com:not(:empty)::before,
+.dm-c-ctx-quem:not(:empty) + .dm-c-ctx-com:not(:empty)::before{content:"·";position:absolute;left:-10px;top:0}
 .dm-c-cat{display:none}
-.dm-c-meta{
-  grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--dm-e1);
-  font-size:13px;color:var(--dm-mudo);min-width:0;
-}
-.dm-c-meta > *{min-width:0;overflow-wrap:anywhere}
-.dm-c-estado{display:inline-flex;gap:6px;flex-wrap:wrap;align-items:center}
-/* o separador vai no fato ANTERIOR, com espaço que não quebra: nunca abre
-   uma linha sozinho */
-.dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:"\00a0·";opacity:.5}
-.dm-c-prazo.dm-bad{color:var(--dm-bad);font-weight:600}
-.dm-c-com b{font-weight:600;color:var(--dm-ink2)}
-.dm-c-passo{
-  margin-left:auto;font-size:13px;font-weight:600;color:var(--dm-info);white-space:nowrap;
-}
-.dm-c-passo::after{content:"›";margin-left:3px;color:var(--dm-marca)}
-.dm-item.dm-urgente{box-shadow:inset 3px 0 0 var(--dm-bad);padding-left:var(--dm-e2)}
-.dm-item.dm-urgente:hover{box-shadow:inset 3px 0 0 var(--dm-bad),0 0 0 12px var(--dm-card3)}
-.dm-item.dm-atrasada .dm-c-prazo{color:var(--dm-bad);font-weight:600}
-/* entrada de lista: as oito primeiras linhas escalonadas em 20ms */
-.dm-fila > .dm-item{animation:dm-entra 160ms var(--dm-curva-entra) both}
-.dm-fila > .dm-item:nth-child(2){animation-delay:20ms}
-.dm-fila > .dm-item:nth-child(3){animation-delay:40ms}
-.dm-fila > .dm-item:nth-child(4){animation-delay:60ms}
-.dm-fila > .dm-item:nth-child(5){animation-delay:80ms}
-.dm-fila > .dm-item:nth-child(6){animation-delay:100ms}
-.dm-fila > .dm-item:nth-child(7){animation-delay:120ms}
-.dm-fila > .dm-item:nth-child(8){animation-delay:140ms}
-@keyframes dm-entra{0%{opacity:0;transform:translateY(4px)}100%{opacity:1;transform:none}}
-[aria-busy="true"] > .dm-fila{opacity:.6;transition:opacity 120ms}
+.dm-c-meta{grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;font-size:13px;line-height:18px;color:var(--dm-mudo);min-width:0}
+.dm-c-meta > *{min-width:0}
+.dm-c-estado{display:inline-flex;flex-wrap:wrap;gap:6px 8px;align-items:center}
+.dm-c-prazo{font-variant-numeric:tabular-nums}
+.dm-c-prazo.dm-bad{color:var(--dm-bad);font-weight:500}
+.dm-c-parada{font-size:inherit;color:var(--dm-warn)}
+.dm-c-parada::before{content:" · ";color:var(--dm-linha-3)}
+.dm-c-com b{font-weight:600;color:var(--dm-ink-2)}
+.dm-c-passo{margin-left:auto;font-size:13px;font-weight:600;color:var(--dm-ink);white-space:nowrap;display:inline-flex;align-items:center;gap:2px}
+/* na lista do celular o próximo passo tem lugar fixo: a última linha, à
+   direita. Antes ele ficava na linha dos fatos quando cabia e caía sozinho
+   embaixo quando não cabia, e a ação mudava de lugar de linha para linha */
+.dm-c-meta > .dm-c-passo{flex:1 0 100%;justify-content:flex-end}
+.dm-c-passo svg{width:16px;height:16px;color:var(--dm-icone)}
+.dm-item:hover .dm-c-passo svg{color:var(--dm-ink)}
+.dm-item.dm-urgente::before{content:"";position:absolute;left:0;top:12px;bottom:12px;width:3px;border-radius:0 2px 2px 0;background:var(--dm-bad-ponto)}
+.dm-item.dm-atrasada .dm-c-prazo{color:var(--dm-bad);font-weight:500}
+.dm-pre{display:inline}
+[aria-busy="true"] > .dm-tabela{opacity:.6;transition:opacity 120ms}
 
-/* a forma compacta (576 a 959 de contêiner): duas linhas por demanda, o
-   título em cima e, embaixo, a pílula, o contexto e "com quem está"; prazo e
-   passo em colunas à direita. As colunas da segunda linha são `max-content`
-   (medidas pela pílula e pelo "com"); o contexto some com reticências. */
-@container (min-width:576px){
+/* TABELA A (640): nº | demanda | estado, com o prazo embaixo | a coluna
+   final (o próximo passo; sem passo, o responsável) */
+@container (min-width:640px){
+  .dm-fila-cab,.dm-item{
+    display:grid;grid-template-columns:56px minmax(0,1fr) 184px 120px;
+    grid-template-areas:"num tit estado fim";column-gap:var(--dm-e4);align-items:center;
+    padding:0 var(--dm-e4);
+  }
+  .dm-item{grid-template-rows:auto auto;grid-template-areas:"num tit estado fim" "num tit prazo fim";min-height:64px;padding-top:10px;padding-bottom:10px;row-gap:3px}
   .dm-fila-cab{
-    display:grid;grid-template-columns:48px max-content minmax(0,1fr) max-content 110px 150px;
-    column-gap:var(--dm-e2);align-items:end;
-    padding:0 0 var(--dm-e1);border-bottom:1px solid var(--dm-linha);
-    font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
-    position:sticky;top:var(--dm-topo-altura);background:var(--dm-bg);z-index:4;
+    min-height:40px;background:var(--dm-sup-2);border-bottom:1px solid var(--dm-linha);
+    font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);
   }
-  /* sob as sub-abas fixas do desktop (48px), o cabeçalho gruda mais abaixo */
-  .dm-corpo:has(> .dm-subabas) .dm-fila-cab{top:calc(var(--dm-topo-altura) + 48px)}
-  /* as células do cabeçalho têm os mesmos nomes de área das linhas: sem as
-     áreas declaradas aqui também, todas caíam na mesma linha implícita, uma
-     por cima da outra, no canto direito (medido em 1440, 23/09/2026) */
-  .dm-fila-cab > *{font:inherit;color:inherit;letter-spacing:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dm-fila-cab > .dm-c-passo::after{content:none}
-  .dm-fila-cab > .dm-c-com,.dm-fila-cab > .dm-c-cat{display:none}
-  /* a forma compacta (640 a 959) tem o estado SOB o título, e não numa
-     coluna: com cinco colunas fixas o título ficava com 200px e a pílula
-     "Aguardando informações" quebrava em duas linhas */
-  .dm-fila-cab,.dm-item{grid-template-areas:"num tit tit tit prazo passo" "num estado cat com prazo passo"}
-  .dm-fila-cab > .dm-c-estado,.dm-fila-cab > .dm-c-cat,.dm-fila-cab > .dm-c-com{display:none}
-  .dm-item{
-    grid-template-columns:48px max-content minmax(0,1fr) max-content 110px 150px;
-    align-items:center;row-gap:4px;padding:10px 0;min-height:56px;
-  }
-  .dm-c-ctx{display:none}
-  .dm-c-cat{display:block;grid-area:cat;font-size:13px;color:var(--dm-mudo);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;align-self:center}
-  .dm-c-com{display:block;grid-area:com;white-space:nowrap;align-self:center}
-  .dm-fila-cab > .dm-c-passo,.dm-item .dm-c-passo{padding-right:4px}
+  /* a célula de cabeçalho carrega a mesma classe da coluna (`dm-c-prazo`...),
+     e as regras da coluna não podem mexer na letra nem no alinhamento dela */
+  .dm-fila > .dm-fila-cab > *{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:inherit;color:inherit;align-self:center}
+  .dm-fila > .dm-fila-cab > .dm-c-cat,.dm-fila > .dm-fila-cab > .dm-c-prazo,.dm-fila > .dm-fila-cab > .dm-c-com{display:none}
+  .dm-fila-cab > .dm-c-passo{grid-area:fim;justify-content:flex-end}
   .dm-c-meta{display:contents}
-  .dm-c-meta > .dm-c-fato:has(+ .dm-c-fato)::after{content:none}
-  .dm-c-estado{grid-area:estado;align-self:center}
-  .dm-c-prazo{grid-area:prazo;white-space:nowrap}
-  .dm-c-passo{grid-area:passo;text-align:right;margin-left:0}
-  .dm-c-tit b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .dm-c-estado{grid-area:estado;min-width:0;align-self:end}
+  .dm-c-prazo{grid-area:prazo;min-width:0;align-self:start;font-size:12px;line-height:16px}
+  .dm-c-parada{display:block;font-size:12px;line-height:16px}
+  .dm-c-parada::before{content:none}
+  .dm-c-com{display:none}
+  .dm-c-ctx-com{display:inline}
+  /* na linha de contexto o nome vem com o "com" ("· com Ana"): sozinho,
+     "Ana" não dizia quem ela é na demanda */
+  .dm-c-ctx-com .dm-pre{display:inline}
+  .dm-c-passo{grid-area:fim;justify-content:flex-end;margin-left:0;text-align:right}
+  .dm-c-meta > .dm-c-passo{flex:none}
+  /* `> b`, e não `b`: o "você" da linha de contexto também é um <b>, e
+     virava bloco de 15px numa linha própria */
+  .dm-c-tit > b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* QUEM ENCURTA É O "DE ONDE", NUNCA O "COM QUEM": a linha inteira era
+     uma só com reticências, e o nome (o fato que decide "Confirmar") era o
+     primeiro a sumir em 768 e 1024 */
+  .dm-c-ctx{display:flex;flex-wrap:nowrap;margin-left:0;min-width:0;white-space:nowrap;overflow:hidden}
+  .dm-c-ctx > *{position:static;margin-left:0}
+  .dm-c-ctx-de{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
+  .dm-c-ctx-quem,.dm-c-ctx-com{flex:none}
+  /* na linha única da tabela o ponto volta a ser texto, entre espaços */
+  .dm-c-ctx-de:not(:empty) + .dm-c-ctx-quem:not(:empty)::before,
+  .dm-c-ctx-de:not(:empty) ~ .dm-c-ctx-com:not(:empty)::before,
+  .dm-c-ctx-quem:not(:empty) + .dm-c-ctx-com:not(:empty)::before{content:" · ";position:static;white-space:pre}
+  /* NAS PRÓPRIAS DEMANDAS, A CATEGORIA NO LUGAR DO SETOR: a linha era
+     "Comunic… · Divulgação de culto · com Maria", o setor virando toco. A
+     categoria já diz quem atende; o setor volta na tabela larga, em coluna
+     própria, e no celular, onde a linha quebra em vez de cortar */
+  .dm-c-ctx-minha > .dm-c-ctx-de{display:none}
+  /* o seletor que apaga o ponto pesa MAIS que o que o desenha (0-4-1):
+     com `.dm-c-ctx-minha .dm-c-ctx-quem::before` (0-2-1) o setor sumia e o
+     "·" ficava, abrindo cada linha de quem pede (medido em 23/09/2026, e
+     travado em scripts/demandas-larguras.mjs) */
+  .dm-c-ctx-minha > .dm-c-ctx-de:not(:empty) + .dm-c-ctx-quem:not(:empty)::before{content:none}
   .dm-pre{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:48px max-content minmax(0,1fr) max-content 110px;grid-template-areas:"num tit tit tit prazo" "num estado cat com prazo"}
+  /* o prazo embaixo da pílula diz que é prazo ("para 28/09"): sem coluna
+     com cabeçalho, "Concluída 28/09" se lia como a data da entrega */
+  .dm-c-prazo > .dm-pre{display:inline}
+  .dm-c-com b{text-transform:capitalize}
+  /* sem próximo passo, a coluna final é de quem está com a demanda */
+  .dm-fila.dm-sem-passo .dm-c-com{display:block;grid-area:fim;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--dm-ink-2)}
+  .dm-fila.dm-sem-passo .dm-fila-cab > .dm-c-com{display:block;grid-area:fim;color:inherit}
+  .dm-fila.dm-sem-passo .dm-c-ctx-com{display:none}
 }
-@container (min-width:960px){
-  .dm-fila-cab,.dm-item{grid-template-columns:52px minmax(0,1fr) 190px 120px 110px 140px;grid-template-areas:"num tit estado prazo com passo"}
-  .dm-fila-cab > .dm-c-estado{display:block}
+/* TABELA B (920): estado e prazo lado a lado, e o responsável ganha coluna.
+   920 e não 980: em 1280 a lista mede 950px, e o desktop mais comum caía na
+   forma de tablet */
+@container (min-width:920px){
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) 168px 112px 112px 112px;grid-template-areas:"num tit estado prazo com passo"}
+  .dm-item{grid-template-rows:auto;row-gap:0}
+  .dm-fila > .dm-fila-cab > .dm-c-prazo,.dm-fila > .dm-fila-cab > .dm-c-com{display:block}
+  .dm-fila-cab > .dm-c-passo{grid-area:passo}
   .dm-c-estado{align-self:center}
-  .dm-c-ctx{display:block}
-  .dm-c-cat{display:none}
-  .dm-c-prazo{overflow:hidden;text-overflow:ellipsis}
-  .dm-fila-cab > .dm-c-com,.dm-c-com{display:block}
-  .dm-c-com{grid-area:com;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:52px minmax(0,1fr) 190px 120px 110px;grid-template-areas:"num tit estado prazo com"}
+  .dm-c-prazo{align-self:center;font-size:13px;line-height:18px}
+  .dm-c-prazo > .dm-pre{display:none}
+  .dm-c-com{display:block;grid-area:com;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .dm-item .dm-c-com{color:var(--dm-ink-2)}
+  .dm-c-ctx-com{display:none}
+  .dm-c-passo{grid-area:passo}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) 168px 112px 112px;grid-template-areas:"num tit estado prazo com"}
+  .dm-fila.dm-sem-passo .dm-c-com,.dm-fila.dm-sem-passo .dm-fila-cab > .dm-c-com{grid-area:com}
+  /* o "Precisa de você": o passo no lugar do responsável, e quem está com a
+     demanda volta para a linha de contexto */
+  .dm-fila.dm-tarefas .dm-fila-cab,.dm-fila.dm-tarefas .dm-item{grid-template-columns:56px minmax(0,1fr) 168px 112px 112px;grid-template-areas:"num tit estado prazo passo"}
+  .dm-fila.dm-tarefas .dm-c-com,.dm-fila.dm-tarefas .dm-fila-cab > .dm-c-com{display:none}
+  .dm-fila.dm-tarefas .dm-c-ctx-com{display:inline}
 }
-@container (min-width:1100px){
-  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(120px,170px) 190px 120px 90px 140px;grid-template-areas:"num tit cat estado prazo com passo"}
-  .dm-item{min-height:48px}
-  .dm-fila-cab > .dm-c-cat,.dm-c-cat{display:block}
-  .dm-c-cat{grid-area:cat;font-size:13px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* TABELA C (1180): o setor (ou a categoria) e quem pediu ganham coluna */
+@container (min-width:1180px){
+  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 168px 112px 112px 112px;grid-template-areas:"num tit cat estado prazo com passo"}
+  .dm-fila > .dm-fila-cab > .dm-c-cat{display:block}
+  .dm-c-cat{display:block;grid-area:cat;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dm-item .dm-c-cat{font-size:13px;line-height:18px;color:var(--dm-ink-2)}
+  .dm-item .dm-c-cat small{display:block;font-size:12px;line-height:16px;color:var(--dm-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .dm-c-ctx{display:none}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(120px,170px) 190px 120px 90px;grid-template-areas:"num tit cat estado prazo com"}
-  /* a categoria e quem pediu quebram em duas linhas de 18px em vez de
-     cortar o nome com reticências */
-  .dm-item .dm-c-cat{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:18px}
+  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 168px 112px 112px;grid-template-areas:"num tit cat estado prazo com"}
+  .dm-fila.dm-tarefas .dm-fila-cab,.dm-fila.dm-tarefas .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,200px) 168px 112px 112px;grid-template-areas:"num tit cat estado prazo passo"}
+  /* o "Precisa de você" não tem coluna de responsável: "com Ana" fica
+     embaixo do título, sem a parte de onde é (que virou a coluna do setor) */
+  .dm-fila.dm-tarefas .dm-c-ctx{display:block}
+  .dm-fila.dm-tarefas .dm-c-ctx-de,.dm-fila.dm-tarefas .dm-c-ctx-quem{display:none}
+  /* pesa o mesmo que a regra que desenha o ponto (0-4-1), e vem depois */
+  .dm-fila.dm-tarefas .dm-c-ctx-com:not(:empty)::before{content:none}
 }
-@container (min-width:1200px){
-  .dm-fila-cab,.dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,220px) 190px 120px 90px 140px}
-  .dm-fila.dm-sem-passo .dm-fila-cab,.dm-fila.dm-sem-passo .dm-item{grid-template-columns:56px minmax(0,1fr) minmax(140px,220px) 190px 120px 90px}
-}
-/* as linhas somadas do "Precisa de você" ("5 demandas esperando você em
-   Atender"): o número é uma contagem, não um identificador, e a linha tem
-   três partes em qualquer largura (classe dupla: ganha das formas de
-   contêiner) */
-.dm-item.dm-item-soma{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"num tit passo";align-items:center;row-gap:0}
-.dm-item-soma > .dm-c-num{font-size:22px;font-weight:650;color:var(--dm-ink);letter-spacing:-.02em;line-height:1;min-width:28px}
+/* as linhas somadas do "Precisa de você": o número é uma contagem, e a
+   linha tem três partes em qualquer largura */
+.dm-item.dm-item-soma{grid-template-columns:auto minmax(0,1fr) auto;grid-template-rows:auto;grid-template-areas:"num tit passo";align-items:center;align-content:center;column-gap:12px;row-gap:0;min-height:60px;padding-top:10px;padding-bottom:10px}
+/* a coluna do número leva um ícone, e a conta mora na frase ("1 pedido de
+   papel espera você"): um "1" solto embaixo de "#104" se lia como a demanda
+   número 1. O ícone fica na altura da primeira linha: em 320 a frase quebra
+   em duas, e centrado ele caía entre elas */
+.dm-item-soma > .dm-c-num{display:flex;align-self:start;margin-top:2px;color:var(--dm-icone);min-width:0}
+.dm-item-soma > .dm-c-num svg{width:18px;height:18px}
 .dm-item-soma > .dm-c-meta{display:contents}
-.dm-item-soma .dm-c-passo{grid-area:passo;margin-left:0}
+.dm-item-soma .dm-c-passo{grid-area:passo}
+.dm-item-soma .dm-c-ctx{display:block;white-space:normal;margin-left:0}
+/* na tabela, a linha somada cai nas colunas das linhas de cima: a conta na
+   coluna do número, a frase na da demanda, o gesto na coluna final */
+@container (min-width:640px){
+  .dm-item.dm-item-soma{grid-template-columns:56px minmax(0,1fr) 112px;column-gap:var(--dm-e4)}
+  .dm-item-soma > .dm-c-num{align-self:center;margin-top:0}
+  .dm-item-soma > .dm-c-num svg{width:16px;height:16px}
+  .dm-item-soma .dm-c-tit > b{font-size:14px;line-height:20px}
+}
 .dm-corte{
-  margin:12px 0 0;padding:10px 12px;
-  font-size:14px;line-height:1.5;color:var(--dm-mudo);
-  border-top:1px solid var(--dm-linha);
+  margin:0;padding:10px var(--dm-e4);font-size:13px;line-height:18px;color:var(--dm-ink-2);
+  background:var(--dm-sup-2);border-top:1px solid var(--dm-linha);
+}
+.dm-linha-vazia{display:flex;align-items:flex-start;gap:10px;padding:14px var(--dm-e4);font-size:14px;line-height:20px;color:var(--dm-mudo)}
+.dm-linha-vazia svg{width:18px;height:18px;color:var(--dm-ok-ponto);margin-top:1px}
+.dm-linha-vazia b{color:var(--dm-ink);font-weight:600}
+/* a linha de informação (o mês único dos Números): ícone cinza e, quando
+   há, o gesto que resolve, à direita */
+.dm-linha-vazia.dm-neutra{align-items:center;color:var(--dm-ink-2)}
+.dm-linha-vazia.dm-neutra svg{color:var(--dm-icone);margin-top:0}
+.dm-linha-vazia > .dm-btn{margin-left:auto;flex:none}
+/* no celular a frase ocupa a linha e o gesto desce para baixo dela (em 320
+   a frase tinha 85px de largura e cinco linhas) */
+@media (max-width:479px){
+  .dm-linha-vazia.dm-neutra{flex-wrap:wrap}
+  .dm-linha-vazia.dm-neutra > .dm-cresce{flex:1 1 calc(100% - 28px)}
+  .dm-linha-vazia.dm-neutra > .dm-btn{margin-left:28px}
 }
 
-/* -------------------------------------------------------------- contagens */
-/* Um componente só de "número com legenda", em duas variantes: atalho (é
-   botão ou link, tem canto) e leitura (fio, sem canto). Selecionado é
-   contorno de 2px, não fundo preto; alarme é número vermelho, não fundo
-   preto. */
-.dm-contas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e1)}
-@media (min-width:520px){ .dm-contas{grid-template-columns:repeat(4,minmax(0,1fr))} }
-.dm-contas.dm-duas-colunas{grid-template-columns:repeat(2,minmax(0,1fr))}
-.dm-contas.dm-duas-colunas > .dm-conta:nth-child(3):last-child{grid-column:1 / -1}
-.dm-conta{
-  display:block;min-width:0;min-height:64px;padding:10px var(--dm-e2);
-  border:1px solid var(--dm-linha2);background:var(--dm-card);border-radius:var(--dm-r);
-  text-decoration:none;color:inherit;text-align:left;font:inherit;cursor:pointer;
-  transition:background var(--dm-t),border-color var(--dm-t),box-shadow var(--dm-t);
-}
-@media (hover:hover){ .dm-conta:hover{background:var(--dm-card3);border-color:var(--dm-linha3)} }
-.dm-conta[aria-pressed="true"]{border-color:var(--dm-ink);box-shadow:inset 0 0 0 1px var(--dm-ink)}
-.dm-conta b{display:block;font-size:22px;font-weight:650;letter-spacing:-.02em;line-height:1.1;font-variant-numeric:tabular-nums}
-.dm-conta small{display:block;font-size:12px;color:var(--dm-mudo);margin-top:2px;line-height:1.35}
-.dm-conta.dm-bad b{color:var(--dm-bad)}
-.dm-conta.dm-zero b{color:var(--dm-mudo)}
-.dm-conta.dm-leitura{border-color:var(--dm-linha);border-radius:0;cursor:default}
-@media (hover:hover){ .dm-conta.dm-leitura:hover{background:var(--dm-card);border-color:var(--dm-linha)} }
-.dm-conta.dm-kpi b{font-size:30px;letter-spacing:-.03em}
-.dm-barra{height:6px;background:var(--dm-card2);margin-top:8px}
-.dm-barra i{display:block;height:100%;background:var(--dm-ink)}
-
-/* ------------------------------------------------------------------ tabela */
-.dm-tab{width:100%;border-collapse:collapse;font-size:14px}
+/* ------------------------------------------------ tabela de verdade */
+/* a de leitura (Números) e a editável (Setores, Categorias) */
+.dm-tab{width:100%;border-collapse:collapse;font-size:14px;line-height:20px}
 .dm-tab th{
-  white-space:nowrap;
-  text-align:left;font-size:12px;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--dm-mudo);font-weight:600;padding:0 var(--dm-e2) var(--dm-e1) 0;
-  border-bottom:1px solid var(--dm-linha);vertical-align:bottom;
+  text-align:left;white-space:nowrap;font-size:12px;line-height:16px;font-weight:500;
+  color:var(--dm-mudo);background:var(--dm-sup-2);
+  padding:12px var(--dm-e4);border-bottom:1px solid var(--dm-linha);vertical-align:bottom;
 }
-.dm-tab td{padding:10px var(--dm-e2) 10px 0;border-bottom:1px solid var(--dm-linha);vertical-align:middle}
-.dm-tab tr:last-child td{border-bottom:0}
-.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;padding-left:var(--dm-e3);padding-right:0}
-.dm-tab select,.dm-tab input{
-  min-height:44px;border:1px solid var(--dm-linha2);background:var(--dm-card3);
-  border-radius:var(--dm-r);padding:0 8px;max-width:100%;
-}
-.dm-tab select{appearance:none;-webkit-appearance:none;padding-right:32px;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%23252525' stroke-opacity='.5' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 10px center}
-.dm-tab td.dm-primeira{position:sticky;left:0;background:var(--dm-card);z-index:1}
-/* o campo solto dentro da tabela não ocupa a célula inteira */
-.dm-tab .dm-campo-solto{width:auto;min-width:150px;max-width:200px}
-.dm-tab .dm-campo-solto.dm-estreito{width:64px;min-width:0;padding-inline:8px}
-.dm-tab .dm-campo-solto.dm-dinheiro{width:120px;padding-inline:10px}
+.dm-tab td{padding:10px var(--dm-e4);border-bottom:1px solid var(--dm-linha);vertical-align:middle;color:var(--dm-ink)}
+.dm-tab tbody tr:last-child td{border-bottom:0}
+.dm-tab tbody tr:hover td{background:var(--dm-sup-2)}
+.dm-tab td.dm-n,.dm-tab th.dm-n{text-align:right;font-variant-numeric:tabular-nums;width:1%;white-space:nowrap}
+.dm-tab td.dm-bad{color:var(--dm-bad);font-weight:600}
+.dm-tab td.dm-mudo{color:var(--dm-mudo)}
+.dm-tab td.dm-primeira{position:sticky;left:0;background:var(--dm-sup);z-index:1;font-weight:500}
+.dm-tab th.dm-primeira{position:sticky;left:0;z-index:2}
 .dm-tab td > .dm-linha{flex-wrap:nowrap;white-space:nowrap}
-/* a tabela de rótulo/valor (a ficha) vira duas colunas no celular */
-/* a tabela de LEITURA rola de lado dentro do cartão, com a primeira coluna
-   fixa e um sinal de que rola; a EDITÁVEL vira cartões (ver `dm-cartoes`) */
-.dm-rola{overflow-x:auto;-webkit-overflow-scrolling:touch;
-  mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent);
-  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 24px),transparent)}
+.dm-tab .dm-fim{text-align:right;width:1%;white-space:nowrap}
+/* ABAIXO DE 1280 O NOME É QUEM GANHA A LARGURA (Categorias): o select de
+   destino tinha 240px e o nome da categoria quebrava em três linhas */
+@media (max-width:1279px){
+  .dm-tab th,.dm-tab td{padding-left:12px;padding-right:12px}
+  .dm-tab th:first-child,.dm-tab td:first-child{padding-left:var(--dm-e4)}
+  .dm-tab .dm-ctl.dm-filtro{max-width:176px}
+}
+.dm-rola{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .dm-rola .dm-tab{min-width:max-content}
-@media (min-width:720px){ .dm-rola{mask-image:none;-webkit-mask-image:none} .dm-rola .dm-tab{min-width:0} }
-/* no celular o último número sai de baixo da máscara */
-@media (max-width:719px){ .dm-rola .dm-tab th:last-child,.dm-rola .dm-tab td:last-child{padding-right:var(--dm-e4)} }
-/* a tabela editável abaixo de 720: um cartão por linha, controles rotulados */
-.dm-cartoes{display:grid;gap:var(--dm-e2)}
+@media (min-width:720px){ .dm-rola .dm-tab{min-width:0} }
+/* a tabela que rola de lado diz que rola: a borda do lado que tem mais
+   esmaece (quem liga os atributos é `useFitaQueRola`, medindo) */
+.dm-rola[data-mais-depois]{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent);mask-image:linear-gradient(to right,#000 calc(100% - 32px),transparent)}
+/* NO CELULAR A TABELA DE LEITURA EMPILHA (Números, por setor): o nome numa
+   linha, os números embaixo, cada um com o seu rótulo. Rolando de lado ela
+   mostrava "Setor, Pediu, Atendeu" e escondia justamente "Atrasadas". */
+@media (max-width:719px){
+  .dm-rola .dm-tab.dm-empilha{min-width:0}
+  .dm-tab.dm-empilha thead{display:none}
+  .dm-tab.dm-empilha tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 8px;padding:12px var(--dm-e4);border-top:1px solid var(--dm-linha)}
+  .dm-tab.dm-empilha tbody tr:first-child{border-top:0}
+  .dm-tab.dm-empilha td{display:block;padding:0;border:0;text-align:left;background:transparent}
+  .dm-tab.dm-empilha td.dm-primeira{grid-column:1 / -1;position:static;font-weight:600}
+  .dm-tab.dm-empilha td[data-rot]::before{content:attr(data-rot);display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);margin-bottom:2px}
+  .dm-tab.dm-empilha td[colspan]{grid-column:1 / -1}
+  .dm-tab.dm-empilha td[data-rot]::before{white-space:nowrap}
+}
+/* em 320 quatro números por linha não cabem com os rótulos: dois */
+@media (max-width:359px){ .dm-tab.dm-empilha tr{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* a tabela editável em cartões: um cartão por linha, controles rotulados.
+   Quem decide é `useEstreito` no componente: Setores abaixo de 720,
+   Categorias abaixo de 1280 */
+.dm-cartoes{display:grid;gap:0;border:1px solid var(--dm-linha);border-radius:var(--dm-r3);background:var(--dm-sup);overflow:hidden}
 .dm-cartao-linha{
-  border:1px solid var(--dm-linha);padding:var(--dm-e3);display:grid;gap:var(--dm-e2);
+  display:grid;gap:var(--dm-e3);padding:var(--dm-e4);border-top:1px solid var(--dm-linha);
   grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"tit acao" "campos campos";align-items:center;
 }
-.dm-cartao-linha > h3{margin:0;grid-area:tit}
+.dm-cartao-linha:first-child{border-top:0}
+.dm-cartao-linha > h3{margin:0;grid-area:tit;font-size:14px;line-height:20px;font-weight:600}
 .dm-cartao-linha > .dm-cartao-campos{grid-area:campos}
 .dm-cartao-linha > .dm-cartao-campos + div{grid-area:acao}
-.dm-cartao-linha > .dm-cartao-campos + div > .dm-rente{margin:0 -8px 0 0}
-.dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e2);align-items:end}
-.dm-cartao-campo:has(> .dm-linha){grid-column:1 / -1}
-/* duas colunas já em 380 (prazo e "dias", os dois interruptores); o select
-   de destino precisa da largura toda */
-@media (min-width:380px){ .dm-cartao-campos{grid-template-columns:1fr 1fr} .dm-cartao-campo:has(> select){grid-column:1 / -1} }
-.dm-cartao-campo > span:first-child{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:4px}
-/* quem decide entre tabela e cartões é `useEstreito(719)` no componente,
-   para a página não carregar os dois e duplicar cada controle */
+/* "Desativar" em cada linha é um gesto raro repetido treze vezes: em cinza,
+   e só escurece sob o mouse (o peso fica no diálogo que confirma) */
+.dm-tab .dm-fim .dm-btn.dm-txt,.dm-cartao-linha .dm-btn.dm-txt{color:var(--dm-mudo)}
+.dm-tab .dm-fim .dm-btn.dm-txt:hover,.dm-cartao-linha .dm-btn.dm-txt:hover{color:var(--dm-ink)}
+.dm-cartao-campos{display:grid;grid-template-columns:1fr;gap:var(--dm-e3);align-items:end}
+@media (min-width:380px){
+  .dm-cartao-campos{grid-template-columns:1fr 1fr}
+  /* o select e o prazo ocupam a linha: os dois interruptores caem juntos
+     na linha de baixo, lado a lado (antes "Exige aprovação" ficava ao lado
+     do prazo e "Exige orçamento" sozinho embaixo) */
+  .dm-cartao-campo:has(> select),.dm-cartao-campo:has(> .dm-linha){grid-column:1 / -1}
+}
+/* NO TABLET E EM 1024 AS CATEGORIAS SÃO CARTÕES DE DUAS COLUNAS — 23/09/2026.
+   Na tabela, entre 768 e 1279, o destino ("Manutenção e infraestrutura")
+   saía cortado nos sete selects de cada grupo, e alargar a coluna quebrava o
+   nome da categoria em três linhas. No cartão: o destino e o prazo lado a
+   lado, os dois interruptores embaixo; a tabela volta a partir de 1280 */
+@media (min-width:720px){
+  .dm-cartao-campos{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+  .dm-cartao-campo:has(> select),.dm-cartao-campo:has(> .dm-linha){grid-column:auto}
+}
+.dm-cartao-campo > span:first-child{display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);margin-bottom:6px}
+.dm-cartao-campo > .dm-ctl.dm-filtro{width:100%;max-width:none}
+.dm-cartoes-setores .dm-cartao-campos{grid-template-columns:minmax(0,1fr)}
 
-/* ------------------------------------------------------------------ ficha */
+/* ============================================================== a ficha */
 /* a faixa de fatos sob o título: os quatro que decidem a ação */
 .dm-fatos{
   display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  border:1px solid var(--dm-linha);margin-bottom:var(--dm-e3);
+  border:1px solid var(--dm-linha);border-radius:var(--dm-r3);margin-bottom:var(--dm-e8);overflow:hidden;
 }
-.dm-fato{padding:10px var(--dm-e2);border-bottom:1px solid var(--dm-linha);border-right:1px solid var(--dm-linha);min-width:0}
-.dm-fato:nth-child(2n){border-right:0}
-.dm-fato:nth-last-child(-n+2){border-bottom:0}
-.dm-fato > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:3px}
-.dm-fato > div{font-size:14px;font-weight:500;overflow-wrap:anywhere}
-.dm-fato > div small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:13px;font-weight:400;color:var(--dm-mudo)}
-@media (min-width:720px){
-  .dm-fatos{grid-template-columns:repeat(4,minmax(0,1fr))}
-  .dm-fato{border-bottom:0}
-  .dm-fato:nth-child(2n){border-right:1px solid var(--dm-linha)}
-  .dm-fato:last-child{border-right:0}
+.dm-fato{padding:var(--dm-e3) var(--dm-e4);min-width:0;border-right:1px solid var(--dm-linha);border-bottom:1px solid var(--dm-linha);margin:0 -1px -1px 0}
+.dm-fato > span{display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);margin-bottom:4px}
+.dm-fato > div{font-size:14px;line-height:20px;font-weight:600;overflow-wrap:anywhere;color:var(--dm-ink)}
+.dm-fato > div.dm-bad{color:var(--dm-bad)}
+.dm-fato > div small{display:block;font-size:13px;line-height:18px;font-weight:400;color:var(--dm-mudo);margin-top:1px}
+@media (min-width:720px){ .dm-fato{padding:var(--dm-e4) var(--dm-e5)} }
+/* quatro colunas só com espaço para elas: em 768 eram quatro de 180px, com
+   o nome de quem pediu em três linhas, e em 1024 "Quem atende" tinha cinco;
+   em 320, uma coluna (o nome saía em quatro linhas de 143px) */
+@media (min-width:1280px){ .dm-fatos{grid-template-columns:repeat(4,minmax(0,1fr))} }
+@media (max-width:359px){ .dm-fatos{grid-template-columns:minmax(0,1fr)} }
+/* rótulo e valor em duas colunas dentro do pedido */
+.dm-pares{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e3) var(--dm-e5);border-top:1px solid var(--dm-linha);padding-top:var(--dm-e4);margin-top:var(--dm-e4)}
+@media (min-width:1280px){ .dm-pares{grid-template-columns:repeat(3,minmax(0,1fr))} }
+.dm-pares > div > span{display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);margin-bottom:2px}
+.dm-pares > div{min-width:0;font-size:14px;line-height:20px;overflow-wrap:anywhere}
+.dm-pares.dm-uma-coluna{grid-template-columns:1fr;border-top:0;padding-top:0;margin-top:0;gap:var(--dm-e4)}
+.dm-pares.dm-dado-fixo{margin:0 0 var(--dm-e3)}
+/* o dado que não se edita aqui (o e-mail do perfil) tem o rótulo com a
+   mesma cara do rótulo dos campos de cima */
+.dm-pares.dm-dado-fixo > div > span{font-size:13px;line-height:18px;font-weight:500;color:var(--dm-ink);margin-bottom:6px}
+
+/* O PAINEL DE AÇÃO. No desktop, a coluna à direita, fixa: o próximo passo
+   em cima, os ajustes e os recados embaixo. No celular, a barra fixa e a
+   folha; sem ação que ande, um bloco em linha. */
+.dm-painel{display:grid;gap:0;align-content:start;border:1px solid var(--dm-linha);border-radius:var(--dm-r3);background:var(--dm-sup);overflow:hidden}
+.dm-painel-bloco{padding:var(--dm-e4) var(--dm-e5)}
+.dm-painel-bloco + .dm-painel-bloco{border-top:1px solid var(--dm-linha)}
+.dm-painel-titulo{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--dm-mudo);margin-bottom:8px}
+.dm-painel-estado{font-size:15px;line-height:21px;font-weight:600;color:var(--dm-ink);margin-bottom:var(--dm-e3)}
+.dm-painel-bloco > .dm-peq{margin-bottom:var(--dm-e2)}
+.dm-painel-acoes{display:grid;gap:var(--dm-e2)}
+.dm-painel-acoes:empty{display:none}
+.dm-painel-ajustes{display:grid;grid-template-columns:1fr;gap:0;margin:0 -10px}
+.dm-painel-ajustes > .dm-btn{justify-content:flex-start;gap:10px}
+.dm-painel-ajustes > .dm-btn svg{color:var(--dm-icone)}
+.dm-painel-ajustes > .dm-perigo svg{color:currentColor}
+.dm-painel-form .dm-folha-topo{margin-bottom:var(--dm-e3)}
+.dm-painel-linha{margin-top:var(--dm-e6)}
+@media (min-width:720px){ .dm-painel-linha .dm-grade{grid-template-columns:repeat(2,minmax(0,280px))} }
+.dm-recados .dm-painel-titulo{margin-bottom:var(--dm-e2)}
+.dm-ficha{align-items:start}
+
+.dm-barra-acao{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--dm-e2);
+  padding:10px var(--dm-calha) calc(10px + env(safe-area-inset-bottom, 0px));
+  background:rgba(255,255,255,.97);border-top:1px solid var(--dm-linha);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);
+  animation:dm-sobe 220ms var(--dm-curva-entra);
 }
-@media (min-width:1024px){
-  .dm-fato > div small{display:inline;margin-left:4px;-webkit-line-clamp:none}
-  .dm-fato > div small::before{content:"· "}
-}
-/* rótulo/valor em duas colunas dentro de "O que foi pedido" */
-.dm-pares{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--dm-e2) var(--dm-e3);
-  border-top:1px solid var(--dm-linha);padding-top:var(--dm-e2);margin-top:var(--dm-e2)}
-.dm-pares > div > span{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin-bottom:2px}
-.dm-pares > div{min-width:0;font-size:14px;overflow-wrap:anywhere}
-.dm-pares.dm-uma-coluna{grid-template-columns:1fr;border-top:0;padding-top:0;margin-top:0}
-/* a barra de enviar da Nova: a frase-resumo à esquerda, o botão à direita */
-.dm-barra-acao.dm-barra-enviar,.dm-barra-acao.dm-barra-enviar:has(> :last-child:nth-child(2)){grid-template-columns:1fr auto;align-items:center}
+.dm-barra-acao:has(> :only-child){grid-template-columns:1fr}
+.dm-barra-acao > .dm-btn{min-width:0;min-height:48px}
+@keyframes dm-sobe{0%{translate:0 100%}100%{translate:0 0}}
+@media (min-width:720px) and (max-width:1023px){ .dm-barra-acao{grid-template-columns:auto minmax(220px,360px);justify-content:end} }
+@media (min-width:1024px){ .dm-barra-acao{display:none} }
+.dm-barra-acao.dm-barra-enviar{grid-template-columns:minmax(0,1fr) auto;align-items:center}
+.dm-barra-enviar > .dm-cresce{font-size:13px;line-height:18px;color:var(--dm-mudo);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .dm-barra-enviar > .dm-cresce:empty{display:none}
 .dm-barra-acao.dm-barra-enviar:has(> .dm-cresce:empty){grid-template-columns:1fr}
 @media (min-width:720px) and (max-width:1023px){
-  .dm-barra-acao.dm-barra-enviar{grid-template-columns:minmax(0,1fr) minmax(220px,360px)}
-  .dm-barra-acao.dm-barra-enviar:has(> .dm-cresce:empty){grid-template-columns:minmax(220px,360px);justify-content:end}
+  .dm-barra-acao.dm-barra-enviar{grid-template-columns:minmax(0,1fr) minmax(220px,320px)}
+  .dm-barra-acao.dm-barra-enviar:has(> .dm-cresce:empty){grid-template-columns:minmax(220px,320px);justify-content:end}
 }
-/* o painel de ação: no desktop, coluna fixa; no celular, a barra fixa */
-.dm-painel{padding:var(--dm-card-pad)}
-.dm-painel-titulo{margin-bottom:2px}
-.dm-painel-estado{font-size:13px;color:var(--dm-mudo);margin-bottom:var(--dm-e2)}
-.dm-painel-acoes{display:grid;gap:var(--dm-e1)}
-.dm-painel-ajustes{display:grid;grid-template-columns:1fr;gap:0;margin:var(--dm-e2) 0 0 -8px}
-.dm-painel-ajustes > .dm-btn{justify-content:flex-start;min-height:44px}
-.dm-painel-ajustes > .dm-perigo{margin-top:var(--dm-e1)}
-.dm-folha .dm-painel-ajustes{margin-left:0}
-.dm-painel-secao{border-top:1px solid var(--dm-linha);margin-top:var(--dm-e3);padding-top:var(--dm-e3)}
-.dm-barra-acao{
-  position:fixed;left:0;right:0;bottom:0;z-index:40;
-  display:grid;grid-template-columns:auto minmax(0,1fr);gap:var(--dm-e1);
-  padding:8px var(--dm-e3) calc(8px + env(safe-area-inset-bottom, 0px));
-  background:var(--dm-bg);border-top:1px solid var(--dm-linha);
-  animation:dm-sobe 200ms var(--dm-curva-entra);
-}
-.dm-barra-acao:has(> :only-child){grid-template-columns:1fr}
-.dm-barra-acao > .dm-btn{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;line-height:44px;padding-top:0;padding-bottom:0}
-@keyframes dm-sobe{0%{transform:translateY(100%)}100%{transform:none}}
-@media (min-width:720px) and (max-width:1023px){ .dm-barra-acao{grid-template-columns:auto minmax(220px,360px);justify-content:end;padding-inline:var(--dm-calha)} }
-@media (min-width:1024px){ .dm-barra-acao{display:none} }
-/* a folha que sobe do rodapé no celular, com o formulário da ação; no
-   desktop o mesmo <dialog> abre como caixa centralizada */
+
+/* a folha: sobe do rodapé no celular; no desktop o mesmo <dialog> abre
+   centralizado */
 .dm-folha{
   border:0;padding:0;margin:0;max-width:100%;max-height:100dvh;width:100%;
   position:fixed;left:0;right:0;bottom:0;top:auto;
-  background:var(--dm-card);color:var(--dm-ink);
-  border-radius:16px 16px 0 0;box-shadow:var(--dm-sombra-flutua);
-  animation:dm-sobe var(--dm-t-painel);
+  background:var(--dm-sup);color:var(--dm-ink);
+  border-radius:var(--dm-r4) var(--dm-r4) 0 0;box-shadow:var(--dm-sombra-dialogo);
+  animation:dm-sobe var(--dm-t-abre);
 }
-.dm-folha::backdrop{background:rgba(37,37,37,.40)}
-.dm-folha-in{padding:8px var(--dm-e3) calc(var(--dm-e3) + env(safe-area-inset-bottom, 0px));max-height:calc(100dvh - 48px);overflow:auto}
-.dm-folha-alca{width:36px;height:4px;border-radius:2px;background:var(--dm-linha2);margin:4px auto var(--dm-e2)}
-.dm-folha-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);margin-bottom:var(--dm-e1)}
+.dm-folha::backdrop{background:rgba(16,16,20,.44)}
+.dm-folha-in{padding:8px var(--dm-e5) calc(var(--dm-e5) + env(safe-area-inset-bottom, 0px));max-height:calc(100dvh - 40px);overflow:auto}
+.dm-folha-alca{width:36px;height:4px;border-radius:2px;background:var(--dm-linha-2);margin:4px auto var(--dm-e3)}
+.dm-folha-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e3);margin-bottom:var(--dm-e3)}
+.dm-folha-topo h3{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;color:var(--dm-ink)}
+.dm-folha-topo .dm-btn{margin-right:-10px}
+.dm-folha .dm-painel-estado{margin-bottom:var(--dm-e3)}
+.dm-folha-secao{border-top:1px solid var(--dm-linha);margin-top:var(--dm-e4);padding-top:var(--dm-e3)}
 @media (min-width:1024px){
   .dm-folha{
-    position:fixed;inset:0;margin:auto;width:min(480px,calc(100% - 32px));max-height:min(90dvh,720px);height:fit-content;
-    border-radius:var(--dm-r);animation:dm-toast-entra 200ms var(--dm-curva-entra);
+    inset:0;margin:auto;width:min(520px,calc(100% - 32px));max-height:min(88dvh,760px);height:fit-content;
+    border-radius:var(--dm-r4);animation:dm-toast-entra 200ms var(--dm-curva-entra);
   }
+  .dm-folha-in{padding:var(--dm-e5) var(--dm-e6) var(--dm-e6)}
   .dm-folha-alca{display:none}
 }
-/* quem acompanha, em uma linha; o formulário de incluir a um toque */
-.dm-acompanha-bloco{margin:var(--dm-e2) 0}
-.dm-acompanha{display:flex;flex-wrap:wrap;align-items:center;gap:4px var(--dm-e1);font-size:14px;color:var(--dm-ink2);min-height:44px}
-/* quando "Incluir alguém" desce de linha, o padding de 8px o desalinha do
-   rótulo; na mesma linha o vão de 8px entre irmãos compensa */
-.dm-acompanha > .dm-btn.dm-txt{margin-left:-8px}
-.dm-acompanha .dm-rot{margin-right:4px}
-/* o formulário da ação dentro do painel ou da folha: os cartões de dentro
-   perdem a moldura, senão é caixa dentro de caixa */
-.dm-painel .dm-card,.dm-folha .dm-card{border:0;padding:0;margin-bottom:var(--dm-e2);background:transparent}
+
+/* quem acompanha: pessoas como fichas, e incluir a um toque */
+.dm-acompanha{display:flex;flex-wrap:wrap;align-items:center;gap:var(--dm-e2);font-size:14px;color:var(--dm-ink-2)}
+.dm-chip{
+  display:inline-flex;align-items:center;gap:8px;min-height:36px;max-width:100%;
+  padding:0 2px 0 6px;border:1px solid var(--dm-linha);border-radius:18px;background:var(--dm-sup);
+  font-size:14px;color:var(--dm-ink);
+}
+.dm-chip > span:not(.dm-avatar){min-width:0;overflow-wrap:anywhere;padding-right:8px}
+.dm-chip > .dm-btn{border-radius:16px;margin-left:-4px}
+.dm-acompanha-form{margin-top:var(--dm-e3)}
 /* anexos: uma linha por link, com quem colou */
-.dm-anexos{list-style:none;margin:0;padding:0}
-.dm-anexos li{display:flex;align-items:center;gap:var(--dm-e2);padding:6px 0;border-bottom:1px solid var(--dm-linha);flex-wrap:wrap}
-.dm-anexos li:last-child{border-bottom:0}
-.dm-anexo-link{flex:1 1 200px;min-width:0;padding:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;text-decoration:underline;text-underline-offset:3px}
-.dm-anexo-de{font-size:12px;color:var(--dm-mudo);white-space:nowrap}
-/* o histórico: o fio termina no último ponto */
-.dm-hist{list-style:none;margin:0;padding:0}
-.dm-hist li{position:relative;padding:0 0 var(--dm-e3) 20px}
+.dm-anexos{display:grid}
+.dm-anexos li{display:flex;align-items:center;gap:var(--dm-e3);padding:10px var(--dm-e4);border-top:1px solid var(--dm-linha);flex-wrap:wrap;min-height:52px}
+.dm-anexos li:first-child{border-top:0}
+.dm-anexos li svg{width:16px;height:16px;color:var(--dm-icone)}
+.dm-anexo-link{flex:1 1 200px;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;font-weight:500;color:var(--dm-ink);text-decoration:underline;text-decoration-color:var(--dm-linha-2);text-underline-offset:3px}
+.dm-anexo-link:where(a):hover{text-decoration-color:currentColor}
+.dm-anexo-de{font-size:12px;color:var(--dm-mudo);overflow-wrap:anywhere}
+.dm-anexos-novos{border:1px solid var(--dm-linha);border-radius:var(--dm-r3);margin-top:var(--dm-e3)}
+.dm-anexos-novos .dm-anexo-link{text-decoration:none}
+
+/* A ATIVIDADE: um fio vertical, um ponto por fato; o marco é o ponto cheio,
+   e o comentário ganha a caixa do texto. */
+.dm-hist{display:grid}
+.dm-hist li{position:relative;padding:0 0 var(--dm-e5) 26px}
 .dm-hist li::before{
-  content:'';position:absolute;left:0;top:6px;width:7px;height:7px;
-  border-radius:50%;background:var(--dm-linha3);
+  content:"";position:absolute;left:5px;top:6px;width:9px;height:9px;border-radius:50%;
+  background:var(--dm-sup);box-shadow:inset 0 0 0 2px var(--dm-linha-2);
 }
-.dm-hist li::after{content:'';position:absolute;left:3px;top:17px;bottom:-4px;width:1px;background:var(--dm-linha)}
+.dm-hist li::after{content:"";position:absolute;left:9px;top:19px;bottom:2px;width:1px;background:var(--dm-linha)}
+.dm-hist li:last-child{padding-bottom:0}
 .dm-hist li:last-child::after{content:none}
-.dm-hist li.dm-marco::before{background:var(--dm-ink)}
-.dm-hist .dm-q{font-size:13px;color:var(--dm-mudo)}
-.dm-hist .dm-q b{font-weight:500;color:var(--dm-ink2)}
-.dm-hist .dm-t{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:3px;font-size:15px;line-height:1.5;max-width:68ch}
-.dm-hist .dm-interno{
-  border-left:3px solid var(--dm-warn);padding:8px var(--dm-e2);
-  background:var(--dm-warn-bg);
+.dm-hist li.dm-marco::before{background:var(--dm-ink);box-shadow:none}
+.dm-hist .dm-q{font-size:13px;line-height:20px;color:var(--dm-mudo)}
+.dm-hist .dm-q b{font-weight:600;color:var(--dm-ink)}
+.dm-quando{color:var(--dm-mudo);font-weight:400;white-space:nowrap}
+/* no cartão verde a hora relativa acompanha a cor do cartão, sem negrito */
+.dm-aviso .dm-sep .dm-quando{color:inherit}
+/* a frase e a hora são duas peças de `dm-sep`: sem vão entre as linhas
+   quando a hora desce, e alinhadas pela linha de base */
+.dm-hist .dm-q .dm-sep-in,.dm-aviso-o-que > .dm-sep-in{row-gap:0;align-items:baseline}
+.dm-hist .dm-t{
+  white-space:pre-wrap;overflow-wrap:anywhere;margin-top:6px;font-size:var(--dm-t-corpo);line-height:1.55;max-width:72ch;
+  padding:10px 12px;border-radius:var(--dm-r3);background:var(--dm-sup-2);box-shadow:inset 0 0 0 1px var(--dm-linha);color:var(--dm-ink);
 }
+.dm-hist .dm-interno .dm-t{background:var(--dm-warn-bg);box-shadow:inset 0 0 0 1px var(--dm-warn-ln)}
 
-/* --------------------------------------------------------------- avisos */
-.dm-avisos{list-style:none;margin:0;padding:0}
-.dm-aviso-grupo{border-top:1px solid var(--dm-linha);padding:var(--dm-e2) 0}
-.dm-aviso-grupo > a{display:block;font-size:15px;font-weight:650;letter-spacing:-.01em;text-decoration:none;min-height:44px;padding:8px 0;overflow-wrap:anywhere}
+/* ============================================================== avisos */
+.dm-avisos{display:grid}
+.dm-aviso-grupo{padding:14px var(--dm-e4);border-top:1px solid var(--dm-linha);display:grid;gap:6px}
+.dm-aviso-grupo:first-child{border-top:0}
+.dm-aviso-grupo > a{display:flex;align-items:baseline;gap:8px;font-size:14px;line-height:20px;font-weight:600;text-decoration:none;min-height:24px;overflow-wrap:anywhere;color:var(--dm-ink);justify-self:start}
 .dm-aviso-grupo > a:hover{text-decoration:underline;text-underline-offset:3px}
-.dm-aviso-grupo ul{list-style:none;margin:0;padding:0}
-.dm-aviso-grupo li{position:relative;padding:4px 0 4px 18px;font-size:14px}
-.dm-aviso-grupo li::before{content:'';position:absolute;left:2px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--dm-linha2)}
-.dm-aviso-grupo li.dm-novo::before{background:var(--dm-ink)}
-.dm-aviso-grupo li.dm-novo .dm-aviso-o-que{font-weight:600}
+.dm-aviso-grupo > a .dm-num{color:var(--dm-mudo);font-weight:500;flex:none}
+.dm-aviso-grupo ul{display:grid;gap:2px}
+.dm-aviso-grupo li{position:relative;padding:3px 0 3px 16px;font-size:14px;line-height:20px;color:var(--dm-ink-2)}
+.dm-aviso-grupo li::before{content:"";position:absolute;left:1px;top:10px;width:6px;height:6px;border-radius:50%;background:var(--dm-linha-2)}
+.dm-aviso-grupo li.dm-novo::before{background:var(--dm-info-ponto)}
+.dm-aviso-grupo li.dm-novo .dm-aviso-o-que{font-weight:600;color:var(--dm-ink)}
 .dm-aviso-o-que{overflow-wrap:anywhere}
-/* no cartão "Últimos avisos" do Início o fato fica logo sob o título */
-.dm-aviso-grupo > .dm-aviso-o-que{font-size:14px;padding:0 0 8px}
-.dm-aviso-de{font-size:13px;color:var(--dm-mudo);overflow-wrap:anywhere}
-.dm-avisos-dia{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;margin:var(--dm-e3) 0 var(--dm-e1)}
+.dm-aviso-de{font-size:13px;line-height:18px;color:var(--dm-mudo);overflow-wrap:anywhere;margin-top:2px}
+.dm-avisos-dia{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--dm-mudo);padding:10px var(--dm-e4);background:var(--dm-sup-2);border-top:1px solid var(--dm-linha);border-bottom:1px solid var(--dm-linha)}
+.dm-tabela > div:first-child > .dm-avisos-dia{border-top:0}
+/* o grupo (a demanda) é o link: 44px no toque */
+/* o número na linha de base do título, mesmo quando o título quebra em
+   duas linhas (centralizado, "#111" flutuava entre as duas) */
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .dm-aviso-grupo > a{min-height:44px;padding:12px 0;margin:-12px 0;align-items:baseline} }
 
-/* ------------------------------------------------------------------ outros */
-.dm-mais{margin-top:var(--dm-e2)}
+/* ============================================================ gráficos */
+/* barras horizontais: rótulo, valor e a barra embaixo, na mesma escala */
+.dm-barras{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.dm-barras-linha{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;min-width:0}
+.dm-barras-linha > div:first-child{display:flex;align-items:baseline;justify-content:space-between;gap:var(--dm-e3);font-size:13px;line-height:18px}
+.dm-barras-linha b{font-weight:600;font-variant-numeric:tabular-nums;color:var(--dm-ink)}
+/* o motivo do atraso é o conteúdo, e não pode sair cortado: no celular o
+   rótulo quebra linha em vez de virar reticências */
+@media (max-width:719px){ .dm-barras-linha .dm-corta{white-space:normal;overflow:visible;overflow-wrap:anywhere} }
+.dm-barras-sub::before{content:" · "}
+@media (max-width:719px){
+  .dm-barras-sub{display:block}
+  .dm-barras-sub::before{content:none}
+}
+.dm-barra{height:8px;border-radius:4px;background:var(--dm-sup-3);overflow:hidden}
+.dm-barra i{display:block;height:100%;border-radius:4px;background:var(--dm-ink-2)}
+/* a falta do dado ("2 seguem atrasadas, sem trava"), embaixo das barras */
+.dm-nota-barras{font-size:13px;line-height:18px;color:var(--dm-mudo)}
+.dm-barras + .dm-nota-barras,.dm-motivos + .dm-nota-barras{margin-top:var(--dm-e4);padding-top:var(--dm-e3);border-top:1px solid var(--dm-linha)}
+/* o motivo escrito por quem concluiu com atraso, como citação */
+.dm-motivos{display:grid;gap:var(--dm-e3)}
+.dm-motivos > li{font-size:14px;line-height:21px;color:var(--dm-ink-2);overflow-wrap:anywhere}
+.dm-barras + .dm-motivos{margin-top:var(--dm-e4);padding-top:var(--dm-e4);border-top:1px solid var(--dm-linha)}
+/* colunas por mês: a mesma `dm-barra`, em pé. O número em cima de cada
+   coluna, o mês embaixo, a escala do maior mês. */
+.dm-colunas-caixa{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* colunas de 36 a 72px, distribuídas pela caixa: com 1fr, três meses viravam
+   três barras de 48px soltas numa área de 1.090px, e presas à esquerda o
+   eixo cruzava a caixa vazia */
+.dm-colunas{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(36px,72px);justify-content:space-around;align-items:end;gap:var(--dm-e2);height:200px;border-bottom:1px solid var(--dm-linha-2);min-width:min-content}
+.dm-coluna{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%;min-width:0}
+.dm-coluna > b{font-size:12px;line-height:16px;font-weight:600;color:var(--dm-ink-2);font-variant-numeric:tabular-nums}
+.dm-colunas .dm-barra{display:flex;align-items:flex-end;flex:1 1 auto;width:100%;max-width:48px;height:auto;border-radius:4px 4px 0 0;background:transparent}
+.dm-colunas .dm-barra i{width:100%;border-radius:4px 4px 0 0;background:var(--dm-ink-2)}
+.dm-colunas-rot{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(36px,72px);justify-content:space-around;gap:var(--dm-e2);margin-top:8px;min-width:min-content}
+/* o mês sem pedido: sem barra (zero não é "um pouco"), e o 0 em cinza */
+.dm-coluna.dm-zero > b{color:var(--dm-mudo);font-weight:500}
+.dm-colunas-rot > span{font-size:12px;line-height:16px;color:var(--dm-mudo);text-align:center;white-space:nowrap}
+.dm-frase-unica{font-size:14px;line-height:21px}
+
+/* ========================================================= estados vazios */
+.dm-vazio{display:grid;justify-items:center;gap:6px;padding:var(--dm-e10) var(--dm-e4);text-align:center}
+.dm-vazio-ico{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--dm-sup-3);color:var(--dm-ink-2);margin-bottom:6px}
+.dm-vazio-ico svg{width:20px;height:20px}
+.dm-vazio.dm-bom .dm-vazio-ico{background:var(--dm-ok-bg);color:var(--dm-ok)}
+.dm-vazio h3{font-size:14px;line-height:20px;font-weight:600;color:var(--dm-ink)}
+.dm-vazio > div{font-size:13px;line-height:19px;color:var(--dm-mudo);max-width:46ch}
+.dm-vazio > div .dm-btn{margin-top:var(--dm-e3)}
+.dm-vazio a:not(.dm-btn){color:var(--dm-ink);text-decoration:underline;text-underline-offset:3px}
+.dm-vazio.dm-solto{border:1px dashed var(--dm-linha-2);border-radius:var(--dm-r3)}
+.dm-caixa-corpo > .dm-vazio{padding:var(--dm-e4) 0}
+/* dentro de uma tabela o vazio é uma linha que explica, e não um palco:
+   24px de respiro, e não 40 */
+.dm-tabela > .dm-vazio{padding:var(--dm-e6) var(--dm-e4)}
+.dm-config-corpo > .dm-vazio{margin-top:var(--dm-e3)}
+
+/* ---------------------------------------------------------------- esqueleto */
+.dm-esqueleto div{background:var(--dm-sup-3);border-radius:var(--dm-r2);animation:dm-pulso 1.4s ease-in-out infinite}
+.dm-esqueleto .dm-esq-linha{display:flex;align-items:center;gap:var(--dm-e4);min-height:64px;padding:0 var(--dm-e4);background:transparent;border-radius:0;animation:none;border-top:1px solid var(--dm-linha)}
+.dm-esqueleto .dm-esq-linha:first-child{border-top:0}
+.dm-esqueleto .dm-esq-linha > div{height:12px}
+.dm-esqueleto .dm-esq-fatos{display:flex;flex-wrap:wrap;gap:1px;background:var(--dm-linha);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);overflow:hidden;animation:none}
+.dm-esqueleto .dm-esq-fatos > div{flex:1 1 130px;height:92px;border-radius:0;background:var(--dm-sup-2)}
+.dm-esqueleto.dm-em-caixa{border:1px solid var(--dm-linha);border-radius:var(--dm-r3);overflow:hidden}
+@keyframes dm-pulso{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* ------------------------------------------------------------- miudezas */
 .dm-mais > summary{
-  list-style:none;cursor:pointer;user-select:none;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  min-height:44px;padding:0 var(--dm-e3);border-radius:var(--dm-r);
-  color:var(--dm-ink2);font-size:14px;font-weight:550;
-  transition:background var(--dm-t),color var(--dm-t);
+  list-style:none;cursor:pointer;user-select:none;display:inline-flex;align-items:center;gap:6px;
+  min-height:var(--dm-h-peq);font-size:13px;font-weight:500;color:var(--dm-ink-2);border-radius:var(--dm-r2);
 }
 .dm-mais > summary::-webkit-details-marker{display:none}
-.dm-card.dm-mais > summary{justify-content:flex-start;padding:0;font-size:15px;font-weight:650;color:var(--dm-ink)}
 .dm-mais > summary::after{
-  content:"";width:6px;height:6px;
-  border-right:1.6px solid currentColor;border-bottom:1.6px solid currentColor;
-  transform:translateY(-2px) rotate(45deg);transition:transform var(--dm-t);
+  content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;
+  transform:translateY(-2px) rotate(45deg);transition:transform var(--dm-t);margin-left:2px;
 }
-.dm-mais[open] > summary::after{transform:translateY(2px) rotate(-135deg)}
-.dm-mais > summary:hover{color:var(--dm-ink);background:var(--dm-card2)}
-/* a gaveta pequena e à esquerda ("Ver os sites aceitos"), com o mesmo alvo */
-.dm-mais.dm-esq{margin-top:0}
-.dm-mais.dm-esq > summary{justify-content:flex-start;padding:0;font-size:13px;font-weight:500}
-.dm-mais.dm-esq > summary:hover{background:transparent}
-.dm-mais > .dm-grade{margin-top:var(--dm-e1)}
+.dm-mais[open] > summary::after{transform:translateY(1px) rotate(-135deg)}
+.dm-mais > summary:hover{color:var(--dm-ink)}
+.dm-mais > p{margin-top:6px;font-size:13px;line-height:19px;color:var(--dm-mudo);max-width:72ch}
+.dm-mais.dm-explica{margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e4)}
+.dm-mais.dm-mais-caixa > .dm-hist{margin-top:var(--dm-e3)}
 .dm .dm-gaveta{
-  display:inline-flex;align-items:center;gap:8px;
-  min-height:44px;padding:0;border:0;background:transparent;
-  color:var(--dm-ink2);font-size:14px;font-weight:600;cursor:pointer;text-align:left;
+  display:inline-flex;align-items:center;gap:8px;min-height:var(--dm-h);padding:0;margin:var(--dm-e3) 0;
+  color:var(--dm-ink);font-size:14px;font-weight:600;cursor:pointer;text-align:left;
 }
-.dm .dm-gaveta:hover{color:var(--dm-ink)}
+.dm .dm-gaveta:hover{color:var(--dm-ink-2)}
 .dm .dm-gaveta::before{
-  content:'›';color:var(--dm-marca);font-size:17px;line-height:1;
-  transition:transform var(--dm-t);
+  content:"";width:16px;height:16px;flex:none;background:currentColor;transition:transform var(--dm-t);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 3.5 10.5 8 6 12.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6 3.5 10.5 8 6 12.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
 }
 .dm .dm-gaveta[aria-expanded="true"]::before{transform:rotate(90deg)}
-.dm-esqueleto div{background:var(--dm-card2);animation:dm-pulso 1.4s ease-in-out infinite}
-.dm-esqueleto .dm-esq-linha{display:flex;align-items:center;gap:var(--dm-e2);min-height:56px;background:transparent;animation:none;border-bottom:1px solid var(--dm-linha)}
-.dm-esqueleto .dm-esq-linha > div{height:14px;border-radius:2px}
-.dm-esqueleto .dm-esq-fatos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--dm-linha);animation:none;border:1px solid var(--dm-linha)}
-.dm-esqueleto .dm-esq-fatos > div{height:64px;animation:dm-pulso 1.4s ease-in-out infinite}
-@media (min-width:720px){ .dm-esqueleto .dm-esq-fatos{grid-template-columns:repeat(4,minmax(0,1fr))} }
-@keyframes dm-pulso{0%,100%{opacity:.55}50%{opacity:.95}}
-.dm-vazio{padding:var(--dm-e5) var(--dm-e3);text-align:center}
-.dm-vazio > .dm-rot{margin-bottom:6px}
-.dm-vazio > h3{margin-bottom:8px}
-@media (min-width:1024px){ .dm-vazio{text-align:left;max-width:520px} }
-.dm-copiar-falhou{display:block}
+.dm-sem-data{margin:calc(-1 * var(--dm-e3)) 0 var(--dm-e3);width:fit-content}
+.dm-enviar{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:var(--dm-e3);margin-top:var(--dm-e5)}
+.dm-enviar > .dm-cresce{text-align:right}
+/* a coluna do formulário não passa de 760px: em 1920 o título e a
+   descrição tinham 900px de largura */
+@media (min-width:1024px){ .dm-duas.dm-duas-form{grid-template-columns:minmax(0,760px) var(--dm-trilho)} }
+.dm-copiar-falhou{display:grid;gap:6px;width:100%}
 .dm .dm-copiar-cru{
-  display:block;width:100%;margin-top:var(--dm-e1);
-  padding:var(--dm-e2);border:1px solid var(--dm-linha);border-radius:var(--dm-r);
-  background:var(--dm-card2);color:var(--dm-ink);
-  font:inherit;font-size:max(16px,1rem);line-height:1.5;resize:vertical;
+  display:block;width:100%;padding:var(--dm-e3);border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);
+  background:var(--dm-sup-2);color:var(--dm-ink);font:inherit;line-height:1.5;resize:vertical;min-height:88px;
 }
-.dm-pode{list-style:none;margin:0;padding:0}
-.dm-pode li{padding:6px 0 6px 18px;position:relative;font-size:14px}
-.dm-pode li::before{content:'';position:absolute;left:2px;top:14px;width:8px;height:2px;background:var(--dm-ink)}
-.dm-pessoa{display:block;padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha);
-  text-decoration:none;color:inherit;transition:background var(--dm-t)}
-.dm-pessoa.dm-inativa{opacity:.62}
-.dm-pessoa a.dm-item-tit{display:flex;align-items:center;min-height:44px}
-.dm-item-tit{font-weight:600;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere}
-.dm-item-topo{display:flex;align-items:baseline;gap:var(--dm-e2);margin-bottom:5px}
-.dm-item-baixo{display:flex;gap:var(--dm-e1);flex-wrap:wrap;align-items:center;font-size:13px;color:var(--dm-mudo)}
-.dm-item-baixo > *{min-width:0;overflow-wrap:anywhere}
-.dm-item-baixo > span:not(.dm-pill) + span:not(.dm-pill)::before{content:'·';margin-right:6px;opacity:.5}
-/* um pedido de papel por linha no desktop: nome e pílula à esquerda, o par
-   Aceitar/Recusar à direita */
-@media (max-width:1023px){ .dm-pedido > .dm-linha{margin-top:var(--dm-e1)} }
-@media (min-width:1024px){
-  .dm-pedido{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:var(--dm-e3);align-items:center}
-  .dm-pedido > .dm-item-topo,.dm-pedido > .dm-item-baixo{grid-column:1}
-  .dm-pedido > .dm-item-topo{margin-bottom:2px}
-  .dm-pedido > .dm-linha{grid-column:2;grid-row:1 / span 2}
-}
-/* a lista de pessoas da administracao: no celular, um bloco por pessoa
-   (nome, papeis, setor e funcao, e-mail); a partir de 1024 vira uma tabela
-   de cinco colunas com cabecalho, sem <table>, para a linha inteira
-   continuar sendo um link */
-.dm-pessoas{border-top:1px solid var(--dm-linha)}
-.dm-pessoas .dm-pessoa{display:block;min-height:44px}
-.dm-pessoas .dm-pessoa:hover{background:var(--dm-card3);box-shadow:0 0 0 12px var(--dm-card3)}
+.dm.dm .dm-copiar-cru{font-size:16px}
+.dm-pode{display:grid;gap:2px}
+.dm-pode li{display:flex;gap:10px;align-items:flex-start;padding:5px 0;font-size:14px;line-height:20px;color:var(--dm-ink-2)}
+.dm-pode li svg{width:16px;height:16px;margin-top:2px;color:var(--dm-ok-ponto)}
+.dm-pronta .dm-caixa{margin-top:var(--dm-e2)}
+
+/* ============================================================ pessoas */
+/* na lista estreita, um bloco por pessoa; na larga, uma tabela com
+   cabeçalho, sem <table>, para a linha inteira ser um link */
+.dm-pessoas{background:var(--dm-sup);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);overflow:hidden}
+.dm-pessoa{display:block;padding:var(--dm-e3) var(--dm-e4);border-top:1px solid var(--dm-linha);text-decoration:none;color:inherit;transition:background var(--dm-t)}
+.dm-pessoas > .dm-pessoa:first-child,.dm-pessoas-cab + .dm-pessoa{border-top:0}
+.dm-pessoa:where(a):hover{background:var(--dm-sup-2)}
+.dm-pessoa.dm-inativa .dm-p-nome b{color:var(--dm-mudo)}
+.dm-pessoa.dm-inativa .dm-avatar{opacity:.6}
 .dm-pessoas > .dm-pessoas-cab{display:none}
-.dm-p-nome{display:block;font-size:15px;line-height:1.35;min-width:0;overflow-wrap:anywhere}
-.dm-p-nome small{font-weight:400;font-size:13px}
-.dm-p-origem{white-space:nowrap}
-.dm-p-origem::before{content:"\00a0· "}
-.dm-p-papel{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.dm-p-nome{display:flex;align-items:center;gap:12px;min-width:0}
+.dm-p-nome > span:not(.dm-avatar){display:grid;min-width:0;line-height:1.35}
+.dm-p-nome b{font-size:14px;font-weight:600;overflow-wrap:anywhere;color:var(--dm-ink)}
+.dm-p-nome small{font-size:12px;color:var(--dm-mudo);overflow-wrap:anywhere}
+.dm-p-papel{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+/* no celular o papel e o bloco "setor · função" entram na altura do nome,
+   depois do avatar; a segunda linha da função não volta mais para a borda */
+.dm-pessoa > .dm-p-papel,.dm-pessoa > .dm-p-onde{margin-left:44px}
+.dm-p-onde{margin-top:8px}
 .dm-p-papel:empty{display:none}
-.dm-p-setor,.dm-p-funcao,.dm-p-email{font-size:13px;color:var(--dm-mudo);min-width:0;overflow-wrap:anywhere}
-.dm-p-setor,.dm-p-funcao{display:inline}
+.dm-p-setor,.dm-p-funcao{font-size:13px;line-height:18px;color:var(--dm-mudo);min-width:0;overflow-wrap:anywhere}
+.dm-p-setor{color:var(--dm-ink-2)}
 .dm-p-setor:empty,.dm-p-funcao:empty{display:none}
-.dm-p-setor:not(:empty){margin-top:6px;display:inline-block}
-.dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:'·';margin:0 6px;opacity:.5}
-.dm-p-email{display:block;margin-top:2px}
-/* no tablet (720 a 1023) três colunas: nome e papéis, setor e função,
-   e-mail. O bloco de celular esticado a 720px era uma coluna de 110px por
-   pessoa. */
-@media (min-width:720px) and (max-width:1023px){
-  .dm-pessoas .dm-pessoa{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1.2fr) minmax(0,1.3fr);column-gap:var(--dm-e3);align-items:center;padding:8px 0;min-height:52px}
-  .dm-p-nome,.dm-p-papel{grid-column:1}
-  .dm-p-papel{margin-top:4px}
-  .dm-p-setor,.dm-p-funcao{grid-column:2;display:block;margin:0}
-  .dm-p-setor:not(:empty){margin:0;display:block}
-  .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:none}
-  .dm-p-email{grid-column:3;grid-row:1 / span 3;margin:0}
-  .dm-pessoas > .dm-pessoas-cab{display:none}
-}
-@media (min-width:1024px){
-  .dm-pessoas{border-top:0}
-  .dm-pessoas .dm-pessoa{
-    display:grid;align-items:center;column-gap:var(--dm-e3);
-    grid-template-columns:minmax(0,2.2fr) minmax(0,1.7fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.9fr);
-    min-height:52px;padding:8px 0;
+/* A TABELA DE PESSOAS DECIDE PELA LARGURA DA LISTA, como a fila de
+   demandas: cartões abaixo de 640px, três colunas (a função embaixo do
+   setor) a partir de 640, quatro a partir de 880 (1280 tem 952 de lista;
+   1024 tem 728, e com quatro colunas sete de nove nomes quebravam). No
+   iPad em pé eram cartões de uma coluna com metade da largura vazia. */
+.dm-pessoas{container-type:inline-size}
+@container (min-width:640px){
+  .dm-pessoas > .dm-pessoa{
+    display:grid;align-items:center;column-gap:var(--dm-e4);
+    grid-template-columns:minmax(0,3fr) minmax(0,1.2fr) minmax(0,1.7fr);
+    min-height:60px;padding:8px var(--dm-e4);
   }
-  .dm-pessoas .dm-pessoas-cab{
-    display:grid;min-height:36px;padding:0 0 6px;
-    font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dm-mudo);font-weight:600;
+  .dm-pessoas > .dm-pessoas-cab{
+    display:grid;min-height:40px;background:var(--dm-sup-2);border-bottom:1px solid var(--dm-linha);
+    font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);
   }
-  .dm-pessoas .dm-pessoas-cab:hover{background:transparent;box-shadow:none}
-  .dm-pessoas .dm-pessoas-cab > span{font-size:12px;color:var(--dm-mudo);margin:0;display:block}
+  .dm-pessoas-cab > span{font:inherit;color:inherit;margin:0}
+  .dm-pessoas > .dm-pessoas-cab > .dm-p-funcao{display:none}
   .dm-p-papel{margin-top:0}
-  .dm-p-setor:not(:empty){margin-top:0;display:block}
-  .dm-p-setor,.dm-p-funcao,.dm-p-email{display:block;margin-top:0}
-  .dm-p-setor:empty,.dm-p-funcao:empty{display:block}
-  .dm-p-setor:not(:empty) + .dm-p-funcao:not(:empty)::before{content:none}
+  .dm-pessoa > .dm-p-papel,.dm-pessoa > .dm-p-onde{margin-left:0}
+  .dm-pessoa > .dm-p-onde{margin-top:0}
+  .dm-pessoas .dm-p-onde > .dm-sep-in{display:block;margin-left:0}
+  .dm-p-onde .dm-sep-in > *{margin-left:0}
+  /* o ponto do celular não entra na tabela (o seletor que o apaga precisa
+     pesar mais que o que o desenha) */
+  .dm-pessoas .dm-p-onde .dm-sep-in > :not(.dm-pill) + :not(.dm-pill)::before{content:none}
+  .dm-pessoas .dm-p-onde .dm-p-setor{display:block}
+  .dm-pessoas .dm-p-onde .dm-p-funcao{display:block;font-size:12px;line-height:16px;margin-top:2px}
+  .dm-pessoas .dm-p-onde .dm-p-funcao:empty{display:none}
 }
-/* 95 · a lista de sites de anexo, na administração: duas colunas quando cabe */
-.dm-sites{list-style:none;margin:0;padding:0;border-top:1px solid var(--dm-linha)}
-.dm-sites li{display:flex;align-items:center;gap:var(--dm-e2);min-height:48px;padding:6px 0;
-  border-bottom:1px solid var(--dm-linha);overflow-wrap:anywhere}
-@media (min-width:720px){ .dm-sites{display:grid;grid-template-columns:1fr 1fr;column-gap:var(--dm-e4);border-top:0} .dm-sites li{border-top:1px solid var(--dm-linha);border-bottom:0} }
+@container (min-width:880px){
+  .dm-pessoas > .dm-pessoa{grid-template-columns:minmax(0,2.6fr) minmax(0,1.3fr) minmax(0,1.4fr) minmax(0,1.4fr)}
+  .dm-pessoas > .dm-pessoas-cab > .dm-p-funcao{display:block}
+  /* o bloco some e setor e função são duas colunas */
+  .dm-pessoas .dm-p-onde,.dm-pessoas .dm-p-onde > .dm-sep-in{display:contents}
+  .dm-pessoas .dm-p-onde .dm-p-funcao{font-size:13px;line-height:18px;margin-top:0}
+  .dm-pessoas .dm-p-onde .dm-p-funcao:empty{display:block}
+}
+/* um pedido de papel por linha: nome e pílula à esquerda, o par à direita */
+.dm-pedido{display:grid;gap:var(--dm-e3);padding:var(--dm-e4);border-top:1px solid var(--dm-linha)}
+.dm-pedido:first-child{border-top:0}
+@media (min-width:720px){ .dm-pedido{grid-template-columns:minmax(0,1fr) auto;align-items:center} }
+.dm-item-tit{font-size:14px;font-weight:600;min-width:0;overflow-wrap:anywhere;color:var(--dm-ink);text-decoration:none}
+.dm-item-tit:where(a):hover{text-decoration:underline;text-underline-offset:3px}
+.dm-item-baixo{font-size:13px;line-height:20px;color:var(--dm-mudo);margin-top:6px}
+/* a lista de sites de anexo. O fio entre as linhas é uma sombra para
+   cima, e não uma borda: a primeira linha de CADA coluna encosta no alto da
+   tabela, e a tabela (`overflow:hidden`) corta a sombra dela, sem a folha
+   precisar saber onde a coluna quebra */
+.dm-sites{display:grid;margin-top:var(--dm-e3)}
+.dm-sites li{display:flex;align-items:center;gap:var(--dm-e3);min-height:52px;padding:6px var(--dm-e4);box-shadow:0 -1px 0 var(--dm-linha);overflow-wrap:anywhere}
+.dm-sites li svg{width:16px;height:16px;color:var(--dm-icone)}
+/* 31 sites numa coluna eram 1.600px de rolagem: duas colunas quando a seção
+   tem 560px ou mais, na ordem do nome do serviço DE CIMA PARA BAIXO, como
+   num índice (em linhas, a ordem corria em zigue-zague entre as colunas) */
+.dm-config-corpo{container-type:inline-size}
+@container (min-width:560px){
+  .dm-sites{display:block;columns:2;column-gap:0;column-rule:1px solid var(--dm-linha)}
+  .dm-sites li{min-height:48px;break-inside:avoid}
+}
+/* em 1024 a coluna de explicação comia 280px e a lista ficava numa coluna
+   de 456px, com 1.580px de rolagem; em 1280, duas colunas de 336px, com
+   "Mercado Livre" quebrando linha. Na página de anexos, até 1439, a
+   explicação sobe para cima do conteúdo, e a lista ganha a largura toda */
+@media (min-width:1024px) and (max-width:1439px){
+  .dm-config:has(.dm-sites) > .dm-config-sec{grid-template-columns:minmax(0,1fr);gap:var(--dm-e4)}
+}
+
+/* ========================================================= configuração */
+/* seções de configuração: o título e a explicação à esquerda, o conteúdo
+   à direita (desktop); empilhado no celular */
+.dm-config{display:grid;gap:0}
+.dm-config-sec{display:grid;gap:var(--dm-e4);padding:var(--dm-e6) 0;border-top:1px solid var(--dm-linha)}
+.dm-config-sec:first-child{border-top:0;padding-top:0}
+@media (min-width:1024px){ .dm-config-sec{grid-template-columns:240px minmax(0,1fr);gap:var(--dm-e10);padding:var(--dm-e8) 0} }
+.dm-config-lado h2{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em}
+.dm-config-lado p{font-size:13px;line-height:19px;color:var(--dm-mudo);margin-top:4px;max-width:44ch}
+.dm-config-corpo{min-width:0}
+/* a administração inteira (as quatro seções, com o cabeçalho) não estica
+   além de 1.040px: em 1920 eram 500px entre o nome do setor e o
+   interruptor, e a borda direita pulava ao trocar de seção */
+.dm-limite{max-width:1040px}
+
+/* ================================================================= a porta */
+/* entrar, cadastro e o portão: um cartão no meio, sobre o fundo */
+.dm-auth{background:var(--dm-fundo);display:flex;flex-direction:column;min-height:100dvh}
+.dm-auth-topo{display:flex;align-items:center;padding:calc(env(safe-area-inset-top, 0px) + var(--dm-e3)) var(--dm-calha) 0;max-width:1120px;width:100%;margin:0 auto}
+.dm .dm-auth-meio{flex:1 1 auto;display:flex;align-items:flex-start;justify-content:center;width:100%;padding:var(--dm-e5) var(--dm-calha) var(--dm-e10)}
+@media (min-width:720px){ .dm .dm-auth-meio{align-items:center;padding-top:var(--dm-e8)} }
+.dm-auth-caixa{
+  width:100%;max-width:480px;background:var(--dm-sup);border:1px solid var(--dm-linha);border-radius:var(--dm-r4);
+  padding:var(--dm-e6) var(--dm-e5);box-shadow:0 1px 2px rgba(16,16,20,.04),0 12px 32px rgba(16,16,20,.05);
+}
+@media (min-width:720px){ .dm-auth-caixa{padding:var(--dm-e8)} }
+.dm-auth-caixa h1{font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+.dm-auth-caixa > .dm-rot{margin-bottom:6px}
+.dm-auth-sub{font-size:14px;line-height:21px;color:var(--dm-mudo);margin:8px 0 var(--dm-e6)}
+.dm-auth-sub b{color:var(--dm-ink);font-weight:600;overflow-wrap:anywhere}
+.dm-auth-sub a{color:var(--dm-ink);text-decoration:underline;text-underline-offset:3px}
+.dm-auth-form{display:grid;gap:0}
+.dm-auth-form > .dm-btn{margin-top:var(--dm-e1)}
+.dm-auth-falta{font-size:13px;line-height:18px;color:var(--dm-mudo);margin-top:var(--dm-e2)}
+.dm-auth-pe{font-size:13px;line-height:19px;color:var(--dm-mudo);margin-top:var(--dm-e5);text-align:center}
+.dm-auth-pe a{color:var(--dm-ink);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+.dm-auth-rodape{text-align:center;font-size:12px;color:var(--dm-mudo);padding:0 var(--dm-calha) calc(var(--dm-e5) + env(safe-area-inset-bottom, 0px))}
+.dm-auth-alt{display:grid;gap:2px;margin-top:var(--dm-e5);padding-top:var(--dm-e4);border-top:1px solid var(--dm-linha)}
+/* os outros caminhos: texto à esquerda, a seta de "leva a algum lugar" à
+   direita; sem ela eram frases soltas que ninguém via como botão */
+.dm-auth-alt > .dm-btn{justify-content:space-between;margin:0 -10px;text-align:left}
+.dm-auth-alt > .dm-btn svg{color:var(--dm-icone)}
+.dm-auth-alt > .dm-btn:hover svg{color:var(--dm-ink)}
+/* os passos do cadastro */
+.dm-passos{display:flex;gap:6px;margin-bottom:var(--dm-e3)}
+.dm-passos > span{flex:1 1 0;height:4px;border-radius:2px;background:var(--dm-sup-4)}
+.dm-passos > span.dm-feito{background:var(--dm-preto)}
+.dm-passo-rot{font-size:12px;line-height:16px;font-weight:500;color:var(--dm-mudo);margin-bottom:6px}
+
+
+/* ------------------------------------------------ alvos de toque */
+/* O link que existe sozinho (o anexo, o nome no pedido de papel) tem 44px
+   de altura onde há dedo. No mouse ele volta ao tamanho da linha. */
+@media (max-width:1023px), (hover:none), (pointer:coarse){
+  .dm-anexo-link{display:inline-flex;align-items:center;min-height:44px}
+  .dm-item-tit{display:inline-flex;align-items:center;min-height:44px}
+  .dm-pedido .dm-item-baixo{margin-top:0}
+}
 
 /* ---------------------------------------------------------------- movimento */
+.dm-fila > .dm-item{animation:dm-entra 160ms var(--dm-curva-entra) both}
+@keyframes dm-entra{0%{opacity:0}100%{opacity:1}}
 @media (prefers-reduced-motion:reduce){
   .dm *{animation:none!important;transition:none!important}
   .dm-toast,.dm-folha,.dm-barra-acao{animation:none!important}

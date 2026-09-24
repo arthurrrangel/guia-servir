@@ -177,7 +177,9 @@ const paginasDe = (quem) => [
   { rota: '/demandas/admin?secao=anexos', nome: 'admin-anexos', so: ['admin'],
     exige: '.dm-sites li', texto: 'sites na lista', proibe: 'área restrita' },
   { rota: `/demandas/admin/pessoas/${N._pessoa}`, nome: 'admin-pessoa', so: ['admin'],
-    exige: '.dm-hist', texto: 'Pediu para ser' },
+    /* o bloco do pedido se chama "Quer ser Equipe" desde 23/09/2026, o
+       mesmo nome da pílula na lista de Pessoas */
+    exige: '.dm-hist', texto: 'Quer ser' },
   { rota: '/demandas/admin/pessoas/nova', nome: 'admin-pessoa-nova', so: ['admin'],
     texto: 'Cadastrar pessoa' },
   { rota: '/demandas/admin',     nome: 'admin-restrita', so: ['solicitante'], texto: 'área restrita' },
@@ -266,7 +268,9 @@ try {
         const casca = document.querySelector('.dm');
         if (!casca) return { ok: false, por: 'a casca .dm não existe na página' };
         const cs = getComputedStyle(casca);
-        const bg = cs.getPropertyValue('--dm-bg').trim();
+        /* 23/09/2026 · a folha da terceira versão chama o fundo de
+           `--dm-sup`; o que se confere é que UMA variável da casa resolve */
+        const bg = cs.getPropertyValue('--dm-sup').trim();
         if (!bg) return { ok: false, por: 'as variáveis --dm-* não resolvem: a folha não foi aplicada' };
         const logo = document.querySelector('.dm-logo');
         if (logo && getComputedStyle(logo).display === 'inline') {

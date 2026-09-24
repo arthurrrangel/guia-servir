@@ -13,12 +13,12 @@
    não cabe em 390 e virava rolagem lateral com botões cortados). Os "Sim/Não"
    e "Exige/Não exige" viraram interruptores com o rótulo do que controlam;
    o select de destino perdeu o nome repetido embaixo; os campos soltos
-   usam a mesma vestimenta dos campos com rótulo (`dm-campo-solto`). O que
+   usam a mesma vestimenta dos campos com rótulo (`dm-ctl`). O que
    cada controle FAZ não mudou. */
 
 import { useEffect, useState } from 'react';
 import { Interruptor, Subabas, useEstreito } from './Ui';
-import { confirmar } from '@/lib/confirmar';
+import { confirmar } from '@/components/demandas/Confirmar';
 import type { Bases, Categoria, Setor } from '@/lib/demandas/tipos';
 
 /* O TETO DE GASTO POR SETOR, QUE ATE A 92 NAO EXISTIA.
@@ -45,14 +45,14 @@ export function Teto({ s, indo, salvar }: {
   useEffect(() => { setV(guardado); }, [guardado]);
   if (!s.atende) return <span className="dm-peq dm-mudo">não atende</span>;
   return (
-    <div className="dm-linha">
+    <div className="dm-linha dm-teto">
       <span className="dm-peq dm-mudo">R$</span>
-      <input className="dm-campo-solto dm-estreito dm-dinheiro" inputMode="decimal"
+      <input className="dm-ctl dm-dinheiro" inputMode="decimal"
         aria-label={`Aprovar acima de, em ${s.nome}`}
         placeholder="sem teto" value={v} onChange={e => setV(e.target.value)}
         disabled={indo} />
       {v !== guardado ? (
-        <button className="dm-btn dm-peq dm-pri" disabled={indo}
+        <button type="button" className="dm-btn dm-peq dm-pri" disabled={indo}
           onClick={() => salvar('setor', { id: s.id, teto_sem_aprovacao: v.trim() })}>
           Salvar
         </button>
@@ -75,7 +75,11 @@ export function Setores({ b, indo, salvar }: {
      que é um toggle inócuo. E desativar um setor o tira dos seletores de
      "Vai para", de "Quem está pedindo" e de "Mandar para outro setor" · sem
      que esta tela ofereça "Reativar". O lado das escalas pede confirmação
-     para coisas menores. */
+     para coisas menores.
+
+     E NÃO É VERMELHO NA LINHA · 23/09/2026: treze "Desativar" em vermelho
+     faziam da cor de atraso e urgência a mais repetida da tela. O botão é
+     texto quieto; o vermelho fica no diálogo, que é onde a decisão acontece. */
   const desativar = async (s: Setor) => {
     const ok = await confirmar({
       titulo: `Desativar o setor ${s.nome}?`,
@@ -90,72 +94,71 @@ export function Setores({ b, indo, salvar }: {
   );
 
   return (
-    <>
+    <div>
       {/* "MINISTÉRIO" É A PALAVRA DO OUTRO SISTEMA, E ELA ESTAVA EXPLICANDO
-          UM SETOR, 22/09/2026.
-
-          A frase era "Ministério que só pede fica com isso desligado", dentro
-          da aba SETORES, para explicar o que é um setor que não atende.
-          Ministério é o vocabulário do GUIA Servir; aqui a unidade se chama
-          setor, e é o que está escrito no cabeçalho da coluna, no seletor de
-          cadastro, no "Vai para" das categorias e em `SEM_PERMISSAO_DB`.
-
-          A regra do dono é que os dois sistemas não se encostam, e o
-          vocabulário é justamente onde eles se encostam sem ninguém notar:
-          `regras.ts:598` conta que a mesma palavra já tinha vazado uma vez,
-          pela tradução de erro. Uma explicação que usa a palavra do outro
-          sistema para definir a deste ensina o nome errado a quem está
-          montando o cadastro. */}
+          UM SETOR, 22/09/2026. Aqui a unidade se chama setor, e é o que está
+          escrito no cabeçalho da coluna, no seletor de cadastro, no "Vai
+          para" das categorias e em `SEM_PERMISSAO_DB`. Os dois sistemas não
+          se encostam, e o vocabulário é onde eles se encostam sem ninguém
+          notar. */}
       {/* "Como funciona" recolhido: a explicação existe para quem precisa
           dela, e não como a maior coisa da tela em toda visita */}
-      <details className="dm-mais dm-esq dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+      <details className="dm-mais dm-explica">
         <summary>Como funciona</summary>
-        <p style={{ margin: '6px 0 0' }}>
+        <p>
           <b>Recebe demanda</b> ligado quer dizer que o setor pode receber pedidos. Setor que só pede
           fica desligado, assim ninguém manda uma demanda para um lugar que não vai olhar.
           {' '}<b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo
           que a categoria não exija. Em branco: sem teto.
         </p>
       </details>
-      <div className="dm-card">
-        <h3>Novo setor</h3>
-        <div className="dm-linha dm-criar">
-          <input className="dm-campo-solto dm-cresce" placeholder="Nome do setor" aria-label="Nome do setor novo"
-            value={nome} onChange={e => setNome(e.target.value)} />
-          <Interruptor ligado={atende} rot="Recebe demanda" aoMudar={setAtende} />
-          <button className="dm-btn dm-pri" disabled={indo || !nome.trim()}
-            onClick={async () => { if (await salvar('setor', { nome, atende })) { setNome(''); setAtende(false); } }}>
-            Criar
-          </button>
+      <div className="dm-caixa dm-criar-caixa">
+        <div className="dm-caixa-cab"><h3>Novo setor</h3></div>
+        <div className="dm-caixa-corpo">
+          <div className="dm-linha dm-criar">
+            <input className="dm-ctl dm-cresce" placeholder="Nome do setor" aria-label="Nome do setor novo"
+              value={nome} onChange={e => setNome(e.target.value)} />
+            <Interruptor ligado={atende} rot="Recebe demanda" aoMudar={setAtende} />
+            <button type="button" className="dm-btn dm-pri" disabled={indo || !nome.trim()}
+              onClick={async () => { if (await salvar('setor', { nome, atende })) { setNome(''); setAtende(false); } }}>
+              Criar
+            </button>
+          </div>
         </div>
       </div>
       {estreito ? (
-        <div className="dm-cartoes">
+        /* o cartão tem sempre a mesma anatomia: "Recebe demanda" primeiro
+           (é ele que decide se existe teto), e o teto embaixo só quando o
+           setor atende. Antes o interruptor trocava de lugar de um cartão
+           para o outro, conforme havia campo de teto ou "não atende". */
+        <div className="dm-cartoes dm-cartoes-setores">
           {b.setores.map(s => (
             <div key={s.id} className="dm-cartao-linha">
               <h3>{s.nome}</h3>
               <div className="dm-cartao-campos">
-                <div className="dm-cartao-campo"><span>Aprovar acima de</span><Teto s={s} indo={indo} salvar={salvar} /></div>
                 <div className="dm-cartao-campo">{recebe(s, 'Recebe demanda')}</div>
+                {s.atende
+                  ? <div className="dm-cartao-campo"><span>Aprovar acima de</span><Teto s={s} indo={indo} salvar={salvar} /></div>
+                  : null}
               </div>
               <div>
-                <button className="dm-btn dm-txt dm-perigo dm-rente" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
+                <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="dm-card">
+        <div className="dm-tabela">
           <table className="dm-tab">
-            <thead><tr><th>Setor</th><th>Recebe demanda</th><th>Aprovar acima de</th><th><span className="dm-so-leitor">Situação</span></th></tr></thead>
+            <thead><tr><th>Setor</th><th>Recebe demanda</th><th>Aprovar acima de</th><th className="dm-fim"><span className="dm-so-leitor">Situação</span></th></tr></thead>
             <tbody>
               {b.setores.map(s => (
                 <tr key={s.id}>
                   <td><b>{s.nome}</b></td>
                   <td>{recebe(s, '')}</td>
                   <td><Teto s={s} indo={indo} salvar={salvar} /></td>
-                  <td className="dm-n">
-                    <button className="dm-btn dm-txt dm-perigo dm-peq" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
+                  <td className="dm-fim">
+                    <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={() => desativar(s)}>Desativar</button>
                   </td>
                 </tr>
               ))}
@@ -163,7 +166,7 @@ export function Setores({ b, indo, salvar }: {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -175,10 +178,12 @@ export function Categorias({ b, indo, salvar }: {
   const [g, setG] = useState(grupos[0] || '');
   const [nova, setNova] = useState('');
   const doGrupo = b.categorias.filter(c => c.grupo === g);
-  const estreito = useEstreito(719);
+  /* até 1279 as categorias são cartões: na tabela o destino não cabia (ver
+     "no tablet e em 1024 as categorias são cartões" na folha) */
+  const estreito = useEstreito(1279);
 
   const destino = (c: Categoria) => (
-    <select className="dm-campo-solto" value={c.setor_id || ''} disabled={indo}
+    <select className="dm-ctl dm-filtro" value={c.setor_id || ''} disabled={indo}
       aria-label={`Vai para, ${c.nome}`}
       onChange={e => salvar('categoria', { id: c.id, setor_id: e.target.value })}>
       <option value="">Nenhum</option>
@@ -206,7 +211,7 @@ export function Categorias({ b, indo, salvar }: {
   );
   const prazo = (c: Categoria) => (
     <div className="dm-linha">
-      <input className="dm-campo-solto dm-estreito" type="number" min={0} inputMode="numeric"
+      <input className="dm-ctl dm-estreito" type="number" min={0} inputMode="numeric"
         aria-label={`Dias sugeridos, ${c.nome}`}
         defaultValue={c.prazo_padrao_dias ?? ''} disabled={indo}
         onBlur={e => {
@@ -220,60 +225,47 @@ export function Categorias({ b, indo, salvar }: {
   );
 
   return (
-    <>
-      <details className="dm-mais dm-esq dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e2)' }}>
+    <div>
+      <details className="dm-mais dm-explica">
         <summary>Como funciona</summary>
-        <p style={{ margin: '6px 0 0' }}>
+        <p>
           Aqui mora a <b>triagem</b>. A categoria decide sozinha qual setor atende, se precisa de
           aprovação e quantos dias sugerir de prazo. Mudar uma linha muda o destino de toda demanda
           futura daquele tipo, e não mexe nas que já existem.
         </p>
       </details>
 
-      <Subabas rot="Grupo" valor={g} itens={grupos.map(x => ({ v: x, rot: x }))} aoMudar={setG} />
+      {/* os grupos são um FILTRO da tabela: no desktop, fichas todas à
+          vista (a fita escondia o sexto grupo atrás do esmaecimento) */}
+      <Subabas rot="Grupo" valor={g} itens={grupos.map(x => ({ v: x, rot: x }))} aoMudar={setG} fichas />
 
-      {/* O ADMINISTRADOR NÃO PODIA CRIAR CATEGORIA PELA TELA.
-
-          "Criar categorias" é a PRIMEIRA capacidade que o documento dá ao
-          Administrador, e esta tela só sabia editar: as quatro chamadas a
-          `salvar('categoria', …)` passavam sempre `{ id: c.id, … }`, não havia
-          campo de nome e não havia botão de criar. Categoria nova só nascia
-          por SQL direto no banco, o que significa que a igreja dependia de
-          alguém com acesso ao Supabase para registrar um tipo de pedido novo.
-
-          O banco sempre permitiu: `dem_ajustar('categoria', {…})` SEM `id` faz
-          insert, com `on conflict (grupo, nome) do update set ativa = true`,
-          ou seja, recriar uma categoria desativada a reativa em vez de
-          duplicar.
-
-          É a mesma linha de criação que a aba Setores já tem, copiada para
-          cá. Sem seletor de grupo: o grupo aberto é o que está no `aria-pressed`
-          logo acima, e a categoria nasce nele. Um seletor aqui repetiria, com
-          duas maneiras de responder, a pergunta que a tira de cima já
-          respondeu. */}
-      <div className="dm-card">
-        <h3>Nova categoria em {g || 'nenhum grupo'}</h3>
-        <div className="dm-linha dm-criar">
-          <input className="dm-campo-solto dm-cresce" value={nova} placeholder="Nome da categoria"
-            aria-label={`Nome da categoria nova em ${g}`}
-            onChange={e => setNova(e.target.value)} />
-          <button className="dm-btn dm-pri" disabled={indo || !nova.trim() || !g}
-            onClick={async () => {
-              if (await salvar('categoria', { grupo: g, nome: nova.trim() })) setNova('');
-            }}>Criar</button>
+      {/* O ADMINISTRADOR NÃO PODIA CRIAR CATEGORIA PELA TELA. "Criar
+          categorias" é a PRIMEIRA capacidade que o documento dá ao
+          Administrador. `dem_ajustar('categoria', {…})` SEM `id` faz insert,
+          com `on conflict (grupo, nome) do update set ativa = true`: recriar
+          uma categoria desativada a reativa em vez de duplicar. Sem seletor
+          de grupo: a categoria nasce no grupo aberto na tira de cima. */}
+      <div className="dm-caixa dm-criar-caixa">
+        <div className="dm-caixa-cab"><h3>Nova categoria em {g || 'nenhum grupo'}</h3></div>
+        <div className="dm-caixa-corpo">
+          <div className="dm-linha dm-criar">
+            <input className="dm-ctl dm-cresce" value={nova} placeholder="Nome da categoria"
+              aria-label={`Nome da categoria nova em ${g}`}
+              onChange={e => setNova(e.target.value)} />
+            <button type="button" className="dm-btn dm-pri" disabled={indo || !nova.trim() || !g}
+              onClick={async () => {
+                if (await salvar('categoria', { grupo: g, nome: nova.trim() })) setNova('');
+              }}>Criar</button>
+          </div>
+          {/* A FRASE DIZ O QUE ACONTECE SE ELA FICAR SEM SETOR, E ISSO É
+              MEDIDO: `dem_abrir` resolve o destino com
+              `coalesce(setor_responsavel, c.setor_id, v_setor)`, então
+              categoria sem setor DEVOLVE o pedido para o setor de quem pediu. */}
+          <p className="dm-peq dm-mudo dm-depois-da-lista">
+            Nasce sem setor e sem aprovação. Sem setor, a demanda volta para quem pediu:
+            aponte o destino na linha dela, aqui embaixo.
+          </p>
         </div>
-        {/* A FRASE DIZ O QUE ACONTECE SE ELA FICAR SEM SETOR, E ISSO É MEDIDO.
-
-            `dem_abrir` resolve o destino com
-            `coalesce(setor_responsavel, c.setor_id, v_setor)`: categoria sem
-            setor não recusa a demanda, ela DEVOLVE o pedido para o setor de
-            quem pediu. Criar a categoria e esquecer de apontar o destino não
-            dá erro nenhum, e o pedido fica dando voltas no próprio setor sem
-            ninguém entender por quê. */}
-        <p className="dm-peq dm-mudo" style={{ margin: '8px 0 0' }}>
-          Nasce sem setor e sem aprovação. Sem setor, a demanda volta para quem pediu:
-          aponte o destino na linha dela, aqui embaixo.
-        </p>
       </div>
 
       {estreito ? (
@@ -291,10 +283,10 @@ export function Categorias({ b, indo, salvar }: {
           ))}
         </div>
       ) : (
-        <div className="dm-card">
+        <div className="dm-tabela">
           <table className="dm-tab">
             <thead><tr>
-              <th>Categoria</th><th>Vai para</th><th>Aprovação</th><th>Orçamento</th><th>Prazo</th>
+              <th>Categoria</th><th>Vai para</th><th>Aprovação</th><th>Orçamento</th><th>Prazo sugerido</th>
             </tr></thead>
             <tbody>
               {doGrupo.map(c => (
@@ -313,6 +305,6 @@ export function Categorias({ b, indo, salvar }: {
           </table>
         </div>
       )}
-    </>
+    </div>
   );
 }

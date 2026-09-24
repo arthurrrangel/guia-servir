@@ -4,20 +4,21 @@
    As seis perguntas do pedido, com os nomes dele, e cada uma com a conta ao
    lado:
 
-     Aguardando você   o que chegou e ninguém pegou, o que está com você em
+     Esperando você    o que chegou e ninguém pegou, o que está com você em
                        execução, e o que só você pode aprovar
      Com você          o que você assumiu e ainda está vivo
-     Do setor          tudo que o seu setor atende (para a gestão, o escopo)
+     Em aberto         tudo que o seu setor atende e não acabou (para a
+                       gestão, o escopo; para a administração, tudo)
      Atrasadas         do setor, passaram do prazo
      Urgentes          do setor, marcadas como urgentes
      Concluídas        do setor, entregues
 
-   "Do setor" é `pode_atender` no banco: o responsável da Comunicação vê a
+   "Em aberto" é `pode_atender` no banco: o responsável da Comunicação vê a
    fila da Comunicação e NÃO vê o que o Financeiro atende, nem pelo número da
    demanda na barra de endereço. A tela não filtra nada; ela escolhe o
    recorte, e o banco decide o que cabe nele.
 
-   Os seis atalhos SÃO o seletor. A lista embaixo não desenha as tiras dela
+   As seis vistas SÃO o seletor. A lista embaixo não desenha as tiras dela
    (`controle`), porque dois controles para a mesma pergunta é como a pessoa
    se perde. */
 
@@ -25,10 +26,11 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import Lista, { type Recorte } from '@/components/demandas/Lista';
-import { Pill, Subabas, Vazio } from '@/components/demandas/Ui';
+import { Cabecalho, Pill, Subabas, Vazio } from '@/components/demandas/Ui';
+import { Icone } from '@/components/demandas/Icone';
 import { portal, type Aba } from '@/lib/demandas/api';
-import { rotPapel } from '@/lib/demandas/regras';
-import type { Eu, Portal } from '@/lib/demandas/tipos';
+import { alcanceDoAtendimento, rotPapel } from '@/lib/demandas/regras';
+import type { Portal } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
   return <Casca><Atendimento /></Casca>;
@@ -40,32 +42,21 @@ const VISTAS: { v: Vista; aba: Aba; so: Recorte; conta: (n: Portal['n']) => numb
                 legenda: string }[] = [
   { v: 'agir',       aba: 'agir',   so: 'abertas',    conta: n => n.agir,           legenda: 'Esperando você' },
   { v: 'comigo',     aba: 'comigo', so: 'abertas',    conta: n => n.comigo,         legenda: 'Com você' },
-  { v: 'fila',       aba: 'setor',  so: 'abertas',    conta: n => n.setor_abertas,  legenda: 'Do setor' },
+  { v: 'fila',       aba: 'setor',  so: 'abertas',    conta: n => n.setor_abertas,  legenda: 'Em aberto' },
   { v: 'atrasadas',  aba: 'setor',  so: 'atrasadas',  conta: n => n.atrasadas,      legenda: 'Atrasadas' },
   { v: 'urgentes',   aba: 'setor',  so: 'urgentes',   conta: n => n.urgentes,       legenda: 'Urgentes' },
   { v: 'concluidas', aba: 'setor',  so: 'concluidas', conta: n => n.concluidas,     legenda: 'Concluídas' },
 ];
 
-/* o que "do setor" quer dizer para cada papel, na legenda e no título. A
-   gestão e a administração olham vários setores: o setor aparece em cada
-   linha. Quem atende um setor só vê a fila DELE, e "Comunicação" em toda
-   linha de "Fila da Comunicação" é ruído. */
-function alcance(eu: Eu): { titulo: string; legendaFila: string; varios: boolean } {
-  if (eu.papel === 'admin') return { titulo: 'Todos os setores', legendaFila: 'Em todos os setores', varios: true };
-  if (eu.papel === 'gestor') {
-    if (eu.escopo_total) return { titulo: 'Todos os setores', legendaFila: 'Em todos os setores', varios: true };
-    const e = eu.escopo || [];
-    return { titulo: e.length ? e.join(', ') : 'Seu escopo', legendaFila: 'No seu escopo', varios: e.length !== 1 };
-  }
-  return { titulo: eu.setor ? `Fila da ${eu.setor}` : 'Sua fila', legendaFila: 'Do setor', varios: false };
-}
+/* o que "do setor" quer dizer para cada papel: `alcanceDoAtendimento`, em
+   regras.ts (o Início usa a mesma legenda na casa que abre esta vista) */
 
 function Atendimento() {
   const { eu } = useEu();
   const [p, setP] = useState<Portal | null>(null);
   const [vista, setVista] = useState<Vista>('agir');
 
-  /* o Início manda `?ver=` pelos atalhos das contas */
+  /* o Início manda `?ver=` pelos números da faixa */
   useEffect(() => {
     try {
       const v = new URLSearchParams(window.location.search).get('ver') as Vista | null;
@@ -83,35 +74,34 @@ function Atendimento() {
      segurança. */
   if (!(eu.atende ?? eu.papel !== 'solicitante')) {
     return (
-      <Vazio titulo="O atendimento é de quem faz parte de uma equipe.">
-        Se você atende demandas num setor, peça esse papel no <Link href="/demandas/perfil">seu perfil</Link>.
-      </Vazio>
+      <>
+        <Cabecalho titulo="Atendimento" />
+        <Vazio titulo="O atendimento é de quem faz parte de uma equipe." solto>
+          Se você atende demandas num setor, peça esse papel no <Link href="/demandas/perfil">seu perfil</Link>.
+        </Vazio>
+      </>
     );
   }
-  const a = alcance(eu);
+  const a = alcanceDoAtendimento(eu);
   const atual = VISTAS.find(x => x.v === vista) || VISTAS[0];
 
   return (
     <>
-      <div className="dm-cab">
-        <div>
-          <div className="dm-rot">{'>'} atendimento{eu.papel === 'gestor' ? ' · gestão' : ''}</div>
-          <h1 style={{ marginTop: 4 }}>{a.titulo}</h1>
-          {/* o nome já está no topo; aqui fica o papel, que é o que explica o
-              alcance do título */}
-          <div className="dm-quem"><Pill>{rotPapel(eu.papel)}</Pill></div>
-        </div>
-        <div className="dm-cab-acoes">
-          <Link className="dm-btn dm-txt dm-seta" href="/demandas/numeros">Números</Link>
-        </div>
-      </div>
+      <Cabecalho sobre={eu.papel === 'gestor' ? 'Atendimento · Gestão' : 'Atendimento'} titulo={a.titulo}
+        /* o nome já está na lateral; aqui fica o papel, que é o que explica
+           o alcance do título */
+        meta={<Pill>{rotPapel(eu.papel)}</Pill>}
+        /* no desktop "Números" está na lateral, logo abaixo de Atendimento;
+           no celular a barra de abas não tem lugar para ele, e a porta é
+           esta. Pequena: no celular a regra do cabeçalho alargava o botão
+           até a borda, e uma saída secundária virava a maior peça da tela. */
+        acoes={<Link className="dm-btn dm-peq dm-so-celular" href="/demandas/numeros"><Icone nome="numeros" />Números</Link>} />
 
-      {/* as seis vistas SÃO o seletor: sub-abas no desktop, fita de fichas no
-          celular, cada uma com a sua conta */}
+      {/* as seis vistas SÃO o seletor, cada uma com a sua conta */}
       <Subabas<Vista> rot="O que ver" valor={vista} aoMudar={setVista}
         itens={VISTAS.map(x => ({
           v: x.v, rot: x.v === 'fila' ? a.legendaFila : x.legenda,
-          n: p ? x.conta(p.n) : null, bad: x.v === 'atrasadas',
+          n: p ? x.conta(p.n) : null, bad: x.v === 'atrasadas', destaque: x.v === 'agir',
         }))} />
 
       <Lista eu={eu} abas={[]} recortes={[]} controle={{ aba: atual.aba, so: atual.so }}

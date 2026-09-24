@@ -59,8 +59,14 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { sb } from '@/lib/supabase';
 import { Aviso, Campo } from '@/components/demandas/Ui';
-import { aviseHumano } from '@/lib/erros';
+import { Porta } from '@/components/demandas/Porta';
+import { Icone } from '@/components/demandas/Icone';
+import { aviseHumano as aviseHumanoCru } from '@/lib/erros';
 import { sugerirEmail } from '@/lib/email';
+import { semTravessao } from '@/lib/demandas/regras';
+
+/* as frases de `lib/erros.ts` são das duas casas; aqui saem sem travessão */
+const aviseHumano = (e: unknown, oQueFazia?: string) => semTravessao(aviseHumanoCru(e, oQueFazia));
 
 /* PARA ONDE ESTA PORTA DEVOLVE
 
@@ -223,26 +229,12 @@ export default function EntrarNasDemandas() {
 
   /* --------------------------------------------------------- a moldura */
   const moldura = (titulo: string, sub: React.ReactNode, corpo: React.ReactNode) => (
-    <div className="dm">
-      <header className="dm-topo">
-        <div className="dm-topo-in">
-          <Link href="/demandas" className="dm-logo"><span>GUI{'>'}</span></Link>
-          <div className="dm-topo-nome">Demandas</div>
-        </div>
-      </header>
-      <div className="dm-corpo" style={{ maxWidth: 460 }}>
-        <div className="dm-rot">{'>'} entrar</div>
-        <h1 style={{ margin: '6px 0 var(--dm-e2)' }}>{titulo}</h1>
-        <p className="dm-peq dm-mudo" style={{ marginBottom: 'var(--dm-e3)' }}>{sub}</p>
-        {msg ? <Aviso tom={tom}>{msg}</Aviso> : null}
-        {corpo}
-      </div>
-      <footer className="dm-rodape">
-        <div className="dm-peq dm-mudo">
-          GUIA Church
-        </div>
-      </footer>
-    </div>
+    <Porta>
+      <h1>{titulo}</h1>
+      <p className="dm-auth-sub">{sub}</p>
+      {msg ? <Aviso tom={tom}>{msg}</Aviso> : null}
+      {corpo}
+    </Porta>
   );
 
   if (entrando) {
@@ -252,8 +244,8 @@ export default function EntrarNasDemandas() {
   if (recuperando) {
     return moldura(
       'Escolha sua senha',
-      'Depois disto você entra direto, sem esperar email.',
-      <form onSubmit={definirSenha} className="dm-card">
+      'Depois disto você entra direto, sem esperar e-mail.',
+      <form onSubmit={definirSenha} className="dm-auth-form">
         <Campo rot="Senha nova" ajuda="Pelo menos 8 caracteres.">
           <input type="password" autoComplete="new-password" value={novaSenha}
             onChange={e => setNovaSenha(e.target.value)} />
@@ -266,15 +258,14 @@ export default function EntrarNasDemandas() {
   }
 
   return moldura(
-    'Entre para ver as demandas',
+    'Entrar nas demandas',
     <>
-      Se você recebeu um <b>link pessoal pelo WhatsApp</b>, abra por ele: não precisa de
-      senha nenhuma, e é o caminho mais curto.
+      Recebeu um <b>link pessoal</b> pelo WhatsApp? Abra por ele, sem senha: é o caminho mais curto.
     </>,
     <>
       {modo === 'link' ? (
-        <form onSubmit={porLink} className="dm-card">
-          <Campo rot="Seu email" ajuda="Mandamos um link que entra sem senha.">
+        <form onSubmit={porLink} className="dm-auth-form">
+          <Campo rot="Seu e-mail" ajuda="Mandamos um link que entra sem senha.">
             <input type="email" inputMode="email" autoComplete="email" required
               value={email} onChange={e => setEmail(e.target.value)} />
           </Campo>
@@ -283,8 +274,8 @@ export default function EntrarNasDemandas() {
           </button>
         </form>
       ) : modo === 'senha' ? (
-        <form onSubmit={porSenha} className="dm-card">
-          <Campo rot="Seu email">
+        <form onSubmit={porSenha} className="dm-auth-form">
+          <Campo rot="Seu e-mail">
             <input type="email" inputMode="email" autoComplete="email" required
               value={email} onChange={e => setEmail(e.target.value)} />
           </Campo>
@@ -297,8 +288,8 @@ export default function EntrarNasDemandas() {
           </button>
         </form>
       ) : (
-        <form onSubmit={porCriar} className="dm-card">
-          <Campo rot="Seu email" ajuda="Mandamos um link para você escolher a senha.">
+        <form onSubmit={porCriar} className="dm-auth-form">
+          <Campo rot="Seu e-mail" ajuda="Mandamos um link para você escolher a senha.">
             <input type="email" inputMode="email" autoComplete="email" required
               value={email} onChange={e => setEmail(e.target.value)} />
           </Campo>
@@ -308,29 +299,28 @@ export default function EntrarNasDemandas() {
         </form>
       )}
 
-      <div className="dm-linha" style={{ marginTop: 'var(--dm-e2)' }}>
+      {/* os outros caminhos: cada um com a seta do fim, que é o que diz
+          "isto leva a algum lugar" num botão sem borda */}
+      <div className="dm-auth-alt">
         {modo !== 'link'
-          ? <button className="dm-btn dm-peq" onClick={() => { setModo('link'); setMsg(''); }}>
-              Entrar por link no email
+          ? <button type="button" className="dm-btn dm-txt" onClick={() => { setModo('link'); setMsg(''); }}>
+              <span>Entrar por link no e-mail</span><Icone nome="seta" />
             </button>
           : null}
         {modo !== 'senha'
-          ? <button className="dm-btn dm-peq" onClick={() => { setModo('senha'); setMsg(''); }}>
-              Prefiro entrar com senha
+          ? <button type="button" className="dm-btn dm-txt" onClick={() => { setModo('senha'); setMsg(''); }}>
+              <span>Prefiro entrar com senha</span><Icone nome="seta" />
             </button>
           : null}
         {modo !== 'criar'
-          ? <button className="dm-btn dm-peq" onClick={() => { setModo('criar'); setMsg(''); }}>
-              Criar ou trocar minha senha
+          ? <button type="button" className="dm-btn dm-txt" onClick={() => { setModo('criar'); setMsg(''); }}>
+              <span>Criar ou trocar minha senha</span><Icone nome="seta" />
             </button>
           : null}
       </div>
-      {/* 94 · A PORTA DE QUEM AINDA NÃO EXISTE AQUI.
-
-          Até a 93 esta tela só servia a quem já estava cadastrado, e quem não
-          estava entrava, lia "quem administra cadastra em Ajustes" e parava.
-          O cadastro é da própria pessoa agora, e a entrada aponta para ele. */}
-      <p className="dm-peq dm-mudo" style={{ marginTop: 'var(--dm-e3)' }}>
+      {/* 94 · A PORTA DE QUEM AINDA NÃO EXISTE AQUI: o cadastro é da própria
+          pessoa, e a entrada aponta para ele. */}
+      <p className="dm-auth-pe">
         Primeira vez aqui? <Link href="/demandas/cadastro">Faça seu cadastro</Link>
       </p>
     </>,

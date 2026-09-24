@@ -29,8 +29,9 @@
       e devolve o resultado. Nenhum arquivo do produto é alterado, e a FONTE
       que roda é a fonte que está no disco: sabotar a linha real reprova.
 
-   2. Quatro módulos ganham dublê: `next/link`, `next/navigation`,
-      `@/lib/supabase` e `@/lib/confirmar`. Só esses. O dublê de Supabase é o
+   2. Cinco módulos ganham dublê: `next/link`, `next/navigation`,
+      `@/lib/supabase`, `@/lib/confirmar` e o diálogo próprio do Demandas
+      (`@/components/demandas/Confirmar`). Só esses. O dublê de Supabase é o
       que importa: ele entrega um `rpc(nome, args)` controlado por este
       arquivo, e com isso TODO o resto do caminho (api.ts, rpcCom, a tradução
       de erro, a casca que pergunta "quem sou eu") continua sendo o de
@@ -111,6 +112,9 @@ const DUBLES = {
     export const lerCredenciais = () => ({ url: 'x', key: 'y' });
     export const gravarCredenciais = () => {};`,
   '@/lib/confirmar': `
+    export const confirmar = async () => globalThis.__confirma !== false;`,
+  /* o diálogo próprio do Demandas (23/09/2026), com o mesmo dublê */
+  '@/components/demandas/Confirmar': `
     export const confirmar = async () => globalThis.__confirma !== false;`,
 };
 
@@ -372,7 +376,23 @@ class Documento extends No {
   createComment(d) { return new Comentario(this, d); }
   createDocumentFragment() { const f = new No(this, 11); f.nodeName = '#fragment'; return f; }
   querySelector() { return null; }
-  querySelectorAll() { return []; }
+  /* 23/09/2026 · a Nova procura o primeiro campo marcado como faltando por
+     `document.querySelectorAll('input,select,textarea')`: a mesma lista de
+     tags que o `querySelector` dos elementos entende, e só ela */
+  querySelectorAll(sel) {
+    const tags = String(sel).split(',').map(s => s.trim().toUpperCase());
+    if (tags.some(t => !/^[A-Z]+$/.test(t))) {
+      throw new Error(`o DOM de mentira só entende lista de tags, e veio: ${sel}`);
+    }
+    const achados = [];
+    (function anda(x) {
+      for (const c of x.childNodes) {
+        if (c.nodeType === 1 && tags.includes(c.tagName)) achados.push(c);
+        anda(c);
+      }
+    })(this.documentElement);
+    return achados;
+  }
   getElementById() { return null; }
 }
 
@@ -632,6 +652,9 @@ const porTag = (no, tag) => todos(no, x => x.nodeType === 1 && x.tagName === tag
 const texto = no => no.textContent.replace(/\s+/g, ' ').trim();
 const botao = (no, rot) => porTag(no, 'BUTTON').find(b => texto(b) === rot);
 const porAria = (no, chave, v) => todos(no, x => x.nodeType === 1 && x.getAttribute(chave) === v)[0];
+/* o texto dos avisos da tela (`.dm-aviso`), separados por " | " */
+const avisosDe = (no) => todos(no, x => x.nodeType === 1 && (x.getAttribute('class') || '').split(' ').includes('dm-aviso'))
+  .map(texto).join(' | ');
 
 /* `Campo` e `Bloco` são `<label>`/`<div>` com `<span>rótulo</span>` na frente */
 function campo(no, rot) {
@@ -688,6 +711,10 @@ function mundoNovo() {
   const arm = armario();
   globalThis.localStorage = arm;
   globalThis.window.localStorage = arm;
+  /* o recado que atravessa a troca de tela mora aqui (23/09/2026) */
+  const sessao = armario();
+  globalThis.sessionStorage = sessao;
+  globalThis.window.sessionStorage = sessao;
   return arm;
 }
 
@@ -763,7 +790,7 @@ const EU_EQUIPE = {
 console.log('\n1. Os dois portais têm o recorte de concluídas, e ele vira `status: concluida`');
 /* O ESCOPO DA PRIMEIRA VERSÃO PEDE "painel com demandas abertas, atrasadas e
    concluídas", e isso continua valendo para os DOIS portais da 94: o Início
-   de quem pede tem "Abertas / Concluídas / Histórico", e o Atendimento
+   de quem pede tem "Em aberto / Concluídas / Histórico", e o Atendimento
    tem os seis atalhos do pedido do Arthur, entre eles Atrasadas e
    Concluídas. Aqui se mede o que cada toque manda para o banco. */
 {
@@ -778,7 +805,7 @@ console.log('\n1. Os dois portais têm o recorte de concluídas, e ele vira `sta
 
   const tira = porAria(alvo, 'aria-label', 'Em que estado');
   const rotulos = porTag(tira, 'BUTTON').map(texto);
-  ok(rotulos.join('|') === 'Abertas|Concluídas|Histórico',
+  ok(rotulos.join('|') === 'Em aberto|Concluídas|Histórico',
     'o Início tem os três estados de quem pede', rotulos.join(' | '));
 
   const primeira = b.ultima('dem_lista');
@@ -829,7 +856,7 @@ console.log('\n1. Os dois portais têm o recorte de concluídas, e ele vira `sta
   globalThis.__banco = b;
   const { alvo, desmontar } = await montar(Atendimento);
   const atalhos = porTag(porAria(alvo, 'aria-label', 'O que ver'), 'BUTTON');
-  ok(atalhos.map(x => texto(x)).join('|') === 'Esperando você3|Com você2|Do setor9|Atrasadas1|Urgentes4|Concluídas12',
+  ok(atalhos.map(x => texto(x)).join('|') === 'Esperando você3|Com você2|Em aberto9|Atrasadas1|Urgentes4|Concluídas12',
     'os seis atalhos do pedido, cada um com a sua conta', atalhos.map(texto).join(' | '));
   ok(b.ultima('dem_lista').args.p_f.aba === 'agir',
     'o Atendimento abre em "esperando você"', JSON.stringify(b.ultima('dem_lista').args.p_f));
@@ -1189,6 +1216,39 @@ const BASES_NOVA = {
   await tres.desmontar();
 }
 {
+  /* 23/09/2026 · UMA FALTA SÓ se escreve "Falta: a categoria." (era "Falta :
+     a categoria.", com o espaço), e o campo que falta fica marcado, com a
+     frase embaixo; o preenchido, não */
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_GESTOR, dem_bases: BASES_NOVA });
+  const { alvo, desmontar } = await montar(Nova);
+  await teclar(campo(alvo, 'Título'), 'Arte para o culto de celebração');
+  await teclar(campo(alvo, 'O que precisa ser feito'), 'Uma arte quadrada para o feed e um story.');
+  await teclar(campo(alvo, 'Para quando'), '2026-10-01');
+  await assentar();
+  await clicar(botao(alvo, 'Enviar a demanda'));
+  const avisos = avisosDe(alvo);
+  ok(!/Falta/.test(avisos), 'com uma falta só, sem resumo: o campo marcado diz tudo', avisos);
+  ok(campo(alvo, 'Categoria').getAttribute('aria-invalid') === 'true', 'e a categoria fica marcada');
+  ok(campo(alvo, 'Título').getAttribute('aria-invalid') !== 'true', 'e o título, preenchido, não');
+  ok(/Falta a categoria\./.test(texto(alvo)), 'com a frase embaixo do campo', texto(alvo).slice(0, 400));
+  ok(document.activeElement === campo(alvo, 'Categoria'), 'e o foco vai para o campo que falta',
+    String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+{
+  /* e com duas ou mais, o resumo aparece, com os dois-pontos colados */
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_GESTOR, dem_bases: BASES_NOVA });
+  const { alvo, desmontar } = await montar(Nova);
+  await clicar(botao(alvo, 'Enviar a demanda'));
+  const avisos = avisosDe(alvo);
+  ok(/^Falta preencher: um título/.test(avisos.trim()) && !/ :/.test(avisos), 'várias faltas: "Falta preencher: …"', avisos);
+  ok(document.activeElement === campo(alvo, 'Título'), 'e o foco vai para o primeiro campo que falta',
+    String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+{
   /* o que foi digitado atrás da gaveta volta COM a gaveta aberta: guardar o
      trabalho e escondê-lo é meio conserto */
   mundoNovo();
@@ -1358,7 +1418,8 @@ console.log('\n9. Números: a tabela por setor sai por volume, e o mês único v
   ok(/Mês a mês/.test(t), 'a seção de volume por período existe com um mês só');
   ok(/Todo o período cabe em set\/26: 12 demandas/.test(t),
     'e diz o número do período em texto', t.slice(-320));
-  ok(/comparar meses/.test(t), 'apontando o gesto que faz a comparação aparecer');
+  /* 23/09/2026 · o gesto virou o botão "Comparar meses" (que abre 1 ano) */
+  ok(/comparar meses/i.test(t), 'apontando o gesto que faz a comparação aparecer');
   await desmontar();
 }
 {
@@ -1463,7 +1524,7 @@ console.log('\n10. A lista cortada diz quantas ficaram de fora');
    O que sobra para este arquivo é o que só a tela sabe: qual rótulo cada ação
    ganha, e que a lista de fora da grade é `['comentar','validar']` — as duas
    têm lugar próprio (a caixa fixa do fim e o cartão verde). */
-const { acoesDe, primariaDe } = await import('@/lib/demandas/regras.ts');
+const { acoesDe, primariaDe, quemManda } = await import('@/lib/demandas/regras.ts');
 
 const ROTULO = {
   aprovar: 'Aprovar', rejeitar: 'Recusar', assumir: 'Assumir e começar',
@@ -1493,6 +1554,21 @@ const noPainel = (d, quem) => acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includ
 function gradeEsperada(d, quem) {
   return noPainel(d, quem).map(a => rotDe(a, d, quem));
 }
+/* O PASSO É DE OUTRA PESSOA (23/09/2026): com a demanda na mão de outra
+   pessoa ("Com Monik, em 3 dias"), o que quem administra vê são poderes, e
+   não o passo dele. O painel se chama "Ações" e nenhum botão é preto; o
+   primário continua o mesmo, e continua o último da barra, só sem o preto.
+   Também quando quem atende olha a demanda travada esperando quem pediu: o
+   passo é de quem pediu. Confirmar, decidir a aprovação e responder a
+   trava continuam sendo o passo de quem olha. */
+const passoDeOutro = (d, quem, prim) => {
+  const pediu = !!(quem.pede ?? quem.abriu);
+  const espera = d.status === 'travada' && d.travada_por === 'informacao';
+  return prim !== 'validar'
+    && !(d.falta_aprovacao && (quem.aprova ?? quemManda(quem.papel)))
+    && !(espera && pediu)
+    && ((espera && !pediu) || (!!d.responsavel_id && d.responsavel_id !== quem.id));
+};
 
 /* A DIVISÃO É DECISÃO DE TELA, E NÃO TEM FONTE ACIMA DELA.
 
@@ -1534,6 +1610,8 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
     ['aberta · quem pediu',         {}, QUEM.pediu],
     ['aberta · quem só enxerga',    {}, QUEM.soEnxerga],
     ['execução · quem atende',      { status: 'execucao', responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.atende],
+    ['execução · a gestão olhando a demanda de outra pessoa',
+      { status: 'execucao', responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.gestor],
     ['travada por informação · quem pediu',
       { status: 'travada', travada_por: 'informacao', travada_nota: 'Qual sala?' }, QUEM.pediu],
     ['travada por informação · quem atende',
@@ -1576,9 +1654,17 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
     const pretos = porTag(porClasse(grade(alvo), 'dm-painel-acoes') || grade(alvo), 'BUTTON')
       .filter(x => /(^| )dm-pri( |$)/.test(x.getAttribute('class') || ''));
     const prim = primariaDe(carga.demanda, noPainel(carga.demanda, quem));
-    ok(pretos.length === (prim ? 1 : 0) && (!prim || texto(pretos[0]) === rotDe(prim, carga.demanda, quem)),
-      `${nome}: ${prim ? 'um primário só, e é "' + rotDe(prim, carga.demanda, quem) + '"' : 'nenhum primário'}`,
+    const doOutro = !!prim && passoDeOutro(carga.demanda, quem, prim);
+    const preto = prim && !doOutro;
+    ok(pretos.length === (preto ? 1 : 0) && (!preto || texto(pretos[0]) === rotDe(prim, carga.demanda, quem)),
+      `${nome}: ${preto ? 'um primário só, e é "' + rotDe(prim, carga.demanda, quem) + '"'
+        : doOutro ? 'o passo é de outra pessoa, e nenhum botão é preto' : 'nenhum primário'}`,
       `pretos: [${pretos.map(texto).join(' | ')}]`);
+    const titulo = porClasse(grade(alvo), 'dm-painel-titulo');
+    const tituloDevia = !div.grade.length ? 'Esta demanda'
+      : passoDeOutro(carga.demanda, quem, prim) ? 'Ações' : 'Próximo passo';
+    ok(titulo && texto(titulo) === tituloDevia, `${nome}: o painel se chama "${tituloDevia}"`,
+      titulo ? texto(titulo) : '(sem título)');
     const barra = porAria(alvo, 'aria-label', 'Ações');
     const barraCel = todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-barra-acao')[0];
     /* a barra fixa só existe quando há ação que ANDA com a demanda (o
@@ -1595,8 +1681,8 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
     if (barraCel && prim) {
       const ultimo = porTag(barraCel, 'BUTTON').slice(-1)[0];
       ok(ultimo && texto(ultimo) === rotDe(prim, carga.demanda, quem)
-         && /(^| )dm-pri( |$)/.test(ultimo.getAttribute('class') || ''),
-        `${nome}: e o primário é o último botão da barra, à direita`,
+         && /(^| )dm-pri( |$)/.test(ultimo.getAttribute('class') || '') === !doOutro,
+        `${nome}: e o primário é o último botão da barra, à direita${doOutro ? ', sem o preto' : ''}`,
         barraCel ? porTag(barraCel, 'BUTTON').map(texto).join(' | ') : '(sem barra)');
     }
     ok(!!barra, `${nome}: o painel tem nome para o leitor de tela`);
@@ -1636,6 +1722,57 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
   await desmontar();
 }
 
+{
+  /* MANDAR PARA OUTRO SETOR — 23/09/2026. O formulário abria no setor de
+     hoje, com "Mandar" ativo, e um toque sem mudar nada tirava o dono da
+     demanda; e o acerto (quem mandou deixa de ver a demanda) aparecia como a
+     tela vermelha de "não existe". Agora: sem escolha, sem o setor de hoje,
+     "Mandar" só com escolha, e depois do ok um recado e a volta para a fila. */
+  const SETORES = [
+    { id: 's1', nome: 'Comunicação', slug: 'com', atende: true },
+    { id: 's2', nome: 'Compras e suprimentos', slug: 'compras', atende: true },
+    { id: 's3', nome: 'Louvor', slug: 'louvor', atende: false },
+  ];
+  const carga = vista({ status: 'execucao', responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.gestor);
+  const { alvo, desmontar } = await comFicha(carga, { dem_bases: { ok: true, setores: SETORES, categorias: [] } });
+  await clicar(botao(grade(alvo), 'Mandar para outro setor'), 'o ajuste de mandar');
+  const sel = porTag(grade(alvo), 'SELECT')[0];
+  const opcoes = sel ? porTag(sel, 'OPTION').map(o => o.getAttribute('value') || '') : [];
+  const escolhida = sel ? porTag(sel, 'OPTION').find(o => o.selected) : null;
+  ok(escolhida && (escolhida.getAttribute('value') || '') === '' && opcoes[0] === '',
+    'o formulário abre sem setor escolhido',
+    `escolhida=${escolhida ? escolhida.getAttribute('value') : '(nenhuma)'} opções=${opcoes.join(',')}`);
+  ok(!opcoes.includes('s1') && opcoes.includes('s2') && !opcoes.includes('s3'),
+    'e oferece só os OUTROS setores que atendem', opcoes.join(','));
+  const mandar = botao(grade(alvo), 'Mandar');
+  ok(mandar && mandar.hasAttribute('disabled'), '"Mandar" começa desligado');
+  await escolher(sel, 's2');
+  ok(!botao(grade(alvo), 'Mandar').hasAttribute('disabled'), 'e liga com a escolha');
+  globalThis.__idas = [];
+  const b2 = banco({ dem_quem_sou: EU_GESTOR, dem_bases: { ok: true, setores: SETORES, categorias: [] },
+                     dem_mover: { ok: true }, dem_ver: { ok: false, erro: 'NAO_EXISTE' } });
+  globalThis.__banco = b2;
+  await clicar(botao(grade(alvo), 'Mandar'), 'mandar');
+  const c = b2.ultima('dem_mover');
+  ok(c && c.args.p_acao === 'redirecionar' && c.args.p_d.setor === 's2', 'manda para o setor escolhido',
+    JSON.stringify(c && c.args));
+  ok((globalThis.__idas || []).includes('/demandas/atendimento'),
+    'e quem deixou de ver a demanda volta para a fila, e não para a tela de erro', JSON.stringify(globalThis.__idas));
+  ok(!/Essa demanda não existe/.test(texto(alvo)), 'sem a tela vermelha', texto(alvo).slice(0, 200));
+  const guardado = globalThis.sessionStorage.getItem('demandas.recado');
+  ok(guardado && JSON.parse(guardado).texto === 'Demanda #7 foi para Compras e suprimentos.',
+    'e o recado vai guardado para a tela de destino', String(guardado));
+  await desmontar();
+  /* a tela de destino (outra casca) mostra o recado, uma vez */
+  globalThis.__banco = banco({ dem_quem_sou: EU_GESTOR, dem_portal: portalDe(EU_GESTOR),
+                               dem_lista: { ok: true, itens: [], total: 0, tem_mais: false } });
+  const fila = await montar(Atendimento);
+  ok(/Demanda #7 foi para Compras e suprimentos/.test(texto(fila.alvo)),
+    'e a fila mostra o recado ao abrir', texto(fila.alvo).slice(0, 300));
+  ok(globalThis.sessionStorage.getItem('demandas.recado') === null, 'e o recado é lido uma vez só');
+  await fila.desmontar();
+}
+
 console.log('\n12. A ficha: "tirar" o anexo é decidido por anexo, e não pela pessoa');
 {
   /* O DEFEITO DA MIGRAÇÃO 89, INTEIRO.
@@ -1661,8 +1798,10 @@ console.log('\n12. A ficha: "tirar" o anexo é decidido por anexo, e não pela p
   ok(existe(daPessoa, 'a linha do anexo que a pessoa colou'), 'achei o anexo dela');
   ok(existe(doColega, 'a linha do anexo do colega'), 'achei o anexo do colega');
 
-  const tirarDela = daPessoa && porTag(daPessoa, 'BUTTON').find(x => texto(x) === 'tirar');
-  const tirarDele = doColega && porTag(doColega, 'BUTTON').find(x => texto(x) === 'tirar');
+  /* 23/09/2026 · o botão passou a "Tirar", com maiúscula, como todo botão
+     do sistema; o que se mede é o botão por anexo, e não a caixa da letra */
+  const tirarDela = daPessoa && porTag(daPessoa, 'BUTTON').find(x => /^tirar$/i.test(texto(x)));
+  const tirarDele = doColega && porTag(doColega, 'BUTTON').find(x => /^tirar$/i.test(texto(x)));
   ok(!!tirarDela, 'o anexo com `posso_tirar` tem o botão de tirar');
   ok(!tirarDele,
     'e o que NÃO é dela não tem: quem decide é o servidor, anexo por anexo',
@@ -1764,8 +1903,8 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
   const { alvo, desmontar } = await comFicha(vista(
     { status: 'aberta', aprovacao: null, falta_aprovacao: true }, QUEM.atende));
   const t = texto(alvo);
-  ok(/Esperando aprovação/.test(t),
-    'demanda ABERTA que passou a exigir aprovação diz isso na tela', t.slice(0, 400));
+  ok(/Aguardando aprovação/.test(avisosDe(alvo)),
+    'demanda ABERTA que passou a exigir aprovação diz isso num aviso', avisosDe(alvo));
   ok(/passou a exigir aprovação/.test(t),
     'e conta que foi a categoria que mudou, e não que o pedido nasceu assim', t.slice(0, 500));
   ok(/Quem decide é a liderança/.test(t),
@@ -1787,14 +1926,14 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
     { status: 'travada', travada_por: 'aprovacao', aprovacao: 'pendente', falta_aprovacao: true },
     QUEM.gestor));
   const t = texto(alvo);
-  ok(/Você pode aprovar ou recusar aqui ao lado/.test(t),
+  ok(/Você pode aprovar ou recusar nesta página/.test(t),
     'quem manda lê que a decisão é dele', t.slice(0, 500));
   ok(botoesDaGrade(alvo).includes('Aprovar') && botoesDaGrade(alvo).includes('Recusar'),
     'e os dois botões estão na grade', botoesDaGrade(alvo).join(' | '));
   /* o aviso do PORTÃO substitui o da trava: dois avisos amarelos dizendo a
      mesma coisa em palavras diferentes é ruído */
-  ok(!/Esperando aprovação\./.test(t.replace(/Esperando aprovação\./, '')),
-    'e o aviso do portão aparece uma vez só', t.slice(0, 500));
+  ok((avisosDe(alvo).match(/Aguardando aprovação/g) || []).length === 1,
+    'e o aviso do portão aparece uma vez só', avisosDe(alvo));
   await desmontar();
 }
 {
@@ -1805,8 +1944,10 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
   const t = texto(alvo);
   ok(/Qual sala precisa de limpeza\?/.test(t), 'a trava por informação mostra a pergunta',
     t.slice(0, 400));
-  ok(!/Esperando aprovação/.test(t), 'e não fala de aprovação nenhuma');
-  ok(/Responda aqui embaixo/.test(t),
+  ok(!/aprovação/.test(avisosDe(alvo)), 'e não fala de aprovação nenhuma', avisosDe(alvo));
+  ok(/Aguardando informações de quem pediu/.test(avisosDe(alvo)),
+    'e o aviso usa o nome da pílula, dizendo de quem', avisosDe(alvo));
+  ok(/Responda em “Responder e destravar”/.test(t),
     'e diz a quem pediu que responder destrava', t.slice(0, 400));
   ok(botoesDaGrade(alvo).includes('Responder e destravar'),
     'com o botão escrito na língua de quem vai tocar nele', botoesDaGrade(alvo).join(' | '));
@@ -1872,13 +2013,19 @@ console.log('\n15. A ficha: a caixinha "Só para a equipe" é só de quem atende
     { em: '2026-09-11T10:00:00Z', tipo: 'comentario', de: null, para: null,
       texto: 'O cliente é o pastor.', interno: true, quem: 'Monik Ribeiro' },
     { em: '2026-09-10T10:00:00Z', tipo: 'abertura', de: null, para: null,
+      texto: null, interno: false, quem: 'Paula Mendes' },
+    /* quem olha (a sessão é da Ana Silva) é "Você" na atividade, como na
+       faixa de fatos (23/09/2026) */
+    { em: '2026-09-10T11:00:00Z', tipo: 'prioridade', de: 'normal', para: 'alta',
       texto: null, interno: false, quem: 'Ana Silva' },
   ]));
   const t = texto(alvo);
   ok(/interno \(só a equipe vê\)/.test(t),
     'o comentário interno diz por escrito que é interno', t.slice(-500));
-  ok(/Ana abriu a demanda/.test(t) && /Monik escreveu/.test(t),
+  ok(/Paula abriu a demanda/.test(t) && /Monik escreveu/.test(t),
     'e o histórico vira frase, e não nome de tipo', t.slice(-500));
+  ok(/Você mudou a prioridade/.test(t) && !/Ana mudou/.test(t),
+    'e o gesto de quem olha é "Você"', t.slice(-500));
   await desmontar();
 }
 
@@ -1962,14 +2109,16 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
      duas a mais. O que não pode faltar é UMA, e ela tem que ir para a lista. */
   /* 94 · e ela volta para o PORTAL de quem olha: quem atende, para o
      Atendimento (onde estava a fila); quem pede, para as suas. */
-  /* 23/09/2026 · a saída é o "‹ Atender" / "‹ Minhas demandas" acima do
-     título (`a.dm-volta`), com o nome da aba de onde a pessoa veio */
+  /* 23/09/2026 · a saída é o "‹ Atendimento" / "‹ Minhas demandas" acima do
+     título (`a.dm-volta`), com o nome da seção de onde a pessoa veio: o
+     mesmo da lateral e do alto da fila (a aba do celular é "Atender" porque
+     cinco abas em 320px não cabem nomes longos) */
   const volta = (alvo) => todos(alvo, x => x.nodeType === 1 && x.tagName === 'A'
     && (x.getAttribute('class') || '') === 'dm-volta')[0];
   {
     const { alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
     const saida = volta(alvo);
-    ok(!!saida && texto(saida) === 'Atender', 'quem atende tem a saída do topo, "Atender"',
+    ok(!!saida && texto(saida) === 'Atendimento', 'quem atende tem a saída do topo, "Atendimento"',
       saida ? texto(saida) : '(sem link)');
     ok(saida && saida.getAttribute('href') === '/demandas/atendimento',
       'e ela leva para o Atendimento', saida ? saida.getAttribute('href') : '(sem link)');
@@ -2017,8 +2166,8 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
   ok(!/Maria passou para Maria/.test(t), 'e não como "Maria passou para Maria Aparecida…"', t.slice(-700));
   ok(!/mudou de Aberta para Em execução/.test(t),
     'e a linha de status do mesmo gesto não aparece duas vezes', t.slice(-700));
-  ok(/Maria mudou de Em execução para/.test(t),
-    'mas uma mudança de status que não veio de assumir continua inteira', t.slice(-700));
+  ok(/Maria travou a demanda/.test(t),
+    'mas uma mudança de status que não veio de assumir continua, com o verbo do botão', t.slice(-700));
   ok(/Ana passou para José Carlos de Oliveira Nascimento/.test(t),
     'e passar para outra pessoa continua sendo "passou para"', t.slice(-700));
   await desmontar();
@@ -2159,7 +2308,7 @@ console.log('\n20. O perfil muda o que é da pessoa, e só isso');
   const c = b.ultima('dem_perfil');
   ok(c && Object.keys(c.args.p_d).sort().join(',') === 'funcao,nome,telefone',
     'salvar manda nome, telefone e função, e mais nada', JSON.stringify(c && c.args.p_d));
-  await clicar(botao(alvo, 'Lidero um ministério'));
+  await clicar(botao(alvo, 'Pedir para liderar'));
   const d = b.ultima('dem_perfil');
   ok(d && d.args.p_d.papel_pedido === 'lider' && !('papel' in d.args.p_d),
     'pedir outro papel manda o PEDIDO, nunca o papel', JSON.stringify(d && d.args.p_d));

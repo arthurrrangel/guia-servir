@@ -21,13 +21,14 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import Casca, { useEu } from '@/components/demandas/Casca';
-import { Aviso, CaixaDeAcao, Campo, Copiar, Esqueleto, Opcoes, Pill, useEstreito } from '@/components/demandas/Ui';
+import Casca, { recadoParaDepois, useEu } from '@/components/demandas/Casca';
+import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, Secao, useEstreito } from '@/components/demandas/Ui';
+import { Icone, type NomeDoIcone } from '@/components/demandas/Icone';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, TRAVAS, acoesDe, carimbo, comoOPdfChama, dataCheia, dataCurta, diasDeAtraso,
-  dinheiro, linkZap, pedidoPara, primariaDe, quando, quemManda, recado, recadoDoErro, rotPrioridade,
-  rotTrava, situacao, tetoDe, tomPill, tomPrioridade, type Acao,
+  HOJE, PRIORIDADES, TRAVAS, acoesDe, dataCheia, dataCurta, dataHora, diaNoRio, diasDeAtraso,
+  dinheiro, iniciais, linkZap, pedidoPara, primariaDe, quando, quemManda, recado, recadoDoErro,
+  rotTrava, situacao, tetoDe, type Acao,
   fraseDoEvento, dicaDeAnexo, recadoDeSite, siteDoLink, siteRecusado,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
@@ -58,16 +59,22 @@ function Uma() {
   const [v, setV] = useState<VistaComTeto | null>(null);
   const [b, setB] = useState<Bases | null>(null);
   const [erro, setErro] = useState('');
+  /* a recusa que não muda com outra tentativa (a demanda não existe, ou não
+     é de quem olha): sem "Tentar de novo", e a saída vira o gesto principal */
+  const [semVolta, setSemVolta] = useState(false);
   /* a ação aberta (o formulário), ou 'mais' (a folha de ajustes do celular) */
   const [aberto, setAberto] = useState<Acao | 'mais' | ''>('');
   const [indo, setIndo] = useState(false);
   /* celular ou desktop, para o formulário da ação abrir na folha ou no painel */
   const celular = useEstreito(1023);
 
-  const carregar = useCallback(async () => {
-    const r = await ver(numero);
-    if (!r.ok) { setErro(recadoDoErro(r, 'abrir a demanda')); setV(null); return; }
-    setErro('');
+  const aplicar = useCallback((r: Awaited<ReturnType<typeof ver>>) => {
+    if (!r.ok) {
+      setErro(recadoDoErro(r, 'abrir a demanda'));
+      setSemVolta(r.erro === 'NAO_EXISTE' || r.erro === 'SEM_ACESSO');
+      setV(null); return;
+    }
+    setErro(''); setSemVolta(false);
     setV({
       demanda: r.demanda, eu: r.eu, eventos: r.eventos, anexos: r.anexos,
       /* 94 · quem acompanha. Esta montagem campo a campo JOGAVA FORA o que não
@@ -75,7 +82,8 @@ function Uma() {
       participantes: r.participantes,
       eventos_total: (r as Partial<{ eventos_total: number }>).eventos_total,
     });
-  }, [numero]);
+  }, []);
+  const carregar = useCallback(async () => { aplicar(await ver(numero)); }, [numero, aplicar]);
 
   useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
   useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias, anexos: x.anexos }); }); }, []);
@@ -86,8 +94,28 @@ function Uma() {
     setIndo(true); setErro('');
     const r = await mover(numero, acao, dados);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r, 'gravar')); return false; }
+    if (!r.ok) { setErro(recadoDoErro(r, 'salvar')); return false; }
     setAberto('');
+    /* MANDAR PARA OUTRO SETOR TIRA A DEMANDA DE QUEM MANDOU — 23/09/2026.
+       Quem atende deixa de vê-la (`pode_ver`), e a ficha recarregava,
+       recebia "não existe" e trocava a tela pela vermelha de erro: um acerto
+       aparecendo como falha. Agora o recado diz para onde ela foi, e quem
+       deixou de vê-la volta para a própria fila. */
+    if (acao === 'redirecionar') {
+      const depois = await ver(numero);
+      const nome = (b?.setores || []).find(s => s.id === dados.setor)?.nome;
+      const recado = { texto: `Demanda #${numero} foi para ${nome || 'o outro setor'}.` };
+      if (!depois.ok) {
+        /* a casca desta tela morre na troca: o recado vai guardado */
+        recadoParaDepois(recado);
+        const atende = !!ctx.eu && (ctx.eu.atende ?? ctx.eu.papel !== 'solicitante');
+        router.push(atende ? '/demandas/atendimento' : '/demandas');
+        return true;
+      }
+      ctx.toast?.(recado);
+      aplicar(depois);
+      return true;
+    }
     await carregar();
     if (acao === 'assumir') ctx.toast?.({ texto: `Demanda #${numero} é sua. Ela está em execução.` });
     if (acao === 'validar') ctx.toast?.({ texto: 'Confirmado. Obrigado por dizer.' });
@@ -164,13 +192,21 @@ function Uma() {
   }, [aberto]);
 
   if (erro && !v) {
+    /* a saída é a de quem olha: quem atende volta para o Atendimento */
+    const atende = !!ctx.eu && (ctx.eu.atende ?? ctx.eu.papel !== 'solicitante');
+    const saida = atende ? { href: '/demandas/atendimento', rot: 'Atendimento' } : { href: '/demandas', rot: 'Início' };
     return (
       <>
-        <Aviso tom="bad">{erro}</Aviso>
+        <Cabecalho volta={saida} sobre={`Demanda #${Number.isFinite(numero) ? numero : ''}`}
+          titulo="Não deu para abrir a demanda" />
+        {/* a demanda que não existe (ou não é de quem olha) não é falha do
+            sistema: aviso cinza; a falha de rede continua vermelha */}
+        <Aviso tom={semVolta ? undefined : 'bad'}>{erro}</Aviso>
         <div className="dm-linha">
-          <button className="dm-btn dm-pri" onClick={carregar}>Tentar de novo</button>
-          <Link className="dm-btn" href="/demandas">Voltar para a lista</Link>
+          {semVolta ? null : <button type="button" className="dm-btn dm-pri" onClick={carregar}>Tentar de novo</button>}
+          <Link className={semVolta ? 'dm-btn dm-pri' : 'dm-btn'} href={saida.href}>Voltar para {saida.rot === 'Início' ? 'o Início' : 'o Atendimento'}</Link>
         </div>
+        <span className="dm-sem-barra" hidden />
       </>
     );
   }
@@ -200,7 +236,7 @@ function Uma() {
      para caber na barra: ajustes, dois ou mais secundários, ou os recados */
   const temMais = ajustes.length > 0 || secundarias.length > 1 || podeAvisar;
   /* a barra fixa só existe com uma ação que anda com a demanda; ajustes e
-     recados sozinhos moram num cartão em linha no celular (uma barra fixa só
+     recados sozinhos moram num bloco em linha no celular (uma barra fixa só
      com "Mais" era 56px de rodapé para esconder dois botões-texto) */
   const temBarra = !!primaria || secundarias.length > 0;
   const soAjustes = !temBarra && (ajustes.length > 0 || podeAvisar);
@@ -223,135 +259,221 @@ function Uma() {
       default:             return a;
     }
   };
+  /* o ícone de cada ajuste: o botão-texto da coluna se lê pela palavra, e o
+     ícone deixa a lista varrível de relance */
+  const iconeDe = (a: Acao): NomeDoIcone | null => {
+    switch (a) {
+      case 'prazo':        return 'calendario';
+      /* a seta de prioridade, e não o triângulo de alerta (que é o do
+         aviso da trava, na mesma tela) */
+      case 'prioridade':   return 'alta';
+      case 'redirecionar': return 'setores';
+      case 'anexar':       return 'anexos';
+      case 'cancelar':     return 'fechar';
+      default:             return null;
+    }
+  };
   /* assumir e validar gravam direto; as outras abrem o formulário */
   const tocar = (a: Acao) => (a === 'assumir' || a === 'validar' ? agir(a) : setAberto(a));
-  const botao = (a: Acao, classe: string) => (
-    <button key={a} type="button" className={classe} disabled={indo} onClick={() => tocar(a)}>{rotulo(a)}</button>
-  );
+  const botao = (a: Acao, classe: string) => {
+    const ic = classe.includes('dm-txt') ? iconeDe(a) : null;
+    return (
+      <button key={a} type="button" className={classe} disabled={indo} onClick={() => tocar(a)}>
+        {ic ? <Icone nome={ic} /> : null}{rotulo(a)}
+      </button>
+    );
+  };
+  /* O PAINEL DIZ O QUE VEM, SEM PONTO FINAL — 23/09/2026. Era "Esperando
+     Pedro responder." ao lado de "Com você, em 3 dias", e "Concluída em
+     23/09" debaixo do rótulo "Próximo passo" quando o passo era de quem pediu
+     confirmar. Frase de estado curta, sem ponto, e o passo quando há passo. */
   const estadoDoPainel =
-    d.status === 'concluida' ? `Concluída em ${carimbo(d.concluida_em).split(' ')[0]}${primaria ? '' : '. Nada a fazer.'}`
-    : d.status === 'cancelada' ? 'Cancelada.'
-    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua.' : 'Parada até a liderança aprovar.')
-    : d.status === 'travada' ? `${rotTrava(d.travada_por)}.`
-    : d.responsavel_id && d.responsavel_id === v.eu.id ? `Com você${d.prazo ? `, ${prazoEmPalavras(d.prazo, sit, atraso)}` : ''}`
-    : d.responsavel ? `Com ${d.responsavel.split(' ')[0]}${d.prazo ? `, ${prazoEmPalavras(d.prazo, sit, atraso)}` : ''}`
-    : d.status === 'aberta' ? 'Ninguém assumiu ainda.'
+    d.status === 'concluida'
+      ? (primaria === 'validar' ? 'Confirme se resolveu'
+         : `Concluída em ${dataCheia(d.concluida_em)}`)
+    : d.status === 'cancelada' ? 'Cancelada'
+    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua' : 'Parada até a liderança aprovar')
+    /* a trava dita do lado de quem olha, e não a frase do aviso de cima de
+       novo (eram três "Esperando informação de quem pediu" na mesma tela) */
+    : d.status === 'travada' ? (
+        d.travada_por === 'informacao'
+          ? ((v.eu.pede ?? v.eu.abriu) ? 'A equipe espera uma resposta sua'
+             : `Esperando ${d.abriu ? d.abriu.split(' ')[0] : 'quem pediu'} responder`)
+          : rotTrava(d.travada_por))
+    /* "Com Maria, vence em 3 dias", e não "Com Maria, em 3 dias" (em três
+       dias ela o quê?) */
+    : d.responsavel_id && d.responsavel_id === v.eu.id ? `Com você${d.prazo ? `, ${vence(prazoEmPalavras(d.prazo, sit, atraso))}` : ''}`
+    : d.responsavel ? `Com ${d.responsavel.split(' ')[0]}${d.prazo ? `, ${vence(prazoEmPalavras(d.prazo, sit, atraso))}` : ''}`
+    : d.status === 'aberta' ? 'Ninguém assumiu ainda'
     : '';
+
+  /* "PRÓXIMO PASSO" SÓ QUANDO O PASSO É DE QUEM OLHA. Com a demanda na mão
+     de outra pessoa ("Com Pedro, em 3 dias"), os botões de quem administra
+     são poderes (travar, concluir por ela), e não o passo dele: o título é
+     "Ações". O mesmo vale para quem atende uma demanda travada esperando
+     quem pediu ("Esperando Pedro responder"): o passo é do Pedro, e a
+     resposta dele já destrava; "Destravar" ali é a exceção. Confirmar,
+     decidir a aprovação e responder a trava continuam sendo o passo de quem
+     olha. */
+  const quemPediuOlha = !!(v.eu.pede ?? v.eu.abriu);
+  const esperaQuemPediu = d.status === 'travada' && d.travada_por === 'informacao';
+  const passoDeOutro = primaria !== 'validar'
+    && !(d.falta_aprovacao && (v.eu.aprova ?? quemManda(v.eu.papel)))
+    && !(esperaQuemPediu && quemPediuOlha)
+    && ((esperaQuemPediu && !quemPediuOlha) || (!!d.responsavel_id && d.responsavel_id !== v.eu.id));
+  const tituloDoPainel = !(primaria || secundarias.length) ? 'Esta demanda' : passoDeOutro ? 'Ações' : 'Próximo passo';
+  /* e o botão cheio é de quem tem o passo: concluir a demanda de outra
+     pessoa é um poder raro, e não o convite da tela */
+  const cheio = passoDeOutro ? 'dm-btn' : 'dm-btn dm-pri';
 
   /* ---------------------------------------- o painel de ação (desktop) e a folha */
   const painel = aberto && aberto !== 'mais' ? (
-    <div ref={cxForm}>
+    <div className="dm-painel-bloco dm-painel-form" ref={cxForm}>
       <div className="dm-folha-topo">
-        <h3 className="dm-painel-titulo">{rotulo(aberto)}</h3>
-        <button type="button" className="dm-btn dm-txt dm-mini" onClick={() => setAberto('')}>Deixa pra lá</button>
+        <h3>{rotulo(aberto)}</h3>
+        <button type="button" className="dm-btn dm-txt dm-peq" onClick={() => setAberto('')}>Voltar</button>
       </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
     </div>
   ) : (
     <>
-      <h3 className="dm-painel-titulo">{primaria || secundarias.length ? 'Próximo passo' : 'Esta demanda'}</h3>
-      {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
-      {!temAcao ? (
-        <p className="dm-peq dm-mudo" style={{ margin: 0 }}>
-          {d.status === 'concluida' || d.status === 'cancelada'
-            ? 'Já encerrada. Se precisar, escreva aqui embaixo.'
-            : d.falta_aprovacao
-              ? 'Parada até a liderança aprovar. Se precisar, escreva aqui embaixo.'
-              : 'Quem toca é o setor responsável. Se precisar, escreva aqui embaixo.'}
-        </p>
-      ) : null}
-      <div className="dm-painel-acoes">
-        {primaria ? botao(primaria, 'dm-btn dm-pri dm-larga') : null}
-        {secundarias.map(a => botao(a, a === 'rejeitar' ? 'dm-btn dm-perigo dm-larga' : 'dm-btn dm-larga'))}
+      <div className="dm-painel-bloco">
+        <h3 className="dm-painel-titulo">{tituloDoPainel}</h3>
+        {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
+        {!temAcao ? (
+          <p className="dm-peq dm-mudo">
+            {d.status === 'concluida' || d.status === 'cancelada'
+              ? 'Já encerrada. Se precisar, escreva aqui embaixo.'
+              : d.falta_aprovacao
+                /* o "parada até a liderança aprovar" já é a frase de cima */
+                ? 'Se precisar, escreva aqui embaixo.'
+                : 'Quem toca é o setor responsável. Se precisar, escreva aqui embaixo.'}
+          </p>
+        ) : null}
+        <div className="dm-painel-acoes">
+          {primaria ? botao(primaria, `${cheio} dm-larga`) : null}
+          {secundarias.map(a => botao(a, a === 'rejeitar' ? 'dm-btn dm-perigo dm-larga' : 'dm-btn dm-larga'))}
+        </div>
       </div>
       {ajustes.length ? (
-        <div className="dm-painel-ajustes">
-          {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+        <div className="dm-painel-bloco">
+          <h3 className="dm-painel-titulo">Ajustes</h3>
+          <div className="dm-painel-ajustes">
+            {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+          </div>
         </div>
       ) : null}
-      {podeAvisar ? <Recados d={d} base={base} eu={v.eu} /> : null}
+      {podeAvisar ? <div className="dm-painel-bloco"><Recados d={d} base={base} eu={v.eu} /></div> : null}
     </>
   );
+
+  const pares = d.evento || d.local || d.publico || d.orcamento !== null || d.aprovacao || d.falta_aprovacao;
+
+  /* a trava que ainda vale: a pergunta dela já está no aviso amarelo do
+     alto, e a atividade não a repete (a linha diz "Maria travou a demanda") */
+  const ultimaTrava = d.status === 'travada'
+    ? linhas.map(e => e.tipo === 'status' && e.para === 'travada').lastIndexOf(true) : -1;
+  /* quem olha é "Você" na atividade, como na faixa de fatos */
+  const meuNome = ctx.eu?.nome || null;
 
   return (
     <>
       {/* 94 · A SAÍDA VOLTA PARA O PORTAL DE QUEM OLHA: quem atende, para a
           fila; quem pede, para as suas. */}
-      {v.eu.atende
-        ? <Link className="dm-volta" href="/demandas/atendimento">Atender</Link>
-        : <Link className="dm-volta" href="/demandas">Minhas demandas</Link>}
-
-      <div className="dm-cab">
-        <div>
-          <div className="dm-rot">{'>'} demanda #{d.numero} · {d.categoria}</div>
-          <h1 style={{ marginTop: 6 }}>{d.titulo}</h1>
-          <div className="dm-linha" style={{ marginTop: 'var(--dm-e2)', gap: 6 }}>
-            <Pill tom={tomPill(d.status)}>
-              <span className={`dm-ponto ${tomPill(d.status) ? 'dm-' + tomPill(d.status) : ''}`} />
-              {comoOPdfChama(d)}
-            </Pill>
-            {tomPrioridade(d.prioridade) ? <Pill tom={tomPrioridade(d.prioridade)}>{rotPrioridade(d.prioridade)}</Pill> : null}
-            {sit === 'atrasada' ? <Pill tom="bad">{atraso} {atraso === 1 ? 'dia' : 'dias'} de atraso</Pill> : null}
-            {sit === 'parada' ? <Pill tom="warn">parada há {d.parada_dias} dias</Pill> : null}
-            {d.reaberturas > 0 ? <Pill tom="warn">reaberta {d.reaberturas}×</Pill> : null}
-          </div>
-        </div>
-      </div>
+      <Cabecalho
+        /* "Atendimento", o nome da seção na lateral e no alto da fila */
+        volta={v.eu.atende ? { href: '/demandas/atendimento', rot: 'Atendimento' } : { href: '/demandas', rot: 'Minhas demandas' }}
+        /* `dm-sep`: com uma categoria longa, a linha quebrava deixando
+           "Demanda #105 ·" sozinho em cima */
+        sobre={<span className="dm-sep"><span className="dm-sep-in"><span className="dm-num">Demanda #{d.numero}</span><span>{d.categoria}</span></span></span>}
+        titulo={d.titulo}
+        meta={<>
+          <Estado d={d} />
+          <Prio p={d.prioridade} />
+          {sit === 'atrasada' ? <Pill tom="bad">{atraso} {atraso === 1 ? 'dia' : 'dias'} de atraso</Pill> : null}
+          {sit === 'parada' ? <Pill tom="warn">parada há {d.parada_dias} dias</Pill> : null}
+          {/* a pílula de estado já diz "Reaberta"; quantas vezes é um fato */}
+          {d.reaberturas > 0 ? <span>{d.reaberturas === 1 ? 'reaberta uma vez' : `reaberta ${d.reaberturas} vezes`}</span> : null}
+        </>} />
 
       {erro && !aberto ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       {/* ---------------------------------------------------- o que acontece
 
           O portão fala primeiro, em qualquer status, e diz de quem é a vez. */}
+      {/* OS AVISOS TÊM UMA FORMA SÓ: o nome do estado em negrito (o mesmo
+          da pílula, sem ponto) e, embaixo, o que ele quer dizer para quem
+          olha. Eram "Esperando aprovação." ao lado da pílula "Aguardando
+          aprovação", e a frase colada no nome. */}
       {d.falta_aprovacao ? (
         <Aviso tom="warn">
-          <div>
-            <b>Esperando aprovação.</b>{' '}
+          <b>Aguardando aprovação</b>
+          <div className="dm-aviso-mais">
             {d.aprovacao === 'pendente'
               ? 'A liderança precisa decidir antes de esta demanda andar.'
               : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a liderança decidir.'}
             {(v.eu.aprova ?? quemManda(v.eu.papel))
-              ? <> Você pode aprovar ou recusar aqui ao lado.</>
+              ? <> Você pode aprovar ou recusar nesta página.</>
               : <> Quem decide é a liderança. Não há o que fazer aqui enquanto isso.</>}
           </div>
         </Aviso>
       ) : null}
-      {d.status === 'travada' && !d.falta_aprovacao ? (
-        <Aviso tom="warn">
-          <div>
-            <b>{rotTrava(d.travada_por)}.</b>{d.travada_nota ? ` ${d.travada_nota}` : ''}
-            {d.travada_por === 'informacao' && (v.eu.pede ?? v.eu.abriu) && acoes.includes('destravar')
-              ? <> Responda aqui embaixo e a demanda volta a andar.</>
-              : null}
-          </div>
-        </Aviso>
-      ) : null}
-      {d.status === 'concluida' ? (
-        <Aviso tom="ok">
-          <div>
-            <b>Concluída</b> em {carimbo(d.concluida_em)}. {d.conclusao}
-            {d.atraso_motivo ? <> <span className="dm-mudo">(atrasou: {d.atraso_motivo})</span></> : null}
-            {/* A ETAPA 5 DO PDF: quem pediu confirma que resolveu. O botão é
-                o primário do painel (era o menor botão da tela, dentro deste
-                aviso); confirmada, vira a frase, que é o registro pedido. */}
-            {d.validada_em ? (
-              <div className="dm-peq" style={{ marginTop: 6 }}>
-                Validada{d.validada_por ? ` por ${d.validada_por}` : ''} em {dataCheia(d.validada_em.slice(0, 10))}.
+      {d.status === 'travada' && !d.falta_aprovacao ? (() => {
+        const respondeAqui = d.travada_por === 'informacao' && (v.eu.pede ?? v.eu.abriu) && acoes.includes('destravar');
+        return (
+          <Aviso tom="warn">
+            <b>{rotTrava(d.travada_por)}</b>
+            {d.travada_nota || respondeAqui ? (
+              <div className="dm-aviso-mais">
+                {d.travada_nota}
+                {/* o gesto pelo nome do botão, e não "aqui embaixo": no
+                    desktop o que fica embaixo é o comentário, que não destrava */}
+                {respondeAqui ? <>{d.travada_nota ? ' ' : ''}Responda em “Responder e destravar” e a demanda volta a andar.</> : null}
               </div>
             ) : null}
-          </div>
+          </Aviso>
+        );
+      })() : null}
+      {d.status === 'concluida' ? (
+        <Aviso tom="ok">
+          {/* o carimbo numa linha, o que foi feito na outra, e o motivo do
+              atraso com o seu rótulo (era um parêntese no meio da frase) */}
+          {/* a hora relativa é peça própria, e não quebra ao meio ("há 15 /
+              min" em 390) */}
+          <span className="dm-sep">
+            <span className="dm-sep-in">
+              <b>Concluída em {dataHora(d.concluida_em)}</b>
+              {quando(d.concluida_em) && quando(d.concluida_em) !== dataCheia(d.concluida_em)
+                ? <span className="dm-quando">{quando(d.concluida_em)}</span> : null}
+            </span>
+          </span>
+          {d.conclusao ? <div className="dm-aviso-mais">{d.conclusao}</div> : null}
+          {d.atraso_motivo ? <div className="dm-aviso-mais"><b>Motivo do atraso:</b> {d.atraso_motivo}</div> : null}
+          {/* A ETAPA 5 DO PDF: quem pediu confirma que resolveu. O botão é o
+              primário do painel; confirmada, vira a frase, que é o registro
+              pedido. */}
+          {d.validada_em ? (
+            <div className="dm-aviso-mais">
+              Validada{d.validada_por ? ` por ${d.validada_por}` : ''} em {dataCheia(d.validada_em)}.
+            </div>
+          ) : null}
         </Aviso>
       ) : null}
       {d.status === 'cancelada' ? (
-        <Aviso tom="bad"><div><b>Cancelada.</b> {d.cancelada_motivo}</div></Aviso>
+        /* cinza, como a pílula: cancelada é "não vai andar", e não erro */
+        <Aviso>
+          <b>Cancelada</b>
+          {d.cancelada_motivo ? <div className="dm-aviso-mais">{d.cancelada_motivo}</div> : null}
+        </Aviso>
       ) : null}
 
       {/* ------------------------------------------ os quatro fatos que decidem */}
       <div className="dm-fatos">
         <div className="dm-fato">
           <span>Quem pediu</span>
-          <div>{d.abriu}<small>{d.solicitante}</small></div>
+          {/* a mesma regra das duas células: quem olha é "Você" */}
+          <div>{v.eu.abriu ? 'Você' : d.abriu}<small>{d.solicitante}</small></div>
         </div>
         <div className="dm-fato">
           <span>Quem atende</span>
@@ -362,126 +484,152 @@ function Uma() {
         </div>
         <div className="dm-fato">
           <span>Prazo</span>
-          <div>
+          <div className={sit === 'atrasada' ? 'dm-bad' : undefined}>
             {d.prazo ? dataCheia(d.prazo) : 'sem data'}
             <small>
-              {d.prazo ? prazoEmPalavras(d.prazo, sit, atraso) : (d.sem_prazo_porque || 'sem justificativa')}
+              {d.prazo ? prazoEmPalavras(d.prazo, sit, atraso, d.status === 'concluida' ? d.concluida_em : null)
+                : (d.sem_prazo_porque || 'sem justificativa')}
               {pedidoPara(d.prazo, prazoPedido)}
             </small>
           </div>
         </div>
         <div className="dm-fato">
-          <span>Aberta</span>
-          <div>{carimbo(d.criada_em).split(' · ')[0]}<small>{quando(d.criada_em)}</small></div>
+          <span>Aberta em</span>
+          <div>{dataHora(d.criada_em)}<small>{quando(d.criada_em)}</small></div>
         </div>
       </div>
 
-      <div className="dm-duas">
-        {/* ------------------------------------------------------- o pedido */}
+      <div className="dm-duas dm-ficha">
         <div>
-          <div className="dm-card">
-            <h3>O que foi pedido</h3>
-            <p className="dm-texto-livre">{d.descricao}</p>
-            {d.objetivo ? <p className="dm-peq dm-mudo">Objetivo: {d.objetivo}</p> : null}
-            {d.impacto ? <p className="dm-peq"><b>Impacto:</b> {d.impacto}</p> : null}
-            {d.evento || d.local || d.publico || d.orcamento !== null || d.aprovacao || d.falta_aprovacao ? (
-              <div className="dm-pares">
-                {d.evento ? <div><span>Evento</span>{d.evento} · {dataCheia(d.evento_data)}</div> : null}
-                {d.local ? <div><span>Onde</span>{d.local}</div> : null}
-                {d.publico ? <div><span>Público</span>{d.publico}</div> : null}
-                {d.orcamento !== null ? <div><span>Orçamento</span>{dinheiro(d.orcamento)}</div> : null}
-                {d.aprovacao
-                  ? <div><span>Aprovação</span>{d.aprovacao}{d.aprovacao_nota ? `: ${d.aprovacao_nota}` : ''}</div>
-                  : d.falta_aprovacao ? <div><span>Aprovação</span>esperando a liderança decidir</div> : null}
-              </div>
-            ) : null}
-          </div>
-
-          {v.anexos.length ? (
-            <div className="dm-card">
-              <div className="dm-entre" style={{ marginBottom: 'var(--dm-e1)' }}>
-                <h3 style={{ margin: 0 }}>Anexos<span className="dm-selo">{v.anexos.length}</span></h3>
-                {acoes.includes('anexar') ? (
-                  <button type="button" className="dm-btn dm-txt dm-mini" disabled={indo} onClick={() => setAberto('anexar')}>Juntar um anexo</button>
+          {/* ------------------------------------------------------- o pedido */}
+          <Secao titulo="O que foi pedido">
+            <div className="dm-caixa">
+              <div className="dm-caixa-corpo">
+                <p className="dm-texto-livre">{d.descricao}</p>
+                {d.objetivo ? <p className="dm-peq dm-mudo dm-depois-do-texto">Objetivo: {d.objetivo}</p> : null}
+                {d.impacto ? <p className="dm-peq dm-depois-do-texto"><b>Impacto:</b> {d.impacto}</p> : null}
+                {pares ? (
+                  <div className="dm-pares">
+                    {/* "Culto de celebração, em 12/10/2026": frase, e não dois
+                        pedaços com um ponto que ficava sozinho no fim da linha */}
+                    {d.evento ? <div><span>Evento</span>{d.evento}{d.evento_data ? `, em ${dataCheia(d.evento_data)}` : ''}</div> : null}
+                    {d.local ? <div><span>Onde</span>{d.local}</div> : null}
+                    {d.publico ? <div><span>Público</span>{d.publico}</div> : null}
+                    {d.orcamento !== null ? <div><span>Orçamento</span><span className="dm-num">{dinheiro(d.orcamento)}</span></div> : null}
+                    {d.aprovacao
+                      ? <div><span>Aprovação</span>{d.aprovacao}{d.aprovacao_nota ? `: ${d.aprovacao_nota}` : ''}</div>
+                      : d.falta_aprovacao ? <div><span>Aprovação</span>esperando a liderança decidir</div> : null}
+                  </div>
                 ) : null}
               </div>
+            </div>
+          </Secao>
+
+          {v.anexos.length ? (
+            <Secao titulo="Anexos" n={v.anexos.length}
+              acoes={acoes.includes('anexar') ? (
+                <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={() => setAberto('anexar')}>
+                  <Icone nome="anexos" />Juntar um anexo
+                </button>
+              ) : null}>
               {/* O anexo é um LINK para a conta de alguém: o único jeito de a
                   pessoa saber para onde vai é antes de clicar (o rótulo traz
                   o site), e a ficha diz QUEM colou, quando, e se chegou
                   depois de a demanda fechar. Quem pode tirar quem diz é o
                   servidor, anexo por anexo (`posso_tirar`, migração 89). */}
-              <ul className="dm-anexos">
+              <ul className="dm-anexos dm-tabela">
                 {v.anexos.map((a, i) => (
                   <li key={a.id || i}>
+                    <Icone nome="link" />
                     <a className="dm-anexo-link" href={a.url} target="_blank" rel="noopener noreferrer">{a.nome}</a>
                     <span className="dm-anexo-de">
                       {a.quem ? `${a.quem} · ` : ''}{dataCurta(a.em)}
                       {a.depois_de_fechar ? <b> · juntado depois de concluída</b> : null}
                     </span>
                     {a.posso_tirar ? (
-                      <button className="dm-btn dm-mini" disabled={indo}
-                        onClick={() => agir('desanexar', { anexo_id: a.id })}>tirar</button>
+                      <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo}
+                        onClick={() => agir('desanexar', { anexo_id: a.id })}>Tirar</button>
                     ) : null}
                   </li>
                 ))}
               </ul>
-            </div>
+            </Secao>
           ) : null}
 
           <Acompanham v={v} indo={indo} agir={agir} sair={() => router.push('/demandas')} />
 
-          {/* --------------------------------------------------------- histórico */}
-          <h2 style={{ margin: 'var(--dm-e4) 0 var(--dm-e2)' }}>O que já aconteceu</h2>
-          <ul className="dm-hist">
-            {linhas.map((e, i) => (
-              <li key={i} className={marco(e.tipo) || e.marcoAbsorvido ? 'dm-marco' : ''}>
-                {/* COR SOZINHA NÃO INFORMA: o comentário interno leva a
-                    palavra ao lado do carimbo, além da tarja. */}
-                <div className={e.interno ? 'dm-interno' : ''}>
-                  <div className="dm-q">
-                    <b>{frase(e)}</b> <span className="dm-mudo">· {quando(e.em)}</span>
-                    {e.interno ? <span className="dm-mudo"> · interno (só a equipe vê)</span> : null}
+          {/* no celular, quando não há ação que ande com a demanda, os ajustes
+              e os recados ficam num bloco em linha (o mesmo conteúdo do painel
+              do desktop), e não numa barra fixa só com "Mais". Antes da
+              Atividade: o painel é o contexto de agora, a atividade é o
+              registro, e a caixa de escrever continua sendo a última coisa. */}
+          {soAjustes ? (
+            <div className="dm-painel dm-painel-linha dm-so-celular" role="group" aria-label="Esta demanda">
+              <div className="dm-painel-bloco">
+                <h3 className="dm-painel-titulo">Esta demanda</h3>
+                {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
+                {ajustes.length ? (
+                  <div className="dm-painel-ajustes">
+                    {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
                   </div>
-                  {e.texto ? <div className="dm-t">{e.texto}</div> : null}
-                </div>
-              </li>
-            ))}
-          </ul>
-          {linhas.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
-          {/* HISTÓRICO CORTADO TEM QUE DIZER QUE FOI CORTADO (o teto de 200 da
-              93). Fica no fim, que é onde a linha do tempo termina de ser
-              lida, e diz quais faltam: os mais antigos. */}
-          {eventosDeFora > 0 ? (
-            <p className="dm-corte" role="status">
-              Mostrando os {eventos.length} mais recentes. Outros {eventosDeFora} mais
-              antigos não couberam.
-            </p>
+                ) : null}
+              </div>
+              {podeAvisar ? <div className="dm-painel-bloco"><Recados d={d} base={base} eu={v.eu} /></div> : null}
+            </div>
           ) : null}
 
-          {acoes.includes('comentar') ? (
-            <Escrever atende={v.eu.atende} salvando={indo}
-              aoEnviar={(texto, interno) => agir('comentar', { texto, interno })} />
-          ) : null}
+          {/* --------------------------------------------------------- histórico */}
+          <Secao titulo="Atividade">
+            <div className="dm-caixa">
+              <div className="dm-caixa-corpo">
+                <ul className="dm-hist">
+                  {linhas.map((e, i) => (
+                    <li key={i} className={marco(e.tipo) || e.marcoAbsorvido ? 'dm-marco' : ''}>
+                      {/* COR SOZINHA NÃO INFORMA: o comentário interno leva a
+                          palavra ao lado do carimbo, além da tarja. */}
+                      <div className={e.interno ? 'dm-interno' : ''}>
+                        {/* `dm-sep`: o "·" antes da hora nunca abre linha
+                            quando a frase quebra no celular */}
+                        <div className="dm-q dm-sep">
+                          <div className="dm-sep-in">
+                            <b>{frase(e, meuNome)}</b>
+                            <span className="dm-quando">{quando(e.em)}</span>
+                            {e.interno ? <span className="dm-quando">interno (só a equipe vê)</span> : null}
+                          </div>
+                        </div>
+                        {/* o texto da conclusão já está no cartão verde do alto, e
+                            a pergunta da trava que ainda vale, no aviso amarelo:
+                            na atividade fica o gesto (quem, quando) */}
+                        {e.texto && !(e.tipo === 'status' && e.para === 'concluida' && e.texto === d.conclusao)
+                          && !(i === ultimaTrava && e.texto === d.travada_nota)
+                          ? <div className="dm-t">{e.texto}</div> : null}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                {linhas.length === 0 ? <p className="dm-mudo dm-peq">Nada ainda.</p> : null}
+              </div>
+              {/* HISTÓRICO CORTADO TEM QUE DIZER QUE FOI CORTADO (o teto de 200 da
+                  93). Fica no fim, que é onde a linha do tempo termina de ser
+                  lida, e diz quais faltam: os mais antigos. */}
+              {eventosDeFora > 0 ? (
+                <p className="dm-corte" role="status">
+                  Mostrando os {eventos.length} mais recentes. Outros {eventosDeFora} mais
+                  antigos não couberam.
+                </p>
+              ) : null}
+              {acoes.includes('comentar') ? (
+                <div className="dm-caixa-pe dm-caixa-escrever">
+                  <Escrever atende={v.eu.atende} salvando={indo}
+                    aoEnviar={(texto, interno) => agir('comentar', { texto, interno })} />
+                </div>
+              ) : null}
+            </div>
+          </Secao>
         </div>
 
-        {/* no celular, quando não há ação que ande com a demanda, os ajustes e
-            os recados ficam num cartão em linha (o mesmo conteúdo do painel do
-            desktop), e não numa barra fixa só com "Mais" */}
-        {soAjustes ? (
-          <div className="dm-card dm-so-celular" aria-label="Esta demanda">
-            <h3 className="dm-painel-titulo">Esta demanda</h3>
-            {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
-            {ajustes.length ? (
-              <div className="dm-painel-ajustes">
-                {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
-              </div>
-            ) : null}
-            {podeAvisar ? <Recados d={d} base={base} eu={v.eu} /> : null}
-          </div>
-        ) : null}
-
         {/* ------------------------------------------------- o painel (desktop) */}
-        <aside className="dm-card dm-painel dm-fixa dm-so-desktop" aria-label="Ações" aria-live="polite">
+        <aside className="dm-painel dm-fixa dm-so-desktop" aria-label="Ações" aria-live="polite">
           {painel}
         </aside>
       </div>
@@ -495,13 +643,15 @@ function Uma() {
               secundário toma o lugar dele. */}
           <div className="dm-barra-acao" role="group" aria-label="Ações">
             {temMais ? (
-              <button type="button" className="dm-btn" disabled={indo} onClick={() => setAberto('mais')}>Mais</button>
+              <button type="button" className="dm-btn" disabled={indo} onClick={() => setAberto('mais')}>
+                <Icone nome="mais" />Mais
+              </button>
             ) : secundarias[0] ? botao(secundarias[0], secundarias[0] === 'rejeitar' ? 'dm-btn dm-perigo' : 'dm-btn') : null}
-            {primaria ? botao(primaria, 'dm-btn dm-pri') : null}
+            {primaria ? botao(primaria, cheio) : null}
           </div>
           <div className="dm-barra-espaco" />
         </>
-      ) : null}
+      ) : <span className="dm-sem-barra" hidden />}
       {celular && aberto ? (
         <Folha fechar={() => setAberto('')} titulo={aberto === 'mais' ? 'Mais' : rotulo(aberto)}>
           {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
@@ -514,11 +664,15 @@ function Uma() {
                 </div>
               ) : null}
               {ajustes.length ? (
-                <div className="dm-painel-ajustes">
-                  {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+                /* o fio da seção na caixa de fora: com os -10px dos ajustes,
+                   ele saía 20px mais largo que o fio seguinte */
+                <div className="dm-folha-secao">
+                  <div className="dm-painel-ajustes">
+                    {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
+                  </div>
                 </div>
               ) : null}
-              {podeAvisar ? <Recados d={d} base={base} eu={v.eu} /> : null}
+              {podeAvisar ? <div className="dm-folha-secao"><Recados d={d} base={base} eu={v.eu} /></div> : null}
             </>
           ) : (
             <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
@@ -530,11 +684,21 @@ function Uma() {
 }
 
 /* "em 3 dias", "vence hoje", "18 dias de atraso", "há 2 dias" */
-function prazoEmPalavras(prazo: string, sit: ReturnType<typeof situacao>, atraso: number): string {
+const vence = (t: string) => (t.startsWith('em ') || t === 'amanhã' ? `vence ${t}` : t);
+
+/* A CONCLUÍDA SE MEDE PELA ENTREGA, E NÃO POR HOJE — 23/09/2026. Dizia
+   "passou" para toda concluída cujo prazo ficou para trás no calendário,
+   inclusive a entregue no prazo. */
+function prazoEmPalavras(prazo: string, sit: ReturnType<typeof situacao>, atraso: number,
+                         concluidaEm?: string | null): string {
   if (sit === 'atrasada') return `${atraso} ${atraso === 1 ? 'dia' : 'dias'} de atraso`;
   if (sit === 'hoje') return 'vence hoje';
+  if (sit === 'fechada') {
+    if (!concluidaEm) return '';
+    const depois = Math.round((Date.parse(diaNoRio(concluidaEm)) - Date.parse(prazo.slice(0, 10))) / 86400000);
+    return depois > 0 ? `entregue ${depois} ${depois === 1 ? 'dia' : 'dias'} depois do prazo` : 'entregue no prazo';
+  }
   const dias = Math.round((Date.parse(prazo) - Date.parse(HOJE())) / 86400000);
-  if (sit === 'fechada') return dias < 0 ? 'passou' : '';
   return dias === 1 ? 'amanhã' : `em ${dias} dias`;
 }
 
@@ -569,8 +733,8 @@ function Folha({ titulo, fechar, children }: { titulo: string; fechar: () => voi
       <div className="dm-folha-in">
         <div className="dm-folha-alca" aria-hidden="true" />
         <div className="dm-folha-topo">
-          <h3 className="dm-painel-titulo">{titulo}</h3>
-          <button type="button" className="dm-btn dm-txt dm-mini" onClick={fechar}>Deixa pra lá</button>
+          <h3>{titulo}</h3>
+          <button type="button" className="dm-btn dm-txt dm-peq" onClick={fechar}>Voltar</button>
         </div>
         {children}
       </div>
@@ -580,11 +744,11 @@ function Folha({ titulo, fechar, children }: { titulo: string; fechar: () => voi
 
 /* ------------------------------------------------------------- escrever
 
-   A caixa de comentário fica no FIM do histórico, que é onde se responde. É
-   uma linha de 46px que cresce ao focar ou quando já tem texto; o botão
-   nasce quieto e vira primário quando há o que enviar. Não apaga o texto
-   quando o servidor recusa. A caixinha "Só para a equipe" só existe para
-   quem atende, porque o servidor ignora a chave para os outros. */
+   A caixa de comentário fica no FIM da atividade, que é onde se responde. É
+   uma linha de 44px que cresce ao focar ou quando já tem texto; o botão
+   aparece com o texto. Não apaga o texto quando o servidor recusa. A
+   caixinha "Só para a equipe" só existe para quem atende, porque o servidor
+   ignora a chave para os outros. */
 function Escrever({ atende, salvando, aoEnviar }: {
   atende: boolean; salvando: boolean;
   aoEnviar: (texto: string, interno: boolean) => Promise<boolean>;
@@ -596,9 +760,9 @@ function Escrever({ atende, salvando, aoEnviar }: {
   const aberta = foco || t.length > 0;
   const sobra = teto - t.length;
   return (
-    <div className={aberta ? 'dm-card dm-escrever dm-aberta' : 'dm-card dm-escrever'}>
+    <div className={aberta ? 'dm-escrever dm-aberta' : 'dm-escrever'}>
       <Campo rot="Escrever alguma coisa">
-        <textarea value={t} maxLength={teto} placeholder="Escrever…" rows={1}
+        <textarea value={t} maxLength={teto} placeholder="Escrever um comentário…" rows={1}
           onFocus={() => setFoco(true)} onBlur={() => setFoco(false)}
           onChange={e => setT(e.target.value)} />
       </Campo>
@@ -637,15 +801,15 @@ function Recados({ d, base, eu }: { d: Vista['demanda']; base: string; eu: Vista
   const zap = linkZap(alvo.tel, texto);
   if (!zap && !alvo.nome) return null;
   return (
-    <div className="dm-painel-secao">
-      <div className="dm-rot" style={{ marginBottom: 'var(--dm-e1)' }}>Avisar {alvo.quem}</div>
-      <div className="dm-painel-acoes">
+    <div className="dm-recados">
+      <h3 className="dm-painel-titulo">Avisar {alvo.quem}</h3>
+      <div className="dm-grade">
         {zap
           ? <a className="dm-btn dm-zap dm-larga" href={zap} target="_blank" rel="noopener noreferrer">
-              WhatsApp para {alvo.nome.split(' ')[0]}
+              <Icone nome="mensagem" />WhatsApp para {alvo.nome.split(' ')[0]}
             </a>
           : <span className="dm-peq dm-mudo">{alvo.nome || 'Essa pessoa'} não tem telefone cadastrado.</span>}
-        <Copiar texto={texto} rot="Copiar o recado" classe="dm-btn dm-txt dm-larga" />
+        <Copiar texto={texto} rot="Copiar o recado" classe="dm-btn dm-larga" />
       </div>
     </div>
   );
@@ -661,80 +825,78 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
   const [motivo, setMotivo] = useState<'informacao' | 'aprovacao' | 'terceiros'>('informacao');
   const [prazo, setPrazo] = useState(d.prazo || '');
   const [prio, setPrio] = useState(d.prioridade);
-  const [setor, setSetor] = useState(d.setor_responsavel_id);
+  /* começa sem escolha: começava no setor de hoje, com "Mandar" ativo, e um
+     toque sem mudar nada tirava o dono da demanda (o banco aceita mandar
+     para o mesmo setor, e zera o responsável) */
+  const [setor, setSetor] = useState('');
   const [url, setUrl] = useState('');
   const [urlErro, setUrlErro] = useState('');
   const [atraso, setAtraso] = useState('');
 
   if (!aberto || aberto === 'comentar') return null;
-  /* o "Deixa pra lá" mora no topo do painel e da folha; aqui só o que a ação
+  /* o "Voltar" mora no topo do painel e da folha; aqui só o que a ação
      precisa */
-  const fecha = null;
 
   if (aberto === 'concluir') {
-    /* `HOJE()` E NAO `toISOString()` — 22/09/2026.
+    /* `HOJE()` E NAO `toISOString()` — 22/09/2026: das 21h do Rio a
+       meia-noite a tela pedia motivo de atraso de uma demanda que vence HOJE.
 
-       `new Date().toISOString()` e SEMPRE UTC. Das 21h do Rio a meia-noite a
-       tela pedia motivo de atraso de uma demanda que vence HOJE. O servidor
-       usa `demandas.hoje()`, que e o dia do Rio; `HOJE()` e o mesmo remedio
-       deste lado, e ja estava neste arquivo para outras contas. */
+       "OPCIONAL" ERA MENTIRA, E RECUSAVA TODA CONCLUSAO ATRASADA:
+       `supabase/86` recusa concluir sem `atraso` quando o prazo ja passou
+       (`ATRASO_PRECISA_MOTIVO`). O campo e obrigatorio quando aparece, e o
+       botao so liga com os dois. */
     const tarde = !!d.prazo && d.prazo < HOJE();
-    /* "OPCIONAL" ERA MENTIRA, E RECUSAVA TODA CONCLUSAO ATRASADA.
-
-       `supabase/86` recusa concluir sem `atraso` quando o prazo ja passou:
-       `ATRASO_PRECISA_MOTIVO`. O campo aparecia JUSTAMENTE porque a demanda
-       esta atrasada, dizia "Opcional", e o botao ficava habilitado so com a
-       conclusao preenchida. Toda conclusao atrasada era recusada uma vez.
-
-       O "Deixa pra la" tambem sumia quando `tarde`, porque o `extra` e um so:
-       era ou o campo ou o botao de fechar. Agora sao os dois. */
     return (
       <CaixaDeAcao rot="O que foi feito" botao="Concluir" salvando={indo} teto={tetoDe('concluir')}
         dica="A conclusão precisa dizer o que foi realizado. É o que quem pediu vai ler."
         podeEnviar={!tarde || !!atraso.trim()}
         extra={tarde ? (
-          <>
-            <Campo rot="Por que atrasou"
-              ajuda="Obrigatório: esta demanda passou do prazo, e o servidor não conclui sem isto.">
-              <input value={atraso} maxLength={tetoDe('atraso')}
-                onChange={e => setAtraso(e.target.value)} />
-            </Campo>
-            {fecha}
-          </>
-        ) : fecha}
+          <Campo rot="Por que atrasou"
+            ajuda="Obrigatório: esta demanda passou do prazo, e o servidor não conclui sem isto.">
+            <input value={atraso} maxLength={tetoDe('atraso')}
+              onChange={e => setAtraso(e.target.value)} />
+          </Campo>
+        ) : null}
         aoEnviar={t => agir('concluir', { texto: t, atraso })} />
     );
   }
   if (aberto === 'travar') {
     return (
-      <div className="dm-card">
+      <div className="dm-acao-form">
         {/* O SELETOR OFERECIA UMA TRAVA QUE O SERVIDOR RECUSA — 22/09/2026.
-
-            `supabase/85` recusa `motivo = 'aprovacao'` quando a demanda JA foi
-            aprovada e quem pede nao e lideranca: `SO_GESTOR_REABRE_APROVACAO`.
-            Estado normalissimo — demanda aprovada, em execucao, quem atende
-            quer devolver para a lideranca. `acoesDe` nao tem como cobrir, ela
-            decide por ACAO e nunca por motivo. Quem cobre e o seletor. */}
-        <Campo rot="Por que está travada">
-          <select value={motivo} onChange={e => setMotivo(e.target.value as never)}>
-            {TRAVAS.filter(t => t.v !== 'aprovacao'
-                             || d.aprovacao !== 'aprovada'
-                             || quemManda(eu.papel))
-                   .map(t => <option key={t.v} value={t.v}>{t.rot}</option>)}
-          </select>
-        </Campo>
+            `supabase/85` recusa `motivo = 'aprovacao'` quando a demanda JA
+            foi aprovada e quem pede nao e lideranca
+            (`SO_GESTOR_REABRE_APROVACAO`). `acoesDe` decide por ACAO e nunca
+            por motivo; quem cobre e o seletor. */}
+        {/* TRÊS OPÇÕES EMPILHADAS, E NÃO UM SELECT: "Aguardando informações
+            de quem pediu" não cabia fechado em nenhuma largura de painel
+            (270px de texto em 198 a 250), e a regra da casa é botão para
+            poucas opções (ver `Opcoes`) */}
+        <Bloco rot="Por que está travada">
+          <Opcoes rot="Por que está travada" valor={motivo} empilhadas
+            opcoes={TRAVAS.filter(t => t.v !== 'aprovacao'
+                                   || d.aprovacao !== 'aprovada'
+                                   || quemManda(eu.papel))
+                         .map(t => ({ v: t.v, rot: t.rot }))}
+            aoMudar={v => setMotivo(v)} />
+        </Bloco>
         <CaixaDeAcao rot="O que falta, exatamente" botao="Travar" salvando={indo}
           teto={tetoDe('travar')}
           dica="Quem pediu vai ler isto. Seja específico: “qual sala?” resolve; “falta informação” não."
-          extra={fecha}
           aoEnviar={t => agir('travar', { motivo, texto: t })} />
       </div>
     );
   }
   if (aberto === 'destravar') {
+    /* QUEM PEDIU RESPONDE, E A RESPOSTA É O QUE DESTRAVA — 23/09/2026. O
+       formulário deixava "Destravar" ligado com a caixa vazia: a demanda
+       andava sem a informação que a equipe pediu. Para quem pediu, a
+       resposta é obrigatória e o botão diz o que faz; quem atende pode
+       destravar sem texto (a resposta pode ter chegado por outro caminho) */
+    const responde = !!(eu.pede ?? eu.abriu) && d.travada_por === 'informacao';
     return (
-      <CaixaDeAcao rot={eu.abriu ? 'A sua resposta' : 'O que destravou'} botao="Destravar"
-        salvando={indo} exigeTexto={false} extra={fecha} teto={tetoDe('destravar')}
+      <CaixaDeAcao rot={responde ? 'A sua resposta' : 'O que destravou'} botao={responde ? 'Enviar resposta' : 'Destravar'}
+        salvando={indo} exigeTexto={responde} teto={tetoDe('destravar')}
         aoEnviar={t => agir('destravar', { texto: t })} />
     );
   }
@@ -742,107 +904,93 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
     return (
       <CaixaDeAcao rot="Por que cancelar" botao="Cancelar a demanda" tom="perigo" salvando={indo} teto={tetoDe('cancelar')}
         dica="Fica no histórico. Cancelar sem motivo é perder a informação de por que não foi feito."
-        extra={fecha} aoEnviar={t => agir('cancelar', { texto: t })} />
+        aoEnviar={t => agir('cancelar', { texto: t })} />
     );
   }
   if (aberto === 'reabrir') {
     return (
       <CaixaDeAcao rot="O que não ficou resolvido" botao="Reabrir" salvando={indo} teto={tetoDe('reabrir')}
-        dica="A demanda volta para execução com o histórico inteiro." extra={fecha}
+        dica="A demanda volta para execução com o histórico inteiro."
         aoEnviar={t => agir('reabrir', { texto: t })} />
     );
   }
   if (aberto === 'aprovar') {
     return (
       <CaixaDeAcao rot="Observação da aprovação" botao="Aprovar" salvando={indo} exigeTexto={false} teto={tetoDe('aprovar')}
-        dica="Depois disto o setor responsável pode começar." extra={fecha}
+        dica="Depois disto o setor responsável pode começar."
         aoEnviar={t => agir('aprovar', { texto: t })} />
     );
   }
   if (aberto === 'rejeitar') {
     return (
       <CaixaDeAcao rot="Por que não aprovar" botao="Recusar" tom="perigo" salvando={indo} teto={tetoDe('rejeitar')}
-        dica="A demanda é encerrada com este motivo, e quem pediu lê." extra={fecha}
+        dica="A demanda é encerrada com este motivo, e quem pediu lê."
         aoEnviar={t => agir('rejeitar', { texto: t })} />
     );
   }
   if (aberto === 'prazo') {
-    /* BECO SEM SAIDA GARANTIDO — 22/09/2026.
-
-       `supabase/86` recusa tirar o prazo sem motivo: `SEM_PRAZO_PRECISA_MOTIVO`,
-       que a tela traduz como "Para tirar o prazo, diga por que". So que aqui
-       nao havia NENHUM campo de texto, entao nao havia onde dizer.
-
-       E nao era caso de borda: `prazo` nasce com `d.prazo || ''`, entao numa
-       demanda SEM prazo bastava abrir o formulario e tocar em Gravar, sem ter
-       mexido em nada, para cair no erro sem saida.
-
-       `/demandas/nova` ja tinha o par "Nao tenho data" + "Por que nao tem
-       data". Esta tela nao tinha recebido o par. */
-    const tirando = !prazo;
+    /* BECO SEM SAIDA GARANTIDO — 22/09/2026: `supabase/86` recusa tirar o
+       prazo sem motivo (`SEM_PRAZO_PRECISA_MOTIVO`), e aqui nao havia onde
+       dizer. Com o campo vazio, a caixa do porque aparece. */
+    /* "tirar a data" só existe quando havia data: numa demanda sem data, o
+       campo vazio é o começo, e não um pedido para tirar */
+    const tirando = !prazo && !!d.prazo;
     return (
-      <div className="dm-card">
+      <div className="dm-acao-form">
         <Campo rot="Novo prazo"
-          ajuda="Deixe em branco para tirar a data. O registro retroativo é aceito: data no passado vale.">
-          {/* SEM `min`: a 89 deixou registrado por que. O servidor aceita data
-              no passado DE PROPOSITO ("a lampada queimou semana passada, poe
-              ai"), e no seletor nativo do celular a roda nao desce abaixo do
-              `min` — nao existe "digitar". */}
+          ajuda={d.prazo ? 'Deixe em branco para tirar a data. Pode ser uma data no passado.' : 'Pode ser uma data no passado.'}>
+          {/* SEM `min`: o servidor aceita data no passado DE PROPOSITO, e no
+              seletor nativo do celular a roda nao desce abaixo do `min`. */}
           <input type="date" value={prazo} onChange={e => setPrazo(e.target.value)} />
         </Campo>
         {tirando ? (
-          <CaixaDeAcao rot="Por que fica sem data" botao="Gravar sem data" salvando={indo}
-            teto={tetoDe('sem_prazo')} extra={fecha}
+          <CaixaDeAcao rot="Por que fica sem data" botao="Salvar sem data" salvando={indo}
+            teto={tetoDe('sem_prazo')}
             dica="“Não sei quando” serve. O que não serve é sumir com a data sem dizer nada."
             aoEnviar={t => agir('prazo', { prazo: '', texto: t })} />
         ) : (
-          <div className="dm-linha">
-            <button className="dm-btn dm-pri dm-cresce" disabled={indo}
-              onClick={() => agir('prazo', { prazo })}>Gravar</button>
-            {fecha}
-          </div>
+          /* "Salvar" só quando mudou, como no Perfil e na ficha da pessoa */
+          <button type="button" className="dm-btn dm-pri dm-larga" disabled={indo || prazo === (d.prazo || '')}
+            onClick={() => agir('prazo', { prazo })}>Salvar</button>
         )}
       </div>
     );
   }
   if (aberto === 'prioridade') {
     return (
-      <div className="dm-card">
-        <Campo rot="Prioridade" ajuda={PRIORIDADES.find(p => p.v === prio)?.explica}>
-          <select value={prio} onChange={e => setPrio(e.target.value as never)}>
-            {PRIORIDADES.map(p => <option key={p.v} value={p.v}>{p.rot}</option>)}
-          </select>
-        </Campo>
+      <div className="dm-acao-form">
+        {/* os quatro botões da Nova, e não um select: o mesmo campo com o
+            mesmo desenho nas duas telas */}
+        <Bloco rot="Prioridade" ajuda={PRIORIDADES.find(p => p.v === prio)?.explica}>
+          <Opcoes rot="Prioridade" valor={prio}
+            opcoes={PRIORIDADES.map(p => ({ v: p.v, rot: p.rot }))}
+            aoMudar={v => setPrio(v)} />
+        </Bloco>
         {prio === 'urgente' ? (
-          <CaixaDeAcao rot="O que acontece se não for feito" botao="Gravar" salvando={indo} extra={fecha}
+          <CaixaDeAcao rot="O que acontece se não for feito" botao="Salvar" salvando={indo}
             teto={tetoDe('prioridade')}
             aoEnviar={t => agir('prioridade', { prioridade: prio, texto: t })} />
         ) : (
-          <div className="dm-linha">
-            <button className="dm-btn dm-pri dm-cresce" disabled={indo}
-              onClick={() => agir('prioridade', { prioridade: prio })}>Gravar</button>
-            {fecha}
-          </div>
+          <button type="button" className="dm-btn dm-pri dm-larga" disabled={indo || prio === d.prioridade}
+            onClick={() => agir('prioridade', { prioridade: prio })}>Salvar</button>
         )}
       </div>
     );
   }
   if (aberto === 'redirecionar') {
     return (
-      <div className="dm-card">
-        <Campo rot="Qual setor vai atender" ajuda="Só aparecem os setores que recebem demanda.">
+      <div className="dm-acao-form">
+        <Campo rot="Qual setor vai atender" ajuda="Só aparecem os outros setores que recebem demanda.">
           <select value={setor} onChange={e => setSetor(e.target.value)}>
-            {(b?.setores || []).filter(s => s.atende).map(s => (
+            <option value="">Escolha o setor</option>
+            {(b?.setores || []).filter(s => s.atende && s.id !== d.setor_responsavel_id).map(s => (
               <option key={s.id} value={s.id}>{s.nome}</option>
             ))}
           </select>
         </Campo>
-        <div className="dm-linha">
-          <button className="dm-btn dm-pri dm-cresce" disabled={indo} onClick={() => agir('redirecionar', { setor })}>
-            Mandar
-          </button>
-          {fecha}
-        </div>
+        <button type="button" className="dm-btn dm-pri dm-larga" disabled={indo || !setor} onClick={() => agir('redirecionar', { setor })}>
+          Mandar
+        </button>
       </div>
     );
   }
@@ -858,17 +1006,13 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
       agir('anexar', { url: u, nome: u.split('/').pop() });
     };
     return (
-      <div className="dm-card">
-        <Campo rot="Link do arquivo" ajuda={dicaDeAnexo(b?.anexos)}>
+      <div className="dm-acao-form">
+        <Campo rot="Link do arquivo" ajuda={dicaDeAnexo(b?.anexos)} erro={urlErro || undefined}>
           <input value={url} placeholder="https://…" inputMode="url"
             aria-invalid={urlErro ? true : undefined}
             onChange={e => { setUrl(e.target.value); setUrlErro(''); }} />
         </Campo>
-        {urlErro ? <p className="dm-peq dm-erro-campo" role="alert">{urlErro}</p> : null}
-        <div className="dm-linha">
-          <button className="dm-btn dm-pri dm-cresce" disabled={indo || !url.trim()} onClick={juntar}>Juntar</button>
-          {fecha}
-        </div>
+        <button type="button" className="dm-btn dm-pri dm-larga" disabled={indo || !url.trim()} onClick={juntar}>Juntar</button>
       </div>
     );
   }
@@ -899,35 +1043,42 @@ function Acompanham({ v, indo, agir, sair }: {
   const pode = !!v.eu.inclui;
   if (!ps.length && !pode) return null;
   return (
-    <div className="dm-acompanha-bloco">
+    <Secao titulo="Quem acompanha"
+      acoes={pode ? (
+        /* o gatilho não muda de nome ao abrir: era "Fechar" em cima e
+           "Voltar" embaixo, duas palavras para fechar o mesmo
+           formulário. Tocar de novo recolhe (`aria-expanded` diz o estado) */
+        <button type="button" className="dm-btn dm-txt dm-peq" aria-expanded={abrindo}
+          onClick={() => setAbrindo(x => !x)}>
+          <Icone nome="nova" />Incluir alguém
+        </button>
+      ) : null}>
       <div className="dm-acompanha">
-        <span className="dm-rot">Quem acompanha</span>
         {ps.length ? ps.map(p => (
-          <span key={p.id} className="dm-linha" style={{ gap: 4 }}>
-            {p.nome}{p.eu ? ' (você)' : ''}
+          <span key={p.id} className="dm-chip">
+            <span className="dm-avatar dm-mini" aria-hidden="true">{iniciais(p.nome)}</span>
+            <span>{p.nome}{p.eu ? ' (você)' : ''}</span>
             {pode || p.eu ? (
-              <button className="dm-btn dm-txt dm-mini" disabled={indo}
+              <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo}
                 onClick={async () => {
                   const deu = await agir('tirar', { membro_id: p.id });
                   if (deu && p.eu && !v.eu.abriu && !v.eu.atende) sair();
-                }}>{p.eu ? 'sair' : 'tirar'}</button>
+                }}>{p.eu ? 'Sair' : 'Tirar'}</button>
             ) : null}
           </span>
         )) : <span className="dm-mudo">Só quem pediu e quem atende.</span>}
-        {pode ? (
-          <button type="button" className="dm-btn dm-txt dm-mini" aria-expanded={abrindo}
-            onClick={() => setAbrindo(x => !x)}>{abrindo ? 'Fechar' : <span className="dm-seta">Incluir alguém</span>}</button>
-        ) : null}
       </div>
       {pode && abrindo ? (
-        <form className="dm-card" onSubmit={async e => {
+        <form className="dm-caixa dm-acompanha-form" onSubmit={async e => {
           e.preventDefault();
           if (await agir('incluir', { quem: quem.trim() })) { setQuem(''); setAbrindo(false); }
         }}>
-          <Opcoes rot="Incluir pelo" valor={por}
-            opcoes={[{ v: 'tel', rot: 'WhatsApp' }, { v: 'email', rot: 'E-mail' }]}
-            aoMudar={x => { setPor(x); setQuem(''); }} />
-          <div style={{ marginTop: 'var(--dm-e2)' }}>
+          <div className="dm-caixa-corpo">
+            <Bloco rot="Incluir pelo">
+              <Opcoes rot="Incluir pelo" valor={por}
+                opcoes={[{ v: 'tel', rot: 'WhatsApp' }, { v: 'email', rot: 'E-mail' }]}
+                aoMudar={x => { setPor(x); setQuem(''); }} />
+            </Bloco>
             <Campo rot={por === 'tel' ? 'WhatsApp da pessoa' : 'E-mail da pessoa'} classe="dm-curto"
               ajuda="Só quem já tem cadastro. Ela passa a ver esta demanda.">
               {por === 'tel'
@@ -935,12 +1086,12 @@ function Acompanham({ v, indo, agir, sair }: {
                 : <input key="email" type="email" inputMode="email" value={quem} onChange={e => setQuem(e.target.value)} autoComplete="off" />}
             </Campo>
           </div>
-          <div className="dm-linha">
+          <div className="dm-caixa-pe">
+            <button type="button" className="dm-btn dm-txt" onClick={() => setAbrindo(false)}>Voltar</button>
             <button className="dm-btn dm-pri" disabled={indo || !quem.trim()}>Incluir</button>
-            <button type="button" className="dm-btn dm-txt" onClick={() => setAbrindo(false)}>Deixa pra lá</button>
           </div>
         </form>
       ) : null}
-    </div>
+    </Secao>
   );
 }

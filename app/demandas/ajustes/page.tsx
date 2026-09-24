@@ -16,17 +16,17 @@
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Porta } from '@/components/demandas/Porta';
 
 export default function Ajustes() {
   const router = useRouter();
   useEffect(() => { router.replace('/demandas/admin'); }, [router]);
   return (
-    <div className="dm">
-      <div className="dm-corpo">
-        <p className="dm-peq dm-mudo">
-          Os ajustes agora ficam na <Link href="/demandas/admin">Administração</Link>.
-        </p>
-      </div>
-    </div>
+    <Porta>
+      <h1>Os ajustes mudaram de lugar</h1>
+      <p className="dm-auth-sub">
+        Agora eles ficam na <Link href="/demandas/admin">Administração</Link>. Levando você para lá…
+      </p>
+    </Porta>
   );
 }
