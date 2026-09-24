@@ -742,15 +742,97 @@ export function agruparAvisos(itens: AvisoDentro[]): GrupoDeAvisos[] {
   return [...m.values()];
 }
 
-/* "assumiu" e "mudou de Aberta para Em execução" no mesmo instante são um
-   gesto só: a segunda linha some quando está colada na primeira */
-export function semRepetir(itens: AvisoDentro[]): AvisoDentro[] {
-  const ms = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
-  return itens.filter((e, i) => {
-    if (!(e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao')) return true;
-    return ![itens[i - 1], itens[i + 1]].some(o => o && o.tipo === 'responsavel' && o.quem === e.quem
-      && Math.abs(ms(o) - ms(e)) < 5000);
-  });
+/* UM GESTO, UMA LINHA — 24/09/2026 (auditoria R11).
+
+   O gatilho do banco (`fn_historico`) escreve um fato por COLUNA que mudou,
+   e `dem_mover` escreve o comentário do gesto. A tela contava o que o banco
+   fez, e não o que a pessoa fez: aprovar virava "destravou a demanda" e
+   "marcou a aprovação como aprovada"; recusar, "cancelou" e "marcou a
+   aprovação como rejeitada", com o motivo duas vezes; reabrir, quatro
+   linhas, uma delas "Pedro: atraso", o tipo cru; mandar para outro setor,
+   três. Só "assumir" já era uma linha (22/09).
+
+   Aqui os fatos da MESMA pessoa no MESMO instante (5 s; o banco carimba o
+   gesto inteiro com o mesmo `now()`) viram o gesto, com o verbo do botão:
+   aprovou, recusou, reabriu (com o porquê), mandou para outro setor,
+   assumiu, destravou (com a resposta). O que o gesto já diz sai: a mudança
+   de status, o responsável que ficou vazio, o motivo de atraso apagado. A
+   ficha e os Avisos usam esta mesma função, e a frase de cada linha continua
+   sendo `fraseDoEvento`. */
+type Fato = { tipo: string; de: string | null; para: string | null; quem: string | null; em: string; texto?: string | null };
+export function umGestoUmaLinha<E extends Fato>(fatos: E[]): (E & { marcoAbsorvido?: boolean })[] {
+  const ms = (e: Fato) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
+  const saida: (E & { marcoAbsorvido?: boolean })[] = [];
+  for (let i = 0; i < fatos.length;) {
+    let j = i + 1;
+    while (j < fatos.length && fatos[j].quem === fatos[i].quem && Math.abs(ms(fatos[j]) - ms(fatos[i])) < 5000) j++;
+    saida.push(...juntarOGesto(fatos.slice(i, j)));
+    i = j;
+  }
+  return saida;
+}
+
+function juntarOGesto<E extends Fato>(g: E[]): (E & { marcoAbsorvido?: boolean })[] {
+  const acha = (f: (e: E) => boolean) => g.find(f);
+  const fora = new Set<E>();
+  const muda = new Map<E, { texto?: string | null; tipo?: string; marcoAbsorvido?: boolean }>();
+  const status = acha(e => e.tipo === 'status');
+  const coment = acha(e => e.tipo === 'comentario');
+  const aprov = acha(e => e.tipo === 'aprovacao');
+  const reab = acha(e => e.tipo === 'reabertura');
+  const setor = acha(e => e.tipo === 'setor');
+  const assumiu = acha(e => e.tipo === 'responsavel' && !!e.para && e.para === e.quem);
+  /* o motivo de atraso apagado no reabrir não é gesto de ninguém */
+  for (const e of g) if (e.tipo === 'atraso') fora.add(e);
+  /* tirar um anexo é "tirou", e o texto é só o nome */
+  for (const e of g) {
+    if (e.tipo === 'anexo' && /^Tirou o anexo: /.test(e.texto || '')) {
+      muda.set(e, { tipo: 'anexo_tirado', texto: (e.texto || '').replace(/^Tirou o anexo: /, '') });
+    }
+  }
+  if (aprov && (aprov.para === 'aprovada' || aprov.para === 'rejeitada')) {
+    /* aprovou / recusou: a demanda andou (ou foi cancelada) por causa disso,
+       e o status do mesmo instante não é outra linha. O motivo da recusa é o
+       da aprovação; o do status repete com "Aprovação recusada:" na frente */
+    const doStatus = status?.texto ? status.texto.replace(/^Aprova[çc][ãa]o recusada:\s*/i, '') : null;
+    muda.set(aprov, { texto: aprov.texto || doStatus, marcoAbsorvido: true });
+    if (status) fora.add(status);
+  } else if (aprov && aprov.para === 'pendente' && status && status.para === 'travada') {
+    /* travar por aprovação: "travou a demanda" (com a pergunta) já diz */
+    fora.add(aprov);
+  }
+  if (reab) {
+    /* o porquê do reabrir chega como comentário do mesmo instante */
+    muda.set(reab, { texto: coment?.texto ?? reab.texto ?? null, marcoAbsorvido: true });
+    if (status) fora.add(status);
+    if (coment) fora.add(coment);
+  }
+  if (setor) {
+    /* mandar para outro setor solta o responsável e volta a demanda para
+       Aberta: "mandou de Comunicação para Manutenção" diz as três coisas */
+    if (status) { fora.add(status); muda.set(setor, { ...(muda.get(setor) || {}), marcoAbsorvido: true }); }
+    for (const e of g) if (e.tipo === 'responsavel' && !e.para) fora.add(e);
+  }
+  if (assumiu && status && status.para === 'execucao' && !aprov && !reab && !setor) {
+    fora.add(status);
+    muda.set(assumiu, { marcoAbsorvido: true });
+  }
+  if (status && !fora.has(status) && status.de === 'travada' && (status.para === 'execucao' || status.para === 'aberta')
+      && coment && !reab) {
+    /* destravar com resposta: a resposta é o texto da linha "destravou" */
+    muda.set(status, { texto: coment.texto ?? null });
+    fora.add(coment);
+  }
+  return g.filter(e => !fora.has(e)).map(e => ({ ...e, ...(muda.get(e) || {}) }));
+}
+
+/* o valor que o gatilho escreve (`to_char` com o separador do servidor) em
+   reais, do jeito daqui */
+function reais(v: string | null): string {
+  const t = (v || '').trim();
+  if (!t) return '';
+  const n = /,\d{2}$/.test(t) ? Number(t.replace(/\./g, '').replace(',', '.')) : Number(t.replace(/,/g, ''));
+  return Number.isFinite(n) ? dinheiro(n) : t;
 }
 
 /* O LINK DE CADASTRO DE CADA SETOR — 23/09/2026.
@@ -912,7 +994,7 @@ const PORBANCO: Record<string, string> = {
      encostava. Com `PORBANCO` tendo precedência, ela não chega mais lá. */
   SEM_PERMISSAO_DB: 'Você não tem permissão para isso neste setor. Fale com quem administra as demandas.',
   SEM_SISTEMA: 'O sistema de demandas ainda não foi instalado neste ambiente.',
-  SO_GESTOR: 'Só a liderança aprova ou recusa.',
+  SO_GESTOR: 'Só a gestão aprova ou recusa.',
   SO_ADMIN: 'Só quem administra o sistema mexe aqui.',
   FALTA_APROVACAO: 'Esta demanda ainda espera aprovação.',
   NAO_ESTA_PENDENTE: 'Esta demanda não está esperando aprovação.',
@@ -931,7 +1013,7 @@ const PORBANCO: Record<string, string> = {
   /* ---- o vocabulário que nasceu nas migrações 84 a 87 ------------------
      Cada uma destas linhas é a diferença entre a pessoa saber o que fazer e
      a pessoa ver uma palavra em MAIÚSCULA que não quer dizer nada para ela. */
-  SO_GESTOR_REABRE_APROVACAO: 'Esta demanda já foi aprovada. Devolver para aprovação é decisão da liderança.',
+  SO_GESTOR_REABRE_APROVACAO: 'Esta demanda já foi aprovada. Devolver para aprovação é decisão da gestão.',
   JA_TEM_DONO: 'Outra pessoa assumiu esta demanda primeiro.',
   PRAZO_NAO_VEIO: 'Escolha a nova data, ou diga que não vai ter data.',
   PRAZO_INVALIDO: 'Essa data não existe. Use o seletor de data.',
@@ -967,7 +1049,7 @@ const PORBANCO: Record<string, string> = {
   ACAO_DESCONHECIDA: 'Não sei fazer isso.',
   FALTA_CAMPO: 'Falta preencher um campo obrigatório.',
   /* ---- migração 91: a etapa 5 do PDF ----------------------------------- */
-  SO_QUEM_PEDIU: 'Quem confirma que resolveu é quem pediu, ou a liderança.',
+  SO_QUEM_PEDIU: 'Quem confirma que resolveu é quem pediu, ou a gestão.',
   NAO_ESTA_CONCLUIDA: 'Só dá para confirmar depois que a demanda for concluída.',
   JA_VALIDADA: 'Esta demanda já foi confirmada.',
   /* ---- os dois que o próprio `api.ts` produz e ninguém traduzia --------
@@ -1279,7 +1361,9 @@ export const MOTIVOS: Record<string, string> = {
 /* `eu` é o nome de quem olha: a ficha dizia "Quem pediu: Você" na faixa e
    "Pedro abriu a demanda" na atividade, para o próprio Pedro. Com o nome, o
    gesto dele é "Você abriu a demanda", e o que fizeram com ele, "passou
-   para você". Os Avisos não passam `eu`: lá só entra o que OUTRA pessoa fez. */
+   para você". Os Avisos também passam (24/09/2026): lá só entra o que OUTRA
+   pessoa fez, mas o que fizeram COM quem lê é "incluiu você", e não
+   "incluiu Rafael" para o próprio Rafael. */
 export function fraseDoEvento(e: { tipo: string; de: string | null; para: string | null; quem: string | null },
                               eu?: string | null): string {
   const souEu = (n: string | null) => !!eu && !!n && n === eu;
@@ -1307,9 +1391,16 @@ export function fraseDoEvento(e: { tipo: string; de: string | null; para: string
     case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
     case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
     case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
-    case 'aprovacao':   return `${q} marcou a aprovação como ${e.para}`;
+    /* o verbo do botão ("Recusar"), e não a palavra da coluna ("rejeitada") */
+    case 'aprovacao':
+      if (e.para === 'aprovada') return `${q} aprovou`;
+      if (e.para === 'rejeitada') return `${q} recusou`;
+      return `${q} mandou para aprovação`;
     case 'reabertura':  return `${q} reabriu`;
     case 'anexo':       return `${q} juntou um anexo`;
+    case 'anexo_tirado': return `${q} tirou um anexo`;
+    case 'orcamento':
+      return e.de ? `${q} mudou o orçamento de ${reais(e.de)} para ${reais(e.para)}` : `${q} informou o orçamento: ${reais(e.para)}`;
     case 'comentario':  return `${q} escreveu`;
     /* "confirmou que resolveu" e não "validou": a palavra do PDF é de
        processo, e quem lê esta linha é a pessoa que pediu. */
@@ -1381,6 +1472,29 @@ export function nomesDosSites(sites: readonly string[]): string[] {
   return [...new Set(sites.map(nomeDoSite))];
 }
 
+/* O NOME DO ANEXO A PARTIR DO LINK — 24/09/2026 (auditoria R11). A ficha
+   mandava o fim cru do link ("view?usp=sharing") e a Nova, o fim do caminho
+   ("view"): o banco juntava o site e a seção Anexos enchia de
+   "view?usp=sharing · drive.google.com". Agora as duas usam esta: o nome do
+   arquivo quando o link tem um (arte-final.png); nos serviços conhecidos,
+   cujo caminho é código (o Drive, o Docs), o nome do serviço; fora deles, o
+   fim do caminho sem a busca. O banco continua juntando o site (o rótulo
+   carrega o destino, migração 85). */
+export function nomeDoLink(u: string): string {
+  let url: URL;
+  try { url = new URL(String(u ?? '').trim()); } catch { return 'anexo'; }
+  const host = url.hostname.toLowerCase().replace(/^www\./, '');
+  const partes = url.pathname.split('/').filter(Boolean)
+    .map(x => { try { return decodeURIComponent(x); } catch { return x; } });
+  const arquivo = [...partes].reverse().find(x => /\.[a-z0-9]{2,5}$/i.test(x));
+  if (arquivo) return arquivo;
+  const conhecido = NOME_DO_SITE[host] ?? NOME_DO_SITE[url.hostname.toLowerCase()];
+  if (conhecido) return conhecido;
+  const GENERICOS = /^(view|edit|open|preview|sharing|share|present|pub|download|htmlview|embed)$/i;
+  while (partes.length && GENERICOS.test(partes[partes.length - 1])) partes.pop();
+  return partes.pop() || host;
+}
+
 /** A dica curta do campo de anexo: os mais usados primeiro, e quantos mais. */
 export function dicaDeAnexo(regra: RegraDeAnexo | null | undefined): string {
   if (!regra?.restrito) return 'Cole o link do arquivo: Drive, Dropbox, Fotos.';
@@ -1396,3 +1510,7 @@ export function dicaDeAnexo(regra: RegraDeAnexo | null | undefined): string {
 /** O recado de quando a tela já sabe que o site vai ser recusado. */
 export const recadoDeSite = (site: string) =>
   `Links de ${site} não são aceitos como anexo. Use Google Drive, Dropbox, OneDrive ou iCloud.`;
+/** O mesmo recado embaixo do campo, onde a ajuda logo abaixo já diz quais
+    sites entram: a lista repetida duas vezes, uma em cima da outra, era
+    ruído (24/09/2026, auditoria R11). */
+export const recadoDeSiteNoCampo = (site: string) => `Links de ${site} não são aceitos como anexo.`;

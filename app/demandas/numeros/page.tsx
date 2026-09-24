@@ -63,13 +63,18 @@ function Painel() {
 
   useEffect(() => { buscar(); }, [buscar]);
 
-  if (eu && eu.papel === 'solicitante') {
+  /* QUEM NÃO ATENDE NÃO TEM NÚMEROS, E A TELA DIZ ISSO SEM ALARME —
+     24/09/2026 (auditoria R11). A guarda cobria só o Membro: a Líder que
+     chegava pelo endereço via "Você não tem permissão para isso" em vermelho
+     e um "Tentar de novo" que nunca funcionaria. */
+  const atende = !!eu && (eu.atende ?? eu.papel !== 'solicitante');
+  if (eu && !atende) {
     return (
       <>
-        <Cabecalho sobre="Atendimento" titulo="Números" />
-        <Aviso tom="info">
-          Esta tela mostra os números de todos os setores, e por isso é de quem coordena.
-          As suas demandas estão no <b>Início</b>.
+        <Cabecalho volta={{ href: '/demandas', rot: 'Início' }} sobre="Números" titulo="Os números são de quem atende" />
+        <Aviso>
+          Esta tela mostra o atendimento de todos os setores, e por isso é de quem atende ou coordena.
+          As suas demandas{eu.papel === 'lider' ? ' e as do ministério' : ''} estão no <b>Início</b>.
         </Aviso>
       </>
     );
@@ -140,7 +145,7 @@ function Painel() {
               {/* sem base, "sem dados", e não "0%" (que se lia como "tudo
                   atrasou") */}
               <Kpi rot="No prazo" valor={n.no_prazo_pct === null || !n.no_prazo_base ? 'sem dados' : `${n.no_prazo_pct}%`}
-                sub={n.no_prazo_base ? `de ${n.no_prazo_base} com prazo` : 'nenhuma com prazo'} />
+                sub={n.no_prazo_base ? `de ${n.no_prazo_base} com prazo` : 'nenhuma concluída com prazo'} />
               <Kpi rot="Primeira resposta" valor={horas(n.horas_ate_resposta)} sub="em média" />
               <Kpi rot="Até concluir" valor={horas(n.horas_ate_concluir)} sub="em média" />
             </Kpis>

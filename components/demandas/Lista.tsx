@@ -213,7 +213,10 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
       ) : null}
 
       <div aria-busy={ocupado}>
-        {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 ? (
+        {/* com erro, a lista vazia não é notícia: "Nada esperando você" com o
+            visto verde embaixo de "Sem conexão agora" afirmava o que a tela
+            não sabia (24/09/2026, auditoria R11) */}
+        {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 && erro ? null : itens.length === 0 ? (
           <div className="dm-tabela">
             <Vazio titulo={v.titulo} tom={v.tom ?? tomDoVazio}>
               {v.dica}
@@ -365,6 +368,10 @@ export function Linha({ d, eu, mostrarSetor = true }: { d: Resumo; eu?: Eu | nul
           {/* prioridade é de fila: na demanda que acabou, "Alta" ao lado de
               "Concluída" é ruído */}
           {sit !== 'fechada' ? <Prio p={d.prioridade} /> : null}
+          {/* e a concluída diz se quem pediu já confirmou (24/09/2026, R11:
+              a lista tinha o dado e não o mostrava) */}
+          {/* (na lista do que espera, o "Confirmar" do fim da linha já diz) */}
+          {d.status === 'concluida' && !d.motivo ? <small className="dm-c-confirma">{d.validada_em ? 'confirmada' : 'a confirmar'}</small> : null}
         </span>
         {/* três fatos, não cinco: para quando, com quem está, e o que fazer */}
         <span className={`dm-c-prazo ${sit === 'atrasada' ? 'dm-bad' : ''}`}>

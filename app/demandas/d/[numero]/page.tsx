@@ -20,16 +20,17 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { recadoParaDepois, useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, RascunhoDaCaixa, Secao, useEstreito } from '@/components/demandas/Ui';
 import { Icone, type NomeDoIcone } from '@/components/demandas/Icone';
+import { confirmar } from '@/components/demandas/Confirmar';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
   HOJE, PRIORIDADES, TRAVAS, acoesDe, dataCheia, dataCurta, dataHora, diaNoRio, diasDeAtraso,
   dinheiro, iniciais, linkZap, pedidoPara, primariaDe, quando, quemManda, recado, recadoDoErro,
   rotTrava, situacao, tetoDe, type Acao,
-  fraseDoEvento, dicaDeAnexo, recadoDeSite, siteDoLink, siteRecusado,
+  fraseDoEvento, dicaDeAnexo, nomeDoLink, recadoDeSiteNoCampo, siteDoLink, siteRecusado, umGestoUmaLinha,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
 
@@ -45,6 +46,8 @@ const FORA_DA_GRADE: Acao[] = ['comentar'];
    botão-texto). `cancelar` é ajuste em perigo. A ordem é a de leitura. */
 const PRINCIPAIS: Acao[] = ['aprovar', 'rejeitar', 'assumir', 'concluir', 'travar', 'destravar', 'validar', 'reabrir'];
 const AJUSTES: Acao[] = ['prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
+/* os gestos cuja recusa aparece no próprio bloco, e não no alto da ficha */
+const NO_PROPRIO_BLOCO: (Acao | '')[] = ['comentar', 'incluir', 'tirar'];
 
 /* O TETO DE EVENTOS DA MIGRAÇÃO 93 (200 mais recentes, e `eventos_total` com
    quantos a pessoa poderia ver). Opcional porque um banco na 92 não manda. */
@@ -65,6 +68,12 @@ function Uma() {
   /* a ação aberta (o formulário), ou 'mais' (a folha de ajustes do celular) */
   const [aberto, setAberto] = useState<Acao | 'mais' | ''>('');
   const [indo, setIndo] = useState(false);
+  /* A RECUSA APARECE ONDE FOI O GESTO — 24/09/2026 (auditoria R11). O aviso
+     vermelho morava só no alto da ficha: o comentário recusado dava o aviso
+     1012px acima da tela em 390, e o botão voltava ao normal sem nada mudar
+     à vista. Comentar e quem acompanha mostram a recusa no próprio bloco; os
+     gestos de um toque (assumir, confirmar) levam a tela até o aviso. */
+  const [erroDe, setErroDe] = useState<Acao | ''>('');
   /* celular ou desktop, para o formulário da ação abrir na folha ou no painel */
   const celular = useEstreito(1023);
 
@@ -91,10 +100,17 @@ function Uma() {
   /* DEVOLVE SE DEU CERTO, E ISSO É O QUE SEGURA O TEXTO DA PESSOA: o ramo de
      erro devolve `false`, e a caixa não apaga o que foi escrito. */
   async function agir(acao: Acao, dados: Record<string, unknown> = {}): Promise<boolean> {
-    setIndo(true); setErro('');
+    setIndo(true); setErro(''); setErroDe('');
     const r = await mover(numero, acao, dados);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r, 'salvar')); return false; }
+    if (!r.ok) {
+      setErro(recadoDoErro(r, 'salvar')); setErroDe(acao);
+      if (acao === 'assumir' || acao === 'validar') {
+        requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+          ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+      }
+      return false;
+    }
     setAberto('');
     /* MANDAR PARA OUTRO SETOR TIRA A DEMANDA DE QUEM MANDOU — 23/09/2026.
        Quem atende deixa de vê-la (`pode_ver`), e a ficha recarregava,
@@ -133,28 +149,11 @@ function Uma() {
   }, [v]);
   const eventosDeFora = Math.max(0, (v?.eventos_total ?? 0) - eventos.length);
 
-  /* UM GESTO, UMA LINHA: `assumir` grava o status e o responsável no mesmo
-     instante; "Maria assumiu" já diz as duas coisas. */
-  const linhas = useMemo(() => {
-    const ms = (e: { em: string }) => { const t = Date.parse(e.em); return Number.isNaN(t) ? 0 : t; };
-    const assumiu = (e: typeof eventos[number]) =>
-      e.tipo === 'responsavel' && !!e.para && e.para === e.quem;
-    const abriuExecucao = (e: typeof eventos[number]) =>
-      e.tipo === 'status' && (e.de || 'aberta') === 'aberta' && e.para === 'execucao';
-    const fora = new Set<number>();
-    /* quem absorveu um status vira marco: "Maria assumiu" é a linha que muda
-       o estado da demanda, e o ponto dela tem que dizer isso */
-    const absorveu = new Set<number>();
-    for (let i = 0; i < eventos.length; i++) {
-      if (!abriuExecucao(eventos[i])) continue;
-      for (const j of [i - 1, i + 1]) {
-        const o = eventos[j];
-        if (o && assumiu(o) && o.quem === eventos[i].quem
-            && Math.abs(ms(o) - ms(eventos[i])) < 5000) { fora.add(i); absorveu.add(j); break; }
-      }
-    }
-    return eventos.map((e, i) => ({ ...e, marcoAbsorvido: absorveu.has(i) })).filter((_, i) => !fora.has(i));
-  }, [eventos]);
+  /* UM GESTO, UMA LINHA: os fatos que o banco grava para um gesto só
+     ("assumir" grava o status e o responsável; "recusar", a aprovação e o
+     cancelamento) viram a linha do gesto. A regra mora em `regras.ts`, a
+     mesma dos Avisos. */
+  const linhas = useMemo(() => umGestoUmaLinha(eventos), [eventos]);
 
   /* O PRAZO PEDIDO NO NASCIMENTO, quando o setor mudou a data: o primeiro
      evento `prazo` guarda em `de` o que existia antes. Cala quando o
@@ -189,11 +188,17 @@ function Uma() {
      o teclado era o gesto que apagava o parágrafo. O "Voltar" continua
      fechando, e o rascunho continua lá. */
   const rascunhos = useRef(new Map<string, string>());
+  const chaveDo = (campo?: string) => (campo ? `${aberto}:${campo}` : aberto);
   const guarda = useMemo(() => ({
-    ler: () => rascunhos.current.get(aberto) || '',
-    gravar: (t: string) => { if (t.trim()) rascunhos.current.set(aberto, t); else rascunhos.current.delete(aberto); },
+    ler: (campo?: string) => rascunhos.current.get(chaveDo(campo)) || '',
+    gravar: (t: string, campo?: string) => {
+      if (t.trim()) rascunhos.current.set(chaveDo(campo), t); else rascunhos.current.delete(chaveDo(campo));
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [aberto]);
-  const segurar = useCallback(() => !!aberto && aberto !== 'mais' && !!rascunhos.current.get(aberto), [aberto]);
+  /* qualquer campo escrito do formulário aberto segura o Escape */
+  const segurar = useCallback(() => !!aberto && aberto !== 'mais'
+    && [...rascunhos.current.keys()].some(k => k === aberto || k.startsWith(`${aberto}:`)), [aberto]);
 
   /* e Escape fecha, porque o único jeito de desistir era achar o "Deixa pra
      lá" lá embaixo. Na folha do celular quem fecha é o <dialog>. */
@@ -236,9 +241,17 @@ function Uma() {
      demanda já está com a pessoa (o servidor aceita, como troca de dono, mas
      aqui é ruído), e "Travar" numa demanda já travada (re-travar existe para
      trocar o motivo; o caminho é destravar e travar de novo) */
+  /* quem pediu está olhando: é dele confirmar, e é ele quem responde a trava */
+  const quemPediuOlha = !!(v.eu.pede ?? v.eu.abriu);
+  /* CONFIRMAR O PRÓPRIO TRABALHO NÃO É CONFIRMAÇÃO — 24/09/2026 (auditoria
+     R11). O servidor deixa a gestão confirmar no lugar de quem pediu (o PDF:
+     "o setor solicitante ou responsável pela gestão valida"), e a gestora
+     que executou a demanda via "Resolveu, obrigado" como o passo dela: um
+     toque e quem pediu perdia a vez. Quem executou e não pediu não confirma. */
   const contradiz = (a: Acao) =>
     (a === 'assumir' && !!d.responsavel_id && d.responsavel_id === v.eu.id)
-    || (a === 'travar' && d.status === 'travada');
+    || (a === 'travar' && d.status === 'travada')
+    || (a === 'validar' && !quemPediuOlha && !!d.responsavel_id && d.responsavel_id === v.eu.id);
   const naGrade = acoes.filter(a => !FORA_DA_GRADE.includes(a) && !contradiz(a));
   const primaria = primariaDe(d, naGrade);
   const secundarias = PRINCIPAIS.filter(a => naGrade.includes(a) && a !== primaria);
@@ -273,7 +286,8 @@ function Uma() {
       case 'travar':       return 'Travar';
       case 'destravar':    return (v.eu.pede ?? v.eu.abriu) && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar';
       case 'reabrir':      return 'Reabrir';
-      case 'validar':      return 'Resolveu, obrigado';
+      /* o "obrigado" é de quem pediu; a gestão confirma no lugar dele */
+      case 'validar':      return quemPediuOlha ? 'Resolveu, obrigado' : 'Confirmar pela gestão';
       case 'prazo':        return 'Mudar o prazo';
       case 'prioridade':   return 'Rever a prioridade';
       case 'redirecionar': return 'Mandar para outro setor';
@@ -298,10 +312,24 @@ function Uma() {
   };
   /* assumir e validar gravam direto; as outras abrem o formulário */
   const tocar = (a: Acao) => (a === 'assumir' || a === 'validar' ? agir(a) : setAberto(a));
+  /* a gestão confirmando no lugar de quem pediu pergunta antes: é uma vez
+     só, e quem pediu perde a vez */
+  const tocarPerguntando = async (a: Acao) => {
+    if (a === 'validar' && !quemPediuOlha) {
+      const nome = d.abriu ? d.abriu.split(' ')[0] : 'quem pediu';
+      const sim = await confirmar({
+        titulo: `Confirmar no lugar de ${nome}?`,
+        texto: `A confirmação é de quem pediu. Depois desta, ${nome} não confirma mais.`,
+        acao: 'Confirmar',
+      });
+      if (!sim) return;
+    }
+    tocar(a);
+  };
   const botao = (a: Acao, classe: string) => {
     const ic = classe.includes('dm-txt') ? iconeDe(a) : null;
     return (
-      <button key={a} type="button" className={classe} disabled={indo} onClick={() => tocar(a)}>
+      <button key={a} type="button" className={classe} disabled={indo} onClick={() => tocarPerguntando(a)}>
         {ic ? <Icone nome={ic} /> : null}{rotulo(a)}
       </button>
     );
@@ -312,10 +340,11 @@ function Uma() {
      confirmar. Frase de estado curta, sem ponto, e o passo quando há passo. */
   const estadoDoPainel =
     d.status === 'concluida'
-      ? (primaria === 'validar' ? 'Confirme se resolveu'
+      ? (primaria === 'validar'
+           ? (quemPediuOlha ? 'Confirme se resolveu' : `Esperando ${d.abriu ? d.abriu.split(' ')[0] : 'quem pediu'} confirmar`)
          : `Concluída em ${dataCheia(d.concluida_em)}`)
-    : d.status === 'cancelada' ? 'Cancelada'
-    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua' : 'Parada até a liderança aprovar')
+    : d.status === 'cancelada' ? (d.aprovacao === 'rejeitada' ? 'Recusada pela gestão' : 'Cancelada')
+    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua' : 'Parada até a gestão aprovar')
     /* a trava dita do lado de quem olha, e não a frase do aviso de cima de
        novo (eram três "Esperando informação de quem pediu" na mesma tela) */
     : d.status === 'travada' ? (
@@ -338,16 +367,28 @@ function Uma() {
      resposta dele já destrava; "Destravar" ali é a exceção. Confirmar,
      decidir a aprovação e responder a trava continuam sendo o passo de quem
      olha. */
-  const quemPediuOlha = !!(v.eu.pede ?? v.eu.abriu);
   const esperaQuemPediu = d.status === 'travada' && d.travada_por === 'informacao';
-  const passoDeOutro = primaria !== 'validar'
+  /* e confirmar é o passo de quem pediu: para a gestão é um poder */
+  const passoDeOutro = (primaria === 'validar' && !quemPediuOlha) || (primaria !== 'validar'
     && !(d.falta_aprovacao && (v.eu.aprova ?? quemManda(v.eu.papel)))
     && !(esperaQuemPediu && quemPediuOlha)
-    && ((esperaQuemPediu && !quemPediuOlha) || (!!d.responsavel_id && d.responsavel_id !== v.eu.id));
+    && ((esperaQuemPediu && !quemPediuOlha) || (!!d.responsavel_id && d.responsavel_id !== v.eu.id)));
   const tituloDoPainel = !temBarra ? 'Esta demanda' : passoDeOutro ? 'Ações' : 'Próximo passo';
   /* e o botão cheio é de quem tem o passo: concluir a demanda de outra
      pessoa é um poder raro, e não o convite da tela */
   const cheio = passoDeOutro ? 'dm-btn' : 'dm-btn dm-pri';
+  /* O "NÃO" DA DECISÃO AO LADO DO "SIM" — 24/09/2026 (auditoria R11). No
+     celular a barra era "Mais | Aprovar", e Recusar morava na folha, junto
+     dos ajustes, enquanto o aviso dizia "aprovar ou recusar nesta página".
+     Quando o passo de quem olha é uma decisão (aprovar ou recusar; confirmar
+     ou reabrir), a barra mostra as duas, e o resto desce para o cartão
+     "Esta demanda" em linha. */
+  const par: Acao | null = passoDeOutro ? null
+    : primaria === 'aprovar' && secundarias.includes('rejeitar') ? 'rejeitar'
+    : primaria === 'validar' && secundarias.includes('reabrir') ? 'reabrir' : null;
+  const maisNaBarra = temMais && !par;
+  const outrasNoCartao = soReabrir ? secundarias : par ? secundarias.filter(a => a !== par) : [];
+  const cartaoEmLinha = soAjustes || (!!par && (outrasNoCartao.length > 0 || ajustes.length > 0 || podeAvisar));
 
   /* ---------------------------------------- o painel de ação (desktop) e a folha */
   const painel = aberto && aberto !== 'mais' ? (
@@ -371,7 +412,7 @@ function Uma() {
             {d.status === 'concluida' || d.status === 'cancelada'
               ? 'Já encerrada. Se precisar, escreva aqui embaixo.'
               : d.falta_aprovacao
-                /* o "parada até a liderança aprovar" já é a frase de cima */
+                /* o "parada até a gestão aprovar" já é a frase de cima */
                 ? 'Se precisar, escreva aqui embaixo.'
                 : 'Quem toca é o setor responsável. Se precisar, escreva aqui embaixo.'}
           </p>
@@ -422,7 +463,7 @@ function Uma() {
           {d.reaberturas > 0 ? <span>{d.reaberturas === 1 ? 'reaberta uma vez' : `reaberta ${d.reaberturas} vezes`}</span> : null}
         </>} />
 
-      {erro && !aberto ? <Aviso tom="bad">{erro}</Aviso> : null}
+      {erro && !aberto && !NO_PROPRIO_BLOCO.includes(erroDe) ? <Aviso tom="bad">{erro}</Aviso> : null}
 
       {/* ---------------------------------------------------- o que acontece
 
@@ -436,11 +477,11 @@ function Uma() {
           <b>Aguardando aprovação</b>
           <div className="dm-aviso-mais">
             {d.aprovacao === 'pendente'
-              ? 'A liderança precisa decidir antes de esta demanda andar.'
-              : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a liderança decidir.'}
+              ? 'A gestão precisa decidir antes de esta demanda andar.'
+              : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a gestão decidir.'}
             {(v.eu.aprova ?? quemManda(v.eu.papel))
               ? <> Você pode aprovar ou recusar nesta página.</>
-              : <> Quem decide é a liderança. Não há o que fazer aqui enquanto isso.</>}
+              : <> Quem decide é a gestão. Não há o que fazer aqui enquanto isso.</>}
           </div>
         </Aviso>
       ) : null}
@@ -488,8 +529,14 @@ function Uma() {
       {d.status === 'cancelada' ? (
         /* cinza, como a pílula: cancelada é "não vai andar", e não erro */
         <Aviso>
-          <b>Cancelada</b>
-          {d.cancelada_motivo ? <div className="dm-aviso-mais">{d.cancelada_motivo}</div> : null}
+          {/* a recusa da gestão cancela a demanda; o aviso diz qual das duas
+              foi, e o motivo sai sem o "Aprovação recusada:" que o banco põe */}
+          <b>{d.aprovacao === 'rejeitada' ? 'Cancelada: a gestão recusou a aprovação' : 'Cancelada'}</b>
+          {d.cancelada_motivo ? (
+            <div className="dm-aviso-mais">
+              {d.aprovacao === 'rejeitada' ? d.cancelada_motivo.replace(/^Aprova[çc][ãa]o recusada:\s*/i, '') : d.cancelada_motivo}
+            </div>
+          ) : null}
         </Aviso>
       ) : null}
 
@@ -584,21 +631,23 @@ function Uma() {
             </Secao>
           ) : null}
 
-          <Acompanham v={v} indo={indo} agir={agir} sair={() => router.push('/demandas')} />
+          <Acompanham v={v} indo={indo} agir={agir} sair={() => router.push('/demandas')}
+            erro={erroDe === 'incluir' || erroDe === 'tirar' ? erro : ''} />
 
           {/* no celular, quando não há ação que ande com a demanda, os ajustes
               e os recados ficam num bloco em linha (o mesmo conteúdo do painel
               do desktop), e não numa barra fixa só com "Mais". Antes da
               Atividade: o painel é o contexto de agora, a atividade é o
               registro, e a caixa de escrever continua sendo a última coisa. */}
-          {soAjustes ? (
+          {cartaoEmLinha ? (
             <div className="dm-painel dm-painel-linha dm-so-celular" role="group" aria-label="Esta demanda">
               <div className="dm-painel-bloco">
                 <h3 className="dm-painel-titulo">Esta demanda</h3>
-                {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
-                {soReabrir ? (
+                {/* com a decisão na barra, o estado já está no aviso de cima */}
+                {estadoDoPainel && !par ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
+                {outrasNoCartao.length ? (
                   <div className="dm-painel-acoes">
-                    {secundarias.map(a => botao(a, 'dm-btn dm-larga'))}
+                    {outrasNoCartao.map(a => botao(a, 'dm-btn dm-larga'))}
                   </div>
                 ) : null}
                 {ajustes.length ? (
@@ -653,7 +702,7 @@ function Uma() {
               ) : null}
               {acoes.includes('comentar') ? (
                 <div className="dm-caixa-pe dm-caixa-escrever">
-                  <Escrever atende={v.eu.atende} salvando={indo}
+                  <Escrever atende={v.eu.atende} salvando={indo} erro={erroDe === 'comentar' ? erro : ''}
                     aoEnviar={(texto, interno) => agir('comentar', { texto, interno })} />
                 </div>
               ) : null}
@@ -675,7 +724,8 @@ function Uma() {
               (medido em 23/09/2026). Quando não há "Mais", o único
               secundário toma o lugar dele. */}
           <div className="dm-barra-acao" role="group" aria-label="Ações">
-            {temMais ? (
+            {par ? botao(par, par === 'rejeitar' ? 'dm-btn dm-perigo' : 'dm-btn')
+              : maisNaBarra ? (
               <button type="button" className="dm-btn" disabled={indo} onClick={() => setAberto('mais')}>
                 <Icone nome="mais" />Mais
               </button>
@@ -735,12 +785,12 @@ function haQuanto(iso: string): string {
 const vence = (t: string) => (t.startsWith('em ') || t === 'amanhã' ? `vence ${t}` : t);
 
 /* a linha "Aprovação" da tabela do pedido: "aprovada", "recusada" ou
-   "esperando a liderança decidir". Pendente sem portão (a categoria deixou de
+   "esperando a gestão decidir". Pendente sem portão (a categoria deixou de
    exigir) não é linha nenhuma: não há o que esperar. */
 function aprovacaoEmPalavras(d: { aprovacao?: string | null; falta_aprovacao?: boolean }): string {
   if (d.aprovacao === 'aprovada') return 'aprovada';
   if (d.aprovacao === 'rejeitada') return 'recusada';
-  if (d.falta_aprovacao) return 'esperando a liderança decidir';
+  if (d.falta_aprovacao) return 'esperando a gestão decidir';
   return '';
 }
 
@@ -811,9 +861,11 @@ function Folha({ titulo, fechar, segurar, children }: {
    aparece com o texto. Não apaga o texto quando o servidor recusa. A
    caixinha "Só para a equipe" só existe para quem atende, porque o servidor
    ignora a chave para os outros. */
-function Escrever({ atende, salvando, aoEnviar }: {
+function Escrever({ atende, salvando, aoEnviar, erro }: {
   atende: boolean; salvando: boolean;
   aoEnviar: (texto: string, interno: boolean) => Promise<boolean>;
+  /* a recusa do servidor, aqui, e não no alto da ficha */
+  erro?: string;
 }) {
   const [t, setT] = useState('');
   const [foco, setFoco] = useState(false);
@@ -823,6 +875,7 @@ function Escrever({ atende, salvando, aoEnviar }: {
   const sobra = teto - t.length;
   return (
     <div className={aberta ? 'dm-escrever dm-aberta' : 'dm-escrever'}>
+      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       <Campo rot="Escrever alguma coisa">
         <textarea value={t} maxLength={teto} placeholder="Escrever um comentário…" rows={1}
           onFocus={() => setFoco(true)} onBlur={() => setFoco(false)}
@@ -884,6 +937,7 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
      sabe que NÃO pode apagar o que a pessoa escreveu */
   agir: (a: Acao, dados?: Record<string, unknown>) => Promise<boolean>;
 }) {
+  const guarda = useContext(RascunhoDaCaixa);
   const [motivo, setMotivo] = useState<'informacao' | 'aprovacao' | 'terceiros'>('informacao');
   const [prazo, setPrazo] = useState(d.prazo || '');
   const [prio, setPrio] = useState(d.prioridade);
@@ -893,7 +947,9 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
   const [setor, setSetor] = useState('');
   const [url, setUrl] = useState('');
   const [urlErro, setUrlErro] = useState('');
-  const [atraso, setAtraso] = useState('');
+  /* o motivo do atraso também fica guardado com o rascunho da ação */
+  const [atraso, setAtrasoLocal] = useState(() => guarda?.ler('atraso') ?? '');
+  const setAtraso = (x: string) => { setAtrasoLocal(x); guarda?.gravar(x, 'atraso'); };
 
   if (!aberto || aberto === 'comentar') return null;
   /* o "Voltar" mora no topo do painel e da folha; aqui só o que a ação
@@ -914,7 +970,7 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
         podeEnviar={!tarde || !!atraso.trim()}
         extra={tarde ? (
           <Campo rot="Por que atrasou"
-            ajuda="Obrigatório: esta demanda passou do prazo, e o servidor não conclui sem isto.">
+            ajuda="Obrigatório quando passa do prazo. O motivo aparece em Números, em “Por que atrasa”.">
             <input value={atraso} maxLength={tetoDe('atraso')}
               onChange={e => setAtraso(e.target.value)} />
           </Campo>
@@ -987,7 +1043,7 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
   }
   if (aberto === 'aprovar') {
     return (
-      <CaixaDeAcao rot="Observação da aprovação" botao="Aprovar" salvando={indo} exigeTexto={false} teto={tetoDe('aprovar')}
+      <CaixaDeAcao rot="Observação da aprovação (opcional)" botao="Aprovar" salvando={indo} exigeTexto={false} teto={tetoDe('aprovar')}
         dica="Depois disto o setor responsável pode começar."
         aoEnviar={t => agir('aprovar', { texto: t })} />
     );
@@ -1073,8 +1129,8 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
       const u = url.trim();
       if (!siteDoLink(u)) { setUrlErro('Cole o link inteiro, começando com https://'); return; }
       const recusado = siteRecusado(u, b?.anexos);
-      if (recusado) { setUrlErro(recadoDeSite(recusado)); return; }
-      agir('anexar', { url: u, nome: u.split('/').pop() });
+      if (recusado) { setUrlErro(recadoDeSiteNoCampo(recusado)); return; }
+      agir('anexar', { url: u, nome: nomeDoLink(u) });
     };
     return (
       <div className="dm-acao-form">
@@ -1100,10 +1156,11 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
 
    UMA LINHA, E O FORMULÁRIO A UM TOQUE — 23/09/2026. O formulário sempre
    aberto custava 300px em toda ficha, para uma ação rara. */
-function Acompanham({ v, indo, agir, sair }: {
+function Acompanham({ v, indo, agir, sair, erro }: {
   v: Vista; indo: boolean;
   agir: (a: Acao, d?: Record<string, unknown>) => Promise<boolean>;
   sair: () => void;
+  erro?: string;
 }) {
   const [quem, setQuem] = useState('');
   const [abrindo, setAbrindo] = useState(false);
@@ -1124,6 +1181,7 @@ function Acompanham({ v, indo, agir, sair }: {
           <Icone nome="nova" />Incluir alguém
         </button>
       ) : null}>
+      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       <div className="dm-acompanha">
         {ps.length ? ps.map(p => (
           <span key={p.id} className="dm-chip">
@@ -1132,8 +1190,16 @@ function Acompanham({ v, indo, agir, sair }: {
             {pode || p.eu ? (
               <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo}
                 onClick={async () => {
+                  /* sair tira o acesso de quem não pediu nem atende: pergunta
+                     antes (era um toque só) */
+                  const perde = p.eu && !v.eu.abriu && !v.eu.atende;
+                  if (perde && !(await confirmar({
+                    titulo: 'Sair desta demanda?',
+                    texto: 'Você deixa de ver a demanda e de receber os avisos dela. Quem pediu ou quem atende pode incluir você de novo.',
+                    acao: 'Sair',
+                  }))) return;
                   const deu = await agir('tirar', { membro_id: p.id });
-                  if (deu && p.eu && !v.eu.abriu && !v.eu.atende) sair();
+                  if (deu && perde) sair();
                 }}>{p.eu ? 'Sair' : 'Tirar'}</button>
             ) : null}
           </span>

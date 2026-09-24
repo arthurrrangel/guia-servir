@@ -193,15 +193,23 @@ function Numeros({ n, eu, atende, precisa }: { n: Portal['n']; eu: Eu; atende: b
      de 556px em 1440 (e três no celular, a terceira sozinha numa linha): a
      faixa de quem pede parecia outro produto ao lado da de quem atende. A
      primeira é a mesma pergunta das duas faixas: o que espera por você. */
+  /* A LÍDER LÊ O MINISTÉRIO PRIMEIRO — 24/09/2026 (auditoria R11). A faixa
+     dizia "Em aberto 0" e "Concluídas 0 entregues" (as dela) antes do
+     ministério, e logo abaixo "Precisa de você" listava duas concluídas do
+     ministério para confirmar: metade da faixa eram zeros sobre ela mesma.
+     Para a líder, o ministério vem logo depois do que espera por ela, e as
+     casas dela dizem que são dela. */
+  const lider = eu.papel === 'lider';
   return (
     <Kpis rot="Suas demandas" colunas={4}>
       <Kpi rot="Esperando você" valor={precisa} destaque
         sub={precisa === 1 ? 'resposta ou confirmação' : 'respostas ou confirmações'} />
+      {lider ? <Kpi rot="Do ministério" valor={n.ministerio} sub="em aberto" /> : null}
       <Kpi rot="Em aberto" valor={n.minhas_andamento} sub={umOuVarios(n.minhas_andamento, 'pedida por você', 'pedidas por você')} />
-      <Kpi rot="Concluídas" valor={n.minhas_concluidas} sub={umOuVarios(n.minhas_concluidas, 'entregue', 'entregues')} />
-      {eu.papel === 'lider'
-        ? <Kpi rot="Do ministério" valor={n.ministerio} sub="em aberto" />
-        : <Kpi rot="Acompanho" valor={n.participo} sub="de outras pessoas" />}
+      <Kpi rot="Concluídas" valor={n.minhas_concluidas}
+        sub={lider ? umOuVarios(n.minhas_concluidas, 'pedida por você', 'pedidas por você')
+          : umOuVarios(n.minhas_concluidas, 'entregue', 'entregues')} />
+      {lider ? null : <Kpi rot="Acompanho" valor={n.participo} sub="de outras pessoas" />}
     </Kpis>
   );
 }

@@ -511,7 +511,9 @@ export function Toast({ t, fechar }: { t: ToastPedido; fechar: () => void }) {
    tocava fora da folha para baixar o teclado perdia o parágrafo. Quem monta
    a caixa pode guardar o texto fora dela (a ficha guarda um por ação), e a
    caixa nasce com ele. Sem guardião, a caixa é como sempre foi. */
-export const RascunhoDaCaixa = createContext<{ ler: () => string; gravar: (t: string) => void } | null>(null);
+/* `campo` separa o texto de um segundo campo do mesmo formulário (o "Por que
+   atrasou" do Concluir); sem ele, é o da caixa */
+export const RascunhoDaCaixa = createContext<{ ler: (campo?: string) => string; gravar: (t: string, campo?: string) => void } | null>(null);
 
 export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando, aoEnviar, extra,
                              teto = 4000, podeEnviar = true }: {

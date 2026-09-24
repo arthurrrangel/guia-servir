@@ -16,7 +16,7 @@ import {
   siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
   horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe, iniciais,
   chaveDoSetor, setorDoLink, pedidoDoLink, buscaDoLink, diaNoRio, dataCurta, fraseDoEvento, umOuVarios,
-  alcanceDoAtendimento,
+  alcanceDoAtendimento, umGestoUmaLinha, nomeDoLink,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -1021,16 +1021,18 @@ function servidorAceita(acao, d, eu) {
   const ficha = readFileSync('app/demandas/d/[numero]/page.tsx', 'utf8');
   const corpoAgir = corpoDe(ficha, 'async function agir');
   ok(corpoAgir !== null, 'achei o `agir` da ficha para executar');
+  /* `setErroDe` (24/09/2026): a recusa lembra de qual gesto veio, para
+     aparecer no bloco dele */
   const agir = new Function('acao', 'dados', 'setIndo', 'setErro', 'mover', 'numero',
-                            'recadoDoErro', 'setAberto', 'carregar',
+                            'recadoDoErro', 'setAberto', 'carregar', 'setErroDe',
     `return (async () => {${corpoAgir}})();`);
   const nada = () => {};
   const recusa = await agir('concluir', {}, nada, nada,
     async () => ({ ok: false, erro: 'ATRASO_PRECISA_MOTIVO' }), 7,
-    () => 'qualquer frase', nada, async () => {});
+    () => 'qualquer frase', nada, async () => {}, nada);
   ok(recusa === false, 'recusa do servidor devolve false, que é o que segura o texto');
   const passou = await agir('concluir', {}, nada, nada,
-    async () => ({ ok: true }), 7, () => '', nada, async () => {});
+    async () => ({ ok: true }), 7, () => '', nada, async () => {}, nada);
   ok(passou === true, 'e o caminho bom devolve true');
 
   /* ---- 8c. o comentário interno: a chave que ninguém mandava -------------
@@ -1147,8 +1149,9 @@ function servidorAceita(acao, d, eu) {
     ok(roda('concluir').pedida === null && roda('concluir').abriu === 'concluir',
       'e "Concluir" abre o formulário em vez de gravar', JSON.stringify(roda('concluir')));
   }
-  ok(/case 'validar':\s*return 'Resolveu, obrigado'/.test(ficha),
-    'o botão de validar se chama "Resolveu, obrigado"');
+  /* 24/09/2026 (R11): para quem pediu; a gestão lê "Confirmar pela gestão" */
+  ok(/case 'validar':[^\n]*quemPediuOlha \? 'Resolveu, obrigado' : 'Confirmar pela gestão'/.test(ficha),
+    'o botão de validar se chama "Resolveu, obrigado" para quem pediu, e "Confirmar pela gestão" para a gestão');
 
   /* ---- 8e. as ações que NÃO viram botão na grade ------------------------- */
   const fora = new Function(`return (${/FORA_DA_GRADE[^=]*=\s*(\[[^\]]*\])/.exec(ficha)[1]});`)();
@@ -1416,6 +1419,83 @@ function servidorAceita(acao, d, eu) {
   ok(JSON.stringify(pedidoDoLink('?equipe=' + 'x'.repeat(61))) === '{}', 'chave maior que 60 é descartada');
   ok(buscaDoLink({}) === '' && buscaDoLink({ equipe: 'compras' }) === '?equipe=compras'
      && buscaDoLink({ setor: 'kids' }) === '?setor=kids', 'o que viaja no link do e-mail');
+}
+
+{
+  /* UM GESTO, UMA LINHA — 24/09/2026 (auditoria R11). Os fatos têm a forma
+     que o gatilho `fn_historico` e `dem_mover` gravam para cada gesto, no
+     mesmo instante (o `now()` da transação). */
+  const T = '2026-09-20T10:00:00.123+00:00';
+  const f = (tipo, quem, extra = {}) => ({ tipo, quem, de: null, para: null, texto: null, em: T, ...extra });
+  const frases = (fs) => umGestoUmaLinha(fs).map(e => fraseDoEvento(e) + (e.texto ? ` «${e.texto}»` : ''));
+  const ARTHUR = 'Arthur Rangel', PEDRO = 'Pedro Henrique', MARIA = 'Maria Silva';
+
+  const aprovar = [f('status', ARTHUR, { de: 'travada', para: 'aberta' }),
+                   f('aprovacao', ARTHUR, { de: 'pendente', para: 'aprovada', texto: 'Pode comprar.' })];
+  ok(frases(aprovar).join(' | ') === 'Arthur aprovou «Pode comprar.»',
+    'aprovar é "aprovou", com a observação, e não "destravou" + "marcou a aprovação"', frases(aprovar).join(' | '));
+
+  const recusar = [f('status', ARTHUR, { de: 'travada', para: 'cancelada', texto: 'Aprovação recusada: Fora do orçamento.' }),
+                   f('aprovacao', ARTHUR, { de: 'pendente', para: 'rejeitada', texto: 'Fora do orçamento.' })];
+  ok(frases(recusar).join(' | ') === 'Arthur recusou «Fora do orçamento.»',
+    'recusar é "recusou", com o motivo uma vez só, e nunca "cancelou" nem "rejeitada"', frases(recusar).join(' | '));
+
+  const reabrir = [f('comentario', PEDRO, { texto: 'A arte saiu com a data errada.' }),
+                   f('status', PEDRO, { de: 'concluida', para: 'execucao' }),
+                   f('reabertura', PEDRO), f('atraso', PEDRO, { de: 'Faltou a foto.' })];
+  ok(frases(reabrir).join(' | ') === 'Pedro reabriu «A arte saiu com a data errada.»',
+    'reabrir é uma linha, com o porquê, e o tipo cru "atraso" nunca aparece', frases(reabrir).join(' | '));
+
+  const mandar = [f('status', MARIA, { de: 'execucao', para: 'aberta' }),
+                  f('responsavel', MARIA, { de: MARIA, para: null }),
+                  f('setor', MARIA, { de: 'Comunicação', para: 'Manutenção e infraestrutura' })];
+  const lm = umGestoUmaLinha(mandar);
+  ok(frases(mandar).join(' | ') === 'Maria mandou de Comunicação para Manutenção e infraestrutura' && lm[0].marcoAbsorvido,
+    'mandar para outro setor é uma linha, e ela muda o estado (marco)', frases(mandar).join(' | '));
+
+  const assumir = [f('status', MARIA, { de: 'aberta', para: 'execucao' }), f('responsavel', MARIA, { para: MARIA })];
+  ok(frases(assumir).join(' | ') === 'Maria assumiu', 'assumir continua uma linha', frases(assumir).join(' | '));
+
+  const responder = [f('comentario', PEDRO, { texto: 'Sala 3, às 19h.' }),
+                     f('status', PEDRO, { de: 'travada', para: 'execucao' })];
+  ok(frases(responder).join(' | ') === 'Pedro destravou a demanda «Sala 3, às 19h.»',
+    'destravar com resposta: a resposta é o texto da linha', frases(responder).join(' | '));
+
+  const travarAprov = [f('status', MARIA, { de: 'execucao', para: 'travada', texto: 'Passa do teto.' }),
+                       f('aprovacao', MARIA, { de: null, para: 'pendente' })];
+  ok(frases(travarAprov).join(' | ') === 'Maria travou a demanda «Passa do teto.»',
+    'travar por aprovação é "travou", sem "mandou para aprovação" do lado', frases(travarAprov).join(' | '));
+
+  const tirar = [f('anexo', MARIA, { texto: 'Tirou o anexo: arte.png · drive.google.com' })];
+  ok(frases(tirar).join(' | ') === 'Maria tirou um anexo «arte.png · drive.google.com»',
+    'tirar um anexo é "tirou", e não "juntou"', frases(tirar).join(' | '));
+
+  ok(fraseDoEvento(f('orcamento', PEDRO, { de: null, para: '14,750.90' })) === `Pedro informou o orçamento: ${dinheiro(14750.9)}`
+     && fraseDoEvento(f('orcamento', PEDRO, { de: '1.200,00', para: '1.350,00' })) === `Pedro mudou o orçamento de ${dinheiro(1200)} para ${dinheiro(1350)}`,
+    'o orçamento em reais, qualquer que seja o separador do servidor',
+    fraseDoEvento(f('orcamento', PEDRO, { de: null, para: '14,750.90' })));
+
+  /* o que NÃO pode juntar: duas pessoas, ou a mesma pessoa em momentos diferentes */
+  const doisGestos = [f('comentario', PEDRO, { texto: 'Oi' }),
+                      f('status', MARIA, { de: 'travada', para: 'execucao' })];
+  ok(frases(doisGestos).length === 2, 'gestos de pessoas diferentes no mesmo instante continuam duas linhas',
+    frases(doisGestos).join(' | '));
+  const depois = [f('comentario', PEDRO, { texto: 'Oi' }),
+                  f('status', PEDRO, { de: 'travada', para: 'execucao', em: '2026-09-20T10:05:00+00:00' })];
+  ok(frases(depois).length === 2, 'e a mesma pessoa cinco minutos depois também', frases(depois).join(' | '));
+  const doisComentarios = [f('comentario', PEDRO, { texto: 'Um' }), f('comentario', PEDRO, { texto: 'Dois' })];
+  ok(frases(doisComentarios).length === 2, 'dois comentários seguidos não se engolem');
+
+  /* o nome do anexo pelo link (R11: "view?usp=sharing · drive.google.com") */
+  ok(nomeDoLink('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing') === 'Google Drive',
+    'um arquivo do Drive se chama "Google Drive", e não "view?usp=sharing"',
+    nomeDoLink('https://drive.google.com/file/d/1AbCdEfGhIjKlMnOp/view?usp=sharing'));
+  ok(nomeDoLink('https://www.dropbox.com/s/abc123/arte-final.png?dl=0') === 'arte-final.png',
+    'com nome de arquivo no link, o nome do arquivo', nomeDoLink('https://www.dropbox.com/s/abc123/arte-final.png?dl=0'));
+  ok(nomeDoLink('https://exemplo.org/pasta/relatorio-anual/edit') === 'relatorio-anual',
+    'fora dos serviços conhecidos, o fim do caminho sem o "edit"', nomeDoLink('https://exemplo.org/pasta/relatorio-anual/edit'));
+  ok(nomeDoLink('https://exemplo.org/') === 'exemplo.org' && nomeDoLink('não é link') === 'anexo',
+    'sem caminho, o site; sem link, "anexo"');
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

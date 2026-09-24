@@ -1551,7 +1551,10 @@ const FORA_DA_GRADE = ['comentar'];
 /* o que o painel DEVIA ter, calculado pelo espelho. `destravar` muda de rótulo
    quando quem abriu vai responder, e a ficha escreve isso de propósito. */
 const rotDe = (a, d, quem) => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
-  ? 'Responder e destravar' : ROTULO[a]);
+  ? 'Responder e destravar'
+  /* o "obrigado" é de quem pediu; a gestão confirma no lugar dele (R11) */
+  : a === 'validar' && !(quem.pede ?? quem.abriu) ? 'Confirmar pela gestão'
+  : ROTULO[a]);
 /* O QUE CONTRADIZ A FICHA NÃO VIRA BOTÃO (23/09/2026, auditoria do Fable):
    "Assumir e começar" quando a demanda já está com a pessoa, e "Travar" numa
    demanda já travada. O servidor aceita os dois (troca de dono; re-travar
@@ -1559,7 +1562,9 @@ const rotDe = (a, d, quem) => (a === 'destravar' && quem.abriu && d.travada_por 
    espelho aqui aplica a mesma regra, escrita por extenso. */
 const contradiz = (a, d, quem) =>
   (a === 'assumir' && !!d.responsavel_id && d.responsavel_id === quem.id)
-  || (a === 'travar' && d.status === 'travada');
+  || (a === 'travar' && d.status === 'travada')
+  /* quem executou e não pediu não confirma o próprio trabalho (R11) */
+  || (a === 'validar' && !(quem.pede ?? quem.abriu) && !!d.responsavel_id && d.responsavel_id === quem.id);
 const noPainel = (d, quem) => acoesDe(d, quem).filter(a => !FORA_DA_GRADE.includes(a) && !contradiz(a, d, quem));
 function gradeEsperada(d, quem) {
   return noPainel(d, quem).map(a => rotDe(a, d, quem));
@@ -1574,10 +1579,11 @@ function gradeEsperada(d, quem) {
 const passoDeOutro = (d, quem, prim) => {
   const pediu = !!(quem.pede ?? quem.abriu);
   const espera = d.status === 'travada' && d.travada_por === 'informacao';
-  return prim !== 'validar'
+  /* confirmar é o passo de quem pediu; para a gestão é um poder (R11) */
+  return (prim === 'validar' && !pediu) || (prim !== 'validar'
     && !(d.falta_aprovacao && (quem.aprova ?? quemManda(quem.papel)))
     && !(espera && pediu)
-    && ((espera && !pediu) || (!!d.responsavel_id && d.responsavel_id !== quem.id));
+    && ((espera && !pediu) || (!!d.responsavel_id && d.responsavel_id !== quem.id)));
 };
 
 /* A DIVISÃO É DECISÃO DE TELA, E NÃO TEM FONTE ACIMA DELA.
@@ -1641,6 +1647,16 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
     ['concluída e confirmada · quem pediu',
       { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z',
         validada_em: '2026-09-13T10:00:00Z', validada_por: 'u1' }, QUEM.pediu],
+    /* R11: a gestão que não pediu confirma como poder ("Ações", sem preto);
+       a que executou não confirma o próprio trabalho */
+    ['concluída · a gestão olhando',
+      { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z',
+        responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.gestor],
+    ['concluída · a gestora que executou',
+      { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z',
+        responsavel: 'Ana', responsavel_id: 'u3' }, QUEM.gestor],
+    ['esperando aprovação · gestor, no celular o par',
+      { aprovacao: 'pendente', falta_aprovacao: true, status: 'travada', travada_por: 'aprovacao' }, QUEM.gestor],
   ];
   /* comparados como CONJUNTO: a ordem da grade é decisão de layout (o que se
      usa mais fica em cima), e cobrar a ordem aqui faria este teste reprovar
@@ -1704,6 +1720,15 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
       ok(!!cartao && devia.every(r => nele.includes(r)),
         `${nome}: e ${soReabrir ? '"Reabrir" e ' : ''}os ajustes moram no cartão em linha do celular`,
         cartao ? nele.join(' | ') : '(sem cartão)');
+    }
+    /* o "não" da decisão ao lado do "sim", sem "Mais" (R11) */
+    const parDevia = doOutro ? null
+      : prim === 'aprovar' && div.grade.includes('Recusar') ? 'Recusar'
+      : prim === 'validar' && div.grade.includes('Reabrir') ? 'Reabrir' : null;
+    if (barraCel && parDevia) {
+      const bs = porTag(barraCel, 'BUTTON').map(texto);
+      ok(bs.length === 2 && bs[0] === parDevia,
+        `${nome}: no celular, "${parDevia}" fica ao lado do primário, e não dentro de "Mais"`, bs.join(' | '));
     }
     if (barraCel && prim) {
       const ultimo = porTag(barraCel, 'BUTTON').slice(-1)[0];
@@ -1959,7 +1984,7 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
     'demanda ABERTA que passou a exigir aprovação diz isso num aviso', avisosDe(alvo));
   ok(/passou a exigir aprovação/.test(t),
     'e conta que foi a categoria que mudou, e não que o pedido nasceu assim', t.slice(0, 500));
-  ok(/Quem decide é a liderança/.test(t),
+  ok(/Quem decide é a gestão/.test(t),
     'e diz de quem é a vez, para quem não decide', t.slice(0, 600));
   ok(!botoesDaGrade(alvo).includes('Concluir'),
     'com o portão aberto, Concluir não é oferecido', botoesDaGrade(alvo).join(' | '));
@@ -1967,7 +1992,7 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
     'nem Travar: o servidor recusa todo motivo que não seja `aprovacao`',
     botoesDaGrade(alvo).join(' | '));
   /* a linha da tabela também não pode sumir: era o segundo sintoma */
-  ok(/Aprovação/.test(t) && /esperando a liderança decidir/.test(t),
+  ok(/Aprovação/.test(t) && /esperando a gestão decidir/.test(t),
     'e a tabela do pedido mostra a linha de aprovação mesmo sem valor gravado',
     t.slice(0, 900));
   await desmontar();
@@ -2119,7 +2144,7 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
     { status: 'aberta', falta_aprovacao: true }, QUEM.soEnxerga));
   ok(botoesDaGrade(alvo).length === 0, 'grade vazia com o portão aberto',
     botoesDaGrade(alvo).join(' | '));
-  ok(/até a liderança aprovar/.test(texto(alvo)),
+  ok(/até a gestão aprovar/.test(texto(alvo)),
     'e a frase do cartão vazio é a do portão, e não a de "o setor é que toca"',
     texto(alvo).slice(0, 700));
   await desmontar();
@@ -2224,6 +2249,36 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
     'mas uma mudança de status que não veio de assumir continua, com o verbo do botão', t.slice(-700));
   ok(/Ana passou para José Carlos de Oliveira Nascimento/.test(t),
     'e passar para outra pessoa continua sendo "passou para"', t.slice(-700));
+  await desmontar();
+}
+{
+  /* 24/09/2026 (auditoria R11): a ficha conta o GESTO, e não o que o
+     gatilho gravou coluna por coluna. Recusar gravava "cancelou" e "marcou
+     a aprovação como rejeitada", com o motivo duas vezes; reabrir, quatro
+     linhas, uma delas "Pedro: atraso". */
+  const T1 = '2026-09-15T10:00:00.5+00:00', T2 = '2026-09-16T11:00:00.5+00:00';
+  const PEDRO = 'Pedro Henrique Almeida Vasconcelos', ARTHUR = 'Arthur Rangel';
+  const eventos = [
+    { tipo: 'abertura', de: null, para: 'aberta', quem: PEDRO, em: '2026-09-10T09:00:00+00:00', texto: null, interno: false },
+    { tipo: 'status', de: 'travada', para: 'cancelada', quem: ARTHUR, em: T1,
+      texto: 'Aprovação recusada: Fora do orçamento deste mês.', interno: false },
+    { tipo: 'aprovacao', de: 'pendente', para: 'rejeitada', quem: ARTHUR, em: T1,
+      texto: 'Fora do orçamento deste mês.', interno: false },
+    { tipo: 'comentario', de: null, para: null, quem: PEDRO, em: T2, texto: 'Consegui outro orçamento.', interno: false },
+    { tipo: 'status', de: 'cancelada', para: 'aberta', quem: PEDRO, em: T2, texto: null, interno: false },
+    { tipo: 'reabertura', de: null, para: null, quem: PEDRO, em: T2, texto: null, interno: false },
+    { tipo: 'atraso', de: 'Faltou a peça.', para: null, quem: PEDRO, em: T2, texto: null, interno: false },
+  ];
+  const { alvo, desmontar } = await comFicha(vista({ status: 'aberta', reaberturas: 1 }, QUEM.atende, eventos));
+  const t = texto(alvo);
+  ok(/Arthur recusou/.test(t) && !/Arthur cancelou/.test(t) && !/rejeitada/.test(t),
+    'recusar aparece como "Arthur recusou", sem "cancelou" nem "rejeitada"', t.slice(-600));
+  ok((t.match(/Fora do orçamento deste mês/g) || []).length === 1,
+    'e o motivo aparece uma vez só', String((t.match(/Fora do orçamento deste mês/g) || []).length));
+  ok(/Pedro reabriu/.test(t) && /Consegui outro orçamento/.test(t) && !/Pedro escreveu/.test(t),
+    'reabrir é "Pedro reabriu" com o porquê, e não um comentário solto', t.slice(-600));
+  ok(!/: atraso/.test(t) && !/mudou de Cancelada para Aberta/.test(t),
+    'e nem o tipo cru "atraso" nem a mudança de status do mesmo gesto aparecem', t.slice(-600));
   await desmontar();
 }
 

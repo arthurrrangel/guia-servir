@@ -60,12 +60,22 @@ function Administracao() {
   }, []);
   useEffect(() => { if (eu?.papel === 'admin') recarregar(); }, [eu, recarregar]);
 
+  /* 24/09/2026 (auditoria R11): Setores e Categorias salvavam em silêncio,
+     e a recusa aparecia no alto da página, 1750px acima do select em 390,
+     com o select voltando sozinho ao valor antigo. Agora o acerto diz
+     "Salvo" e a recusa leva a tela até o aviso. */
   async function salvar(o: 'setor' | 'categoria', d: Record<string, unknown>) {
     setIndo(true); setErro('');
     const r = await ajustar(o, d);
     setIndo(false);
-    if (!r.ok) { setErro(recadoDoErro(r, 'salvar')); return false; }
+    if (!r.ok) {
+      setErro(recadoDoErro(r, 'salvar'));
+      requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+      return false;
+    }
     await recarregar();
+    ctx.toast?.({ texto: o === 'setor' ? 'Setor salvo.' : 'Categoria salva.' });
     return true;
   }
 
@@ -346,7 +356,10 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
                 <Pill>{rotPapel(m.papel)}</Pill>
                 {/* inativa é cinza (não é erro), e o pedido de papel é âmbar:
                     parado esperando a decisão de alguém, como "Aguardando" */}
-                {m.ativo === false ? <Pill>Inativa</Pill> : null}
+                {/* "Sem acesso", e não "Inativa": na linha de uma pessoa a
+                    palavra não diz o gênero de ninguém (o filtro e a conta
+                    concordam com "pessoas") */}
+                {m.ativo === false ? <Pill>Sem acesso</Pill> : null}
                 {m.papel_pedido ? <Pill tom="warn">Quer ser {rotPapel(m.papel_pedido)}</Pill> : null}
               </span>
               {/* setor e função num bloco só no celular (recuado como o

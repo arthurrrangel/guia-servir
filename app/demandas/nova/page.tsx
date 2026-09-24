@@ -18,8 +18,8 @@ import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Opcoes } from '@/com
 import { Icone } from '@/components/demandas/Icone';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomesDosSites, prazoSugerido,
-  rascunhoVazio, recadoDeSite, recadoDoErro, quemManda, siteDoLink, siteRecusado, type Rascunho,
+  HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomeDoLink, nomesDosSites, prazoSugerido,
+  rascunhoVazio, recadoDeSiteNoCampo, recadoDoErro, quemManda, siteDoLink, siteRecusado, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
 
@@ -280,7 +280,7 @@ function Nova() {
         {pronta.precisa_aprovacao ? (
           <Aviso tom="warn">
             Esta categoria <b>precisa de aprovação</b> antes de alguém executar. Ela já está na
-            fila da liderança e ninguém consegue começar antes disso.
+            fila da gestão e ninguém consegue começar antes disso.
           </Aviso>
         ) : (
           <Aviso tom="ok">
@@ -331,7 +331,7 @@ function Nova() {
 
   return (
     <>
-      <Cabecalho volta={{ href: '/demandas', rot: 'Início' }} sobre="Nova demanda" titulo="O que você precisa?"
+      <Cabecalho volta={{ href: '/demandas', rot: 'Início', soCelular: true }} sobre="Nova demanda" titulo="O que você precisa?"
         meta={<span>A categoria decide para qual setor vai, se precisa de aprovação e o prazo sugerido.</span>} />
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
 
@@ -462,7 +462,7 @@ function Nova() {
         <div className="dm-caixa">
           <div className="dm-caixa-corpo">
           {manda ? (
-            <Campo rot="Quem está pedindo" ajuda="Como liderança, você pode abrir em nome de outro setor.">
+            <Campo rot="Quem está pedindo" ajuda="Quem é da gestão pode abrir em nome de outro setor.">
               <select value={r.setor_solicitante || eu?.setor_id || ''}
                 onChange={e => setR(v => ({ ...v, setor_solicitante: e.target.value }))}>
                 {/* 94 · gestor com escopo pede em nome dos setores que acompanha
@@ -524,7 +524,7 @@ function Nova() {
                 const url = anexoUrl.trim();
                 if (!siteDoLink(url)) { setAnexoErro('Cole o link inteiro, começando com https://'); return; }
                 const recusado = siteRecusado(url, b?.anexos);
-                if (recusado) { setAnexoErro(recadoDeSite(recusado)); return; }
+                if (recusado) { setAnexoErro(recadoDeSiteNoCampo(recusado)); return; }
                 setAnexos(a => [...a, { nome: nomeDoLink(url), url }]);
                 setAnexoUrl(''); setAnexoErro('');
               }}>Juntar</button>
@@ -590,7 +590,7 @@ function Nova() {
           {cat ? (
             <div className="dm-pares dm-uma-coluna">
               <div><span>Vai para</span>{setorDaCat || 'nenhum setor ainda'}</div>
-              <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da liderança antes de começar' : 'não precisa'}</div>
+              <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da gestão antes de começar' : 'não precisa'}</div>
               <div><span>Prazo sugerido</span>{cat.prazo_padrao_dias ? `${dataCheia(prazoSugerido(cat))} (${cat.prazo_padrao_dias} dias)` : 'sem sugestão'}</div>
               <div><span>Orçamento</span>{cat.exige_orcamento ? 'obrigatório nesta categoria' : 'quando der para estimar'}</div>
               <div><span>Anexos</span>{dicaDeAnexo(b?.anexos)}</div>
@@ -616,10 +616,4 @@ function Nova() {
   );
 }
 
-function nomeDoLink(u: string): string {
-  try {
-    const p = new URL(u.trim());
-    const fim = p.pathname.split('/').filter(Boolean).pop();
-    return decodeURIComponent(fim || p.hostname);
-  } catch { return 'anexo'; }
-}
+/* `nomeDoLink` mora em `regras.ts` desde 24/09/2026: a ficha usa a mesma */

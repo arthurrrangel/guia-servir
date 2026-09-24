@@ -133,11 +133,12 @@ function Ficha() {
         titulo={nova ? 'Cadastrar pessoa' : p!.nome}
         meta={p ? <>
           <Pill>{rotPapel(p.papel)}</Pill>
-          {/* ativa é o normal e não ganha pílula; inativa é cinza, e não
-              vermelho (vermelho é atraso e urgência, e só) */}
-          {p.ativo === false ? <Pill>Inativa</Pill> : null}
-          <span>{p.origem === 'cadastro' ? 'Cadastrou-se' : 'Cadastrada pela administração'} em {dataCheia(p.criado_em || '')}</span>
-        </> : <span>Cadastrar é o mesmo que editar alguém que ainda não existe.</span>} />
+          {/* com acesso é o normal e não ganha pílula; sem acesso é cinza, e
+              não vermelho (vermelho é atraso e urgência, e só). "Sem acesso", e
+              não "Inativa": a palavra não diz o gênero de ninguém */}
+          {p.ativo === false ? <Pill>Sem acesso</Pill> : null}
+          <span>{p.origem === 'cadastro' ? 'Fez o próprio cadastro' : 'Cadastro feito pela administração'} em {dataCheia(p.criado_em || '')}</span>
+        </> : <span>A pessoa entra com o e-mail cadastrado aqui.</span>} />
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       {ok ? <Aviso tom="ok">{ok}</Aviso> : null}
 
@@ -228,9 +229,9 @@ function Ficha() {
                 {homonimos.map((h, i) => (
                   <span key={h.id}>
                     {i ? ', ' : ''}<Link href={`/demandas/admin/pessoas/${h.id}`}>{h.nome}</Link>
-                    {h.setor ? ` (${h.setor}${h.ativo ? '' : ', inativa'})` : h.ativo ? '' : ' (inativa)'}
+                    {h.setor ? ` (${h.setor}${h.ativo ? '' : ', sem acesso'})` : h.ativo ? '' : ' (sem acesso)'}
                   </span>
-                ))}. Se for a mesma pessoa, abra a ficha dela em vez de cadastrar de novo.
+                ))}. Se for a mesma pessoa, abra a ficha que já existe em vez de cadastrar de novo.
               </Aviso>
             ) : null}
           </div>
@@ -281,7 +282,7 @@ function Ficha() {
             {f!.atividade.pediu || f!.atividade.com_ela || f!.atividade.concluiu || f!.atividade.acompanha ? (
               <Kpis colunas={2}>
                 <Kpi rot="Pediu" valor={f!.atividade.pediu} sub={`${f!.atividade.pediu_abertas} em andamento`} />
-                <Kpi rot="Com ela agora" valor={f!.atividade.com_ela} />
+                <Kpi rot="Atendendo agora" valor={f!.atividade.com_ela} />
                 <Kpi rot="Concluiu" valor={f!.atividade.concluiu} />
                 <Kpi rot="Acompanha" valor={f!.atividade.acompanha} />
               </Kpis>
@@ -320,19 +321,19 @@ function Ficha() {
           {/* ------------------------------------------------------ situação */}
           <Secao titulo="Situação"
             sub={p.ativo === false
-              ? 'Inativa: não entra, nem pelo e-mail nem pelo link. As demandas dela continuam no sistema.'
-              : 'Ativa. Desativar tira o acesso na hora, e as demandas dela continuam no sistema.'}>
+              ? 'Sem acesso: não entra, nem pelo e-mail nem pelo link. As demandas continuam no sistema.'
+              : 'Com acesso. Desativar tira o acesso na hora, e as demandas continuam no sistema.'}>
             {p.ativo === false ? (
               <button type="button" className="dm-btn" disabled={indo}
-                onClick={() => enviar({ id, ativo: true }, 'Reativada.')}>Reativar</button>
+                onClick={() => enviar({ id, ativo: true }, 'O acesso voltou.')}>Reativar</button>
             ) : (
               <button type="button" className="dm-btn dm-perigo" disabled={indo} onClick={async () => {
                 const sim = await confirmar({
                   titulo: `Desativar ${p.nome.split(' ')[0]}?`,
-                  texto: 'Ela deixa de entrar, pelo e-mail e pelo link. Nada do que ela pediu ou atendeu é apagado.',
+                  texto: 'O acesso acaba na hora, pelo e-mail e pelo link. Nada do que foi pedido ou atendido é apagado.',
                   acao: 'Desativar',
                 });
-                if (sim) enviar({ id, ativo: false }, 'Desativada.');
+                if (sim) enviar({ id, ativo: false }, 'Acesso desligado.');
               }}>Desativar</button>
             )}
           </Secao>
@@ -399,10 +400,10 @@ function Papeis({ r, setR, b }: { r: Rascunho; setR: React.Dispatch<React.SetSta
 
 function fraseDaPessoa(h: { tipo: string; de: string | null; para: string | null }): string {
   switch (h.tipo) {
-    case 'cadastro': return h.para === 'cadastro' ? 'Fez o próprio cadastro' : 'Cadastrada';
+    case 'cadastro': return h.para === 'cadastro' ? 'Fez o próprio cadastro' : 'Cadastro feito pela administração';
     case 'papel':    return `Papel: ${rotPapel(h.de)} para ${rotPapel(h.para)}`;
     case 'setor':    return `Setor: ${h.de || 'nenhum'} para ${h.para || 'nenhum'}`;
-    case 'ativo':    return h.para === 'false' ? 'Desativada' : 'Reativada';
+    case 'ativo':    return h.para === 'false' ? 'Acesso desligado' : 'Acesso religado';
     case 'escopo':   return `Escopo: ${h.para === 'todos' ? 'todos os setores' : h.para === 'escolhidos' ? 'setores escolhidos' : h.para}`;
     case 'pedido':   return h.para ? `Pediu para ser ${rotPapel(h.para)}` : 'Pedido de papel encerrado';
     case 'contato':  return `Mudou ${h.para}`;

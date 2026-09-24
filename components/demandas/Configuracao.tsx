@@ -108,7 +108,7 @@ export function Setores({ b, indo, salvar }: {
         <p>
           <b>Recebe demanda</b> ligado quer dizer que o setor pode receber pedidos. Setor que só pede
           fica desligado, assim ninguém manda uma demanda para um lugar que não vai olhar.
-          {' '}<b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a liderança, mesmo
+          {' '}<b>Aprovar acima de</b> é o valor a partir do qual a demanda espera a gestão, mesmo
           que a categoria não exija. Em branco: sem teto.
         </p>
       </details>

@@ -14,12 +14,12 @@
    para Em execução" do mesmo toque viram uma linha, como na ficha. */
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Cabecalho, Esqueleto, Secao, Vazio } from '@/components/demandas/Ui';
 import { avisos } from '@/lib/demandas/api';
 import {
-  HOJE, agruparAvisos, carimbo, dataCheia, diaNoRio, fraseDoEvento, quando, recadoDoErro, semRepetir, somaDias,
+  HOJE, agruparAvisos, carimbo, dataCheia, diaNoRio, fraseDoEvento, quando, recadoDoErro, somaDias, umGestoUmaLinha,
   type GrupoDeAvisos,
 } from '@/lib/demandas/regras';
 import type { AvisoDentro } from '@/lib/demandas/tipos';
@@ -45,17 +45,24 @@ function Avisos() {
   const [itens, setItens] = useState<AvisoDentro[] | null>(null);
   const [erro, setErro] = useState('');
 
-  useEffect(() => {
-    let vivo = true;
+  /* com "Tentar de novo", como as outras telas (24/09/2026: na falha de rede
+     esta era a única sem saída) */
+  const vivo = useRef(true);
+  const carregar = useCallback(() => {
+    setErro('');
     avisos(true).then(r => {
-      if (!vivo) return;
+      if (!vivo.current) return;
       if (!r.ok) { setErro(recadoDoErro(r, 'carregar os avisos')); setItens([]); return; }
       setItens(r.itens || []);
       ctx.zerarAvisos?.();
     });
-    return () => { vivo = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    vivo.current = true;
+    carregar();
+    return () => { vivo.current = false; };
+  }, [carregar]);
 
   const { novos, antigos } = useMemo(() => {
     const todos = itens || [];
@@ -66,22 +73,26 @@ function Avisos() {
     <li key={`${g.numero}-${novoBloco ? 'n' : 'a'}`} className="dm-aviso-grupo">
       <Link href={`/demandas/d/${g.numero}`}><span className="dm-num">#{g.numero}</span> {g.titulo}</Link>
       <ul>
-        {semRepetir(g.itens).map((a, i) => (
+        {umGestoUmaLinha(g.itens).map((a, i) => (
           <li key={`${a.em}-${i}`} className={a.novo ? 'dm-novo' : undefined}>
             {/* a frase e a hora como duas peças de `dm-sep`: o "·" antes da
                 hora nunca abre a linha quando a frase quebra */}
             <div className="dm-aviso-o-que dm-sep">
               <div className="dm-sep-in">
                 <span>
-                  {fraseDoEvento(a)}
+                  {fraseDoEvento(a, ctx.eu?.nome)}
                   {a.novo ? <span className="dm-so-leitor"> (novo)</span> : null}
                 </span>
                 <span className="dm-quando" title={carimbo(a.em)}>{quando(a.em)}</span>
               </div>
             </div>
             {/* o que foi escrito: o comentário, a pergunta da trava (quem pediu
-                precisa ler o que perguntaram) e o que foi feito, na conclusão */}
-            {a.texto && (a.tipo === 'comentario' || (a.tipo === 'status' && (a.para === 'travada' || a.para === 'concluida')))
+                precisa ler o que perguntaram), o que foi feito na conclusão, e
+                o porquê de recusar, cancelar ou reabrir (24/09/2026: a recusa
+                chegava sem motivo nenhum) */}
+            {a.texto && (a.tipo === 'comentario' || a.tipo === 'aprovacao' || a.tipo === 'reabertura'
+                         || (a.tipo === 'status' && a.para !== 'aberta' && a.para !== 'execucao')
+                         || (a.tipo === 'status' && a.de === 'travada'))
               ? <div className="dm-aviso-de">“{a.texto.length > 140 ? a.texto.slice(0, 140) + '…' : a.texto}”</div>
               : null}
           </li>
@@ -115,7 +126,12 @@ function Avisos() {
           da aba) e a pergunta que ela responde no título */}
       <Cabecalho sobre="Avisos" titulo="O que mudou nas suas demandas"
         meta={<span>O que outras pessoas fizeram nos últimos 60 dias. Abrir esta tela marca tudo como visto.</span>} />
-      {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
+      {erro ? (
+        <>
+          <Aviso tom="bad">{erro}</Aviso>
+          <button type="button" className="dm-btn dm-tentar" onClick={carregar}>Tentar de novo</button>
+        </>
+      ) : null}
       {itens === null ? <Esqueleto forma="lista" /> : itens.length === 0 && !erro ? (
         <div className="dm-tabela">
           <Vazio titulo="Nenhum aviso ainda.">Quando alguém mexer numa demanda sua, aparece aqui.</Vazio>
