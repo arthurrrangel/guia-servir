@@ -589,6 +589,8 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-acao-form .dm-campo{margin-bottom:0}
 
 /* a caixa de comentário no fim da atividade */
+.dm-link-no-texto{color:var(--dm-ink);text-decoration:underline;text-underline-offset:3px;overflow-wrap:anywhere}
+.dm-link-no-texto:hover{color:var(--dm-ink-2)}
 .dm-escrever{display:grid;gap:var(--dm-e2)}
 /* escrevendo um comentário no celular, a barra de ação sai da frente: no
    navegador que encolhe a página quando o teclado abre, ela cobria a caixa
@@ -1419,6 +1421,12 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-anexo-link{flex:1 1 200px;min-width:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;font-weight:500;color:var(--dm-ink);text-decoration:underline;text-decoration-color:var(--dm-linha-2);text-underline-offset:3px}
 .dm-anexo-link:where(a):hover{text-decoration-color:currentColor}
 .dm-anexo-de{font-size:12px;color:var(--dm-mudo);overflow-wrap:anywhere}
+/* a coluna do "Tirar" existe mesmo na linha sem ele: quem juntou e quando
+   ficam alinhados de uma linha para a outra (24/09/2026, auditoria R12) */
+@media (min-width:720px){
+  .dm-anexos:not(.dm-anexos-novos) li{display:grid;grid-template-columns:16px minmax(0,1fr) auto minmax(56px,auto);align-items:center}
+  .dm-anexos:not(.dm-anexos-novos) li > .dm-btn{justify-self:end}
+}
 .dm-anexos-novos{border:1px solid var(--dm-linha);border-radius:var(--dm-r3);margin-top:var(--dm-e3)}
 .dm-anexos-novos .dm-anexo-link{text-decoration:none}
 

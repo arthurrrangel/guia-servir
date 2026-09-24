@@ -19,7 +19,7 @@
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import Casca from '@/components/demandas/Casca';
+import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Kpi, Kpis, Opcoes, Pill, Secao } from '@/components/demandas/Ui';
 import { Icone } from '@/components/demandas/Icone';
 import { ajustar, bases, pessoa } from '@/lib/demandas/api';
@@ -49,7 +49,13 @@ function Ficha() {
   const [f, setF] = useState<FichaPessoa | null>(null);
   const [r, setR] = useState<Rascunho>(VAZIO);
   const [erro, setErro] = useState('');
-  const [ok, setOk] = useState('');
+  /* O ACERTO É TOAST, E A RECUSA VEM À VISTA — 24/09/2026 (auditoria R12).
+     "Papel salvo." e as recusas nasciam no alto da ficha, fora da tela em 390
+     e em 1024: a pessoa salvava lá embaixo e nada mudava à vista. Agora o
+     acerto é o toast (o mesmo de Setores e Categorias) e a recusa leva a
+     tela até o aviso. */
+  const ctx = useEu();
+  const setOk = (t: string) => { if (t) ctx.toast?.({ texto: t }); };
   const [indo, setIndo] = useState(false);
   const [homonimos, setHomonimos] = useState<{ id: string; nome: string; setor: string | null; ativo: boolean }[] | null>(null);
   const [linkVisivel, setLinkVisivel] = useState(false);
@@ -79,6 +85,8 @@ function Ficha() {
     if (!resp.ok) {
       if (resp.erro === 'HOMONIMO') { setHomonimos((resp as unknown as { quem: typeof homonimos }).quem || []); return false; }
       setErro(recadoDoErro(resp, 'salvar'));
+      requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
       return false;
     }
     setHomonimos(null);
@@ -100,7 +108,17 @@ function Ficha() {
     return d;
   }
 
-  if (erro && !b) return <Aviso tom="bad">{erro}</Aviso>;
+  /* sem os setores a ficha não monta; a falha tem título e saída, e não
+     uma faixa vermelha solta */
+  if (erro && !b) {
+    return (
+      <>
+        <Cabecalho volta={{ href: '/demandas/admin', rot: 'Pessoas' }} sobre="Administração" titulo={nova ? 'Cadastrar pessoa' : 'Pessoa'} />
+        <Aviso tom="bad">{erro}</Aviso>
+        <button type="button" className="dm-btn dm-tentar" onClick={() => { setErro(''); carregar(); }}>Tentar de novo</button>
+      </>
+    );
+  }
   if (!b || (!nova && !f && !erro)) return <Esqueleto forma="ficha" />;
   if (!nova && !f) {
     return (
@@ -140,7 +158,6 @@ function Ficha() {
           <span>{p.origem === 'cadastro' ? 'Fez o próprio cadastro' : 'Cadastro feito pela administração'} em {dataCheia(p.criado_em || '')}</span>
         </> : <span>A pessoa entra com o e-mail cadastrado aqui.</span>} />
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
-      {ok ? <Aviso tom="ok">{ok}</Aviso> : null}
 
       <div className="dm-duas">
       <div>
@@ -332,6 +349,7 @@ function Ficha() {
                   titulo: `Desativar ${p.nome.split(' ')[0]}?`,
                   texto: 'O acesso acaba na hora, pelo e-mail e pelo link. Nada do que foi pedido ou atendido é apagado.',
                   acao: 'Desativar',
+                  vermelho: true,
                 });
                 if (sim) enviar({ id, ativo: false }, 'Acesso desligado.');
               }}>Desativar</button>

@@ -317,6 +317,21 @@ export const rascunhoVazio = (): Rascunho => ({
    as frases, e `camposQueFaltam` devolve os pares, na ordem da tela. */
 export type Falta = { campo: 'titulo' | 'descricao' | 'categoria_id' | 'setor' | 'prazo' | 'impacto'
                           | 'evento' | 'evento_data' | 'orcamento'; texto: string };
+/* O VALOR COMO SE ESCREVE NO BRASIL — 24/09/2026 (auditoria R12). O campo
+   de orçamento trocava a vírgula por ponto enquanto se digitava: "1.500,00"
+   virava "1.500.00", o banco recusava (a regra dele é a de `dem_abrir`: até
+   dez dígitos e dois decimais), e a Nova falhava calada. Agora o campo guarda
+   o que a pessoa escreveu, e isto traduz na hora de mandar: sem "R$", sem o
+   ponto de milhar, com a vírgula decimal virando ponto. */
+export function valorParaOBanco(v: string | null | undefined): string {
+  let t = String(v ?? '').replace(/R\$|\s/g, '');
+  if (!t) return '';
+  if (t.includes(',')) t = t.replace(/\./g, '').replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, '');
+  return t;
+}
+export const valorValido = (v: string | null | undefined) => /^[0-9]{1,10}(\.[0-9]{1,2})?$/.test(valorParaOBanco(v));
+
 export function camposQueFaltam(r: Rascunho, temSetor: boolean, cat?: Categoria | null): Falta[] {
   const f: Falta[] = [];
   if (r.titulo.trim().length < 4) f.push({ campo: 'titulo', texto: 'um título que diga o que é' });
@@ -350,6 +365,9 @@ export function camposQueFaltam(r: Rascunho, temSetor: boolean, cat?: Categoria 
      checar, e "não havia como" é a forma que este defeito usa para voltar. */
   if (cat?.exige_orcamento && !r.orcamento.trim()) {
     f.push({ campo: 'orcamento', texto: 'o valor estimado (esta categoria pede)' });
+  }
+  if ((r.orcamento || '').trim() && !valorValido(r.orcamento)) {
+    f.push({ campo: 'orcamento', texto: 'o valor em reais, como 1.500,00' });
   }
   return f;
 }
@@ -677,7 +695,7 @@ export function telVisivel(t: string | null | undefined): string {
   return t || '';
 }
 
-export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta' | 'pronta'): string {
+export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta' | 'pronta' | 'lembrar'): string {
   const link = `${base.replace(/\/$/, '')}/d/${d.numero}`;
   /* sem travessão: "#105 · título", o mesmo separador das telas */
   const cab = `Demanda #${d.numero} · ${d.titulo}`;
@@ -690,6 +708,12 @@ export function recado(d: Resumo, base: string, o: 'abriu' | 'mudou' | 'pergunta
   }
   if (o === 'pronta') {
     return `${cab}\nFoi concluída. Se não resolveu, dá para reabrir na própria página.\n${link}`;
+  }
+  /* 24/09/2026 (auditoria R12): quem PEDE falando com quem atende. Mandava
+     "Precisamos de uma informação sua" e "Se não resolveu, dá para reabrir",
+     as frases de quem atende, na boca de quem pediu */
+  if (o === 'lembrar') {
+    return `${cab}\nPode dar uma olhada nesta demanda?\n${link}`;
   }
   /* o nome da pílula ("Aguardando informações"), e não o da coluna com a
      trava entre parênteses ("Aguardando retorno (Aguardando …)") */
@@ -817,6 +841,10 @@ function juntarOGesto<E extends Fato>(g: E[]): (E & { marcoAbsorvido?: boolean }
     fora.add(status);
     muda.set(assumiu, { marcoAbsorvido: true });
   }
+  /* concluir sem ter assumido grava quem concluiu como responsável: "Arthur
+     concluiu" já diz, e "Arthur assumiu" embaixo contava ao contrário
+     (24/09/2026, auditoria R12) */
+  if (assumiu && status && status.para === 'concluida') fora.add(assumiu);
   if (status && !fora.has(status) && status.de === 'travada' && (status.para === 'execucao' || status.para === 'aberta')
       && coment && !reab) {
     /* destravar com resposta: a resposta é o texto da linha "destravou" */
@@ -1293,7 +1321,14 @@ export function recadoDoErro(
        transporte, e traduz os dois para a mesma frase genérica. */
     const e = new Error(r.regra) as Error & { code?: string };
     if (r.codigo) e.code = r.codigo;
-    return semTravessao(humano(e, oQueFazia).texto);
+    const t = semTravessao(humano(e, oQueFazia).texto);
+    /* NA LEITURA, NINGUÉM FEZ NADA PARA SE PERDER — 24/09/2026 (auditoria
+       R12). A frase de rede de `lib/erros.ts` (das duas casas, e não muda
+       por causa desta) tranquiliza quem ESCREVEU; ao carregar uma lista, "Nada
+       do que você fez se perdeu" responde uma pergunta que ninguém fez. */
+    return /^(carregar|abrir)/.test(oQueFazia)
+      ? t.replace(/Nada do que você fez se perdeu[:,]?\s*(\S)/, (_m, c: string) => c.toUpperCase())
+      : t;
   }
   return 'Não consegui. Tente de novo.';
 }
@@ -1325,7 +1360,7 @@ export const rotPapel = (p: Papel | string | null | undefined) =>
    crua, e o teste de telas cobra que isso não aconteça. */
 export const PERMISSOES: Record<string, string> = {
   pedir: 'Abrir demandas',
-  acompanhar: 'Acompanhar as que abriu e aquelas em que foi incluído',
+  acompanhar: 'Acompanhar as que abriu e as que incluírem você',
   ver_ministerio: 'Ver o que o ministério pediu',
   validar_ministerio: 'Confirmar a entrega do que o ministério pediu',
   atender_setor: 'Atender a fila do setor',
@@ -1389,7 +1424,10 @@ export function fraseDoEvento(e: { tipo: string; de: string | null; para: string
       if (e.para && e.quem && e.para === e.quem) return `${q} assumiu`;
       return e.para ? `${q} passou para ${souEu(e.para) ? 'você' : e.para}` : `${q} soltou o responsável`;
     case 'setor':       return `${q} mandou de ${e.de} para ${e.para}`;
-    case 'prazo':       return `${q} mudou o prazo${e.de ? ` de ${dataCurta(e.de)}` : ''} para ${e.para ? dataCurta(e.para) : 'sem data'}`;
+    /* tirar o prazo é "tirou o prazo", e não "mudou para sem data" */
+    case 'prazo':
+      if (!e.para) return e.de ? `${q} tirou o prazo (era ${dataCurta(e.de)})` : `${q} deixou sem prazo`;
+      return `${q} ${e.de ? `mudou o prazo de ${dataCurta(e.de)} para` : 'pôs o prazo em'} ${dataCurta(e.para)}`;
     case 'prioridade':  return `${q} mudou a prioridade de ${e.de} para ${e.para}`;
     /* o verbo do botão ("Recusar"), e não a palavra da coluna ("rejeitada") */
     case 'aprovacao':
@@ -1480,6 +1518,21 @@ export function nomesDosSites(sites: readonly string[]): string[] {
    cujo caminho é código (o Drive, o Docs), o nome do serviço; fora deles, o
    fim do caminho sem a busca. O banco continua juntando o site (o rótulo
    carrega o destino, migração 85). */
+/* DOIS LINKS DO MESMO SERVIÇO NÃO VIRAM DUAS LINHAS IGUAIS — 24/09/2026
+   (auditoria R12). Dois arquivos do Drive eram "Google Drive · drive.google.com"
+   duas vezes. Sem nome dado por quem junta, o segundo é "Google Drive 2" (o
+   rótulo do banco é "nome · site", e a comparação é pelo nome). */
+export function nomeSemRepetir(nome: string, existentes: readonly string[]): string {
+  const base = (x: string) => String(x || '').split(' · ')[0].trim().toLowerCase();
+  const usados = new Set(existentes.map(base));
+  if (!usados.has(nome.trim().toLowerCase())) return nome;
+  for (let i = 2; i < 100; i++) {
+    const n = `${nome} ${i}`;
+    if (!usados.has(n.toLowerCase())) return n;
+  }
+  return nome;
+}
+
 export function nomeDoLink(u: string): string {
   let url: URL;
   try { url = new URL(String(u ?? '').trim()); } catch { return 'anexo'; }

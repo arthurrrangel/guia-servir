@@ -18,7 +18,7 @@ import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Opcoes } from '@/com
 import { Icone } from '@/components/demandas/Icone';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
-  HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomeDoLink, nomesDosSites, prazoSugerido,
+  HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomeDoLink, nomeSemRepetir, nomesDosSites, prazoSugerido,
   rascunhoVazio, recadoDeSiteNoCampo, recadoDoErro, quemManda, siteDoLink, siteRecusado, type Rascunho,
 } from '@/lib/demandas/regras';
 import type { Bases, Categoria, Prioridade } from '@/lib/demandas/tipos';
@@ -111,6 +111,7 @@ function Nova() {
   const [r, setR] = useState<Rascunho>(rascunhoVazio());
   const [anexos, setAnexos] = useState<{ nome: string; url: string }[]>([]);
   const [anexoUrl, setAnexoUrl] = useState('');
+  const [anexoNome, setAnexoNome] = useState('');
   const [anexoErro, setAnexoErro] = useState('');
   const [mais, setMais] = useState(false);
   const [semData, setSemData] = useState(false);
@@ -244,7 +245,14 @@ function Nova() {
     setIndo(true); setErro('');
     const x = await abrir({ ...r, sem_prazo_porque: semData ? r.sem_prazo_porque : '' }, anexos);
     setIndo(false);
-    if (!x.ok) { setErro(recadoDoErro(x, 'abrir a demanda')); return; }
+    if (!x.ok) {
+      setErro(recadoDoErro(x, 'abrir a demanda'));
+      /* a recusa aparece à vista: nascia no alto da página, 1016px acima da
+         tela em 390, e o botão só voltava de "Enviando…" (24/09/2026, R12) */
+      requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+      return;
+    }
     /* o rascunho só morre quando o banco confirmou o número. Limpar antes do
        `ok` é perder o texto inteiro numa falha de rede, que é o caso comum no
        4G da igreja e exatamente o que este guardado existe para cobrir. */
@@ -508,7 +516,7 @@ function Nova() {
               ? 'Esta categoria exige o valor. Sem número, a aprovação trava esperando.'
               : 'Quando der para estimar. Ajuda quem decide a comparar pedidos.'}>
             <input inputMode="decimal" value={r.orcamento}
-              onChange={e => setR(v => ({ ...v, orcamento: e.target.value.replace(',', '.') }))} />
+              onChange={e => setR(v => ({ ...v, orcamento: e.target.value }))} />
           </Campo>
 
           {/* 95 · A LISTA DE SITES AVISA AQUI, E NÃO DEPOIS DE ENVIAR: o banco
@@ -525,12 +533,21 @@ function Nova() {
                 if (!siteDoLink(url)) { setAnexoErro('Cole o link inteiro, começando com https://'); return; }
                 const recusado = siteRecusado(url, b?.anexos);
                 if (recusado) { setAnexoErro(recadoDeSiteNoCampo(recusado)); return; }
-                setAnexos(a => [...a, { nome: nomeDoLink(url), url }]);
-                setAnexoUrl(''); setAnexoErro('');
+                setAnexos(a => [...a, { nome: anexoNome.trim() || nomeSemRepetir(nomeDoLink(url), a.map(x => x.nome)), url }]);
+                setAnexoUrl(''); setAnexoNome(''); setAnexoErro('');
               }}>Juntar</button>
             </div>
           </Campo>
           {anexoErro ? <p className="dm-peq dm-erro-campo" role="alert">{anexoErro}</p> : null}
+          {/* o nome aparece só depois do link colado: quem não quer nomear não
+              vê o campo (24/09/2026, auditoria R12) */}
+          {anexoUrl.trim() ? (
+            <Campo rot="Nome do anexo (opcional)" ajuda="Como o anexo aparece na demanda.">
+              <input value={anexoNome} maxLength={120}
+                placeholder={siteDoLink(anexoUrl.trim()) ? nomeSemRepetir(nomeDoLink(anexoUrl.trim()), anexos.map(x => x.nome)) : 'Ex.: Orçamento da loja'}
+                onChange={e => setAnexoNome(e.target.value)} />
+            </Campo>
+          ) : null}
           {b?.anexos?.restrito && b.anexos.sites.length ? (
             <details className="dm-mais">
               <summary>Ver os sites aceitos</summary>

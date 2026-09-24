@@ -137,6 +137,32 @@ export function Campo({ rot, ajuda, erro, falta, classe, children }: {
   );
 }
 
+/* O LINK NO TEXTO É LINK — 24/09/2026 (auditoria R12). O link do Drive
+   colado na descrição ou num comentário era texto puro, quebrado em quatro
+   linhas, e no celular só dava para copiar selecionando. Só `https`, e só o
+   que `podeLinkar` aceita: a ficha passa a mesma regra do anexo, então um
+   link de site fora da lista continua texto (colar não vira convite a
+   clicar). A pontuação do fim da frase não entra no link. */
+export function TextoComLinks({ texto, podeLinkar }: { texto: string; podeLinkar?: (url: string) => boolean }) {
+  const partes = String(texto || '').split(/(https:\/\/[^\s<>"']+)/g);
+  return (
+    <>
+      {partes.map((p, i) => {
+        if (i % 2 === 0) return p;
+        const m = /^(.*?)([.,;:!?)\]]*)$/.exec(p);
+        const url = m ? m[1] : p;
+        const resto = m ? m[2] : '';
+        if (!url || (podeLinkar && !podeLinkar(url))) return p;
+        return (
+          <span key={i}>
+            <a className="dm-link-no-texto" href={url} target="_blank" rel="noopener noreferrer">{url}</a>{resto}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 /** O mesmo desenho do `Campo`, SEM o `<label>`.
 
     UM `<label>` ROTULA O PRIMEIRO DESCENDENTE ROTULAVEL, E ISSO E UM

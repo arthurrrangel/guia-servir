@@ -118,7 +118,9 @@ function Avisos() {
       .map(([d, xs]) => ({ dia: dia(d), grupos: agruparAvisos(xs) }));
   }, [itens]);
 
-  const quantosNovos = novos.reduce((s, g) => s + g.itens.length, 0);
+  /* conta LINHAS (gestos), e não fatos do banco: "Novos 7" em cima de quatro
+     linhas (24/09/2026, auditoria R12) */
+  const quantosNovos = novos.reduce((s, g) => s + umGestoUmaLinha(g.itens).length, 0);
 
   return (
     <div className="dm-leitura">

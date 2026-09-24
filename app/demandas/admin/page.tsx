@@ -388,6 +388,7 @@ function Pedidos({ pedidos, nomeSetor, recarregar }: {
 }) {
   const [indo, setIndo] = useState('');
   const [erro, setErro] = useState('');
+  const ctx = useEu();
   async function decidir(m: Membro, decisao: 'aceitar' | 'recusar') {
     setIndo(m.id); setErro('');
     const r = await ajustar('pedido', { id: m.id, decisao });
@@ -399,6 +400,12 @@ function Pedidos({ pedidos, nomeSetor, recarregar }: {
       return;
     }
     await recarregar();
+    /* a linha some da lista; o recado diz o que aconteceu com quem
+       (24/09/2026, auditoria R12) */
+    const nome = m.nome.split(' ')[0];
+    ctx.toast?.({ texto: decisao === 'aceitar'
+      ? `${nome} agora é ${rotPapel(m.papel_pedido)}.`
+      : `Pedido de ${nome} recusado. Continua como Membro.` });
   }
   return (
     <Secao titulo="Pedidos de papel" n={pedidos.length} destaque sub="Quem se cadastrou pedindo para liderar ou atender. Até decidir, a pessoa usa o sistema como Membro.">

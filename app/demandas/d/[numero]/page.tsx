@@ -22,7 +22,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { recadoParaDepois, useEu } from '@/components/demandas/Casca';
-import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, RascunhoDaCaixa, Secao, useEstreito } from '@/components/demandas/Ui';
+import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, RascunhoDaCaixa, Secao, TextoComLinks, useEstreito } from '@/components/demandas/Ui';
 import { Icone, type NomeDoIcone } from '@/components/demandas/Icone';
 import { confirmar } from '@/components/demandas/Confirmar';
 import { bases, mover, ver } from '@/lib/demandas/api';
@@ -30,7 +30,7 @@ import {
   HOJE, PRIORIDADES, TRAVAS, acoesDe, dataCheia, dataCurta, dataHora, diaNoRio, diasDeAtraso,
   dinheiro, iniciais, linkZap, pedidoPara, primariaDe, quando, quemManda, recado, recadoDoErro,
   rotTrava, situacao, tetoDe, type Acao,
-  fraseDoEvento, dicaDeAnexo, nomeDoLink, recadoDeSiteNoCampo, siteDoLink, siteRecusado, umGestoUmaLinha,
+  fraseDoEvento, dicaDeAnexo, nomeDoLink, nomeSemRepetir, nomesDosSites, recadoDeSiteNoCampo, siteDoLink, siteRecusado, umGestoUmaLinha,
 } from '@/lib/demandas/regras';
 import type { Bases, Vista } from '@/lib/demandas/tipos';
 
@@ -46,6 +46,9 @@ const FORA_DA_GRADE: Acao[] = ['comentar'];
    botão-texto). `cancelar` é ajuste em perigo. A ordem é a de leitura. */
 const PRINCIPAIS: Acao[] = ['aprovar', 'rejeitar', 'assumir', 'concluir', 'travar', 'destravar', 'validar', 'reabrir'];
 const AJUSTES: Acao[] = ['prazo', 'prioridade', 'redirecionar', 'anexar', 'cancelar'];
+/* as recusas que querem dizer "a ficha que você vê ficou velha" */
+const CONFLITO = ['JA_TEM_DONO', 'JA_VALIDADA', 'JA_FECHADA', 'NAO_ESTA_TRAVADA', 'NAO_ESTA_PENDENTE',
+                  'NAO_ESTA_FECHADA', 'NAO_ESTA_CONCLUIDA', 'FALTA_APROVACAO', 'NAO_PARTICIPA'];
 /* os gestos cuja recusa aparece no próprio bloco, e não no alto da ficha */
 const NO_PROPRIO_BLOCO: (Acao | '')[] = ['comentar', 'incluir', 'tirar'];
 
@@ -104,8 +107,15 @@ function Uma() {
     const r = await mover(numero, acao, dados);
     setIndo(false);
     if (!r.ok) {
-      setErro(recadoDoErro(r, 'salvar')); setErroDe(acao);
-      if (acao === 'assumir' || acao === 'validar') {
+      /* A RECUSA POR CONFLITO RECARREGA A FICHA ANTES DE FALAR — 24/09/2026
+         (auditoria R12). "Outra pessoa assumiu esta demanda primeiro" aparecia
+         em cima de "ninguém assumiu" e do botão preto "Assumir e começar": a
+         ficha era a de antes do conflito. Recarregar limpa o erro (ver
+         `aplicar`), então a frase entra depois. */
+      const frase = recadoDoErro(r, 'salvar');
+      if (r.erro && CONFLITO.includes(r.erro)) await carregar();
+      setErro(frase); setErroDe(acao);
+      if (acao === 'assumir' || acao === 'validar' || acao === 'desanexar') {
         requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
           ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
       }
@@ -134,7 +144,8 @@ function Uma() {
     }
     await carregar();
     if (acao === 'assumir') ctx.toast?.({ texto: `Demanda #${numero} é sua. Ela está em execução.` });
-    if (acao === 'validar') ctx.toast?.({ texto: 'Confirmado. Obrigado por dizer.' });
+    /* o "obrigado" é de quem pediu; a gestão só lê que ficou confirmado */
+    if (acao === 'validar') ctx.toast?.({ texto: (v?.eu.pede ?? v?.eu.abriu) ? 'Confirmado. Obrigado por dizer.' : 'Confirmado pela gestão.' });
     return true;
   }
 
@@ -236,6 +247,8 @@ function Uma() {
   /* a raiz do SISTEMA, não do site: os links que saem daqui pelo WhatsApp
      precisam cair em /demandas, e não na home da igreja */
   const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
+  /* o link colado no texto vira link pela mesma porta do anexo */
+  const linkavel = (u: string) => !!siteDoLink(u) && !siteRecusado(u, b?.anexos);
 
   /* o que contradiz a ficha não vira botão: "Assumir e começar" quando a
      demanda já está com a pessoa (o servidor aceita, como troca de dono, mas
@@ -287,7 +300,9 @@ function Uma() {
       case 'destravar':    return (v.eu.pede ?? v.eu.abriu) && d.travada_por === 'informacao' ? 'Responder e destravar' : 'Destravar';
       case 'reabrir':      return 'Reabrir';
       /* o "obrigado" é de quem pediu; a gestão confirma no lugar dele */
-      case 'validar':      return quemPediuOlha ? 'Resolveu, obrigado' : 'Confirmar pela gestão';
+      /* e a líder, que responde pelo ministério sem ter aberto, confirma sem
+         o "obrigado" na boca de quem não pediu */
+      case 'validar':      return v.eu.abriu ? 'Resolveu, obrigado' : quemPediuOlha ? 'Confirmar que resolveu' : 'Confirmar pela gestão';
       case 'prazo':        return 'Mudar o prazo';
       case 'prioridade':   return 'Rever a prioridade';
       case 'redirecionar': return 'Mandar para outro setor';
@@ -399,7 +414,7 @@ function Uma() {
       </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
       <RascunhoDaCaixa.Provider value={guarda}>
-        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} anexos={v.anexos} />
       </RascunhoDaCaixa.Provider>
     </div>
   ) : (
@@ -475,10 +490,18 @@ function Uma() {
       {d.falta_aprovacao ? (
         <Aviso tom="warn">
           <b>Aguardando aprovação</b>
+          {/* O PORQUÊ DA APROVAÇÃO, ONDE QUEM DECIDE LÊ — 24/09/2026 (auditoria
+              R12). Quem trava por aprovação escreve o motivo ("trilha
+              licenciada, R$ 300"), e o banco escreve os dele ("passa do
+              teto…"); a atividade esconde a nota porque ela estaria aqui, e
+              aqui só havia a frase genérica. Com nota, a nota; sem ela, a
+              frase. */}
           <div className="dm-aviso-mais">
-            {d.aprovacao === 'pendente'
-              ? 'A gestão precisa decidir antes de esta demanda andar.'
-              : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a gestão decidir.'}
+            {d.travada_nota
+              ? d.travada_nota
+              : d.aprovacao === 'pendente'
+                ? 'A gestão precisa decidir antes de esta demanda andar.'
+                : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a gestão decidir.'}
             {(v.eu.aprova ?? quemManda(v.eu.papel))
               ? <> Você pode aprovar ou recusar nesta página.</>
               : <> Quem decide é a gestão. Não há o que fazer aqui enquanto isso.</>}
@@ -521,7 +544,8 @@ function Uma() {
               pedido. */}
           {d.validada_em ? (
             <div className="dm-aviso-mais">
-              Validada{d.validada_por ? ` por ${d.validada_por}` : ''} em {dataCheia(d.validada_em)}.
+              {/* "confirmada", a palavra das outras telas (a do PDF é "validada") */}
+              Confirmada{d.validada_por ? ` por ${d.validada_por}` : ''} em {dataCheia(d.validada_em)}.
             </div>
           ) : null}
         </Aviso>
@@ -577,7 +601,7 @@ function Uma() {
           <Secao titulo="O que foi pedido">
             <div className="dm-caixa">
               <div className="dm-caixa-corpo">
-                <p className="dm-texto-livre">{d.descricao}</p>
+                <p className="dm-texto-livre"><TextoComLinks texto={d.descricao} podeLinkar={linkavel} /></p>
                 {d.objetivo ? <p className="dm-peq dm-mudo dm-depois-do-texto">Objetivo: {d.objetivo}</p> : null}
                 {d.impacto ? <p className="dm-peq dm-depois-do-texto"><b>Impacto:</b> {d.impacto}</p> : null}
                 {pares ? (
@@ -684,7 +708,7 @@ function Uma() {
                             na atividade fica o gesto (quem, quando) */}
                         {e.texto && !(e.tipo === 'status' && e.para === 'concluida' && e.texto === d.conclusao)
                           && !(i === ultimaTrava && e.texto === d.travada_nota)
-                          ? <div className="dm-t">{e.texto}</div> : null}
+                          ? <div className="dm-t"><TextoComLinks texto={e.texto} podeLinkar={linkavel} /></div> : null}
                       </div>
                     </li>
                   ))}
@@ -759,7 +783,7 @@ function Uma() {
             </>
           ) : (
             <RascunhoDaCaixa.Provider value={guarda}>
-        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} anexos={v.anexos} />
       </RascunhoDaCaixa.Provider>
           )}
         </Folha>
@@ -905,7 +929,10 @@ function recadoDe(d: Vista['demanda'], eu: Vista['eu']) {
   const alvo = eu.atende
     ? { nome: d.abriu, tel: d.abriu_telefone, quem: 'quem pediu' }
     : { nome: d.responsavel || '', tel: d.resp_telefone, quem: 'quem atende' };
-  const tipo = d.status === 'concluida' ? 'pronta'
+  /* as frases de "pronta" e "pergunta" são de quem atende; quem pede
+     escreve para quem atende com a dele */
+  const tipo = !eu.atende ? 'lembrar'
+    : d.status === 'concluida' ? 'pronta'
     : d.status === 'travada' && d.travada_por === 'informacao' ? 'pergunta'
     : 'mudou';
   return { ...alvo, tipo, zap: linkZap(alvo.tel, '') };
@@ -931,8 +958,10 @@ function Recados({ d, base, eu }: { d: Vista['demanda']; base: string; eu: Vista
 }
 
 /* -------------------------------------------- o formulário da ação aberta */
-function Formulario({ aberto, d, b, eu, indo, agir }: {
+function Formulario({ aberto, d, b, eu, indo, agir, anexos = [] }: {
   aberto: Acao | ''; d: Vista['demanda']; b: Bases | null; eu: Vista['eu']; indo: boolean;
+  /* os anexos que já estão na demanda, para o nome do novo não repetir */
+  anexos?: { nome: string }[];
   /* devolve `false` quando o servidor recusou, e é assim que a `CaixaDeAcao`
      sabe que NÃO pode apagar o que a pessoa escreveu */
   agir: (a: Acao, dados?: Record<string, unknown>) => Promise<boolean>;
@@ -947,6 +976,7 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
   const [setor, setSetor] = useState('');
   const [url, setUrl] = useState('');
   const [urlErro, setUrlErro] = useState('');
+  const [nomeAnexo, setNomeAnexo] = useState('');
   /* o motivo do atraso também fica guardado com o rascunho da ação */
   const [atraso, setAtrasoLocal] = useState(() => guarda?.ler('atraso') ?? '');
   const setAtraso = (x: string) => { setAtrasoLocal(x); guarda?.gravar(x, 'atraso'); };
@@ -998,9 +1028,15 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
                          .map(t => ({ v: t.v, rot: t.rot }))}
             aoMudar={v => setMotivo(v)} />
         </Bloco>
-        <CaixaDeAcao rot="O que falta, exatamente" botao="Travar" salvando={indo}
+        {/* quem lê a nota depende do motivo: a pergunta vai para quem pediu,
+            o porquê da aprovação vai para a gestão, e o de terceiros fica
+            no registro (24/09/2026, auditoria R12) */}
+        <CaixaDeAcao rot={motivo === 'aprovacao' ? 'O que precisa ser aprovado, e por quê' : motivo === 'terceiros' ? 'Esperando o quê, e de quem' : 'O que falta, exatamente'}
+          botao="Travar" salvando={indo}
           teto={tetoDe('travar')}
-          dica="Quem pediu vai ler isto. Seja específico: “qual sala?” resolve; “falta informação” não."
+          dica={motivo === 'aprovacao' ? 'A gestão vai ler isto para decidir. Diga o valor e o motivo.'
+            : motivo === 'terceiros' ? 'Fica no registro da demanda. Diga quem e até quando, se souber.'
+            : 'Quem pediu vai ler isto. Seja específico: “qual sala?” resolve; “falta informação” não.'}
           aoEnviar={t => agir('travar', { motivo, texto: t })} />
       </div>
     );
@@ -1130,7 +1166,7 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
       if (!siteDoLink(u)) { setUrlErro('Cole o link inteiro, começando com https://'); return; }
       const recusado = siteRecusado(u, b?.anexos);
       if (recusado) { setUrlErro(recadoDeSiteNoCampo(recusado)); return; }
-      agir('anexar', { url: u, nome: nomeDoLink(u) });
+      agir('anexar', { url: u, nome: nomeAnexo.trim() || nomeSemRepetir(nomeDoLink(u), anexos.map(a => a.nome)) });
     };
     return (
       <div className="dm-acao-form">
@@ -1138,6 +1174,19 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
           <input value={url} placeholder="https://…" inputMode="url"
             aria-invalid={urlErro ? true : undefined}
             onChange={e => { setUrl(e.target.value); setUrlErro(''); }} />
+        </Campo>
+        {/* a lista inteira, como na Nova: "e mais 18" sem ter onde ver era
+            promessa (24/09/2026, auditoria R12) */}
+        {b?.anexos?.restrito && b.anexos.sites.length > 4 ? (
+          <details className="dm-mais">
+            <summary>Ver os sites aceitos</summary>
+            <p>{nomesDosSites(b.anexos.sites).join(', ')}.</p>
+          </details>
+        ) : null}
+        <Campo rot="Nome (opcional)" ajuda="Como o anexo aparece na demanda.">
+          <input value={nomeAnexo} maxLength={120}
+            placeholder={siteDoLink(url.trim()) ? nomeSemRepetir(nomeDoLink(url.trim()), anexos.map(a => a.nome)) : 'Ex.: Orçamento da loja'}
+            onChange={e => setNomeAnexo(e.target.value)} />
         </Campo>
         <button type="button" className="dm-btn dm-pri dm-larga" disabled={indo || !url.trim()} onClick={juntar}>Juntar</button>
       </div>

@@ -16,7 +16,7 @@ import {
   siteDoLink, siteNaLista, siteRecusado, dicaDeAnexo, nomesDosSites, recadoDeSite,
   horas, dinheiro, dataCheia, rotStatus, carimbo, CODIGOS, HOJE, TETO, tetoDe, pedidoPara, primariaDe, iniciais,
   chaveDoSetor, setorDoLink, pedidoDoLink, buscaDoLink, diaNoRio, dataCurta, fraseDoEvento, umOuVarios,
-  alcanceDoAtendimento, umGestoUmaLinha, nomeDoLink,
+  alcanceDoAtendimento, umGestoUmaLinha, nomeDoLink, valorParaOBanco, valorValido, camposQueFaltam,
 } from '../lib/demandas/regras.ts';
 import { ehRecusaDeIdentidade, rpcCom } from '../lib/demandas/api.ts';
 
@@ -1023,16 +1023,27 @@ function servidorAceita(acao, d, eu) {
   ok(corpoAgir !== null, 'achei o `agir` da ficha para executar');
   /* `setErroDe` (24/09/2026): a recusa lembra de qual gesto veio, para
      aparecer no bloco dele */
+  /* `CONFLITO` (24/09/2026): as recusas que recarregam a ficha antes */
   const agir = new Function('acao', 'dados', 'setIndo', 'setErro', 'mover', 'numero',
-                            'recadoDoErro', 'setAberto', 'carregar', 'setErroDe',
+                            'recadoDoErro', 'setAberto', 'carregar', 'setErroDe', 'CONFLITO',
     `return (async () => {${corpoAgir}})();`);
   const nada = () => {};
+  const CONF = ['JA_TEM_DONO'];
   const recusa = await agir('concluir', {}, nada, nada,
     async () => ({ ok: false, erro: 'ATRASO_PRECISA_MOTIVO' }), 7,
-    () => 'qualquer frase', nada, async () => {}, nada);
+    () => 'qualquer frase', nada, async () => {}, nada, CONF);
   ok(recusa === false, 'recusa do servidor devolve false, que é o que segura o texto');
   const passou = await agir('concluir', {}, nada, nada,
-    async () => ({ ok: true }), 7, () => '', nada, async () => {}, nada);
+    async () => ({ ok: true }), 7, () => '', nada, async () => {}, nada, CONF);
+  /* e a recusa por conflito recarrega a ficha ANTES de pôr a frase: a ordem
+     é o que impede o recarregamento de apagar o erro */
+  {
+    const ordem = [];
+    await agir('assumir', {}, nada, x => { if (x) ordem.push('erro'); },
+      async () => ({ ok: false, erro: 'JA_TEM_DONO' }), 7, () => 'Outra pessoa assumiu', nada,
+      async () => { ordem.push('recarregou'); }, nada, CONF).catch(() => {});
+    ok(ordem.join(',') === 'recarregou,erro', 'conflito: recarrega a ficha e só depois mostra a recusa', ordem.join(','));
+  }
   ok(passou === true, 'e o caminho bom devolve true');
 
   /* ---- 8c. o comentário interno: a chave que ninguém mandava -------------
@@ -1150,7 +1161,7 @@ function servidorAceita(acao, d, eu) {
       'e "Concluir" abre o formulário em vez de gravar', JSON.stringify(roda('concluir')));
   }
   /* 24/09/2026 (R11): para quem pediu; a gestão lê "Confirmar pela gestão" */
-  ok(/case 'validar':[^\n]*quemPediuOlha \? 'Resolveu, obrigado' : 'Confirmar pela gestão'/.test(ficha),
+  ok(/case 'validar':[^\n]*'Resolveu, obrigado'[^\n]*'Confirmar pela gestão'/.test(ficha),
     'o botão de validar se chama "Resolveu, obrigado" para quem pediu, e "Confirmar pela gestão" para a gestão');
 
   /* ---- 8e. as ações que NÃO viram botão na grade ------------------------- */
@@ -1453,6 +1464,10 @@ function servidorAceita(acao, d, eu) {
   ok(frases(mandar).join(' | ') === 'Maria mandou de Comunicação para Manutenção e infraestrutura' && lm[0].marcoAbsorvido,
     'mandar para outro setor é uma linha, e ela muda o estado (marco)', frases(mandar).join(' | '));
 
+  const concluirDireto = [f('status', ARTHUR, { de: 'aberta', para: 'concluida', texto: 'Feito.' }),
+                          f('responsavel', ARTHUR, { para: ARTHUR })];
+  ok(frases(concluirDireto).join(' | ') === 'Arthur concluiu «Feito.»',
+    'concluir sem ter assumido é "concluiu", sem "assumiu" embaixo', frases(concluirDireto).join(' | '));
   const assumir = [f('status', MARIA, { de: 'aberta', para: 'execucao' }), f('responsavel', MARIA, { para: MARIA })];
   ok(frases(assumir).join(' | ') === 'Maria assumiu', 'assumir continua uma linha', frases(assumir).join(' | '));
 
@@ -1496,6 +1511,27 @@ function servidorAceita(acao, d, eu) {
     'fora dos serviços conhecidos, o fim do caminho sem o "edit"', nomeDoLink('https://exemplo.org/pasta/relatorio-anual/edit'));
   ok(nomeDoLink('https://exemplo.org/') === 'exemplo.org' && nomeDoLink('não é link') === 'anexo',
     'sem caminho, o site; sem link, "anexo"');
+}
+
+{
+  /* O VALOR COMO SE ESCREVE NO BRASIL (24/09/2026, auditoria R12): o campo
+     trocava a vírgula por ponto enquanto se digitava, "1.500,00" virava
+     "1.500.00" e o banco recusava. A regra do banco é a de `dem_abrir`. */
+  const BANCO = /^[0-9]{1,10}([.,][0-9]{1,2})?$/;
+  for (const [escrito, vai] of [['1.500,00', '1500.00'], ['1500,5', '1500.5'], ['1.500', '1500'],
+                                ['R$ 14.750,90', '14750.90'], ['300', '300'], ['1500.50', '1500.50'],
+                                [' 2.000.000,00 ', '2000000.00']]) {
+    ok(valorParaOBanco(escrito) === vai && BANCO.test(vai), `"${escrito}" chega ao banco como ${vai}`, valorParaOBanco(escrito));
+  }
+  ok(!valorValido('1.500.00') && !valorValido('abc') && !valorValido('12,345') && valorValido('1.500,00'),
+    'o que o banco recusaria a tela recusa antes, e o que ele aceita passa');
+  const rasc = { ...rascunhoVazio(), titulo: 'Cadeiras novas', descricao: 'Doze cadeiras para a sala.', categoria_id: 'c1',
+                 prazo: '2026-10-10', orcamento: '1.500.00' };
+  ok(camposQueFaltam(rasc, true).some(f => f.campo === 'orcamento' && /1\.500,00/.test(f.texto)),
+    'valor torto é falta no campo de orçamento, com o exemplo do jeito brasileiro',
+    JSON.stringify(camposQueFaltam(rasc, true)));
+  ok(!camposQueFaltam({ ...rasc, orcamento: '1.500,00' }, true).some(f => f.campo === 'orcamento'),
+    'e "1.500,00" não é falta');
 }
 
 if (falhas) { console.log(`regras: ${falhas} falha(s) em ${feitas}`); process.exit(1); }

@@ -63,8 +63,13 @@ function Atendimento() {
       if (v && VISTAS.some(x => x.v === v)) setVista(v);
     } catch { /* sem URL legível, fica no primeiro */ }
   }, []);
+  /* sem as contas, as abas ficam sem número, e não com "·" para sempre
+     (24/09/2026, auditoria R12): a lista de cada aba tem o próprio erro */
+  const [semContas, setSemContas] = useState(false);
   useEffect(() => {
-    portal().then(r => { if (r.ok && (r as unknown as Portal).n) setP(r as unknown as Portal); });
+    portal().then(r => {
+      if (r.ok && (r as unknown as Portal).n) setP(r as unknown as Portal); else setSemContas(true);
+    });
   }, []);
 
   if (!eu) return null;
@@ -101,7 +106,7 @@ function Atendimento() {
       <Subabas<Vista> rot="O que ver" valor={vista} aoMudar={setVista}
         itens={VISTAS.map(x => ({
           v: x.v, rot: x.v === 'fila' ? a.legendaFila : x.legenda,
-          n: p ? x.conta(p.n) : null, bad: x.v === 'atrasadas', destaque: x.v === 'agir',
+          n: p ? x.conta(p.n) : semContas ? undefined : null, bad: x.v === 'atrasadas', destaque: x.v === 'agir',
         }))} />
 
       <Lista eu={eu} abas={[]} recortes={[]} controle={{ aba: atual.aba, so: atual.so }}

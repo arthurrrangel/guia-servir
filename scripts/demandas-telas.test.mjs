@@ -99,7 +99,9 @@ const DUBLES = {
     export const usePathname = () => globalThis.__caminho || '/demandas';
     export const useRouter = () => ({
       push(u) { (globalThis.__idas = globalThis.__idas || []).push(String(u)); },
-      replace() {}, refresh() {},
+      /* o \`replace\` também fica registrado (24/09/2026): é por ele que a casca
+         leva quem está sem sessão para a porta */
+      replace(u) { (globalThis.__idas = globalThis.__idas || []).push(String(u)); }, refresh() {},
     });
     export const useSearchParams = () => new URLSearchParams(globalThis.__busca || '');
     export const useParams = () => globalThis.__params || { numero: '1' };`,
@@ -1095,8 +1097,11 @@ console.log('\n5. O campo de orçamento não depende da categoria exigir orçame
     'e continua lá numa categoria que NÃO exige orçamento (31 das 43)');
   await teclar(campo(alvo, 'Orçamento estimado (R$)'), '250,50');
   await assentar();
-  ok(valorDe(campo(alvo, 'Orçamento estimado (R$)')) === '250.50',
-    'o valor digitado é aceito e a vírgula vira ponto',
+  /* 24/09/2026 (auditoria R12): o campo guarda o que a pessoa escreveu, com
+     a vírgula; a tradução para o banco é na hora de mandar (`valorParaOBanco`).
+     Trocar a vírgula enquanto se digitava fazia "1.500,00" virar "1.500.00" */
+  ok(valorDe(campo(alvo, 'Orçamento estimado (R$)')) === '250,50',
+    'o valor digitado fica como foi escrito, com a vírgula',
     valorDe(campo(alvo, 'Orçamento estimado (R$)')));
 
   await escolher(campo(alvo, 'Categoria'), 'c2');
@@ -1244,6 +1249,28 @@ const BASES_NOVA = {
   ok(/Falta a categoria\./.test(texto(alvo)), 'com a frase embaixo do campo', texto(alvo).slice(0, 400));
   ok(document.activeElement === campo(alvo, 'Categoria'), 'e o foco vai para o campo que falta',
     String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+{
+  /* O VALOR DO JEITO BRASILEIRO CHEGA AO BANCO (24/09/2026, auditoria R12):
+     "1.500,00" virava "1.500.00" no campo e o banco recusava; e a recusa
+     nascia no alto da página, fora da tela */
+  mundoNovo();
+  const b = banco({ dem_quem_sou: EU_GESTOR, dem_bases: BASES_NOVA,
+    dem_abrir: { ok: true, numero: 43, precisa_aprovacao: false, setor_responsavel: 'Comunicação', contato: null } });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Nova);
+  await teclar(campo(alvo, 'Título'), 'Cadeiras para a sala');
+  await teclar(campo(alvo, 'O que precisa ser feito'), 'Doze cadeiras para a sala do Kids.');
+  await teclar(campo(alvo, 'Para quando'), '2026-10-01');
+  await escolher(campo(alvo, 'Categoria'), 'c1');
+  await clicar(botao(alvo, 'Evento, local, orçamento e anexos'));
+  await teclar(campo(alvo, 'Orçamento estimado (R$)'), '1.500,00');
+  await assentar();
+  await clicar(botao(alvo, 'Enviar a demanda'));
+  const c = b.ultima('dem_abrir');
+  ok(c && c.args.p_d.orcamento === '1500.00', '"1.500,00" vai ao banco como 1500.00',
+    JSON.stringify(c && c.args.p_d.orcamento));
   await desmontar();
 }
 {
@@ -1553,7 +1580,7 @@ const FORA_DA_GRADE = ['comentar'];
 const rotDe = (a, d, quem) => (a === 'destravar' && quem.abriu && d.travada_por === 'informacao'
   ? 'Responder e destravar'
   /* o "obrigado" é de quem pediu; a gestão confirma no lugar dele (R11) */
-  : a === 'validar' && !(quem.pede ?? quem.abriu) ? 'Confirmar pela gestão'
+  : a === 'validar' && !quem.abriu ? ((quem.pede ?? quem.abriu) ? 'Confirmar que resolveu' : 'Confirmar pela gestão')
   : ROTULO[a]);
 /* O QUE CONTRADIZ A FICHA NÃO VIRA BOTÃO (23/09/2026, auditoria do Fable):
    "Assumir e começar" quando a demanda já está com a pessoa, e "Travar" numa
@@ -1943,7 +1970,7 @@ console.log('\n13. A ficha: o cartão verde de concluída e a etapa 5 do PDF');
       validada_em: '2026-09-14T09:30:00Z', validada_por: 'Pedro Jovens' },
     QUEM.pediu));
   const t = texto(alvo);
-  ok(/Validada por Pedro Jovens em 14\/09\/2026/.test(t),
+  ok(/Confirmada por Pedro Jovens em 14\/09\/2026/.test(t),
     'demanda já confirmada diz quem confirmou e quando', t.slice(0, 400));
   ok(!botao(alvo, 'Resolveu, obrigado'),
     'e o botão de confirmar some: confirmar duas vezes o servidor recusa');
@@ -2011,6 +2038,17 @@ console.log('\n14. A ficha: o portão de aprovação fala antes de tudo');
      mesma coisa em palavras diferentes é ruído */
   ok((avisosDe(alvo).match(/Aguardando aprovação/g) || []).length === 1,
     'e o aviso do portão aparece uma vez só', avisosDe(alvo));
+  await desmontar();
+}
+{
+  /* e quem decide lê POR QUE a aprovação foi pedida (24/09/2026, R12): a
+     nota da trava morava escondida entre o aviso genérico e a atividade */
+  const { alvo, desmontar } = await comFicha(vista(
+    { status: 'travada', travada_por: 'aprovacao', aprovacao: 'pendente', falta_aprovacao: true,
+      travada_nota: 'Trilha licenciada, R$ 300 por ano.' },
+    QUEM.gestor));
+  ok(/Trilha licenciada, R\$ 300 por ano/.test(avisosDe(alvo)),
+    'o aviso de aprovação traz o porquê escrito por quem travou', avisosDe(alvo));
   await desmontar();
 }
 {
@@ -2445,6 +2483,27 @@ console.log('\n21. O cadastro: o e-mail primeiro, e depois só o que é da pesso
   ok(otp && /\/demandas\/entrar\?volta=%2Fdemandas%2Fcadastro$/.test(otp.options.emailRedirectTo),
     'e o link volta pela porta das demandas, direto para o cadastro', otp && otp.options.emailRedirectTo);
   ok(b.chamadas.length === 0, 'e nenhuma função do banco foi chamada sem login', JSON.stringify(b.chamadas));
+  await desmontar();
+}
+{
+  /* SEM REDE NÃO É SEM CADASTRO — 24/09/2026 (auditoria R12). A primeira
+     pergunta caindo por rede fazia a casca dizer "Falta só o seu cadastro"
+     a quem já tinha (e "Entrar" a quem veio pelo link). */
+  mundoNovo();
+  const b = banco({ dem_quem_sou: { __erro: { message: 'TypeError: Failed to fetch' } } });
+  b.auth = { getSession: async () => ({ data: { session: { user: { email: 'lara@exemplo.com' } } } }) };
+  globalThis.__banco = b;
+  globalThis.__idas = [];
+  const { alvo, desmontar } = await montar(Inicio);
+  const t = texto(alvo);
+  ok(/Não consegui abrir as demandas/.test(t) && !!botao(alvo, 'Tentar de novo'),
+    'sem rede, a porta diz que não conseguiu, com "Tentar de novo"', t.slice(0, 300));
+  ok(!/Falta só o seu cadastro/.test(t) && !(globalThis.__idas || []).some(x => /entrar/.test(String(x))),
+    'e não manda fazer cadastro nem entrar de novo', t.slice(0, 300));
+  ok(!/Nada do que você fez se perdeu/.test(t), 'e não fala de trabalho perdido numa leitura', t.slice(0, 300));
+  const antes = b.quantas('dem_quem_sou');
+  await clicar(botao(alvo, 'Tentar de novo'), 'o Tentar de novo da porta');
+  ok(b.quantas('dem_quem_sou') > antes, '"Tentar de novo" pergunta de novo', String(b.quantas('dem_quem_sou')));
   await desmontar();
 }
 {

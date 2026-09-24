@@ -85,6 +85,8 @@ export function Setores({ b, indo, salvar }: {
       titulo: `Desativar o setor ${s.nome}?`,
       texto: 'Ele some das listas de quem pede e de quem atende, e as demandas que já estão nele continuam lá.',
       acao: 'Desativar',
+      /* esta tela não reativa setor: para quem usa, não volta */
+      perigo: true,
     });
     if (ok) salvar('setor', { id: s.id, ativo: false });
   };
@@ -214,11 +216,14 @@ export function Categorias({ b, indo, salvar }: {
       <input className="dm-ctl dm-estreito" type="number" min={0} inputMode="numeric"
         aria-label={`Dias sugeridos, ${c.nome}`}
         defaultValue={c.prazo_padrao_dias ?? ''} disabled={indo}
-        onBlur={e => {
-          const v = e.target.value.trim();
+        onBlur={async e => {
+          const campo = e.currentTarget;
+          const v = campo.value.trim();
           const antigo = c.prazo_padrao_dias ?? '';
           if (String(v) === String(antigo)) return;
-          salvar('categoria', { id: c.id, prazo_padrao_dias: v });
+          /* recusado, o campo volta ao que está salvo: continuar mostrando o
+             valor que não entrou dizia que ele entrou (24/09/2026, R12) */
+          if (!(await salvar('categoria', { id: c.id, prazo_padrao_dias: v }))) campo.value = String(antigo);
         }} />
       <span className="dm-peq dm-mudo">dias</span>
     </div>

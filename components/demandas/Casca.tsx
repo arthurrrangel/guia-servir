@@ -38,9 +38,9 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Suspense, createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { Suspense, createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ehRecusaDeIdentidade, esquecerToken, quemSou } from '@/lib/demandas/api';
-import { iniciais, rotPapel } from '@/lib/demandas/regras';
+import { iniciais, recadoDoErro, rotPapel } from '@/lib/demandas/regras';
 import { sb } from '@/lib/supabase';
 import type { Eu } from '@/lib/demandas/tipos';
 import { Icone, type NomeDoIcone } from './Icone';
@@ -59,6 +59,9 @@ import { Aviso, Esqueleto, Toast, Vazio, useFitaQueRola, type ToastPedido } from
    assinatura. */
 type Ctx = {
   eu: Eu | null; carregando: boolean; semSistema?: boolean;
+  /* a falha que NÃO é de identidade (rede, configuração): a casca não pode
+     concluir daí que a pessoa saiu ou não tem cadastro (24/09/2026, R12) */
+  falha?: string; tentarDeNovo?: () => void;
   /* 94 · a tela de avisos zera o contador da casca quando a pessoa os abre.
      Sem isto o número continuava na barra até a próxima carga, dizendo que
      havia coisa nova sobre o que ela acabou de ler. */
@@ -321,7 +324,7 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
      `?volta=`; a porta só aceita o que, normalizado, continua em
      `/demandas` (ver `destino()` em `app/demandas/entrar/page.tsx`). */
   const router = useRouter();
-  const semSessao = !carregando && !eu && !semSistema && email === null;
+  const semSessao = !carregando && !eu && !semSistema && !ctx.falha && email === null;
   useEffect(() => {
     if (!semSessao) return;
     const aqui = caminho + (typeof window !== 'undefined' ? window.location.search : '');
@@ -338,6 +341,18 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
         </aside>
         <main className="dm-corpo"><Esqueleto forma="lista" /></main>
       </div>
+    );
+  }
+
+  if (!eu && ctx.falha) {
+    /* sem rede, a porta diz isso, e não "entre" nem "faça o cadastro" */
+    return (
+      <Porta>
+        <div className="dm-rot">Sem conexão</div>
+        <h1>Não consegui abrir as demandas</h1>
+        <Aviso tom="bad">{ctx.falha}</Aviso>
+        <button type="button" className="dm-btn dm-pri dm-larga" onClick={() => ctx.tentarDeNovo?.()}>Tentar de novo</button>
+      </Porta>
     );
   }
 
@@ -492,16 +507,26 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
   const [eu, setEu] = useState<Eu | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [semSistema, setSemSistema] = useState(false);
-  useEffect(() => {
-    let vivo = true;
+  /* SEM REDE NÃO É SEM CADASTRO — 24/09/2026 (auditoria R12). Quando a
+     primeira pergunta ("quem sou") falhava por rede, a casca lia a falta de
+     resposta como falta de pessoa: quem entrou pelo link caía em "Entrar", e
+     quem entrou pelo e-mail lia "Falta só o seu cadastro". A queda do 4G é o
+     caso comum. Agora a falha que não é de identidade tem porta própria, com
+     "Tentar de novo". */
+  const [falha, setFalha] = useState('');
+  const vivo = useRef(true);
+  const carregar = useCallback(() => {
+    setCarregando(true); setFalha('');
     const responder = (r: { ok?: boolean; erro?: string } | null) => {
-      if (!vivo) return;
+      if (!vivo.current) return;
+      const deRede = !!r && !r.ok && !ehRecusaDeIdentidade(r as { ok: boolean; erro?: string }) && r.erro !== 'SEM_SISTEMA';
       setEu(r && r.ok ? (r as unknown as Eu) : null);
       setSemSistema(!!r && !r.ok && r.erro === 'SEM_SISTEMA');
+      setFalha(deRede ? recadoDoErro(r, 'abrir as demandas') : '');
       setCarregando(false);
     };
     quemSou().then(r => {
-      if (!vivo) return;
+      if (!vivo.current) return;
       if (r.ok) { responder(r); return; }
       /* link velho guardado sombreia o login por e-mail: descarta e repergunta.
          Só quando a recusa é de IDENTIDADE — ver `ehRecusaDeIdentidade`. */
@@ -513,8 +538,12 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
       }
       responder(r);
     });
-    return () => { vivo = false; };
   }, []);
+  useEffect(() => {
+    vivo.current = true;
+    carregar();
+    return () => { vivo.current = false; };
+  }, [carregar]);
   const zerarAvisos = () => setEu(e => (e ? { ...e, avisos: 0 } : e));
   const ajustarEu = (p: Partial<Eu>) => setEu(e => (e ? { ...e, ...p } : e));
   const [toast, setToast] = useState<ToastPedido | null>(null);
@@ -531,7 +560,7 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
     } catch { /* sem armazenamento, sem recado: a tela de destino continua certa */ }
   }, []);
   return (
-    <Contexto.Provider value={{ eu, carregando, semSistema, zerarAvisos, ajustarEu,
+    <Contexto.Provider value={{ eu, carregando, semSistema, falha, tentarDeNovo: carregar, zerarAvisos, ajustarEu,
                                 toast: pedirToast, toastAtual: toast, fecharToast }}>
       <CascaInterna admin={admin}>{children}</CascaInterna>
     </Contexto.Provider>

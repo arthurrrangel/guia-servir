@@ -24,6 +24,9 @@ export type Confirmacao = {
   acao?: string;
   /** Não volta: o botão fica vermelho e aparece "Não dá para desfazer." */
   perigo?: boolean;
+  /** Tira alguma coisa do ar, mas volta (desativar): o botão fica vermelho,
+      sem a frase de que não dá para desfazer, que ali seria mentira. */
+  vermelho?: boolean;
 };
 
 let caixa: HTMLDialogElement | null = null;
@@ -96,7 +99,7 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
   d.querySelector<HTMLParagraphElement>('.dm-dialogo-sem-volta')!.hidden = !c.perigo;
   const sim = d.querySelector<HTMLButtonElement>('[data-sim]')!;
   sim.textContent = c.acao || 'Confirmar';
-  sim.className = c.perigo ? 'dm-btn dm-pri dm-perigo' : 'dm-btn dm-pri';
+  sim.className = c.perigo || c.vermelho ? 'dm-btn dm-pri dm-perigo' : 'dm-btn dm-pri';
 
   return new Promise<boolean>(res => {
     resolver = res;

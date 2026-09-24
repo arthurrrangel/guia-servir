@@ -26,6 +26,7 @@
 import { sb } from '@/lib/supabase';
 import type { AvisoDentro, Bases, Cadastro, Eu, FichaPessoa, Membro, Numeros, Portal, RegraDeAnexo, Resumo, Vista } from './tipos';
 import type { Acao, Rascunho } from './regras';
+import { valorParaOBanco } from './regras';
 
 type Resposta<T> = ({ ok: true } & T) | { ok: false; erro: string; regra?: string; codigo?: string; site?: string; campo?: string };
 
@@ -273,7 +274,8 @@ export const abrir = async (r: Rascunho, anexos: { nome: string; url: string }[]
       prioridade: r.prioridade, impacto: r.impacto,
       prazo: r.prazo || null, sem_prazo_porque: r.sem_prazo_porque,
       evento: r.evento, evento_data: r.evento_data || null,
-      orcamento: r.orcamento || null,
+      /* "1.500,00" chega ao banco como 1500.00 (ver `valorParaOBanco`) */
+      orcamento: r.orcamento ? valorParaOBanco(r.orcamento) : null,
       anexos,
     },
   });
