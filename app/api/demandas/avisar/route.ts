@@ -229,7 +229,11 @@ function texto(d: Aviso) {
          nada" contradizia o Início, que pede "Confirmar" */
       d.estado === 'Concluída'
         ? 'Se resolveu, confirme na ficha (“Resolveu, obrigado”). Se não resolveu, dá para reabrir lá.'
-        : 'Você não precisa fazer nada: este aviso existe para você não ficar conferindo. Se alguma coisa não bater, diga na própria ficha.',
+        /* cancelada não é "nada a fazer": a pessoa quer saber quem e por quê
+           (24/09/2026, auditoria R14) */
+        : d.estado === 'Cancelada'
+          ? 'O motivo está na ficha, junto com quem cancelou. Se ainda precisar, dá para abrir uma nova.'
+          : 'Você não precisa fazer nada: este aviso existe para você não ficar conferindo. Se alguma coisa não bater, diga na própria ficha.',
       ...rodape,
     ].join('\n');
   }

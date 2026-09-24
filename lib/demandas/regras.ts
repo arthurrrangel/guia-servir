@@ -1015,7 +1015,9 @@ export function iniciais(nome: string | null | undefined): string {
 
 const PORBANCO: Record<string, string> = {
   SEM_ACESSO: 'Este link não vale mais, ou você não tem acesso a esta demanda.',
-  NAO_EXISTE: 'Essa demanda não existe.',
+  /* existe e não está aberta para quem olha é a mesma recusa, de propósito
+     (o banco não conta qual das duas); a frase cobre as duas */
+  NAO_EXISTE: 'Essa demanda não existe, ou não está aberta para você.',
   SEM_SETOR: 'Falta dizer de qual setor você é. Quem organiza resolve isso em Ajustes.',
   CATEGORIA_INVALIDA: 'Escolha uma categoria.',
   NAO_E_SEU_SETOR: 'Quem atende esta demanda é outro setor.',

@@ -2497,6 +2497,56 @@ console.log('\n20. O perfil muda o que é da pessoa, e só isso');
   await desmontar();
 }
 
+{
+  /* VOLTAR PARA A ABA NÃO APAGA O QUE SE DIGITAVA (24/09/2026, auditoria
+     R14): a casca refaz a conta de avisos ao voltar, e trocava o objeto da
+     pessoa inteiro; o Perfil se refazia e perdia o WhatsApp e a função */
+  mundoNovo();
+  let vez = 0;
+  const b = banco({ dem_quem_sou: () => ({ ...EU_MEMBRO, telefone: '5521999990005', funcao: '', avisos: vez++ }) });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Perfil);
+  await teclar(campo(alvo, 'Função'), 'Recepção');
+  await assentar();
+  document.visibilityState = 'visible';
+  await act(async () => { document.dispatchEvent(evento('visibilitychange')); });
+  await assentar();
+  ok(b.quantas('dem_quem_sou') >= 2, 'voltar para a aba refaz a pergunta', String(b.quantas('dem_quem_sou')));
+  ok(valorDe(campo(alvo, 'Função')) === 'Recepção', 'e o que estava sendo digitado continua lá',
+    valorDe(campo(alvo, 'Função')));
+  delete document.visibilityState;
+  await desmontar();
+}
+{
+  /* "/demandas/d/abc" não é número: a ficha diz que não existe, em vez de
+     "Carregando" para sempre (R14) */
+  mundoNovo();
+  globalThis.__banco = banco({ dem_quem_sou: EU_GESTOR });
+  const { alvo, desmontar } = await abrirFicha('abc');
+  ok(/não existe/.test(texto(alvo)), 'endereço sem número vira "não existe"', texto(alvo).slice(0, 200));
+  await desmontar();
+}
+{
+  /* a busca por número que não acha NESTA aba oferece abrir a demanda pelo
+     número (R14: "107" com a #107 logo acima, em "Precisa de você") */
+  mundoNovo();
+  const b = banco({ dem_quem_sou: EU_GESTOR,
+    dem_lista: (args) => (args.p_f && args.p_f.busca
+      ? { ok: true, itens: [], total: 0, tem_mais: false }
+      : { ok: true, itens: [demanda(1)], total: 1, tem_mais: false }) });
+  globalThis.__banco = b;
+  const { alvo, desmontar } = await montar(Painel);
+  const procurar = porAria(alvo, 'aria-label', 'Procurar');
+  if (procurar) {
+    await teclar(procurar, '107');
+    await assentar();
+    await assentarDepoisDe(420);
+  }
+  const abrir = todos(alvo, x => x.nodeType === 1 && x.tagName === 'A' && x.getAttribute('href') === '/demandas/d/107')[0];
+  ok(!!abrir && /Abrir a #107/.test(texto(abrir)), 'e o vazio oferece "Abrir a #107"', texto(alvo).slice(-300));
+  await desmontar();
+}
+
 console.log('\n21. O cadastro: o e-mail primeiro, e depois só o que é da pessoa');
 {
   mundoNovo();

@@ -39,6 +39,10 @@ export type Ordem = 'urgencia' | 'prazo' | 'recente' | 'numero';
    espera o dedo parar. */
 const ESPERA_DA_BUSCA = 300;
 
+/* há tira de abas ou de recortes (o vazio da busca diz "nesta aba") */
+const tiras0 = (abas: { v: Aba }[], recortes: { v: Recorte }[], controle?: unknown) =>
+  !!controle || abas.length > 1 || recortes.length > 1;
+
 export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial = 'abertas', vazio, contas, controle,
                                 mostrarSetor = true, tomDoVazio }: {
   eu: Eu;
@@ -129,8 +133,16 @@ export default function Lista({ eu, abas, recortes, abaInicial, recorteInicial =
      visto verde: "O setor está em dia", "Nada esperando você". Era o único
      lugar em que o produto afirmava uma coisa falsa, e com cara de boa
      notícia. Com termo, a frase é da busca, e a saída é limpar. */
+  /* A BUSCA É DA ABA, E O VAZIO DIZ ISSO — 24/09/2026 (auditoria R14). O
+     Pedro buscava "107" e lia que não havia, com a #107 em "Precisa de você"
+     logo acima: a busca olha só a aba e o recorte abertos. Com número, a
+     saída é abrir a demanda pelo número, onde quer que ela esteja. */
+  const soNumero = /^\d{1,7}$/.test(termo);
   const v = termo
-    ? { titulo: `Nenhuma demanda com “${termo}”`, dica: 'Confira a palavra ou procure pelo número da demanda.',
+    ? { titulo: `Nenhuma demanda com “${termo}” ${tiras0(abas, recortes, controle) ? 'nesta aba' : 'aqui'}`,
+        dica: soNumero
+          ? <Link className="dm-btn dm-peq" href={`/demandas/d/${termo}`}>Abrir a #{termo}</Link>
+          : 'Confira a palavra, troque de aba ou procure pelo número da demanda.',
         tom: 'filtro' as const, limpar: true }
     : { ...vazio(aba, so), limpar: false };
   const temPasso = (itens || []).some(d => !!d.motivo);

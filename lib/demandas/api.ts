@@ -193,7 +193,12 @@ export function meuToken(): string | null {
     try {
       const u = new URL(window.location.href);
       u.searchParams.delete('t');
-      window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+      /* O ESTADO DO HISTÓRICO VAI JUNTO — 24/09/2026 (auditoria R14). Com
+         `null`, esta troca apagava o estado que o Next guarda na entrada, e o
+         Next ignora o Voltar para uma entrada sem ele: quem entrava pelo link
+         pessoal abria uma ficha, tocava em Voltar, e a URL mudava com a ficha
+         ainda na tela. É o padrão do login do Supabase. */
+      window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
     } catch { /* navegador sem history: o token fica na barra, mas funciona */ }
     return naUrl;
   }

@@ -97,7 +97,11 @@ function Uma() {
   }, []);
   const carregar = useCallback(async () => { aplicar(await ver(numero)); }, [numero, aplicar]);
 
-  useEffect(() => { if (Number.isFinite(numero)) carregar(); }, [numero, carregar]);
+  /* "/demandas/d/abc" não é número: sem isto, "Carregando" para sempre */
+  useEffect(() => {
+    if (Number.isFinite(numero)) carregar();
+    else { setErro(recadoDoErro({ ok: false, erro: 'NAO_EXISTE' }, 'abrir a demanda')); setSemVolta(true); }
+  }, [numero, carregar]);
   useEffect(() => { bases().then(x => { if (x.ok) setB({ setores: x.setores, categorias: x.categorias, anexos: x.anexos }); }); }, []);
 
   /* DEVOLVE SE DEU CERTO, E ISSO É O QUE SEGURA O TEXTO DA PESSOA: o ramo de
@@ -157,8 +161,18 @@ function Uma() {
   useEffect(() => {
     if (!tituloDaAba) return;
     const antes = document.title;
-    document.title = tituloDaAba;
-    return () => { document.title = antes; };
+    const aplicar = () => { if (document.title !== tituloDaAba) document.title = tituloDaAba; };
+    aplicar();
+    /* o título dos metadados do Next chega no fim do carregamento e
+       reescrevia o "#N título" (11 de 40 aberturas diretas pelo link, R14):
+       enquanto a ficha está aberta, o título volta a ser o dela */
+    let obs: MutationObserver | null = null;
+    try {
+      obs = new MutationObserver(aplicar);
+      /* o documento inteiro: neste build o <title> dos metadados chega no body */
+      obs.observe(document.documentElement, { subtree: true, childList: true, characterData: true });
+    } catch { /* sem observador: fica o título posto agora */ }
+    return () => { obs?.disconnect(); document.title = antes; };
   }, [tituloDaAba]);
 
   /* A ORDEM DO HISTÓRICO É DECIDIDA AQUI (`Date.parse`, e não texto: o
@@ -236,7 +250,7 @@ function Uma() {
     const saida = atende ? { href: '/demandas/atendimento', rot: 'Atendimento' } : { href: '/demandas', rot: 'Início' };
     return (
       <>
-        <Cabecalho volta={saida} sobre={`Demanda #${Number.isFinite(numero) ? numero : ''}`}
+        <Cabecalho volta={saida} sobre={Number.isFinite(numero) ? `Demanda #${numero}` : 'Demanda'}
           titulo="Não deu para abrir a demanda" />
         {/* a demanda que não existe (ou não é de quem olha) não é falha do
             sistema: aviso cinza; a falha de rede continua vermelha */}
@@ -1228,6 +1242,18 @@ function Acompanham({ v, indo, agir, sair, erro }: {
 }) {
   const [quem, setQuem] = useState('');
   const [abrindo, setAbrindo] = useState(false);
+  /* O FORMULÁRIO QUE ABRE APARECE — 24/09/2026 (auditoria R14). Com o botão
+     rente ao pé da tela, o formulário nascia inteiro abaixo da dobra (atrás
+     da barra de ação, em 390), sem rolar e sem foco: o toque parecia morto.
+     O mesmo cuidado do formulário do painel (`cxForm`). */
+  const cxIncluir = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (!abrindo) return;
+    const f = cxIncluir.current;
+    if (!f) return;
+    f.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    f.querySelector<HTMLElement>('input')?.focus({ preventScroll: true });
+  }, [abrindo]);
   /* WhatsApp primeiro, porque é o que a igreja sabe de cor; cada um com o
      seu teclado */
   const [por, setPor] = useState<'tel' | 'email'>('tel');
@@ -1270,7 +1296,7 @@ function Acompanham({ v, indo, agir, sair, erro }: {
         )) : <span className="dm-mudo">Só quem pediu e quem atende.</span>}
       </div>
       {pode && abrindo ? (
-        <form className="dm-caixa dm-acompanha-form" onSubmit={async e => {
+        <form ref={cxIncluir} className="dm-caixa dm-acompanha-form" onSubmit={async e => {
           e.preventDefault();
           if (await agir('incluir', { quem: quem.trim() })) { setQuem(''); setAbrindo(false); }
         }}>

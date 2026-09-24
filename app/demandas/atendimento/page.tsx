@@ -67,9 +67,15 @@ function Atendimento() {
      (24/09/2026, auditoria R12): a lista de cada aba tem o próprio erro */
   const [semContas, setSemContas] = useState(false);
   useEffect(() => {
-    portal().then(r => {
-      if (r.ok && (r as unknown as Portal).n) setP(r as unknown as Portal); else setSemContas(true);
+    const contar = () => portal().then(r => {
+      if (r.ok && (r as unknown as Portal).n) { setP(r as unknown as Portal); setSemContas(false); } else setSemContas(true);
     });
+    contar();
+    /* as contas das abas se refazem ao voltar para a aba do navegador, como
+       a lista (24/09/2026, auditoria R14) */
+    const f = () => { if (document.visibilityState === 'visible') contar(); };
+    document.addEventListener('visibilitychange', f);
+    return () => document.removeEventListener('visibilitychange', f);
   }, []);
 
   if (!eu) return null;

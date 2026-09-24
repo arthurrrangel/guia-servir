@@ -42,10 +42,14 @@ function Perfil() {
   const [indo, setIndo] = useState(false);
   const [msg, setMsg] = useState<{ tom: 'ok' | 'bad'; t: string } | null>(null);
 
+  /* os campos seguem os DADOS, e não o objeto: a casca troca o objeto ao
+     voltar para a aba (a conta de avisos), e isto apagava o que a pessoa
+     estava digitando (24/09/2026, auditoria R14) */
   useEffect(() => {
     if (!eu) return;
     setNome(eu.nome || ''); setTel(telVisivel(eu.telefone)); setFuncao(eu.funcao || '');
-  }, [eu]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eu?.nome, eu?.telefone, eu?.funcao]);
 
   if (!eu) return null;
 

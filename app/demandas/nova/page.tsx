@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Opcoes } from '@/components/demandas/Ui';
 import { Icone } from '@/components/demandas/Icone';
+import { depoisDoToque } from '@/components/demandas/toque';
 import { abrir, bases } from '@/lib/demandas/api';
 import {
   HOJE, PRIORIDADES, camposQueFaltam, dataCheia, dicaDeAnexo, linkZap, nomeDoLink, nomeSemRepetir, nomesDosSites, prazoSugerido,
@@ -386,8 +387,9 @@ function Nova() {
              formulário; o toque nele tirava o foco, o bloco sumia, a página
              encurtava 114px e o dedo terminava em outro lugar: no Android, o
              primeiro toque nunca enviava. Trocar de um campo para outro não
-             muda nada, e sair para um botão espera o toque terminar. */
-          if (campoDeTexto(e.target) && !campoDeTexto(e.relatedTarget)) setTimeout(() => setDigitando(false), 0);
+             muda nada, e sair para um botão espera o toque terminar (no
+             mouse, o botão subir: ver `toque.ts`). */
+          if (campoDeTexto(e.target) && !campoDeTexto(e.relatedTarget)) depoisDoToque(() => setDigitando(false));
         }}>
       <div>
       <div className="dm-caixa">

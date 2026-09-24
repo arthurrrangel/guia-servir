@@ -45,6 +45,12 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
     'guarda o token ANTES de tirar da barra (senão some sem ter sido salvo)');
   ok(corpo.indexOf('return naUrl') > corpo.indexOf('replaceState'),
     'e devolve o token depois de limpar, não antes');
+  /* 24/09/2026 (auditoria R14): com `null` no lugar do estado, o Next perdia
+     a entrada e o Voltar do navegador não voltava ao Início */
+  ok(/replaceState\(window\.history\.state,/.test(corpo) && !/replaceState\(null/.test(corpo),
+    'e a troca leva junto o estado do histórico (o Voltar continua funcionando)');
+  const inicio = ler('app/demandas/page.tsx');
+  ok(!/replaceState\(null/.test(inicio), 'o Início também não apaga o estado ao tirar o ?bemvindo');
 }
 
 /* --------------------------------- 2. a rota recebe noindex no cabeçalho */

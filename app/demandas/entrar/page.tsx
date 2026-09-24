@@ -167,7 +167,20 @@ export default function EntrarNasDemandas() {
           setMsg(/expired|invalid/i.test(erroLink)
             ? 'Esse link já venceu ou já foi usado. Peça um novo aqui embaixo.'
             : 'Não consegui entrar por esse link. Peça um novo aqui embaixo.');
+          return;
         }
+        /* O LINK PESSOAL RECUSADO — 24/09/2026 (auditoria R14). Quem abria
+           um link trocado caía aqui lendo "entre pelo link", que era o que
+           acabara de fazer. A casca deixa a marca ao descartar o link. */
+        try {
+          const marca = Number(sessionStorage.getItem('demandas.linkRecusado') || 0);
+          sessionStorage.removeItem('demandas.linkRecusado');
+          /* só a marca de agora: a de uma hora atrás é de outra história */
+          if (marca && Date.now() - marca < 60000) {
+            setTom('warn');
+            setMsg('Esse link pessoal não vale mais: foi trocado ou chegou incompleto. Entre com o seu e-mail aqui embaixo, ou peça um link novo a quem administra as demandas.');
+          }
+        } catch { /* sem armazenamento: fica a porta de sempre */ }
       })
       .catch(() => { clearTimeout(teto); setEntrando(false); });
   }, []);

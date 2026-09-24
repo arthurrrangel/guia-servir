@@ -79,6 +79,13 @@ function Inicio() {
     setErro(''); setP(r as unknown as Portal);
   }, [atende]);
   useEffect(() => { carregar(); }, [carregar]);
+  /* e ao voltar para a aba do navegador, a faixa e "Precisa de você" se
+     refazem com a lista (24/09/2026, auditoria R14) */
+  useEffect(() => {
+    const f = () => { if (document.visibilityState === 'visible') carregar(); };
+    document.addEventListener('visibilitychange', f);
+    return () => document.removeEventListener('visibilitychange', f);
+  }, [carregar]);
 
   /* o cadastro devolve a pessoa para cá com `?bemvindo=1`. A frase aparece
      uma vez, como toast, e o parâmetro sai da barra: recarregar não repete
@@ -89,7 +96,8 @@ function Inicio() {
       if (u.searchParams.get('bemvindo') === '1') {
         ctx.toast?.({ texto: 'Cadastro feito. Você já pode abrir demandas.' });
         u.searchParams.delete('bemvindo');
-        window.history.replaceState(null, '', u.pathname + u.search + u.hash);
+        /* o estado do Next vai junto (ver `meuToken` em api.ts) */
+        window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash);
       }
     } catch { /* sem history: nada a fazer */ }
     // eslint-disable-next-line react-hooks/exhaustive-deps

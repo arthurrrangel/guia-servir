@@ -46,6 +46,7 @@ import type { Eu } from '@/lib/demandas/tipos';
 import { Icone, type NomeDoIcone } from './Icone';
 import { Porta } from './Porta';
 import { Aviso, Esqueleto, Toast, Vazio, useFitaQueRola, type ToastPedido } from './Ui';
+import { campoDeDigitar, depoisDoToque, vigiarOToque } from './toque';
 
 /* QUEM SOU EU, UMA VEZ POR TELA — NÃO DUAS.
 
@@ -99,6 +100,8 @@ export function useEu(): Ctx {
       if (ehRecusaDeIdentidade(r) && typeof window !== 'undefined'
           && localStorage.getItem('demandas.link')) {
         esquecerToken();
+        /* a porta de entrar diz que o link não vale mais (ver entrar/page.tsx) */
+        try { sessionStorage.setItem('demandas.linkRecusado', String(Date.now())); } catch { /* sem armazenamento */ }
         quemSou().then(r2 => {
           if (!vivo) return;
           setEu(r2.ok ? (r2 as unknown as Eu) : null);
@@ -305,6 +308,22 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
   const semSistema = !!ctx.semSistema;
   const caminho = usePathname() || '/demandas';
   const [email, setEmail] = useState<string | null | undefined>(undefined);
+  /* SAINDO DE UM CAMPO, AS BARRAS DE BAIXO ESPERAM O TOQUE TERMINAR ·
+     24/09/2026 (auditoria R14). Escrevendo no celular, a folha esconde a
+     barra de abas e a de ação pelo foco (`:has(:focus)`, que se corrige
+     sozinho). Mas o toque num botão rente ao pé tira o foco no `mousedown`,
+     a barra voltava no mesmo instante, e o `mouseup` caía nela: o dedo
+     soltava em "Avisos" e o toque se perdia. `dm-segura` segura as barras
+     fora da frente até o toque terminar (`depoisDoToque`). */
+  const [segura, setSegura] = useState(false);
+  const segurando = useRef(0);
+  useEffect(() => { vigiarOToque(); }, []);
+  const soltarDoCampo = (e: React.FocusEvent) => {
+    if (!campoDeDigitar(e.target) || campoDeDigitar(e.relatedTarget)) return;
+    segurando.current++;
+    setSegura(true);
+    depoisDoToque(() => { segurando.current--; if (segurando.current <= 0) { segurando.current = 0; setSegura(false); } });
+  };
 
   /* só perguntamos quem é a sessão quando o sistema NÃO reconheceu a pessoa:
      é a diferença entre "você não tem login" e "você tem login, mas não está
@@ -455,7 +474,7 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
   const naFicha = caminho.startsWith('/demandas/d/');
   const atende = atendeDe(eu);
   return (
-    <div className={`dm dm-casca ${semAbas ? '' : 'dm-com-abas'} ${naFicha ? 'dm-na-ficha' : ''}`}>
+    <div className={`dm dm-casca ${semAbas ? '' : 'dm-com-abas'} ${naFicha ? 'dm-na-ficha' : ''} ${segura ? 'dm-segura' : ''}`}>
       <Lateral eu={eu} caminho={caminho} />
       <header className="dm-topo">
         <Link href="/demandas" className="dm-marca" aria-label="Demandas, início">
@@ -466,7 +485,7 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
           <span className="dm-avatar" aria-hidden="true">{iniciais(eu.nome)}</span>
         </Link>
       </header>
-      <main className="dm-corpo">{children}</main>
+      <main className="dm-corpo" onBlur={soltarDoCampo}>{children}</main>
       {!semAbas ? (
         <nav className="dm-abas" aria-label="Seções de demandas">
           {ABAS(eu).map(a => (
@@ -533,6 +552,8 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
       if (ehRecusaDeIdentidade(r) && typeof window !== 'undefined'
           && localStorage.getItem('demandas.link')) {
         esquecerToken();
+        /* a porta de entrar diz que o link não vale mais (ver entrar/page.tsx) */
+        try { sessionStorage.setItem('demandas.linkRecusado', String(Date.now())); } catch { /* sem armazenamento */ }
         quemSou().then(responder);
         return;
       }
@@ -549,7 +570,13 @@ export default function Casca({ children, admin }: { children: React.ReactNode; 
   useEffect(() => {
     const f = () => {
       if (document.visibilityState !== 'visible') return;
-      quemSou().then(r => { if (vivo.current && r.ok) setEu(r as unknown as Eu); });
+      /* só a conta muda: trocar o objeto inteiro fazia cada tela que olha
+         para `eu` se refazer (o Perfil apagava o que estava sendo digitado) */
+      quemSou().then(r => {
+        if (!vivo.current || !r.ok) return;
+        const novo = r as unknown as Eu;
+        setEu(e => (e && e.avisos !== novo.avisos ? { ...e, avisos: novo.avisos } : e));
+      });
     };
     document.addEventListener('visibilitychange', f);
     return () => document.removeEventListener('visibilitychange', f);
