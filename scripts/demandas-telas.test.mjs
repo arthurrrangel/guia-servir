@@ -403,7 +403,11 @@ function montarMundo() {
     navigator: { userAgent: 'node' },
     location: { href: 'http://x/demandas', search: '', pathname: '/demandas', hash: '', origin: 'http://x' },
     history: { replaceState() {}, pushState() {} },
-    addEventListener() {}, removeEventListener() {},
+    /* os ouvintes da janela ficam guardados (e nunca disparam sozinhos): o
+       teste do Escape da ficha dispara `keydown` por `teclaNaJanela` */
+    _ouvintes: {},
+    addEventListener(t, fn) { (this._ouvintes[t] ||= new Set()).add(fn); },
+    removeEventListener(t, fn) { this._ouvintes[t]?.delete(fn); },
     setTimeout, clearTimeout, setInterval, clearInterval,
     requestAnimationFrame: fn => setTimeout(() => fn(Date.now()), 0),
     cancelAnimationFrame: id => clearTimeout(id),
@@ -692,6 +696,12 @@ async function escolher(no, valor, oQue = 'o seletor') {
   await assentar();
 }
 const valorDe = no => (no ? String(no.value === undefined ? '' : no.value) : '(campo ausente)');
+async function teclaNaJanela(tecla) {
+  await act(async () => {
+    for (const fn of [...(globalThis.window._ouvintes?.keydown || [])]) fn(evento('keydown', { key: tecla }));
+  });
+  await assentar();
+}
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => {
@@ -1603,7 +1613,7 @@ async function comFicha(carga, extra = {}) {
 
 console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel e estado por estado');
 {
-  /* dez combinações de estado × quem está olhando. Cada uma monta a ficha de
+  /* as combinações de estado × quem está olhando. Cada uma monta a ficha de
      verdade e compara o conjunto de botões com o do espelho. */
   const CASOS = [
     ['aberta · quem atende',        {}, QUEM.atende],
@@ -1624,6 +1634,13 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
       { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z' }, QUEM.pediu],
     ['cancelada · quem atende',
       { status: 'cancelada', cancelada_motivo: 'O evento saiu do calendário.' }, QUEM.atende],
+    /* a encerrada de verdade (24/09/2026, auditoria R10): só reabrir sobra */
+    ['concluída · quem atende',
+      { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z',
+        responsavel: 'Monik', responsavel_id: 'u9' }, QUEM.atende],
+    ['concluída e confirmada · quem pediu',
+      { status: 'concluida', conclusao: 'Arte entregue.', concluida_em: '2026-09-12T18:00:00Z',
+        validada_em: '2026-09-13T10:00:00Z', validada_por: 'u1' }, QUEM.pediu],
   ];
   /* comparados como CONJUNTO: a ordem da grade é decisão de layout (o que se
      usa mais fica em cima), e cobrar a ordem aqui faria este teste reprovar
@@ -1661,22 +1678,32 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
         : doOutro ? 'o passo é de outra pessoa, e nenhum botão é preto' : 'nenhum primário'}`,
       `pretos: [${pretos.map(texto).join(' | ')}]`);
     const titulo = porClasse(grade(alvo), 'dm-painel-titulo');
-    const tituloDevia = !div.grade.length ? 'Esta demanda'
+    /* "REABRIR" SOZINHO NÃO ANDA COM A DEMANDA (24/09/2026, auditoria R10):
+       na encerrada, sem primário, ele não é "Próximo passo" nem ganha barra
+       fixa; mora no cartão "Esta demanda", e as abas do celular voltam */
+    const soReabrir = !prim && div.grade.length > 0 && div.grade.every(r => r === ROTULO.reabrir);
+    const anda = div.grade.length > 0 && !soReabrir;
+    const tituloDevia = !anda ? 'Esta demanda'
       : passoDeOutro(carga.demanda, quem, prim) ? 'Ações' : 'Próximo passo';
     ok(titulo && texto(titulo) === tituloDevia, `${nome}: o painel se chama "${tituloDevia}"`,
       titulo ? texto(titulo) : '(sem título)');
     const barra = porAria(alvo, 'aria-label', 'Ações');
     const barraCel = todos(alvo, x => x.nodeType === 1 && (x.getAttribute('class') || '') === 'dm-barra-acao')[0];
     /* a barra fixa só existe quando há ação que ANDA com a demanda (o
-       primário ou um secundário); só ajustes moram num cartão em linha */
-    const temBarra = div.grade.length > 0;
+       primário ou um secundário que não seja reabrir); o resto mora num
+       cartão em linha */
+    const temBarra = anda;
     ok(!!barraCel === temBarra, `${nome}: no celular, ${temBarra ? 'a barra fixa existe' : 'não há barra'}`,
       String(!!barraCel));
-    if (!temBarra && div.mais) {
+    ok(!!porClasse(alvo, 'dm-sem-barra') === !temBarra,
+      `${nome}: ${temBarra ? 'a barra esconde as abas' : 'e a marca que devolve as abas está lá'}`);
+    if (!temBarra && (div.mais || soReabrir)) {
       const cartao = porAria(alvo, 'aria-label', 'Esta demanda');
-      ok(!!cartao && porTag(cartao, 'BUTTON').length >= div.mais.length,
-        `${nome}: e os ajustes moram no cartão em linha do celular`,
-        cartao ? porTag(cartao, 'BUTTON').map(texto).join(' | ') : '(sem cartão)');
+      const nele = cartao ? porTag(cartao, 'BUTTON').map(texto) : [];
+      const devia = [...(soReabrir ? div.grade : []), ...(div.mais || [])];
+      ok(!!cartao && devia.every(r => nele.includes(r)),
+        `${nome}: e ${soReabrir ? '"Reabrir" e ' : ''}os ajustes moram no cartão em linha do celular`,
+        cartao ? nele.join(' | ') : '(sem cartão)');
     }
     if (barraCel && prim) {
       const ultimo = porTag(barraCel, 'BUTTON').slice(-1)[0];
@@ -1719,6 +1746,31 @@ console.log('\n11. A ficha: a grade de ações sai de `acoesDe`, papel por papel
   ok(document.activeElement && document.activeElement.tagName === 'TEXTAREA',
     'e o foco cai no primeiro campo dele, sem a pessoa procurar',
     String(document.activeElement && document.activeElement.tagName));
+  await desmontar();
+}
+
+{
+  /* O RASCUNHO DA AÇÃO — 24/09/2026 (auditoria R10). Esc e o toque fora da
+     folha desmontavam a caixa e o texto ia junto. Agora: com texto escrito,
+     Escape não fecha; o "Voltar" fecha e não apaga (reabrir devolve o
+     texto); sem texto, Escape fecha como antes. */
+  const { b, alvo, desmontar } = await comFicha(vista({}, QUEM.atende));
+  const caixa = () => porTag(grade(alvo), 'TEXTAREA')[0];
+  const frase = 'Troquei a lâmpada do corredor.';
+  await clicar(botao(grade(alvo), 'Concluir'), 'o botão Concluir');
+  await teclar(caixa(), frase, 'a caixa de concluir');
+  await assentar();
+  await teclaNaJanela('Escape');
+  ok(!!caixa() && valorDe(caixa()) === frase, 'com texto escrito, Escape não fecha a caixa', valorDe(caixa()));
+  await clicar(botao(grade(alvo), 'Voltar'), 'o Voltar do painel');
+  ok(!caixa(), 'o "Voltar" fecha');
+  await clicar(botao(grade(alvo), 'Concluir'), 'o botão Concluir de novo');
+  ok(valorDe(caixa()) === frase, 'e reabrir devolve o que estava escrito', valorDe(caixa()));
+  await teclar(caixa(), '', 'a caixa de concluir');
+  await assentar();
+  await teclaNaJanela('Escape');
+  ok(!caixa(), 'sem texto, Escape fecha como antes');
+  ok(!b.ultima('dem_mover'), 'e nada disso gravou');
   await desmontar();
 }
 
@@ -2109,7 +2161,7 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
      duas a mais. O que não pode faltar é UMA, e ela tem que ir para a lista. */
   /* 94 · e ela volta para o PORTAL de quem olha: quem atende, para o
      Atendimento (onde estava a fila); quem pede, para as suas. */
-  /* 23/09/2026 · a saída é o "‹ Atendimento" / "‹ Minhas demandas" acima do
+  /* 23/09/2026 · a saída é o "‹ Atendimento" / "‹ Início" acima do
      título (`a.dm-volta`), com o nome da seção de onde a pessoa veio: o
      mesmo da lateral e do alto da fila (a aba do celular é "Atender" porque
      cinco abas em 320px não cabem nomes longos) */
@@ -2129,8 +2181,10 @@ console.log('\n16. A ficha: o cartão de ações nunca fica mudo, e a ficha sabe
   {
     const { alvo, desmontar } = await comFicha(vista({}, QUEM.pediu));
     const saida = volta(alvo);
-    ok(saida && texto(saida) === 'Minhas demandas' && saida.getAttribute('href') === '/demandas',
-      'quem pediu volta para as suas, no Início', saida ? `${texto(saida)} → ${saida.getAttribute('href')}` : '(sem link)');
+    /* 24/09/2026 · "Início", o nome da aba e o da volta da Nova: a mesma
+       saída tinha dois nomes (auditoria R10) */
+    ok(saida && texto(saida) === 'Início' && saida.getAttribute('href') === '/demandas',
+      'quem pediu volta para o Início, com o nome da aba', saida ? `${texto(saida)} → ${saida.getAttribute('href')}` : '(sem link)');
     await desmontar();
   }
 }

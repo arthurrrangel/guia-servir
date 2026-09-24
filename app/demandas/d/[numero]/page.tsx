@@ -22,7 +22,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Casca, { recadoParaDepois, useEu } from '@/components/demandas/Casca';
-import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, Secao, useEstreito } from '@/components/demandas/Ui';
+import { Aviso, Bloco, CaixaDeAcao, Cabecalho, Campo, Copiar, Esqueleto, Estado, Opcoes, Pill, Prio, RascunhoDaCaixa, Secao, useEstreito } from '@/components/demandas/Ui';
 import { Icone, type NomeDoIcone } from '@/components/demandas/Icone';
 import { bases, mover, ver } from '@/lib/demandas/api';
 import {
@@ -182,14 +182,27 @@ function Uma() {
     n.querySelector<HTMLElement>('textarea,input,select')?.focus({ preventScroll: true });
   }, [aberto, celular]);
 
+  /* O TEXTO DE CADA AÇÃO FICA GUARDADO ENQUANTO A FICHA ESTÁ ABERTA —
+     24/09/2026 (auditoria R10). Um rascunho por ação: fechar e abrir de novo
+     devolve o que a pessoa escreveu. E com texto escrito, Escape e o toque
+     fora da folha não fecham (a regra das Escalas): tocar fora para baixar
+     o teclado era o gesto que apagava o parágrafo. O "Voltar" continua
+     fechando, e o rascunho continua lá. */
+  const rascunhos = useRef(new Map<string, string>());
+  const guarda = useMemo(() => ({
+    ler: () => rascunhos.current.get(aberto) || '',
+    gravar: (t: string) => { if (t.trim()) rascunhos.current.set(aberto, t); else rascunhos.current.delete(aberto); },
+  }), [aberto]);
+  const segurar = useCallback(() => !!aberto && aberto !== 'mais' && !!rascunhos.current.get(aberto), [aberto]);
+
   /* e Escape fecha, porque o único jeito de desistir era achar o "Deixa pra
      lá" lá embaixo. Na folha do celular quem fecha é o <dialog>. */
   useEffect(() => {
     if (!aberto) return;
-    const f = (e: KeyboardEvent) => { if (e.key === 'Escape') setAberto(''); };
+    const f = (e: KeyboardEvent) => { if (e.key === 'Escape' && !segurar()) setAberto(''); };
     window.addEventListener('keydown', f);
     return () => window.removeEventListener('keydown', f);
-  }, [aberto]);
+  }, [aberto, segurar]);
 
   if (erro && !v) {
     /* a saída é a de quem olha: quem atende volta para o Atendimento */
@@ -237,9 +250,19 @@ function Uma() {
   const temMais = ajustes.length > 0 || secundarias.length > 1 || podeAvisar;
   /* a barra fixa só existe com uma ação que anda com a demanda; ajustes e
      recados sozinhos moram num bloco em linha no celular (uma barra fixa só
-     com "Mais" era 56px de rodapé para esconder dois botões-texto) */
-  const temBarra = !!primaria || secundarias.length > 0;
-  const soAjustes = !temBarra && (ajustes.length > 0 || podeAvisar);
+     com "Mais" era 56px de rodapé para esconder dois botões-texto).
+
+     "REABRIR" SOZINHO NÃO ANDA COM A DEMANDA — 24/09/2026. Na encerrada
+     (concluída e já confirmada, a concluída vista pela equipe, a cancelada)
+     a única ação que sobrava era reabrir: o celular ganhava uma barra fixa
+     só com "Mais", 288px de botão genérico no lugar das abas, e o painel do
+     desktop dizia "Próximo passo · Concluída em 23/09 · Reabrir", como se
+     reabrir fosse o que vem. Reabrir é a exceção: mora no cartão "Esta
+     demanda", junto dos ajustes, e as abas voltam. Com "Resolveu, obrigado"
+     ao lado (quem pediu decidindo), continua na barra: ali é a escolha. */
+  const soReabrir = !primaria && secundarias.length > 0 && secundarias.every(a => a === 'reabrir');
+  const temBarra = !!primaria || (secundarias.length > 0 && !soReabrir);
+  const soAjustes = !temBarra && (ajustes.length > 0 || podeAvisar || soReabrir);
 
   const rotulo = (a: Acao) => {
     switch (a) {
@@ -321,7 +344,7 @@ function Uma() {
     && !(d.falta_aprovacao && (v.eu.aprova ?? quemManda(v.eu.papel)))
     && !(esperaQuemPediu && quemPediuOlha)
     && ((esperaQuemPediu && !quemPediuOlha) || (!!d.responsavel_id && d.responsavel_id !== v.eu.id));
-  const tituloDoPainel = !(primaria || secundarias.length) ? 'Esta demanda' : passoDeOutro ? 'Ações' : 'Próximo passo';
+  const tituloDoPainel = !temBarra ? 'Esta demanda' : passoDeOutro ? 'Ações' : 'Próximo passo';
   /* e o botão cheio é de quem tem o passo: concluir a demanda de outra
      pessoa é um poder raro, e não o convite da tela */
   const cheio = passoDeOutro ? 'dm-btn' : 'dm-btn dm-pri';
@@ -334,7 +357,9 @@ function Uma() {
         <button type="button" className="dm-btn dm-txt dm-peq" onClick={() => setAberto('')}>Voltar</button>
       </div>
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
-      <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+      <RascunhoDaCaixa.Provider value={guarda}>
+        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+      </RascunhoDaCaixa.Provider>
     </div>
   ) : (
     <>
@@ -368,7 +393,7 @@ function Uma() {
     </>
   );
 
-  const pares = d.evento || d.local || d.publico || d.orcamento !== null || d.aprovacao || d.falta_aprovacao;
+  const pares = d.evento || d.local || d.publico || d.orcamento !== null || !!aprovacaoEmPalavras(d);
 
   /* a trava que ainda vale: a pergunta dela já está no aviso amarelo do
      alto, e a atividade não a repete (a linha diz "Maria travou a demanda") */
@@ -383,7 +408,7 @@ function Uma() {
           fila; quem pede, para as suas. */}
       <Cabecalho
         /* "Atendimento", o nome da seção na lateral e no alto da fila */
-        volta={v.eu.atende ? { href: '/demandas/atendimento', rot: 'Atendimento' } : { href: '/demandas', rot: 'Minhas demandas' }}
+        volta={v.eu.atende ? { href: '/demandas/atendimento', rot: 'Atendimento' } : { href: '/demandas', rot: 'Início' }}
         /* `dm-sep`: com uma categoria longa, a linha quebrava deixando
            "Demanda #105 ·" sozinho em cima */
         sobre={<span className="dm-sep"><span className="dm-sep-in"><span className="dm-num">Demanda #{d.numero}</span><span>{d.categoria}</span></span></span>}
@@ -495,7 +520,7 @@ function Uma() {
         </div>
         <div className="dm-fato">
           <span>Aberta em</span>
-          <div>{dataHora(d.criada_em)}<small>{quando(d.criada_em)}</small></div>
+          <div>{dataHora(d.criada_em)}<small>{haQuanto(d.criada_em)}</small></div>
         </div>
       </div>
 
@@ -516,9 +541,12 @@ function Uma() {
                     {d.local ? <div><span>Onde</span>{d.local}</div> : null}
                     {d.publico ? <div><span>Público</span>{d.publico}</div> : null}
                     {d.orcamento !== null ? <div><span>Orçamento</span><span className="dm-num">{dinheiro(d.orcamento)}</span></div> : null}
-                    {d.aprovacao
-                      ? <div><span>Aprovação</span>{d.aprovacao}{d.aprovacao_nota ? `: ${d.aprovacao_nota}` : ''}</div>
-                      : d.falta_aprovacao ? <div><span>Aprovação</span>esperando a liderança decidir</div> : null}
+                    {/* o valor do banco ("pendente", "rejeitada") não é
+                        frase: a tela diz o que ele quer dizer, com o verbo
+                        do botão ("Recusar"), e o portão manda no "esperando" */}
+                    {aprovacaoEmPalavras(d)
+                      ? <div><span>Aprovação</span>{aprovacaoEmPalavras(d)}{d.aprovacao_nota ? `: ${d.aprovacao_nota}` : ''}</div>
+                      : null}
                   </div>
                 ) : null}
               </div>
@@ -568,6 +596,11 @@ function Uma() {
               <div className="dm-painel-bloco">
                 <h3 className="dm-painel-titulo">Esta demanda</h3>
                 {estadoDoPainel ? <div className="dm-painel-estado">{estadoDoPainel}</div> : null}
+                {soReabrir ? (
+                  <div className="dm-painel-acoes">
+                    {secundarias.map(a => botao(a, 'dm-btn dm-larga'))}
+                  </div>
+                ) : null}
                 {ajustes.length ? (
                   <div className="dm-painel-ajustes">
                     {ajustes.map(a => botao(a, a === 'cancelar' ? 'dm-btn dm-txt dm-perigo' : 'dm-btn dm-txt'))}
@@ -653,7 +686,7 @@ function Uma() {
         </>
       ) : <span className="dm-sem-barra" hidden />}
       {celular && aberto ? (
-        <Folha fechar={() => setAberto('')} titulo={aberto === 'mais' ? 'Mais' : rotulo(aberto)}>
+        <Folha fechar={() => setAberto('')} segurar={segurar} titulo={aberto === 'mais' ? 'Esta demanda' : rotulo(aberto)}>
           {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
           {aberto === 'mais' ? (
             <>
@@ -675,7 +708,9 @@ function Uma() {
               {podeAvisar ? <div className="dm-folha-secao"><Recados d={d} base={base} eu={v.eu} /></div> : null}
             </>
           ) : (
-            <Formulario aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+            <RascunhoDaCaixa.Provider value={guarda}>
+        <Formulario key={aberto} aberto={aberto} d={d} b={b} eu={v.eu} indo={indo} agir={agir} />
+      </RascunhoDaCaixa.Provider>
           )}
         </Folha>
       ) : null}
@@ -683,8 +718,31 @@ function Uma() {
   );
 }
 
+/* "Aberta em 25/07/2026 às 20:52 · há 2 meses": passados 30 dias `quando`
+   devolve a própria data, e a casa repetia "25/07/2026" embaixo dela
+   (auditoria R10) */
+function haQuanto(iso: string): string {
+  const q = quando(iso);
+  if (q !== dataCheia(iso)) return q;
+  const dias = Math.floor((Date.now() - Date.parse(iso)) / 86400000);
+  const meses = Math.max(1, Math.floor(dias / 30));
+  if (meses < 12) return `há ${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  const anos = Math.floor(meses / 12);
+  return `há ${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+}
+
 /* "em 3 dias", "vence hoje", "18 dias de atraso", "há 2 dias" */
 const vence = (t: string) => (t.startsWith('em ') || t === 'amanhã' ? `vence ${t}` : t);
+
+/* a linha "Aprovação" da tabela do pedido: "aprovada", "recusada" ou
+   "esperando a liderança decidir". Pendente sem portão (a categoria deixou de
+   exigir) não é linha nenhuma: não há o que esperar. */
+function aprovacaoEmPalavras(d: { aprovacao?: string | null; falta_aprovacao?: boolean }): string {
+  if (d.aprovacao === 'aprovada') return 'aprovada';
+  if (d.aprovacao === 'rejeitada') return 'recusada';
+  if (d.falta_aprovacao) return 'esperando a liderança decidir';
+  return '';
+}
 
 /* A CONCLUÍDA SE MEDE PELA ENTREGA, E NÃO POR HOJE — 23/09/2026. Dizia
    "passou" para toda concluída cujo prazo ficou para trás no calendário,
@@ -718,7 +776,11 @@ const frase = fraseDoEvento;
    (prisão de foco, Escape, devolução do foco, tudo de graça). Tocar fora
    fecha. Onde `showModal` não existe (iOS antigo), o formulário abre em
    linha, como antes. */
-function Folha({ titulo, fechar, children }: { titulo: string; fechar: () => void; children: React.ReactNode }) {
+function Folha({ titulo, fechar, segurar, children }: {
+  titulo: string; fechar: () => void; children: React.ReactNode;
+  /* com texto escrito, Escape e o toque fora não fecham: só o "Voltar" */
+  segurar?: () => boolean;
+}) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const d = ref.current;
@@ -728,8 +790,8 @@ function Folha({ titulo, fechar, children }: { titulo: string; fechar: () => voi
     return () => { if (d.open) d.close(); };
   }, []);
   return (
-    <dialog ref={ref} className="dm-folha" onCancel={e => { e.preventDefault(); fechar(); }}
-      onClick={e => { if (e.target === e.currentTarget) fechar(); }}>
+    <dialog ref={ref} className="dm-folha" onCancel={e => { e.preventDefault(); if (!segurar?.()) fechar(); }}
+      onClick={e => { if (e.target === e.currentTarget && !segurar?.()) fechar(); }}>
       <div className="dm-folha-in">
         <div className="dm-folha-alca" aria-hidden="true" />
         <div className="dm-folha-topo">
@@ -894,10 +956,19 @@ function Formulario({ aberto, d, b, eu, indo, agir }: {
        resposta é obrigatória e o botão diz o que faz; quem atende pode
        destravar sem texto (a resposta pode ter chegado por outro caminho) */
     const responde = !!(eu.pede ?? eu.abriu) && d.travada_por === 'informacao';
+    /* A PERGUNTA EM CIMA DA RESPOSTA — 24/09/2026 (auditoria R10). Ela
+       morava só no aviso do topo da ficha, que a folha do celular cobre e
+       que já saiu da tela quando a pessoa rolou até o botão: respondia-se
+       de memória. */
     return (
-      <CaixaDeAcao rot={responde ? 'A sua resposta' : 'O que destravou'} botao={responde ? 'Enviar resposta' : 'Destravar'}
-        salvando={indo} exigeTexto={responde} teto={tetoDe('destravar')}
-        aoEnviar={t => agir('destravar', { texto: t })} />
+      <div className="dm-acao-form">
+        {responde && d.travada_nota ? (
+          <div className="dm-pergunta"><span>O que a equipe perguntou</span>{d.travada_nota}</div>
+        ) : null}
+        <CaixaDeAcao rot={responde ? 'A sua resposta' : 'O que destravou'} botao={responde ? 'Enviar resposta' : 'Destravar'}
+          salvando={indo} exigeTexto={responde} teto={tetoDe('destravar')}
+          aoEnviar={t => agir('destravar', { texto: t })} />
+      </div>
     );
   }
   if (aberto === 'cancelar') {

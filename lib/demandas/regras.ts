@@ -320,8 +320,10 @@ export type Falta = { campo: 'titulo' | 'descricao' | 'categoria_id' | 'setor' |
 export function camposQueFaltam(r: Rascunho, temSetor: boolean, cat?: Categoria | null): Falta[] {
   const f: Falta[] = [];
   if (r.titulo.trim().length < 4) f.push({ campo: 'titulo', texto: 'um título que diga o que é' });
-  if (r.descricao.trim().length < 10) f.push({ campo: 'descricao', texto: 'a descrição do que precisa ser feito' });
+  /* na ordem da tela (título, categoria, descrição): o resumo "Falta
+     preencher" é lido de cima para baixo junto com os campos */
   if (!r.categoria_id) f.push({ campo: 'categoria_id', texto: 'a categoria' });
+  if (r.descricao.trim().length < 10) f.push({ campo: 'descricao', texto: 'a descrição do que precisa ser feito' });
   if (!temSetor) f.push({ campo: 'setor', texto: 'o setor que está pedindo' });
   if (!r.prazo && !r.sem_prazo_porque.trim()) f.push({ campo: 'prazo', texto: 'uma data desejada, ou o porquê de não ter data' });
   if (r.prioridade === 'urgente' && !r.impacto.trim()) f.push({ campo: 'impacto', texto: 'o que acontece se não for feito (urgente pede isso)' });
@@ -874,7 +876,9 @@ export function horas(h: number | null): string {
   /* sem dado é "sem dados", e não um travessão solto na casa */
   if (h === null || h === undefined) return 'sem dados';
   /* abaixo de uma hora, minutos: "0,4 h" e "0 h" não se leem */
-  if (h < 1) { const m = Math.round(h * 60); return m < 1 ? 'menos de 1 min' : `${m} min`; }
+  /* e "< 1 min", e não "menos de 1 min": na casa de número a frase quebrava
+     em duas linhas ("menos de / 1 min" em 1440) */
+  if (h < 1) { const m = Math.round(h * 60); return m < 1 ? '< 1 min' : `${m} min`; }
   if (h < 24) return `${umaCasa(h)} h`;
   const d = umaCasa(h / 24);
   return `${d} ${d === '1' ? 'dia' : 'dias'}`;

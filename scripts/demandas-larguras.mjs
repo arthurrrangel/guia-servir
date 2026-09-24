@@ -21,6 +21,13 @@
      5. O VALOR DE CADA SELECT CABE NA CAIXA FECHADA (medido com a letra
         dela): "Manutenção e inf…" saía nos sete selects de cada grupo de
         Categorias, entre 768 e 1279.
+     6. A BARRA FIXA DO CELULAR NUNCA É SÓ "MAIS". Em 24/09/2026 a demanda
+        encerrada (concluída vista pela equipe, confirmada, cancelada) tinha
+        uma barra com um único botão genérico de 288 a 720px, e as abas
+        sumiam; só as fichas em andamento estavam no conjunto medido.
+     7. O VALOR DE CADA PAR DA FICHA NA LETRA DO TEXTO (14px), e não na do
+        rótulo: o orçamento, o número que decide Aprovar ou Recusar, saía em
+        12px cinza, porque a regra do rótulo pegava todo `span`.
 
    Precisa do app no ar em 127.0.0.1:3400, com a semente de
    `scripts/demandas-celular-subir.sh` (os números das demandas vêm de
@@ -41,14 +48,17 @@ const PAPEIS = [
     ['inicio', '/demandas'], ['atendimento', '/demandas/atendimento'], ['numeros', '/demandas/numeros'],
     ['admin-pessoas', '/demandas/admin'], ['admin-setores', '/demandas/admin?secao=setores'],
     ['admin-categorias', '/demandas/admin?secao=categorias'], ['admin-anexos', '/demandas/admin?secao=anexos'],
-    ['admin-pessoa', `/demandas/admin/pessoas/${N._pessoa}`], ['ficha', `/demandas/d/${N.admin.execucao}`]] },
+    ['admin-pessoa', `/demandas/admin/pessoas/${N._pessoa}`], ['ficha', `/demandas/d/${N.admin.execucao}`],
+    ['ficha-aprovacao', `/demandas/d/${N.admin.travada}`]] },
   { tok: 'tok-comunica', quem: 'responsavel', rotas: [
     ['inicio', '/demandas'], ['atendimento', '/demandas/atendimento'], ['atendimento-fila', '/demandas/atendimento?ver=fila'],
     ['ficha', `/demandas/d/${N.responsavel.execucao}`], ['ficha-travada', `/demandas/d/${N.responsavel.travada}`],
-    ['avisos', '/demandas/avisos']] },
+    ['avisos', '/demandas/avisos'], ['ficha-encerrada', `/demandas/d/${N.responsavel.concluida}`],
+    ['ficha-confirmada', `/demandas/d/${N.responsavel.validada}`]] },
   { tok: 'tok-pede', quem: 'solicitante', rotas: [
     ['inicio', '/demandas'], ['nova', '/demandas/nova'], ['ficha', `/demandas/d/${N.solicitante.execucao}`],
-    ['ficha-concluida', `/demandas/d/${N.solicitante.concluida}`], ['avisos', '/demandas/avisos'], ['perfil', '/demandas/perfil']] },
+    ['ficha-concluida', `/demandas/d/${N.solicitante.concluida}`], ['ficha-confirmada', `/demandas/d/${N.solicitante.validada}`],
+    ['avisos', '/demandas/avisos'], ['perfil', '/demandas/perfil']] },
   { tok: 'tok-lider', quem: 'lider', rotas: [['inicio', '/demandas']] },
 ];
 
@@ -135,10 +145,24 @@ for (const w of LARGURAS) {
           const mede = regua.measureText(op.text.trim()).width;
           if (mede > cabe + 1) cortados.push(`«${op.text.trim().slice(0, 30)}» ${Math.round(mede)}/${Math.round(cabe)}px`);
         }
+        /* 6. a barra fixa do celular nunca é só "Mais" */
+        let soMais = '';
+        const barra = document.querySelector('.dm-barra-acao');
+        if (barra && visivel(barra)) {
+          const bs = [...barra.querySelectorAll('button,a')].filter(visivel);
+          if (bs.length === 1 && (bs[0].textContent || '').trim() === 'Mais') soMais = 'a barra tem só "Mais"';
+        }
+        /* 7. o valor de cada par da ficha na letra do texto */
+        const miudos = [];
+        for (const v of document.querySelectorAll('.dm-pares > div > span:not(:first-child)')) {
+          if (!visivel(v)) continue;
+          const px = parseFloat(getComputedStyle(v).fontSize);
+          if (px < 14) miudos.push(`«${(v.textContent || '').trim().slice(0, 24)}» em ${px}px`);
+        }
         const raiz = document.querySelector('.dm') || document.body;
         return {
           rola: document.documentElement.scrollWidth - window.innerWidth,
-          orfaos, contextos, tortos, somas, cortados,
+          orfaos, contextos, tortos, somas, cortados, soMais, miudos,
           travessao: (raiz.innerText || '').split('\n').filter(l => l.includes('—')).slice(0, 2),
         };
       });
@@ -149,6 +173,8 @@ for (const w of LARGURAS) {
         m.tortos.join(' | '));
       ok(m.travessao.length === 0, `${etiqueta} · nenhum travessão no texto da tela`, m.travessao.join(' | '));
       ok(m.cortados.length === 0, `${etiqueta} · o valor de cada select cabe na caixa`, m.cortados.slice(0, 3).join(' | '));
+      ok(!m.soMais, `${etiqueta} · a barra fixa não é só "Mais"`, m.soMais);
+      ok(m.miudos.length === 0, `${etiqueta} · o valor de cada par na letra do texto`, m.miudos.slice(0, 2).join(' | '));
     }
     await ctx.close();
   }

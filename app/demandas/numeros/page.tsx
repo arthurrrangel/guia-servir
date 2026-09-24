@@ -355,14 +355,30 @@ function Barras({ itens }: { itens: { rot: string; n: number; sub?: string }[] }
    barras horizontais, em pé. */
 function Colunas({ itens }: { itens: { rot: string; n: number }[] }) {
   const max = Math.max(1, ...itens.map(i => i.n));
+  /* NO CELULAR, O GRÁFICO ABRE NO MÊS DE AGORA — 24/09/2026. Em "1 ano" são
+     13 meses, e a caixa rola de lado: aberta no começo, a pessoa via sete
+     zeros de set/25 a mar/26 e lia "nada aconteceu". O mês que importa é o
+     último, então a caixa nasce rolada até ele (no desktop tudo cabe e isto
+     não faz nada). */
+  const caixa = useRef<HTMLDivElement>(null);
+  const chave = itens.map(i => i.rot).join();
+  useEffect(() => {
+    const c = caixa.current;
+    if (c && c.scrollWidth > c.clientWidth) c.scrollLeft = c.scrollWidth;
+  }, [chave]);
   return (
-    <div className="dm-colunas-caixa" role="img"
+    <div className="dm-colunas-caixa" role="img" ref={caixa}
       aria-label={itens.map(i => `${i.rot}: ${i.n}`).join(', ')}>
       <div className="dm-colunas">
         {itens.map((i, k) => (
+          /* O NÚMERO EM CIMA DA PRÓPRIA BARRA — 24/09/2026. Com a barra
+             ocupando a altura toda e o número no topo da coluna, o "1" de
+             julho ficava a 150px da barrinha dele, solto no alto do gráfico.
+             Agora a barra tem a altura da conta e o número vem logo acima;
+             os 20px de cima são a vaga do número da barra mais alta. */
           <div key={k} className={i.n ? 'dm-coluna' : 'dm-coluna dm-zero'}>
             <b>{i.n}</b>
-            <div className="dm-barra"><i style={{ height: i.n ? `${Math.max(2, Math.round((i.n / max) * 100))}%` : '0' }} /></div>
+            <div className="dm-barra" style={{ height: i.n ? `max(2px, calc((100% - 20px) * ${(i.n / max).toFixed(4)}))` : '0' }} />
           </div>
         ))}
       </div>

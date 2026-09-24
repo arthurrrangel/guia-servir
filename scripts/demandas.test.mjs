@@ -886,7 +886,7 @@ function servidorAceita(acao, d, eu) {
   ok(horas(36) === '1,5 dia' || horas(36) === '1,5 dias', 'dia e meio com vírgula', horas(36));
   ok(horas(2.3) === '2,3 h', 'hora quebrada com vírgula, e não com ponto', horas(2.3));
   ok(horas(24) === '1 dia', 'um dia no singular', horas(24));
-  ok(horas(0.4) === '24 min' && horas(0) === 'menos de 1 min', 'abaixo de uma hora, minutos', `${horas(0.4)} | ${horas(0)}`);
+  ok(horas(0.4) === '24 min' && horas(0) === '< 1 min', 'abaixo de uma hora, minutos', `${horas(0.4)} | ${horas(0)}`);
   ok(iniciais('Paulo Souza Filho') === 'PS', 'o sufixo não vira inicial', iniciais('Paulo Souza Filho'));
   ok(iniciais('João Lima Júnior') === 'JL' && iniciais('João Lima Jr.') === 'JL', 'Júnior e Jr. também não');
   ok(iniciais('Ana Clara Mendes') === 'AM', 'primeiro nome e último sobrenome', iniciais('Ana Clara Mendes'));

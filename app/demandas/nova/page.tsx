@@ -294,7 +294,7 @@ function Nova() {
             <p className="dm-peq dm-mudo dm-antes-do-botao">
               O sistema não manda WhatsApp sozinho. Ele escreve o recado; você toca uma vez e envia.
             </p>
-            <div className="dm-linha">
+            <div className="dm-linha dm-linha-botoes">
               {zap
                 ? <a className="dm-btn dm-zap" href={zap} target="_blank" rel="noopener noreferrer">
                     <Icone nome="mensagem" />Mandar para {pronta.contato!.nome.split(' ')[0]}
@@ -317,6 +317,17 @@ function Nova() {
   const resumoDoPedido = r.prazo
     ? <>Pedindo para {dataCheia(r.prazo)}{setorDaCat ? `, para ${setorDaCat}` : ''}.</>
     : setorDaCat ? <>Para {setorDaCat}.</> : null;
+  /* NA BARRA DO CELULAR, DUAS LINHAS QUE NÃO SE COMEM — 24/09/2026. A frase
+     inteira ao lado do botão cortava o destino em 320 e 360 ("Pedindo para
+     27/09/2026, para…"). Aqui o setor numa linha e a data na outra, cada uma
+     com a própria reticência: a data nunca some, e o setor se reconhece pelo
+     começo. */
+  const resumoDaBarra = setorDaCat || r.prazo ? (
+    <>
+      {setorDaCat ? <span className="dm-resumo-setor">{setorDaCat}</span> : null}
+      {r.prazo ? <span>Para {dataCheia(r.prazo)}</span> : null}
+    </>
+  ) : null;
 
   return (
     <>
@@ -594,7 +605,7 @@ function Nova() {
 
       {!digitando ? (
         <div className="dm-barra-acao dm-barra-enviar">
-          <span className="dm-cresce">{resumoDoPedido}</span>
+          <span className="dm-cresce">{resumoDaBarra}</span>
           <button type="button" className="dm-btn dm-pri" disabled={indo} onClick={enviar} aria-busy={indo || undefined}>
             {indo ? 'Enviando…' : 'Enviar a demanda'}
           </button>

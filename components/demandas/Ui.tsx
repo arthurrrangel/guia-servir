@@ -11,7 +11,7 @@
    contam por que cada uma é como é continuam aqui, junto dela. */
 
 import Link from 'next/link';
-import { Children, cloneElement, isValidElement, useEffect, useState } from 'react';
+import { Children, cloneElement, createContext, isValidElement, useContext, useEffect, useState } from 'react';
 import { comoOPdfChama, type EstadoDoPDF } from '@/lib/demandas/regras';
 import { Icone, type NomeDoIcone } from './Icone';
 
@@ -506,6 +506,13 @@ export function Toast({ t, fechar }: { t: ToastPedido; fechar: () => void }) {
 /* Caixa de texto que vira ação: o padrão de "concluir", "travar", "cancelar".
    O botão só liga quando há texto, porque o banco vai recusar vazio de
    qualquer jeito e é melhor a pessoa ver isso antes de tocar. */
+/* O RASCUNHO DA CAIXA DE AÇÃO — 24/09/2026 (auditoria R10). Esc, o toque
+   fora da folha ou o "Voltar" desmontavam a caixa e o texto ia junto: quem
+   tocava fora da folha para baixar o teclado perdia o parágrafo. Quem monta
+   a caixa pode guardar o texto fora dela (a ficha guarda um por ação), e a
+   caixa nasce com ele. Sem guardião, a caixa é como sempre foi. */
+export const RascunhoDaCaixa = createContext<{ ler: () => string; gravar: (t: string) => void } | null>(null);
+
 export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando, aoEnviar, extra,
                              teto = 4000, podeEnviar = true }: {
   rot: string; dica?: string; botao: string;
@@ -523,7 +530,9 @@ export function CaixaDeAcao({ rot, dica, botao, tom, exigeTexto = true, salvando
      caixa sabe o que mais e obrigatorio; esta porta e para ele dizer. */
   podeEnviar?: boolean;
 }) {
-  const [t, setT] = useState('');
+  const guarda = useContext(RascunhoDaCaixa);
+  const [t, setTLocal] = useState(() => guarda?.ler() ?? '');
+  const setT = (x: string) => { setTLocal(x); guarda?.gravar(x); };
   /* O TETO NAO E ZELO, E O QUE IMPEDE A FICHA DE FICAR PESADA PARA SEMPRE.
 
      Esta peca e uma so e serve sete usos: comentar, concluir, travar,

@@ -212,7 +212,7 @@ function Anexos({ regra, trocar, toast }: {
               if (!v) return;
               if (await pedir({ incluir: v }, { txt: 'Site incluído.' })) setSite('');
             }}>
-              <input className="dm-ctl dm-cresce" value={site} placeholder="drive.google.com" aria-label="Site a incluir"
+              <input className="dm-ctl dm-cresce" value={site} placeholder="Ex.: drive.google.com" aria-label="Site a incluir"
                 inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} onChange={e => setSite(e.target.value)} />
               <button type="submit" className="dm-btn dm-pri" disabled={indo || !site.trim()}>Incluir</button>
             </form>

@@ -97,10 +97,21 @@ function Inicio() {
 
   if (!eu) return null;
   const n = p?.n;
-  const abas: { v: Aba; rot: string }[] = [{ v: 'minhas', rot: 'Minhas' }];
+  /* para quem atende, "Pedidas por você": "Minhas" logo abaixo de "Com você
+     3 em execução" se lia como as dela para atender */
+  const abas: { v: Aba; rot: string }[] = [{ v: 'minhas', rot: atende ? 'Pedidas por você' : 'Minhas' }];
   if (eu.papel === 'lider') abas.push({ v: 'ministerio', rot: 'Ministério' });
   if ((n?.participo ?? 0) > 0) abas.push({ v: 'participo', rot: 'Acompanho' });
   const pendentesDoLado = p ? (p.precisa || []).length : 0;
+  /* O TÍTULO É DA SEÇÃO, E NÃO DE UMA ABA — 24/09/2026 (auditoria R10). Com
+     mais de uma aba, "Minhas demandas" ficava em cima das nove do
+     ministério: com abas, o título é neutro e a aba diz de quem. */
+  const tituloDaLista = abas.length > 1 ? 'Demandas' : atende ? 'Pedidas por você' : 'Minhas demandas';
+  /* e a líder sem nada aberto em nome próprio abre no ministério, que é onde
+     está o trabalho dela (a aba "Minhas" vazia era a primeira coisa da
+     lista). A lista remonta quando o portal chega com as contas (`key`). */
+  const abaInicial: Aba = eu.papel === 'lider' && !!n && !n.minhas_andamento && (n.ministerio || 0) > 0
+    ? 'ministerio' : 'minhas';
 
   return (
     <>
@@ -130,8 +141,8 @@ function Inicio() {
       {/* para quem atende, "Pedidas por você": "Minhas demandas: nenhuma em
           andamento" logo abaixo de "Com você 3 em execução" se lia como
           contradição (as três são dela, mas para atender) */}
-      <Secao titulo={atende ? 'Pedidas por você' : 'Minhas demandas'}>
-        <Lista eu={eu} abas={abas} abaInicial="minhas"
+      <Secao titulo={tituloDaLista}>
+        <Lista key={abaInicial} eu={eu} abas={abas} abaInicial={abaInicial}
           recortes={[
             /* "Em aberto", o nome do conjunto em todo o sistema (a aba do
                Atendimento, a casa de cima, Números); "Abertas" confundia com
@@ -212,12 +223,15 @@ function vazioDoInicio(aba: Aba, so: string, pendentes: number, atende: boolean)
   if (so === 'concluidas') return { titulo: 'Nenhum pedido seu foi concluído ainda.' };
   if (so === 'tudo') return { titulo: 'Você ainda não abriu nenhuma demanda.' };
   /* sem o visto verde quando há pendência logo acima: "boa notícia" ao lado
-     de "as 3 de cima esperam a sua resposta" se contradizia */
+     de "as 3 de cima esperam a sua resposta" se contradizia. E o título diz
+     DE QUEM é o vazio: "Nada em aberto." embaixo de três demandas abertas
+     do ministério (a líder responde por elas) se contradizia do mesmo jeito */
+  const titulo = atende ? 'Nada pedido por você em aberto.' : 'Nenhuma demanda sua em aberto.';
   if (pendentes > 0) {
-    return { titulo: 'Nada em aberto.',
+    return { titulo,
              dica: `${pendentes === 1 ? 'A de cima espera' : `As ${pendentes} de cima esperam`} a sua resposta ou confirmação.` };
   }
-  return { titulo: atende ? 'Nada pedido por você em aberto.' : 'Nenhuma demanda sua em aberto.', tom: 'bom' };
+  return { titulo, tom: 'bom' };
 }
 
 /* O QUE ESPERA POR VOCÊ, DE TODOS OS LADOS.
