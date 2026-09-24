@@ -17,6 +17,14 @@
    existia. Tudo que ele cria tem sufixo `-x9` ou grupo `VAL`.
 
    Rode e leia as duas saidas: o NOTICE do bloco e a linha de contagens.
+
+   ATE A 95. A fixture daqui cria uma GESTORA ('VAL Ges') para aprovar, e a
+   migracao 96 (24/09/2026) tirou o papel do banco: depois dela o primeiro
+   `insert` deste arquivo morre em `ck_papel`, e a transacao inteira volta
+   atras sem mexer em nada. Quem aprova agora e so a administracao, e ela e
+   uma pessoa so: uma fixture nao pode criar outra. O que a 96 mudou e
+   conferido em producao pela conferencia da propria 96 (bloco `$conf$`), com
+   a administracao de verdade e sem gravar nada fora do CONF96.
    ============================================================================= */
 begin;
 do $v$

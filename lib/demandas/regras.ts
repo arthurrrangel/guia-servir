@@ -1133,6 +1133,13 @@ const PORBANCO: Record<string, string> = {
   PEDIDO_INVALIDO: 'Escolha uma das opções.',
   NADA_A_PEDIR: 'Você já tem esse papel, ou um que faz mais.',
   PAPEL_INVALIDO: 'Escolha um dos papéis da lista.',
+  /* 96 · a administração é de uma pessoa só, e a Gestão foi desligada. As
+     frases chegam com o banco; as telas que param de oferecer os dois papéis
+     vêm no commit seguinte */
+  ADMIN_UNICO: 'A administração é de uma pessoa só. Escolha Membro, Líder ou Equipe.',
+  SEM_GESTAO: 'O papel Gestão não existe mais: quem aprova e coordena é a administração. Escolha Membro, Líder ou Equipe.',
+  LOGIN_VAZIO: 'A administração entra por e-mail. Deixe um e-mail preenchido.',
+  CONFIRMAR_LOGIN: 'Esse é o e-mail com que a administração entra. Confirme a troca antes de salvar.',
   ULTIMO_ADMIN: 'Esta é a única pessoa que administra. Dê esse papel a outra pessoa antes de tirar dela.',
   ESCOPO_VAZIO: 'Gestor precisa acompanhar todos os setores, ou pelo menos um. Escolha antes de salvar.',
   ESCOPO_INVALIDO: 'Um dos setores escolhidos não existe mais. Recarregue a página.',

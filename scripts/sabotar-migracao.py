@@ -152,12 +152,35 @@ CADEIA = ([glob.glob(f'{RAIZ}/supabase/{f}.sql')[0] for f in BASE]
           + [glob.glob(f'{RAIZ}/supabase/{n}-*.sql')[0] for n in getattr(mod, 'RESTAURA', [N])])
 
 open(f'{S}/prep.sql', 'w').write(PREP)
-subprocess.run(['psql', '-h', '/tmp', '-p', '5439', '-U', 'postgres', '-d', 'postgres', '-q',
-                '-c', f'drop database if exists {BANCO};', '-c', f'create database {BANCO};'],
-               capture_output=True, text=True)
 
 
-def montar():
+# ENTRE UM CASO E O SEGUINTE, O BANCO NASCE DE NOVO, E NAO E REMONTADO POR
+# CIMA — 24/09/2026.
+#
+# `montar()` reaplicava a cadeia inteira no banco que o caso anterior tinha
+# usado. Valia enquanto toda migracao aceitava ser reaplicada por cima das
+# seguintes. A 96 tirou o papel gestor do `ck_papel`, e a conferencia da 67
+# (reaplicada por cima dela) cria um gestor de teste: a remontagem morria no
+# segundo caso com "violates check constraint ck_papel". Em producao isso
+# nunca acontece (`exige_versao_ate` recusa arquivo velho sobre banco novo);
+# aqui a bateria reaplicava o passado por cima do presente.
+#
+# Agora a cadeia e montada UMA vez, num banco modelo, e cada caso ganha uma
+# copia dele (`create database ... template`). Construido do zero de
+# verdade, como o cabecalho acima sempre prometeu, e mais rapido.
+MODELO = f'{BANCO}_modelo'
+
+
+def admin_sql(*cmds):
+    args = ['psql', '-h', '/tmp', '-p', '5439', '-U', 'postgres', '-d', 'postgres', '-q']
+    for c in cmds:
+        args += ['-c', c]
+    return subprocess.run(args, capture_output=True, text=True)
+
+
+def construir_modelo():
+    admin_sql(f'drop database if exists {BANCO};', f'drop database if exists {MODELO};',
+              f'create database {BANCO};')
     saida = psql(f'{S}/prep.sql', *CADEIA)
     if 'ERROR' in saida:
         print('NAO CONSEGUI MONTAR O BANCO DA SABOTAGEM:')
@@ -165,8 +188,20 @@ def montar():
             if 'ERROR' in l:
                 print('  ' + l)
         sys.exit(2)
+    r = admin_sql(f'alter database {BANCO} rename to {MODELO};')
+    if r.returncode != 0:
+        print('NAO CONSEGUI GUARDAR O BANCO MODELO:', (r.stdout + r.stderr).strip()[:300])
+        sys.exit(2)
 
 
+def montar():
+    r = admin_sql(f'drop database if exists {BANCO};', f'create database {BANCO} template {MODELO};')
+    if r.returncode != 0 or 'ERROR' in (r.stdout + r.stderr):
+        print('NAO CONSEGUI COPIAR O BANCO MODELO:', (r.stdout + r.stderr).strip()[:300])
+        sys.exit(2)
+
+
+construir_modelo()
 montar()
 
 print(f'SABOTAGENS DA {N}\n')
@@ -211,6 +246,8 @@ elif f'OK {N}' not in out:
     falhas += 1
 else:
     print('  ok   controle negativo: sem sabotagem, a conferencia roda e passa')
+
+admin_sql(f'drop database if exists {BANCO};', f'drop database if exists {MODELO};')
 
 print()
 if falhas:

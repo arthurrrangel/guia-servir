@@ -129,6 +129,97 @@ if [ "$st" != 0 ]; then
   exit 1
 fi
 
+# A 96 ENTRA DEPOIS DA SUITE ANTIGA, E NAO NA CADEIA DE CIMA — 24/09/2026.
+#
+# A suite antiga descreve o banco ate a 95, como a producao estava: ela cria
+# duas gestoras e confere o que o papel gestor fazia. A 96 tira o papel do
+# `ck_papel`, entao a suite antiga nao roda mais DEPOIS dela (o primeiro
+# `insert` de gestor morre). E a cadeia de cima tambem nao pode incluir a 96:
+# ela e aplicada DUAS vezes, e a segunda passada reaplicaria a conferencia da
+# 67 (que cria um gestor de teste) por cima da 96. Em producao isso nunca
+# acontece: `exige_versao_ate` recusa arquivo velho sobre banco novo.
+#
+# Entao a 96 entra aqui, por cima do banco que a suite antiga deixou (uma
+# administracao e duas gestoras de verdade, e nao so as linhas CONF96 da
+# conferencia), duas vezes, e a suite da 96 confere a conversao, as recusas e
+# o panorama.
+cat "$B/supabase/96-uma-pessoa-controla-tudo.sql" > /tmp/_m96.sql
+cp "$B/scripts/demandas-banco-96.test.sql" /tmp/_test96.sql
+# O QUE A PRODUCAO PODERIA TER NA HORA DA 96 E A SUITE ANTIGA NAO DEIXA
+# (auditoria R15A): demanda viva nas maos de quem era gestor (uma em
+# execucao, uma travada) e um pedido de papel na linha da administracao, que
+# aceito a desfaria. A suite da 96 confere o que a migracao fez com cada um.
+cat > /tmp/_antes96.sql <<'SQL'
+begin;
+create table public._antes96 (caso text primary key, numero int);
+-- a Joice via tudo: uma de Compras em execucao com ela, e uma da Manutencao
+-- travada com ela (a suite antiga deixa as duas abertas, sem ninguem)
+with d as (
+  select d.id from demandas.demandas d
+   where d.status = 'aberta' and d.responsavel_id is null and not demandas.falta_aprovacao(d)
+     and d.setor_responsavel = (select id from demandas.setores where slug = 'compras')
+   order by d.numero limit 1
+), u as (
+  update demandas.demandas x
+     set responsavel_id = (select id from demandas.membros where token = 'tk-gestor'), status = 'execucao',
+         /* aberta por quem TEM e-mail: a volta para a fila avisa essa pessoa
+            (R15B achou a conferencia confundindo esse aviso com sobra dela) */
+         aberta_por = (select id from demandas.membros where token = 'tk-lara')
+    from d where x.id = d.id returning x.numero
+) insert into public._antes96 select 'joice em execucao', numero from u;
+with d as (
+  select d.id from demandas.demandas d
+   where d.status = 'aberta' and d.responsavel_id is null and not demandas.falta_aprovacao(d)
+     and d.setor_responsavel = (select id from demandas.setores where slug = 'manutencao')
+   order by d.numero limit 1
+), u as (
+  update demandas.demandas x
+     set responsavel_id = (select id from demandas.membros where token = 'tk-gestor'), status = 'travada',
+         travada_por = 'informacao', travada_nota = 'Qual o horario? (antes da 96)'
+    from d where x.id = d.id returning x.numero
+) insert into public._antes96 select 'joice travada', numero from u;
+update demandas.membros set papel_pedido = 'lider', papel_pedido_em = now() where token = 'tk-admin';
+-- texto livre com o e-mail e o telefone da administracao (alguem escreveu
+-- "me chama no ..."): e digitado, e nao vazamento do panorama. A conferencia
+-- da 96 reprovava por isso (R15B); agora olha so os campos que o panorama monta
+insert into demandas.eventos (demanda_id, membro_id, tipo, texto)
+  select d.id, (select id from demandas.membros where token = 'tk-jovem'), 'comentario',
+         'me chama no arthur@teste ou no 5531900000001'
+    from demandas.demandas d
+   where d.numero = (select numero from public._antes96 where caso = 'joice travada');
+do $$ begin
+  if (select count(*) from public._antes96) <> 2
+     or (select papel from demandas.membros where token = 'tk-gil') <> 'gestor'
+     or (select papel from demandas.membros where token = 'tk-gestor') <> 'gestor' then
+    raise exception 'o banco da suite antiga nao tem o que a suite da 96 precisa (duas gestoras, e demanda aberta de Compras e da Manutencao)';
+  end if;
+end $$;
+-- os avisos que ESTA montagem enfileirou (ela mudou estado e quem pediu por
+-- fora das funcoes) nao sao de ninguem: a suite da 96 conta os que a 96 cria
+delete from demandas.avisos where criado_em = now();
+commit;
+SQL
+chmod 644 /tmp/_m96.sql /tmp/_test96.sql /tmp/_antes96.sql
+su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -v ON_ERROR_STOP=1 -f /tmp/_antes96.sql" > /tmp/_antes96.log 2>&1 || {
+  grep -E "ERROR" /tmp/_antes96.log | head -5
+  echo; echo "FALHOU — nao consegui montar o estado de antes da 96."; exit 1; }
+su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -v ON_ERROR_STOP=1 -f /tmp/_m96.sql" > /tmp/_m96.log 2>&1 || {
+  grep -E "ERROR|REPROVOU|PAROU|^  -" /tmp/_m96.log | head -20
+  echo; echo "FALHOU — a 96 nao entrou por cima do banco da suite antiga."; exit 1; }
+grep -E "^psql.*NOTICE:  (96|OK 96)" /tmp/_m96.log | sed 's/^psql:[^ ]* NOTICE:  /   /'
+su postgres -c "$PG/psql -h /tmp -U postgres -d dem -q -v ON_ERROR_STOP=1 -f /tmp/_m96.sql" > /tmp/_m96b.log 2>&1 || {
+  grep -E "ERROR|REPROVOU|^  -" /tmp/_m96b.log | head -20
+  echo; echo "FALHOU — reaplicar a 96 por cima dela mesma nao e seguro."; exit 1; }
+st=0
+su postgres -c "$PG/psql -h /tmp -U postgres -d dem -f /tmp/_test96.sql" > /tmp/_test96.log 2>&1 || st=$?
+grep -v '^NOTICE' /tmp/_test96.log | grep -E "FALHOU|REPROVOU|x 96|demandas-banco-96" | tail -40
+grep -E "demandas-banco-96:" /tmp/_test96.log
+if [ "$st" != 0 ]; then
+  echo
+  echo "FALHOU — a suite da 96 reprovou (psql saiu $st)."
+  exit 1
+fi
+
 # ===========================================================================
 # OS CODIGOS DO BANCO CONTRA AS FRASES DA TELA
 #
