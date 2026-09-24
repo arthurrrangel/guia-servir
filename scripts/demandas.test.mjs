@@ -1160,9 +1160,11 @@ function servidorAceita(acao, d, eu) {
     ok(roda('concluir').pedida === null && roda('concluir').abriu === 'concluir',
       'e "Concluir" abre o formulário em vez de gravar', JSON.stringify(roda('concluir')));
   }
-  /* 24/09/2026 (R11): para quem pediu; a gestão lê "Confirmar pela gestão" */
-  ok(/case 'validar':[^\n]*'Resolveu, obrigado'[^\n]*'Confirmar pela gestão'/.test(ficha),
-    'o botão de validar se chama "Resolveu, obrigado" para quem pediu, e "Confirmar pela gestão" para a gestão');
+  /* 24/09/2026 (R11): para quem pediu; quem decide lê "Confirmar entrega"
+     (96: a Gestão foi desligada, e quem confirma no lugar de quem pediu é a
+     administração; "Confirmar pela administração" não cabia em 320) */
+  ok(/case 'validar':[^\n]*'Resolveu, obrigado'[^\n]*'Confirmar entrega'/.test(ficha),
+    'o botão de validar se chama "Resolveu, obrigado" para quem pediu, e "Confirmar entrega" para quem decide');
 
   /* ---- 8e. as ações que NÃO viram botão na grade ------------------------- */
   const fora = new Function(`return (${/FORA_DA_GRADE[^=]*=\s*(\[[^\]]*\])/.exec(ficha)[1]});`)();

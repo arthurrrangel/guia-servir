@@ -15,7 +15,7 @@ export type NomeDoIcone =
   | 'pessoas' | 'setores' | 'categorias' | 'anexos' | 'sair' | 'voltar' | 'seta'
   | 'busca' | 'ok' | 'alerta' | 'info' | 'erro' | 'relogio' | 'mais' | 'mensagem'
   | 'copiar' | 'fechar' | 'lista' | 'calendario' | 'portal' | 'link' | 'check'
-  | 'alta' | 'urgente' | 'filtro';
+  | 'alta' | 'urgente' | 'filtro' | 'panorama';
 
 const DESENHO: Record<NomeDoIcone, React.ReactNode> = {
   inicio: <><path d="M3.5 10.2 12 3.5l8.5 6.7" /><path d="M5.5 8.8V19a1.5 1.5 0 0 0 1.5 1.5h3.5v-6h3v6H17a1.5 1.5 0 0 0 1.5-1.5V8.8" /></>,
@@ -52,6 +52,8 @@ const DESENHO: Record<NomeDoIcone, React.ReactNode> = {
   alta: <path d="m7 14.5 5-5 5 5" />,
   urgente: <><path d="m7 12.5 5-5 5 5" /><path d="m7 17.5 5-5 5 5" /></>,
   filtro: <><path d="M4 7h16" /><path d="M7 12h10" /><path d="M10 17h4" /></>,
+  /* 96 · o panorama: quatro quadros, o do alto maior (o que pede decisão) */
+  panorama: <><rect x="3.5" y="3.5" width="17" height="7" rx="1.5" /><rect x="3.5" y="13.5" width="7.5" height="7" rx="1.5" /><rect x="13" y="13.5" width="7.5" height="7" rx="1.5" /></>,
 };
 
 export function Icone({ nome, className }: { nome: NomeDoIcone; className?: string }) {

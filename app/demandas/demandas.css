@@ -566,8 +566,6 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-aviso-campo{color:var(--dm-warn);font-size:12px;line-height:17px}
 .dm-caixinha{display:flex;align-items:center;gap:10px;min-height:var(--dm-h);cursor:pointer;font-size:14px}
 .dm .dm-caixinha input{width:18px;height:18px;min-height:0;margin:0;padding:0;accent-color:var(--dm-preto);flex:none;border:0}
-.dm-escopo{display:grid;gap:0;margin-top:var(--dm-e2);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);padding:2px var(--dm-e3)}
-@media (min-width:720px){ .dm-escopo{grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--dm-e4)} }
 /* a linha de criar (Novo setor, Nova categoria, Incluir site, Juntar) */
 .dm-linha.dm-criar{flex-wrap:nowrap}
 /* a base 0 e não "auto": com "auto" o campo herdava `width:100%` como base,
@@ -1266,6 +1264,31 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 }
 /* em 320 quatro números por linha não cabem com os rótulos: dois */
 @media (max-width:359px){ .dm-tab.dm-empilha tr{grid-template-columns:repeat(2,minmax(0,1fr))} }
+
+/* 96 · O PANORAMA. Por setor tem seis números: no celular, três por linha
+   (duas linhas iguais, e não quatro em cima e dois soltos embaixo); em 320,
+   dois. A carga tem o nome com o setor embaixo, e o nome leva à ficha. */
+@media (max-width:719px){ .dm-tab.dm-empilha.dm-pano-setores tr{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:359px){ .dm-tab.dm-empilha.dm-pano-setores tr{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.dm-pano-setores td.dm-primeira .dm-pill{margin-left:6px;vertical-align:1px}
+/* os setores que atendem sem ninguém e sem nada: uma frase no pé da tabela */
+/* a frase de baixo da tabela, e a ação dela num botão de verdade: o link no
+   meio da frase tinha 17px de altura no celular (auditoria R15A) */
+.dm-pano-parados{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;margin:0;padding:12px var(--dm-e4);border-top:1px solid var(--dm-linha);font-size:13px;line-height:20px;color:var(--dm-ink-2)}
+.dm-pano-parados p{margin:0;flex:1 1 220px;min-width:0}
+.dm-pano-parados b{font-weight:600;color:var(--dm-ink)}
+.dm-pano-nota{margin:0;padding:12px var(--dm-e4);font-size:13px;line-height:20px;color:var(--dm-ink-2)}
+.dm-fila > .dm-pano-nota + .dm-item{border-top:1px solid var(--dm-linha)}
+/* "Mostrar mais" das aprovações: um botão com a cara da linha de soma */
+.dm-fila > button.dm-item{width:100%;margin:0;border:0;border-top:1px solid var(--dm-linha);background:none;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.dm-pano-carga td.dm-primeira a{color:var(--dm-ink);font-weight:600;text-decoration:none}
+/* no toque, o nome é um alvo de 44px (medido em 390: 243×17) */
+@media (max-width:1023px){ .dm-pano-carga td.dm-primeira a{display:inline-flex;align-items:center;min-height:44px} }
+.dm-pano-carga td.dm-primeira a:hover{text-decoration:underline;text-underline-offset:3px}
+.dm-pano-carga td.dm-primeira small{display:block;font-size:12px;line-height:16px;font-weight:400;color:var(--dm-mudo);margin-top:2px}
+/* a ficha de quem administra: o papel é uma frase, e não um seletor */
+.dm-adm-unica{margin:0;color:var(--dm-ink-2);max-width:62ch;font-size:14px;line-height:22px}
+.dm-adm-unica b{color:var(--dm-ink)}
 
 /* a tabela editável em cartões: um cartão por linha, controles rotulados.
    Quem decide é `useEstreito` no componente: Setores abaixo de 720,

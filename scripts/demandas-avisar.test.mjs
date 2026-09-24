@@ -589,6 +589,67 @@ const assuntoDe = (e) => String(emailDe(e).subject ?? '');
 }
 
 /* ==========================================================================
+   7b · 96: O AVISO DE APROVAR. Sem Gestão, quem aprova é a administração, e
+   o aviso de demanda nova ia só para a equipe do setor. O `aprovar` fala com
+   ela: o que decidir, quanto custa, por que tem portão, e onde decidir.
+   ========================================================================== */
+{
+  montar({ fila: [avisoBase(0, { tipo: 'aprovar', numero: 45, orcamento: 2500.5, abriu: 'Caio Jovem',
+    nota: 'Esta categoria exige aprovação antes da execução.', falta_aprovacao: true })] });
+  await chamar({ headers: comToken });
+  ok(cena.emails.length === 1, 'o aviso de aprovar sai', `saíram ${cena.emails.length}`);
+  const corpo = textoDe(cena.emails[0]);
+  const assunto = assuntoDe(cena.emails[0]);
+  ok(/precisa da sua aprovação/.test(corpo.split('\n')[0]), 'a primeira linha diz o que fazer: aprovar', corpo.split('\n')[0]);
+  ok(/2\.500,50/.test(corpo) && /R\$/.test(corpo), 'o corpo traz o valor em reais', corpo);
+  ok(corpo.includes('Por que precisa: Esta categoria exige aprovação antes da execução.'),
+     'o corpo traz o motivo do portão', corpo);
+  ok(corpo.includes('Pedida por: Caio Jovem'), 'o corpo diz quem pediu', corpo);
+  ok(/Aprove ou recuse/.test(corpo) && !/não precisa fazer nada/i.test(corpo),
+     'e pede a decisão, sem dizer que não há nada a fazer', corpo);
+  ok(corpo.includes(`${SITE}/demandas/d/45`), 'com o link da ficha', corpo);
+  ok(/#45/.test(assunto) && /espera a sua aprovação/.test(assunto) && /2\.500,50/.test(assunto),
+     'o assunto diz o número, a aprovação e o valor', assunto);
+
+  for (const orcamento of [null, undefined, 0, 'abc', 'NaN', -3]) {
+    montar({ fila: [avisoBase(0, { tipo: 'aprovar', numero: 46, orcamento, nota: null, falta_aprovacao: true })] });
+    await chamar({ headers: comToken });
+    const c = textoDe(cena.emails[0]);
+    ok(!/Valor:/.test(c) && !/NaN|undefined|null/.test(c + assuntoDe(cena.emails[0])),
+       `valor ${JSON.stringify(orcamento)} não vira linha de valor nem lixo no e-mail`, c);
+    ok(!/Por que precisa:/.test(c), 'e sem motivo, a linha do motivo não aparece', c);
+  }
+
+  /* R15B · o pedido de aprovação que a administração já decidiu não sai, e
+     sai da fila (carimbado), para não voltar em toda varredura */
+  montar({ fila: [avisoBase(0, { tipo: 'aprovar', numero: 47, orcamento: 90, falta_aprovacao: false })] });
+  const resp = await chamar({ headers: comToken });
+  const corpoResp = await resp.json().catch(() => null);
+  const carimbo = cena.rpcs.find(r => r.fn === 'dem_aviso_enviado');
+  ok(cena.emails.length === 0, 'o de aprovar já decidido não vira e-mail', `saíram ${cena.emails.length}`);
+  ok(!!carimbo && JSON.stringify(carimbo.args.p_ids) === JSON.stringify([avisoBase(0).aviso_id]),
+     'e sai da fila, carimbado', JSON.stringify(carimbo && carimbo.args));
+  ok(corpoResp && corpoResp.jaDecididos === 1, 'e a resposta conta', JSON.stringify(corpoResp));
+  /* e os outros tipos não olham isso: o `nova` de uma demanda sem portão sai */
+  montar({ fila: [avisoBase(0, { tipo: 'nova', numero: 48, falta_aprovacao: false })] });
+  await chamar({ headers: comToken });
+  ok(cena.emails.length === 1, 'o de demanda nova sai normalmente', `saíram ${cena.emails.length}`);
+
+  /* os quatro textos são quatro, e o de aprovar não é o de demanda nova */
+  montar({ fila: [
+    avisoBase(0, { tipo: 'nova', numero: 51 }),
+    avisoBase(1, { tipo: 'status', numero: 52, estado: 'Em execução' }),
+    avisoBase(2, { tipo: 'informacao', numero: 53, nota: 'Qual?' }),
+    avisoBase(3, { tipo: 'aprovar', numero: 54, orcamento: 10, falta_aprovacao: true,
+      email: 'quem.administra@exemplo-guia.test', nome: 'Quem Administra', titulo: 'Cadeiras novas' }),
+  ] });
+  await chamar({ headers: comToken });
+  const primeiras = cena.emails.map(e => textoDe(e).split('\n')[0]);
+  ok(new Set(primeiras).size === 4, 'os quatro tipos abrem com frases diferentes', primeiras.join(' || '));
+  ok(new Set(cena.emails.map(assuntoDe)).size === 4, 'e com assuntos diferentes');
+}
+
+/* ==========================================================================
    8 · LIXO NA ENTRADA NÃO DERRUBA A ROTA.
 
    Uma rota de API que estoura devolve 500 com pilha de execução, e pilha de

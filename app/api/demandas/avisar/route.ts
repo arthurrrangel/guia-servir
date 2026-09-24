@@ -160,7 +160,7 @@ async function enviar(para: string, assunto: string, corpo: string) {
    texto para o setor inteiro num `to:` só, o que (a) mostra o e-mail de cada
    um para todos os outros e (b) não deixa dizer "a SUA demanda" para quem
    pediu. A 91 devolve uma linha por destinatário. */
-type Tipo = 'nova' | 'status' | 'informacao';
+type Tipo = 'nova' | 'status' | 'informacao' | 'aprovar';
 type Aviso = {
   aviso_id: string; tipo: Tipo;
   email: string; nome: string | null;
@@ -168,7 +168,17 @@ type Aviso = {
   setor: string | null; abriu: string | null;
   prioridade: string; prazo: string | null; falta_aprovacao: boolean;
   estado: string | null; nota: string | null;
+  /** 96 · o valor, para o aviso de aprovar (um banco antes da 96 não manda) */
+  orcamento?: number | string | null;
 };
+
+/* o valor em reais, ou nada: `NaN`, zero e texto que não é número não viram
+   "R$ NaN" dentro de um e-mail */
+function reais(v: Aviso['orcamento']) {
+  const n = typeof v === 'string' ? Number(v) : v;
+  if (typeof n !== 'number' || !Number.isFinite(n) || n <= 0) return '';
+  return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
 
 /* `new Date('lixo').toLocaleDateString()` devolve a string "Invalid Date", e
    ela ia inteira para dentro do e-mail no lugar do prazo */
@@ -182,18 +192,18 @@ function quando(prazo: string | null) {
 /* tipo que o banco não previu não pode virar e-mail sem texto: cai no `nova`,
    que é o único que não afirma nada sobre quem está lendo */
 function tipoDe(d: Aviso): Tipo {
-  return d.tipo === 'status' || d.tipo === 'informacao' ? d.tipo : 'nova';
+  return d.tipo === 'status' || d.tipo === 'informacao' || d.tipo === 'aprovar' ? d.tipo : 'nova';
 }
 
-/* OS TRÊS TEXTOS.
+/* OS QUATRO TEXTOS.
 
    Curtos de propósito, e sem HTML: o que a pessoa precisa saber no aviso é o
    que É, de QUEM, para QUANDO, e o link. O resto ela lê na ficha. E-mail de
    sistema que conta a vida inteira da demanda ensina a não ler e-mail de
    sistema.
 
-   São três porque falam com pessoas diferentes sobre coisas diferentes, e um
-   texto só para os três viraria o pior dos três: quem PEDIU não quer ler
+   São quatro porque falam com pessoas diferentes sobre coisas diferentes, e
+   um texto só para todos viraria o pior de todos: quem PEDIU não quer ler
    "abra para assumir", e quem ATENDE não quer ler "a sua demanda".
 
      · `nova`       quem atende o setor. O que fazer agora: abrir e assumir.
@@ -203,6 +213,9 @@ function tipoDe(d: Aviso): Tipo {
      · `informacao` quem pediu, e é ele que DESTRAVA: a demanda parou esperando
                     um dado dele. Por isso a pergunta viaja no corpo, e não só
                     o link: quem já sabe a resposta responde sem abrir nada.
+     · `aprovar`    a administração (96: a única que aprova). O que decidir, e
+                    quanto custa: o valor e o motivo do portão vêm no corpo,
+                    porque é o que se decide, e a demanda não anda sem ela.
 
    O PORTÃO APARECE NO `nova` porque muda o que a pessoa deve fazer AGORA: sem
    essa linha, quem atende abre a ficha, encontra todos os botões fora, e
@@ -251,6 +264,23 @@ function texto(d: Aviso) {
     ].join('\n');
   }
 
+  if (tipoDe(d) === 'aprovar') {
+    const valor = reais(d.orcamento);
+    return [
+      `A demanda #${d.numero} precisa da sua aprovação para andar.`,
+      '',
+      cabeca,
+      trilhaESetor,
+      ...(valor ? [`Valor: ${valor}`] : []),
+      `Prazo: ${quando(d.prazo)}`,
+      ...(umaLinha(d.abriu, 60) ? [`Pedida por: ${umaLinha(d.abriu, 60)}`] : []),
+      ...(umaLinha(d.nota, 300) ? [`Por que precisa: ${umaLinha(d.nota, 300)}`] : []),
+      '',
+      'Enquanto não houver decisão, ninguém consegue assumir nem concluir. Aprove ou recuse na ficha:',
+      ...rodape,
+    ].join('\n');
+  }
+
   const urgente = d.prioridade === 'urgente' || d.prioridade === 'alta';
   return [
     `${umaLinha(d.abriu, 60) || 'Alguém'} abriu uma demanda para ${umaLinha(d.setor, 60) || 'o seu setor'}.`,
@@ -260,7 +290,7 @@ function texto(d: Aviso) {
     `Prazo: ${quando(d.prazo)}${urgente ? `  ·  Prioridade ${umaLinha(d.prioridade, 20)}` : ''}`,
     '',
     d.falta_aprovacao
-      ? 'Esta demanda precisa de aprovação da gestão antes de andar. Você não precisa fazer nada ainda.'
+      ? 'Esta demanda precisa de aprovação da administração antes de andar. Você não precisa fazer nada ainda.'
       : 'Abra para assumir, pedir informação ou mandar para outro setor.',
     ...rodape,
   ].join('\n');
@@ -273,6 +303,10 @@ function assunto(d: Aviso) {
   }
   if (tipoDe(d) === 'informacao') {
     return umaLinha(`Demanda #${d.numero} espera uma informação sua: ${titulo}`, 140);
+  }
+  if (tipoDe(d) === 'aprovar') {
+    const valor = reais(d.orcamento);
+    return umaLinha(`Demanda #${d.numero} espera a sua aprovação${valor ? ` (${valor})` : ''}: ${titulo}`, 140);
   }
   const marca = d.prioridade === 'urgente' ? '[URGENTE] ' : '';
   return umaLinha(`${marca}Demanda #${d.numero}: ${titulo}`, 140);
@@ -312,6 +346,7 @@ async function varrer(req: Request) {
   const fila = (Array.isArray(data) ? data : []) as Aviso[];
   const feitos: string[] = [];
   const permanentes: string[] = [];
+  const jaDecididos: string[] = [];
   const porErro = new Map<string, string[]>();
   const falhas: { numero: number; motivo: string }[] = [];
   let semIdentificacao = 0;
@@ -334,6 +369,13 @@ async function varrer(req: Request) {
       continue;
     }
 
+    /* 96 · O PEDIDO DE APROVAÇÃO JÁ DECIDIDO NÃO SAI. A fila espera a
+       varredura (a do cron é uma vez por dia); se a administração aprovou ou
+       recusou pela tela nesse meio-tempo, "precisa da sua aprovação" chegaria
+       mentindo (auditoria R15B). Encerra sem e-mail. `=== false` e não só
+       falsy: um banco que não manda o campo continua mandando o aviso. */
+    if (tipoDe(d) === 'aprovar' && d.falta_aprovacao === false) { jaDecididos.push(d.aviso_id); continue; }
+
     const r = await enviar(alvo, assunto(d), texto(d));
     if (r.enviado) { feitos.push(d.aviso_id); continue; }
 
@@ -353,6 +395,7 @@ async function varrer(req: Request) {
     console.warn(`[demandas/avisar] ${permanentes.length} aviso(s) sem e-mail válido, dados por encerrados`);
     await s.rpc('dem_aviso_enviado', { p_ids: permanentes });
   }
+  if (jaDecididos.length) await s.rpc('dem_aviso_enviado', { p_ids: jaDecididos });
   for (const [motivo, ids] of porErro) {
     await s.rpc('dem_aviso_falhou', { p_ids: ids, p_erro: motivo.slice(0, 200) });
   }
@@ -368,6 +411,8 @@ async function varrer(req: Request) {
     naFila: fila.length,
     avisados: feitos.length,
     semDestinatario: permanentes.length,
+    /* pedidos de aprovação que a administração decidiu antes do e-mail sair */
+    jaDecididos: jaDecididos.length,
     semIdentificacao,
     /* as falhas viajam na resposta em vez de sumirem num log que ninguém lê */
     falhas,

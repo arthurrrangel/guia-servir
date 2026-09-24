@@ -46,7 +46,8 @@ const N = JSON.parse(readFileSync('/tmp/celular-numeros.json', 'utf8'));
 const PAPEIS = [
   { tok: 'tok-admin', quem: 'admin', rotas: [
     ['inicio', '/demandas'], ['atendimento', '/demandas/atendimento'], ['numeros', '/demandas/numeros'],
-    ['admin-pessoas', '/demandas/admin'], ['admin-setores', '/demandas/admin?secao=setores'],
+    ['admin-panorama', '/demandas/admin'], ['admin-pessoas', '/demandas/admin?secao=pessoas'],
+    ['admin-setores', '/demandas/admin?secao=setores'],
     ['admin-categorias', '/demandas/admin?secao=categorias'], ['admin-anexos', '/demandas/admin?secao=anexos'],
     ['admin-pessoa', `/demandas/admin/pessoas/${N._pessoa}`], ['ficha', `/demandas/d/${N.admin.execucao}`],
     ['ficha-aprovacao', `/demandas/d/${N.admin.travada}`]] },

@@ -53,7 +53,6 @@ const PAPEIS = [
   { tok: 'tok-comunica',   quem: 'responsavel', fichas: true },
   { tok: 'tok-pede',       quem: 'solicitante', fichas: true },
   { tok: 'tok-lider',      quem: 'lider',       fichas: true },
-  { tok: 'tok-gestor-com', quem: 'gestor',      fichas: true },
   { tok: 'tok-colega',     quem: 'colega' },
   { tok: 'tok-pedido',     quem: 'pedido' },
   { jwt: 'novo@exemplo.org', quem: 'novo' },
@@ -143,8 +142,9 @@ const FICHAS = ['execucao', 'travada', 'concluida', 'validada', 'comLink', 'atra
 const NOME_DA_FICHA = { execucao: 'detalhe-execucao', travada: 'detalhe-travada',
   concluida: 'detalhe-concluida', validada: 'detalhe-validada',
   comLink: 'detalhe-com-link-colado', atrasada: 'detalhe-atrasada' };
-const TODOS = ['admin', 'responsavel', 'solicitante', 'lider', 'gestor'];
-const ATENDE = ['admin', 'responsavel', 'gestor'];
+/* 96 · a Gestão foi desligada: quatro papéis, e a administração é uma só */
+const TODOS = ['admin', 'responsavel', 'solicitante', 'lider'];
+const ATENDE = ['admin', 'responsavel'];
 const paginasDe = (quem) => [
   { rota: '/demandas',           nome: 'inicio', so: [...TODOS, 'colega', 'pedido'] },
   /* A LISTA VAZIA · 22/09/2026. Foi nela que o Arthur viu, em produção, o
@@ -166,7 +166,10 @@ const paginasDe = (quem) => [
   { rota: '/demandas/atendimento', nome: 'atendimento-sem-equipe', so: ['solicitante'],
     texto: 'de quem faz parte de uma equipe' },
   { rota: '/demandas/numeros',   nome: 'numeros', so: ATENDE },
-  { rota: '/demandas/admin',     nome: 'admin-pessoas', so: ['admin'],
+  /* 96 · a entrada da administração é o Panorama; Pessoas tem o endereço dela */
+  { rota: '/demandas/admin',     nome: 'admin-panorama', so: ['admin'],
+    exige: '.dm-adm-faixa', texto: 'A operação agora', proibe: 'área restrita' },
+  { rota: '/demandas/admin?secao=pessoas', nome: 'admin-pessoas', so: ['admin'],
     exige: '.dm-adm-faixa', texto: 'Pedidos de papel', proibe: 'área restrita' },
   { rota: '/demandas/admin?secao=setores',    nome: 'admin-setores', so: ['admin'],
     exige: '.dm-adm-faixa', proibe: 'área restrita' },

@@ -2,8 +2,8 @@
 /* A ADMINISTRAÇÃO · migração 94.
 
    Separada da interface comum, com topo próprio (a faixa escura de
-   `Casca admin`), e com quatro seções: Pessoas, Setores, Categorias e
-   Anexos (a lista de sites aceitos, migração 95).
+   `Casca admin`), e com cinco seções: Panorama (migração 96, a entrada),
+   Pessoas, Setores, Categorias e Anexos (a lista de sites aceitos, 95).
 
    PESSOAS é a base central que o pedido cobrou: "uma pessoa deve existir uma
    única vez na base". A lista mostra todo mundo, ativo e inativo, com papel,
@@ -20,6 +20,7 @@ import { useSearchParams } from 'next/navigation';
 import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Categorias, Setores } from '@/components/demandas/Configuracao';
+import { Panorama } from '@/components/demandas/Panorama';
 import { Aviso, Cabecalho, Esqueleto, Pill, Secao, Vazio } from '@/components/demandas/Ui';
 import { Icone } from '@/components/demandas/Icone';
 import { ajustar, ajustarAnexos, bases, pessoas } from '@/lib/demandas/api';
@@ -31,9 +32,9 @@ export default function Pagina() {
   return <Suspense fallback={null}><Casca admin><Administracao /></Casca></Suspense>;
 }
 
-type Secao = 'pessoas' | 'setores' | 'categorias' | 'anexos';
+type Secao = 'panorama' | 'pessoas' | 'setores' | 'categorias' | 'anexos';
 const SECOES: [Secao, string][] = [
-  ['pessoas', 'Pessoas'], ['setores', 'Setores'], ['categorias', 'Categorias'], ['anexos', 'Anexos'],
+  ['panorama', 'Panorama'], ['pessoas', 'Pessoas'], ['setores', 'Setores'], ['categorias', 'Categorias'], ['anexos', 'Anexos'],
 ];
 
 function Administracao() {
@@ -43,9 +44,9 @@ function Administracao() {
   const [ms, setMs] = useState<Membro[] | null>(null);
   const busca = useSearchParams();
   /* a seção vem da URL: as abas da faixa preta são links, e "Portal" também.
-     Fora da lista, fica em Pessoas. */
+     Fora da lista, fica no Panorama (96: a entrada de quem controla tudo) */
   const pedida = busca?.get('secao') as Secao | null;
-  const secao: Secao = pedida && SECOES.some(([v]) => v === pedida) ? pedida : 'pessoas';
+  const secao: Secao = pedida && SECOES.some(([v]) => v === pedida) ? pedida : 'panorama';
   const [erro, setErro] = useState('');
   const [indo, setIndo] = useState(false);
 
@@ -58,7 +59,8 @@ function Administracao() {
     else setErro(recadoDoErro(x, 'carregar os setores'));
     if (p.ok) setMs(p.membros); else setErro(recadoDoErro(p, 'carregar as pessoas'));
   }, []);
-  useEffect(() => { if (eu?.papel === 'admin') recarregar(); }, [eu, recarregar]);
+  /* o Panorama tem a sua chamada; as outras seções leem setores e pessoas */
+  useEffect(() => { if (eu?.papel === 'admin' && secao !== 'panorama') recarregar(); }, [eu, recarregar, secao]);
 
   /* 24/09/2026 (auditoria R11): Setores e Categorias salvavam em silêncio,
      e a recusa aparecia no alto da página, 1750px acima do select em 390,
@@ -79,7 +81,8 @@ function Administracao() {
     return true;
   }
 
-  const rotSecao = SECOES.find(([v]) => v === secao)?.[1] || 'Pessoas';
+  const rotSecao = SECOES.find(([v]) => v === secao)?.[1] || 'Panorama';
+  if (secao === 'panorama') return <div className="dm-limite"><Panorama /></div>;
   if (erro && (!b || !ms)) {
     return (
       <>
@@ -93,6 +96,7 @@ function Administracao() {
 
   const ativas = ms.filter(m => m.ativo !== false).length, inativas = ms.filter(m => m.ativo === false).length;
   const SUB: Record<Secao, string> = {
+    panorama: '',
     pessoas: '',
     setores: 'Quem recebe demanda e o teto de gasto sem aprovação de cada setor.',
     categorias: 'A triagem: para qual setor cada tipo de pedido vai, e o que ele exige.',
@@ -300,7 +304,10 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
             <button key={v} type="button" aria-pressed={situ === v} onClick={() => setSitu(v)}>{r}</button>
           ))}
         </div>
+        {/* o nome do botão é "Filtros", e não "Filtros2": o selo é número
+            para o olho, e para o leitor de tela vira frase (auditoria R15A) */}
         <button type="button" className="dm-btn dm-filtros-toggle" aria-expanded={filtrosAbertos || !!papel || !!setor}
+          aria-label={papel || setor ? `Filtros, ${(papel ? 1 : 0) + (setor ? 1 : 0) === 1 ? '1 ligado' : '2 ligados'}` : 'Filtros'}
           onClick={() => setFiltrosAbertos(x => !x)}>
           <Icone nome="filtro" /><span>Filtros</span>
           {papel || setor ? <span className="dm-selo">{(papel ? 1 : 0) + (setor ? 1 : 0)}</span> : null}
@@ -308,7 +315,8 @@ function Pessoas({ ms, b, recarregar }: { ms: Membro[]; b: Bases; recarregar: ()
         <div className="dm-ferramentas-dir">
           <select aria-label="Papel" value={papel} onChange={e => setPapel(e.target.value)} className="dm-ctl dm-filtro">
             <option value="">Todos os papéis</option>
-            {PAPEIS.map(p => <option key={p.v} value={p.v}>{p.rot}</option>)}
+            {/* 96 · a Gestão foi desligada: o filtro não oferece um papel que ninguém tem */}
+            {PAPEIS.filter(p => p.v !== 'gestor').map(p => <option key={p.v} value={p.v}>{p.rot}</option>)}
           </select>
           <select aria-label="Setor" value={setor} onChange={e => setSetor(e.target.value)} className="dm-ctl dm-filtro dm-filtro-setor">
             <option value="">Todos os setores</option>

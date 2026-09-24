@@ -108,7 +108,8 @@ for f in 50-demandas 52-o-que-a-auditoria-de-arquitetura-provou 57-dem-lista-com
          92-o-teto-era-de-quem-pede-e-o-invisivel-passava-pelo-meio \
          93-o-carimbo-velho-sobre-trabalho-novo-e-a-ficha-de-20-mb \
          94-a-base-central-de-pessoas-e-o-escopo-que-o-banco-cobra \
-         95-o-anexo-vem-de-site-que-a-igreja-conhece; do
+         95-o-anexo-vem-de-site-que-a-igreja-conhece \
+         96-uma-pessoa-controla-tudo; do
   echo "-- ===== $f ====="
   cat "$B/supabase/$f.sql"
 done > /tmp/_mig.sql
@@ -215,7 +216,6 @@ su postgres -c "$PG/psql -h /tmp -U postgres -d $BANCO -tAc \"
                ('responsavel','tok-comunica'),
                ('solicitante','tok-pede'),
                ('lider','tok-lider'),
-               ('gestor','tok-gestor-com'),
                ('colega','tok-colega'),
                ('pedido','tok-pedido')) p(quem, tok)\"" \
   > /tmp/celular-numeros.json

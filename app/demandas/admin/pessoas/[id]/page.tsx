@@ -3,7 +3,7 @@
 
    "Pessoas → cadastrar, editar, ativar/desativar, vincular setor, definir
    papel, revisar permissões." Tudo isso numa tela só, na ordem em que se
-   decide: quem é, o que pediu, os dados, o papel e o escopo, o que pode, o
+   decide: quem é, o que pediu, os dados, o papel, o que pode, o
    que fez, o link pessoal, a situação, e o histórico do cadastro.
 
    `/demandas/admin/pessoas/nova` é a mesma tela vazia: cadastrar é editar
@@ -22,9 +22,10 @@ import { useCallback, useEffect, useState } from 'react';
 import Casca, { useEu } from '@/components/demandas/Casca';
 import { Aviso, Bloco, Cabecalho, Campo, Copiar, Esqueleto, Kpi, Kpis, Opcoes, Pill, Secao } from '@/components/demandas/Ui';
 import { Icone } from '@/components/demandas/Icone';
-import { ajustar, bases, pessoa } from '@/lib/demandas/api';
+import { ajustar, bases, guardarToken, meuToken, pessoa } from '@/lib/demandas/api';
 import { confirmar } from '@/components/demandas/Confirmar';
-import { PAPEIS, PERMISSOES, carimbo, dataCheia, iniciais, recadoDoErro, rotPapel, soDigitos, telVisivel } from '@/lib/demandas/regras';
+import { sb } from '@/lib/supabase';
+import { PAPEIS, PAPEIS_QUE_SE_DAO, PERMISSOES, carimbo, dataCheia, iniciais, recadoDoErro, rotPapel, soDigitos, telVisivel } from '@/lib/demandas/regras';
 import type { Bases, FichaPessoa, Papel } from '@/lib/demandas/tipos';
 
 export default function Pagina() {
@@ -33,12 +34,22 @@ export default function Pagina() {
 
 type Rascunho = {
   nome: string; auth_email: string; telefone: string; setor_id: string; funcao: string;
-  papel: Papel; escopo_total: boolean; escopo: string[];
+  papel: Papel;
 };
 const VAZIO: Rascunho = {
   nome: '', auth_email: '', telefone: '', setor_id: '', funcao: '',
-  papel: 'solicitante', escopo_total: false, escopo: [],
+  papel: 'solicitante',
 };
+/* 96 · Pessoas é uma seção da administração com endereço próprio: o
+   `/demandas/admin` sem nada é o Panorama */
+const PESSOAS = '/demandas/admin?secao=pessoas';
+
+/* E-MAIL NÃO TEM ESPAÇO NEM CARACTERE INVISÍVEL. Colado do WhatsApp, ele
+   chega com espaço de largura zero, marca de direção ou espaço duro no meio,
+   e o banco (96) recusa com EMAIL_INVALIDO: um e-mail assim nunca casaria com
+   o do link de entrada (auditoria R15B). A tela tira antes de mandar, e o
+   banco continua recusando o que sobrar. */
+const semInvisiveis = (t: string) => t.replace(/[\s\p{Cf}]/gu, '');
 
 function Ficha() {
   const params = useParams<{ id: string }>();
@@ -73,7 +84,6 @@ function Ficha() {
       nome: fp.pessoa.nome, auth_email: fp.pessoa.auth_email || fp.pessoa.email || '',
       telefone: telVisivel(fp.pessoa.telefone), setor_id: fp.pessoa.setor_id || '',
       funcao: fp.pessoa.funcao || '', papel: fp.pessoa.papel,
-      escopo_total: !!fp.pessoa.escopo_total, escopo: (fp.pessoa.escopo || []).map(e => e.id),
     });
   }, [id, nova]);
   useEffect(() => { carregar(); }, [carregar]);
@@ -84,6 +94,12 @@ function Ficha() {
     setIndo(false);
     if (!resp.ok) {
       if (resp.erro === 'HOMONIMO') { setHomonimos((resp as unknown as { quem: typeof homonimos }).quem || []); return false; }
+      /* 96 · o banco pede a confirmação do e-mail de entrar da administração
+         mesmo quando a tela não achou que mudou (a ficha estava velha) */
+      if (resp.erro === 'CONFIRMAR_LOGIN' && !d.confirmar_login) {
+        if (await confirmarLogin(String(d.auth_email || ''))) return enviar({ ...d, confirmar_login: true }, feito);
+        return false;
+      }
       setErro(recadoDoErro(resp, 'salvar'));
       requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
         ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
@@ -91,20 +107,45 @@ function Ficha() {
     }
     setHomonimos(null);
     if (nova) { router.replace(`/demandas/admin/pessoas/${resp.id}`); return true; }
+    /* 96 · quem troca o PRÓPRIO e-mail de entrar e entrou por e-mail não
+       entra mais com a sessão de agora (o banco procura o e-mail velho): sai
+       já, e a porta de entrada abre com o e-mail novo escrito (R15B) */
+    if (d.confirmar_login && f?.pessoa.id && f.pessoa.id === ctx.eu?.id && !meuToken()) {
+      try {
+        sessionStorage.setItem('demandas.loginTrocado',
+          JSON.stringify({ email: String(d.auth_email || ''), em: Date.now() }));
+      } catch { /* sem armazenamento: a porta abre sem o e-mail escrito */ }
+      try { await sb()?.auth.signOut(); } catch { /* sem sessão, já está fora */ }
+      location.href = '/demandas/entrar';
+      return true;
+    }
     setOk(feito);
     await carregar();
     return true;
   }
 
+  /* 96 · A ADMINISTRAÇÃO NÃO SE TRANCA PARA FORA. Ela é uma pessoa só: com o
+     e-mail de entrar escrito errado, não há outra administração para
+     consertar pela tela (auditoria R15A). O banco pede a confirmação
+     (CONFIRMAR_LOGIN) e a tela a faz aqui, com o e-mail novo à vista. */
+  async function confirmarLogin(novo: string) {
+    const e = semInvisiveis(novo).toLowerCase();
+    /* quem entrou pelo link continua dentro; quem entrou pelo e-mail sai
+       ao salvar, porque a sessão é do e-mail velho */
+    return confirmar({
+      titulo: 'Trocar o e-mail com que você entra?',
+      texto: meuToken()
+        ? `Ao salvar, a entrada por e-mail passa a ser só por ${e}. Aqui você continua dentro, pelo link pessoal. Confira letra por letra: com o e-mail errado, a entrada por e-mail não funciona.`
+        : `Ao salvar, a entrada por e-mail passa a ser só por ${e}, e você sai deste aparelho para entrar de novo por ele. Confira letra por letra: com o e-mail errado, você só entra pelo link pessoal.`,
+      acao: 'Trocar e salvar',
+    });
+  }
+
   function dadosDoRascunho(): Record<string, unknown> {
     const d: Record<string, unknown> = {
-      nome: r.nome.trim(), auth_email: r.auth_email.trim(), telefone: soDigitos(r.telefone),
+      nome: r.nome.trim(), auth_email: semInvisiveis(r.auth_email), telefone: soDigitos(r.telefone),
       setor_id: r.setor_id, funcao: r.funcao.trim(), papel: r.papel,
     };
-    if (r.papel === 'gestor') {
-      d.escopo_total = r.escopo_total;
-      if (!r.escopo_total) d.escopo = r.escopo;
-    }
     return d;
   }
 
@@ -113,7 +154,7 @@ function Ficha() {
   if (erro && !b) {
     return (
       <>
-        <Cabecalho volta={{ href: '/demandas/admin', rot: 'Pessoas' }} sobre="Administração" titulo={nova ? 'Cadastrar pessoa' : 'Pessoa'} />
+        <Cabecalho volta={{ href: PESSOAS, rot: 'Pessoas' }} sobre="Administração" titulo={nova ? 'Cadastrar pessoa' : 'Pessoa'} />
         <Aviso tom="bad">{erro}</Aviso>
         <button type="button" className="dm-btn dm-tentar" onClick={() => { setErro(''); carregar(); }}>Tentar de novo</button>
       </>
@@ -123,14 +164,14 @@ function Ficha() {
   if (!nova && !f) {
     return (
       <>
-        <Cabecalho volta={{ href: '/demandas/admin', rot: 'Pessoas' }} sobre="Administração" titulo="Pessoa" />
+        <Cabecalho volta={{ href: PESSOAS, rot: 'Pessoas' }} sobre="Administração" titulo="Pessoa" />
         <Aviso tom="bad">{erro}</Aviso>
         {/* a pessoa que não existe não volta com outra tentativa; a falha de
             rede volta (24/09/2026, auditoria R13) */}
         <div className="dm-linha">
           {erro === 'Essa pessoa não existe.' ? null
             : <button type="button" className="dm-btn dm-pri" onClick={() => { setErro(''); carregar(); }}>Tentar de novo</button>}
-          <Link className="dm-btn" href="/demandas/admin">Voltar para Pessoas</Link>
+          <Link className="dm-btn" href={PESSOAS}>Voltar para Pessoas</Link>
         </div>
       </>
     );
@@ -140,18 +181,27 @@ function Ficha() {
   const base = typeof window !== 'undefined' ? window.location.origin + '/demandas' : '';
   /* "Salvar" só existe habilitado quando mudou: a mesma regra do Perfil */
   const mudouDados = !!p && (
-    r.nome.trim() !== p.nome || r.auth_email.trim() !== (p.auth_email || p.email || '')
+    r.nome.trim() !== p.nome || semInvisiveis(r.auth_email) !== (p.auth_email || p.email || '')
     || soDigitos(r.telefone) !== soDigitos(telVisivel(p.telefone)) || r.setor_id !== (p.setor_id || '')
     || r.funcao.trim() !== (p.funcao || ''));
-  const mudouPapel = !!p && (
-    r.papel !== p.papel || (r.papel === 'gestor' && (r.escopo_total !== !!p.escopo_total
-      || (!r.escopo_total && r.escopo.slice().sort().join() !== (p.escopo || []).map(e => e.id).sort().join()))));
+  const mudouPapel = !!p && r.papel !== p.papel;
+  /* 96 · a administração é de uma pessoa só: na ficha dela, o papel não se
+     troca e o acesso não se desliga (o banco recusaria com ULTIMO_ADMIN).
+     Só a ATIVA: uma administração antiga, sem acesso, é histórico, e a
+     ficha dela diz "Sem acesso" com o Reativar (que o banco recusa com
+     ADMIN_UNICO enquanto houver a atual, e a frase diz por quê). */
+  const administra = p?.papel === 'admin' && p?.ativo !== false;
+  /* a ficha de quem está usando a tela: o link novo dela precisa voltar */
+  const souEu = !!p && !!ctx.eu?.id && ctx.eu.id === p.id;
+  const loginAntes = (p?.auth_email || p?.email || '').trim().toLowerCase();
+  const loginAgora = semInvisiveis(r.auth_email).toLowerCase();
+  const mudouLogin = administra && loginAgora !== loginAntes;
 
   /* o mesmo limite de largura das quatro seções da administração: a borda
      direita não pula ao abrir uma pessoa */
   return (
     <div className="dm-limite">
-      <Cabecalho volta={{ href: '/demandas/admin', rot: 'Pessoas' }}
+      <Cabecalho volta={{ href: PESSOAS, rot: 'Pessoas' }}
         lado={p ? <span className="dm-avatar dm-grande" aria-hidden="true">{iniciais(p.nome)}</span> : null}
         sobre={nova ? 'Administração · Pessoa nova' : 'Administração · Pessoa'}
         titulo={nova ? 'Cadastrar pessoa' : p!.nome}
@@ -244,7 +294,7 @@ function Ficha() {
             {/* o papel mora no mesmo bloco na pessoa NOVA (cadastrar é um passo
                 só), e em bloco próprio na pessoa que já existe (mudar papel é
                 decisão, e não correção de dado) */}
-            {nova ? <Papeis r={r} setR={setR} b={b} /> : null}
+            {nova ? <Papeis r={r} setR={setR} /> : null}
 
             {homonimos ? (
               <Aviso tom="warn">
@@ -261,34 +311,54 @@ function Ficha() {
           <div className="dm-caixa-pe">
             <button type="button" className="dm-btn dm-pri" disabled={indo || !r.nome.trim() || !r.setor_id || (!nova && !mudouDados)}
               aria-busy={indo || undefined}
-              onClick={() => nova
-                ? enviar({ ...dadosDoRascunho(), ...(homonimos ? { confirmar_homonimo: true } : {}) }, 'Cadastrado.')
-                : enviar({ id, nome: r.nome.trim(), auth_email: r.auth_email.trim(),
-                           telefone: soDigitos(r.telefone), setor_id: r.setor_id, funcao: r.funcao.trim() },
-                         'Dados salvos.')}>
+              onClick={async () => {
+                if (nova) {
+                  enviar({ ...dadosDoRascunho(), ...(homonimos ? { confirmar_homonimo: true } : {}) }, 'Cadastrado.');
+                  return;
+                }
+                const d: Record<string, unknown> = { id, nome: r.nome.trim(), auth_email: semInvisiveis(r.auth_email),
+                  telefone: soDigitos(r.telefone), setor_id: r.setor_id, funcao: r.funcao.trim() };
+                /* a administração sem e-mail de entrar: recusado aqui, com a
+                   frase do banco (LOGIN_VAZIO), sem ir até ele; trocado, a
+                   pergunta vem antes de gravar */
+                if (administra && !loginAgora) {
+                  setErro(recadoDoErro({ ok: false, erro: 'LOGIN_VAZIO' }, 'salvar'));
+                  requestAnimationFrame(() => document.querySelector('.dm-aviso.dm-bad')
+                    ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+                  return;
+                }
+                if (mudouLogin) {
+                  if (!(await confirmarLogin(loginAgora))) return;
+                  d.confirmar_login = true;
+                }
+                enviar(d, 'Dados salvos.');
+              }}>
               {nova ? (homonimos ? 'É outra pessoa: cadastrar assim mesmo' : 'Cadastrar') : 'Salvar dados'}
             </button>
           </div>
         </div>
       </Secao>
 
-      {p ? (
-        /* ------------------------------------------------ papel e escopo */
-        <Secao titulo="Papel e escopo">
+      {p && administra ? (
+        /* ---------------------------------------- o papel de quem administra */
+        <Secao titulo="Papel">
           <div className="dm-caixa">
             <div className="dm-caixa-corpo">
-              <Papeis r={r} setR={setR} b={b} />
+              <p className="dm-adm-unica"><b>Administração</b> é de uma pessoa só. Ela vê tudo, aprova, e cuida
+                de pessoas, setores, categorias e anexos. O papel não muda de mão por esta tela.</p>
+            </div>
+          </div>
+        </Secao>
+      ) : p ? (
+        /* ------------------------------------------------------------ papel */
+        <Secao titulo="Papel">
+          <div className="dm-caixa">
+            <div className="dm-caixa-corpo">
+              <Papeis r={r} setR={setR} />
             </div>
             <div className="dm-caixa-pe">
               <button type="button" className="dm-btn dm-pri" disabled={indo || !mudouPapel} aria-busy={indo || undefined}
-                onClick={() => {
-                  const d: Record<string, unknown> = { id, papel: r.papel };
-                  if (r.papel === 'gestor') {
-                    d.escopo_total = r.escopo_total;
-                    if (!r.escopo_total) d.escopo = r.escopo;
-                  }
-                  enviar(d, 'Papel salvo.');
-                }}>Salvar papel</button>
+                onClick={() => enviar({ id, papel: r.papel }, 'Papel salvo.')}>Salvar papel</button>
             </div>
           </div>
         </Secao>
@@ -326,12 +396,21 @@ function Ficha() {
                 ? <Copiar texto={`${base}?t=${p.token}`} rot="Copiar o link" classe="dm-btn" />
                 : <button type="button" className="dm-btn" onClick={() => setLinkVisivel(true)}>Ver o link</button>}
               <button type="button" className="dm-btn dm-txt" disabled={indo} onClick={async () => {
-                const sim = await confirmar({
+                const sim = await confirmar(souEu ? {
+                  titulo: 'Trocar o seu link pessoal?',
+                  texto: 'O link antigo para de funcionar na hora, em todo aparelho que entrou por ele. Neste aparelho você continua dentro.',
+                  acao: 'Trocar',
+                } : {
                   titulo: 'Trocar o link pessoal?',
                   texto: 'O link antigo para de funcionar na hora. Use quando ele foi parar onde não devia.',
                   acao: 'Trocar',
                 });
                 if (!sim) return;
+                /* 96 · quem troca o PRÓPRIO link e entrou por ele perderia a
+                   sessão na mesma hora (auditoria R15A): o banco devolve o link
+                   novo só nesse caso, e esta tela o guarda no lugar do antigo.
+                   Quem entrou pelo e-mail continua pelo e-mail. */
+                const antes = souEu ? meuToken() : null;
                 setIndo(true); setErro(''); setOk('');
                 const x = await ajustar('link', { id });
                 setIndo(false);
@@ -341,6 +420,7 @@ function Ficha() {
                     ?.scrollIntoView({ block: 'center', behavior: 'smooth' }));
                   return;
                 }
+                if (souEu && antes && x.token) guardarToken(x.token);
                 setOk('Link trocado. O antigo não entra mais.'); setLinkVisivel(false); await carregar();
               }}>Novo link</button>
             </div>
@@ -348,10 +428,12 @@ function Ficha() {
 
           {/* ------------------------------------------------------ situação */}
           <Secao titulo="Situação"
-            sub={p.ativo === false
+            sub={administra
+              ? 'Com acesso. A administração não se desativa.'
+              : p.ativo === false
               ? 'Sem acesso: não entra, nem pelo e-mail nem pelo link. As demandas continuam no sistema.'
               : 'Com acesso. Desativar tira o acesso na hora, e as demandas continuam no sistema.'}>
-            {p.ativo === false ? (
+            {administra ? null : p.ativo === false ? (
               <button type="button" className="dm-btn" disabled={indo}
                 onClick={() => enviar({ id, ativo: true }, 'O acesso voltou.')}>Reativar</button>
             ) : (
@@ -389,41 +471,17 @@ function Ficha() {
 }
 
 
-/* O PAPEL E, PARA A GESTÃO, O ESCOPO.
+/* O PAPEL · 96: TRÊS, E SÓ TRÊS.
 
-   Gestor precisa dizer o que acompanha: todos os setores, ou alguns. O banco
-   recusa gestor sem escopo (ESCOPO_VAZIO), e a tela não deixa chegar lá sem
-   mostrar a pergunta. */
-function Papeis({ r, setR, b }: { r: Rascunho; setR: React.Dispatch<React.SetStateAction<Rascunho>>; b: Bases }) {
+   A Gestão foi desligada (o banco recusa com SEM_GESTAO) e a administração é
+   de uma pessoa só (ADMIN_UNICO): o seletor oferece Membro, Líder e Equipe. */
+function Papeis({ r, setR }: { r: Rascunho; setR: React.Dispatch<React.SetStateAction<Rascunho>> }) {
   const explica = PAPEIS.find(x => x.v === r.papel)?.explica;
   return (
-    <>
-      <Bloco rot="Papel" ajuda={explica}>
-        <Opcoes rot="Papel" valor={r.papel} opcoes={PAPEIS.map(p => ({ v: p.v, rot: p.rot }))}
-          aoMudar={v => setR(x => ({ ...x, papel: v }))} />
-      </Bloco>
-      {r.papel === 'gestor' ? (
-        <Bloco rot="Acompanha" ajuda="O que a gestão vê, aprova e redistribui.">
-          <Opcoes rot="Acompanha" valor={r.escopo_total ? 'todos' : 'alguns'}
-            opcoes={[{ v: 'todos', rot: 'Todos os setores' }, { v: 'alguns', rot: 'Só alguns' }]}
-            aoMudar={v => setR(x => ({ ...x, escopo_total: v === 'todos' }))} />
-          {!r.escopo_total ? (
-            <div className="dm-escopo">
-              {b.setores.map(s => (
-                <label key={s.id} className="dm-caixinha">
-                  <input type="checkbox" checked={r.escopo.includes(s.id)}
-                    onChange={e => setR(x => ({
-                      ...x,
-                      escopo: e.target.checked ? [...x.escopo, s.id] : x.escopo.filter(y => y !== s.id),
-                    }))} />
-                  <span>{s.nome}</span>
-                </label>
-              ))}
-            </div>
-          ) : null}
-        </Bloco>
-      ) : null}
-    </>
+    <Bloco rot="Papel" ajuda={explica}>
+      <Opcoes rot="Papel" valor={r.papel} opcoes={PAPEIS_QUE_SE_DAO.map(p => ({ v: p.v, rot: p.rot }))}
+        aoMudar={v => setR(x => ({ ...x, papel: v }))} />
+    </Bloco>
   );
 }
 

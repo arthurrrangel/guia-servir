@@ -15,7 +15,12 @@
      · os cinco papéis, o participante e o pedido de papel, para ver o
        menu de abas e o portal de cada um.
 
-   Roda depois das migrações do Demandas, até a 95. */
+   Roda depois das migrações do Demandas, até a 96.
+
+   DESDE A 96 NÃO HÁ GESTÃO, E A ADMINISTRAÇÃO É UMA SÓ. Ana, que era a
+   gestora de tudo, é a equipe da Manutenção (é ela quem assume e conclui as
+   demandas 6 e 9, de manutenção); Bruno, o gestor só da Comunicação, saiu:
+   o isolamento dele era o do escopo de gestão, que não existe mais. */
 
 -- ------------------------------------------------------- a lista de anexo --
 /* 95 · a lista nasce desligada no banco (a migração explica por quê). Aqui
@@ -34,7 +39,7 @@ insert into demandas.membros (nome, email, telefone, setor_id, papel, token) val
   ('José Carlos de Oliveira Nascimento',  'jose@exemplo.org',   '21999990003',
      (select id from demandas.setores where slug='compras'),       'responsavel',  'tok-compras'),
   ('Ana Beatriz Rodrigues dos Santos',    'ana@exemplo.org',    '21999990004',
-     (select id from demandas.setores where slug='pastoral'),      'gestor',       'tok-gestor'),
+     (select id from demandas.setores where slug='manutencao'),    'responsavel',  'tok-manutencao'),
   ('Pedro Henrique Almeida Vasconcelos',  'pedro@exemplo.org',  '21999990005',
      (select id from demandas.setores where slug='eventos'),       'solicitante',  'tok-pede')
 on conflict (token) do nothing;
@@ -51,8 +56,7 @@ on conflict (token) do nothing;
    no MESMO ministério (eventos), e Rafael não pode ver o que Pedro pediu, a
    não ser a demanda em que Pedro o incluiu. Carla está num setor que atende
    (comunicação) sem papel de equipe, e setor sem papel não é credencial: ela
-   não vê a fila da comunicação. Bruno é gestor só da comunicação, e não
-   alcança compras nem manutenção. `demandas-isolamento.mjs` cobra os três. */
+   não vê a fila da comunicação. `demandas-isolamento.mjs` cobra os dois. */
 insert into demandas.membros (nome, email, telefone, setor_id, papel, token, funcao) values
   ('Luciana Ferreira de Albuquerque Moura', 'luciana@exemplo.org', '21999990006',
      (select id from demandas.setores where slug='eventos'),       'lider',        'tok-lider',
@@ -62,23 +66,9 @@ insert into demandas.membros (nome, email, telefone, setor_id, papel, token, fun
      'Recepção'),
   ('Carla Simone Duarte Bittencourt',       'carla@exemplo.org',   '21999990008',
      (select id from demandas.setores where slug='comunicacao'),   'solicitante',  'tok-pedido',
-     'Fotografia'),
-  ('Bruno Tavares de Menezes Filho',        'bruno@exemplo.org',   '21999990009',
-     (select id from demandas.setores where slug='pastoral'),      'gestor',       'tok-gestor-com',
-     'Coordenação de mídia')
+     'Fotografia')
 on conflict (token) do nothing;
 
-/* A GESTORA DA SEMENTE ACOMPANHA TUDO, E ISSO AGORA É UMA DECISÃO ESCRITA.
-
-   Desde a 94 o gestor nasce sem escopo (`escopo_total = false`) e não vê
-   nada além do que é dele. A semente usa Ana para assumir e concluir as
-   demandas 6 e 9, de manutenção: sem esta linha as duas ações seriam
-   recusadas, e antes do `exige` abaixo a recusa passava calada. */
-update demandas.membros set escopo_total = true where token = 'tok-gestor';
-insert into demandas.gestao (membro_id, setor_id)
-  select m.id, s.id from demandas.membros m, demandas.setores s
-   where m.token = 'tok-gestor-com' and s.slug = 'comunicacao'
-on conflict do nothing;
 /* o pedido de papel, como o cadastro deixa: a pessoa já é membro e pediu mais.
    Cadastrou-se há três dias e pediu há dois: a ficha dizia "Pedido em 21/09"
    embaixo de "Cadastrou-se em 23/09" (23/09/2026) */
@@ -137,7 +127,7 @@ do $$
 declare
   t_pede  text := 'tok-pede';
   t_com   text := 'tok-comunica';
-  t_ges   text := 'tok-gestor';
+  t_ges   text := 'tok-manutencao';
   c_divul uuid; c_compra uuid; c_manut uuid; c_reemb uuid;
   r jsonb; n1 int; n2 int; n3 int; n4 int; n5 int; n6 int; n7 int; n8 int; n9 int;
   n10 int; n11 int; n12 int;

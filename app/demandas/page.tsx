@@ -128,7 +128,12 @@ function Inicio() {
           <Pill>{rotPapel(eu.papel)}</Pill>
           {eu.setor ? <span>{eu.setor}</span> : null}
           {eu.funcao ? <span>{eu.funcao}</span> : null}
-        </>} />
+        </>}
+        /* 96 · quem controla tudo chega ao panorama num toque, também no
+           celular (lá a Administração mora atrás do Perfil) */
+        acoes={eu.papel === 'admin'
+          ? <Link className="dm-btn" href="/demandas/admin"><Icone nome="panorama" />Panorama</Link>
+          : undefined} />
 
       {eu.papel_pedido ? (
         <Aviso tom="info">
@@ -328,7 +333,7 @@ function Precisa({ p, eu, atende, agirItens }: { p: Portal; eu: Eu; atende: bool
                 </Link>
               ) : null}
               {pedidos ? (
-                <Link className="dm-item dm-item-soma" href="/demandas/admin">
+                <Link className="dm-item dm-item-soma" href="/demandas/admin?secao=pessoas">
                   <span className="dm-c-num"><Icone nome="pessoas" /></span>{' '}
                   <span className="dm-c-tit"><b>{pedidos} {umOuVarios(pedidos, 'pedido de papel espera você', 'pedidos de papel esperam você')}</b></span>
                   <span className="dm-c-meta"><span className="dm-c-passo">Decidir<Icone nome="seta" /></span></span>

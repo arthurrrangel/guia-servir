@@ -98,7 +98,7 @@ function Atendimento() {
 
   return (
     <>
-      <Cabecalho sobre={eu.papel === 'gestor' ? 'Atendimento · Gestão' : 'Atendimento'} titulo={a.titulo}
+      <Cabecalho sobre="Atendimento" titulo={a.titulo}
         /* o nome já está na lateral; aqui fica o papel, que é o que explica
            o alcance do título */
         meta={<Pill>{rotPapel(eu.papel)}</Pill>}

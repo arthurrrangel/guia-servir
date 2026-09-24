@@ -24,7 +24,7 @@
    --------------------------------------------------------------------------- */
 
 import { sb } from '@/lib/supabase';
-import type { AvisoDentro, Bases, Cadastro, Eu, FichaPessoa, Membro, Numeros, Portal, RegraDeAnexo, Resumo, Vista } from './tipos';
+import type { AvisoDentro, Bases, Cadastro, Eu, FichaPessoa, Membro, Numeros, Panorama, Portal, RegraDeAnexo, Resumo, Vista } from './tipos';
 import type { Acao, Rascunho } from './regras';
 import { valorParaOBanco } from './regras';
 
@@ -335,13 +335,19 @@ export const pessoa = (id: string) =>
   rpc<FichaPessoa>('dem_pessoa', { p_token: t(), p_id: id });
 
 export const ajustar = (oQue: 'setor' | 'categoria' | 'membro' | 'pedido' | 'link', d: Record<string, unknown>) =>
-  rpc<{ id: string; quem?: { id: string; nome: string; setor: string | null; ativo: boolean }[] }>(
+  rpc<{ id: string; quem?: { id: string; nome: string; setor: string | null; ativo: boolean }[];
+        /** 96 · só quando a pessoa trocou o PRÓPRIO link: o novo, para a tela guardar */
+        token?: string }>(
     'dem_ajustar', { p_token: t(), p_o_que: oQue, p_d: d });
 
 /* 95 · a lista de sites de anexo. Um pedido por vez: ligar/desligar, incluir
    ou tirar. A resposta traz a regra inteira de volta, e a tela troca a dela. */
 export const ajustarAnexos = (d: { restrito?: boolean; incluir?: string; tirar?: string }) =>
   rpc<RegraDeAnexo>('dem_ajustar', { p_token: t(), p_o_que: 'anexos', p_d: d });
+
+/* 96 · o panorama, só para a administração: uma chamada com tudo */
+export const panorama = () =>
+  rpc<Panorama>('dem_panorama', { p_token: t() });
 
 /* ------------------------------------------------ migração 94: os portais */
 

@@ -181,6 +181,19 @@ export default function EntrarNasDemandas() {
             setMsg('Esse link pessoal não vale mais: foi trocado ou chegou incompleto. Entre com o seu e-mail aqui embaixo, ou peça um link novo a quem administra as demandas.');
           }
         } catch { /* sem armazenamento: fica a porta de sempre */ }
+        /* 96 · A ADMINISTRAÇÃO TROCOU O PRÓPRIO E-MAIL DE ENTRAR. A ficha a
+           tirou da sessão (que era do e-mail velho) e deixou o novo aqui:
+           a porta abre com ele escrito, e diz por quê (auditoria R15B). */
+        try {
+          const trocado = JSON.parse(sessionStorage.getItem('demandas.loginTrocado') || 'null');
+          sessionStorage.removeItem('demandas.loginTrocado');
+          if (trocado && typeof trocado.email === 'string' && trocado.email
+              && Date.now() - Number(trocado.em || 0) < 600000) {
+            setEmail(trocado.email);
+            setTom('ok');
+            setMsg(`O seu e-mail de entrar agora é ${trocado.email}. Peça aqui embaixo o link de entrada por ele.`);
+          }
+        } catch { /* sem armazenamento, ou marca estragada: a porta de sempre */ }
       })
       .catch(() => { clearTimeout(teto); setEntrando(false); });
   }, []);

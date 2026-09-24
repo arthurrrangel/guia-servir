@@ -296,7 +296,7 @@ function Nova() {
         {pronta.precisa_aprovacao ? (
           <Aviso tom="warn">
             Esta categoria <b>precisa de aprovação</b> antes de alguém executar. Ela já está na
-            fila da gestão e ninguém consegue começar antes disso.
+            fila da administração e ninguém consegue começar antes disso.
           </Aviso>
         ) : (
           <Aviso tom="ok">
@@ -311,7 +311,7 @@ function Nova() {
             <div className="dm-caixa-corpo">
               <h2 className="dm-caixa-titulo">O que vem agora</h2>
               <p className="dm-peq dm-mudo">
-                Quando a gestão aprovar, a demanda vai para {pronta.setor_responsavel || setorDaCat || 'o setor responsável'}, e você recebe o aviso.
+                Quando a administração aprovar, a demanda vai para {pronta.setor_responsavel || setorDaCat || 'o setor responsável'}, e você recebe o aviso.
               </p>
             </div>
           ) : (
@@ -498,7 +498,7 @@ function Nova() {
         <div className="dm-caixa">
           <div className="dm-caixa-corpo">
           {manda ? (
-            <Campo rot="Quem está pedindo" ajuda="Quem é da gestão pode abrir em nome de outro setor.">
+            <Campo rot="Quem está pedindo" ajuda="A administração pode abrir em nome de outro setor.">
               <select value={r.setor_solicitante || eu?.setor_id || ''}
                 onChange={e => setR(v => ({ ...v, setor_solicitante: e.target.value }))}>
                 {/* 94 · gestor com escopo pede em nome dos setores que acompanha
@@ -644,7 +644,7 @@ function Nova() {
           {cat ? (
             <div className="dm-pares dm-uma-coluna">
               <div><span>Vai para</span>{setorDaCat || 'nenhum setor ainda'}</div>
-              <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da gestão antes de começar' : 'não precisa'}</div>
+              <div><span>Aprovação</span>{cat.exige_aprovacao ? 'precisa da administração antes de começar' : 'não precisa'}</div>
               <div><span>Prazo sugerido</span>{cat.prazo_padrao_dias ? `${dataCheia(prazoSugerido(cat))} (${cat.prazo_padrao_dias} dias)` : 'sem sugestão'}</div>
               <div><span>Orçamento</span>{cat.exige_orcamento ? 'obrigatório nesta categoria' : 'quando der para estimar'}</div>
               <div><span>Anexos</span>{dicaDeAnexo(b?.anexos)}</div>

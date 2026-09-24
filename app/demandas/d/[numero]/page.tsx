@@ -149,7 +149,7 @@ function Uma() {
     await carregar();
     if (acao === 'assumir') ctx.toast?.({ texto: `Demanda #${numero} é sua. Ela está em execução.` });
     /* o "obrigado" é de quem pediu; a gestão só lê que ficou confirmado */
-    if (acao === 'validar') ctx.toast?.({ texto: (v?.eu.pede ?? v?.eu.abriu) ? 'Confirmado. Obrigado por dizer.' : 'Confirmado pela gestão.' });
+    if (acao === 'validar') ctx.toast?.({ texto: (v?.eu.pede ?? v?.eu.abriu) ? 'Confirmado. Obrigado por dizer.' : 'Confirmado pela administração.' });
     return true;
   }
 
@@ -326,7 +326,10 @@ function Uma() {
       /* o "obrigado" é de quem pediu; a gestão confirma no lugar dele */
       /* e a líder, que responde pelo ministério sem ter aberto, confirma sem
          o "obrigado" na boca de quem não pediu */
-      case 'validar':      return v.eu.abriu ? 'Resolveu, obrigado' : quemPediuOlha ? 'Confirmar que resolveu' : 'Confirmar pela gestão';
+      /* 96 · "Confirmar pela administração" não cabia no botão em 320
+         (194/192px, medido); "entrega" é a palavra da etapa 5, e o diálogo
+         diz no lugar de quem ("Confirmar no lugar de X?") */
+      case 'validar':      return v.eu.abriu ? 'Resolveu, obrigado' : quemPediuOlha ? 'Confirmar que resolveu' : 'Confirmar entrega';
       case 'prazo':        return 'Mudar o prazo';
       case 'prioridade':   return 'Rever a prioridade';
       case 'redirecionar': return 'Mandar para outro setor';
@@ -382,8 +385,8 @@ function Uma() {
       ? (primaria === 'validar'
            ? (quemPediuOlha ? 'Confirme se resolveu' : `Esperando ${d.abriu ? d.abriu.split(' ')[0] : 'quem pediu'} confirmar`)
          : `Concluída em ${dataCheia(d.concluida_em)}`)
-    : d.status === 'cancelada' ? (d.aprovacao === 'rejeitada' ? 'Recusada pela gestão' : 'Cancelada')
-    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua' : 'Parada até a gestão aprovar')
+    : d.status === 'cancelada' ? (d.aprovacao === 'rejeitada' ? 'Recusada pela administração' : 'Cancelada')
+    : d.falta_aprovacao ? ((v.eu.aprova ?? quemManda(v.eu.papel)) ? 'A decisão é sua' : 'Parada até a administração aprovar')
     /* a trava dita do lado de quem olha, e não a frase do aviso de cima de
        novo (eram três "Esperando informação de quem pediu" na mesma tela) */
     : d.status === 'travada' ? (
@@ -524,11 +527,11 @@ function Uma() {
             {d.travada_nota
               ? d.travada_nota
               : d.aprovacao === 'pendente'
-                ? 'A gestão precisa decidir antes de esta demanda andar.'
-                : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a gestão decidir.'}
+                ? 'A administração precisa decidir antes de esta demanda andar.'
+                : 'A categoria desta demanda passou a exigir aprovação. Ela fica parada até a administração decidir.'}
             {(v.eu.aprova ?? quemManda(v.eu.papel))
               ? <> Você pode aprovar ou recusar nesta página.</>
-              : <> Quem decide é a gestão. Não há o que fazer aqui enquanto isso.</>}
+              : <> Quem decide é a administração. Não há o que fazer aqui enquanto isso.</>}
           </div>
         </Aviso>
       ) : null}
@@ -579,7 +582,7 @@ function Uma() {
         <Aviso>
           {/* a recusa da gestão cancela a demanda; o aviso diz qual das duas
               foi, e o motivo sai sem o "Aprovação recusada:" que o banco põe */}
-          <b>{d.aprovacao === 'rejeitada' ? 'Cancelada: a gestão recusou a aprovação' : 'Cancelada'}</b>
+          <b>{d.aprovacao === 'rejeitada' ? 'Cancelada: a administração recusou a aprovação' : 'Cancelada'}</b>
           {d.cancelada_motivo ? (
             <div className="dm-aviso-mais">
               {d.aprovacao === 'rejeitada' ? d.cancelada_motivo.replace(/^Aprova[çc][ãa]o recusada:\s*/i, '') : d.cancelada_motivo}
@@ -838,7 +841,7 @@ const vence = (t: string) => (t.startsWith('em ') || t === 'amanhã' ? `vence ${
 function aprovacaoEmPalavras(d: { aprovacao?: string | null; falta_aprovacao?: boolean }): string {
   if (d.aprovacao === 'aprovada') return 'aprovada';
   if (d.aprovacao === 'rejeitada') return 'recusada';
-  if (d.falta_aprovacao) return 'esperando a gestão decidir';
+  if (d.falta_aprovacao) return 'esperando a administração decidir';
   return '';
 }
 
@@ -1063,7 +1066,7 @@ function Formulario({ aberto, d, b, eu, indo, agir, anexos = [] }: {
         <CaixaDeAcao rot={motivo === 'aprovacao' ? 'O que precisa ser aprovado, e por quê' : motivo === 'terceiros' ? 'Esperando o quê, e de quem' : 'O que falta, exatamente'}
           botao="Travar" salvando={indo}
           teto={tetoDe('travar')}
-          dica={motivo === 'aprovacao' ? 'A gestão vai ler isto para decidir. Diga o valor e o motivo.'
+          dica={motivo === 'aprovacao' ? 'A administração vai ler isto para decidir. Diga o valor e o motivo.'
             : motivo === 'terceiros' ? 'Fica no registro da demanda. Diga quem e até quando, se souber.'
             : 'Quem pediu vai ler isto. Seja específico: “qual sala?” resolve; “falta informação” não.'}
           aoEnviar={t => agir('travar', { motivo, texto: t })} />

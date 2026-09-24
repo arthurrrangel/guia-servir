@@ -236,11 +236,12 @@ function Lateral({ eu, caminho }: { eu: Eu; caminho: string }) {
 }
 
 /* AS SEÇÕES DA ADMINISTRAÇÃO. A seção vem da URL (`?secao=`), e
-   `/demandas/admin` sem nada é "pessoas". `useSearchParams` pede o Suspense
+   `/demandas/admin` sem nada é o Panorama (96). `useSearchParams` pede o Suspense
    na pré-renderização; sem ele o build reprova a página inteira. Fica aqui,
    em volta só da navegação, para as outras telas não pagarem por uma
    leitura que só a administração faz. */
 const SECOES_ADMIN: { v: string; rot: string; icone: NomeDoIcone }[] = [
+  { v: 'panorama', rot: 'Panorama', icone: 'panorama' },
   { v: 'pessoas', rot: 'Pessoas', icone: 'pessoas' }, { v: 'setores', rot: 'Setores', icone: 'setores' },
   { v: 'categorias', rot: 'Categorias', icone: 'categorias' }, { v: 'anexos', rot: 'Anexos', icone: 'anexos' },
 ];
@@ -248,7 +249,7 @@ function SecoesDaAdministracao({ caminho, secaoAberta, forma }: {
   caminho: string; secaoAberta: string | null; forma: 'lateral' | 'fita';
 }) {
   /* a ficha de uma pessoa é filha de Pessoas */
-  const secao = caminho === '/demandas/admin' ? (secaoAberta || 'pessoas')
+  const secao = caminho === '/demandas/admin' ? (secaoAberta || 'panorama')
     : caminho.startsWith('/demandas/admin/pessoas') ? 'pessoas' : '';
   const fita = useFitaQueRola<HTMLElement>();
   return (
@@ -256,7 +257,7 @@ function SecoesDaAdministracao({ caminho, secaoAberta, forma }: {
       ref={forma === 'fita' ? fita : undefined}>
       {SECOES_ADMIN.map(x => (
         <Link key={x.v} className={forma === 'lateral' ? 'dm-nav-item' : undefined}
-          href={x.v === 'pessoas' ? '/demandas/admin' : `/demandas/admin?secao=${x.v}`}
+          href={x.v === 'panorama' ? '/demandas/admin' : `/demandas/admin?secao=${x.v}`}
           aria-current={secao === x.v ? 'page' : undefined}>
           {forma === 'lateral' ? <Icone nome={x.icone} /> : null}
           {forma === 'lateral' ? <span>{x.rot}</span> : x.rot}

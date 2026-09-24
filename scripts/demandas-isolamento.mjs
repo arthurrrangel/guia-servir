@@ -33,8 +33,12 @@
                papel de equipe; pediu para ser equipe
      Maria ... equipe da comunicação
      José .... equipe de compras
-     Bruno ... gestão, com escopo só na comunicação
-     Arthur .. administração
+     Ana ..... equipe da manutenção (até a 95, gestora de tudo)
+     Arthur .. administração, a única (96)
+
+   DESDE A 96 NÃO HÁ GESTÃO. Bruno, o gestor só da comunicação, saiu da
+   semente com o papel; a seção H prova de fora o que a 96 prometeu: uma
+   administração só, nenhuma gestão, e o panorama só para ela.
 
    Precisa de `scripts/demandas-celular-subir.sh` (ponte na 54321, app na
    3400). Roda por último em `npm run test:demandas`, porque cria dados. */
@@ -77,9 +81,8 @@ const numerosDe = r => (r.itens || []).map(i => i.numero);
 
 /* ---------------------------------------------------------------- pessoas */
 const TOK = {
-  arthur: 'tok-admin', maria: 'tok-comunica', jose: 'tok-compras', ana: 'tok-gestor',
+  arthur: 'tok-admin', maria: 'tok-comunica', jose: 'tok-compras', ana: 'tok-manutencao',
   pedro: 'tok-pede', luciana: 'tok-lider', rafael: 'tok-colega', carla: 'tok-pedido',
-  bruno: 'tok-gestor-com',
 };
 const eu = {};
 const RODADA = Date.now().toString(36);
@@ -213,12 +216,14 @@ try {
 
   /* ====================================================================
      B · PROFISSIONAL DO SETOR A TENTANDO ACESSAR DEMANDA DO SETOR B */
-  secao('B · entre setores: Maria (comunicação), Bruno (gestão da comunicação), Carla (setor sem papel)');
+  secao('B · entre setores: Maria (comunicação), Ana (manutenção), Carla (setor sem papel)');
   for (const n of [...deCompras, ...deManutencao]) {
     const r = await rpc('dem_ver', { p_token: TOK.maria, p_numero: n });
     ok(recusou(r, 'NAO_EXISTE'), `Maria abre #${n} (${setorDe.get(n)}): não existe`, r.txt);
-    const g = await rpc('dem_ver', { p_token: TOK.bruno, p_numero: n });
-    ok(recusou(g, 'NAO_EXISTE'), `Bruno, gestor só da comunicação, abre #${n} (${setorDe.get(n)}): não existe`, g.txt);
+  }
+  for (const n of [...deCompras, ...daComunicacao]) {
+    const g = await rpc('dem_ver', { p_token: TOK.ana, p_numero: n });
+    ok(recusou(g, 'NAO_EXISTE'), `Ana, equipe da manutenção, abre #${n} (${setorDe.get(n)}): não existe`, g.txt);
   }
   {
     const n = deCompras[0];
@@ -226,15 +231,18 @@ try {
                              ['redirecionar', { setor: idComunicacao }], ['concluir', { texto: 'x' }]]) {
       const r = await rpc('dem_mover', { p_token: TOK.maria, p_numero: n, p_acao: acao, p_d: d });
       ok(recusou(r, 'NAO_EXISTE'), `Maria tenta "${acao}" em #${n} de compras: não existe`, r.txt);
-      const g = await rpc('dem_mover', { p_token: TOK.bruno, p_numero: n, p_acao: acao, p_d: d });
-      ok(recusou(g, 'NAO_EXISTE'), `Bruno tenta "${acao}" em #${n} de compras: não existe`, g.txt);
+      const g = await rpc('dem_mover', { p_token: TOK.ana, p_numero: n, p_acao: acao, p_d: d });
+      ok(recusou(g, 'NAO_EXISTE'), `Ana tenta "${acao}" em #${n} de compras: não existe`, g.txt);
     }
   }
-  /* Maria vê a fila da comunicação. Bruno, gestor da comunicação, vê a fila
-     E o que a comunicação pediu a outros setores (as de Carla): é o escopo
-     dele, pelos dois lados. Nada além disso para nenhum dos dois. */
-  const permitidasBruno = new Set([...daComunicacao, ...(await doCarla())]);
-  for (const [quem, tok, pode] of [['Maria', TOK.maria, new Set(daComunicacao)], ['Bruno', TOK.bruno, permitidasBruno]]) {
+  /* Maria vê a fila da comunicação; Ana, a da manutenção. Nada além disso
+     para nenhuma das duas (até a 95 Ana era a gestora de tudo e via o banco
+     inteiro: a 96 a trouxe para a equipe) */
+  /* a fila inteira da manutenção, e não só as de Pedro (`deManutencao` é a
+     lista de ALVOS, filtrada por Pedro): a que Carla abre na seção B, numa
+     rodada anterior, é da manutenção e é da Ana ver */
+  const daManutencao = tudo.itens.filter(i => /manuten/i.test(i.responsavel_setor || '')).map(i => i.numero);
+  for (const [quem, tok, pode] of [['Maria', TOK.maria, new Set(daComunicacao)], ['Ana', TOK.ana, new Set(daManutencao)]]) {
     let vaz = [], n = 0;
     for (const aba of ABAS) {
       for (const f of FILTROS) {
@@ -293,7 +301,7 @@ try {
      C · USUÁRIO COMUM TENTANDO ACESSAR A ÁREA ADMINISTRATIVA */
   secao('C · a administração pela API, com o token de quem não administra');
   for (const [quem, tok] of [['Pedro', TOK.pedro], ['Maria', TOK.maria], ['Luciana', TOK.luciana],
-                             ['Bruno (gestão)', TOK.bruno], ['Ana (gestão total)', TOK.ana]]) {
+                             ['Ana (equipe, ex-gestora de tudo)', TOK.ana], ['Carla', TOK.carla]]) {
     const p = await rpc('dem_pessoas', { p_token: tok });
     ok(recusou(p, 'SO_ADMIN') && !p.txt.includes('tok-'), `${quem} lista as pessoas: SO_ADMIN`, p.txt);
     const f = await rpc('dem_pessoa', { p_token: tok, p_id: idCarla });
@@ -330,10 +338,10 @@ try {
       const r = await rpc('dem_perfil', { p_token: TOK.pedro, p_d: { papel_pedido: p } });
       ok(recusou(r, 'PEDIDO_INVALIDO'), `Pedro pede o papel "${p}" pelo perfil: não se pede`, r.txt);
     }
-    const g = await rpc('dem_ajustar', { p_token: TOK.bruno, p_o_que: 'membro',
-                                         p_d: { id: eu.bruno.id, escopo_total: true } });
-    ok(recusou(g, 'SO_ADMIN'), 'Bruno tenta aumentar o próprio escopo: SO_ADMIN', g.txt);
-    const b2 = await rpc('dem_ver', { p_token: TOK.bruno, p_numero: deCompras[0] });
+    const g = await rpc('dem_ajustar', { p_token: TOK.ana, p_o_que: 'membro',
+                                         p_d: { id: eu.ana.id, escopo_total: true } });
+    ok(recusou(g, 'SO_ADMIN'), 'Ana tenta se dar escopo de tudo: SO_ADMIN', g.txt);
+    const b2 = await rpc('dem_ver', { p_token: TOK.ana, p_numero: deCompras[0] });
     ok(recusou(b2, 'NAO_EXISTE'), 'e continua sem ver compras', b2.txt);
   }
 
@@ -419,6 +427,59 @@ try {
   }
 
   /* ====================================================================
+     H · UMA PESSOA CONTROLA TUDO (96), PELA API */
+  secao('H · uma administração só, nenhuma gestão, e o panorama só dela');
+  {
+    const pessoasAntes = await rpc('dem_pessoas', { p_token: TOK.arthur });
+    const admins = (pessoasAntes.membros || []).filter(m => m.papel === 'admin' && m.ativo);
+    ok(admins.length === 1 && admins[0].id === eu.arthur.id, 'a base tem uma administração ativa, e é o Arthur',
+       admins.map(m => m.nome).join(', '));
+    ok(!(pessoasAntes.membros || []).some(m => m.papel === 'gestor'), 'e ninguém com o papel Gestão');
+    for (const [rot, d, codigo] of [
+      ['Maria para Administração', { id: eu.maria.id, papel: 'admin' }, 'ADMIN_UNICO'],
+      ['Maria para Gestão', { id: eu.maria.id, papel: 'gestor' }, 'SEM_GESTAO'],
+      ['escopo para Maria', { id: eu.maria.id, escopo: [idCompras] }, 'SEM_GESTAO'],
+      ['escopo de tudo para Maria', { id: eu.maria.id, escopo_total: true }, 'SEM_GESTAO'],
+      ['uma Administração nova', { nome: `Outra Adm ${LETRAS}`, setor_id: idComunicacao, papel: 'admin' }, 'ADMIN_UNICO'],
+      ['uma Gestão nova', { nome: `Outra Gestao ${LETRAS}`, setor_id: idComunicacao, papel: 'gestor' }, 'SEM_GESTAO'],
+      ['o Arthur deixa de administrar', { id: eu.arthur.id, papel: 'responsavel' }, 'ULTIMO_ADMIN'],
+      ['o Arthur se desativa', { id: eu.arthur.id, ativo: false }, 'ULTIMO_ADMIN'],
+      /* R15A: com uma administração só, o login dela errado tranca tudo */
+      ['o Arthur fica sem e-mail de entrar', { id: eu.arthur.id, auth_email: '', email: '' }, 'LOGIN_VAZIO'],
+      ['o Arthur troca o e-mail de entrar sem confirmar', { id: eu.arthur.id, auth_email: `outro.${LETRAS.toLowerCase()}@exemplo.org` }, 'CONFIRMAR_LOGIN'],
+    ]) {
+      const r = await rpc('dem_ajustar', { p_token: TOK.arthur, p_o_que: 'membro', p_d: d });
+      ok(recusou(r, codigo), `a própria administração tenta ${rot}: ${codigo}`, r.txt);
+    }
+    const q = await rpc('dem_quem_sou', { p_token: TOK.maria });
+    ok(q.papel === 'responsavel', 'e Maria continua equipe', q.papel);
+    const depois = await rpc('dem_pessoas', { p_token: TOK.arthur });
+    ok((depois.membros || []).filter(m => m.papel === 'admin' && m.ativo).length === 1
+       && !(depois.membros || []).some(m => /^Outra (Adm|Gestao)/.test(m.nome)),
+       'depois das dez tentativas: ainda uma administração, e ninguém novo');
+    const eu2 = await rpc('dem_quem_sou', { p_token: TOK.arthur });
+    ok(eu2.ok === true && eu2.papel === 'admin', 'e o Arthur continua entrando, administrando', eu2.txt.slice(0, 120));
+  }
+  for (const [quem, tok] of [['Pedro', TOK.pedro], ['Maria', TOK.maria], ['José', TOK.jose], ['Ana', TOK.ana],
+                             ['Luciana', TOK.luciana], ['Rafael', TOK.rafael], ['Carla', TOK.carla]]) {
+    const r = await rpc('dem_panorama', { p_token: tok });
+    ok(recusou(r, 'SO_ADMIN') && !r.txt.includes('operacao'), `${quem} pede o panorama: SO_ADMIN`, r.txt);
+  }
+  {
+    const s0 = await rpc('dem_panorama', { p_token: null });
+    ok(recusou(s0, 'SEM_ACESSO'), 'o panorama sem identidade: SEM_ACESSO', s0.txt);
+    const r = await rpc('dem_panorama', { p_token: TOK.arthur });
+    ok(r.ok === true && !!r.operacao && Array.isArray(r.setores), 'o panorama abre para a administração', r.txt.slice(0, 120));
+    ok(!r.txt.includes('tok-') && !/\b55\d{10,11}\b/.test(r.txt) && !/@exemplo\.org/.test(r.txt),
+       'e não carrega link pessoal, telefone nem e-mail de ninguém', r.txt.match(/tok-[a-z-]+|55\d{10,11}|[\w.]+@exemplo\.org/)?.[0]);
+    const po = await rpc('dem_portal', { p_token: TOK.arthur });
+    ok(String(r.operacao?.na_fila) === String(po.n?.fila) && String(r.operacao?.atrasadas) === String(po.n?.atrasadas)
+       && String(r.operacao?.aprovar) === String(po.n?.aprovar),
+       'e as contas batem com o Atendimento da administração (fila, atrasadas, aprovar)',
+       `${r.operacao?.na_fila}/${po.n?.fila} ${r.operacao?.atrasadas}/${po.n?.atrasadas} ${r.operacao?.aprovar}/${po.n?.aprovar}`);
+  }
+
+  /* ====================================================================
      G · PELO NAVEGADOR: A BARRA DE ENDEREÇO */
   secao('G · pelo navegador, digitando o endereço');
   const nav = await chromium.launch({ executablePath: chromeDoContainer() });
@@ -492,7 +553,10 @@ try {
       await pag.goto(`${BASE}/demandas?t=tok-inventado-na-barra`, { waitUntil: 'networkidle' });
       await pag.waitForTimeout(500);
       const t = await pag.evaluate(() => document.body.innerText);
-      ok(/entre para ver/i.test(t) && !/Arte para o culto/.test(t), 'um link inventado na barra não entra em nada', t.slice(0, 100));
+      /* a porta é a de entrar, e desde a R14 ela diz que o link não vale
+         (a frase antiga, "entre para ver", saiu com a tela do meio em 23/09) */
+      ok(/Entrar nas demandas/.test(t) && /não vale mais/.test(t) && !/Arte para o culto/.test(t),
+         'um link inventado na barra não entra em nada, e a porta diz que ele não vale', t.slice(0, 300));
       await ctx.close();
     }
   } finally {

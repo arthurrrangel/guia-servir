@@ -1028,7 +1028,7 @@ const PORBANCO: Record<string, string> = {
      encostava. Com `PORBANCO` tendo precedência, ela não chega mais lá. */
   SEM_PERMISSAO_DB: 'Você não tem permissão para isso neste setor. Fale com quem administra as demandas.',
   SEM_SISTEMA: 'O sistema de demandas ainda não foi instalado neste ambiente.',
-  SO_GESTOR: 'Só a gestão aprova ou recusa.',
+  SO_GESTOR: 'Só a administração aprova ou recusa.',
   SO_ADMIN: 'Só quem administra o sistema mexe aqui.',
   FALTA_APROVACAO: 'Esta demanda ainda espera aprovação.',
   NAO_ESTA_PENDENTE: 'Esta demanda não está esperando aprovação.',
@@ -1047,7 +1047,7 @@ const PORBANCO: Record<string, string> = {
   /* ---- o vocabulário que nasceu nas migrações 84 a 87 ------------------
      Cada uma destas linhas é a diferença entre a pessoa saber o que fazer e
      a pessoa ver uma palavra em MAIÚSCULA que não quer dizer nada para ela. */
-  SO_GESTOR_REABRE_APROVACAO: 'Esta demanda já foi aprovada. Devolver para aprovação é decisão da gestão.',
+  SO_GESTOR_REABRE_APROVACAO: 'Esta demanda já foi aprovada. Devolver para aprovação é decisão da administração.',
   JA_TEM_DONO: 'Outra pessoa assumiu esta demanda primeiro.',
   PRAZO_NAO_VEIO: 'Escolha a nova data, ou diga que não vai ter data.',
   PRAZO_INVALIDO: 'Essa data não existe. Use o seletor de data.',
@@ -1083,7 +1083,7 @@ const PORBANCO: Record<string, string> = {
   ACAO_DESCONHECIDA: 'Não sei fazer isso.',
   FALTA_CAMPO: 'Falta preencher um campo obrigatório.',
   /* ---- migração 91: a etapa 5 do PDF ----------------------------------- */
-  SO_QUEM_PEDIU: 'Quem confirma que resolveu é quem pediu, ou a gestão.',
+  SO_QUEM_PEDIU: 'Quem confirma que resolveu é quem pediu, ou a administração.',
   NAO_ESTA_CONCLUIDA: 'Só dá para confirmar depois que a demanda for concluída.',
   JA_VALIDADA: 'Esta demanda já foi confirmada.',
   /* ---- os dois que o próprio `api.ts` produz e ninguém traduzia --------
@@ -1133,15 +1133,14 @@ const PORBANCO: Record<string, string> = {
   PEDIDO_INVALIDO: 'Escolha uma das opções.',
   NADA_A_PEDIR: 'Você já tem esse papel, ou um que faz mais.',
   PAPEL_INVALIDO: 'Escolha um dos papéis da lista.',
-  /* 96 · a administração é de uma pessoa só, e a Gestão foi desligada. As
-     frases chegam com o banco; as telas que param de oferecer os dois papéis
-     vêm no commit seguinte */
+  /* 96 · a administração é de uma pessoa só, e não muda de mão pela tela */
+  ULTIMO_ADMIN: 'A administração é de uma pessoa só e não sai dela por esta tela.',
   ADMIN_UNICO: 'A administração é de uma pessoa só. Escolha Membro, Líder ou Equipe.',
   SEM_GESTAO: 'O papel Gestão não existe mais: quem aprova e coordena é a administração. Escolha Membro, Líder ou Equipe.',
+  /* a administração é quem conserta tudo; se ela não entra, ninguém conserta */
   LOGIN_VAZIO: 'A administração entra por e-mail. Deixe um e-mail preenchido.',
   CONFIRMAR_LOGIN: 'Esse é o e-mail com que a administração entra. Confirme a troca antes de salvar.',
-  ULTIMO_ADMIN: 'Esta é a única pessoa que administra. Dê esse papel a outra pessoa antes de tirar dela.',
-  ESCOPO_VAZIO: 'Gestor precisa acompanhar todos os setores, ou pelo menos um. Escolha antes de salvar.',
+  ESCOPO_VAZIO: 'Escolha pelo menos um setor antes de salvar.',
   ESCOPO_INVALIDO: 'Um dos setores escolhidos não existe mais. Recarregue a página.',
   HOMONIMO: 'Já existe alguém com esse nome. Confira se não é a mesma pessoa.',
   SEM_PEDIDO: 'Essa pessoa não tem pedido esperando.',
@@ -1361,9 +1360,15 @@ export const PAPEIS: { v: Papel; rot: string; explica: string }[] = [
   { v: 'solicitante', rot: 'Membro',        explica: 'Abre demandas e acompanha as próprias.' },
   { v: 'lider',       rot: 'Líder',         explica: 'Pede pelo ministério: vê e confirma o que o ministério pediu.' },
   { v: 'responsavel', rot: 'Equipe',        explica: 'Atende a fila do próprio setor: assume, ajusta o prazo e conclui.' },
-  { v: 'gestor',      rot: 'Gestão',        explica: 'Acompanha os setores do escopo: vê, aprova gastos e redistribui.' },
-  { v: 'admin',       rot: 'Administração', explica: 'Tudo o que a Gestão faz, mais pessoas, setores, categorias e anexos.' },
+  /* 96 · desligado em 24/09/2026. Fica aqui só para o histórico de quem já
+     foi ("Papel: Gestão para Membro"); nenhuma tela oferece */
+  { v: 'gestor',      rot: 'Gestão',        explica: 'Papel desligado: quem aprova e coordena é a administração.' },
+  { v: 'admin',       rot: 'Administração', explica: 'Uma pessoa só: vê tudo, aprova, e cuida de pessoas, setores, categorias e anexos.' },
 ];
+/* 96 · OS PAPÉIS QUE SE DÃO. A administração é de uma pessoa só (o banco
+   recusa a segunda com ADMIN_UNICO) e a Gestão foi desligada (SEM_GESTAO):
+   nenhum seletor oferece os dois. */
+export const PAPEIS_QUE_SE_DAO = PAPEIS.filter(p => p.v === 'solicitante' || p.v === 'lider' || p.v === 'responsavel');
 export const rotPapel = (p: Papel | string | null | undefined) =>
   PAPEIS.find(x => x.v === p)?.rot ?? String(p || '');
 

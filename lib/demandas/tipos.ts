@@ -64,6 +64,32 @@ export type AvisoDentro = {
   novo: boolean;
 };
 
+/** 96 · o panorama do sistema, só para a administração (`dem_panorama`).
+    As contas são as mesmas das listas e dos Números, sem período. */
+export type Panorama = {
+  agora: string;
+  operacao: {
+    vivas: number; na_fila: number; em_execucao: number; aprovar: number;
+    travadas: number; esperando_quem_pediu: number; atrasadas: number; paradas: number;
+    a_confirmar: number; recebidas_30d: number; concluidas_30d: number; total: number;
+  };
+  setores: {
+    id: string; nome: string; atende: boolean; equipe: number;
+    /** desativado com demanda viva continua na lista, com `ativo: false` */
+    ativo?: boolean;
+    vivas: number; na_fila: number; aprovar: number; atrasadas: number; concluidas_30d: number;
+  }[];
+  pessoas: {
+    ativas: number; sem_acesso: number; pedidos: number; equipe_sem_setor: number;
+    por_papel: { admin: number; responsavel: number; lider: number; solicitante: number };
+  };
+  carga: { id: string; nome: string; setor: string | null; com_ela: number; atrasadas: number }[];
+  aprovar: (Resumo & { orcamento: number | null })[];
+  fila: Resumo[];
+  /** no formato dos avisos, para o gesto se juntar com a mesma função */
+  recentes: Omit<AvisoDentro, 'motivo' | 'novo'>[];
+};
+
 /** A situação de quem está no cadastro, pelo e-mail do login. */
 export type Cadastro =
   | { situacao: 'sem_login' }
