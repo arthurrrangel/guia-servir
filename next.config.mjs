@@ -142,6 +142,28 @@ const nextConfig = {
       ...ROTAS_FECHADAS.map(source => ({ source, headers: [NAO_INDEXAR] })),
       { source: '/eu', headers: [NAO_INDEXAR] },
       { source: '/eu/:caminho+', headers: [NAO_INDEXAR_NUNCA] },
+      /* Follow Camp 2027: fora da busca enquanto a página tiver campos a
+         confirmar (valor, local, link da ficha). Sai daqui junto com a meta
+         `robots` de public/followcamp/index.html no dia em que ficar completa. */
+      { source: '/followcamp', headers: [NAO_INDEXAR] },
+      { source: '/followcamp/:caminho*', headers: [NAO_INDEXAR] },
+    ];
+  },
+  /* FOLLOW CAMP 2027 · 29/09/2026
+
+     A landing page do retiro é um HTML estático em public/followcamp/, com as
+     fotos, os adesivos e as fontes ao lado, em public/followcamp/a/. Ela não
+     passa pelo app/layout.tsx de propósito: a identidade do acampamento (a
+     espiral vermelha, o logo adesivo) é outra, e o cabeçalho do site em cima
+     dela seria duas marcas brigando na mesma tela.
+
+     O Next não resolve index.html sozinho dentro de public/, então
+     /followcamp precisa desta reescrita para não dar 404. Os caminhos dentro
+     da página são absolutos (/followcamp/a/...) porque, servida em
+     /followcamp sem barra no fim, um caminho relativo apontaria para a raiz. */
+  async rewrites() {
+    return [
+      { source: '/followcamp', destination: '/followcamp/index.html' },
     ];
   },
   async redirects() {
@@ -158,6 +180,8 @@ const nextConfig = {
       { source: '/pequenos-grupos', destination: '/pequena-guia', permanent: true },
       { source: '/pg', destination: '/pequena-guia', permanent: true },
       { source: '/contato', destination: '/como-chegar', permanent: false },
+      /* o jeito que alguém vai digitar o endereço do retiro */
+      { source: '/follow-camp', destination: '/followcamp', permanent: false },
     ];
   },
 };
