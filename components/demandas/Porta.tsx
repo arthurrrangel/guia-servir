@@ -12,14 +12,16 @@
 
 import Link from 'next/link';
 
-/* a marca: o selo preto e o nome. O selo é um link para o Início com a
-   própria classe (`dm-logo`), que a trava de `demandas-css.test.mjs` vigia:
-   ele diz as duas cores, para uma nunca virar a outra. */
+/* A MARCA É A DA IGREJA (30/09/2026): o logotipo oficial da GUIA Church,
+   pedido do Arthur ("tudo logo da guia"). Era um selo preto escrito "GUI>"
+   com o nome "Demandas" ao lado, uma marca que a igreja não tem. O desenho
+   vem de `/marca/guia-church.svg` (o mesmo vetor do site) como máscara em
+   `.dm-logo`: nenhuma peça do sistema de escalas entra aqui, só o arquivo
+   público da marca. A classe diz as duas cores (`demandas-css.test.mjs`). */
 export function Marca() {
   return (
-    <Link href="/demandas" className="dm-marca" aria-label="Demandas, início">
-      <span className="dm-logo" aria-hidden="true">GUI{'>'}</span>
-      <span className="dm-marca-nome">Demandas</span>
+    <Link href="/demandas" className="dm-marca" aria-label="GUIA Church, início das demandas">
+      <span className="dm-logo" aria-hidden="true" />
     </Link>
   );
 }

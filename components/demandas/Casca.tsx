@@ -213,8 +213,7 @@ function Lateral({ eu, caminho }: { eu: Eu; caminho: string }) {
     <aside className="dm-lateral" aria-label="Navegação">
       <div className="dm-lateral-topo">
         <div className="dm-marca">
-          <Link href="/demandas" className="dm-logo" aria-label="Demandas, início">GUI{'>'}</Link>
-          <span className="dm-marca-nome">Demandas</span>
+          <Link href="/demandas" className="dm-logo" aria-label="GUIA Church, início das demandas" />
         </div>
       </div>
       <div className="dm-lateral-nova">
@@ -283,8 +282,7 @@ function LateralDaAdministracao({ eu, caminho }: { eu: Eu; caminho: string }) {
     <aside className="dm-lateral dm-lateral-adm" aria-label="Navegação da administração">
       <div className="dm-lateral-topo">
         <div className="dm-marca">
-          <Link href="/demandas" className="dm-logo" aria-label="Demandas, início">GUI{'>'}</Link>
-          <span className="dm-marca-nome">Demandas</span>
+          <Link href="/demandas" className="dm-logo" aria-label="GUIA Church, início das demandas" />
         </div>
       </div>
       <Link className="dm-nav-item dm-nav-voltar" href="/demandas">
@@ -356,7 +354,7 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
       <div className="dm dm-casca">
         <aside className="dm-lateral" aria-hidden="true">
           <div className="dm-lateral-topo">
-            <div className="dm-marca"><span className="dm-logo">GUI{'>'}</span><span className="dm-marca-nome">Demandas</span></div>
+            <div className="dm-marca"><span className="dm-logo" /></div>
           </div>
         </aside>
         <main className="dm-corpo"><Esqueleto forma="lista" /></main>
@@ -478,9 +476,8 @@ function CascaInterna({ children, admin }: { children: React.ReactNode; admin?: 
     <div className={`dm dm-casca ${semAbas ? '' : 'dm-com-abas'} ${naFicha ? 'dm-na-ficha' : ''} ${segura ? 'dm-segura' : ''}`}>
       <Lateral eu={eu} caminho={caminho} />
       <header className="dm-topo">
-        <Link href="/demandas" className="dm-marca" aria-label="Demandas, início">
-          <span className="dm-logo" aria-hidden="true">GUI{'>'}</span>
-          <span className="dm-marca-nome">Demandas</span>
+        <Link href="/demandas" className="dm-marca" aria-label="GUIA Church, início das demandas">
+          <span className="dm-logo" aria-hidden="true" />
         </Link>
         <Link className="dm-topo-eu" href="/demandas/perfil" aria-label={`Perfil de ${eu.primeiro_nome || eu.nome}`}>
           <span className="dm-avatar" aria-hidden="true">{iniciais(eu.nome)}</span>

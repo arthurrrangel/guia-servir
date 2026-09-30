@@ -118,7 +118,7 @@ const ESPERADO = [
   { rota: `/demandas/d/${N.execucao}`, onde: '.dm h3', pseudo: '::before', prop: 'content', vale: 'none', por: 'h3 sem o chevron do outro sistema' },
 
   // a logo continua branca no preto (o defeito de 18/09, agora com trava)
-  { rota: '/demandas',      onde: '.dm-logo', prop: 'color', vale: 'rgb(255, 255, 255)', por: 'logo legível' },
+  { rota: '/demandas',      onde: '.dm-logo', prop: 'color', vale: 'rgb(24, 24, 27)', por: 'logo legível: a marca da igreja em tinta' },
 ];
 
 const nav = await chromium.launch({ executablePath: chromeDoContainer() });

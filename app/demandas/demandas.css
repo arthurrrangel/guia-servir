@@ -218,16 +218,23 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-lateral-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);padding:4px var(--dm-e2) 0;min-height:36px}
 .dm-marca{display:inline-flex;align-items:center;gap:10px;color:var(--dm-ink);text-decoration:none;min-width:0}
 .dm-marca:where(a){min-height:44px}
-/* a marca: a caixa preta diz as duas cores, para uma nunca virar a outra
-   (o defeito de 18/09: texto #252525 sobre fundo #252525). 11px em caixa
-   alta espaçada é rótulo, e o medidor de celular o aceita como tal. */
+/* A MARCA É A DA IGREJA (30/09/2026): o logotipo oficial da GUIA Church
+   (símbolo, GUI> e CHURCH), o mesmo vetor do site, servido em
+   `/marca/guia-church.svg` e usado como MÁSCARA: a forma vem do arquivo e a
+   cor vem daqui (`background:currentColor`), então a lateral clara pinta em
+   tinta e a sala escura da administração pinta em branco, com um arquivo
+   só. Antes era uma caixa preta escrita "GUI>" com "Demandas" ao lado, uma
+   marca que a igreja não tem; o Arthur pediu a de verdade.
+   A classe continua dizendo as duas cores, para uma nunca virar a outra (o
+   defeito de 18/09: texto #252525 sobre fundo #252525). 36px no desktop e
+   30 no celular: abaixo disso o CHURCH do logotipo vira um risco. */
 .dm-logo{
-  display:inline-flex;align-items:center;justify-content:center;flex:none;
-  height:26px;padding:0 5px 0 8px;border-radius:6px;
-  background:var(--dm-preto);color:#fff;
-  font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;line-height:1;
+  display:block;flex:none;height:36px;aspect-ratio:8184 / 2520;
+  color:var(--dm-ink);background:currentColor;
+  -webkit-mask:url(/marca/guia-church.svg) center / contain no-repeat;
+          mask:url(/marca/guia-church.svg) center / contain no-repeat;
 }
-.dm-marca-nome{font-size:15px;font-weight:600;letter-spacing:-.01em;white-space:nowrap}
+@media (max-width:1023px){ .dm-logo{height:30px} }
 .dm-lateral-nova .dm-btn{width:100%}
 .dm-nav{display:grid;gap:2px}
 .dm-nav-grupo{
@@ -273,8 +280,7 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
    escuro no celular. É outra sala, e a pessoa vê isso antes de ler. */
 .dm-adm-faixa{display:grid;gap:2px}
 .dm-adm .dm-lateral{background:var(--dm-adm-fundo);border-right-color:var(--dm-adm-fundo)}
-.dm-adm .dm-lateral .dm-marca-nome{color:var(--dm-adm-ink)}
-.dm-adm .dm-lateral .dm-logo{background:#fff;color:var(--dm-preto)}
+.dm-adm .dm-lateral .dm-logo{color:#fff}
 .dm-adm .dm-lateral .dm-nav-grupo{color:var(--dm-adm-mudo)}
 .dm-adm .dm-lateral .dm-nav-item{color:var(--dm-adm-mudo)}
 .dm-adm .dm-lateral .dm-nav-item svg{color:var(--dm-adm-mudo)}
