@@ -180,7 +180,8 @@ section[id]{scroll-margin-top:84px}
 .abertura .adesivo-texto{max-width:15ch}
 .abertura .lead{max-width:56ch;color:var(--tinta)}
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:6px 0 0;padding:0;list-style:none}
-.chips li{display:inline-flex;align-items:center;gap:.5em;min-height:40px;padding:0 1em;border-radius:999px;border:2px solid var(--linha);background:var(--cartao);font:600 .9rem/1.2 var(--f-texto)}
+.chips li{display:inline-flex;align-items:center;justify-content:center;text-align:center;text-wrap:balance;gap:.5em;min-height:40px;padding:.45em 1.1em;border-radius:999px;border:2px solid var(--linha);background:var(--cartao);font:600 .9rem/1.2 var(--f-texto)}
+@media (max-width:359.98px){.chips li{font-size:.84rem;padding:.45em .9em}}
 
 /* Diagnóstico */
 .diagnostico{border-top:2px solid var(--linha)}
@@ -262,6 +263,7 @@ section[id]{scroll-margin-top:84px}
 .condicoes div{display:grid;grid-template-columns:108px minmax(0,1fr);gap:12px;align-items:baseline}
 .condicoes dt{font:700 .86rem/1.4 var(--f-texto);color:var(--tinta)}
 .condicoes dd{margin:0;font-size:.93rem;line-height:1.45;color:var(--tinta-2)}
+@media (max-width:479.98px){.condicoes{gap:14px}.condicoes div{grid-template-columns:1fr;gap:2px}}
 .nota-ficha{margin-top:10px;font-size:.88rem;line-height:1.5;color:rgba(255,255,255,.88)}
 .mapa{display:inline-block;font:700 .9rem/1.2 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;padding:6px 0}
 .zap{font-weight:700;white-space:nowrap;color:inherit;text-decoration:underline;text-decoration-color:var(--fogo);text-decoration-thickness:2px;text-underline-offset:3px}
@@ -413,9 +415,9 @@ section[id]{scroll-margin-top:84px}
       <h2 class="adesivo-texto" id="t-abertura" data-texto="Seguir começa quando eu me rendo.">Seguir começa quando eu me rendo.</h2>
       <p class="lead">Cinco noites longe da rotina, no meio da natureza, com gente da sua idade. Acampamento de verdade, amizades que começam na primeira refeição e espaço de sobra pra conversar com Deus sobre o que você vem carregando sozinho.</p>
       <ul class="chips" aria-label="Resumo do retiro">
-        <li>13 a 24 anos</li>
-        <li>5 noites no Carnaval</li>
-        <li>Espaço Bethel · Barra de Guaratiba</li>
+        <li>05 a 10 de fevereiro de&nbsp;2027 (Carnaval)</li>
+        <li>Para jovens de 13 a 24 anos</li>
+        <li>Espaço Bethel, Barra&nbsp;de&nbsp;Guaratiba, Rio&nbsp;de&nbsp;Janeiro</li>
       </ul>
     </div>
   </section>
@@ -524,7 +526,7 @@ section[id]{scroll-margin-top:84px}
         <div class="linha"><dt>Quem acompanha</dt><dd><p>Monitores adultos e a equipe de líderes acompanham todas as atividades.</p></dd></div>
         <div class="linha"><dt>Onde dormem</dt><dd><p>Dormitórios divididos por gênero e faixa etária. As atividades também são organizadas por faixa etária.</p></dd></div>
         <div class="linha"><dt>Alimentação</dt><dd><p>4 refeições por dia. Restrição alimentar ou alergia vai num campo próprio da ficha, e a equipe se organiza.</p></dd></div>
-        <div class="linha"><dt>Autorização</dt><dd><p>Obrigatória para menores de 18 anos. O termo está no próprio formulário de inscrição.</p></dd></div>
+        <div class="linha"><dt>Autorização</dt><dd><p>Para menores de 18 anos, a autorização assinada pelos responsáveis é obrigatória. O termo está disponível no formulário de inscrição.</p></dd></div>
         <div class="linha"><dt>Contato</dt><dd><p>WhatsApp da organização: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a></p></dd></div>
       </dl>
     </div>
@@ -540,9 +542,9 @@ section[id]{scroll-margin-top:84px}
       </div>
 
       <dl class="painel info" aria-label="Informações práticas">
-        <div><dt>Quando</dt><dd><p>05 a 10 de fevereiro de 2027, no Carnaval.</p><p>Check-in na sexta (05/02) a partir das 19h. Saída na quarta (10/02) às 10h.</p></dd></div>
-        <div><dt>Para quem</dt><dd><p>Jovens de 13 a 24 anos, com atividades organizadas por faixa etária.</p></dd></div>
-        <div><dt>Onde</dt><dd><p><b>Espaço Bethel</b><br>Estrada Roberto Burle Marx, 1245<br>Barra de Guaratiba, Rio de Janeiro</p><a class="mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Espa%C3%A7o%20Bethel%2C%20Estrada%20Roberto%20Burle%20Marx%2C%201245%2C%20Barra%20de%20Guaratiba%2C%20Rio%20de%20Janeiro" target="_blank" rel="noopener">Ver no mapa ↗</a></dd></div>
+        <div><dt>Quando</dt><dd><p>05 a 10 de fevereiro de 2027, durante o Carnaval.</p><p>Check-in na sexta (05/02) a partir das 19h. Encerramento e saída na quarta (10/02) às 10h.</p></dd></div>
+        <div><dt>Para quem</dt><dd><p>Jovens de 13 a 24 anos. As atividades são organizadas por faixa etária, pra cada um viver o retiro do jeito certo pra sua fase.</p><p>Menores de 18 anos precisam de autorização dos responsáveis (detalhes abaixo).</p></dd></div>
+        <div><dt>Onde</dt><dd><p><b>Espaço Bethel</b><br>Estrada Roberto Burle Marx, 1245<br>Barra de Guaratiba, Rio de Janeiro, RJ<br>CEP 23020-255</p><p>Um acampamento cercado pela natureza, com estrutura preparada pra receber a galera com segurança.</p><a class="mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Espa%C3%A7o%20Bethel%2C%20Estrada%20Roberto%20Burle%20Marx%2C%201245%2C%20Barra%20de%20Guaratiba%2C%20Rio%20de%20Janeiro" target="_blank" rel="noopener">Ver no mapa ↗</a></dd></div>
       </dl>
 
       <div class="inscricao-grid">
@@ -574,11 +576,11 @@ section[id]{scroll-margin-top:84px}
             </ul>
           </div>
           <dl class="condicoes">
-            <div><dt>Pagamento</dt><dd>Dinheiro, Pix ou cartão de crédito</dd></div>
-            <div><dt>Carnê Follow</dt><dd>Parcelado, com quitação até 3 de janeiro</dd></div>
-            <div><dt>Irmãos</dt><dd>10% de desconto quando dois ou mais se inscrevem</dd></div>
+            <div><dt>Pagamento</dt><dd>Dinheiro, Pix ou cartão de crédito. Parcelamento no cartão ainda está sendo definido.</dd></div>
+            <div><dt>Carnê Follow</dt><dd>Opção de pagamento parcelado pelo carnê, com quitação até 3 de janeiro.</dd></div>
+            <div><dt>Irmãos</dt><dd>10% de desconto quando dois ou mais irmãos se inscrevem.</dd></div>
           </dl>
-          <p class="nota">As vagas são limitadas pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
+          <p class="nota">O número de campistas é limitado pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
           <p class="apoio"><b>Se o valor pesar no bolso,</b> existe apoio financeiro. É só conversar com a gente.</p>
           <a class="btn btn-fogo" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Quero me inscrever agora</a>
         </div>
@@ -594,6 +596,7 @@ section[id]{scroll-margin-top:84px}
       </div>
       <div class="faq">
         <details><summary>Posso ir sozinho, sem conhecer ninguém?</summary><div class="resp"><p>Pode, e é mais comum do que parece. Boa parte dos campistas chega sem conhecer ninguém. Os grupos são montados pra misturar gente nova, e os líderes têm a missão de ninguém ficar de fora.</p></div></details>
+        <details><summary>Quem pode participar?</summary><div class="resp"><p>Jovens de 13 a 24 anos. As dinâmicas são divididas por faixa etária.</p></div></details>
         <details><summary>O que significa “Eu me Rendo”?</summary><div class="resp"><p>É o tema do Follow Camp 2027. Seguir Jesus começa num ponto específico: quando você abre mão de controlar tudo e confia que Deus sabe conduzir a sua vida. Durante o retiro, vamos olhar pra isso de perto, com Romanos 12 como base.</p></div></details>
         <details><summary>Como funciona a alimentação? Tenho restrição, e agora?</summary><div class="resp"><p>São 4 refeições por dia inclusas na inscrição: café da manhã, almoço, lanche e janta. Se você tem restrição alimentar ou alergia, informe na ficha de inscrição: tem um campo próprio pra isso, e a equipe se organiza.</p></div></details>
         <details><summary>Tem transporte?</summary><div class="resp"><p>Ainda estamos fechando os detalhes. Em breve a organização divulga as informações de transporte.</p></div></details>
