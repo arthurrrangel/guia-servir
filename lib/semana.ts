@@ -12,11 +12,10 @@ import { PEQUENAS_GUIAS, type PequenaGuia } from './pequenas-guias';
 
    O QUE ENTRA, E DE ONDE:
    · o culto de domingo, 10h — de lib/igreja.ts, a mesma fonte do rodapé;
-   · o Follow, o culto de jovens de sábado — acontece nos sábados do mês,
-     MENOS no primeiro (dito pelo Arthur). O horário não está confirmado em
-     lugar nenhum, então ele entra SEM hora: "Sábado · Follow". Página de
-     igreja não é lugar de dado inventado. Quando IGREJA.followHora existir,
-     a hora entra sozinha.
+   · o Follow, o culto de jovens de sábado: desde outubro de 2026, TODO
+     sábado do mês, às 19h (dito pelo Arthur em 30/09/2026; antes era todo
+     sábado menos o primeiro, sem hora confirmada). A hora vem de
+     IGREJA.followHora.
    · as Pequenas Guias, dia e hora de cada uma — de lib/pequenas-guias.ts.
 
    Tudo é calculado no aparelho da pessoa, depois de montar: o servidor
@@ -66,7 +65,7 @@ export function minutosDaHora(hora?: string): number | null {
 
 /** O Follow acontece nos sábados do mês, menos no primeiro. */
 export function ehSabadoDeFollow(d: Date): boolean {
-  return d.getDay() === 6 && d.getDate() > 7;
+  return d.getDay() === 6;          // todo sábado é Follow (30/09/2026)
 }
 
 /** Tudo que acontece numa semana típica, sem data: o calendário fixo. */

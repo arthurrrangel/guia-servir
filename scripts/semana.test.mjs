@@ -10,7 +10,8 @@ t('17h30 → 1050', S.minutosDaHora('17h30') === 1050);
 t('sem hora → null', S.minutosDaHora(undefined) === null);
 t('lixo → null', S.minutosDaHora('à noite') === null);
 
-t('sábado 5/9/2026 é o primeiro do mês: sem Follow', !S.ehSabadoDeFollow(d(2026, 9, 5)));
+/* desde 30/09/2026 todo sábado é Follow, às 19h, inclusive o primeiro do mês */
+t('sábado 5/9/2026, primeiro do mês, também tem Follow', S.ehSabadoDeFollow(d(2026, 9, 5)));
 t('sábado 12/9/2026 tem Follow', S.ehSabadoDeFollow(d(2026, 9, 12)));
 t('terça não é Follow', !S.ehSabadoDeFollow(d(2026, 9, 8)));
 
@@ -20,12 +21,12 @@ t('terça 15h → hoje Elas 17h30', p1 && p1.evento.nome === 'Elas' && p1.emDias
 // terça 8/9/2026, 18h: a Elas já passou; a próxima é quarta 20h (grupos)
 const p2 = S.proxima(d(2026, 9, 8, 18));
 t('terça 18h → amanhã, 20h, grupo de quarta', p2 && p2.evento.dia === 3 && p2.emDias === 1 && S.rotuloDoDia(p2) === 'Amanhã');
-// sexta 11/9/2026: próximo é sábado (Follow, 12/9, sem hora)
+// sexta 11/9/2026: próximo é sábado (Follow, 12/9, às 19h)
 const p3 = S.proxima(d(2026, 9, 11, 10));
-t('sexta → amanhã Follow (sem hora)', p3 && p3.evento.tipo === 'follow' && p3.emDias === 1 && !p3.evento.hora);
-// sexta 4/9/2026: sábado 5/9 é o primeiro do mês → sem Follow → próximo é domingo 6/9, 10h
+t('sexta → amanhã Follow às 19h', p3 && p3.evento.tipo === 'follow' && p3.emDias === 1 && p3.evento.hora === '19h');
+// sexta 4/9/2026: sábado 5/9 é o primeiro do mês e agora também tem Follow
 const p4 = S.proxima(d(2026, 9, 4, 10));
-t('sexta antes do 1º sábado → domingo 10h', p4 && p4.evento.tipo === 'culto' && p4.emDias === 2 && S.rotuloDoDia(p4) === 'Domingo');
+t('sexta antes do 1º sábado → amanhã Follow', p4 && p4.evento.tipo === 'follow' && p4.emDias === 1 && S.rotuloDoDia(p4) === 'Amanhã');
 // domingo 6/9/2026, 11h: o culto começou às 10, ainda conta (tolerância 90 min)
 const p5 = S.proxima(d(2026, 9, 6, 11));
 t('domingo 11h → ainda é o culto de hoje', p5 && p5.evento.tipo === 'culto' && p5.emDias === 0);

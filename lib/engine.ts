@@ -126,10 +126,12 @@ export function respostaDe(v: Voluntario, data: string): Resposta {
    sem extensão. A cópia é conferida contra a fonte por
    `scripts/hora-do-culto.test.mjs`, que reprova se as duas divergirem. */
 export const MIN_CULTO_DOMINGO = 10 * 60;   // 10h — IGREJA.cultoHora
-/* O Follow não tem hora confirmada em lugar nenhum (IGREJA.followHora é null,
-   e `lib/semana.ts` diz o mesmo). 18h continua sendo palpite, e fica escrito
-   que é. Quando a igreja confirmar, os dois lugares mudam juntos. */
-export const MIN_FOLLOW_PALPITE = 18 * 60;
+/* O FOLLOW É ÀS 19H, TODO SÁBADO (dito pelo Arthur em 30/09/2026). Até
+   aqui a hora não estava confirmada e o motor usava 18h como palpite; o
+   nome da constante ficou para não mexer nos consumidores. A mesma hora
+   está em `IGREJA.followHora`, e `scripts/hora-do-culto.test.mjs` reprova
+   se os dois divergirem. */
+export const MIN_FOLLOW_PALPITE = 19 * 60;
 
 /** Hora de início deste dia, em minutos. Um evento com `inicio` informado
  *  manda; senão vale o tipo do dia. */
@@ -454,9 +456,8 @@ const pesoDe = (s: string) => PESO_STATUS[s] ?? 2;
    `eu_dados` passou a trazer `evento` e `inicio` na 71; só o consumidor do
    `.ics` tinha sido atualizado. */
 /* o nome é `distintivoDoDia` e não `rotuloCurto` porque `rotuloCurto` já
-   existe neste arquivo, com outra regra (a do `tipoDoDia`, que sabe que o
-   primeiro sábado do mês não tem Follow). Duas funções com o mesmo nome
-   curto num arquivo só é como se escolhe a errada. */
+   existe neste arquivo, com outra regra (a do `tipoDoDia`). Duas funções
+   com o mesmo nome curto num arquivo só é como se escolhe a errada. */
 export const distintivoDoDia = (s: string, evento?: string | null) => {
   const mes = MESES[+s.slice(5, 7) - 1].slice(0, 3);
   const dt = noMeioDia(s);
@@ -723,36 +724,23 @@ export function domingosDoMes(ano: number, mes: number): string[] {
   return out;
 }
 
-/* Culto do Follow: todo sábado do mês MENOS o primeiro.
-
-   ATENÇÃO AO QUE ESTAVA ESCRITO AQUI ANTES — 19/09/2026.
-
-   Esta linha dizia: "a mesma regra vale no banco (coluna gerada em
-   cultos.tipo), então app e banco nunca discordam sobre o que é um sábado de
-   Follow". É FALSO, e foi medido:
-
-       2026-10-03 (1º sábado)  cultos.tipo (coluna gerada) -> 'follow'
-                               sabadosDoFollow / cultosAte -> não é dia de culto
-
-   A coluna gerada é `case when dow = 6 then 'follow' else 'domingo' end`, sem
-   a exceção do primeiro sábado. Quem tem a exceção são `sabadosDoFollow`
-   aqui, `cultosAte` abaixo, `culto_guarda` (migração 54) e
-   `eu_proximos_domingos` (migração 09), todos com `dia > 7`.
-
-   NA PRÁTICA NÃO DÓI, e por isso não virou migração: no primeiro sábado não
-   existe culto em nenhum dos dois lados, então a coluna gerada só rotula uma
-   linha que, naquele dia, só existe se for EVENTO — e evento ignora `tipos`.
-   Trocar a expressão de uma coluna gerada exige reescrever a tabela inteira.
-
-   O que doía era o comentário: ele mandava confiar numa igualdade que não
-   existe, e quem fosse depurar calendário procuraria no lugar errado. */
+/* O CALENDÁRIO DO BANCO E O DAQUI VOLTARAM A CONCORDAR (30/09/2026).
+   A coluna gerada `cultos.tipo` sempre disse "sábado é Follow", sem exceção;
+   quem tirava o primeiro sábado eram `sabadosDoFollow`, `cultosAte`,
+   `culto_guarda`, `criar_evento` e `eu_proximos_domingos`. Com o Follow em
+   todo sábado, a exceção saiu de todos eles (aqui e na migração 98). */
+/* TODO SÁBADO É FOLLOW DESDE OUTUBRO DE 2026 (Arthur, 30/09/2026: "culto
+   follow terá agora todos os sabados do mes, as 19h"). Até aqui o primeiro
+   sábado do mês ficava de fora, aqui, em `cultosAte`, em `lib/semana.ts` e,
+   no banco, em `eu_proximos_domingos`, `culto_guarda` e `criar_evento`. Os
+   três do banco mudam juntos na migração 98. */
 export function sabadosDoFollow(ano: number, mes: number): string[] {
   const out: string[] = [];
   const ultimo = new Date(Date.UTC(ano, mes, 0)).getUTCDate();
   for (let d = 1; d <= ultimo; d++) {
     if (new Date(Date.UTC(ano, mes - 1, d)).getUTCDay() === 6) out.push(isoDe(ano, mes, d));
   }
-  return out.slice(1);          // fora o primeiro sábado
+  return out;
 }
 
 /* O tipo sai do dia da semana: sábado é Follow, o resto é domingo. */
@@ -883,7 +871,7 @@ export function cultosAte(ref: string, n: number): string[] {
   for (let i = 0; i <= n; i++) {
     const d = addDias(ref, i);
     const dow = new Date(t(d)).getUTCDay();
-    if (dow === 0 || (dow === 6 && +d.slice(8, 10) > 7)) out.push(d);
+    if (dow === 0 || dow === 6) out.push(d);      // todo sábado é Follow (98)
   }
   return out;
 }

@@ -33,11 +33,12 @@ export const IGREJA = {
      outra hora e chegou a circular. Uma fonte só evita a próxima divergência. */
   cultoDia: 'Domingo',
   cultoHora: '10h',
-  /* O FOLLOW, culto de jovens: sábados do mês, menos o primeiro (dito pelo
-     Arthur em ago/2026). O HORÁRIO não está confirmado em lugar nenhum e por
-     isso é null: enquanto for, o site diz "Sábado · Follow" sem hora. Quando
-     a igreja confirmar, escrever aqui ("19h") liga a hora em todas as telas. */
-  followHora: null as string | null,
+  /* O FOLLOW, culto de jovens: TODO sábado do mês, às 19h (Arthur,
+     30/09/2026: "culto follow terá agora todos os sabados do mes, as 19h").
+     Até aqui era todo sábado menos o primeiro, sem hora confirmada, e o site
+     dizia "Sábado · Follow" sem hora. Escrever a hora aqui liga a hora em
+     todas as telas; o motor tem a mesma em `MIN_FOLLOW_PALPITE`. */
+  followHora: '19h' as string | null,
 
   instagram: 'https://instagram.com/guiachurch',
   instagramArroba: '@guiachurch',

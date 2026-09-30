@@ -483,25 +483,26 @@ console.log('\n24. AUDITORIA: marca de "1ª vez" sobrevive ao ir e voltar do ban
 
 console.log('\n15. Culto do Follow (sábado, sem HEAD e sem transmissão)');
 {
-  /* setembro/2026: sábados 5, 12, 19, 26 — o dia 5 é o primeiro do mês e NÃO
-     tem Follow. Se essa conta escorregar, o time é escalado num dia que não
-     existe. */
+  /* TODO SÁBADO É FOLLOW desde 30/09/2026 (antes, o primeiro sábado do mês
+     ficava de fora). Setembro/2026 tem sábados 5, 12, 19, 26: quatro Follows,
+     começando no dia 5. Se essa conta escorregar, o primeiro sábado some da
+     escala e ninguém é escalado no Follow que acontece. */
   const sabs = E.sabadosDoFollow(2026, 9);
-  ok(sabs.length === 3, 'três Follows em setembro/2026', sabs.join(','));
-  ok(!sabs.includes('2026-09-05'), 'o primeiro sábado do mês fica de fora');
-  ok(sabs[0] === '2026-09-12', 'começa no segundo sábado', sabs[0]);
+  ok(sabs.length === 4, 'quatro Follows em setembro/2026', sabs.join(','));
+  ok(sabs.includes('2026-09-05'), 'o primeiro sábado do mês também é Follow');
+  ok(sabs[0] === '2026-09-05', 'começa no primeiro sábado', sabs[0]);
 
-  /* fevereiro/2026 tem 4 sábados (7,14,21,28) → 3 Follows. Um mês com 5
-     sábados tem 4. A regra é "todos menos o primeiro", não "sempre 3". */
-  ok(E.sabadosDoFollow(2026, 2).length === 3, 'fevereiro/2026: 3 Follows');
-  ok(E.sabadosDoFollow(2026, 8).length === 4, 'agosto/2026 tem 5 sábados: 4 Follows',
+  /* fevereiro/2026 tem 4 sábados (7,14,21,28) → 4 Follows; agosto/2026 tem
+     5 sábados → 5. A regra é "todo sábado", não "sempre 4". */
+  ok(E.sabadosDoFollow(2026, 2).length === 4, 'fevereiro/2026: 4 Follows');
+  ok(E.sabadosDoFollow(2026, 8).length === 5, 'agosto/2026 tem 5 sábados: 5 Follows',
      E.sabadosDoFollow(2026, 8).join(','));
 
   ok(E.tipoDoDia('2026-09-12') === 'follow', 'sábado é Follow');
   ok(E.tipoDoDia('2026-09-13') === 'domingo', 'domingo é domingo');
-  ok(E.cultosDoMes(2026, 9).length === 7, '4 domingos + 3 Follows = 7 cultos',
+  ok(E.cultosDoMes(2026, 9).length === 8, '4 domingos + 4 Follows = 8 cultos',
      String(E.cultosDoMes(2026, 9).length));
-  ok(E.cultosDoMes(2026, 9)[0] === '2026-09-06', 'a lista vem em ordem de data',
+  ok(E.cultosDoMes(2026, 9)[0] === '2026-09-05', 'a lista vem em ordem de data',
      E.cultosDoMes(2026, 9)[0]);
 
   const S = base(TIME());
@@ -542,8 +543,8 @@ console.log('\n15. Culto do Follow (sábado, sem HEAD e sem transmissão)');
   const alvos = E.cultosAte('2026-09-10', 4);     // quinta
   ok(alvos.length === 2 && alvos[0] === SAB && alvos[1] === DOM,
      'da quinta, a cobrança pega o Follow e o domingo', alvos.join(','));
-  ok(!E.cultosAte('2026-09-03', 4).includes('2026-09-05'),
-     'a cobrança não inventa Follow no primeiro sábado');
+  ok(E.cultosAte('2026-09-03', 4).includes('2026-09-05'),
+     'a cobrança alcança o Follow do primeiro sábado (todo sábado é Follow)');
 }
 
 /* O PLACAR FICAVA AQUI, E MENTIA.

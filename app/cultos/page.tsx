@@ -179,7 +179,7 @@ export default function Cultos() {
             <div className="g-cab-txt">
               <p className="g-rot">Sábado</p>
               <Tit className="g-h2" id="follow-t">Follow</Tit>
-              <p className="g-ed">O culto de jovens da GUIA. {FOLLOW_HORA ? `Sábado, ${FOLLOW_HORA}, menos o primeiro do mês.` : 'Todo sábado, menos o primeiro do mês.'}</p>
+              <p className="g-ed">O culto de jovens da GUIA. {FOLLOW_HORA ? `Todo sábado, às ${FOLLOW_HORA}.` : 'Todo sábado.'}</p>
             </div>
             <div className="g-acoes">
               {FOLLOW_HORA
