@@ -138,6 +138,15 @@ function Escala() {
   const futuros = dias.filter(d => d >= hoje);
   const passados = dias.filter(d => d < hoje);
   const proximo = futuros[0];
+  /* O DIA DO LINK NASCE ABERTO (30/09/2026). Os links do Painel levam a
+     `#d<data>` (e os avisos, a `#p<data>-<posto>`), mas só o próximo culto
+     nascia aberto: quem tocava em "Domingo, 11 de outubro" caía numa linha
+     fechada e ainda precisava abrir. */
+  const [diaDoLink, setDiaDoLink] = useState('');
+  useEffect(() => {
+    const m = /^#[dp](\d{4}-\d{2}-\d{2})/.exec(window.location.hash);
+    if (m) setDiaDoLink(m[1]);
+  }, []);
   const rolou = useRef(false);
 
   useEffect(() => {
@@ -315,7 +324,7 @@ function Escala() {
     setOcupado(true);
     const snap = retrato([d]);
     dia.slots[funcao].fixo = !dia.slots[funcao].fixo;
-    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.fixo ? 'Travado: o sorteio não mexe' : 'Destravado'); }
+    try { pinta(); await salvarDia(S, d, equipe!.id); await recarregar(); aviso(dia.slots[funcao]?.fixo ? 'Fixo: o sorteio não mexe neste posto' : 'Solto: o sorteio pode trocar'); }
     catch (e: any) { await falhou(e, snap); }
     setOcupado(false);
   }
@@ -466,9 +475,16 @@ function Escala() {
     const x = S.escalas[d];
     if (!x || !Object.values(x.slots || {}).some((s: any) => s?.vid)) { a.aMontar++; return a; }
     const r = resumoDia(S, d);
-    a.vagas += r.vagas.length; a.pendentes += r.pendentes; a.furos += r.furos;
+    a.vagas += r.vagas.length; a.pendentes += r.pendentes; a.furos += r.furos; a.recusados += r.recusados;
     return a;
-  }, { vagas: 0, pendentes: 0, furos: 0, aMontar: 0 });
+  }, { vagas: 0, pendentes: 0, furos: 0, recusados: 0, aMontar: 0 });
+  /* QUEM NÃO PODE TAMBÉM É FALTA DE GENTE (30/09/2026). As pílulas dos dias
+     já seguiam a régua do motor e pintavam de vermelho o dia com alguém que
+     avisou que não vai; a faixa e a frase do mês não somavam os recusados, e
+     outubro aparecia com sete dias vermelhos e "Postos sem ninguém 0, Furos
+     0, falta a confirmação". A casa agora é "Não podem" (avisaram + furaram),
+     como no Painel. */
+  const naoPodem = contas.recusados + contas.furos;
 
   const nomeMes = MESES[mes - 1];
   const montados = futuros.length - contas.aMontar;
@@ -491,18 +507,24 @@ function Escala() {
             <button className="es-btn es-icone es-peq" aria-label="Próximo mês" onClick={() => mover(1)}><IcSeta /></button>
           </span>
         </>}
-        meta={!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
+        meta={!futuros.length ? 'Esse mês já passou inteiro.'
           : contas.aMontar === futuros.length ? 'Nada montado ainda. O sorteio respeita quem não pode e quem já serviu.'
           : contas.vagas ? 'Vaga sem ninguém é o que faz o culto não acontecer. É por onde começar.'
+          : naoPodem ? 'Tem gente que não pode. Troque ou sorteie de novo os dias em vermelho.'
           : contas.pendentes ? 'Falta a confirmação de quem foi escalado.'
           : 'Mês fechado.'}
         acoes={<>
           <button className="es-btn" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
             Pedir a disponibilidade
           </button>
-          <button className="es-btn es-pri" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
-            Montar o mês inteiro
-          </button>
+          {/* mês que já passou inteiro não tem o que montar: a ação cheia
+              leva para o seguinte, em vez de um botão que só responde
+              "esse mês já passou" */}
+          {futuros.length
+            ? <button className="es-btn es-pri" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
+                Montar o mês inteiro
+              </button>
+            : <button className="es-btn es-pri" onClick={() => mover(1)}>Ir para o próximo mês</button>}
         </>}
       />
 
@@ -523,8 +545,14 @@ function Escala() {
       <div className="es-ec-topo">
         {!!futuros.length && (
           <Kpis n={4}>
-            <Kpi rot="Cultos a montar" valor={contas.aMontar} de={futuros.length}
-              sub={!contas.aMontar ? 'todos montados' : !montados ? 'nenhum montado ainda' : cont(montados, 'já montado', 'já montados')}
+            {/* SEM FRAÇÃO AQUI (30/09/2026): "0/8" no alto da tela se lê como
+                progresso, e zero de oito parecia "nada feito" justo quando o
+                mês estava inteiro montado. As quatro casas desta faixa contam
+                o que falta, e zero é bom em todas; o total vai por escrito. */}
+            <Kpi rot="Cultos a montar" valor={contas.aMontar}
+              sub={!contas.aMontar ? (futuros.length === 1 ? 'o culto está montado' : `os ${futuros.length} estão montados`)
+                : !montados ? `nenhum dos ${futuros.length} montado ainda`
+                : `${montados} de ${futuros.length} já ${pl(montados, 'montado', 'montados')}`}
               tom={contas.aMontar ? '' : 'zero'}
               rotulo={`Cultos a montar: ${contas.aMontar} de ${futuros.length}`} />
             <Kpi rot="Postos sem ninguém" valor={contas.vagas}
@@ -533,9 +561,12 @@ function Escala() {
             <Kpi rot="Sem resposta" valor={contas.pendentes}
               sub={contas.pendentes ? 'esperando confirmar' : 'ninguém devendo'}
               tom={contas.pendentes ? 'warn' : 'zero'} />
-            <Kpi rot="Furos" valor={contas.furos}
-              sub={contas.furos ? 'chame o plantão' : 'ninguém furou'}
-              tom={contas.furos ? 'bad' : 'zero'} />
+            <Kpi rot="Não podem" valor={naoPodem}
+              sub={naoPodem
+                ? [contas.recusados ? `${contas.recusados} ${pl(contas.recusados, 'avisou', 'avisaram')}` : '',
+                   contas.furos ? `${contas.furos} ${pl(contas.furos, 'furou', 'furaram')}` : ''].filter(Boolean).join(' · ')
+                : 'ninguém desmarcou'}
+              tom={naoPodem ? 'bad' : 'zero'} />
           </Kpis>
         )}
         <Dobra titulo="O que esses botões fazem">
@@ -565,7 +596,7 @@ function Escala() {
             <Secao titulo="Próximos cultos">
               <div className="es-ec-dias">
                 {futuros.map(d => (
-                  <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
+                  <DiaCard key={d} d={d} aberto={d === proximo || d === diaDoLink} passado={false}
                     {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
                 ))}
               </div>
@@ -704,9 +735,11 @@ function Escala() {
 
    30/09/2026: o alarme saiu do nome e foi para a pílula. Nome em vermelho
    dizia "tem algo errado com esta pessoa", e o que está errado é a escala:
-   "em todos" (vermelho, é quem sustenta o mês sozinho) e "acima do limite"
-   (âmbar). As duas frases de rodapé que repetiam esses nomes saíram junto,
-   porque a pílula já diz a mesma coisa na linha de cada um.
+   "em todos" (quem sustenta o mês sozinho) e "acima do limite". As duas
+   pílulas são azuis, o tom de "fato a saber": vermelho no sistema é falta de
+   gente no culto, e âmbar é resposta que não veio; carga pesada não é
+   nenhum dos dois. As duas frases de rodapé que repetiam esses nomes saíram
+   junto, porque a pílula já diz a mesma coisa na linha de cada um.
 ============================================================================= */
 function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) {
   const [verZerados, setVerZerados] = useState(false);
@@ -733,8 +766,8 @@ function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) 
               <li key={p.id} className="es-ec-pessoa">
                 <span className="es-ec-pessoa-nome">
                   {p.nome}
-                  {mc === 'todos' && <Pilula tom="bad">em todos</Pilula>}
-                  {mc === 'acima' && <Pilula tom="warn">acima do limite</Pilula>}
+                  {mc === 'todos' && <Pilula tom="info">em todos</Pilula>}
+                  {mc === 'acima' && <Pilula tom="info">acima do limite</Pilula>}
                 </span>
                 <span className="es-ec-fita" aria-hidden="true">
                   {m.montados.map(d => (
@@ -962,8 +995,11 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           Ele vai na mensagem do grupo E na tela de quem está escalado. */}
       <label className="es-campo es-ec-recado">
         <span>Recado deste dia</span>
-        <textarea className="es-ctl" rows={2} defaultValue={dia?.obs || ''} disabled={ocupado}
-          placeholder="ex: chegar 18h, tem batismo antes do culto"
+        {/* UMA LINHA, COMO SEMPRE FOI: com `textarea`, o Enter gravava uma
+            quebra que a mensagem do grupo mantinha e a tela do voluntário
+            juntava (auditoria de 30/09/2026). O Enter aqui é "pronto". */}
+        <input className="es-ctl" enterKeyHint="done" defaultValue={dia?.obs || ''} disabled={ocupado}
+          placeholder="ex: chegar 18h, tem batismo"
           onBlur={e => { if (e.target.value !== (dia?.obs || '')) void salvarObs(d, e.target.value); }} />
         <small>Vai na mensagem do grupo e no link de quem está escalado.</small>
       </label>
@@ -1024,7 +1060,7 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
       <span className="es-ec-quem">
         <Escolha
           forma="campo" valor={slot?.vid || ''} vazia={!slot?.vid} desabilitado={ocupado}
-          rotulo={`Quem faz ${f.nome} em ${fmtDia(d)}`}
+          rotulo={`Quem faz ${f.nome} em ${fmtLongo(d)}`}
           mostra={slot?.vid ? nomeDe(S, slot.vid) : 'precisa de alguém'}
           aoMudar={v => trocar(d, f.nome, v)}>
           <option value="">precisa de alguém</option>
@@ -1094,8 +1130,8 @@ function Disponibilidade({ d, S, aviso }: any) {
           <span><b>{rp.posso.length}</b> {pl(rp.posso.length, 'pode', 'podem')}</span>
           <span><b>{rp.nao.length}</b> {pl(rp.nao.length, 'não pode', 'não podem')}</span>
           {rp.mudo.length
-            ? <Pilula tom="warn">{rp.mudo.length} sem resposta</Pilula>
-            : <span><b>0</b> sem resposta</span>}
+            ? <Pilula tom="warn">{rp.mudo.length} não {pl(rp.mudo.length, 'informou', 'informaram')}</Pilula>
+            : <span><b>0</b> não informaram</span>}
         </span>
       </summary>
       <div className="es-dobra-corpo es-ec-disp-corpo">

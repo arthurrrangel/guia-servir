@@ -212,9 +212,12 @@ function Lateral({ eu, caminho }: { eu: Eu; caminho: string }) {
   return (
     <aside className="dm-lateral" aria-label="Navegação">
       <div className="dm-lateral-topo">
-        <div className="dm-marca">
-          <Link href="/demandas" className="dm-logo" aria-label="GUIA Church, início das demandas" />
-        </div>
+        {/* o link é a `dm-marca`, e o logotipo mora dentro: com o próprio
+            link mascarado, a máscara recortava o anel de foco e o teclado não
+            via onde estava (auditoria de 30/09/2026) */}
+        <Link href="/demandas" className="dm-marca" aria-label="GUIA Church, início das demandas">
+          <span className="dm-logo" aria-hidden="true" />
+        </Link>
       </div>
       <div className="dm-lateral-nova">
         <Link className="dm-btn dm-pri" href="/demandas/nova" aria-current={caminho === '/demandas/nova' ? 'page' : undefined}>
@@ -281,9 +284,12 @@ function LateralDaAdministracao({ eu, caminho }: { eu: Eu; caminho: string }) {
   return (
     <aside className="dm-lateral dm-lateral-adm" aria-label="Navegação da administração">
       <div className="dm-lateral-topo">
-        <div className="dm-marca">
-          <Link href="/demandas" className="dm-logo" aria-label="GUIA Church, início das demandas" />
-        </div>
+        {/* o link é a `dm-marca`, e o logotipo mora dentro: com o próprio
+            link mascarado, a máscara recortava o anel de foco e o teclado não
+            via onde estava (auditoria de 30/09/2026) */}
+        <Link href="/demandas" className="dm-marca" aria-label="GUIA Church, início das demandas">
+          <span className="dm-logo" aria-hidden="true" />
+        </Link>
       </div>
       <Link className="dm-nav-item dm-nav-voltar" href="/demandas">
         <Icone nome="portal" /><span>Voltar ao portal</span>

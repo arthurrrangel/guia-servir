@@ -235,6 +235,9 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
           mask:url(/marca/guia-church.svg) center / contain no-repeat;
 }
 @media (max-width:1023px){ .dm-logo{height:30px} }
+/* no alto contraste do Windows o fundo pintado some e a marca sumia junto:
+   ela segue a cor de texto do sistema */
+@media (forced-colors:active){ .dm-logo{forced-color-adjust:none;background:CanvasText} }
 .dm-lateral-nova .dm-btn{width:100%}
 .dm-nav{display:grid;gap:2px}
 .dm-nav-grupo{
@@ -293,7 +296,7 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-adm .dm-lateral .dm-eu:hover{background:var(--dm-adm-toque)}
 .dm-adm .dm-lateral .dm-eu-txt small{color:var(--dm-adm-mudo)}
 .dm-adm .dm-lateral .dm-avatar{background:var(--dm-adm-toque);color:var(--dm-adm-ink);box-shadow:inset 0 0 0 1px var(--dm-adm-linha)}
-.dm-adm .dm-lateral .dm-logo:focus-visible,.dm-adm .dm-lateral .dm-nav-item:focus-visible,.dm-adm .dm-lateral .dm-eu:focus-visible{outline-color:#fff}
+.dm-adm .dm-lateral .dm-marca:focus-visible,.dm-adm .dm-lateral .dm-nav-item:focus-visible,.dm-adm .dm-lateral .dm-eu:focus-visible{outline-color:#fff}
 .dm-nav-voltar{margin-bottom:-4px}
 .dm-lateral-adm .dm-nav-voltar{border:1px solid var(--dm-adm-linha)}
 

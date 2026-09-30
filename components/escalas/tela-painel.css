@@ -11,6 +11,10 @@
 .es-item.es-pn-posto{min-height:56px}
 @media (min-width:720px){
   .es-fila.es-colunas > .es-item.es-pn-posto{min-height:52px}
+  /* a situação é uma coluna de estado, e não de ação: começa na borda
+     esquerda do cabeçalho "Situação", como nas outras filas (medido: estava
+     15px à direita dele em todas as larguras) */
+  .es-fila.es-colunas > .es-item.es-pn-posto > .es-c-acao{justify-content:flex-start}
   .es-c-tit > b.es-pn-fn{font-size:13px;line-height:18px;font-weight:500;letter-spacing:0}
 }
 

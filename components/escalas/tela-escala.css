@@ -53,6 +53,9 @@
 .es-ec-probs{display:grid;gap:var(--es-e2)}
 .es-ec-probs > .es-aviso{margin-bottom:0}
 .es-ec-ir{font-weight:600;white-space:nowrap}
+/* no toque, o "ir para" é um alvo de 44px na própria linha (tinha 17px de
+   altura, colado no fim da frase) */
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .es-ec-ir{display:flex;align-items:center;width:fit-content;min-height:44px} }
 
 .es-ec-nota{font-size:14px;line-height:21px;color:var(--es-ink-2)}
 .es-ec-nota b{color:var(--es-ink)}

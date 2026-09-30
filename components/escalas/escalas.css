@@ -223,6 +223,9 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
    um risco cinza (medido: em 30px as letras dele têm 3px de altura) */
 .es-logo{display:block;height:36px;width:auto;flex:none;color:var(--es-ink)}
 @media (max-width:1023px){ .es-logo{height:30px} }
+/* no alto contraste do Windows o fundo vira preto e a tinta #18181b sumia:
+   a marca segue a cor de texto do sistema */
+@media (forced-colors:active){ .es-logo{forced-color-adjust:none;color:CanvasText} }
 
 /* O MINISTÉRIO. É a pergunta que o líder de mais de uma área faz antes de
    qualquer outra ("estou olhando o quê?"), então mora no alto, com a conta
@@ -245,8 +248,14 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
 .es-troca.es-troca-topo{width:auto;max-width:60vw;min-height:44px;padding:0 8px 0 12px;border-radius:22px}
 .es-troca.es-troca-topo .es-troca-txt{display:flex;align-items:baseline;gap:6px}
 .es-troca.es-troca-topo .es-troca-txt b{font-size:14px}
+/* abaixo de 400px o nome do ministério é que precisa do espaço: a conta de
+   pessoas sai do botão (ela está no rótulo de leitura e na lateral) */
+@media (max-width:399px){ .es-troca.es-troca-topo .es-troca-txt small{display:none} }
 
-.es-menu-fundo{position:fixed;inset:0;z-index:48;background:transparent}
+.es-menu-fundo{position:fixed;inset:0;z-index:29;background:transparent}
+/* aberto pelo topo do celular, o fundo fica logo abaixo do topo (40): cobre
+   a página inteira e deixa o menu, que mora dentro do topo, por cima */
+.es-menu-fundo.es-fundo-topo{z-index:39}
 .es-menu{
   position:absolute;z-index:50;left:0;right:0;top:calc(100% + 6px);
   display:grid;gap:2px;padding:6px;max-height:min(70vh,520px);overflow-y:auto;
@@ -390,7 +399,9 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e2) var(--es-e3);
   padding:var(--es-e3) var(--es-e4);border-bottom:1px solid var(--es-linha);min-height:48px;
 }
-.es-caixa-cab h3{font-size:14px;line-height:20px;font-weight:600}
+/* o título da caixa é h2 ou h3 conforme a página (nos Ajustes cada caixa é
+   uma seção, e h1 pulando para h3 deixava um degrau vazio na leitura) */
+.es-caixa-cab :is(h2,h3){font-size:14px;line-height:20px;font-weight:600}
 .es-caixa-corpo{padding:var(--es-e4)}
 /* UM RECUO SÓ, 16px, EM TODA SUPERFÍCIE (30/09/2026): título e corpo da
    caixa, linha da fila, cabeçalho de tabela, dobra, faixa de números, o dia
@@ -699,9 +710,12 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
   border-radius:var(--es-r4);background:var(--es-sup);color:var(--es-ink);box-shadow:var(--es-sombra-dialogo);
 }
 .es-dialogo::backdrop{background:rgba(16,16,20,.44)}
-.es-dialogo-corpo{display:grid;gap:8px;padding:var(--es-e6)}
-.es-dialogo-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;color:var(--es-ink)}
-.es-dialogo-texto{font-size:14px;line-height:21px;color:var(--es-mudo)}
+/* uma coluna que encolhe: com coluna `auto`, um e-mail comprido no título
+   ("Tirar o acesso de ...?") abria o diálogo 179px para fora da tela em 320
+   e cortava os botões (auditoria de 30/09/2026) */
+.es-dialogo-corpo{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:var(--es-e6)}
+.es-dialogo-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;color:var(--es-ink);overflow-wrap:anywhere}
+.es-dialogo-texto{font-size:14px;line-height:21px;color:var(--es-mudo);overflow-wrap:anywhere}
 .es-dialogo-sem-volta{font-size:13px;line-height:18px;font-weight:500;color:var(--es-bad)}
 .es-dialogo-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:var(--es-e4)}
 .es-dialogo .es-btn.es-pri.es-perigo{background:var(--es-bad);border-color:var(--es-bad);color:#fff}
@@ -834,6 +848,20 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
           mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
 }
 .es-dobra[open] > summary::after{transform:rotate(180deg)}
+/* A NOTA DESCE NO CELULAR. Ao lado do título, a nota ("como sai no
+   WhatsApp", "Já em uso · abrir para copiar de novo") espremia o título em
+   cinco linhas em 320px. Abaixo de 720 ela vai para baixo do título, e a
+   seta fica no meio da altura. Regra da base: estava escrita duas vezes,
+   uma em cada tela que tinha achado o defeito, e a terceira não tinha. */
+@media (max-width:719px){
+  .es-dobra > summary:has(> small){
+    display:grid;grid-template-columns:minmax(0,1fr) 16px;column-gap:var(--es-e3);row-gap:2px;
+    padding-top:var(--es-e3);padding-bottom:var(--es-e3);
+  }
+  .es-dobra > summary:has(> small) > span{grid-column:1;grid-row:1}
+  .es-dobra > summary:has(> small) > small{grid-column:1;grid-row:2;white-space:normal}
+  .es-dobra > summary:has(> small)::after{grid-column:2;grid-row:1 / span 2;align-self:center}
+}
 .es-dobra > summary:hover{background:var(--es-sup-2)}
 .es-dobra > summary:focus-visible{outline-offset:-2px}
 .es-dobra-corpo{padding:0 var(--es-e4) var(--es-e4);border-top:1px solid var(--es-linha);padding-top:var(--es-e4)}
@@ -889,10 +917,14 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
 .es-escolha.es-como-pill:hover .es-escolha-txt{filter:brightness(.97)}
 /* como campo: a pessoa de um posto */
 .es-escolha.es-como-campo{width:100%}
+/* o nome inteiro, quebrando linha se preciso: com reticências, "Amanda
+   Ribeiro de Souza" virava "Amanda Ribeiro de So..." numa coluna de 212px,
+   e a escala é justamente onde se confere QUEM está no posto */
 .es-escolha.es-como-campo .es-escolha-txt{
-  width:100%;min-height:var(--es-h);padding:0 10px 0 12px;justify-content:space-between;
+  width:100%;min-height:var(--es-h);padding:6px 10px 6px 12px;justify-content:space-between;
   border:1px solid var(--es-linha-2);border-radius:var(--es-r2);background:var(--es-sup);box-shadow:var(--es-sombra-btn);
-  font-size:14px;color:var(--es-ink);
+  font-size:14px;line-height:20px;color:var(--es-ink);
+  white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;
 }
 .es-escolha.es-como-campo:hover .es-escolha-txt{border-color:var(--es-linha-3)}
 .es-escolha.es-como-campo.es-vazia .es-escolha-txt{color:var(--es-bad);border-style:dashed;border-color:var(--es-bad-ln)}
@@ -912,7 +944,6 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
 .es-porta-topo{display:flex;align-items:center;gap:10px;margin-bottom:var(--es-e2)}
 .es-porta-caixa h1{font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.02em}
 .es-porta-sub{font-size:14px;line-height:21px;color:var(--es-mudo)}
-.es-porta-pe{font-size:13px;line-height:19px;color:var(--es-mudo);text-align:center}
 
 /* --------------------------------------------------------- estados da casca */
 /* sem acesso, sem conexão, primeiro ministério: uma coluna estreita */

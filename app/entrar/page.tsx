@@ -203,7 +203,7 @@ export default function Entrar() {
     setCarregando(false);
     setTom(error ? 'erro' : 'bom');
     setMsg(error ? aviseHumano(error, 'enviar o link')
-      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu email (olhe também o spam ou "Outros") e clique no link para entrar. O link vale por uma hora e serve uma vez só.`);
+      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu e-mail (olhe também o spam ou "Outros") e clique no link para entrar. O link vale por uma hora e serve uma vez só.`);
   }
 
   async function porSenha(e: React.FormEvent) {
@@ -229,7 +229,7 @@ export default function Entrar() {
     setCarregando(false);
     setTom(error ? 'erro' : 'bom');
     setMsg(error ? aviseHumano(error, 'enviar o link')
-      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu email (olhe também o spam ou "Outros") e clique no link: você volta para esta tela para escolher a senha. O link vale por uma hora.`);
+      : `${sug ? `Corrigi o endereço para ${sug} e mandei o link. ` : 'Pronto. '}Abra seu e-mail (olhe também o spam ou "Outros") e clique no link: você volta para esta tela para escolher a senha. O link vale por uma hora.`);
   }
 
   /* a sessão já está aberta pelo link; só falta gravar a senha */
@@ -249,7 +249,7 @@ export default function Entrar() {
         <div className="es-rot">Espaço do organizador</div>
         <h1>Escolha sua senha</h1>
         <p className="es-porta-sub">
-          Da próxima vez você entra com email e senha, sem esperar link.
+          Da próxima vez você entra com e-mail e senha, sem esperar link.
         </p>
       </div>
       <form onSubmit={definirSenha}>
@@ -276,14 +276,14 @@ export default function Entrar() {
         <h1>{modo === 'criar' ? 'Criar senha' : 'Entrar'}</h1>
         <p className="es-porta-sub">
           {modo === 'criar'
-            ? 'Vale para a primeira senha e para trocar uma esquecida. Você recebe um link por email e escolhe a senha aqui.'
+            ? 'Vale para a primeira senha e para trocar uma esquecida. Você recebe um link por e-mail e escolhe a senha aqui.'
             : 'Voluntário não entra por aqui: ele usa o link pessoal que você manda.'}
         </p>
       </div>
 
       <form onSubmit={enviar}>
         <label className="es-campo" htmlFor="ent-email">
-          <span>Seu email</span>
+          <span>Seu e-mail</span>
           {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
               "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
               enterKeyHint troca o "return" do teclado por "ir" — a tecla que
@@ -311,7 +311,7 @@ export default function Entrar() {
       <div className="es-aj-trocas">
         {modo !== 'link' && (
           <button type="button" className="es-btn es-txt" onClick={() => { setModo('link'); setMsg(''); }}>
-            <span>Prefiro receber um link no email</span><IcSeta />
+            <span>Prefiro receber um link no e-mail</span><IcSeta />
           </button>
         )}
         {modo !== 'senha' && (
@@ -325,7 +325,6 @@ export default function Entrar() {
           </button>
         )}
       </div>
-      <p className="es-porta-pe">GUIA Church</p>
     </Moldura>
   );
 }

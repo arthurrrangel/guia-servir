@@ -147,11 +147,15 @@ ok(colisoes.length === 0,
 
 /* prova de que a trava ENXERGA o defeito de hoje. Sem isto, um teste que
    nunca reprova passa por saudável. */
+/* 30/09/2026: a prova usava o `dm-logo` num <a>. O logotipo virou o da
+   igreja, desenhado num <span> dentro do link (`dm-marca`), e é o link que
+   carrega a cor agora: a prova passa a olhar para ele. A classe do defeito é
+   a mesma, "regra de elemento `.dm a` ganhando da classe de um link". */
 {
   const finge = { sel: '.dm a', props: ['color'] };
-  const daClasse = propsDaClasse.get('dm-logo');
+  const daClasse = propsDaClasse.get('dm-marca');
   const pegaria = /^\.dm\s+[a-z]+$/.test(finge.sel)
-    && (classesPorTag.get('a') || new Set()).has('dm-logo')
+    && (classesPorTag.get('a') || new Set()).has('dm-marca')
     && !!daClasse && finge.props.some(p => daClasse.has(p));
   ok(pegaria, 'a trava reprova o defeito de 18/09 se ele voltar');
 }

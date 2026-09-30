@@ -56,19 +56,8 @@
 }
 @media (min-width:1280px){ .es-aj-grade{grid-template-columns:200px minmax(0,760px);gap:var(--es-e10)} }
 
-/* A DOBRA NO CELULAR. A nota da dobra não quebra linha ("Já em uso · abrir
-   para copiar de novo"), e ao lado do título ela espremia o título em
-   quatro linhas e passava da tela em 320px. Abaixo de 720 a nota desce para
-   baixo do título, e a seta fica no meio da altura. */
-@media (max-width:719px){
-  .es-aj-secoes .es-dobra > summary{
-    display:grid;grid-template-columns:minmax(0,1fr) 16px;column-gap:var(--es-e3);row-gap:2px;
-    padding-top:var(--es-e3);padding-bottom:var(--es-e3);
-  }
-  .es-aj-secoes .es-dobra > summary > span{grid-column:1;grid-row:1}
-  .es-aj-secoes .es-dobra > summary > small{grid-column:1;grid-row:2;white-space:normal}
-  .es-aj-secoes .es-dobra > summary::after{grid-column:2;grid-row:1 / span 2;align-self:center}
-}
+/* a nota da dobra no celular é regra da base ("a nota desce no celular",
+   escalas.css) */
 
 /* o miolo das seções: um ritmo só entre texto, campos e ações */
 .es-aj-pilha{display:grid;gap:var(--es-e4)}

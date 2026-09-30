@@ -13,7 +13,7 @@ import { IcBusca, IcMais, IcSeta, IcX } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  Nivel, SEXOS, confirmada, filaDeConferencia, funcoesAtivas,
+  Nivel, SEXOS, confirmada, filaDeConferencia, funcoesAtivas, hojeISO,
   msgConvite, pendenciasDeSexo, saudeDoTime,
 } from '@/lib/engine';
 import { telefoneOk } from '@/lib/nome';
@@ -166,7 +166,7 @@ function Time() {
   async function remover(vid: string, nome: string) {
     if (!await confirmar({
       titulo: `Remover ${nome} do time?`,
-      texto: 'Só dá para remover quem ainda não serviu nenhuma vez — é para limpar cadastro errado. Quem já tem escala no histórico sai por "Pausar".',
+      texto: 'Só dá para remover quem ainda não serviu nenhuma vez: é para limpar cadastro errado. Quem já tem escala no histórico sai por "Pausar".',
       acao: 'Remover', perigo: true,
     })) return;
     try { await removerVoluntario(vid); await recarregar(); aviso('Removido'); }
@@ -261,8 +261,22 @@ function Time() {
      informar, e qual posto ficou sem gente. */
   const temExigencia = funcoesAtivas(S).some(f => f.exigeSexo);
   const pend = pendenciasDeSexo(S);
+  /* O QUE AINDA DÁ PARA TROCAR, UMA LINHA POR PESSOA E POSTO (30/09/2026).
+     O aviso mandava "troque na aba Escala" listando também cultos que já
+     passaram, e repetia o nome a cada data: "Giovana em APOIO (06/09),
+     Giovana em APOIO (20/09), Giovana em APOIO (11/10)...". Agora conta só
+     de hoje em diante e junta as datas de cada pessoa no mesmo posto. */
+  const hoje = hojeISO();
+  const errados: { nome: string; funcao: string; datas: string[] }[] = [];
+  for (const x of pend.escaladosErrados) {
+    if (x.data < hoje) continue;
+    const g = errados.find(e => e.nome === x.nome && e.funcao === x.funcao);
+    if (g) g.datas.push(x.data); else errados.push({ nome: x.nome, funcao: x.funcao, datas: [x.data] });
+  }
+  const ddmm = (d: string) => `${d.slice(8, 10)}/${d.slice(5, 7)}`;
+  const emLista = (xs: string[]) => xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} e ${xs[xs.length - 1]}`;
   const temAviso = !S.voluntarios.length || !!pend.semSexo.length
-    || !!pend.postosSemNinguem.length || !!pend.escaladosErrados.length;
+    || !!pend.postosSemNinguem.length || !!errados.length;
 
   /* DOIS GRUPOS: quem espera a sua conferência e o time conferido, cada um
      numa seção. Desde 30/09/2026 cada linha também diz a própria situação
@@ -294,11 +308,15 @@ function Time() {
      pausado antes de ser conferido aparece como "aguardando". Errar para esse
      lado é barato: as duas palavras pedem a mesma ação da líder, que é
      decidir se a pessoa entra. */
-  const situacao = (ativo: boolean, novo: boolean, nFuros: number): { tom: Tom; txt: string } =>
+  /* A PÍLULA SÓ QUANDO ACRESCENTA (30/09/2026). "esperando conferência"
+     aparecia em sete das dez linhas do grupo "Esperando sua conferência", e
+     "conferido" em todas as do "Time conferido": o título do grupo já diz, e
+     a repetição era o que a decisão de 08/09 tinha tirado. Fica a pílula do
+     que difere do grupo: aguardando, pausado, furos. */
+  const situacao = (ativo: boolean, novo: boolean, nFuros: number): { tom: Tom; txt: string } | null =>
     !ativo ? (novo ? { tom: 'warn', txt: 'aguardando' } : { tom: 'neutro', txt: 'pausado' })
     : nFuros > 0 ? { tom: 'bad', txt: `${nFuros} ${pl(nFuros, 'furo', 'furos')}` }
-    : novo ? { tom: 'warn', txt: 'esperando conferência' }
-    : { tom: 'ok', txt: 'conferido' };
+    : null;
 
   /* a fila de um grupo: a linha abre a pessoa logo abaixo dela */
   const listaDe = (grupo: typeof ordenados) => (
@@ -337,7 +355,7 @@ function Time() {
                   title={`${cont(est.carga, 'escala', 'escalas')} em ${S.config.janelaCarga} dias; até ${limite} por mês`}>
                   <span className="es-tm-so-pilha">carga </span>{est.carga}/{limite}
                 </span>
-                <span className="es-c-est"><Pilula tom={sit.tom}>{sit.txt}</Pilula></span>
+                <span className="es-c-est">{sit && <Pilula tom={sit.tom}>{sit.txt}</Pilula>}</span>
               </span>
               <span className="es-c-acao"><IcSeta /></span>
             </button>
@@ -543,7 +561,12 @@ function Time() {
               sub={pendentes ? `${pl(pendentes, 'nível', 'níveis')} esperando você` : 'tudo conferido'}
               tom={pendentes ? 'warn' : 'zero'} />
             <Kpi rot="Funções frágeis" valor={frageis} de={saude.funcoes.length}
-              sub={menosDeTres ? `${menosDeTres} com menos de 3 pessoas` : frageis ? 'todas com 3 ou mais' : 'todas de pé'}
+              sub={/* a linha explica o número inteiro, não um pedaço dele: "7" com
+                     "3 com menos de 3 pessoas" embaixo deixava quatro sem
+                     explicação (auditoria de 30/09/2026) */
+                menosDeTres === frageis && frageis ? (frageis === 1 ? 'com menos de 3 pessoas' : 'todas com menos de 3 pessoas')
+                : menosDeTres ? `${menosDeTres} delas com menos de 3 pessoas`
+                : frageis ? 'falta titular conferido' : 'todas de pé'}
               tom={menosDeTres ? 'bad' : frageis ? '' : 'zero'} />
             <Kpi rot="Furos" valor={furos} sub={`nos últimos ${S.config.janelaCarga} dias`} tom={furos ? 'bad' : 'zero'} />
           </Kpis>
@@ -570,11 +593,11 @@ function Time() {
               Essa vaga não vai preencher sozinha.
             </Aviso>
           )}
-          {!!pend.escaladosErrados.length && (
+          {!!errados.length && (
             <Aviso tom="warn">
               Tem gente escalada onde não pode entrar, de antes desta regra existir:{' '}
-              {pend.escaladosErrados.slice(0, 4).map(x => `${x.nome} em ${x.funcao} (${x.data.slice(8, 10)}/${x.data.slice(5, 7)})`).join(', ')}
-              {pend.escaladosErrados.length > 4 ? ` e mais ${pend.escaladosErrados.length - 4}` : ''}.
+              {errados.slice(0, 4).map(g => `${g.nome} em ${g.funcao} (${emLista(g.datas.map(ddmm))})`).join('; ')}
+              {errados.length > 4 ? `; e mais ${errados.length - 4}` : ''}.
               Ninguém foi tirado da escala: troque na aba Escala.
             </Aviso>
           )}
@@ -698,7 +721,7 @@ function Time() {
           grupo. Fica no fim e fechado, para não empurrar a lista do time para
           baixo em toda visita; o "Adicionar pessoa" do alto abre e traz até
           aqui. */}
-      <div className="es-secao es-tm-fim">
+      <div className="es-secao">
         <Dobra titulo="Adicionar pessoa na mão" nota="quase sempre não é preciso" id="adicionar">
           <div className="es-tm-pilha">
             <div className="es-dupla">

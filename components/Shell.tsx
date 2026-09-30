@@ -27,7 +27,10 @@ type Ctx = {
      instantâneo. A gravação segue por baixo; se falhar, o snapshot reverte. */
   pinta: () => void;
   aviso: (t: string) => void; base: string;
-  equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => void;
+  /* devolve se a troca vingou: quem troca E navega (a linha de uma área no
+     Painel) espera o sim antes de sair da tela, senão a tela seguinte nascia
+     com o ministério de antes quando a leitura do novo falhava */
+  equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => Promise<boolean>;
   recarregarEquipes: () => Promise<Equipe[]>;
   /* AS CONTAS DO QUE ESPERA POR VOCÊ (30/09/2026). Uma leitura só do banco
      (`painel_ministerio`, contagens), feita pela casca porque é ela que
@@ -230,6 +233,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     const guardado = _cacheEstado.get(id);
     setNums(_cacheNums.get(id) || null); setNumsFalhou(false);
     if (guardado) { setS(guardado); setFase('pronto'); } else setFase('carregando');
+    let responde: (ok: boolean) => void = () => {};
+    const vingou = new Promise<boolean>(r => { responde = r; });
+    /* já aberto nesta sessão: a troca vale na hora, e a revalidação segue por
+       baixo sem segurar quem espera */
+    if (guardado) responde(true);
     /* O .catch NÃO É ZELO — sem ele isto trava a tela. `setFase('carregando')`
        já rodou; se `recarregar()` REJEITAR (a internet caiu no meio da troca,
        e aí o fetch lança em vez de devolver {error}), nada mais mexe na fase e
@@ -237,6 +245,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        Voltar era o único gesto. Falha e recusa terminam no mesmo lugar: volta
        para o ministério de antes e diz o que houve. */
     const voltarAtras = () => {
+      responde(false);
       if (idAtivo.current !== id) return;                 // outra troca assumiu
       idAtivo.current = antesId; _cacheAtiva = antesId; nomeAtivo.current = antesNome;
       setEquipeId(antesId);
@@ -245,8 +254,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       aviso('Não consegui abrir esse ministério. Tente de novo.');
     };
     void recarregar()
-      .then(est => { if (est) setFase('pronto'); else voltarAtras(); })
+      .then(est => { if (est) { setFase('pronto'); responde(true); } else voltarAtras(); })
       .catch(voltarAtras);
+    return vingou;
   }, [recarregar, equipes, aviso]);
 
   useEffect(() => {
@@ -351,6 +361,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     return () => { vivo = false; sub.subscription.unsubscribe(); };
   }, [recarregar, recarregarEquipes, aviso, lerNums]);
 
+  /* SEM SESSÃO, VAI PARA A PORTA. Era um `router.replace` no meio do
+     desenho, e o React acusava "não atualize o roteador durante o render"
+     (visto na auditoria de 30/09/2026). Num efeito, o desenho só mostra o
+     esqueleto e a troca acontece depois. */
+  useEffect(() => {
+    if (fase === 'sem-login' && caminho !== '/entrar') router.replace('/entrar');
+  }, [fase, caminho, router]);
+
   /* Esc fecha o menu e devolve o foco ao botão — sem isso, quem navega por
      teclado abre a lista de ministérios e não tem como sair dela. */
   useEffect(() => {
@@ -379,7 +397,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   if (fase === 'carregando') return cascaVazia(<Esqueleto />);
   if (fase === 'sem-conexao') return cascaVazia(<Conexao aoSalvar={() => location.reload()} />);
-  if (fase === 'sem-login') { if (caminho !== '/entrar') router.replace('/entrar'); return cascaVazia(<Esqueleto />); }
+  if (fase === 'sem-login') return cascaVazia(<Esqueleto />);
   if (fase === 'sem-acesso') return cascaVazia(
     <div className="es-estado">
       <h1>Este e-mail não tem acesso</h1>
@@ -405,7 +423,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const nPessoas = S.voluntarios.filter(v => v.ativo).length;
 
   /* OS SELOS DA NAVEGAÇÃO. Dois, e só onde a espera tem prazo:
-       Escala    postos do PRÓXIMO culto sem gente de pé (sem ninguém,
+       Escala    postos do PRÓXIMO culto para resolver (sem ninguém,
                  furou, não pode). É o que vira buraco no domingo.
        Entradas  pessoas que se ofereceram e esperam resposta.
      Conferir nível e disponibilidade não entram: "nada ali trava o
@@ -417,23 +435,34 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const nEscala = rProx ? rProx.vagas.length + rProx.furos + rProx.recusados : 0;
   const nEntradas = nums ? (nums.candidaturas_novas || 0) + (nums.aguardando_conversa || 0) : 0;
   const selo: Record<string, { n: number; rot: string }> = {
-    '/escala': { n: nEscala, rot: nEscala === 1 ? '1 posto do próximo culto sem gente de pé' : `${nEscala} postos do próximo culto sem gente de pé` },
+    '/escala': { n: nEscala, rot: nEscala === 1 ? '1 posto do próximo culto para resolver' : `${nEscala} postos do próximo culto para resolver` },
     '/painel/candidaturas': { n: nEntradas, rot: nEntradas === 1 ? '1 pessoa esperando resposta' : `${nEntradas} pessoas esperando resposta` },
   };
   const navItens = ABAS.map(a => ({ ...a, on: ativa === a.href, selo: selo[a.href] }));
 
+  /* O MENU É UMA LISTA QUE SE ABRE, NÃO UM `role="menu"` (30/09/2026): o
+     papel de menu promete setas e foco preso, e ele não tinha nenhum dos
+     dois. Aberto, o Tab entra nele; sair dele com o foco fecha. O fundo que
+     fecha no clique mora FORA do topo: o `backdrop-filter` do topo prende
+     `position:fixed` dentro dele, e no celular o fundo cobria só a faixa de
+     56px, deixando o toque passar para a página (medido na auditoria). */
+  const sairDoMenu = (ev: React.FocusEvent) => {
+    const para = ev.relatedTarget as Node | null;
+    const dentro = (el: Element | null) => !!(el && para && el.contains(para));
+    if (!para || dentro(document.getElementById('menu-equipes')) || para === btnSeletor.current || para === btnTopo.current) return;
+    setMenuAberto(false);
+  };
   const menu = menuAberto && (
     <>
-      <div className="es-menu-fundo" onClick={fecharMenu} />
-      <div className="es-menu" id="menu-equipes" role="menu" aria-label="Ministérios">
+      <div className="es-menu" id="menu-equipes" aria-label="Ministérios" onBlur={sairDoMenu}>
         <div className="es-menu-grupo">Ministérios</div>
         {equipes.map(e => (
-          <button key={e.id} role="menuitem" className="es-menu-item"
+          <button key={e.id} className="es-menu-item"
             aria-current={e.id === equipeId ? 'true' : undefined} onClick={() => trocarEquipe(e.id)}>
             <span>{e.nome}</span>{e.id === equipeId && <IcCheck />}
           </button>
         ))}
-        <Link href="/ajustes/ministerios" role="menuitem" className="es-menu-item es-mudo" onClick={() => setMenuAberto(false)}>
+        <Link href="/ajustes/ministerios" className="es-menu-item es-mudo" onClick={() => setMenuAberto(false)}>
           <span>Novo ministério</span><IcMais />
         </Link>
         {/* MESMA PESSOA, MESMO PRODUTO. Quem organiza e também serve acha o
@@ -443,14 +472,14 @@ export default function Shell({ children }: { children: React.ReactNode }) {
             <div className="es-menu-risco" />
             <div className="es-menu-grupo">Onde eu sirvo</div>
             {meus.map(v => (
-              <a key={v.slug} role="menuitem" className="es-menu-item" href={`/eu/${v.token}`}>
+              <a key={v.slug} className="es-menu-item" href={`/eu/${v.token}`}>
                 <span>Meu espaço na {v.equipe}</span><IcPessoa />
               </a>
             ))}
           </>
         )}
         <div className="es-menu-risco es-so-celular" />
-        <button role="menuitem" className="es-menu-item es-mudo es-so-celular" onClick={sair}>
+        <button className="es-menu-item es-mudo es-so-celular" onClick={sair}>
           <span>Sair</span><IcSair />
         </button>
       </div>
@@ -463,6 +492,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         menuLugarRef.current = lugar; setMenuLugar(lugar);
         setMenuAberto(v => !(v && menuLugar === lugar));
       }}
+      onBlur={menuAberto ? sairDoMenu : undefined}
       aria-expanded={menuAberto && menuLugar === (topo ? 'topo' : 'lateral')} aria-controls="menu-equipes"
       aria-label={`Ministério: ${equipe?.nome || 'nenhum'}, ${nPessoas} ${nPessoas === 1 ? 'pessoa' : 'pessoas'}. Trocar`}>
       <span className="es-troca-txt">
@@ -518,6 +548,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
+        {menuAberto && <div className={`es-menu-fundo${menuLugar === 'topo' ? ' es-fundo-topo' : ''}`} onClick={fecharMenu} />}
         <main className="es-corpo">{children}</main>
 
         <nav className="es-abas" aria-label="Seções">

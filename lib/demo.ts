@@ -10,7 +10,7 @@
    conferidos) porque densidade falsa esconde problema de layout: uma tela
    linda com 3 pessoas costuma quebrar com 17.
    =========================================================================== */
-import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia } from './engine';
+import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia } from './engine';
 
 const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
   ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any, exigeSexo });
@@ -180,8 +180,20 @@ export function visaoGeralDemo() {
     vagas: postos - preenchidos, furos: 0, recusados: 0, pendentes: 0,
     candidaturas_novas: 0, ...extra,
   });
+  /* A LINHA DA MÍDIA SAI DO ESTADO DA MÍDIA (30/09/2026): escrita à mão, ela
+     dizia "9 de 9, 4 sem resposta" ao lado dos números do próprio Painel,
+     que o harness monta de `estadoDemo()` (10 de 10, 6 sem resposta, 1 não
+     pode). As outras áreas não têm estado no harness e seguem à mão. */
+  const S = estadoDemo();
+  const r = S.escalas[prox] ? resumoDia(S, prox) : null;
+  const midia = r
+    ? a('midia', 'Mídia', 10, r.total, r.preenchidos, {
+        vagas: r.vagas.length, furos: r.furos, recusados: r.recusados, pendentes: r.pendentes,
+        candidaturas_novas: (candidaturasDemo() as { status: string }[]).filter(c => c.status === 'enviada' || c.status === 'em_analise').length,
+      })
+    : a('midia', 'Mídia', 10, funcoesDoDia(S, prox).length, 0);
   return [
-    a('midia', 'Mídia', 10, 9, 9, { vagas: 0, pendentes: 4 }),
+    { ...midia, confirmados: r ? r.confirmados : 0, tipo: tipoDoDia(prox) },
     a('louvor', 'Louvor', 20, 10, 0, { candidaturas_novas: 4 }),
     a('kids', 'GUIA Kids', 30, 9, 0),
     a('servico', 'Connect', 40, 16, 0, { candidaturas_novas: 6 }),

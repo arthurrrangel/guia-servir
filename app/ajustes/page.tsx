@@ -113,10 +113,22 @@ function Ajustes() {
      as mudanças já pedidas, mesmo antes do recarregar voltar */
   const cfgRef = useRef({ ...S.config });
   useEffect(() => { cfgRef.current = { ...S.config }; }, [S.config]);
+  /* O CAMPO VOLTA AO QUE ESTÁ SALVO QUANDO A GRAVAÇÃO FALHA (30/09/2026).
+     Os campos são não controlados (`defaultValue`) e renascem pela `key`,
+     que é o próprio valor salvo. Numa falha o valor salvo não muda, a `key`
+     não muda, e o seletor continuava mostrando a escolha que não gravou,
+     com o aviso de erro já sumido. A versão sobe a cada falha e força o
+     campo a renascer com o que o banco tem. */
+  const [versaoCfg, setVersaoCfg] = useState(0);
   async function cfg(chave: string, valor: any) {
     cfgRef.current = { ...cfgRef.current, [chave]: valor };
     try { await salvarConfig(equipe!.id, cfgRef.current); await recarregar(); aviso('Salvo'); }
-    catch (e) { aviso(aviseHumano(e, 'salvar')); await recarregar(); }
+    catch (e) {
+      aviso(aviseHumano(e, 'salvar'));
+      cfgRef.current = { ...S.config };
+      await recarregar();
+      setVersaoCfg(v => v + 1);
+    }
   }
   /* mesma correção de `mudar` em /time: gravava em silêncio, sem indicador
      em voo e sem confirmação no fim. `cfg`, logo acima, já dizia 'Salvo'. */
@@ -242,20 +254,20 @@ function Ajustes() {
 
           <section className="es-caixa" id="regras">
             <div className="es-caixa-cab">
-              <h3>Regras do rodízio</h3>
+              <h2>Regras do rodízio</h2>
               <span className="es-peq es-mudo">Valem para o sorteio automático</span>
             </div>
             <div className="es-caixa-corpo">
               <div className="es-dupla es-aj-campos">
                 <label className="es-campo">
                   <span>Máximo de escalas por pessoa por mês</span>
-                  <select className="es-ctl" key={S.config.limitePadrao} aria-label="Máximo de escalas por pessoa por mês" defaultValue={S.config.limitePadrao} onChange={e => cfg('limitePadrao', +e.target.value)}>
+                  <select className="es-ctl" key={`${versaoCfg}:${S.config.limitePadrao}`} aria-label="Máximo de escalas por pessoa por mês" defaultValue={S.config.limitePadrao} onChange={e => cfg('limitePadrao', +e.target.value)}>
                     {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
                   </select>
                 </label>
                 <label className="es-campo">
                   <span>Plantonistas por domingo</span>
-                  <select className="es-ctl" key={S.config.plantaoQtd} aria-label="Plantonistas por domingo" defaultValue={S.config.plantaoQtd} onChange={e => cfg('plantaoQtd', +e.target.value)}>
+                  <select className="es-ctl" key={`${versaoCfg}:${S.config.plantaoQtd}`} aria-label="Plantonistas por domingo" defaultValue={S.config.plantaoQtd} onChange={e => cfg('plantaoQtd', +e.target.value)}>
                     {[0, 1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </label>
@@ -268,13 +280,13 @@ function Ajustes() {
                       ("quinta-feira") que entra numa frase, não uma data, e o
                       teclado certo é o de texto. O medidor de celular acusa
                       "prazo" sem calendário, e respeita quem declara. */}
-                  <input className="es-ctl" inputMode="text" enterKeyHint="done" key={S.config.prazoConfirmacao} aria-label="Prazo para confirmar"
+                  <input className="es-ctl" inputMode="text" enterKeyHint="done" key={`${versaoCfg}:${S.config.prazoConfirmacao}`} aria-label="Prazo para confirmar"
                     placeholder="ex: quinta-feira"
                     defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
                 </label>
                 <label className="es-campo">
                   <span>Equilibrar a carga olhando</span>
-                  <select className="es-ctl" key={S.config.janelaCarga} aria-label="Equilibrar a carga olhando" defaultValue={S.config.janelaCarga} onChange={e => cfg('janelaCarga', +e.target.value)}>
+                  <select className="es-ctl" key={`${versaoCfg}:${S.config.janelaCarga}`} aria-label="Equilibrar a carga olhando" defaultValue={S.config.janelaCarga} onChange={e => cfg('janelaCarga', +e.target.value)}>
                     {[30, 60, 90, 120, 180].map(n => <option key={n} value={n}>últimos {n} dias</option>)}
                   </select>
                 </label>
@@ -284,17 +296,17 @@ function Ajustes() {
 
           <section className="es-caixa" id="aviso">
             <div className="es-caixa-cab">
-              <h3>Texto do aviso mensal</h3>
+              <h2>Texto do aviso mensal</h2>
             </div>
             <div className="es-caixa-corpo">
               <div className="es-aj-campos">
                 <label className="es-campo">
                   <span>Como você começa o aviso</span>
-                  <input className="es-ctl" enterKeyHint="done" key={S.config.saudacao} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
+                  <input className="es-ctl" enterKeyHint="done" key={`${versaoCfg}:${S.config.saudacao}`} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
                 </label>
                 <label className="es-campo">
                   <span>Como você termina</span>
-                  <textarea className="es-ctl" key={S.config.rodape} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
+                  <textarea className="es-ctl" key={`${versaoCfg}:${S.config.rodape}`} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
                   <small>{'{PRAZO}'} vira o prazo acima.</small>
                 </label>
               </div>
@@ -303,7 +315,7 @@ function Ajustes() {
 
           <section className="es-caixa" id="funcoes">
             <div className="es-caixa-cab">
-              <h3>Funções</h3>
+              <h2>Funções</h2>
             </div>
             <div className="es-caixa-corpo">
               <p className="es-prosa">
@@ -452,7 +464,7 @@ function Ajustes() {
                   <input className="es-ctl" enterKeyHint="done" value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
                     aria-label="Email de quem vai organizar"
                     inputMode="email" autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false}
-                    placeholder="email do organizador" />
+                    placeholder="e-mail de quem organiza" />
                   <select className="es-ctl" aria-label="Qual ministério essa pessoa organiza" value={equipeDoLider}
                     onChange={e => setEquipeDoLider(e.target.value)}>
                     <option value="">todos os ministérios</option>
@@ -480,14 +492,14 @@ function Ajustes() {
               <div className="es-aj-senha">
                 <h4 className="es-caixa-titulo">Sua senha</h4>
                 <p className="es-prosa">
-                  Você entra por um link no email. Se preferir senha, escolha uma aqui: da
+                  Você entra por um link no e-mail. Se preferir senha, escolha uma aqui: da
                   próxima vez, toque em <b>Prefiro entrar com senha</b> na tela de entrar.
                 </p>
                 <form className="es-linha es-criar" onSubmit={async e => {
                   e.preventDefault();
                   if (minhaSenha.length < 8 || gravando) return;
                   setGravando(true);
-                  try { await definirMinhaSenha(minhaSenha); setMinhaSenha(''); aviso('Senha salva. Da próxima vez, entre com email e senha.'); }
+                  try { await definirMinhaSenha(minhaSenha); setMinhaSenha(''); aviso('Senha salva. Da próxima vez, entre com e-mail e senha.'); }
                   catch (err) { aviso(aviseHumano(err, 'salvar a senha')); }
                   setGravando(false);
                 }}>
@@ -508,8 +520,8 @@ function Ajustes() {
               endereço; aqui fica só o link. */}
           <section className="es-caixa" id="ministerios">
             <div className="es-caixa-cab">
-              <h3>Outros ministérios</h3>
-              <span className="es-peq es-mudo">Fora do alcance desta página</span>
+              <h2>Outros ministérios</h2>
+              <span className="es-peq es-mudo">Vale para a igreja inteira</span>
             </div>
             <div className="es-caixa-corpo">
               <div className="es-entre es-aj-outros">

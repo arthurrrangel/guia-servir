@@ -2,7 +2,7 @@
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { mudarStatus } from '@/lib/db';
 import { AreaVisao, visaoGeral } from '@/lib/equipes';
 import { IcSino, IcSeta, IcCopiar } from '@/components/Icones';
@@ -13,7 +13,7 @@ import { leituraDoDia } from '@/components/escalas/leitura';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
-  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
+  problemas, cultosAte, resumoDia, addDias, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -86,7 +86,7 @@ function Igreja() {
 
   return (
     <Secao
-      titulo={comum ? `A igreja ${comum.tipo === 'follow' ? 'no Follow de' : 'no domingo'} ${fmtDia(comum.proxima_data!)}` : 'A igreja no próximo culto'}
+      titulo={comum ? `A igreja ${comum.tipo === 'follow' ? 'no Follow' : 'no domingo'}, ${fmtLongo(comum.proxima_data!)}` : 'A igreja no próximo culto'}
       sub={emFalta === 0 ? 'Todas as áreas de pé.' : emFalta === 1 ? '1 área precisa de gente.' : `${emFalta} áreas precisam de gente.`}>
       <div className="es-fila es-colunas" style={{ '--es-cols': 'minmax(0,1fr) 110px 170px 24px' } as React.CSSProperties}>
         <div className="es-fila-cab" aria-hidden="true"><span>Área</span><span className="es-n">Postos</span><span>Situação</span><span /></div>
@@ -95,21 +95,21 @@ function Igreja() {
           const dela = equipes.find(e => e.slug === a.slug);
           const sub = [
             !a.proxima_data ? cont(a.postos, 'função', 'funções')
-              : umaSoData ? null : `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)}`,
+              : umaSoData ? null : `${a.tipo === 'follow' ? 'Follow' : 'Domingo'}, ${fmtLongo(a.proxima_data)}`,
             a.candidaturas_novas > 0 ? `${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar` : null,
           ].filter(Boolean).join(' · ');
           const miolo = (
             <>
               <span className="es-c-tit"><b>{a.equipe}</b>{sub && <small>{sub}</small>}</span>
               <span className="es-c-meta">
-                <span className="es-c-num">{a.proxima_data ? `${a.preenchidos} de ${a.postos}` : '—'}</span>
+                <span className="es-c-num">{a.proxima_data ? `${a.preenchidos} de ${a.postos}` : ''}</span>
                 <span className="es-c-est"><Pilula tom={l.tom}>{l.txt}</Pilula></span>
               </span>
               <span className="es-c-acao">{dela && <IcSeta />}</span>
             </>
           );
           return dela
-            ? <button key={a.slug} className="es-item" onClick={() => { trocarEquipe(dela.id); router.push('/escala'); }}
+            ? <button key={a.slug} className="es-item" onClick={async () => { if (await trocarEquipe(dela.id)) router.push('/escala'); }}
                 aria-label={`${a.equipe}: ${l.txt}. Abrir a escala`}>{miolo}</button>
             : <div key={a.slug} className="es-item">{miolo}</div>;
         })}
@@ -127,24 +127,26 @@ function Pendencias() {
   if (numsFalhou) return <Aviso tom="bad">Não consegui carregar o que espera por você neste ministério. Recarregue a página.</Aviso>;
   if (!p) return null;
 
-  /* cada linha é uma frase inteira e concorda com o número (05/09/2026) */
+  /* cada linha é uma frase inteira e concorda com o número (05/09/2026). O
+     número é tinta em todas: nada aqui é falta de gente no culto, e o
+     vermelho do sistema quer dizer só isso (30/09/2026). */
   const itens = [
-    p.candidaturas_novas && { grave: true, n: p.candidaturas_novas,
+    p.candidaturas_novas && { n: p.candidaturas_novas,
       txt: pl(p.candidaturas_novas, 'pessoa quer entrar e espera resposta', 'pessoas querem entrar e esperam resposta'),
       href: '/painel/candidaturas' },
-    p.aguardando_conversa && { grave: false, n: p.aguardando_conversa,
+    p.aguardando_conversa && { n: p.aguardando_conversa,
       txt: pl(p.aguardando_conversa, 'pessoa esperando a conversa com a liderança', 'pessoas esperando a conversa com a liderança'),
       href: '/painel/candidaturas' },
-    p.sem_conferir && { grave: false, n: p.sem_conferir,
+    p.sem_conferir && { n: p.sem_conferir,
       txt: pl(p.sem_conferir, 'pessoa com nível declarado que você ainda não conferiu', 'pessoas com nível declarado que você ainda não conferiu'),
       href: '/time/conferir' },
-    p.sem_disponibilidade && { grave: false, n: p.sem_disponibilidade,
+    p.sem_disponibilidade && { n: p.sem_disponibilidade,
       txt: pl(p.sem_disponibilidade, 'pessoa não respondeu a disponibilidade do mês', 'pessoas não responderam a disponibilidade do mês'),
       href: '/time' },
-    p.funcoes_sem_gente && { grave: true, n: p.funcoes_sem_gente,
+    p.funcoes_sem_gente && { n: p.funcoes_sem_gente,
       txt: pl(p.funcoes_sem_gente, 'função sem ninguém que saiba fazer', 'funções sem ninguém que saiba fazer'),
       href: '/ajustes' },
-  ].filter(Boolean) as { grave: boolean; n: number; txt: string; href: string }[];
+  ].filter(Boolean) as { n: number; txt: string; href: string }[];
 
   if (!itens.length) return null;
   return (
@@ -152,7 +154,7 @@ function Pendencias() {
       <div className="es-fila">
         {itens.map((i, k) => (
           <Link key={k} href={i.href} className="es-item es-com-n">
-            <span className={`es-c-n${i.grave ? ' es-bad' : ''}`}>{i.n}</span>
+            <span className="es-c-n">{i.n}</span>
             <span className="es-c-tit"><b>{i.txt}</b></span>
             <span className="es-c-acao"><IcSeta /></span>
           </Link>
@@ -186,6 +188,15 @@ function Painel() {
   const { S, recarregar, aviso, base } = useApp();
   const [salvando, setSalvando] = useState('');
   const [otimista, setOtimista] = useState<{ f: string; st: Status } | null>(null);
+  /* a âncora do endereço (`/painel#cobrar`): o navegador procura o alvo
+     antes de a tela existir (ela nasce depois de a casca ler o banco), e não
+     rolava. Uma vez, quando o alvo aparece. */
+  const rolouAncora = useRef(false);
+  useEffect(() => {
+    if (rolouAncora.current || !window.location.hash) return;
+    const el = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (el) { rolouAncora.current = true; el.scrollIntoView({ block: 'start' }); }
+  });
 
   const hoje = hojeISO();
   /* o próximo culto pode ser um sábado do Follow: mirar sempre no domingo
@@ -337,9 +348,9 @@ function Painel() {
       {r && (
         <div className="es-secao">
           <Kpis n={4}>
-            <Kpi rot="Postos de pé" valor={r.preenchidos} de={r.total}
+            <Kpi rot="Postos preenchidos" valor={r.preenchidos} de={r.total}
               sub={vagas ? `${vagas} sem ninguém` : 'todos com alguém'} tom={vagas ? 'bad' : ''}
-              rotulo={`Postos de pé: ${r.preenchidos} de ${r.total}`} />
+              rotulo={`Postos preenchidos: ${r.preenchidos} de ${r.total}`} />
             <Kpi rot="Confirmados" valor={r.confirmados} de={r.preenchidos}
               sub={r.confirmados === r.preenchidos && r.preenchidos ? 'todos responderam' : 'dos escalados'}
               tom={r.confirmados ? '' : 'zero'} rotulo={`Confirmados: ${r.confirmados} de ${r.preenchidos}`} />
@@ -417,7 +428,7 @@ function Painel() {
           )}
 
           {!!pendentes.length && (
-            <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem responder" n={pendentes.length}
+            <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem resposta" n={pendentes.length}
               sub="O botão abre o WhatsApp da pessoa com a cobrança já escrita. Você só aperta enviar."
               acoes={
                 <button className="es-btn es-peq" onClick={() => copiar(
@@ -467,7 +478,7 @@ function Painel() {
                 return (
                   <Link href={`/escala?m=${d.slice(0, 7)}#d${d}`} key={d} className="es-item">
                     <span className="es-c-tit">
-                      <b>{tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'Domingo'} {fmtDia(d)}</b>
+                      <b>{tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'Domingo'}, {fmtLongo(d)}</b>
                       <small>{rr ? `${rr.preenchidos} de ${rr.total} postos` : 'escala por montar'}</small>
                     </span>
                     <span className="es-c-acao">

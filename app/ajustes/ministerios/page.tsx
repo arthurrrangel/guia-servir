@@ -144,7 +144,7 @@ function Ministerios() {
         </Secao>
 
         <section className="es-caixa">
-          <div className="es-caixa-cab"><h3>Abrir um novo</h3></div>
+          <div className="es-caixa-cab"><h2>Abrir um novo</h2></div>
           <div className="es-caixa-corpo es-aj-pilha">
             <p className="es-prosa">
               O ministério nasce vazio: depois dele vêm as funções e o time, nessa ordem.

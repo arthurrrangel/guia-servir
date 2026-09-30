@@ -96,13 +96,8 @@
   .es-tab.es-empilha.es-tm-frageis td[data-rot]::before{content:none}
 }
 
-/* no celular estreito a nota desce para baixo do título, e a seta fica na
-   primeira linha: lado a lado, "Adicionar pessoa na mão" quebrava em quatro */
-@media (max-width:479px){
-  .es-tm-fim > .es-dobra > summary{flex-wrap:wrap;row-gap:2px;padding-top:10px;padding-bottom:10px}
-  .es-tm-fim > .es-dobra > summary::after{order:2}
-  .es-tm-fim > .es-dobra > summary > small{order:3;flex-basis:100%;white-space:normal}
-}
+/* a nota da dobra no celular estreito é regra da base ("a nota desce no
+   celular", escalas.css) */
 
 /* ================================================== a conferência de nível */
 
