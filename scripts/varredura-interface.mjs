@@ -27,7 +27,7 @@ const TELAS=ARGS.length?ARGS.map(a=>[a==='home'?'/':'/'+a, a]):PADRAO;
 
 const CHECK = () => {
   const cs=getComputedStyle, out={sobrepoe:[],contraste:[],morta:[],alvo:[],falsoBotao:[],semNome:[]};
-  const raiz=document.querySelector('.sistema')||document.querySelector('.lid')||document.querySelector('.vol')||document.body;
+  const raiz=document.querySelector('.es-casca')||document.querySelector('.lid')||document.querySelector('.vol')||document.body;
   if(!raiz) return {semRaiz:true};
   const nome=e=>String(e.className||e.tagName).trim().slice(0,26)||e.tagName;
   const vis=e=>{const s=cs(e),r=e.getBoundingClientRect();
@@ -89,7 +89,7 @@ const CHECK = () => {
   }
 
   /* 4. ALVO DE TOQUE de verdade: so o que e controle, nao link dentro de frase. */
-  for(const e of raiz.querySelectorAll('button,summary,[role="button"],a.lid-bt,a.acao,a.btn,a.pri')){
+  for(const e of raiz.querySelectorAll('button,summary,[role="button"],a.es-btn,a.lid-bt,a.acao,a.btn,a.pri')){
     const r=e.getBoundingClientRect(); if(!vis(e)) continue;
     if(r.height<40) out.alvo.push(nome(e)+' h='+Math.round(r.height)+' :'+(e.textContent||'').trim().slice(0,16));
   }

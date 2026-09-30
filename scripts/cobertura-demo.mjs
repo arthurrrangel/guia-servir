@@ -13,7 +13,7 @@ for(const [rota,nome] of TELAS){
   try{await p.goto(B+rota,{waitUntil:'domcontentloaded',timeout:15000});}catch{}
   await p.waitForTimeout(2200);
   const r=await p.evaluate(()=>{
-    const raiz=document.querySelector('.sistema')||document.querySelector('.vol');
+    const raiz=document.querySelector('.es-casca')||document.querySelector('.vol');
     const main=document.querySelector('main')||raiz;
     const txt=(main?.innerText||'').trim();
     return { altura:document.documentElement.scrollHeight, elementos:main?main.querySelectorAll('*').length:0,

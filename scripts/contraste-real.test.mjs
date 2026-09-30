@@ -65,10 +65,10 @@ try {
      #252525 — saía como branco sobre rgb(250,254,255), 1.02:1. Era o layout
      refeito na hora da foto. Se voltar a acontecer, quero saber por aqui. */
   await pag.goto(`${BASE}/ajustes?demo=1`, { waitUntil: 'domcontentloaded' });
-  await pag.waitForSelector('.sistema', { timeout: 10000 });
+  await pag.waitForSelector('.es-casca', { timeout: 10000 });
   await pag.waitForTimeout(1500);
   const sist = await medirContraste(pag);
-  const pretos = sist.fracos.filter(f => /\.pri|lid-bt/.test(f));
+  const pretos = sist.fracos.filter(f => /es-pri/.test(f));
   ok(pretos.length === 0, 'botão preto com texto branco NÃO é acusado', pretos.slice(0, 3).join(' | '));
   ok(sist.medidos > 30, 'achou texto para medir nos ajustes', `mediu ${sist.medidos}`);
 
@@ -79,10 +79,10 @@ try {
      era fotografado no meio do deslize. Tela curta não pega esse defeito;
      por isso a prova mora nesta. */
   await pag.goto(`${BASE}/escala?demo=1`, { waitUntil: 'domcontentloaded' });
-  await pag.waitForSelector('.sistema', { timeout: 10000 });
+  await pag.waitForSelector('.es-casca', { timeout: 10000 });
   await pag.waitForTimeout(1500);
   const comprida = await medirContraste(pag);
-  const pretos2 = comprida.fracos.filter(f => /lid-bt/.test(f));
+  const pretos2 = comprida.fracos.filter(f => /es-pri/.test(f));
   ok(pretos2.length === 0, 'numa tela comprida, os botões pretos de baixo também passam', pretos2.slice(0, 3).join(' | '));
   ok(comprida.fracos.length === 0, 'a tela de escala passa inteira', comprida.fracos.slice(0, 4).join(' | '));
 

@@ -1,0 +1,147 @@
+/* ==========================================================================
+   tela-ajustes.css · as regras só de /ajustes, /ajustes/ministerios e
+   /entrar (30/09/2026). Todas sob `.es` e com prefixo `es-aj-` (ver a trava
+   em escalas.css).
+   ========================================================================== */
+
+/* o alinhamento: um recuo só, 16px, é regra da base ("um recuo só" em
+   escalas.css) */
+/* a nota que desce para baixo do título, no celular, fica colada nele, como
+   a nota da dobra (a 8px ela lia como uma terceira linha solta) */
+.es-aj-secoes .es-caixa-cab{row-gap:2px}
+
+/* =========================================================== /ajustes */
+
+/* A GRADE. No celular, uma coluna: o índice vira a fita no alto e as seções
+   empilham. A partir de 1024, o índice fixo à esquerda e as seções à
+   direita, em largura de leitura. */
+.es-aj-grade{display:grid;grid-template-columns:minmax(0,1fr);align-items:start}
+.es-aj-secoes{display:grid;gap:var(--es-e6);min-width:0}
+/* o respiro entre as seções é o da grade: a margem de `.es-caixa + .es-caixa`
+   somaria por cima e daria dois ritmos na mesma coluna */
+.es-aj-secoes > .es-caixa + .es-caixa,.es-aj-secoes > .es-dobra + .es-dobra{margin-top:0}
+
+
+/* O ÍNDICE. Os itens são os mesmos da lateral da casca (`es-nav-item`):
+   14px, caixa normal, e o atual com o mesmo contorno. O atual aqui é
+   `aria-current="true"` (a seção na tela), e não "page": a página atual já
+   está acesa na lateral. */
+.es-aj-indice .es-nav-item[aria-current="true"]{
+  background:var(--es-sup);color:var(--es-ink);font-weight:600;
+  box-shadow:0 0 0 1px var(--es-linha),var(--es-sombra-btn);
+}
+
+/* no celular, a fita que rola de lado, de borda a borda da tela. A máscara
+   apaga a ponta direita: quem rola precisa saber que rola. */
+@media (max-width:1023px){
+  .es-aj-indice{
+    display:flex;gap:var(--es-e1);overflow-x:auto;scrollbar-width:none;
+    margin:0 calc(-1 * var(--es-calha)) var(--es-e5);padding:var(--es-e1) var(--es-calha);
+    -webkit-mask-image:linear-gradient(90deg,var(--es-ink) calc(100% - var(--es-e6)),transparent);
+            mask-image:linear-gradient(90deg,var(--es-ink) calc(100% - var(--es-e6)),transparent);
+  }
+  .es-aj-indice::-webkit-scrollbar{display:none}
+  .es-aj-indice .es-nav-item{width:auto;flex:none;white-space:nowrap;padding:0 var(--es-e3)}
+}
+
+@media (min-width:1024px){
+  .es-aj-grade{grid-template-columns:180px minmax(0,760px);gap:var(--es-e8)}
+  /* fixo no alto enquanto as seções passam. O primeiro item nasce na
+     altura do título da primeira seção: 48px é a altura do cabeçalho da
+     caixa e da dobra, e o item tem a altura da linha da lateral */
+  .es-aj-indice{
+    position:sticky;top:var(--es-e8);display:grid;gap:2px;
+    padding-top:calc((48px - var(--es-h-linha)) / 2);
+  }
+}
+@media (min-width:1280px){ .es-aj-grade{grid-template-columns:200px minmax(0,760px);gap:var(--es-e10)} }
+
+/* A DOBRA NO CELULAR. A nota da dobra não quebra linha ("Já em uso · abrir
+   para copiar de novo"), e ao lado do título ela espremia o título em
+   quatro linhas e passava da tela em 320px. Abaixo de 720 a nota desce para
+   baixo do título, e a seta fica no meio da altura. */
+@media (max-width:719px){
+  .es-aj-secoes .es-dobra > summary{
+    display:grid;grid-template-columns:minmax(0,1fr) 16px;column-gap:var(--es-e3);row-gap:2px;
+    padding-top:var(--es-e3);padding-bottom:var(--es-e3);
+  }
+  .es-aj-secoes .es-dobra > summary > span{grid-column:1;grid-row:1}
+  .es-aj-secoes .es-dobra > summary > small{grid-column:1;grid-row:2;white-space:normal}
+  .es-aj-secoes .es-dobra > summary::after{grid-column:2;grid-row:1 / span 2;align-self:center}
+}
+
+/* o miolo das seções: um ritmo só entre texto, campos e ações */
+.es-aj-pilha{display:grid;gap:var(--es-e4)}
+.es-aj-pilha > .es-campo,.es-aj-pilha > .es-aviso{margin:0}
+/* os campos lado a lado se alinham pela base: em 1024 "Máximo de escalas
+   por pessoa por mês" quebra em duas linhas, e o seletor dele descia 18px
+   abaixo do vizinho */
+.es .es-aj-campos{display:grid;gap:var(--es-e5) var(--es-e4);align-items:end}
+.es-aj-campos > .es-campo{margin-bottom:0}
+@media (min-width:560px){ .es-aj-campos > .es-aj-inteiro{grid-column:1 / -1} }
+
+/* AS FUNÇÕES. A lista encosta nas bordas da caixa, como a tabela na caixa
+   da base: fio entre as linhas, e a linha aberta ganha o fundo da fila. */
+.es-caixa > .es-aj-fila{border:0;border-radius:0}
+.es-aj-fn > summary{cursor:pointer}
+.es-aj-fn > summary::-webkit-details-marker{display:none}
+.es-aj-fn > summary:hover{background:var(--es-sup-2)}
+.es-aj-fn > summary:focus-visible{outline-offset:-2px}
+.es-aj-fn .es-c-acao{gap:var(--es-e2)}
+.es-aj-fn > summary .es-c-acao > svg{transform:rotate(90deg);transition:transform var(--es-t)}
+.es-aj-fn[open] > summary .es-c-acao > svg{transform:rotate(-90deg)}
+.es-aj-fn[open]{background:var(--es-sup-2)}
+.es-aj-fn[open] > summary:hover{background:var(--es-sup-3)}
+.es-aj-fn-corpo{display:grid;gap:var(--es-e3);padding:var(--es-e1) var(--es-e4) var(--es-e4)}
+
+/* as ações de texto encostam o texto na borda dos campos de cima: o botão
+   de texto tem 10px de respiro por dentro */
+.es-aj-acoes{margin-left:-10px}
+
+/* liberar acesso: o seletor do ministério tem a largura do que ele diz */
+@media (min-width:720px){ .es-linha.es-criar.es-aj-liberar > select.es-ctl{flex:0 1 240px} }
+
+/* outros ministérios: a frase e o botão na mesma linha; a frase encolhe e
+   quebra antes de empurrar o botão para baixo (no celular ele desce) */
+.es-aj-outros > .es-prosa{flex:1 1 280px}
+
+/* a senha de quem está logado: um bloco à parte, abaixo de quem tem acesso */
+.es-aj-senha{display:grid;gap:var(--es-e2);padding-top:var(--es-e4);border-top:1px solid var(--es-linha)}
+.es-aj-senha > .es-caixa-titulo{margin:0}
+
+/* ============================================== /ajustes/ministerios */
+.es-aj-coluna{display:grid;gap:var(--es-e6);max-width:760px}
+.es-aj-coluna > .es-aviso,.es-aj-coluna > .es-secao{margin:0}
+/* cada ministério é a linha e, quando aberto, o que se edita embaixo dela */
+.es-aj-min:first-child > .es-item{border-top:0}
+.es-aj-min .es-c-acao{gap:var(--es-e2)}
+.es-aj-min.es-aj-aberta{background:var(--es-sup-2)}
+.es-aj-min .es-c-acao .es-btn > svg{transform:rotate(90deg);transition:transform var(--es-t)}
+.es-aj-min .es-c-acao .es-btn[aria-expanded="true"] > svg{transform:rotate(-90deg)}
+.es-aj-min-corpo{display:grid;gap:var(--es-e3);padding:var(--es-e1) var(--es-e4) var(--es-e4)}
+.es-aj-min-corpo > .es-campo{margin:0}
+.es-aj-volta{justify-self:start;margin-left:-10px}
+
+/* ============================================================ /entrar */
+/* a mesma porta das Demandas: a marca, o título com o rótulo em cima, a
+   frase, o formulário, os outros caminhos e o pé */
+
+/* A CAIXA PRESA PELO ALTO. Centrada na altura, ela pulava a cada troca:
+   medido em 1440, 504px no link, 584 na senha e 525 no criar, e o alto da
+   caixa andava uns 40px sob o dedo que acabou de tocar "Prefiro entrar com
+   senha"; na hidratação ela saltava de 155 para 504. Presa pelo alto, o que
+   muda cresce para baixo e nada foge do lugar. */
+.es-porta.es-aj-fundo{align-items:start}
+@media (min-width:720px){ .es-porta.es-aj-fundo{padding-top:max(var(--es-e8), 16vh)} }
+.es-aj-porta > .es-aviso{margin-bottom:0}
+.es-aj-porta-cab{display:grid;gap:var(--es-e1)}
+.es-aj-porta-cab > .es-porta-sub{margin-top:var(--es-e1)}
+/* os outros caminhos: o texto à esquerda, alinhado com o campo de cima, e a
+   seta de "leva a algum lugar" à direita. Frase comprida quebra linha em vez
+   de passar da caixa em 320px. */
+.es-aj-trocas{display:grid;gap:2px;padding-top:var(--es-e3);border-top:1px solid var(--es-linha)}
+.es-aj-trocas > .es-btn{justify-content:space-between;margin:0 -10px;white-space:normal;text-align:left}
+.es-aj-trocas > .es-btn svg{color:var(--es-icone)}
+.es-aj-trocas > .es-btn:hover svg{color:var(--es-ink)}
+/* sem credenciais, a conexão ocupa o lugar da caixa */
+.es-aj-conexao > .es-estado{margin:0;width:100%}

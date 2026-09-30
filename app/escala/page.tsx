@@ -1,13 +1,14 @@
 'use client';
-import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
 import { apagarEvento, criarEvento, mudarStatus, salvarDia, salvarDias } from '@/lib/db';
-import { Aviso, Escolha, Trabalhando } from '@/components/Ui';
+import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
+import { leituraDoDia } from '@/components/escalas/leitura';
+import { IcCopiar, IcDado, IcSeta, IcSino } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  candidatos, cargaDoMes, cultosDoMes, diasDoMes, esqueceOsDias, fmtDia, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
+  candidatos, cargaDoMes, diaLongo, diasDoMes, esqueceOsDias, fmtDia, fmtLongo, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
 } from '@/lib/engine';
@@ -48,18 +49,39 @@ import { pl, cont } from '@/lib/plural';
 
    6. ÍCONE SEM NOME. Estrela e cadeado, sem rótulo, com `title` que no celular
       não existe. E o cadeado ativo era preto sobre preto: invisível. Viraram
-      palavras: travar / travado, 1ª vez.
+      palavras: "fixo" e "1ª vez", cada uma uma ficha que acende.
 
    O QUE FOI PRESERVADO INTEIRO: o motor e todas as ações que já funcionavam.
    Sortear o mês, sortear o dia, trocar, travar, marcar primeira vez, recado,
    plantão, e o retrato local que restaura a tela quando o save falha, que é a
    coisa que impede o líder de publicar uma escala que o banco nunca recebeu.
+
+   A SUPERFÍCIE, 30/09/2026. A tela passou para a língua do Financeiro e do
+   Demandas, a mesma do /painel (ver components/escalas/Pecas.tsx):
+
+     . o mês é o título, com as setas coladas nele, e a faixa de números diz
+       o mês de longe: cultos a montar, postos sem ninguém, sem resposta,
+       furos. "Montar o mês inteiro" é a única ação cheia da tela;
+     . cada culto é uma caixa que abre, com a pílula do estado na linha
+       fechada, no tom da régua do motor (`classificar`);
+     . dentro, cada posto é uma linha: função, pessoa, situação e as marcas;
+     . ao lado, o mês em pessoas e o evento esporádico.
+
+   Nenhuma ação mudou com isso: o que mudou foi marcação, classe e texto.
    ============================================================================= */
 
 const ehFollow = (d: string) => tipoDoDia(d) === 'follow';
 const nomeDia = (d: string) => (ehFollow(d) ? 'Follow, sábado' : 'domingo');
 
 export default function Pagina() { return <Shell><Escala /></Shell>; }
+
+/* o mês em que a tela abre: o de hoje, se ainda tem culto por vir; senão, o
+   seguinte. Mesma conta de dias da lista (`diasDoMes`, com os eventos). */
+function mesDeAbrir(S: Estado, hoje: string): { ano: number; mes: number } {
+  const a = +hoje.slice(0, 4), m = +hoje.slice(5, 7);
+  if (diasDoMes(S, a, m).some(d => d >= hoje)) return { ano: a, mes: m };
+  return m === 12 ? { ano: a + 1, mes: 1 } : { ano: a, mes: m + 1 };
+}
 
 function Escala() {
   const { S, recarregar, pinta, aviso, base, equipe } = useApp();
@@ -92,8 +114,17 @@ function Escala() {
     aviso(aviseHumano(e, 'salvar'));
   }
 
-  const [ano, setAno] = useState(+hoje.slice(0, 4));
-  const [mes, setMes] = useState(+hoje.slice(5, 7));
+  /* O MÊS DE ABRIR É O DO PRÓXIMO CULTO (30/09/2026).
+
+     A tela abria sempre no mês de hoje. No dia 30/09, com os cultos de
+     setembro todos passados, ela dizia "Esse mês já passou inteiro. Use as
+     setas para ir para o próximo", enquanto o Painel, um toque antes, mandava
+     "Monte a escala de outubro". O líder que obedecia ao painel caía no mês
+     errado e precisava descobrir a seta. Agora: se o mês de hoje ainda tem
+     culto por vir (domingo, Follow ou evento), abre nele; se não tem, abre no
+     seguinte. O `?m=` de um link continua mandando (efeito logo abaixo). */
+  const [ano, setAno] = useState(() => mesDeAbrir(S, hoje).ano);
+  const [mes, setMes] = useState(() => mesDeAbrir(S, hoje).mes);
   const [ocupado, setOcupado] = useState(false);
   const [verPassado, setVerPassado] = useState(false);
   /* EVENTO ESPORÁDICO (migração 54) — o que não está na programação fixa. */
@@ -422,163 +453,99 @@ function Escala() {
     setOcupado(false);
   }
 
-  /* ------------------------------------------------------------- o placar
-     Um número para o mês, e é o que decide se o culto acontece. Vaga primeiro;
-     sem vaga, quantos ainda não responderam. */
+  /* ------------------------------------------------------------- as contas
+     O que decide se o culto acontece, somado no mês: cultos sem ninguém
+     escalado, postos sem ninguém, quem não respondeu e quem furou. É a faixa
+     de números logo abaixo do título. */
+  /* "A MONTAR" É NÃO TER NINGUÉM ESCALADO, não é o dia não existir. Um
+     evento esporádico nasce com o dia criado e os postos vazios: pela
+     existência do dia, os dez postos dele entravam em "Postos sem ninguém"
+     enquanto a linha do próprio dia dizia "a montar" (30/09/2026). A régua
+     é a do Painel e da linha do dia: montado é ter alguém numa vaga. */
   const contas = futuros.reduce((a, d) => {
-    if (!S.escalas[d]) { a.aMontar++; return a; }
+    const x = S.escalas[d];
+    if (!x || !Object.values(x.slots || {}).some((s: any) => s?.vid)) { a.aMontar++; return a; }
     const r = resumoDia(S, d);
     a.vagas += r.vagas.length; a.pendentes += r.pendentes; a.furos += r.furos;
     return a;
   }, { vagas: 0, pendentes: 0, furos: 0, aMontar: 0 });
 
-  const placar = contas.aMontar === futuros.length && futuros.length
-    ? { n: futuros.length, un: '', rot: futuros.length === 1 ? 'culto a montar' : 'cultos a montar' }
-    : contas.vagas ? { n: contas.vagas, un: '', rot: contas.vagas === 1 ? 'vaga sem ninguém' : 'vagas sem ninguém' }
-    : contas.pendentes ? { n: contas.pendentes, un: '', rot: pl(contas.pendentes, 'ainda não confirmou', 'ainda não confirmaram') }
-    : futuros.length ? { n: 0, un: '', rot: 'tudo confirmado' }
-    : null;
-  const urge = contas.vagas > 0 || contas.furos > 0;
+  const nomeMes = MESES[mes - 1];
+  const montados = futuros.length - contas.aMontar;
 
   return (
-    <div className="lid">
-      {ocupado && <Trabalhando />}
-      {/* ---------------------------------------------------------- a faixa
-          A legenda "Escala" saiu (a aba já diz), o placar cola no mês e o
-          cabeçalho passa a ser o mesmo componente das outras seis telas. Ver
-          components/Faixa.tsx para a regra; a nota sobre a ordem placar/frase/
-          botões no celular está lá. A ajuda recolhida continua: ela é material
-          de primeira vez e fechada custa zero a quem já sabe. */}
-      <Faixa
-        urgente={urge}
-        titulo={
-          <span className="esc-mes">
-            <span className="esc-mes-nome">{MESES[mes - 1]} {ano}</span>
-            {/* as duas setas num par indivisível: com a faixa na medida da
-                lista, "‹" ficava na linha do título e "›" descia sozinho. */}
-            <span className="esc-setas">
-              <button className="esc-seta" aria-label="Mês anterior" onClick={() => mover(-1)}>‹</button>
-              <button className="esc-seta" aria-label="Próximo mês" onClick={() => mover(1)}>›</button>
-            </span>
+    <>
+      {ocupado && <Fio />}
+      {/* ------------------------------------------------------- o cabeçalho
+          O mês é o título e as setas moram coladas nele: um par só, que não
+          se separa. A frase embaixo diz o estado do mês. "Montar o mês
+          inteiro" é a única ação cheia da tela; os botões de cada dia são
+          contorno ou texto. */}
+      <Cab
+        comSetas
+        rot="Escala"
+        titulo={<>
+          {`${nomeMes.charAt(0).toUpperCase()}${nomeMes.slice(1)} de ${ano}`}
+          <span className="es-setas">
+            <button className="es-btn es-icone es-peq" aria-label="Mês anterior" onClick={() => mover(-1)}><IcSeta dir="e" /></button>
+            <button className="es-btn es-icone es-peq" aria-label="Próximo mês" onClick={() => mover(1)}><IcSeta /></button>
           </span>
-        }
-        placar={placar ? { n: placar.n, rot: placar.rot } : null}
-        sub={!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
+        </>}
+        meta={!futuros.length ? 'Esse mês já passou inteiro. Use as setas para ir para o próximo.'
           : contas.aMontar === futuros.length ? 'Nada montado ainda. O sorteio respeita quem não pode e quem já serviu.'
           : contas.vagas ? 'Vaga sem ninguém é o que faz o culto não acontecer. É por onde começar.'
           : contas.pendentes ? 'Falta a confirmação de quem foi escalado.'
           : 'Mês fechado.'}
-        acao={
-          <button className="lid-bt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
-            Montar o mês inteiro
-          </button>
-        }
-        extra={
-          <button className="lid-bt-txt" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
+        acoes={<>
+          <button className="es-btn" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
             Pedir a disponibilidade
           </button>
-        }
-        rodape={
-          <details className="esc-ajuda">
-            <summary>O que esses botões fazem</summary>
-            <p>
-              Montar e sortear preenchem só o que está vazio: <strong>quem confirmou
-              e quem você travou não se mexe</strong>. Pedir, copiar e cobrar geram
-              um texto para você colar no grupo. <strong>Nada é enviado daqui.</strong>
-            </p>
-          </details>
-        }
+          <button className="es-btn es-pri" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
+            Montar o mês inteiro
+          </button>
+        </>}
       />
 
       {semFuncoes && (
-        <div style={{ marginTop: 'var(--e5)' }}>
-          <Aviso tom="atencao">
-            Este ministério ainda não tem <strong>funções</strong> (PROJEÇÃO, VOCAL, RECEPÇÃO…). Sem elas não há o que sortear.
-            Crie as funções em <strong>Ajustes → Funções</strong> e depois volte aqui.
-          </Aviso>
-        </div>
+        <Aviso tom="warn">
+          Este ministério ainda não tem <b>funções</b> (PROJEÇÃO, VOCAL, RECEPÇÃO…). Sem elas não há o que sortear.
+          Crie as funções em <b>Ajustes → Funções</b> e depois volte aqui.
+        </Aviso>
       )}
       {!S.voluntarios.length && (
-        <div style={{ marginTop: 'var(--e5)' }}>
-          <Aviso tom="atencao">Time vazio. Cadastre as pessoas na aba <strong>Time</strong> antes de montar qualquer coisa.</Aviso>
-        </div>
+        <Aviso tom="warn">Time vazio. Cadastre as pessoas na aba <b>Time</b> antes de montar qualquer coisa.</Aviso>
       )}
 
-      {/* ===================================================== EVENTO ESPORÁDICO
-
-          O que não está na programação fixa: o GUIA Empreendedor numa quinta,
-          um ensaio geral num sábado. Depois de criado, o dia entra na lista
-          como qualquer domingo e "Montar" sorteia com as MESMAS regras.
-
-          Fica fechado por padrão e no fim da área de ações porque é o caminho
-          raro: o comum é montar o mês. Um formulário aberto aqui em cima
-          competiria com o botão que a pessoa veio usar. */}
-      <details className="esc-evento" open={abrirEvento}
-        onToggle={e => setAbrirEvento((e.currentTarget as HTMLDetailsElement).open)}
-        style={{ marginTop: 'var(--e5)' }}>
-        <summary className="esc-evento-abrir">Adicionar evento esporádico</summary>
-        <div className="esc-evento-corpo">
-          <p className="esc-evento-dica">
-            Para o que não é domingo nem Follow — um GUIA Empreendedor, um ensaio,
-            uma conferência. Depois de criado ele aparece na lista com os outros
-            dias, e o sorteio respeita quem avisou que não pode e quem já serviu
-            demais no mês.
+      {/* A FAIXA DE NÚMEROS só existe com culto por vir: num mês que já
+          passou ela seria uma fileira de zeros sem decisão nenhuma. A ajuda
+          recolhida continua logo embaixo: é material de primeira vez, e
+          fechada custa zero a quem já sabe. */}
+      <div className="es-ec-topo">
+        {!!futuros.length && (
+          <Kpis n={4}>
+            <Kpi rot="Cultos a montar" valor={contas.aMontar} de={futuros.length}
+              sub={!contas.aMontar ? 'todos montados' : !montados ? 'nenhum montado ainda' : cont(montados, 'já montado', 'já montados')}
+              tom={contas.aMontar ? '' : 'zero'}
+              rotulo={`Cultos a montar: ${contas.aMontar} de ${futuros.length}`} />
+            <Kpi rot="Postos sem ninguém" valor={contas.vagas}
+              sub={contas.vagas ? 'é por onde começar' : 'nos cultos montados'}
+              tom={contas.vagas ? 'bad' : 'zero'} />
+            <Kpi rot="Sem resposta" valor={contas.pendentes}
+              sub={contas.pendentes ? 'esperando confirmar' : 'ninguém devendo'}
+              tom={contas.pendentes ? 'warn' : 'zero'} />
+            <Kpi rot="Furos" valor={contas.furos}
+              sub={contas.furos ? 'chame o plantão' : 'ninguém furou'}
+              tom={contas.furos ? 'bad' : 'zero'} />
+          </Kpis>
+        )}
+        <Dobra titulo="O que esses botões fazem">
+          <p className="es-prosa">
+            Montar e sortear preenchem só o que está vazio: <b>quem confirmou
+            e quem você travou não se mexe</b>. Pedir, copiar e cobrar geram
+            um texto para você colar no grupo. <b>Nada é enviado daqui.</b>
           </p>
-          <div className="esc-evento-campos">
-            <label>
-              <span>O que é</span>
-              <input value={evNome} maxLength={80} placeholder="GUIA Empreendedor"
-                onChange={e => setEvNome(e.target.value)} />
-            </label>
-            <label>
-              <span>Dia</span>
-              <input type="date" value={evData} min={hoje}
-                onChange={e => setEvData(e.target.value)} />
-            </label>
-            <label>
-              <span>Hora <span className="esc-evento-opc">(opcional)</span></span>
-              <input type="time" value={evHora} onChange={e => setEvHora(e.target.value)} />
-            </label>
-          </div>
-          {/* BOTÃO CINZA QUE NÃO DIZ O QUE FALTA É UM BECO.
-
-              Com o nome preenchido e a data em branco o botão ficava cinza e
-              nada na vizinhança dizia qual dos três campos estava faltando.
-              Medido nos dois tamanhos de tela. A pessoa toca, não acontece
-              nada, e não há como descobrir o porquê a não ser adivinhando.
-
-              E O RÓTULO PAROU DE ECOAR O QUE FOI DIGITADO. Ele era
-              `Criar "{nome}"`, então em 390px um nome longo quebrava em duas
-              linhas e o botão ia de 53px para 72px de altura, empurrando tudo
-              o que estava abaixo para baixo enquanto a pessoa digitava.
-              Medido: 292x53 vazio, 292x72 com "Conferencia de Missoes…". O
-              nome já está no campo logo acima; repeti-lo no botão custava um
-              layout que pula e não acrescentava nada. */}
-          {(() => {
-            const falta = [
-              evNome.trim().length < 2 ? 'o nome' : null,
-              !evData ? 'o dia' : null,
-            ].filter(Boolean);
-            return (
-              <>
-                <button className="lid-bt" disabled={ocupado || falta.length > 0}
-                  onClick={criarOEvento}>
-                  {ocupado ? 'Criando…' : 'Criar o evento'}
-                </button>
-                {falta.length > 0 && (
-                  <p className="esc-evento-falta" role="status">
-                    Falta {falta.join(' e ')}.
-                  </p>
-                )}
-              </>
-            );
-          })()}
-          <p className="esc-evento-dica">
-            O evento é <strong>deste ministério</strong> ({equipe?.nome || 'o do topo'}) e
-            só aparece para quem organiza ele.
-          </p>
-        </div>
-      </details>
+        </Dobra>
+      </div>
 
       {/* A FITA DE DOMINGOS SAIU. Ela existia para pular para um dia no meio
           de nove cartões em ordem de data. Com o próximo em cima e o passado
@@ -587,43 +554,130 @@ function Escala() {
           delas só para navegar na outra, é complexidade que eu mesmo tinha
           acabado de criar. */}
 
-      {/* A LISTA E O PESO, LADO A LADO. 07/09/2026.
-          Medido em 1440: o cartão de dia acaba em x=856 e o `.lid` vai até
-          1290. São 434px vazios em toda a altura da página, e em 1920 são os
-          mesmos 434 mais 390 de margem de cada lado. A tentação era alargar o
-          cartão, e ela está errada: a largura dele é 64ch por medição (ver a
-          nota em globals.css), porque uma linha de nome + estado é uma linha
-          de LEITURA. O que cabe ali do lado é conteúdo de outra natureza. */}
-      <div className="esc-palco">
-        <div className="esc-lista">
+      {/* A LISTA E O PESO, LADO A LADO. A lista de dias é leitura, e alargar
+          a caixa do dia não ajuda ninguém: o que cabe do lado é conteúdo de
+          outra natureza (o mês em pessoas, o evento esporádico). Abaixo de
+          1100px o trilho desce para depois da lista, na ordem do DOM. */}
+      <div className="es-duas es-secao">
+        <div className="es-pilha">
           {/* -------------------------------------------------- o que ainda vem */}
-          {futuros.map(d => (
-            <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
-              {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
-          ))}
+          {!!futuros.length && (
+            <Secao titulo="Próximos cultos">
+              <div className="es-ec-dias">
+                {futuros.map(d => (
+                  <DiaCard key={d} d={d} aberto={d === proximo} passado={false}
+                    {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+                ))}
+              </div>
+            </Secao>
+          )}
 
           {/* ---------------------------------------------------- o que passou
               Recolhido. É referência: o líder vem aqui para registrar um furo
               ou conferir o que aconteceu, não para trabalhar. */}
           {!!passados.length && (
-            <section className="lid-secao">
-              <div className="lid-secao-cab">
-                <span className="rot">Já passaram</span>
-                <button className="lid-bt-txt" onClick={() => setVerPassado(v => !v)}>
+            <Secao titulo="Já passaram"
+              acoes={
+                <button className="es-btn es-txt es-peq" aria-expanded={verPassado} onClick={() => setVerPassado(v => !v)}>
                   {verPassado ? 'Esconder' : `Ver ${passados.length}`}
                 </button>
-              </div>
-              {verPassado && passados.map(d => (
-                <DiaCard key={d} d={d} aberto={false} passado
-                  {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
-              ))}
-            </section>
+              }>
+              {verPassado && (
+                <div className="es-ec-dias">
+                  {passados.map(d => (
+                    <DiaCard key={d} d={d} aberto={false} passado
+                      {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+                  ))}
+                </div>
+              )}
+            </Secao>
           )}
         </div>
 
-        <MesEmPessoas S={S} ano={ano} mes={mes} />
+        <div className="es-pilha">
+          <MesEmPessoas S={S} ano={ano} mes={mes} />
+
+          {/* ===================================================== EVENTO ESPORÁDICO
+
+              O que não está na programação fixa: o GUIA Empreendedor numa quinta,
+              um ensaio geral num sábado. Depois de criado, o dia entra na lista
+              como qualquer domingo e "Montar" sorteia com as MESMAS regras.
+
+              Fica fechado por padrão e no trilho porque é o caminho raro: o
+              comum é montar o mês. Um formulário aberto em cima competiria com
+              o botão que a pessoa veio usar.
+
+              É a dobra da casa escrita à mão, e não a peça `Dobra`, por um
+              motivo só: `criarOEvento` FECHA a dobra depois de criar
+              (`setAbrirEvento(false)`), e para isso o `open` precisa seguir o
+              estado nos dois sentidos, o que pede o `onToggle` aqui. */}
+          <details className="es-dobra" open={abrirEvento}
+            onToggle={e => setAbrirEvento((e.currentTarget as HTMLDetailsElement).open)}>
+            <summary><span>Adicionar evento esporádico</span></summary>
+            <div className="es-dobra-corpo es-ec-evento">
+              <p className="es-ec-dica">
+                Para o que não é domingo nem Follow: um GUIA Empreendedor, um ensaio,
+                uma conferência. Depois de criado ele aparece na lista com os outros
+                dias, e o sorteio respeita quem avisou que não pode e quem já serviu
+                demais no mês.
+              </p>
+              <label className="es-campo es-curto">
+                <span>O que é</span>
+                <input className="es-ctl" value={evNome} maxLength={80} placeholder="GUIA Empreendedor"
+                  onChange={e => setEvNome(e.target.value)} />
+              </label>
+              <label className="es-campo es-data">
+                <span>Dia</span>
+                <input className="es-ctl" type="date" value={evData} min={hoje}
+                  onChange={e => setEvData(e.target.value)} />
+              </label>
+              <label className="es-campo es-data">
+                <span>Hora</span>
+                <input className="es-ctl" type="time" value={evHora} onChange={e => setEvHora(e.target.value)} />
+                <small>Opcional.</small>
+              </label>
+              {/* BOTÃO CINZA QUE NÃO DIZ O QUE FALTA É UM BECO.
+
+                  Com o nome preenchido e a data em branco o botão ficava cinza e
+                  nada na vizinhança dizia qual dos três campos estava faltando.
+                  Medido nos dois tamanhos de tela. A pessoa toca, não acontece
+                  nada, e não há como descobrir o porquê a não ser adivinhando.
+
+                  E O RÓTULO PAROU DE ECOAR O QUE FOI DIGITADO. Ele era
+                  `Criar "{nome}"`, então em 390px um nome longo quebrava em duas
+                  linhas e o botão ia de 53px para 72px de altura, empurrando tudo
+                  o que estava abaixo para baixo enquanto a pessoa digitava.
+                  Medido: 292x53 vazio, 292x72 com "Conferencia de Missoes…". O
+                  nome já está no campo logo acima; repeti-lo no botão custava um
+                  layout que pula e não acrescentava nada. */}
+              {(() => {
+                const falta = [
+                  evNome.trim().length < 2 ? 'o nome' : null,
+                  !evData ? 'o dia' : null,
+                ].filter(Boolean);
+                return (
+                  <div className="es-linha">
+                    <button className="es-btn" disabled={ocupado || falta.length > 0}
+                      onClick={criarOEvento}>
+                      {ocupado ? 'Criando…' : 'Criar o evento'}
+                    </button>
+                    {falta.length > 0 && (
+                      <p className="es-ec-falta" role="status">
+                        Falta {falta.join(' e ')}.
+                      </p>
+                    )}
+                  </div>
+                );
+              })()}
+              <p className="es-ec-dica">
+                O evento é <b>deste ministério</b> ({equipe?.nome || 'o do topo'}) e
+                só aparece para quem organiza ele.
+              </p>
+            </div>
+          </details>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
@@ -647,6 +701,12 @@ function Escala() {
    Os traços são decorativos para quem lê com leitor de tela: quem carrega o
    fato é o número ao lado e a lista de datas escondida. Desenho não pode ser
    a única via de uma informação.
+
+   30/09/2026: o alarme saiu do nome e foi para a pílula. Nome em vermelho
+   dizia "tem algo errado com esta pessoa", e o que está errado é a escala:
+   "em todos" (vermelho, é quem sustenta o mês sozinho) e "acima do limite"
+   (âmbar). As duas frases de rodapé que repetiam esses nomes saíram junto,
+   porque a pílula já diz a mesma coisa na linha de cada um.
 ============================================================================= */
 function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) {
   const [verZerados, setVerZerados] = useState(false);
@@ -660,53 +720,47 @@ function MesEmPessoas({ S, ano, mes }: { S: Estado; ano: number; mes: number }) 
       : m.acimaDoLimite.some(x => x.id === id) ? 'acima' : '';
 
   return (
-    <aside className="esc-peso" aria-labelledby="esc-peso-t">
-      <h2 className="esc-peso-t" id="esc-peso-t">O mês em pessoas</h2>
-      <p className="esc-peso-sub">
+    <Secao titulo="O mês em pessoas"
+      sub={<>
         {cont(m.escalados.length, 'pessoa entra', 'pessoas entram')} nos{' '}
         {cont(m.montados.length, 'culto montado', 'cultos montados')} de {MESES[mes - 1]}.
-      </p>
+      </>}>
+      <div className="es-caixa">
+        <ol className="es-ec-peso">
+          {m.escalados.map(p => {
+            const mc = marca(p.id);
+            return (
+              <li key={p.id} className="es-ec-pessoa">
+                <span className="es-ec-pessoa-nome">
+                  {p.nome}
+                  {mc === 'todos' && <Pilula tom="bad">em todos</Pilula>}
+                  {mc === 'acima' && <Pilula tom="warn">acima do limite</Pilula>}
+                </span>
+                <span className="es-ec-fita" aria-hidden="true">
+                  {m.montados.map(d => (
+                    <i key={d} className={p.dias.includes(d) ? 'es-ec-traco es-ec-cheio' : 'es-ec-traco'} />
+                  ))}
+                </span>
+                <span className="es-ec-pessoa-n">{p.n}</span>
+                <span className="es-so-leitor">
+                  {cont(p.n, 'culto', 'cultos')} em {MESES[mes - 1]}: {p.dias.map(fmtDia).join(', ')}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
 
-      <ol className="esc-peso-l">
-        {m.escalados.map(p => (
-          <li key={p.id} className={marca(p.id)}>
-            <span className="esc-peso-n">{p.nome}</span>
-            <span className="esc-peso-fita" aria-hidden="true">
-              {m.montados.map(d => (
-                <i key={d} className={p.dias.includes(d) ? 'on' : ''} />
-              ))}
-            </span>
-            <span className="esc-peso-q">{p.n}</span>
-            <span className="so-leitor">
-              {cont(p.n, 'culto', 'cultos')} em {MESES[mes - 1]}: {p.dias.map(fmtDia).join(', ')}
-            </span>
-          </li>
-        ))}
-      </ol>
-
-      {!!m.emTodos.length && (
-        <p className="esc-peso-nota todos">
-          {m.emTodos.map(p => p.nome).join(' · ')}{' '}
-          {pl(m.emTodos.length, 'está', 'estão')} em todos os cultos montados.
-        </p>
-      )}
-      {!!m.acimaDoLimite.length && (
-        <p className="esc-peso-nota acima">
-          {m.acimaDoLimite.map(p => p.nome).join(' · ')}{' '}
-          {pl(m.acimaDoLimite.length, 'passou', 'passaram')} do limite do mês.
-        </p>
-      )}
-
-      {!!m.zerados.length && (
-        <div className="esc-peso-zero">
-          <button className="lid-bt-txt" onClick={() => setVerZerados(v => !v)}
-            aria-expanded={verZerados}>
-            {cont(m.zerados.length, 'pessoa não entra', 'pessoas não entram')} em nenhum
-          </button>
-          {verZerados && <p>{m.zerados.map(p => p.nome).join(' · ')}</p>}
-        </div>
-      )}
-    </aside>
+        {!!m.zerados.length && (
+          <div className="es-ec-peso-pe">
+            <button className="es-btn es-txt es-peq" onClick={() => setVerZerados(v => !v)}
+              aria-expanded={verZerados}>
+              {cont(m.zerados.length, 'pessoa não entra', 'pessoas não entram')} em nenhum
+            </button>
+            {verZerados && <p>{m.zerados.map(p => p.nome).join(' · ')}</p>}
+          </div>
+        )}
+      </div>
+    </Secao>
   );
 }
 
@@ -768,37 +822,47 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
   /* O RESUMO DA LINHA FECHADA muda de pergunta conforme o tempo do culto.
      Antes era sempre "N/M confirmados", em vermelho, inclusive num domingo
      vivido há três semanas — vermelho sobre uma coisa que ninguém mais pode
-     mudar é o jeito mais rápido de ensinar o líder a ignorar a cor. */
-  const resumo = !doDia.length ? { tom: '', txt: 'sem funções neste dia' }
+     mudar é o jeito mais rápido de ensinar o líder a ignorar a cor.
+
+     30/09/2026: o tom virou o da pílula do sistema, e a cascata do culto por
+     vir passou a seguir a régua do motor (`classificar`: vaga, furo ou quem
+     não pode = falta gente; sem resposta = espera). Ela não olhava o "não
+     pode": um domingo com alguém que avisou que não vai saía "6 a confirmar"
+     em âmbar aqui, e "1 não pode" em vermelho no Painel e no selo da aba
+     Escala, para o mesmo dia. "A montar" é neutro, como "não montada" no
+     Painel: ainda não há juízo a fazer sobre um dia sem ninguém escalado.
+     As palavras da soma são as de `components/escalas/leitura.ts`, as mesmas
+     do Painel ("sem resposta", e não "a confirmar"). */
+  const resumo: { tom: Tom; txt: string } = !doDia.length ? { tom: 'neutro', txt: 'sem funções neste dia' }
     : passado
-      ? r && r.furos ? { tom: 'ruim', txt: r.furos === 1 ? '1 pessoa furou' : `${r.furos} pessoas furaram` }
-        : r && r.confirmados ? { tom: '', txt: `${r.confirmados} de ${r.preenchidos} ${pl(r.confirmados, 'confirmou', 'confirmaram')}` }
-        : { tom: '', txt: 'aconteceu' }
-    : !dia || !preenchidos ? { tom: 'pend', txt: 'a montar' }
-    : r && r.vagas.length ? { tom: 'ruim', txt: r.vagas.length === 1 ? '1 vaga sem ninguém' : `${r.vagas.length} vagas sem ninguém` }
-    : r && r.furos ? { tom: 'ruim', txt: `${r.furos} ${pl(r.furos, 'furou', 'furaram')}` }
-    : semConfirmar ? { tom: 'pend', txt: semConfirmar === 1 ? '1 a confirmar' : `${semConfirmar} a confirmar` }
-    : { tom: 'ok', txt: 'tudo confirmado' };
+      ? r && r.furos ? { tom: 'bad', txt: r.furos === 1 ? '1 pessoa furou' : `${r.furos} pessoas furaram` }
+        : r && r.confirmados ? { tom: 'neutro', txt: `${r.confirmados} de ${r.preenchidos} ${pl(r.confirmados, 'confirmou', 'confirmaram')}` }
+        : { tom: 'neutro', txt: 'aconteceu' }
+    : !dia || !preenchidos ? { tom: 'neutro', txt: 'a montar' }
+    : r ? leituraDoDia({ vagas: r.vagas.length, furos: r.furos, recusados: r.recusados, pendentes: semConfirmar })
+    : { tom: 'neutro', txt: 'a montar' };
+
+  /* O NOME DO DIA. O culto como a tela sempre chamou ("domingo", "Follow,
+     sábado"), com a data por extenso, como no título do Painel. O evento
+     leva o próprio nome, o dia da semana de verdade e a hora: `nomeDia` só
+     conhece sábado e domingo, e chamava de "domingo" um evento numa quarta
+     (o defeito que `diaLongo` já corrigiu na tela do voluntário, na 71). */
+  const nome = nomeDia(d);
+  const titulo = dia?.evento
+    ? `${diaLongo(d, dia.evento)}${dia.inicio ? ` · ${String(dia.inicio).slice(0, 5)}` : ''}`
+    : `${nome.charAt(0).toUpperCase()}${nome.slice(1)}, ${fmtLongo(d)}`;
 
   return (
-    <details className={`esc-dia ${resumo.tom}`} id={`d${d}`} open={aberto} style={{ scrollMarginTop: 96 }}>
+    <details className="es-ec-dia" id={`d${d}`} open={aberto}>
       <summary>
-        <span className="lid-marca" aria-hidden="true" />
-        <span>
-          <span className="esc-dia-nome">
-            {dia?.evento ? dia.evento : `${nomeDia(d)}, ${fmtDia(d)}`}
-          </span>
-          <span className="esc-dia-sub">
-            {/* num evento, a data e a hora vão no subtítulo: o nome já ocupou
-                a linha de cima, e é a hora que a pessoa procura */}
-            {dia?.evento && `${nomeDia(d)}, ${fmtDia(d)}${dia.inicio ? ` · ${String(dia.inicio).slice(0, 5)}` : ''} · `}
-            {passado ? 'já passou' : preenchidos ? `${preenchidos} de ${cont(doDia.length, 'posto', 'postos')}` : cont(doDia.length, 'posto', 'postos')}
-          </span>
+        <b className="es-ec-dia-tit">{titulo}</b>
+        <span className="es-ec-dia-sub">
+          {preenchidos ? `${preenchidos} de ${cont(doDia.length, 'posto', 'postos')}` : cont(doDia.length, 'posto', 'postos')}
         </span>
-        <span className="esc-dia-est">{resumo.txt}</span>
+        <span className="es-ec-dia-est"><Pilula tom={resumo.tom}>{resumo.txt}</Pilula></span>
       </summary>
 
-      <div className="esc-corpo">
+      <div className="es-ec-dia-corpo">
         <Corpo {...{ d, passado, S, dia, doDia, r, probs, preenchidos, ocupado, semFuncoes, aviso,
           gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
         {/* tirar o evento fica DENTRO do dia, e não na lista de cima: quem
@@ -806,8 +870,8 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
             domingo não se apaga por aqui (a RPC recusa, e a tela também não
             oferece). */}
         {dia?.evento && dia?.cultoId && !passado && (
-          <div className="esc-evento-tirar">
-            <button className="lid-bt-txt" disabled={ocupado}
+          <div className="es-linha es-ec-tirar">
+            <button className="es-btn es-txt es-peq es-perigo" disabled={ocupado}
               onClick={() => tirarOEvento(dia.cultoId!, dia.evento!)}>
               Tirar {dia.evento} da escala
             </button>
@@ -825,33 +889,35 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
   return (
     <>
       {/* AS AÇÕES DO DIA. Copiar a escala é a que o líder usa toda semana, e
-          por isso é a sólida — QUANDO HÁ ESCALA. Num dia vazio (todo mês novo
-          nasce assim) a sólida oferecia copiar uma escala que não existe e a
-          única ação que mudava algo, sortear, era a secundária 57px abaixo.
-          Auditoria de 07/09: hierarquia invertida no estado em que o líder
-          mais precisa de direção. No vazio, sortear é a sólida e copiar
-          espera, desligado. Cobrar só aparece quando há quem cobrar. */}
-      <div className="esc-acoes">
+          por isso é a de contorno, a mais forte do dia, QUANDO HÁ ESCALA. Num
+          dia vazio (todo mês novo nasce assim) a mais forte oferecia copiar
+          uma escala que não existe e a única ação que mudava algo, sortear,
+          era a secundária 57px abaixo. Auditoria de 07/09: hierarquia
+          invertida no estado em que o líder mais precisa de direção. No
+          vazio, sortear é a de contorno e copiar espera, desligado. Cobrar só
+          aparece quando há quem cobrar. Nenhuma é cheia: a ação cheia da tela
+          é "Montar o mês inteiro", no alto. */}
+      <div className="es-linha">
         {preenchidos ? (
           <>
-            <button className="lid-bt" onClick={() => copiar(msgEscala(S, d), aviso, 'Escala copiada. Cole no grupo.')}>
-              Copiar a escala
+            <button className="es-btn es-peq" onClick={() => copiar(msgEscala(S, d), aviso, 'Escala copiada. Cole no grupo.')}>
+              <IcCopiar />Copiar a escala
             </button>
-            <button className="lid-bt-txt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
-              Sortear de novo
+            <button className="es-btn es-txt es-peq" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
+              <IcDado />Sortear de novo
             </button>
           </>
         ) : (
           <>
-            <button className="lid-bt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
-              Sortear este dia
+            <button className="es-btn es-peq" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
+              <IcDado />Sortear este dia
             </button>
-            <button className="lid-bt-txt" disabled>Copiar a escala</button>
+            <button className="es-btn es-txt es-peq" disabled><IcCopiar />Copiar a escala</button>
           </>
         )}
         {!passado && !!cobranca && (
-          <button className="lid-bt-txt" onClick={() => copiar(cobranca, aviso, 'Cobrança copiada. Cole no grupo.')}>
-            Cobrar confirmação
+          <button className="es-btn es-txt es-peq" onClick={() => copiar(cobranca, aviso, 'Cobrança copiada. Cole no grupo.')}>
+            <IcSino />Cobrar confirmação
           </button>
         )}
       </div>
@@ -859,21 +925,22 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
       {/* OS PROBLEMAS APONTAM PARA A LINHA. Eram frases soltas: o líder lia
           "Fulano está em PROJEÇÃO e ILUMINAÇÃO ao mesmo tempo" e caçava as
           duas linhas numa lista de nove. Agora o texto leva até lá. */}
-      {probs.map((p: any, i: number) => (
-        <div key={i} className={`esc-prob ${p.grau === 'erro' ? 'ruim' : 'pend'}`}>
-          <span className="esc-prob-marca" aria-hidden="true" />
-          <span>
-            {p.texto}
-            {!!p.foco?.length && (
-              <a className="esc-prob-ir" href={`#p${d}-${slugFn(p.foco[0])}`}>ir para {p.foco[0]}</a>
-            )}
-          </span>
+      {!!probs.length && (
+        <div className="es-ec-probs">
+          {probs.map((p: any, i: number) => (
+            <Aviso key={i} tom={p.grau === 'erro' ? 'bad' : 'warn'}>
+              {p.texto}
+              {!!p.foco?.length && (
+                <>{' '}<a className="es-ec-ir" href={`#p${d}-${slugFn(p.foco[0])}`}>ir para {p.foco[0]}</a></>
+              )}
+            </Aviso>
+          ))}
         </div>
-      ))}
+      )}
 
       {!passado && doDia.length > 0 && preenchidos === 0 && (
-        <p className="esc-nota">
-          Ninguém escalado ainda. <strong>Sortear</strong> preenche tudo de uma vez.
+        <p className="es-ec-nota">
+          Ninguém escalado ainda. <b>Sortear</b> preenche tudo de uma vez.
         </p>
       )}
 
@@ -883,43 +950,45 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
       {/* Relatório que o líder ESCALADO escreveu no fim daquele culto. Aqui é
           só leitura: quem viveu o dia é quem escreve, no link dele. */}
       {(dia?.relatorio || dia?.problemas) && (
-        <div className="esc-relato">
-          <span className="esc-mini">Relatório de quem liderou o dia</span>
+        <div className="es-caixa es-ec-relato">
+          <span className="es-ec-rot">Relatório de quem liderou o dia</span>
           {dia.relatorio && <p>{dia.relatorio}</p>}
-          {dia.problemas && <p><strong>Problemas:</strong> {dia.problemas}</p>}
-          {dia.relatadoEm && <span className="esc-relato-quando">enviado em {new Date(dia.relatadoEm).toLocaleString('pt-BR')}</span>}
+          {dia.problemas && <p><b>Problemas:</b> {dia.problemas}</p>}
+          {dia.relatadoEm && <small>enviado em {new Date(dia.relatadoEm).toLocaleString('pt-BR')}</small>}
         </div>
       )}
 
       {/* recado ACIMA da escala: escreve o aviso antes de montar e publicar.
           Ele vai na mensagem do grupo E na tela de quem está escalado. */}
-      <label className="esc-recado">
-        <span className="esc-mini">Recado deste dia</span>
-        <input enterKeyHint="done" defaultValue={dia?.obs || ''} disabled={ocupado}
+      <label className="es-campo es-ec-recado">
+        <span>Recado deste dia</span>
+        <textarea className="es-ctl" rows={2} defaultValue={dia?.obs || ''} disabled={ocupado}
           placeholder="ex: chegar 18h, tem batismo antes do culto"
           onBlur={e => { if (e.target.value !== (dia?.obs || '')) void salvarObs(d, e.target.value); }} />
-        <span className="esc-recado-nota">
-          Vai na mensagem do grupo e no link de quem está escalado.
-        </span>
+        <small>Vai na mensagem do grupo e no link de quem está escalado.</small>
       </label>
 
-      {/* ------------------------------------------------------- os postos */}
-      <div className="esc-postos">
+      {/* ------------------------------------------------------- os postos
+          Uma linha por posto, e o plantão fecha a lista. */}
+      <div className="es-fila es-ec-postos">
         {doDia.map((f: any) => (
           <Posto key={f.nome} {...{ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira }} />
         ))}
-      </div>
-
-      {/* plantão embaixo, sozinho */}
-      <div className="esc-plantao">
-        <span className="esc-mini">Plantão, quem entra se alguém faltar</span>
-        <div className="esc-plantao-in">
-          <span className={dia?.plantao?.length ? 'esc-plantao-nomes' : 'esc-plantao-vazio'}>
-            {dia?.plantao?.length ? dia.plantao.map((p: string) => nomeDe(S, p)).join(', ') : 'ninguém ainda'}
+        <div className="es-ec-posto es-ec-plantao">
+          <span className="es-ec-fn">Plantão</span>
+          <span className="es-ec-quem">
+            {dia?.plantao?.length
+              ? <b className="es-ec-plantao-nomes">{dia.plantao.map((p: string) => nomeDe(S, p)).join(', ')}</b>
+              : <span className="es-ec-plantao-vazio">ninguém ainda</span>}
           </span>
-          <button className="lid-bt-txt" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => novoPlantao(d)}>
-            Sugerir
-          </button>
+          <span className="es-ec-extra">
+            <span className="es-ec-sit"><Pilula tom="info">entra se alguém faltar</Pilula></span>
+            <span className="es-ec-marcas">
+              <button className="es-btn es-txt es-peq" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => novoPlantao(d)}>
+                Sugerir
+              </button>
+            </span>
+          </span>
         </div>
       </div>
     </>
@@ -941,20 +1010,20 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
     ? [{ id: slot.vid, nome: nomeDe(S, slot.vid), nivel: '', carga: 0, forcado: true } as any, ...lista]
     : lista;
 
-  const tom = !slot?.vid ? 'ruim'
-    : st === 'confirmado' ? 'ok' : st === 'recusado' || st === 'furou' ? 'ruim' : 'pend';
-
+  /* A COR MORA NA SITUAÇÃO, NÃO NA LINHA (30/09/2026). O fio colorido à
+     esquerda de cada posto saiu: a pílula da situação já diz confirmou /
+     falta confirmar / não pode, e a vaga sem ninguém é o campo tracejado.
+     Sem pessoa não há situação, e a pílula some. */
   return (
-    <div className={`esc-posto ${tom}`} id={`p${d}-${slugFn(f.nome)}`}>
-      <span className="lid-marca" aria-hidden="true" />
-      <div className="esc-posto-in">
-        <span className="esc-fn">{f.nome}</span>
+    <div className="es-ec-posto" id={`p${d}-${slugFn(f.nome)}`}>
+      <span className="es-ec-fn">{f.nome}</span>
 
-        {/* O NOME OCUPA A LINHA INTEIRA e é só o nome. O contexto que ajuda a
-            ESCOLHER (nível, carga, se a pessoa disse que pode) vive dentro da
-            lista, que é onde ele é usado. */}
+      {/* O NOME OCUPA A LINHA INTEIRA e é só o nome. O contexto que ajuda a
+          ESCOLHER (nível, carga, se a pessoa disse que pode) vive dentro da
+          lista, que é onde ele é usado. */}
+      <span className="es-ec-quem">
         <Escolha
-          classe="esc-quem" valor={slot?.vid || ''} vazio={!slot?.vid} desabilitado={ocupado}
+          forma="campo" valor={slot?.vid || ''} vazia={!slot?.vid} desabilitado={ocupado}
           rotulo={`Quem faz ${f.nome} em ${fmtDia(d)}`}
           mostra={slot?.vid ? nomeDe(S, slot.vid) : 'precisa de alguém'}
           aoMudar={v => trocar(d, f.nome, v)}>
@@ -973,61 +1042,75 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
             );
           })}
         </Escolha>
+      </span>
 
-        {/* travar e 1ª vez viraram palavras. Eram dois ícones sem rótulo, e o
-            cadeado ativo ficava preto sobre preto. */}
-        {slot?.vid && (
-          <div className="esc-tags">
-            <button className={`esc-tag ${slot.fixo ? 'on' : ''}`} disabled={ocupado} onClick={() => travar(d, f.nome)}>
-              {slot.fixo ? 'travado' : 'travar'}
+      {slot?.vid && (
+        <span className="es-ec-extra">
+          {/* A SITUAÇÃO. Não existia nesta tela: só no painel e só para o
+              próximo culto. É por isso que o banco tem 0 furos marcados em 92
+              escalações. */}
+          <span className="es-ec-sit">
+            <Escolha
+              forma="pill" tom={tomDoStatus(st)} valor={st} desabilitado={ocupado || !dia?.cultoId}
+              rotulo={`Situação de ${nomeDe(S, slot.vid)} em ${f.nome}`}
+              mostra={SITUACOES.find(s => s.v === st)?.rot || st}
+              aoMudar={v => situacao(d, f.nome, v as Status)}>
+              {SITUACOES.map(s => <option key={s.v} value={s.v}>{s.rot}</option>)}
+            </Escolha>
+          </span>
+
+          {/* fixo e 1ª vez são fichas que acendem (`aria-pressed`). Eram dois
+              ícones sem rótulo, e o cadeado ativo ficava preto sobre preto. */}
+          <span className="es-ec-marcas">
+            <button className="es-ficha" aria-pressed={!!slot.fixo} disabled={ocupado} onClick={() => travar(d, f.nome)}>
+              fixo
             </button>
-            <button className={`esc-tag ${slot.primeiraVez ? 'on' : ''}`} disabled={ocupado} onClick={() => marcarPrimeira(d, f.nome)}>
+            <button className="es-ficha" aria-pressed={!!slot.primeiraVez} disabled={ocupado} onClick={() => marcarPrimeira(d, f.nome)}>
               1ª vez
             </button>
-            {slot.fixo && <span className="esc-tag-nota">o sorteio não mexe</span>}
-            {slot.primeiraVez && <span className="esc-tag-nota">chega 30 min mais cedo</span>}
-          </div>
-        )}
-      </div>
-
-      {/* A SITUAÇÃO. Não existia nesta tela: só no painel e só para o próximo
-          culto. É por isso que o banco tem 0 furos marcados em 92 escalações. */}
-      {slot?.vid && (
-        <Escolha
-          classe="esc-sit" valor={st} desabilitado={ocupado || !dia?.cultoId}
-          rotulo={`Situação de ${nomeDe(S, slot.vid)} em ${f.nome}`}
-          mostra={SITUACOES.find(s => s.v === st)?.rot || st}
-          aoMudar={v => situacao(d, f.nome, v as Status)}>
-          {SITUACOES.map(s => <option key={s.v} value={s.v}>{s.rot}</option>)}
-        </Escolha>
+          </span>
+          {(slot.fixo || slot.primeiraVez) && (
+            <span className="es-ec-notas">
+              {slot.fixo && <span>o sorteio não mexe</span>}
+              {slot.primeiraVez && <span>chega 30 min mais cedo</span>}
+            </span>
+          )}
+        </span>
       )}
     </div>
   );
 }
 
-/* quem respondeu posso / não posso neste dia */
+/* quem respondeu posso / não posso neste dia. Fechada, é uma linha de
+   contagem; aberta, os nomes e a cobrança de quem não respondeu. */
 function Disponibilidade({ d, S, aviso }: any) {
   const rp = respostasDoDia(S, d);
   if (!rp.total) return null;
   return (
-    <details className="esc-disp">
+    <details className="es-dobra">
       <summary>
-        <span><b>{rp.posso.length}</b> {pl(rp.posso.length, 'pode', 'podem')}</span>
-        <span><b>{rp.nao.length}</b> não</span>
-        <span className={rp.mudo.length ? 'falta' : ''}><b>{rp.mudo.length}</b> sem responder</span>
-        <span className="esc-disp-ver">ver nomes</span>
+        <span className="es-ec-disp-linha">
+          <b className="es-ec-disp-tit">Disponibilidade</b>
+          <span><b>{rp.posso.length}</b> {pl(rp.posso.length, 'pode', 'podem')}</span>
+          <span><b>{rp.nao.length}</b> {pl(rp.nao.length, 'não pode', 'não podem')}</span>
+          {rp.mudo.length
+            ? <Pilula tom="warn">{rp.mudo.length} sem resposta</Pilula>
+            : <span><b>0</b> sem resposta</span>}
+        </span>
       </summary>
-      <div className="esc-disp-corpo">
-        <div><span className="esc-mini">Podem</span><p>{rp.posso.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
-        <div><span className="esc-mini">Não podem</span><p>{rp.nao.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
-        <div><span className="esc-mini">Não responderam</span><p>{rp.mudo.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
+      <div className="es-dobra-corpo es-ec-disp-corpo">
+        <div className="es-ec-grupo"><span className="es-ec-rot">Podem</span><p>{rp.posso.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
+        <div className="es-ec-grupo"><span className="es-ec-rot">Não podem</span><p>{rp.nao.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
+        <div className="es-ec-grupo"><span className="es-ec-rot">Não responderam</span><p>{rp.mudo.map((v: any) => v.nome).join(', ') || 'ninguém'}</p></div>
         {!!rp.mudo.length && (
-          <button className="lid-bt-txt" style={{ marginTop: 14 }}
-            onClick={() => copiar(
-              `Pessoal, quem ainda não respondeu a disponibilidade de ${fmtDia(d)}: ${rp.mudo.map((v: any) => v.nome).join(', ')}. Entrem no link de vocês e marquem posso ou não posso, é rapidinho.`,
-              aviso, 'Cobrança copiada. Cole no grupo.')}>
-            Cobrar quem não respondeu
-          </button>
+          <div className="es-linha">
+            <button className="es-btn es-peq"
+              onClick={() => copiar(
+                `Pessoal, quem ainda não respondeu a disponibilidade de ${fmtDia(d)}: ${rp.mudo.map((v: any) => v.nome).join(', ')}. Entrem no link de vocês e marquem posso ou não posso, é rapidinho.`,
+                aviso, 'Cobrança copiada. Cole no grupo.')}>
+              <IcCopiar />Cobrar quem não respondeu
+            </button>
+          </div>
         )}
       </div>
     </details>

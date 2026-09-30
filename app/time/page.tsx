@@ -5,10 +5,11 @@ import { Fragment, useState } from 'react';
 import {
   atualizarVoluntario, conferirVoluntario, criarVoluntario, definirHabilidade, limparPinDe, removerVoluntario,
 } from '@/lib/db';
-import { Faixa } from '@/components/Faixa';
-import { cont } from '@/lib/plural';
-import { Aviso, Medidor, Trabalhando } from '@/components/Ui';
-import { IcBusca, IcMais, IcSeta } from '@/components/Icones';
+import { cont, pl } from '@/lib/plural';
+import {
+  Cab, Kpis, Kpi, Secao, Pilula, Aviso, Vazio, Fio, Dobra, Tom, tomCls, tomDaSituacao,
+} from '@/components/escalas/Pecas';
+import { IcBusca, IcMais, IcSeta, IcX } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
@@ -17,16 +18,20 @@ import {
 } from '@/lib/engine';
 import { telefoneOk } from '@/lib/nome';
 
+/* =============================================================================
+   O TIME
+
+   Quem serve, o que cada um sabe fazer e quanto cada um já pegou. Na língua
+   do Financeiro e do Demandas desde 30/09/2026: a situação no título, os
+   números que decidem numa faixa, a busca e as funções como ferramenta, as
+   pessoas numa fila com colunas (pessoa, carga, situação), e o diagnóstico
+   das funções numa tabela. Cor só na pílula, no número e no aviso.
+   ============================================================================= */
+
 export default function Pagina() { return <Shell><Time /></Shell>; }
 
 const CICLO: (Nivel | null)[] = [null, 'titular', 'reserva', 'treino'];
-const CLASSE: Record<string, string> = { titular: 't', reserva: 'r', treino: 'e' };
 const CURTO: Record<string, string> = { titular: 'faz sozinho', reserva: 'ajuda quando falta', treino: 'aprendendo' };
-/* Sigla de 4 letras do chip de área. Pegar só a primeira palavra funcionava na
-   Mídia (PROJEÇÃO, FOTO), mas no Serviço do Culto todos os postos numerados
-   colapsavam: LÍDER 1 e LÍDER 2 viravam "LÍDE", os quatro setores viravam
-   "SETO". Quando o último pedaço é curto (1 ou 2 caracteres), ele é justamente
-   o que distingue, então entra na sigla. */
 /* O NOME DA FUNÇÃO NO FILTRO, SEM O PARÊNTESE.
    "TRANSMISSÃO (CORTE + PTZ)" tem 25 caracteres e sozinha empurrava a fila de
    filtros para uma segunda linha, quebrando a grade. O parêntese é detalhe
@@ -37,11 +42,9 @@ function curtoF(nome: string) {
   return sem || nome;
 }
 
-function marca(nome: string) {
-  const p = nome.trim().split(/\s+/);
-  const fim = p.length > 1 ? p[p.length - 1] : '';
-  return fim && fim.length <= 2 ? p[0].slice(0, 3) + fim : p[0].slice(0, 4);
-}
+/* as colunas da fila de pessoas no desktop: nada em `auto` (ver a fila em
+   escalas.css), para a coluna Pessoa não andar de uma linha para outra */
+const COLUNAS = { '--es-cols': 'minmax(0,1fr) 96px 184px 24px' } as React.CSSProperties;
 
 function Time() {
   const { S, recarregar, aviso, base, equipe } = useApp();
@@ -60,6 +63,21 @@ function Time() {
      quando o time cresce, que é justamente o objetivo do produto. */
   const [busca, setBusca] = useState('');
   const [porFuncao, setPorFuncao] = useState('');
+  /* A PESSOA ABERTA (30/09/2026). A linha resume a pessoa, e o painel só abre
+     quando o líder vai mexer: quando cada pessoa vinha aberta, ocupava mais
+     de mil pixels e o Time tinha 39 mil de rolagem. Era um <details> por
+     pessoa; agora a linha é um botão da fila e o painel nasce logo abaixo
+     dela. Várias podem ficar abertas ao mesmo tempo, como antes. O conjunto
+     mora aqui, e não na linha,
+     porque quem é conferido troca de grupo ("Esperando sua conferência" para
+     "Time conferido") e continua aberto, como o <details> continuava quando a
+     lista era uma só. */
+  const [abertas, setAbertas] = useState<Set<string>>(() => new Set());
+  const alternar = (id: string) => setAbertas(s => {
+    const n = new Set(s);
+    if (n.has(id)) n.delete(id); else n.add(id);
+    return n;
+  });
   const funcoes = funcoesAtivas(S);
   const mapa = new Map(S.funcoes.map(f => [f.nome, f.id!]));
   const saude = saudeDoTime(S);
@@ -207,6 +225,16 @@ function Time() {
     catch (e) { aviso(aviseHumano(e)); }
   }
 
+  /* "Adicionar pessoa", no alto, leva ao formulário que já existe no fim da
+     tela: abre a dobra, rola até ela e põe o cursor no nome. */
+  function abrirAdicionar() {
+    const d = document.getElementById('adicionar') as HTMLDetailsElement | null;
+    if (!d) return;
+    d.open = true;
+    d.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.getElementById('add-nome')?.focus({ preventScroll: true });
+  }
+
   const fila = filaDeConferencia(S);
   /* CONTAGEM, não lista. Já escrevi `pendentes.length` aqui embaixo uma vez e a
      seção inteira sumiu em silêncio: número não tem length. */
@@ -219,19 +247,13 @@ function Time() {
   /* sem acento e sem caixa: quem procura "giovana" acha "Giovana", e quem
      procura "rosalem" acha pelo sobrenome — busca que só casa o começo do
      primeiro nome não serve para lista de gente. */
-  const chave = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const chave = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
   const alvo = chave(busca.trim());
   const ordenados = todos.filter(v =>
     (!alvo || chave(v.nome).includes(alvo)) &&
     (!porFuncao || !!v.funcoes[porFuncao]));
   const filtrando = !!alvo || !!porFuncao;
 
-  /* TIME FALAVA A LÍNGUA VELHA. Cartão cinza, avatar colorido, h1 em Inter
-     pesada — a mesma marca em dois produtos diferentes, dependendo da aba.
-     Aqui a tela passa para a faixa + seção do resto do sistema. Nada de
-     estrutura mudou: continua "conferir nível" no topo e a lista de pessoas
-     embaixo, que é a pergunta em aberto com o Arthur e não é minha para
-     responder sozinho. */
   const ativos = S.voluntarios.filter(v => v.ativo).length;
   /* 18/09/2026. A regra do prédio (posto que só aceita homem ou só mulher) é
      aplicada pelo motor e pelo banco, em silêncio. Silêncio aqui é vaga vazia
@@ -239,447 +261,510 @@ function Time() {
      informar, e qual posto ficou sem gente. */
   const temExigencia = funcoesAtivas(S).some(f => f.exigeSexo);
   const pend = pendenciasDeSexo(S);
+  const temAviso = !S.voluntarios.length || !!pend.semSexo.length
+    || !!pend.postosSemNinguem.length || !!pend.escaladosErrados.length;
+
+  /* DOIS GRUPOS: quem espera a sua conferência e o time conferido, cada um
+     numa seção. Desde 30/09/2026 cada linha também diz a própria situação
+     numa pílula, porque a fila agora tem a coluna Situação. */
+  const esperando = ordenados.filter(v => v.conferido === false);
+  const conferidos = ordenados.filter(v => v.conferido !== false);
+
+  /* OS NÚMEROS DA FAIXA: só o que esta tela já calcula. Frágil é a função
+     que não está "ok" no diagnóstico lá de baixo; o vermelho fica para
+     quando alguma tem menos de três pessoas, que é falta de gente. */
+  const inativos = S.voluntarios.length - ativos;
+  const frageis = saude.funcoes.filter(f => f.grau !== 'ok').length;
+  const menosDeTres = saude.funcoes.filter(f => f.aptos < 3).length;
+  const furos = saude.pessoas.reduce((a, p) => a + p.furos, 0);
+
+  /* A SITUAÇÃO DA PESSOA, numa pílula só e no tom fixo do sistema: fora da
+     escala primeiro, depois o furo (que é por pessoa), e só então o grupo.
+
+     "pausado" descreve uma DECISÃO da liderança, e depois da migração 63 a
+     maior parte dos inativos nunca foi ativada: quem já está no sistema e se
+     cadastra numa segunda área aberta nasce esperando liberação, porque a
+     porta anônima deixou de criar vínculo ativo em identidade que ela não
+     criou. Chamar isso de "pausado" manda a líder procurar uma decisão que
+     ninguém tomou.
+
+     O SINAL É `conferido`, E ELE NÃO É PERFEITO: não existe coluna dizendo
+     "já esteve ativo". Daqui para frente ele acerta sempre, porque a tela só
+     deixa conferir quem está ativo (ver as ações, abaixo). Para trás, alguém
+     pausado antes de ser conferido aparece como "aguardando". Errar para esse
+     lado é barato: as duas palavras pedem a mesma ação da líder, que é
+     decidir se a pessoa entra. */
+  const situacao = (ativo: boolean, novo: boolean, nFuros: number): { tom: Tom; txt: string } =>
+    !ativo ? (novo ? { tom: 'warn', txt: 'aguardando' } : { tom: 'neutro', txt: 'pausado' })
+    : nFuros > 0 ? { tom: 'bad', txt: `${nFuros} ${pl(nFuros, 'furo', 'furos')}` }
+    : novo ? { tom: 'warn', txt: 'esperando conferência' }
+    : { tom: 'ok', txt: 'conferido' };
+
+  /* a fila de um grupo: a linha abre a pessoa logo abaixo dela */
+  const listaDe = (grupo: typeof ordenados) => (
+    <div className="es-fila es-colunas" style={COLUNAS}>
+      <div className="es-fila-cab" aria-hidden="true">
+        <span>Pessoa</span><span className="es-n">Carga</span><span>Situação</span><span />
+      </div>
+      {grupo.map(v => {
+        const est = saude.pessoas.find(p => p.id === v.id)!;
+        const novo = v.conferido === false;
+        const aberta = abertas.has(v.id);
+        const areas = funcoes.filter(f => v.funcoes[f.nome]);
+        /* limiteMes nulo = a pessoa segue o padrão da equipe. Sem esse
+           fallback a linha virava "1/" e o select ficava sem opção marcada. */
+        const limite = v.limiteMes ?? S.config.limitePadrao;
+        const sit = situacao(v.ativo, novo, est.furos);
+        return (
+          <Fragment key={v.id}>
+            <button type="button" className="es-item es-tm-linha" onClick={() => alternar(v.id)}
+              aria-expanded={aberta} aria-controls={`pessoa-${v.id}`}>
+              <span className="es-c-tit">
+                <b>{v.nome}</b>
+                {areas.length
+                  ? <span className="es-etqs">
+                      {areas.map(f => (
+                        <span key={f.nome} className="es-etq"
+                          title={`${f.nome}: ${CURTO[v.funcoes[f.nome]]}${confirmada(v, f.nome) ? '' : ', a conferir'}`}>
+                          {curtoF(f.nome)}
+                        </span>
+                      ))}
+                    </span>
+                  : <small>sem área ainda</small>}
+              </span>
+              <span className="es-c-meta">
+                <span className="es-c-num"
+                  title={`${cont(est.carga, 'escala', 'escalas')} em ${S.config.janelaCarga} dias; até ${limite} por mês`}>
+                  <span className="es-tm-so-pilha">carga </span>{est.carga}/{limite}
+                </span>
+                <span className="es-c-est"><Pilula tom={sit.tom}>{sit.txt}</Pilula></span>
+              </span>
+              <span className="es-c-acao"><IcSeta /></span>
+            </button>
+            {aberta && (
+              <div className="es-tm-aberta" id={`pessoa-${v.id}`}>
+                <div className="es-caixa">
+                  <div className="es-caixa-cab">
+                    <p className="es-peq es-mudo">
+                      {est.carga} escala{est.carga === 1 ? '' : 's'} em {S.config.janelaCarga} dias
+                      {est.parado > 60 && est.carga === 0 && <> · há muito tempo sem servir</>}
+                    </p>
+                    {/* AS AÇÕES DA PESSOA, NA VOZ DO LÍDER. 08/09/2026. Eram
+                        cinco botões em quatro trajes, em quatro linhas no
+                        celular. A anatomia continua a de toda ação do líder:
+                        UMA em destaque (conferir o nível, se a pessoa é nova;
+                        senão, mandar o link) e o resto em texto, na mesma
+                        linha. Desde 30/09 o destaque é contorno: a única ação
+                        cheia desta tela é "Conferir níveis", no alto. */}
+                    {(() => {
+                      const tel = (v.tel || '').replace(/\D/g, '');
+                      const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgConvite(S, v.id, base))}` : null;
+                      const copiarLink = () => copiar(msgConvite(S, v.id, base), aviso, 'Link pessoal copiado. Mande no privado.');
+                      const link = zap
+                        ? <a key="zap" className={novo ? 'es-btn es-txt' : 'es-btn'} href={zap} target="_blank" rel="noopener">Enviar link no WhatsApp</a>
+                        : <button key="copia" type="button" className={novo ? 'es-btn es-txt' : 'es-btn'} onClick={copiarLink}>Copiar link pessoal</button>;
+                      /* QUEM NÃO ESTÁ ATIVO NÃO TEM LINK QUE FUNCIONE. `eu_dados`
+                         exige `and v.ativo`, então mandar o link pessoal para quem
+                         está inativo entrega a frase "Link invalido" — e antes da
+                         migração 63 isso era raro, porque quase ninguém nascia
+                         inativo. Depois dela é o caminho comum: toda pessoa que já
+                         existe no sistema e se cadastra numa segunda área aberta
+                         chega assim. Então o cartão de quem está inativo oferece só
+                         o que resolve: liberar. Conferir o nível vem DEPOIS, e isso
+                         também torna inalcançável pela tela o estado
+                         "conferido mas nunca ativado", que é o que faria a marca de
+                         cima dizer "pausado" para quem nunca entrou. */
+                      if (!v.ativo) return (
+                        <div className="es-linha es-tm-acoes">
+                          <button type="button" className="es-btn" onClick={() => mudar(v.id, { ativo: true })}>{novo ? 'Liberar' : 'Reativar'}</button>
+                          <button type="button" className="es-btn es-txt es-perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
+                        </div>
+                      );
+                      return (
+                        <div className="es-linha es-tm-acoes">
+                          {novo && <button type="button" className="es-btn" onClick={() => conferir(v.id, v.nome)}>Conferi, está certo</button>}
+                          {link}
+                          {zap && <button type="button" className="es-btn es-txt" onClick={copiarLink}>Copiar link</button>}
+                          <button type="button" className="es-btn es-txt" onClick={() => limparPin(v.id, v.nome)}>Apagar PIN</button>
+                          <button type="button" className="es-btn es-txt" onClick={() => mudar(v.id, { ativo: false })}>Pausar</button>
+                          <button type="button" className="es-btn es-txt es-perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  <div className="es-caixa-corpo es-tm-pilha">
+                    {/* ================================================== 81
+                        O QUE A LÍDER ESTÁ LIBERANDO.
+
+                        Este cadastro veio pelo formulário público com um
+                        telefone que o sistema JÁ conhecia, então o vínculo
+                        nasceu colado na identidade dessa pessoa — e quem
+                        digitou o nome foi quem preencheu o formulário.
+
+                        Quase sempre é a própria pessoa entrando numa segunda
+                        área, e aí não há nada a fazer além de conferir. Mas foi
+                        por aqui que a cadeia medida na migração 81 passou:
+                        anônimo se inscreve com o telefone de alguém, a líder
+                        clica "Liberar" sem nada na tela dizer que o nome
+                        diverge, e o link pessoal da vítima sai pela porta do
+                        PIN.
+
+                        O banco já segura o passo seguinte (o PIN espera alguém
+                        conferir). Este aviso existe para que a líder saiba o
+                        que está olhando ANTES de conferir, que é o momento em
+                        que a decisão é dela. Os dois nomes aparecem lado a lado
+                        quando divergem, porque é a divergência que ela precisa
+                        julgar. */}
+                    {v.identidadeReivindicada && (
+                      <Aviso tom="warn">
+                        {v.nomeDaPessoa && v.nomeDaPessoa.trim().toLowerCase() !== v.nome.trim().toLowerCase() ? (
+                          <>Este cadastro usou o WhatsApp de <b>{v.nomeDaPessoa}</b>, que já está no sistema,
+                          mas o nome digitado foi <b>{v.nome}</b>. Confirme com {v.nomeDaPessoa.split(' ')[0]} antes
+                          de conferir: conferir é o que libera o acesso dela ao link pessoal.</>
+                        ) : (
+                          <>Este cadastro veio pelo formulário público com um WhatsApp que o sistema já
+                          conhecia. Se for a mesma pessoa entrando nesta área, toque em &ldquo;Conferi, está
+                          certo&rdquo;: é isso que libera o acesso dela pelo PIN.</>
+                        )}
+                      </Aviso>
+                    )}
+
+                    <div className="es-campo">
+                      <span>O que sabe fazer</span>
+                      <div className="es-tm-niveis">
+                        {funcoes.map(f => {
+                          const n = v.funcoes[f.nome];
+                          /* nível que a pessoa declarou e ninguém conferiu fica
+                             tracejado: é a diferença entre "eu sei" e "o time
+                             sabe que ela sabe". */
+                          const sodito = !!n && !confirmada(v, f.nome);
+                          return (
+                            <span key={f.nome} className={'es-tm-nivel' + (n ? ' es-tm-tem' : '') + (sodito ? ' es-tm-dito' : '')}
+                              role="button" tabIndex={0}
+                              title={sodito ? 'nível declarado pela própria pessoa, ainda não conferido' : undefined}
+                              aria-disabled={!!chipSalvando}
+                              aria-busy={chipSalvando === v.id + '|' + f.nome || undefined}
+                              onKeyDown={teclaAtiva(() => ciclar(v.id, f.nome))}
+                              onClick={() => ciclar(v.id, f.nome)}>
+                              {f.nome}{n ? <small> · {CURTO[n]}</small> : ''}{sodito ? ' ?' : ''}
+                            </span>
+                          );
+                        })}
+                      </div>
+                      <small>Toque na função para trocar o nível. O &ldquo;?&rdquo; marca o que a pessoa declarou e ninguém conferiu.</small>
+                    </div>
+
+                    <div className="es-tm-campos">
+                      <label className="es-campo" htmlFor={'tel-' + v.id}>
+                        <span>WhatsApp</span>
+                        <input className="es-ctl" id={'tel-' + v.id} key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
+                          type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
+                          onBlur={e => void salvarTelefone(v.id, v.tel || '', e.target)} />
+                      </label>
+                      {/* 18/09/2026: só aparece onde serve para alguma coisa. Se
+                          nenhum posto desta área tem exigência, perguntar o sexo
+                          de todo mundo seria coletar dado por coletar. */}
+                      {temExigencia && (
+                        <label className="es-campo">
+                          <span>Homem ou mulher</span>
+                          <select className="es-ctl" key={String(v.sexo)} aria-label={`Homem ou mulher: ${v.nome}`}
+                            defaultValue={v.sexo || ''}
+                            onChange={e => mudar(v.id, { sexo: e.target.value || null })}>
+                            <option value="">não informado</option>
+                            {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
+                          </select>
+                        </label>
+                      )}
+                      <label className="es-campo">
+                        <span>Máximo de escalas por mês</span>
+                        <select className="es-ctl" key={String(v.limiteMes)} aria-label={`Máximo de escalas por mês de ${v.nome}`}
+                          defaultValue={v.limiteMes == null ? '' : String(v.limiteMes)}
+                          onChange={e => mudar(v.id, { limite_mes: e.target.value === '' ? null : +e.target.value })}>
+                          <option value="">segue a equipe ({S.config.limitePadrao} por mês)</option>
+                          {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
+                        </select>
+                      </label>
+                    </div>
+
+                    {!!v.indisponivel.length && (
+                      <div className="es-campo">
+                        <span>Avisou que não pode</span>
+                        {/* data é informação, não controle: etiqueta quieta, sem
+                            borda (o que tem borda, se aperta) */}
+                        <div className="es-etqs">
+                          {v.indisponivel.sort().map(d => (
+                            <span key={d} className="es-etq es-num">{d.slice(8, 10)}/{d.slice(5, 7)}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </Fragment>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="lid">
-      {ocupado && <Trabalhando />}
-      {/* O h1 ERA "MÍDIA". A navegação, 30px acima, já diz Mídia. O maior texto
-          da tela repetia o menor e não acrescentava um fato. Agora o título é a
-          situação do time, e o placar saiu daqui porque diria o mesmo número em
-          outra fonte. Ver components/Faixa.tsx. */}
-      <Faixa
+    <>
+      {ocupado && <Fio />}
+      {/* O título é a situação do time, não o nome do ministério: a lateral já
+          diz de onde é. */}
+      <Cab
+        rot="Time"
         titulo={S.voluntarios.length ? `${cont(ativos, 'pessoa', 'pessoas')} no time` : 'Ainda não tem time'}
-        sub={S.voluntarios.length
+        meta={S.voluntarios.length
           ? 'Quem serve, o que cada um sabe fazer e quanto cada um já pegou.'
           : 'Sem saber quem sabe fazer o quê, não existe rodízio.'}
+        acoes={<>
+          <button type="button" className="es-btn" onClick={abrirAdicionar}><IcMais />Adicionar pessoa</button>
+          {/* A FILA DE CONFERÊNCIA SAIU DAQUI (arquitetura de informação,
+              29/08/2026). Esta página carregava 1.509 elementos contra 277 do
+              /painel, e a diferença estava toda numa fila que existe só
+              enquanto tem fila. TIME é o nome de uma coisa permanente (quem
+              são as pessoas), e a fila virou endereço próprio, do mesmo jeito
+              que as candidaturas já são. Fica aqui a convocação, porque nível
+              não conferido piora a escala de verdade: a ação cheia da tela e o
+              número na faixa. */}
+          {pendentes > 0 && <Link href="/time/conferir" className="es-btn es-pri">Conferir níveis</Link>}
+        </>}
       />
-      {!S.voluntarios.length && (
-        <Aviso tom="info">Comece pelas pessoas que serviram no último domingo.</Aviso>
-      )}
-      {!!pend.semSexo.length && (
-        <Aviso tom="atencao">
-          {cont(pend.semSexo.length, 'pessoa está', 'pessoas estão')} sem informar se é homem ou
-          mulher, e por isso {pend.semSexo.length === 1 ? 'fica' : 'ficam'} de fora dos postos que
-          exigem: {pend.semSexo.map(p => p.nome).join(', ')}. Abra a pessoa e informe no campo
-          ao lado do WhatsApp.
-        </Aviso>
-      )}
-      {!!pend.postosSemNinguem.length && (
-        <Aviso tom="erro">
-          {pend.postosSemNinguem.map(p => `${p.nome} (só ${p.exigeSexo === 'M' ? 'homens' : 'mulheres'})`).join(' e ')}
-          {pend.postosSemNinguem.length === 1 ? ' não tem' : ' não têm'} ninguém que possa entrar.
-          Essa vaga não vai preencher sozinha.
-        </Aviso>
-      )}
-      {!!pend.escaladosErrados.length && (
-        <Aviso tom="atencao">
-          Tem gente escalada onde não pode entrar, de antes desta regra existir:{' '}
-          {pend.escaladosErrados.slice(0, 4).map(x => `${x.nome} em ${x.funcao} (${x.data.slice(8, 10)}/${x.data.slice(5, 7)})`).join(', ')}
-          {pend.escaladosErrados.length > 4 ? ` e mais ${pend.escaladosErrados.length - 4}` : ''}.
-          Ninguém foi tirado da escala: troque na aba Escala.
-        </Aviso>
+
+      {!!S.voluntarios.length && (
+        <div className="es-secao">
+          <Kpis n={4}>
+            <Kpi rot="Pessoas ativas" valor={ativos} de={S.voluntarios.length}
+              sub={inativos ? `${inativos} fora da escala` : 'ninguém fora da escala'} tom={ativos ? '' : 'zero'} />
+            <Kpi rot="A conferir" valor={pendentes} destaque={pendentes > 0}
+              sub={pendentes ? `${pl(pendentes, 'nível', 'níveis')} esperando você` : 'tudo conferido'}
+              tom={pendentes ? 'warn' : 'zero'} />
+            <Kpi rot="Funções frágeis" valor={frageis} de={saude.funcoes.length}
+              sub={menosDeTres ? `${menosDeTres} com menos de 3 pessoas` : frageis ? 'todas com 3 ou mais' : 'todas de pé'}
+              tom={menosDeTres ? 'bad' : frageis ? '' : 'zero'} />
+            <Kpi rot="Furos" valor={furos} sub={`nos últimos ${S.config.janelaCarga} dias`} tom={furos ? 'bad' : 'zero'} />
+          </Kpis>
+        </div>
       )}
 
-      {/* A FILA DE CONFERÊNCIA SAIU DAQUI — arquitetura de informação, 29/08/2026.
-
-          Esta página carregava 1.509 elementos contra 277 do /painel: era três
-          a cinco vezes a mais pesada do produto, e a diferença estava toda numa
-          fila que existe só enquanto tem fila. TIME é o nome de uma coisa
-          permanente — quem são as pessoas — e quem ocupava o topo era um
-          mutirão que some quando acaba.
-
-          A fila virou endereço próprio, do mesmo jeito que as candidaturas já
-          são: as duas são caixa de entrada gerada pelo mesmo cadastro, e só uma
-          tinha página. Fica aqui a convocação, porque nível não conferido piora
-          a escala de verdade — não é detalhe que possa sumir de vista. */}
-      {pendentes > 0 && (
-        <Link href="/time/conferir" className="lid-alerta ruim" style={{ marginTop: 'var(--e5)' }}>
-          <span className="lid-alerta-n">{pendentes}</span>
-          <span>
-            <span className="lid-alerta-txt">
-              {pendentes === 1
-                ? 'pessoa esperando você conferir o nível'
-                : 'níveis esperando sua conferência'}
-            </span>
-            <span className="dim pequeno" style={{ display: 'block', marginTop: 'var(--e1)' }}>
-              Até você conferir, quem disse <strong>faz sozinho</strong> conta
-              como <strong>ajuda quando falta</strong> no sorteio.
-            </span>
-          </span>
-        </Link>
+      {temAviso && (
+        <div className="es-secao">
+          {!S.voluntarios.length && (
+            <Aviso tom="info">Comece pelas pessoas que serviram no último domingo.</Aviso>
+          )}
+          {!!pend.semSexo.length && (
+            <Aviso tom="warn">
+              {cont(pend.semSexo.length, 'pessoa está', 'pessoas estão')} sem informar se é homem ou
+              mulher, e por isso {pend.semSexo.length === 1 ? 'fica' : 'ficam'} de fora dos postos que
+              exigem: {pend.semSexo.map(p => p.nome).join(', ')}. Abra a pessoa e informe no campo
+              ao lado do WhatsApp.
+            </Aviso>
+          )}
+          {!!pend.postosSemNinguem.length && (
+            <Aviso tom="bad">
+              {pend.postosSemNinguem.map(p => `${p.nome} (só ${p.exigeSexo === 'M' ? 'homens' : 'mulheres'})`).join(' e ')}
+              {pend.postosSemNinguem.length === 1 ? ' não tem' : ' não têm'} ninguém que possa entrar.
+              Essa vaga não vai preencher sozinha.
+            </Aviso>
+          )}
+          {!!pend.escaladosErrados.length && (
+            <Aviso tom="warn">
+              Tem gente escalada onde não pode entrar, de antes desta regra existir:{' '}
+              {pend.escaladosErrados.slice(0, 4).map(x => `${x.nome} em ${x.funcao} (${x.data.slice(8, 10)}/${x.data.slice(5, 7)})`).join(', ')}
+              {pend.escaladosErrados.length > 4 ? ` e mais ${pend.escaladosErrados.length - 4}` : ''}.
+              Ninguém foi tirado da escala: troque na aba Escala.
+            </Aviso>
+          )}
+        </div>
       )}
 
-      {/* DOIS GRUPOS, NÃO DEZESSETE ETIQUETAS.
-          A lista já vinha ordenada com os não conferidos primeiro, mas cada um
-          deles carregava a própria etiqueta "confira" — dez vezes a mesma
-          palavra, empilhada numa coluna. Etiqueta que se repete não informa
-          mais, informa menos: vira textura. O nome do grupo diz uma vez o que
-          a etiqueta dizia dez, e a contagem ao lado ("10 de 17") responde
-          sozinha a pergunta que traz o líder aqui. */}
       {S.voluntarios.length > 5 && (
-        <div className="tm-achar">
-          <div className="tm-busca">
-            <label htmlFor="tm-q" className="so-leitor">Procurar pessoa pelo nome</label>
+        <div className="es-secao es-tm-achar">
+          <div className="es-busca">
             {/* a lupa não é enfeite: sem ela o campo é um fio com uma frase em
                 cinza, e fio com frase em cinza é rótulo, não caixa de digitar. */}
-            <IcBusca className="tm-lupa" />
+            <IcBusca />
+            <label htmlFor="tm-q" className="es-so-leitor">Procurar pessoa pelo nome</label>
             <input id="tm-q" type="search" value={busca} placeholder="Procurar pelo nome"
               autoComplete="off" enterKeyHint="search"
               onChange={e => setBusca(e.target.value)} />
             {!!busca && (
-              <button type="button" className="tm-limpa" onClick={() => setBusca('')}
-                aria-label="Limpar a busca">×</button>
+              <button type="button" className="es-tm-limpa" onClick={() => setBusca('')}
+                aria-label="Limpar a busca"><IcX /></button>
             )}
           </div>
           {/* as funções da equipe como filtro. Só aparecem quando há mais de
               uma: com uma função só, filtrar por ela devolve a lista inteira. */}
           {funcoes.length > 1 && (
-            <div className="tm-funcoes" role="group" aria-label="Filtrar por função">
+            <div className="es-fichas" role="group" aria-label="Filtrar por função">
               {funcoes.map(f => (
-                <button key={f.nome} type="button"
-                  className={`tm-f ${porFuncao === f.nome ? 'on' : ''}`}
+                <button key={f.nome} type="button" className="es-ficha"
                   aria-pressed={porFuncao === f.nome}
                   onClick={() => setPorFuncao(porFuncao === f.nome ? '' : f.nome)}>
                   {curtoF(f.nome)}
-                  <i>{S.voluntarios.filter(v => v.funcoes[f.nome]).length}</i>
+                  <span className="es-num">{S.voluntarios.filter(v => v.funcoes[f.nome]).length}</span>
                 </button>
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {filtrando && (
-        <div className="tm-achou">
-          <span>
-            {ordenados.length === 0
-              ? 'Ninguém com esse filtro'
-              : `${ordenados.length} de ${todos.length}`}
-            {porFuncao && <> em <b>{porFuncao}</b></>}
-            {alvo && <> com <b>{busca.trim()}</b> no nome</>}
-          </span>
-          <button type="button" className="tm-zerar"
-            onClick={() => { setBusca(''); setPorFuncao(''); }}>Ver o time todo</button>
-        </div>
-      )}
-
-      {ordenados.map((v, i) => {
-        const est = saude.pessoas.find(p => p.id === v.id)!;
-        const novo = v.conferido === false;
-        const abreGrupo = i === 0 || (ordenados[i - 1].conferido === false) !== novo;
-        const noGrupo = ordenados.filter(x => (x.conferido === false) === novo).length;
-        /* resumo em uma linha: as áreas da pessoa cabem em micro-chips e o
-           cartão inteiro só abre quando o líder vai mexer. Antes cada pessoa
-           ocupava mais de mil pixels e o Time tinha 39 mil de rolagem. */
-        const areas = funcoes.filter(f => v.funcoes[f.nome]);
-        return (
-          <Fragment key={v.id}>
-          {abreGrupo && (
-            <div className="lid-secao-cab" style={{ marginTop: i === 0 ? 'var(--e6)' : 'var(--e8)' }}>
-              <span className="rot">{novo ? 'Esperando sua conferência' : 'Time conferido'}</span>
-              <span className="lid-secao-nota">
-                {novo ? `${noGrupo} de ${ordenados.length}` : `${noGrupo} pessoa${noGrupo === 1 ? '' : 's'}`}
+          {filtrando && !!ordenados.length && (
+            <div className="es-linha">
+              <span className="es-peq es-dim">
+                {`${ordenados.length} de ${todos.length}`}
+                {porFuncao && <> em <b>{porFuncao}</b></>}
+                {alvo && <> com <b>{busca.trim()}</b> no nome</>}
               </span>
+              <button type="button" className="es-btn es-txt es-peq"
+                onClick={() => { setBusca(''); setPorFuncao(''); }}>Ver o time todo</button>
             </div>
           )}
-          <details className={`tm-pessoa ${novo ? 'card-novo' : ''}`} style={{ opacity: v.ativo ? 1 : .55 }}>
-            <summary>
-              <span className="cresce">
-                {/* "pausado" descreve uma DECISÃO da liderança, e depois da
-                    migração 63 a maior parte dos inativos nunca foi ativada:
-                    quem já está no sistema e se cadastra numa segunda área
-                    aberta nasce esperando liberação, porque a porta anônima
-                    deixou de criar vínculo ativo em identidade que ela não
-                    criou. Chamar isso de "pausado" manda a líder procurar uma
-                    decisão que ninguém tomou.
+        </div>
+      )}
 
-                    O SINAL É `conferido`, E ELE NÃO É PERFEITO: não existe
-                    coluna dizendo "já esteve ativo". Daqui para frente ele
-                    acerta sempre, porque a tela só deixa conferir quem está
-                    ativo (ver as ações, abaixo). Para trás, alguém pausado
-                    antes de ser conferido aparece como "aguardando". Errar
-                    para esse lado é barato: as duas palavras pedem a mesma
-                    ação da líder, que é decidir se a pessoa entra. */}
-                <span className="pessoa-nome">{v.nome}{!v.ativo && <span className="marca-est" style={{ marginLeft: 8 }}>{novo ? 'aguardando' : 'pausado'}</span>}</span>
-                <span className="pessoa-areas">
-                  {areas.length
-                    ? areas.map(f => (
-                        <i key={f.nome} className={`marca-nivel ${CLASSE[v.funcoes[f.nome]]}${confirmada(v, f.nome) ? '' : ' so-dito'}`}
-                           title={`${f.nome}: ${CURTO[v.funcoes[f.nome]]}`}>{marca(f.nome)}</i>
-                      ))
-                    : <span className="dim peq">sem área ainda</span>}
-                </span>
-              </span>
-              <span className="pessoa-meta">
-                {/* "confira" saiu daqui: agora quem diz isso é o título do grupo,
-                    uma vez. O furo continua por pessoa porque é por pessoa. */}
-                {est.furos > 0 && <span className="marca-est bad">{est.furos} furo{est.furos > 1 ? 's' : ''}</span>}
-                {/* limiteMes nulo = a pessoa segue o padrão da equipe. Sem
-                    esse fallback a linha virava "1/" e o select ficava sem
-                    opção marcada. */}
-                <span className="dim peq num">{est.carga}/{v.limiteMes ?? S.config.limitePadrao}</span>
-                <IcSeta className="giro" />
-              </span>
-            </summary>
-            <div className="pessoa-corpo">
-            <div className="entre">
-              <div className="dim pequeno">
-                {est.carga} escala{est.carga === 1 ? '' : 's'} em {S.config.janelaCarga} dias
-                {est.parado > 60 && est.carga === 0 && <> · há muito tempo sem servir</>}
-              </div>
-              {/* AS AÇÕES DA PESSOA, NA VOZ DO LÍDER. 08/09/2026. Eram cinco
-                  botões em quatro trajes (pílula verde vazada, pílula com
-                  ícone, verde sólido, fantasma em caixa alta, vazado cinza),
-                  em quatro linhas no celular — o ponto mais pesado do
-                  sistema. Agora é a anatomia de toda ação do líder: UMA sólida
-                  (conferir o nível, se a pessoa é nova; senão, mandar o link)
-                  e o resto em texto, na mesma linha. */}
-              {(() => {
-                const tel = (v.tel || '').replace(/\D/g, '');
-                const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgConvite(S, v.id, base))}` : null;
-                const copiarLink = () => copiar(msgConvite(S, v.id, base), aviso, 'Link pessoal copiado. Mande no privado.');
-                const link = zap
-                  ? <a key="zap" className={novo ? 'lid-bt-txt' : 'lid-bt'} href={zap} target="_blank" rel="noopener">Enviar link no WhatsApp</a>
-                  : <button key="copia" className={novo ? 'lid-bt-txt' : 'lid-bt'} onClick={copiarLink}>Copiar link pessoal</button>;
-                /* QUEM NÃO ESTÁ ATIVO NÃO TEM LINK QUE FUNCIONE. `eu_dados`
-                   exige `and v.ativo`, então mandar o link pessoal para quem
-                   está inativo entrega a frase "Link invalido" — e antes da
-                   migração 63 isso era raro, porque quase ninguém nascia
-                   inativo. Depois dela é o caminho comum: toda pessoa que já
-                   existe no sistema e se cadastra numa segunda área aberta
-                   chega assim. Então o cartão de quem está inativo oferece só
-                   o que resolve: liberar. Conferir o nível vem DEPOIS, e isso
-                   também torna inalcançável pela tela o estado
-                   "conferido mas nunca ativado", que é o que faria a marca de
-                   cima dizer "pausado" para quem nunca entrou. */
-                if (!v.ativo) return (
-                  <div className="lid-acoes">
-                    <button className="lid-bt" onClick={() => mudar(v.id, { ativo: true })}>{novo ? 'Liberar' : 'Reativar'}</button>
-                    <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
-                  </div>
-                );
-                return (
-                  <div className="lid-acoes">
-                    {novo && <button className="lid-bt" onClick={() => conferir(v.id, v.nome)}>Conferi, está certo</button>}
-                    {link}
-                    {zap && <button className="lid-bt-txt" onClick={copiarLink}>Copiar link</button>}
-                    <button className="lid-bt-txt" onClick={() => limparPin(v.id, v.nome)}>Apagar PIN</button>
-                    <button className="lid-bt-txt" onClick={() => mudar(v.id, { ativo: false })}>Pausar</button>
-                    <button className="lid-bt-txt perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
-                  </div>
-                );
-              })()}
+      {filtrando && !ordenados.length && (
+        <div className="es-secao">
+          <Vazio titulo="Ninguém com esse filtro" icone={<IcBusca />} solto>
+            {porFuncao && <>em <b>{porFuncao}</b></>}
+            {porFuncao && alvo && ' '}
+            {alvo && <>com <b>{busca.trim()}</b> no nome</>}
+            <div>
+              <button type="button" className="es-btn"
+                onClick={() => { setBusca(''); setPorFuncao(''); }}>Ver o time todo</button>
             </div>
+          </Vazio>
+        </div>
+      )}
 
-            {/* ================================================================ 81
-                O QUE A LÍDER ESTÁ LIBERANDO.
+      {!!esperando.length && (
+        <Secao titulo="Esperando sua conferência" n={esperando.length}
+          sub={pendentes > 0
+            ? <>Até você conferir, quem disse <b>faz sozinho</b> conta como <b>ajuda quando falta</b> no sorteio.</>
+            : undefined}>
+          {listaDe(esperando)}
+        </Secao>
+      )}
 
-                Este cadastro veio pelo formulário público com um telefone que
-                o sistema JÁ conhecia, então o vínculo nasceu colado na
-                identidade dessa pessoa — e quem digitou o nome foi quem
-                preencheu o formulário.
-
-                Quase sempre é a própria pessoa entrando numa segunda área, e
-                aí não há nada a fazer além de conferir. Mas foi por aqui que
-                a cadeia medida na migração 81 passou: anônimo se inscreve com
-                o telefone de alguém, a líder clica "Liberar" sem nada na tela
-                dizer que o nome diverge, e o link pessoal da vítima sai pela
-                porta do PIN.
-
-                O banco já segura o passo seguinte (o PIN espera alguém
-                conferir). Este aviso existe para que a líder saiba o que está
-                olhando ANTES de conferir, que é o momento em que a decisão é
-                dela. Os dois nomes aparecem lado a lado quando divergem,
-                porque é a divergência que ela precisa julgar. */}
-            {v.identidadeReivindicada && (
-              <p className="postos-falta" role="note" style={{ marginTop: 12 }}>
-                {v.nomeDaPessoa && v.nomeDaPessoa.trim().toLowerCase() !== v.nome.trim().toLowerCase() ? (
-                  <>Este cadastro usou o WhatsApp de <b>{v.nomeDaPessoa}</b>, que já está no sistema,
-                  mas o nome digitado foi <b>{v.nome}</b>. Confirme com {v.nomeDaPessoa.split(' ')[0]} antes
-                  de conferir: conferir é o que libera o acesso dela ao link pessoal.</>
-                ) : (
-                  <>Este cadastro veio pelo formulário público com um WhatsApp que o sistema já
-                  conhecia. Se for a mesma pessoa entrando nesta área, toque em &ldquo;Conferi, está
-                  certo&rdquo;: é isso que libera o acesso dela pelo PIN.</>
-                )}
-              </p>
-            )}
-
-            <div className="chips" style={{ marginTop: 14 }}>
-              {funcoes.map(f => {
-                const n = v.funcoes[f.nome];
-                /* nível que a pessoa declarou e ninguém conferiu fica tracejado:
-                   é a diferença entre "eu sei" e "o time sabe que ela sabe". */
-                const sodito = !!n && !confirmada(v, f.nome);
-                return (
-                  <span key={f.nome} className={`chip ${n ? CLASSE[n] : 'add'}${sodito ? ' so-dito' : ''}`}
-                    role="button" tabIndex={0}
-                    title={sodito ? 'nível declarado pela própria pessoa, ainda não conferido' : undefined}
-                    aria-disabled={!!chipSalvando}
-                    style={chipSalvando === v.id + '|' + f.nome ? { opacity: .5 } : undefined}
-                    onKeyDown={teclaAtiva(() => ciclar(v.id, f.nome))}
-                    onClick={() => ciclar(v.id, f.nome)}>
-                    {f.nome}{n ? ` · ${CURTO[n]}` : ''}{sodito ? ' ?' : ''}
-                  </span>
-                );
-              })}
-            </div>
-
-            {/* `pessoa-campos`: alinhado pela base. Com o rótulo de duas linhas
-                ("Máximo de escalas por mês") o `.linha` centrado deixava os dois
-                campos 9px fora um do outro. */}
-            <div className="linha pessoa-campos" style={{ marginTop: 14 }}>
-              <div style={{ width: 190 }}>
-                <label htmlFor={'tel-' + v.id}>WhatsApp</label>
-                <input id={'tel-' + v.id} key={v.tel} defaultValue={v.tel || ''} placeholder="11999998888"
-                  type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done"
-                  onBlur={e => void salvarTelefone(v.id, v.tel || '', e.target)} />
-              </div>
-              {/* 18/09/2026: só aparece onde serve para alguma coisa. Se
-                  nenhum posto desta área tem exigência, perguntar o sexo de
-                  todo mundo seria coletar dado por coletar. */}
-              {/* largura 180 e não 150: em 390px o texto "não informado" era
-                  cortado no meio da palavra dentro do seletor. */}
-              {temExigencia && (
-                <div style={{ width: 180 }}>
-                  <label>Homem ou mulher</label>
-                  <select key={String(v.sexo)} aria-label={`Homem ou mulher: ${v.nome}`}
-                    defaultValue={v.sexo || ''}
-                    onChange={e => mudar(v.id, { sexo: e.target.value || null })}>
-                    <option value="">não informado</option>
-                    {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
-                  </select>
-                </div>
-              )}
-              <div style={{ width: 200 }}>
-                <label>Máximo de escalas por mês</label>
-                <select key={String(v.limiteMes)} aria-label={`Máximo de escalas por mês de ${v.nome}`}
-                  defaultValue={v.limiteMes == null ? '' : String(v.limiteMes)}
-                  onChange={e => mudar(v.id, { limite_mes: e.target.value === '' ? null : +e.target.value })}>
-                  <option value="">segue a equipe ({S.config.limitePadrao} por mês)</option>
-                  {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
-                </select>
-              </div>
-              {!!v.indisponivel.length && (
-                <div className="cresce">
-                  <label>Avisou que não pode</label>
-                  <div className="linha" style={{ gap: 'var(--e3)' }}>
-                    {v.indisponivel.sort().map(d => (
-                      /* data é informação, não controle: sem caixa, pela mesma
-                         lei do resto da tela (tem borda, se aperta). */
-                      <span key={d} className="marca-est bad">{d.slice(8, 10)}/{d.slice(5, 7)}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            </div>
-          </details>
-          </Fragment>
-        );
-      })}
+      {!!conferidos.length && (
+        <Secao titulo="Time conferido" sub={cont(conferidos.length, 'pessoa', 'pessoas')}>
+          {listaDe(conferidos)}
+        </Secao>
+      )}
 
       {!!S.voluntarios.length && (
-        <>
-          <section className="lid-secao">
-          <div className="lid-secao-cab">
-            <span className="rot">Onde o time é frágil</span>
-            <span className="lid-secao-nota">a meta é 3 por função</span>
+        <Secao titulo="Onde o time é frágil"
+          sub={<>A meta é 3 por função. Abaixo de três, a escala quebra na primeira gripe. Cada mês,
+            coloque alguém como <em>aprendendo</em> na função mais vermelha.</>}>
+          <div className="es-caixa">
+            <table className="es-tab es-empilha es-tm-frageis">
+              <thead>
+                <tr>
+                  <th>Função</th>
+                  <th className="es-n">Pessoas</th>
+                  <th className="es-tm-c-med" aria-hidden="true" />
+                  <th className="es-tm-c-est">Situação</th>
+                </tr>
+              </thead>
+              <tbody>
+                {saude.funcoes.map(f => {
+                  const tom = tomDaSituacao(f.grau as 'ok' | 'atencao' | 'critico');
+                  return (
+                    <tr key={f.nome}>
+                      <td className="es-primeira">{f.nome}</td>
+                      <td className="es-n" data-rot="Pessoas">{f.aptos} de 3</td>
+                      <td className="es-tm-c-med" data-rot="Meta">
+                        <span className={'es-tm-medidor' + (tom === 'ok' ? '' : tomCls(tom))} aria-hidden="true">
+                          <span style={{ width: `${Math.min(100, Math.round((f.aptos / 3) * 100))}%` }} />
+                        </span>
+                      </td>
+                      {/* a pílula diz o veredito curto: "ninguém conferido: só o
+                          que se declararam" fica "ninguém conferido", porque
+                          pílula não quebra linha */}
+                      <td className="es-tm-c-est" data-rot="Situação">
+                        <Pilula tom={tom}>{f.texto.split(':')[0]}</Pilula>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-            {saude.funcoes.map(f => (
-              <div className="slot" key={f.nome}>
-                <div className="rotulo"><span className="overline">{f.nome}</span></div>
-                <Medidor valor={f.aptos} total={3} grau={f.grau as any} />
-                <span className="dim pequeno num" style={{ width: 118, textAlign: 'right' }}>
-                  {f.aptos} de 3 pessoa{f.aptos === 1 ? '' : 's'}
-                </span>
-                <span className={`marca-est ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`}>
-                  <span className={`ponto ${f.grau === 'ok' ? 'ok' : f.grau === 'atencao' ? 'warn' : 'bad'}`} />{f.texto}
-                </span>
-              </div>
-            ))}
-          <p className="dim pequeno">
-            Abaixo de três, a escala quebra na primeira gripe. Cada mês, coloque
-            alguém como <em>aprendendo</em> na função mais vermelha.
-          </p>
-          </section>
-        </>
+        </Secao>
       )}
+
       {/* Cadastrar na mão virou exceção: quase todo mundo entra pelo link do
           grupo. Fica no fim e fechado, para não empurrar a lista do time para
-          baixo em toda visita. */}
-      <details className="bloco-extra" style={{ marginTop: 24 }}>
-        <summary>
-          <span className="cresce">Adicionar pessoa na mão</span>
-          <span className="dim peq">quase sempre não é preciso</span>
-          <IcSeta className="giro" />
-        </summary>
-        <div className="bloco-extra-corpo">
-      <div className="legenda">
-        <strong>Marque o que cada pessoa sabe fazer.</strong> Toque no nome da função para alternar o nível:
-        {/* A LEGENDA ERA QUATRO BOTÕES QUE NÃO FAZEM NADA.
-            Usava `.chip`, que é o controle de verdade logo acima: mesma borda,
-            mesmo fundo, mesmo padding — só que o de cima cicla o nível ao toque
-            e este não faz absolutamente nada. Quem tenta apertar aprende que
-            caixinha não é confiável, e passa a duvidar das de cima também.
-            Vira `.marca-nivel`, que é a marca colorida que a lista já usa em
-            cada linha. Assim a legenda ensina a MESMA língua que a tela fala,
-            em vez de imitar o botão. */}
-        <div className="legenda-niveis">
-          <i className="marca-nivel t">faz sozinho</i>
-          <i className="marca-nivel r">ajuda quando falta</i>
-          <i className="marca-nivel e">aprendendo</i>
-          <i className="marca-nivel">nada</i>
-        </div>
-        É isso que o sorteio usa. Quem está <em>aprendendo</em> nunca cai sozinho na escala.
-      </div>
-      <div className="card">
-        <h3 aria-level={2}>Adicionar pessoa</h3>
-        <div className="grade">
-          <div><label htmlFor="add-nome">Nome</label>
-            <input id="add-nome" value={nome} onChange={e => setNome(e.target.value)} placeholder="como aparece no grupo do WhatsApp"
-              autoCapitalize="words" autoComplete="name" enterKeyHint="next" /></div>
-          <div><label htmlFor="add-tel">WhatsApp, sem ele a pessoa não entra pelo link do grupo</label>
-            <input id="add-tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
-              type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done" /></div>
-          {temExigencia && (
-            <div><label htmlFor="add-sexo">Homem ou mulher, porque esta área tem posto que só aceita um</label>
-              <select id="add-sexo" value={novoSexo} onChange={e => setNovoSexo(e.target.value)}>
-                <option value="">não informado</option>
-                {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
-              </select></div>
-          )}
-        </div>
-        <div style={{ marginTop: 14 }}>
-          <label>O que essa pessoa sabe fazer</label>
-          <div className="chips">
-            {funcoes.map(f => {
-              const n = novas[f.nome];
-              return (
-                <span key={f.nome} className={`chip ${n ? CLASSE[n] : 'add'}`}
-                  role="button" tabIndex={0}
-                  onKeyDown={teclaAtiva(() => {
-                    const prox = CICLO[(CICLO.indexOf(n || null) + 1) % CICLO.length];
-                    const c = { ...novas }; if (prox) c[f.nome] = prox; else delete c[f.nome];
-                    setNovas(c);
-                  })}
-                  onClick={() => {
-                    const prox = CICLO[(CICLO.indexOf(n || null) + 1) % CICLO.length];
-                    const c = { ...novas }; if (prox) c[f.nome] = prox; else delete c[f.nome];
-                    setNovas(c);
-                  }}>
-                  {f.nome}{n ? ` · ${CURTO[n]}` : ''}
-                </span>
-              );
-            })}
+          baixo em toda visita; o "Adicionar pessoa" do alto abre e traz até
+          aqui. */}
+      <div className="es-secao es-tm-fim">
+        <Dobra titulo="Adicionar pessoa na mão" nota="quase sempre não é preciso" id="adicionar">
+          <div className="es-tm-pilha">
+            <div className="es-dupla">
+              <label className="es-campo" htmlFor="add-nome">
+                <span>Nome</span>
+                <input className="es-ctl" id="add-nome" value={nome} onChange={e => setNome(e.target.value)}
+                  placeholder="como aparece no grupo do WhatsApp"
+                  autoCapitalize="words" autoComplete="name" enterKeyHint="next" />
+              </label>
+              <label className="es-campo" htmlFor="add-tel">
+                <span>WhatsApp</span>
+                <input className="es-ctl" id="add-tel" value={tel} onChange={e => setTel(e.target.value)} placeholder="11999998888"
+                  type="tel" inputMode="tel" autoComplete="tel" enterKeyHint="done" />
+                <small>Sem ele a pessoa não entra pelo link do grupo.</small>
+              </label>
+            </div>
+            {temExigencia && (
+              <label className="es-campo es-curto" htmlFor="add-sexo">
+                <span>Homem ou mulher</span>
+                <select className="es-ctl" id="add-sexo" value={novoSexo} onChange={e => setNovoSexo(e.target.value)}>
+                  <option value="">não informado</option>
+                  {SEXOS.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
+                </select>
+                <small>Esta área tem posto que só aceita um.</small>
+              </label>
+            )}
+            {/* A LEGENDA É TEXTO. Ela já foi quatro botões que não faziam nada
+                (o mesmo desenho do controle de verdade), e quem tentava
+                apertar aprendia a desconfiar dos de cima. */}
+            <div className="es-campo">
+              <span>O que essa pessoa sabe fazer</span>
+              <div className="es-tm-niveis">
+                {funcoes.map(f => {
+                  const n = novas[f.nome];
+                  return (
+                    <span key={f.nome} className={'es-tm-nivel' + (n ? ' es-tm-tem' : '')}
+                      role="button" tabIndex={0}
+                      onKeyDown={teclaAtiva(() => {
+                        const prox = CICLO[(CICLO.indexOf(n || null) + 1) % CICLO.length];
+                        const c = { ...novas }; if (prox) c[f.nome] = prox; else delete c[f.nome];
+                        setNovas(c);
+                      })}
+                      onClick={() => {
+                        const prox = CICLO[(CICLO.indexOf(n || null) + 1) % CICLO.length];
+                        const c = { ...novas }; if (prox) c[f.nome] = prox; else delete c[f.nome];
+                        setNovas(c);
+                      }}>
+                      {f.nome}{n ? <small> · {CURTO[n]}</small> : ''}
+                    </span>
+                  );
+                })}
+              </div>
+              <small>
+                Toque no nome da função para alternar o nível: faz sozinho, ajuda quando falta,
+                aprendendo e nada. É isso que o sorteio usa. Quem está aprendendo nunca cai sozinho
+                na escala.
+              </small>
+            </div>
+            <div className="es-linha">
+              <button type="button" className="es-btn" disabled={ocupado || !nome.trim()} onClick={adicionar}>
+                <IcMais />Adicionar ao time
+              </button>
+            </div>
           </div>
-        </div>
-        <div style={{ marginTop: 16 }}>
-          <button className="pri" disabled={ocupado || !nome.trim()} onClick={adicionar}><IcMais /> Adicionar ao time</button>
-        </div>
+        </Dobra>
       </div>
-        </div>
-      </details>
-    </div>
+    </>
   );
 }
-

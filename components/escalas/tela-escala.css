@@ -1,0 +1,185 @@
+/* ==========================================================================
+   tela-escala.css · as regras só da /escala (30/09/2026)
+   Todas sob `.es` e com prefixo `es-ec-` (ver a trava em escalas.css).
+   ========================================================================== */
+
+/* as âncoras (`#d2026-10-04`, `#p...`) param onde a casca manda: ver
+   "onde a âncora para" em escalas.css */
+
+/* o alto: a faixa de números e, logo embaixo, a ajuda recolhida */
+.es-ec-topo{display:grid;gap:var(--es-e3)}
+
+/* ------------------------------------------------------------- os dias */
+.es-ec-dias{display:grid;gap:var(--es-e2)}
+
+/* UM CULTO É UMA CAIXA QUE ABRE. Fechada, uma linha de 64px: o dia em
+   negrito, os postos em cinza embaixo, a pílula do estado à direita e a
+   seta que gira. No celular estreito o nome do dia fica com a linha de cima
+   inteira e a pílula desce para a direita da segunda: ao lado dela, "Follow,
+   sábado, 10 de outubro" quebrava em três linhas. */
+.es-ec-dia{
+  background:var(--es-sup);border:1px solid var(--es-linha);border-radius:var(--es-r3);min-width:0;
+}
+.es-ec-dia > summary{
+  display:grid;align-items:center;gap:2px var(--es-e3);
+  grid-template-columns:minmax(0,1fr) auto 16px;
+  grid-template-areas:"tit est seta" "sub est seta";
+  min-height:64px;padding:var(--es-e3) var(--es-e4);
+  cursor:pointer;user-select:none;border-radius:var(--es-r3);
+  transition:background var(--es-t);
+}
+.es-ec-dia > summary::-webkit-details-marker{display:none}
+.es-ec-dia > summary::after{
+  content:"";grid-area:seta;width:16px;height:16px;background:var(--es-icone);transition:transform var(--es-t);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+}
+.es-ec-dia[open] > summary::after{transform:rotate(180deg)}
+.es-ec-dia > summary:hover{background:var(--es-sup-2)}
+.es-ec-dia > summary:focus-visible{outline-offset:-2px}
+.es-ec-dia[open] > summary{border-bottom:1px solid var(--es-linha);border-radius:var(--es-r3) var(--es-r3) 0 0}
+.es-ec-dia-tit{grid-area:tit;min-width:0;font-size:15px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es-ec-dia-sub{grid-area:sub;min-width:0;font-size:13px;line-height:18px;color:var(--es-mudo);font-variant-numeric:tabular-nums}
+.es-ec-dia-est{grid-area:est;justify-self:end;display:flex;min-width:0}
+@media (max-width:479px){
+  .es-ec-dia > summary{grid-template-areas:"tit tit seta" "sub est seta"}
+}
+
+/* o miolo do dia: blocos empilhados, um respiro só entre eles */
+.es-ec-dia-corpo{display:grid;gap:var(--es-e4);padding:var(--es-e4);min-width:0}
+.es-ec-dia-corpo > .es-campo{margin-bottom:0}
+
+/* os problemas: um aviso por linha, e o caminho até o posto no fim */
+.es-ec-probs{display:grid;gap:var(--es-e2)}
+.es-ec-probs > .es-aviso{margin-bottom:0}
+.es-ec-ir{font-weight:600;white-space:nowrap}
+
+.es-ec-nota{font-size:14px;line-height:21px;color:var(--es-ink-2)}
+.es-ec-nota b{color:var(--es-ink)}
+
+/* o rótulo pequeno de um bloco de leitura (relatório, disponibilidade) */
+.es-ec-rot{font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo)}
+
+/* o relatório de quem liderou: leitura, numa caixa pequena */
+.es-caixa.es-ec-relato{display:grid;gap:4px;padding:var(--es-e3) var(--es-e4);background:var(--es-sup-2)}
+.es-ec-relato > p{font-size:14px;line-height:21px;color:var(--es-ink-2);overflow-wrap:anywhere}
+.es-ec-relato > p b{color:var(--es-ink)}
+.es-ec-relato > small{font-size:12px;line-height:16px;color:var(--es-mudo)}
+
+/* tirar o evento: botão-texto sozinho na linha, puxado 10px (o respiro
+   dele) para a palavra cair na vertical do resto do miolo */
+.es-ec-tirar{margin-left:-10px}
+
+/* o recado cabe em duas linhas: a caixa de 96px da base é de texto longo */
+.es .es-ec-recado > textarea.es-ctl{min-height:72px}
+
+/* ------------------------------------------------- a disponibilidade */
+/* Fechada, uma linha de contagem; o "sem resposta" é a pílula âmbar quando
+   falta alguém. No celular a contagem desce para baixo do rótulo. */
+.es-ec-disp-linha{
+  display:flex;flex-wrap:wrap;align-items:center;gap:4px var(--es-e3);padding:var(--es-e2) 0;
+  font-size:13px;line-height:20px;font-weight:400;color:var(--es-ink-2);font-variant-numeric:tabular-nums;
+}
+.es-ec-disp-linha b{font-weight:600;color:var(--es-ink)}
+.es-ec-disp-linha > .es-ec-disp-tit{font-size:14px}
+@media (max-width:479px){ .es-ec-disp-linha > .es-ec-disp-tit{flex-basis:100%} }
+.es-ec-disp-corpo{display:grid;gap:var(--es-e3)}
+.es-ec-grupo{display:grid;gap:2px}
+.es-ec-grupo > p{font-size:14px;line-height:21px;color:var(--es-ink);overflow-wrap:anywhere}
+
+/* ------------------------------------------------------------ os postos */
+/* UMA LINHA POR POSTO: função, pessoa, situação e as duas marcas. Quem
+   decide a forma é a largura da caixa do dia, e não a da janela: com o
+   trilho ao lado, a lista tem 460px em 1100, 572px em 1280 e 732px em 1440.
+   Por isso as colunas nascem por contêiner, a partir de 640px de fila.
+
+   Abaixo disso a linha empilha: a função pequena em cima, a pessoa na
+   largura toda, e a situação com as marcas embaixo.
+
+   Nas colunas, nenhuma é `auto`: a pessoa e a situação caem na mesma
+   vertical em todas as linhas (ver a nota de `--es-cols` em escalas.css).
+   A nota das marcas ligadas ("o sorteio não mexe") desce para uma segunda
+   linha, embaixo da pessoa, para não empurrar as colunas. */
+.es-fila.es-ec-postos{container-type:inline-size}
+.es-ec-posto{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-items:center;
+  padding:var(--es-e3) var(--es-e4);border-top:1px solid var(--es-linha);min-width:0;
+}
+.es-ec-postos > .es-ec-posto:first-child{border-top:0}
+.es-ec-fn{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.02em;color:var(--es-ink-2);overflow-wrap:anywhere;min-width:0}
+.es-ec-quem{display:flex;min-width:0}
+.es-ec-extra{display:flex;flex-wrap:wrap;align-items:center;gap:6px var(--es-e2);min-width:0;margin-top:2px}
+.es-ec-sit{display:flex;min-width:0}
+.es-ec-marcas{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-left:auto}
+.es-ec-notas{display:flex;flex-wrap:wrap;gap:2px var(--es-e3);font-size:12px;line-height:16px;color:var(--es-mudo)}
+.es-ec-plantao-nomes{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es-ec-plantao-vazio{font-size:14px;line-height:20px;color:var(--es-mudo)}
+
+/* AS COLUNAS, de 640px de fila para cima */
+@container (min-width:640px){
+  .es-ec-posto{
+    grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) 150px 120px;
+    column-gap:var(--es-e3);row-gap:4px;min-height:56px;
+  }
+  .es-ec-fn{font-size:13px;line-height:18px;font-weight:500;letter-spacing:0}
+  .es-ec-extra{display:contents}
+  .es-ec-sit{grid-column:3}
+  .es-ec-marcas{grid-column:4;margin-left:0}
+  .es-ec-notas{grid-column:2 / -1}
+  /* o nome do plantão na mesma vertical do nome dentro do campo */
+  .es-ec-plantao .es-ec-quem{padding-left:13px}
+}
+
+/* O CELULAR. Empilhada, a linha de baixo leva a situação e as duas fichas
+   lado a lado. Com o respiro de toque da base (12px) as fichas somavam
+   262px com a situação mais larga ("falta confirmar"), e um telefone de
+   360px dá 260: as fichas desciam sozinhas, penduradas à direita. Com 8px
+   de respiro são 246px, e cabe de 360px para cima (medido, com a Inter).
+   Cada ficha continua com 44px ou mais de largura e 40px de altura. */
+@container (max-width:639px){
+  .es-ec-marcas > .es-ficha{padding:0 8px}
+}
+/* Abaixo disso (a fila de um telefone de 320px), as fichas ganham a linha
+   delas, à esquerda, embaixo da situação. A situação na linha da função,
+   à direita, foi tentada e saiu: em 320px a função ficava com 70px e
+   "ILUMINAÇÃO" quebrava no meio da palavra. */
+@container (max-width:285px){
+  .es-ec-marcas{margin-left:0;flex-basis:100%}
+}
+
+/* ficha desligada enquanto grava: o reset de botão da base apagava a borda
+   da ficha (pesa mais que `.es-ficha`), e a marca sumia por um instante */
+.es-ec-marcas > .es-ficha:disabled{cursor:not-allowed;opacity:.55;background:var(--es-sup);border-color:var(--es-linha-2);color:var(--es-ink-2)}
+.es-ec-marcas > .es-ficha[aria-pressed="true"]:disabled{border-color:var(--es-ink);color:var(--es-ink)}
+
+/* ------------------------------------------------------ o mês em pessoas */
+/* Uma fita por pessoa: cada culto montado é um traço, cheio em tinta se ela
+   entra e vazio em linha clara se não. O alarme é a pílula embaixo do nome. */
+.es-ec-peso{display:grid}
+.es-ec-pessoa{
+  display:flex;align-items:center;gap:var(--es-e3);min-height:40px;
+  padding:6px var(--es-e4);border-top:1px solid var(--es-linha);
+}
+.es-ec-peso > .es-ec-pessoa:first-child{border-top:0}
+/* a pílula mora embaixo do nome, sempre: ao lado, ela cabia com um nome
+   curto e descia com um longo, e a lista virava duas formas no trilho */
+.es-ec-pessoa-nome{
+  flex:1 1 auto;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  font-size:14px;line-height:20px;color:var(--es-ink);overflow-wrap:anywhere;
+}
+.es-ec-fita{display:flex;gap:3px;flex:none}
+.es-ec-traco{display:block;width:6px;height:16px;border-radius:2px;background:var(--es-linha)}
+.es-ec-traco.es-ec-cheio{background:var(--es-ink)}
+.es-ec-pessoa-n{flex:none;min-width:20px;text-align:right;font-size:13px;line-height:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--es-ink)}
+/* o pé: quem não entra em nenhum, a um toque. O botão-texto tem 10px de
+   respiro próprio: o pé tira 10 dos 16 para o texto cair na vertical dos
+   nomes de cima. */
+.es-ec-peso-pe{padding:4px 6px;border-top:1px solid var(--es-linha);background:var(--es-sup-2);border-radius:0 0 var(--es-r3) var(--es-r3)}
+.es-ec-peso-pe > p{padding:0 10px 8px;font-size:13px;line-height:19px;color:var(--es-ink-2)}
+
+/* -------------------------------------------------- o evento esporádico */
+.es-ec-evento{display:grid;gap:var(--es-e4)}
+.es-ec-evento > .es-campo{margin-bottom:0}
+.es-ec-dica{font-size:13px;line-height:19px;color:var(--es-mudo)}
+.es-ec-dica b{color:var(--es-ink-2)}
+.es-ec-falta{font-size:13px;line-height:19px;color:var(--es-ink-2)}

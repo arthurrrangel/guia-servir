@@ -1,0 +1,159 @@
+/* ==========================================================================
+   tela-time.css · as regras só do Time, da conferência de nível e das
+   Entradas (30/09/2026). Prefixo `es-tm-` (Time e Conferir) e `es-en-`
+   (Entradas); todo seletor carrega uma classe `es-` (ver a trava em
+   escalas.css).
+   ========================================================================== */
+
+/* =================================================================== Time */
+
+/* a ferramenta: a busca em cima, as funções embaixo, e o que o filtro achou.
+   A coluna é `minmax(0,1fr)` de propósito: numa coluna implícita (`auto`) o
+   × da busca somava à largura mínima do campo e, em 320px, a caixa passava
+   16px da tela. */
+.es-tm-achar{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3);justify-items:start}
+.es-tm-achar > *{max-width:100%}
+
+/* o × que limpa a busca, dentro da caixa dela */
+.es-tm-limpa{
+  display:inline-flex;align-items:center;justify-content:center;flex:none;
+  width:28px;height:28px;margin-right:-4px;border-radius:var(--es-r2);color:var(--es-icone);
+  transition:background var(--es-t),color var(--es-t);
+}
+.es-tm-limpa:hover{background:var(--es-sup-3);color:var(--es-ink)}
+.es-busca .es-tm-limpa svg{width:14px;height:14px}
+@media (max-width:1023px), (hover:none), (pointer:coarse){
+  .es-tm-limpa{width:40px;height:40px;margin-right:-8px}
+}
+
+/* A PESSOA NA FILA: o nome, e embaixo as funções que ela sabe. A seta gira
+   quando a pessoa está aberta; a linha aberta fica no cinza do painel. */
+.es-tm-linha .es-c-tit{gap:6px}
+.es-tm-linha .es-c-acao > svg{transition:transform var(--es-t)}
+.es-tm-linha[aria-expanded="true"]{background:var(--es-sup-2)}
+.es-tm-linha[aria-expanded="true"] .es-c-acao > svg{transform:rotate(90deg)}
+/* "carga" escrito só quando a linha empilha: no desktop, o cabeçalho da
+   coluna já diz */
+@media (min-width:720px){ .es-tm-so-pilha{display:none} }
+
+/* o painel da pessoa aberta nasce logo abaixo da linha, dentro da fila: uma
+   faixa cinza com a caixa branca em cima */
+.es-tm-aberta{padding:var(--es-e3);background:var(--es-sup-2);border-top:1px solid var(--es-linha)}
+@media (min-width:720px){ .es-tm-aberta{padding:var(--es-e4)} }
+.es-tm-acoes{gap:4px}
+.es-tm-pilha{display:grid;gap:var(--es-e5)}
+.es-tm-pilha > .es-campo,.es-tm-pilha > .es-aviso{margin-bottom:0}
+
+/* O NÍVEL POR FUNÇÃO. Um toque passa para o próximo (nada, faz sozinho,
+   ajuda quando falta, aprendendo). Sem cor: o nível está escrito na ficha,
+   quem tem nível ganha o contorno em tinta, e o que a pessoa declarou e
+   ninguém conferiu fica tracejado, com o "?". */
+.es-tm-niveis{display:flex;flex-wrap:wrap;gap:6px}
+.es-tm-nivel{
+  display:inline-flex;align-items:center;flex-wrap:wrap;gap:0 4px;min-height:32px;max-width:100%;
+  padding:5px 10px;border:1px solid var(--es-linha-2);border-radius:var(--es-r2);background:var(--es-sup);
+  font-size:13px;line-height:18px;font-weight:500;color:var(--es-mudo);cursor:pointer;
+  -webkit-user-select:none;user-select:none;overflow-wrap:anywhere;
+  transition:border-color var(--es-t),background var(--es-t),color var(--es-t);
+}
+.es-tm-nivel:hover{border-color:var(--es-linha-3);background:var(--es-sup-2);color:var(--es-ink)}
+.es-tm-nivel > small{font-size:13px;font-weight:500;color:var(--es-mudo)}
+.es-tm-nivel.es-tm-tem{border-color:var(--es-ink);color:var(--es-ink);font-weight:600}
+.es-tm-nivel.es-tm-dito{border-style:dashed;border-color:var(--es-linha-3)}
+.es-tm-nivel[aria-disabled="true"]{cursor:progress}
+.es-tm-nivel[aria-busy="true"]{opacity:.5}
+.es-tm-nivel:focus-visible{outline-offset:1px}
+/* no toque, 44px como todo alvo (medido em 390 e 320: tinham 40) */
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .es-tm-nivel{min-height:44px;padding-top:11px;padding-bottom:11px} }
+
+/* os campos da pessoa: lado a lado enquanto couberem */
+.es-tm-campos{display:grid;gap:var(--es-e4);grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr))}
+.es-tm-campos > .es-campo{margin-bottom:0}
+
+/* ONDE O TIME É FRÁGIL. A função, quantas pessoas de três, o medidor e o
+   veredito. O medidor é fino e cinza; o tom, quando há, só no preenchimento. */
+.es-tm-medidor{display:block;width:100%;min-width:48px;height:6px;border-radius:3px;background:var(--es-sup-3);overflow:hidden}
+.es-tm-medidor > span{display:block;height:100%;border-radius:inherit;background:var(--es-ink)}
+.es-tm-medidor.es-warn > span{background:var(--es-warn-ponto)}
+.es-tm-medidor.es-bad > span{background:var(--es-bad-ponto)}
+.es-tab.es-tm-frageis td.es-primeira{font-weight:500;overflow-wrap:anywhere}
+.es-tab.es-tm-frageis .es-tm-c-med{width:24%}
+.es-tab.es-tm-frageis .es-tm-c-est{width:1%;white-space:nowrap}
+/* No celular a linha vira duas: a função e o veredito em cima, o medidor e
+   a conta embaixo. As três colunas da pilha comum não davam para a pílula
+   em 320px. É flex, e não grade, porque cada linha é uma grade própria: com
+   a pílula numa coluna `auto`, o medidor mudava de largura de uma função
+   para outra. Assim ele tem sempre a largura da linha menos a conta.
+   O piso de 40% no nome é o que manda o medidor para a segunda linha: sem
+   ele, com a pílula curta ("ok"), o medidor cabia na primeira e espremia o
+   nome até uma letra por linha (medido em 320px). */
+@media (max-width:719px){
+  .es-tab.es-empilha.es-tm-frageis tr{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2) var(--es-e3)}
+  .es-tab.es-empilha.es-tm-frageis td.es-primeira{order:1;flex:1 1 0;min-width:40%}
+  .es-tab.es-empilha.es-tm-frageis td.es-tm-c-est{order:2;flex:none;width:auto}
+  .es-tab.es-empilha.es-tm-frageis td.es-tm-c-med{order:3;flex:1 1 calc(100% - 56px - var(--es-e3));width:auto}
+  .es-tab.es-empilha.es-tm-frageis td.es-n{order:4;flex:none;width:56px;text-align:right}
+  .es-tab.es-empilha.es-tm-frageis td[data-rot]::before{content:none}
+}
+
+/* no celular estreito a nota desce para baixo do título, e a seta fica na
+   primeira linha: lado a lado, "Adicionar pessoa na mão" quebrava em quatro */
+@media (max-width:479px){
+  .es-tm-fim > .es-dobra > summary{flex-wrap:wrap;row-gap:2px;padding-top:10px;padding-bottom:10px}
+  .es-tm-fim > .es-dobra > summary::after{order:2}
+  .es-tm-fim > .es-dobra > summary > small{order:3;flex-basis:100%;white-space:normal}
+}
+
+/* ================================================== a conferência de nível */
+
+/* os pontos de atenção, dentro da dobra: o espaço entre eles é o vão da
+   pilha, e o último não soma a margem dele ao respiro da dobra */
+.es-tm-avisos{display:grid;gap:var(--es-e3)}
+.es-tm-avisos > .es-aviso{margin-bottom:0}
+
+/* cada área é uma dobra, e as pessoas dela ficam rente às bordas da dobra */
+.es-tm-areas .es-dobra-corpo{padding:0}
+.es-tm-areas .es-dobra-corpo > .es-fila{border:0;border-radius:0 0 var(--es-r3) var(--es-r3)}
+.es-tm-conf > .es-c-acao{gap:4px}
+/* no celular os quatro níveis descem para baixo do nome, em quatro partes
+   iguais: lado a lado com o nome, espremiam o nome até sumir */
+@media (max-width:719px){
+  .es-item.es-tm-conf{grid-template-columns:minmax(0,1fr);grid-template-areas:"tit" "acao";gap:var(--es-e2)}
+  .es-tm-conf > .es-c-acao{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+  .es-tm-conf > .es-c-acao > .es-btn{padding:0 4px}
+}
+
+/* ============================================================== Entradas */
+
+/* a candidatura na fila: o nome, e embaixo as funções que ela marcou */
+.es-en-linha .es-c-tit{gap:6px}
+.es-en-linha .es-c-acao > svg{transition:transform var(--es-t)}
+.es-en-linha[aria-expanded="true"]{background:var(--es-sup-2)}
+.es-en-linha[aria-expanded="true"] .es-c-acao > svg{transform:rotate(90deg)}
+
+/* a candidatura aberta: a mesma faixa cinza do Time, com a caixa em cima */
+.es-en-aberta{padding:var(--es-e3);background:var(--es-sup-2);border-top:1px solid var(--es-linha)}
+@media (min-width:720px){ .es-en-aberta{padding:var(--es-e4)} }
+.es-en-pilha{display:grid;gap:var(--es-e3)}
+.es-en-pilha > .es-aviso,.es-en-pilha > .es-campo{margin-bottom:0}
+.es-en-nota{max-width:64ch}
+/* o nome inteiro vai no botão ("Chamar Rafael Nogueira do Nascimento no
+   WhatsApp"): ele quebra linha em vez de passar da caixa */
+.es-en-botoes > .es-btn{white-space:normal;padding-top:6px;padding-bottom:6px}
+@media (max-width:479px){ .es-en-botoes > .es-btn{flex:1 1 100%} }
+
+/* o que a pessoa mandou: rótulo e valor lado a lado; no celular, um em cima
+   do outro */
+.es-en-dados{display:grid;grid-template-columns:minmax(0,1fr);gap:2px var(--es-e4);margin:0;font-size:14px;line-height:20px}
+.es-en-dados dt{font-size:13px;line-height:18px;color:var(--es-mudo);margin-top:var(--es-e2)}
+.es-en-dados dt:first-of-type{margin-top:0}
+.es-en-dados dd{margin:0;color:var(--es-ink);overflow-wrap:anywhere}
+@media (min-width:560px){
+  .es-en-dados{grid-template-columns:160px minmax(0,1fr);row-gap:var(--es-e2)}
+  .es-en-dados dt{margin-top:0;line-height:20px}
+}
+
+/* o histórico: a data à esquerda, o que aconteceu à direita */
+.es-en-hist{display:grid;gap:6px}
+.es-en-hist li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:var(--es-e2);font-size:13px;line-height:19px;color:var(--es-ink-2)}
+.es-en-hist li > span:first-child{color:var(--es-mudo);font-variant-numeric:tabular-nums}

@@ -16,7 +16,7 @@ for(const [w,h,tag] of [[1280,900,'desk'],[390,844,'cel']]){
     await p.waitForTimeout(2200);
     const r=await p.evaluate((vw)=>{
       const cs=getComputedStyle, out={cortado:[],forado:[],toque:[],inline:[]};
-      const raiz=document.querySelector('.sistema')||document.querySelector('.lid')||document.querySelector('.vol');
+      const raiz=document.querySelector('.es-casca')||document.querySelector('.lid')||document.querySelector('.vol');
       if(!raiz) return {semRaiz:true};
       for(const e of raiz.querySelectorAll('*')){
         const s=cs(e), rc=e.getBoundingClientRect();

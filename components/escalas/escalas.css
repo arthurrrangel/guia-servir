@@ -1,0 +1,928 @@
+/* ==========================================================================
+   ESCALAS · a folha do sistema de quem monta a escala (30/09/2026)
+
+   O PEDIDO. "Trazer a vibe do sistema financeiro, que dá uma intuitividade
+   absurda." A intuitividade do Financeiro e do Demandas não vem da cor: vem
+   de cinco decisões de estrutura, e são elas que esta folha traz.
+
+     · CASCA DE PRODUTO. No desktop, lateral fixa com a navegação, o
+       ministério e a conta do que espera por você. No celular, a navegação
+       desce para abas no rodapé e o alto fica com a marca e o ministério.
+     · HIERARQUIA POR TIPO E ALINHAMENTO. Seção é título e espaço; caixa só
+       onde há superfície de verdade (tabela, faixa de números, formulário).
+     · NÚMERO É DADO. Algarismo tabular, alinhado, e cor só quando decide.
+     · ESTADO SE LÊ DE LONGE. Pílula com ponto em cinco tons, e o mesmo tom
+       quer dizer a mesma coisa em toda tela (ver "pílulas").
+     · UMA AÇÃO CHEIA POR TELA. O resto é contorno ou texto.
+
+   A TRAVA. Esta folha divide a página com `app/globals.css`, que veste o
+   site público e o espaço do voluntário, e o Next junta tudo numa folha só.
+   Três regras sem exceção, conferidas por `scripts/escalas-css.test.mjs`:
+
+     1. toda classe começa com `es-` e toda regra mora sob `.es`;
+     2. toda variável começa com `--es-` e nasce em `.es`, nunca em `:root`;
+     3. regra de elemento solto só dentro de `:where()`, que não pesa.
+
+   AS ESCALAS E O DEMANDAS NÃO SE ENCOSTAM. A linguagem é a mesma de
+   `app/demandas/demandas.css` (valores copiados, não importados): quem usa
+   os dois sistemas vê uma casa só, e mexer num não quebra o outro.
+
+   O que não muda: 44px de alvo no toque, 16px em todo campo no celular (o
+   Safari dá zoom abaixo disso), 12px de piso em texto (11px só em rótulo de
+   caixa alta espaçada), contraste AA medido sobre o próprio fundo.
+   ========================================================================== */
+
+.es{
+  /* ---- superfícies (zinco, levemente frio) */
+  --es-sup:#ffffff;
+  --es-sup-2:#fafafa;
+  --es-sup-3:#f4f4f5;
+  --es-sup-4:#ebebed;
+  --es-fundo:#f5f5f6;
+
+  /* ---- traços */
+  --es-linha:#e4e4e7;
+  --es-linha-2:#d4d4d8;
+  --es-linha-3:#a1a1aa;
+
+  /* ---- tinta. `--es-mudo` é o cinza de texto mais claro permitido:
+         5,3:1 no branco, 5,0:1 no `--es-sup-2`, 4,8:1 no `--es-sup-3`. */
+  --es-ink:#18181b;
+  --es-ink-2:#3f3f46;
+  --es-mudo:#6b6b73;
+  --es-icone:#8a8a93;          /* ícone e traço, nunca texto */
+  --es-preto:#1c1c1f;          /* ação primária */
+  --es-preto-toque:#34343a;
+
+  /* ---- foco: monocromático, com halo nos campos */
+  --es-foco:#18181b;
+  --es-halo:rgba(24,24,27,.12);
+
+  /* ---- estado. Texto medido sobre o próprio fundo claro (>= 5,7:1). */
+  --es-ok:#15703a;    --es-ok-bg:#effaf3;    --es-ok-ln:#bfe6cc;    --es-ok-ponto:#16a34a;
+  --es-warn:#9a4d05;  --es-warn-bg:#fff7eb;  --es-warn-ln:#f6d9a8;  --es-warn-ponto:#e08a0b;
+  --es-bad:#b42318;   --es-bad-bg:#fef3f2;   --es-bad-ln:#f9cfca;   --es-bad-ponto:#e0352b;
+  --es-info:#1d4fd7;  --es-info-bg:#eff4ff;  --es-info-ln:#c9d8fb;  --es-info-ponto:#2e67f2;
+  --es-neutro:#52525b;--es-neutro-bg:#f4f4f5;--es-neutro-ln:#e0e0e4;--es-neutro-ponto:#a1a1aa;
+
+  /* ---- ritmo (base 4) */
+  --es-e1:4px; --es-e2:8px; --es-e3:12px; --es-e4:16px; --es-e5:20px; --es-e6:24px; --es-e8:32px; --es-e10:40px; --es-e12:48px;
+  --es-calha:16px;
+
+  /* ---- alturas: toque primeiro; o mouse ganha densidade mais abaixo */
+  --es-h:44px;
+  --es-h-peq:44px;
+  --es-h-linha:44px;
+
+  /* ---- cantos e sombras */
+  --es-r1:4px; --es-r2:6px; --es-r3:8px; --es-r4:12px;
+  --es-sombra-btn:0 1px 1px rgba(16,16,20,.04);
+  --es-sombra-menu:0 12px 32px rgba(16,16,20,.14),0 0 0 1px rgba(16,16,20,.06);
+  --es-sombra-dialogo:0 24px 64px rgba(16,16,20,.22),0 0 0 1px rgba(16,16,20,.06);
+
+  /* ---- casca */
+  --es-lateral-l:0px;
+  --es-abas-alt:60px;
+  --es-topo-alt:56px;
+  --es-largura:1360px;
+  --es-trilho:320px;
+
+  /* ---- movimento */
+  --es-curva:cubic-bezier(.22,.61,.36,1);
+  --es-curva-entra:cubic-bezier(.2,.8,.2,1);
+  --es-t:140ms var(--es-curva);
+  --es-t-abre:220ms var(--es-curva-entra);
+
+  /* ---- tipo */
+  --es-fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --es-t-corpo:15px;
+  --es-t-campo:16px;
+  --es-t-titulo:22px; --es-lh-titulo:28px;
+
+  background:var(--es-sup);
+  color:var(--es-ink);
+  font-family:var(--es-fonte);
+  font-size:var(--es-t-corpo);
+  line-height:1.5;
+  min-height:100dvh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-align:left;
+}
+@media (min-width:720px){ .es{ --es-calha:24px } }
+@media (min-width:1024px){ .es{ --es-t-titulo:24px; --es-lh-titulo:32px; --es-lateral-l:240px } }
+@media (min-width:1280px){ .es{ --es-calha:40px; --es-lateral-l:256px; --es-trilho:340px } }
+/* densidade de desktop só com mouse de verdade: tablet deitado continua
+   com alvo de dedo */
+@media (min-width:1024px) and (hover:hover) and (pointer:fine){
+  .es{ --es-h:36px; --es-h-peq:32px; --es-h-linha:34px; --es-t-corpo:14px; --es-t-campo:14px }
+}
+
+.es *,.es *::before,.es *::after{box-sizing:border-box}
+/* ONDE A ÂNCORA PARA. `globals.css` dá ao documento `scroll-padding-top:88px`
+   (o cabeçalho do site público) e a todo `section[id]` `scroll-margin-top:84px`,
+   e os dois SOMAM. Medido em 30/09/2026: o dia vindo do link do Painel
+   parava a 160px do alto no celular e as seções dos Ajustes, a 172px. Na
+   casca a regra é uma só: 72px no celular (o topo fixo de 56 e um respiro) e
+   32px no desktop (o respiro do alto do corpo). As telas não mexem nisso. */
+html:has(.es-casca){scroll-padding-top:72px}
+@media (min-width:1024px){ html:has(.es-casca){scroll-padding-top:32px} }
+.es.es :where(section[id]){scroll-margin-top:0}
+/* a borda da página no puxão do celular: branca, como o corpo */
+html:has(.es-casca),body:has(.es-casca){background:#ffffff}
+html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
+
+/* O VAZAMENTO DO OUTRO SISTEMA ENTRA POR BAIXO DA CASCA.
+
+   `globals.css` pinta elemento solto: `label` em caixa alta, `h3` com
+   chevron antes e fonte de título, `button` com 44px e fundo cinza no
+   toque, `input` com 52px e canto zero, `main` com largura e margem
+   próprias. Tudo aqui é zerado dentro de `:where()`, que pesa 0-1-0: ganha
+   do elemento do outro sistema (0-0-1) e perde de qualquer classe desta
+   folha. Os estados (`button:hover`, 0-1-1) pedem 0-2-0. */
+.es :where(label){
+  text-transform:none;letter-spacing:normal;font-size:inherit;font-family:inherit;
+  font-weight:inherit;color:inherit;display:block;margin:0;
+}
+.es :where(h1,h2,h3,h4){
+  margin:0;font-family:inherit;text-transform:none;letter-spacing:-.01em;
+  color:inherit;display:block;line-height:1.3;font-weight:600;font-size:inherit;
+}
+.es :where(h3)::before{content:none}
+.es :where(p){margin:0}
+.es :where(ul,ol){margin:0;padding:0;list-style:none}
+.es :where(b,strong){font-weight:600}
+.es :where(small){font-size:inherit}
+.es :where(table){border-collapse:collapse;border-spacing:0}
+.es :where(pre){margin:0}
+:where(.es a){color:inherit;text-decoration:none}
+.es :where(button){
+  font:inherit;color:inherit;background:none;border:0;border-radius:0;margin:0;padding:0;
+  min-height:0;max-width:none;text-transform:none;letter-spacing:normal;font-weight:inherit;
+  cursor:pointer;text-align:inherit;transition:none;display:inline-flex;align-items:center;gap:0;
+}
+.es :where(button):is(:hover,:active){transform:none;background-color:transparent}
+.es :where(button):disabled{background-color:transparent;opacity:1;color:inherit;border-color:transparent}
+.es :where(input,select,textarea){font:inherit;color:inherit;letter-spacing:normal;text-transform:none}
+.es :where(main){max-width:none;margin:0;padding:0;position:static;z-index:auto;text-align:left}
+.es :where(details) > :where(summary){list-style:none}
+.es :focus-visible{outline:2px solid var(--es-foco);outline-offset:2px}
+.es :where(svg){flex:none}
+
+/* ------------------------------------------------------------------ texto */
+/* o rótulo de cima do título: de onde é isto ("Mídia · 30 de setembro") */
+.es-rot{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:13px;line-height:18px;font-weight:500;color:var(--es-mudo)}
+.es-peq{font-size:13px;line-height:19px}
+.es-dim{color:var(--es-ink-2)}
+.es-mudo{color:var(--es-mudo)}
+.es-num{font-variant-numeric:tabular-nums}
+.es-cresce{flex:1 1 auto;min-width:0}
+.es-corta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.es-prosa{max-width:68ch;font-size:14px;line-height:22px;color:var(--es-ink-2)}
+.es-prosa b{color:var(--es-ink)}
+.es-so-leitor{
+  position:absolute;width:1px;height:1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;margin:-1px;padding:0;border:0;
+  /* invisível, mas com a tinta certa: o medidor de contraste lê o texto do
+     leitor de tela, e dentro da busca ele herdava o cinza de ícone (3,4:1) */
+  color:var(--es-ink);
+}
+@media (max-width:1023px){ .es-so-desktop{display:none!important} }
+@media (min-width:1024px){ .es-so-celular{display:none!important} }
+.es-link{color:var(--es-ink);text-decoration:underline;text-decoration-color:var(--es-linha-3);text-underline-offset:3px}
+.es-link:hover{text-decoration-color:var(--es-ink)}
+
+/* =============================================================== a casca */
+
+/* No desktop a lateral é fixa e o conteúdo anda à direita dela; no celular
+   a navegação é a barra de abas do rodapé, e o corpo ganha chão para ela
+   não cobrir a última linha. */
+.es-casca{display:block;padding-left:var(--es-lateral-l);padding-bottom:calc(var(--es-abas-alt) + env(safe-area-inset-bottom, 0px))}
+@media (min-width:1024px){ .es-casca{padding-bottom:0} }
+
+/* --------------------------------------------------------------- lateral */
+.es-lateral{display:none}
+@media (min-width:1024px){
+  .es-lateral{
+    display:flex;flex-direction:column;gap:var(--es-e4);
+    position:fixed;inset:0 auto 0 0;width:var(--es-lateral-l);z-index:30;
+    padding:var(--es-e4) var(--es-e3) var(--es-e3);
+    background:var(--es-sup-2);border-right:1px solid var(--es-linha);
+    overflow-y:auto;scrollbar-width:thin;
+  }
+}
+.es-lateral-topo{display:flex;align-items:center;justify-content:space-between;gap:var(--es-e2);padding:4px var(--es-e2) 0;min-height:36px}
+.es-marca{display:inline-flex;align-items:center;gap:10px;color:var(--es-ink);text-decoration:none;min-width:0;min-height:44px;border-radius:var(--es-r2)}
+/* A MARCA É A DA IGREJA (30/09/2026): o logotipo oficial, `Logo` de
+   components/Marca.tsx (símbolo, GUI> e CHURCH num caminho só), em tinta.
+   A primeira versão desta casca trazia do Demandas uma caixa preta escrita
+   "GUI>" e o nome "Escalas" ao lado: uma marca que a igreja não tem. O
+   Arthur pediu a de verdade, e ela vai sozinha, sem nome de produto colado:
+   quem diz em que tela se está é a navegação logo abaixo. */
+/* 36px no desktop e 30 no celular: abaixo disso o CHURCH do logotipo vira
+   um risco cinza (medido: em 30px as letras dele têm 3px de altura) */
+.es-logo{display:block;height:36px;width:auto;flex:none;color:var(--es-ink)}
+@media (max-width:1023px){ .es-logo{height:30px} }
+
+/* O MINISTÉRIO. É a pergunta que o líder de mais de uma área faz antes de
+   qualquer outra ("estou olhando o quê?"), então mora no alto, com a conta
+   de pessoas embaixo do nome, e abre a lista no mesmo lugar. */
+.es-ministerio{position:relative}
+.es-troca{
+  display:flex;align-items:center;gap:10px;width:100%;min-height:52px;
+  padding:8px 10px 8px 12px;border:1px solid var(--es-linha-2);border-radius:var(--es-r3);
+  background:var(--es-sup);color:var(--es-ink);box-shadow:var(--es-sombra-btn);text-align:left;
+  transition:border-color var(--es-t),background var(--es-t);
+}
+.es-troca:hover{border-color:var(--es-linha-3);background:var(--es-sup)}
+.es-troca[aria-expanded="true"]{border-color:var(--es-ink)}
+.es-troca-txt{display:grid;flex:1 1 auto;min-width:0;line-height:1.25}
+.es-troca-txt b{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.es-troca-txt small{font-size:12px;color:var(--es-mudo);font-variant-numeric:tabular-nums;white-space:nowrap}
+.es-troca > svg{width:16px;height:16px;color:var(--es-icone);transform:rotate(90deg);transition:transform var(--es-t)}
+.es-troca[aria-expanded="true"] > svg{transform:rotate(-90deg)}
+/* no topo do celular a troca é compacta: nome e conta numa linha */
+.es-troca.es-troca-topo{width:auto;max-width:60vw;min-height:44px;padding:0 8px 0 12px;border-radius:22px}
+.es-troca.es-troca-topo .es-troca-txt{display:flex;align-items:baseline;gap:6px}
+.es-troca.es-troca-topo .es-troca-txt b{font-size:14px}
+
+.es-menu-fundo{position:fixed;inset:0;z-index:48;background:transparent}
+.es-menu{
+  position:absolute;z-index:50;left:0;right:0;top:calc(100% + 6px);
+  display:grid;gap:2px;padding:6px;max-height:min(70vh,520px);overflow-y:auto;
+  background:var(--es-sup);border-radius:var(--es-r3);box-shadow:var(--es-sombra-menu);
+  animation:es-entra-menu 160ms var(--es-curva-entra);
+}
+.es-topo .es-menu{left:auto;right:0;width:min(300px,calc(100vw - 2 * var(--es-calha)))}
+.es-menu-grupo{font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo);padding:8px 10px 4px}
+.es-menu-item{
+  display:flex;align-items:center;gap:10px;width:100%;min-height:var(--es-h-linha);
+  padding:0 10px;border-radius:var(--es-r2);font-size:14px;font-weight:500;color:var(--es-ink);
+  text-decoration:none;text-align:left;transition:background var(--es-t);
+}
+.es-menu-item:hover{background:var(--es-sup-3)}
+.es-menu-item > span:first-child{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.es-menu-item > svg{width:16px;height:16px;color:var(--es-ink)}
+.es-menu-item[aria-current="true"]{font-weight:600}
+.es-menu-item.es-mudo{color:var(--es-ink-2)}
+.es-menu-risco{height:1px;background:var(--es-linha);margin:4px 2px}
+@keyframes es-entra-menu{0%{opacity:0;translate:0 -4px}100%{opacity:1;translate:0 0}}
+
+.es-nav{display:grid;gap:2px}
+.es-nav-item{
+  display:flex;align-items:center;gap:10px;min-height:var(--es-h-linha);width:100%;
+  padding:0 var(--es-e2);border-radius:var(--es-r2);
+  font-size:14px;font-weight:500;color:var(--es-ink-2);text-decoration:none;text-align:left;
+  transition:background var(--es-t),color var(--es-t);
+}
+.es-nav-item svg{width:18px;height:18px;color:var(--es-icone);transition:color var(--es-t)}
+.es-nav-item:hover{background:var(--es-sup-3);color:var(--es-ink)}
+.es-nav-item:hover svg{color:var(--es-ink-2)}
+.es-nav-item[aria-current="page"]{background:var(--es-sup);color:var(--es-ink);font-weight:600;box-shadow:0 0 0 1px var(--es-linha),0 1px 2px rgba(16,16,20,.05)}
+.es-nav-item[aria-current="page"] svg{color:var(--es-ink)}
+.es-nav-item > span:first-of-type{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.es-nav-n{
+  display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;
+  border-radius:10px;background:var(--es-preto);color:#fff;font-size:12px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.es-lateral-pe{margin-top:auto;border-top:1px solid var(--es-linha);padding-top:var(--es-e3);display:grid;gap:2px}
+.es-lateral-pe .es-nav-item{color:var(--es-ink-2)}
+.es-conta{padding:6px var(--es-e2) 2px;font-size:12px;line-height:16px;color:var(--es-mudo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ----------------------------------------------------- topo (celular) */
+.es-topo{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--es-e3);
+  min-height:calc(var(--es-topo-alt) + env(safe-area-inset-top, 0px));
+  padding:env(safe-area-inset-top, 0px) var(--es-calha) 0;
+  background:rgba(255,255,255,.96);border-bottom:1px solid var(--es-linha);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);
+  position:sticky;top:0;z-index:40;
+}
+@media (min-width:1024px){ .es-casca > .es-topo{display:none} }
+.es-topo .es-ministerio{position:static}
+
+/* ------------------------------------------ barra de abas (celular) */
+.es-abas{
+  position:fixed;left:0;right:0;bottom:0;z-index:40;
+  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+  padding:0 max(env(safe-area-inset-right, 0px), 4px) env(safe-area-inset-bottom, 0px) max(env(safe-area-inset-left, 0px), 4px);
+  background:rgba(255,255,255,.97);border-top:1px solid var(--es-linha);
+  -webkit-backdrop-filter:saturate(180%) blur(12px);backdrop-filter:saturate(180%) blur(12px);
+}
+@media (min-width:1024px){ .es-abas{display:none} }
+.es-aba{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  min-height:var(--es-abas-alt);padding:6px 2px 4px;position:relative;min-width:0;
+  font-size:12px;line-height:14px;font-weight:500;color:var(--es-mudo);text-decoration:none;white-space:nowrap;
+}
+.es-aba > svg{width:22px;height:26px;color:var(--es-icone)}
+.es-aba[aria-current="page"]{color:var(--es-ink);font-weight:600}
+.es-aba[aria-current="page"] > svg{color:var(--es-ink)}
+.es-aba-n{
+  position:absolute;top:4px;left:calc(50% + 5px);
+  min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+  background:var(--es-preto);color:#fff;box-shadow:0 0 0 2px var(--es-sup);
+  font-size:12px;font-weight:600;line-height:18px;text-align:center;font-variant-numeric:tabular-nums;
+}
+/* escrevendo no celular, as abas saem da frente: no navegador que encolhe a
+   página quando o teclado abre, elas subiam junto e cobriam o campo */
+@media (max-width:1023px){
+  .es-casca:has(.es-corpo :is(textarea, input:is([type="text"],[type="search"],[type="email"],[type="tel"],[type="url"],[type="number"],:not([type]))):focus) > .es-abas{display:none}
+}
+
+/* ------------------------------------------------------------- o corpo */
+.es-corpo{
+  display:block;max-width:var(--es-largura);margin:0 auto;width:100%;
+  padding:var(--es-e5) var(--es-calha) var(--es-e10);
+}
+@media (min-width:1024px){ .es-corpo{padding-top:var(--es-e8);padding-bottom:var(--es-e12)} }
+/* leitura (ajustes, conferência): linha curta, sem esticar até 1360 */
+.es-leitura{max-width:880px}
+
+/* =========================================================== cabeçalho */
+.es-cab{display:grid;gap:var(--es-e2);margin-bottom:var(--es-e6)}
+@media (min-width:1024px){ .es-cab{margin-bottom:var(--es-e8)} }
+.es-cab-linha{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:var(--es-e4) var(--es-e6)}
+.es-cab-txt{flex:1 1 320px;min-width:0}
+.es-cab .es-rot{margin-bottom:4px}
+.es-cab-titulo{font-size:var(--es-t-titulo);line-height:var(--es-lh-titulo);font-weight:600;letter-spacing:-.02em;text-wrap:balance;overflow-wrap:anywhere}
+.es-cab-titulo.es-com-setas{display:flex;align-items:center;gap:var(--es-e3);flex-wrap:wrap}
+.es-cab-meta{margin-top:var(--es-e2);font-size:13px;line-height:20px;color:var(--es-mudo);max-width:72ch}
+.es-cab-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+@media (max-width:719px){
+  .es-cab-acoes{width:100%}
+  .es-cab-acoes > .es-btn:not(.es-txt):not(.es-peq){flex:1 1 auto}
+}
+/* as setas do mês, coladas no título: um par de botões quadrados */
+.es-setas{display:inline-flex;gap:4px}
+
+/* ================================================== seções e composição */
+.es-secao{margin-top:var(--es-e8)}
+.es-secao:first-child,.es-cab + .es-secao{margin-top:0}
+.es-secao-cab{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e2) var(--es-e4);margin-bottom:var(--es-e3);min-height:32px}
+.es-secao-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:var(--es-e2)}
+.es-secao-sub{font-size:13px;line-height:19px;color:var(--es-mudo);margin-top:2px;max-width:72ch}
+.es-secao-cab > div:first-child{min-width:0}
+
+/* duas colunas a partir de 1024: a principal e o trilho da direita. Abaixo,
+   uma coluna, na ordem do DOM, que é a ordem de leitura. */
+.es-duas{display:grid;gap:var(--es-e8);grid-template-columns:minmax(0,1fr);align-items:start}
+.es-duas > *{min-width:0}
+@media (min-width:1100px){ .es-duas{grid-template-columns:minmax(0,1fr) var(--es-trilho);gap:var(--es-e8)} }
+.es-duas > * > .es-secao:first-child{margin-top:0}
+@media (max-width:1099px){ .es-duas > * + *{margin-top:0} }
+.es-pilha{display:grid;gap:var(--es-e8);align-content:start}
+.es-pilha > .es-secao{margin-top:0}
+.es-grade{display:grid;gap:var(--es-e2)}
+.es-grade > *{min-width:0}
+.es-entre{display:flex;align-items:center;justify-content:space-between;gap:var(--es-e3);flex-wrap:wrap}
+.es-entre > *{min-width:0}
+.es-linha{display:flex;align-items:center;gap:var(--es-e2);flex-wrap:wrap}
+.es-linha > *{min-width:0}
+@media (max-width:479px){ .es-linha-botoes > .es-btn{flex:1 1 100%} }
+
+/* ---------------------------------------------------------------- caixa */
+/* A superfície de verdade: tabela, formulário, painel. Fio de 1px, canto de
+   8, sem sombra. */
+.es-caixa{background:var(--es-sup);border:1px solid var(--es-linha);border-radius:var(--es-r3);min-width:0}
+.es-caixa-cab{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e2) var(--es-e3);
+  padding:var(--es-e3) var(--es-e4);border-bottom:1px solid var(--es-linha);min-height:48px;
+}
+.es-caixa-cab h3{font-size:14px;line-height:20px;font-weight:600}
+.es-caixa-corpo{padding:var(--es-e4)}
+/* UM RECUO SÓ, 16px, EM TODA SUPERFÍCIE (30/09/2026): título e corpo da
+   caixa, linha da fila, cabeçalho de tabela, dobra, faixa de números, o dia
+   da escala. O corpo da caixa tinha 20 no desktop e o título 16: o rótulo do
+   primeiro campo ficava 4px à direita do título da própria caixa, e as
+   linhas da fila logo abaixo, de novo a 16. Numa tela, exatamente duas
+   bordas esquerdas: a da superfície e a do texto dentro dela. */
+.es-caixa-corpo + .es-caixa-corpo,.es-caixa-divisa{border-top:1px solid var(--es-linha)}
+.es-caixa-titulo{font-size:14px;line-height:20px;font-weight:600;margin-bottom:4px}
+.es-caixa-pe{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:var(--es-e2);
+  padding:var(--es-e3) var(--es-e4);border-top:1px solid var(--es-linha);background:var(--es-sup-2);
+  border-radius:0 0 var(--es-r3) var(--es-r3);
+}
+.es-caixa-pe > .es-cresce{margin-right:auto}
+@media (max-width:479px){ .es-caixa-pe > .es-btn{flex:1 1 auto} }
+.es-caixa + .es-caixa{margin-top:var(--es-e4)}
+
+/* O PRÓXIMO PASSO. A única caixa com fundo da tela inicial: é a decisão do
+   dia, e ela tem a ação cheia. Urgente ganha o fio vermelho, e só. */
+.es-passo{
+  display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e4) var(--es-e6);
+  padding:var(--es-e5) var(--es-e4);border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup-2);
+}
+.es-passo-txt{flex:1 1 360px;min-width:0;display:grid;gap:4px}
+.es-passo-tit{font-size:17px;line-height:24px;font-weight:600;letter-spacing:-.01em;text-wrap:balance}
+.es-passo-sub{font-size:14px;line-height:21px;color:var(--es-ink-2);max-width:72ch}
+.es-passo-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+.es-passo.es-bad{background:var(--es-bad-bg);border-color:var(--es-bad-ln)}
+.es-passo.es-bad .es-passo-tit{color:var(--es-bad)}
+.es-passo.es-ok{background:var(--es-ok-bg);border-color:var(--es-ok-ln)}
+@media (max-width:719px){
+  .es-passo{padding:var(--es-e4)}
+  .es-passo-acoes{width:100%}
+  .es-passo-acoes > .es-btn:not(.es-txt){flex:1 1 auto}
+}
+
+/* ============================================================== botões */
+.es-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--es-e2);
+  min-height:var(--es-h);padding:0 14px;min-width:0;
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r2);
+  background:var(--es-sup);color:var(--es-ink);box-shadow:var(--es-sombra-btn);
+  font-size:14px;line-height:20px;font-weight:500;letter-spacing:-.005em;white-space:nowrap;
+  text-decoration:none;cursor:pointer;text-align:center;
+  transition:background var(--es-t),border-color var(--es-t),color var(--es-t),box-shadow var(--es-t);
+}
+.es-btn svg{width:16px;height:16px;flex:none}
+.es-btn:hover{background:var(--es-sup-2);border-color:var(--es-linha-3);color:var(--es-ink)}
+.es-btn:active{transform:none;background:var(--es-sup-3)}
+/* desabilitado: o mesmo desenho quieto em qualquer variante. Quando
+   habilita, escurece: a mudança é o retorno. */
+.es-btn:disabled,.es-btn:disabled:hover{cursor:not-allowed;background:var(--es-sup-3);color:var(--es-mudo);border-color:var(--es-linha);box-shadow:none;opacity:1}
+.es-btn.es-pri{background:var(--es-preto);border-color:var(--es-preto);color:#fff;box-shadow:0 1px 2px rgba(16,16,20,.16)}
+.es-btn.es-pri:hover{background:var(--es-preto-toque);border-color:var(--es-preto-toque);color:#fff}
+.es-btn.es-pri:active{background:#000}
+.es-btn.es-pri:disabled,.es-btn.es-pri:disabled:hover{background:var(--es-sup-3);color:var(--es-mudo);border-color:var(--es-linha);box-shadow:none}
+.es-btn.es-perigo{color:var(--es-bad);border-color:var(--es-bad-ln)}
+.es-btn.es-perigo:hover{background:var(--es-bad-bg);border-color:var(--es-bad);color:var(--es-bad)}
+.es-btn.es-perigo:disabled,.es-btn.es-perigo:disabled:hover{color:var(--es-mudo);border-color:var(--es-linha);background:var(--es-sup-3)}
+/* o WhatsApp é um botão comum com o ícone verde: botão verde era a peça
+   mais saturada da tela e competia com a ação cheia */
+.es-btn.es-zap svg{color:var(--es-ok-ponto)}
+/* o botão-texto: sem borda, para ajustes e saídas discretas */
+.es-btn.es-txt{border-color:transparent;background:transparent;box-shadow:none;color:var(--es-ink-2);padding:0 10px}
+.es-btn.es-txt:hover{background:var(--es-sup-3);color:var(--es-ink);border-color:transparent}
+.es-btn.es-txt:disabled,.es-btn.es-txt:disabled:hover{background:transparent;border-color:transparent;color:var(--es-mudo)}
+.es-btn.es-txt.es-perigo{color:var(--es-bad)}
+.es-btn.es-txt.es-perigo:hover{background:var(--es-bad-bg)}
+.es-btn.es-peq{min-height:var(--es-h-peq);padding:0 10px;font-size:13px}
+.es-btn.es-larga{width:100%}
+.es-btn.es-icone{width:var(--es-h);padding:0}
+.es-btn.es-icone.es-peq{width:var(--es-h-peq)}
+.es-btn[aria-busy="true"]{cursor:progress}
+
+/* =============================================================== campos */
+.es-campo{display:grid;gap:6px;align-content:start;margin-bottom:var(--es-e5);min-width:0}
+.es-campo > span{font-size:13px;line-height:18px;font-weight:500;color:var(--es-ink)}
+.es-campo > small{font-size:12px;line-height:17px;color:var(--es-mudo)}
+.es-campo > small.es-erro-campo{color:var(--es-bad);font-size:13px;line-height:18px}
+.es-campo:last-child{margin-bottom:0}
+.es-dupla{display:grid;gap:0 var(--es-e4);grid-template-columns:minmax(0,1fr)}
+.es-dupla > *{min-width:0}
+@media (min-width:560px){ .es-dupla{grid-template-columns:repeat(2,minmax(0,1fr))} }
+.es .es-ctl{
+  display:block;width:100%;min-height:var(--es-h);margin:0;
+  padding:7px 12px;border:1px solid var(--es-linha-2);border-radius:var(--es-r2);
+  background:var(--es-sup);color:var(--es-ink);box-shadow:var(--es-sombra-btn);
+  font-size:var(--es-t-campo);line-height:20px;
+  transition:border-color var(--es-t),box-shadow var(--es-t),background var(--es-t);
+}
+/* 16px no celular: o Safari dá zoom sozinho abaixo disso. O `.es.es` é
+   para ganhar da regra do outro sistema que pesa 0-2-1 */
+.es.es .es-ctl{font-size:var(--es-t-campo)}
+.es .es-ctl::placeholder{color:var(--es-mudo);opacity:1}
+.es .es-ctl:hover{border-color:var(--es-linha-3)}
+.es .es-ctl:focus{outline:none;border-color:var(--es-foco);box-shadow:0 0 0 3px var(--es-halo);background-color:var(--es-sup)}
+.es .es-ctl:focus-visible{outline:none}
+.es .es-ctl:disabled{background:var(--es-sup-3);color:var(--es-mudo);cursor:not-allowed;box-shadow:none}
+.es .es-ctl[aria-invalid="true"]{border-color:var(--es-bad);box-shadow:0 0 0 3px rgba(224,53,43,.12)}
+.es textarea.es-ctl{min-height:96px;resize:vertical;line-height:1.55;padding-top:10px;padding-bottom:10px}
+.es select.es-ctl{
+  appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;text-overflow:ellipsis;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%2371717a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 10px center;background-size:16px;
+}
+.es input[type="date"].es-ctl,.es input[type="time"].es-ctl{-webkit-appearance:none;appearance:none;min-height:var(--es-h)}
+.es input[type="number"].es-ctl{text-align:right;font-variant-numeric:tabular-nums}
+@media (min-width:720px){
+  .es-campo.es-curto > .es-ctl{max-width:440px}
+  .es-campo.es-data > .es-ctl{max-width:220px}
+}
+.es .es-ctl.es-estreito{width:auto;max-width:220px;flex:0 1 auto}
+.es-erro-campo{color:var(--es-bad);font-size:13px;line-height:18px;overflow-wrap:anywhere}
+.es-caixinha{display:flex;align-items:center;gap:10px;min-height:var(--es-h);cursor:pointer;font-size:14px}
+.es .es-caixinha input{width:18px;height:18px;min-height:0;margin:0;padding:0;accent-color:var(--es-preto);flex:none;border:0}
+.es-linha.es-criar{flex-wrap:nowrap}
+.es-linha.es-criar > .es-ctl{flex:1 1 0%;min-width:160px}
+.es-linha.es-criar > .es-btn{flex:none}
+@media (max-width:719px){
+  .es-linha.es-criar{flex-wrap:wrap}
+  .es-linha.es-criar > .es-ctl{flex:1 1 100%}
+  .es-linha.es-criar > .es-btn{flex:1 1 auto}
+}
+
+/* ------------------------------------------------------------ interruptor */
+.es-interruptor{
+  display:inline-flex;align-items:center;gap:10px;min-height:var(--es-h);min-width:44px;white-space:nowrap;
+  border:0;background:transparent;padding:0;cursor:pointer;font-size:14px;color:var(--es-ink);text-align:left;
+}
+.es-interruptor::before{
+  content:"";flex:none;width:36px;height:20px;border-radius:10px;background-color:var(--es-linha-2);
+  transition:background-color var(--es-t),background-position var(--es-t);
+  background-image:radial-gradient(circle at 10px 10px,#fff 0 7px,transparent 7.5px);
+  background-repeat:no-repeat;background-position:0 0;
+}
+.es-interruptor:hover::before{background-color:var(--es-linha-3)}
+.es-interruptor[aria-checked="true"]::before{background-color:var(--es-preto);background-position:16px 0}
+.es-interruptor:disabled{cursor:not-allowed;color:var(--es-mudo)}
+.es-interruptor:disabled::before{opacity:.5}
+
+/* ------------------------------------------------------------------ busca */
+.es-busca{
+  display:flex;align-items:center;gap:8px;min-height:var(--es-h);width:100%;
+  padding:0 10px;border:1px solid var(--es-linha-2);border-radius:var(--es-r2);
+  background:var(--es-sup);box-shadow:var(--es-sombra-btn);color:var(--es-icone);
+  transition:border-color var(--es-t),box-shadow var(--es-t);
+}
+.es-busca:hover{border-color:var(--es-linha-3)}
+.es-busca:focus-within{border-color:var(--es-foco);box-shadow:0 0 0 3px var(--es-halo)}
+.es-busca svg{width:16px;height:16px}
+.es .es-busca input{flex:1 1 auto;min-width:0;min-height:calc(var(--es-h) - 2px);border:0;background:transparent;outline:0;padding:0;margin:0;color:var(--es-ink);box-shadow:none;width:auto}
+.es.es .es-busca input{font-size:var(--es-t-campo)}
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .es .es-busca input{min-height:44px} }
+.es .es-busca input::placeholder{color:var(--es-mudo);opacity:1}
+.es .es-busca input:focus-visible{outline:0}
+.es .es-busca input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+@media (min-width:720px){ .es-busca{width:280px} }
+
+/* ------------------------------------------------------------- segmentado */
+.es-seg{
+  display:inline-flex;gap:2px;padding:2px;max-width:100%;
+  background:var(--es-sup-3);border-radius:var(--es-r3);border:1px solid var(--es-linha);
+  overflow-x:auto;scrollbar-width:none;
+}
+.es-seg::-webkit-scrollbar{display:none}
+.es-seg button{
+  flex:1 0 auto;justify-content:center;min-height:calc(var(--es-h) - 6px);padding:0 12px;white-space:nowrap;
+  border-radius:var(--es-r2);color:var(--es-mudo);font-size:13px;font-weight:500;gap:6px;
+  transition:background var(--es-t),color var(--es-t),box-shadow var(--es-t);
+}
+.es-seg button:hover{color:var(--es-ink);background:transparent}
+.es-seg button[aria-pressed="true"]{background:var(--es-sup);color:var(--es-ink);font-weight:600;box-shadow:0 1px 2px rgba(16,16,20,.08),0 0 0 1px rgba(16,16,20,.06)}
+.es-seg button:disabled{cursor:not-allowed;color:var(--es-mudo)}
+.es-seg button:focus-visible{outline-offset:-2px}
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .es-seg button{min-height:44px} }
+
+/* ------------------------------------------------------------- filtros */
+/* fichas de filtro (as funções no Time): contorno quieto, e a escolhida em
+   tinta. Seleção é contorno, nunca preto cheio: preto é ação. */
+.es-fichas{display:flex;flex-wrap:wrap;gap:6px}
+.es-ficha{
+  display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 10px;
+  border:1px solid var(--es-linha-2);border-radius:16px;background:var(--es-sup);
+  font-size:13px;font-weight:500;color:var(--es-ink-2);white-space:nowrap;
+  transition:border-color var(--es-t),background var(--es-t),color var(--es-t);
+}
+.es-ficha:hover{border-color:var(--es-linha-3);color:var(--es-ink);background:var(--es-sup-2)}
+.es-ficha[aria-pressed="true"]{border-color:var(--es-ink);box-shadow:inset 0 0 0 1px var(--es-ink);color:var(--es-ink);font-weight:600;background:var(--es-sup)}
+.es-ficha .es-num{color:var(--es-mudo);font-weight:500}
+/* no toque, 44px como todo alvo (medido em 390: as fichas tinham 40) */
+@media (max-width:1023px), (hover:none), (pointer:coarse){ .es-ficha{min-height:44px;padding:0 12px;border-radius:22px} }
+
+/* ============================================================= pílulas */
+/* O ESTADO: ponto e palavra, em cinco tons, e o tom é fixo no sistema
+   inteiro. Cor sozinha não informa: a palavra está sempre lá.
+
+     es-bad    falta gente: sem ninguém, furou, não pode
+     es-warn   espera resposta: sem responder, esperando você
+     es-ok     de pé: confirmado, coberto, conferido
+     es-info   um fato a saber: primeira vez, fixo, plantão, novo
+     (neutro)  sem juízo: não montada, já passou, encerrada */
+.es-pill{
+  display:inline-flex;align-items:center;gap:6px;max-width:100%;
+  min-height:22px;padding:1px 8px;border-radius:var(--es-r2);
+  background:var(--es-neutro-bg);color:var(--es-neutro);box-shadow:inset 0 0 0 1px var(--es-neutro-ln);
+  font-size:12px;line-height:18px;font-weight:500;white-space:nowrap;
+}
+.es-pill.es-ok{background:var(--es-ok-bg);color:var(--es-ok);box-shadow:inset 0 0 0 1px var(--es-ok-ln)}
+.es-pill.es-warn{background:var(--es-warn-bg);color:var(--es-warn);box-shadow:inset 0 0 0 1px var(--es-warn-ln)}
+.es-pill.es-bad{background:var(--es-bad-bg);color:var(--es-bad);box-shadow:inset 0 0 0 1px var(--es-bad-ln)}
+.es-pill.es-info{background:var(--es-info-bg);color:var(--es-info);box-shadow:inset 0 0 0 1px var(--es-info-ln)}
+.es-ponto{width:6px;height:6px;border-radius:50%;background:var(--es-neutro-ponto);flex:none}
+.es-ponto.es-ok{background:var(--es-ok-ponto)}
+.es-ponto.es-warn{background:var(--es-warn-ponto)}
+.es-ponto.es-bad{background:var(--es-bad-ponto)}
+.es-ponto.es-info{background:var(--es-info-ponto)}
+.es-selo{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:20px;height:20px;padding:0 6px;border-radius:10px;
+  background:var(--es-preto);color:#fff;font-size:12px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+/* a etiqueta quieta: o nome de uma função, um nível. Não é estado. */
+.es-etq{
+  display:inline-flex;align-items:center;min-height:20px;padding:0 6px;border-radius:var(--es-r1);
+  background:var(--es-sup-3);color:var(--es-ink-2);font-size:12px;line-height:18px;font-weight:500;white-space:nowrap;
+}
+.es-etqs{display:flex;flex-wrap:wrap;gap:4px}
+
+/* ============================================================== avisos */
+.es-aviso{
+  display:flex;gap:10px;align-items:flex-start;
+  padding:var(--es-e3) var(--es-e4);border-radius:var(--es-r3);
+  background:var(--es-neutro-bg);color:var(--es-ink);box-shadow:inset 0 0 0 1px var(--es-neutro-ln);
+  font-size:14px;line-height:20px;margin-bottom:var(--es-e4);overflow-wrap:anywhere;
+}
+.es-aviso > svg{width:18px;height:18px;margin-top:1px;color:var(--es-neutro-ponto)}
+.es-aviso > div{min-width:0;flex:1 1 auto}
+.es-aviso.es-ok{background:var(--es-ok-bg);box-shadow:inset 0 0 0 1px var(--es-ok-ln);color:var(--es-ok)}
+.es-aviso.es-ok > svg{color:var(--es-ok-ponto)}
+.es-aviso.es-warn{background:var(--es-warn-bg);box-shadow:inset 0 0 0 1px var(--es-warn-ln);color:var(--es-warn)}
+.es-aviso.es-warn > svg{color:var(--es-warn-ponto)}
+.es-aviso.es-bad{background:var(--es-bad-bg);box-shadow:inset 0 0 0 1px var(--es-bad-ln);color:var(--es-bad)}
+.es-aviso.es-bad > svg{color:var(--es-bad-ponto)}
+.es-aviso.es-info{background:var(--es-info-bg);box-shadow:inset 0 0 0 1px var(--es-info-ln);color:var(--es-info)}
+.es-aviso.es-info > svg{color:var(--es-info-ponto)}
+.es-aviso b{font-weight:600}
+.es-aviso a{text-decoration:underline;text-underline-offset:3px}
+.es-aviso .es-btn{margin-top:var(--es-e2)}
+.es-caixa-corpo > .es-aviso:last-child{margin-bottom:0}
+
+/* o toast: o sucesso que muda ou some da tela. Erro que decide algo nunca
+   é só toast: fica na página, ao lado do que falhou. */
+.es-toast{
+  position:fixed;left:50%;transform:translateX(-50%);z-index:70;
+  bottom:calc(var(--es-abas-alt) + 12px + env(safe-area-inset-bottom, 0px));
+  max-width:min(440px,calc(100% - 32px));width:max-content;
+  display:flex;align-items:center;gap:var(--es-e3);
+  padding:8px 14px;min-height:48px;background:var(--es-preto);color:#fff;
+  border-radius:var(--es-r3);box-shadow:var(--es-sombra-dialogo);font-size:14px;font-weight:500;line-height:20px;
+  animation:es-toast-entra 260ms var(--es-curva-entra);overflow-wrap:anywhere;
+}
+@media (min-width:1024px){ .es-toast{left:auto;right:32px;bottom:24px;transform:none} }
+@keyframes es-toast-entra{0%{opacity:0;translate:0 8px}100%{opacity:1;translate:0 0}}
+
+/* o fio de trabalho: enquanto uma ação grava, um traço desliza no alto */
+.es-fio{position:fixed;top:0;left:0;right:0;height:2px;z-index:75;background:var(--es-linha-2);overflow:hidden;pointer-events:none}
+.es-fio::after{content:"";position:absolute;inset:0;background:var(--es-ink);animation:es-desliza 1.15s ease-in-out infinite}
+@keyframes es-desliza{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+
+/* ============================================================== números */
+/* A FAIXA DE NÚMEROS. Uma superfície só, com fios de 1px entre as casas. O
+   fio é o FUNDO da faixa aparecendo no vão entre as casas brancas. */
+.es-kpis{display:flex;flex-wrap:wrap;gap:1px;background:var(--es-linha);border:1px solid var(--es-linha);border-radius:var(--es-r3);overflow:hidden}
+.es-kpi{
+  flex:1 1 calc(50% - 1px);min-width:0;display:grid;align-content:start;gap:2px;
+  padding:var(--es-e3) var(--es-e4) 14px;min-height:92px;
+  background:var(--es-sup);color:inherit;text-decoration:none;text-align:left;
+  transition:background var(--es-t);
+}
+@media (min-width:720px){ .es-kpi{flex-basis:calc(100% / var(--es-n, 4) - 1px)} }
+@media (min-width:1024px){ .es-kpi{padding:var(--es-e4)} }
+.es-kpi:where(a):hover{background:var(--es-sup-2)}
+.es-kpi:where(a):focus-visible{outline-offset:-2px}
+.es-kpi-rot{font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo);display:flex;align-items:center;gap:6px}
+.es-kpi-valor{font-size:26px;line-height:34px;font-weight:600;letter-spacing:-.025em;font-variant-numeric:tabular-nums;color:var(--es-ink);white-space:nowrap}
+.es-kpi-valor small{font-size:16px;font-weight:500;color:var(--es-mudo);letter-spacing:0;margin-left:2px}
+@media (min-width:1024px){ .es-kpi-valor{font-size:28px;line-height:36px} }
+.es-kpi-sub{font-size:12px;line-height:16px;color:var(--es-mudo)}
+.es-kpi.es-bad .es-kpi-valor{color:var(--es-bad)}
+.es-kpi.es-warn .es-kpi-valor{color:var(--es-warn)}
+.es-kpi.es-zero .es-kpi-valor{color:var(--es-mudo)}
+.es-kpi.es-texto .es-kpi-valor{font-size:18px;line-height:34px;letter-spacing:-.01em}
+@media (min-width:1024px){ .es-kpi.es-texto .es-kpi-valor{font-size:20px;line-height:36px} }
+/* o ponto de "é com você" é preto, como o selo: vermelho é falta de gente,
+   e só */
+.es-kpi.es-destaque .es-kpi-rot::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--es-ink)}
+
+/* =============================================================== o diálogo
+   A confirmação do que não se desfaz direito. Montada por lib/confirmar.ts:
+   a pergunta em cima, o que acontece embaixo em cinza, e os dois botões à
+   direita, com o foco nascendo no "Voltar". No celular os botões empilham. */
+.es-dialogo{
+  width:min(440px,calc(100vw - 32px));max-width:none;padding:0;margin:auto;border:0;
+  border-radius:var(--es-r4);background:var(--es-sup);color:var(--es-ink);box-shadow:var(--es-sombra-dialogo);
+}
+.es-dialogo::backdrop{background:rgba(16,16,20,.44)}
+.es-dialogo-corpo{display:grid;gap:8px;padding:var(--es-e6)}
+.es-dialogo-titulo{font-size:16px;line-height:24px;font-weight:600;letter-spacing:-.01em;color:var(--es-ink)}
+.es-dialogo-texto{font-size:14px;line-height:21px;color:var(--es-mudo)}
+.es-dialogo-sem-volta{font-size:13px;line-height:18px;font-weight:500;color:var(--es-bad)}
+.es-dialogo-btns{display:flex;justify-content:flex-end;gap:8px;margin-top:var(--es-e4)}
+.es-dialogo .es-btn.es-pri.es-perigo{background:var(--es-bad);border-color:var(--es-bad);color:#fff}
+.es-dialogo .es-btn.es-pri.es-perigo:hover{background:#9d1f15;border-color:#9d1f15;color:#fff}
+@media (max-width:479px){
+  .es-dialogo-btns{flex-direction:column-reverse}
+  .es-dialogo-btns > .es-btn{width:100%}
+}
+
+/* ============================================================ a fila */
+/* A LISTA QUE SE CLICA: linhas de uma caixa só, com colunas no desktop e
+   empilhadas no celular. Cada lista diz as próprias colunas em
+   `--es-cols` (no desktop), e a linha organiza as células por PAPEL:
+
+     .es-c-tit   o que é (nome, data)            sempre na frente
+     .es-c-num   um número (9 de 12)             tabular
+     .es-c-est   o estado (pílula)
+     .es-c-acao  o que fazer (Abrir, Cobrar)     sempre no fim
+
+   Assim uma lista nova não precisa de regra própria, e renomear uma
+   coluna não quebra o celular.
+
+   SEM `auto` EM `--es-cols`. Cada linha é uma grade independente: com uma
+   coluna `auto`, a pílula "falta confirmar" (mais larga que "confirmou")
+   encolhia as colunas de texto só naquela linha, e a coluna Pessoa andava
+   12px de uma linha para a outra (medido em 1440, 30/09/2026). Texto em
+   `minmax(0,Nfr)`, o resto em largura fixa. */
+.es-fila{background:var(--es-sup);border:1px solid var(--es-linha);border-radius:var(--es-r3);overflow:hidden;min-width:0}
+.es-fila-cab{display:none}
+.es-item{
+  display:grid;align-items:center;gap:4px var(--es-e3);
+  grid-template-columns:minmax(0,1fr) auto;
+  grid-template-areas:"tit acao" "meta acao";
+  padding:var(--es-e3) var(--es-e4);min-height:60px;
+  border-top:1px solid var(--es-linha);color:inherit;text-decoration:none;text-align:left;width:100%;
+  transition:background var(--es-t);
+}
+.es-fila > .es-item:first-child,.es-fila-cab + .es-item{border-top:0}
+.es-item:where(a,button):hover{background:var(--es-sup-2)}
+.es-item:where(a,button):focus-visible{outline-offset:-2px}
+.es-c-tit{grid-area:tit;min-width:0;display:grid;gap:2px}
+.es-c-tit > b{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es-c-tit > small{font-size:13px;line-height:18px;color:var(--es-mudo);overflow-wrap:anywhere}
+.es-c-meta{grid-area:meta;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;min-width:0}
+.es-c-num{font-size:13px;line-height:20px;color:var(--es-ink-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.es-c-est{min-width:0;display:flex;flex-wrap:wrap;gap:4px}
+.es-c-acao{grid-area:acao;display:inline-flex;align-items:center;justify-content:flex-end;gap:2px;font-size:13px;font-weight:600;color:var(--es-ink);white-space:nowrap}
+.es-c-acao > svg{width:16px;height:16px;color:var(--es-icone)}
+.es-item.es-so-tit{grid-template-areas:"tit acao";min-height:52px}
+/* o número grande à esquerda (as pendências do painel) */
+.es-item.es-com-n{grid-template-columns:auto minmax(0,1fr) auto;grid-template-areas:"n tit acao"}
+.es-c-n{grid-area:n;min-width:28px;font-size:16px;line-height:24px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--es-ink)}
+.es-c-n.es-bad{color:var(--es-bad)}
+@media (min-width:720px){
+  .es-fila.es-colunas > .es-fila-cab{
+    display:grid;align-items:end;gap:var(--es-e3);grid-template-columns:var(--es-cols);
+    padding:10px var(--es-e4);background:var(--es-sup-2);border-bottom:1px solid var(--es-linha);
+    font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo);
+  }
+  .es-fila-cab > .es-n{text-align:right}
+  .es-fila.es-colunas > .es-item{grid-template-columns:var(--es-cols);grid-template-areas:none}
+  .es-fila.es-colunas > .es-item > *{grid-area:auto}
+  .es-fila.es-colunas .es-c-meta{display:contents}
+  .es-fila.es-colunas .es-c-num{text-align:right}
+}
+.es-fila > .es-vazio{padding:var(--es-e6) var(--es-e4)}
+.es-fila-pe{padding:10px var(--es-e4);border-top:1px solid var(--es-linha);background:var(--es-sup-2);font-size:13px;line-height:19px;color:var(--es-ink-2)}
+
+/* ------------------------------------------------ tabela de verdade */
+.es-tab{width:100%;border-collapse:collapse;font-size:14px;line-height:20px}
+.es-tab th{
+  text-align:left;white-space:nowrap;font-size:12px;line-height:16px;font-weight:500;
+  color:var(--es-mudo);background:var(--es-sup-2);
+  padding:12px var(--es-e4);border-bottom:1px solid var(--es-linha);vertical-align:bottom;
+}
+.es-tab td{padding:10px var(--es-e4);border-bottom:1px solid var(--es-linha);vertical-align:middle;color:var(--es-ink)}
+.es-tab tbody tr:last-child td{border-bottom:0}
+.es-tab tbody tr:hover td{background:var(--es-sup-2)}
+.es-tab td.es-n,.es-tab th.es-n{text-align:right;font-variant-numeric:tabular-nums;width:1%;white-space:nowrap}
+.es-tab td.es-mudo{color:var(--es-mudo)}
+.es-tab .es-fim{text-align:right;width:1%;white-space:nowrap}
+@media (max-width:1279px){
+  .es-tab th,.es-tab td{padding-left:12px;padding-right:12px}
+  .es-tab th:first-child,.es-tab td:first-child{padding-left:var(--es-e4)}
+}
+.es-rola{overflow-x:auto;-webkit-overflow-scrolling:touch}
+/* NO CELULAR A TABELA DE LEITURA EMPILHA: o nome numa linha, os números
+   embaixo, cada um com o seu rótulo. Rolando de lado ela escondia a coluna
+   que mais importava. */
+@media (max-width:719px){
+  .es-tab.es-empilha thead{display:none}
+  .es-tab.es-empilha tr{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 8px;padding:12px var(--es-e4);border-top:1px solid var(--es-linha)}
+  .es-tab.es-empilha tbody tr:first-child{border-top:0}
+  .es-tab.es-empilha td{display:block;padding:0;border:0;text-align:left;background:transparent;width:auto}
+  .es-tab.es-empilha td.es-primeira{grid-column:1 / -1;font-weight:600}
+  .es-tab.es-empilha td[data-rot]::before{content:attr(data-rot);display:block;font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo);margin-bottom:2px;white-space:nowrap}
+  .es-tab.es-empilha td[colspan]{grid-column:1 / -1}
+  .es-tab.es-empilha tbody tr:hover td{background:transparent}
+}
+
+/* ========================================================= estados vazios */
+.es-vazio{display:grid;justify-items:center;gap:6px;padding:var(--es-e10) var(--es-e4);text-align:center}
+.es-vazio-ico{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:var(--es-sup-3);color:var(--es-ink-2);margin-bottom:6px}
+.es-vazio-ico svg{width:20px;height:20px}
+.es-vazio.es-bom .es-vazio-ico{background:var(--es-ok-bg);color:var(--es-ok)}
+.es-vazio h3{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink)}
+.es-vazio > div{font-size:13px;line-height:19px;color:var(--es-mudo);max-width:46ch}
+.es-vazio > div .es-btn{margin-top:var(--es-e3)}
+.es-vazio.es-solto{border:1px dashed var(--es-linha-2);border-radius:var(--es-r3)}
+
+/* ---------------------------------------------------------------- esqueleto */
+.es-esqueleto{display:grid;gap:var(--es-e4)}
+.es-esqueleto > div{background:var(--es-sup-3);border-radius:var(--es-r3);animation:es-pulso 1.4s ease-in-out infinite}
+@keyframes es-pulso{0%,100%{opacity:.6}50%{opacity:1}}
+
+/* ------------------------------------------------------------- a dobra */
+/* O QUE SE ABRE QUANDO PRECISA (a mensagem do grupo, as regras): uma caixa
+   com o título e a seta, e o corpo embaixo. A seta gira; nada pula. */
+.es-dobra{background:var(--es-sup);border:1px solid var(--es-linha);border-radius:var(--es-r3);min-width:0}
+.es-dobra > summary{
+  display:flex;align-items:center;gap:var(--es-e3);min-height:48px;padding:0 var(--es-e4);
+  cursor:pointer;user-select:none;font-size:14px;font-weight:600;color:var(--es-ink);border-radius:var(--es-r3);
+}
+.es-dobra > summary::-webkit-details-marker{display:none}
+.es-dobra > summary > span{flex:1 1 auto;min-width:0}
+.es-dobra > summary > small{font-size:13px;font-weight:500;color:var(--es-mudo);white-space:nowrap}
+.es-dobra > summary::after{
+  content:"";width:16px;height:16px;flex:none;background:var(--es-icone);transition:transform var(--es-t);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat;
+}
+.es-dobra[open] > summary::after{transform:rotate(180deg)}
+.es-dobra > summary:hover{background:var(--es-sup-2)}
+.es-dobra > summary:focus-visible{outline-offset:-2px}
+.es-dobra-corpo{padding:0 var(--es-e4) var(--es-e4);border-top:1px solid var(--es-linha);padding-top:var(--es-e4)}
+.es-dobra + .es-dobra{margin-top:var(--es-e3)}
+/* o texto que vai para o WhatsApp, como ele vai sair */
+.es-msg{
+  white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit;font-size:14px;line-height:1.6;
+  color:var(--es-ink-2);background:var(--es-sup-2);border:1px solid var(--es-linha);border-radius:var(--es-r2);
+  padding:var(--es-e3) var(--es-e4);margin:0;max-height:420px;overflow-y:auto;
+}
+/* a lista numerada de regras */
+.es-regras{display:grid;gap:10px;counter-reset:es-regra}
+.es-regras li{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;font-size:14px;line-height:21px;color:var(--es-ink-2);counter-increment:es-regra}
+.es-regras li::before{content:counter(es-regra);font-weight:600;color:var(--es-ink);font-variant-numeric:tabular-nums}
+.es-regras b{color:var(--es-ink)}
+
+/* ------------------------------------------------------ a escolha nativa */
+/* O SELECT QUE NÃO SEQUESTRA A LINHA. O texto visível é nosso; o <select>
+   nativo fica por cima, transparente, e recebe toque, teclado e leitor de
+   tela. O foco é desenhado no invólucro. (Mesmo desenho do `Escolha` do
+   espaço do voluntário, com as cores daqui.) */
+.es-escolha{position:relative;display:inline-flex;align-items:center;min-width:0;max-width:100%}
+.es .es-escolha > select{
+  position:absolute;inset:0;width:100%;height:100%;min-height:0;opacity:0;cursor:pointer;
+  margin:0;padding:0;border:0;appearance:none;-webkit-appearance:none;font-size:16px;
+}
+.es-escolha.es-off > select{cursor:default}
+.es-escolha-txt{
+  display:inline-flex;align-items:center;gap:6px;min-width:0;max-width:100%;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none;
+}
+.es-escolha-txt::after{
+  content:"";width:14px;height:14px;flex:none;background:var(--es-icone);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6.5 8 10l3.5-3.5' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat;
+}
+.es-escolha.es-off .es-escolha-txt::after{display:none}
+.es-escolha:focus-within{outline:2px solid var(--es-foco);outline-offset:2px;border-radius:var(--es-r2)}
+.es-escolha.es-off{opacity:.55}
+/* como pílula: a situação de um posto, trocável no lugar */
+.es-escolha.es-como-pill .es-escolha-txt{
+  min-height:28px;padding:0 8px;border-radius:var(--es-r2);font-size:12px;line-height:18px;font-weight:500;
+  background:var(--es-neutro-bg);color:var(--es-neutro);box-shadow:inset 0 0 0 1px var(--es-neutro-ln);
+}
+.es-escolha.es-como-pill.es-ok .es-escolha-txt{background:var(--es-ok-bg);color:var(--es-ok);box-shadow:inset 0 0 0 1px var(--es-ok-ln)}
+.es-escolha.es-como-pill.es-warn .es-escolha-txt{background:var(--es-warn-bg);color:var(--es-warn);box-shadow:inset 0 0 0 1px var(--es-warn-ln)}
+.es-escolha.es-como-pill.es-bad .es-escolha-txt{background:var(--es-bad-bg);color:var(--es-bad);box-shadow:inset 0 0 0 1px var(--es-bad-ln)}
+.es-escolha.es-como-pill .es-escolha-txt::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--es-neutro-ponto);flex:none}
+.es-escolha.es-como-pill.es-ok .es-escolha-txt::before{background:var(--es-ok-ponto)}
+.es-escolha.es-como-pill.es-warn .es-escolha-txt::before{background:var(--es-warn-ponto)}
+.es-escolha.es-como-pill.es-bad .es-escolha-txt::before{background:var(--es-bad-ponto)}
+.es-escolha.es-como-pill .es-escolha-txt::after{background:currentColor;opacity:.7}
+.es-escolha.es-como-pill:hover .es-escolha-txt{filter:brightness(.97)}
+/* como campo: a pessoa de um posto */
+.es-escolha.es-como-campo{width:100%}
+.es-escolha.es-como-campo .es-escolha-txt{
+  width:100%;min-height:var(--es-h);padding:0 10px 0 12px;justify-content:space-between;
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r2);background:var(--es-sup);box-shadow:var(--es-sombra-btn);
+  font-size:14px;color:var(--es-ink);
+}
+.es-escolha.es-como-campo:hover .es-escolha-txt{border-color:var(--es-linha-3)}
+.es-escolha.es-como-campo.es-vazia .es-escolha-txt{color:var(--es-bad);border-style:dashed;border-color:var(--es-bad-ln)}
+@media (max-width:1023px), (hover:none), (pointer:coarse){
+  .es-escolha.es-como-pill .es-escolha-txt{min-height:36px;padding:0 10px}
+  .es-escolha.es-como-pill{min-height:44px}
+}
+
+/* ================================================================= a porta */
+/* /entrar: fora da casca, uma caixa no meio da página cinza */
+.es-porta{min-height:100dvh;display:grid;place-items:center;padding:var(--es-e8) var(--es-calha);background:var(--es-fundo)}
+.es-porta-caixa{
+  width:100%;max-width:420px;display:grid;gap:var(--es-e4);
+  padding:var(--es-e8) var(--es-e6);background:var(--es-sup);border:1px solid var(--es-linha);border-radius:var(--es-r4);
+}
+@media (max-width:479px){ .es-porta-caixa{padding:var(--es-e6) var(--es-e4)} }
+.es-porta-topo{display:flex;align-items:center;gap:10px;margin-bottom:var(--es-e2)}
+.es-porta-caixa h1{font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.02em}
+.es-porta-sub{font-size:14px;line-height:21px;color:var(--es-mudo)}
+.es-porta-pe{font-size:13px;line-height:19px;color:var(--es-mudo);text-align:center}
+
+/* --------------------------------------------------------- estados da casca */
+/* sem acesso, sem conexão, primeiro ministério: uma coluna estreita */
+.es-estado{max-width:460px;margin:var(--es-e10) auto 0;display:grid;gap:var(--es-e3)}
+.es-estado h1{font-size:22px;line-height:28px;font-weight:600;letter-spacing:-.02em}
+.es-estado p{font-size:14px;line-height:21px;color:var(--es-mudo)}
+
+/* ---------------------------------------------------------------- movimento */
+@media (prefers-reduced-motion:reduce){
+  .es *{animation:none!important;transition:none!important}
+  .es-toast{animation:none!important}
+  .es-fio::after{animation:none!important;opacity:.55}
+}

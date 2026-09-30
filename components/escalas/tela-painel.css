@@ -1,0 +1,34 @@
+/* ==========================================================================
+   tela-painel.css · as regras só do /painel (30/09/2026)
+   Todas sob `.es` e com prefixo `es-pn-` (ver a trava em escalas.css).
+   ========================================================================== */
+
+/* a escala do dia: a função em cima, pequena, e a pessoa embaixo, que é o
+   que se procura. No desktop viram colunas (função · pessoa · situação). */
+.es-c-tit > b.es-pn-fn{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.02em;color:var(--es-ink-2);overflow-wrap:anywhere}
+.es-pn-pessoa{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es-pn-vaga{color:var(--es-bad);font-weight:500}
+.es-item.es-pn-posto{min-height:56px}
+@media (min-width:720px){
+  .es-fila.es-colunas > .es-item.es-pn-posto{min-height:52px}
+  .es-c-tit > b.es-pn-fn{font-size:13px;line-height:18px;font-weight:500;letter-spacing:0}
+}
+
+/* os três passos da primeira vez: o texto de cada passo tem largura de
+   leitura, e o botão do passo da vez fica à direita */
+.es-item.es-pn-passo{align-items:start;padding-top:var(--es-e4);padding-bottom:var(--es-e4)}
+.es-item.es-pn-passo .es-c-tit > small{max-width:60ch;font-size:14px;line-height:21px;color:var(--es-ink-2)}
+.es-item.es-pn-passo .es-c-n{line-height:20px}
+.es-item.es-pn-passo .es-c-acao{align-self:center}
+@media (max-width:559px){
+  .es-item.es-pn-passo{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"n tit" "n acao"}
+  .es-item.es-pn-passo .es-c-acao{justify-content:flex-start;margin-top:var(--es-e2)}
+}
+
+/* a cobrança de quem não respondeu: o botão de WhatsApp cabe inteiro no
+   celular, embaixo do nome, em vez de espremer o nome */
+@media (max-width:479px){
+  .es-pn-cobrar .es-item{grid-template-columns:minmax(0,1fr);grid-template-areas:"tit" "acao"}
+  .es-pn-cobrar .es-c-acao{justify-content:flex-start;margin-top:6px}
+  .es-pn-cobrar .es-c-acao > .es-btn{flex:1 1 auto}
+}

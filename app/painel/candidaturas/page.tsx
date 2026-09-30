@@ -1,11 +1,12 @@
 'use client';
-import { Faixa } from '@/components/Faixa';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Shell, { useApp } from '@/components/Shell';
-import { Aviso } from '@/components/Ui';
+import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Tom } from '@/components/escalas/Pecas';
+import { IcSeta } from '@/components/Icones';
 import { msgConvite, vol } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
+import { cont, pl } from '@/lib/plural';
 import {
   ABERTAS, NO_TIME, O_QUE_FAZER, Candidatura, Passo, Resposta, ROTULO_STATUS, StatusCand,
   decidir, historicoDe, listarCandidaturas, linkWhatsApp, respostasDe, telefoneLegivel,
@@ -37,14 +38,18 @@ import {
    3. QUATRO BOTÕES DO MESMO TAMANHO
       "Quero conversar", "Aprovar", "Já está servindo" e "Encerrar" apareciam
       lado a lado, iguais. Escolher entre quatro é trabalho, e quem organiza
-      abre isso no celular entre um culto e outro. Agora há uma ação sólida
-      por linha — a do momento — e as outras viram texto, depois da frase
-      "depois de falar com ela".
+      abre isso no celular entre um culto e outro. Agora há uma ação cheia
+      por candidatura aberta, a do momento, e as outras vêm em contorno,
+      depois da frase "depois de falar com ela".
 
    O QUE FOI PRESERVADO: a fila continua sendo uma tela só, com o detalhe
    abrindo dentro da linha (sair da lista para decidir e voltar perdendo a
    posição é atrito puro no celular), e a ordem continua sendo por espera, não
    por data de chegada.
+
+   30/09/2026: na língua do Financeiro e do Demandas. A situação no título,
+   a faixa de números no lugar do placar preto, cada candidatura uma linha
+   da fila (nome, funções, estado, espera) e a aberta numa caixa.
    ============================================================================= */
 
 export default function Pagina() { return <Shell><Fila /></Shell>; }
@@ -58,6 +63,9 @@ const diasAtras = (iso: string) =>
   Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
 const espera = (n: number) => n === 0 ? 'chegou hoje' : n === 1 ? 'há 1 dia' : `há ${n} dias`;
 const nomeInteiro = (n: string) => (n || '').trim();
+
+/* as colunas das filas no desktop (nada em `auto`: ver a fila em escalas.css) */
+const COLUNAS = { '--es-cols': 'minmax(0,1fr) 200px 96px 24px' } as React.CSSProperties;
 
 function Fila() {
   const { equipe, aviso, recarregar } = useApp();
@@ -86,9 +94,15 @@ function Fila() {
   const fechadas = lista.filter(c => !ABERTAS.includes(c.status) && !NO_TIME.includes(c.status))
     .sort((a, b) => b.atualizado_em.localeCompare(a.atualizado_em));
 
+  /* RECARREGAR NÃO APAGA A TELA (30/09/2026). Depois de cada decisão a lista
+     é relida, e com `!carregando` em cada bloco a tela inteira sumia por um
+     instante, inclusive a ficha que a pessoa acabou de usar. Com lista na
+     mão, ela fica à vista enquanto a nova chega; só a primeira carga espera. */
+  const mostra = !carregando || lista.length > 0;
   const maisAntiga = abertas.length ? diasAtras(abertas[0].criado_em) : 0;
-  /* a faixa inverte quando alguém já está esperando há três dias. Não é
-     enfeite: é o único número desta tela que estraga a jornada de verdade. */
+  /* a espera da mais antiga ganha o tom de "espera resposta" a partir de três
+     dias. Não é enfeite: é o único número desta tela que estraga a jornada
+     de verdade. */
   const urge = maisAntiga >= 3;
 
   const props = {
@@ -97,63 +111,88 @@ function Fila() {
     mudou: async (m: string) => { aviso(m); await carregar(); await recarregar(); },
   };
 
+  /* a fila de uma seção: a linha abre a candidatura logo abaixo dela */
+  const filaDe = (itens: Candidatura[], comEspera: boolean) => (
+    <div className="es-fila es-colunas" style={COLUNAS}>
+      <div className="es-fila-cab" aria-hidden="true">
+        <span>Pessoa</span><span>Situação</span><span className="es-n">{comEspera ? 'Espera' : ''}</span><span />
+      </div>
+      {itens.map(c => (
+        <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
+      ))}
+    </div>
+  );
+
   return (
-    <div className="lid">
+    <>
       {/* LISTA VAZIA NÃO É A MESMA COISA QUE LISTA QUE NÃO CARREGOU.
           Com a internet caindo, esta tela dizia, em letra grande e com toda a
           confiança, "Ninguém esperando resposta" — e logo abaixo aparecia o
           aviso de falha, que ninguém lê depois de já ter lido o título. Uma
           tela só afirma o que ela sabe: se não conseguiu ler a lista, diz isso.
 
-          O PLACAR NÃO REPETE O TÍTULO. O número de pessoas já está no h1; o que
-          falta é o número que mede a falha: há quanto tempo a primeira delas
-          está esperando. */}
-      <Faixa
-        urgente={urge}
-        titulo={erro ? 'Não consegui carregar quem está esperando'
+          OS NÚMEROS NÃO REPETEM O TÍTULO SEM ACRESCENTAR. O título diz quantas
+          pessoas esperam; a faixa diz há quanto tempo a primeira delas está
+          esperando, que é o número que mede a falha. */}
+      <Cab
+        rot="Entradas"
+        /* e ENQUANTO CARREGA ela também não afirma nada: a lista começa vazia,
+           e por um instante o título dizia "Ninguém esperando resposta" com
+           duas pessoas esperando (medido em 30/09/2026) */
+        titulo={carregando && !lista.length ? 'Quem quer entrar no time'
+          : erro ? 'Não consegui carregar quem está esperando'
           : abertas.length === 0 ? 'Ninguém esperando resposta'
             : abertas.length === 1 ? '1 pessoa esperando você'
               : `${abertas.length} pessoas esperando você`}
-        sub={erro ? erro
+        meta={carregando && !lista.length ? undefined
+          : erro ? erro
           : abertas.length === 0
             ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
             : maisAntiga === 0
               ? 'Chegou hoje. Responder no mesmo dia é o que faz a pessoa aparecer no domingo.'
               : `A mais antiga está esperando ${espera(maisAntiga)}. Quem se oferece e não recebe resposta some, e não volta.`}
-        acao={erro ? <button className="lid-bt" onClick={() => { setErro(''); void carregar(); }}>Tentar de novo</button> : undefined}
-        placar={abertas.length > 0
-          ? { n: maisAntiga === 0 ? 'hoje' : <>{maisAntiga}<i>d</i></>, rot: maisAntiga === 0 ? 'chegou a primeira' : 'esperando a mais antiga' }
-          : null}
+        acoes={erro ? <button type="button" className="es-btn" onClick={() => { setErro(''); void carregar(); }}>Tentar de novo</button> : undefined}
       />
 
-      {/* o erro já é o subtítulo da faixa agora; repetir aqui embaixo era a
+      {/* o erro já é a linha de baixo do título; repetir aqui embaixo era a
           mesma frase duas vezes na mesma tela */}
-      {carregando && <p className="dim" style={{ marginTop: 'var(--e6)' }}>carregando…</p>}
-
-      {!carregando && abertas.length > 0 && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab">
-            <span className="rot">Esperando você</span>
-            <span className="lid-secao-nota">A mais antiga na frente</span>
-          </div>
-          {abertas.map(c => (
-            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
-          ))}
-        </section>
+      {carregando && !lista.length && (
+        <div className="es-secao es-esqueleto" aria-busy="true" aria-label="Carregando">
+          <div style={{ height: 92 }} /><div style={{ height: 180 }} />
+        </div>
       )}
 
-      {!carregando && noTime.length > 0 && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab">
-            <span className="rot">Já entraram no time</span>
-            <span className="lid-secao-nota">
-              {noTime.length === 1 ? '1 pessoa' : `${noTime.length} pessoas`}
-            </span>
-          </div>
-          {noTime.map(c => (
-            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
-          ))}
-        </section>
+      {mostra && !erro && lista.length > 0 && (
+        <div className="es-secao">
+          <Kpis n={4}>
+            <Kpi rot="Esperando você" valor={abertas.length} destaque={abertas.length > 0}
+              sub={abertas.length ? 'esperando resposta' : 'ninguém na fila'}
+              tom={abertas.length ? 'warn' : 'zero'} />
+            <Kpi rot="A mais antiga"
+              valor={!abertas.length ? 'ninguém'
+                : maisAntiga === 0 ? 'hoje'
+                  : <>{maisAntiga}<small> {pl(maisAntiga, 'dia', 'dias')}</small></>}
+              texto={!abertas.length || maisAntiga === 0}
+              sub={abertas.length ? `chegou em ${dia(abertas[0].criado_em)}` : 'sem espera'}
+              tom={!abertas.length ? 'zero' : urge ? 'warn' : ''} />
+            <Kpi rot="Entraram no time" valor={noTime.length}
+              sub="aprovadas ou servindo" tom={noTime.length ? '' : 'zero'} />
+            <Kpi rot="Encerradas" valor={fechadas.length}
+              sub="por enquanto" tom={fechadas.length ? '' : 'zero'} />
+          </Kpis>
+        </div>
+      )}
+
+      {mostra && abertas.length > 0 && (
+        <Secao titulo="Esperando você" n={abertas.length} sub="A mais antiga na frente.">
+          {filaDe(abertas, true)}
+        </Secao>
+      )}
+
+      {mostra && noTime.length > 0 && (
+        <Secao titulo="Já entraram no time" sub={cont(noTime.length, 'pessoa', 'pessoas')}>
+          {filaDe(noTime, false)}
+        </Secao>
       )}
 
       {/* "como chega gente aqui" responde a pergunta de quem tem a lista
@@ -161,42 +200,43 @@ function Fila() {
           passo a passo de chegada ali reforça a leitura errada de que não
           tem ninguém. */}
       {!carregando && !erro && lista.length === 0 && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab"><span className="rot">Como chega gente aqui</span></div>
-          <div className="lid-alerta">
-            <span className="lid-alerta-n">1</span>
-            <span>
-              Mande o link da área no grupo do WhatsApp:{' '}
-              <code style={{ overflowWrap: 'anywhere' }}>guiaservir.com/servir</code>
-            </span>
+        <Secao titulo="Como chega gente aqui">
+          <div className="es-fila">
+            <div className="es-item es-com-n">
+              <span className="es-c-n">1</span>
+              <span className="es-c-tit"><b>Mande o link da área no grupo do WhatsApp</b><small>guiaservir.com/servir</small></span>
+            </div>
+            <div className="es-item es-com-n">
+              <span className="es-c-n">2</span>
+              <span className="es-c-tit"><b>Quem se cadastrar aparece nesta tela na hora, com as funções que marcou.</b></span>
+            </div>
+            <div className="es-item es-com-n">
+              <span className="es-c-n">3</span>
+              <span className="es-c-tit"><b>Você chama no WhatsApp, conversa e aprova. O resto o sistema faz.</b></span>
+            </div>
           </div>
-          <div className="lid-alerta">
-            <span className="lid-alerta-n">2</span>
-            <span>Quem se cadastrar aparece nesta tela na hora, com as funções que marcou.</span>
-          </div>
-          <div className="lid-alerta">
-            <span className="lid-alerta-n">3</span>
-            <span>Você chama no WhatsApp, conversa e aprova. O resto o sistema faz.</span>
-          </div>
-        </section>
+        </Secao>
       )}
 
-      {!carregando && fechadas.length > 0 && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab">
-            <span className="rot">Encerradas</span>
-            <button className="lid-bt-txt" onClick={() => setVerEncerradas(v => !v)}>
+      {mostra && fechadas.length > 0 && (
+        <Secao titulo="Encerradas"
+          acoes={
+            <button type="button" className="es-btn es-txt es-peq" aria-expanded={verEncerradas}
+              onClick={() => setVerEncerradas(v => !v)}>
               {verEncerradas ? 'Esconder' : `Ver ${fechadas.length}`}
             </button>
-          </div>
-          {verEncerradas && fechadas.map(c => (
-            <Linha key={c.id} c={c} aberta={aberta === c.id} {...props} />
-          ))}
-        </section>
+          }>
+          {verEncerradas && filaDe(fechadas, false)}
+        </Secao>
       )}
-    </div>
+    </>
   );
 }
+
+/* O TOM DA PÍLULA, no sentido fixo do sistema: esperando o seu contato, você
+   disse que ia chamar e conversa marcada esperam resposta (warn); no time é
+   de pé (ok); encerrada e inativa são fato sem juízo (neutro). */
+const tomDo = (t: '' | 'ok' | 'pend' | 'ruim'): Tom => t === 'ok' ? 'ok' : t === '' ? 'neutro' : 'warn';
 
 /* -------------------------------------------------------------- uma pessoa */
 function Linha({ c, aberta, abrir, equipeNome, mudou }: {
@@ -266,151 +306,169 @@ function Linha({ c, aberta, abrir, equipeNome, mudou }: {
   const zapLink = v?.token && tel
     ? linkWhatsApp(tel, msgConvite(S, c.voluntario_id!, base)) : '';
 
+  /* A AÇÃO DO MOMENTO é a única cheia: chamar no WhatsApp quem ainda espera o
+     contato, ou mandar o link a quem já entrou. Ela só existe numa linha
+     aberta, e só uma abre por vez, então nunca há duas cheias na tela. */
+  const temBotoes = (f.chama && !!zapContato) || (c.status === 'aprovada' && !!zapLink)
+    || (c.status === 'entrevista' && !!zapContato);
+  const quem = outroNome ? digitado : nome;
+
   return (
-    <details className={`lid-cand ${f.tom}`} open={aberta}>
-      <summary onClick={e => { e.preventDefault(); abrir(c.id); }}>
-        <span className="lid-marca" aria-hidden="true" />
-        <span>
-          <span className="lid-cand-nome">{outroNome ? digitado : nome}</span>
-          <span className="lid-cand-sub">
-            {funcoes.length ? funcoes.join(' · ') : 'sem função marcada'}
-          </span>
+    <>
+      <button type="button" className="es-item es-en-linha" onClick={() => abrir(c.id)}
+        aria-expanded={aberta} aria-controls={`cand-${c.id}`}>
+        <span className="es-c-tit">
+          <b>{quem}</b>
+          {funcoes.length
+            ? <span className="es-etqs">{funcoes.map(fn => <span key={fn} className="es-etq">{fn}</span>)}</span>
+            : <small>sem função marcada</small>}
         </span>
-        <span className="lid-cand-est">
-          {f.rot}
-          {ABERTAS.includes(c.status) && <span className="lid-cand-esp">{espera(dias)}</span>}
+        <span className="es-c-meta">
+          <span className="es-c-est"><Pilula tom={tomDo(f.tom)}>{f.rot}</Pilula></span>
+          <span className="es-c-num">{ABERTAS.includes(c.status) ? espera(dias) : ''}</span>
         </span>
-      </summary>
+        <span className="es-c-acao"><IcSeta /></span>
+      </button>
 
-      <div className="lid-cand-corpo">
-        {erro && <Aviso tom="erro">{erro}</Aviso>}
+      {aberta && (
+        <div className="es-en-aberta" id={`cand-${c.id}`}>
+          <div className="es-caixa">
+            <div className="es-caixa-corpo es-en-pilha">
+              {erro && <Aviso tom="bad">{erro}</Aviso>}
 
-        {/* A INSTRUÇÃO. Primeira coisa dentro da linha aberta, porque é a
-            única que o líder precisa ler para agir. */}
-        <p className="lid-cand-fazer">{f.txt}</p>
+              {/* A INSTRUÇÃO. Primeira coisa dentro da linha aberta, porque é a
+                  única que o líder precisa ler para agir. */}
+              <p className="es-prosa">{f.txt}</p>
 
-        <div className="lid-cand-btns">
-          {f.chama && zapContato && (
-            <a className="lid-bt" href={zapContato} target="_blank" rel="noreferrer" onClick={aoChamar}>
-              Chamar {nomeInteiro(nome)} no WhatsApp
-            </a>
-          )}
-          {f.chama && !zapContato && (
-            <span style={{ fontSize: 'var(--t-ui)', color: 'var(--bad)' }}>
-              Sem WhatsApp cadastrado. Fale com quem indicou essa pessoa.
-            </span>
-          )}
-          {c.status === 'aprovada' && zapLink && (
-            <a className="lid-bt" href={zapLink} target="_blank" rel="noreferrer">
-              Mandar o link de {nomeInteiro(nome)}
-            </a>
-          )}
-          {c.status === 'entrevista' && zapContato && (
-            <a className="lid-bt-txt" href={zapContato} target="_blank" rel="noreferrer">
-              Abrir o WhatsApp
-            </a>
-          )}
-        </div>
+              {/* ESTE TELEFONE JÁ ESTÁ NO SISTEMA COM OUTRO NOME.
+                  A frase é factual e não acusa ninguém: na maioria das vezes é
+                  apelido ou nome de casada. Mas é a única coisa que separa isso de
+                  uma candidatura aberta em nome de terceiro, e sem ela a aprovação
+                  é às cegas. Por isso vem antes dos botões. */}
+              {outroNome && (
+                <Aviso tom="warn">
+                  O nome escrito no cadastro foi <b>{digitado}</b>, mas este WhatsApp já
+                  está no sistema como <b>{nome}</b>. Confirme com a pessoa antes de
+                  aprovar: aprovar liga esta candidatura ao cadastro de {nomeInteiro(nome)}.
+                </Aviso>
+              )}
 
-        {/* AS DECISÕES. Depois da conversa, nunca antes dela: é essa a ordem
-            do mundo real, e a tela passa a ter a mesma. */}
-        {!NO_TIME.includes(c.status) && (
-          <>
-            <span className="lid-cand-mini">Depois de falar com {nomeInteiro(nome)}</span>
-            <div className="lid-cand-btns" style={{ marginTop: 16 }}>
-              <button className="lid-bt-txt" disabled={ocupado}
-                onClick={() => agir('aprovada', `${nomeInteiro(nome)} entrou no time`)}>
-                {ocupado ? 'salvando…' : 'Aprovar e criar no time'}
-              </button>
-              {c.status !== 'recusada' && (
-                <button className="lid-bt-txt perigo" disabled={ocupado}
-                  onClick={() => agir('recusada', 'candidatura encerrada')}>
-                  Encerrar por enquanto
-                </button>
+              {temBotoes && (
+                <div className="es-linha es-en-botoes">
+                  {f.chama && zapContato && (
+                    <a className="es-btn es-pri" href={zapContato} target="_blank" rel="noreferrer" onClick={aoChamar}>
+                      Chamar {nomeInteiro(nome)} no WhatsApp
+                    </a>
+                  )}
+                  {c.status === 'aprovada' && zapLink && (
+                    <a className="es-btn es-pri" href={zapLink} target="_blank" rel="noreferrer">
+                      Mandar o link de {nomeInteiro(nome)}
+                    </a>
+                  )}
+                  {c.status === 'entrevista' && zapContato && (
+                    <a className="es-btn" href={zapContato} target="_blank" rel="noreferrer">
+                      Abrir o WhatsApp
+                    </a>
+                  )}
+                </div>
+              )}
+              {f.chama && !zapContato && (
+                <Aviso tom="warn">Sem WhatsApp cadastrado. Fale com quem indicou essa pessoa.</Aviso>
               )}
             </div>
-            <p className="dim peq" style={{ marginTop: 12, maxWidth: '52ch' }}>
-              Aprovar cria a pessoa no time na hora, com as funções marcadas como{' '}
-              <strong>a conferir</strong>. Encerrar não é um não definitivo: a tela
-              dela oferece as outras áreas.
-            </p>
-          </>
-        )}
-        {c.status === 'aprovada' && (
-          <>
-            <span className="lid-cand-mini">Quando vir a pessoa servindo</span>
-            <div className="lid-cand-btns" style={{ marginTop: 16 }}>
-              <button className="lid-bt-txt" disabled={ocupado}
-                onClick={() => agir('ativa', 'marcado como servindo')}>
-                Marcar como servindo
-              </button>
-              <Link className="lid-bt-txt" href="/time">Conferir o nível na aba Time</Link>
+
+            {/* AS DECISÕES. Depois da conversa, nunca antes dela: é essa a ordem
+                do mundo real, e a tela passa a ter a mesma. */}
+            {!NO_TIME.includes(c.status) && (
+              <div className="es-caixa-corpo es-en-pilha">
+                <h3 className="es-caixa-titulo">Depois de falar com {nomeInteiro(nome)}</h3>
+                <div className="es-linha es-en-botoes">
+                  <button type="button" className="es-btn" disabled={ocupado}
+                    onClick={() => agir('aprovada', `${nomeInteiro(nome)} entrou no time`)}>
+                    {ocupado ? 'salvando…' : 'Aprovar e criar no time'}
+                  </button>
+                  {c.status !== 'recusada' && (
+                    <button type="button" className="es-btn" disabled={ocupado}
+                      onClick={() => agir('recusada', 'candidatura encerrada')}>
+                      Encerrar por enquanto
+                    </button>
+                  )}
+                </div>
+                <p className="es-peq es-mudo es-en-nota">
+                  Aprovar cria a pessoa no time na hora, com as funções marcadas como{' '}
+                  <b>a conferir</b>. Encerrar não é um não definitivo: a tela
+                  dela oferece as outras áreas.
+                </p>
+              </div>
+            )}
+            {c.status === 'aprovada' && (
+              <div className="es-caixa-corpo es-en-pilha">
+                <h3 className="es-caixa-titulo">Quando vir a pessoa servindo</h3>
+                <div className="es-linha es-en-botoes">
+                  <button type="button" className="es-btn" disabled={ocupado}
+                    onClick={() => agir('ativa', 'marcado como servindo')}>
+                    Marcar como servindo
+                  </button>
+                  <Link className="es-btn" href="/time">Conferir o nível na aba Time</Link>
+                </div>
+              </div>
+            )}
+
+            {/* O QUE ELA MANDOU */}
+            <div className="es-caixa-corpo es-en-pilha">
+              <h3 className="es-caixa-titulo">O que {nomeInteiro(quem)} mandou</h3>
+              <dl className="es-en-dados">
+                <dt>Chegou</dt><dd>{dia(c.criado_em)} · {espera(dias)}</dd>
+                {outroNome && <><dt>Nome no sistema</dt><dd>{nome}</dd></>}
+                <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>
+                {c.pessoas?.email && <><dt>E-mail</dt><dd>{c.pessoas.email}</dd></>}
+                <dt>Quer fazer</dt>
+                <dd>{funcoes.length ? funcoes.join(' · ') : 'não marcou nenhuma função'}</dd>
+                {resp.map(r => (
+                  <Fragment key={r.pergunta}>
+                    <dt>{r.pergunta}</dt><dd>{r.resposta.split('|').join(', ')}</dd>
+                  </Fragment>
+                ))}
+              </dl>
             </div>
-          </>
-        )}
 
-        {/* ESTE TELEFONE JÁ ESTÁ NO SISTEMA COM OUTRO NOME.
-            A frase é factual e não acusa ninguém: na maioria das vezes é
-            apelido ou nome de casada. Mas é a única coisa que separa isso de
-            uma candidatura aberta em nome de terceiro, e sem ela a aprovação
-            é às cegas. */}
-        {outroNome && (
-          <p className="lid-cand-alerta" role="note">
-            O nome escrito no cadastro foi <strong>{digitado}</strong>, mas este WhatsApp já
-            está no sistema como <strong>{nome}</strong>. Confirme com a pessoa antes de
-            aprovar: aprovar liga esta candidatura ao cadastro de {nomeInteiro(nome)}.
-          </p>
-        )}
+            {/* ANOTAÇÃO */}
+            <div className="es-caixa-corpo es-en-pilha">
+              {/* teto de 500: é uma anotação de decisão, não um prontuário — e campo
+                  sem teto é por onde entra um texto colado inteiro sem querer */}
+              <label className="es-campo">
+                <span>Anotação da liderança</span>
+                <textarea rows={2} value={nota} className="es-ctl" maxLength={500}
+                  placeholder="o que ficou combinado, o que falta…"
+                  aria-label={`Anotação sobre ${nome}, só a liderança vê`}
+                  onChange={e => setNota(e.target.value)} />
+                <small>Só a liderança vê. Fica junto da próxima decisão que você tomar aqui.</small>
+              </label>
+              {c.nota_interna && (
+                <p className="es-peq es-dim">Já anotado: {c.nota_interna}</p>
+              )}
+            </div>
 
-        {/* O QUE ELA MANDOU */}
-        <span className="lid-cand-mini">O que {nomeInteiro(outroNome ? digitado : nome)} mandou</span>
-        <dl className="lid-cand-dl">
-          <dt>Chegou</dt><dd>{dia(c.criado_em)} · {espera(dias)}</dd>
-          {outroNome && <><dt>Nome no sistema</dt><dd>{nome}</dd></>}
-          <dt>WhatsApp</dt><dd>{telefoneLegivel(tel) || 'não informou'}</dd>
-          {c.pessoas?.email && <><dt>E-mail</dt><dd>{c.pessoas.email}</dd></>}
-          <dt>Quer fazer</dt>
-          <dd>{funcoes.length ? funcoes.join(' · ') : 'não marcou nenhuma função'}</dd>
-          {resp.map(r => (
-            <span key={r.pergunta} style={{ display: 'contents' }}>
-              <dt>{r.pergunta}</dt><dd>{r.resposta.split('|').join(', ')}</dd>
-            </span>
-          ))}
-        </dl>
-
-        {/* ANOTAÇÃO */}
-        <span className="lid-cand-mini">Anotação da liderança</span>
-        {/* teto de 500: é uma anotação de decisão, não um prontuário — e campo
-            sem teto é por onde entra um texto colado inteiro sem querer */}
-        <textarea rows={2} value={nota} className="lid-cand-nota" maxLength={500}
-          placeholder="o que ficou combinado, o que falta…"
-          aria-label={`Anotação sobre ${nome}, só a liderança vê`}
-          onChange={e => setNota(e.target.value)} />
-        <p className="dim peq" style={{ marginTop: 6 }}>
-          Só a liderança vê. Fica junto da próxima decisão que você tomar aqui.
-        </p>
-        {c.nota_interna && (
-          <p className="dim peq" style={{ marginTop: 8 }}>Já anotado: {c.nota_interna}</p>
-        )}
-
-        {hist.length > 0 && (
-          <>
-            <span className="lid-cand-mini">Histórico</span>
-            <ul className="lid-cand-hist">
-              {hist.map((h, i) => (
-                <li key={i}>
-                  <span>{dia(h.quando)}</span>
-                  <span>
-                    <b>{ROTULO_STATUS[h.para as StatusCand] || h.para}</b>
-                    {h.por && h.por !== 'sistema' ? `, ${h.por}` : ''}
-                    {h.nota ? ` (${h.nota})` : ''}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
-        )}
-      </div>
-    </details>
+            {hist.length > 0 && (
+              <div className="es-caixa-corpo es-en-pilha">
+                <h3 className="es-caixa-titulo">Histórico</h3>
+                <ul className="es-en-hist">
+                  {hist.map((h, i) => (
+                    <li key={i}>
+                      <span>{dia(h.quando)}</span>
+                      <span>
+                        <b>{ROTULO_STATUS[h.para as StatusCand] || h.para}</b>
+                        {h.por && h.por !== 'sistema' ? `, ${h.por}` : ''}
+                        {h.nota ? ` (${h.nota})` : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 }

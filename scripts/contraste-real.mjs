@@ -324,6 +324,10 @@ const razao = (l1, l2) => (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
  * Devolve { fracos, sobreFoto, medidos } — `fracos` reprova, `sobreFoto` avisa.
  */
 export async function medirContraste(pag) {
+  /* o selo "N" do Next em desenvolvimento cobre o canto de baixo à esquerda
+     (a aba "Painel" da barra do celular) e entrava na conta como fundo. Ele
+     não existe em produção: sai antes de medir (30/09/2026). */
+  await pag.addStyleTag({ content: 'nextjs-portal{display:none!important}' });
   const itens = await pag.evaluate(COLHER);
   if (!itens.length) return { fracos: [], sobreFoto: [], medidos: 0 };
 

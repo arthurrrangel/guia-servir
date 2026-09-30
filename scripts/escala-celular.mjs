@@ -38,13 +38,13 @@ const TELAS = [{ nome: '320', width: 320, height: 640 }, { nome: '390', width: 3
    relatório verde sobre a tela errada — foi o que aconteceu na auditoria de
    demandas, e a lição vale aqui. */
 const PAGINAS = [
-  { rota: '/painel?demo=1',                nome: 'painel',       guarda: '.sistema' },
-  { rota: '/escala?demo=1',                nome: 'escala',       guarda: '.sistema' },
-  { rota: '/time?demo=1',                  nome: 'time',         guarda: '.sistema' },
-  { rota: '/time/conferir?demo=1',         nome: 'conferir',     guarda: '.sistema' },
-  { rota: '/ajustes?demo=1',               nome: 'ajustes',      guarda: '.sistema' },
-  { rota: '/ajustes/ministerios?demo=1',   nome: 'ministerios',  guarda: '.sistema' },
-  { rota: '/painel/candidaturas?demo=1',   nome: 'candidaturas', guarda: '.sistema' },
+  { rota: '/painel?demo=1',                nome: 'painel',       guarda: '.es-casca' },
+  { rota: '/escala?demo=1',                nome: 'escala',       guarda: '.es-casca' },
+  { rota: '/time?demo=1',                  nome: 'time',         guarda: '.es-casca' },
+  { rota: '/time/conferir?demo=1',         nome: 'conferir',     guarda: '.es-casca' },
+  { rota: '/ajustes?demo=1',               nome: 'ajustes',      guarda: '.es-casca' },
+  { rota: '/ajustes/ministerios?demo=1',   nome: 'ministerios',  guarda: '.es-casca' },
+  { rota: '/painel/candidaturas?demo=1',   nome: 'candidaturas', guarda: '.es-casca' },
   /* a tela do voluntário não tem <main> nem a casca `.sistema`: ela é a
      `.vol`, que é outra casca, mais enxuta, porque quem entra ali entra por
      link pessoal e não navega o sistema */
@@ -103,7 +103,12 @@ try {
          por cima de tudo; adiantar a de quem está escondido acordaria o menu
          fechado por cima de tudo. Os dois porquês estão em
          `contraste-real.mjs`. */
-      await pag.addStyleTag({ content: '*,*::before,*::after{transition:none!important}' });
+      /* O SELO "N" DO NEXT EM DESENVOLVIMENTO (30/09/2026) fica no canto de
+         baixo à esquerda, em cima da aba "Painel" da barra do celular, e o
+         contraste da aba era medido contra o cinza dele (4,30:1). Ele não
+         existe em produção: sai da medida para ela medir o que o voluntário
+         e o líder veem. */
+      await pag.addStyleTag({ content: '*,*::before,*::after{transition:none!important} nextjs-portal{display:none!important}' });
       await pag.evaluate(() => {
         const aparece = (e) => {
           if (!(e instanceof Element)) return false;

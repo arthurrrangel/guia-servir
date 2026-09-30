@@ -1,12 +1,15 @@
 'use client';
+import '@/components/escalas/escalas.css';
+import '@/components/escalas/tela-ajustes.css';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { sb, lerCredenciais } from '@/lib/supabase';
 import { Conexao } from '@/components/Shell';
-import { Logo } from '@/components/Marca';
-import { Aviso } from '@/components/Ui';
+import { Aviso } from '@/components/escalas/Pecas';
+import { IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { sugerirEmail } from '@/lib/email';
+import { Logo } from '@/components/Marca';
 
 /* PARA ONDE O LOGIN DEVOLVE A PESSOA — 82d.
 
@@ -47,6 +50,35 @@ function destinoDoLogin(): string {
     if (v.startsWith('//') || v.includes('\\')) return PADRAO;
     return v;
   } catch { return PADRAO; }
+}
+
+/* o tom da mensagem na língua das peças novas. O estado continua dizendo
+   'erro' | 'bom' | 'atencao', escrito por quem manda a mensagem (ver `tom`);
+   aqui só se traduz na hora de desenhar. */
+const TOM_DO_AVISO = { erro: 'bad', atencao: 'warn', bom: 'ok' } as const;
+
+/* A PORTA (30/09/2026). A mesma moldura da porta das Demandas: fundo cinza,
+   uma caixa no meio com a marca no alto e o formulário dentro. Toda tela
+   desta rota (carregando, entrando, sem conexão, escolher a senha, entrar)
+   nasce nela, então nada pula de lugar quando uma vira a outra. */
+function Moldura({ children, ocupada }: { children: React.ReactNode; ocupada?: boolean }) {
+  return (
+    <div className="es es-porta es-aj-fundo">
+      <main className="es-porta-caixa es-aj-porta" aria-busy={ocupada || undefined}>
+        <div className="es-porta-topo">
+          {/* A marca era um desenho parado. Esta é a única tela do produto sem
+              barra, sem migalha e sem nada por baixo: quem tocasse em "Sou da
+              organização" por engano, no celular, não tinha nenhuma saída na
+              página — só o gesto de voltar do navegador, que muita gente não
+              usa. A marca vira a saída, que é onde todo mundo procura primeiro. */}
+          <Link href="/" className="es-marca" aria-label="GUIA Church, voltar para o site">
+            <Logo className="es-logo" />
+          </Link>
+        </div>
+        {children}
+      </main>
+    </div>
+  );
 }
 
 export default function Entrar() {
@@ -131,12 +163,19 @@ export default function Entrar() {
     return () => clearTimeout(teto);
   }, []);
 
-  if (!pronto) return <div className="carregando">…</div>;
-  if (!temConexao) return <Conexao aoSalvar={() => location.reload()} />;
+  if (!pronto) return <Moldura ocupada><p className="es-porta-sub">…</p></Moldura>;
+  if (!temConexao) return <div className="es es-porta es-aj-fundo es-aj-conexao"><Conexao aoSalvar={() => location.reload()} /></div>;
   /* Enquanto a sessão está sendo aberta, o formulário some. Deixá-lo na tela
      convida a pessoa a pedir OUTRO link no meio do processo, e o segundo
      pedido invalida o primeiro: ela se tranca fora sozinha. */
-  if (entrando) return <div className="carregando">entrando…</div>;
+  if (entrando) return (
+    <Moldura ocupada>
+      <div className="es-aj-porta-cab">
+        <div className="es-rot">Espaço do organizador</div>
+        <h1>Entrando…</h1>
+      </div>
+    </Moldura>
+  );
 
   async function porLink(e: React.FormEvent) {
     e.preventDefault(); setMsg('');
@@ -205,53 +244,37 @@ export default function Entrar() {
   }
 
   if (recuperando) return (
-    <main className="lid entrada">
-      <div className="entrada-marca">
-        <Link href="/" className="marca-link" aria-label="Voltar para o site da GUIA Church">
-          <Logo className="logo entrada-logo" />
-        </Link>
-        <span className="rot">Espaço do organizador</span>
-        <h1 className="entrada-titulo">Escolha sua senha</h1>
-        <p className="entrada-sub">
+    <Moldura>
+      <div className="es-aj-porta-cab">
+        <div className="es-rot">Espaço do organizador</div>
+        <h1>Escolha sua senha</h1>
+        <p className="es-porta-sub">
           Da próxima vez você entra com email e senha, sem esperar link.
         </p>
       </div>
       <form onSubmit={definirSenha}>
-        <label htmlFor="ent-nova">Senha nova</label>
-        <input id="ent-nova" type="password" required minLength={8} autoComplete="new-password"
-          enterKeyHint="go" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
-          placeholder="pelo menos 8 caracteres" />
-        <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
+        <label className="es-campo" htmlFor="ent-nova">
+          <span>Senha nova</span>
+          <input className="es-ctl" id="ent-nova" type="password" required minLength={8} autoComplete="new-password"
+            enterKeyHint="go" value={novaSenha} onChange={e => setNovaSenha(e.target.value)}
+            placeholder="pelo menos 8 caracteres" />
+        </label>
+        <button className="es-btn es-pri es-larga" type="submit" disabled={carregando}>
           {carregando ? 'aguarde…' : 'Salvar senha e entrar'}
         </button>
       </form>
-      {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
-    </main>
+      {msg && <Aviso tom={TOM_DO_AVISO[tom]}>{msg}</Aviso>}
+    </Moldura>
   );
 
   const enviar = modo === 'link' ? porLink : modo === 'senha' ? porSenha : porCriar;
 
   return (
-    /* A PORTA DA FRENTE FALAVA A LÍNGUA VELHA. Fundo cinza, cartão branco
-       flutuando no meio com sombra, tudo em Inter — enquanto atrás dela o
-       sistema inteiro é papel branco, Raleway e fio de 1px. Era a primeira
-       coisa que o líder via, e prometia outro produto.
-
-       Sem cartão: o formulário é o conteúdo da página, não um objeto pousado
-       sobre ela. O que separa é o mesmo fio de sempre. */
-    <main className="lid entrada">
-      <div className="entrada-marca">
-        {/* A marca era um desenho parado. Esta é a única tela do produto sem
-            barra, sem migalha e sem nada por baixo: quem tocasse em "Sou da
-            organização" por engano, no celular, não tinha nenhuma saída na
-            página — só o gesto de voltar do navegador, que muita gente não
-            usa. A marca vira a saída, que é onde todo mundo procura primeiro. */}
-        <Link href="/" className="marca-link" aria-label="Voltar para o site da GUIA Church">
-          <Logo className="logo entrada-logo" />
-        </Link>
-        <span className="rot">Espaço do organizador</span>
-        <h1 className="entrada-titulo">{modo === 'criar' ? 'Criar senha' : 'Entrar'}</h1>
-        <p className="entrada-sub">
+    <Moldura>
+      <div className="es-aj-porta-cab">
+        <div className="es-rot">Espaço do organizador</div>
+        <h1>{modo === 'criar' ? 'Criar senha' : 'Entrar'}</h1>
+        <p className="es-porta-sub">
           {modo === 'criar'
             ? 'Vale para a primeira senha e para trocar uma esquecida. Você recebe um link por email e escolhe a senha aqui.'
             : 'Voluntário não entra por aqui: ele usa o link pessoal que você manda.'}
@@ -259,44 +282,50 @@ export default function Entrar() {
       </div>
 
       <form onSubmit={enviar}>
-        <label htmlFor="ent-email">Seu email</label>
-        {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
-            "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
-            enterKeyHint troca o "return" do teclado por "ir" — a tecla que
-            manda o formulário sem a pessoa ter que fechar o teclado e
-            procurar o botão embaixo dele. */}
-        <input id="ent-email" type="email" required autoComplete="email" value={email}
-          inputMode="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
-          enterKeyHint="go"
-          onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
+        <label className="es-campo" htmlFor="ent-email">
+          <span>Seu email</span>
+          {/* autoCapitalize="off" não é preciosismo: sem ele o iPhone escreve
+              "Voce@email.com" com V maiúsculo e o login falha sem dizer por quê.
+              enterKeyHint troca o "return" do teclado por "ir" — a tecla que
+              manda o formulário sem a pessoa ter que fechar o teclado e
+              procurar o botão embaixo dele. */}
+          <input className="es-ctl" id="ent-email" type="email" required autoComplete="email" value={email}
+            inputMode="email" autoCapitalize="off" autoCorrect="off" spellCheck={false}
+            enterKeyHint="go"
+            onChange={e => setEmail(e.target.value)} placeholder="voce@email.com" />
+        </label>
         {modo === 'senha' && (
-          <>
-            <div style={{ height: 12 }} />
-            <label htmlFor="ent-senha">Sua senha</label>
-            <input id="ent-senha" type="password" required autoComplete="current-password" enterKeyHint="go" value={senha} onChange={e => setSenha(e.target.value)} />
-          </>
+          <label className="es-campo" htmlFor="ent-senha">
+            <span>Sua senha</span>
+            <input className="es-ctl" id="ent-senha" type="password" required autoComplete="current-password" enterKeyHint="go" value={senha} onChange={e => setSenha(e.target.value)} />
+          </label>
         )}
-        <button className="lid-bt entrada-bt" type="submit" disabled={carregando}>
+        <button className="es-btn es-pri es-larga" type="submit" disabled={carregando}>
           {carregando ? 'aguarde…' : modo === 'link' ? 'Receber link de acesso' : modo === 'senha' ? 'Entrar' : 'Receber link para criar senha'}
         </button>
       </form>
-      {msg && <div style={{ marginTop: 18 }}><Aviso tom={tom}>{msg}</Aviso></div>}
+      {msg && <Aviso tom={TOM_DO_AVISO[tom]}>{msg}</Aviso>}
       {/* duas saídas de texto, uma por linha. "Criar senha" aparece nos dois
           modos de entrar: quem chegou pelo link e quem esqueceu a senha
           precisam da mesma porta. */}
-      <div className="entrada-trocas">
+      <div className="es-aj-trocas">
         {modo !== 'link' && (
-          <button className="lid-bt-txt" onClick={() => { setModo('link'); setMsg(''); }}>Prefiro receber um link no email</button>
+          <button type="button" className="es-btn es-txt" onClick={() => { setModo('link'); setMsg(''); }}>
+            <span>Prefiro receber um link no email</span><IcSeta />
+          </button>
         )}
         {modo !== 'senha' && (
-          <button className="lid-bt-txt" onClick={() => { setModo('senha'); setMsg(''); }}>Prefiro entrar com senha</button>
+          <button type="button" className="es-btn es-txt" onClick={() => { setModo('senha'); setMsg(''); }}>
+            <span>Prefiro entrar com senha</span><IcSeta />
+          </button>
         )}
         {modo !== 'criar' && (
-          <button className="lid-bt-txt" onClick={() => { setModo('criar'); setMsg(''); }}>
-            {modo === 'senha' ? 'Esqueci ou ainda não tenho senha' : 'Criar ou trocar minha senha'}
+          <button type="button" className="es-btn es-txt" onClick={() => { setModo('criar'); setMsg(''); }}>
+            <span>{modo === 'senha' ? 'Esqueci ou ainda não tenho senha' : 'Criar ou trocar minha senha'}</span><IcSeta />
           </button>
         )}
       </div>
-    </main>
+      <p className="es-porta-pe">GUIA Church</p>
+    </Moldura>
   );
 }

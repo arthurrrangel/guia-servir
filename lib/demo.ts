@@ -10,7 +10,7 @@
    conferidos) porque densidade falsa esconde problema de layout: uma tela
    linda com 3 pessoas costuma quebrar com 17.
    =========================================================================== */
-import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, hojeISO, funcoesDoDia, tipoDoDia } from './engine';
+import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia } from './engine';
 
 const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
   ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any, exigeSexo });
@@ -67,7 +67,14 @@ export function estadoDemo(): Estado {
      um furo. Sem isso eu desenharia só o estado feliz. */
   const hoje = hojeISO();
   const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
-  const dias = cultosDoMes(ano, mes);
+  /* ESTE MÊS E O PRÓXIMO (30/09/2026). Só o mês corrente deixava o harness
+     cego no fim de todo mês: no dia 30 os cultos de setembro já tinham
+     passado, o próximo culto caía em outubro sem escala, e o painel e a
+     escala só desenhavam o estado "monte o mês", nunca um culto por vir
+     montado. Com o mês seguinte montado, o fim do mês desenha o que o líder
+     vê de verdade quando o robô do dia 26 já rodou. */
+  const [anoS, mesS] = mes === 12 ? [ano + 1, 1] : [ano, mes + 1];
+  const dias = [...cultosDoMes(ano, mes), ...cultosDoMes(anoS, mesS)];
   /* O DEMO NÃO PODE MENTIR. Ele usava um ciclo único de status para o mês
      inteiro, e com isso um domingo que ainda vai acontecer nascia com alguém
      marcado como FUROU. Eu desenhei a tela olhando para esse dado e quase
@@ -98,9 +105,10 @@ export function estadoDemo(): Estado {
     if (d === dias[0]) dia.obs = 'Chegar 18h, tem batismo antes do culto.';
   }
   /* respostas de disponibilidade, para o painel do dia não ficar vazio */
+  const porVir = dias.filter(d => d >= hoje);
   S.voluntarios.forEach((v, i) => {
-    if (i % 3 === 0) v.disponivel = dias.slice(0, 3);
-    if (i % 5 === 0) v.indisponivel = [dias[1]];
+    if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
+    if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
   });
   return S;
 }
@@ -159,7 +167,10 @@ export function euDemo(variante: string = '') {
 export function visaoGeralDemo() {
   const hoje = hojeISO();
   const [ano, mes] = [+hoje.slice(0, 4), +hoje.slice(5, 7)];
-  const prox = cultosDoMes(ano, mes).find(d => d >= hoje) || cultosDoMes(ano, mes)[0];
+  /* o próximo culto de verdade, mesmo que caia no mês seguinte: no fim do
+     mês esta linha voltava para o primeiro domingo do mês que já passou, e o
+     painel desenhava "A igreja no domingo 06/09" no dia 30/09 */
+  const prox = cultosAte(hoje, 8)[0] || cultosDoMes(ano, mes)[0];
   const a = (
     slug: string, equipe: string, ordem: number, postos: number, preenchidos: number,
     extra: Partial<{ vagas: number | null; furos: number; recusados: number; pendentes: number; candidaturas_novas: number; proxima_data: string | null }> = {},
@@ -223,11 +234,27 @@ export function equipesDemo() {
    apaga a linha. Com um item só, a varredura mede uma linha e as outras
    quatro continuam invisíveis — inclusive a variante `grave`, que é a única
    com marca vermelha. */
+/* 30/09/2026 · AS CONTAS SAEM DAS FIXTURES, E NÃO DE NÚMEROS ESCRITOS À MÃO.
+   Eram 2 candidaturas novas e 1 em conversa, enquanto `candidaturasDemo()`
+   tem uma de cada: o selo de Entradas na casca nova dizia 3 e a própria tela
+   de Entradas dizia "2 pessoas esperando você". O mesmo com "3 pessoas sem
+   conferir" num time de fixture com 10. Harness que discorda de si mesmo
+   desenha uma tela que o produto nunca produz. A conta aqui é a mesma da
+   RPC `painel_ministerio` (supabase/23), só que sobre as fixtures. */
 export function painelDemo() {
+  const S = estadoDemo();
+  const hoje = hojeISO();
+  const ativos = S.voluntarios.filter(v => v.ativo);
+  const cands = candidaturasDemo() as { status: string }[];
+  const funcoesSemGente = S.funcoes.filter(f => f.ativa && !ativos.some(v => v.funcoes[f.nome])).length;
+  const vagasPendentes = Object.entries(S.escalas).filter(([d]) => d >= hoje)
+    .reduce((n, [, dia]) => n + Object.values(dia.slots).filter(x => x?.vid && x.status === 'pendente').length, 0);
   return {
-    voluntarios: 17, funcoes: 11,
-    candidaturas_novas: 2, aguardando_conversa: 1,
-    sem_conferir: 3, sem_disponibilidade: 6,
-    vagas_pendentes: 4, funcoes_sem_gente: 1,
+    voluntarios: ativos.length, funcoes: S.funcoes.filter(f => f.ativa).length,
+    candidaturas_novas: cands.filter(c => c.status === 'enviada' || c.status === 'em_analise').length,
+    aguardando_conversa: cands.filter(c => c.status === 'conversa' || c.status === 'entrevista').length,
+    sem_conferir: ativos.filter(v => !v.conferido).length,
+    sem_disponibilidade: ativos.filter(v => ![...(v.disponivel || []), ...(v.indisponivel || [])].some(d => d >= hoje)).length,
+    vagas_pendentes: vagasPendentes, funcoes_sem_gente: funcoesSemGente,
   };
 }

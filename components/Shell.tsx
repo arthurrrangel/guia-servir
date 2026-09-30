@@ -5,11 +5,17 @@ import Link from 'next/link';
 import { sb, lerCredenciais, gravarCredenciais } from '@/lib/supabase';
 import { carregarEstado } from '@/lib/db';
 import { Equipe, listarEquipes, souLider } from '@/lib/equipes';
-import { Estado, estadoVazio } from '@/lib/engine';
+import { Estado, estadoVazio, cultosAte, hojeISO, resumoDia } from '@/lib/engine';
+import { Painel as NumPainel, painelDoMinisterio } from '@/lib/candidaturas';
 import { aviseHumano } from '@/lib/erros';
-import { IcAjustes, IcCalendario, IcPainel, IcSair, IcSeta, IcTime } from './Icones';
+import { IcAjustes, IcCalendario, IcCheck, IcEntrada, IcMais, IcPainel, IcPessoa, IcSair, IcSeta, IcTime } from './Icones';
+import { Aviso, Esqueleto } from './escalas/Pecas';
 import { Logo } from './Marca';
-import { Aviso, Esqueleto } from './Ui';
+import './escalas/escalas.css';
+import './escalas/tela-painel.css';
+import './escalas/tela-escala.css';
+import './escalas/tela-time.css';
+import './escalas/tela-ajustes.css';
 
 type Ctx = {
   S: Estado; recarregar: () => Promise<Estado | null>;
@@ -23,17 +29,36 @@ type Ctx = {
   aviso: (t: string) => void; base: string;
   equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => void;
   recarregarEquipes: () => Promise<Equipe[]>;
+  /* AS CONTAS DO QUE ESPERA POR VOCÊ (30/09/2026). Uma leitura só do banco
+     (`painel_ministerio`, contagens), feita pela casca porque é ela que
+     desenha os selos da navegação; o /painel usa a mesma, em vez de pedir de
+     novo. `null` com `numsFalhou` falso é "ainda carregando". */
+  nums: NumPainel | null; numsFalhou: boolean;
 };
 const C = createContext<Ctx>(null as any);
 export const useApp = () => useContext(C);
 
+/* A ORDEM É A DO TRABALHO (30/09/2026): o que espera por mim, a escala, as
+   pessoas, quem está chegando, e os ajustes por último. Entradas ficava em
+   segundo, com o mesmo ícone do Time; agora tem o seu (a pessoa com o "+") e
+   um selo com quantas pessoas esperam resposta, que é o que a fazia merecer
+   o segundo lugar. */
 const ABAS = [
   { href: '/painel', rotulo: 'Painel', Ic: IcPainel },
-  { href: '/painel/candidaturas', rotulo: 'Entradas', Ic: IcTime },
   { href: '/escala', rotulo: 'Escala', Ic: IcCalendario },
   { href: '/time', rotulo: 'Time', Ic: IcTime },
+  { href: '/painel/candidaturas', rotulo: 'Entradas', Ic: IcEntrada },
   { href: '/ajustes', rotulo: 'Ajustes', Ic: IcAjustes },
 ];
+/* a aba acesa também nas telas de dentro: /time/conferir é do Time,
+   /ajustes/ministerios é de Ajustes. Antes as duas deixavam a navegação sem
+   nenhuma aba marcada, e a pessoa não sabia onde estava. */
+const abaDe = (caminho: string) =>
+  caminho.startsWith('/painel/candidaturas') ? '/painel/candidaturas'
+  : caminho.startsWith('/time') ? '/time'
+  : caminho.startsWith('/ajustes') ? '/ajustes'
+  : caminho.startsWith('/escala') ? '/escala'
+  : caminho.startsWith('/painel') ? '/painel' : '';
 const K_EQUIPE = 'escala.equipe';
 
 /* O LÍDER QUE TAMBÉM SERVE.
@@ -64,8 +89,10 @@ type MeuVinculo = { slug: string; equipe: string; token: string };
    Não substitui a persistência real: o localStorage guarda a equipe ativa entre
    reloads; isto guarda o ESTADO entre abas na mesma sessão de navegador. */
 const _cacheEstado = new Map<string, Estado>();
+const _cacheNums = new Map<string, NumPainel>();
 let _cacheEquipes: Equipe[] = [];
 let _cacheAtiva = '';
+let _cacheConta = '';
 
 export default function Shell({ children }: { children: React.ReactNode }) {
   /* 'sem-carga' (82): a carga FRIA falhou. Sem esta fase, o Shell seguia para
@@ -81,16 +108,37 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const [msg, setMsg] = useState('');
   const [base, setBase] = useState('');
   const [menuAberto, setMenuAberto] = useState(false);
+  /* o menu nasce ao lado do botão que o abriu: a lateral (desktop) ou o topo
+     (celular). Desenhar nos dois lugares punha dois `#menu-equipes` na página. */
+  const [menuLugar, setMenuLugar] = useState<'lateral' | 'topo'>('lateral');
+  const btnTopo = useRef<HTMLButtonElement>(null);
   const caminho = usePathname();
   const router = useRouter();
   const btnSeletor = useRef<HTMLButtonElement>(null);
-  const fecharMenu = useCallback(() => { setMenuAberto(false); btnSeletor.current?.focus(); }, []);
+  const menuLugarRef = useRef<'lateral' | 'topo'>('lateral');
+  const fecharMenu = useCallback(() => {
+    setMenuAberto(false);
+    (menuLugarRef.current === 'topo' ? btnTopo : btnSeletor).current?.focus();
+  }, []);
   /* refs nascem alinhadas ao cache: se voltamos a uma aba com estado guardado,
      `recarregar()` já sabe qual equipe revalidar sem esperar o efeito. */
   const idAtivo = useRef(_cacheAtiva);
   const nomeAtivo = useRef(_cacheEquipes.find(e => e.id === _cacheAtiva)?.nome || '');
   const seq = useRef(0);          // descarta resposta fora de ordem da MESMA equipe
   const [meus, setMeus] = useState<MeuVinculo[]>([]);
+  const [conta, setConta] = useState(_cacheConta);
+  const [nums, setNums] = useState<NumPainel | null>(() => _cacheNums.get(_cacheAtiva) || null);
+  const [numsFalhou, setNumsFalhou] = useState(false);
+  const seqNums = useRef(0);
+  /* as contas andam por fora da carga do Estado: falhar aqui não derruba a
+     tela, só deixa os selos sem número (e o /painel diz que não conseguiu). */
+  const lerNums = useCallback((id: string) => {
+    if (!id) return;
+    const meu = ++seqNums.current;
+    void painelDoMinisterio(id)
+      .then(r => { if (idAtivo.current !== id || seqNums.current !== meu) return; if (r) _cacheNums.set(id, r); setNums(r); setNumsFalhou(false); })
+      .catch(() => { if (idAtivo.current !== id || seqNums.current !== meu) return; setNumsFalhou(true); });
+  }, []);
 
   /* 16/09/2026: o aviso durava 2,2s para qualquer texto. "Recado salvo" cabe
      nisso; uma recusa do banco com nome e motivo, não. Agora dura o tempo de
@@ -116,6 +164,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     const id = idAtivo.current;
     if (!id) return null;
     const meu = ++seq.current;
+    lerNums(id);
     try {
       const est = await carregarEstado(id, nomeAtivo.current);
       if (idAtivo.current !== id || seq.current !== meu) return null;   // chegou tarde: ignora
@@ -157,7 +206,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       }
       return null;
     }
-  }, [aviso]);
+  }, [aviso, lerNums]);
 
   const recarregarEquipes = useCallback(async () => {
     const lista = await listarEquipes();
@@ -179,6 +228,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        hora e revalida por baixo — trocar de equipe também fica instantâneo na
        segunda visita. Só a primeira vez mostra o esqueleto. */
     const guardado = _cacheEstado.get(id);
+    setNums(_cacheNums.get(id) || null); setNumsFalhou(false);
     if (guardado) { setS(guardado); setFase('pronto'); } else setFase('carregando');
     /* O .catch NÃO É ZELO — sem ele isto trava a tela. `setFase('carregando')`
        já rodou; se `recarregar()` REJEITAR (a internet caiu no meio da troca,
@@ -225,6 +275,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         setEquipes(eqs); _cacheEquipes = eqs;
         setEquipeId('demo');
         setS(est); _cacheEstado.set('demo', est); setFase('pronto');
+        setConta('lider@exemplo.com');
+        lerNums('demo');
       });
       return;
     }
@@ -288,13 +340,16 @@ export default function Shell({ children }: { children: React.ReactNode }) {
        `entrar` sem ser chamado nunca e o app parado no estado inicial, sem
        erro e sem tela de login. Falhar decidindo "não tem sessão" leva a
        pessoa para o login, que é a saída certa. */
+    /* o e-mail de quem entrou mora no pé da lateral: "quem sou" é a segunda
+       pergunta de quem usa mais de uma conta no mesmo navegador */
+    const guardarConta = (email?: string | null) => { _cacheConta = email || ''; setConta(email || ''); };
     s.auth.getSession()
-      .then(({ data }) => entrar(!!data.session))
+      .then(({ data }) => { guardarConta(data.session?.user?.email); entrar(!!data.session); })
       .catch(() => entrar(false))
       .catch(() => entrar(false));
-    const { data: sub } = s.auth.onAuthStateChange((_e, sess) => entrar(!!sess));
+    const { data: sub } = s.auth.onAuthStateChange((_e, sess) => { guardarConta(sess?.user?.email); entrar(!!sess); });
     return () => { vivo = false; sub.subscription.unsubscribe(); };
-  }, [recarregar, recarregarEquipes, aviso]);
+  }, [recarregar, recarregarEquipes, aviso, lerNums]);
 
   /* Esc fecha o menu e devolve o foco ao botão — sem isso, quem navega por
      teclado abre a lista de ministérios e não tem como sair dela. */
@@ -305,127 +360,175 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [menuAberto, fecharMenu]);
 
-  if (fase === 'carregando') return <Esqueleto />;
-  if (fase === 'sem-conexao') return <Conexao aoSalvar={() => location.reload()} />;
-  if (fase === 'sem-login') { if (caminho !== '/entrar') router.replace('/entrar'); return <Esqueleto />; }
-  if (fase === 'sem-acesso') return (
-    <main style={{ maxWidth: 460, paddingTop: 80 }} className="centro">
-      <h1>Este email não tem acesso</h1>
-      <p className="dim" style={{ margin: '10px 0 20px' }}>
-        Você entrou, mas este email não está na lista de organizadores. Peça para quem administra liberar seu email.
-      </p>
-      <button className="pri" onClick={async () => { await sb()!.auth.signOut(); location.href = '/entrar'; }}>Sair e trocar de conta</button>
-    </main>
+  /* A CASCA VAZIA. Carregando, a lateral e o corpo já nascem no lugar: o
+     conteúdo chega por dentro, sem a página pular de uma coluna para duas. */
+  const cascaVazia = (miolo: React.ReactNode) => (
+    <div className="es es-casca">
+      <aside className="es-lateral" aria-hidden="true">
+        <div className="es-lateral-topo">
+          <span className="es-marca"><Logo className="es-logo" /></span>
+        </div>
+      </aside>
+      <header className="es-topo">
+        <span className="es-marca"><Logo className="es-logo" /></span>
+      </header>
+      <main className="es-corpo">{miolo}</main>
+    </div>
   );
-  if (fase === 'sem-equipe') return <PrimeiraEquipe aoCriar={async (id) => { const l = await recarregarEquipes(); trocarEquipe(id, l); }} />;
+  const sair = async () => { await sb()!.auth.signOut(); location.href = '/entrar'; };
+
+  if (fase === 'carregando') return cascaVazia(<Esqueleto />);
+  if (fase === 'sem-conexao') return cascaVazia(<Conexao aoSalvar={() => location.reload()} />);
+  if (fase === 'sem-login') { if (caminho !== '/entrar') router.replace('/entrar'); return cascaVazia(<Esqueleto />); }
+  if (fase === 'sem-acesso') return cascaVazia(
+    <div className="es-estado">
+      <h1>Este e-mail não tem acesso</h1>
+      <p>Você entrou, mas este e-mail não está na lista de quem organiza. Peça para quem administra liberar o seu e-mail.</p>
+      <div><button className="es-btn es-pri" onClick={sair}>Sair e trocar de conta</button></div>
+    </div>
+  );
+  if (fase === 'sem-equipe') return cascaVazia(<PrimeiraEquipe aoCriar={async (id) => { const l = await recarregarEquipes(); trocarEquipe(id, l); }} />);
   /* 82 · a carga falhou, e isto NÃO é "não tem nada". A diferença entre as
      duas é a diferença entre "cadastre seu time" e "seu time está lá, eu é
      que não consegui ler". */
-  if (fase === 'sem-carga') return (
-    <main style={{ maxWidth: 460, paddingTop: 80 }} className="centro">
+  if (fase === 'sem-carga') return cascaVazia(
+    <div className="es-estado">
       <h1>Não consegui carregar</h1>
-      <p className="dim" style={{ margin: '10px 0 6px' }}>{erroCarga}</p>
-      <p className="dim" style={{ margin: '0 0 20px', fontSize: 14 }}>
-        Seus dados continuam no lugar. Isto é uma falha de leitura, não um ministério vazio.
-      </p>
-      <button className="pri" onClick={() => location.reload()}>Tentar de novo</button>
-    </main>
+      <p>{erroCarga}</p>
+      <p>Seus dados continuam no lugar. Isto é uma falha de leitura, não um ministério vazio.</p>
+      <div><button className="es-btn es-pri" onClick={() => location.reload()}>Tentar de novo</button></div>
+    </div>
   );
 
   const equipe = equipes.find(e => e.id === equipeId) || null;
-  const navItens = ABAS.map(a => ({ ...a, on: caminho === a.href }));
+  const ativa = abaDe(caminho);
+  const nPessoas = S.voluntarios.filter(v => v.ativo).length;
+
+  /* OS SELOS DA NAVEGAÇÃO. Dois, e só onde a espera tem prazo:
+       Escala    postos do PRÓXIMO culto sem gente de pé (sem ninguém,
+                 furou, não pode). É o que vira buraco no domingo.
+       Entradas  pessoas que se ofereceram e esperam resposta.
+     Conferir nível e disponibilidade não entram: "nada ali trava o
+     domingo", e selo em tudo é selo em nada. */
+  const prox = cultosAte(hojeISO(), 8)[0];
+  const diaProx = prox ? S.escalas[prox] : null;
+  const montado = !!diaProx && Object.values(diaProx.slots || {}).some((x: any) => x?.vid);
+  const rProx = montado && prox ? resumoDia(S, prox) : null;
+  const nEscala = rProx ? rProx.vagas.length + rProx.furos + rProx.recusados : 0;
+  const nEntradas = nums ? (nums.candidaturas_novas || 0) + (nums.aguardando_conversa || 0) : 0;
+  const selo: Record<string, { n: number; rot: string }> = {
+    '/escala': { n: nEscala, rot: nEscala === 1 ? '1 posto do próximo culto sem gente de pé' : `${nEscala} postos do próximo culto sem gente de pé` },
+    '/painel/candidaturas': { n: nEntradas, rot: nEntradas === 1 ? '1 pessoa esperando resposta' : `${nEntradas} pessoas esperando resposta` },
+  };
+  const navItens = ABAS.map(a => ({ ...a, on: ativa === a.href, selo: selo[a.href] }));
+
+  const menu = menuAberto && (
+    <>
+      <div className="es-menu-fundo" onClick={fecharMenu} />
+      <div className="es-menu" id="menu-equipes" role="menu" aria-label="Ministérios">
+        <div className="es-menu-grupo">Ministérios</div>
+        {equipes.map(e => (
+          <button key={e.id} role="menuitem" className="es-menu-item"
+            aria-current={e.id === equipeId ? 'true' : undefined} onClick={() => trocarEquipe(e.id)}>
+            <span>{e.nome}</span>{e.id === equipeId && <IcCheck />}
+          </button>
+        ))}
+        <Link href="/ajustes/ministerios" role="menuitem" className="es-menu-item es-mudo" onClick={() => setMenuAberto(false)}>
+          <span>Novo ministério</span><IcMais />
+        </Link>
+        {/* MESMA PESSOA, MESMO PRODUTO. Quem organiza e também serve acha o
+            próprio espaço aqui, onde já está, e não só no link do WhatsApp. */}
+        {meus.length > 0 && (
+          <>
+            <div className="es-menu-risco" />
+            <div className="es-menu-grupo">Onde eu sirvo</div>
+            {meus.map(v => (
+              <a key={v.slug} role="menuitem" className="es-menu-item" href={`/eu/${v.token}`}>
+                <span>Meu espaço na {v.equipe}</span><IcPessoa />
+              </a>
+            ))}
+          </>
+        )}
+        <div className="es-menu-risco es-so-celular" />
+        <button role="menuitem" className="es-menu-item es-mudo es-so-celular" onClick={sair}>
+          <span>Sair</span><IcSair />
+        </button>
+      </div>
+    </>
+  );
+  const troca = (topo: boolean) => (
+    <button ref={topo ? btnTopo : btnSeletor} className={`es-troca${topo ? ' es-troca-topo' : ''}`}
+      onClick={() => {
+        const lugar = topo ? 'topo' : 'lateral';
+        menuLugarRef.current = lugar; setMenuLugar(lugar);
+        setMenuAberto(v => !(v && menuLugar === lugar));
+      }}
+      aria-expanded={menuAberto && menuLugar === (topo ? 'topo' : 'lateral')} aria-controls="menu-equipes"
+      aria-label={`Ministério: ${equipe?.nome || 'nenhum'}, ${nPessoas} ${nPessoas === 1 ? 'pessoa' : 'pessoas'}. Trocar`}>
+      <span className="es-troca-txt">
+        <b>{equipe?.nome || 'Ministério'}</b>
+        <small>{nPessoas} {nPessoas === 1 ? 'pessoa' : 'pessoas'}</small>
+      </span>
+      <IcSeta />
+    </button>
+  );
 
   return (
-    <C.Provider value={{ S, recarregar, pinta, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes }}>
-      {/* O COMENTÁRIO QUE ESTAVA AQUI DESCREVIA UMA REGRA QUE NÃO EXISTE.
-
-          Ele dizia que `.sistema` é "o casco tipográfico do gestor" e que sem
-          ele "a barra fica numa fonte e a tela em outra". Nenhuma das três
-          folhas do projeto define `.sistema`: a classe não tem uma única
-          declaração. Ela já foi o casco, e deixou de ser no dia em que a
-          tipografia passou a ser Inter em tudo, declarada no `body` — o que
-          `globals.css` registra como "agora é Inter em tudo". O comentário
-          ficou.
-
-          Comentário que descreve regra inexistente é pior que comentário
-          nenhum: o próximo a passar por aqui lê, acredita, e ou vai procurar
-          a regra que não existe ou deixa de mexer numa coisa que não faz nada.
-
-          O <div> FICA, e o motivo real é o segundo parágrafo do comentário
-          antigo, que continua verdadeiro: ele envolve topo, abas, conteúdo e
-          barra de baixo, e é nu de propósito — sem transform, sem filter, sem
-          overflow, que são as três coisas que quebrariam o `position:sticky`
-          do `.topo` e o `position:fixed` da `.barra-fundo`. É um contêiner
-          estrutural, e a classe é o gancho para quando voltar a precisar de
-          estilo. */}
-      <div className="sistema">
-      <header className="topo">
-        <div className="topo-in">
-          <div className="marca">
-            {/* a marca da igreja, a mesma do site público — não um ícone à
-                parte. O seletor de equipe continua pendurado nela. */}
-            <Logo className="logo" />
-            <div className="marca-nome">
-              <button ref={btnSeletor} className="seletor-equipe" onClick={() => setMenuAberto(v => !v)}
-                aria-expanded={menuAberto} aria-controls="menu-equipes">
-                <span className="seletor-nome">{equipe?.nome || 'Equipe'}</span>
-                <span aria-hidden>·</span>
-                <span>{(() => { const n = S.voluntarios.filter(v => v.ativo).length; return `${n}`; })()}</span>
-                <IcSeta />
-              </button>
-            </div>
-            {menuAberto && (
-              <>
-                <div className="menu-fundo" onClick={fecharMenu} />
-                <div className="menu-equipes" id="menu-equipes">
-                  {/* MESMA PESSOA, MESMO PRODUTO.
-                      Quem organiza e também serve encontrava o próprio espaço
-                      só se tivesse guardado o link do WhatsApp. Agora ele está
-                      onde a pessoa já está, dentro do mesmo menu. */}
-                  {meus.length > 0 && (
-                    <>
-                      <div className="overline" style={{ padding: '4px 12px 8px' }}>Onde eu sirvo</div>
-                      {meus.map(v => (
-                        <a key={v.slug} className="menu-item" href={`/eu/${v.token}`}>
-                          {v.equipe} · meu espaço
-                        </a>
-                      ))}
-                      <div className="menu-risco" />
-                    </>
-                  )}
-                  <div className="overline" style={{ padding: '4px 12px 8px' }}>Ministérios</div>
-                  {equipes.map(e => (
-                    <button key={e.id} className={`menu-item ${e.id === equipeId ? 'on' : ''}`}
-                      aria-current={e.id === equipeId ? 'true' : undefined} onClick={() => trocarEquipe(e.id)}>
-                      {e.nome}{e.id === equipeId && ' ✓'}
-                    </button>
-                  ))}
-                  <Link href="/ajustes/ministerios" className="menu-item add" onClick={fecharMenu}>+ novo ministério</Link>
-                </div>
-              </>
-            )}
+    <C.Provider value={{ S, recarregar, pinta, aviso, base, equipe, equipes, trocarEquipe, recarregarEquipes, nums, numsFalhou }}>
+      {/* A CASCA. É contêiner nu de propósito: sem transform, filter nem
+          overflow, que quebrariam o `position:fixed` da lateral e das abas e
+          o `sticky` do topo. `.es` é onde nascem os tokens desta folha. */}
+      <div className="es es-casca">
+        <aside className="es-lateral" aria-label="Navegação">
+          <div className="es-lateral-topo">
+            <Link href="/painel" className="es-marca" aria-label="GUIA Church, ir para o painel">
+              <Logo className="es-logo" />
+            </Link>
           </div>
-          <button className="mini fantasma" onClick={async () => { await sb()!.auth.signOut(); location.href = '/entrar'; }}>
-            <IcSair /> Sair
-          </button>
-        </div>
-        <nav className="abas" aria-label="Seções">
+          <div className="es-ministerio">
+            {troca(false)}
+            {menuLugar === 'lateral' && menu}
+          </div>
+          <nav className="es-nav" aria-label="Seções">
+            {navItens.map(a => (
+              <Link key={a.href} href={a.href} className="es-nav-item" aria-current={a.on ? 'page' : undefined}>
+                <a.Ic /><span>{a.rotulo}</span>
+                {a.selo?.n ? <span className="es-nav-n" aria-label={a.selo.rot}>{a.selo.n > 99 ? '99+' : a.selo.n}</span> : null}
+              </Link>
+            ))}
+          </nav>
+          <div className="es-lateral-pe">
+            {meus.map(v => (
+              <a key={v.slug} className="es-nav-item" href={`/eu/${v.token}`}>
+                <IcPessoa /><span>Meu espaço na {v.equipe}</span>
+              </a>
+            ))}
+            <button className="es-nav-item" onClick={sair}><IcSair /><span>Sair</span></button>
+            {conta && <div className="es-conta" title={conta}>{conta}</div>}
+          </div>
+        </aside>
+
+        <header className="es-topo">
+          <Link href="/painel" className="es-marca" aria-label="GUIA Church, ir para o painel">
+            <Logo className="es-logo" />
+          </Link>
+          <div className="es-ministerio">
+            {troca(true)}
+            {menuLugar === 'topo' && menu}
+          </div>
+        </header>
+
+        <main className="es-corpo">{children}</main>
+
+        <nav className="es-abas" aria-label="Seções">
           {navItens.map(a => (
-            <Link key={a.href} href={a.href} className={a.on ? 'on' : ''} aria-current={a.on ? 'page' : undefined}>
-              <a.Ic /> {a.rotulo}
+            <Link key={a.href} href={a.href} className="es-aba" aria-current={a.on ? 'page' : undefined}>
+              <a.Ic /><span>{a.rotulo}</span>
+              {a.selo?.n ? <span className="es-aba-n" aria-label={a.selo.rot}>{a.selo.n > 99 ? '99+' : a.selo.n}</span> : null}
             </Link>
           ))}
         </nav>
-      </header>
-      <main>{children}</main>
-      <nav className="barra-fundo" aria-label="Seções">
-        {navItens.map(a => (
-          <Link key={a.href} href={a.href} className={a.on ? 'on' : ''} aria-current={a.on ? 'page' : undefined}>
-            <a.Ic /> {a.rotulo}
-          </Link>
-        ))}
-      </nav>
-      {msg && <div className="toast" role="status">{msg}</div>}
+        {msg && <div className="es-toast" role="status">{msg}</div>}
       </div>
     </C.Provider>
   );
@@ -434,30 +537,30 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 function PrimeiraEquipe({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [nome, setNome] = useState('');
   const [ocupado, setOcupado] = useState(false);
-  /* Esta tela usava alert() do navegador para dar a notícia de que não deu
-     certo. Modal do sistema operacional é o oposto do que a pessoa precisa
-     num erro: ela cobre a tela, não diz o que fazer, e só oferece "OK" —
-     que é justamente a palavra errada. O aviso agora fica na página, do
-     lado do botão que falhou, e o texto vem em português. */
+  /* o aviso fica na página, do lado do botão que falhou, e em português:
+     o alert() do navegador cobria a tela e só oferecia "OK". */
   const [erro, setErro] = useState('');
   return (
-    <main style={{ maxWidth: 460, paddingTop: 70 }}>
+    <div className="es-estado">
       <h1>Crie seu primeiro ministério</h1>
-      <p className="dim" style={{ margin: '8px 0 18px' }}>
-        Cada ministério (Mídia, Louvor, Recepção…) tem seu próprio time, funções e escala. Você pode adicionar quantos quiser.
-      </p>
-      <div className="card">
-        <label htmlFor="nt-nome">Nome do ministério</label>
-        <input id="nt-nome" value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
-        <div style={{ height: 14 }} />
-        <button className="pri grande" disabled={ocupado || !nome.trim()} onClick={async () => {
-          setOcupado(true); setErro('');
-          try { const { criarEquipe } = await import('@/lib/equipes'); const eq = await criarEquipe(nome.trim()); aoCriar(eq.id); }
-          catch (e) { setErro(aviseHumano(e, 'criar o ministério')); setOcupado(false); }
-        }}>Criar ministério</button>
-        {erro && <div style={{ marginTop: 14 }}><Aviso tom="erro">{erro}</Aviso></div>}
+      <p>Cada ministério (Mídia, Louvor, Recepção) tem seu próprio time, funções e escala. Você pode criar quantos quiser.</p>
+      <div className="es-caixa">
+        <div className="es-caixa-corpo">
+          <label className="es-campo" htmlFor="nt-nome">
+            <span>Nome do ministério</span>
+            <input className="es-ctl" id="nt-nome" value={nome} onChange={e => setNome(e.target.value)} placeholder="ex: Louvor" autoFocus />
+          </label>
+          {erro && <Aviso tom="bad">{erro}</Aviso>}
+        </div>
+        <div className="es-caixa-pe">
+          <button className="es-btn es-pri" disabled={ocupado || !nome.trim()} onClick={async () => {
+            setOcupado(true); setErro('');
+            try { const { criarEquipe } = await import('@/lib/equipes'); const eq = await criarEquipe(nome.trim()); aoCriar(eq.id); }
+            catch (e) { setErro(aviseHumano(e, 'criar o ministério')); setOcupado(false); }
+          }}>Criar ministério</button>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 
@@ -465,24 +568,28 @@ export function Conexao({ aoSalvar }: { aoSalvar: () => void }) {
   const [url, setUrl] = useState('');
   const [key, setKey] = useState('');
   return (
-    <main style={{ maxWidth: 540, paddingTop: 60 }}>
+    <div className="es-estado">
       <h1>Conectar ao banco</h1>
-      <p className="dim" style={{ marginTop: 8 }}>
-        Cole o endereço e a chave pública do seu projeto Supabase. Fica salvo neste aparelho.
-      </p>
-      <div className="card">
-        <label htmlFor="cfg-url">URL do projeto</label>
-        <input id="cfg-url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" />
-        <div style={{ height: 12 }} />
-        <label htmlFor="cfg-key">Chave anon (public)</label>
-        <input id="cfg-key" value={key} onChange={e => setKey(e.target.value)} placeholder="eyJhbGciOi..." />
-        <div style={{ height: 14 }} />
-        <button className="pri grande" disabled={!url || !key}
-          onClick={() => { gravarCredenciais({ url: url.trim().replace(/\/$/, ''), key: key.trim() }); aoSalvar(); }}>
-          Conectar
-        </button>
+      <p>Cole o endereço e a chave pública do seu projeto Supabase. Fica salvo neste aparelho.</p>
+      <div className="es-caixa">
+        <div className="es-caixa-corpo">
+          <label className="es-campo" htmlFor="cfg-url">
+            <span>URL do projeto</span>
+            <input className="es-ctl" id="cfg-url" value={url} onChange={e => setUrl(e.target.value)} placeholder="https://xxxx.supabase.co" />
+          </label>
+          <label className="es-campo" htmlFor="cfg-key">
+            <span>Chave anon (pública)</span>
+            <input className="es-ctl" id="cfg-key" value={key} onChange={e => setKey(e.target.value)} placeholder="eyJhbGciOi..." />
+          </label>
+        </div>
+        <div className="es-caixa-pe">
+          <button className="es-btn es-pri" disabled={!url || !key}
+            onClick={() => { gravarCredenciais({ url: url.trim().replace(/\/$/, ''), key: key.trim() }); aoSalvar(); }}>
+            Conectar
+          </button>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
 

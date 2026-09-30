@@ -1,11 +1,10 @@
 'use client';
-import { Faixa } from '@/components/Faixa';
 import { cont } from '@/lib/plural';
 import Shell, { useApp } from '@/components/Shell';
 import Link from 'next/link';
 import { useState } from 'react';
 import { definirHabilidade } from '@/lib/db';
-import { Aviso } from '@/components/Ui';
+import { Cab, Secao, Aviso, Dobra, Fio } from '@/components/escalas/Pecas';
 import { IcSeta } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { Nivel, declaracoesSuspeitas, filaDeConferencia } from '@/lib/engine';
@@ -37,9 +36,14 @@ import { Nivel, declaracoesSuspeitas, filaDeConferencia } from '@/lib/engine';
    E O RISCO DE ESCONDER, que é real: nível não conferido não é cosmético — um
    "faz sozinho" que ninguém confirmou vale como "ajuda quando falta", e o
    sorteio não deixa a área de pé só nessa pessoa. Fila esquecida é escala pior.
-   Por isso a convocação continua em DOIS lugares que o líder abre sozinho: a
-   linha no topo do /time e a pendência no /painel. Mudou onde o trabalho é
-   feito, não se ele é lembrado.
+   Por isso a convocação continua em DOIS lugares que o líder abre sozinho: o
+   alto do /time (a ação cheia e o número na faixa) e a pendência no /painel.
+   Mudou onde o trabalho é feito, não se ele é lembrado.
+
+   30/09/2026: na língua do Financeiro e do Demandas. Cada área é uma dobra
+   com a conta de pessoas, e cada pessoa uma linha da fila com os quatro
+   níveis como botões: o que ela declarou vem em contorno, os outros em
+   texto.
    ============================================================================= */
 
 export default function Pagina() { return <Shell><Conferir /></Shell>; }
@@ -70,88 +74,86 @@ function Conferir() {
   }
 
   return (
-    <div className="lid">
-      <Faixa
+    <>
+      {/* enquanto grava, os botões ficam desligados; o fio diz "estou fazendo" */}
+      {!!chipSalvando && <Fio />}
+      <Cab
+        rot="Time"
         titulo={pendentes ? `${cont(pendentes, 'nível', 'níveis')} para conferir` : 'Tudo conferido'}
-        sub={pendentes
+        meta={pendentes
           ? 'Estas pessoas se cadastraram sozinhas e escolheram o próprio nível. Vá área por área, é rápido.'
           : 'Quando alguém novo se cadastrar, aparece aqui.'}
-        extra={<Link className="lid-bt-txt" href="/time">Ver o time</Link>}
+        acoes={<Link className="es-btn" href="/time">Ver o time</Link>}
       />
 
-      {/* A REGRA INTEIRA, UMA VEZ SÓ. Ela não se repete nas 32 linhas abaixo:
-          repetir "vale como ajuda até você conferir" em cada linha não informa,
-          só faz a lista parecer o dobro do tamanho. */}
-      {pendentes > 0 && (
-        <p className="dim pequeno" style={{ marginTop: 'var(--e5)' }}>
-          Enquanto ninguém confere, um <strong>faz sozinho</strong> declarado <strong>vale
-          como ajuda quando falta</strong>: a pessoa entra na escala normal, mas o sorteio
-          não deixa a área de pé só nela.
-        </p>
-      )}
-
       {!!suspeitas.length && (
-        <details className="bloco-extra" style={{ margin: '18px 0 4px' }}>
-          <summary>
-            <span className="marca-est warn"><span className="ponto warn" />{suspeitas.length}</span>
-            <span className="cresce">{suspeitas.length === 1 ? 'ponto de atenção' : 'pontos de atenção'}</span>
-            <IcSeta className="giro" />
-          </summary>
-          <div className="bloco-extra-corpo" style={{ paddingTop: 12 }}>
-            {suspeitas.map((sp, i) => (
-              <Aviso key={i} tom={sp.motivo === 'pilar_unico' ? 'erro' : 'atencao'}>{sp.texto}</Aviso>
-            ))}
-          </div>
-        </details>
+        <div className="es-secao">
+          <Dobra titulo={cont(suspeitas.length, 'ponto de atenção', 'pontos de atenção')}>
+            <div className="es-tm-avisos">
+              {suspeitas.map((sp, i) => (
+                <Aviso key={i} tom={sp.motivo === 'pilar_unico' ? 'bad' : 'warn'}>{sp.texto}</Aviso>
+              ))}
+            </div>
+          </Dobra>
+        </div>
       )}
 
       {pendentes === 0 && !suspeitas.length && (
-        <div style={{ marginTop: 'var(--e5)' }}>
-          <Aviso tom="bom">
+        <div className="es-secao">
+          <Aviso tom="ok">
             Todo mundo do time está com o nível conferido. O sorteio pode contar com quem
-            declarou <strong>faz sozinho</strong> para segurar uma área.
+            declarou <b>faz sozinho</b> para segurar uma área.
           </Aviso>
         </div>
       )}
 
-      {/* UMA ÁREA ABERTA POR VEZ. Nove blocos abertos ao mesmo tempo são 32
-          linhas iguais para rolar; o texto acima diz "vá área por área" e é
+      {/* A REGRA INTEIRA, UMA VEZ SÓ, no alto da lista. Ela não se repete nas 32
+          linhas abaixo: repetir "vale como ajuda até você conferir" em cada
+          linha não informa, só faz a lista parecer o dobro do tamanho.
+
+          UMA ÁREA ABERTA POR VEZ. Nove blocos abertos ao mesmo tempo são 32
+          linhas iguais para rolar; o texto do alto diz "vá área por área" e é
           isso que um bloco por vez permite. A contagem vai no cabeçalho para
           ninguém precisar abrir para saber se tem alguém ali dentro. */}
-      {fila.map((bl, i) => (
-        <details className="area-conf" key={bl.funcao} open={i === 0}>
-          <summary>
-            <span className="overline">{bl.funcao}</span>
-            <span className="area-conf-n">{bl.pendentes.length}</span>
-            <IcSeta className="giro" />
-          </summary>
-          {bl.pendentes.map(p => (
-            <div className="conf-linha" key={p.id}>
-              <div className="cresce">
-                <div className="forte">{p.nome.split(' ').slice(0, 2).join(' ')}</div>
-                <div className="dim pequeno">
-                  disse <strong>{MINI[p.declarou]}</strong>
-                  {p.declarou !== p.efetivo && <> · vale <strong>{MINI[p.efetivo]}</strong></>}
+      {pendentes > 0 && (
+        <Secao titulo="Área por área"
+          sub={<>Enquanto ninguém confere, um <b>faz sozinho</b> declarado <b>vale como ajuda quando
+            falta</b>: a pessoa entra na escala normal, mas o sorteio não deixa a área de pé só nela.</>}>
+          <div className="es-tm-areas">
+            {fila.map((bl, i) => (
+              <Dobra key={bl.funcao} titulo={bl.funcao} nota={cont(bl.pendentes.length, 'pessoa', 'pessoas')} aberta={i === 0}>
+                <div className="es-fila">
+                  {bl.pendentes.map(p => (
+                    <div className="es-item es-tm-conf" key={p.id}>
+                      <span className="es-c-tit">
+                        <b>{p.nome.split(' ').slice(0, 2).join(' ')}</b>
+                        <small>
+                          disse <b>{MINI[p.declarou]}</b>
+                          {p.declarou !== p.efetivo && <> · vale <b>{MINI[p.efetivo]}</b></>}
+                        </small>
+                      </span>
+                      <span className="es-c-acao" role="group" aria-label={`Nível de ${p.nome} em ${bl.funcao}`}>
+                        {OPCOES.map(o => (
+                          <button key={o.rotulo} type="button"
+                            className={o.nivel === p.declarou ? 'es-btn es-peq' : 'es-btn es-txt es-peq'}
+                            disabled={!!chipSalvando}
+                            onClick={() => conferirNivel(p.id, bl.funcao, o.nivel)}>
+                            {o.rotulo}
+                          </button>
+                        ))}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              </div>
-              <div className="conf-btns" role="group" aria-label={`Nível de ${p.nome} em ${bl.funcao}`}>
-                {OPCOES.map(o => (
-                  <button key={o.rotulo}
-                    className={`seg ${o.nivel === p.declarou ? 'on' : ''} ${o.nivel === null ? 'nao' : ''}`}
-                    disabled={!!chipSalvando}
-                    onClick={() => conferirNivel(p.id, bl.funcao, o.nivel)}>
-                    {o.rotulo}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </details>
-      ))}
+              </Dobra>
+            ))}
+          </div>
+        </Secao>
+      )}
 
-      <p className="lid-pe">
-        <Link href="/time">‹ Voltar ao time</Link>
-      </p>
-    </div>
+      <div className="es-secao">
+        <Link className="es-btn es-txt" href="/time"><IcSeta dir="e" />Voltar ao time</Link>
+      </div>
+    </>
   );
 }

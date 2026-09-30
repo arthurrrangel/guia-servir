@@ -296,6 +296,14 @@ export const MEDIR = (largura) => {
        Em português "dia" aparece em meia dúzia de frases que não pedem
        calendário. O que pede calendário diz o nome: data, prazo, nascimento,
        vencimento. */
+    /* "PRAZO" QUE É PALAVRA, E NÃO DATA · 30/09/2026. O "Prazo para
+       confirmar" dos Ajustes das escalas guarda "quinta-feira", que entra na
+       frase do WhatsApp ("Confirma no seu link até quinta-feira"). Ele só
+       passou a ser acusado quando o rótulo ficou ligado ao campo (antes o
+       medidor lia o placeholder). A exceção vale só para quem DECLARA o
+       teclado de texto (`inputmode="text"`); um campo de prazo sem essa
+       declaração continua acusado. */
+    if (modo === 'text') continue;
     if (/\bdata\b|\bprazo\b|nascimento|vencimento/.test(rot) && tipo !== 'date' && tipo !== 'datetime-local')
       teclado.push(nome(e) + ` (data com type=${tipo})`);
   }

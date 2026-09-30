@@ -1,17 +1,19 @@
 'use client';
-import { Faixa } from '@/components/Faixa';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { mudarStatus } from '@/lib/db';
-import { Painel as NumPainel, painelDoMinisterio } from '@/lib/candidaturas';
 import { AreaVisao, visaoGeral } from '@/lib/equipes';
 import { IcSino, IcSeta, IcCopiar } from '@/components/Icones';
-import { Escolha, Aviso } from '@/components/Ui';
+import {
+  Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, tomDoStatus, Tom,
+} from '@/components/escalas/Pecas';
+import { leituraDoDia } from '@/components/escalas/leitura';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
-  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes, classificar,
+  problemas, cultosAte, resumoDia, addDias, fmtDia, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -19,258 +21,164 @@ import { pl, cont } from '@/lib/plural';
    O PAINEL DE QUEM ORGANIZA
 
    A pergunta desta tela é uma só: O QUE PRECISA DE MIM AGORA. Tudo o mais é
-   referência, e referência fica embaixo.
+   referência, e referência fica embaixo ou ao lado.
 
    A cascata de prioridade que decide o próximo passo (vagas > furos >
-   recusados > pendentes > montar o mês > tudo pronto) NÃO mudou nesta
-   reforma. Ela estava certa. O que mudou foi a superfície: a tela falava
-   outra língua visual que o resto do produto (card arredondado, gradiente,
-   avatar colorido, sombra) e quem vinha do site via duas empresas diferentes.
+   recusados > pendentes > montar o mês > tudo pronto) NÃO mudou. Ela estava
+   certa. O que mudou em 30/09/2026 foi a superfície, para a língua do
+   Financeiro e do Demandas:
 
-   O QUE ENTROU DE NOVO
-     . a visão da igreja inteira, para quem organiza mais de uma área. Era o
-       buraco real: três dos quatro organizadores são admin e não tinham como
-       saber se o domingo estava coberto sem trocar de equipe cinco vezes.
-     . as pendências deixaram de ser um cartãozinho e entraram na hierarquia
-       da tela, logo abaixo do próximo passo.
+     . o culto em foco é o título, e a faixa de números diz o estado dele
+       de longe: postos de pé, confirmados, sem resposta, sem gente;
+     . o próximo passo é a única caixa com fundo, e tem a única ação cheia;
+     . a escala do dia é uma tabela (função, pessoa, situação), com a
+       situação trocável no lugar, na mesma pílula que a Escala usa;
+     . ao lado, o que também espera por você e os próximos cultos, cada
+       linha com a pílula do estado e o caminho para resolver.
 
-   O QUE SAIU, E POR QUÊ
-     . o anel de confirmações: gráfico para 9 itens é enfeite com aparência de
-       dado. Virou número grande, que é o que se lê de longe.
-     . os avatares coloridos: em lista de escala, a chave de leitura é o nome
-       da FUNÇÃO, não o rosto. Círculo colorido com iniciais é vocabulário de
-       painel genérico, e não existe no site da igreja.
-     . o gradiente do herói: a urgência já está nas palavras. Quando urge, a
-       faixa inverte para fundo tinta, que é o recurso que a home usa.
+   A cor segue o tom fixo do sistema (ver Pecas.tsx): vermelho é falta de
+   gente, âmbar é resposta que não veio, verde é de pé. Um tom, um sentido.
    ============================================================================= */
-
-/* o vocabulário da situação mora aqui e na escala. Uma lista só, para as duas
-   telas dizerem as mesmas palavras. */
 
 export default function Pagina() { return <Shell><Painel /></Shell>; }
 
-/* --------------------------------------------------------- a igreja inteira */
+/* o dia de hoje por extenso, com a primeira letra grande */
+function hojePorExtenso() {
+  const s = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+
+/* --------------------------------------------------------- a igreja inteira
+   Para quem organiza mais de uma área: se o domingo está coberto na igreja
+   toda, sem trocar de ministério cinco vezes. A linha de uma área que você
+   organiza abre a escala dela (troca o ministério e vai para a Escala);
+   antes ela levava para a página pública da área, no site. */
 function Igreja() {
+  const { equipes, trocarEquipe } = useApp();
+  const router = useRouter();
   const [areas, setAreas] = useState<AreaVisao[] | null>(null);
   /* 14/09/2026: vazio e falha eram o mesmo desenho (a seção sumia). Um líder
      com o token expirado via um painel limpo e concluía que estava tudo
-     coberto. Agora a falha tem cara de falha. */
+     coberto. A falha tem cara de falha. */
   const [falhou, setFalhou] = useState(false);
   useEffect(() => {
     let vivo = true;
-    /* sem .catch, uma rede que cai deixa `areas` em null para sempre e esta
-       seção some sem dizer nada. Lista vazia é o mesmo desenho (a seção não
-       aparece), mas agora é uma decisão e não uma promessa órfã. */
     void visaoGeral().then(r => { if (vivo) setAreas(r); }).catch(() => { if (vivo) { setAreas([]); setFalhou(true); } });
     return () => { vivo = false; };
   }, []);
 
-  /* uma área só não é visão geral: é a própria tela. */
-  if (falhou) return <Aviso tom="erro">Não consegui carregar a visão geral da igreja. Recarregue a página; se continuar, saia e entre de novo.</Aviso>;
+  if (falhou) return <Aviso tom="bad">Não consegui carregar a visão da igreja. Recarregue a página; se continuar, saia e entre de novo.</Aviso>;
+  /* uma área só não é visão geral: é a própria tela */
   if (!areas || areas.length < 2) return null;
 
-  /* "1 NÃO PODE" SAÍA ÂMBAR AQUI E VERMELHO NO BLOCO DE BAIXO. 05/09/2026.
-     Mesmo fato, mesma tela, duas cores: esta função classificava recusa como
-     `pend`, e o "Depois disso" usa resumoDia(), que classifica recusa como
-     `critico`. Cor é a primeira coisa que se lê num painel; se ela discorda de
-     si mesma na mesma rolagem, o líder para de confiar na cor.
+  const leitura = (a: AreaVisao) => a.vagas === null
+    ? { tom: 'neutro' as Tom, txt: 'sem culto marcado' }
+    : leituraDoDia({ vagas: a.vagas, furos: a.furos, recusados: a.recusados, pendentes: a.pendentes });
+  const emFalta = areas.filter(a => leitura(a).tom === 'bad').length;
 
-     Quem estava errado era este lado, e a prova está no topo desta página: o
-     alerta mais alto do painel para uma recusa é "Alguém não pode no domingo
-     — re-sorteie ou troque antes de publicar", com botão de resolver agora.
-     Recusa abre buraco na escala. A regra agora é a mesma dos dois lados:
-     falta gente = vermelho, ninguém respondeu ainda = âmbar. */
-  /* 20/09/2026: a COR agora vem de `classificar`, em lib/engine.ts, que é a
-     mesma função que `resumoDia` usa no bloco de baixo. O parágrafo acima
-     conta como as duas divergiram uma vez e como foram alinhadas à mão; à
-     mão elas voltam a divergir na próxima regra nova. O TEXTO continua aqui,
-     porque ele é desta tela: a visão geral diz "3 sem ninguém" e o bloco de
-     baixo diz outra coisa, de propósito. */
-  const leitura = (a: AreaVisao) => {
-    if (a.vagas === null) return { cls: '', txt: 'sem culto marcado' };
-    const cls = { critico: 'ruim', atencao: 'pend', ok: 'ok' }[classificar({
-      vagas: a.vagas, furos: a.furos, recusados: a.recusados, pendentes: a.pendentes,
-    })];
-    if (a.vagas > 0) return { cls, txt: `${a.vagas} sem ninguém` };
-    if (a.furos > 0) return { cls, txt: `${a.furos} ${pl(a.furos, 'furou', 'furaram')}` };
-    if (a.recusados > 0) return { cls, txt: `${a.recusados} ${pl(a.recusados, 'não pode', 'não podem')}` };
-    if (a.pendentes > 0) return { cls, txt: `${a.pendentes} sem responder` };
-    return { cls, txt: 'coberto' };
-  };
-  /* a conta da nota do cabeçalho segue a mesma régua da cor: área vermelha é
-     área que precisa de gente. Antes ela contava vaga e furo mas ignorava
-     recusa, e o cabeçalho dizia "3 áreas" com quatro marcas vermelhas na
-     lista logo abaixo. */
-  const emFalta = areas.filter(a => leitura(a).cls === 'ruim').length;
-
-  /* A DATA ESTAVA ESCRITA CINCO VEZES. 07/09/2026. Cada linha de área trazia
-     "DOMINGO 12/09 · 9 de 9". Cinco áreas, cinco vezes a mesma data, uma
-     debaixo da outra — e por ser a mesma em todas ela não distinguia nenhuma:
-     era ruído com aparência de dado. O que a linha precisa dizer é quantos
-     postos estão de pé; QUANDO é uma propriedade do domingo, não da área.
-
-     Só sai da linha quando é de fato comum a todas. Igreja em que uma área
-     serve no sábado do Follow e as outras no domingo continua vendo a data em
-     cada linha, porque aí ela volta a distinguir. */
+  /* A DATA SÓ SAI DA LINHA QUANDO É DE TODAS (07/09/2026): cinco vezes a
+     mesma data não distingue nenhuma área. Igreja em que uma área serve no
+     sábado e as outras no domingo continua vendo a data em cada linha. */
   const datas = new Set(areas.map(a => a.proxima_data ? `${a.tipo}|${a.proxima_data}` : ''));
   const umaSoData = datas.size === 1 && !datas.has('');
   const comum = umaSoData ? areas[0] : null;
 
   return (
-    <section className="lid-secao">
-      <div className="lid-secao-cab">
-        <span className="rot">
-          {comum
-            ? `${comum.tipo === 'follow' ? 'O Follow de' : 'O domingo'} ${fmtDia(comum.proxima_data!)}`
-            : 'O domingo da igreja'}
-        </span>
-        <span className="lid-secao-nota">
-          {emFalta === 0 ? 'Todas as áreas de pé' : emFalta === 1 ? '1 área precisa de gente' : `${emFalta} áreas precisam de gente`}
-        </span>
-      </div>
-      <div className="lid-igreja">
+    <Secao
+      titulo={comum ? `A igreja ${comum.tipo === 'follow' ? 'no Follow de' : 'no domingo'} ${fmtDia(comum.proxima_data!)}` : 'A igreja no próximo culto'}
+      sub={emFalta === 0 ? 'Todas as áreas de pé.' : emFalta === 1 ? '1 área precisa de gente.' : `${emFalta} áreas precisam de gente.`}>
+      <div className="es-fila es-colunas" style={{ '--es-cols': 'minmax(0,1fr) 110px 170px 24px' } as React.CSSProperties}>
+        <div className="es-fila-cab" aria-hidden="true"><span>Área</span><span className="es-n">Postos</span><span>Situação</span><span /></div>
         {areas.map(a => {
           const l = leitura(a);
-          return (
-            <Link key={a.slug} href={`/servir/${a.slug}`} className={`lid-area ${l.cls}`}>
-              {/* O ESTADO FICA NA LINHA DO NOME, E A DATA GANHA A LARGURA TODA.
-                  05/09/2026. Antes o nome e a data moravam num <span> só, à
-                  esquerda, e o estado ocupava uma coluna `auto` com
-                  white-space:nowrap à direita. Num celular de 390px,
-                  "4 SEM RESPONDER" (uppercase com .15em de entreletra) come
-                  ~170px e sobra menos de 160 para "DOMINGO 06/09 · 9 DE 9",
-                  que precisa de ~200: a data quebrava e deixava um "9" órfão
-                  na segunda linha, com o estado boiando no meio de um bloco
-                  de duas linhas, alinhado a coisa nenhuma.
-                  Nada estourava e nada se sobrepunha, então a varredura deu
-                  zero — este é o defeito que só o olho pega.
-                  Agora são quatro células numa grade de 2x2: o estado sobe
-                  para a linha do NOME, que é o que ele qualifica, e a data
-                  passa a ocupar as duas colunas embaixo. Mesma altura. */}
-              <span className="lid-marca" aria-hidden="true" />
-              <span className="lid-area-nome">{a.equipe}</span>
-              <span className="lid-area-est">{l.txt}</span>
-              <span className="lid-area-sub">
-                {!a.proxima_data ? cont(a.postos, 'função', 'funções')
-                  : umaSoData ? `${a.preenchidos} de ${a.postos}`
-                  : `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)} · ${a.preenchidos} de ${a.postos}`}
-                {a.candidaturas_novas > 0 && ` · ${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar`}
+          const dela = equipes.find(e => e.slug === a.slug);
+          const sub = [
+            !a.proxima_data ? cont(a.postos, 'função', 'funções')
+              : umaSoData ? null : `${a.tipo === 'follow' ? 'Follow' : 'domingo'} ${fmtDia(a.proxima_data)}`,
+            a.candidaturas_novas > 0 ? `${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar` : null,
+          ].filter(Boolean).join(' · ');
+          const miolo = (
+            <>
+              <span className="es-c-tit"><b>{a.equipe}</b>{sub && <small>{sub}</small>}</span>
+              <span className="es-c-meta">
+                <span className="es-c-num">{a.proxima_data ? `${a.preenchidos} de ${a.postos}` : '—'}</span>
+                <span className="es-c-est"><Pilula tom={l.tom}>{l.txt}</Pilula></span>
               </span>
-            </Link>
+              <span className="es-c-acao">{dela && <IcSeta />}</span>
+            </>
           );
+          return dela
+            ? <button key={a.slug} className="es-item" onClick={() => { trocarEquipe(dela.id); router.push('/escala'); }}
+                aria-label={`${a.equipe}: ${l.txt}. Abrir a escala`}>{miolo}</button>
+            : <div key={a.slug} className="es-item">{miolo}</div>;
         })}
       </div>
-    </section>
+    </Secao>
   );
 }
 
 /* ------------------------------------------------------------- pendências
-   Só aparece o que EXIGE alguma coisa. Bloco que mostra zero é ruído, e ruído
-   diário é como o líder aprende a não olhar o painel. */
+   Só aparece o que EXIGE alguma coisa. Linha que mostra zero é ruído, e
+   ruído diário é como o líder aprende a não olhar o painel. As contas vêm da
+   casca (`nums`), a mesma leitura que acende os selos da navegação. */
 function Pendencias() {
-  const { equipe } = useApp();
-  const [p, setP] = useState<NumPainel | null>(null);
-  const [pFalhou, setPFalhou] = useState(false);
-  useEffect(() => {
-    let vivo = true;
-    if (!equipe?.id) return;
-    void painelDoMinisterio(equipe.id).then(r => { if (vivo) setP(r); }).catch(() => { if (vivo) setPFalhou(true); });
-    return () => { vivo = false; };
-  }, [equipe?.id]);
-  if (pFalhou) return <Aviso tom="erro">Não consegui carregar as pendências deste ministério. Recarregue a página.</Aviso>;
+  const { nums: p, numsFalhou } = useApp();
+  if (numsFalhou) return <Aviso tom="bad">Não consegui carregar o que espera por você neste ministério. Recarregue a página.</Aviso>;
   if (!p) return null;
 
-  /* CADA LINHA É UMA FRASE INTEIRA, E CONCORDA COM O NÚMERO. 05/09/2026.
-     Três das cinco linhas eram fragmentos sem sujeito — "esperando a conversa
-     com a liderança", "com nível declarado e ainda não conferido", "sem
-     responder a disponibilidade do mês". Quem lê tem que adivinhar do que se
-     está falando a partir do algarismo da coluna da esquerda. E a quinta saía
-     errada no singular: "1 funções sem ninguém que saiba fazer", que estava
-     no ar. Só a primeira tinha plural, e por isso só ela lia bem. */
-  const pl = (n: number, um: string, varios: string) => (n === 1 ? um : varios);
+  /* cada linha é uma frase inteira e concorda com o número (05/09/2026) */
   const itens = [
     p.candidaturas_novas && { grave: true, n: p.candidaturas_novas,
-      txt: pl(p.candidaturas_novas,
-        'pessoa quer entrar e espera resposta',
-        'pessoas querem entrar e esperam resposta'),
+      txt: pl(p.candidaturas_novas, 'pessoa quer entrar e espera resposta', 'pessoas querem entrar e esperam resposta'),
       href: '/painel/candidaturas' },
     p.aguardando_conversa && { grave: false, n: p.aguardando_conversa,
-      txt: pl(p.aguardando_conversa,
-        'pessoa esperando a conversa com a liderança',
-        'pessoas esperando a conversa com a liderança'),
+      txt: pl(p.aguardando_conversa, 'pessoa esperando a conversa com a liderança', 'pessoas esperando a conversa com a liderança'),
       href: '/painel/candidaturas' },
     p.sem_conferir && { grave: false, n: p.sem_conferir,
-      txt: pl(p.sem_conferir,
-        'pessoa com nível declarado que você ainda não conferiu',
-        'pessoas com nível declarado que você ainda não conferiu'),
+      txt: pl(p.sem_conferir, 'pessoa com nível declarado que você ainda não conferiu', 'pessoas com nível declarado que você ainda não conferiu'),
       href: '/time/conferir' },
     p.sem_disponibilidade && { grave: false, n: p.sem_disponibilidade,
-      txt: pl(p.sem_disponibilidade,
-        'pessoa não respondeu a disponibilidade do mês',
-        'pessoas não responderam a disponibilidade do mês'),
+      txt: pl(p.sem_disponibilidade, 'pessoa não respondeu a disponibilidade do mês', 'pessoas não responderam a disponibilidade do mês'),
       href: '/time' },
     p.funcoes_sem_gente && { grave: true, n: p.funcoes_sem_gente,
-      txt: pl(p.funcoes_sem_gente,
-        'função sem ninguém que saiba fazer',
-        'funções sem ninguém que saiba fazer'),
+      txt: pl(p.funcoes_sem_gente, 'função sem ninguém que saiba fazer', 'funções sem ninguém que saiba fazer'),
       href: '/ajustes' },
   ].filter(Boolean) as { grave: boolean; n: number; txt: string; href: string }[];
 
   if (!itens.length) return null;
   return (
-    <section className="lid-secao">
-      <div className="lid-secao-cab">
-        <span className="rot">Também espera por você</span>
-        <span className="lid-secao-nota">Nada aqui trava o domingo</span>
-      </div>
-      <div>
+    <Secao titulo="Também espera por você" sub="Nada aqui trava o próximo culto.">
+      <div className="es-fila">
         {itens.map((i, k) => (
-          <Link key={k} href={i.href} className={`lid-alerta ${i.grave ? 'ruim' : ''}`}>
-            <span className="lid-alerta-n">{i.n}</span>
-            <span className="lid-alerta-txt">{i.txt}</span>
+          <Link key={k} href={i.href} className="es-item es-com-n">
+            <span className={`es-c-n${i.grave ? ' es-bad' : ''}`}>{i.n}</span>
+            <span className="es-c-tit"><b>{i.txt}</b></span>
+            <span className="es-c-acao"><IcSeta /></span>
           </Link>
         ))}
       </div>
-    </section>
+    </Secao>
   );
 }
 
 /* ---------------------------------------------------------------------------
-   AS CINCO REGRAS — a doutrina de operação, que estava no porão da gaveta.
-
-   Elas moravam no fim do /ajustes: sétima seção da página mais alta do líder
-   (6,2 telas), abaixo de "Quem organiza". Duas coisas erradas nisso.
-
-   1. NÃO SÃO UM AJUSTE. Não se configura nada aqui — é o contrato de como a
-      escala funciona. Documentação guardada na gaveta de configuração é
-      documentação que ninguém acha.
-   2. QUEM MAIS PRECISA DELAS É QUEM NUNCA VAI ABRIR AQUELA PÁGINA. O líder novo
-      está no painel tentando entender o produto, não em Ajustes.
-
-   E duas delas não são regra de sistema, são PROMESSA AO LÍDER: "você não caça
-   substituto" e "o sistema bloqueia" dizem o que ele NÃO precisa fazer. Isso é
-   a primeira coisa que alguém com medo de assumir uma escala precisa ler.
-
-   Aqui: fechada por padrão para quem já roda a escala, aberta na primeira vez.
-   Disponível sempre, no caminho de ninguém.
+   AS CINCO REGRAS — a doutrina de operação. Não são um ajuste: são o
+   contrato de como a escala funciona, e duas delas são promessa ao líder
+   ("você não caça substituto", "o sistema bloqueia"). Fechadas para quem já
+   roda a escala, abertas na primeira vez.
 --------------------------------------------------------------------------- */
 function CincoRegras({ aberta = false }: { aberta?: boolean }) {
   return (
-    <details className="bloco-extra" open={aberta} style={{ marginTop: 'var(--e7)' }}>
-      <summary>
-        <span className="cresce">As cinco regras da escala</span>
-        <IcSeta className="giro" />
-      </summary>
-      <div className="bloco-extra-corpo" style={{ paddingTop: 12 }}>
-        <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.8, maxWidth: 'var(--prosa)' }}>
-          <li><strong>Quem não pode, acha o substituto.</strong> Você não caça substituto.</li>
-          <li><strong>Confirmação é ativa.</strong> Ver a mensagem não é confirmar.</li>
-          <li><strong>Ninguém em duas funções ao mesmo tempo.</strong> O sistema bloqueia.</li>
-          <li><strong>Buraco vai publicado.</strong> Vaga escondida vira furo no domingo.</li>
-          <li><strong>Toda função precisa de 3 pessoas.</strong> Menos que isso é dependência.</li>
-        </ol>
-      </div>
-    </details>
+    <Dobra titulo="As cinco regras da escala" aberta={aberta}>
+      <ol className="es-regras">
+        <li><span><b>Quem não pode, acha o substituto.</b> Você não caça substituto.</span></li>
+        <li><span><b>Confirmação é ativa.</b> Ver a mensagem não é confirmar.</span></li>
+        <li><span><b>Ninguém em duas funções ao mesmo tempo.</b> O sistema bloqueia.</span></li>
+        <li><span><b>Buraco vai publicado.</b> Vaga escondida vira furo no domingo.</span></li>
+        <li><span><b>Toda função precisa de 3 pessoas.</b> Menos que isso é dependência.</span></li>
+      </ol>
+    </Dobra>
   );
 }
 
@@ -308,31 +216,29 @@ function Painel() {
         href: '/escala', rot: 'Montar a escala', mostra: temTime && temFuncoes },
     ];
     return (
-      <div className="lid">
-        <div className="lid-faixa">
-          <div className="lid-faixa-in"><div className="lid-faixa-txt">
-            <span className="rot">Primeira vez por aqui</span>
-            <h1>Três passos e a escala sai em minutos</h1>
-            <p className="lid-faixa-sub">Depois disso, todo mês é só conferir e publicar.</p>
-          </div></div>
-        </div>
-        <section className="lid-secao">
+      <>
+        <Cab rot="Primeira vez por aqui" titulo="Três passos e a escala sai em minutos"
+          meta="Depois disso, todo mês é só conferir e publicar." />
+        <div className="es-fila">
           {passos.map(p => (
-            <div key={p.n} className={`lid-linha ${p.feito ? 'ok' : ''}`}>
-              <span className="lid-marca" aria-hidden="true" />
-              <span>
-                <span className="lid-fn">Passo {p.n}{p.feito ? ' · feito' : ''}</span>
-                <span className="lid-nome">{p.titulo}</span>
-                <p style={{ margin: '6px 0 0', fontSize: 'var(--t-ui)', lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '52ch' }}>{p.txt}</p>
+            <div key={p.n} className="es-item es-com-n es-pn-passo">
+              <span className="es-c-n">{p.n}</span>
+              <span className="es-c-tit">
+                <b>{p.titulo}</b>
+                <small>{p.txt}</small>
               </span>
-              {p.mostra && <Link href={p.href} className="lid-bt">{p.rot}</Link>}
+              <span className="es-c-acao">
+                {p.feito ? <Pilula tom="ok">feito</Pilula>
+                  : p.mostra ? <Link href={p.href} className="es-btn es-pri">{p.rot}</Link>
+                  : <Pilula>depois</Pilula>}
+              </span>
             </div>
           ))}
-        </section>
+        </div>
         {/* na primeira vez ela abre: é agora que estas cinco linhas valem mais
-            do que qualquer botão desta tela. */}
-        <CincoRegras aberta />
-      </div>
+            do que qualquer botão desta tela */}
+        <div className="es-secao"><CincoRegras aberta /></div>
+      </>
     );
   }
 
@@ -348,13 +254,11 @@ function Painel() {
     /* quem a tela acredita estar na vaga vai junto na gravação — ver o
        comentário de `mudarStatus` em lib/db.ts */
     const vid = dia?.slots?.[funcao]?.vid;
-    /* o `return` era mudo (20/09, reauditoria). Se a tela oferecer o seletor
-       numa vaga vazia — ou se o dia ainda não tiver `cultoId` porque a carga
-       degradou —, o toque não fazia nada e não dizia nada. É a mesma classe
-       de defeito que o recado tinha. */
+    /* o `return` era mudo (20/09, reauditoria): toque que não faz nada tem
+       que dizer por quê */
     if (!f?.id || !dia?.cultoId || !vid) {
       aviso(!vid ? 'Essa vaga está sem ninguém: escolha a pessoa antes de marcar.'
-                 : 'Ainda não carreguei esse domingo por inteiro. Recarregue a página.');
+                 : 'Ainda não carreguei esse culto por inteiro. Recarregue a página.');
       return;
     }
     setSalvando(funcao); setOtimista({ f: funcao, st: status });
@@ -366,238 +270,218 @@ function Painel() {
   const diasFaltam = Math.round((Date.parse(prox) - Date.parse(hoje)) / 86400000);
   const quando = prox === hoje ? 'é hoje' : diasFaltam === 1 ? 'é amanhã' : `faltam ${diasFaltam} dias`;
 
-  /* o mês seguinte já está na hora de montar? (o cron faz no dia 26; a partir
-     do dia 18 o painel já cutuca, pra ninguém deixar pro último dia) */
+  /* o mês seguinte já está na hora de montar? (o robô monta no dia 26; a
+     partir do dia 18 o painel já cutuca, para ninguém deixar pro fim) */
   const diaDoMes = +hoje.slice(8, 10);
-  /* a mesma `proxMes` que o robô do dia 26 usa (lib/engine.ts). Era uma cópia
-     desta aritmética escrita aqui, e ela decide QUAL MÊS o botão "Montar"
-     agiria: divergir do robô é o líder montar um mês e o robô montar outro. */
+  /* a mesma `proxMes` que o robô do dia 26 usa: divergir do robô é o líder
+     montar um mês e o robô montar outro */
   const pm = proxMes(hoje);
   const proxMesMontado = cultosDoMes(pm.ano, pm.mes).some(d => { const x = S.escalas[d]; return x && Object.values(x.slots || {}).some((s: any) => s?.vid); });
   const cutucaProxMes = diaDoMes >= 18 && !proxMesMontado;
 
   const vagas = r ? r.vagas.length : 0;
-  const furos = r ? (r as any).furos || 0 : 0;
+  const furos = r ? r.furos : 0;
   const recus = r ? r.recusados : 0;
   const pend = r ? r.pendentes : 0;
-  const mesDe = (a: number, m: number) => MESES[m - 1];
+  const mesDe = (m: number) => MESES[m - 1];
+  const linkDoDia = `/escala?m=${prox.slice(0, 7)}#d${prox}`;
 
   /* O PRÓXIMO PASSO: a única coisa que o líder precisa fazer agora.
      Esta cascata é o coração da tela e não mudou na reforma visual. */
   const passo: any = !dia
-    ? { urg: '', tag: 'Sua missão agora', titulo: `Monte a escala de ${mesDe(+prox.slice(0, 4), +prox.slice(5, 7))}`,
+    ? { urg: '', titulo: `Monte a escala de ${mesDe(+prox.slice(5, 7))}`,
         sub: `${Dia}, ${fmtLongo(prox)}, ${quando}. O sorteio distribui todas as funções em um clique, respeitando quem não pode.`,
         acao: { tipo: 'link', label: 'Montar a escala', href: `/escala?m=${prox.slice(0, 7)}` } }
     : vagas
-    ? { urg: 'fogo', tag: 'Precisa de você', titulo: vagas === 1 ? `Falta gente ${noDia}` : `Faltam ${vagas} pessoas ${noDia}`,
+    ? { urg: 'fogo', titulo: vagas === 1 ? `Falta gente ${noDia}` : `Faltam ${vagas} pessoas ${noDia}`,
         sub: `${vagas === 1 ? '1 função está' : `${vagas} funções estão`} sem ninguém em ${fmtLongo(prox)}. Vaga escondida vira furo no culto: resolva antes de publicar.`,
-        acao: { tipo: 'link', label: 'Resolver agora', href: `/escala?m=${prox.slice(0, 7)}#d${prox}` },
+        acao: { tipo: 'link', label: 'Resolver agora', href: linkDoDia },
         sec: { label: 'Copiar assim mesmo', on: () => copiar(msgEscala(S, prox), aviso) } }
     : furos
-    ? { urg: 'fogo', tag: 'Precisa de você', titulo: furos === 1 ? `Alguém furou ${noDia}` : `${furos} pessoas furaram ${noDia}`,
+    ? { urg: 'fogo', titulo: furos === 1 ? `Alguém furou ${noDia}` : `${furos} pessoas furaram ${noDia}`,
         sub: `Em ${fmtLongo(prox)}. Chame o plantão ou remaneje na escala antes que o culto chegue.`,
-        acao: { tipo: 'link', label: 'Resolver agora', href: `/escala?m=${prox.slice(0, 7)}#d${prox}` } }
+        acao: { tipo: 'link', label: 'Resolver agora', href: linkDoDia } }
     : recus
-    ? { urg: 'fogo', tag: 'Precisa de você', titulo: recus === 1 ? `Alguém não pode ${noDia}` : `${recus} pessoas não podem ${noDia}`,
+    ? { urg: 'fogo', titulo: recus === 1 ? `Alguém não pode ${noDia}` : `${recus} pessoas não podem ${noDia}`,
         sub: `${recus === 1 ? '1 pessoa avisou que não pode' : `${recus} pessoas avisaram que não podem`} servir em ${fmtLongo(prox)}. Re-sorteie ou troque antes de publicar.`,
-        acao: { tipo: 'link', label: 'Resolver agora', href: `/escala?m=${prox.slice(0, 7)}#d${prox}` } }
+        acao: { tipo: 'link', label: 'Resolver agora', href: linkDoDia } }
     : pend
-    ? { urg: '', tag: 'Quase lá', titulo: pend === 1 ? 'Falta 1 confirmação' : `Faltam ${pend} confirmações`,
+    ? { urg: '', titulo: pend === 1 ? 'Falta 1 confirmação' : `Faltam ${pend} confirmações`,
         sub: `${pend === 1 ? '1 pessoa ainda não respondeu' : `${pend} pessoas ainda não responderam`} para ${fmtLongo(prox)}. Um toque abre o WhatsApp de cada um com a cobrança pronta.`,
         acao: { tipo: 'rolar', label: 'Ver quem falta' } }
     : cutucaProxMes
-    ? { urg: '', tag: 'Adiante o próximo mês', titulo: `Hora de montar ${mesDe(pm.ano, pm.mes)}`,
-        sub: `${Dia} está redondo. Aproveite: peça a indisponibilidade e monte ${mesDe(pm.ano, pm.mes)} antes do fim do mês, sem correria.`,
-        acao: { tipo: 'link', label: `Montar ${mesDe(pm.ano, pm.mes)}`, href: `/escala?m=${pm.ano}-${String(pm.mes).padStart(2, '0')}` } }
-    : { urg: '', tag: 'Tudo pronto', titulo: `${Dia} está redondo`,
+    ? { urg: '', titulo: `Hora de montar ${mesDe(pm.mes)}`,
+        sub: `${Dia} está redondo. Aproveite: peça a disponibilidade e monte ${mesDe(pm.mes)} antes do fim do mês, sem correria.`,
+        acao: { tipo: 'link', label: `Montar ${mesDe(pm.mes)}`, href: `/escala?m=${pm.ano}-${String(pm.mes).padStart(2, '0')}` } }
+    : { urg: 'ok', titulo: `${Dia} está redondo`,
         sub: `Todo mundo confirmado para ${fmtLongo(prox)}. É só publicar, ou reenviar, a escala no grupo.`,
         acao: { tipo: 'copiar', label: 'Copiar para o WhatsApp' } };
 
   const rolarPara = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  const situacao = (st: string) => st === 'confirmado' ? 'ok' : st === 'pendente' ? 'pend' : 'ruim';
+  const naoPodem = furos + recus;
 
   return (
-    <div className="lid">
-      {/* A FAIXA responde uma pergunta só: o que eu preciso fazer agora.
-          Uma ação sólida, no máximo duas de texto ao lado. */}
-      {/* A LEGENDA ("Precisa de você", "Quase lá") SAIU. Era a terceira linha
-          de um cabeçalho que já tinha título e frase, e o que ela dizia o título
-          já dizia — "Alguém não pode no Follow" não precisa de "Precisa de
-          você" em cima para ser urgente; a faixa escura já é o urgente.
-          E as ações foram para no máximo duas: a que resolve, e uma de saída.
-          Quando existe uma segunda escolha ("Copiar assim mesmo"), ela é a de
-          texto e o "Abrir escala" fica para o corpo da página, que já leva lá
-          em cada linha. Três botões empilhados no celular eram o defeito
-          medido na /escala hoje de manhã. */}
-      <Faixa
-        urgente={passo.urg === 'fogo'}
-        titulo={passo.titulo}
-        sub={passo.sub}
-        placar={r ? { n: <>{r.confirmados}<i>/{r.total}</i></>, rot: pl(r.confirmados, 'confirmado', 'confirmados') } : null}
-        acao={
-          passo.acao.tipo === 'link' ? <Link href={passo.acao.href} className="lid-bt">{passo.acao.label}</Link>
-          : passo.acao.tipo === 'copiar' ? <button className="lid-bt" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />{passo.acao.label}</button>
-          : <button className="lid-bt" onClick={() => rolarPara('cobrar')}><IcSino />{passo.acao.label}</button>
-        }
-        extra={
-          passo.sec ? <button className="lid-bt-txt" onClick={passo.sec.on}>{passo.sec.label}</button>
-          : dia && passo.acao.tipo !== 'copiar' ? <Link href="/escala" className="lid-bt-txt">Abrir escala</Link>
-          : undefined
-        }
+    <>
+      <Cab
+        rot={hojePorExtenso()}
+        titulo={`${Dia}, ${fmtLongo(prox)}`}
+        meta={dia ? `${quando[0].toUpperCase()}${quando.slice(1)}. ${cont(r!.total, 'posto', 'postos')} neste culto.` : `${quando[0].toUpperCase()}${quando.slice(1)}. A escala deste culto ainda não foi montada.`}
+        /* "Abrir na escala" só quando o passo abaixo não leva para lá: com
+           "Resolver agora" logo embaixo, eram dois botões para o mesmo lugar */
+        acoes={dia && passo.acao.tipo !== 'link' ? <Link href={linkDoDia} className="es-btn">Abrir na escala</Link> : undefined}
       />
 
-      <Igreja />
-
-      {!!probs.length && (
-        <section className="lid-secao">
-          <div className="lid-secao-cab"><span className="rot">Conferir antes de publicar</span></div>
-          {probs.map((p, i) => (
-            <div key={i} className={`lid-alerta ${p.grau === 'erro' ? 'ruim' : ''}`}>
-              {/* a coluna de 26px de `.lid-alerta-n` existe para NÚMERO alinhar com
-                  número (tabular-nums). Aqui o conteúdo é um sinal de um
-                  caractere, e ele ficava encostado à esquerda de uma caixa
-                  larga: 38px de vão entre o "!" e a frase que ele qualifica. */}
-              <span className="lid-alerta-n sinal" aria-hidden="true">{p.grau === 'erro' ? '!' : '·'}</span>
-              <span>{p.texto}</span>
-            </div>
-          ))}
-        </section>
+      {/* A FAIXA DE NÚMEROS diz o culto em foco de longe. Com a escala por
+          montar, os quatro números seriam zeros enfileirados: a faixa sai e o
+          passo abaixo diz o que fazer. */}
+      {r && (
+        <div className="es-secao">
+          <Kpis n={4}>
+            <Kpi rot="Postos de pé" valor={r.preenchidos} de={r.total}
+              sub={vagas ? `${vagas} sem ninguém` : 'todos com alguém'} tom={vagas ? 'bad' : ''}
+              rotulo={`Postos de pé: ${r.preenchidos} de ${r.total}`} />
+            <Kpi rot="Confirmados" valor={r.confirmados} de={r.preenchidos}
+              sub={r.confirmados === r.preenchidos && r.preenchidos ? 'todos responderam' : 'dos escalados'}
+              tom={r.confirmados ? '' : 'zero'} rotulo={`Confirmados: ${r.confirmados} de ${r.preenchidos}`} />
+            <Kpi rot="Sem resposta" valor={pend} destaque={pend > 0}
+              sub={pend ? 'esperando confirmar' : 'ninguém devendo'} tom={pend ? 'warn' : 'zero'} />
+            <Kpi rot="Não podem" valor={naoPodem}
+              sub={naoPodem ? `${recus ? `${recus} ${pl(recus, 'avisou', 'avisaram')}` : ''}${recus && furos ? ' · ' : ''}${furos ? `${furos} ${pl(furos, 'furou', 'furaram')}` : ''}` : 'ninguém desmarcou'}
+              tom={naoPodem ? 'bad' : 'zero'} />
+          </Kpis>
+        </div>
       )}
 
-      <div className="lid-duas" style={{ marginTop: 'var(--e7)' }}>
-        <div>
+      {/* O PRÓXIMO PASSO: a única caixa com fundo, com a única ação cheia.
+          Urgente (falta gente) pinta o fio e o título de vermelho; redondo
+          pinta de verde; o resto fica neutro. */}
+      <div className={`es-secao es-passo${passo.urg === 'fogo' ? ' es-bad' : passo.urg === 'ok' ? ' es-ok' : ''}`}>
+        <div className="es-passo-txt">
+          <h2 className="es-passo-tit">{passo.titulo}</h2>
+          <p className="es-passo-sub">{passo.sub}</p>
+        </div>
+        <div className="es-passo-acoes">
+          {passo.acao.tipo === 'link' ? <Link href={passo.acao.href} className="es-btn es-pri">{passo.acao.label}</Link>
+            : passo.acao.tipo === 'copiar' ? <button className="es-btn es-pri" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />{passo.acao.label}</button>
+            : <button className="es-btn es-pri" onClick={() => rolarPara('cobrar')}><IcSino />{passo.acao.label}</button>}
+          {passo.sec && <button className="es-btn es-txt" onClick={passo.sec.on}>{passo.sec.label}</button>}
+        </div>
+      </div>
+
+      {!!probs.length && (
+        <Secao titulo="Conferir antes de publicar">
+          {probs.map((p, i) => <Aviso key={i} tom={p.grau === 'erro' ? 'bad' : 'warn'}>{p.texto}</Aviso>)}
+        </Secao>
+      )}
+
+      <div className="es-duas es-secao">
+        <div className="es-pilha">
           {dia && (
-            <>
-              <section>
-                <div className="lid-secao-cab">
-                  <span className="rot">{ehFollow ? 'Follow' : 'Domingo'}, {fmtLongo(prox)}</span>
-                  <span className="lid-secao-nota">{quando}</span>
-                </div>
+            <Secao titulo={`A escala ${ehFollow ? 'do Follow' : 'de domingo'}`}
+              sub="A situação de cada pessoa muda aqui mesmo, no toque.">
+              <div className="es-fila es-colunas" style={{ '--es-cols': 'minmax(0,1fr) minmax(0,1.3fr) 168px' } as React.CSSProperties}>
+                <div className="es-fila-cab" aria-hidden="true"><span>Função</span><span>Pessoa</span><span>Situação</span></div>
                 {funcoesDoDia(S, prox).map(f => {
                   const s = dia.slots[f.nome];
                   const st = (otimista?.f === f.nome ? otimista.st : (s?.status || 'pendente')) as Status;
                   return (
-                    <div className={`lid-linha ${s?.vid ? situacao(st) : 'ruim'}`} key={f.nome}>
-                      <span className="lid-marca" aria-hidden="true" />
-                      <span>
-                        <span className="lid-fn">{f.nome}</span>
+                    <div className="es-item es-pn-posto" key={f.nome}>
+                      <span className="es-c-tit"><b className="es-pn-fn">{f.nome}</b></span>
+                      <span className="es-c-meta">
                         {s?.vid
-                          ? <span className="lid-nome">{nomeDe(S, s.vid)}</span>
-                          : <span className="lid-vazio">precisa de alguém</span>}
+                          ? <span className="es-pn-pessoa">{nomeDe(S, s.vid)}</span>
+                          : <span className="es-pn-pessoa es-pn-vaga">Precisa de alguém</span>}
                       </span>
-                      {/* MESMO CONTROLE DA ESCALA. Eram dois: aqui uma caixa
-                          de formulário, lá uma palavra. Mesma ação, mesmo dado,
-                          duas aparências — o líder pula entre as duas telas o
-                          tempo todo. */}
-                      {s?.vid && (
-                        <Escolha classe="esc-sit" valor={st} desabilitado={salvando === f.nome}
-                          rotulo={`Situação de ${nomeDe(S, s.vid)} em ${f.nome}`}
-                          mostra={SITUACOES.find(x => x.v === st)?.rot || st}
-                          aoMudar={v => marcar(f.nome, v as Status)}>
-                          {SITUACOES.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
-                        </Escolha>
-                      )}
+                      <span className="es-c-acao">
+                        {s?.vid
+                          ? <Escolha forma="pill" tom={tomDoStatus(st)} valor={st} desabilitado={salvando === f.nome}
+                              rotulo={`Situação de ${nomeDe(S, s.vid)} em ${f.nome}`}
+                              mostra={SITUACOES.find(x => x.v === st)?.rot || st}
+                              aoMudar={v => marcar(f.nome, v as Status)}>
+                              {SITUACOES.map(x => <option key={x.v} value={x.v}>{x.rot}</option>)}
+                            </Escolha>
+                          : <Pilula tom="bad">sem ninguém</Pilula>}
+                      </span>
                     </div>
                   );
                 })}
                 {!!dia.plantao?.length && (
-                  <div className="lid-linha">
-                    <span className="lid-marca" aria-hidden="true" />
-                    <span>
-                      <span className="lid-fn">Plantão</span>
-                      <span className="lid-nome" style={{ color: 'var(--cinza)' }}>
-                        {dia.plantao.map(p => nomeDe(S, p)).join(', ')} · entra se alguém furar
-                      </span>
-                    </span>
+                  <div className="es-item es-pn-posto">
+                    <span className="es-c-tit"><b className="es-pn-fn">Plantão</b></span>
+                    <span className="es-c-meta"><span className="es-pn-pessoa">{dia.plantao.map(p => nomeDe(S, p)).join(', ')}</span></span>
+                    <span className="es-c-acao"><Pilula tom="info">entra se alguém faltar</Pilula></span>
                   </div>
                 )}
-              </section>
-
-              {!!pendentes.length && (
-                <section className="lid-secao" id="cobrar" style={{ scrollMarginTop: 90 }}>
-                  <div className="lid-secao-cab">
-                    <span className="rot">{pendentes.length} sem responder</span>
-                    <button className="lid-bt-txt" onClick={() => copiar(
-                      pendentes.map(([, s]) => msgCobranca(S, s.vid!, prox, base)).join('\n\n· · ·\n\n'), aviso,
-                      'Cobranças copiadas. Cole no privado de cada um.')}>Copiar todas</button>
-                  </div>
-                  {pendentes.map(([fn, s]) => {
-                    const v = vol(S, s.vid);
-                    const tel = (v?.tel || '').replace(/\D/g, '');
-                    const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgCobranca(S, s.vid!, prox, base))}` : null;
-                    return (
-                      <div className="lid-linha pend" key={fn}>
-                        <span className="lid-marca" aria-hidden="true" />
-                        <span>
-                          <span className="lid-fn">{fn}</span>
-                          <span className="lid-nome">{v?.nome}</span>
-                        </span>
-                        {zap
-                          ? <a className="lid-bt-txt" href={zap} target="_blank" rel="noopener">Cobrar no WhatsApp</a>
-                          : <button className="lid-bt-txt" onClick={() => copiar(msgCobranca(S, s.vid!, prox, base), aviso, 'Cobrança copiada.')}>Copiar</button>}
-                      </div>
-                    );
-                  })}
-                  <p style={{ margin: '16px 0 0', fontSize: 'var(--t-apoio)', lineHeight: 1.6, color: 'var(--cinza)', maxWidth: '54ch' }}>
-                    O botão abre o WhatsApp da pessoa com a mensagem já digitada. Você só aperta enviar.
-                  </p>
-                </section>
-              )}
-
-              <details className="bloco-extra" style={{ marginTop: 'var(--e6)' }}>
-                <summary>
-                  <span className="cresce">Ver a mensagem que vai para o grupo</span>
-                  <IcSeta className="giro" />
-                </summary>
-                <div className="bloco-extra-corpo">
-                  <pre className="lid-msg">{msgEscala(S, prox)}</pre>
-                </div>
-              </details>
-            </>
+              </div>
+            </Secao>
           )}
+
+          {!!pendentes.length && (
+            <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem responder" n={pendentes.length}
+              sub="O botão abre o WhatsApp da pessoa com a cobrança já escrita. Você só aperta enviar."
+              acoes={
+                <button className="es-btn es-peq" onClick={() => copiar(
+                  pendentes.map(([, s]) => msgCobranca(S, s.vid!, prox, base)).join('\n\n· · ·\n\n'), aviso,
+                  'Cobranças copiadas. Cole no privado de cada um.')}><IcCopiar />Copiar todas</button>
+              }>
+              <div className="es-fila">
+                {pendentes.map(([fn, s]) => {
+                  const v = vol(S, s.vid);
+                  const tel = (v?.tel || '').replace(/\D/g, '');
+                  const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgCobranca(S, s.vid!, prox, base))}` : null;
+                  return (
+                    <div className="es-item" key={fn}>
+                      <span className="es-c-tit"><b>{v?.nome}</b><small>{fn}</small></span>
+                      <span className="es-c-acao">
+                        {zap
+                          ? <a className="es-btn es-peq es-zap" href={zap} target="_blank" rel="noopener"><IcSino />Cobrar no WhatsApp</a>
+                          : <button className="es-btn es-peq" onClick={() => copiar(msgCobranca(S, s.vid!, prox, base), aviso, 'Cobrança copiada.')}><IcCopiar />Copiar</button>}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </Secao>
+          )}
+
+          {dia && (
+            <Dobra titulo="A mensagem que vai para o grupo" nota="como sai no WhatsApp">
+              <pre className="es-msg">{msgEscala(S, prox)}</pre>
+              <div className="es-linha" style={{ marginTop: 12 }}>
+                <button className="es-btn es-peq" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />Copiar a mensagem</button>
+              </div>
+            </Dobra>
+          )}
+
+          <Igreja />
         </div>
 
-        <div>
-          <section>
-            <div className="lid-secao-cab"><span className="rot">Depois disso</span></div>
-            {/* DUAS LÍNGUAS PARA A MESMA COISA, NA MESMA TELA. 05/09/2026.
-                Este bloco dizia "2/5" e o bloco da igreja, seis centímetros
-                acima, dizia "9 de 9". Um é fração, o outro é frase, e nem
-                sequer contavam a mesma coisa: "2/5" era confirmados sobre
-                preenchidos, "9 de 9" é preenchidos sobre postos. O líder que
-                lê os dois no mesmo scroll tem que descobrir isso sozinho.
-
-                Agora os dois blocos têm a mesma forma: o VEREDITO em cima, ao
-                lado do nome, com o mesmo vocabulário de leitura() ("sem
-                ninguém", "não pode", "sem responder", "coberto"); e os
-                NÚMEROS embaixo, na linha larga, sempre preenchidos de postos.
-                Nenhuma informação a menos, uma língua só. */}
-            {seguintes.map(d => {
-              const rr = S.escalas[d] ? resumoDia(S, d) : null;
-              const cls = !rr ? '' : rr.situacao === 'ok' ? 'ok' : rr.situacao === 'atencao' ? 'pend' : 'ruim';
-              const est = !rr ? 'não montada'
-                : rr.vagas.length ? `${rr.vagas.length} sem ninguém`
-                : rr.furos ? `${rr.furos} ${pl(rr.furos, 'furou', 'furaram')}`
-                : rr.recusados ? `${rr.recusados} ${pl(rr.recusados, 'não pode', 'não podem')}`
-                : rr.pendentes ? `${rr.pendentes} sem responder`
-                : 'coberto';
-              return (
-                <Link href={`/escala?m=${d.slice(0, 7)}#d${d}`} key={d} className={`lid-area ${cls}`}>
-                  <span className="lid-marca" aria-hidden="true" />
-                  <span className="lid-area-nome">
-                    {tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'domingo'} {fmtDia(d)}
-                  </span>
-                  <span className="lid-area-est">{est}</span>
-                  {rr && <span className="lid-area-sub">{rr.preenchidos} de {rr.total}</span>}
-                </Link>
-              );
-            })}
-          </section>
-
+        <div className="es-pilha">
           <Pendencias />
+
+          <Secao titulo="Depois disso">
+            <div className="es-fila">
+              {seguintes.map(d => {
+                const rr = S.escalas[d] && Object.values(S.escalas[d].slots || {}).some((x: any) => x?.vid) ? resumoDia(S, d) : null;
+                const l = rr ? leituraDoDia({ vagas: rr.vagas.length, furos: rr.furos, recusados: rr.recusados, pendentes: rr.pendentes }) : null;
+                return (
+                  <Link href={`/escala?m=${d.slice(0, 7)}#d${d}`} key={d} className="es-item">
+                    <span className="es-c-tit">
+                      <b>{tipoDoDia(d) === 'follow' ? 'Follow, sábado' : 'Domingo'} {fmtDia(d)}</b>
+                      <small>{rr ? `${rr.preenchidos} de ${rr.total} postos` : 'escala por montar'}</small>
+                    </span>
+                    <span className="es-c-acao">
+                      {l ? <Pilula tom={l.tom}>{l.txt}</Pilula> : <Pilula>não montada</Pilula>}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </Secao>
+
           <CincoRegras />
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -72,16 +72,21 @@ function fechar(v: boolean) {
 
 function montar(): HTMLDialogElement {
   const d = document.createElement('dialog');
-  d.className = 'dlg';
+  /* 30/09/2026 · A ROUPA DAS ESCALAS NOVAS. As telas do líder passaram a
+     morar em `.es` (components/escalas/escalas.css), e os resets de lá
+     desmontariam as classes antigas (`.dlg`, `.btn`), como aconteceu com o
+     Demandas em 23/09. O comportamento é o mesmo; as classes são as de lá, e
+     o desistir passou a "Voltar", como no Demandas: a mesma palavra para o
+     mesmo gesto nos dois sistemas. */
+  d.className = 'es-dialogo';
   d.innerHTML = `
-    <form method="dialog" class="dlg-corpo">
-      <span class="rot dlg-rot"></span>
-      <h2 class="dlg-titulo"></h2>
-      <p class="dlg-texto"></p>
-      <p class="dlg-sem-volta">Não dá para desfazer.</p>
-      <div class="dlg-btns">
-        <button type="button" class="btn" data-nao autofocus>Cancelar</button>
-        <button type="button" class="btn pri" data-sim>Confirmar</button>
+    <form method="dialog" class="es-dialogo-corpo">
+      <h2 class="es-dialogo-titulo"></h2>
+      <p class="es-dialogo-texto"></p>
+      <p class="es-dialogo-sem-volta">Não dá para desfazer.</p>
+      <div class="es-dialogo-btns">
+        <button type="button" class="es-btn" data-nao autofocus>Voltar</button>
+        <button type="button" class="es-btn es-pri" data-sim>Confirmar</button>
       </div>
     </form>`;
 
@@ -93,20 +98,12 @@ function montar(): HTMLDialogElement {
   d.addEventListener('cancel', e => { e.preventDefault(); fechar(false); });
 
   /* clique no ::backdrop chega como clique no próprio <dialog> (o miolo é o
-     .dlg-corpo). Fora = cancelar, igual ao Escape. */
+     .es-dialogo-corpo). Fora = voltar, igual ao Escape. */
   d.addEventListener('click', e => { if (e.target === d) fechar(false); });
 
-  /* O DIÁLOGO NASCIA FORA DA CASCA DO SISTEMA DE DEMANDAS.
-
-     `document.body` fica fora do `<div className="dm">`, então o diálogo
-     herdava `globals.css` — o do outro sistema. Medido: corpo 17px contra
-     16px, botão 45px de altura contra 44, e duas variáveis de raio
-     diferentes. Duas escalas tipográficas na mesma tela.
-
-     O COMPORTAMENTO dele está certo e fica: `showModal()` dá prisão de foco,
-     Escape e `inert` de graça, e o foco nasce no "Cancelar". Só a roupa era
-     de outra casa. */
-    (document.querySelector('.dm') ?? document.body).appendChild(d);
+  /* O diálogo nasce DENTRO da casca (`.es`), onde moram os tokens e as
+     classes dele. Em `document.body` ele ficaria sem roupa nenhuma. */
+  (document.querySelector('.es') ?? document.body).appendChild(d);
   return d;
 }
 
@@ -124,10 +121,10 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
   /* REANCORAR A CADA CHAMADA — 21/09/2026.
 
      `caixa` é de módulo: ela nasce uma vez e vive enquanto a aba viver. Desde
-     que o diálogo passou a ser pendurado em `.dm`, isso virou um defeito: o
-     `<div className="dm">` é renderizado POR PÁGINA (cada tela de demandas
-     chama `<Casca>`, o `layout.tsx` só repassa), então toda navegação entre
-     telas destrói o nó que segura o diálogo. Medido no Chromium:
+     que o diálogo passou a ser pendurado na casca (`.dm` em 21/09, `.es` em
+     30/09), isso virou um defeito: a casca é renderizada POR PÁGINA (cada
+     tela do líder chama `<Shell>`), então toda navegação entre telas destrói
+     o nó que segura o diálogo. Medido no Chromium, no Demandas:
 
        dialogoAindaConectado: false
        depoisDeDesmontar: "InvalidStateError: Failed to execute 'showModal'
@@ -138,21 +135,21 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
      para sempre, sem mensagem nenhuma.
 
      `appendChild` de um nó que já existe MOVE, não duplica: reancorar é uma
-     linha e cobre também o caminho de ir de uma tela das escalas para uma de
-     demandas e voltar. */
-  const pai = document.querySelector('.dm') ?? document.body;
+     linha e cobre também o caminho de ir do Painel para a Escala e voltar. */
+  const pai = document.querySelector('.es') ?? document.body;
   if (d.parentNode !== pai) pai.appendChild(d);
 
-  d.classList.toggle('perigo', !!c.perigo);
-  d.querySelector('.dlg-rot')!.textContent = c.perigo ? 'Isto apaga' : 'Confirmar';
-  d.querySelector('.dlg-titulo')!.textContent = c.titulo;
+  d.querySelector('.es-dialogo-titulo')!.textContent = c.titulo;
 
-  const txt = d.querySelector<HTMLParagraphElement>('.dlg-texto')!;
+  const txt = d.querySelector<HTMLParagraphElement>('.es-dialogo-texto')!;
   txt.textContent = c.texto || '';
   txt.hidden = !c.texto;
 
-  d.querySelector<HTMLParagraphElement>('.dlg-sem-volta')!.hidden = !c.perigo;
-  d.querySelector('[data-sim]')!.textContent = c.acao || 'Confirmar';
+  d.querySelector<HTMLParagraphElement>('.es-dialogo-sem-volta')!.hidden = !c.perigo;
+  const sim = d.querySelector<HTMLButtonElement>('[data-sim]')!;
+  sim.textContent = c.acao || 'Confirmar';
+  /* o que apaga fica vermelho; o resto, a ação cheia de sempre */
+  sim.classList.toggle('es-perigo', !!c.perigo);
 
   return new Promise<boolean>(res => {
     resolver = res;

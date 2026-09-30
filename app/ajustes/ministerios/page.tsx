@@ -1,12 +1,13 @@
 'use client';
-import { Faixa } from '@/components/Faixa';
 import Shell, { useApp } from '@/components/Shell';
 import Link from 'next/link';
 import { useState } from 'react';
 import { atualizarEquipe, criarEquipe, removerEquipe } from '@/lib/equipes';
 import { aviseHumano } from '@/lib/erros';
-import { Aviso } from '@/components/Ui';
+import { Cab, Aviso, Secao, Pilula } from '@/components/escalas/Pecas';
+import { IcSeta } from '@/components/Icones';
 import { confirmar } from '@/lib/confirmar';
+import { cont } from '@/lib/plural';
 
 /* =============================================================================
    /ajustes/ministerios — O QUE VALE PARA A CASA INTEIRA
@@ -79,90 +80,89 @@ function Ministerios() {
   }
 
   return (
-    <div className="lid">
-      <Faixa
-        titulo="A casa inteira"
-        sub="Esta é a única página que alcança os outros ministérios. Cada um tem time, funções e escala próprios, e a escala automática do dia 26 monta todos."
-        placar={{ n: equipes.length, rot: equipes.length === 1 ? 'ministério' : 'ministérios' }}
-      />
+    <>
+      <Cab rot="Ajustes" titulo="Ministérios da igreja"
+        meta="Esta é a única página que alcança os outros ministérios. Cada um tem time, funções e escala próprios, e a escala automática do dia 26 monta todos." />
 
-      {/* O AVISO VEM ANTES DA LISTA. Depois dela seria post-mortem. */}
-      <div style={{ marginTop: 'var(--e5)' }}>
-        <Aviso tom="atencao">
-          Apagar um ministério leva junto <strong>o time, as funções e todas as escalas</strong> dele,
+      <div className="es-aj-coluna">
+        {/* O AVISO VEM ANTES DA LISTA. Depois dela seria post-mortem. */}
+        <Aviso tom="warn">
+          Apagar um ministério leva junto <b>o time, as funções e todas as escalas</b> dele,
           e não dá para desfazer. Para só parar de usar um, tire as funções dele em Ajustes. Os
           dados continuam lá.
         </Aviso>
-      </div>
 
-      <section className="lid-secao">
-        <div className="lid-secao-cab">
-          <span className="rot">Os ministérios da igreja</span>
-          <span className="lid-secao-nota">O nome salva ao sair do campo</span>
-        </div>
-        {/* MESMA LINHA DO /ajustes E DO /time: fechada diz o nome e o estado;
-            aberta mostra renomear e apagar. "Abrir" (trocar de ministério) é a
-            ação que a pessoa mais usa aqui e fica visível na linha fechada; o
-            "apagar" de um ministério inteiro — que leva time, funções e
-            escalas — deixa de ser um link permanente a 80px do dedo.
+        <Secao titulo={cont(equipes.length, 'ministério', 'ministérios')}>
+          {/* MESMA LINHA DO /ajustes E DO /time: fechada diz o nome e o estado;
+              aberta mostra renomear e apagar. "Abrir" (trocar de ministério) é a
+              ação que a pessoa mais usa aqui e fica visível na linha fechada; o
+              "apagar" de um ministério inteiro — que leva time, funções e
+              escalas — deixa de ser um link permanente a 80px do dedo.
 
-            08/09: não é <details>. Botão dentro de <summary> é interativo
-            aninhado em interativo (o axe acusou, e leitor de tela anuncia os
-            dois como um só). O nome é um botão que abre/fecha (aria-expanded);
-            "Abrir" é irmão dele na mesma linha, não filho. */}
-        <div className="ajt-lista">
-          {equipes.map(e => {
-            const estaAberto = aberto === e.id;
-            return (
-              <div className="ajt-item" key={e.id}>
-                <div className="ajt-item-cab">
-                  <button type="button" className="ajt-toggle" aria-expanded={estaAberto} aria-controls={`min-${e.id}`}
-                    onClick={() => setAberto(a => (a === e.id ? null : e.id))}>
-                    <span className="ajt-nome estatico">{e.nome}</span>
-                  </button>
-                  <span className="ajt-quando-rot">
-                    {e.id === equipe?.id
-                      ? 'aberto agora'
-                      : <button type="button" className="lid-bt-txt" onClick={() => trocarEquipe(e.id)}>Abrir</button>}
-                  </span>
-                </div>
-                {estaAberto && (
-                  <div className="ajt-corpo" id={`min-${e.id}`}>
-                    <label className="ajt-campo">
-                      <span className="ajt-rot">Nome</span>
-                      <input enterKeyHint="done" key={e.nome} defaultValue={e.nome}
-                        aria-label={`nome do ministério ${e.nome}`}
-                        onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
-                    </label>
-                    <div className="ajt-acoes">
-                      <button className="lid-bt-txt perigo" aria-label={`apagar ${e.nome}`}
-                        disabled={equipes.length < 2}
-                        onClick={() => void apagar(e.id, e.nome)}>Apagar este ministério</button>
-                    </div>
+              08/09: não é <details>. Botão dentro de <summary> é interativo
+              aninhado em interativo (o axe acusou, e leitor de tela anuncia os
+              dois como um só). Quem abre e fecha é o botão "Editar"
+              (aria-expanded); "Abrir" é irmão dele na mesma linha, não filho. */}
+          <div className="es-fila">
+            {equipes.map(e => {
+              const estaAberto = aberto === e.id;
+              return (
+                <div className={estaAberto ? 'es-aj-min es-aj-aberta' : 'es-aj-min'} key={e.id}>
+                  <div className="es-item es-so-tit">
+                    <span className="es-c-tit"><b>{e.nome}</b></span>
+                    <span className="es-c-acao">
+                      {e.id === equipe?.id
+                        ? <Pilula>aberto agora</Pilula>
+                        : <button type="button" className="es-btn es-peq" onClick={() => trocarEquipe(e.id)}>Abrir</button>}
+                      <button type="button" className="es-btn es-txt es-peq" aria-expanded={estaAberto} aria-controls={`min-${e.id}`}
+                        aria-label={`Editar ${e.nome}`}
+                        onClick={() => setAberto(a => (a === e.id ? null : e.id))}>
+                        Editar<IcSeta />
+                      </button>
+                    </span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </section>
+                  {estaAberto && (
+                    <div className="es-aj-min-corpo" id={`min-${e.id}`}>
+                      <label className="es-campo">
+                        <span>Nome</span>
+                        <input className="es-ctl" enterKeyHint="done" key={e.nome} defaultValue={e.nome}
+                          aria-label={`nome do ministério ${e.nome}`}
+                          onBlur={ev => void renomear(e.id, e.nome, ev.target.value)} />
+                        <small>O nome salva ao sair do campo.</small>
+                      </label>
+                      <div className="es-linha es-aj-acoes">
+                        <button className="es-btn es-txt es-peq es-perigo" aria-label={`apagar ${e.nome}`}
+                          disabled={equipes.length < 2}
+                          onClick={() => void apagar(e.id, e.nome)}>Apagar este ministério</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Secao>
 
-      <section className="lid-secao">
-        <div className="lid-secao-cab"><span className="rot">Abrir um novo</span></div>
-        <p className="dim pequeno">
-          O ministério nasce vazio: depois dele vêm as funções e o time, nessa ordem.
-        </p>
-        <div className="ajt-novo">
-          <input enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)}
-            aria-label="nome do novo ministério"
-            placeholder="novo ministério (ex: Louvor)" />
-          <button disabled={gravando || !nova.trim()} onClick={() => void criar()}>Criar ministério</button>
-        </div>
-      </section>
+        <section className="es-caixa">
+          <div className="es-caixa-cab"><h3>Abrir um novo</h3></div>
+          <div className="es-caixa-corpo es-aj-pilha">
+            <p className="es-prosa">
+              O ministério nasce vazio: depois dele vêm as funções e o time, nessa ordem.
+            </p>
+            <label className="es-campo">
+              <span>Nome do novo ministério</span>
+              <input className="es-ctl" enterKeyHint="done" value={nova} onChange={e => setNova(e.target.value)}
+                aria-label="nome do novo ministério"
+                placeholder="ex: Louvor" />
+            </label>
+          </div>
+          <div className="es-caixa-pe">
+            <button className="es-btn es-pri" disabled={gravando || !nova.trim()} onClick={() => void criar()}>Criar ministério</button>
+          </div>
+        </section>
 
-      <p className="lid-pe">
-        <Link href="/ajustes">‹ Voltar aos ajustes de {equipe?.nome}</Link>
-      </p>
-    </div>
+        <Link href="/ajustes" className="es-btn es-txt es-aj-volta"><IcSeta dir="e" />Voltar aos ajustes de {equipe?.nome}</Link>
+      </div>
+    </>
   );
 }

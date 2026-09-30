@@ -43,7 +43,7 @@ try {
     `documento ${m.larguraDoc}px`);
 
   await pag.goto(`${BASE}/escala?demo=1`, { waitUntil: 'domcontentloaded' });
-  await pag.waitForSelector('.sistema', { timeout: 10000 });
+  await pag.waitForSelector('.es-casca', { timeout: 10000 });
   await pag.waitForTimeout(1600);
   m = await medir(pag, 390);
   ok(m.teclado.length === 0,
@@ -93,7 +93,7 @@ try {
     },
     {
       por: 'campo que dá zoom no iOS',
-      css: '.g-pe-cols input, .lid-cand-nota, input{ font-size:13px!important }',
+      css: '.g-pe-cols input, .es .es-ctl, input{ font-size:13px!important }',
       balde: 'zoomIos', rota: '/escala?demo=1',
     },
     {

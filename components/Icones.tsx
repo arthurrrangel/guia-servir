@@ -77,3 +77,13 @@ export const IcEstrela = ({ className, cheia }: P & { cheia?: boolean }) => (
 export const IcBusca = ({ className }: P) => (
   <svg {...base} className={className}><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg>
 );
+
+/* 30/09/2026 · a casca das escalas. Entradas tinha o mesmo ícone do Time (as
+   duas pessoas), e na barra de baixo do celular as duas abas eram o mesmo
+   desenho lado a lado. Entrada é alguém chegando: a pessoa com o "+". */
+export const IcEntrada = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="10" cy="8.5" r="3.4"/><path d="M3.6 19.5c.9-3.1 3.4-4.8 6.4-4.8 1.3 0 2.5.3 3.5.9"/><path d="M18 13.5v6M15 16.5h6"/></svg>
+);
+export const IcPessoa = ({ className }: P) => (
+  <svg {...base} className={className}><circle cx="12" cy="8.5" r="3.6"/><path d="M5 19.5c1-3.3 3.7-5 7-5s6 1.7 7 5"/></svg>
+);
