@@ -142,11 +142,12 @@ const nextConfig = {
       ...ROTAS_FECHADAS.map(source => ({ source, headers: [NAO_INDEXAR] })),
       { source: '/eu', headers: [NAO_INDEXAR] },
       { source: '/eu/:caminho+', headers: [NAO_INDEXAR_NUNCA] },
-      /* Follow Camp 2027: fora da busca enquanto a página tiver campos a
-         confirmar (valor, local, link da ficha). Sai daqui junto com a meta
-         `robots` de public/followcamp/index.html no dia em que ficar completa. */
-      { source: '/followcamp', headers: [NAO_INDEXAR] },
-      { source: '/followcamp/:caminho*', headers: [NAO_INDEXAR] },
+      /* Follow Camp 2027 (30/09/2026): a página entrou na busca, mas as fotos
+         do retiro de 2026 não. São campistas, muitos menores de idade, e foto
+         solta no Google Imagens perde o contexto da página. O cabeçalho vai no
+         próprio arquivo, e não só na página, porque a imagem pode ser achada
+         por outro caminho que não a /followcamp. */
+      { source: '/followcamp/a/:arquivo(fc26-.*)', headers: [NAO_INDEXAR] },
     ];
   },
   /* FOLLOW CAMP 2027 · 29/09/2026

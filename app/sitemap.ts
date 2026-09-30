@@ -35,6 +35,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/sobre`, changeFrequency: 'yearly', priority: 0.7 },
     { url: `${SITE}/pequena-guia`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE}/servir`, changeFrequency: 'weekly', priority: 0.8 },
+    /* Follow Camp 2027: página de evento, com prazo. Sai daqui depois de
+       10/02/2027, quando o retiro acabar, para o sitemap não prometer um
+       evento que já passou. */
+    { url: `${SITE}/followcamp`, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${SITE}/acessar`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE}/privacidade`, changeFrequency: 'yearly', priority: 0.2 },
   ];

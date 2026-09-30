@@ -4,9 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Follow Camp 2027 · Eu me Rendo</title>
-<meta name="description" content="Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval. Cinco noites longe da rotina, no meio da natureza. Tema: Eu me Rendo.">
-<!-- Fora da busca enquanto houver campos a confirmar. Tirar esta linha e o cabeçalho em next.config.mjs quando a página estiver completa. -->
-<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval. Cinco noites no Espaço Bethel, em Barra de Guaratiba (RJ). Tema: Eu me Rendo.">
 <meta name="theme-color" content="#4F2B18">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/apple-icon.png">
@@ -15,13 +13,14 @@
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="GUIA Church">
 <meta property="og:title" content="Follow Camp 2027 · Eu me Rendo">
-<meta property="og:description" content="Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval. Cinco noites longe da rotina, no meio da natureza. Tema: Eu me Rendo.">
+<meta property="og:description" content="Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval. Cinco noites no Espaço Bethel, em Barra de Guaratiba (RJ). Tema: Eu me Rendo.">
 <meta property="og:url" content="https://guiaservir.com/followcamp">
 <meta property="og:image" content="https://guiaservir.com/followcamp/a/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Follow Camp 2027, Eu me Rendo, 05 a 10 de fevereiro de 2027">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Event","name":"Follow Camp 2027 · Eu me Rendo","description":"Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval. Cinco noites no Espaço Bethel, em Barra de Guaratiba (RJ). Tema: Eu me Rendo.","startDate":"2027-02-05T19:00:00-03:00","endDate":"2027-02-10T10:00:00-03:00","eventStatus":"https://schema.org/EventScheduled","eventAttendanceMode":"https://schema.org/OfflineEventAttendanceMode","typicalAgeRange":"13-24","image":["https://guiaservir.com/followcamp/a/og.jpg"],"location":{"@type":"Place","name":"Espaço Bethel","address":{"@type":"PostalAddress","streetAddress":"Estrada Roberto Burle Marx, 1245","addressLocality":"Rio de Janeiro","addressRegion":"RJ","postalCode":"23020-255","addressCountry":"BR"}},"organizer":{"@type":"Organization","name":"GUIA Church","url":"https://guiaservir.com"},"offers":{"@type":"Offer","name":"1º lote","price":"697","priceCurrency":"BRL","availability":"https://schema.org/InStock","validThrough":"2026-11-03T23:59:59-03:00","url":"https://guiaservir.com/followcamp"}}</script>
 <link rel="preload" href="/followcamp/a/poppins-900.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/followcamp/a/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/followcamp/a/logo.webp" as="image" type="image/webp">
@@ -44,7 +43,6 @@
   --papel:#FFF6EE; --cartao:#FFFFFF; --tinta:#2A140B; --tinta-2:#6A4636;
   --rubi:#C01800; --linha:rgba(79,43,24,.16); --contorno:#4F2B18; --sombra:rgba(42,20,11,.30);
   --topo-bg:rgba(255,246,238,.9);
-  --pend-txt:#B01600; --pend-borda:#F32402; --pend-bg:rgba(243,36,2,.07);
   --f-display:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --f-texto:"Poppins",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
   --f-pixel:"Silkscreen","Courier New",ui-monospace,monospace;
@@ -58,7 +56,6 @@
     --papel:#160B06; --cartao:#22130B; --tinta:#FFF1E7; --tinta-2:#D2B3A2;
     --rubi:#FF6A45; --linha:rgba(255,241,231,.14); --contorno:#8A5A42; --sombra:rgba(0,0,0,.6);
     --topo-bg:rgba(22,11,6,.88);
-    --pend-txt:#FECB13; --pend-borda:#FECB13; --pend-bg:rgba(254,203,19,.08);
     color-scheme:dark;
   }
 }
@@ -66,7 +63,6 @@
   --papel:#160B06; --cartao:#22130B; --tinta:#FFF1E7; --tinta-2:#D2B3A2;
   --rubi:#FF6A45; --linha:rgba(255,241,231,.14); --contorno:#8A5A42; --sombra:rgba(0,0,0,.6);
   --topo-bg:rgba(22,11,6,.88);
-  --pend-txt:#FECB13; --pend-borda:#FECB13; --pend-bg:rgba(254,203,19,.08);
   color-scheme:dark;
 }
 :root{
@@ -91,10 +87,6 @@ section[id]{scroll-margin-top:84px}
 /* Pular para o conteúdo */
 .pular{position:absolute;left:-9999px;top:8px;z-index:100;background:var(--cartao);color:var(--tinta);padding:10px 14px;border-radius:10px;border:2px solid var(--contorno);font-weight:700;text-decoration:none}
 .pular:focus{left:16px}
-
-/* Aviso de prévia */
-.aviso{background:var(--cacau);color:#FFF6EE;font:500 .8rem/1.45 var(--f-texto);text-align:center;padding:9px var(--gutter)}
-.aviso b{font:400 .7rem/1 var(--f-pixel);background:var(--sol);color:#1a0d06;padding:.35em .55em .3em;border-radius:4px;margin-right:.55em;letter-spacing:.04em;vertical-align:1px}
 
 /* Topo */
 .topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--topo-bg);-webkit-backdrop-filter:saturate(1.3) blur(12px);backdrop-filter:saturate(1.3) blur(12px);border-bottom:2px solid var(--linha)}
@@ -132,11 +124,6 @@ section[id]{scroll-margin-top:84px}
 .bolha::before,.bolha::after{content:"";position:absolute;left:14px;width:0;height:0;border-style:solid}
 .bolha::before{bottom:-11px;border-width:11px 11px 0 0;border-color:#140a05 transparent transparent transparent}
 .bolha::after{bottom:-7px;left:16px;border-width:8px 7px 0 0;border-color:var(--branco) transparent transparent transparent}
-
-/* Campo pendente */
-.pend{display:inline-block;font:700 .8em/1.35 var(--f-texto);letter-spacing:.02em;color:var(--pend-txt);background:var(--pend-bg);border:1.5px dashed var(--pend-borda);border-radius:7px;padding:.12em .5em;vertical-align:.05em;overflow-wrap:anywhere}
-.no-escuro .pend{color:#FFE27A;border-color:#FECB13;background:rgba(20,8,2,.22)}
-.no-escuro .painel .pend{color:var(--pend-txt);border-color:var(--pend-borda);background:var(--pend-bg)}
 
 /* Faixas de espiral */
 .faixa{position:relative;overflow:hidden;isolation:isolate;color:var(--branco)}
@@ -194,8 +181,6 @@ section[id]{scroll-margin-top:84px}
 .abertura .lead{max-width:56ch;color:var(--tinta)}
 .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:6px 0 0;padding:0;list-style:none}
 .chips li{display:inline-flex;align-items:center;gap:.5em;min-height:40px;padding:0 1em;border-radius:999px;border:2px solid var(--linha);background:var(--cartao);font:600 .9rem/1.2 var(--f-texto)}
-.chips li .pend{font-size:.82rem}
-.chips li:has(.pend){border-color:transparent;background:transparent;padding:0}
 
 /* Diagnóstico */
 .diagnostico{border-top:2px solid var(--linha)}
@@ -232,9 +217,6 @@ section[id]{scroll-margin-top:84px}
 .foto{margin:0;background:var(--branco);padding:7px;border-radius:16px;box-shadow:0 16px 30px -18px var(--sombra),0 0 0 1px rgba(79,43,24,.08);rotate:var(--r,0deg);transition:rotate .35s ease,scale .35s ease}
 .foto img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}
 .foto:hover{rotate:0deg;scale:1.03}
-.legenda{margin-top:22px;text-align:center;font:600 .82rem/1.4 var(--f-texto);color:var(--tinta-2)}
-.depo{margin:40px auto 0;max-width:760px;background:var(--cartao);border:2px dashed var(--pend-borda);border-radius:var(--raio);padding:26px 22px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
-.depo .aspas{font:900 3.2rem/0.6 var(--f-display);color:var(--fogo);height:.5em}
 
 /* Pais */
 .pais{background:var(--cartao);border-top:2px solid var(--linha);border-bottom:2px solid var(--linha)}
@@ -250,7 +232,7 @@ section[id]{scroll-margin-top:84px}
 .inscricao .h2{color:var(--branco)}
 .painel{background:var(--cartao);color:var(--tinta);border:3px solid var(--cacau);border-radius:28px;box-shadow:0 8px 0 var(--cacau);padding:26px 22px;min-width:0}
 .info{margin-top:44px;display:grid;grid-template-columns:1fr;gap:0}
-@media (min-width:880px){.info{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:880px){.info{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .info>div{padding:16px 6px;border-bottom:2px solid var(--linha);display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center}
 .info>div:last-child{border-bottom:0}
 @media (min-width:880px){.info>div{border-bottom:0;border-right:2px solid var(--linha);padding:6px 20px;align-items:flex-start;text-align:left}.info>div:last-child{border-right:0}}
@@ -265,14 +247,25 @@ section[id]{scroll-margin-top:84px}
 .passos p{color:rgba(255,255,255,.9)}
 .passos .extra{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .preco{display:flex;flex-direction:column;gap:14px;align-items:center;text-align:center}
-.preco .valor{font:900 clamp(1.3rem,4vw,1.7rem)/1.2 var(--f-display)}
-.preco .valor .pend{font-size:.72em}
+.preco .valor{font:900 clamp(2.5rem,8vw,3.3rem)/1 var(--f-display);letter-spacing:-.02em;margin-top:4px}
 .preco .por{font:600 .88rem/1 var(--f-texto);color:var(--tinta-2);margin-top:-6px}
 .preco .nota{font-size:.92rem;color:var(--tinta-2)}
 .preco .apoio{background:var(--papel);border-radius:16px;padding:14px 16px;font-size:.95rem;width:100%}
 .preco .apoio b{color:var(--tinta)}
-.toast{font:600 .88rem/1.4 var(--f-texto);color:var(--tinta);background:var(--papel);border:2px dashed var(--pend-borda);border-radius:12px;padding:10px 14px}
-.passos .toast{color:#1d0e06;background:#FFF1C2;border-color:#FECB13}
+.preco .lote{font:700 .84rem/1 var(--f-texto);letter-spacing:.01em;background:var(--sol);color:#1d0e06;padding:.6em 1em;border-radius:999px}
+.sub-rotulo{font:700 .76rem/1.3 var(--f-texto);letter-spacing:.12em;text-transform:uppercase;color:var(--rubi);margin-bottom:12px}
+.inclui-bloco{width:100%;text-align:left;border-top:2px solid var(--linha);padding-top:18px;margin-top:4px}
+.inclui{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.inclui li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:10px;align-items:start;font-size:.95rem;line-height:1.45}
+.inclui li::before{content:"";width:20px;height:20px;border-radius:50%;margin-top:.1em;background:var(--brasa) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.6 6.3l2.2 2.2 4.6-4.9' fill='none' stroke='%23fff' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/12px no-repeat}
+.condicoes{width:100%;margin:0;border-top:2px solid var(--linha);padding-top:16px;display:grid;gap:10px;text-align:left}
+.condicoes div{display:grid;grid-template-columns:108px minmax(0,1fr);gap:12px;align-items:baseline}
+.condicoes dt{font:700 .86rem/1.4 var(--f-texto);color:var(--tinta)}
+.condicoes dd{margin:0;font-size:.93rem;line-height:1.45;color:var(--tinta-2)}
+.nota-ficha{margin-top:10px;font-size:.88rem;line-height:1.5;color:rgba(255,255,255,.88)}
+.mapa{display:inline-block;font:700 .9rem/1.2 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;padding:6px 0}
+.zap{font-weight:700;white-space:nowrap;color:inherit;text-decoration:underline;text-decoration-color:var(--fogo);text-decoration-thickness:2px;text-underline-offset:3px}
+.final .zap{text-decoration-color:rgba(255,255,255,.75)}
 
 /* Dúvidas */
 .faq{max-width:780px;margin:40px auto 0;display:grid;gap:12px}
@@ -351,8 +344,6 @@ section[id]{scroll-margin-top:84px}
 
 <a class="pular" href="#conteudo">Pular para o conteúdo</a>
 
-<div class="aviso" role="note"><b>PRÉVIA</b>Página para aprovação. Os campos tracejados ainda precisam ser preenchidos.</div>
-
 <header class="topo">
   <div class="cont">
     <a class="logo-link" href="#inicio" aria-label="Follow Camp 2027, voltar ao início"></a>
@@ -424,7 +415,7 @@ section[id]{scroll-margin-top:84px}
       <ul class="chips" aria-label="Resumo do retiro">
         <li>13 a 24 anos</li>
         <li>5 noites no Carnaval</li>
-        <li><span class="pend">[NOME DO LOCAL]</span></li>
+        <li>Espaço Bethel · Barra de Guaratiba</li>
       </ul>
     </div>
   </section>
@@ -508,7 +499,7 @@ section[id]{scroll-margin-top:84px}
       <div class="cabeca">
         <p class="bolha">TBT</p>
         <h2 class="h2" id="t-2026">Como foi o Follow Camp 2026</h2>
-        <p class="lead">Em 2026, <span class="pend">[Nº DE CAMPISTAS]</span> jovens viveram o Follow Camp. As fotos são de lá.</p>
+        <p class="lead">Um pouco do que rolou no último retiro.</p>
       </div>
       <ul class="galeria" id="galeria">
         <li><figure class="foto" style="--r:-3deg;--i:0"><img src="/followcamp/a/fc26-sitio.webp" loading="lazy" decoding="async" width="640" height="800" alt="Vista do sítio do Follow Camp 2026, com piscina e brinquedo inflável entre as árvores"></figure></li>
@@ -518,11 +509,6 @@ section[id]{scroll-margin-top:84px}
         <li><figure class="foto" style="--r:-2.5deg;--i:4"><img src="/followcamp/a/fc26-adoracao.webp" loading="lazy" decoding="async" width="720" height="900" alt="Campistas em adoração, em preto e branco"></figure></li>
         <li><figure class="foto" style="--r:1.5deg;--i:5"><img src="/followcamp/a/fc26-campista.webp" loading="lazy" decoding="async" width="720" height="900" alt="Campista de olhos fechados durante a adoração"></figure></li>
       </ul>
-      <p class="legenda">Fotos do Follow Camp 2026.</p>
-      <div class="depo">
-        <span class="aspas" aria-hidden="true">“</span>
-        <span class="pend">[2 OU 3 DEPOIMENTOS REAIS DE CAMPISTAS DE 2026, COM NOME E IDADE]</span>
-      </div>
     </div>
   </section>
 
@@ -535,11 +521,11 @@ section[id]{scroll-margin-top:84px}
       </div>
       <dl class="lista">
         <div class="linha"><dt>Quem organiza</dt><dd><p>O Follow, ministério de jovens da GUIA Church, na Barra da Tijuca.</p></dd></div>
-        <div class="linha"><dt>Quem acompanha</dt><dd><p>Líderes do Follow, em grupos pequenos. Cada campista tem um líder que sabe o nome dele.</p><span class="pend">[NOMES DOS RESPONSÁVEIS E Nº DE LÍDERES POR GRUPO]</span></dd></div>
-        <div class="linha"><dt>Onde dormem</dt><dd><p>As atividades são organizadas por faixa etária.</p><span class="pend">[CONFIRMAR: DORMITÓRIOS SEPARADOS POR GÊNERO E FAIXA ETÁRIA]</span></dd></div>
-        <div class="linha"><dt>Saúde</dt><dd><p>Restrição alimentar vai na ficha cadastral, e a cozinha se organiza.</p><span class="pend">[CONFIRMAR: QUEM RESPONDE POR SAÚDE E EMERGÊNCIA NO LOCAL]</span></dd></div>
-        <div class="linha"><dt>Durante o retiro</dt><dd><p>Contato da coordenação para os pais:</p><span class="pend">[CONTATO DA COORDENAÇÃO DURANTE O RETIRO]</span></dd></div>
-        <div class="linha"><dt>Autorização</dt><dd><p>Obrigatória para menores de 18 anos. O modelo está no passo 2 da inscrição.</p></dd></div>
+        <div class="linha"><dt>Quem acompanha</dt><dd><p>Monitores adultos e a equipe de líderes acompanham todas as atividades.</p></dd></div>
+        <div class="linha"><dt>Onde dormem</dt><dd><p>Dormitórios divididos por gênero e faixa etária. As atividades também são organizadas por faixa etária.</p></dd></div>
+        <div class="linha"><dt>Alimentação</dt><dd><p>4 refeições por dia. Restrição alimentar ou alergia vai num campo próprio da ficha, e a equipe se organiza.</p></dd></div>
+        <div class="linha"><dt>Autorização</dt><dd><p>Obrigatória para menores de 18 anos. O termo está no próprio formulário de inscrição.</p></dd></div>
+        <div class="linha"><dt>Contato</dt><dd><p>WhatsApp da organização: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a></p></dd></div>
       </dl>
     </div>
   </section>
@@ -554,33 +540,47 @@ section[id]{scroll-margin-top:84px}
       </div>
 
       <dl class="painel info" aria-label="Informações práticas">
-        <div><dt>Quando</dt><dd><p>05 a 10 de fevereiro de 2027, no Carnaval.</p><span class="pend">[CONFIRMAR HORÁRIOS DE CHECK-IN E ENCERRAMENTO]</span></dd></div>
-        <div><dt>Para quem</dt><dd><p>Jovens de 13 a 24 anos, com atividades por faixa etária.</p></dd></div>
-        <div><dt>Onde</dt><dd><span class="pend">[NOME DO LOCAL]</span><span class="pend">[ENDEREÇO COMPLETO]</span></dd></div>
-        <div><dt>O que está incluso</dt><dd><span class="pend">[ITENS INCLUSOS A CONFIRMAR]</span></dd></div>
+        <div><dt>Quando</dt><dd><p>05 a 10 de fevereiro de 2027, no Carnaval.</p><p>Check-in na sexta (05/02) a partir das 19h. Saída na quarta (10/02) às 10h.</p></dd></div>
+        <div><dt>Para quem</dt><dd><p>Jovens de 13 a 24 anos, com atividades organizadas por faixa etária.</p></dd></div>
+        <div><dt>Onde</dt><dd><p><b>Espaço Bethel</b><br>Estrada Roberto Burle Marx, 1245<br>Barra de Guaratiba, Rio de Janeiro</p><a class="mapa" href="https://www.google.com/maps/search/?api=1&amp;query=Espa%C3%A7o%20Bethel%2C%20Estrada%20Roberto%20Burle%20Marx%2C%201245%2C%20Barra%20de%20Guaratiba%2C%20Rio%20de%20Janeiro" target="_blank" rel="noopener">Ver no mapa ↗</a></dd></div>
       </dl>
 
       <div class="inscricao-grid">
         <ol class="passos">
           <li><div><h3>Preencha a ficha cadastral</h3><p>Leva menos de cinco minutos.</p>
-            <div class="extra"><a class="btn btn-branco btn-peq" href="#inscricao" data-ficha data-abre-ficha>Abrir a ficha <span class="seta" aria-hidden="true">→</span></a></div>
-            <p class="toast" role="status" hidden>O link da ficha ainda não foi definido. Ele entra aqui assim que a coordenação criar o formulário.</p></div></li>
-          <li><div><h3>Autorização, se tiver menos de 18</h3><p>Baixe o modelo, consiga a assinatura dos responsáveis e envie o documento.</p>
-            <div class="extra"><span class="pend">[LINK DO MODELO DE AUTORIZAÇÃO]</span></div></div></li>
-          <li><div><h3>Escolha a forma de pagamento</h3>
-            <div class="extra"><span class="pend">[FORMAS DE PAGAMENTO]</span></div></div></li>
+            <div class="extra"><a class="btn btn-branco btn-peq" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte data-rotulo-ficha="Abrir a ficha">Quero me inscrever <span class="seta" aria-hidden="true">→</span></a></div>
+            <p class="nota-ficha" data-sem-ficha>O formulário abre em breve. Até lá, a inscrição começa pelo WhatsApp da organização.</p></div></li>
+          <li><div><h3>Autorização, se tiver menos de 18</h3><p>O termo de autorização dos responsáveis está no próprio formulário de inscrição.</p></div></li>
+          <li><div><h3>Escolha a forma de pagamento</h3><p>Dinheiro, Pix ou cartão de crédito.</p></div></li>
           <li><div><h3>Fique de olho no e-mail</h3><p>A confirmação da vaga chega por lá, com todas as informações do retiro.</p></div></li>
         </ol>
 
         <div class="painel preco" aria-labelledby="t-preco">
           <p class="rotulo" id="t-preco">Investimento</p>
-          <p class="valor"><span class="pend">[VALOR DA INSCRIÇÃO]</span></p>
+          <p class="valor">R$ 697</p>
           <p class="por">por campista</p>
-          <p class="nota">As vagas são limitadas pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem.</p>
-          <span class="pend">[CONFIRMAR PRAZO FINAL DE INSCRIÇÃO]</span>
+          <p class="lote">1º lote, até 3 de novembro</p>
+          <div class="inclui-bloco">
+            <p class="sub-rotulo">Está incluso</p>
+            <ul class="inclui">
+              <li>Hospedagem no Espaço Bethel</li>
+              <li>4 refeições por dia: café da manhã, almoço, lanche e janta</li>
+              <li>Todas as gincanas e atividades da programação</li>
+              <li>Camisa oficial do retiro</li>
+              <li>Bag (meninas) ou sacochila (meninos)</li>
+              <li>Bloco e agenda</li>
+              <li>Copo personalizado</li>
+              <li>Pulseira personalizada</li>
+            </ul>
+          </div>
+          <dl class="condicoes">
+            <div><dt>Pagamento</dt><dd>Dinheiro, Pix ou cartão de crédito</dd></div>
+            <div><dt>Carnê Follow</dt><dd>Parcelado, com quitação até 3 de janeiro</dd></div>
+            <div><dt>Irmãos</dt><dd>10% de desconto quando dois ou mais se inscrevem</dd></div>
+          </dl>
+          <p class="nota">As vagas são limitadas pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
           <p class="apoio"><b>Se o valor pesar no bolso,</b> existe apoio financeiro. É só conversar com a gente.</p>
-          <a class="btn btn-fogo" href="#inscricao" data-ficha data-abre-ficha>Quero me inscrever agora</a>
-          <p class="toast" role="status" hidden>O link da ficha ainda não foi definido. Ele entra aqui assim que a coordenação criar o formulário.</p>
+          <a class="btn btn-fogo" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Quero me inscrever agora</a>
         </div>
       </div>
     </div>
@@ -593,12 +593,12 @@ section[id]{scroll-margin-top:84px}
         <h2 class="h2" id="t-duvidas">Perguntas frequentes</h2>
       </div>
       <div class="faq">
-        <details><summary>Posso ir sozinho, sem conhecer ninguém?</summary><div class="resp"><p>Pode, e é mais comum do que parece. Boa parte dos campistas chega sem conhecer ninguém. Os grupos são montados para misturar gente nova, e os líderes têm a missão de ninguém ficar de fora.</p></div></details>
-        <details><summary>O que significa “Eu me Rendo”?</summary><div class="resp"><p>É o tema do Follow Camp 2027. Seguir Jesus começa num ponto específico: quando você abre mão de controlar tudo e confia que Deus sabe conduzir a sua vida. Durante o retiro, vamos olhar para isso de perto, com Romanos 12 como base.</p></div></details>
-        <details><summary>Como funciona a alimentação? Tenho restrição, e agora?</summary><div class="resp"><p>Todas as refeições estão inclusas. Se você tem restrição alimentar, avise na ficha cadastral e a cozinha se organiza.</p><span class="pend">[CONFIRMAR DETALHES DA ALIMENTAÇÃO]</span></div></details>
-        <details><summary>Tem transporte?</summary><div class="resp"><span class="pend">[INFORMAÇÕES DE TRANSPORTE]</span></div></details>
-        <details><summary>O que eu levo?</summary><div class="resp"><span class="pend">[LISTA DO QUE LEVAR]</span></div></details>
-        <details><summary>E se eu não puder mais ir?</summary><div class="resp"><p>Existem condições de cancelamento.</p><span class="pend">[CONFIRMAR POLÍTICA DE CANCELAMENTO]</span></div></details>
+        <details><summary>Posso ir sozinho, sem conhecer ninguém?</summary><div class="resp"><p>Pode, e é mais comum do que parece. Boa parte dos campistas chega sem conhecer ninguém. Os grupos são montados pra misturar gente nova, e os líderes têm a missão de ninguém ficar de fora.</p></div></details>
+        <details><summary>O que significa “Eu me Rendo”?</summary><div class="resp"><p>É o tema do Follow Camp 2027. Seguir Jesus começa num ponto específico: quando você abre mão de controlar tudo e confia que Deus sabe conduzir a sua vida. Durante o retiro, vamos olhar pra isso de perto, com Romanos 12 como base.</p></div></details>
+        <details><summary>Como funciona a alimentação? Tenho restrição, e agora?</summary><div class="resp"><p>São 4 refeições por dia inclusas na inscrição: café da manhã, almoço, lanche e janta. Se você tem restrição alimentar ou alergia, informe na ficha de inscrição: tem um campo próprio pra isso, e a equipe se organiza.</p></div></details>
+        <details><summary>Tem transporte?</summary><div class="resp"><p>Ainda estamos fechando os detalhes. Em breve a organização divulga as informações de transporte.</p></div></details>
+        <details><summary>O que eu levo?</summary><div class="resp"><p>A lista completa está no formulário de inscrição, incluindo o kit básico de higiene. O essencial: Bíblia, caderno, roupas confortáveis pra atividades, agasalho, itens de higiene e roupa de cama e banho.</p></div></details>
+        <details><summary>E se eu não puder mais ir?</summary><div class="resp"><p>Você tem direito de cancelar sem custo em até 7 dias depois de fazer a inscrição, garantido por lei pra compras online. Depois desse prazo, os cancelamentos seguem os prazos definidos pela organização, por conta dos contratos de locação e alimentação.</p><p>Fale com a gente pelo WhatsApp pra resolver: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a>.</p></div></details>
       </div>
     </div>
   </section>
@@ -612,8 +612,8 @@ section[id]{scroll-margin-top:84px}
     <div class="cont">
       <h2 class="adesivo-texto" id="t-final" data-texto="Seguir começa quando eu me rendo.">Seguir começa quando eu me rendo.</h2>
       <p>São cinco noites e uma decisão. Em fevereiro, você pode descobrir o que acontece quando solta o controle e deixa Deus conduzir.</p>
-      <a class="btn btn-branco" href="#inscricao" data-ficha>Minha vaga é essa <span class="seta" aria-hidden="true">→</span></a>
-      <p class="duvida">Ficou com alguma dúvida? Fala com a gente: <span class="pend">[CONTATO PARA DÚVIDAS]</span></p>
+      <a class="btn btn-branco" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Minha vaga é essa <span class="seta" aria-hidden="true">→</span></a>
+      <p class="duvida">Ficou com alguma dúvida? Fala com a gente no WhatsApp: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a>.</p>
     </div>
   </section>
 
@@ -622,7 +622,8 @@ section[id]{scroll-margin-top:84px}
 <footer class="rodape">
   <div class="cont">
     <a class="logo-link" href="#inicio" aria-label="Follow Camp 2027, voltar ao início"></a>
-    <p>Follow Camp 2027 · Eu me Rendo · 05 a 10 de fevereiro</p>
+    <p>Follow Camp 2027 · Eu me Rendo</p>
+    <p>05 a 10 de fevereiro de 2027 · Espaço Bethel, Barra de Guaratiba</p>
     <p>Um retiro do Follow, ministério de jovens da GUIA Church.</p>
     <nav aria-label="Links">
       <a href="https://www.instagram.com/guiafollow/" target="_blank" rel="noopener">@guiafollow</a>
@@ -632,14 +633,15 @@ section[id]{scroll-margin-top:84px}
 </footer>
 
 <div class="barra" id="barra">
-  <p class="txt"><b>Follow Camp 2027</b>05 a 10 de fevereiro · 13 a 24 anos</p>
+  <p class="txt"><b>1º lote: R$ 697</b>até 3 de novembro</p>
   <a class="btn btn-fogo btn-peq" href="#inscricao" data-ficha tabindex="-1">Inscrever</a>
 </div>
 
 <script>
 (function () {
   "use strict";
-  // Link da ficha de inscrição. Enquanto estiver vazio, os botões levam à seção de inscrição.
+  // Link do formulário de inscrição. Vazio: os botões de navegação levam à seção de
+  // inscrição e os de inscrever abrem o WhatsApp da organização (já no HTML).
   var FICHA_URL = "";
 
   var root = document.documentElement;
@@ -705,23 +707,17 @@ section[id]{scroll-margin-top:84px}
   }
   window.addEventListener("resize", function () { if (window.innerWidth >= 960) fecharMenu(false); });
 
-  /* Botões de inscrição */
-  document.querySelectorAll("[data-ficha]").forEach(function (el) {
-    if (FICHA_URL) {
+  /* Botões de inscrição: com a ficha no ar, todos abrem a ficha */
+  if (FICHA_URL) {
+    document.querySelectorAll("[data-ficha], [data-converte]").forEach(function (el) {
       el.setAttribute("href", FICHA_URL);
       el.setAttribute("target", "_blank");
       el.setAttribute("rel", "noopener");
-      return;
-    }
-    if (el.hasAttribute("data-abre-ficha")) {
-      el.addEventListener("click", function (ev) {
-        ev.preventDefault();
-        var caixa = el.closest("li, .painel");
-        var aviso = caixa ? caixa.querySelector(".toast") : null;
-        if (aviso) aviso.hidden = false;
-      });
-    }
-  });
+      var rotulo = el.getAttribute("data-rotulo-ficha");
+      if (rotulo && el.firstChild && el.firstChild.nodeType === 3) el.firstChild.nodeValue = rotulo + " ";
+    });
+    document.querySelectorAll("[data-sem-ficha]").forEach(function (el) { el.hidden = true; });
+  }
 
   /* Barra fixa: aparece fora do herói, da inscrição e do final */
   var barra = document.getElementById("barra");
