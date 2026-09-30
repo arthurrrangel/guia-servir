@@ -10,6 +10,7 @@ import {
   Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, tomDoStatus, Tom,
 } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
+import { rolarAte } from '@/components/escalas/ancora';
 import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
@@ -109,7 +110,8 @@ function Igreja() {
             </>
           );
           return dela
-            ? <button key={a.slug} className="es-item" onClick={async () => { if (await trocarEquipe(dela.id)) router.push('/escala'); }}
+            ? <button key={a.slug} id={`area-${a.slug}`} className="es-item"
+                onClick={async () => { if (await trocarEquipe(dela.id, undefined, `area-${a.slug}`)) router.push('/escala'); }}
                 aria-label={`${a.equipe}: ${l.txt}. Abrir a escala`}>{miolo}</button>
             : <div key={a.slug} className="es-item">{miolo}</div>;
         })}
@@ -190,12 +192,12 @@ function Painel() {
   const [otimista, setOtimista] = useState<{ f: string; st: Status } | null>(null);
   /* a âncora do endereço (`/painel#cobrar`): o navegador procura o alvo
      antes de a tela existir (ela nasce depois de a casca ler o banco), e não
-     rolava. Uma vez, quando o alvo aparece. */
+     rolava. Uma vez, quando o alvo aparece, e mantida no lugar enquanto a
+     coluna da direita chega (ver `components/escalas/ancora.ts`). */
   const rolouAncora = useRef(false);
   useEffect(() => {
     if (rolouAncora.current || !window.location.hash) return;
-    const el = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
-    if (el) { rolouAncora.current = true; el.scrollIntoView({ block: 'start' }); }
+    if (rolarAte(decodeURIComponent(window.location.hash.slice(1)))) rolouAncora.current = true;
   });
 
   const hoje = hojeISO();

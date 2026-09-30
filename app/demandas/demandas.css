@@ -1763,6 +1763,11 @@ html:has(.dm-auth),body:has(.dm-auth){background:#f5f5f6}
 .dm-auth-falta{font-size:13px;line-height:18px;color:var(--dm-mudo);margin-top:var(--dm-e2)}
 .dm-auth-pe{font-size:13px;line-height:19px;color:var(--dm-mudo);margin-top:var(--dm-e5);text-align:center}
 .dm-auth-pe a{color:var(--dm-ink);font-weight:500;text-decoration:underline;text-underline-offset:3px}
+/* no toque o link do pé é o caminho de quem chega pela primeira vez: alvo
+   de 44px de altura, e não os 16 da linha (medido a 390 e 320, 30/09/2026) */
+@media (max-width:1023px), (hover:none), (pointer:coarse){
+  .dm-auth-pe a{display:inline-flex;align-items:center;min-height:44px;padding:0 6px;margin:0 -6px}
+}
 .dm-auth-rodape{text-align:center;font-size:12px;color:var(--dm-mudo);padding:0 var(--dm-calha) calc(var(--dm-e5) + env(safe-area-inset-bottom, 0px))}
 .dm-auth-alt{display:grid;gap:2px;margin-top:var(--dm-e5);padding-top:var(--dm-e4);border-top:1px solid var(--dm-linha)}
 /* os outros caminhos: texto à esquerda, a seta de "leva a algum lugar" à

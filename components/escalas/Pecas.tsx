@@ -38,15 +38,17 @@ export const tomDoStatus = (st?: string | null): Tom =>
            já diz, e o maior texto da tela repetindo o menor é ruído
    meta    uma linha de fatos, só quando acrescenta
    acoes   no máximo uma cheia; o resto contorno ou texto */
-export function Cab({ rot, titulo, meta, acoes, comSetas }: {
+export function Cab({ rot, titulo, meta, acoes, comSetas, idTitulo }: {
   rot?: ReactNode; titulo: ReactNode; meta?: ReactNode; acoes?: ReactNode; comSetas?: boolean;
+  /** quando a tela leva o foco ao título (troca de mês, por exemplo) */
+  idTitulo?: string;
 }) {
   return (
     <header className="es-cab">
       <div className="es-cab-linha">
         <div className="es-cab-txt">
           {rot && <div className="es-rot">{rot}</div>}
-          <h1 className={`es-cab-titulo${comSetas ? ' es-com-setas' : ''}`}>{titulo}</h1>
+          <h1 className={`es-cab-titulo${comSetas ? ' es-com-setas' : ''}`} id={idTitulo} tabIndex={idTitulo ? -1 : undefined}>{titulo}</h1>
           {meta && <div className="es-cab-meta">{meta}</div>}
         </div>
         {acoes && <div className="es-cab-acoes">{acoes}</div>}

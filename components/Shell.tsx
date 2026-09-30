@@ -30,7 +30,11 @@ type Ctx = {
   /* devolve se a troca vingou: quem troca E navega (a linha de uma área no
      Painel) espera o sim antes de sair da tela, senão a tela seguinte nascia
      com o ministério de antes quando a leitura do novo falhava */
-  equipe: Equipe | null; equipes: Equipe[]; trocarEquipe: (id: string, lista?: Equipe[]) => Promise<boolean>;
+  equipe: Equipe | null; equipes: Equipe[];
+  /* `focoSeFalhar`: o id do elemento que recebe o foco de volta quando a
+     troca não vinga (a tela renasce depois do esqueleto e o foco caía no
+     body) */
+  trocarEquipe: (id: string, lista?: Equipe[], focoSeFalhar?: string) => Promise<boolean>;
   recarregarEquipes: () => Promise<Equipe[]>;
   /* AS CONTAS DO QUE ESPERA POR VOCÊ (30/09/2026). Uma leitura só do banco
      (`painel_ministerio`, contagens), feita pela casca porque é ela que
@@ -97,6 +101,19 @@ let _cacheEquipes: Equipe[] = [];
 let _cacheAtiva = '';
 let _cacheConta = '';
 
+/* devolve o foco a um elemento que ainda vai nascer: depois de uma troca de
+   ministério que falhou, a tela sai do esqueleto e desenha de novo, às vezes
+   com mais uma leitura no meio. Tenta a cada quadro por até 3 s. */
+function focarQuandoExistir(id: string, ms = 3000) {
+  const ate = Date.now() + ms;
+  const tentar = () => {
+    const el = document.getElementById(id);
+    if (el) { el.focus(); return; }
+    if (Date.now() < ate) requestAnimationFrame(tentar);
+  };
+  requestAnimationFrame(tentar);
+}
+
 export default function Shell({ children }: { children: React.ReactNode }) {
   /* 'sem-carga' (82): a carga FRIA falhou. Sem esta fase, o Shell seguia para
      'pronto' com `estadoVazio()`, e a tela do líder escrevia "Ainda não tem
@@ -123,6 +140,17 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     setMenuAberto(false);
     (menuLugarRef.current === 'topo' ? btnTopo : btnSeletor).current?.focus();
   }, []);
+  /* ESCOLHER UM MINISTÉRIO DEVOLVE O FOCO AO BOTÃO DO MENU, como o Esc
+     (auditoria de 30/09/2026: caía no body, e quem usa teclado ou leitor de
+     tela recomeçava do topo a cada troca). Se o ministério ainda não estava
+     carregado, a casca inteira renasce depois do esqueleto, e o foco espera
+     o botão novo existir. */
+  const focarGatilho = useRef(false);
+  useEffect(() => {
+    if (!focarGatilho.current || fase !== 'pronto') return;
+    const b = (menuLugarRef.current === 'topo' ? btnTopo : btnSeletor).current;
+    if (b) { focarGatilho.current = false; b.focus(); }
+  });
   /* refs nascem alinhadas ao cache: se voltamos a uma aba com estado guardado,
      `recarregar()` já sabe qual equipe revalidar sem esperar o efeito. */
   const idAtivo = useRef(_cacheAtiva);
@@ -220,7 +248,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
 
   /* Trocar de ministério só conclui se o carregamento deu certo. Antes, uma
      falha de rede deixava a tela dizendo "Louvor" com os dados da Mídia. */
-  const trocarEquipe = useCallback((id: string, lista?: Equipe[]) => {
+  const trocarEquipe = useCallback((id: string, lista?: Equipe[], focoSeFalhar?: string) => {
     const antesId = idAtivo.current, antesNome = nomeAtivo.current;
     const fonte = lista || equipes;
     idAtivo.current = id; _cacheAtiva = id;
@@ -252,6 +280,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       try { if (antesId) localStorage.setItem(K_EQUIPE, antesId); } catch {}
       setFase(antesId ? 'pronto' : 'sem-equipe');
       aviso('Não consegui abrir esse ministério. Tente de novo.');
+      if (focoSeFalhar) focarQuandoExistir(focoSeFalhar);
     };
     void recarregar()
       .then(est => { if (est) { setFase('pronto'); responde(true); } else voltarAtras(); })
@@ -458,7 +487,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
         <div className="es-menu-grupo">Ministérios</div>
         {equipes.map(e => (
           <button key={e.id} className="es-menu-item"
-            aria-current={e.id === equipeId ? 'true' : undefined} onClick={() => trocarEquipe(e.id)}>
+            aria-current={e.id === equipeId ? 'true' : undefined}
+            onClick={() => { focarGatilho.current = true; void trocarEquipe(e.id); }}>
             <span>{e.nome}</span>{e.id === equipeId && <IcCheck />}
           </button>
         ))}
@@ -515,6 +545,13 @@ export default function Shell({ children }: { children: React.ReactNode }) {
               <Logo className="es-logo" />
             </Link>
           </div>
+          {/* O FUNDO QUE FECHA O MENU MORA ONDE O MENU MORA. Na lateral ele
+              nasce aqui dentro: a lateral é fixa com z-index 30, e um fundo na
+              casca, abaixo dela, deixava a parte vazia da lateral fora do
+              alcance (auditoria de 30/09/2026, rodada 2). No topo do celular é
+              o contrário: o `backdrop-filter` do topo prende um filho fixo à
+              caixa do topo, e o fundo fica na casca (logo abaixo). */}
+          {menuLugar === 'lateral' && menuAberto && <div className="es-menu-fundo" onClick={fecharMenu} />}
           <div className="es-ministerio">
             {troca(false)}
             {menuLugar === 'lateral' && menu}
@@ -548,7 +585,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        {menuAberto && <div className={`es-menu-fundo${menuLugar === 'topo' ? ' es-fundo-topo' : ''}`} onClick={fecharMenu} />}
+        {menuLugar === 'topo' && menuAberto && <div className="es-menu-fundo es-fundo-topo" onClick={fecharMenu} />}
         <main className="es-corpo">{children}</main>
 
         <nav className="es-abas" aria-label="Seções">

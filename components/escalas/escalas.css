@@ -127,6 +127,12 @@
    32px no desktop (o respiro do alto do corpo). As telas não mexem nisso. */
 html:has(.es-casca){scroll-padding-top:72px}
 @media (min-width:1024px){ html:has(.es-casca){scroll-padding-top:32px} }
+/* e embaixo, abaixo de 1024px, a barra de abas (60 e a borda segura do
+   aparelho): sem isto o Tab levava o foco para baixo dela e ele ficava
+   coberto (medido a 900x700: 73% de "ILUMINAÇÃO 5 pessoas" sob a barra).
+   Valor escrito por extenso porque o html fica acima de `.es`, onde mora o
+   `--es-abas-alt`. */
+@media (max-width:1023px){ html:has(.es-casca){scroll-padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px) + 8px)} }
 .es.es :where(section[id]){scroll-margin-top:0}
 /* a borda da página no puxão do celular: branca, como o corpo */
 html:has(.es-casca),body:has(.es-casca){background:#ffffff}
@@ -252,9 +258,13 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
    pessoas sai do botão (ela está no rótulo de leitura e na lateral) */
 @media (max-width:399px){ .es-troca.es-troca-topo .es-troca-txt small{display:none} }
 
-.es-menu-fundo{position:fixed;inset:0;z-index:29;background:transparent}
-/* aberto pelo topo do celular, o fundo fica logo abaixo do topo (40): cobre
-   a página inteira e deixa o menu, que mora dentro do topo, por cima */
+/* o fundo que fecha o menu. Na lateral ele mora dentro dela: fixo, cobre a
+   tela inteira no nível da lateral (30), acima da página, e o menu (50)
+   fica por cima dele. Aberto pelo topo do celular, mora na casca, logo
+   abaixo do topo (40): cobre a página e deixa o menu, que mora dentro do
+   topo, por cima. As abas de baixo (40) seguem tocáveis: tocar numa seção
+   leva a ela, e a troca de página fecha o menu. */
+.es-menu-fundo{position:fixed;inset:0;z-index:48;background:transparent}
 .es-menu-fundo.es-fundo-topo{z-index:39}
 .es-menu{
   position:absolute;z-index:50;left:0;right:0;top:calc(100% + 6px);
@@ -357,6 +367,10 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
 .es-cab .es-rot{margin-bottom:4px}
 .es-cab-titulo{font-size:var(--es-t-titulo);line-height:var(--es-lh-titulo);font-weight:600;letter-spacing:-.02em;text-wrap:balance;overflow-wrap:anywhere}
 .es-cab-titulo.es-com-setas{display:flex;align-items:center;gap:var(--es-e3);flex-wrap:wrap}
+/* o título recebe o foco quando a tela troca de assunto sozinha (a Escala
+   indo para o mês de hoje): é destino de leitura, não controle, e não
+   ganha o anel */
+.es-cab-titulo[tabindex="-1"]:focus{outline:none}
 .es-cab-meta{margin-top:var(--es-e2);font-size:13px;line-height:20px;color:var(--es-mudo);max-width:72ch}
 .es-cab-acoes{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
 @media (max-width:719px){

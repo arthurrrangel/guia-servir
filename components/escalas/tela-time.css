@@ -29,6 +29,9 @@
 /* A PESSOA NA FILA: o nome, e embaixo as funções que ela sabe. A seta gira
    quando a pessoa está aberta; a linha aberta fica no cinza do painel. */
 .es-tm-linha .es-c-tit{gap:6px}
+/* o nome e, quando há, a situação ao lado (aguardando, pausado, furos) */
+.es-tm-nome{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;min-width:0}
+.es-tm-nome > b{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
 .es-tm-linha .es-c-acao > svg{transition:transform var(--es-t)}
 .es-tm-linha[aria-expanded="true"]{background:var(--es-sup-2)}
 .es-tm-linha[aria-expanded="true"] .es-c-acao > svg{transform:rotate(90deg)}

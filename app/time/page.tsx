@@ -7,7 +7,7 @@ import {
 } from '@/lib/db';
 import { cont, pl } from '@/lib/plural';
 import {
-  Cab, Kpis, Kpi, Secao, Pilula, Aviso, Vazio, Fio, Dobra, Tom, tomCls, tomDaSituacao,
+  Cab, Kpis, Kpi, Secao, Pilula, Aviso, Vazio, Fio, Dobra, Tom, tomCls,
 } from '@/components/escalas/Pecas';
 import { IcBusca, IcMais, IcSeta, IcX } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
@@ -28,6 +28,20 @@ import { telefoneOk } from '@/lib/nome';
    das funções numa tabela. Cor só na pílula, no número e no aviso.
    ============================================================================= */
 
+/* O TOM DE UMA FUNÇÃO NO DIAGNÓSTICO (30/09/2026). O motor diz "crítico"
+   para duas coisas diferentes: falta gente que saiba fazer, e falta o líder
+   conferir quem disse que sabe. Vermelho no sistema é falta de gente; a
+   conferência que espera o líder é âmbar, como a casa "A conferir" logo
+   acima. ILUMINAÇÃO com 5 pessoas e ninguém conferido aparecia com a barra
+   cheia em vermelho, e o líder ia atrás de voluntário quando o que faltava
+   era ele conferir. */
+function tomDaFuncao(f: { grau: string; aptos: number; titulares: number; declarados: number }): Tom {
+  if (f.grau === 'ok') return 'ok';
+  if (f.aptos <= 1) return 'bad';                               // ninguém ou uma pessoa só
+  if (f.titulares === 0 && f.declarados === 0) return 'bad';    // ninguém segura sozinho
+  return 'warn';                                                // espera conferência, ou sem folga
+}
+
 export default function Pagina() { return <Shell><Time /></Shell>; }
 
 const CICLO: (Nivel | null)[] = [null, 'titular', 'reserva', 'treino'];
@@ -44,7 +58,10 @@ function curtoF(nome: string) {
 
 /* as colunas da fila de pessoas no desktop: nada em `auto` (ver a fila em
    escalas.css), para a coluna Pessoa não andar de uma linha para outra */
-const COLUNAS = { '--es-cols': 'minmax(0,1fr) 96px 184px 24px' } as React.CSSProperties;
+/* Pessoa, Carga e a seta. A situação (aguardando, pausado, furos) mora
+   junto do nome desde 30/09/2026: é exceção, e numa coluna própria deixava
+   o cabeçalho "Situação" em cima de 12 células vazias de 17. */
+const COLUNAS = { '--es-cols': 'minmax(0,1fr) 96px 24px' } as React.CSSProperties;
 
 function Time() {
   const { S, recarregar, aviso, base, equipe } = useApp();
@@ -279,17 +296,22 @@ function Time() {
     || !!pend.postosSemNinguem.length || !!errados.length;
 
   /* DOIS GRUPOS: quem espera a sua conferência e o time conferido, cada um
-     numa seção. Desde 30/09/2026 cada linha também diz a própria situação
-     numa pílula, porque a fila agora tem a coluna Situação. */
+     numa seção. Desde 30/09/2026 a linha diz a situação da pessoa numa
+     pílula ao lado do nome, só quando há o que dizer. */
   const esperando = ordenados.filter(v => v.conferido === false);
   const conferidos = ordenados.filter(v => v.conferido !== false);
 
   /* OS NÚMEROS DA FAIXA: só o que esta tela já calcula. Frágil é a função
      que não está "ok" no diagnóstico lá de baixo; o vermelho fica para
-     quando alguma tem menos de três pessoas, que é falta de gente. */
+     a que tem falta de gente (ver `tomDaFuncao`). */
   const inativos = S.voluntarios.length - ativos;
   const frageis = saude.funcoes.filter(f => f.grau !== 'ok').length;
-  const menosDeTres = saude.funcoes.filter(f => f.aptos < 3).length;
+  /* a casa conta pelo MESMO critério da tabela lá embaixo: vermelha é falta
+     de gente, âmbar é o resto (espera conferência, um titular só, sem
+     folga). Contar "menos de 3 pessoas" dava "3 com pouca gente" em cima de
+     uma tabela com uma só vermelha (auditoria de 30/09/2026, rodada 3). */
+  const vermelhas = saude.funcoes.filter(f => tomDaFuncao(f) === 'bad').length;
+  const ambar = saude.funcoes.filter(f => tomDaFuncao(f) === 'warn').length;
   const furos = saude.pessoas.reduce((a, p) => a + p.furos, 0);
 
   /* A SITUAÇÃO DA PESSOA, numa pílula só e no tom fixo do sistema: fora da
@@ -322,7 +344,7 @@ function Time() {
   const listaDe = (grupo: typeof ordenados) => (
     <div className="es-fila es-colunas" style={COLUNAS}>
       <div className="es-fila-cab" aria-hidden="true">
-        <span>Pessoa</span><span className="es-n">Carga</span><span>Situação</span><span />
+        <span>Pessoa</span><span className="es-n">Carga</span><span />
       </div>
       {grupo.map(v => {
         const est = saude.pessoas.find(p => p.id === v.id)!;
@@ -338,7 +360,10 @@ function Time() {
             <button type="button" className="es-item es-tm-linha" onClick={() => alternar(v.id)}
               aria-expanded={aberta} aria-controls={`pessoa-${v.id}`}>
               <span className="es-c-tit">
-                <b>{v.nome}</b>
+                <span className="es-tm-nome">
+                  <b>{v.nome}</b>
+                  {sit && <Pilula tom={sit.tom}>{sit.txt}</Pilula>}
+                </span>
                 {areas.length
                   ? <span className="es-etqs">
                       {areas.map(f => (
@@ -355,7 +380,6 @@ function Time() {
                   title={`${cont(est.carga, 'escala', 'escalas')} em ${S.config.janelaCarga} dias; até ${limite} por mês`}>
                   <span className="es-tm-so-pilha">carga </span>{est.carga}/{limite}
                 </span>
-                <span className="es-c-est">{sit && <Pilula tom={sit.tom}>{sit.txt}</Pilula>}</span>
               </span>
               <span className="es-c-acao"><IcSeta /></span>
             </button>
@@ -563,11 +587,12 @@ function Time() {
             <Kpi rot="Funções frágeis" valor={frageis} de={saude.funcoes.length}
               sub={/* a linha explica o número inteiro, não um pedaço dele: "7" com
                      "3 com menos de 3 pessoas" embaixo deixava quatro sem
-                     explicação (auditoria de 30/09/2026) */
-                menosDeTres === frageis && frageis ? (frageis === 1 ? 'com menos de 3 pessoas' : 'todas com menos de 3 pessoas')
-                : menosDeTres ? `${menosDeTres} delas com menos de 3 pessoas`
-                : frageis ? 'falta titular conferido' : 'todas de pé'}
-              tom={menosDeTres ? 'bad' : frageis ? '' : 'zero'} />
+                     explicação (duas rodadas de auditoria, 30/09/2026) */
+                !frageis ? 'todas de pé'
+                : vermelhas && ambar ? `${vermelhas} com falta de gente, ${ambar} ${pl(ambar, 'pede', 'pedem')} atenção`
+                : vermelhas ? (vermelhas === 1 ? 'com falta de gente' : 'todas com falta de gente')
+                : ambar === 1 ? 'pede atenção' : 'todas pedem atenção'}
+              tom={vermelhas ? 'bad' : ambar ? 'warn' : 'zero'} />
             <Kpi rot="Furos" valor={furos} sub={`nos últimos ${S.config.janelaCarga} dias`} tom={furos ? 'bad' : 'zero'} />
           </Kpis>
         </div>
@@ -692,7 +717,7 @@ function Time() {
               </thead>
               <tbody>
                 {saude.funcoes.map(f => {
-                  const tom = tomDaSituacao(f.grau as 'ok' | 'atencao' | 'critico');
+                  const tom = tomDaFuncao(f);
                   return (
                     <tr key={f.nome}>
                       <td className="es-primeira">{f.nome}</td>

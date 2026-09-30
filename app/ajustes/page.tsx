@@ -3,7 +3,7 @@ import Shell, { useApp, copiar } from '@/components/Shell';
 import Link from 'next/link';
 import { IcSeta } from '@/components/Icones';
 import { Cab, Aviso, Dobra, Fio, Pilula } from '@/components/escalas/Pecas';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   addLider, definirMinhaSenha, listarLideres, removerFuncao, removerLider, salvarConfig, salvarFuncoes,
   souOrganizadorGeral, type LinhaLider,
@@ -23,6 +23,46 @@ const SECOES = [
   { id: 'organiza', rot: 'Quem organiza' },
   { id: 'ministerios', rot: 'Outros ministérios' },
 ];
+
+/* O RASCUNHO DE TEXTO DOS AJUSTES, GUARDADO NESTE APARELHO ATÉ GRAVAR
+   (30/09/2026). Por ministério e campo; com o valor salvo de quando foi
+   escrito (`base`), para não ressuscitar por cima do que outra pessoa
+   salvou depois, e com a data, para não voltar depois de uma semana. */
+type Rascunho = { valor: string; base: string; quando: number };
+const SETE_DIAS = 7 * 24 * 60 * 60 * 1000;
+const chaveDoRascunho = (eq: string, k: string) => `escalas:rascunho:${eq}:${k}`;
+function lerRascunho(eq: string, k: string): Rascunho | null {
+  try {
+    const r = JSON.parse(localStorage.getItem(chaveDoRascunho(eq, k)) || 'null');
+    return r && typeof r.valor === 'string' && typeof r.base === 'string' && typeof r.quando === 'number' ? r : null;
+  } catch { return null; }
+}
+function apagarRascunho(eq: string, k: string) {
+  try { localStorage.removeItem(chaveDoRascunho(eq, k)); } catch {}
+}
+function guardarRascunho(eq: string, k: string, valor: string, baseAgora: string) {
+  const antes = lerRascunho(eq, k);
+  try {
+    localStorage.setItem(chaveDoRascunho(eq, k), JSON.stringify({ valor, base: antes ? antes.base : baseAgora, quando: Date.now() }));
+  } catch {}
+}
+function apagarRascunhoSeIgual(eq: string, k: string, gravado: string) {
+  const r = lerRascunho(eq, k);
+  if (r && r.valor === gravado) apagarRascunho(eq, k);
+}
+/* os rascunhos que ainda valem para este ministério, contra o salvo agora */
+function rascunhosValidos(eq: string | undefined, config: any): Record<string, string> {
+  const fora: Record<string, string> = {};
+  if (!eq || typeof window === 'undefined') return fora;
+  for (const k of ['prazoConfirmacao', 'saudacao', 'rodape']) {
+    const r = lerRascunho(eq, k);
+    if (!r) continue;
+    const agora = String(config?.[k] ?? '');
+    if (r.valor === agora || r.base !== agora || Date.now() - r.quando > SETE_DIAS) { apagarRascunho(eq, k); continue; }
+    fora[k] = r.valor;
+  }
+  return fora;
+}
 
 export default function Pagina() { return <Shell><Ajustes /></Shell>; }
 
@@ -109,27 +149,169 @@ function Ajustes() {
     .catch(() => setFalhouGeral(true)); }, []);
   async function recarregarLideres() { try { setLideres(await listarLideres()); } catch {} }
 
-  /* duas edições em sequência não podem se atropelar: o ref acumula
-     as mudanças já pedidas, mesmo antes do recarregar voltar */
-  const cfgRef = useRef({ ...S.config });
-  useEffect(() => { cfgRef.current = { ...S.config }; }, [S.config]);
-  /* O CAMPO VOLTA AO QUE ESTÁ SALVO QUANDO A GRAVAÇÃO FALHA (30/09/2026).
-     Os campos são não controlados (`defaultValue`) e renascem pela `key`,
-     que é o próprio valor salvo. Numa falha o valor salvo não muda, a `key`
-     não muda, e o seletor continuava mostrando a escolha que não gravou,
-     com o aviso de erro já sumido. A versão sobe a cada falha e força o
-     campo a renascer com o que o banco tem. */
-  const [versaoCfg, setVersaoCfg] = useState(0);
-  async function cfg(chave: string, valor: any) {
-    cfgRef.current = { ...cfgRef.current, [chave]: valor };
-    try { await salvarConfig(equipe!.id, cfgRef.current); await recarregar(); aviso('Salvo'); }
-    catch (e) {
-      aviso(aviseHumano(e, 'salvar'));
-      cfgRef.current = { ...S.config };
-      await recarregar();
-      setVersaoCfg(v => v + 1);
+  /* =====================================================================
+     A CONFIGURAÇÃO DESTE MINISTÉRIO, E O QUE ACONTECE QUANDO GRAVAR FALHA
+     (30/09/2026, três rodadas de auditoria).
+
+     `salvarConfig` grava a configuração INTEIRA. O `cfgRef` acumula o que o
+     líder já pediu, para duas edições seguidas não se atropelarem, e cada
+     gravação manda o `cfgRef` todo.
+
+     SELETOR: numa falha, só ele renasce, com o valor salvo, e com o foco
+     de volta se o tinha. Mostrar a escolha que não gravou era mentir. Mas
+     só renasce se ainda for a última escolha do líder: com duas setas
+     seguidas no ar, a primeira que falha não pode desfazer a segunda.
+
+     TEXTO (prazo, começo e fim do aviso): numa falha, o que a pessoa
+     escreveu FICA. Na tela, com a nota de que não salvou; e neste aparelho
+     (localStorage, por ministério e campo) até gravar. Sair da tela ou
+     trocar de ministério desmontava tudo e o rascunho sumia, depois de a
+     nota ter prometido salvar. Ao voltar, o rascunho reaparece com a nota e
+     é reenviado. Enquanto a tela está aberta, reenvia sozinho quando a
+     conexão volta e a cada 20 s, em silêncio. Rascunho que alguém já
+     superou (o valor salvo mudou desde que ele foi escrito) ou com mais de
+     sete dias é descartado.
+
+     A primeira correção remontava os seis campos numa falha qualquer e
+     apagava o parágrafo que o líder escrevia em outro campo. Hoje a `key`
+     dos campos só muda com o ministério (e a do seletor, na falha dele).
+
+     Gravar no `blur` só acontece se o texto for diferente do salvo: passar
+     pelos campos com Tab, sem mexer, gravava três vezes e, sem conexão,
+     pintava três campos intactos de "não salvou". */
+  const TEXTOS = ['prazoConfirmacao', 'saudacao', 'rodape'];
+  const salvo = (k: string) => String((S.config as any)[k] ?? '');
+  /* o que vale AGORA, para quem termina depois de um await: o desenho em
+     que a gravação começou pode ser de outro ministério, ou velho */
+  const salvoRef = useRef(S.config); salvoRef.current = S.config;
+  const equipeRef = useRef(equipe?.id); equipeRef.current = equipe?.id;
+
+  /* lidos uma vez por ministério e por configuração salva: servem para o
+     texto com que o campo nasce e para o que a próxima gravação leva */
+  const rascunhos = useMemo(() => rascunhosValidos(equipe?.id, S.config), [equipe?.id, S.config]);
+  const cfgRef = useRef<Record<string, any>>({ ...S.config, ...rascunhos });
+  useEffect(() => { cfgRef.current = { ...S.config, ...rascunhos }; }, [S.config, rascunhos]);
+
+  const [versoes, setVersoes] = useState<Record<string, number>>({});
+  const [naoSalvou, setNaoSalvou] = useState<Record<string, { rede: boolean; texto: string }>>({});
+  const tirarNota = (k: string) => setNaoSalvou(m => { if (!m[k]) return m; const n = { ...m }; delete n[k]; return n; });
+  const campos = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>>({});
+  const chaveDo = (k: string) => `${equipe?.id}:${versoes[k] || 0}`;
+  /* o seletor que renasce volta com o foco, se o tinha */
+  const refocar = useRef('');
+  const guardar = (k: string) => (el: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null) => {
+    campos.current[k] = el;
+    if (el && refocar.current === k) { refocar.current = ''; el.focus(); }
+  };
+  const renascer = (k: string) => {
+    if (document.activeElement === campos.current[k]) refocar.current = k;
+    setVersoes(v => ({ ...v, [k]: (v[k] || 0) + 1 }));
+  };
+  /* o texto que o campo mostra ao nascer: o rascunho guardado, se houver */
+  const inicial = (k: string) => rascunhos[k] ?? salvo(k);
+
+  async function gravar(mudancas: Record<string, any>, silencioso = false) {
+    const eq = equipe?.id;
+    if (!eq) return;
+    for (const k of Object.keys(mudancas)) {
+      if (TEXTOS.includes(k)) guardarRascunho(eq, k, String(mudancas[k]), String((salvoRef.current as any)[k] ?? ''));
+    }
+    cfgRef.current = { ...cfgRef.current, ...mudancas };
+    const enviado: Record<string, any> = { ...cfgRef.current };
+    try {
+      await salvarConfig(eq, enviado);
+      for (const k of TEXTOS) apagarRascunhoSeIgual(eq, k, String(enviado[k] ?? ''));
+      if (equipeRef.current !== eq) return;            // o líder já foi para outro ministério
+      setNaoSalvou(m => {
+        const n = { ...m };
+        for (const k of Object.keys(m)) if (String(enviado[k] ?? '') === (campos.current[k]?.value ?? '')) delete n[k];
+        return n;
+      });
+      const est = await recarregar();
+      /* o seletor mostra o que o banco tem: numa corrida entre duas
+         gravações, a tela e o banco podiam terminar em valores diferentes */
+      if (est && equipeRef.current === eq) {
+        for (const k of Object.keys(mudancas)) {
+          if (TEXTOS.includes(k)) continue;
+          const el = campos.current[k];
+          if (el && el.value !== String((est.config as any)[k])) renascer(k);
+        }
+      }
+      aviso('Salvo');
+    } catch (e: any) {
+      if (equipeRef.current !== eq) return;            // não mexe no ministério que está na tela agora
+      const texto = aviseHumano(e, 'salvar');
+      const rede = /failed to fetch|networkerror|network request failed|load failed/i.test(String(e?.message || e));
+      let seletorFalhou = false;
+      for (const k of Object.keys(mudancas)) {
+        if (TEXTOS.includes(k)) {
+          /* se enquanto isso a pessoa voltou ao texto salvo, não há o que avisar */
+          if ((campos.current[k]?.value ?? '') !== String((salvoRef.current as any)[k] ?? '')) {
+            setNaoSalvou(m => ({ ...m, [k]: { rede, texto } }));
+          }
+          continue;
+        }
+        if (cfgRef.current[k] !== mudancas[k]) continue;  // já há escolha mais nova no ar
+        cfgRef.current = { ...cfgRef.current, [k]: (salvoRef.current as any)[k] };
+        renascer(k);
+        seletorFalhou = true;
+      }
+      /* o texto tem a nota no próprio campo; o seletor, que volta sozinho
+         ao valor salvo, precisa do aviso para a pessoa saber por quê */
+      if (seletorFalhou && !silencioso) aviso(texto);
     }
   }
+  const cfg = (chave: string, valor: any) => gravar({ [chave]: valor });
+  const gravarRef = useRef(gravar);
+  gravarRef.current = gravar;
+
+  /* sair do campo de texto: grava só o que mudou em relação ao salvo; se a
+     pessoa voltou ao texto salvo, o rascunho deixa de existir */
+  const aoSair = (k: string) => (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const v = e.target.value;
+    if (v === salvo(k)) {
+      if (equipe?.id) apagarRascunho(equipe.id, k);
+      cfgRef.current = { ...cfgRef.current, [k]: (S.config as any)[k] };
+      tirarNota(k);
+      return;
+    }
+    void gravar({ [k]: v });
+  };
+
+  /* ao abrir a tela (ou trocar de ministério), o rascunho guardado volta
+     com a nota e é reenviado */
+  useEffect(() => {
+    const eq = equipe?.id;
+    if (!eq) return;
+    const r = rascunhosValidos(eq, salvoRef.current);
+    const ks = Object.keys(r);
+    /* sem rascunho, a nota que vier de outro ministério sai junto */
+    setNaoSalvou(Object.fromEntries(ks.map(k => [k, { rede: true, texto: '' }])));
+    if (ks.length) void gravarRef.current(r, true);
+  }, [equipe?.id]);
+
+  /* enquanto houver texto sem salvar por falta de conexão, tenta de novo
+     quando o aparelho volta a ficar online e a cada 20 s, sem repetir aviso */
+  const pendentesDeRede = Object.keys(naoSalvou).filter(k => naoSalvou[k].rede).join(',');
+  useEffect(() => {
+    if (!pendentesDeRede) return;
+    const tentar = () => {
+      const m: Record<string, any> = {};
+      for (const k of pendentesDeRede.split(',')) { const el = campos.current[k]; if (el) m[k] = el.value; }
+      if (Object.keys(m).length) void gravarRef.current(m, true);
+    };
+    window.addEventListener('online', tentar);
+    const t = window.setInterval(tentar, 20000);
+    return () => { window.removeEventListener('online', tentar); window.clearInterval(t); };
+  }, [pendentesDeRede]);
+
+  const notaDe = (k: string) => naoSalvou[k] && (
+    <small className="es-erro-campo" id={`nao-salvou-${k}`} role="status">
+      {naoSalvou[k].rede
+        ? 'Sem conexão: ainda não salvou. O texto fica guardado neste aparelho e eu tento de novo sozinho.'
+        : `Não salvou. ${naoSalvou[k].texto}`}
+    </small>
+  );
   /* mesma correção de `mudar` em /time: gravava em silêncio, sem indicador
      em voo e sem confirmação no fim. `cfg`, logo acima, já dizia 'Salvo'. */
   async function fn(id: string, campos: any) {
@@ -261,13 +443,13 @@ function Ajustes() {
               <div className="es-dupla es-aj-campos">
                 <label className="es-campo">
                   <span>Máximo de escalas por pessoa por mês</span>
-                  <select className="es-ctl" key={`${versaoCfg}:${S.config.limitePadrao}`} aria-label="Máximo de escalas por pessoa por mês" defaultValue={S.config.limitePadrao} onChange={e => cfg('limitePadrao', +e.target.value)}>
+                  <select className="es-ctl" key={chaveDo('limitePadrao')} ref={guardar('limitePadrao')} aria-label="Máximo de escalas por pessoa por mês" defaultValue={S.config.limitePadrao} onChange={e => cfg('limitePadrao', +e.target.value)}>
                     {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
                   </select>
                 </label>
                 <label className="es-campo">
                   <span>Plantonistas por domingo</span>
-                  <select className="es-ctl" key={`${versaoCfg}:${S.config.plantaoQtd}`} aria-label="Plantonistas por domingo" defaultValue={S.config.plantaoQtd} onChange={e => cfg('plantaoQtd', +e.target.value)}>
+                  <select className="es-ctl" key={chaveDo('plantaoQtd')} ref={guardar('plantaoQtd')} aria-label="Plantonistas por domingo" defaultValue={S.config.plantaoQtd} onChange={e => cfg('plantaoQtd', +e.target.value)}>
                     {[0, 1, 2, 3].map(n => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </label>
@@ -280,13 +462,16 @@ function Ajustes() {
                       ("quinta-feira") que entra numa frase, não uma data, e o
                       teclado certo é o de texto. O medidor de celular acusa
                       "prazo" sem calendário, e respeita quem declara. */}
-                  <input className="es-ctl" inputMode="text" enterKeyHint="done" key={`${versaoCfg}:${S.config.prazoConfirmacao}`} aria-label="Prazo para confirmar"
-                    placeholder="ex: quinta-feira"
-                    defaultValue={S.config.prazoConfirmacao} onBlur={e => cfg('prazoConfirmacao', e.target.value)} />
+                  <input className="es-ctl" inputMode="text" enterKeyHint="done" key={equipe?.id} aria-label="Prazo para confirmar"
+                    placeholder="ex: quinta-feira" ref={guardar('prazoConfirmacao')}
+                    aria-invalid={naoSalvou.prazoConfirmacao ? true : undefined}
+                    aria-describedby={naoSalvou.prazoConfirmacao ? 'nao-salvou-prazoConfirmacao' : undefined}
+                    defaultValue={inicial('prazoConfirmacao')} onBlur={aoSair('prazoConfirmacao')} />
+                  {notaDe('prazoConfirmacao')}
                 </label>
                 <label className="es-campo">
                   <span>Equilibrar a carga olhando</span>
-                  <select className="es-ctl" key={`${versaoCfg}:${S.config.janelaCarga}`} aria-label="Equilibrar a carga olhando" defaultValue={S.config.janelaCarga} onChange={e => cfg('janelaCarga', +e.target.value)}>
+                  <select className="es-ctl" key={chaveDo('janelaCarga')} ref={guardar('janelaCarga')} aria-label="Equilibrar a carga olhando" defaultValue={S.config.janelaCarga} onChange={e => cfg('janelaCarga', +e.target.value)}>
                     {[30, 60, 90, 120, 180].map(n => <option key={n} value={n}>últimos {n} dias</option>)}
                   </select>
                 </label>
@@ -302,12 +487,21 @@ function Ajustes() {
               <div className="es-aj-campos">
                 <label className="es-campo">
                   <span>Como você começa o aviso</span>
-                  <input className="es-ctl" enterKeyHint="done" key={`${versaoCfg}:${S.config.saudacao}`} aria-label="Como você começa o aviso" defaultValue={S.config.saudacao} onBlur={e => cfg('saudacao', e.target.value)} />
+                  <input className="es-ctl" enterKeyHint="done" key={equipe?.id} aria-label="Como você começa o aviso"
+                    ref={guardar('saudacao')}
+                    aria-invalid={naoSalvou.saudacao ? true : undefined}
+                    aria-describedby={naoSalvou.saudacao ? 'nao-salvou-saudacao' : undefined}
+                    defaultValue={inicial('saudacao')} onBlur={aoSair('saudacao')} />
+                  {notaDe('saudacao')}
                 </label>
                 <label className="es-campo">
                   <span>Como você termina</span>
-                  <textarea className="es-ctl" key={`${versaoCfg}:${S.config.rodape}`} aria-label="Como você termina o aviso" defaultValue={S.config.rodape} rows={3} onBlur={e => cfg('rodape', e.target.value)} />
-                  <small>{'{PRAZO}'} vira o prazo acima.</small>
+                  <textarea className="es-ctl" key={equipe?.id} aria-label="Como você termina o aviso"
+                    ref={guardar('rodape')}
+                    aria-invalid={naoSalvou.rodape ? true : undefined}
+                    aria-describedby={naoSalvou.rodape ? 'nao-salvou-rodape' : undefined}
+                    defaultValue={inicial('rodape')} rows={3} onBlur={aoSair('rodape')} />
+                  {notaDe('rodape') || <small>{'{PRAZO}'} vira o prazo acima.</small>}
                 </label>
               </div>
             </div>
@@ -413,7 +607,7 @@ function Ajustes() {
             nota={falhouLista ? 'não consegui carregar a lista' : `${lideres.length} com acesso`}>
             <div className="es-aj-pilha">
               <p className="es-prosa">
-                Só estes emails abrem o espaço do organizador, e cada um vê apenas o
+                Só estes e-mails abrem o espaço do organizador, e cada um vê apenas o
                 ministério que organiza. Quem está como <b>todos</b> vê tudo
                 e dá acesso aos outros. Voluntário não entra aqui: ele usa o link pessoal.
               </p>
@@ -462,7 +656,7 @@ function Ajustes() {
                       leitor de tela. Campo sem nome é campo que só quem construiu
                       entende. */}
                   <input className="es-ctl" enterKeyHint="done" value={novoLider} onChange={e => setNovoLider(e.target.value)} type="email"
-                    aria-label="Email de quem vai organizar"
+                    aria-label="E-mail de quem vai organizar"
                     inputMode="email" autoComplete="off" autoCapitalize="off" autoCorrect="off" spellCheck={false}
                     placeholder="e-mail de quem organiza" />
                   <select className="es-ctl" aria-label="Qual ministério essa pessoa organiza" value={equipeDoLider}
@@ -490,7 +684,10 @@ function Ajustes() {
                   cria a senha pela própria tela de entrar ("Criar ou trocar minha
                   senha"), que manda um link. */}
               <div className="es-aj-senha">
-                <h4 className="es-caixa-titulo">Sua senha</h4>
+                {/* rótulo, não título: a dobra "Quem organiza" não é um título,
+                    e um h4 aqui pulava do h2 "Funções" para o h4 (auditoria
+                    de 30/09/2026) */}
+                <p className="es-caixa-titulo">Sua senha</p>
                 <p className="es-prosa">
                   Você entra por um link no e-mail. Se preferir senha, escolha uma aqui: da
                   próxima vez, toque em <b>Prefiro entrar com senha</b> na tela de entrar.

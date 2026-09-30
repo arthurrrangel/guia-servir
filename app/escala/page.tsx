@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { apagarEvento, criarEvento, mudarStatus, salvarDia, salvarDias } from '@/lib/db';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
+import { rolarAte } from '@/components/escalas/ancora';
 import { IcCopiar, IcDado, IcSeta, IcSino } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
@@ -143,11 +144,28 @@ function Escala() {
      nascia aberto: quem tocava em "Domingo, 11 de outubro" caía numa linha
      fechada e ainda precisava abrir. */
   const [diaDoLink, setDiaDoLink] = useState('');
+  const rolou = useRef(false);
   useEffect(() => {
     const m = /^#[dp](\d{4}-\d{2}-\d{2})/.exec(window.location.hash);
     if (m) setDiaDoLink(m[1]);
+    /* o endereço pode mudar com a tela aberta (um link para outro dia na
+       mesma página). Se o alvo já está à vista, num dia aberto, o navegador
+       resolve sozinho; se o dia está fechado ou é de outro mês, a tela abre
+       o dia (e o mês) e a rolagem espera por ele, como na chegada. */
+    const mudou = () => {
+      const h = /^#[dp]((\d{4})-(\d{2})-\d{2})/.exec(window.location.hash);
+      if (!h) return;
+      const alvo = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+      if (alvo && (alvo as HTMLDetailsElement).open !== false && alvo.closest('details')?.open) return;
+      const a = +h[2], ms = +h[3];
+      if (ms < 1 || ms > 12 || a < 2020 || a > 2100) return;   // o mesmo filtro do `?m=`
+      rolou.current = false;
+      setAno(a); setMes(ms);
+      setDiaDoLink(h[1]);
+    };
+    window.addEventListener('hashchange', mudou);
+    return () => window.removeEventListener('hashchange', mudou);
   }, []);
-  const rolou = useRef(false);
 
   useEffect(() => {
     /* `?m=` VEM DE FORA E PRECISA SER CONFERIDO, NÃO SÓ RECONHECIDO.
@@ -165,13 +183,26 @@ function Escala() {
     const m = new URLSearchParams(window.location.search).get('m');
     if (m && /^\d{4}-\d{2}$/.test(m)) {
       const a = +m.slice(0, 4), s = +m.slice(5, 7);
+      if (s >= 1 && s <= 12 && a >= 2020 && a <= 2100) { setAno(a); setMes(s); return; }
+    }
+    /* sem `?m=`, o dia do link diz o mês: `/escala#d2026-11-01` abria em
+       outubro, e a rolagem ficava pendente até o líder ir a novembro por
+       conta própria, quando a página pulava 358px (auditoria de 30/09/2026) */
+    const h = /^#[dp](\d{4})-(\d{2})-\d{2}/.exec(window.location.hash);
+    if (h) {
+      const a = +h[1], s = +h[2];
       if (s >= 1 && s <= 12 && a >= 2020 && a <= 2100) { setAno(a); setMes(s); }
     }
   }, []);
+  /* a rolagem espera o dia do link abrir: `#p<data>-<posto>` só existe
+     dentro do dia aberto, e o dia aberto muda a altura da página. Rolar
+     antes deixava o sábado 31/10 no pé da tela a 1440px (auditoria de
+     30/09/2026). O resto está em `components/escalas/ancora.ts`. */
   useEffect(() => {
     if (rolou.current || !window.location.hash) return;
-    const el = document.getElementById(window.location.hash.slice(1));
-    if (el) { rolou.current = true; el.scrollIntoView({ block: 'start' }); }
+    const m = /^#[dp](\d{4}-\d{2}-\d{2})/.exec(window.location.hash);
+    if (m && diaDoLink !== m[1]) return;
+    if (rolarAte(decodeURIComponent(window.location.hash.slice(1)))) rolou.current = true;
   });
 
   async function criarOEvento() {
@@ -201,10 +232,28 @@ function Escala() {
     finally { setOcupado(false); }
   }
 
+  /* A AÇÃO CHEIA NÃO DISPARA LOGO DEPOIS DE TROCAR DE MÊS (30/09/2026). No
+     mês que já passou, o botão cheio leva ao mês de hoje; no lugar dele, no
+     mês novo, nasce "Montar o mês inteiro". Um duplo clique de costume
+     chegava a outubro e já abria "Remontar os 8 cultos". */
+  const trocouEm = useRef(0);
+  function irPara(a: number, m: number) {
+    setMes(m); setAno(a); setVerPassado(false);
+    trocouEm.current = Date.now();
+    rolou.current = true;   // trocar de mês à mão encerra a âncora do endereço
+  }
   function mover(n: number) {
     let m = mes + n, a = ano;
     if (m > 12) { m = 1; a++; } if (m < 1) { m = 12; a--; }
-    setMes(m); setAno(a); setVerPassado(false);
+    irPara(a, m);
+  }
+  const deHoje = mesDeAbrir(S, hoje);
+  /* do mês passado direto para o de hoje (um link velho de janeiro pedia
+     oito cliques até outubro), e o foco vai para o título do mês novo: quem
+     usa teclado ou leitor de tela ouve para onde foi */
+  function irParaHoje() {
+    irPara(deHoje.ano, deHoje.mes);
+    requestAnimationFrame(() => document.getElementById('titulo-do-mes')?.focus());
   }
 
   /* ------------------------------------------------------------- as ações
@@ -218,8 +267,8 @@ function Escala() {
         ? `Remontar o único culto de ${MESES[mes - 1]} que ainda não passou?`
         : `Remontar os ${futuros.length} cultos de ${MESES[mes - 1]} que ainda não passaram?`,
       texto: futuros.length === 1
-        ? 'Quem você travou e quem já confirmou não mudam.'
-        : 'Domingos e sábados do Follow. Quem você travou e quem já confirmou não mudam.',
+        ? 'Quem está fixo e quem já confirmou não mudam.'
+        : 'Domingos e sábados do Follow. Quem está fixo e quem já confirmou não mudam.',
       acao: 'Remontar',
     })) return;
     setOcupado(true);
@@ -499,6 +548,7 @@ function Escala() {
           contorno ou texto. */}
       <Cab
         comSetas
+        idTitulo="titulo-do-mes"
         rot="Escala"
         titulo={<>
           {`${nomeMes.charAt(0).toUpperCase()}${nomeMes.slice(1)} de ${ano}`}
@@ -521,10 +571,11 @@ function Escala() {
               leva para o seguinte, em vez de um botão que só responde
               "esse mês já passou" */}
           {futuros.length
-            ? <button className="es-btn es-pri" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={gerarTudo}>
+            ? <button className="es-btn es-pri" disabled={ocupado || !S.voluntarios.length || semFuncoes}
+                onClick={() => { if (Date.now() - trocouEm.current > 700) void gerarTudo(); }}>
                 Montar o mês inteiro
               </button>
-            : <button className="es-btn es-pri" onClick={() => mover(1)}>Ir para o próximo mês</button>}
+            : <button className="es-btn es-pri" onClick={irParaHoje}>Ir para {MESES[deHoje.mes - 1]}</button>}
         </>}
       />
 
@@ -571,9 +622,12 @@ function Escala() {
         )}
         <Dobra titulo="O que esses botões fazem">
           <p className="es-prosa">
-            Montar e sortear preenchem só o que está vazio: <b>quem confirmou
-            e quem você travou não se mexe</b>. Pedir, copiar e cobrar geram
-            um texto para você colar no grupo. <b>Nada é enviado daqui.</b>
+            {/* "preenchem só o que está vazio" não era verdade: o sorteio
+                refaz todo posto que não está fixo nem confirmado (`gerarDia`,
+                em lib/engine.ts). Corrigido em 30/09/2026. */}
+            Montar e sortear refazem os postos, <b>menos quem já confirmou e
+            quem está fixo</b>. Pedir, copiar e cobrar geram um texto para você
+            colar no grupo. <b>Nada é enviado daqui.</b>
           </p>
         </Dobra>
       </div>
