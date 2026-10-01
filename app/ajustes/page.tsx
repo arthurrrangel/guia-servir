@@ -215,6 +215,29 @@ function Ajustes() {
   /* o texto que o campo mostra ao nascer: o rascunho guardado, se houver */
   const inicial = (k: string) => rascunhos[k] ?? salvo(k);
 
+  /* O CAMPO SEGUE O SALVO — 01/10/2026.
+     Os campos daqui são não controlados (`defaultValue`): nascem com o valor
+     daquele instante e o React não mexe mais no que aparece. Quando o estado
+     do ministério muda DEPOIS do nascimento (recarga em segundo plano), o
+     campo ficava mostrando o valor antigo. Medido em produção: o Louvor tinha
+     "quinta-feira" salvo e o campo do prazo mostrava "véspera", o padrão do
+     código. Só muda o campo que ainda mostra o salvo de antes: o que a
+     pessoa está editando, ou o que não salvou (a nota diz que o texto está
+     guardado no aparelho), fica como está. */
+  const salvoAntes = useRef<Record<string, string>>({});
+  useEffect(() => {
+    for (const k of [...TEXTOS, 'limitePadrao', 'plantaoQtd', 'janelaCarga']) {
+      const novo = TEXTOS.includes(k) ? inicial(k) : String((S.config as any)[k] ?? '');
+      const antes = salvoAntes.current[k];
+      salvoAntes.current[k] = novo;
+      const el = campos.current[k];
+      if (!el || antes === undefined || antes === novo) continue;
+      if (document.activeElement === el || naoSalvou[k]) continue;
+      if (el.value === antes) el.value = novo;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [S.config, rascunhos]);
+
   /* devolve se gravou (01/10/2026): os grupos por área precisam saber, para
      voltar ao salvo sem remontar a seção inteira */
   async function gravar(mudancas: Record<string, any>, silencioso = false): Promise<boolean> {
