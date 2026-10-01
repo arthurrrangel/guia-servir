@@ -106,7 +106,8 @@ export default function RepertorioDoDia({ S, d, cultoId, equipeId, ocupado, pint
           </label>
         ))}
       </div>
-      <small className="es-ec-rep-nota">Vai na mensagem do grupo e na página de quem está escalado.</small>
+      {/* sem frase de rodapé: a do recado, logo acima, já diz para onde os
+          dois vão (no ar em 01/10, as duas linhas iguais uma embaixo da outra) */}
     </div>
   );
 }

@@ -238,7 +238,6 @@
 .es .es-ec-rep-tit{font-size:13px;line-height:18px;font-weight:600;color:var(--es-ink)}
 .es .es-ec-rep-campos{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3)}
 .es .es-ec-rep-campos > .es-campo{margin-bottom:0}
-.es .es-ec-rep-nota{font-size:12px;line-height:17px;color:var(--es-mudo)}
 @media (min-width:720px){
   .es .es-ec-rep-campos{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
