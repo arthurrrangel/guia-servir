@@ -661,8 +661,11 @@ export function Conexao({ aoSalvar }: { aoSalvar: () => void }) {
   );
 }
 
-export async function copiar(txt: string, aviso: (t: string) => void, rotulo = 'Copiado. É só colar no WhatsApp.') {
-  try { await navigator.clipboard.writeText(txt); aviso(rotulo); return; } catch {}
+/* devolve se copiou: quem marca "enviado" depois de copiar (Mandar nos
+   grupos, 01/10/2026) não pode marcar o que não foi para a área de
+   transferência */
+export async function copiar(txt: string, aviso: (t: string) => void, rotulo = 'Copiado. É só colar no WhatsApp.'): Promise<boolean> {
+  try { await navigator.clipboard.writeText(txt); aviso(rotulo); return true; } catch {}
   try {
     const ta = document.createElement('textarea');
     ta.value = txt; ta.readOnly = true;
@@ -671,5 +674,6 @@ export async function copiar(txt: string, aviso: (t: string) => void, rotulo = '
     const deuCerto = document.execCommand('copy');
     ta.remove();
     aviso(deuCerto ? rotulo : 'Não consegui copiar. Use "Ver a mensagem" e copie manualmente.');
-  } catch { aviso('Não consegui copiar. Use "Ver a mensagem" e copie manualmente.'); }
+    return deuCerto;
+  } catch { aviso('Não consegui copiar. Use "Ver a mensagem" e copie manualmente.'); return false; }
 }

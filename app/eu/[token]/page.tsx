@@ -13,6 +13,8 @@ import { Logo } from '@/components/Marca';
 import { quemSou, outrasAreas, organiza, faltaDizerSexo, vinculoDeste, type Identidade } from '@/lib/identidade';
 import { aviseHumano } from '@/lib/erros';
 import { pl, cont } from '@/lib/plural';
+import { lembrarVinculo, esquecerVinculo, noPrincipal } from '@/lib/meu-token';
+import { rolarAte } from '@/components/escalas/ancora';
 
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
@@ -171,6 +173,18 @@ export default function Eu() {
      trocar a que funciona no dia da campanha seria trocar de asa em pleno voo. */
   const [espaco, setEspaco] = useState<any>(null);
   const [fase, setFase] = useState<'carregando' | 'erro' | 'rede' | 'ok'>('carregando');
+  /* veio da porta do link do grupo (?porta=c|d): mostra "Não é você?" */
+  const [viaPorta, setViaPorta] = useState<'' | 'confirmar' | 'disponibilidade'>('');
+  const [slugDaPorta, setSlugDaPorta] = useState('');
+  useEffect(() => {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const v = q.get('porta');
+      setViaPorta(v === 'd' ? 'disponibilidade' : v === 'c' || v === '1' ? 'confirmar' : '');
+      const m = q.get('m') || '';
+      if (/^[a-z0-9-]{1,40}$/.test(m)) setSlugDaPorta(m);
+    } catch {}
+  }, []);
   const [ocupado, setOcupado] = useState('');
   const [flash, setFlash] = useState('');
   const [erro, setErro] = useState('');
@@ -200,12 +214,14 @@ export default function Eu() {
       s.rpc('eu_proximos_domingos'),
     ]);
     if (error) {
-      if (/link inv/i.test(error.message || '')) { if (inicial) setFase('erro'); return; }
+      /* link que não vale mais: o aparelho esquece, para o link do grupo
+         não mandar a pessoa para cá de novo (01/10/2026) */
+      if (/link inv/i.test(error.message || '')) { esquecerVinculo(token); if (inicial) setFase('erro'); return; }
       if (inicial) setFase('rede');
       else setErro('Salvou! Só não consegui atualizar a tela agora, recarregue quando tiver sinal.');
       return;
     }
-    if (!data?.length) { if (inicial) setFase('erro'); return; }
+    if (!data?.length) { esquecerVinculo(token); if (inicial) setFase('erro'); return; }
     setErro('');
     /* 16/09/2026: o aparelho passa a saber quem é a pessoa. Até aqui só quem
        entrava pelo PIN guardava o token; quem só usava o link pessoal era
@@ -262,11 +278,33 @@ export default function Eu() {
        PromiseLike, um "thenable" — tem .then e NÃO tem .catch. A forma de dois
        argumentos existe no PromiseLike e faz a mesma coisa aqui. */
     sb()!.rpc('eu_espaco', { p_token: token }).then(
-      ({ data: e }) => { if ((e as any)?.ok) setEspaco(e); },
+      ({ data: e }) => {
+        if (!(e as any)?.ok) return;
+        setEspaco(e);
+        /* 01/10/2026: o aparelho passa a saber DE QUAL ministério é este
+           token. É o que deixa o link do grupo (/confirmar/<ministério>)
+           abrir a página certa de quem serve em dois ministérios. */
+        lembrarVinculo(token, (e as any).equipe_slug);
+      },
       () => {},
     );
     setFase('ok');
   }, [token]);
+
+  /* O LINK QUE CHEGA COM ÂNCORA (#quando-posso, #confirmar), vindo da porta
+     do grupo. O navegador procura a âncora ao abrir a página, quando ela
+     ainda é só o "carregando", e desiste. Aqui a busca acontece de novo
+     quando a página existe, e segue a página enquanto ela assenta. */
+  useEffect(() => {
+    if (fase !== 'ok') return;
+    let id = '';
+    try { id = decodeURIComponent(window.location.hash.slice(1)); } catch { return; }
+    if (!id || !/^[a-z0-9-]+$/i.test(id)) return;
+    let tentativas = 0;
+    const tentar = () => { if (!rolarAte(id) && ++tentativas < 30) window.setTimeout(tentar, 100); };
+    const q = window.requestAnimationFrame(tentar);
+    return () => window.cancelAnimationFrame(q);
+  }, [fase]);
 
   useEffect(() => { void carregar(); }, [carregar]);
 
@@ -658,6 +696,24 @@ export default function Eu() {
             Quando há confirmação pendente, ela toma a primeira dobra e o fundo
             vira tinta. Quando não há, a mesma faixa em papel diz o que vem. */}
         <div id="confirmar" className={`vol-chamada ${pendentes.length ? 'age' : ''}`}>
+          {/* CHEGOU PELO LINK DO GRUPO (01/10/2026). A porta leva direto à
+              página de quem já abriu o próprio link neste celular. Num celular
+              da família, isso podia abrir a página de outra pessoa: de quem é
+              a página vem antes de tudo, e a saída junto. O ministério vem da
+              própria porta (?m=), para a linha nascer junto com o bloco e não
+              empurrar os botões depois (auditoria 3). */}
+          {!!viaPorta && !!nome && (
+            <p style={{ margin: '0 0 12px', fontSize: 14, lineHeight: '21px', color: 'inherit', opacity: 0.86 }}>
+              Página de {nome}.{' '}
+              {!!(slugDaPorta || espaco?.equipe_slug) && (
+                <a href={noPrincipal(`/equipe/${slugDaPorta || espaco?.equipe_slug}?ir=${viaPorta}`)}
+                  onClick={() => esquecerVinculo(token)}
+                  style={{ color: 'inherit', textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                  Não é você?
+                </a>
+              )}
+            </p>
+          )}
           <span className="rot">
             {pendentes.length ? 'Precisa de você' : novo ? 'Bem-vindo' : `Olá, ${primeiro}`}
           </span>
@@ -686,6 +742,7 @@ export default function Eu() {
               : novo ? 'Este endereço é seu. É aqui que a sua escala aparece, e é daqui que você avisa quando não pode.'
               : 'Quando a escala do mês sair, ela aparece aqui.'}
           </p>
+
 
           {/* A PRIMEIRA VISITA NÃO PODE SER UM BECO.
               Quem acabou de ser aprovado caía numa tela que dizia "Você não

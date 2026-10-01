@@ -12,11 +12,13 @@ import { atualizarEquipe } from '@/lib/equipes';
 import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
+import GruposPorArea from '@/components/escalas/GruposPorArea';
 import { cont } from '@/lib/plural';
 
 /* a ordem é a da página, não a alfabética: o índice é um mapa dela. */
 const SECOES = [
   { id: 'grupo', rot: 'Grupo no WhatsApp' },
+  { id: 'grupos', rot: 'Grupos por área' },
   { id: 'regras', rot: 'Regras do rodízio' },
   { id: 'aviso', rot: 'Texto do aviso' },
   { id: 'funcoes', rot: 'Funções' },
@@ -210,9 +212,11 @@ function Ajustes() {
   /* o texto que o campo mostra ao nascer: o rascunho guardado, se houver */
   const inicial = (k: string) => rascunhos[k] ?? salvo(k);
 
-  async function gravar(mudancas: Record<string, any>, silencioso = false) {
+  /* devolve se gravou (01/10/2026): os grupos por área precisam saber, para
+     voltar ao salvo sem remontar a seção inteira */
+  async function gravar(mudancas: Record<string, any>, silencioso = false): Promise<boolean> {
     const eq = equipe?.id;
-    if (!eq) return;
+    if (!eq) return false;
     for (const k of Object.keys(mudancas)) {
       if (TEXTOS.includes(k)) guardarRascunho(eq, k, String(mudancas[k]), String((salvoRef.current as any)[k] ?? ''));
     }
@@ -221,7 +225,7 @@ function Ajustes() {
     try {
       await salvarConfig(eq, enviado);
       for (const k of TEXTOS) apagarRascunhoSeIgual(eq, k, String(enviado[k] ?? ''));
-      if (equipeRef.current !== eq) return;            // o líder já foi para outro ministério
+      if (equipeRef.current !== eq) return true;       // o líder já foi para outro ministério
       setNaoSalvou(m => {
         const n = { ...m };
         for (const k of Object.keys(m)) if (String(enviado[k] ?? '') === (campos.current[k]?.value ?? '')) delete n[k];
@@ -238,8 +242,9 @@ function Ajustes() {
         }
       }
       aviso('Salvo');
+      return true;
     } catch (e: any) {
-      if (equipeRef.current !== eq) return;            // não mexe no ministério que está na tela agora
+      if (equipeRef.current !== eq) return false;      // não mexe no ministério que está na tela agora
       const texto = aviseHumano(e, 'salvar');
       const rede = /failed to fetch|networkerror|network request failed|load failed/i.test(String(e?.message || e));
       let seletorFalhou = false;
@@ -259,6 +264,7 @@ function Ajustes() {
       /* o texto tem a nota no próprio campo; o seletor, que volta sozinho
          ao valor salvo, precisa do aviso para a pessoa saber por quê */
       if (seletorFalhou && !silencioso) aviso(texto);
+      return false;
     }
   }
   const cfg = (chave: string, valor: any) => gravar({ [chave]: valor });
@@ -433,6 +439,27 @@ function Ajustes() {
               </div>
             </div>
           </Dobra>
+
+          {/* GRUPOS POR ÁREA — 01/10/2026. Logo depois do grupo geral, porque
+              é a continuação dele: o geral recebe tudo, cada área a sua parte. */}
+          <section className="es-caixa" id="grupos">
+            <div className="es-caixa-cab">
+              <h2>Grupos por área</h2>
+              <span className="es-peq es-mudo">Para mandar a escala em cada grupo do WhatsApp</span>
+            </div>
+            <div className="es-caixa-corpo">
+              <p className="es-prosa">
+                Se o ministério tem um grupo para cada área (banda, vocal, som), crie os grupos
+                e marque as funções de cada um. Na Escala, <b>Mandar nos grupos</b> monta a
+                mensagem de cada grupo só com a parte dele, com o link para cada pessoa confirmar.
+                O grupo geral continua recebendo a escala inteira.
+              </p>
+              {/* a `key` muda só com o ministério: uma falha não remonta a
+                  seção (apagava o que se digitava ao lado); quem volta ao
+                  salvo é o próprio componente */}
+              <GruposPorArea key={equipe?.id || ''} S={S} gravar={m => gravar(m, true)} aviso={aviso} />
+            </div>
+          </section>
 
           <section className="es-caixa" id="regras">
             <div className="es-caixa-cab">

@@ -46,13 +46,16 @@
 }
 
 /* o miolo do dia: blocos empilhados, um respiro só entre eles */
-.es-ec-dia-corpo{display:grid;gap:var(--es-e4);padding:var(--es-e4);min-width:0}
+.es-ec-dia-corpo{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e4);padding:var(--es-e4);min-width:0}
 .es-ec-dia-corpo > .es-campo{margin-bottom:0}
 
 /* os problemas: um aviso por linha, e o caminho até o posto no fim */
 .es-ec-probs{display:grid;gap:var(--es-e2)}
 .es-ec-probs > .es-aviso{margin-bottom:0}
-.es-ec-ir{font-weight:600;white-space:nowrap}
+/* quebra quando precisa: com nome de posto longo ("TRANSMISSÃO AO VIVO
+   (CORTE, PTZ E CÂMERAS)"), o nowrap empurrava o dia inteiro para fora da
+   tela no celular (auditoria de 01/10/2026) */
+.es-ec-ir{font-weight:600;overflow-wrap:anywhere}
 /* no toque, o "ir para" é um alvo de 44px na própria linha (tinha 17px de
    altura, colado no fim da frase) */
 @media (max-width:1023px), (hover:none), (pointer:coarse){ .es-ec-ir{display:flex;align-items:center;width:fit-content;min-height:44px} }
@@ -186,3 +189,45 @@
 .es-ec-dica{font-size:13px;line-height:19px;color:var(--es-mudo)}
 .es-ec-dica b{color:var(--es-ink-2)}
 .es-ec-falta{font-size:13px;line-height:19px;color:var(--es-ink-2)}
+
+/* ===================================================== mandar nos grupos
+   01/10/2026. Uma linha por grupo: nome e a conta dele, a marca de enviado,
+   e as duas saídas (abrir o WhatsApp com o texto, ou copiar). O texto fica
+   recolhido em "Ver o texto": quem quer conferir abre, quem confia manda. */
+.es-mg{display:grid;gap:var(--es-e3);margin-top:var(--es-e3);padding:var(--es-e4);border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup-2)}
+.es-mg-cab{display:grid;gap:2px}
+/* recebe o foco quando o painel abre: contorno só para quem veio pelo teclado */
+.es-mg-cab:focus{outline:none}
+.es-mg-cab:focus-visible{outline:2px solid var(--es-foco);outline-offset:4px}
+.es-mg-cab b{font-size:15px;line-height:22px;font-weight:600}
+.es-mg-cab span{font-size:13px;line-height:19px;color:var(--es-ink-2);max-width:72ch}
+.es-mg-lista{list-style:none;margin:0;padding:0;display:grid}
+.es-mg-linha{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:var(--es-e1) var(--es-e3);
+  padding:var(--es-e3) 0;border-top:1px solid var(--es-linha);
+}
+.es-mg-linha:first-child{border-top:0;padding-top:0}
+.es-mg-tit{display:grid;gap:1px;min-width:0}
+.es-mg-tit b{font-size:14px;line-height:20px;font-weight:600;overflow-wrap:anywhere}
+.es-mg-tit small{font-size:12px;line-height:17px;color:var(--es-mudo)}
+.es-mg-est{justify-self:end;grid-column:2}
+/* as saídas ficam sempre na última coluna: sem o selo de enviado, elas caíam
+   na do meio e terminavam 12px antes das outras linhas (auditoria 3) */
+.es-mg-acoes{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--es-e1);grid-column:3}
+.es-mg-texto{grid-column:1 / -1}
+.es-mg-texto > summary{display:inline-flex;align-items:center;min-height:32px;font-size:13px;line-height:18px;color:var(--es-ink-2);cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.es-mg-texto > summary::-webkit-details-marker{display:none}
+.es-mg-texto > summary:focus-visible{outline:2px solid var(--es-foco);outline-offset:2px}
+.es-mg-texto[open] > summary{margin-bottom:var(--es-e2)}
+.es-mg-vazio .es-mg-tit b{color:var(--es-mudo)}
+.es-mg-dica{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2)}
+.es-mg-dica a{color:var(--es-ink);text-underline-offset:3px}
+@media (max-width:719px){
+  .es-mg{padding:var(--es-e3)}
+  /* no celular, uma coisa por linha: o nome do grupo inteiro em cima, a
+     marca de enviado embaixo dele, e as saídas por último. Lado a lado, a
+     marca espremia o nome em três linhas. */
+  .es-mg-linha{grid-template-columns:minmax(0,1fr)}
+  .es-mg-est{justify-self:start;grid-column:auto}
+  .es-mg-acoes{justify-content:flex-start;grid-column:auto}
+}

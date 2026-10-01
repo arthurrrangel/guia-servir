@@ -134,3 +134,33 @@
 .es-aj-trocas > .es-btn:hover svg{color:var(--es-ink)}
 /* sem credenciais, a conexão ocupa o lugar da caixa */
 .es-aj-conexao > .es-estado{margin:0;width:100%}
+
+/* ======================================================= grupos por área
+   01/10/2026. Cada grupo é um nome e as funções dele, marcadas como fichas.
+   Ficha marcada é preta com o tique (o estado não depende só da cor); a
+   desmarcada é contorno. Altura de toque de 44px, como todo o resto. */
+.es-gz{display:grid;gap:var(--es-e5);margin-top:var(--es-e5)}
+.es-gz:focus{outline:none}
+.es-gz-grupo{display:grid;gap:var(--es-e3);padding-top:var(--es-e5);border-top:1px solid var(--es-linha)}
+.es-gz-grupo:first-child{padding-top:0;border-top:0}
+.es .es-gz-nome{max-width:360px;margin-bottom:0}
+.es-gz-pe{margin-left:-10px}
+.es-gz-rot{margin:0;font-size:13px;line-height:18px;color:var(--es-mudo)}
+.es-gz-rot.es-gz-falta{color:var(--es-warn)}
+.es-gz-fns{display:flex;flex-wrap:wrap;gap:var(--es-e2)}
+.es-gz-fn{
+  display:inline-flex;align-items:center;gap:6px;min-height:var(--es-h-peq);padding:0 12px;
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r2);background:var(--es-sup);color:var(--es-ink-2);
+  font:inherit;font-size:13px;line-height:18px;font-weight:500;cursor:pointer;text-align:left;
+  transition:background var(--es-t),border-color var(--es-t),color var(--es-t);
+}
+.es-gz-fn svg{width:14px;height:14px;flex:none}
+.es-gz-fn:hover{border-color:var(--es-linha-3);color:var(--es-ink)}
+.es-gz-fn[aria-pressed="true"]{background:var(--es-preto);border-color:var(--es-preto);color:#fff}
+.es-gz-fn[aria-pressed="true"]:hover{background:var(--es-preto-toque);border-color:var(--es-preto-toque);color:#fff}
+.es-gz-fn:focus-visible{outline:2px solid var(--es-foco);outline-offset:2px}
+.es-gz-fn:disabled{cursor:not-allowed;opacity:.6}
+.es-gz-novo{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--es-e2) var(--es-e3);padding-top:var(--es-e5);border-top:1px solid var(--es-linha)}
+.es-gz-novo:first-child{padding-top:0;border-top:0}
+.es .es-gz-novo .es-campo{flex:1 1 220px;max-width:360px;margin-bottom:0}
+.es-gz-geral{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2)}

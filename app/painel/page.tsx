@@ -13,8 +13,9 @@ import { leituraDoDia } from '@/components/escalas/leitura';
 import { rolarAte } from '@/components/escalas/ancora';
 import { aviseHumano } from '@/lib/erros';
 import {
-  Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgEscala, nomeDe, vol,
+  Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgConfirmar, msgEscala, nomeDe, vol,
   problemas, cultosAte, resumoDia, addDias, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
+  linkDoVoluntario,
 } from '@/lib/engine';
 import { pl, cont } from '@/lib/plural';
 
@@ -187,7 +188,7 @@ function CincoRegras({ aberta = false }: { aberta?: boolean }) {
 }
 
 function Painel() {
-  const { S, recarregar, aviso, base } = useApp();
+  const { S, recarregar, aviso, base, equipe } = useApp();
   const [salvando, setSalvando] = useState('');
   const [otimista, setOtimista] = useState<{ f: string; st: Status } | null>(null);
   /* a âncora do endereço (`/painel#cobrar`): o navegador procura o alvo
@@ -309,7 +310,7 @@ function Painel() {
     ? { urg: 'fogo', titulo: vagas === 1 ? `Falta gente ${noDia}` : `Faltam ${vagas} pessoas ${noDia}`,
         sub: `${vagas === 1 ? '1 função está' : `${vagas} funções estão`} sem ninguém em ${fmtLongo(prox)}. Vaga escondida vira furo no culto: resolva antes de publicar.`,
         acao: { tipo: 'link', label: 'Resolver agora', href: linkDoDia },
-        sec: { label: 'Copiar assim mesmo', on: () => copiar(msgEscala(S, prox), aviso) } }
+        sec: { label: 'Copiar assim mesmo', on: () => copiar(msgEscala(S, prox, { link: linkDoVoluntario(base, equipe?.slug) }), aviso) } }
     : furos
     ? { urg: 'fogo', titulo: furos === 1 ? `Alguém furou ${noDia}` : `${furos} pessoas furaram ${noDia}`,
         sub: `Em ${fmtLongo(prox)}. Chame o plantão ou remaneje na escala antes que o culto chegue.`,
@@ -375,7 +376,7 @@ function Painel() {
         </div>
         <div className="es-passo-acoes">
           {passo.acao.tipo === 'link' ? <Link href={passo.acao.href} className="es-btn es-pri">{passo.acao.label}</Link>
-            : passo.acao.tipo === 'copiar' ? <button className="es-btn es-pri" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />{passo.acao.label}</button>
+            : passo.acao.tipo === 'copiar' ? <button className="es-btn es-pri" onClick={() => copiar(msgEscala(S, prox, { link: linkDoVoluntario(base, equipe?.slug) }), aviso)}><IcCopiar />{passo.acao.label}</button>
             : <button className="es-btn es-pri" onClick={() => rolarPara('cobrar')}><IcSino />{passo.acao.label}</button>}
           {passo.sec && <button className="es-btn es-txt" onClick={passo.sec.on}>{passo.sec.label}</button>}
         </div>
@@ -433,9 +434,14 @@ function Painel() {
             <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem resposta" n={pendentes.length}
               sub="O botão abre o WhatsApp da pessoa com a cobrança já escrita. Você só aperta enviar."
               acoes={
+                /* ERA "COPIAR TODAS" (até 01/10/2026): juntava a cobrança de
+                   cada pessoa, cada uma com o LINK PESSOAL dela, num texto só.
+                   Colado no privado de alguém, entregava a chave dos outros;
+                   colado no grupo, a de todo mundo. A cobrança coletiva agora
+                   é a do grupo: os nomes e o link do ministério, sem chave. */
                 <button className="es-btn es-peq" onClick={() => copiar(
-                  pendentes.map(([, s]) => msgCobranca(S, s.vid!, prox, base)).join('\n\n· · ·\n\n'), aviso,
-                  'Cobranças copiadas. Cole no privado de cada um.')}><IcCopiar />Copiar todas</button>
+                  msgConfirmar(S, prox, linkDoVoluntario(base, equipe?.slug)), aviso,
+                  'Cobrança copiada. Cole no grupo.')}><IcCopiar />Cobrar no grupo</button>
               }>
               <div className="es-fila">
                 {pendentes.map(([fn, s]) => {
@@ -459,9 +465,9 @@ function Painel() {
 
           {dia && (
             <Dobra titulo="A mensagem que vai para o grupo" nota="como sai no WhatsApp">
-              <pre className="es-msg">{msgEscala(S, prox)}</pre>
+              <pre className="es-msg">{msgEscala(S, prox, { link: linkDoVoluntario(base, equipe?.slug) })}</pre>
               <div className="es-linha" style={{ marginTop: 12 }}>
-                <button className="es-btn es-peq" onClick={() => copiar(msgEscala(S, prox), aviso)}><IcCopiar />Copiar a mensagem</button>
+                <button className="es-btn es-peq" onClick={() => copiar(msgEscala(S, prox, { link: linkDoVoluntario(base, equipe?.slug) }), aviso)}><IcCopiar />Copiar a mensagem</button>
               </div>
             </Dobra>
           )}

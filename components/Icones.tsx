@@ -65,6 +65,10 @@ export const IcMarca = ({ className }: P) => (
 export const IcGrupo = ({ className }: P) => (
   <svg {...base} className={className}><circle cx="8" cy="9" r="3"/><path d="M2.5 19c.7-2.8 2.9-4.3 5.5-4.3s4.8 1.5 5.5 4.3"/><circle cx="17" cy="9.5" r="2.4"/><path d="M16 14.8c2.3.2 4 1.6 4.7 3.9"/></svg>
 );
+/* enviar: o avião de papel, sem marca de aplicativo nenhum (01/10/2026) */
+export const IcEnviar = ({ className }: P) => (
+  <svg {...base} className={className}><path d="M21 3 3.5 10.6l7 2.9L13.4 20.5 21 3Z"/><path d="m10.5 13.5 4.6-4.6"/></svg>
+);
 export const IcMais = ({ className }: P) => (
   <svg {...base} className={className}><path d="M12 5.5v13M5.5 12h13"/></svg>
 );

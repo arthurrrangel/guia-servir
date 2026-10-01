@@ -5,6 +5,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import { Aviso } from '@/components/Ui';
 import { IcBusca, IcSeta } from '@/components/Icones';
 import { emNome } from '@/lib/nome';
+import { lembrarVinculo, esquecerVinculo, tokenDoMinisterio, ultimoToken } from '@/lib/meu-token';
 
 /* ATENÇÃO — como a identificação funciona aqui (não simplificar de volta).
    A entrada antiga era: escolher o nome numa lista + digitar os 4 últimos
@@ -15,7 +16,7 @@ import { emNome } from '@/lib/nome';
    O PIN nunca é guardado em texto: vai como sha256(pin + token) na coluna
    pin_hash, e o banco trava depois de 8 tentativas erradas no dia. */
 
-const K_TOKEN = 'escala.meu-token';
+/* o token do aparelho mora em lib/meu-token.ts (com o ministério de cada um) */
 
 /* DE ONDE VEM O NOME INTEIRO.
 
@@ -182,7 +183,37 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
   const marcadas = Object.keys(fNiveis).length;
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(fEmail.trim());
 
-  useEffect(() => { try { setTokenSalvo(localStorage.getItem(K_TOKEN) || ''); } catch {} }, []);
+  /* o token deste ministério, se o aparelho souber; senão o último aberto,
+     como sempre foi (01/10/2026: quem serve em dois ministérios abria o do
+     outro) */
+  useEffect(() => {
+    const t = tokenDoMinisterio(slug);
+    if (t) { setTokenSalvo(t); return; }
+    /* o token antigo, sem ministério anotado, só vira "já entrei neste
+       aparelho" se o banco disser que é DESTE ministério (auditoria de
+       01/10/2026: a porta da Mídia oferecia a página do Louvor) */
+    const u = ultimoToken();
+    if (!u || ehDemo()) return;
+    let vivo = true;
+    sb()?.rpc('eu_espaco', { p_token: u }).then(
+      ({ data }: any) => {
+        if (vivo && data?.ok && data.equipe_slug === slug) { lembrarVinculo(u, slug); setTokenSalvo(u); }
+      },
+      () => {},
+    );
+    return () => { vivo = false; };
+  }, [slug]);
+
+  /* VEIO DO LINK DO GRUPO (01/10/2026). /confirmar/<ministério> e
+     /disponibilidade/<ministério> mandam para cá quem o aparelho ainda não
+     conhece, com ?ir=. Depois do PIN, a pessoa cai no ponto da página que o
+     link prometia, e não no topo. */
+  const [ir, setIr] = useState<'' | 'confirmar' | 'disponibilidade'>('');
+  useEffect(() => {
+    const v = new URLSearchParams(window.location.search).get('ir');
+    if (v === 'confirmar' || v === 'disponibilidade') setIr(v);
+  }, []);
+  const ancora = ir === 'confirmar' ? '#confirmar' : ir === 'disponibilidade' ? '#quando-posso' : '';
 
   const ehDemo = () => process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).has('demo');
@@ -357,6 +388,20 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
       ? 'Estes postos são para quem já sabe a função. Se você quer se voluntariar e aprender, chama no (21) 99594-6491 que a liderança te encaixa.'
       : '');
     setFNiveis(servico ? { 'ESTACIONAMENTO 2': 'titular' } : { 'FOTO': 'reserva' });
+    /* ?demo=lista: a tela de "Quem é você?", que é onde cai quem chega pelo
+       link do grupo num aparelho que ainda não conhece (01/10/2026). Nomes
+       inventados: esta variante existe para a auditoria e para captura. */
+    if (new URLSearchParams(window.location.search).get('demo') === 'lista') {
+      const P = (id: string, nome: string, pin = true) =>
+        ({ voluntario_id: id, primeiro_nome: nome.split(' ')[0], nome_completo: nome, tem_pin: pin, tem_tel: true });
+      setAreas([
+        { area: 'PROJEÇÃO', gente: [P('d1', 'Ana Beatriz Lima'), P('d2', 'Bruno Carvalho')] },
+        { area: 'FOTO', gente: [P('d3', 'Carla Mendes', false), P('d4', 'Daniel Rocha')] },
+        { area: 'TRANSMISSÃO (CORTE + PTZ)', gente: [P('d5', 'Eduarda Nunes')] },
+      ]);
+      setFase('inicio');
+      return;
+    }
     setFase('cadastro');
   }, [slug]);
 
@@ -407,8 +452,8 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
   }
 
   function entrou(token: string) {
-    try { localStorage.setItem(K_TOKEN, token); } catch {}
-    location.href = `/eu/${token}`;
+    lembrarVinculo(token, slug);
+    location.href = `/eu/${token}${ancora}`;
   }
 
   /* `valor` existe porque o auto-envio do 4º dígito chama esta função de
@@ -493,7 +538,7 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
        /eu só havia "Trocar meu PIN", que não descreve o que ela ia fazer.
        O token já está salvo no aparelho ANTES do passo do PIN: se ela fechar a
        tela aqui, não perde nada — volta pelo "já entrei neste aparelho". */
-    try { localStorage.setItem(K_TOKEN, res.token); } catch {}
+    lembrarVinculo(res.token, slug);
     setTokenNovo(res.token);
     setEnviadoPor((res.nome || '').trim() || fNome.trim());
     setPinNovo(''); setOcupado(false); setFase('pin-primeiro');
@@ -566,6 +611,8 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     : fase === 'cadastro' ? 'Leva menos de um minuto. Depois você recebe a escala e responde por aqui.'
     : fase === 'enviado' ? `Seu cadastro chegou para a liderança do ${equipe}.`
     : fase === 'pin-primeiro' ? 'Falta uma coisa só: um PIN de 4 números para você voltar aqui.'
+    : ir === 'confirmar' ? 'Ache seu nome e toque nele para confirmar a sua escala.'
+    : ir === 'disponibilidade' ? 'Ache seu nome e toque nele para marcar os seus dias.'
     : 'Ache seu nome na sua área e toque nele.';
 
   return (
@@ -613,8 +660,8 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
           <>
             {!!tokenSalvo && (
               <div className="linha" style={{ marginBottom: 14, gap: 8 }}>
-                <a className="btn claro cresce" href={`/eu/${tokenSalvo}`}>Já entrei neste aparelho, abrir minha página</a>
-                <button className="mini fantasma" onClick={() => { try { localStorage.removeItem(K_TOKEN); } catch {} setTokenSalvo(''); }}>
+                <a className="btn claro cresce" href={`/eu/${tokenSalvo}${ancora}`}>Já entrei neste aparelho, abrir minha página</a>
+                <button className="mini fantasma" onClick={() => { esquecerVinculo(tokenSalvo); setTokenSalvo(''); }}>
                   Não sou eu
                 </button>
               </div>

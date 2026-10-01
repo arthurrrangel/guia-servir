@@ -5,14 +5,16 @@ import { apagarEvento, criarEvento, mudarStatus, salvarDia, salvarDias } from '@
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
 import { rolarAte } from '@/components/escalas/ancora';
-import { IcCopiar, IcDado, IcSeta, IcSino } from '@/components/Icones';
+import { IcCopiar, IcDado, IcEnviar, IcSeta, IcSino } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
   candidatos, cargaDoMes, diaLongo, diasDoMes, esqueceOsDias, fmtDia, fmtLongo, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
+  gruposValidos, linkDoVoluntario,
 } from '@/lib/engine';
+import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -564,7 +566,7 @@ function Escala() {
           : contas.pendentes ? 'Falta a confirmação de quem foi escalado.'
           : 'Mês fechado.'}
         acoes={<>
-          <button className="es-btn" onClick={() => copiar(msgColeta(S, ano, mes, base), aviso, 'Pedido copiado. Cole no grupo.')}>
+          <button className="es-btn" onClick={() => copiar(msgColeta(S, ano, mes, base, linkDoVoluntario(base, equipe?.slug, 'disponibilidade')), aviso, 'Pedido copiado. Cole no grupo.')}>
             Pedir a disponibilidade
           </button>
           {/* mês que já passou inteiro não tem o que montar: a ação cheia
@@ -971,7 +973,15 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
 
 function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFuncoes, aviso,
   gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsCorpo) {
-  const cobranca = msgConfirmar(S, d);
+  /* 01/10/2026: toda mensagem que vai para o grupo fecha com o link do
+     ministério (nunca o de alguém), que leva cada pessoa à própria página */
+  const { base, equipe } = useApp();
+  const link = linkDoVoluntario(base, equipe?.slug);
+  const cobranca = msgConfirmar(S, d, link);
+  /* dia que já passou não se manda: lá "Copiar a escala" volta a ser a de
+     contorno, como sempre foi */
+  const temGrupos = !passado && gruposValidos(S).length > 0;
+  const [mandar, setMandar] = useState(false);
 
   return (
     <>
@@ -987,9 +997,27 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
       <div className="es-linha">
         {preenchidos ? (
           <>
-            <button className="es-btn es-peq" onClick={() => copiar(msgEscala(S, d), aviso, 'Escala copiada. Cole no grupo.')}>
+            {/* MANDAR NOS GRUPOS (01/10/2026). Com grupos por área nos
+                Ajustes, mandar por grupo vira a ação de contorno do dia e
+                copiar a escala inteira desce para texto; sem grupos, fica
+                como sempre foi, e "Mandar nos grupos" aparece em texto para
+                quem ainda não sabe que dá. */}
+            {temGrupos && (
+              <button className="es-btn es-peq" aria-expanded={mandar} aria-controls={mandar ? `mg${d}` : undefined}
+                onClick={() => setMandar(v => !v)}>
+                <IcEnviar />Mandar nos grupos
+              </button>
+            )}
+            <button className={`es-btn es-peq${temGrupos ? ' es-txt' : ''}`}
+              onClick={() => copiar(msgEscala(S, d, { link }), aviso, 'Escala copiada. Cole no grupo.')}>
               <IcCopiar />Copiar a escala
             </button>
+            {!temGrupos && !passado && (
+              <button className="es-btn es-txt es-peq" aria-expanded={mandar} aria-controls={mandar ? `mg${d}` : undefined}
+                onClick={() => setMandar(v => !v)}>
+                <IcEnviar />Mandar nos grupos
+              </button>
+            )}
             <button className="es-btn es-txt es-peq" disabled={ocupado || !S.voluntarios.length || semFuncoes} onClick={() => gerarUm(d)}>
               <IcDado />Sortear de novo
             </button>
@@ -1008,6 +1036,11 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           </button>
         )}
       </div>
+
+      {mandar && !passado && !!preenchidos && !!equipe && (
+        <MandarNosGrupos S={S} d={d} base={base} slug={equipe.slug} equipeId={equipe.id}
+          aviso={aviso} id={`mg${d}`} />
+      )}
 
       {/* OS PROBLEMAS APONTAM PARA A LINHA. Eram frases soltas: o líder lia
           "Fulano está em PROJEÇÃO e ILUMINAÇÃO ao mesmo tempo" e caçava as

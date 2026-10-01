@@ -934,5 +934,119 @@ console.log('\n31. Quem recusou o dia nao e sugerido para cobrir OUTRA vaga dele
      E.quemPodeCobrir(S4, D, 'PROJEÇÃO').map(x => x.nome).join(','));
 }
 
+console.log('\n32. Grupos por área: cada grupo recebe a parte dele, e o link nunca é a chave de ninguém');
+/* 01/10/2026 — pedido do Arthur: a escala sai para cada grupo do WhatsApp
+   (banda, vocal, som) só com a parte daquele grupo, e com o link para cada
+   pessoa confirmar. O link que vai no grupo é UM por ministério: o token de
+   cada pessoa é a chave dela e não pode ir para um grupo. */
+{
+  const S = base(TIME());
+  /* cada pessoa com a sua chave, para a prova de que nenhuma vaza ser de verdade */
+  S.voluntarios.forEach((x, i) => { x.token = `segredo${i}x${x.nome.toLowerCase()}`; });
+  const D = E.domingosDoMes(2026, 8)[0];
+  E.gerarDia(S, D);
+  S.config.grupos = [
+    { id: 'g1', nome: 'Foto e vídeo', funcoes: ['FOTO', 'FILMAGEM', 'EDIÇÃO'] },
+    { id: 'g2', nome: 'Transmissão', funcoes: ['HEAD', 'TRANSMISSÃO'] },
+    { id: 'g3', nome: '   ', funcoes: ['PROJEÇÃO'] },             // sem nome
+    { id: 'g4', nome: 'Fantasma', funcoes: ['NÃO EXISTE'] },        // sem função que exista
+  ];
+  ok(E.gruposValidos(S).map(g => g.id).join(',') === 'g1,g2',
+     'grupo sem nome ou sem função existente fica de fora', E.gruposValidos(S).map(g => g.id).join(','));
+
+  const link = E.linkDoVoluntario('https://escalas.guiaservir.com', 'midia');
+  ok(link === 'https://guiaservir.com/confirmar/midia', 'o link sai no endereço público, por ministério', link);
+  ok(E.linkDoVoluntario('http://127.0.0.1:3500', 'midia', 'disponibilidade') === 'http://127.0.0.1:3500/disponibilidade/midia',
+     'fora do domínio da igreja o link usa o próprio endereço');
+  ok(E.linkDoVoluntario('https://guiaservir.com', '') === '', 'sem ministério não há link');
+
+  const g1 = S.config.grupos[0];
+  S.escalas[D].plantao = [S.voluntarios[0].id];
+  S.escalas[D].obs = 'chegar 18h';
+  const m = E.msgEscala(S, D, { link, grupo: g1 });
+  ok(/\(\d\d\/\d\d\) · Foto e vídeo/.test(m), 'o título diz de qual grupo é a mensagem', m.split('\n')[1]);
+  ok(m.includes('FOTO') && m.includes('FILMAGEM') && m.includes('EDIÇÃO'), 'as funções do grupo estão lá');
+  ok(!m.includes('PROJEÇÃO') && !m.includes('HEAD') && !m.includes('TRANSMISSÃO'), 'e as de fora do grupo não', m);
+  ok(!m.includes('PLANTÃO'), 'o plantão, que é do dia inteiro, vai só na escala completa');
+  ok(m.includes('chegar 18h'), 'o recado do dia vai em todo grupo');
+  ok(m.trim().endsWith('Confirma por aqui: ' + link), 'o link fecha a mensagem', m.slice(-120));
+  ok(S.voluntarios.every(x => x.token && !m.includes(x.token)), 'nenhum token de ninguém na mensagem');
+
+  const cheia = E.msgEscala(S, D, { link });
+  ok(cheia.includes('PROJEÇÃO') && cheia.includes('PLANTÃO') && cheia.endsWith('Confirma por aqui: ' + link),
+     'a escala completa leva tudo, com o plantão e o link');
+  ok(!E.msgEscala(S, D).includes('por aqui'), 'sem link pedido, a mensagem é a de sempre');
+
+  /* a vaga do grupo aparece no grupo: é ali que alguém pode cobrir */
+  S.escalas[D].slots['FOTO'].status = 'recusado';
+  ok(E.msgEscala(S, D, { grupo: g1 }).includes('PRECISO DE ALGUÉM'), 'a vaga da área aparece na mensagem da área');
+
+  /* no Follow, só as funções do grupo que existem no sábado */
+  const SAB = E.sabadosDoFollow(2026, 8)[1];
+  E.gerarDia(S, SAB);
+  const doSab = E.gruposDoDia(S, SAB).find(x => x.grupo.id === 'g2');
+  ok(doSab && doSab.funcoes.length === 0, 'no sábado, o grupo de funções só de domingo fica sem posto',
+     JSON.stringify(doSab && doSab.funcoes.map(x => x.nome)));
+  const doDom = E.gruposDoDia(S, D).find(x => x.grupo.id === 'g1');
+  ok(doDom.funcoes.length === 3 && doDom.conta.recusados === 1 && doDom.conta.vagas === 0 && doDom.conta.preenchidos === 2,
+     'a conta do grupo no domingo, com as palavras da tela: 3 postos, 1 não pode, 2 preenchidos',
+     JSON.stringify(doDom.conta));
+  /* furou e vaga sem ninguém são contas separadas, como no resumo do dia */
+  S.escalas[D].slots['FILMAGEM'].status = 'furou';
+  S.escalas[D].slots['EDIÇÃO'].vid = null;
+  const c2 = E.contaDoRecorte(S, D, g1);
+  ok(c2.furos === 1 && c2.vagas === 1 && c2.recusados === 1 && c2.preenchidos === 0,
+     'furou, sem ninguém e não pode, cada um no seu número', JSON.stringify(c2));
+  E.gerarDia(S, D);
+
+  /* a marca de "enviado" só acusa mudança de verdade */
+  const a1 = E.assinaturaDoEnvio(S, D, g1);
+  S.escalas[D].slots['FILMAGEM'].status = 'confirmado';
+  ok(E.assinaturaDoEnvio(S, D, g1) === a1, 'alguém confirmar não pede mensagem nova');
+  S.escalas[D].slots['FILMAGEM'].vid = S.voluntarios[4].id === S.escalas[D].slots['FILMAGEM'].vid
+    ? S.voluntarios[3].id : S.voluntarios[4].id;
+  ok(E.assinaturaDoEnvio(S, D, g1) !== a1, 'trocar a pessoa de um posto pede');
+  {
+    const SR = base([v('Ana', { 'A': 'titular' }), v('Bia', { 'B': 'titular' })],
+      [{ id: 'fa', nome: 'A', simultanea: true, ordem: 1, ativa: true }, { id: 'fb', nome: 'B', simultanea: true, ordem: 2, ativa: true }]);
+    const DR = E.domingosDoMes(2026, 8)[0];
+    E.gerarDia(SR, DR);
+    const antes = E.assinaturaDoEnvio(SR, DR);
+    SR.funcoes.reverse(); SR.funcoes[0].ordem = 1; SR.funcoes[1].ordem = 2;
+    ok(E.assinaturaDoEnvio(SR, DR) === antes, 'reordenar os postos não acusa mudança');
+  }
+
+  /* a cobrança no grupo leva o mesmo link, e nenhum token */
+  S.escalas[D].slots['EDIÇÃO'].status = 'pendente';
+  const cob = E.msgConfirmar(S, D, link);
+  ok(cob.includes(link) && S.voluntarios.every(x => x.token && !cob.includes(x.token)),
+     'a cobrança do grupo leva o link do ministério, nunca o de alguém', cob);
+  const col = E.msgColeta(S, 2026, 10, 'https://guiaservir.com',
+    E.linkDoVoluntario('https://guiaservir.com', 'midia', 'disponibilidade'));
+  ok(col.includes('por este link:\nhttps://guiaservir.com/disponibilidade/midia'), 'o pedido de disponibilidade leva o link de marcar os dias');
+
+  /* o rodapé padrão antigo ("no seu link pessoal"), guardado por quem já
+     salvou os Ajustes, não pode ir ao lado do link do grupo, que é o mesmo
+     para todos; o texto que o líder escreveu fica como está */
+  S.config.rodape = E.RODAPE_ANTIGO;
+  ok(!E.msgEscala(S, D, { link }).includes('link pessoal') && E.msgEscala(S, D, { link }).includes('Confirma até'),
+     'o rodapé antigo vira o novo quando a mensagem leva o link do grupo');
+  ok(E.msgEscala(S, D).includes('link pessoal'), 'sem o link do grupo, o rodapé antigo fica como estava');
+  S.config.rodape = 'Confirma no seu link pessoal até {PRAZO}. Quem não puder, avisa agora e já indica quem cobre. ';
+  const serv = E.msgEscala(S, D, { link });
+  ok(!serv.includes('link pessoal') && serv.includes('Confirma até') && serv.includes('já indica quem cobre.'),
+     'a variação do Serviço do Culto (migração 12) também vira, e o resto da frase fica', serv.slice(-200));
+  S.config.rodape = 'Qualquer dúvida, fala comigo.';
+  ok(E.msgEscala(S, D, { link }).includes('Qualquer dúvida, fala comigo.'), 'rodapé escrito pelo líder nunca é trocado');
+
+  /* a função é guardada pelo id: renomear não tira ela do grupo */
+  const S2 = base([v('Ana', { 'TECLADO': 'titular' })],
+    [{ id: 'f9', nome: 'TECLADO', simultanea: true, ordem: 1, ativa: true }]);
+  S2.config.grupos = [{ id: 'gb', nome: 'Banda', funcoes: ['f9'] }];
+  S2.funcoes[0].nome = 'TECLAS';
+  ok(E.gruposValidos(S2).length === 1 && E.funcaoNoGrupo(S2.config.grupos[0], S2.funcoes[0]),
+     'renomear a função não tira ela do grupo');
+}
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

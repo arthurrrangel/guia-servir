@@ -15,7 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 import {
   addDias, cultosAte, diasDoMes, fmtDia, funcoesAtivas, funcoesDoDia, gerarMes, msgColeta, msgEscala,
   tipoDoDia, nomeDe, MESES, Estado, decisaoDoRobo, avisarDiaSemNinguem, bancoAtrasado, proxMes,
-  cobrarDoDia,
+  cobrarDoDia, linkDoVoluntario,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
 
@@ -314,7 +314,7 @@ async function rodar(req: Request) {
           equipe: e.nome,
           email: await enviar(paraEquipe(lideres, e.id),
             `${e.nome} · dia 20: pedir indisponibilidade de ${MESES[prox.mes - 1]}`,
-            `Cole no grupo do ministério:\n\n${msgColeta(S, prox.ano, prox.mes, SITE)}`),
+            `Cole no grupo do ministério:\n\n${msgColeta(S, prox.ano, prox.mes, SITE, linkDoVoluntario(SITE, e.slug, 'disponibilidade'))}`),
         });
       } catch (err) {
         falhas.push(`${e.nome}: ${String((err as Error)?.message || err).slice(0, 120)}`);
@@ -478,7 +478,7 @@ async function rodar(req: Request) {
            Ou seja, o único sinal que a plataforma sabe emitir sumia
            justamente na falha que o `maxDuration` existe para tornar visível.
            Enviando por equipe, um corte custa os que faltaram, não todos. */
-        const texto = dias.map(d => msgEscala(S, d)).join('\n\n' + '-'.repeat(24) + '\n\n');
+        const texto = dias.map(d => msgEscala(S, d, { link: linkDoVoluntario(SITE, e.slug) })).join('\n\n' + '-'.repeat(24) + '\n\n');
         blocos.push({ id: e.id, nome: e.nome, vagas, texto });
         envios.push({ equipe: e.nome,
           email: await enviar(paraEquipe(lideres, e.id),

@@ -41,6 +41,14 @@ export function estadoDemo(): Estado {
        só veria o layout deles em produção, com gente de verdade. */
     F('APOIO NO BANHEIRO', 10, true, ['domingo'], 'F'),
   ];
+  /* 01/10/2026: grupos por área, para o harness mostrar "Mandar nos grupos"
+     já configurado. APOIO NO BANHEIRO fica de fora de propósito: é o caso
+     da função que só vai no grupo geral. */
+  S.config.grupos = [
+    { id: 'gd1', nome: 'Mídia · Projeção e luz', funcoes: ['f1', 'f2'] },
+    { id: 'gd2', nome: 'Mídia · Foto e vídeo', funcoes: ['f3', 'f4', 'f5'] },
+    { id: 'gd3', nome: 'Mídia · Transmissão', funcoes: ['f6', 'f7', 'f8', 'f9'] },
+  ];
   S.voluntarios = [
     P('Arthur Rangel', { 'PROJEÇÃO': 'titular' }, true),
     /* Amanda informou, Giovana não: é o par que faz os avisos do topo do

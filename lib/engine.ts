@@ -283,7 +283,23 @@ export type Config = {
   /* desmarcar com menos de X horas do culto conta como "em cima da hora".
      Não bloqueia nada: entra no histórico e dispara a busca por substituto. */
   horasTardio: number;
+  /* os grupos do WhatsApp por área (banda, vocal, som...), com as funções de
+     cada um. Mora dentro de `config.dados`, que já é JSON: não pede coluna
+     nova nem migração. Ausente = o ministério só tem o grupo geral. */
+  grupos?: GrupoZap[];
 };
+/* GRUPOS POR ÁREA NO WHATSAPP — 01/10/2026.
+
+   Pedido do Arthur: "o gestor copia uma única escala e manda só no grupo
+   geral. O sistema poderia gerar a mensagem de cada grupo/departamento, já
+   com a parte dele". O WhatsApp não deixa site nenhum postar nem escolher um
+   grupo comum, então o sistema faz a parte que dá: monta o texto de cada
+   grupo e abre o WhatsApp com ele pronto; o líder só toca no grupo.
+
+   `funcoes` guarda o id da função (o nome é a segunda chave, para o harness e
+   para linha antiga sem id): renomear "Teclado" para "Teclas" não pode tirar a
+   função do grupo em silêncio. Uma função pode estar em mais de um grupo. */
+export type GrupoZap = { id: string; nome: string; funcoes: string[] };
 export type Estado = {
   /* CAMPO FANTASMA, AGORA DECLARADO — auditoria 29/08/2026.
      `ponte.ts` e `demo.ts` escreviam isto com `(S as any).temAcesso = ...`:
@@ -301,12 +317,14 @@ export type Estado = {
   equipe?: string;
 };
 
+/* o rodapé padrão até 01/10/2026 (ver msgEscala) */
+export const RODAPE_ANTIGO = 'Confirma no seu link pessoal até {PRAZO}. Quem não puder, avisa agora e já indica o substituto.';
 export const CONFIG_PADRAO: Config = {
   limitePadrao: 2, janelaCarga: 90, plantaoQtd: 1,
   prazoConfirmacao: 'quinta-feira',
   horasTardio: 48,
   saudacao: 'Boa noite galera',
-  rodape: 'Confirma no seu link pessoal até {PRAZO}. Quem não puder, avisa agora e já indica o substituto.',
+  rodape: 'Confirma até {PRAZO}. Quem não puder, avisa agora e já indica o substituto.',
 };
 
 export const estadoVazio = (): Estado => ({
@@ -1535,7 +1553,7 @@ export function problemas(S: Estado, data: string): Problema[] {
    WhatsApp por pessoa, no painel) ou era sobre DISPONIBILIDADE do mês, que é
    outra pergunta. Cobrar confirmação de um domingo, no grupo, de uma vez, não
    tinha botão em lugar nenhum, e é o que o líder faz na terça de manhã. */
-export function msgConfirmar(S: Estado, data: string) {
+export function msgConfirmar(S: Estado, data: string, link = '') {
   const dia = S.escalas[data];
   const faltam = funcoesDoDia(S, data)
     .map(f => dia?.slots?.[f.nome])
@@ -1546,9 +1564,12 @@ export function msgConfirmar(S: Estado, data: string) {
   const quem = nomes.length === 1 ? nomes[0]
     : nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
   const dia_ = tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'domingo';
-  return `${quem}: vocês estão na escala d${dia_ === 'domingo' ? 'e domingo' : 'o Follow de sábado'} (${fmtDia(data)}) `
-    + `e ainda falta confirmar. Entrem no link de vocês e toquem em EU VOU. `
-    + `Se não puder, marca "não posso" que eu chamo outra pessoa, sem problema.`;
+  const cab = `${quem}: vocês estão na escala d${dia_ === 'domingo' ? 'e domingo' : 'o Follow de sábado'} (${fmtDia(data)}) `
+    + `e ainda falta confirmar. `;
+  const fim = `Se não puder, marca "não posso" que eu chamo outra pessoa, sem problema.`;
+  return link
+    ? `${cab}Toquem em EU VOU por aqui:\n${link}\n\n${fim}`
+    : `${cab}Entrem no link de vocês e toquem em EU VOU. ${fim}`;
 }
 
 /* A COR DO DIA, EM UM LUGAR SÓ — 20/09/2026.
@@ -1595,15 +1616,117 @@ export function resumoDia(S: Estado, data: string) {
 }
 
 /* ------------------------------------------------------------- mensagens --- */
-export function msgEscala(S: Estado, data: string) {
+/* ------------------------------------------------ grupos por área e link ---
+
+   O LINK QUE VAI NO GRUPO NÃO É O LINK PESSOAL. O link `/eu/<token>` é a
+   chave da pessoa: quem abre confirma, recusa e mexe na disponibilidade dela.
+   Um link de cada um numa mensagem de grupo entregaria a chave de todo mundo
+   para o grupo inteiro. O que vai no grupo é UM link por ministério
+   (`/confirmar/<ministério>`): no celular que já abriu o próprio link ele leva
+   direto à página da pessoa; nos outros, cai na porta da equipe, onde ela se
+   identifica pelo PIN. Ver `components/PortaDoVoluntario.tsx`. */
+const chaveDaFuncao = (f: Funcao) => f.id || f.nome;
+export const funcaoNoGrupo = (g: GrupoZap, f: Funcao) =>
+  g.funcoes.includes(chaveDaFuncao(f)) || g.funcoes.includes(f.nome);
+
+/** Os grupos que dá para usar: com nome e com ao menos uma função que existe. */
+export function gruposValidos(S: Estado): GrupoZap[] {
+  const lista = Array.isArray(S.config.grupos) ? S.config.grupos : [];
+  return lista
+    .filter(g => !!g && typeof g.nome === 'string' && !!g.nome.trim()
+      && Array.isArray(g.funcoes) && S.funcoes.some(f => f.ativa !== false && funcaoNoGrupo(g, f)))
+    /* grupo gravado sem id (à mão, ou por versão antiga) ganha um pelo nome:
+       sem isso, a chave da lista e a marca de "enviado" ficavam repartidas */
+    .map(g => (g.id ? g : { ...g, id: 'nome:' + g.nome.trim() }));
+}
+
+/* A CONTA DE UM RECORTE DO DIA, COM AS PALAVRAS DA TELA. O dia diz
+   "1 não pode", "1 furou", "2 sem resposta", "1 sem ninguém" (leitura.ts);
+   a linha do grupo não pode chamar o mesmo posto por outro nome. */
+export type ContaDoRecorte = {
+  postos: number; preenchidos: number;
+  vagas: number; recusados: number; furos: number; semResposta: number;
+};
+export function contaDoRecorte(S: Estado, data: string, grupo?: GrupoZap): ContaDoRecorte {
+  const dia = S.escalas[data];
+  const c: ContaDoRecorte = { postos: 0, preenchidos: 0, vagas: 0, recusados: 0, furos: 0, semResposta: 0 };
+  for (const f of funcoesDoDia(S, data)) {
+    if (grupo && !funcaoNoGrupo(grupo, f)) continue;
+    c.postos++;
+    const sl = dia?.slots?.[f.nome];
+    if (!sl?.vid) { c.vagas++; continue; }
+    if (sl.status === 'recusado') { c.recusados++; continue; }
+    if (sl.status === 'furou') { c.furos++; continue; }
+    c.preenchidos++;
+    if ((sl.status || 'pendente') === 'pendente') c.semResposta++;
+  }
+  return c;
+}
+
+export type GrupoDoDia = { grupo: GrupoZap; funcoes: Funcao[]; conta: ContaDoRecorte };
+/** Cada grupo válido com a parte dele NESTE dia (o Follow não tem todos os postos). */
+export function gruposDoDia(S: Estado, data: string): GrupoDoDia[] {
+  const doDia = funcoesDoDia(S, data);
+  return gruposValidos(S).map(grupo => ({
+    grupo,
+    funcoes: doDia.filter(f => funcaoNoGrupo(grupo, f)),
+    conta: contaDoRecorte(S, data, grupo),
+  }));
+}
+
+/** O endereço público: quem está em escalas.guiaservir.com manda guiaservir.com, que é o que todo mundo conhece. */
+export function sitePublico(base: string) {
+  try {
+    const u = new URL(base);
+    /* o endereço da Vercel (escala-midia-*.vercel.app) também: o voluntário
+       é reconhecido em guiaservir.com, não no endereço técnico do líder */
+    return /(^|\.)guiaservir\.com$/i.test(u.hostname) || /\.vercel\.app$/i.test(u.hostname)
+      ? 'https://guiaservir.com' : u.origin;
+  } catch { return (base || '').replace(/\/+$/, ''); }
+}
+/** O link do grupo: um só por ministério, nunca o token de ninguém. */
+export function linkDoVoluntario(base: string, slug: string | null | undefined,
+  para: 'confirmar' | 'disponibilidade' = 'confirmar') {
+  if (!base || !slug) return '';
+  return `${sitePublico(base)}/${para}/${encodeURIComponent(slug)}`;
+}
+
+/* O QUE FOI MANDADO, PARA SABER SE MUDOU DEPOIS. Só entra quem está em cada
+   posto e o recado: a pessoa confirmar muda o texto ("(confirmou)") mas não
+   pede mensagem nova; trocar alguém ou abrir uma vaga pede. */
+export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
+  const dia = S.escalas[data];
+  const partes: string[] = [];
+  for (const f of funcoesDoDia(S, data)) {
+    if (grupo && !funcaoNoGrupo(grupo, f)) continue;
+    const sl = dia?.slots?.[f.nome];
+    const fora = !sl?.vid || sl.status === 'recusado' || sl.status === 'furou';
+    /* pela chave da função, e em ordem: renomear ou reordenar postos não
+       muda quem foi chamado, e não pode acusar "mudou depois do envio" */
+    partes.push(`${f.id || f.nome}=${fora ? '-' : sl!.vid}`);
+  }
+  partes.sort();
+  if (!grupo) partes.push('p=' + [...(dia?.plantao || [])].sort().join(','));
+  partes.push('o=' + (dia?.obs || ''));
+  let h = 5381;
+  for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
+  return h.toString(36);
+}
+
+export function msgEscala(S: Estado, data: string,
+  opts: { link?: string; grupo?: GrupoZap } = {}) {
   const dia = S.escalas[data] || { slots: {}, plantao: [], obs: '' };
+  const g = opts.grupo;
   /* `dia.evento` e não só `data`: sem ele a mensagem do grupo saía dizendo
      "Escala de domingo (15/10)" numa QUINTA de evento. A tela já acertava,
      porque passa o evento; a mensagem ficou para trás quando a 54 criou o
      terceiro tipo de dia, e é ela que vai para o WhatsApp de todo mundo. */
   const L: string[] = [S.config.saudacao,
-    `${tituloDoCulto(data, dia.evento)} (${fmtDia(data)})`, ''];
+    `${tituloDoCulto(data, dia.evento)} (${fmtDia(data)})${g ? ` · ${g.nome.trim()}` : ''}`, ''];
   for (const f of funcoesDoDia(S, data)) {
+    /* no recorte de um grupo, só as funções dele; a vaga aberta continua
+       aparecendo, e é justamente ali que alguém pode cobrir */
+    if (g && !funcaoNoGrupo(g, f)) continue;
     const sl = dia.slots?.[f.nome];
     L.push(f.nome);
     /* mostrar quem já confirmou é o empurrão mais barato que existe: o
@@ -1615,13 +1738,24 @@ export function msgEscala(S: Estado, data: string) {
     else L.push(`${nomeDe(S, sl.vid)} (falta confirmar)`);
     L.push('');
   }
-  if (dia.plantao?.length) {
+  /* o plantão cobre o dia inteiro, não uma área: vai só na escala completa */
+  if (!g && dia.plantao?.length) {
     L.push('PLANTÃO (entra se alguém furar)');
     dia.plantao.forEach(p => L.push(nomeDe(S, p)));
     L.push('');
   }
   if (dia.obs) { L.push(dia.obs); L.push(''); }
-  L.push((S.config.rodape || '').replace('{PRAZO}', S.config.prazoConfirmacao));
+  /* quem já salvou os Ajustes alguma vez guardou o rodapé padrão ANTIGO,
+     que fala em "link pessoal". Ao lado do link do grupo (que é o mesmo para
+     todos), ele vira o novo; texto que o líder escreveu fica como está. */
+  /* pela primeira frase, e não pelo texto inteiro: o Serviço do Culto nasceu
+     com outra variação do padrão antigo ("...já indica quem cobre.", migração
+     12), e um espaço no fim já fazia a comparação exata falhar (auditoria 4) */
+  const rodape = opts.link
+    ? (S.config.rodape || '').replace(/^\s*Confirma no seu link pessoal até \{PRAZO\}\.\s*/, 'Confirma até {PRAZO}. ').trim()
+    : (S.config.rodape || '');
+  L.push(rodape.replace('{PRAZO}', S.config.prazoConfirmacao));
+  if (opts.link) L.push(`Confirma por aqui: ${opts.link}`);
   return L.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
 
@@ -1640,13 +1774,16 @@ export function msgCobranca(S: Estado, vid: string, data: string, base: string) 
     + `Confirma no seu link até ${S.config.prazoConfirmacao}?\n${base}/eu/${v?.token}#confirmar`;
 }
 
-export function msgColeta(S: Estado, ano: number, mes: number, _base: string) {
+export function msgColeta(S: Estado, ano: number, mes: number, _base: string, link = '') {
   const doms = domingosDoMes(ano, mes).map(fmtDia).join(', ');
   const sabs = sabadosDoFollow(ano, mes).map(fmtDia).join(', ');
   return `${S.config.saudacao}\n\nVou montar a escala de ${MESES[mes - 1]}. Domingos: ${doms}.`
     + (sabs ? `\nFollow (sábado): ${sabs}.` : '') + `\n\n`
-    + `Entra no seu link pessoal e marca só os dias em que você NÃO pode. `
-    + `Quem não marcar nada entra no rodízio normal.\n\nSe você quer aprender uma função nova, me chama que eu encaixo você como dupla de treino.`;
+    + (link
+      ? `Marca só os dias em que você NÃO pode, por este link:\n${link}\n`
+      : `Entra no seu link pessoal e marca só os dias em que você NÃO pode. `)
+    + `Quem não marcar nada entra no rodízio normal.`
+    + `\n\nSe você quer aprender uma função nova, me chama que eu encaixo você como dupla de treino.`;
 }
 
 /* ------------------------------------------- auditoria do que foi declarado
