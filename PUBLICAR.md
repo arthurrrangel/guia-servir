@@ -183,6 +183,12 @@ publicou: você torceu.
   commit — o que está no ar deixa de ter um sha que o explique. Só vale como
   socorro, com a árvore limpa e igual à origem, e dizendo isso em voz alta.
 - **Deploy fora do git.** O que está no ar tem que ter um commit.
+- **Confiar em `schema_versao` para dizer o que está na produção.** A 55 encheu
+  a régua com 1..55 sem conferir, e a 42 (nome inteiro na lista da equipe), a
+  45 e a 46 nunca tinham entrado. Em 19/09 a casca de /equipe saiu confiando
+  nessa régua e a lista voltou ao primeiro nome. Antes de apagar um "plano B"
+  que espera uma migração, rode `scripts/impressao-digital.sql` nos dois
+  bancos e compare (a 101 nasceu assim, em 01/10).
 - **Refazer o build de um commit que já não é o mais novo.** Em 01/10 o build
   do `089d117` caiu no teste de tempo (`engine-tempo`, que oscila na Vercel) e
   foi refeito pelo `create_deployment` com o id dele. Nesse meio tempo outra
