@@ -18,6 +18,8 @@ import { rolarAte } from '@/components/escalas/ancora';
 /* 103 · troca, função nova e agenda do ministério */
 import TrocaDoVoluntario from '@/components/escalas/TrocaDoVoluntario';
 import FuncoesDoVoluntario from '@/components/escalas/FuncoesDoVoluntario';
+/* 104 · o aviso no celular */
+import AvisoNoCelular from '@/components/escalas/AvisoNoCelular';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
 
 type Item = {
@@ -1117,6 +1119,8 @@ export default function Eu() {
             Nome e função, sem telefone: a pessoa não precisa ligar para
             ninguém, precisa saber com quem vai trabalhar. */}
         <Instalar token={token} />
+        {/* 104 · ligar o aviso no celular (só aparece com as chaves no Vercel) */}
+        {trocasOk && <AvisoNoCelular token={token} avisar={avisar} errar={errar} />}
 
         {gente.length > 1 && (
           <section className="vol-secao">

@@ -303,10 +303,14 @@ caso('o aviso de banco atrasado nao promete mais que o robo volta sozinho', () =
   assert.equal(daEscala.length, 1, 'ha exatamente um cron para /api/cron')
   assert.equal(daEscala[0].schedule, '0 12 * * *',
     'uma execucao por dia: a "proxima" e amanha, e amanha nao e dia 20 nem 26 nem quinta')
-  /* e nenhum cron do outro sistema aponta para dentro das escalas */
+  /* e nenhum cron do outro sistema aponta para dentro das escalas.
+     104 · o lembrete do aviso no celular é um cron das escalas com rota
+     própria (/api/cron/lembretes): ele só MANDA aviso, não monta, não coleta
+     e não cobra, então não muda nada do que este caso mede sobre /api/cron.
+     Entra na lista pelo nome exato, e nenhum outro caminho de escalas. */
   for (const c of vercel.crons.filter(c => c.path !== '/api/cron')) {
-    assert.ok(c.path.startsWith('/api/demandas/'),
-      `cron inesperado em ${c.path}: so /api/cron e os do sistema de demandas`)
+    assert.ok(c.path.startsWith('/api/demandas/') || c.path === '/api/cron/lembretes',
+      `cron inesperado em ${c.path}: so /api/cron, /api/cron/lembretes e os do sistema de demandas`)
   }
 })
 

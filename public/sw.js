@@ -94,3 +94,42 @@ self.addEventListener('fetch', e => {
     })());
   }
 });
+
+/* O AVISO NO CELULAR · 104, 01/10/2026
+
+   O servidor manda o aviso cifrado (web push); o navegador acorda este
+   arquivo e ele só mostra. Título, texto e endereço vêm prontos de
+   lib/aviso.ts. Tocar no aviso abre a página da pessoa: se ela já está
+   aberta numa aba ou no app instalado, é essa que ganha o foco. */
+self.addEventListener('push', e => {
+  let m = {};
+  try { m = e.data ? e.data.json() : {}; } catch { m = { corpo: e.data ? e.data.text() : '' }; }
+  const titulo = m.titulo || 'GUIA Servir';
+  e.waitUntil(self.registration.showNotification(titulo, {
+    body: m.corpo || '',
+    tag: m.tag || undefined,
+    renotify: !!m.tag,
+    icon: '/icone-192.png',
+    badge: '/icone-192.png',
+    data: { url: m.url || '/eu' },
+  }));
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const alvo = new URL((e.notification.data && e.notification.data.url) || '/eu', self.location.origin);
+  /* só abre endereço desta casa (ou do endereço principal da igreja) */
+  const casa = alvo.origin === self.location.origin || /^https:\/\/(www\.|escalas\.)?guiaservir\.com$/.test(alvo.origin);
+  const url = casa ? alvo.href : self.location.origin + '/eu';
+  e.waitUntil((async () => {
+    const abertas = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of abertas) {
+      if (c.url.split('#')[0] === url.split('#')[0]) {
+        try { await c.focus(); } catch {}
+        try { if ('navigate' in c) await c.navigate(url); } catch {}
+        return;
+      }
+    }
+    await self.clients.openWindow(url);
+  })());
+});

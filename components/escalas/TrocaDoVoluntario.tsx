@@ -28,6 +28,17 @@ import {
 
 const primeiro = (n: string | null | undefined) => (n || '').trim().split(/\s+/)[0] || 'A pessoa';
 const chaveDaVaga = (v: { culto_id: string; funcao_id: string }) => `${v.culto_id}\u0000${v.funcao_id}`;
+/* 104 · o aviso no celular do outro lado da troca. Melhor-esforço: a troca já
+   aconteceu no banco; se o aviso não sair, a pessoa vê o pedido ao abrir a
+   página, como antes. O servidor decide se há aviso (um por pedido). */
+const avisarTroca = (token: string, troca: string, evento: 'pedido' | 'resposta') => {
+  try {
+    void fetch('/api/aviso/troca', {
+      method: 'POST', headers: { 'content-type': 'application/json' }, keepalive: true,
+      body: JSON.stringify({ token, troca, evento }),
+    }).catch(() => {});
+  } catch { /* nada */ }
+};
 
 type Props = {
   token: string;
@@ -69,6 +80,7 @@ export default function TrocaDoVoluntario(p: Props) {
     if (error) { p.errar(aviseHumano(error, 'responder')); return; }
     const r = data as any;
     if (!r?.ok) { p.errar(erroAoResponder(r)); await p.aoMudar(); return; }
+    avisarTroca(p.token, t.id, 'resposta');
     p.avisar(aceita
       ? `Pronto. A vaga de ${t.funcao} é sua, já confirmada.`
       : `Registrado. ${primeiro(t.outro)} vê a resposta ao abrir a página.`);
@@ -243,6 +255,7 @@ function PainelPedir(p: Props & { vaga: Vaga; quando: string; porta: string }) {
     if (error) { p.errar(aviseHumano(error, 'pedir')); return; }
     const r = data as any;
     if (!r?.ok) { p.errar(erroAoPedir(r, c.nome, p.responsavel)); return; }
+    if (typeof r.id === 'string') avisarTroca(p.token, r.id, 'pedido');
     setPedidos(xs => [...xs, c.voluntario_id]);
     p.avisar(`Pedido enviado a ${primeiro(c.nome)}. Avise pelo WhatsApp.`);
     await p.aoMudar();
