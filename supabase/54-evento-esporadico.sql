@@ -928,10 +928,13 @@ begin
       else
         /* o teste cria a propria gente. Depender do dado que existe foi
            exatamente o que fez este caso nunca rodar. */
-        insert into voluntarios (nome, telefone, equipe_id, ativo)
+        /* 01/10/2026 · com o sexo que o posto pede (48). O `limit 1` acima
+           não tem ordem, e cair num posto de um sexo só com gente sem sexo
+           informado reprovava o arquivo ao acaso no escala-banco.sh. */
+        insert into voluntarios (nome, telefone, equipe_id, ativo, sexo)
           values ('Confirmado Cinquentaequatro',
                   '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0'),
-                  v_eq, true)
+                  v_eq, true, (select f.exige_sexo from funcoes f where f.id = v_f))
           returning id into v_v;
         perform salvar_dia(v_eq, v_data, '', jsonb_build_array(jsonb_build_object(
           'funcao_id', v_f, 'voluntario_id', v_v, 'status', 'pendente')), '{}'::uuid[]);
@@ -1065,10 +1068,14 @@ begin
       /* e o placar da escala passa a ser RELATIVO: o que importa é que nada
          sumiu, não que o número seja 1 */
       select count(*) into v_esc_antes from escalacoes where culto_id = v_dom;
-      insert into voluntarios (nome, telefone, equipe_id, ativo)
+      /* 01/10/2026 · com o sexo que o posto pede (48): o `limit 1` acima não
+         tem ordem, e cair em BANHEIRO FEMININO ou GABINETE E BANHEIRO
+         MASCULINO com a vítima sem sexo reprovava o arquivo ao acaso no
+         escala-banco.sh (medido: 2 em 6 rodadas). */
+      insert into voluntarios (nome, telefone, equipe_id, ativo, sexo)
         values ('Vitima Cinquentaequatro',
                 '21' || lpad((floor(random()*900000000)+100000000)::text, 9, '0'),
-                v_vitima, true)
+                v_vitima, true, (select f.exige_sexo from funcoes f where f.id = v_fn2))
         returning id into v_vol2;
       if v_fn2 is not null and v_vol2 is not null
          and not exists (select 1 from escalacoes e where e.culto_id = v_dom and e.funcao_id = v_fn2) then

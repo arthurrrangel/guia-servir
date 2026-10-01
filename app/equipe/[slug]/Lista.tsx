@@ -440,6 +440,10 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     if (codigo === 'EMAIL_INVALIDO') return 'Confira o e-mail, ou deixe em branco.';
     if (codigo === 'JA_CADASTRADO')
       return 'Esse WhatsApp já está cadastrado. Ache seu nome na lista e entre por ele.';
+    /* 102 · cadastro que existe e está inativo: não está na lista, então
+       "ache seu nome" era um beco */
+    if (codigo === 'NAO_LIBERADO')
+      return 'Esse WhatsApp já tem cadastro aqui, esperando a liderança liberar. Seu nome aparece na lista assim que liberarem. Se já faz tempo, fale com quem lidera a área.';
     if (codigo === 'MUITOS_CADASTROS') return 'Muitos cadastros agora. Tente de novo daqui a pouco.';
     return 'Não consegui entrar. Fale com quem organiza a escala do ministério.';
   }

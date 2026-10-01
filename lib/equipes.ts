@@ -67,6 +67,9 @@ export type AreaVisao = {
   vagas: number | null;
   furos: number; recusados: number; pendentes: number;
   candidaturas_novas: number;
+  /* 102 · cadastro pela lista da equipe que ninguém liberou. Também quer
+     entrar. Opcional: banco sem a 102 não manda a coluna. */
+  esperando_liberacao?: number;
 };
 
 export async function visaoGeral(): Promise<AreaVisao[]> {

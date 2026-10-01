@@ -171,6 +171,8 @@ export async function decidir(id: string, status: StatusCand, nota?: string) {
 export type Painel = {
   voluntarios: number; funcoes: number; candidaturas_novas: number;
   aguardando_conversa: number; sem_conferir: number; sem_disponibilidade: number;
+  /* 102 · vínculo inativo que ninguém liberou. Opcional: banco sem a 102 não manda. */
+  esperando_liberacao?: number;
   vagas_pendentes: number; funcoes_sem_gente: number;
 };
 export async function painelDoMinisterio(equipeId: string): Promise<Painel | null> {

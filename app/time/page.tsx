@@ -13,7 +13,7 @@ import { IcBusca, IcMais, IcSeta, IcX } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import {
-  Nivel, SEXOS, confirmada, filaDeConferencia, funcoesAtivas, hojeISO,
+  Nivel, SEXOS, confirmada, esperaLiberacao, filaDeConferencia, funcoesAtivas, hojeISO,
   msgConvite, pendenciasDeSexo, saudeDoTime,
 } from '@/lib/engine';
 import { telefoneOk } from '@/lib/nome';
@@ -298,8 +298,13 @@ function Time() {
   /* DOIS GRUPOS: quem espera a sua conferência e o time conferido, cada um
      numa seção. Desde 30/09/2026 a linha diz a situação da pessoa numa
      pílula ao lado do nome, só quando há o que dizer. */
-  const esperando = ordenados.filter(v => v.conferido === false);
-  const conferidos = ordenados.filter(v => v.conferido !== false);
+  /* 102 · TRÊS, COM QUEM ESPERA LIBERAÇÃO NO ALTO. Quem se cadastrou pela
+     lista e ninguém liberou não aparece na lista da equipe nem entra no
+     sorteio, e a tela chamava isso de "pausado" quando a pessoa já tinha o
+     nível conferido: o Elias esperou um mês no Louvor assim. */
+  const liberar = ordenados.filter(esperaLiberacao);
+  const esperando = ordenados.filter(v => !esperaLiberacao(v) && v.conferido === false);
+  const conferidos = ordenados.filter(v => !esperaLiberacao(v) && v.conferido !== false);
 
   /* OS NÚMEROS DA FAIXA: só o que esta tela já calcula. Frágil é a função
      que não está "ok" no diagnóstico lá de baixo; o vermelho fica para
@@ -335,13 +340,13 @@ function Time() {
      "conferido" em todas as do "Time conferido": o título do grupo já diz, e
      a repetição era o que a decisão de 08/09 tinha tirado. Fica a pílula do
      que difere do grupo: aguardando, pausado, furos. */
-  const situacao = (ativo: boolean, novo: boolean, nFuros: number): { tom: Tom; txt: string } | null =>
-    !ativo ? (novo ? { tom: 'warn', txt: 'aguardando' } : { tom: 'neutro', txt: 'pausado' })
+  const situacao = (ativo: boolean, aguardando: boolean, nFuros: number): { tom: Tom; txt: string } | null =>
+    !ativo ? (aguardando ? { tom: 'warn', txt: 'aguardando' } : { tom: 'neutro', txt: 'pausado' })
     : nFuros > 0 ? { tom: 'bad', txt: `${nFuros} ${pl(nFuros, 'furo', 'furos')}` }
     : null;
 
   /* a fila de um grupo: a linha abre a pessoa logo abaixo dela */
-  const listaDe = (grupo: typeof ordenados) => (
+  const listaDe = (grupo: typeof ordenados, noGrupoDeLiberar = false) => (
     <div className="es-fila es-colunas" style={COLUNAS}>
       <div className="es-fila-cab" aria-hidden="true">
         <span>Pessoa</span><span className="es-n">Carga</span><span />
@@ -354,7 +359,10 @@ function Time() {
         /* limiteMes nulo = a pessoa segue o padrão da equipe. Sem esse
            fallback a linha virava "1/" e o select ficava sem opção marcada. */
         const limite = v.limiteMes ?? S.config.limitePadrao;
-        const sit = situacao(v.ativo, novo, est.furos);
+        const aguardando = esperaLiberacao(v);
+        /* no grupo "Esperando liberação" o título já diz: a pílula só repetiria */
+        const sit0 = situacao(v.ativo, aguardando, est.furos);
+        const sit = noGrupoDeLiberar && sit0?.txt === 'aguardando' ? null : sit0;
         return (
           <Fragment key={v.id}>
             <button type="button" className="es-item es-tm-linha" onClick={() => alternar(v.id)}
@@ -388,8 +396,12 @@ function Time() {
                 <div className="es-caixa">
                   <div className="es-caixa-cab">
                     <p className="es-peq es-mudo">
-                      {est.carga} escala{est.carga === 1 ? '' : 's'} em {S.config.janelaCarga} dias
-                      {est.parado > 60 && est.carga === 0 && <> · há muito tempo sem servir</>}
+                      {aguardando
+                        ? <>Ainda não aparece na lista da equipe nem entra no sorteio.</>
+                        : <>
+                            {est.carga} escala{est.carga === 1 ? '' : 's'} em {S.config.janelaCarga} dias
+                            {est.parado > 60 && est.carga === 0 && <> · há muito tempo sem servir</>}
+                          </>}
                     </p>
                     {/* AS AÇÕES DA PESSOA, NA VOZ DO LÍDER. 08/09/2026. Eram
                         cinco botões em quatro trajes, em quatro linhas no
@@ -415,10 +427,13 @@ function Time() {
                          o que resolve: liberar. Conferir o nível vem DEPOIS, e isso
                          também torna inalcançável pela tela o estado
                          "conferido mas nunca ativado", que é o que faria a marca de
-                         cima dizer "pausado" para quem nunca entrou. */
+                         cima dizer "pausado" para quem nunca entrou.
+                         102: o estado já existia, de antes desta regra (o Elias, no
+                         Louvor, desde 04/09). Desde a 102 quem decide entre Liberar e
+                         Reativar é `liberado_em`, e não `conferido`. */
                       if (!v.ativo) return (
                         <div className="es-linha es-tm-acoes">
-                          <button type="button" className="es-btn" onClick={() => mudar(v.id, { ativo: true })}>{novo ? 'Liberar' : 'Reativar'}</button>
+                          <button type="button" className="es-btn" onClick={() => mudar(v.id, { ativo: true })}>{aguardando ? 'Liberar' : 'Reativar'}</button>
                           <button type="button" className="es-btn es-txt es-perigo" onClick={() => remover(v.id, v.nome)}>Remover</button>
                         </div>
                       );
@@ -684,6 +699,13 @@ function Time() {
             </div>
           </Vazio>
         </div>
+      )}
+
+      {!!liberar.length && (
+        <Secao id="liberar" titulo="Esperando liberação" n={liberar.length}
+          sub="Se cadastraram pela lista da equipe. Até você liberar, o nome não aparece na lista nem entra no sorteio.">
+          {listaDe(liberar, true)}
+        </Secao>
       )}
 
       {!!esperando.length && (

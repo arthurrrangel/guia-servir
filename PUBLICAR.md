@@ -216,3 +216,14 @@ publicou: você torceu.
   `extensions`, e `dem_ajustar` não o alcançava. Ler o banco de produção
   (`select` no SQL Editor) continua permitido e é o que separa "acho" de
   "medi".
+- **`create temp table` dentro de migração.** No SQL Editor do Supabase ela
+  dispara o "Run and enable RLS", que acrescenta um `ALTER ... ENABLE ROW LEVEL
+  SECURITY` DEPOIS do commit, numa tabela que o `on commit drop` já levou: o
+  editor mostra erro com a migração inteira aplicada (a 101, em 01/10). Guarde
+  o "antes" num `do` (variável, ou md5 conferido no começo) em vez de tabela
+  temporária. A 102 já nasceu assim.
+- **Teste de migração que escolhe linha com `limit 1` sem `order by`.** A
+  ordem física muda com o autovacuum, e o teste reprova ao acaso. Em 01/10 a
+  conferência da 54 caía num posto de um sexo só (48) com gente sem sexo
+  informado: 2 de 6 rodadas do `escala-banco.sh`. Quem cria gente para um
+  posto escolhido assim dá a ela o sexo que o posto pede.

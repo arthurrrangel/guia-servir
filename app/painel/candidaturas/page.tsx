@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Shell, { useApp } from '@/components/Shell';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Tom } from '@/components/escalas/Pecas';
 import { IcSeta } from '@/components/Icones';
-import { msgConvite, vol } from '@/lib/engine';
+import { esperaLiberacao, msgConvite, vol } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 import { cont, pl } from '@/lib/plural';
 import {
@@ -68,7 +68,7 @@ const nomeInteiro = (n: string) => (n || '').trim();
 const COLUNAS = { '--es-cols': 'minmax(0,1fr) 200px 96px 24px' } as React.CSSProperties;
 
 function Fila() {
-  const { equipe, aviso, recarregar } = useApp();
+  const { equipe, aviso, recarregar, S } = useApp();
   const [lista, setLista] = useState<Candidatura[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
@@ -104,6 +104,11 @@ function Fila() {
      dias. Não é enfeite: é o único número desta tela que estraga a jornada
      de verdade. */
   const urge = maisAntiga >= 3;
+  /* 102 · QUEM SE CADASTROU PELA LISTA DA EQUIPE também espera você, e não
+     é candidatura: é vínculo que nasceu inativo esperando "Liberar" no Time.
+     Antes não aparecia em lugar nenhum (o Elias, no Louvor, um mês). */
+  const soltas = (S?.voluntarios || []).filter(esperaLiberacao);
+  const nEsperando = abertas.length + soltas.length;
 
   const props = {
     equipeNome: equipe?.nome || '',
@@ -141,11 +146,13 @@ function Fila() {
            duas pessoas esperando (medido em 30/09/2026) */
         titulo={carregando && !lista.length ? 'Quem quer entrar no time'
           : erro ? 'Não consegui carregar quem está esperando'
-          : abertas.length === 0 ? 'Ninguém esperando resposta'
-            : abertas.length === 1 ? '1 pessoa esperando você'
-              : `${abertas.length} pessoas esperando você`}
+          : nEsperando === 0 ? 'Ninguém esperando resposta'
+            : nEsperando === 1 ? '1 pessoa esperando você'
+              : `${nEsperando} pessoas esperando você`}
         meta={carregando && !lista.length ? undefined
           : erro ? erro
+          : abertas.length === 0 && soltas.length > 0
+            ? 'Se cadastraram pela lista da equipe. Libere no Time: até lá o nome não aparece na lista.'
           : abertas.length === 0
             ? 'Quem se cadastrar pelo site aparece aqui na hora, e você recebe a pessoa por aqui mesmo.'
             : maisAntiga === 0
@@ -189,6 +196,24 @@ function Fila() {
         </Secao>
       )}
 
+      {soltas.length > 0 && (
+        <Secao titulo="Esperando liberação" n={soltas.length}
+          sub="Cadastro pela lista da equipe. Até você liberar no Time, o nome não aparece na lista nem entra no sorteio.">
+          <div className="es-fila">
+            {soltas.map(v => (
+              <Link key={v.id} href="/time#liberar" className="es-item"
+                aria-label={`${v.nome}: liberar no Time`}>
+                <span className="es-c-tit">
+                  <b>{v.nome}</b>
+                  {!!Object.keys(v.funcoes).length && <small>{Object.keys(v.funcoes).join(', ')}</small>}
+                </span>
+                <span className="es-c-acao"><IcSeta /></span>
+              </Link>
+            ))}
+          </div>
+        </Secao>
+      )}
+
       {mostra && noTime.length > 0 && (
         <Secao titulo="Já entraram no time" sub={cont(noTime.length, 'pessoa', 'pessoas')}>
           {filaDe(noTime, false)}
@@ -199,7 +224,7 @@ function Fila() {
           vazia. Quem não conseguiu LER a lista tem outra pergunta, e ver o
           passo a passo de chegada ali reforça a leitura errada de que não
           tem ninguém. */}
-      {!carregando && !erro && lista.length === 0 && (
+      {!carregando && !erro && lista.length === 0 && soltas.length === 0 && (
         <Secao titulo="Como chega gente aqui">
           <div className="es-fila">
             <div className="es-item es-com-n">

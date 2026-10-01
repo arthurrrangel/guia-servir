@@ -56,6 +56,10 @@ function hojePorExtenso() {
    toda, sem trocar de ministério cinco vezes. A linha de uma área que você
    organiza abre a escala dela (troca o ministério e vai para a Escala);
    antes ela levava para a página pública da área, no site. */
+/* 102 · quem quer entrar numa área: pedido de candidatura que espera resposta
+   e cadastro pela lista da equipe que ninguém liberou. */
+const entram = (a: AreaVisao) => a.candidaturas_novas + (a.esperando_liberacao || 0);
+
 function Igreja() {
   const { equipes, trocarEquipe } = useApp();
   const router = useRouter();
@@ -98,7 +102,8 @@ function Igreja() {
           const sub = [
             !a.proxima_data ? cont(a.postos, 'função', 'funções')
               : umaSoData ? null : `${a.tipo === 'follow' ? 'Follow' : 'Domingo'}, ${fmtLongo(a.proxima_data)}`,
-            a.candidaturas_novas > 0 ? `${a.candidaturas_novas} ${pl(a.candidaturas_novas, 'quer', 'querem')} entrar` : null,
+            /* 102: quem espera liberação também quer entrar */
+            entram(a) > 0 ? `${entram(a)} ${pl(entram(a), 'quer', 'querem')} entrar` : null,
           ].filter(Boolean).join(' · ');
           const miolo = (
             <>
@@ -140,6 +145,11 @@ function Pendencias() {
     p.aguardando_conversa && { n: p.aguardando_conversa,
       txt: pl(p.aguardando_conversa, 'pessoa esperando a conversa com a liderança', 'pessoas esperando a conversa com a liderança'),
       href: '/painel/candidaturas' },
+    /* 102 · cadastro pela lista da equipe que ninguém liberou. Até liberar, o
+       nome não aparece na lista e a pessoa não entra no sorteio. */
+    p.esperando_liberacao && { n: p.esperando_liberacao,
+      txt: pl(p.esperando_liberacao, 'pessoa se cadastrou e espera você liberar', 'pessoas se cadastraram e esperam você liberar'),
+      href: '/time#liberar' },
     p.sem_conferir && { n: p.sem_conferir,
       txt: pl(p.sem_conferir, 'pessoa com nível declarado que você ainda não conferiu', 'pessoas com nível declarado que você ainda não conferiu'),
       href: '/time/conferir' },

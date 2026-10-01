@@ -281,6 +281,9 @@ export default function Servir() {
       EMAIL_INVALIDO: 'Confira o e-\u2060mail, ou deixe em branco.',
       SEM_AREA: 'Escolha pelo menos uma coisa que você quer fazer.',
       JA_NO_TIME: 'Esse WhatsApp já está no time desta área. Abra a sua página pela lista da equipe.',
+      /* 102 · o vínculo existe e está inativo: a lista não o mostra, então
+         mandar procurar o nome nela era um beco (o Elias, 01/10/2026) */
+      NAO_LIBERADO: 'Esse WhatsApp já tem cadastro nesta área, esperando a liderança liberar. Seu nome aparece na lista da equipe assim que liberarem. Se já faz tempo, fale com quem lidera a área.',
       MUITOS_CADASTROS: 'Muita gente se cadastrando agora. Tente de novo daqui a pouco.',
     };
     setErro(m[r?.erro] || 'Não consegui enviar. Tente de novo, ou fale com a liderança da área.');

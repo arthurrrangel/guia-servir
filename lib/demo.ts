@@ -293,6 +293,8 @@ export function painelDemo() {
     candidaturas_novas: cands.filter(c => c.status === 'enviada' || c.status === 'em_analise').length,
     aguardando_conversa: cands.filter(c => c.status === 'conversa' || c.status === 'entrevista').length,
     sem_conferir: ativos.filter(v => !v.conferido).length,
+    /* 102: a mesma conta da RPC, sobre as fixtures */
+    esperando_liberacao: S.voluntarios.filter(v => !v.ativo && v.liberadoEm === null).length,
     sem_disponibilidade: ativos.filter(v => ![...(v.disponivel || []), ...(v.indisponivel || [])].some(d => d >= hoje)).length,
     vagas_pendentes: vagasPendentes, funcoes_sem_gente: funcoesSemGente,
   };

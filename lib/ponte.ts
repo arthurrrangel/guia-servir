@@ -44,6 +44,7 @@ export type LinhaVoluntario = {
   limite_mes: number | null;
   token: string; equipe_id: string; conferido: boolean;
   sexo?: string | null;                // opcional na carga (degradação)
+  liberado_em?: string | null;         // 102, opcional na carga (degradação)
 };
 export type LinhaHabilidade = {
   voluntario_id: string; funcao_id: string; nivel: Nivel; confirmado: boolean;
@@ -179,6 +180,9 @@ export function montarEstado(l: LinhasDoBanco): Estado {
        coluna, e "não sei" ali não pode virar alarme na tela do Time. */
     identidadeReivindicada: (v as any).identidade_reivindicada === true,
     nomeDaPessoa: (v as any).pessoas?.nome ?? null,
+    /* 102 · undefined quando a coluna não veio (banco sem a 102, ou GRANT
+       recusado): "não sei" não pode virar "nunca liberado" na tela. */
+    liberadoEm: 'liberado_em' in v ? (v.liberado_em ?? null) : undefined,
     funcoes: habPorVol.get(v.id) || {}, confirmadas: okPorVol.get(v.id) || {},
     indisponivel: indisPorVol.get(v.id) || [],
     disponivel: dispPorVol.get(v.id) || [],
@@ -464,7 +468,10 @@ const COLUNAS_ESSENCIAIS =
    de `voluntarios` é relido do catálogo e `voluntarios_grant_conferir()`
    responde, em todo `banco-do-zero.sh`, se alguma coluna ficou de fora. Este
    código aqui é a rede; aquilo é a regra. */
-const COLUNAS_OPCIONAIS = ['sexo', 'identidade_reivindicada', 'pessoas(nome)'];
+/* 102 · `liberado_em` também é opcional: sem a migração 102 a carga segue sem
+   ela, e a tela do Time volta ao sinal antigo (`conferido`) para dizer quem
+   espera liberação. */
+const COLUNAS_OPCIONAIS = ['sexo', 'identidade_reivindicada', 'pessoas(nome)', 'liberado_em'];
 const COLUNAS_VOLUNTARIO = [COLUNAS_ESSENCIAIS, ...COLUNAS_OPCIONAIS].join(',');
 
 /** Permissão negada em alguma coluna. 42501 é o código do Postgres. */
@@ -555,7 +562,7 @@ async function lerVoluntarios(s: any, equipeId: string) {
      essenciais + UMA opcional. O que passa, passa.
 
      São N+1 consultas, e só aqui — quando o banco já está errado e a
-     alternativa era perder as três. Com três opcionais, quatro idas. */
+     alternativa era perder as três. Com quatro opcionais (102), cinco idas. */
   const boas: string[] = [];
   const caidas: string[] = [];
   for (const c of COLUNAS_OPCIONAIS) {
@@ -582,7 +589,8 @@ function avisarGrant(caidas: string[]) {
   if (!caidas.length || typeof console === 'undefined') return;
   console.warn('[ponte] o banco recusou', caidas.join(', '),
     '— segui sem essa(s) coluna(s), e COM as outras. Falta um GRANT:'
-    + ' rode a migracao 82, ou `select * from voluntarios_grant_conferir()` para ver quais.');
+    + ' rode a migracao 82, ou `select * from voluntarios_grant_conferir()` para ver quais.'
+    + ' Se for liberado_em, falta a migracao 102.');
 }
 
 /* A carga olha no máximo 200 dias para trás. Sem a janela, cada troca de

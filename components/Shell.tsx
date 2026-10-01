@@ -462,7 +462,11 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   const montado = !!diaProx && Object.values(diaProx.slots || {}).some((x: any) => x?.vid);
   const rProx = montado && prox ? resumoDia(S, prox) : null;
   const nEscala = rProx ? rProx.vagas.length + rProx.furos + rProx.recusados : 0;
-  const nEntradas = nums ? (nums.candidaturas_novas || 0) + (nums.aguardando_conversa || 0) : 0;
+  /* 102 · quem se cadastrou pela lista da equipe e ninguém liberou também
+     espera resposta. Antes não contava em lugar nenhum: o Elias esperou um
+     mês no Louvor sem um selo sequer. */
+  const nEntradas = nums ? (nums.candidaturas_novas || 0) + (nums.aguardando_conversa || 0)
+    + (nums.esperando_liberacao || 0) : 0;
   const selo: Record<string, { n: number; rot: string }> = {
     '/escala': { n: nEscala, rot: nEscala === 1 ? '1 posto do próximo culto para resolver' : `${nEscala} postos do próximo culto para resolver` },
     '/painel/candidaturas': { n: nEntradas, rot: nEntradas === 1 ? '1 pessoa esperando resposta' : `${nEntradas} pessoas esperando resposta` },

@@ -81,6 +81,11 @@ export type Voluntario = {
      os dois lado a lado — foi a divergência entre eles que ninguém via. */
   identidadeReivindicada?: boolean;
   nomeDaPessoa?: string | null;
+  /* 102 · quando o vínculo ficou ativo pela primeira vez. null com ativo
+     false = se cadastrou e ninguém liberou ainda (aguardando); data com ativo
+     false = pausado por decisão. undefined = o banco ainda não tem a coluna,
+     e a tela volta ao sinal antigo (`conferido`). */
+  liberadoEm?: string | null;
   /* por área: true quando alguém do time conferiu o nível, false quando é só
      o que a pessoa declarou no cadastro. Área que não está aqui vale como
      conferida (é cadastro antigo, feito pelo líder). */
@@ -89,6 +94,13 @@ export type Voluntario = {
      em indisponivel simplesmente não respondeu ainda. */
   disponivel?: string[];
 };
+
+/* 102 · se cadastrou e ninguém liberou ainda ("aguardando"), que é diferente
+   de pausado: pausado é decisão de alguém, aguardando é decisão que falta.
+   Sem a coluna (banco antes da 102) vale o sinal antigo, inativo e não
+   conferido, que errava o caso do Elias (conferido e nunca liberado). */
+export const esperaLiberacao = (v: Voluntario) =>
+  !v.ativo && (v.liberadoEm === undefined ? v.conferido === false : v.liberadoEm === null);
 
 /* Como cada pessoa respondeu a um domingo: 'posso', 'nao' ou 'mudo'.
    'mudo' não impede escalar (decisão do líder), só aparece na cobrança. */
