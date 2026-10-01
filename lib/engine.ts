@@ -842,13 +842,17 @@ export function cargaDoMes(S: Estado, ano: number, mes: number) {
   };
 }
 
-/* As áreas que este dia precisa. O Follow não tem HEAD nem transmissão,
-   então escalar essas funções num sábado seria criar vaga que não existe. */
+/* As áreas que este dia precisa: os postos ativos que valem no tipo do dia
+   (`funcoes.tipos`). Desde a 99 (Arthur, 01/10/2026: "no follow precisa ter
+   as mesmas posições de que no culto de domingo"), Mídia e Louvor têm no
+   Follow os mesmos postos do domingo; Connect, GUIA Kids e Livraria não
+   servem no Follow e não têm posto nele. Escalar num sábado um posto que só
+   vale no domingo seria criar vaga que não existe. */
 export function funcoesDoDia(S: Estado, data: string) {
   /* EVENTO ESPORÁDICO: valem TODOS os postos ativos do ministério.
 
      `funcoes.tipos` responde "em qual culto RECORRENTE este posto existe" —
-     PROJEÇÃO no domingo e no Follow, HEAD só no domingo. Evento não é
+     na Mídia, todo posto no domingo e no Follow (99); no Kids, só no domingo. Evento não é
      recorrente: ele já diz de quem é (`cultos.equipe_id`), e quem é dono leva
      os postos todos.
 
@@ -1664,7 +1668,7 @@ export function contaDoRecorte(S: Estado, data: string, grupo?: GrupoZap): Conta
 }
 
 export type GrupoDoDia = { grupo: GrupoZap; funcoes: Funcao[]; conta: ContaDoRecorte };
-/** Cada grupo válido com a parte dele NESTE dia (o Follow não tem todos os postos). */
+/** Cada grupo válido com a parte dele NESTE dia (só os postos que valem no tipo do dia). */
 export function gruposDoDia(S: Estado, data: string): GrupoDoDia[] {
   const doDia = funcoesDoDia(S, data);
   return gruposValidos(S).map(grupo => ({

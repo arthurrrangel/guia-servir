@@ -1,3 +1,19 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     salvar_funcoes (a 99 refez: posto novo segue o ministerio no Follow)
+
+   Por isso ele se recusa a rodar num banco que ja passou da 98. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe e o bloco nao faz
+   nada, como na 32.
+
+   Se voce REALMENTE precisa reaplicar, a mensagem do erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(98);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    48 · QUEM PODE ENTRAR ONDE
    18/09/2026.
