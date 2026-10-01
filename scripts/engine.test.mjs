@@ -1105,5 +1105,29 @@ console.log('\n33. Repertório: só link de playlist das três plataformas, e s�
   ok(!E.msgEscala(S, D, { link }).includes('javascript'), 'link que não passa nunca vai para a mensagem');
 }
 
+console.log('\n34. Prazo para confirmar: "véspera" é o dia antes de cada culto');
+/* 01/10/2026 — com a escala indo para os grupos 2 dias antes, a mensagem de
+   sexta para o domingo dizia "Confirma até quinta-feira". */
+{
+  const P = (prazo, data) => E.prazoDoDia({ config: { prazoConfirmacao: prazo } }, data);
+  ok(P('véspera', '2026-10-03') === 'sexta-feira', 'Follow de sábado 03/10: até sexta-feira', P('véspera', '2026-10-03'));
+  ok(P('véspera', '2026-10-04') === 'sábado', 'domingo 04/10: até sábado', P('véspera', '2026-10-04'));
+  ok(P('Véspera do culto', '2026-11-01') === 'sábado', 'aceita "Véspera do culto", com maiúscula', P('Véspera do culto', '2026-11-01'));
+  ok(P('vespera', '2026-10-15') === 'quarta-feira', 'sem acento, e num evento de quinta (15/10): até quarta-feira', P('vespera', '2026-10-15'));
+  ok(P('', '2026-10-04') === 'sábado' && P(undefined, '2026-10-04') === 'sábado', 'campo vazio é véspera');
+  ok(P('quinta-feira', '2026-10-04') === 'quinta-feira', 'texto do líder vai como ele escreveu');
+  ok(P('vésperas de natal', '2026-12-20') === 'vésperas de natal', 'só a palavra véspera inteira vira o dia antes');
+  ok(P('véspera', '2027-01-01') === 'quinta-feira', 'virada de ano: 01/01/2027 (sexta) tem véspera na quinta');
+  ok(E.CONFIG_PADRAO.prazoConfirmacao === 'véspera', 'ministério novo nasce com véspera');
+
+  const S = base(TIME());
+  const D = E.domingosDoMes(2026, 9)[0];   // 04/10/2026
+  E.gerarDia(S, D);
+  S.config.prazoConfirmacao = 'véspera';
+  ok(E.msgEscala(S, D, { link: 'https://x' }).includes('Confirma até sábado.'), 'a mensagem do grupo diz o dia', E.msgEscala(S, D, { link: 'https://x' }).slice(-160));
+  const vid = Object.values(S.escalas[D].slots).find(s => s?.vid)?.vid;
+  ok(E.msgCobranca(S, vid, D, 'https://x').includes('Confirma no seu link até sábado?'), 'a cobrança individual também');
+}
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

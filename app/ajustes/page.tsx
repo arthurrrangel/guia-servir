@@ -523,11 +523,16 @@ function Ajustes() {
                       teclado certo é o de texto. O medidor de celular acusa
                       "prazo" sem calendário, e respeita quem declara. */}
                   <input className="es-ctl" inputMode="text" enterKeyHint="done" key={equipe?.id} aria-label="Prazo para confirmar"
-                    placeholder="ex: quinta-feira" ref={guardar('prazoConfirmacao')}
+                    placeholder="véspera" ref={guardar('prazoConfirmacao')}
                     aria-invalid={naoSalvou.prazoConfirmacao ? true : undefined}
-                    aria-describedby={naoSalvou.prazoConfirmacao ? 'nao-salvou-prazoConfirmacao' : undefined}
+                    aria-describedby={naoSalvou.prazoConfirmacao ? 'nao-salvou-prazoConfirmacao' : 'prazo-dica'}
                     defaultValue={inicial('prazoConfirmacao')} onBlur={aoSair('prazoConfirmacao')} />
-                  {notaDe('prazoConfirmacao')}
+                  {notaDe('prazoConfirmacao') || (
+                    /* 01/10/2026: com a escala indo para os grupos 2 dias antes,
+                       um dia fixo ("quinta-feira") já tinha passado na mensagem
+                       de sexta. "véspera" é o dia antes de cada culto. */
+                    <small id="prazo-dica">véspera = o dia antes de cada culto</small>
+                  )}
                 </label>
                 <label className="es-campo">
                   <span>Equilibrar a carga olhando</span>

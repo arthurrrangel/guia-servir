@@ -388,7 +388,8 @@ export type Estado = {
 export const RODAPE_ANTIGO = 'Confirma no seu link pessoal até {PRAZO}. Quem não puder, avisa agora e já indica o substituto.';
 export const CONFIG_PADRAO: Config = {
   limitePadrao: 2, janelaCarga: 90, plantaoQtd: 1,
-  prazoConfirmacao: 'quinta-feira',
+  /* o dia antes de cada culto (ver prazoDoDia) */
+  prazoConfirmacao: 'véspera',
   horasTardio: 48,
   saudacao: 'Boa noite galera',
   rodape: 'Confirma até {PRAZO}. Quem não puder, avisa agora e já indica o substituto.',
@@ -409,6 +410,23 @@ export function addDias(s: string, n: number) {
   return isoDe(dt.getUTCFullYear(), dt.getUTCMonth() + 1, dt.getUTCDate());
 }
 export const hojeISO = () => { const d = new Date(); return isoDe(d.getFullYear(), d.getMonth() + 1, d.getDate()); };
+
+/* O PRAZO PARA CONFIRMAR, DITO PARA CADA CULTO — 01/10/2026.
+
+   O prazo era um texto fixo do ministério ("quinta-feira") que entra na frase
+   "Confirma até ___". Com as escalas indo para os grupos sozinhas 2 dias
+   antes (quinta para o Follow de sábado, sexta para o domingo), a mensagem de
+   sexta dizia "Confirma até quinta-feira": um prazo que já passou.
+
+   "véspera" (e o campo vazio) vira o dia antes de cada culto, pelo nome:
+   "sexta-feira" para o Follow de sábado, "sábado" para o domingo. Qualquer
+   outro texto é do líder e vai como ele escreveu. */
+const NOME_DO_DIA = ['domingo', 'segunda-feira', 'terça-feira', 'quarta-feira', 'quinta-feira', 'sexta-feira', 'sábado'];
+export function prazoDoDia(S: { config: { prazoConfirmacao?: string } }, data: string) {
+  const p = (S.config.prazoConfirmacao || '').trim();
+  if (p && !/^v[eé]spera\b/i.test(p)) return p;
+  return NOME_DO_DIA[new Date(t(addDias(data, -1)) + DIA / 2).getUTCDay()];
+}
 export const fmtDia = (s: string) => `${s.slice(8, 10)}/${s.slice(5, 7)}`;
 export const MESES = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 export const fmtLongo = (s: string) => `${+s.slice(8, 10)} de ${MESES[+s.slice(5, 7) - 1]}`;
@@ -1837,7 +1855,7 @@ export function msgEscala(S: Estado, data: string,
   const rodape = opts.link
     ? (S.config.rodape || '').replace(/^\s*Confirma no seu link pessoal até \{PRAZO\}\.\s*/, 'Confirma até {PRAZO}. ').trim()
     : (S.config.rodape || '');
-  L.push(rodape.replace('{PRAZO}', S.config.prazoConfirmacao));
+  L.push(rodape.replace('{PRAZO}', prazoDoDia(S, data)));
   if (opts.link) L.push(`Confirma por aqui: ${opts.link}`);
   return L.join('\n').replace(/\n{3,}/g, '\n\n').trim();
 }
@@ -1854,7 +1872,7 @@ export function msgCobranca(S: Estado, vid: string, data: string, base: string) 
   const v = vol(S, vid);
   const fns = Object.entries(S.escalas[data]?.slots || {}).filter(([, s]) => s?.vid === vid).map(([f]) => f);
   return `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? `o Follow de sábado` : 'e domingo'} (${fmtDia(data)}) em ${fns.join(' e ')}. `
-    + `Confirma no seu link até ${S.config.prazoConfirmacao}?\n${base}/eu/${v?.token}#confirmar`;
+    + `Confirma no seu link até ${prazoDoDia(S, data)}?\n${base}/eu/${v?.token}#confirmar`;
 }
 
 export function msgColeta(S: Estado, ano: number, mes: number, _base: string, link = '') {
