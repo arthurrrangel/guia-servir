@@ -183,6 +183,15 @@ publicou: você torceu.
   commit — o que está no ar deixa de ter um sha que o explique. Só vale como
   socorro, com a árvore limpa e igual à origem, e dizendo isso em voz alta.
 - **Deploy fora do git.** O que está no ar tem que ter um commit.
+- **Refazer o build de um commit que já não é o mais novo.** Em 01/10 o build
+  do `089d117` caiu no teste de tempo (`engine-tempo`, que oscila na Vercel) e
+  foi refeito pelo `create_deployment` com o id dele. Nesse meio tempo outra
+  sessão tinha publicado o `f35276d` (pagamento do Follow Camp), e o refeito,
+  mais velho, tomou o lugar dele: `/followcamp/pagar` saiu do ar de ~07:57 a
+  ~10:32 (horário de Brasília), até o `e1e8aca`, que tem os dois, subir.
+  Antes de refazer qualquer build: `git fetch` e `list_deployments`. Só se
+  refaz o deployment do commit que É o `origin/master` naquele minuto; se
+  o HEAD mudou, quem sobe é ele.
 - **Escrever no banco pelo painel do Supabase.** A camada de segurança da
   sessão deixa ler (logs, SQL só de leitura, formulário de SMTP) às vezes, e
   barra DDL no SQL Editor sempre (setValue, Ctrl+A/Ctrl+C, os três jeitos,

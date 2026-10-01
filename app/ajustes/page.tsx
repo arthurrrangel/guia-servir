@@ -19,6 +19,7 @@ import { cont } from '@/lib/plural';
 const SECOES = [
   { id: 'grupo', rot: 'Grupo no WhatsApp' },
   { id: 'grupos', rot: 'Grupos por área' },
+  { id: 'repertorio', rot: 'Repertório' },
   { id: 'regras', rot: 'Regras do rodízio' },
   { id: 'aviso', rot: 'Texto do aviso' },
   { id: 'funcoes', rot: 'Funções' },
@@ -196,6 +197,8 @@ function Ajustes() {
 
   const [versoes, setVersoes] = useState<Record<string, number>>({});
   const [naoSalvou, setNaoSalvou] = useState<Record<string, { rede: boolean; texto: string }>>({});
+  /* o botão do repertório não aceita o segundo toque enquanto o primeiro grava */
+  const [repGravando, setRepGravando] = useState(false);
   const tirarNota = (k: string) => setNaoSalvou(m => { if (!m[k]) return m; const n = { ...m }; delete n[k]; return n; });
   const campos = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null>>({});
   const chaveDo = (k: string) => `${equipe?.id}:${versoes[k] || 0}`;
@@ -458,6 +461,36 @@ function Ajustes() {
                   seção (apagava o que se digitava ao lado); quem volta ao
                   salvo é o próprio componente */}
               <GruposPorArea key={equipe?.id || ''} S={S} gravar={m => gravar(m, true)} aviso={aviso} />
+            </div>
+          </section>
+
+          {/* O REPERTÓRIO — 01/10/2026. Pedido do Louvor: o setlist de cada
+              culto no link de quem serve. Desligado por padrão: ministério
+              que não toca nada não ganha três campos a mais em cada dia. */}
+          <section className="es-caixa" id="repertorio">
+            <div className="es-caixa-cab">
+              <h2>Repertório</h2>
+              <span className="es-peq es-mudo">O setlist de cada culto, no link de quem serve</span>
+            </div>
+            <div className="es-caixa-corpo es-aj-pilha">
+              <p className="es-prosa">
+                Ligado, cada culto da Escala ganha os links das playlists do <b>Spotify</b>,
+                do <b>Deezer</b> e do <b>YouTube</b>. Quem está escalado vê os botões na própria
+                página, e a mensagem do grupo leva os links.
+              </p>
+              <div className="es-linha es-aj-rep">
+                <button type="button" className="es-btn" aria-pressed={!!S.config.repertorio}
+                  disabled={!equipe?.id || repGravando}
+                  onClick={async () => {
+                    setRepGravando(true);
+                    try { await gravar({ repertorio: !S.config.repertorio }); } finally { setRepGravando(false); }
+                  }}>
+                  {S.config.repertorio ? 'Desligar o repertório' : 'Ligar o repertório'}
+                </button>
+                <span className="es-peq es-mudo" role="status">
+                  {S.config.repertorio ? 'Ligado neste ministério.' : 'Desligado neste ministério.'}
+                </span>
+              </div>
             </div>
           </section>
 

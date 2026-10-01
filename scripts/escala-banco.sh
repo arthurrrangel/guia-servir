@@ -104,7 +104,7 @@ su postgres -c "$PG/psql -h /tmp -p $PORTA -U postgres -d $BANCO -q -v ON_ERROR_
 
 echo "2. as migrações, em ordem, num banco vazio"
 falhas=0
-ARQS=$(ls "$B"/supabase/[0-9][0-9]-*.sql | grep -v '00-ESTADO' | sort)
+ARQS=$(ls "$B"/supabase/*.sql | grep -E '/[0-9]{2,3}-' | grep -v '00-ESTADO' | sort -V)   # 100 · dois ou três dígitos, em ordem numérica
 for f in $ARQS; do
   if ! roda "$f"; then
     echo "   FALHOU  $(basename "$f")"

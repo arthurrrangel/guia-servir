@@ -164,3 +164,6 @@
 .es-gz-novo:first-child{padding-top:0;border-top:0}
 .es .es-gz-novo .es-campo{flex:1 1 220px;max-width:360px;margin-bottom:0}
 .es-gz-geral{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2)}
+
+/* o repertório: o botão e o estado na mesma linha */
+.es .es-aj-rep{gap:var(--es-e3)}

@@ -1048,5 +1048,62 @@ console.log('\n32. Grupos por área: cada grupo recebe a parte dele, e o link nu
      'renomear a função não tira ela do grupo');
 }
 
+console.log('\n33. Repertório: só link de playlist das três plataformas, e só com ele ligado');
+/* 01/10/2026 — pedido do Louvor: o setlist do culto (Spotify, Deezer e uma
+   playlist do YouTube) no link de quem serve e na mensagem do grupo. O link
+   vira botão na tela de gente que confia no que vê: só https, só os domínios
+   de cada plataforma. */
+{
+  const N = E.normalizarLinkRepertorio;
+  const bom = (k, t, esperado) => { const r = N(k, t); ok(r.ok && r.url === esperado, `aceita ${k}: ${t}`, JSON.stringify(r)); };
+  const ruim = (k, t, rot) => { const r = N(k, t); ok(!r.ok, `recusa ${rot}`, JSON.stringify(r)); };
+  bom('spotify', 'https://open.spotify.com/playlist/37i9dQZF1DX0', 'https://open.spotify.com/playlist/37i9dQZF1DX0');
+  bom('spotify', '  open.spotify.com/playlist/abc?si=1 ', 'https://open.spotify.com/playlist/abc?si=1');
+  bom('spotify', 'https://spotify.link/Xy12', 'https://spotify.link/Xy12');
+  bom('deezer', 'https://www.deezer.com/br/playlist/123', 'https://www.deezer.com/br/playlist/123');
+  bom('deezer', 'https://link.deezer.com/s/30AbC', 'https://link.deezer.com/s/30AbC');
+  bom('youtube', 'https://youtube.com/playlist?list=PLx1', 'https://youtube.com/playlist?list=PLx1');
+  bom('youtube', 'https://youtu.be/abc', 'https://youtu.be/abc');
+  bom('youtube', 'https://music.youtube.com/playlist?list=1', 'https://music.youtube.com/playlist?list=1');
+  ok(N('spotify', '   ').ok && N('spotify', '').url === '', 'campo vazio é apagar, e apagar vale');
+  ruim('spotify', 'javascript:alert(1)', 'javascript:');
+  ruim('spotify', 'http://open.spotify.com/playlist/x', 'http sem s');
+  ruim('spotify', 'https://open.spotify.com.golpe.com/x', 'domínio que só começa igual');
+  ruim('spotify', 'https://golpe.com/open.spotify.com', 'o domínio no caminho');
+  ruim('deezer', 'https://youtube.com/playlist?list=x', 'link de uma plataforma na casa de outra');
+  ruim('youtube', 'https://youtube.com/' + 'a'.repeat(500), 'link com mais de 500 caracteres');
+  ruim('youtube', 'isso não é link', 'texto que não é link');
+
+  const links = E.linksDoRepertorio({ youtube: 'https://youtu.be/a', spotify: 'https://open.spotify.com/x', deezer: 'javascript:1', tidal: 'https://tidal.com/x' });
+  ok(links.map(l => l.chave).join(',') === 'spotify,youtube', 'só o que passa vira botão, na ordem Spotify, Deezer, YouTube', JSON.stringify(links));
+  ok(E.linksDoRepertorio(null).length === 0 && E.linksDoRepertorio('x').length === 0, 'nada ou lixo vira lista vazia');
+
+  /* a mensagem e a marca de "enviado" */
+  const S = base(TIME());
+  const D = E.domingosDoMes(2026, 8)[0];
+  E.gerarDia(S, D);
+  S.config.grupos = [{ id: 'g1', nome: 'Banda', funcoes: ['FOTO'] }];
+  const link = 'https://guiaservir.com/confirmar/midia';
+  const antes = E.msgEscala(S, D, { link });
+  const assAntes = E.assinaturaDoEnvio(S, D);
+  const assGrupoAntes = E.assinaturaDoEnvio(S, D, S.config.grupos[0]);
+  S.escalas[D].repertorio = { spotify: 'https://open.spotify.com/playlist/x', youtube: 'https://youtube.com/playlist?list=y' };
+  ok(E.msgEscala(S, D, { link }) === antes, 'com o repertório desligado, a mensagem não muda');
+  ok(E.assinaturaDoEnvio(S, D) === assAntes, 'com ele desligado, "enviado" também não muda');
+  S.config.repertorio = true;
+  const m = E.msgEscala(S, D, { link });
+  ok(m.includes('REPERTÓRIO\nSpotify: https://open.spotify.com/playlist/x\nYouTube: https://youtube.com/playlist?list=y'),
+     'ligado, a mensagem leva os links, na ordem das plataformas', m.slice(-260));
+  ok(m.indexOf('REPERTÓRIO') < m.indexOf('Confirma por aqui'), 'os links vêm antes do link de confirmar');
+  ok(E.msgEscala(S, D, { link, grupo: S.config.grupos[0] }).includes('REPERTÓRIO'), 'o recorte do grupo também leva o setlist');
+  ok(E.assinaturaDoEnvio(S, D) !== assAntes && E.assinaturaDoEnvio(S, D, S.config.grupos[0]) !== assGrupoAntes,
+     'o setlist que entra depois do envio vira "mudou depois do envio"');
+  delete S.escalas[D].repertorio;
+  ok(E.assinaturaDoEnvio(S, D) === assAntes && E.msgEscala(S, D, { link }) === antes,
+     'ligado e sem setlist no dia: mensagem e assinatura iguais às de antes');
+  S.escalas[D].repertorio = { spotify: 'javascript:alert(1)' };
+  ok(!E.msgEscala(S, D, { link }).includes('javascript'), 'link que não passa nunca vai para a mensagem');
+}
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

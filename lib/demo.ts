@@ -114,6 +114,16 @@ export function estadoDemo(): Estado {
   }
   /* respostas de disponibilidade, para o painel do dia não ficar vazio */
   const porVir = dias.filter(d => d >= hoje);
+  /* 01/10/2026: o repertório ligado, com o setlist no primeiro culto que vem
+     (Spotify e YouTube; o Deezer em branco, para o harness mostrar campo
+     preenchido e campo vazio juntos) */
+  S.config.repertorio = true;
+  if (porVir[0] && S.escalas[porVir[0]]) {
+    S.escalas[porVir[0]].repertorio = {
+      spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX0XUfTFmNBRM',
+      youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG',
+    };
+  }
   S.voluntarios.forEach((v, i) => {
     if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
     if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
@@ -124,6 +134,13 @@ export function estadoDemo(): Estado {
 /* mora em ./demo-ligado agora, para poder ser perguntado sem carregar este
    arquivo. Reexportado só para quem já importava daqui. */
 export { demoLigado } from './demo-ligado';
+
+/* o setlist do harness (100): as três plataformas, com link de verdade na forma */
+const REP_DEMO = {
+  spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX0XUfTFmNBRM',
+  deezer: 'https://link.deezer.com/s/30AbCdEfGh',
+  youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG',
+};
 
 /* Fixture da página do voluntário. Mesma forma que o eu_dados devolve. */
 /* `?demo=confirmado` mostra a tela de quem já respondeu tudo: é a única em
@@ -146,9 +163,11 @@ export function euDemo(variante: string = '') {
     nome: 'Giovana Rosalem',
     equipe: 'Mídia',
     escalas: [
-      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false },
-      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false },
-      { culto_id: 'c2', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false },
+      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
+      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false, repertorio: REP_DEMO },
+      /* o segundo culto só com o YouTube: o setlist pode vir parcial */
+      { culto_id: 'c2', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false,
+        repertorio: { youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG' } },
       { culto_id: 'c3', data: prox[2] || prox[0], funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), status: 'recusado', primeira_vez: false, plantao: false },
       { culto_id: 'c4', data: prox[3] || prox[0], funcao: '', status: '', primeira_vez: false, plantao: true },
       /* posto de líder do dia num culto que JÁ passou: é a única combinação em

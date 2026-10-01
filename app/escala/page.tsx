@@ -15,6 +15,7 @@ import {
   gruposValidos, linkDoVoluntario,
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
+import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -975,7 +976,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
   gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsCorpo) {
   /* 01/10/2026: toda mensagem que vai para o grupo fecha com o link do
      ministério (nunca o de alguém), que leva cada pessoa à própria página */
-  const { base, equipe } = useApp();
+  const { base, equipe, pinta } = useApp();
   const link = linkDoVoluntario(base, equipe?.slug);
   const cobranca = msgConfirmar(S, d, link);
   /* dia que já passou não se manda: lá "Copiar a escala" volta a ser a de
@@ -1090,6 +1091,14 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           onBlur={e => { if (e.target.value !== (dia?.obs || '')) void salvarObs(d, e.target.value); }} />
         <small>Vai na mensagem do grupo e no link de quem está escalado.</small>
       </label>
+
+      {/* O REPERTÓRIO (01/10/2026): com ele ligado nos Ajustes, o setlist do
+          culto. Só em dia que já tem culto no banco (o link mora nele) e que
+          ainda não passou. */}
+      {!!S.config.repertorio && !passado && !!dia?.cultoId && !!equipe?.id && (
+        <RepertorioDoDia S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id}
+          ocupado={ocupado} pinta={pinta} aviso={aviso} />
+      )}
 
       {/* ------------------------------------------------------- os postos
           Uma linha por posto, e o plantão fecha a lista. */}

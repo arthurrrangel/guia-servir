@@ -1,6 +1,6 @@
 'use client';
 import { sb } from './supabase';
-import { addDias, Estado, hojeISO, Nivel, Status } from './engine';
+import { addDias, Estado, hojeISO, Nivel, Repertorio, Status } from './engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
@@ -337,6 +337,23 @@ export async function apagarEvento(cultoId: string) {
   const { data: r, error } = await sb()!.rpc('apagar_evento', { p_id: cultoId });
   if (error) throw error;
   if (!r?.ok) throw new Error(r?.erro || 'EVENTO_NAO_APAGADO');
+}
+
+/* =============================================================================
+   O REPERTÓRIO DO CULTO (migração 100) — 01/10/2026.
+
+   Grava SÓ o setlist, por RPC: `salvarDia` reescreve o dia inteiro por
+   diferença, e um link colado não tem por que passar por perto das
+   escalações. A RPC confere quem lidera o ministério (a mesma política de
+   `culto_obs`) e o banco recusa link que não seja de playlist das três
+   plataformas, com `{ok:false, erro}` em vez de estourar.
+   ============================================================================= */
+export async function salvarRepertorio(cultoId: string, equipeId: string, rep: Repertorio) {
+  const { data: r, error } = await sb()!.rpc('salvar_repertorio', {
+    p_culto: cultoId, p_equipe: equipeId, p_repertorio: rep,
+  });
+  if (error) throw error;
+  if (!r?.ok) throw new Error(r?.erro || 'REPERTORIO_NAO_SALVO');
 }
 
 export async function salvarConfig(equipeId: string, dados: any) {

@@ -276,6 +276,9 @@ export type Dia = {
   evento?: string;
   /* horário de início, quando informado. É a "hora" do pedido do Arthur. */
   inicio?: string | null;
+  /* o setlist do culto: os links das playlists (migração 100). Só vale
+     quando o ministério liga o repertório nos Ajustes. */
+  repertorio?: Repertorio;
 };
 export type Config = {
   limitePadrao: number; janelaCarga: number; plantaoQtd: number;
@@ -287,6 +290,9 @@ export type Config = {
      cada um. Mora dentro de `config.dados`, que já é JSON: não pede coluna
      nova nem migração. Ausente = o ministério só tem o grupo geral. */
   grupos?: GrupoZap[];
+  /* o setlist de cada culto no link de quem serve (pedido do Louvor,
+     01/10/2026). Desligado = o ministério não vê nada disso. */
+  repertorio?: boolean;
 };
 /* GRUPOS POR ÁREA NO WHATSAPP — 01/10/2026.
 
@@ -300,6 +306,67 @@ export type Config = {
    para linha antiga sem id): renomear "Teclado" para "Teclas" não pode tirar a
    função do grupo em silêncio. Uma função pode estar em mais de um grupo. */
 export type GrupoZap = { id: string; nome: string; funcoes: string[] };
+
+/* =============================================================================
+   O REPERTÓRIO DO CULTO — 01/10/2026.
+
+   Pedido do Louvor, pelo Arthur: quem entra no site para confirmar a escala
+   já deveria achar ali o setlist do dia. Quem lidera monta a playlist no
+   Spotify e no Deezer, e uma no YouTube "para quem não usa nenhuma das duas",
+   e cola os três links no culto. Cada pessoa escalada vê os três botões na
+   própria página, e a mensagem do grupo passa a levar os links.
+
+   SÓ LINK DE PLAYLIST, E SÓ DAS TRÊS. O link vira um botão na página de
+   gente que não é do time de tecnologia: `javascript:` ou um endereço
+   qualquer ali seria um botão que faz outra coisa. Então só `https://`, só os
+   domínios de cada plataforma (inclusive os links curtos que o app do
+   celular gera ao compartilhar) e no máximo 500 caracteres. O banco confere
+   o mesmo (migração 100), para nada passar por fora da tela.
+   ============================================================================= */
+export type Repertorio = { spotify?: string; deezer?: string; youtube?: string };
+export type ChaveRepertorio = keyof Repertorio;
+export const PLATAFORMAS: { chave: ChaveRepertorio; nome: string; dominios: string[] }[] = [
+  { chave: 'spotify', nome: 'Spotify', dominios: ['open.spotify.com', 'spotify.link', 'spotify.app.link'] },
+  { chave: 'deezer', nome: 'Deezer', dominios: ['deezer.com', 'deezer.page.link', 'link.deezer.com', 'dzr.page.link'] },
+  { chave: 'youtube', nome: 'YouTube', dominios: ['youtube.com', 'youtu.be', 'music.youtube.com'] },
+];
+
+/** O link colado, conferido: '' quando o campo ficou vazio (apagar vale). */
+export function normalizarLinkRepertorio(chave: ChaveRepertorio, texto: string):
+  { ok: true; url: string } | { ok: false; erro: string } {
+  const p = PLATAFORMAS.find(x => x.chave === chave)!;
+  let t = (texto || '').trim();
+  if (!t) return { ok: true, url: '' };
+  /* quem copia da barra do celular às vezes leva sem o https */
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(t)) t = 'https://' + t.replace(/^\/+/, '');
+  let u: URL;
+  try { u = new URL(t); } catch { return { ok: false, erro: `Isso não é um link. Cole o link da playlist do ${p.nome}.` }; }
+  if (u.protocol !== 'https:') return { ok: false, erro: `Cole o link do ${p.nome} que começa com https://.` };
+  const host = u.hostname.toLowerCase();
+  if (!p.dominios.some(d => host === d || host.endsWith('.' + d)))
+    return { ok: false, erro: `Esse link não é do ${p.nome}. Cole o link da playlist do ${p.nome}.` };
+  const url = u.toString();
+  if (url.length > 500) return { ok: false, erro: 'Esse link é comprido demais. Use o botão Compartilhar da playlist.' };
+  return { ok: true, url };
+}
+
+/** Os links que podem virar botão, na ordem das plataformas. */
+export function linksDoRepertorio(rep?: Repertorio | null): { chave: ChaveRepertorio; nome: string; url: string }[] {
+  if (!rep || typeof rep !== 'object') return [];
+  const out: { chave: ChaveRepertorio; nome: string; url: string }[] = [];
+  for (const p of PLATAFORMAS) {
+    const v = (rep as any)[p.chave];
+    if (typeof v !== 'string' || !v) continue;
+    const r = normalizarLinkRepertorio(p.chave, v);
+    if (r.ok && r.url) out.push({ chave: p.chave, nome: p.nome, url: r.url });
+  }
+  return out;
+}
+
+/** O repertório do dia que a mensagem e a página mostram (vazio com ele desligado). */
+export function repertorioDoDia(S: Estado, data: string) {
+  return S.config.repertorio ? linksDoRepertorio(S.escalas[data]?.repertorio) : [];
+}
 export type Estado = {
   /* CAMPO FANTASMA, AGORA DECLARADO — auditoria 29/08/2026.
      `ponte.ts` e `demo.ts` escreviam isto com `(S as any).temAcesso = ...`:
@@ -1712,6 +1779,10 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
   partes.sort();
   if (!grupo) partes.push('p=' + [...(dia?.plantao || [])].sort().join(','));
   partes.push('o=' + (dia?.obs || ''));
+  /* o setlist que entra depois do envio é motivo de mandar de novo. Só entra
+     na conta quando existe: o dia sem repertório guarda a assinatura de antes */
+  const rep = repertorioDoDia(S, data);
+  if (rep.length) partes.push('r=' + rep.map(l => l.url).join(','));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
@@ -1749,6 +1820,14 @@ export function msgEscala(S: Estado, data: string,
     L.push('');
   }
   if (dia.obs) { L.push(dia.obs); L.push(''); }
+  /* o setlist do dia, em todos os recortes: a banda, o vocal e o som ensaiam
+     a mesma lista */
+  const rep = repertorioDoDia(S, data);
+  if (rep.length) {
+    L.push('REPERTÓRIO');
+    for (const l of rep) L.push(`${l.nome}: ${l.url}`);
+    L.push('');
+  }
   /* quem já salvou os Ajustes alguma vez guardou o rodapé padrão ANTIGO,
      que fala em "link pessoal". Ao lado do link do grupo (que é o mesmo para
      todos), ele vira o novo; texto que o líder escreveu fica como está. */

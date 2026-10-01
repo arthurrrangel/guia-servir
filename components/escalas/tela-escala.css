@@ -231,3 +231,14 @@
   .es-mg-est{justify-self:start;grid-column:auto}
   .es-mg-acoes{justify-content:flex-start;grid-column:auto}
 }
+
+/* o repertório do culto (01/10/2026): três campos, lado a lado a partir de
+   720px; no celular, um embaixo do outro */
+.es .es-ec-repertorio{display:grid;gap:var(--es-e2);margin:0 0 var(--es-e5)}
+.es .es-ec-rep-tit{font-size:13px;line-height:18px;font-weight:600;color:var(--es-ink)}
+.es .es-ec-rep-campos{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3)}
+.es .es-ec-rep-campos > .es-campo{margin-bottom:0}
+.es .es-ec-rep-nota{font-size:12px;line-height:17px;color:var(--es-mudo)}
+@media (min-width:720px){
+  .es .es-ec-rep-campos{grid-template-columns:repeat(3,minmax(0,1fr))}
+}

@@ -45,8 +45,9 @@ import { join } from 'node:path'
 
 const DIR = new URL('../supabase/', import.meta.url).pathname
 const arquivos = readdirSync(DIR)
-  .filter((f) => /^\d{2}-.*\.sql$/.test(f))
-  .sort((a, b) => (Number(a.slice(0, 2)) - Number(b.slice(0, 2))) || a.localeCompare(b))
+  /* 100 · dois ou três dígitos, em ordem numérica: "100-" depois de "99-" */
+  .filter((f) => /^\d{2,3}-.*\.sql$/.test(f))
+  .sort((a, b) => (parseInt(a, 10) - parseInt(b, 10)) || a.localeCompare(b))
 
 /* O que cada arquivo REESCREVE.
 

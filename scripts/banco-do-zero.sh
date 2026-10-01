@@ -103,7 +103,9 @@ fi
 
 echo "· aplicando as migrações num banco vazio"
 ok=0; falhou=0; quebradas=""
-for f in $(ls "$RAIZ"/supabase/*.sql | grep -E '/[0-9]{2}-' | grep -v '00-ESTADO' | sort); do
+# 100 · a partir da 100 o número tem três dígitos: o filtro aceita dois ou
+# três, e a ordem é a NUMÉRICA (`sort -V`), senão "100-" viria antes de "11-".
+for f in $(ls "$RAIZ"/supabase/*.sql | grep -E '/[0-9]{2,3}-' | grep -v '00-ESTADO' | sort -V); do
   if $P -d guia -v ON_ERROR_STOP=1 -q -f "$f" > "$DIR/ultima.log" 2>&1; then
     ok=$((ok+1))
   else

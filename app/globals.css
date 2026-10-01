@@ -3489,6 +3489,18 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 }
 .vol-secao-nota{ font-size:var(--t-rot); color:var(--cinza) }
 
+/* 100 · o repertório: um culto por linha, as três plataformas lado a lado
+   (no celular também: "Spotify", "Deezer", "YouTube" cabem em 358px) */
+.vol-barra-links{ display:inline-flex; align-items:center; gap:var(--e5) }
+.vol-rep{ padding:var(--e4) 0; border-bottom:1px solid var(--linha) }
+.vol-rep:last-child{ border-bottom:0 }
+.vol-rep-dia{ font-size:var(--t-corpo); font-weight:600; color:var(--noite) }
+.vol-rep .vol-btns{ margin-top:var(--e3); flex-wrap:nowrap }
+.vol-secao .vol-bt.vol-bt-rep{
+  flex:1 1 0; min-width:0; padding-left:var(--e3); padding-right:var(--e3);
+  background:transparent; color:var(--noite); border-color:var(--linha);
+}
+
 /* a próxima escala: a data é o assunto, então é ela que fica grande */
 .vol-prox{ padding:var(--e5) 0 var(--e1) }
 .vol-prox-fn{

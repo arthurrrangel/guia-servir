@@ -4,8 +4,8 @@
    isso, o Node de linha de comando (que só apaga os tipos, não os resolve)
    tenta importar `Estado` como valor em tempo de execução e o módulo nem
    carrega — foi o que impediu de testar este arquivo. */
-import { CONFIG_PADRAO, estadoVazio, garantirDia } from './engine';
-import type { Estado, Nivel, Status } from './engine';
+import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio } from './engine';
+import type { Estado, Nivel, Repertorio, Status } from './engine';
 
 /* =============================================================================
    AS LINHAS DO BANCO, COM TIPO — 20/09/2026.
@@ -72,6 +72,9 @@ export type LinhaRecado = {
   culto_id: string; equipe_id: string; obs: string;
   relatorio: string | null; problemas: string | null;
   relatado_por: string | null; relatado_em: string | null;
+  /* o setlist do culto (migração 100). Opcional: antes da 100 a coluna não
+     existe, e `select('*')` simplesmente não a traz. */
+  repertorio?: Record<string, string> | null;
 };
 export type LinhaConfig = { id?: number | null; dados: Record<string, any>; equipe_id: string | null };
 
@@ -319,6 +322,12 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     }
     recadoVeioDe.set(data, r.culto_id);
     if ((r.obs || '').trim()) abrir(data).obs = r.obs;
+    /* o setlist: só o que é link de playlist de verdade chega ao estado */
+    if (linksDoRepertorio(r.repertorio).length) {
+      const rep: Repertorio = {};
+      for (const lk of linksDoRepertorio(r.repertorio)) rep[lk.chave] = lk.url;
+      abrir(data).repertorio = rep;
+    }
     /* relatório do fim do culto: mora na mesma linha do recado */
     if (r.relatorio || r.problemas) {
       const d = abrir(data);

@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe, distintivoDoDia, horaDoDia } from '@/lib/engine';
+import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe, distintivoDoDia, horaDoDia, linksDoRepertorio } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -36,6 +36,9 @@ type Item = {
   escalado_em?: string | null;
   /* posto de líder do dia: quem está aqui escreve o relatório no fim do culto */
   relata?: boolean; relatorio?: string | null; problemas?: string | null;
+  /* 100 · o setlist do culto (links do Spotify, Deezer e YouTube), quando o
+     ministério ligou o repertório */
+  repertorio?: Record<string, string> | null;
 };
 /* quem mais está escalado no MESMO dia, na mesma área: nome e função, sem
    telefone. Ver supabase/40-quem-serve-com-voce.sql para o porquê. */
@@ -515,12 +518,18 @@ export default function Eu() {
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em
      estado nenhum, nem no "link inválido" — que é justamente quando a pessoa
      mais precisa de um caminho para algum lugar. */
-  const Barra = ({ perfil = false }: { perfil?: boolean }) => (
+  const Barra = ({ perfil = false, repertorio = false }: { perfil?: boolean; repertorio?: boolean }) => (
     <div className="vol-barra" role="banner">
       <div className="vol-barra-in">
         <Link href="/" aria-label="GUIA Church"><Logo className="logo" /></Link>
         {perfil
-          ? <a className="vol-quem" href="#meu-perfil">Meu perfil</a>
+          ? (
+            <span className="vol-barra-links">
+              {/* 100 · o repertório tem lugar na barra quando existe */}
+              {repertorio && <a className="vol-quem" href="#repertorio">Repertório</a>}
+              <a className="vol-quem" href="#meu-perfil">Meu perfil</a>
+            </span>
+          )
           : <Link className="vol-quem" href="/eu">Achar meu link</Link>}
       </div>
     </div>
@@ -594,6 +603,24 @@ export default function Eu() {
   const proxima = futuras.find(i => (i.status || 'pendente') !== 'recusado') || null;
   /* "depois disso" não repete o que já está no bloco preto lá em cima: a
      pessoa acabou de ver aquelas duas linhas e decidir sobre elas. */
+  /* 100 · O REPERTÓRIO: o setlist de cada culto em que a pessoa serve, do
+     mais próximo ao mais distante. Um por culto (quem está em dois postos no
+     mesmo culto vê uma vez só), e nunca o do dia em que ela disse que não
+     pode. Só link que passa por `linksDoRepertorio` vira botão. */
+  const setlists = (() => {
+    const vistos = new Set<string>();
+    const out: { culto_id: string; data: string; evento?: string | null;
+                 links: ReturnType<typeof linksDoRepertorio> }[] = [];
+    for (const i of [...itens].sort((a, b) => a.data.localeCompare(b.data))) {
+      if (i.data < hoje || vistos.has(i.culto_id)) continue;
+      if (!i.plantao && (i.status || 'pendente') === 'recusado') continue;
+      const links = linksDoRepertorio(i.repertorio as any);
+      if (!links.length) continue;
+      vistos.add(i.culto_id);
+      out.push({ culto_id: i.culto_id, data: i.data, evento: i.evento, links });
+    }
+    return out;
+  })();
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
   const restantes = futuras.filter(i =>
     !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
@@ -689,7 +716,7 @@ export default function Eu() {
 
   return (
     <div className="vol">
-      <Barra perfil />
+      <Barra perfil repertorio={!!setlists.length} />
       <div className="vol-in entra" role="main">
 
         {/* 1. O QUE PRECISO FAZER.
@@ -941,6 +968,34 @@ export default function Eu() {
                 </div>
               </div>
             </div>
+          </section>
+        )}
+
+        {/* 100 · O REPERTÓRIO. Pedido do Louvor: quem entra para confirmar já
+            acha aqui o setlist do dia, nas três plataformas (quem não usa
+            Spotify nem Deezer tem a playlist do YouTube). */}
+        {!!setlists.length && (
+          <section className="vol-secao" id="repertorio">
+            <div className="vol-secao-cab">
+              <span className="rot">Repertório</span>
+              <span className="vol-secao-nota">
+                {setlists.length === 1 ? '1 culto' : `${setlists.length} cultos`}
+              </span>
+            </div>
+            {setlists.map(r => (
+              <div className="vol-rep" key={r.culto_id}>
+                <div className="vol-rep-dia">{diaLongo(r.data, r.evento)}</div>
+                <div className="vol-btns">
+                  {r.links.map(l => (
+                    <a key={l.chave} className="vol-bt vol-bt-rep" href={l.url}
+                      target="_blank" rel="noopener noreferrer"
+                      aria-label={`Ouvir o repertório no ${l.nome}`}>
+                      {l.nome}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
           </section>
         )}
 
