@@ -67,6 +67,9 @@ export type LinhaEscalacao = {
   voluntario_id: string | null;        // vaga aberta é linha com voluntário nulo
   status: Status; fixo: boolean; primeira_vez: boolean;
   respondido_em: string | null; escalado_em: string | null;
+  /* 103 · de quem a vaga veio por troca. Opcional: antes da 103 a coluna não
+     existe, e `select('*')` simplesmente não a traz. */
+  trocou_de?: string | null;
 };
 export type LinhaPlantao = { culto_id: string; voluntario_id: string };
 export type LinhaRecado = {
@@ -293,7 +296,10 @@ export function montarEstado(l: LinhasDoBanco): Estado {
     deQuemVeio.set(chave, e.culto_id);
     abrir(data).slots[fn] = { vid: e.voluntario_id, status: e.status as Status, fixo: e.fixo,
       primeiraVez: !!e.primeira_vez, respondidoEm: e.respondido_em || null,
-      escaladoEm: e.escalado_em || null };
+      escaladoEm: e.escalado_em || null,
+      /* 103 · a marca da troca, e quem o banco tinha aqui ao carregar */
+      ...('trocou_de' in e ? { trocouDe: e.trocou_de ?? null } : {}),
+      vidNoBanco: e.voluntario_id };
   }
   /* 82b · e o plantão vira CONJUNTO. `plantoes` tem `primary key (culto_id,
      voluntario_id)`: a mesma pessoa em duas linhas de `cultos` na mesma data
@@ -358,6 +364,8 @@ export function paraSalvarDia(S: Estado, data: string, equipeId: string) {
     .map(([fn, sl]) => ({
       funcao_id: idFuncao.get(fn), voluntario_id: sl.vid,
       status: sl.status || 'pendente', fixo: !!sl.fixo, primeira_vez: !!sl.primeiraVez,
+      /* 103 · quem o banco tinha ao carregar (ver `planoDoDia`) */
+      ...(sl.vidNoBanco !== undefined ? { carregado: sl.vidNoBanco } : {}),
     }));
   return {
     p_equipe: equipeId, p_data: data, p_obs: dia.obs || '', p_slots: slots,

@@ -274,6 +274,15 @@ export type Slot = {
   /* quando ESTA PESSOA entrou NESTA vaga (migração 38). Nulo nas linhas
      anteriores à migração: nulo é "não sei", nunca "é antigo". */
   escaladoEm?: string | null;
+  /* 103 · de quem a vaga veio, quando ela passou por troca aceita no link do
+     voluntário. Nulo quando a vaga mudou de outro jeito; undefined = o banco
+     ainda não tem a coluna. */
+  trocouDe?: string | null;
+  /* 103 · quem o BANCO tinha nesta vaga quando a tela carregou. Só a ponte
+     preenche, e só ela lê: é o que deixa salvar o dia sem desfazer uma troca
+     que o voluntário aceitou depois de a tela abrir (`planoDoDia`). Vaga que
+     o líder ou o sorteio refez nasce sem ele, porque é decisão nova. */
+  vidNoBanco?: string | null;
 };
 export type Dia = {
   cultoId?: string; slots: Record<string, Slot>; plantao: string[]; obs: string;

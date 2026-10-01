@@ -9054,3 +9054,104 @@ body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
 .ajt-senha .rot{ display:block }
 .ajt-senha .pequeno{ margin-top:var(--e2) }
 .ajt-senha .linha{ margin-top:var(--e4) }
+
+/* =============================================================================
+   103 · 01/10/2026 · A TROCA, A FUNÇÃO NOVA E A AGENDA NO LINK DO VOLUNTÁRIO
+   Só classes novas; nada do que existe muda de aparência. O pedido de troca
+   é um bloco por pedido, no mesmo ritmo do "Precisa de você", em tinta sobre
+   papel. O painel de pedir e o de acrescentar função são uma caixa clara
+   dentro da seção, o mesmo traje do convite de instalar.
+   ============================================================================= */
+.vol-troca{ padding:var(--e5) 0; border-bottom:1px solid var(--linha2) }
+.vol-troca:last-of-type{ border-bottom:0 }
+.vol-troca-fn{
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
+}
+.vol-troca-dia{ margin-top:var(--e1); font-size:var(--t-corpo); font-weight:600; color:var(--noite) }
+.vol-troca-quem{ margin:var(--e2) 0 0; max-width:48ch; font-size:var(--t-apoio); line-height:1.6; color:var(--cinza) }
+.vol-troca-motivo{ margin:var(--e3) 0 0; max-width:48ch; font-size:var(--t-apoio); line-height:1.6; color:var(--ink); font-weight:var(--p-forte) }
+.vol-troca .vol-btns{ margin-top:var(--e4) }
+.vol-troca-painel{
+  margin-top:var(--e5); padding:var(--e4) var(--e5) var(--e2);
+  border:1px solid var(--linha2); background:var(--card2);
+}
+.vol-troca-painel .vol-linha{ padding:var(--e3) 0 }
+.vol-troca-painel .vol-marca{ display:none }
+.vol-troca-painel > .vol-acao:last-child{ margin-top:var(--e2) }
+.vol-troca-acoes{ display:flex; flex-wrap:wrap; gap:0 var(--e4) }
+/* duas ações de texto na mesma linha ("Não vou mais poder" e "Pedir troca"):
+   o respiro vai à DIREITA de cada uma, para que, quando a segunda desce no
+   celular, ela comece na mesma margem da primeira e não recuada */
+.vol-linha .vol-acao{ margin-right:var(--e4) }
+.vol-troca-acoes .vol-acao{ margin-right:0 }
+/* a ação que mora na coluna da direita da linha ("Pedir", "Tirar"): do
+   tamanho do texto, encostada à direita, e não esticada na coluna inteira */
+.vol-linha > .vol-acao{ justify-self:end; margin-right:0; margin-top:0 }
+.vol-troca-sub{
+  margin-top:var(--e5); font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
+}
+.vol-troca-sub + .vol-troca, .vol-troca-sub + .vol-linha{ padding-top:var(--e3) }
+/* o dia da pessoa na agenda: uma etiqueta quieta, sem cor de estado */
+.vol-dia-tag{
+  display:inline-block; margin-left:var(--e2); padding:1px 6px; vertical-align:middle;
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
+  color:var(--noite); border:1px solid var(--linha3);
+}
+/* acrescentar função */
+.vol-func-abrir{ margin-top:var(--e3) }
+.vol-func-lista{ display:flex; flex-direction:column; margin-top:var(--e3); border-top:1px solid var(--linha2) }
+.vol-func-op{
+  display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%;
+  min-height:var(--toque); padding:var(--e3) 0; text-align:left; cursor:pointer;
+  background:none; border:0; border-bottom:1px solid var(--linha2); border-radius:0;
+  font-family:var(--fonte); color:var(--ink);
+}
+.vol-func-op:hover,.vol-func-op:active{ background:none; color:var(--noite) }
+.vol-func-nome{ font-size:var(--t-ui); font-weight:600 }
+.vol-func-desc{ font-size:var(--t-apoio); line-height:1.5; color:var(--cinza); font-weight:var(--p-corpo) }
+.vol-func-op[aria-pressed="true"]{ box-shadow:inset 3px 0 0 var(--noite); padding-left:var(--e3) }
+.vol-func-op[aria-pressed="true"] .vol-func-nome{ color:var(--noite) }
+.vol-func-nivel{ margin-top:var(--e4) }
+.vol-func-niveis{ display:flex; flex-wrap:wrap; gap:var(--e2); margin-top:var(--e2) }
+.vol-func-niveis .vol-dia-bt{ width:auto; padding-left:var(--e3); padding-right:var(--e3) }
+.vol-func-conferir{ margin-top:var(--e5) }
+.vol-func .vol-btns{ margin-top:var(--e4) }
+
+/* =============================================================================
+   103 · A ESCALA DO MÊS NO PAPEL (components/escalas/ImprimirMes.tsx)
+   Na tela a folha não existe. Na impressão ela é a única coisa: tudo o que
+   é filho direto do <body> e não é a folha some, e a folha ocupa a página.
+   Duas colunas em A4 retrato; um dia nunca quebra entre colunas ou páginas.
+   ============================================================================= */
+.impresso{ display:none }
+@media print{
+  @page{ size:A4 portrait; margin:12mm 12mm 14mm }
+  html, body{ background:#fff !important; scroll-padding-top:0 }
+  body > *:not(.impresso){ display:none !important }
+  .impresso{
+    display:block !important; color:#111; background:#fff;
+    font-family:var(--fonte), system-ui, sans-serif; font-size:9.5pt; line-height:1.35;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
+  .impresso-cab{ margin:0 0 5mm; padding-bottom:3mm; border-bottom:1.2pt solid #111 }
+  .impresso-igreja{ font-size:8pt; letter-spacing:.12em; text-transform:uppercase; color:#555 }
+  .impresso-tit{ margin:1mm 0 0; font-size:17pt; line-height:1.15; font-weight:700; letter-spacing:-.01em }
+  .impresso-vazio{ margin:0 0 4mm; font-size:10pt }
+  .impresso-dias{ columns:2; column-gap:8mm }
+  .impresso-dia{ break-inside:avoid; page-break-inside:avoid; margin:0 0 5mm }
+  .impresso-dia-tit{ margin:0 0 1.5mm; padding-bottom:1mm; font-size:10.5pt; font-weight:700; border-bottom:.6pt solid #111 }
+  .impresso-tab{ width:100%; border-collapse:collapse }
+  .impresso-tab th{
+    width:42%; padding:.9mm 2mm .9mm 0; text-align:left; vertical-align:top;
+    font-size:7.5pt; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:#444;
+  }
+  .impresso-tab td{ padding:.9mm 0; vertical-align:top; border-bottom:.3pt solid #ddd }
+  .impresso-tab tr:last-child td{ border-bottom:0 }
+  .impresso-aberta{ font-weight:700; color:#b3261e }
+  .impresso-nota{ font-weight:400; color:#555 }
+  .impresso-extra{ margin:1.5mm 0 0; font-size:8.5pt }
+  .impresso-pe{ margin-top:4mm; padding-top:2mm; border-top:.4pt solid #bbb; font-size:7.5pt; color:#666 }
+}

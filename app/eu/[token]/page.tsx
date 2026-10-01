@@ -15,6 +15,10 @@ import { aviseHumano } from '@/lib/erros';
 import { pl, cont } from '@/lib/plural';
 import { lembrarVinculo, esquecerVinculo, noPrincipal } from '@/lib/meu-token';
 import { rolarAte } from '@/components/escalas/ancora';
+/* 103 · troca, função nova e agenda do ministério */
+import TrocaDoVoluntario from '@/components/escalas/TrocaDoVoluntario';
+import FuncoesDoVoluntario from '@/components/escalas/FuncoesDoVoluntario';
+import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
 
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
@@ -195,6 +199,37 @@ export default function Eu() {
      dizer "você também serve na Mídia" para quem chegou pelo link do Louvor. */
   const [eu, setEu] = useState<Identidade | null>(null);
   const [salvandoSexo, setSalvandoSexo] = useState('');
+  /* 103 · TROCA, FUNÇÃO NOVA E AGENDA. Chegam depois da tela, como `eu_espaco`:
+     a escala é o que a pessoa veio ver e não espera por isto. `trocasOk` só
+     vira verdadeiro quando `eu_trocas` respondeu, isto é, quando a migração
+     103 está no banco: antes disso nenhum botão novo aparece. */
+  const [trocas, setTrocas] = useState<Troca[]>([]);
+  const [trocasOk, setTrocasOk] = useState(false);
+  const [eventos, setEventos] = useState<Evento[]>([]);
+  const [vagaTroca, setVagaTroca] = useState<Vaga | null>(null);
+  const [ofertas, setOfertas] = useState<Vaga[]>([]);
+
+  /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
+     a seção da troca e os eventos da grade simplesmente não aparecem. */
+  const carregarExtras = useCallback(async () => {
+    const s = sb();
+    if (!s) return;
+    try {
+      const [tr, ev] = await Promise.all([
+        s.rpc('eu_trocas', { p_token: token }),
+        s.rpc('eu_eventos', { p_token: token }),
+      ]);
+      if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
+      if (!ev.error) setEventos((ev.data || []) as Evento[]);
+    } catch { /* a tela fica como estava */ }
+  }, [token]);
+  /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
+  const lerEspaco = useCallback(async () => {
+    try {
+      const { data: e } = await sb()!.rpc('eu_espaco', { p_token: token });
+      if ((e as any)?.ok) setEspaco(e);
+    } catch { /* fica o que estava */ }
+  }, [token]);
 
   /* inicial=true: primeira carga, pode mostrar tela cheia de erro/rede.
      inicial=false: reload de fundo após uma ação — NUNCA rebaixar a tela
@@ -207,6 +242,10 @@ export default function Eu() {
       const d = euDemo(new URLSearchParams(window.location.search).get('demo') || '');
       setNome(d.nome); setEquipe(d.equipe); setItens(d.escalas as any);
       setIndisp(d.indisponivel); setDisponivel(d.disponivel);
+      /* 103 · o harness desenha a troca e a agenda também */
+      if (d.trocas) { setTrocas(d.trocas as Troca[]); setTrocasOk(true); }
+      if (d.eventos) setEventos(d.eventos as Evento[]);
+      if (d.espaco) setEspaco(d.espaco);
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -291,8 +330,9 @@ export default function Eu() {
       },
       () => {},
     );
+    void carregarExtras();
     setFase('ok');
-  }, [token]);
+  }, [token, carregarExtras]);
 
   /* O LINK QUE CHEGA COM ÂNCORA (#quando-posso, #confirmar), vindo da porta
      do grupo. O navegador procura a âncora ao abrir a página, quando ela
@@ -427,6 +467,18 @@ export default function Eu() {
     /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia a
        pessoa não avisar por fora, achando que já estava resolvido. */
     setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
+    /* 103 · quem acabou de largar uma vaga ganha, logo abaixo do "Precisa de
+       você", a oferta de pedir a um colega. Quem voltou atrás perde a oferta. */
+    if (funcaoId) {
+      const it = itens.find(i => i.culto_id === cultoId && i.funcao_id === funcaoId);
+      setOfertas(prev => {
+        const sem = prev.filter(o => !(o.culto_id === cultoId && o.funcao_id === funcaoId));
+        return status === 'recusado' && it && it.data >= hojeISO()
+          ? [...sem, { culto_id: cultoId, funcao_id: funcaoId, funcao: it.funcao, data: it.data,
+                       evento: it.evento ?? null, inicio: it.inicio ?? null }]
+          : sem;
+      });
+    }
     await carregar(false);
     /* desmarcou em cima da hora: quem abriu o buraco ajuda a fechar */
     if (status === 'recusado' && data && horasAte(data, inicio) < TARDIO) {
@@ -451,10 +503,13 @@ export default function Eu() {
      linhas. */
   /* os dias agrupados pelo mês a que pertencem, na ordem em que vêm. Cálculo
      de leitura, não de estado: nada aqui precisa de memo. */
+  /* 103 · os dias da grade: sábados e domingos, e os eventos do ministério no
+     dia deles. A resposta continua sendo por dia, como sempre. */
+  const dias = diasDaGrade(domingos, eventos);
   const porMes = (() => {
     const anoHoje = new Date().getUTCFullYear();
     const g: { chave: string; rot: string; ano: string; dias: string[] }[] = [];
-    for (const d of domingos) {
+    for (const d of dias) {
       const chave = d.slice(0, 7);
       const at = g.find(x => x.chave === chave);
       if (at) { at.dias.push(d); continue; }
@@ -512,7 +567,7 @@ export default function Eu() {
 
   const possoNoMes = (dias: string[]) => marcarPosso(dias, 'salvar o mês');
   const possoTodos = () =>
-    marcarPosso(domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d)), 'salvar tudo');
+    marcarPosso(dias.filter(d => !indisp.includes(d) && !disponivel.includes(d)), 'salvar tudo');
 
   /* ------------------------------------------------------------ os estados
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em
@@ -643,7 +698,7 @@ export default function Eu() {
      pendente ainda está confirmando, mesmo já tendo confirmado o outro. */
   const gente = agruparQuemServe(juntos);
 
-  const semResposta = domingos.filter(d => !indisp.includes(d) && !disponivel.includes(d));
+  const semResposta = dias.filter(d => !indisp.includes(d) && !disponivel.includes(d));
   /* Alguém que acabou de entrar no time. Não é o mesmo que "não tem escala
      este mês", e as duas situações pedem frases diferentes.
 
@@ -669,6 +724,31 @@ export default function Eu() {
      relatório do culto antes do culto não faz sentido, e mostrar dois campos
      de texto abertos em toda visita empurrava o resto da tela para baixo. */
   const paraRelatar = agenda.filter(i => i.relata && i.data <= hoje);
+  /* 103 · as vagas que ainda são da pessoa, para a troca. `furou` não troca:
+     é fato de quem estava lá. */
+  const minhasVagas = new Set(agenda
+    .filter(i => (i.status || 'pendente') !== 'furou' && !!i.funcao_id && i.data >= hoje)
+    .map(i => `${i.culto_id}\u0000${i.funcao_id}`));
+  const abrirTroca = (i: { culto_id: string; funcao_id?: string | null; funcao: string; data: string;
+                           evento?: string | null; inicio?: string | null }) => {
+    if (!i.funcao_id) return;
+    setVagaTroca({ culto_id: i.culto_id, funcao_id: i.funcao_id, funcao: i.funcao, data: i.data,
+                   evento: i.evento ?? null, inicio: i.inicio ?? null });
+    /* o painel nasce no próximo desenho; tenta até ele existir */
+    let n = 0;
+    const tentar = () => { if (!rolarAte('pedir-troca', 800) && ++n < 20) window.setTimeout(tentar, 50); };
+    window.requestAnimationFrame(tentar);
+  };
+  /* a mesma barra de baixo para as ações novas (ver o comentário do fim) */
+  const avisar = (msg: string) => {
+    setErro(''); setFlash(msg);
+    window.setTimeout(() => setFlash(f => (f === msg ? '' : f)), 4200);
+  };
+  const errar = (msg: string) => { setFlash(''); setErro(msg); };
+  /* 103 · a grade "Quando você pode" com os eventos do ministério dentro */
+  const eventosDoDia = (d: string) => eventos.filter(e => e.data === d);
+  const naEscala = (d: string) => agenda.some(i => i.data === d && (i.status || 'pendente') !== 'recusado');
+  const dePlantao = (d: string) => plantoes.some(p => p.data === d);
   const est = (i: Item) => {
     const s = i.status || 'pendente';
     return s === 'confirmado' ? { cls: 'ok', txt: 'confirmado' }
@@ -831,6 +911,22 @@ export default function Eu() {
           ))}
         </div>
 
+        {/* 103 · A TROCA. Logo abaixo do "Precisa de você", porque pedido de
+            colega também pede resposta, e a porta do grupo abre a página aqui
+            em cima (#confirmar). Só existe com a migração 103 no banco. */}
+        {trocasOk && (
+          <TrocaDoVoluntario
+            token={token} trocas={trocas}
+            vaga={vagaTroca} abrirVaga={abrirTroca} fecharVaga={() => setVagaTroca(null)}
+            ofertas={ofertas.filter(o => minhasVagas.has(`${o.culto_id}\u0000${o.funcao_id}`))}
+            minhasVagas={minhasVagas}
+            slug={slugDaPorta || espaco?.equipe_slug || null}
+            responsavel={espaco?.responsavel || null}
+            cultoHora={IGREJA.cultoHora} followHora={IGREJA.followHora}
+            aoMudar={async () => { await carregar(false); }}
+            avisar={avisar} errar={errar} />
+        )}
+
         {/* A PERGUNTA QUE SÓ APARECE PARA QUEM ELA MUDA ALGUMA COISA.
             Alguns postos só aceitam homem ou só mulher — não por preferência,
             por acesso: quem confere o banheiro masculino tem que poder entrar
@@ -965,6 +1061,13 @@ export default function Eu() {
                       Não vou mais poder
                     </button>
                   )}
+                  {/* 103 · pedir a um colega que fique com a vaga: ela continua
+                      sua até alguém aceitar */}
+                  {trocasOk && !!proxima.funcao_id && (
+                    <button type="button" className="ingresso-cal" onClick={() => abrirTroca(proxima)}>
+                      Pedir troca
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -1075,6 +1178,10 @@ export default function Eu() {
                       i.status === 'recusado' ? 'confirmado' : 'recusado', i.data, i.funcao_id)}>
                     {i.status === 'recusado' ? 'Consegui, posso sim' : 'Não vou mais poder'}
                   </button>
+                  {/* 103 · a troca, também para quem já disse que não pode */}
+                  {trocasOk && !!i.funcao_id && (i.status || 'pendente') !== 'furou' && (
+                    <button className="vol-acao" onClick={() => abrirTroca(i)}>Pedir troca</button>
+                  )}
                 </span>
                 <span className="vol-linha-est">{est(i).txt}</span>
               </div>
@@ -1110,7 +1217,7 @@ export default function Eu() {
             <button className="sec" onClick={() => carregar(false)}>Tentar de novo</button>
           </section>
         )}
-        {!!domingos.length && (
+        {!!dias.length && (
           <section className="vol-secao" id="quando-posso">
             <div className="vol-secao-cab">
               <span className="rot">Quando você pode</span>
@@ -1127,6 +1234,8 @@ export default function Eu() {
               {semResposta.length
                 ? `${pl(semResposta.length, 'Falta', 'Faltam')} ${cont(semResposta.length, 'dia', 'dias')} para responder. É isso que garante seu lugar na escala.`
                 : 'Tudo respondido. Pode mudar quando quiser.'}
+              {/* 103 · a agenda do ministério entra na grade */}
+              {!!eventos.length && ' Os eventos da sua área aparecem no dia deles.'}
             </p>
             {/* POR MÊS, E NÃO NUMA GRADE CORRIDA. 07/09/2026.
                 Eram quinze datas em duas colunas sem separação nenhuma. E o
@@ -1162,7 +1271,12 @@ export default function Eu() {
                       const nao = indisp.includes(d);
                       return (
                         <div className="vol-dia" key={d}>
-                          <span className="vol-dia-nome">{diaNoMes(d)}</span>
+                          <span className="vol-dia-nome">
+                            {rotuloDoDia(d, eventosDoDia(d), diaNoMes(d))}
+                            {/* 103 · os dias da pessoa, destacados na agenda */}
+                            {naEscala(d) ? <span className="vol-dia-tag">na escala</span>
+                              : dePlantao(d) ? <span className="vol-dia-tag">plantão</span> : null}
+                          </span>
                           <span className="vol-dia-btns">
                             <button className={`vol-dia-bt sim ${pode ? 'on' : ''}`} disabled={ocupado === d}
                               onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>Posso</button>
@@ -1217,7 +1331,11 @@ export default function Eu() {
             {!!espaco?.funcoes?.length && (
               <div className="vol-eq-linha">
                 <span className="vol-eq-rot">Você faz</span>
-                <span className="vol-eq-val">{espaco.funcoes.map((f: any) => f.funcao).join(' · ')}</span>
+                {/* 103 · a função que a própria pessoa acrescentou espera a
+                    liderança conferir, e a tela diz isso */}
+                <span className="vol-eq-val">
+                  {espaco.funcoes.map((f: any) => f.funcao + (f.conferido === false ? ' (a conferir)' : '')).join(' · ')}
+                </span>
               </div>
             )}
             {!!espaco?.responsavel && (
@@ -1233,6 +1351,12 @@ export default function Eu() {
               </div>
             )}
           </div>
+
+          {/* 103 · acrescentar função pelo próprio link, que entra a conferir */}
+          {trocasOk && (
+            <FuncoesDoVoluntario token={token} responsavel={espaco?.responsavel || null}
+              aoMudar={lerEspaco} avisar={avisar} errar={errar} />
+          )}
 
           {espaco?.whatsapp && (
             <a className="vol-zap" target="_blank" rel="noreferrer"

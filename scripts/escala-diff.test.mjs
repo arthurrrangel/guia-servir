@@ -130,6 +130,55 @@ const quer = (sobrescreve = {}) => [
   ok(mesmo(planoDoPlantao([], []), { apagar: [], inserir: [] }), 'plantão vazio');
 }
 
+/* 11. A TROCA QUE A TELA ABERTA NÃO VIU (103, 01/10/2026).
+   A Ana pediu troca pelo link e a Bia aceitou: no banco a VOZ é da Bia. A
+   tela do líder abriu antes, ainda mostra a Ana, e o líder salva o dia por
+   causa de OUTRA vaga. A VOZ não pode voltar para a Ana. */
+{
+  const base = { status: 'pendente', fixo: false, primeira_vez: false };
+  const p = planoDoDia(
+    [
+      { funcao_id: 'voz', voluntario_id: 'ana', carregado: 'ana', ...base },   // a tela não mexeu
+      { funcao_id: 'baixo', voluntario_id: 'caio', ...base },                  // o líder trocou agora
+    ],
+    [
+      { id: 'l1', funcao_id: 'voz', voluntario_id: 'bia', fixo: false, primeira_vez: false },
+      { id: 'l2', funcao_id: 'baixo', voluntario_id: 'eva', fixo: false, primeira_vez: false },
+    ],
+  );
+  ok(!p.apagar.includes('l1'), 'troca aceita depois da carga: a vaga da Bia não é apagada', JSON.stringify(p));
+  ok(!p.inserir.some(x => x.funcao_id === 'voz'), 'e a Ana não volta para a VOZ', JSON.stringify(p));
+  ok(p.apagar.includes('l2') && p.inserir.some(x => x.funcao_id === 'baixo' && x.voluntario_id === 'caio'),
+    'a vaga que o líder trocou de propósito segue a regra de sempre', JSON.stringify(p));
+}
+{
+  /* o líder escolheu a Ana de propósito (vaga refeita na tela: sem `carregado`) */
+  const p = planoDoDia(
+    [{ funcao_id: 'voz', voluntario_id: 'ana', status: 'pendente', fixo: true, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'bia', fixo: false, primeira_vez: false }],
+  );
+  ok(igual(p, { apagar: ['l1'], atualizar: [], inserir: [{ funcao_id: 'voz', voluntario_id: 'ana', status: 'pendente', fixo: true, primeira_vez: false }] }),
+    'escolha nova do líder vence a troca (decisão de quem lidera)', JSON.stringify(p));
+}
+{
+  /* a tela carregou a Ana, o líder pôs a Bia: `carregado` diz Ana, desejado
+     diz Bia, banco diz Ana. É troca normal do líder. */
+  const p = planoDoDia(
+    [{ funcao_id: 'voz', voluntario_id: 'bia', carregado: 'ana', status: 'pendente', fixo: false, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'ana', fixo: false, primeira_vez: false }],
+  );
+  ok(p.apagar.includes('l1') && p.inserir.some(x => x.voluntario_id === 'bia'),
+    'com carregado diferente do desejado, a troca do líder grava', JSON.stringify(p));
+}
+{
+  /* nada mudou no banco nem na tela: nada a fazer */
+  const p = planoDoDia(
+    [{ funcao_id: 'voz', voluntario_id: 'ana', carregado: 'ana', status: 'confirmado', fixo: false, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'ana', fixo: false, primeira_vez: false }],
+  );
+  ok(igual(p, { apagar: [], atualizar: [], inserir: [] }), 'vaga igual dos dois lados: plano vazio', JSON.stringify(p));
+}
+
 /* O PLACAR ERA UMA CONSTANTE, E ELA NÃO SABIA QUANTAS ASSERÇÕES EXISTEM.
    17 escrito à mão, com 4 das 17 mortas: o "17/17" cobria 13 de verdade.
    Agora `ok` conta, como no resto da suíte. */

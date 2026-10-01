@@ -159,16 +159,33 @@ export function euDemo(variante: string = '') {
      eu passo a revisar uma tela que não existe. */
   const doTipo = (i: number, doDomingo: string, doFollow: string) =>
     tipoDoDia(prox[i] || prox[0]) === 'domingo' ? doDomingo : doFollow;
+  /* 103 · a troca e a agenda só entram na variante `troca`: a de sempre
+     continua desenhando a tela que as outras auditorias conhecem */
+  const comTroca = variante === 'troca';
+  const todos = cultosDoMes(ano, mes).concat(cultosDoMes(ano, mes === 12 ? 1 : mes + 1)).filter(d => d >= hoje);
+  const quarta = (() => {
+    /* um evento numa quarta, entre 5 e 12 dias daqui: a agenda do ministério */
+    const base = new Date(hoje + 'T12:00:00Z');
+    for (let k = 5; k < 13; k++) {
+      const d = new Date(base.getTime() + k * 86400000);
+      if (d.getUTCDay() === 3) return d.toISOString().slice(0, 10);
+    }
+    return '';
+  })();
+  const agoraISO = new Date().toISOString();
   return {
     nome: 'Giovana Rosalem',
     equipe: 'Mídia',
     escalas: [
-      { culto_id: 'c1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
-      { culto_id: 'c1', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false, repertorio: REP_DEMO },
+      { culto_id: 'c1', funcao_id: 'f1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
+      { culto_id: 'c1', funcao_id: 'f2', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false, repertorio: REP_DEMO },
       /* o segundo culto só com o YouTube: o setlist pode vir parcial */
-      { culto_id: 'c2', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false,
+      { culto_id: 'c2', funcao_id: 'f3', data: prox[1] || prox[0], funcao: 'FOTO', status: 'confirmado', primeira_vez: false, plantao: false,
         repertorio: { youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG' } },
-      { culto_id: 'c3', data: prox[2] || prox[0], funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), status: 'recusado', primeira_vez: false, plantao: false },
+      { culto_id: 'c3', funcao_id: 'f4', data: prox[2] || prox[0], funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), status: 'recusado', primeira_vez: false, plantao: false },
+      /* 103 · escalada no evento da quarta, para a agenda destacar o dia */
+      ...(comTroca && quarta ? [{ culto_id: 'e1', funcao_id: 'f1', data: quarta, funcao: 'PROJEÇÃO', status: 'confirmado',
+        primeira_vez: false, plantao: false, evento: 'Ensaio Geral', inicio: '19:30:00' }] : []),
       { culto_id: 'c4', data: prox[3] || prox[0], funcao: '', status: '', primeira_vez: false, plantao: true },
       /* posto de líder do dia num culto que JÁ passou: é a única combinação em
          que o formulário de relatório aparece. Sem esta linha o componente
@@ -182,7 +199,36 @@ export function euDemo(variante: string = '') {
     ],
     indisponivel: [prox[4] || ''].filter(Boolean),
     disponivel: [prox[1] || ''].filter(Boolean),
-    dias: cultosDoMes(ano, mes).concat(cultosDoMes(ano, mes === 12 ? 1 : mes + 1)).filter(d => d >= hoje).slice(0, 12),
+    dias: todos.slice(0, 12),
+    /* 103 · dois pedidos recebidos (um que dá, um num dia em que ela avisou
+       que não pode), um feito e esperando, e uma resposta "não pode" */
+    ...(comTroca ? {
+      trocas: [
+        { id: 't1', papel: 'me_pediram', culto_id: 'c7', data: todos[5] || todos[todos.length - 1], inicio: null, evento: null,
+          funcao_id: 'f5', funcao: 'EDIÇÃO', outro: 'Rafael Prado', status: 'aberta', impede: null,
+          criado_em: agoraISO, respondido_em: null },
+        { id: 't2', papel: 'me_pediram', culto_id: 'c8', data: prox[4] || todos[4], inicio: null, evento: null,
+          funcao_id: 'f3', funcao: 'FOTO', outro: 'Bruno Lima', status: 'aberta', impede: 'INDISPONIVEL',
+          criado_em: agoraISO, respondido_em: null },
+        { id: 't3', papel: 'pedi', culto_id: 'c3', data: prox[2] || prox[0], inicio: null, evento: null,
+          funcao_id: 'f4', funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), outro: 'Larissa Moura', status: 'aberta', impede: null,
+          criado_em: agoraISO, respondido_em: null },
+        { id: 't4', papel: 'pedi', culto_id: 'c3', data: prox[2] || prox[0], inicio: null, evento: null,
+          funcao_id: 'f4', funcao: doTipo(2, 'HEAD', 'ILUMINAÇÃO'), outro: 'Caio Mendes', status: 'recusada', impede: null,
+          criado_em: agoraISO, respondido_em: agoraISO },
+      ],
+      eventos: quarta ? [{ culto_id: 'e1', data: quarta, evento: 'Ensaio Geral', inicio: '19:30:00', fim: null,
+                           escalado: true, resposta: null }] : [],
+      espaco: {
+        ok: true, equipe_slug: 'midia', responsavel: 'Arthur', tem_pin: true,
+        voluntario: { desde: '2026-03-01' },
+        funcoes: [
+          { funcao: 'PROJEÇÃO', nivel: 'titular', conferido: true },
+          { funcao: 'FOTO', nivel: 'reserva', conferido: true },
+          { funcao: 'EDIÇÃO', nivel: 'reserva', conferido: false },
+        ],
+      },
+    } : {}),
   };
 }
 

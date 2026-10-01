@@ -16,6 +16,7 @@ import {
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
+import ImprimirMes from '@/components/escalas/ImprimirMes';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -540,10 +541,14 @@ function Escala() {
 
   const nomeMes = MESES[mes - 1];
   const montados = futuros.length - contas.aMontar;
+  /* 103 · o PDF do mês só aparece quando há alguém escalado em algum dia */
+  const temEscalado = dias.some(d => Object.values(S.escalas[d]?.slots || {}).some(sl => !!sl?.vid));
 
   return (
     <>
       {ocupado && <Fio />}
+      {/* 103 · a folha que só existe no papel (portal no fim do body) */}
+      <ImprimirMes S={S} ano={ano} mes={mes} equipe={equipe?.nome || ''} />
       {/* ------------------------------------------------------- o cabeçalho
           O mês é o título e as setas moram coladas nele: um par só, que não
           se separa. A frase embaixo diz o estado do mês. "Montar o mês
@@ -567,6 +572,11 @@ function Escala() {
           : contas.pendentes ? 'Falta a confirmação de quem foi escalado.'
           : 'Mês fechado.'}
         acoes={<>
+          {/* 103 · a escala do mês em PDF: a janela de imprimir do navegador,
+              com "Salvar como PDF". Sai só a folha (ImprimirMes), nada da tela. */}
+          {temEscalado && (
+            <button className="es-btn es-txt" onClick={() => window.print()}>Salvar em PDF</button>
+          )}
           <button className="es-btn" onClick={() => copiar(msgColeta(S, ano, mes, base, linkDoVoluntario(base, equipe?.slug, 'disponibilidade')), aviso, 'Pedido copiado. Cole no grupo.')}>
             Pedir a disponibilidade
           </button>
@@ -1201,10 +1211,13 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
               1ª vez
             </button>
           </span>
-          {(slot.fixo || slot.primeiraVez) && (
+          {(slot.fixo || slot.primeiraVez || !!slot.trocouDe) && (
             <span className="es-ec-notas">
               {slot.fixo && <span>o sorteio não mexe</span>}
               {slot.primeiraVez && <span>chega 30 min mais cedo</span>}
+              {/* 103 · a vaga passou por troca aceita no link do voluntário:
+                  o líder vê de quem veio, sem precisar ter feito nada */}
+              {!!slot.trocouDe && <span>trocou com {nomeDe(S, slot.trocouDe) || 'um colega'}</span>}
             </span>
           )}
         </span>

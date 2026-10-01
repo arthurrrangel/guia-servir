@@ -29,6 +29,10 @@
 
 export type SlotDesejado = {
   funcao_id: string; voluntario_id: string; status: string; fixo: boolean; primeira_vez: boolean;
+  /* 103 · quem o BANCO tinha nesta vaga quando a tela carregou. Ausente =
+     não sei (vaga refeita na tela, ou quem chama não informou): aí vale a
+     regra de sempre. Ver o comentário de `planoDoDia`. */
+  carregado?: string | null;
 };
 export type LinhaAtual = {
   id: string; funcao_id: string; voluntario_id: string | null; fixo: boolean; primeira_vez: boolean;
@@ -72,6 +76,21 @@ export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): Pla
     }
     vistas.add(linha.funcao_id);
     if (linha.voluntario_id !== quer.voluntario_id) {
+      /* 103 · A TROCA QUE A TELA ABERTA NÃO VIU.
+
+         Desde a 103 o voluntário passa a vaga para um colega pelo próprio
+         link, e o banco muda sem a tela do líder saber. A tela aberta antes
+         disso ainda mostra quem pediu; se o líder salvar QUALQUER coisa
+         desse dia, este laço via "vaga com outra pessoa" e devolvia a vaga a
+         quem pediu, apagando a troca e a confirmação de quem aceitou, sem
+         um aviso.
+
+         Regra: a vaga que a tela NÃO mexeu (a pessoa desejada é a mesma que
+         o banco tinha ao carregar) e que o banco mudou depois (a linha de
+         agora é outra pessoa) fica como o banco está. Quem o líder trocou de
+         propósito nasce sem `carregado` e segue a regra de sempre. */
+      if (quer.carregado !== undefined && quer.voluntario_id === quer.carregado
+          && linha.voluntario_id !== quer.carregado) continue;
       plano.apagar.push(linha.id);
       plano.inserir.push(quer);
       continue;
