@@ -1,0 +1,173 @@
+/* =============================================================================
+   /followcamp/pagar — a mesma identidade da página do Camp (public/followcamp):
+   Poppins pesada, vermelho de fogo, papel quente, contorno cacau e o botão que
+   "afunda" com a sombra dura. Escopo de módulo: nada daqui vaza para o resto
+   do site, e o globals.css do site não manda aqui dentro porque tudo tem
+   classe própria.
+   ============================================================================= */
+.raiz{
+  --fogo:#F32402; --brasa:#E41402; --cacau:#4F2B18; --sol:#FECB13; --mar:#0A22DA; --branco:#fff;
+  --papel:#FFF6EE; --cartao:#FFFFFF; --tinta:#2A140B; --tinta-2:#6A4636; --rubi:#C01800;
+  --linha:rgba(79,43,24,.16); --campo:#FFFDFB; --ok:#0F7A2E; --ok-fundo:#E7F6EC;
+  --f:var(--fc-poppins),system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --f-pixel:var(--fc-pixel),"Courier New",ui-monospace,monospace;
+  position:relative;z-index:1;isolation:isolate;
+  min-height:100dvh;background:var(--papel);color:var(--tinta);
+  font:400 1rem/1.6 var(--f);-webkit-font-smoothing:antialiased;
+  padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  .raiz:not([data-tema="claro"]){
+    --papel:#160B06; --cartao:#22130B; --tinta:#FFF1E7; --tinta-2:#D2B3A2; --rubi:#FF6A45;
+    --linha:rgba(255,241,231,.14); --campo:#1B0E08; --ok:#5BD07E; --ok-fundo:rgba(91,208,126,.12);
+    color-scheme:dark;
+  }
+}
+.raiz[data-tema="escuro"]{
+  --papel:#160B06; --cartao:#22130B; --tinta:#FFF1E7; --tinta-2:#D2B3A2; --rubi:#FF6A45;
+  --linha:rgba(255,241,231,.14); --campo:#1B0E08; --ok:#5BD07E; --ok-fundo:rgba(91,208,126,.12);
+  color-scheme:dark;
+}
+.raiz *,.raiz *::before,.raiz *::after{box-sizing:border-box}
+.raiz :focus-visible{outline:3px solid var(--sol);outline-offset:3px}
+/* o título recebe foco a cada troca de tela (para o leitor de tela); o anel
+   amarelo em volta dele pareceria defeito, não foco */
+.raiz h2[tabindex="-1"]:focus{outline:none}
+
+/* ------------------------------------------------------------------ topo --- */
+.topo{
+  /* brasa e não fogo: o branco sobre o fogo dá 4,15 de contraste, abaixo do AA
+     para o texto pequeno do topo; sobre a brasa dá 4,77 */
+  position:relative;overflow:hidden;background:var(--brasa);color:var(--branco);
+  padding:calc(14px + env(safe-area-inset-top,0px)) 16px 34px;text-align:center;
+  border-bottom:4px solid var(--cacau);
+}
+.topo::before{ /* raios do sol da identidade, discretos */
+  content:"";position:absolute;inset:-60% -20% auto;height:220%;z-index:-1;
+  background:repeating-conic-gradient(from 0deg at 50% 62%,#C41000 0 9deg,transparent 9deg 18deg);
+  opacity:.5;
+}
+.barra{display:flex;align-items:center;justify-content:space-between;max-width:620px;margin:0 auto 10px}
+.voltar{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 12px 0 6px;color:var(--branco);font:600 .9rem/1 var(--f);text-decoration:none;border-radius:999px}
+.voltar:hover{background:rgba(0,0,0,.12)}
+.tema{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.55);background:rgba(0,0,0,.12);color:var(--branco);display:grid;place-items:center;cursor:pointer;padding:0}
+.tema:hover,.tema:active{background:rgba(0,0,0,.22);border-color:var(--branco);color:var(--branco);transform:none}
+.tema svg{width:20px;height:20px}
+.logo{display:block;width:min(220px,58vw);height:auto;margin:0 auto 6px;filter:drop-shadow(0 4px 0 rgba(79,43,24,.45))}
+.titulo{margin:0;font:900 clamp(1.9rem,7vw,2.6rem)/1.05 var(--f);letter-spacing:-.02em;text-shadow:0 3px 0 rgba(79,43,24,.5)}
+.subtitulo{margin:8px 0 0;font:600 .95rem/1.4 var(--f);opacity:.95}
+
+/* ---------------------------------------------------------------- coluna --- */
+/* o globals.css centraliza todo <main> abaixo de 760px (regra do site): aqui o
+   formulário lê da esquerda para a direita */
+.coluna{max-width:620px;margin:-18px auto 0;padding:0 16px;display:grid;gap:22px;text-align:left}
+.painel{background:var(--cartao);color:var(--tinta);border:3px solid var(--cacau);border-radius:26px;box-shadow:0 7px 0 var(--cacau);padding:24px 20px;min-width:0}
+@media (min-width:560px){.painel{padding:30px 30px}}
+.passo{display:grid;gap:12px}
+.passo + .passo{margin-top:26px;padding-top:24px;border-top:2px solid var(--linha)}
+.cabecaPasso{display:flex;align-items:center;gap:12px;margin:0;font:800 1.12rem/1.25 var(--f)}
+.cabecaPasso span{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--sol);color:#1d0e06;border:2px solid var(--cacau);font:900 .95rem/1 var(--f)}
+.ajuda{margin:-4px 0 0;color:var(--tinta-2);font-size:.92rem;line-height:1.5}
+
+/* ---------------------------------------------------------------- campos --- */
+.campo{display:grid;gap:6px}
+/* o globals.css põe todo <label> em caixa alta e cinza: aqui o rótulo é frase */
+.campo label{font:700 .9rem/1.3 var(--f);text-transform:none;letter-spacing:normal;color:inherit;margin:0;text-align:left}
+.campo input{
+  width:100%;min-height:52px;padding:12px 14px;border-radius:14px;border:2px solid var(--linha);
+  background:var(--campo);color:var(--tinta);font:500 1.05rem/1.3 var(--f);
+  transition:border-color .15s ease;
+}
+.campo input:hover{border-color:color-mix(in srgb,var(--cacau) 45%,transparent)}
+.campo input:focus{border-color:var(--cacau);background:var(--campo);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--sol) 70%,transparent)}
+.campo input[aria-invalid="true"]{border-color:var(--rubi)}
+.dupla{display:grid;gap:12px}
+@media (min-width:520px){.dupla{grid-template-columns:1fr 1fr}}
+
+/* ------------------------------------------------------- opções (rádio) --- */
+.opcoes{display:grid;gap:10px;margin:0;padding:0;border:0;min-width:0}
+.opcoes legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.opcao{
+  position:relative;display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:4px 12px;align-items:center;
+  padding:14px 16px;border-radius:18px;border:2px solid var(--linha);background:var(--campo);cursor:pointer;
+  text-transform:none;letter-spacing:normal;color:inherit;font:400 1rem/1.5 var(--f);margin:0;text-align:left;
+  transition:border-color .15s ease,box-shadow .15s ease,translate .15s ease;
+}
+.opcao:hover{border-color:color-mix(in srgb,var(--cacau) 50%,transparent)}
+.opcao input{position:absolute;opacity:0;pointer-events:none}
+.bola{width:24px;height:24px;border-radius:50%;border:2px solid var(--cacau);display:grid;place-items:center;background:var(--cartao)}
+.opcao[data-marcada="true"]{border-color:var(--cacau);box-shadow:0 4px 0 var(--cacau);translate:0 -2px}
+.opcao[data-marcada="true"] .bola::after{content:"";width:12px;height:12px;border-radius:50%;background:var(--brasa)}
+.opcao:has(input:focus-visible){outline:3px solid var(--sol);outline-offset:3px}
+.opcao[aria-disabled="true"]{opacity:.55;cursor:not-allowed}
+.opNome{font:700 1rem/1.3 var(--f)}
+.opPreco{font:900 1.05rem/1 var(--f);white-space:nowrap;text-align:right}
+.opDica{grid-column:2 / -1;color:var(--tinta-2);font-size:.88rem;line-height:1.45}
+.extra{margin:10px 2px 4px}
+
+/* ----------------------------------------------------------------- total --- */
+.total{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:22px;padding-top:18px;border-top:2px dashed var(--linha)}
+.total span{font:700 .82rem/1.2 var(--f);letter-spacing:.14em;text-transform:uppercase;color:var(--rubi)}
+.total strong{font:900 clamp(1.8rem,6vw,2.3rem)/1 var(--f);letter-spacing:-.02em}
+
+/* ---------------------------------------------------------------- botões --- */
+.acoes{display:grid;gap:12px;margin-top:20px}
+.btn{
+  --borda:var(--cacau);--fundo:var(--cartao);--letra:var(--tinta);display:inline-flex;align-items:center;justify-content:center;gap:.55em;width:100%;text-align:center;text-wrap:balance;
+  min-height:56px;padding:0 1.4em;border-radius:999px;border:3px solid var(--borda);
+  font:700 1.05rem/1.1 var(--f);letter-spacing:normal;text-transform:none;text-decoration:none;cursor:pointer;box-shadow:0 5px 0 var(--borda);
+  background:var(--fundo);color:var(--letra);
+  transition:translate .15s ease,box-shadow .15s ease,opacity .15s ease;-webkit-tap-highlight-color:transparent;
+}
+.btn:hover{translate:0 -2px;box-shadow:0 7px 0 var(--borda);background:var(--fundo);border-color:var(--borda);color:var(--letra)}
+.btn:active{translate:0 3px;box-shadow:0 2px 0 var(--borda);background:var(--fundo);border-color:var(--borda);transform:none}
+.btn[disabled]{opacity:.6;cursor:progress;translate:none}
+.fogo{--fundo:var(--brasa);--letra:var(--branco)}
+.claro{--fundo:var(--cartao);--letra:var(--tinta)}
+.zap{--fundo:#157A3D;--letra:#fff;--borda:#0D5E2E}
+.link{justify-self:center;background:none;border:0;min-height:44px;padding:10px;font:700 .95rem/1.2 var(--f);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.link:hover,.link:active{background:none;border:0;color:var(--rubi);transform:none}
+.erro{margin:14px 0 0;padding:12px 14px;border-radius:14px;background:color-mix(in srgb,var(--rubi) 12%,transparent);color:var(--tinta);border:2px solid color-mix(in srgb,var(--rubi) 55%,transparent);font:600 .95rem/1.45 var(--f)}
+.nota{margin:12px 0 0;color:var(--tinta-2);font-size:.86rem;line-height:1.5}
+
+/* ------------------------------------------------------------------- Pix --- */
+.pixCab{text-align:center}
+.pixCab h2{margin:0 0 4px;font:900 1.6rem/1.15 var(--f);letter-spacing:-.01em}
+.pixCab p{margin:0;color:var(--tinta-2)}
+.pixValor{display:block;margin:10px 0 0;font:900 2.4rem/1 var(--f);letter-spacing:-.02em;color:var(--tinta)}
+.qr{display:block;width:min(260px,72vw);height:auto;margin:20px auto 6px;border:3px solid var(--cacau);border-radius:18px;background:#fff;padding:6px}
+.codigo{margin:10px 0 0;padding:12px 14px;border-radius:14px;background:var(--campo);border:2px dashed var(--linha);font:500 .78rem/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;word-break:break-all;color:var(--tinta-2);max-height:6.2em;overflow:hidden;user-select:all;
+  /* o código inteiro está no botão de copiar; aqui ele só aparece, e some em degradê em vez de cortar no meio da linha */
+  -webkit-mask-image:linear-gradient(to bottom,#000 55%,transparent);mask-image:linear-gradient(to bottom,#000 55%,transparent)}
+.chave{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding:12px 14px;border-radius:14px;border:2px solid var(--linha);background:var(--campo)}
+.chave span{display:block;font:700 .76rem/1.2 var(--f);letter-spacing:.12em;text-transform:uppercase;color:var(--rubi)}
+.chave strong{display:block;font:700 1rem/1.3 var(--f);word-break:break-all}
+.chave button{flex:none;min-height:44px;padding:0 14px;border-radius:999px;border:2px solid var(--cacau);background:var(--cartao);color:var(--tinta);font:700 .88rem/1 var(--f);cursor:pointer}
+.chave button:hover,.chave button:active{background:var(--cartao);border-color:var(--cacau);color:var(--tinta)}
+.estado{display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0 0;font:700 .98rem/1.3 var(--f)}
+.gira{width:18px;height:18px;border-radius:50%;border:3px solid var(--linha);border-top-color:var(--brasa);animation:gira 1s linear infinite}
+@keyframes gira{to{rotate:360deg}}
+.relogio{display:block;text-align:center;margin-top:6px;color:var(--tinta-2);font-size:.88rem}
+.resumo{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:8px;border-top:2px solid var(--linha);padding-top:16px}
+.resumo li{display:flex;justify-content:space-between;gap:12px;font-size:.95rem}
+.resumo li span{color:var(--tinta-2);flex:none}
+.resumo li strong{text-align:right;font-weight:700;overflow-wrap:anywhere}
+
+/* ----------------------------------------------------------------- fim --- */
+.selo{width:78px;height:78px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:var(--ok-fundo);border:3px solid var(--ok);color:var(--ok)}
+.selo svg{width:40px;height:40px}
+/* a volta do cartão não é confirmação: sem o verde do "pago" */
+.seloNeutro{background:color-mix(in srgb,var(--sol) 22%,transparent);border-color:var(--cacau);color:var(--tinta)}
+.emBreve{text-align:center}
+.emBreve h2{margin:0 0 8px;font:900 1.5rem/1.2 var(--f)}
+.emBreve p{margin:0 0 6px;color:var(--tinta-2)}
+
+.rodape{max-width:620px;margin:24px auto 0;padding:0 16px;text-align:center;color:var(--tinta-2);font-size:.82rem;line-height:1.5}
+.rodape a{color:inherit;text-decoration:underline;text-underline-offset:2px}
+.vivo{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (prefers-reduced-motion:reduce){
+  .gira{animation:none}
+  .opcao,.btn{transition:none}
+}

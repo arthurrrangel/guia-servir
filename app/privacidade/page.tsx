@@ -43,6 +43,8 @@ const COLETA = [
     r: 'Em quais cultos você foi escalado, se confirmou ou pediu troca, os dias em que marcou indisponibilidade, e as observações que você mesmo escreve. Um PIN de quatro números, escolhido por você, protege esse espaço.' },
   { q: 'Quando você fala com a gente pelo site',
     r: `Os botões de conversa abrem o ${IGREJA.whatsapp ? 'WhatsApp' : 'Instagram'} com uma mensagem já escrita. O que você manda por lá fica no aplicativo, sob a política dele. Este site não guarda cópia da conversa.` },
+  { q: 'Quando você paga o Follow Camp pelo site',
+    r: 'Para gerar o Pix, o nome, o CPF, o e-mail e o celular de quem paga, junto com o nome do campista, vão direto para a Stone (Pagar.me), que processa o pagamento sob a política dela. Este site não guarda nenhum desses dados. No cartão, os dados são digitados na página da própria Stone.' },
 ];
 const LINK = [
   { q: 'Fora da busca',
@@ -74,7 +76,7 @@ export default function Privacidade() {
             <p className="g-ed">O que a gente guarda, e por quê.</p>
             {/* 09/09/2026: era estilo em linha com 28px, que não é degrau da
                 escala (…24, 32…). Virou classe, com 24. */}
-            <p className="g-rot g-rot-data">Atualizada em setembro de 2026</p>
+            <p className="g-rot g-rot-data">Atualizada em outubro de 2026</p>
           </div>
         </div>
       </section>

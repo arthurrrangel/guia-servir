@@ -26,7 +26,6 @@
 <link rel="preload" href="/followcamp/a/logo.webp" as="image" type="image/webp">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-[hidden]{display:none!important}
 </style>
 <style>
 @font-face{font-family:"Poppins";font-style:normal;font-weight:400;font-display:swap;src:url(/followcamp/a/poppins-400.woff2) format("woff2")}
@@ -266,6 +265,8 @@ section[id]{scroll-margin-top:84px}
 @media (max-width:479.98px){.condicoes{gap:14px}.condicoes div{grid-template-columns:1fr;gap:2px}}
 .nota-ficha{margin-top:10px;font-size:.88rem;line-height:1.5;color:rgba(255,255,255,.88)}
 .mapa{display:inline-block;font:700 .9rem/1.2 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;padding:6px 0}
+.pagar-site{display:inline-block;margin-top:14px;font:700 .92rem/1.35 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;text-wrap:balance}
+[hidden]{display:none!important}
 .zap{font-weight:700;white-space:nowrap;color:inherit;text-decoration:underline;text-decoration-color:var(--fogo);text-decoration-thickness:2px;text-underline-offset:3px}
 .final .zap{text-decoration-color:rgba(255,255,255,.75)}
 
@@ -553,7 +554,8 @@ section[id]{scroll-margin-top:84px}
             <div class="extra"><a class="btn btn-branco btn-peq" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte data-rotulo-ficha="Abrir a ficha">Quero me inscrever <span class="seta" aria-hidden="true">→</span></a></div>
             <p class="nota-ficha" data-sem-ficha>O formulário abre em breve. Até lá, a inscrição começa pelo WhatsApp da organização.</p></div></li>
           <li><div><h3>Autorização, se tiver menos de 18</h3><p>O termo de autorização dos responsáveis está no próprio formulário de inscrição.</p></div></li>
-          <li><div><h3>Escolha a forma de pagamento</h3><p>Dinheiro, Pix ou cartão de crédito.</p></div></li>
+          <li><div><h3>Escolha a forma de pagamento</h3><p>Dinheiro, Pix ou cartão de crédito.</p>
+            <div class="extra" data-pagar hidden><a class="btn btn-branco btn-peq" href="/followcamp/pagar">Pagar pelo site <span class="seta" aria-hidden="true">→</span></a></div></div></li>
           <li><div><h3>Fique de olho no e-mail</h3><p>A confirmação da vaga chega por lá, com todas as informações do retiro.</p></div></li>
         </ol>
 
@@ -583,6 +585,7 @@ section[id]{scroll-margin-top:84px}
           <p class="nota">O número de campistas é limitado pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
           <p class="apoio"><b>Se o valor pesar no bolso,</b> existe apoio financeiro. É só conversar com a gente.</p>
           <a class="btn btn-fogo" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Quero me inscrever agora</a>
+          <a class="pagar-site" href="/followcamp/pagar" data-pagar hidden>Já fez a ficha? Pague aqui pelo site, no Pix ou no cartão.</a>
         </div>
       </div>
     </div>
@@ -720,6 +723,19 @@ section[id]{scroll-margin-top:84px}
       if (rotulo && el.firstChild && el.firstChild.nodeType === 3) el.firstChild.nodeValue = rotulo + " ";
     });
     document.querySelectorAll("[data-sem-ficha]").forEach(function (el) { el.hidden = true; });
+  }
+
+  /* Pagar pelo site: o botão só aparece quando a Stone ou a chave Pix estão
+     ligadas (app/api/followcamp/meios). Fora do guiaservir.com, a pergunta
+     falha e ele continua escondido. */
+  if (window.fetch && /^https?:$/.test(location.protocol)) {
+    fetch("/api/followcamp/meios", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) {
+        if (!j || !(j.pix || j.cartao || j.pixDireto)) return;
+        document.querySelectorAll("[data-pagar]").forEach(function (el) { el.hidden = false; });
+      })
+      .catch(function () {});
   }
 
   /* Barra fixa: aparece fora do herói, da inscrição e do final */
