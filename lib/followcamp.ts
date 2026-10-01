@@ -202,19 +202,97 @@ export function maxParcelasCartao(valor: number): number {
   return Math.max(1, Math.min(12, Math.floor(valor / 50)));
 }
 
+/* ------------------------------------------- o cartão pelo link da Stone ---
+   01/10/2026. O Arthur: "Só temos stone nao temos pagar.me". A igreja tem a
+   Conta Stone, e a Conta Stone já faz LINK DE PAGAMENTO (no app ou em
+   conta.stone.com.br), sem contrato novo: valor fixo, aceita vários
+   pagamentos, cartão "em até 18x sem juros" no número de parcelas que quem
+   cria escolhe. É esse link que a tela abre quando a API da Stone
+   (lib/pagarme.ts) não está ligada.
+
+   O link não é segredo: quem tem o link paga, e é para isso que ele existe.
+   Por isso ele mora aqui, no código, com commit, e não numa variável da
+   Vercel: o que está no ar tem que ter um commit.
+
+   O que o link NÃO faz, e a tela diz:
+     · não sabe quem é o campista nem o código: a pessoa avisa no WhatsApp, e
+       a organização acha o pagamento no app pelo nome de quem pagou, o valor
+       e o horário. Por isso a tela pede o nome de quem vai pagar no cartão;
+     · não volta para o site e não confirma nada para o site.
+     · não cobra o juro do parcelamento de quem paga: a taxa é da igreja, ou
+       entra no preço do cartão (Lei 13.455/2017 permite preço diferente por
+       meio de pagamento, informado antes, como a tela faz).
+
+   Cada link DECLARA o valor e as parcelas digitados no app. A tela só oferece
+   um link do lote vigente, e só se o valor declarado ficar entre o preço da
+   regra (nunca menos) e 30% acima dele (mais que isso é erro de digitação).
+   Lote novo: o link velho some sozinho da tela, e é desativado no app. */
+export type LinkCartao = {
+  /** o lote a que o link pertence, igual a `Lote.nome` */
+  lote: string;
+  ref: 'inscricao' | 'irmaos';
+  /** o valor digitado no app da Stone, em reais */
+  valor: number;
+  /** o máximo de parcelas escolhido no app */
+  parcelas: number;
+  url: string;
+};
+
+/** Vazio = o cartão por link fica desligado e a tela nem mostra a opção. */
+export const LINKS_CARTAO: readonly LinkCartao[] = [];
+
+const HOST_DO_LINK = /(^|\.)(stone\.com\.br|pagar\.me)$/;
+
+/** Por que este link não pode ir para a tela (null = pode). */
+export function linkInvalido(l: LinkCartao): string | null {
+  let u: URL;
+  try { u = new URL(l.url); } catch { return 'endereço inválido'; }
+  if (u.protocol !== 'https:' || !HOST_DO_LINK.test(u.hostname)) return `o link não é da Stone: ${u.hostname}`;
+  const lote = LOTES.find(x => x.nome === l.lote);
+  if (!lote) return `lote desconhecido: ${l.lote}`;
+  if (l.ref !== 'inscricao' && l.ref !== 'irmaos') return 'só inscrição e irmãos têm link: a parcela do carnê tem valor livre';
+  if (typeof l.valor !== 'number' || !Number.isFinite(l.valor) || centavos(l.valor) !== Number((l.valor * 100).toFixed(4))) return 'valor com mais de dois dígitos depois da vírgula';
+  const preco = l.ref === 'irmaos' ? valorIrmaos(lote.valor) : lote.valor;
+  if (centavos(l.valor) < centavos(preco)) return `o link cobra ${emReais(l.valor)}, menos que o preço do lote (${emReais(preco)})`;
+  if (centavos(l.valor) > Math.round(centavos(preco) * 1.3)) return `o link cobra ${emReais(l.valor)}, mais de 30% acima do preço (${emReais(preco)}): confira o valor`;
+  if (!Number.isInteger(l.parcelas) || l.parcelas < 1 || l.parcelas > 18) return 'parcelas fora de 1 a 18';
+  return null;
+}
+
+/** O link do lote dado para o que se está pagando, ou null. A tela passa o
+ *  lote que ela já calculou (o mesmo no servidor e na primeira pintura).
+ *  `links` só muda nos testes. */
+export function linkDoLote(ref: Referente | null, lote: Lote | null, links: readonly LinkCartao[] = LINKS_CARTAO): LinkCartao | null {
+  if (!lote || (ref !== 'inscricao' && ref !== 'irmaos')) return null;
+  return links.find(l => l.lote === lote.nome && l.ref === ref && !linkInvalido(l)) ?? null;
+}
+
+export function linkCartaoDe(ref: Referente | null, agora = new Date(), links: readonly LinkCartao[] = LINKS_CARTAO): LinkCartao | null {
+  return linkDoLote(ref, loteVigente(agora), links);
+}
+
+export function temLinkCartao(agora = new Date(), links: readonly LinkCartao[] = LINKS_CARTAO): boolean {
+  return linkCartaoDe('inscricao', agora, links) !== null || linkCartaoDe('irmaos', agora, links) !== null;
+}
+
+export type MeioDoAviso = 'pix' | 'cartao' | 'pixdireto' | 'cartaoLink';
+
 /** O texto que a pessoa manda para a organização, já pronto. */
 export function mensagemWhatsApp(p: {
-  campista: string; ref: Referente; valor: number; codigo: string; meio: 'pix' | 'cartao' | 'pixdireto'; irmao?: string;
+  campista: string; ref: Referente; valor: number; codigo: string; meio: MeioDoAviso; irmao?: string; titular?: string;
 }): string {
-  const meio = p.meio === 'cartao' ? 'cartão' : p.meio === 'pix' ? 'Pix pelo site' : 'Pix direto na conta da igreja';
+  const meio = p.meio === 'cartao' ? 'pelo cartão'
+    : p.meio === 'cartaoLink' ? 'no cartão, pelo link da Stone'
+    : p.meio === 'pix' ? 'pelo Pix do site' : 'pelo Pix direto na conta da igreja';
   const linhas = [
-    `Oi! Paguei pelo ${meio}.`,
+    `Oi! Paguei ${meio}.`,
     `Campista: ${limpaNome(p.campista)}`,
     `${ROTULO[p.ref]}: ${emReais(p.valor)}`,
   ];
   if (p.ref === 'irmaos' && p.irmao) linhas.push(`Irmão inscrito: ${limpaNome(p.irmao)}`);
+  if (p.meio === 'cartaoLink' && p.titular) linhas.push(`Quem pagou no cartão: ${limpaNome(p.titular)}`);
   linhas.push(`Código: ${codigoLegivel(p.codigo)}`);
-  if (p.meio === 'pixdireto') linhas.push('O comprovante vai em seguida.');
+  if (p.meio === 'pixdireto' || p.meio === 'cartaoLink') linhas.push('O comprovante vai em seguida.');
   return linhas.join('\n');
 }
 

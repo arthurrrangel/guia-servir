@@ -44,7 +44,7 @@ const COLETA = [
   { q: 'Quando você fala com a gente pelo site',
     r: `Os botões de conversa abrem o ${IGREJA.whatsapp ? 'WhatsApp' : 'Instagram'} com uma mensagem já escrita. O que você manda por lá fica no aplicativo, sob a política dele. Este site não guarda cópia da conversa.` },
   { q: 'Quando você paga o Follow Camp pelo site',
-    r: 'Para gerar o Pix, o nome, o CPF, o e-mail e o celular de quem paga, junto com o nome do campista, vão direto para a Stone (Pagar.me), que processa o pagamento sob a política dela. Este site não guarda nenhum desses dados. No cartão, os dados são digitados na página da própria Stone.' },
+    r: 'Quando o Pix é gerado pela Stone, o nome, o CPF, o e-mail e o celular de quem paga, junto com o nome do campista, vão direto para a Stone, que processa o pagamento sob a política dela. No Pix direto na conta da igreja e no cartão pelo link da Stone, o site não envia esses dados a ninguém: o nome do campista, o de quem paga e o código do pagamento vão só na mensagem que você mesmo manda no WhatsApp. Os dados do cartão são sempre digitados na página da própria Stone. Este site não guarda nenhum desses dados.' },
 ];
 const LINK = [
   { q: 'Fora da busca',

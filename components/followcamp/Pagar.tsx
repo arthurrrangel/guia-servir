@@ -2,12 +2,18 @@
 /* =============================================================================
    O PAGAMENTO DO FOLLOW CAMP 2027 — 01/10/2026
 
-   Três jeitos de pagar, e cada um só aparece se estiver ligado de verdade:
+   Quatro jeitos de pagar, e cada um só aparece se estiver ligado de verdade:
 
      Pix pela Stone   o QR nasce aqui na tela, e a tela pergunta ao servidor a
                       cada 4 s se o dinheiro caiu. Quando cai, ela diz que caiu.
      Cartão           link da Stone, até 12x com o juro por conta de quem paga.
                       O número do cartão é digitado na página da Stone.
+     (os dois acima pedem a API da Stone, STONE_SECRET_KEY na Vercel)
+     Cartão por link  sem a API: o link de pagamento FIXO criado no app da
+                      Conta Stone (lib/followcamp.ts, LINKS_CARTAO). Ninguém
+                      confirma sozinho: a pessoa avisa no WhatsApp com o código
+                      e o nome de quem pagou, que é como a organização acha o
+                      pagamento no app.
      Pix direto       o BR Code montado aqui mesmo com a chave da igreja
                       (lib/pix.ts). Sem taxa, mas ninguém confirma sozinho: a
                       pessoa manda o comprovante no WhatsApp com o código.
@@ -18,8 +24,8 @@
 
    O QUE ESTA TELA PODE AFIRMAR. "Pagamento confirmado" só aparece quando a
    Stone disse `paid`. A volta do cartão diz o que a Stone disse ao mandar a
-   pessoa de volta, e o Pix direto nunca diz "recebemos": ele não falou com
-   banco nenhum.
+   pessoa de volta, e o Pix direto e o cartão por link nunca dizem
+   "recebemos": eles não falaram com banco nenhum.
    ============================================================================= */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import qrcode from 'qrcode-generator';
@@ -28,16 +34,18 @@ import { PIX_CHAVE, PIX_NOME, PIX_CIDADE, valorDeDigitos } from '@/lib/oferta';
 import {
   FC27, LOTES, ROTULO, PARCELA_MIN, PARCELA_MAX, loteVigente, carneAberto, valorIrmaos, emReais,
   conferirPedido, conferirPagador, codigoFC27, codigoLegivel, mensagemWhatsApp, linkWhatsApp,
-  CODIGO_OK, soDigitos, limpaNome, type Referente,
+  CODIGO_OK, soDigitos, limpaNome, nomeInvalido, linkDoLote, LINKS_CARTAO, type Referente, type LinkCartao,
 } from '@/lib/followcamp';
 import s from './pagar.module.css';
 
-type Meio = 'pix' | 'cartao' | 'pixdireto';
-type Fase = 'form' | 'pix' | 'pago' | 'pixdireto' | 'voltaCartao';
+type Meio = 'pix' | 'cartao' | 'pixdireto' | 'cartaoLink';
+type Fase = 'form' | 'pix' | 'pago' | 'pixdireto' | 'voltaCartao' | 'cartaoLink';
 type Estado = 'aguardando' | 'pago' | 'expirado' | 'falhou' | 'desconhecido';
 
 type Tentativa = {
   codigo: string; campista: string; referente: Referente; irmao: string; valor: number; meio: Meio;
+  /** só no cartão por link: quem paga, o endereço e as parcelas do link */
+  titular?: string; link?: string; parcelas?: number;
 };
 
 type PixAtivo = { pedido: string; assinatura: string; copiaECola: string; expiraEm: number };
@@ -45,6 +53,12 @@ type PixAtivo = { pedido: string; assinatura: string; copiaECola: string; expira
 const CHAVE_TEMA = 'fc27-tema';
 const CHAVE_TENTATIVA = 'fc27-ultima-tentativa';
 const CHAVE_PIX = 'fc27-pix-em-andamento';
+/* Pix direto e cartão por link: o código nasce na tela e só existe nela. Se
+   a aba for descartada enquanto a pessoa paga no app do banco ou na página da
+   Stone, o código voltava como formulário vazio, e o código é o que liga o
+   pagamento ao campista. Guardado na sessão por 3 horas. */
+const CHAVE_ANDAMENTO = 'fc27-em-andamento';
+const ANDAMENTO_VALE = 3 * 60 * 60 * 1000;
 
 /* Pinta o tema escolhido na página do Camp ANTES de o React chegar, sem clarão.
    Roda uma vez, dentro do <div> raiz, que tem suppressHydrationWarning. */
@@ -110,6 +124,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
   const [pCpf, setPCpf] = useState('');
   const [pEmail, setPEmail] = useState('');
   const [pCel, setPCel] = useState('');
+  const [titular, setTitular] = useState('');
 
   const [erro, setErro] = useState<string | null>(null);
   const [campoMal, setCampoMal] = useState<string | null>(null);
@@ -158,12 +173,14 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     try { localStorage.setItem(CHAVE_TEMA, novo === 'escuro' ? 'dark' : 'light'); } catch { /* ok */ }
   }
 
-  /* duas voltas possíveis ao abrir a página:
+  /* três voltas possíveis ao abrir a página:
      1. do cartão: ?fim=cartao&c=FC27XXXXXXXX. A URL só escreve a tela; quem
         prova o pagamento é o painel da Stone.
      2. de um Pix em andamento (a aba foi descartada enquanto a pessoa estava no
         app do banco): o pedido volta da sessão e a consulta recomeça, em vez de
-        a pessoa cair num formulário vazio e gerar OUTRO Pix. */
+        a pessoa cair num formulário vazio e gerar OUTRO Pix.
+     3. de um Pix direto ou de um cartão por link em andamento: a mesma tela,
+        com o MESMO código. */
   useEffect(() => {
     const q = new URLSearchParams(window.location.search);
     if (q.get('fim') === 'cartao') {
@@ -185,8 +202,21 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
         setPix(salvo.pix);
         setEstado('aguardando');
         setFase('pix');
+        return;
       }
     } catch { /* sessão indisponível: segue do formulário */ }
+    try {
+      const salvo = JSON.parse(sessionStorage.getItem(CHAVE_ANDAMENTO) || 'null') as { tentativa: Tentativa; quando: number } | null;
+      const t = salvo?.tentativa;
+      const fresco = salvo && Date.now() - salvo.quando < ANDAMENTO_VALE;
+      /* o link que volta da sessão tem que ser um dos links do código: a tela
+         nunca abre um endereço só porque ele estava guardado */
+      const linkConhecido = t?.meio === 'cartaoLink' && LINKS_CARTAO.some(l => l.url === t.link);
+      if (fresco && t && CODIGO_OK.test(t.codigo) && t.valor > 0 && (t.meio === 'pixdireto' || linkConhecido)) {
+        setTentativa(t);
+        setFase(t.meio === 'pixdireto' ? 'pixdireto' : 'cartaoLink');
+      }
+    } catch { /* idem */ }
   }, []);
 
   /* foco e anúncio a cada troca de fase: quem usa leitor de tela precisa saber
@@ -196,6 +226,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     setAnuncio(fase === 'pix' ? 'Pix gerado. Copie o código ou leia o QR no app do banco.'
       : fase === 'pago' ? 'Pagamento confirmado.'
       : fase === 'pixdireto' ? 'Pix direto gerado. Depois de pagar, mande o comprovante no WhatsApp.'
+      : fase === 'cartaoLink' ? 'Pronto. Abra a página da Stone para pagar no cartão e depois avise no WhatsApp.'
       : 'Pagamento pelo cartão enviado.');
     requestAnimationFrame(() => {
       const h = caixa.current?.querySelector<HTMLElement>('h2');
@@ -209,7 +240,25 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
   const cheio = (lote ?? LOTES[0]).valor;
   const parcela = valorDeDigitos(parcelaDig);
   const valor = referente === 'inscricao' ? cheio : referente === 'irmaos' ? valorIrmaos(cheio) : referente === 'parcela' ? parcela : 0;
-  const algumMeio = temPagarme || temPixDireto;
+  /* o cartão por link só entra quando a API da Stone NÃO está ligada: com a
+     API, o link nasce na hora, para esta pessoa, com o juro de quem paga */
+  const porLink = !temPagarme;
+  const linksDoLote = porLink ? [linkDoLote('inscricao', lote), linkDoLote('irmaos', lote)].filter((l): l is LinkCartao => l !== null) : [];
+  const temLink = linksDoLote.length > 0;
+  const linkAqui = porLink ? linkDoLote(referente, lote) : null;
+  /* no cartão por link o valor é o do link, que pode ter o custo do cartão
+     embutido; a opção do cartão diz a diferença antes */
+  const total = meio === 'cartaoLink' && linkAqui ? linkAqui.valor : valor;
+  const algumMeio = temPagarme || temPixDireto || temLink;
+  const comoParcela = (n: number) => (n <= 1 ? 'À vista' : `Em até ${n}x sem juros`);
+  /* a parcela do carnê tem valor livre: só vai pelo Pix (os dois) ou pelo
+     cartão da API, que faz o link na hora. Só com o link fixo, ela fecha */
+  const carneAqui = temPagarme || temPixDireto;
+  const dicaLink = !referente ? `${comoParcela(Math.max(1, ...linksDoLote.map(l => l.parcelas)))}, na página da Stone.`
+    : referente === 'parcela' ? 'No cartão, só a inscrição inteira. A parcela do carnê vai no Pix.'
+    : !linkAqui ? 'O cartão ainda não está disponível para esta opção. Use o Pix.'
+    : linkAqui.valor > valor ? `${emReais(linkAqui.valor)} no cartão${temPixDireto ? ` (no Pix, ${emReais(valor)})` : ''}. ${comoParcela(linkAqui.parcelas)}, na página da Stone.`
+    : `${comoParcela(linkAqui.parcelas)}, na página da Stone.`;
 
   /* o aviso sai quando a pessoa mexe no campo que ele apontava: aviso velho
      em cima de campo já corrigido faz parecer que a correção não pegou */
@@ -232,6 +281,11 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
       return mal(r.erro, campo);
     }
     if (!meio) return mal('Escolha como você quer pagar.');
+    if (meio === 'cartaoLink') {
+      if (!linkDoLote(referente, loteVigente(new Date()))) return mal('O cartão não está disponível para esta opção. Escolha o Pix.');
+      const m = nomeInvalido(titular, 'de quem vai pagar no cartão');
+      if (m) return mal(m, 'fc-titular');
+    }
     if (meio === 'pix') {
       const p = conferirPagador({ nome: pNome, cpf: pCpf, email: pEmail, celular: pCel });
       if (!p.ok) {
@@ -249,6 +303,10 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     try { sessionStorage.setItem(CHAVE_TENTATIVA, JSON.stringify(t)); } catch { /* ok */ }
   }
 
+  function andamento(t: Tentativa) {
+    try { sessionStorage.setItem(CHAVE_ANDAMENTO, JSON.stringify({ tentativa: t, quando: Date.now() })); } catch { /* ok */ }
+  }
+
   async function seguir() {
     if (ocupado) return;
     if (!conferirTudo() || !referente || !meio) return;
@@ -264,9 +322,23 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
         mal('O Pix direto não está disponível agora. Use outra forma, ou fale com a organização.');
         return;
       }
-      guardar({ ...base, codigo, valor });
+      const t: Tentativa = { ...base, codigo, valor };
+      guardar(t);
+      andamento(t);
       setCopiou(null);
       setFase('pixdireto');
+      return;
+    }
+
+    if (meio === 'cartaoLink') {
+      /* o link é o do lote NA HORA DO CLIQUE: a aba aberta desde 03/11 não
+         manda ninguém para o link do 1º lote em 04/11 */
+      const l = linkDoLote(referente, loteVigente(new Date()));
+      if (!l) { mal('O cartão não está disponível agora. Use o Pix ou fale com a organização.'); return; }
+      const t: Tentativa = { ...base, codigo: codigoFC27(), valor: l.valor, titular: limpaNome(titular), link: l.url, parcelas: l.parcelas };
+      guardar(t);
+      andamento(t);
+      setFase('cartaoLink');
       return;
     }
 
@@ -373,7 +445,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     setEstado('aguardando');
     setErro(null);
     setOcupado(false);
-    try { sessionStorage.removeItem(CHAVE_PIX); } catch { /* ok */ }
+    try { sessionStorage.removeItem(CHAVE_PIX); sessionStorage.removeItem(CHAVE_ANDAMENTO); } catch { /* ok */ }
     try { window.history.replaceState(null, '', '/followcamp/pagar'); } catch { /* ok */ }
     requestAnimationFrame(() => document.getElementById('fc-campista')?.focus());
   }
@@ -391,12 +463,13 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
       {tentativa.campista && <li><span>Campista</span><strong>{tentativa.campista}</strong></li>}
       {tentativa.campista && <li><span>Pagamento</span><strong>{ROTULO[tentativa.referente]}</strong></li>}
       {tentativa.referente === 'irmaos' && tentativa.irmao && <li><span>Irmão inscrito</span><strong>{tentativa.irmao}</strong></li>}
+      {tentativa.meio === 'cartaoLink' && tentativa.titular && <li><span>Quem paga no cartão</span><strong>{tentativa.titular}</strong></li>}
       {tentativa.valor > 0 && <li><span>Valor</span><strong>{emReais(tentativa.valor)}</strong></li>}
       <li><span>Código</span><strong>{codigoLegivel(tentativa.codigo)}</strong></li>
     </ul>
   );
   const zapDoFim = tentativa && tentativa.campista
-    ? linkWhatsApp(mensagemWhatsApp({ campista: tentativa.campista, ref: tentativa.referente, valor: tentativa.valor, codigo: tentativa.codigo, meio: tentativa.meio, irmao: tentativa.irmao }))
+    ? linkWhatsApp(mensagemWhatsApp({ campista: tentativa.campista, ref: tentativa.referente, valor: tentativa.valor, codigo: tentativa.codigo, meio: tentativa.meio, irmao: tentativa.irmao, titular: tentativa.titular }))
     : linkWhatsApp(`Oi! Paguei a inscrição do Follow Camp 2027. Código: ${tentativa ? codigoLegivel(tentativa.codigo) : ''}`);
 
   return (
@@ -452,12 +525,12 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                   {([
                     { id: 'inscricao' as const, nome: ROTULO.inscricao, preco: lote ? emReais(cheio) : '', dica: lote ? `${lote.nome}, até 3 de novembro.` : '1º lote encerrado. O valor do próximo lote ainda não saiu.', fechado: !lote },
                     { id: 'irmaos' as const, nome: 'Inscrição com desconto de irmãos', preco: lote ? emReais(valorIrmaos(cheio)) : '', dica: '10% de desconto para cada irmão, quando dois ou mais se inscrevem.', fechado: !lote },
-                    { id: 'parcela' as const, nome: ROTULO.parcela, preco: '', dica: carne ? `Você escolhe o valor, de ${emReais(PARCELA_MIN)} a ${emReais(PARCELA_MAX)}. Quitação até 3 de janeiro.` : 'O Carnê Follow fechou em 3 de janeiro.', fechado: !carne },
+                    { id: 'parcela' as const, nome: ROTULO.parcela, preco: '', dica: !carne ? 'O Carnê Follow fechou em 3 de janeiro.' : carneAqui ? `Você escolhe o valor, de ${emReais(PARCELA_MIN)} a ${emReais(PARCELA_MAX)}. Quitação até 3 de janeiro.` : `Pelo site, o carnê vai no Pix, que ainda não abriu. Fale com a organização: ${FC27.whatsappTexto}.`, fechado: !carne || !carneAqui },
                   ]).map(o => (
                     <div key={o.id}>
                       <label className={s.opcao} data-marcada={referente === o.id} aria-disabled={o.fechado || undefined}>
                         <input type="radio" name="fc-ref" value={o.id} checked={referente === o.id} disabled={o.fechado}
-                          onChange={() => { setReferente(o.id); setErro(null); }} />
+                          onChange={() => { setReferente(o.id); setErro(null); if (meio === 'cartaoLink' && !linkDoLote(o.id, lote)) setMeio(null); }} />
                         <span className={s.bola} aria-hidden="true" />
                         <span className={s.opNome}>{o.nome}</span>
                         <span className={s.opPreco}>{o.preco}</span>
@@ -492,10 +565,11 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                   {([
                     temPagarme && { id: 'pix' as const, nome: 'Pix', dica: 'O QR aparece aqui na tela, e a confirmação chega em segundos.' },
                     temPagarme && { id: 'cartao' as const, nome: 'Cartão de crédito', dica: 'Em até 12x, com os juros do parcelamento por conta de quem paga. Você digita o cartão na página da Stone.' },
+                    temLink && { id: 'cartaoLink' as const, nome: 'Cartão de crédito', dica: dicaLink, fechado: !!referente && !linkAqui },
                     temPixDireto && { id: 'pixdireto' as const, nome: 'Pix direto na conta da igreja', dica: 'Sem taxa. Depois de pagar, mande o comprovante no WhatsApp com o código do pagamento.' },
-                  ].filter(Boolean) as { id: Meio; nome: string; dica: string }[]).map(o => (
-                    <label key={o.id} className={s.opcao} data-marcada={meio === o.id}>
-                      <input type="radio" name="fc-meio" value={o.id} checked={meio === o.id}
+                  ].filter(Boolean) as { id: Meio; nome: string; dica: string; fechado?: boolean }[]).map(o => (
+                    <label key={o.id} className={s.opcao} data-marcada={meio === o.id} aria-disabled={o.fechado || undefined}>
+                      <input type="radio" name="fc-meio" value={o.id} checked={meio === o.id} disabled={o.fechado}
                         onChange={() => { setMeio(o.id); setErro(null); }} />
                       <span className={s.bola} aria-hidden="true" />
                       <span className={s.opNome}>{o.nome}</span>
@@ -533,16 +607,28 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                     <p className={s.nota}>Esses dados vão direto para a Stone, que processa o pagamento. O site não guarda nenhum deles.</p>
                   </div>
                 )}
+
+                {meio === 'cartaoLink' && (
+                  <div className={s.passo} style={{ marginTop: 6 }}>
+                    <div className={s.campo}>
+                      <label htmlFor="fc-titular">Nome de quem vai pagar no cartão</label>
+                      <input id="fc-titular" autoComplete="name" value={titular} maxLength={80}
+                        aria-invalid={campoMal === 'fc-titular' || undefined} aria-describedby="fc-titular-ajuda"
+                        onChange={e => { setTitular(e.target.value); corrigiu('fc-titular'); }} />
+                    </div>
+                    <p id="fc-titular-ajuda" className={s.nota}>É por esse nome que a organização acha o seu pagamento na Stone. Ele vai só na mensagem que você manda no WhatsApp.</p>
+                  </div>
+                )}
               </div>
 
               <div className={s.total} aria-live="polite">
                 <span>Total</span>
-                <strong>{valor > 0 ? emReais(valor) : 'R$ 0,00'}</strong>
+                <strong>{total > 0 ? emReais(total) : 'R$ 0,00'}</strong>
               </div>
               {erro && <p className={s.erro} role="alert">{erro}</p>}
               <div className={s.acoes}>
                 <button type="button" className={`${s.btn} ${s.fogo}`} onClick={seguir} disabled={ocupado}>
-                  {ocupado ? 'Um instante…' : meio === 'cartao' ? 'Ir para o pagamento com cartão' : meio === 'pixdireto' ? 'Gerar o Pix direto' : 'Gerar o Pix'}
+                  {ocupado ? 'Um instante…' : meio === 'cartao' ? 'Ir para o pagamento com cartão' : meio === 'cartaoLink' ? 'Continuar para o cartão' : meio === 'pixdireto' ? 'Gerar o Pix direto' : 'Gerar o Pix'}
                 </button>
               </div>
             </section>
@@ -631,6 +717,29 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                 <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener">Mandar o comprovante</a>
               </div>
               <p className={s.nota}>Este pagamento não é confirmado sozinho: a organização confere o comprovante com o extrato. Mande o comprovante com o código acima.</p>
+              <div className={s.acoes}><button type="button" className={s.link} onClick={recomecar}>Voltar e mudar algo</button></div>
+            </section>
+          )}
+
+          {fase === 'cartaoLink' && tentativa && tentativa.link && (
+            <section className={s.painel}>
+              <div className={s.pixCab}>
+                <h2>Pague no cartão</h2>
+                <p>{comoParcela(tentativa.parcelas ?? 1)}, na página da Stone.</p>
+                <strong className={s.pixValor}>{emReais(tentativa.valor)}</strong>
+              </div>
+              <ol className={s.etapas}>
+                {/* um <span> por item: no grid do <li>, cada <b> solto viraria uma célula */}
+                <li><span>Abra a página da Stone e pague <b>{emReais(tentativa.valor)}</b> no cartão.</span></li>
+                <li><span>Volte para esta tela e toque em <b>Avisar no WhatsApp</b>. A mensagem já vai com o código.</span></li>
+                <li><span>Mande junto o print do comprovante.</span></li>
+              </ol>
+              <div className={s.acoes}>
+                <a className={`${s.btn} ${s.fogo}`} href={tentativa.link} target="_blank" rel="noopener noreferrer">Abrir a página da Stone</a>
+                <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener">Avisar no WhatsApp</a>
+              </div>
+              {resumo}
+              <p className={s.nota}>Este pagamento não é confirmado sozinho: a organização confere na Stone pelo nome de quem pagou, o valor e o horário. Se a página da Stone pedir um valor diferente de {emReais(tentativa.valor)}, não pague e fale com a organização.</p>
               <div className={s.acoes}><button type="button" className={s.link} onClick={recomecar}>Voltar e mudar algo</button></div>
             </section>
           )}

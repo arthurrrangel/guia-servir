@@ -585,7 +585,7 @@ section[id]{scroll-margin-top:84px}
           <p class="nota">O número de campistas é limitado pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
           <p class="apoio"><b>Se o valor pesar no bolso,</b> existe apoio financeiro. É só conversar com a gente.</p>
           <a class="btn btn-fogo" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Quero me inscrever agora</a>
-          <a class="pagar-site" href="/followcamp/pagar" data-pagar hidden>Já fez a ficha? Pague aqui pelo site, no Pix ou no cartão.</a>
+          <a class="pagar-site" href="/followcamp/pagar" data-pagar data-pagar-como hidden>Já fez a ficha? Pague aqui pelo site.</a>
         </div>
       </div>
     </div>
@@ -725,14 +725,19 @@ section[id]{scroll-margin-top:84px}
     document.querySelectorAll("[data-sem-ficha]").forEach(function (el) { el.hidden = true; });
   }
 
-  /* Pagar pelo site: o botão só aparece quando a Stone ou a chave Pix estão
-     ligadas (app/api/followcamp/meios). Fora do guiaservir.com, a pergunta
+  /* Pagar pelo site: o botão só aparece quando a Stone, o link de cartão da
+     Conta Stone ou a chave Pix estão ligados (app/api/followcamp/meios), e a
+     frase só promete o meio que existe. Fora do guiaservir.com, a pergunta
      falha e ele continua escondido. */
   if (window.fetch && /^https?:$/.test(location.protocol)) {
     fetch("/api/followcamp/meios", { cache: "no-store" })
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (j) {
-        if (!j || !(j.pix || j.cartao || j.pixDireto)) return;
+        if (!j) return;
+        var temPix = !!(j.pix || j.pixDireto), temCartao = !!(j.cartao || j.cartaoLink);
+        if (!temPix && !temCartao) return;
+        var como = temPix && temCartao ? "no Pix ou no cartão" : temPix ? "no Pix" : "no cartão";
+        document.querySelectorAll("[data-pagar-como]").forEach(function (el) { el.textContent = "Já fez a ficha? Pague aqui pelo site, " + como + "."; });
         document.querySelectorAll("[data-pagar]").forEach(function (el) { el.hidden = false; });
       })
       .catch(function () {});

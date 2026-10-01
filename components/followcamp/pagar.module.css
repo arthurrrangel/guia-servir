@@ -149,6 +149,11 @@
 .gira{width:18px;height:18px;border-radius:50%;border:3px solid var(--linha);border-top-color:var(--brasa);animation:gira 1s linear infinite}
 @keyframes gira{to{rotate:360deg}}
 .relogio{display:block;text-align:center;margin-top:6px;color:var(--tinta-2);font-size:.88rem}
+/* os passos do cartão por link: o que fazer na Stone e o que fazer na volta */
+.etapas{margin:18px 0 0;padding:0;list-style:none;counter-reset:etapa;display:grid;gap:10px;text-align:left}
+.etapas li{counter-increment:etapa;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;font-size:.95rem;line-height:1.45}
+.etapas li::before{content:counter(etapa);width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--sol);color:#1d0e06;border:2px solid var(--cacau);font:900 .85rem/1 var(--f)}
+.etapas b{font-weight:700}
 .resumo{margin:18px 0 0;padding:0;list-style:none;display:grid;gap:8px;border-top:2px solid var(--linha);padding-top:16px}
 .resumo li{display:flex;justify-content:space-between;gap:12px;font-size:.95rem}
 .resumo li span{color:var(--tinta-2);flex:none}

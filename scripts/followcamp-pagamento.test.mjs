@@ -15,12 +15,16 @@
         "expirado" só depois da folga.
      5. O PIX DIRETO. O código do campista sai inteiro no BR Code, válido.
      6. O LOG. Nome, CPF, celular e e-mail não entram no log, nem quando a
-        Stone ecoa o pedido inteiro no erro.                                   */
+        Stone ecoa o pedido inteiro no erro.
+     7. O CARTÃO PELO LINK DA CONTA STONE. Só link https da Stone, do lote
+        vigente, nunca mais barato que o lote nem 30% acima; o do 1º lote some
+        em 04/11; e os links que estão no código passam todos nessa regra.   */
 import http from 'node:http';
 import {
   precoDe, valorIrmaos, loteVigente, carneAberto, cpfValido, celularDe, nomeInvalido, emailValido,
   codigoFC27, CODIGO_OK, conferirPedido, conferirPagador, mensagemWhatsApp, codigoLegivel,
   maxParcelasCartao, nomeCurtoDe, descricaoDe,
+  LINKS_CARTAO, linkInvalido, linkCartaoDe, linkDoLote, temLinkCartao, LOTES,
 } from '../lib/followcamp.ts';
 import { pixCopiaECola, pixValido, pixCampos } from '../lib/pix.ts';
 
@@ -101,6 +105,44 @@ ok(/irmão inscrito: João Souza/.test(descricaoDe('irmaos', 'Maria Souza', 'Jo�
   ok(pixValido(cod), 'BR Code do Pix direto válido');
   ok(pixCampos(cod)['54'] === '627.30', `valor no BR Code: ${pixCampos(cod)['54']}`);
   ok(cod.includes(`05${String(COD.length).padStart(2, '0')}${COD}`), 'txid do campista dentro do campo 62');
+}
+
+/* ------------------------------------------ 7. o cartão pelo link da Stone --- */
+{
+  const BOM = { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 12, url: 'https://payment-link.stone.com.br/pl_abc123' };
+  const IRM = { ...BOM, ref: 'irmaos', valor: 627.3, url: 'https://payment-link.stone.com.br/pl_irm456' };
+  ok(linkInvalido(BOM) === null, `link bom recusado: ${linkInvalido(BOM)}`);
+  ok(linkInvalido(IRM) === null, `link de irmãos de 627,30 recusado: ${linkInvalido(IRM)}`);
+  ok(linkInvalido({ ...BOM, url: 'https://link.pagar.me/pl_x' }) === null, 'pagar.me é da Stone');
+  for (const [url, por] of [
+    ['http://payment-link.stone.com.br/pl_abc', 'sem https'],
+    ['https://stone.com.br.golpe.com/pl_abc', 'domínio que só começa com stone.com.br'],
+    ['https://golpestone.com.br/pl_abc', 'domínio que só termina parecido'],
+    ['https://wa.me/5521995946491', 'outro site'],
+    ['nada', 'endereço quebrado'],
+  ]) ok(linkInvalido({ ...BOM, url }) !== null, `link aceito ${por}: ${url}`);
+  ok(linkInvalido({ ...BOM, lote: '2º lote' }) !== null, 'lote que não existe');
+  ok(linkInvalido({ ...BOM, ref: 'parcela' }) !== null, 'o carnê não tem link (valor livre)');
+  ok(linkInvalido({ ...BOM, valor: 696.99 }) !== null, 'link mais barato que o lote');
+  ok(linkInvalido({ ...IRM, valor: 627.29 }) !== null, 'irmãos abaixo do preço');
+  ok(linkInvalido({ ...BOM, valor: 906.1 }) === null && linkInvalido({ ...BOM, valor: 906.11 }) !== null, 'teto: até 30% acima (R$ 906,10)');
+  ok(linkInvalido({ ...BOM, valor: 6970 }) !== null, 'zero a mais no valor');
+  ok(linkInvalido({ ...BOM, valor: 697.001 }) !== null && linkInvalido({ ...BOM, valor: '697' }) !== null, 'valor: número com dois decimais');
+  ok([0, 19, 2.5].every(p => linkInvalido({ ...BOM, parcelas: p }) !== null), 'parcelas de 1 a 18, inteiras');
+  const LISTA = [{ ...BOM, url: 'https://golpe.com/pl' }, BOM, IRM];
+  ok(linkCartaoDe('inscricao', ANTES, LISTA)?.url === BOM.url, 'o link inválido da frente é pulado, o bom é o escolhido');
+  ok(linkCartaoDe('irmaos', FIM_DO_DIA_3, LISTA)?.url === IRM.url, 'o link vale o dia 3/11 inteiro');
+  ok(linkCartaoDe('inscricao', DIA_4, LISTA) === null && linkCartaoDe('irmaos', DIA_4, LISTA) === null, 'em 04/11 o link do 1º lote some');
+  ok(linkCartaoDe('parcela', ANTES, LISTA) === null && linkCartaoDe(null, ANTES, LISTA) === null, 'carnê ou nada escolhido: sem link');
+  ok(linkDoLote('inscricao', null, LISTA) === null && linkDoLote('inscricao', LOTES[0], LISTA)?.url === BOM.url, 'linkDoLote');
+  ok(temLinkCartao(ANTES, LISTA) && !temLinkCartao(DIA_4, LISTA) && !temLinkCartao(ANTES, []), 'temLinkCartao');
+  ok(temLinkCartao(ANTES, [IRM]) && linkCartaoDe('inscricao', ANTES, [IRM]) === null, 'só um dos dois links: o outro fica sem cartão');
+  /* os links DE VERDADE, os que estão no código: todos passam na regra */
+  for (const l of LINKS_CARTAO) ok(linkInvalido(l) === null, `link configurado com problema: ${linkInvalido(l)} (${l.url})`);
+  const m = mensagemWhatsApp({ campista: 'Maria Souza', ref: 'inscricao', valor: 697, codigo: COD, meio: 'cartaoLink', titular: '  Carlos   Souza ' });
+  ok(/^Oi! Paguei no cartão, pelo link da Stone\./.test(m) && /\nQuem pagou no cartão: Carlos Souza\n/.test(m)
+    && /Código: FC27-K7P3M9QX/.test(m) && /comprovante vai em seguida/.test(m), `mensagem do cartão por link: ${m}`);
+  ok(/^Oi! Paguei pelo Pix do site\./.test(mensagemWhatsApp({ campista: 'Maria Souza', ref: 'inscricao', valor: 697, codigo: COD, meio: 'pix' })), 'mensagem do Pix do site');
 }
 
 /* ------------------------------------------- 2 a 4 e 6. o pedido à Stone --- */
@@ -217,4 +259,4 @@ ok(pg.parcelasDe(100, null).max_installments === 2, 'R$ 100 no cartão: até 2x'
 servidor.close();
 
 if (mal) { console.error(`\n${mal} problema(s) no pagamento do Follow Camp.`); process.exit(1); }
-console.log('ok  followcamp-pagamento: valor, pedido à Stone, conferência, estado, Pix direto e log');
+console.log('ok  followcamp-pagamento: valor, pedido à Stone, conferência, estado, Pix direto, cartão por link e log');
