@@ -17,6 +17,7 @@ import {
   msgConvite, pendenciasDeSexo, saudeDoTime,
 } from '@/lib/engine';
 import { telefoneOk } from '@/lib/nome';
+import { PRINCIPAL } from '@/lib/meu-token';
 
 /* =============================================================================
    O TIME
@@ -215,10 +216,16 @@ function Time() {
      `pin_limpar` (migração 76) não devolve o link — quem quiser mandar o
      link manda pelo botão ao lado, que é outro ato e já existia. Ela só
      devolve à pessoa a porta de /servir/<ministério>. */
+  /* ONDE A PESSOA CRIA O PIN NOVO, COM O ENDEREÇO INTEIRO (01/10/2026). O aviso
+     dizia "Ela já pode criar outro em /servir": de /servir até o nome dela são
+     quatro telas (área, "Já sirvo aqui", ministério, lista), e o "Ela" valia
+     para João também. Agora o aviso diz o endereço da lista da equipe, que é
+     onde ela toca no próprio nome, e chama a pessoa pelo nome. */
+  const ondeCriaPin = `${PRINCIPAL.replace(/^https?:\/\//, '')}/equipe/${equipe?.slug || ''}`;
   async function limparPin(vid: string, nome: string) {
     if (!await confirmar({
       titulo: `Apagar o PIN de ${nome}?`,
-      texto: 'Use quando a pessoa não consegue entrar por /servir e diz que nunca criou PIN, ou esqueceu. Ela vai poder criar outro na hora, provando os quatro últimos dígitos do telefone dela. O link pessoal não muda.',
+      texto: `Use quando a pessoa esqueceu o PIN ou diz que nunca criou um. Ela cria outro na hora em ${ondeCriaPin}, tocando no próprio nome e confirmando os quatro últimos números do WhatsApp. O link pessoal não muda.`,
       acao: 'Apagar o PIN',
     })) return;
     try {
@@ -228,9 +235,10 @@ function Time() {
          tinha PIN nenhum não foi destravado de nada, e dizer "PIN apagado"
          ali faria o organizador achar que resolveu um problema que continua
          de pé. */
+      const primeiro = nome.trim().split(/\s+/)[0];
       aviso(r.tinha_pin
-        ? `PIN de ${nome} apagado. Ela já pode criar outro em /servir.`
-        : `${nome} não tinha PIN. O problema dela é outro: confira o telefone cadastrado.`);
+        ? `PIN de ${nome} apagado. ${primeiro} cria outro em ${ondeCriaPin}, tocando no próprio nome.`
+        : `${nome} não tinha PIN. O problema é outro: confira o telefone cadastrado.`);
       await recarregar();
     } catch (e) { aviso(aviseHumano(e)); }
   }

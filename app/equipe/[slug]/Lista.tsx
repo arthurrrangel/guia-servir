@@ -611,7 +611,9 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     : fase === 'pin-primeiro' ? (enviadoPor ? `Você está no time, ${emNome(enviadoPor)}` : 'Você está no time')
     : 'Quem é você?';
   const sub = fase === 'pin' ? 'Digite seu PIN de 4 números para abrir sua página.'
-    : fase === 'criar' ? 'Primeira vez aqui. Confirme que é você e crie um PIN só seu.'
+    /* sem "Primeira vez aqui" (01/10/2026): quem teve o PIN apagado pelo líder
+       cai nesta mesma tela, e para ela não é a primeira vez */
+    : fase === 'criar' ? 'Confirme que é você e crie um PIN só seu.'
     : fase === 'cadastro' ? 'Leva menos de um minuto. Depois você recebe a escala e responde por aqui.'
     : fase === 'enviado' ? `Seu cadastro chegou para a liderança do ${equipe}.`
     : fase === 'pin-primeiro' ? 'Falta uma coisa só: um PIN de 4 números para você voltar aqui.'
