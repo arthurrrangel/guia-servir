@@ -21,6 +21,8 @@ import FuncoesDoVoluntario from '@/components/escalas/FuncoesDoVoluntario';
 /* 104 · o aviso no celular */
 import AvisoNoCelular from '@/components/escalas/AvisoNoCelular';
 import OrdemNoLink, { ordensDoLink, type OrdemDoLink } from '@/components/escalas/OrdemNoLink';
+import ChamadasDoVoluntario from '@/components/escalas/ChamadasDoVoluntario';
+import type { ChamadaMinha } from '@/lib/chamadas';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
 
 type Item = {
@@ -215,6 +217,9 @@ export default function Eu() {
      publicou. Chega depois da tela, como as trocas; antes da 105 no banco a
      chamada falha e a seção simplesmente não aparece. */
   const [ordens, setOrdens] = useState<OrdemDoLink[]>([]);
+  /* 106 · os convites da liderança para cobrir vaga. Mesma regra: sem a 106
+     no banco a chamada falha e nada aparece. */
+  const [chamadas, setChamadas] = useState<ChamadaMinha[]>([]);
 
   /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
      a seção da troca e os eventos da grade simplesmente não aparecem. */
@@ -222,14 +227,16 @@ export default function Eu() {
     const s = sb();
     if (!s) return;
     try {
-      const [tr, ev, or] = await Promise.all([
+      const [tr, ev, or, ch] = await Promise.all([
         s.rpc('eu_trocas', { p_token: token }),
         s.rpc('eu_eventos', { p_token: token }),
         s.rpc('eu_ordens', { p_token: token }),
+        s.rpc('eu_chamadas', { p_token: token }),
       ]);
       if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
       if (!ev.error) setEventos((ev.data || []) as Evento[]);
       if (!or.error) setOrdens(ordensDoLink(or.data));
+      if (!ch.error) setChamadas((ch.data || []) as ChamadaMinha[]);
     } catch { /* a tela fica como estava */ }
   }, [token]);
   /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
@@ -257,6 +264,8 @@ export default function Eu() {
       if (d.espaco) setEspaco(d.espaco);
       /* 105 · e a ordem do culto */
       if ((d as any).ordens) setOrdens(ordensDoLink((d as any).ordens));
+      /* 106 · e os convites para cobrir */
+      if ((d as any).chamadas) setChamadas((d as any).chamadas as ChamadaMinha[]);
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -928,6 +937,14 @@ export default function Eu() {
             </div>
           ))}
         </div>
+
+        {/* 106 · OS CONVITES PARA COBRIR. Logo abaixo do "Precisa de você":
+            também pedem resposta, e o aviso no celular abre aqui (#chamadas). */}
+        <ChamadasDoVoluntario
+          token={token} chamadas={chamadas}
+          cultoHora={IGREJA.cultoHora} followHora={IGREJA.followHora}
+          aoMudar={async () => { await carregar(false); }}
+          avisar={avisar} errar={errar} />
 
         {/* 103 · A TROCA. Logo abaixo do "Precisa de você", porque pedido de
             colega também pede resposta, e a porta do grupo abre a página aqui

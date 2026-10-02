@@ -17,6 +17,7 @@ import {
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
 import OrdemDoCulto from '@/components/escalas/OrdemDoCulto';
+import ChamarParaCobrir from '@/components/escalas/ChamarParaCobrir';
 import ImprimirMes from '@/components/escalas/ImprimirMes';
 import { pl, cont } from '@/lib/plural';
 
@@ -987,7 +988,7 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
   gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsCorpo) {
   /* 01/10/2026: toda mensagem que vai para o grupo fecha com o link do
      ministério (nunca o de alguém), que leva cada pessoa à própria página */
-  const { base, equipe, pinta } = useApp();
+  const { base, equipe, pinta, recarregar } = useApp();
   const link = linkDoVoluntario(base, equipe?.slug);
   const cobranca = msgConfirmar(S, d, link);
   /* dia que já passou não se manda: lá "Copiar a escala" volta a ser a de
@@ -1142,6 +1143,14 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           </span>
         </div>
       </div>
+
+      {/* 106 · CHAMAR QUEM PODE COBRIR (02/10/2026): cada vaga aberta do dia
+          ganha "Chamar quem pode". Só com a 106 no banco, em dia que tem
+          culto e que ainda não passou. */}
+      {!passado && !!dia?.cultoId && !!equipe?.id && (
+        <ChamarParaCobrir S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id}
+          ocupado={ocupado} aviso={aviso} recarregar={recarregar} />
+      )}
     </>
   );
 }

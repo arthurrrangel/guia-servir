@@ -52,6 +52,20 @@ export function mensagemDaTroca(l: LinhaDaTroca, base: string, cultoHora: string
   };
 }
 
+/* 106 · uma linha de `aviso_da_chamada`: a liderança chamou para cobrir */
+export type LinhaDaChamada = {
+  token: string; funcao: string; data: string; evento: string | null; inicio: string | null;
+};
+export function mensagemDaChamada(l: LinhaDaChamada, base: string, cultoHora: string, followHora?: string | null): Mensagem {
+  const quando = quandoDaVaga(l, cultoHora, followHora);
+  return {
+    titulo: 'Precisam de você',
+    corpo: `A liderança chamou você para cobrir ${l.funcao}, ${quando}. Toque para responder.`,
+    url: `${base}/eu/${encodeURIComponent(l.token)}#chamadas`,
+    tag: `chamada-${l.data}-${l.funcao}`,
+  };
+}
+
 /* uma linha de `avisos_para_lembrar` */
 export type LinhaDoLembrete = {
   token: string; tipo: 'd3' | 'd1'; data: string; evento: string | null; inicio: string | null;

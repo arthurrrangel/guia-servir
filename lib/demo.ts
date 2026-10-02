@@ -243,6 +243,19 @@ export function euDemo(variante: string = '') {
         ],
       },
     } : {}),
+    /* 106 · os convites para cobrir, só na variante `chamada`: um aberto,
+       um num dia em que ela avisou que não pode, e um que outra pessoa
+       já preencheu */
+    ...(variante === 'chamada' ? {
+      chamadas: [
+        { id: 'ch1', culto_id: 'c5', funcao_id: 'f6', funcao: 'HEAD', data: todos[3] || todos[todos.length - 1],
+          evento: null, inicio: null, status: 'aberta', aberta: true, impede: null, criado_em: agoraISO },
+        { id: 'ch2', culto_id: 'c8', funcao_id: 'f5', funcao: 'EDIÇÃO', data: prox[4] || todos[4],
+          evento: null, inicio: null, status: 'aberta', aberta: true, impede: 'INDISPONIVEL', criado_em: agoraISO },
+        { id: 'ch3', culto_id: 'c6', funcao_id: 'f4', funcao: 'FOTO', data: todos[6] || todos[todos.length - 1],
+          evento: null, inicio: null, status: 'preenchida', aberta: false, impede: null, criado_em: agoraISO },
+      ],
+    } : {}),
     /* 105 · a ordem do culto só na variante `ordem`: a do Louvor (outro
        ministério) no primeiro culto, e a do segundo culto sem hora de evento.
        O terceiro é o dia recusado: a ordem dele vem do banco, e a tela não

@@ -3,6 +3,7 @@ import { sb } from './supabase';
 import { addDias, Estado, hojeISO, Nivel, Repertorio, Status } from './engine';
 import { ordemDoBanco, type ItemOrdem } from './engine';
 import type { MusicaDoBanco } from './ordem-do-culto';
+import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
@@ -382,6 +383,34 @@ export async function musicasDoMinisterio(equipeId: string): Promise<MusicaDoBan
   const { data, error } = await sb()!.rpc('musicas_do_ministerio', { p_equipe: equipeId });
   if (error) throw error;
   return ((data || []) as MusicaDoBanco[]).filter(m => typeof m?.titulo === 'string' && !!m.titulo);
+}
+
+/* =============================================================================
+   106 · CHAMAR QUEM PODE COBRIR A VAGA — 02/10/2026.
+
+   Quatro RPCs do líder. Quem confere tudo (quem lidera, a vaga aberta, as
+   regras do sorteio, os tetos) é o banco; aqui só se leva e traz. Os recusos
+   do banco voltam como `{ ok: false, erro }`, e a tela diz o que fazer.
+   ============================================================================= */
+export async function chamadasDoDia(equipeId: string, data: string): Promise<ChamadaDoLider[]> {
+  const { data: r, error } = await sb()!.rpc('chamadas_do_dia', { p_equipe: equipeId, p_data: data });
+  if (error) throw error;
+  return (r || []) as ChamadaDoLider[];
+}
+export async function chamarCandidatos(cultoId: string, funcaoId: string): Promise<CandidatoDaVaga[]> {
+  const { data: r, error } = await sb()!.rpc('chamar_candidatos', { p_culto: cultoId, p_funcao: funcaoId });
+  if (error) throw error;
+  return (r || []) as CandidatoDaVaga[];
+}
+export async function chamarParaCobrir(cultoId: string, funcaoId: string, voluntarios: string[]) {
+  const { data: r, error } = await sb()!.rpc('chamar_para_cobrir', { p_culto: cultoId, p_funcao: funcaoId, p_voluntarios: voluntarios });
+  if (error) throw error;
+  return r as { ok: boolean; erro?: string; chamadas?: string[]; recusados?: { voluntario_id: string; motivo: string }[] };
+}
+export async function cancelarChamadas(cultoId: string, funcaoId: string) {
+  const { data: r, error } = await sb()!.rpc('cancelar_chamadas', { p_culto: cultoId, p_funcao: funcaoId });
+  if (error) throw error;
+  return r as { ok: boolean; erro?: string; canceladas?: number };
 }
 
 export async function salvarConfig(equipeId: string, dados: any) {

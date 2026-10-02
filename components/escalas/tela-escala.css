@@ -303,3 +303,49 @@
   .es .es-ec-oi-editar{display:none}
   .es .es-ec-oi-abre{grid-template-columns:minmax(0,1fr);padding-left:var(--es-e1);padding-right:var(--es-e1)}
 }
+
+/* 106 · chamar quem pode cobrir (02/10/2026): embaixo dos postos, uma linha
+   por vaga aberta, com os chamados dela embaixo e a escolha de quem chamar
+   abrindo dentro da linha */
+.es .es-ec-chamar{display:grid;gap:var(--es-e2);margin:var(--es-e5) 0 0}
+.es .es-ec-cv-aceitas{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e2) var(--es-e3);
+  padding:var(--es-e2) var(--es-e3);border:1px solid var(--es-ok-ln);border-radius:var(--es-r3);
+  background:var(--es-ok-bg);color:var(--es-ok);font-size:13px;line-height:19px;font-weight:500;
+}
+.es .es-ec-cv-lista{
+  list-style:none;margin:0;padding:0;display:grid;
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);
+}
+.es .es-ec-cv{display:grid;gap:var(--es-e2);padding:var(--es-e2) var(--es-e2) var(--es-e2) var(--es-e3);border-top:1px solid var(--es-linha)}
+.es .es-ec-cv:first-child{border-top:0}
+.es .es-ec-cv-linha{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--es-e1) var(--es-e3)}
+.es .es-ec-cv-fn{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-cv-est{grid-column:1;grid-row:2;font-size:12px;line-height:17px;color:var(--es-mudo)}
+.es .es-ec-cv-acoes{grid-column:2;grid-row:1 / span 2;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:var(--es-e1)}
+.es .es-ec-cv-chamados{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.es .es-ec-cv-chamado{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e1) var(--es-e2);min-height:32px}
+.es .es-ec-cv-nome{font-size:13px;line-height:19px;font-weight:500;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-cv-escolha{
+  display:grid;gap:var(--es-e3);padding:var(--es-e3);
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r3);background:var(--es-sup-2);
+}
+.es .es-ec-cv-pessoas{margin:0;padding:0;border:0;display:grid;gap:2px;min-width:0}
+.es .es-ec-cv-legenda{padding:0;margin:0 0 var(--es-e1);font-size:13px;line-height:18px;font-weight:600;color:var(--es-ink)}
+.es .es-ec-cv-pessoa{
+  display:grid;grid-template-columns:auto minmax(0,1fr);align-items:start;gap:var(--es-e2);
+  min-height:var(--es-h);padding:var(--es-e2) var(--es-e1);border-radius:var(--es-r2);cursor:pointer;
+}
+.es .es-ec-cv-pessoa:hover{background:var(--es-sup-3)}
+/* a caixa no tamanho dela: a regra geral de campo dá 52px de altura a todo
+   input, e a caixinha desenhada no meio disso ficava na altura da segunda
+   linha, e não do nome */
+.es .es-ec-cv-pessoa input{width:18px;height:18px;min-height:0;padding:0;margin:1px 0 0;accent-color:var(--es-preto)}
+.es .es-ec-cv-pessoa-txt{display:grid;gap:1px;min-width:0}
+.es .es-ec-cv-pessoa-txt small{font-size:12px;line-height:17px;color:var(--es-ink-2)}
+@media (max-width:719px){
+  /* no celular, os botões descem para baixo do nome da vaga */
+  .es .es-ec-cv-linha{grid-template-columns:minmax(0,1fr)}
+  .es .es-ec-cv-est{grid-row:auto}
+  .es .es-ec-cv-acoes{grid-column:1;grid-row:auto;justify-content:flex-start}
+}
