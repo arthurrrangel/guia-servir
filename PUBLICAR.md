@@ -76,6 +76,38 @@ caminho C não leva:
    Limpe `_publicar\` na máquina dele (o Desktop Commander apaga; a ponte não).
 5. Vercel constrói sozinha. Confira a produção como sempre (abaixo).
 
+### B no Mac do Arthur (02/10/2026)
+
+O repositório também está no MacBook do Arthur, em `/Users/rangel/guia-servir`,
+com o git autenticado (osxkeychain). O caminho que funcionou:
+
+1. No container: `git format-patch --binary origin/master..HEAD --stdout >
+   fase.patch`, testado num clone limpo NA BASE, com a árvore igual nos dois
+   (`git rev-parse "HEAD^{tree}"`).
+2. Entregar: copiar para `/mnt/user-data/outputs/` e `device_commit_files` com
+   `stagedPath` para `/Users/rangel/guia-servir/tmp/fase.patch` (`tmp/` está
+   no `.gitignore`).
+3. Aplicar e empurrar pelo osascript (ferramenta "Control your Mac"), que roda
+   no macOS de verdade:
+   `do shell script "cd /Users/rangel/guia-servir && /usr/bin/git fetch origin master && /usr/bin/git merge --ff-only origin/master && /usr/bin/git -c user.name='Arthur Rangel' -c user.email=arthurrangel427@gmail.com am --3way tmp/fase.patch && /usr/bin/git push origin master && /usr/bin/git rev-parse HEAD"`
+4. Conferir como no Windows (o HEAD do Mac é o `origin/master` do container)
+   e `git reset --hard origin/master` no container.
+
+Quando o push responde `could not read Username for 'https://github.com'`, o
+Chaves do Mac não entregou a senha do GitHub: em 02/10 funcionou às 16:58 e
+falhou às 20:30, com o Mac parado havia duas horas, tanto no git da Apple
+quanto no do Homebrew. Não peça nem procure senha ou token. Volte o Mac para
+`origin/master` (o commit continua no patch), deixe o patch em `tmp/` e
+publique quando o Arthur voltar a usar o Mac, ou pelo caminho C.
+
+**Nunca rode git pelo `device_bash` nessa pasta.** O `device_bash` é uma VM
+Linux com a pasta montada, e a montagem não deixa apagar arquivo: um simples
+`git status` cria `.git/index.lock` e não consegue tirar. Com o lock lá, todo
+git do Arthur nessa pasta para ("Unable to create index.lock: File exists").
+Aconteceu em 02/10; o lock vazio saiu pelo osascript (`rm -f .git/index.lock`,
+só se estiver vazio e sem git rodando). Ler arquivo pelo `device_bash` pode;
+git, não.
+
 ## Caminho C — a interface web do GitHub, pelo Chrome
 
 Funciona quando a extensão do Chrome responde. Publica **um commit por

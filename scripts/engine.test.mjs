@@ -119,7 +119,9 @@ console.log('\n9. Datas e mensagem');
   ok(E.proximoDomingo('2026-08-05') === '2026-08-09', 'próximo domingo depois de uma quarta');
   ok(E.proximoDomingo('2026-08-09') === '2026-08-09', 'se hoje é domingo, é hoje');
   E.gerarDia(S, doms[0]);
-  const m = E.msgEscala(S, doms[0]);
+  /* 02/10/2026: a saudação segue a hora de Brasília em que a mensagem é
+     montada; 20h dá "Boa noite", a do padrão */
+  const m = E.msgEscala(S, doms[0], { agora: new Date('2026-08-01T23:00:00Z') });
   ok(m.startsWith('Boa noite galera') && m.includes('Escala de domingo (02/08)'), 'formato do aviso preservado');
   ok(FN.every(f => m.includes(f.nome)), 'todas as funções na mensagem');
 }

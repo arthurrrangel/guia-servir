@@ -240,7 +240,7 @@ export default function OrdemDoCulto({ S, d, cultoId, equipeId, ocupado, pinta, 
           {erros.min && <small className="es-erro-campo" id={idc('e-min')}>{erros.min}</small>}
         </label>
         <label className={`es-campo${rascunho.t === 'musica' ? ' es-ec-of-largo' : ''}`} htmlFor={idc('quem')}>
-          <span id={idc('r-quem')}>{rascunho.t === 'musica' ? 'Quem conduz' : 'Quem'}</span>
+          <span id={idc('r-quem')}>{rascunho.t === 'musica' ? 'Lead' : 'Quem'}</span>
           <input className="es-ctl" id={idc('quem')} aria-labelledby={idc('r-quem')} autoComplete="off" enterKeyHint="done" maxLength={TETO.quem + 10}
             value={rascunho.quem} onChange={mudar('quem')} />
         </label>

@@ -175,25 +175,32 @@ function estadoCom(ordem, ligado = true) {
   d.ordem = ordem;
   return S;
 }
-caso('a mensagem leva as músicas com tom e BPM, e não os momentos', () => {
+caso('a mensagem leva as músicas como o Louvor escreve, e não os momentos', () => {
   const t = msgEscala(estadoCom(BOA), '2026-10-04');
-  /* 02/10/2026, sugestão do Louvor: "Setlist: Tons e BPM", com o "Tom" escrito */
-  assert.match(t, /SETLIST: TOM E BPM\n1\. Bondade de Deus · Tom G · 68 BPM\n2\. Ousado Amor · Tom F#m · 72 BPM/);
-  assert.doesNotMatch(t, /Abertura|Palavra/);
+  /* 02/10/2026, noite: "as mensagens tem que sair assim" (a escala do Louvor):
+     '1. Canção A (E, 67 BPM) Lead - Lia', dentro do bloco REPERTÓRIO */
+  assert.match(t, /REPERTÓRIO\n1\. Bondade de Deus \(G, 68 BPM\) Lead - Bia\n2\. Ousado Amor \(F#m, 72 BPM\)\n/);
+  assert.doesNotMatch(t, /Abertura|Palavra|SETLIST/);
   assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Sem tom' }, 3), '3. Sem tom');
-  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só tom', tom: 'Bb' }, 1), '1. Só tom · Tom Bb');
-  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só BPM', bpm: 90 }, 2), '2. Só BPM · 90 BPM');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só tom', tom: 'Bb' }, 1), '1. Só tom (Bb)');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só BPM', bpm: 90 }, 2), '2. Só BPM (90 BPM)');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só lead', quem: 'Ana' }, 4), '4. Só lead Lead - Ana');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Tudo', tom: 'G#m', bpm: 65, quem: 'Rafa e Lia' }, 5), '5. Tudo (G#m, 65 BPM) Lead - Rafa e Lia');
 });
-caso('com os links, os links vêm primeiro e o setlist logo abaixo; desligado, nada aparece', () => {
+caso('com os links, as músicas vêm primeiro e os links logo embaixo, no mesmo bloco; desligado, nada aparece', () => {
   const S = estadoCom(BOA);
-  S.escalas['2026-10-04'].repertorio = { spotify: 'https://open.spotify.com/playlist/x' };
+  S.escalas['2026-10-04'].repertorio = { spotify: 'https://open.spotify.com/playlist/x', youtube: 'https://youtube.com/playlist?list=PLx' };
   assert.match(msgEscala(S, '2026-10-04'),
-    /REPERTÓRIO\nSpotify: https:\/\/open\.spotify\.com\/playlist\/x\n\nSETLIST: TOM E BPM\n1\. Bondade de Deus · Tom G · 68 BPM\n2\. Ousado Amor · Tom F#m · 72 BPM\n/);
-  assert.doesNotMatch(msgEscala(estadoCom(BOA, false), '2026-10-04'), /REPERTÓRIO|SETLIST|Bondade/);
+    /REPERTÓRIO\n1\. Bondade de Deus \(G, 68 BPM\) Lead - Bia\n2\. Ousado Amor \(F#m, 72 BPM\)\nSpotify: https:\/\/open\.spotify\.com\/playlist\/x\nYouTube: https:\/\/youtube\.com\/playlist\?list=PLx\n\n/);
+  /* só os links, sem música na ordem: o bloco de antes da 105 */
+  const soLinks = estadoCom(undefined);
+  soLinks.escalas['2026-10-04'].repertorio = { spotify: 'https://open.spotify.com/playlist/x' };
+  assert.match(msgEscala(soLinks, '2026-10-04'), /REPERTÓRIO\nSpotify: https:\/\/open\.spotify\.com\/playlist\/x\n\n/);
+  assert.doesNotMatch(msgEscala(estadoCom(BOA, false), '2026-10-04'), /REPERTÓRIO|Bondade/);
 });
-caso('as observações: a nota de cada música, com o número dela, depois do setlist', () => {
+caso('as observações: a nota de cada música, com o número dela, depois do repertório', () => {
   const t = msgEscala(estadoCom(BOA), '2026-10-04');
-  assert.match(t, /2\. Ousado Amor · Tom F#m · 72 BPM\n\nOBSERVAÇÕES\n1\. Bondade de Deus: Comeca so voz e teclado\n/);
+  assert.match(t, /2\. Ousado Amor \(F#m, 72 BPM\)\n\nOBSERVAÇÕES\n1\. Bondade de Deus: Comeca so voz e teclado\n/);
   /* a nota de um momento não é observação do setlist */
   const comNotaNoMomento = BOA.map(i => (i.titulo === 'Palavra' ? { ...i, nota: 'Pastor convidado' } : i));
   assert.doesNotMatch(msgEscala(estadoCom(comNotaNoMomento), '2026-10-04'), /Pastor convidado/);
@@ -216,6 +223,11 @@ caso('o envio só "muda" quando música, tom, BPM ou observação mudam', () => 
   assert.notEqual(assinaturaDoEnvio(estadoCom(outraNota), '2026-10-04'), com, 'mudar a observação pede mensagem nova');
   const notaDeMomento = BOA.map(i => (i.titulo === 'Palavra' ? { ...i, nota: 'outra' } : i));
   assert.equal(assinaturaDoEnvio(estadoCom(notaDeMomento), '2026-10-04'), com, 'a nota de um momento não vai na mensagem e não pede');
+  /* 02/10/2026, noite: o Lead vai na mensagem, então mudar quem conduz pede */
+  const outroLead = BOA.map(i => (i.titulo === 'Bondade de Deus' ? { ...i, quem: 'Ana' } : i));
+  assert.notEqual(assinaturaDoEnvio(estadoCom(outroLead), '2026-10-04'), com, 'mudar o Lead pede mensagem nova');
+  const quemDeMomento = BOA.map(i => (i.titulo === 'Abertura' ? { ...i, quem: 'Outro' } : i));
+  assert.equal(assinaturaDoEnvio(estadoCom(quemDeMomento), '2026-10-04'), com, 'quem conduz um momento não vai na mensagem e não pede');
 });
 
 /* 6 · a ponte -------------------------------------------------------------- */

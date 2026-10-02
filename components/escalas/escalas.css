@@ -994,3 +994,9 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
   .es-toast{animation:none!important}
   .es-fio::after{animation:none!important;opacity:.55}
 }
+
+/* 108 · escrever() (lib/confirmar.ts): o nome de quem é de fora da lista */
+.es-escrever .es-escrever-campo{margin:var(--es-e2) 0 0}
+.es-escrever-sugestoes{display:flex;flex-wrap:wrap;gap:8px}
+.es-escrever-sugestoes[hidden]{display:none}
+.es-escrever .es-dialogo-btns{margin-top:var(--es-e3)}

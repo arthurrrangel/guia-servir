@@ -303,6 +303,12 @@ export type Dia = {
   /* 105 · a ordem do culto deste ministério: músicas com tom, BPM e cifra, e
      os momentos, com a duração de cada um. Vale com o repertório ligado. */
   ordem?: ItemOrdem[];
+  /* 108 · QUEM É DE FORA DA LISTA, POR POSTO (nome da função → texto):
+     "Guest", "Guest Rafa", o técnico de som que é de outro ministério.
+     Vai na mensagem do grupo como está escrito, sem situação, e o posto
+     conta como coberto. Só vale enquanto ninguém da lista está no posto
+     (ver `convidadoNoPosto`). */
+  convidados?: Record<string, string>;
 };
 export type Config = {
   limitePadrao: number; janelaCarga: number; plantaoQtd: number;
@@ -414,22 +420,86 @@ export function musicasDoDia(S: Estado, data: string): ItemOrdem[] {
   if (!S.config.repertorio) return [];
   return (S.escalas[data]?.ordem || []).filter(i => i?.t === 'musica' && !!i.titulo);
 }
-/** a linha da música na mensagem do grupo: '1. Bondade de Deus · Tom G · 68 BPM'
+/** a linha da música na mensagem do grupo: '1. Canção A (E, 67 BPM) Lead - Lia'
 
-    02/10/2026, sugestão do Louvor ("Setlist: Tons e BPM / 1 - Leão E
-    137bpm"): era '1. Bondade de Deus (G, 68 BPM)'. O "Tom" escrito evita a
-    leitura de "Leão E 137" como "Leão e 137", e o ponto do meio é o separador
-    do resto do sistema. */
+    A MENSAGEM SAI COMO O LOUVOR ESCREVE — 02/10/2026, noite. O Arthur mandou
+    a escala de domingo copiada do grupo do Louvor: "as mensagens tem que
+    sair assim". Cada música é '1. Canção A (E, 67 BPM) Lead - Lia': o tom e
+    o BPM entre parênteses e quem conduz como "Lead". Era assim desde a 105,
+    sem o Lead; à tarde do mesmo dia eu tinha trocado para '1. Canção A · Tom E ·
+    67 BPM', lendo na sugestão do Louvor um formato que ela não pedia (ela
+    falava do lugar das informações, que é a página de quem serve). Voltou. */
 export function linhaDaMusica(it: ItemOrdem, n: number): string {
   const p: string[] = [];
-  if (it.tom) p.push(`Tom ${it.tom}`);
+  if (it.tom) p.push(it.tom);
   if (it.bpm) p.push(`${it.bpm} BPM`);
-  return [`${n}. ${it.titulo}`, ...p].join(' · ');
+  return `${n}. ${it.titulo}${p.length ? ` (${p.join(', ')})` : ''}${it.quem ? ` Lead - ${it.quem}` : ''}`;
 }
-/** as observações do setlist: a nota de cada música, com o número dela
+/** as observações das músicas: a nota de cada uma, com o número dela
     ('3. Escape: medley começando da ponte de outra música') */
 export function observacoesDasMusicas(mus: ItemOrdem[]): string[] {
   return mus.map((it, i) => (it.nota ? `${i + 1}. ${it.titulo}: ${it.nota}` : '')).filter(Boolean);
+}
+
+/* =============================================================================
+   108 · QUEM É DE FORA DA LISTA NO POSTO — 02/10/2026.
+
+   Na escala do Louvor, DIRIGENTE é "Guest Rafa", GUITARRA, BATERIA e
+   TECLADO são "Guest" e o SOM é alguém de outro ministério, sem situação. O
+   sistema só sabia dizer "*** PRECISO DE ALGUÉM ***" nesses postos, e o
+   líder reescrevia a mensagem à mão antes de mandar.
+
+   Agora o posto pode levar um texto de quem é de fora da lista. Ele vai na
+   mensagem como está escrito, sem "(confirmou)" nem "(falta confirmar)",
+   porque essa pessoa não confirma pelo link; e o posto conta como coberto:
+   não é vaga, o sorteio não mexe nele e ninguém é chamado para cobrir.
+
+   Pessoa da lista no posto vale mais que o texto: se as duas coisas
+   existirem ao mesmo tempo (um convite aceito no link depois de o líder
+   escrever o nome, por exemplo), quem está escalado é quem aparece.
+   ============================================================================= */
+export const CONVIDADO_TETO = 60;
+/** o texto que o banco aceita (108, `convidados_validos`): aparado, de 1 a 60
+    letras, sem quebra de linha nem tabulação */
+export function textoDeConvidadoValido(s: unknown): s is string {
+  return typeof s === 'string' && s.length > 0 && s.length <= CONVIDADO_TETO
+    && s === s.trim() && !/[\u0000-\u001f\u007f]/.test(s);
+}
+/** quem é de fora da lista neste posto ('' quando há alguém da lista nele,
+    ou quando não há texto) */
+export function convidadoNoPosto(S: Estado, data: string, funcao: string): string {
+  const dia = S.escalas[data];
+  if (!dia || dia.slots?.[funcao]?.vid) return '';
+  return (dia.convidados?.[funcao] || '').trim();
+}
+/** o dia tem alguém: da lista em algum posto, ou de fora da lista */
+export function diaTemGente(S: Estado, data: string): boolean {
+  const dia = S.escalas[data];
+  if (!dia) return false;
+  return Object.values(dia.slots || {}).some(s => !!s?.vid)
+    || Object.keys(dia.convidados || {}).some(fn => !!convidadoNoPosto(S, data, fn));
+}
+
+/* A SAUDAÇÃO PELA HORA — 02/10/2026, noite.
+
+   A saudação é um texto fixo dos Ajustes ("Boa noite galera", o padrão), e a
+   escala do Louvor chegou ao Arthur com "Boa tarde galera": quem manda à
+   tarde trocava a primeira palavra à mão. Quando o texto começa com "Bom
+   dia", "Boa tarde" ou "Boa noite", essa parte segue a hora de Brasília em
+   que a mensagem é montada (5h, 12h, 18h); o resto fica como o líder
+   escreveu. Saudação que não começa assim ("Fala, time!") não muda. */
+export function saudacaoNaHora(texto: string, agora: Date = new Date()): string {
+  const m = /^\s*(bom\s+dia|boa\s+tarde|boa\s+noite)\b/i.exec(texto || '');
+  if (!m) return texto || '';
+  const hora = +new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/Sao_Paulo', hour: 'numeric', hourCycle: 'h23',
+  }).format(agora);
+  const certa = hora >= 5 && hora < 12 ? 'bom dia' : hora >= 12 && hora < 18 ? 'boa tarde' : 'boa noite';
+  /* a caixa de quem escreveu: "Boa tarde", "boa tarde" ou "BOA TARDE" */
+  const orig = m[1];
+  const caixa = orig === orig.toUpperCase() ? certa.toUpperCase()
+    : orig[0] === orig[0].toUpperCase() ? certa[0].toUpperCase() + certa.slice(1) : certa;
+  return texto.replace(m[0], m[0].replace(orig, caixa));
 }
 
 /* A REGRA DO BANCO (`ordem_valida`, 105), IGUAL. É o que decide o que da
@@ -502,6 +572,10 @@ export type Estado = {
   escalas: Record<string, Dia>; config: Config;
   /* nome do ministério dono deste estado — usado nos textos que o voluntário lê */
   equipe?: string;
+  /* o que o banco já sabe guardar além do de sempre. `convidados`: a 108
+     (culto_obs.convidados) está no banco; sem ela, a tela não oferece
+     "Escrever um nome" (ver `ponte.ts`, `montarEstado`). */
+  recursos?: { convidados?: boolean };
 };
 
 /* o rodapé padrão até 01/10/2026 (ver msgEscala) */
@@ -1486,8 +1560,10 @@ export function candidatos(
       porNome(a, b));
 }
 
+/* 108 · posto com alguém de fora da lista ("Guest") não é vaga: o sorteio
+   não preenche, o dia não fica vermelho por ele e ninguém é chamado */
 export const vagasDe = (S: Estado, data: string) =>
-  funcoesDoDia(S, data).filter(f => !S.escalas[data]?.slots?.[f.nome]?.vid).map(f => f.nome);
+  funcoesDoDia(S, data).filter(f => !S.escalas[data]?.slots?.[f.nome]?.vid && !convidadoNoPosto(S, data, f.nome)).map(f => f.nome);
 
 /* Plantão só recebe quem é CURINGA: cobre 2+ funções sem depender de treino
    (titular ou reserva). Alguém que só sabe uma coisa não serve de plantão —
@@ -1592,7 +1668,8 @@ export function gerarDia(S: Estado, data: string, fora?: ForaDoDia) {
     .sort((a, b) => a.n - b.n || a.i - b.i);
 
   for (const { f } of ordem) {
-    if (dia.slots[f.nome]) continue;
+    /* 108 · o posto que o líder deu a alguém de fora da lista fica com ele */
+    if (dia.slots[f.nome] || convidadoNoPosto(S, data, f.nome)) continue;
     const c = candidatos(S, f.nome, data, { fora: F });
     if (c.length) dia.slots[f.nome] = { vid: c[0].id, status: 'pendente', fixo: false };
   }
@@ -1835,12 +1912,16 @@ export function resumoDia(S: Estado, data: string) {
   const furos = preenchidos.filter(f => dia.slots[f.nome].status === 'furou');
   const pendentes = preenchidos.filter(f => (dia.slots[f.nome].status || 'pendente') === 'pendente');
   const vagas = vagasDe(S, data);
+  /* 108 · os postos com alguém de fora da lista: cobertos, sem confirmação.
+     `preenchidos` continua sendo quem é da lista (é a base de "confirmados
+     de N"); quem mostra "postos preenchidos" soma os dois. */
+  const convidados = ativos.filter(f => !!convidadoNoPosto(S, data, f.nome)).length;
   const situacao = classificar({
     vagas: vagas.length, furos: furos.length,
     recusados: recusados.length, pendentes: pendentes.length,
   });
   return {
-    total: ativos.length, preenchidos: preenchidos.length,
+    total: ativos.length, preenchidos: preenchidos.length, convidados,
     confirmados: confirmados.length, pendentes: pendentes.length,
     recusados: recusados.length, furos: furos.length, vagas, situacao,
   };
@@ -1885,6 +1966,8 @@ export function contaDoRecorte(S: Estado, data: string, grupo?: GrupoZap): Conta
     if (grupo && !funcaoNoGrupo(grupo, f)) continue;
     c.postos++;
     const sl = dia?.slots?.[f.nome];
+    /* 108 · alguém de fora da lista cobre o posto e não tem o que responder */
+    if (!sl?.vid && convidadoNoPosto(S, data, f.nome)) { c.preenchidos++; continue; }
     if (!sl?.vid) { c.vagas++; continue; }
     if (sl.status === 'recusado') { c.recusados++; continue; }
     if (sl.status === 'furou') { c.furos++; continue; }
@@ -1933,9 +2016,14 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
     if (grupo && !funcaoNoGrupo(grupo, f)) continue;
     const sl = dia?.slots?.[f.nome];
     const fora = !sl?.vid || sl.status === 'recusado' || sl.status === 'furou';
+    /* 108 · quem é de fora da lista entra pelo texto: mudar "Guest" para
+       "Guest Rafa" depois do envio pede mensagem nova. Posto sem ele
+       continua com o '-' de antes, e a assinatura dos dias que já foram
+       mandados não muda. */
+    const conv = convidadoNoPosto(S, data, f.nome);
     /* pela chave da função, e em ordem: renomear ou reordenar postos não
        muda quem foi chamado, e não pode acusar "mudou depois do envio" */
-    partes.push(`${f.id || f.nome}=${fora ? '-' : sl!.vid}`);
+    partes.push(`${f.id || f.nome}=${conv ? 'c:' + conv : fora ? '-' : sl!.vid}`);
   }
   partes.sort();
   if (!grupo) partes.push('p=' + [...(dia?.plantao || [])].sort().join(','));
@@ -1947,23 +2035,25 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
   /* 105 · as músicas e o tom também: mudar a música ou o tom depois do envio
      pede mensagem nova. Só entra na conta quando existe, pela mesma razão. */
   const mus = musicasDoDia(S, data);
-  /* 02/10/2026: a nota da música passou a ir na mensagem (as observações do
-     setlist), então mudar a nota também pede mensagem nova */
-  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}`).join(','));
+  /* 02/10/2026: a nota da música passou a ir na mensagem (as observações),
+     então mudar a nota também pede mensagem nova. E o Lead (quem conduz),
+     à noite: só entra quando existe, para a assinatura de quem não usa
+     continuar a mesma. */
+  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}${i.quem ? `/q:${i.quem}` : ''}`).join(','));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
 }
 
 export function msgEscala(S: Estado, data: string,
-  opts: { link?: string; grupo?: GrupoZap } = {}) {
+  opts: { link?: string; grupo?: GrupoZap; agora?: Date } = {}) {
   const dia = S.escalas[data] || { slots: {}, plantao: [], obs: '' };
   const g = opts.grupo;
   /* `dia.evento` e não só `data`: sem ele a mensagem do grupo saía dizendo
      "Escala de domingo (15/10)" numa QUINTA de evento. A tela já acertava,
      porque passa o evento; a mensagem ficou para trás quando a 54 criou o
      terceiro tipo de dia, e é ela que vai para o WhatsApp de todo mundo. */
-  const L: string[] = [S.config.saudacao,
+  const L: string[] = [saudacaoNaHora(S.config.saudacao, opts.agora),
     `${tituloDoCulto(data, dia.evento)} (${fmtDia(data)})${g ? ` · ${g.nome.trim()}` : ''}`, ''];
   for (const f of funcoesDoDia(S, data)) {
     /* no recorte de um grupo, só as funções dele; a vaga aberta continua
@@ -1971,9 +2061,12 @@ export function msgEscala(S: Estado, data: string,
     if (g && !funcaoNoGrupo(g, f)) continue;
     const sl = dia.slots?.[f.nome];
     L.push(f.nome);
+    /* 108 · quem é de fora da lista vai como o líder escreveu ("Guest",
+       "Guest Rafa"), sem situação: não confirma pelo link */
+    const conv = convidadoNoPosto(S, data, f.nome);
     /* mostrar quem já confirmou é o empurrão mais barato que existe: o
        compromisso deixa de ser combinado no privado e passa a ser público. */
-    if (!sl?.vid) L.push('*** PRECISO DE ALGUÉM ***');
+    if (!sl?.vid) L.push(conv || '*** PRECISO DE ALGUÉM ***');
     else if (sl.status === 'confirmado') L.push(`${nomeDe(S, sl.vid)} (confirmou)`);
     else if (sl.status === 'recusado') L.push('*** PRECISO DE ALGUÉM ***');
     else if (sl.status === 'furou') L.push('*** PRECISO DE ALGUÉM ***');
@@ -1990,25 +2083,25 @@ export function msgEscala(S: Estado, data: string,
   /* o setlist do dia, em todos os recortes: a banda, o vocal e o som ensaiam
      a mesma lista */
   const rep = repertorioDoDia(S, data);
-  /* 105 · as músicas da ordem, com o tom e o BPM.
-     02/10/2026, sugestão do Louvor: "colocar logo abaixo dos links do
-     setlist" a lista com tom e BPM e as observações. Era a lista ANTES dos
-     links; agora os links (para ouvir) vêm primeiro, depois o setlist com tom
-     e BPM, depois as observações (as notas das músicas). Sem música na ordem,
-     o bloco é o de sempre. */
+  /* 105 · as músicas da ordem, com o tom e o BPM, e depois os links.
+
+     COMO O LOUVOR ESCREVE — 02/10/2026, noite. O Arthur mandou a escala do
+     domingo copiada do grupo do Louvor ("as mensagens tem que sair assim"):
+     um bloco REPERTÓRIO só, primeiro as músicas ('1. Canção A (E, 67 BPM) Lead -
+     Lia') e logo embaixo os links das plataformas. Era assim desde a 105;
+     à tarde eu tinha invertido (links primeiro, "SETLIST: TOM E BPM" à
+     parte), lendo na sugestão do Louvor uma regra para a mensagem que ela
+     dava para a página de quem serve. Voltou. As observações das músicas,
+     quando existem, vêm logo depois do bloco. */
   const mus = musicasDoDia(S, data);
-  if (rep.length) {
+  if (rep.length || mus.length) {
     L.push('REPERTÓRIO');
+    mus.forEach((it, i) => L.push(linhaDaMusica(it, i + 1)));
     for (const l of rep) L.push(`${l.nome}: ${l.url}`);
     L.push('');
   }
-  if (mus.length) {
-    L.push('SETLIST: TOM E BPM');
-    mus.forEach((it, i) => L.push(linhaDaMusica(it, i + 1)));
-    L.push('');
-    const obs = observacoesDasMusicas(mus);
-    if (obs.length) { L.push('OBSERVAÇÕES'); obs.forEach(o => L.push(o)); L.push(''); }
-  }
+  const obs = observacoesDasMusicas(mus);
+  if (obs.length) { L.push('OBSERVAÇÕES'); obs.forEach(o => L.push(o)); L.push(''); }
   /* quem já salvou os Ajustes alguma vez guardou o rodapé padrão ANTIGO,
      que fala em "link pessoal". Ao lado do link do grupo (que é o mesmo para
      todos), ele vira o novo; texto que o líder escreveu fica como está. */
@@ -2038,10 +2131,10 @@ export function msgCobranca(S: Estado, vid: string, data: string, base: string) 
     + `Confirma no seu link até ${prazoDoDia(S, data)}?\n${base}/eu/${v?.token}#confirmar`;
 }
 
-export function msgColeta(S: Estado, ano: number, mes: number, _base: string, link = '') {
+export function msgColeta(S: Estado, ano: number, mes: number, _base: string, link = '', agora?: Date) {
   const doms = domingosDoMes(ano, mes).map(fmtDia).join(', ');
   const sabs = sabadosDoFollow(ano, mes).map(fmtDia).join(', ');
-  return `${S.config.saudacao}\n\nVou montar a escala de ${MESES[mes - 1]}. Domingos: ${doms}.`
+  return `${saudacaoNaHora(S.config.saudacao, agora)}\n\nVou montar a escala de ${MESES[mes - 1]}. Domingos: ${doms}.`
     + (sabs ? `\nFollow (sábado): ${sabs}.` : '') + `\n\n`
     + (link
       ? `Marca só os dias em que você NÃO pode, por este link:\n${link}\n`

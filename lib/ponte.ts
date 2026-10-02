@@ -4,7 +4,7 @@
    isso, o Node de linha de comando (que só apaga os tipos, não os resolve)
    tenta importar `Estado` como valor em tempo de execução e o módulo nem
    carrega — foi o que impediu de testar este arquivo. */
-import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio, ordemDoBanco } from './engine';
+import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio, ordemDoBanco, textoDeConvidadoValido } from './engine';
 import type { Estado, Nivel, Repertorio, Status } from './engine';
 
 /* =============================================================================
@@ -81,6 +81,9 @@ export type LinhaRecado = {
   repertorio?: Record<string, string> | null;
   /* 105 · a ordem do culto. Opcional pelo mesmo motivo: antes da 105 não vem. */
   ordem?: unknown;
+  /* 108 · quem é de fora da lista em cada posto ({id da função: texto}).
+     Antes da 108 a coluna não existe e a chave não vem. */
+  convidados?: Record<string, unknown> | null;
 };
 export type LinhaConfig = { id?: number | null; dados: Record<string, any>; equipe_id: string | null };
 
@@ -95,6 +98,9 @@ export type LinhasDoBanco = {
   /* respostas de "posso" por domingo (tabela disponibilidade) */
   disponibilidades?: LinhaDisponibilidade[];
   equipe?: string;
+  /* 108 · a coluna culto_obs.convidados existe. Undefined = não se sabe (a
+     montagem decide pelas linhas de recado, quando há alguma). */
+  temConvidados?: boolean;
 };
 
 export function montarEstado(l: LinhasDoBanco): Estado {
@@ -324,6 +330,14 @@ export function montarEstado(l: LinhasDoBanco): Estado {
      escolheu ganha. Antes, o recado do evento sobrescrevia o do domingo (ou
      o contrário) pela ordem em que o banco devolveu. */
   const recadoVeioDe = new Map<string, string>();
+  /* 108 · o nome de cada função pelo id (os postos com Guest vêm pelo id) */
+  const nomeDaFuncao = new Map(S.funcoes.filter(f => !!f.id).map(f => [f.id as string, f.nome]));
+  /* 108 · a coluna existe no banco quando a linha vem com a chave, mesmo
+     nula. É o que liga "Escrever um nome" na tela: antes da 108 a opção não
+     aparece, para ninguém escrever o que o banco não sabe guardar. */
+  if (l.temConvidados || (l.recados || []).some(r => !!r && Object.prototype.hasOwnProperty.call(r, 'convidados'))) {
+    S.recursos = { ...(S.recursos || {}), convidados: true };
+  }
   for (const r of l.recados || []) {
     const data = dataDoCulto.get(r.culto_id);
     if (!data) continue;
@@ -344,6 +358,16 @@ export function montarEstado(l: LinhasDoBanco): Estado {
        (e chega igual, para a tela salvar por cima sem acusar MUDOU) */
     const ordem = ordemDoBanco(r.ordem);
     if (ordem.length) abrir(data).ordem = ordem;
+    /* 108 · quem é de fora da lista no posto: pelo id da função, para o nome
+       de hoje; texto que o banco não aceitaria não chega */
+    if (r.convidados && typeof r.convidados === 'object' && !Array.isArray(r.convidados)) {
+      const conv: Record<string, string> = {};
+      for (const [fid, txt] of Object.entries(r.convidados)) {
+        const nome = nomeDaFuncao.get(fid);
+        if (nome && textoDeConvidadoValido(txt)) conv[nome] = txt;
+      }
+      if (Object.keys(conv).length) abrir(data).convidados = conv;
+    }
     /* relatório do fim do culto: mora na mesma linha do recado */
     if (r.relatorio || r.problemas) {
       const d = abrir(data);
@@ -990,11 +1014,23 @@ export async function linhasDaEquipe(
   const ruim2 = [habs, indis, escs, plants, recados, disp].find((r: any) => r?.error);
   if (ruim2?.error) throw ruim2.error;
 
+  /* 108 · sem nenhuma linha de recado na janela, as linhas não dizem se a
+     coluna dos convidados existe: uma pergunta de zero linhas diz (sem ela,
+     um ministério novo só veria "Escrever um nome" depois do primeiro dia
+     salvo). Falhar aqui não derruba a carga: só deixa a opção desligada. */
+  let temConvidados: boolean | undefined;
+  if (!(recados.data || []).length) {
+    try {
+      const { error } = await s.from('culto_obs').select('convidados').limit(0);
+      temConvidados = !error;
+    } catch { temConvidados = false; }
+  }
+
   return {
     funcoes: funcoes.data || [], voluntarios: vols.data || [],
     habilidades: habs.data || [], indisponibilidades: indis.data || [],
     cultos: cultos.data || [], escalacoes: escs.data || [], plantoes: plants.data || [],
     recados: recados.data || [], disponibilidades: disp.data || [],
-    config: cfg?.data || null, equipe: nomeEquipe,
+    config: cfg?.data || null, equipe: nomeEquipe, temConvidados,
   };
 }

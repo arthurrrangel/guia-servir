@@ -419,6 +419,22 @@ export async function salvarRepertorio(cultoId: string, equipeId: string, rep: R
 }
 
 /* =============================================================================
+   108 · QUEM É DE FORA DA LISTA NO POSTO ("Guest") — 02/10/2026.
+
+   Um posto por vez, por RPC: com nome, o posto passa a ser dessa pessoa de
+   fora (quem estava escalado nele sai, na mesma transação); sem nome, o texto
+   sai. O banco confere quem lidera e o texto. Escalar alguém da lista no
+   posto tira o texto sozinho (gatilho da 108).
+   ============================================================================= */
+export async function salvarConvidado(cultoId: string, funcaoId: string, nome: string | null) {
+  const { data: r, error } = await sb()!.rpc('salvar_convidado', {
+    p_culto: cultoId, p_funcao: funcaoId, p_nome: nome,
+  });
+  if (error) throw error;
+  if (!r?.ok) throw new Error(r?.erro || 'CONVIDADO_NAO_SALVO');
+}
+
+/* =============================================================================
    105 · A ORDEM DO CULTO — 02/10/2026.
 
    Grava SÓ a ordem, por RPC, como o repertório. Vai junto a ordem que a tela

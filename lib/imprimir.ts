@@ -16,7 +16,7 @@
    pode NÃO aparece como escalado: no papel, a vaga dele está aberta, porque
    é isso que ela está.
    ============================================================================= */
-import { type Estado, diasDoMes, funcoesDoDia, nomeDe, diaLongo, horaDoDia, MESES } from './engine';
+import { type Estado, convidadoNoPosto, diasDoMes, funcoesDoDia, nomeDe, diaLongo, horaDoDia, MESES } from './engine';
 
 export type PostoImpresso = { funcao: string; quem: string; aberta: boolean; nota: string };
 export type DiaImpresso = {
@@ -35,6 +35,10 @@ export function escalaDoMesParaImprimir(
     const postos = funcoesDoDia(S, data).map(f => {
       const sl = dia?.slots?.[f.nome];
       const nome = sl?.vid ? nomeDe(S, sl.vid) : '';
+      /* 108 · alguém de fora da lista ("Guest", "Guest Rafa") sai como
+         o líder escreveu, e o posto não está aberto */
+      const conv = convidadoNoPosto(S, data, f.nome);
+      if (!sl?.vid && conv) return { funcao: f.nome, quem: conv, aberta: false, nota: '' };
       if (!sl?.vid || !nome) return { funcao: f.nome, quem: 'falta alguém', aberta: true, nota: '' };
       if (sl.status === 'recusado') return { funcao: f.nome, quem: 'falta alguém', aberta: true, nota: `${nome} não pode` };
       return { funcao: f.nome, quem: nome, aberta: false, nota: sl.status === 'furou' ? 'faltou' : '' };

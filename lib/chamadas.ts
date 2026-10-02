@@ -10,7 +10,7 @@
    fecham. Quem decide tudo isso é o banco (supabase/106); daqui sai o que a
    tela escreve.
    ============================================================================= */
-import { type Estado, funcoesDoDia, nomeDe } from './engine';
+import { type Estado, convidadoNoPosto, funcoesDoDia, nomeDe } from './engine';
 import { motivoParaMim } from './trocas';
 
 export type StatusDaChamada = 'aberta' | 'aceita' | 'recusada' | 'preenchida' | 'cancelada' | 'expirada';
@@ -35,10 +35,12 @@ type Volta = { ok?: boolean; erro?: string; motivo?: string; status?: string } |
 
 /* ------------------------------------------------------------ a vaga */
 /** a vaga está aberta: sem ninguém, ou com quem disse que não pode ou furou
-    (a mesma regra de `vaga_aberta`, supabase/106) */
+    (a mesma regra de `vaga_aberta`, supabase/106). 108: posto com alguém de
+    fora da lista ("Guest") está coberto, e não se chama ninguém para ele. */
 export function vagaAberta(S: Estado, data: string, funcao: string): boolean {
   const sl = S.escalas[data]?.slots?.[funcao];
-  return !sl?.vid || sl.status === 'recusado' || sl.status === 'furou';
+  if (!sl?.vid) return !convidadoNoPosto(S, data, funcao);
+  return sl.status === 'recusado' || sl.status === 'furou';
 }
 /** os postos do dia com vaga aberta, na ordem dos postos */
 export function vagasAbertas(S: Estado, data: string) {

@@ -250,3 +250,110 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
     d.querySelector<HTMLButtonElement>('[data-nao]')!.focus();
   });
 }
+
+/* =============================================================================
+   escrever() — UM NOME QUE NÃO ESTÁ NA LISTA · 02/10/2026 (108)
+
+   O posto do Louvor que é de um convidado ("Guest", "Guest Rafa") ou de
+   alguém de outro ministério precisa de um texto, e um <select> não aceita
+   texto. Esta é a terceira peça da mesma família: o mesmo <dialog> nativo,
+   pelos mesmos motivos (foco preso, Escape, fundo inerte, camada acima de
+   qualquer barra), com um campo e os textos que o ministério já usou como
+   atalhos (tocar num deles preenche o campo; Salvar confirma).
+
+   O foco nasce no CAMPO, e não no Voltar como nos outros dois: aqui a ação é
+   escrever, e nada se apaga sem querer (Escape, clique fora e Voltar devolvem
+   null; Enter salva, e campo vazio não salva).
+   ============================================================================= */
+export type Escrita = {
+  titulo: string; texto?: string; rotulo: string;
+  valor?: string; dica?: string; sugestoes?: string[]; acao?: string; max?: number;
+};
+
+let caixaE: HTMLDialogElement | null = null;
+let resolverE: ((v: string | null) => void) | null = null;
+
+function fecharE(v: string | null) {
+  const r = resolverE; resolverE = null;
+  document.body.style.removeProperty('overflow');
+  if (caixaE?.open) caixaE.close();
+  r?.(v);
+}
+
+function montarE(): HTMLDialogElement {
+  const d = document.createElement('dialog');
+  d.className = 'es-dialogo es-escrever';
+  d.innerHTML = `
+    <form class="es-dialogo-corpo" novalidate>
+      <h2 class="es-dialogo-titulo"></h2>
+      <p class="es-dialogo-texto"></p>
+      <label class="es-campo es-escrever-campo">
+        <span data-rotulo></span>
+        <input class="es-ctl" type="text" autocomplete="off" autocapitalize="words" enterkeyhint="done" spellcheck="false" />
+        <small data-dica></small>
+      </label>
+      <div class="es-escrever-sugestoes" role="group" aria-label="Usados antes"></div>
+      <div class="es-dialogo-btns">
+        <button type="button" class="es-btn" data-nao>Voltar</button>
+        <button type="submit" class="es-btn es-pri" data-sim>Salvar</button>
+      </div>
+    </form>`;
+  const form = d.querySelector<HTMLFormElement>('form')!;
+  const campo = d.querySelector<HTMLInputElement>('input')!;
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const v = campo.value.trim().replace(/\s+/g, ' ');
+    if (!v) { campo.focus(); return; }
+    fecharE(v);
+  });
+  d.querySelector<HTMLButtonElement>('[data-nao]')!.onclick = () => fecharE(null);
+  d.addEventListener('cancel', e => { e.preventDefault(); fecharE(null); });
+  d.addEventListener('click', e => { if (e.target === d) fecharE(null); });
+  (document.querySelector('.es') ?? document.body).appendChild(d);
+  return d;
+}
+
+export function escrever(c: Escrita): Promise<string | null> {
+  if (typeof document === 'undefined') return Promise.resolve(null);
+  if (resolverE) fecharE(null);
+  caixaE ??= montarE();
+  const d = caixaE;
+  /* reancorar a cada chamada: a casca é por página (ver `confirmar`) */
+  const pai = document.querySelector('.es') ?? document.body;
+  if (d.parentNode !== pai) pai.appendChild(d);
+
+  d.querySelector('.es-dialogo-titulo')!.textContent = c.titulo;
+  const txt = d.querySelector<HTMLParagraphElement>('.es-dialogo-texto')!;
+  txt.textContent = c.texto || '';
+  txt.hidden = !c.texto;
+  d.querySelector('[data-rotulo]')!.textContent = c.rotulo;
+  const dica = d.querySelector<HTMLElement>('[data-dica]')!;
+  dica.textContent = c.dica || '';
+  dica.hidden = !c.dica;
+  const campo = d.querySelector<HTMLInputElement>('input')!;
+  campo.value = c.valor || '';
+  campo.maxLength = c.max || 60;
+  d.querySelector<HTMLButtonElement>('[data-sim]')!.textContent = c.acao || 'Salvar';
+
+  /* os textos já usados: um toque preenche o campo. Texto entra por
+     textContent, nunca por innerHTML: nome de pessoa é dado. */
+  const lista = d.querySelector<HTMLDivElement>('.es-escrever-sugestoes')!;
+  const sug = [...new Set((c.sugestoes || []).map(s => s.trim()).filter(Boolean))].slice(0, 6);
+  lista.replaceChildren(...sug.map(s => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'es-ficha';
+    b.textContent = s;
+    b.onclick = () => { campo.value = s; campo.focus(); };
+    return b;
+  }));
+  lista.hidden = !sug.length;
+
+  return new Promise<string | null>(res => {
+    resolverE = res;
+    document.body.style.overflow = 'hidden';
+    d.showModal();
+    campo.focus();
+    campo.select();
+  });
+}

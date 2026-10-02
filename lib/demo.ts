@@ -131,6 +131,14 @@ export function estadoDemo(variante = ''): Estado {
     if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
     if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
   });
+  /* 108 · `?demo=convidado`: o banco já sabe guardar quem é de fora da
+     lista, e o primeiro culto que vem tem a FOTO com um "Guest Rafa" (nome
+     inventado), para o harness desenhar o posto coberto por alguém de fora. */
+  if (variante === 'convidado') {
+    S.recursos = { convidados: true };
+    const d0 = porVir[0] && S.escalas[porVir[0]];
+    if (d0) { delete d0.slots['FOTO']; d0.convidados = { FOTO: 'Guest Rafa' }; }
+  }
   /* 107 · `?demo=hoje`: um evento HOJE e outro ontem, montados, para o
      harness desenhar a chegada do dia e o "como foi" (o mês do demo quase
      nunca tem culto no próprio dia). Sem a variante, o estado é o de sempre. */

@@ -1,19 +1,19 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
-import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarDia, salvarDias, tirarNaoPosso } from '@/lib/db';
+import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarConvidado, salvarDia, salvarDias, tirarNaoPosso } from '@/lib/db';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
 import { rolarAte } from '@/components/escalas/ancora';
 import { IcCopiar, IcDado, IcEnviar, IcSeta, IcSino } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
-import { confirmar, decidir } from '@/lib/confirmar';
+import { confirmar, decidir, escrever } from '@/lib/confirmar';
 import { comoMover, perguntaDeMover, type ComoMover } from '@/lib/mover';
 import {
   candidatos, cargaDoMes, diaLongo, diasDoMes, esqueceOsDias, fmtDia, fmtLongo, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, postoSimultaneoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
-  gruposValidos, linkDoVoluntario, addDias,
+  gruposValidos, linkDoVoluntario, addDias, convidadoNoPosto, diaTemGente, CONVIDADO_TETO,
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
@@ -81,6 +81,17 @@ import { pl, cont } from '@/lib/plural';
    ============================================================================= */
 
 const ehFollow = (d: string) => tipoDoDia(d) === 'follow';
+/* 108 · o valor da opção "Escrever um nome" na lista do posto */
+const FORA = '__fora';
+/* os textos de fora da lista que o ministério já usou, do dia mais novo ao
+   mais velho: viram atalhos no "Escrever um nome" */
+function convidadosUsados(S: Estado): string[] {
+  const out: string[] = [];
+  for (const d of Object.keys(S.escalas).sort().reverse()) {
+    for (const t of Object.values(S.escalas[d]?.convidados || {})) if (t && !out.includes(t)) out.push(t);
+  }
+  return out;
+}
 const nomeDia = (d: string) => (ehFollow(d) ? 'Follow, sábado' : 'domingo');
 
 export default function Pagina() { return <Shell><Escala /></Shell>; }
@@ -310,6 +321,9 @@ function Escala() {
   }
 
   async function trocar(d: string, funcao: string, vid: string) {
+    /* 108 · alguém de fora da lista ("Guest"): escrever, ou tirar o texto */
+    if (vid === FORA) { await escreverNome(d, funcao); return; }
+    if (!vid && convidadoNoPosto(S, d, funcao)) { await tirarConvidado(d, funcao); return; }
     const atual = S.escalas[d]?.slots?.[funcao];
     /* 16/09/2026: o banco RECUSA duas coisas que a lista deixava escolher
        (ela mostra quem já está em outra função, de propósito, para o líder
@@ -371,6 +385,9 @@ function Escala() {
       const dia = garantirDia(S, d);
       if (!vid) delete dia.slots[funcao];
       else dia.slots[funcao] = { vid, status: 'pendente', fixo: true };
+      /* 108 · quem é da lista vale mais: o texto de fora sai (no banco, o
+         gatilho da 108 tira junto com a escalação) */
+      if (vid && dia.convidados?.[funcao]) delete dia.convidados[funcao];
       pinta(); await salvarDia(S, d, equipe!.id); await recarregar();
     } catch (e: any) {
       /* a escalação não entrou: o "não posso" volta, senão a pessoa ficaria
@@ -420,6 +437,71 @@ function Escala() {
       } else await falhou(e, snap);
     }
     setOcupado(false);
+  }
+
+  /* 108 · QUEM É DE FORA DA LISTA NO POSTO (02/10/2026). O posto do Louvor
+     que é de um convidado ("Guest", "Guest Rafa") ou de alguém de outro
+     ministério leva um texto, que vai na mensagem do grupo como está escrito
+     e sem situação. Gravar o texto tira quem estava escalado no posto, na
+     mesma transação (salvar_convidado). */
+  async function escreverNome(d: string, funcao: string) {
+    const dia = S.escalas[d];
+    const f = S.funcoes.find(x => x.nome === funcao);
+    if (!dia?.cultoId || !f?.id) { aviso('Esse dia ainda não está salvo: escolha alguém da lista ou sorteie antes.'); pinta(); return; }
+    const atual = dia.slots?.[funcao];
+    if (atual?.vid && atual.status && atual.status !== 'pendente') {
+      const nome = nomeDe(S, atual.vid);
+      const oQue = atual.status === 'confirmado' ? `${nome} já CONFIRMOU esse dia`
+        : atual.status === 'furou' ? `${nome} está marcado como FUROU (isso conta no histórico)`
+        : `${nome} avisou que não pode`;
+      if (!await confirmar({ titulo: `${oQue}.`, texto: 'Escrever outro nome tira essa pessoa do posto e apaga a resposta.', acao: 'Continuar' })) { pinta(); return; }
+    }
+    const conv = convidadoNoPosto(S, d, funcao);
+    const usados = convidadosUsados(S);
+    const nome = await escrever({
+      titulo: `Quem faz ${funcao} em ${fmtLongo(d)}?`,
+      texto: 'Para quem não está na lista: um convidado ou alguém de outro ministério. Vai na mensagem do grupo como você escrever, sem pedir confirmação.',
+      rotulo: 'Nome no posto', valor: conv, max: CONVIDADO_TETO,
+      dica: 'Ex.: Guest, ou Guest e o nome',
+      sugestoes: usados.length ? usados : ['Guest'],
+      acao: 'Salvar',
+    });
+    if (nome === null || nome === conv) { pinta(); return; }
+    setOcupado(true);
+    const snap = retrato([d]);
+    try {
+      await salvarConvidado(dia.cultoId, f.id, nome);
+      const dd = garantirDia(S, d);
+      delete dd.slots[funcao];
+      dd.convidados = { ...(dd.convidados || {}), [funcao]: nome };
+      pinta(); await recarregar();
+      aviso(`${funcao}: ${nome}`);
+    } catch (e: any) { await falhouConvidado(e, snap); }
+    setOcupado(false);
+  }
+  async function tirarConvidado(d: string, funcao: string) {
+    const dia = S.escalas[d];
+    const f = S.funcoes.find(x => x.nome === funcao);
+    if (!dia?.cultoId || !f?.id) return;
+    setOcupado(true);
+    const snap = retrato([d]);
+    try {
+      await salvarConvidado(dia.cultoId, f.id, null);
+      if (dia.convidados) delete dia.convidados[funcao];
+      pinta(); await recarregar();
+      aviso(`${funcao} ficou sem ninguém`);
+    } catch (e: any) { await falhouConvidado(e, snap); }
+    setOcupado(false);
+  }
+  /* as recusas do banco com o que fazer, e o resto pelo caminho de sempre */
+  async function falhouConvidado(e: any, snap: ReturnType<typeof retrato>) {
+    const cod = String(e?.message || '');
+    if (cod === 'NOME_INVALIDO') { await recarregar(); aviso(`Use até ${CONVIDADO_TETO} letras, numa linha só.`); return; }
+    if (e?.code === 'PGRST202') { await recarregar(); aviso('Isso precisa da atualização 108 no banco.'); return; }
+    if (['SEM_PERMISSAO', 'POSTO_INEXISTENTE', 'CULTO_INEXISTENTE'].includes(cod)) {
+      await recarregar(); aviso('Não deu para salvar esse nome. Recarregue a página e tente de novo.'); return;
+    }
+    await falhou(e, snap);
   }
 
   /* A situação de quem já está escalado. Existia só no painel, e só para o
@@ -595,7 +677,8 @@ function Escala() {
      é a do Painel e da linha do dia: montado é ter alguém numa vaga. */
   const contas = futuros.reduce((a, d) => {
     const x = S.escalas[d];
-    if (!x || !Object.values(x.slots || {}).some((s: any) => s?.vid)) { a.aMontar++; return a; }
+    /* 108 · posto com alguém de fora da lista também conta como gente */
+    if (!x || !diaTemGente(S, d)) { a.aMontar++; return a; }
     const r = resumoDia(S, d);
     a.vagas += r.vagas.length; a.pendentes += r.pendentes; a.furos += r.furos; a.recusados += r.recusados;
     return a;
@@ -611,7 +694,7 @@ function Escala() {
   const nomeMes = MESES[mes - 1];
   const montados = futuros.length - contas.aMontar;
   /* 103 · o PDF do mês só aparece quando há alguém escalado em algum dia */
-  const temEscalado = dias.some(d => Object.values(S.escalas[d]?.slots || {}).some(sl => !!sl?.vid));
+  const temEscalado = dias.some(d => diaTemGente(S, d));
 
   return (
     <>
@@ -985,7 +1068,8 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
   const doDia = funcoesDoDia(S, d);
   const r = dia ? resumoDia(S, d) : null;
   const probs = dia ? problemas(S, d) : [];
-  const preenchidos = doDia.filter((f: any) => dia?.slots?.[f.nome]?.vid).length;
+  /* 108 · o posto de alguém de fora da lista está preenchido */
+  const preenchidos = doDia.filter((f: any) => dia?.slots?.[f.nome]?.vid || convidadoNoPosto(S, d, f.nome)).length;
   const semConfirmar = r ? r.pendentes : 0;
 
   /* O RESUMO DA LINHA FECHADA muda de pergunta conforme o tempo do culto.
@@ -1246,6 +1330,10 @@ const slugFn = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira }: PropsPosto) {
   const slot = dia?.slots?.[f.nome];
   const st: Status = (slot?.status || 'pendente') as Status;
+  /* 108 · alguém de fora da lista no posto ("Guest"), e se dá para escrever
+     (com a 108 no banco e o dia já salvo) */
+  const conv = convidadoNoPosto(S, d, f.nome);
+  const podeEscrever = !!S.recursos?.convidados && !!dia?.cultoId;
   /* 02/10/2026: quem avisou que não pode no dia ENTRA na lista, no fim e
      separado ("Avisaram que não podem nesse dia"): sumir dela era o líder
      não conseguir escalar quem falou com ele e agora pode. Escolher alguém
@@ -1287,9 +1375,9 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
           lista, que é onde ele é usado. */}
       <span className="es-ec-quem">
         <Escolha
-          forma="campo" valor={slot?.vid || ''} vazia={!slot?.vid} desabilitado={ocupado}
+          forma="campo" valor={slot?.vid || (conv ? FORA : '')} vazia={!slot?.vid && !conv} desabilitado={ocupado}
           rotulo={`Quem faz ${f.nome} em ${fmtLongo(d)}`}
-          mostra={slot?.vid ? nomeDe(S, slot.vid) : 'precisa de alguém'}
+          mostra={slot?.vid ? nomeDe(S, slot.vid) : conv || 'precisa de alguém'}
           aoMudar={v => trocar(d, f.nome, v)}>
           <option value="">precisa de alguém</option>
           {opcoes.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c)}</option>)}
@@ -1298,8 +1386,21 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
               {naoPodem.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c, true)}</option>)}
             </optgroup>
           )}
+          {/* 108 · quem não está na lista: um convidado ou alguém de outro
+              ministério. O texto vai na mensagem do grupo como está escrito. */}
+          {(podeEscrever || !!conv) && (
+            <optgroup label="Fora da lista">
+              <option value={FORA}>{conv ? `${conv} · mudar o nome` : 'Escrever um nome (convidado, outro ministério)'}</option>
+            </optgroup>
+          )}
         </Escolha>
       </span>
+
+      {!slot?.vid && !!conv && (
+        <span className="es-ec-extra">
+          <span className="es-ec-sit"><Pilula tom="info">fora da lista</Pilula></span>
+        </span>
+      )}
 
       {slot?.vid && (
         <span className="es-ec-extra">

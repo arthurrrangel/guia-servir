@@ -100,12 +100,12 @@ try {
     const meta2 = await itens.nth(1).locator('.es-ec-oi-meta').innerText();
     ok(meta2 === 'G · 72 BPM · Lia · 6 min · com cifra', `${nome}: a música mostra tom, BPM, quem, tempo e cifra`, meta2);
 
-    /* a mensagem do grupo leva as músicas com o tom e o BPM (02/10/2026,
-       sugestão do Louvor: "Setlist: Tons e BPM", depois dos links, e as
-       observações) */
+    /* a mensagem do grupo leva as músicas como o Louvor escreve (02/10/2026,
+       noite: "as mensagens tem que sair assim"): '1. Canção A (E, 67 BPM) Lead -
+       Lia' no bloco REPERTÓRIO, e as observações depois */
     await dia.getByRole('button', { name: 'Mandar nos grupos' }).click(); await esperar(400);
     const msgs = await dia.locator('.es-mg-linha a.es-btn').evaluateAll(as => as.map(a => decodeURIComponent(a.getAttribute('href').split('?text=')[1] || '')));
-    ok(msgs.length >= 1 && msgs.every(t => t.includes('SETLIST: TOM E BPM\n1. Canção da Manhã · Tom G · 72 BPM\n2. Rio de Graça · Tom F#m · 68 BPM\n3. Luz no Caminho · Tom Bb\n')),
+    ok(msgs.length >= 1 && msgs.every(t => t.includes('REPERTÓRIO\n1. Canção da Manhã (G, 72 BPM) Lead - Lia\n2. Rio de Graça (F#m, 68 BPM)\n3. Luz no Caminho (Bb)\n')),
       `${nome}: toda mensagem do dia leva as músicas com o tom`, (msgs[0] || '').slice(-300));
     ok(msgs.every(t => t.includes('OBSERVAÇÕES\n1. Canção da Manhã: Começa só voz e teclado')),
       `${nome}: e as observações, com o número da música`, (msgs[0] || '').slice(-300));
@@ -141,7 +141,7 @@ try {
     ok(await titulo.evaluate(e => e === document.activeElement), `${nome}: o cursor já está no nome da música`);
     await titulo.fill('mar aberto');
     const yAntes = (await form.getByRole('button', { name: 'Salvar' }).boundingBox())?.y;
-    await form.getByLabel('Quem conduz').click(); await esperar(300);
+    await form.getByLabel('Lead').click(); await esperar(300);
     const yDepois = (await form.getByRole('button', { name: 'Salvar' }).boundingBox())?.y;
     ok(yAntes !== undefined && Math.abs(yAntes - yDepois) < 1,
       `${nome}: completar a música não empurra o "Salvar" (o toque não se perde no meio)`, `${yAntes} → ${yDepois}`);
