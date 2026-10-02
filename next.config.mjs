@@ -183,6 +183,15 @@ const nextConfig = {
       { source: '/contato', destination: '/como-chegar', permanent: false },
       /* o jeito que alguém vai digitar o endereço do retiro */
       { source: '/follow-camp', destination: '/followcamp', permanent: false },
+      /* O ENDEREÇO DO QR CODE DO FOLLOW CAMP (02/10/2026). Está IMPRESSO:
+         nunca apagar nem renomear (scripts/qr-impresso.test.mjs reprova o
+         build). O QR guarda só guiaservir.com/fc; para onde ele leva mora
+         aqui. Domínio novo ou página nova: troque só o `destination` (pode
+         ser um endereço completo, https://...), e todo QR já impresso passa
+         a levar para lá. 307 de propósito: o navegador não guarda esse
+         salto, então a troca vale na hora até para quem já escaneou. A única
+         coisa que mata o QR é o guiaservir.com deixar de existir. */
+      { source: '/fc', destination: '/followcamp', permanent: false },
     ];
   },
 };
