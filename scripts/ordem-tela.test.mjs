@@ -239,8 +239,14 @@ try {
   for (const [w, h, toque, nome] of [[1440, 900, false, '1440'], [390, 844, true, '390']]) {
     const c = await ctx(w, h, toque); const p = await c.newPage();
     await p.goto(`${BASE}/eu/x?demo=ordem`, { waitUntil: 'domcontentloaded' });
-    await p.waitForSelector('.vol-in', { timeout: 30000 }); await esperar(2000);
+    await p.waitForSelector('.vol-in', { timeout: 30000 });
+    /* 02/10/2026: a seção chega depois do resto da página (é uma pergunta à
+       parte) e, com o servidor de desenvolvimento ocupado, passava dos 2 s
+       fixos que esta linha esperava: a 1440, que roda primeiro, contava 0.
+       Espera a condição, não o relógio. */
     const sec = p.locator('#ordem');
+    await p.waitForSelector('#ordem .vol-ordem', { timeout: 20000 }).catch(() => {});
+    await esperar(300);
     ok(await sec.count() === 1, `${nome}: a página tem a seção Ordem do culto`);
     const blocos = sec.locator('.vol-ordem');
     ok(await blocos.count() === 2, `${nome}: um bloco por culto, e nada do dia recusado`, String(await blocos.count()));

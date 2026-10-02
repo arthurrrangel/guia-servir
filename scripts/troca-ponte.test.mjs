@@ -67,9 +67,11 @@ caso('a troca aceita depois que a tela abriu sobrevive ao salvar de outra vaga',
     { id: 'l-f2', funcao_id: 'f2', voluntario_id: 'eva', fixo: false, primeira_vez: false },
   ]
   const plano = planoDoDia(p.p_slots, noBanco)
-  assert.ok(!plano.apagar.includes('l-f1'), 'a vaga da Bia fica')
+  assert.ok(!plano.apagar.includes('l-f1') && !plano.trocar.some(x => x.id === 'l-f1'), 'a vaga da Bia fica')
   assert.ok(!plano.inserir.some(x => x.funcao_id === 'f1'), 'a Ana nao volta')
-  assert.ok(plano.apagar.includes('l-f2') && plano.inserir.some(x => x.voluntario_id === 'caio'), 'o BAIXO do lider grava')
+  /* 02/10/2026: trocar de pessoa num posto ocupado muda a propria linha
+     (lib/escala-diff.ts); era DELETE + INSERT e o INSERT estourava o unique */
+  assert.ok(plano.trocar.some(x => x.id === 'l-f2' && x.voluntario_id === 'caio'), 'o BAIXO do lider grava')
 })
 
 caso('a folha do mes: quem esta, a vaga aberta de quem nao pode, e o dia certo', () => {

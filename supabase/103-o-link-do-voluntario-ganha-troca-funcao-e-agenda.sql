@@ -44,12 +44,19 @@
      cobre sozinho), o sexo que o posto pede (48), não avisou que não pode no
      dia (`indisponibilidades`), e não está em NENHUM posto naquele dia, com
      qualquer estado. É o `ocupadoNoDia` do motor, e cobre o simultâneo da 45
-     e o "quem recusou não cobre" da 62. Vaga travada pelo líder (fixo) não
-     troca: quem travou decidiu quem fica.
+     e o "quem recusou não cobre" da 62.
+
+     VAGA FIXA TROCA, SIM (02/10/2026, antes de esta migração rodar em
+     produção). A primeira versão recusava a troca de vaga `fixo` ("quem
+     travou decidiu quem fica"). Mas `fixo` é do SORTEIO: a tela diz "o
+     sorteio não mexe", e todo posto que o líder escolhe à mão nasce fixo
+     (é o que impede "Sortear de novo" de desfazer a escolha). Recusar por
+     ele deixaria quase toda vaga que o líder mexeu sem troca pelo link: o
+     voluntário pedia e ouvia "a liderança travou essa vaga". A troca segue
+     as regras acima, quem aceita confirma, e o líder vê "trocou com".
 
    ACEITAR CONFERE TUDO DE NOVO, com a vaga travada (`for update`): ela ainda
-   é de quem pediu, o dia não passou, não foi travada e quem aceita ainda
-   pode. O conflito de posto simultâneo (45) é deferido; aqui ele confere na
+   é de quem pediu, o dia não passou e quem aceita ainda pode. O conflito de posto simultâneo (45) é deferido; aqui ele confere na
    hora, para o erro voltar como resposta e não como falha no commit. Quem
    aceita e ainda não tinha respondido o dia fica com "posso" nele.
 
@@ -205,7 +212,7 @@ grant execute on function eu_troca_candidatos(text, uuid, uuid) to anon, authent
 create or replace function eu_troca_pedir(p_token text, p_culto_id uuid, p_funcao_id uuid, p_para uuid)
 returns jsonb
 language plpgsql security definer set search_path = public as $fn$
-declare v_id uuid; v_data date; v_fixo boolean; v_status text; v_motivo text; v_n int; v_troca uuid;
+declare v_id uuid; v_data date; v_status text; v_motivo text; v_n int; v_troca uuid;
 begin
   select v.id into v_id from voluntarios v where v.token = p_token and v.ativo;
   if v_id is null then raise exception 'Link invalido'; end if;
@@ -216,13 +223,13 @@ begin
     return jsonb_build_object('ok', false, 'erro', 'JA_PASSOU');
   end if;
 
-  select e.fixo, e.status::text into v_fixo, v_status
+  select e.status::text into v_status
     from escalacoes e
    where e.culto_id = p_culto_id and e.funcao_id = p_funcao_id and e.voluntario_id = v_id;
   if not found or v_status = 'furou' then
     return jsonb_build_object('ok', false, 'erro', 'NAO_E_SUA');
   end if;
-  if v_fixo then return jsonb_build_object('ok', false, 'erro', 'TRAVADO'); end if;
+  /* vaga fixa troca (ver o topo): `fixo` é do sorteio */
 
   v_motivo := troca_impede(p_para, p_culto_id, p_funcao_id);
   if v_motivo is not null then
@@ -260,7 +267,7 @@ grant execute on function eu_troca_pedir(text, uuid, uuid, uuid) to anon, authen
 create or replace function eu_troca_responder(p_token text, p_troca uuid, p_aceita boolean)
 returns jsonb
 language plpgsql security definer set search_path = public as $fn$
-declare v_id uuid; t trocas%rowtype; v_data date; v_fixo boolean; v_dono uuid; v_motivo text; v_n int;
+declare v_id uuid; t trocas%rowtype; v_data date; v_dono uuid; v_motivo text; v_n int;
 begin
   select v.id into v_id from voluntarios v where v.token = p_token and v.ativo;
   if v_id is null then raise exception 'Link invalido'; end if;
@@ -284,7 +291,7 @@ begin
      pedido antes, se esperariam em cruz (um quer expirar o pedido do outro).
      Com a vaga primeiro, o segundo espera o primeiro terminar e encontra o
      pedido dele já vencido. */
-  select e.voluntario_id, e.fixo into v_dono, v_fixo
+  select e.voluntario_id into v_dono
     from escalacoes e
    where e.culto_id = t.culto_id and e.funcao_id = t.funcao_id
      for update;
@@ -305,7 +312,6 @@ begin
     update trocas set status = 'expirada', respondido_em = now() where id = t.id;
     return jsonb_build_object('ok', false, 'erro', 'MUDOU');
   end if;
-  if v_fixo then return jsonb_build_object('ok', false, 'erro', 'TRAVADO'); end if;
 
   v_motivo := troca_impede(v_id, t.culto_id, t.funcao_id);
   if v_motivo is not null then
@@ -585,7 +591,7 @@ declare
   v_ana uuid; v_bia uuid; v_caio uuid; v_duda uuid; v_eva uuid; v_fabi uuid; v_hugo uuid; v_ivo uuid; v_gil uuid; v_jo uuid;
   t_ana text; t_bia text; t_caio text; t_duda text; t_eva text; t_fabi text; t_hugo text; t_ivo text; t_jo text;
   v_culto uuid; v_passado uuid;
-  v_tb uuid; v_th uuid; v_ts uuid; v_t2 uuid; v_t3 uuid; v_t4 uuid; v_t5 uuid; v_t6 uuid;
+  v_tb uuid; v_th uuid; v_ts uuid; v_t2 uuid; v_t3 uuid; v_t4 uuid; v_t5 uuid; v_t6 uuid; v_tf uuid;
   v_j jsonb;
 begin
   /* 1 · estrutura: tabela fechada, funções com dono certo, porta inventariada */
@@ -722,17 +728,23 @@ begin
     /* quem não é o destinatário não responde */
     m := m || jsonb_build_object('caio_responde', eu_troca_responder(t_caio, v_tb, true) ->> 'erro');
 
-    /* vaga travada pelo líder: nem pede, nem passa */
+    /* 02/10/2026 · vaga FIXA troca (ver o topo). O pedido com a vaga fixa
+       abre (e sai em seguida, para não mexer no resto da conferência), e o
+       aceite logo abaixo acontece com a vaga fixa. */
     update escalacoes set fixo = true where culto_id = v_culto and funcao_id = v_voz;
-    m := m || jsonb_build_object('pedir_travado', eu_troca_pedir(t_ana, v_culto, v_voz, v_ivo) ->> 'erro');
-    m := m || jsonb_build_object('aceite_travado', eu_troca_responder(t_bia, v_tb, true) ->> 'erro');
-    update escalacoes set fixo = false where culto_id = v_culto and funcao_id = v_voz;
+    v_tf := (eu_troca_pedir(t_ana, v_culto, v_voz, v_ivo) ->> 'id')::uuid;
+    m := m || jsonb_build_object('pedir_fixo', v_tf is not null);
+    delete from trocas where id = v_tf;
 
-    /* a Bia aceita: a vaga é dela, confirmada, com a marca de onde veio */
+    /* a Bia aceita: a vaga é dela, confirmada, com a marca de onde veio, e
+       continua fixa (o sorteio segue sem mexer nela) */
     m := m || jsonb_build_object('aceite', eu_troca_responder(t_bia, v_tb, true) ->> 'status');
     m := m || jsonb_build_object('vaga_depois',
            (select (e.voluntario_id = v_bia) || ':' || e.status || ':' || (e.trocou_de = v_ana)
               from escalacoes e where e.culto_id = v_culto and e.funcao_id = v_voz));
+    m := m || jsonb_build_object('fixo_depois',
+           (select fixo from escalacoes where culto_id = v_culto and funcao_id = v_voz));
+    update escalacoes set fixo = false where culto_id = v_culto and funcao_id = v_voz;
     m := m || jsonb_build_object('outro_pedido_da_vaga', (select status from trocas where id = v_th));
     m := m || jsonb_build_object('pedido_mesmo_dia', (select status from trocas where id = v_ts));
     m := m || jsonb_build_object('aceite_2x', eu_troca_responder(t_bia, v_tb, true) ->> 'erro');
@@ -876,8 +888,8 @@ begin
         ('impede_ana_ve',       'INDISPONIVEL'),
         ('aceite_indisp',       'INDISPONIVEL'),
         ('caio_responde',       'NAO_E_SEU'),
-        ('pedir_travado',       'TRAVADO'),
-        ('aceite_travado',      'TRAVADO'),
+        ('pedir_fixo',          'true'),
+        ('fixo_depois',         'true'),
         ('aceite',              'aceita'),
         ('vaga_depois',         'true:confirmado:true'),
         ('outro_pedido_da_vaga','expirada'),

@@ -107,6 +107,96 @@ function montar(): HTMLDialogElement {
   return d;
 }
 
+/* =============================================================================
+   decidir() — QUANDO HÁ MAIS DE UM JEITO DE FAZER · 02/10/2026
+
+   `confirmar()` pergunta sim ou não. Mudar alguém de posto num dia montado
+   tem duas respostas boas (trocar os dois de lugar, ou passar só a pessoa) e
+   uma de desistir. Duas perguntas de sim ou não em sequência obrigariam a
+   pessoa a adivinhar o que vem na segunda; aqui as saídas aparecem juntas,
+   cada uma com o que acontece de verdade escrito embaixo.
+
+   O mesmo `<dialog>` nativo, pelos mesmos motivos (foco preso, Escape, fundo
+   inerte, camada acima de qualquer barra), mas outro elemento: o de
+   `confirmar()` fica intocado. Escape, clique fora e "Voltar" devolvem null.
+   O foco nasce no "Voltar", como lá.
+   ============================================================================= */
+export type Saida = { v: string; rot: string; sub?: string; pri?: boolean };
+export type Decisao = { titulo: string; texto?: string; saidas: Saida[] };
+
+let caixaD: HTMLDialogElement | null = null;
+let resolverD: ((v: string | null) => void) | null = null;
+
+function fecharD(v: string | null) {
+  const r = resolverD; resolverD = null;
+  document.body.style.removeProperty('overflow');
+  if (caixaD?.open) caixaD.close();
+  r?.(v);
+}
+
+function montarD(): HTMLDialogElement {
+  const d = document.createElement('dialog');
+  d.className = 'es-dialogo es-decidir';
+  d.innerHTML = `
+    <form method="dialog" class="es-dialogo-corpo">
+      <h2 class="es-dialogo-titulo"></h2>
+      <p class="es-dialogo-texto"></p>
+      <div class="es-dialogo-saidas"></div>
+      <div class="es-dialogo-btns">
+        <button type="button" class="es-btn" data-nao autofocus>Voltar</button>
+      </div>
+    </form>`;
+  d.querySelector<HTMLButtonElement>('[data-nao]')!.onclick = () => fecharD(null);
+  d.addEventListener('cancel', e => { e.preventDefault(); fecharD(null); });
+  d.addEventListener('click', e => { if (e.target === d) fecharD(null); });
+  (document.querySelector('.es') ?? document.body).appendChild(d);
+  return d;
+}
+
+export function decidir(c: Decisao): Promise<string | null> {
+  if (typeof document === 'undefined') return Promise.resolve(null);
+  if (resolverD) fecharD(null);
+  caixaD ??= montarD();
+  const d = caixaD;
+  /* reancorar a cada chamada: a casca é por página (ver `confirmar`) */
+  const pai = document.querySelector('.es') ?? document.body;
+  if (d.parentNode !== pai) pai.appendChild(d);
+
+  d.querySelector('.es-dialogo-titulo')!.textContent = c.titulo;
+  const txt = d.querySelector<HTMLParagraphElement>('.es-dialogo-texto')!;
+  txt.textContent = c.texto || '';
+  txt.hidden = !c.texto;
+
+  /* as saídas: um botão por jeito de fazer, com o efeito por extenso. Texto
+     entra por textContent, nunca por innerHTML: nome de pessoa é dado. */
+  const lista = d.querySelector<HTMLDivElement>('.es-dialogo-saidas')!;
+  lista.replaceChildren(...c.saidas.map(s => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = `es-btn es-saida${s.pri ? ' es-pri' : ''}`;
+    b.dataset.saida = s.v;
+    const rot = document.createElement('span');
+    rot.className = 'es-saida-rot';
+    rot.textContent = s.rot;
+    b.appendChild(rot);
+    if (s.sub) {
+      const sub = document.createElement('span');
+      sub.className = 'es-saida-sub';
+      sub.textContent = s.sub;
+      b.appendChild(sub);
+    }
+    b.onclick = () => fecharD(s.v);
+    return b;
+  }));
+
+  return new Promise<string | null>(res => {
+    resolverD = res;
+    document.body.style.overflow = 'hidden';
+    d.showModal();
+    d.querySelector<HTMLButtonElement>('[data-nao]')!.focus();
+  });
+}
+
 export function confirmar(c: Confirmacao): Promise<boolean> {
   if (typeof document === 'undefined') return Promise.resolve(false);
 

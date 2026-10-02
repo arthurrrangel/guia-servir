@@ -25,6 +25,33 @@
 
    Esta função é pura: recebe o desejado e o que está no banco, devolve o
    plano. Quem fala com o banco é `salvarDia` em lib/db.ts.
+
+   02/10/2026 · TROCAR A PESSOA DE UM POSTO OCUPADO NÃO GRAVAVA DESDE 19/09.
+
+   Pedido do Arthur: "tava tendo bloqueio e não tava conseguindo mudar
+   pessoas". A causa, provada com este código contra o banco local na 102
+   pelo PostgREST: em 19/09 a ordem passou a ser INSERIR PRIMEIRO na troca
+   simples (sai uma pessoa, entra outra), para nada se perder se um
+   gatilho recusasse. Mas `escalacoes` tem `unique (culto_id, funcao_id)`
+   (um posto, uma linha; é nele que a RPC `salvar_dia` faz o `on conflict`):
+   o INSERT de quem entra com a linha de quem sai ainda lá estourava o unique, a
+   requisição inteira caía e a tela dizia "Isso já está cadastrado". Valia
+   para TODA troca de pessoa em posto ocupado, para o "Sortear de novo" e
+   para o "Remontar" de dias com gente. Só esvaziar o posto e escolher de
+   novo funcionava. O teste deste plano conferia a ordem, não o banco.
+
+   Agora a vaga que continua existindo e muda de PESSOA vai em `trocar`: a
+   linha dela é regravada por id, todas numa instrução só (`upsert`). Sem
+   DELETE, a vaga nunca fica vazia por causa de uma recusa; sem INSERT, o
+   unique não tem o que acusar; e numa instrução só, duas pessoas trocando
+   de lugar não tropeçam na regra de função simultânea (o gatilho dela é
+   adiado para o fim da transação, e aí as duas já trocaram). O efeito é o
+   da RPC: situação volta a "falta confirmar", `respondido_em` limpa,
+   `escalado_em` marca a entrada (gatilho da 38).
+
+   DELETE e INSERT ficam para o que eles são: posto que sumiu do dia, posto
+   que ainda não tinha linha. A ordem entre eles e o `trocar` está em
+   `apagarPrimeiro`.
    ============================================================================= */
 
 export type SlotDesejado = {
@@ -37,8 +64,14 @@ export type SlotDesejado = {
 export type LinhaAtual = {
   id: string; funcao_id: string; voluntario_id: string | null; fixo: boolean; primeira_vez: boolean;
 };
+/** vaga que continua existindo e muda de pessoa: a linha é regravada por id */
+export type VagaTrocada = {
+  id: string; funcao_id: string; voluntario_id: string; status: string; fixo: boolean; primeira_vez: boolean;
+};
 export type PlanoDoDia = {
   apagar: string[];                                        // ids de escalacoes
+  /* 02/10/2026: troca de pessoa em vaga que já tem linha (ver o topo) */
+  trocar: VagaTrocada[];
   atualizar: { id: string; fixo?: boolean; primeira_vez?: boolean }[];
   inserir: SlotDesejado[];
   /* A ORDEM ENTRE APAGAR E INSERIR NÃO É SEMPRE A MESMA — 19/09/2026.
@@ -57,12 +90,20 @@ export type PlanoDoDia = {
      a segunda antes de a primeira ter saído. Esse é o caso que o
      `escala-diff.test.mjs` já cobre e que não pode afrouxar.
 
-     `apagarPrimeiro` diz qual dos dois mundos é este. Quem grava obedece. */
+     `apagarPrimeiro` diz qual dos dois mundos é este. Quem grava obedece.
+
+     02/10/2026: a "troca simples" do parágrafo acima nunca chegou a gravar
+     inserindo primeiro: o INSERT no posto que ainda tinha linha estourava o
+     unique (culto, função). Ela e a permuta saíram daqui e foram para
+     `trocar` (uma instrução, sem DELETE nem INSERT). O que sobra para esta
+     ordem é o posto que sumiu do dia com a pessoa dele entrando em outro
+     posto (pela inserção ou pela troca): aí apagar vem antes. Quem grava faz
+     [apagar, se primeiro] → trocar → atualizar → inserir → [apagar]. */
   apagarPrimeiro: boolean;
 };
 
 export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): PlanoDoDia {
-  const plano: PlanoDoDia = { apagar: [], atualizar: [], inserir: [], apagarPrimeiro: false };
+  const plano: PlanoDoDia = { apagar: [], trocar: [], atualizar: [], inserir: [], apagarPrimeiro: false };
   const porFuncao = new Map(desejados.map(d => [d.funcao_id, d]));
   const vistas = new Set<string>();
 
@@ -91,8 +132,13 @@ export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): Pla
          propósito nasce sem `carregado` e segue a regra de sempre. */
       if (quer.carregado !== undefined && quer.voluntario_id === quer.carregado
           && linha.voluntario_id !== quer.carregado) continue;
-      plano.apagar.push(linha.id);
-      plano.inserir.push(quer);
+      /* 02/10/2026: era `apagar` + `inserir`, e o INSERT vinha antes e
+         estourava o unique (culto, função). Agora a própria linha muda de
+         pessoa (ver o topo do arquivo). */
+      plano.trocar.push({
+        id: linha.id, funcao_id: quer.funcao_id, voluntario_id: quer.voluntario_id,
+        status: quer.status, fixo: !!quer.fixo, primeira_vez: !!quer.primeira_vez,
+      });
       continue;
     }
     const patch: { id: string; fixo?: boolean; primeira_vez?: boolean } = { id: linha.id };
@@ -102,13 +148,16 @@ export function planoDoDia(desejados: SlotDesejado[], atuais: LinhaAtual[]): Pla
   }
   for (const d of desejados) if (!vistas.has(d.funcao_id)) plano.inserir.push(d);
 
-  /* permuta = alguém que SAI de um posto também ENTRA em outro no mesmo dia.
-     Só nesse caso o DELETE precisa vir antes. */
+  /* quem SAI por um DELETE (posto que sumiu do dia) e ENTRA em outro posto
+     do mesmo dia: só aí o DELETE precisa vir antes, senão a regra de função
+     simultânea recusa a entrada com a pessoa ainda no posto antigo. A troca
+     cruzada entre duas vagas que continuam existindo não passa mais por
+     aqui: as duas vão no mesmo `trocar`, numa instrução só. */
   const idParaLinha = new Map(atuais.map(l => [l.id, l]));
   const saindo = new Set(
     plano.apagar.map(id => idParaLinha.get(id)?.voluntario_id).filter(Boolean) as string[],
   );
-  plano.apagarPrimeiro = plano.inserir.some(d => saindo.has(d.voluntario_id));
+  plano.apagarPrimeiro = [...plano.inserir, ...plano.trocar].some(d => saindo.has(d.voluntario_id));
   return plano;
 }
 

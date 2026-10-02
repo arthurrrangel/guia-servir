@@ -2,9 +2,16 @@
 
    17/09/2026. A regra que este arquivo protege: uma vaga que continua com a
    mesma pessoa NUNCA vira DELETE+INSERT (é isso que fazia o gatilho recusar
-   quem avisou "não posso" depois de escalado); e trocar de pessoa é sempre
-   DELETE e depois INSERT, nunca UPDATE de voluntario_id, para que dois nomes
-   trocando de lugar não tropecem na regra de função simultânea. */
+   quem avisou "não posso" depois de escalado).
+
+   02/10/2026. A segunda regra deste cabeçalho era "trocar de pessoa é sempre
+   DELETE e depois INSERT". Em 19/09 a ordem virou INSERT primeiro, e o INSERT
+   no posto que ainda tinha linha estourava `unique (culto_id, funcao_id)`:
+   nenhuma troca de pessoa em posto ocupado gravava. Este arquivo conferia a
+   ORDEM e nunca o banco, por isso ficou verde. Agora trocar de pessoa numa
+   vaga que já tem linha vai em `trocar` (a linha muda por id, todas numa
+   instrução só), e a prova contra o banco mora fora daqui (PostgREST + RLS,
+   registrada no Project). Aqui ficam as formas do plano. */
 import { planoDoDia, planoDoPlantao } from '../lib/escala-diff.ts';
 
 let falhas = 0;
@@ -40,8 +47,10 @@ const igual = (a, b) => {
   if (Array.isArray(a) || Array.isArray(b)) {
     throw new Error('igual() compara PLANOS, não arrays — use mesmo() para array');
   }
-  return JSON.stringify({ apagar: a.apagar, atualizar: a.atualizar, inserir: a.inserir })
-    === JSON.stringify({ apagar: b.apagar, atualizar: b.atualizar, inserir: b.inserir });
+  /* 02/10/2026: `trocar` entra na comparação. Sem ele, um plano que
+     esquecesse a troca de pessoa passaria por igual a um plano vazio. */
+  return JSON.stringify({ apagar: a.apagar, trocar: a.trocar || [], atualizar: a.atualizar, inserir: a.inserir })
+    === JSON.stringify({ apagar: b.apagar, trocar: b.trocar || [], atualizar: b.atualizar, inserir: b.inserir });
 };
 const mesmo = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -72,12 +81,14 @@ const quer = (sobrescreve = {}) => [
   ok(igual(p, { apagar: [], atualizar: [{ id: 'e1', fixo: false }], inserir: [] }), 'destravar → um update', JSON.stringify(p));
 }
 
-/* 3. trocar o Thiago pelo João: DELETE do Thiago + INSERT do João, o resto quieto */
+/* 3. trocar uma pessoa por outra: a LINHA de quem sai passa a ser de quem
+   entra, o resto quieto. Sem DELETE (a vaga nunca fica vazia por causa de uma
+   recusa) e sem INSERT (era ele que estourava o unique, 02/10/2026). */
 {
   const p = planoDoDia(quer({ [F.ilum]: { voluntario_id: V.joao } }), atual);
-  ok(mesmo(p.apagar, ['e2']), 'trocar → apaga a linha antiga', JSON.stringify(p));
-  ok(p.atualizar.length === 0, 'trocar → nenhum update');
-  ok(p.inserir.length === 1 && p.inserir[0].voluntario_id === V.joao && p.inserir[0].funcao_id === F.ilum, 'trocar → insere o novo', JSON.stringify(p.inserir));
+  ok(igual(p, { apagar: [], trocar: [{ id: 'e2', funcao_id: F.ilum, voluntario_id: V.joao, status: 'pendente', fixo: true, primeira_vez: false }], atualizar: [], inserir: [] }),
+    'trocar → a mesma linha muda de pessoa, nada apagado nem inserido', JSON.stringify(p));
+  ok(p.apagarPrimeiro === false, 'trocar → nada a apagar antes');
 }
 
 /* 4. tirar o Thiago (vaga fica vazia): só DELETE */
@@ -92,12 +103,13 @@ const quer = (sobrescreve = {}) => [
   ok(p.apagar.length === 0 && p.atualizar.length === 0 && p.inserir.length === 1 && p.inserir[0].funcao_id === F.foto, 'vaga nova → só insert', JSON.stringify(p));
 }
 
-/* 6. duas pessoas trocam de lugar: os dois DELETEs vêm no plano antes dos
-   dois INSERTs (quem grava faz apagar → atualizar → inserir) */
+/* 6. duas pessoas trocam de lugar: as duas linhas mudam de pessoa no mesmo
+   `trocar` (uma instrução só: a regra de função simultânea é conferida no
+   fim, com as duas já trocadas) */
 {
   const p = planoDoDia(quer({ [F.proj]: { voluntario_id: V.thiago }, [F.ilum]: { voluntario_id: V.leticia } }), atual);
-  ok(mesmo([...p.apagar].sort(), ['e1', 'e2']), 'troca cruzada → apaga as duas', JSON.stringify(p.apagar));
-  ok(p.inserir.length === 2, 'troca cruzada → insere as duas');
+  ok(mesmo(p.trocar.map(t => [t.id, t.voluntario_id]), [['e1', V.thiago], ['e2', V.leticia]]), 'troca cruzada → as duas no trocar', JSON.stringify(p.trocar));
+  ok(p.apagar.length === 0 && p.inserir.length === 0, 'troca cruzada → nada apagado nem inserido', JSON.stringify(p));
 }
 
 /* 7. dia sem nada no banco: tudo INSERT */
@@ -146,9 +158,9 @@ const quer = (sobrescreve = {}) => [
       { id: 'l2', funcao_id: 'baixo', voluntario_id: 'eva', fixo: false, primeira_vez: false },
     ],
   );
-  ok(!p.apagar.includes('l1'), 'troca aceita depois da carga: a vaga da Bia não é apagada', JSON.stringify(p));
+  ok(!p.apagar.includes('l1') && !p.trocar.some(x => x.id === 'l1'), 'troca aceita depois da carga: a vaga da Bia não é mexida', JSON.stringify(p));
   ok(!p.inserir.some(x => x.funcao_id === 'voz'), 'e a Ana não volta para a VOZ', JSON.stringify(p));
-  ok(p.apagar.includes('l2') && p.inserir.some(x => x.funcao_id === 'baixo' && x.voluntario_id === 'caio'),
+  ok(p.trocar.some(x => x.id === 'l2' && x.voluntario_id === 'caio') && !p.apagar.includes('l2'),
     'a vaga que o líder trocou de propósito segue a regra de sempre', JSON.stringify(p));
 }
 {
@@ -157,7 +169,7 @@ const quer = (sobrescreve = {}) => [
     [{ funcao_id: 'voz', voluntario_id: 'ana', status: 'pendente', fixo: true, primeira_vez: false }],
     [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'bia', fixo: false, primeira_vez: false }],
   );
-  ok(igual(p, { apagar: ['l1'], atualizar: [], inserir: [{ funcao_id: 'voz', voluntario_id: 'ana', status: 'pendente', fixo: true, primeira_vez: false }] }),
+  ok(igual(p, { apagar: [], trocar: [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'ana', status: 'pendente', fixo: true, primeira_vez: false }], atualizar: [], inserir: [] }),
     'escolha nova do líder vence a troca (decisão de quem lidera)', JSON.stringify(p));
 }
 {
@@ -167,7 +179,7 @@ const quer = (sobrescreve = {}) => [
     [{ funcao_id: 'voz', voluntario_id: 'bia', carregado: 'ana', status: 'pendente', fixo: false, primeira_vez: false }],
     [{ id: 'l1', funcao_id: 'voz', voluntario_id: 'ana', fixo: false, primeira_vez: false }],
   );
-  ok(p.apagar.includes('l1') && p.inserir.some(x => x.voluntario_id === 'bia'),
+  ok(p.trocar.some(x => x.id === 'l1' && x.voluntario_id === 'bia'),
     'com carregado diferente do desejado, a troca do líder grava', JSON.stringify(p));
 }
 {
@@ -182,7 +194,6 @@ const quer = (sobrescreve = {}) => [
 /* O PLACAR ERA UMA CONSTANTE, E ELA NÃO SABIA QUANTAS ASSERÇÕES EXISTEM.
    17 escrito à mão, com 4 das 17 mortas: o "17/17" cobria 13 de verdade.
    Agora `ok` conta, como no resto da suíte. */
-const total = feitas;
 /* ---- 19/09/2026: a ordem entre apagar e inserir ----
 
    Três requisições, três transações. Se o DELETE passa e o INSERT é recusado
@@ -191,27 +202,54 @@ const total = feitas;
    gatilho de função simultânea recusa a entrada antes de a saída acontecer.
    Este é o caso que não pode afrouxar. */
 {
-  /* troca simples: sai a Fernanda, entra o Thiago. Ninguém aparece dos dois
-     lados, então dá para inserir primeiro. */
+  /* troca simples: sai uma pessoa, entra outra. 02/10/2026: a própria
+     linha muda de pessoa. Nada é inserido no posto que ainda tem linha (era
+     o INSERT que estourava o unique) e nada é apagado antes. */
   const p = planoDoDia(
-    [{ funcao_id: 'f1', voluntario_id: 'thiago', status: 'pendente', fixo: false, primeira_vez: false }],
-    [{ id: 'l1', funcao_id: 'f1', voluntario_id: 'fernanda', fixo: false, primeira_vez: false }],
+    [{ funcao_id: 'f1', voluntario_id: 'pb', status: 'pendente', fixo: false, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'f1', voluntario_id: 'pa', fixo: false, primeira_vez: false }],
   );
-  ok(p.apagarPrimeiro === false, 'troca simples insere primeiro (nada se perde se o gatilho recusar)');
+  ok(p.inserir.length === 0 && p.apagar.length === 0 && p.trocar.length === 1 && p.trocar[0].id === 'l1',
+    'troca simples: a linha de quem sai vira de quem entra, sem INSERT no posto ocupado', JSON.stringify(p));
+  ok(p.apagarPrimeiro === false, 'troca simples: nada a apagar antes');
 }
 {
-  /* permuta: Letícia e Thiago trocam de posto. Os dois saem E entram. */
+  /* permuta: duas pessoas trocam de posto. 02/10/2026: as duas linhas no
+     mesmo `trocar`, numa instrução só; não há DELETE para vir antes. */
   const p = planoDoDia(
     [
-      { funcao_id: 'f1', voluntario_id: 'thiago', status: 'pendente', fixo: false, primeira_vez: false },
-      { funcao_id: 'f2', voluntario_id: 'leticia', status: 'pendente', fixo: false, primeira_vez: false },
+      { funcao_id: 'f1', voluntario_id: 'pb', status: 'pendente', fixo: false, primeira_vez: false },
+      { funcao_id: 'f2', voluntario_id: 'pa', status: 'pendente', fixo: false, primeira_vez: false },
     ],
     [
-      { id: 'l1', funcao_id: 'f1', voluntario_id: 'leticia', fixo: false, primeira_vez: false },
-      { id: 'l2', funcao_id: 'f2', voluntario_id: 'thiago', fixo: false, primeira_vez: false },
+      { id: 'l1', funcao_id: 'f1', voluntario_id: 'pa', fixo: false, primeira_vez: false },
+      { id: 'l2', funcao_id: 'f2', voluntario_id: 'pb', fixo: false, primeira_vez: false },
     ],
   );
-  ok(p.apagarPrimeiro === true, 'permuta apaga primeiro (senão o gatilho de simultânea recusa)');
+  ok(p.trocar.length === 2 && p.apagar.length === 0 && p.inserir.length === 0, 'permuta: as duas no trocar', JSON.stringify(p));
+}
+{
+  /* o posto de uma pessoa sai do dia e ela entra no posto de outra (que
+     sai): o DELETE tem de vir antes da troca, senão a regra de simultânea
+     recusa a pessoa ainda no posto antigo */
+  const p = planoDoDia(
+    [{ funcao_id: 'f2', voluntario_id: 'pa', status: 'pendente', fixo: false, primeira_vez: false }],
+    [
+      { id: 'l1', funcao_id: 'f1', voluntario_id: 'pa', fixo: false, primeira_vez: false },
+      { id: 'l2', funcao_id: 'f2', voluntario_id: 'pb', fixo: false, primeira_vez: false },
+    ],
+  );
+  ok(mesmo(p.apagar, ['l1']) && p.trocar.length === 1 && p.trocar[0].voluntario_id === 'pa', 'sai de um posto e entra no de outra pessoa', JSON.stringify(p));
+  ok(p.apagarPrimeiro === true, 'e apaga primeiro');
+}
+{
+  /* o posto de uma pessoa sai do dia e ela entra num posto que ainda não
+     tinha linha: apagar antes do INSERT, pelo mesmo motivo */
+  const p = planoDoDia(
+    [{ funcao_id: 'f2', voluntario_id: 'pa', status: 'pendente', fixo: false, primeira_vez: false }],
+    [{ id: 'l1', funcao_id: 'f1', voluntario_id: 'pa', fixo: false, primeira_vez: false }],
+  );
+  ok(mesmo(p.apagar, ['l1']) && p.inserir.length === 1 && p.apagarPrimeiro === true, 'sai de um posto e entra em posto novo: apaga primeiro', JSON.stringify(p));
 }
 {
   /* vaga nova, sem ninguém saindo */
@@ -222,5 +260,8 @@ const total = feitas;
   ok(p.apagarPrimeiro === false, 'vaga nova insere primeiro');
 }
 
+/* 02/10/2026: o placar era tirado ANTES do bloco de 19/09, e as asserções
+   dele não entravam na conta (falhar ainda falhava; só o número mentia). */
+const total = feitas;
 if (falhas) { console.log(`escala-diff: ${falhas} falha(s) em ${total}`); process.exit(1); }
 console.log(`escala-diff: ${total}/${total} ok`);

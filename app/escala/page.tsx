@@ -1,16 +1,17 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useRef, useState } from 'react';
-import { apagarEvento, criarEvento, mudarStatus, salvarDia, salvarDias } from '@/lib/db';
+import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarDia, salvarDias, tirarNaoPosso } from '@/lib/db';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
 import { rolarAte } from '@/components/escalas/ancora';
 import { IcCopiar, IcDado, IcEnviar, IcSeta, IcSino } from '@/components/Icones';
 import { aviseHumano } from '@/lib/erros';
-import { confirmar } from '@/lib/confirmar';
+import { confirmar, decidir } from '@/lib/confirmar';
+import { comoMover, perguntaDeMover, type ComoMover } from '@/lib/mover';
 import {
   candidatos, cargaDoMes, diaLongo, diasDoMes, esqueceOsDias, fmtDia, fmtLongo, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
-  hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
+  hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, postoSimultaneoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
   gruposValidos, linkDoVoluntario, addDias,
 } from '@/lib/engine';
@@ -315,23 +316,39 @@ function Escala() {
        ver o time inteiro): a pessoa em duas funções simultâneas no mesmo
        culto, e a pessoa que avisou que não pode no dia. A recusa vinha como
        "Não consegui salvar", sem motivo; foi assim que o João Victor a viu
-       na Mídia. Agora a tela diz o motivo antes de tentar, com as mesmas
-       regras do banco (fn_conflito_simultaneo e fn_indisponivel). */
+       na Mídia. A tela passou a dizer o motivo antes de tentar.
+
+       02/10/2026: dizer o motivo ainda era um bloqueio. "Já está em X. Tire
+       de lá antes" deixava o líder sem conseguir mudar ninguém de posto num
+       dia montado (pedido do Arthur: "tava tendo bloqueio e não tava
+       conseguindo mudar pessoas"). Agora as duas recusas viram caminho:
+         · já está em outro posto ao mesmo tempo → mudar de posto (trocar os
+           dois de lugar, ou passar só a pessoa), numa gravação só
+           (lib/mover.ts);
+         · avisou que não pode → a lista mostra no fim, marcado, e o líder que
+           falou com a pessoa escala mesmo assim (o "não posso" daquele dia
+           sai, e ela confirma pelo link).
+       A regra do prédio (sexo do posto) continua sem atalho: o banco também
+       não tem. */
+    let tirarMarca = false;
     if (vid && vid !== atual?.vid) {
       const vol = S.voluntarios.find(v => v.id === vid);
-      if (vol && respostaDe(vol, d) === 'nao') {
-        aviso(`${nomeDe(S, vid)} avisou que não pode nesse dia. Escolha outra pessoa.`); return;
-      }
-      const outra = ocupadoNoDia(S, d, vid, funcao);
-      if (outra && metaFuncao(S, funcao).simultanea && metaFuncao(S, outra).simultanea) {
-        aviso(`${nomeDe(S, vid)} já está em ${outra} nesse mesmo culto. Tire de lá antes, ou escolha outra pessoa.`); return;
-      }
       /* 18/09/2026: a regra do prédio (fn_sexo_do_posto). A lista nem oferece
          quem não pode, então isto só pega o caminho de fora da lista; mas a
          regra que o banco aplica tem que ter voz na tela, senão vira "não
          consegui salvar" de novo. */
       const porque = vol ? porqueNaoPode(S, vol, funcao) : '';
       if (porque) { aviso(porque); return; }
+      if (vol && respostaDe(vol, d) === 'nao') {
+        if (!await confirmar({
+          titulo: `${nomeDe(S, vid)} avisou que não pode em ${fmtDia(d)}.`,
+          texto: 'Se a pessoa falou com você e agora pode, o "não posso" desse dia sai e ela confirma pelo link.',
+          acao: 'Escalar mesmo assim',
+        })) return;
+        tirarMarca = true;
+      }
+      const m = comoMover(S, d, funcao, vid);
+      if (m) { await mudarDePosto(d, funcao, vid, m, tirarMarca); return; }
     }
     /* trocar ou limpar alguém que JÁ respondeu apaga essa resposta: avisar antes */
     if (atual?.vid && atual.status && atual.status !== 'pendente' && atual.vid !== vid) {
@@ -348,12 +365,60 @@ function Escala() {
     }
     setOcupado(true);
     const snap = retrato([d]);
+    let tirou = 0;
     try {
+      if (tirarMarca) tirou = await tirarNaoPosso(vid, d);
       const dia = garantirDia(S, d);
       if (!vid) delete dia.slots[funcao];
       else dia.slots[funcao] = { vid, status: 'pendente', fixo: true };
       pinta(); await salvarDia(S, d, equipe!.id); await recarregar();
-    } catch (e: any) { await falhou(e, snap); }
+    } catch (e: any) {
+      /* a escalação não entrou: o "não posso" volta, senão a pessoa ficaria
+         sem a marca e sem a escala */
+      if (tirou) await devolverNaoPosso(vid, d);
+      await falhou(e, snap);
+    }
+    setOcupado(false);
+  }
+
+  /* MUDAR DE POSTO NO DIA MONTADO — 02/10/2026 (lib/mover.ts).
+     Uma pergunta, uma gravação: o banco aceita as duas vagas ou nenhuma. */
+  async function mudarDePosto(d: string, para: string, quem: string, m: ComoMover, tirarMarca: boolean) {
+    const q = perguntaDeMover(S, d, para, quem, m);
+    const modo = await decidir({ titulo: q.titulo, texto: q.texto, saidas: q.opcoes });
+    if (modo !== 'trocar' && modo !== 'passar') return;
+    const dia = S.escalas[d];
+    const fDe = S.funcoes.find(f => f.nome === m.de)?.id;
+    const fPara = S.funcoes.find(f => f.nome === para)?.id;
+    const nomeP = nomeDe(S, quem), nomeQ = m.ocupante ? nomeDe(S, m.ocupante) : '';
+    setOcupado(true);
+    const snap = retrato([d]);
+    let tirou = 0;
+    try {
+      if (tirarMarca) tirou = await tirarNaoPosso(quem, d);
+      if (dia?.cultoId && fDe && fPara) {
+        await moverNoDia({ culto: dia.cultoId, de: fDe, para: fPara, quem, ocupante: m.ocupante, modo });
+      } else {
+        /* dia que o banco ainda não tem (com gente nele, não deveria
+           existir): o caminho de sempre, que já sabe gravar a permuta */
+        const dd = garantirDia(S, d);
+        const daPessoa = dd.slots[m.de], doOcupante = m.ocupante ? dd.slots[para] : undefined;
+        if (modo === 'trocar' && doOcupante) dd.slots[m.de] = { ...doOcupante, fixo: true, vidNoBanco: undefined };
+        else delete dd.slots[m.de];
+        dd.slots[para] = { ...daPessoa!, status: daPessoa?.status === 'recusado' ? 'pendente' : daPessoa!.status, fixo: true, vidNoBanco: undefined };
+        pinta(); await salvarDia(S, d, equipe!.id);
+      }
+      await recarregar();
+      aviso(modo === 'trocar' && nomeQ
+        ? `Trocados: ${nomeP} em ${para}, ${nomeQ} em ${m.de}`
+        : `${nomeP} passou para ${para}`);
+    } catch (e: any) {
+      if (tirou) await devolverNaoPosso(quem, d);
+      if (e?.message === 'ESCALA_MUDOU_AO_MOVER') {
+        await recarregar();
+        aviso('A escala desse dia mudou enquanto você mexia. Recarreguei: confira como ficou e escolha de novo.');
+      } else await falhou(e, snap);
+    }
     setOcupado(false);
   }
 
@@ -1181,12 +1246,33 @@ const slugFn = (s: string) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira }: PropsPosto) {
   const slot = dia?.slots?.[f.nome];
   const st: Status = (slot?.status || 'pendente') as Status;
-  const lista = candidatos(S, f.nome, d, { excluirOcupados: false, ignorarLimite: true, incluirTreino: true });
-  /* se o ocupante atual deixou de ser candidato (pausado, marcou indisponível,
-     perdeu a habilidade), ele sumiria do select e a linha pareceria vazia. */
+  /* 02/10/2026: quem avisou que não pode no dia ENTRA na lista, no fim e
+     separado ("Avisaram que não podem nesse dia"): sumir dela era o líder
+     não conseguir escalar quem falou com ele e agora pode. Escolher alguém
+     dali pergunta antes (ver `trocar`). */
+  const lista = candidatos(S, f.nome, d, { excluirOcupados: false, ignorarLimite: true, incluirTreino: true, incluirQuemNaoPode: true });
+  const naoPode = (id: string) => {
+    const v = S.voluntarios.find((x: any) => x.id === id);
+    return !!v && respostaDe(v, d) === 'nao';
+  };
+  const podem = lista.filter((c: any) => !naoPode(c.id));
+  const naoPodem = lista.filter((c: any) => naoPode(c.id));
+  /* se o ocupante atual deixou de ser candidato (pausado, perdeu a
+     habilidade), ele sumiria do select e a linha pareceria vazia. */
   const opcoes = slot?.vid && !lista.some((c: any) => c.id === slot.vid)
-    ? [{ id: slot.vid, nome: nomeDe(S, slot.vid), nivel: '', carga: 0, forcado: true } as any, ...lista]
-    : lista;
+    ? [{ id: slot.vid, nome: nomeDe(S, slot.vid), nivel: '', carga: 0, forcado: true } as any, ...podem]
+    : podem;
+  const linhaDe = (c: any, noGrupoNaoPode = false) => {
+    if (c.forcado) return `${c.nome} (não está mais disponível)`;
+    /* quem já disse que pode neste dia vem marcado: é a informação que
+       decide a escolha. Quem já está em outro posto ao mesmo tempo também:
+       escolher essa pessoa é MUDAR ela de posto (02/10/2026). */
+    const vol = S.voluntarios.find((v: any) => v.id === c.id);
+    const resp = vol ? respostaDe(vol, d) : 'mudo';
+    const em = c.id !== slot?.vid ? postoSimultaneoNoDia(S, d, c.id, f.nome) : null;
+    const marca = (em ? `em ${em} · ` : '') + (resp === 'posso' ? 'pode · ' : resp === 'nao' && !noGrupoNaoPode ? 'avisou que não · ' : '');
+    return `${marca}${c.nome} · ${c.nivel} · ${c.carga} escala${c.carga === 1 ? '' : 's'}/${S.config.janelaCarga}d`;
+  };
 
   /* A COR MORA NA SITUAÇÃO, NÃO NA LINHA (30/09/2026). O fio colorido à
      esquerda de cada posto saiu: a pílula da situação já diz confirmou /
@@ -1206,19 +1292,12 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
           mostra={slot?.vid ? nomeDe(S, slot.vid) : 'precisa de alguém'}
           aoMudar={v => trocar(d, f.nome, v)}>
           <option value="">precisa de alguém</option>
-          {opcoes.map((c: any) => {
-            /* quem já disse que pode neste dia vem marcado: é a informação
-               que decide a escolha */
-            const vol = S.voluntarios.find((v: any) => v.id === c.id);
-            const resp = vol ? respostaDe(vol, d) : 'mudo';
-            const marca = resp === 'posso' ? 'pode · ' : resp === 'nao' ? 'avisou que não · ' : '';
-            return (
-              <option key={c.id} value={c.id}>
-                {c.forcado ? `${c.nome} (não está mais disponível)`
-                  : `${marca}${c.nome} · ${c.nivel} · ${c.carga} escala${c.carga === 1 ? '' : 's'}/${S.config.janelaCarga}d`}
-              </option>
-            );
-          })}
+          {opcoes.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c)}</option>)}
+          {naoPodem.length > 0 && (
+            <optgroup label="Avisaram que não podem nesse dia">
+              {naoPodem.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c, true)}</option>)}
+            </optgroup>
+          )}
         </Escolha>
       </span>
 

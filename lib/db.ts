@@ -1,10 +1,15 @@
 'use client';
 import { sb } from './supabase';
-import { addDias, Estado, hojeISO, Nivel, Repertorio, Status } from './engine';
+/* `type` nos que são só tipo (02/10/2026): o Node que roda os testes tira os
+   tipos mas mantém importação de valor, e `Estado` como valor não existe.
+   Era o que impedia uma prova de ponta a ponta de importar este arquivo (o
+   mesmo caso de lib/supabase.ts, 20/09/2026). */
+import { addDias, hojeISO, type Estado, type Nivel, type Repertorio, type Status } from './engine';
 import { ordemDoBanco, type ItemOrdem } from './engine';
 import type { MusicaDoBanco } from './ordem-do-culto';
 import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
 import type { ComoFoiDaEquipe, PresencaDoLider } from './chegada';
+import { planoDeMover, type LinhaDaVaga, type PedidoDeMover } from './mover';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
@@ -135,19 +140,34 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
       if (e) throw e;
     };
 
-    /* INSERIR PRIMEIRO QUANDO DÁ.
+    /* 02/10/2026 · A PESSOA DE UM POSTO OCUPADO MUDA NA PRÓPRIA LINHA.
+       Todas as vagas que mudam de pessoa vão numa instrução só (`upsert` por
+       id): o banco aceita todas ou nenhuma, a vaga nunca fica vazia por causa
+       de uma recusa, e duas pessoas trocando de lugar não tropeçam na regra
+       de função simultânea (ela é conferida no fim da transação). Era DELETE
+       + INSERT, com o INSERT primeiro desde 19/09, e esse INSERT estourava o
+       unique (culto, função): toda troca de pessoa em posto ocupado caía com
+       "Isso já está cadastrado". Ver lib/escala-diff.ts.
 
-       São três requisições, logo três transações: o que o DELETE apagou fica
-       apagado mesmo se o INSERT seguinte for recusado por um gatilho, e a
-       vaga esvazia por causa da tentativa. Inserindo primeiro, uma recusa
-       acontece ANTES de qualquer perda — o estado anterior fica de pé.
+       `escalado_em` vai junto só para todas as linhas terem as mesmas chaves
+       (o PostgREST monta a instrução com a união delas); o gatilho da 38
+       regrava esse campo com o relógio do banco. */
+    const trocar = async () => {
+      if (!plano.trocar.length) return;
+      const agora = new Date().toISOString();
+      const { error: e } = await s.from('escalacoes').upsert(plano.trocar.map(x => ({
+        id: x.id, culto_id: cultoId, funcao_id: x.funcao_id, voluntario_id: x.voluntario_id,
+        status: x.status, respondido_em: null, fixo: x.fixo, primeira_vez: x.primeira_vez, escalado_em: agora,
+      })), { onConflict: 'id' });
+      if (e) throw e;
+    };
 
-       A exceção é a permuta (as mesmas pessoas saindo e entrando no mesmo
-       dia): ali o gatilho de função simultânea recusa a entrada antes de a
-       saída acontecer, e é preciso liberar antes. `planoDoDia` sabe dizer
-       qual dos dois casos é este. */
-    if (plano.apagarPrimeiro) { await apagar(); }
-    else { await inserir(); }
+    /* A ORDEM. DELETE e INSERT sobraram para posto que sumiu do dia e posto
+       que ainda não tinha linha. Apagar vem primeiro só quando a pessoa do
+       posto que sumiu entra em outro posto do dia (`apagarPrimeiro`); fora
+       isso, apagar é o último passo, e uma recusa antes dele não esvazia nada. */
+    if (plano.apagarPrimeiro) await apagar();
+    await trocar();
 
     /* em paralelo: são updates por `id`, sem ordem entre si. Em série, um dia
        remontado com 9 postos custava 9 viagens de rede encadeadas — cerca de
@@ -159,8 +179,8 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
     }))).filter(Boolean);
     if (erros.length) throw erros[0];
 
-    if (plano.apagarPrimeiro) { await inserir(); }
-    else { await apagar(); }
+    await inserir();
+    if (!plano.apagarPrimeiro) await apagar();
   }
 
   /* 4. o plantão */
@@ -182,6 +202,44 @@ export async function salvarDia(S: Estado, data: string, equipeId: string) {
   }
 
   S.escalas[data].cultoId = cultoId;
+}
+
+/* MUDAR PESSOAS DE POSTO NO DIA MONTADO — 02/10/2026. O porquê e o plano
+   moram em lib/mover.ts. Aqui: ler as duas vagas como o banco tem AGORA,
+   conferir que é o que a tela mostrou, e regravar as duas numa instrução só
+   (`upsert` por id: o banco aceita as duas linhas ou nenhuma). */
+export async function moverNoDia(p: PedidoDeMover) {
+  const s = sb()!;
+  const { data: linhas, error } = await s.from('escalacoes')
+    .select('id,funcao_id,voluntario_id,status,respondido_em,fixo,primeira_vez')
+    .eq('culto_id', p.culto).in('funcao_id', [p.de, p.para]);
+  if (error) throw error;
+  const plano = planoDeMover(p, (linhas || []) as LinhaDaVaga[], new Date().toISOString());
+  if (!plano.ok) throw new Error('ESCALA_MUDOU_AO_MOVER');
+  const { error: e } = await s.from('escalacoes').upsert(plano.gravar, { onConflict: 'id' });
+  if (e) throw e;
+  /* a linha que ficou sem ninguém. Falhar aqui não desfaz nada do que já
+     valeu: sobra uma linha vazia, que a tela lê como "precisa de alguém" e o
+     próximo salvamento do dia apaga. Por isso o erro não sobe. */
+  if (plano.limpar.length) {
+    await s.from('escalacoes').delete().in('id', plano.limpar).is('voluntario_id', null);
+  }
+}
+
+/* "ELE PODE SIM" — 02/10/2026. O líder que falou com a pessoa escala quem
+   tinha marcado "não posso" no dia: primeiro sai a marca daquele dia (sem
+   ela o banco recusa, `fn_indisponivel`), depois a escalação. Devolve quantas
+   marcas saíram, para `devolverNaoPosso` repor se a escalação falhar: a
+   pessoa não pode ficar sem o "não posso" e sem a escala. */
+export async function tirarNaoPosso(voluntarioId: string, data: string): Promise<number> {
+  const { data: r, error } = await sb()!.from('indisponibilidades')
+    .delete().eq('voluntario_id', voluntarioId).eq('data', data).select('data');
+  if (error) throw error;
+  return r?.length || 0;
+}
+export async function devolverNaoPosso(voluntarioId: string, data: string) {
+  try { await sb()!.from('indisponibilidades').insert({ voluntario_id: voluntarioId, data }); }
+  catch { /* a melhor tentativa: o erro de quem chamou é o que a pessoa vê */ }
 }
 
 /* "MONTAR A ESCALA DESTE MÊS" CUSTAVA 28 SEGUNDOS NUM 4G RUIM — 20/09/2026.

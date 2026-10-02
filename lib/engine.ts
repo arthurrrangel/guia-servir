@@ -1339,6 +1339,23 @@ export function ocupadoNoDia(S: Estado, data: string, vid: string, funcaoAlvo: s
   return null;
 }
 
+/* EM QUAL POSTO AO MESMO TEMPO A PESSOA JÁ ESTÁ — 02/10/2026.
+
+   É a pergunta do gatilho `fn_conflito_simultaneo` (101): o alvo é
+   simultâneo e a pessoa está em OUTRO posto simultâneo do mesmo culto.
+   `ocupadoNoDia` devolve o primeiro posto que achar, simultâneo ou não; a
+   tela do líder usava ele para essa pergunta, e quem estava em EDIÇÃO (depois
+   do culto) e em CÂMERA 1 aparecia "em EDIÇÃO": a tela deixava passar e o
+   banco recusava por causa da CÂMERA 1, com "não consegui salvar". */
+export function postoSimultaneoNoDia(S: Estado, data: string, vid: string, alvo: string): string | null {
+  if (!metaFuncao(S, alvo).simultanea) return null;
+  for (const [fn, slot] of Object.entries(S.escalas[data]?.slots || {})) {
+    if (fn === alvo || slot?.vid !== vid) continue;
+    if (metaFuncao(S, fn).simultanea) return fn;
+  }
+  return null;
+}
+
 export function garantirDia(S: Estado, data: string): Dia {
   /* CRIAR dia sobe o selo do cache de datas (ver `diasEmOrdem`). Sem isso,
      apagar um dia e criar outro mantém a contagem e a lista em ordem fica
@@ -1390,7 +1407,7 @@ export type Candidato = { id: string; nome: string; nivel: Nivel; carga: number;
    uma contagem que custa o que uma contagem deve custar. */
 function elegiveis(
   S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia; incluirQuemNaoPode?: boolean } = {},
 ): Voluntario[] {
   const excluirOcupados = o.excluirOcupados !== false;
   const [ano, mes] = data.split('-').map(Number);
@@ -1405,7 +1422,12 @@ function elegiveis(
        Fica acima do `ignorarLimite` de propósito — nenhuma opção desta função
        destrava isso, porque o banco também não destrava. */
     if (!podeNoPosto(S, v, funcao)) return false;
-    if ((v.indisponivel || []).includes(data)) return false;
+    /* `incluirQuemNaoPode` (02/10/2026) é só da lista que o LÍDER abre: quem
+       avisou que não pode no dia aparece no fim, marcado, para o líder que
+       falou com a pessoa conseguir escalar mesmo assim (a tela pergunta antes
+       e tira o "não posso" daquele dia). O sorteio e a contagem nunca passam
+       isto: para eles, "não posso" continua sendo não. */
+    if (!o.incluirQuemNaoPode && (v.indisponivel || []).includes(data)) return false;
     if (foraDe(o.fora, data, v.id)) return false;
     if (!o.ignorarLimite) {
       /* `??` e não `||`: zero é um teto ("nenhuma vez este mês"), e com `||`
@@ -1436,7 +1458,7 @@ export const quantosPodem = (
 
 export function candidatos(
   S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
+  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia; incluirQuemNaoPode?: boolean } = {},
 ): Candidato[] {
   const peso = (n: Nivel) => (n === 'titular' ? 0 : n === 'reserva' ? 1 : 2);
   return elegiveis(S, funcao, data, o)
