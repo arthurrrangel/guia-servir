@@ -16,6 +16,7 @@ import {
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
+import OrdemDoCulto from '@/components/escalas/OrdemDoCulto';
 import ImprimirMes from '@/components/escalas/ImprimirMes';
 import { pl, cont } from '@/lib/plural';
 
@@ -1107,6 +1108,14 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           ainda não passou. */}
       {!!S.config.repertorio && !passado && !!dia?.cultoId && !!equipe?.id && (
         <RepertorioDoDia S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id}
+          ocupado={ocupado} pinta={pinta} aviso={aviso} />
+      )}
+
+      {/* 105 · A ORDEM DO CULTO (02/10/2026): as músicas com tom, BPM e cifra, e
+          os momentos com a duração. Mesma regra do repertório: com ele ligado,
+          em dia que tem culto no banco e que ainda não passou. */}
+      {!!S.config.repertorio && !passado && !!dia?.cultoId && !!equipe?.id && (
+        <OrdemDoCulto S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id}
           ocupado={ocupado} pinta={pinta} aviso={aviso} />
       )}
 

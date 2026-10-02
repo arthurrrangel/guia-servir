@@ -300,6 +300,9 @@ export type Dia = {
   /* o setlist do culto: os links das playlists (migração 100). Só vale
      quando o ministério liga o repertório nos Ajustes. */
   repertorio?: Repertorio;
+  /* 105 · a ordem do culto deste ministério: músicas com tom, BPM e cifra, e
+     os momentos, com a duração de cada um. Vale com o repertório ligado. */
+  ordem?: ItemOrdem[];
 };
 export type Config = {
   limitePadrao: number; janelaCarga: number; plantaoQtd: number;
@@ -387,6 +390,92 @@ export function linksDoRepertorio(rep?: Repertorio | null): { chave: ChaveRepert
 /** O repertório do dia que a mensagem e a página mostram (vazio com ele desligado). */
 export function repertorioDoDia(S: Estado, data: string) {
   return S.config.repertorio ? linksDoRepertorio(S.escalas[data]?.repertorio) : [];
+}
+
+/* =============================================================================
+   105 · A ORDEM DO CULTO — 02/10/2026. O tipo mora aqui porque é domínio
+   (a tela, a ponte e a mensagem falam dele); a conferência, o conserto do que
+   a pessoa digita e a conta das horas moram em `lib/ordem-do-culto.ts`.
+   ============================================================================= */
+export type TipoItemOrdem = 'musica' | 'momento';
+export type ItemOrdem = {
+  t: TipoItemOrdem;
+  titulo: string;
+  artista?: string;
+  tom?: string;
+  bpm?: number;
+  cifra?: string;
+  quem?: string;
+  min?: number;
+  nota?: string;
+};
+/** as músicas da ordem do dia, na ordem do culto (vazio com o repertório desligado) */
+export function musicasDoDia(S: Estado, data: string): ItemOrdem[] {
+  if (!S.config.repertorio) return [];
+  return (S.escalas[data]?.ordem || []).filter(i => i?.t === 'musica' && !!i.titulo);
+}
+/** a linha da música na mensagem do grupo: '1. Bondade de Deus (G, 68 BPM)' */
+export function linhaDaMusica(it: ItemOrdem, n: number): string {
+  const p: string[] = [];
+  if (it.tom) p.push(it.tom);
+  if (it.bpm) p.push(`${it.bpm} BPM`);
+  return `${n}. ${it.titulo}${p.length ? ` (${p.join(', ')})` : ''}`;
+}
+
+/* A REGRA DO BANCO (`ordem_valida`, 105), IGUAL. É o que decide o que da
+   ordem chega à tela: o que o banco aceitaria passa IGUAL (senão a tela
+   salvaria por cima de uma ordem "diferente" e o banco responderia MUDOU sem
+   ninguém ter mexido), e o resto não passa. Mora aqui, e não em
+   `lib/ordem-do-culto.ts`, porque a ponte precisa dela e só importa do motor. */
+export const ORDEM_MAX_ITENS = 40;
+export const ORDEM_TETO = { titulo: 80, artista: 60, quem: 40, nota: 140 } as const;
+export const ORDEM_BPM = [30, 300] as const;
+export const ORDEM_MIN = [1, 240] as const;
+const CONTROLE_DA_ORDEM = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
+export const tomValido = (t: unknown): t is string => typeof t === 'string' && /^[A-G](#|b)?m?$/.test(t);
+export const inteiroEntre = (n: unknown, a: number, b: number): n is number =>
+  typeof n === 'number' && Number.isInteger(n) && n >= a && n <= b;
+/** texto que o banco aceita: aparado, não vazio, sem controle, dentro do teto
+    (o teto contado letra por letra, como o banco conta, e não em UTF-16) */
+export function textoDaOrdemValido(s: unknown, teto: number): s is string {
+  return typeof s === 'string' && s !== '' && s === s.trim() && !CONTROLE_DA_ORDEM.test(s) && [...s].length <= teto;
+}
+const CIFRA_DO_BANCO = /^https:\/\/[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*\.[a-z]{2,}(:[0-9]{1,5})?([/?#].*)?$/i;
+/** o link da cifra que vira botão: https de um domínio de verdade, sem
+    usuário@, sem IP, sem espaço, aspas, sinal de tag nem barra invertida */
+export function cifraValida(s: unknown): s is string {
+  return typeof s === 'string' && s.length <= 500 && CIFRA_DO_BANCO.test(s)
+    && !/[\s<>"'\\]/.test(s) && !CONTROLE_DA_ORDEM.test(s);
+}
+/** o item que veio do banco: igual, ou null quando o banco o recusaria */
+export function itemDoBanco(x: unknown): ItemOrdem | null {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const o = x as Record<string, unknown>;
+  if (o.t !== 'musica' && o.t !== 'momento') return null;
+  if (!textoDaOrdemValido(o.titulo, ORDEM_TETO.titulo)) return null;
+  const it: ItemOrdem = { t: o.t, titulo: o.titulo };
+  for (const k of Object.keys(o)) {
+    const v = o[k];
+    switch (k) {
+      case 't': case 'titulo': break;
+      case 'artista': if (it.t !== 'musica' || !textoDaOrdemValido(v, ORDEM_TETO.artista)) return null; it.artista = v; break;
+      case 'quem': if (!textoDaOrdemValido(v, ORDEM_TETO.quem)) return null; it.quem = v; break;
+      case 'nota': if (!textoDaOrdemValido(v, ORDEM_TETO.nota)) return null; it.nota = v; break;
+      case 'tom': if (it.t !== 'musica' || !tomValido(v)) return null; it.tom = v; break;
+      case 'bpm': if (it.t !== 'musica' || !inteiroEntre(v, ORDEM_BPM[0], ORDEM_BPM[1])) return null; it.bpm = v; break;
+      case 'min': if (!inteiroEntre(v, ORDEM_MIN[0], ORDEM_MIN[1])) return null; it.min = v; break;
+      case 'cifra': if (it.t !== 'musica' || !cifraValida(v)) return null; it.cifra = v; break;
+      default: return null;
+    }
+  }
+  return it;
+}
+/** a ordem que veio do banco, só com o que vale (até 40 itens) */
+export function ordemDoBanco(x: unknown): ItemOrdem[] {
+  if (!Array.isArray(x)) return [];
+  const out: ItemOrdem[] = [];
+  for (const i of x) { const it = itemDoBanco(i); if (it) out.push(it); }
+  return out.slice(0, ORDEM_MAX_ITENS);
 }
 export type Estado = {
   /* CAMPO FANTASMA, AGORA DECLARADO — auditoria 29/08/2026.
@@ -1822,6 +1911,10 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
      na conta quando existe: o dia sem repertório guarda a assinatura de antes */
   const rep = repertorioDoDia(S, data);
   if (rep.length) partes.push('r=' + rep.map(l => l.url).join(','));
+  /* 105 · as músicas e o tom também: mudar a música ou o tom depois do envio
+     pede mensagem nova. Só entra na conta quando existe, pela mesma razão. */
+  const mus = musicasDoDia(S, data);
+  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}`).join(','));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
@@ -1862,8 +1955,12 @@ export function msgEscala(S: Estado, data: string,
   /* o setlist do dia, em todos os recortes: a banda, o vocal e o som ensaiam
      a mesma lista */
   const rep = repertorioDoDia(S, data);
-  if (rep.length) {
+  /* 105 · as músicas da ordem, com o tom e o BPM, antes dos links: é o que a
+     banda precisa ler primeiro. Sem música na ordem, o bloco é o de sempre. */
+  const mus = musicasDoDia(S, data);
+  if (rep.length || mus.length) {
     L.push('REPERTÓRIO');
+    mus.forEach((it, i) => L.push(linhaDaMusica(it, i + 1)));
     for (const l of rep) L.push(`${l.nome}: ${l.url}`);
     L.push('');
   }

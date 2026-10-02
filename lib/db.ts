@@ -1,6 +1,8 @@
 'use client';
 import { sb } from './supabase';
 import { addDias, Estado, hojeISO, Nivel, Repertorio, Status } from './engine';
+import { ordemDoBanco, type ItemOrdem } from './engine';
+import type { MusicaDoBanco } from './ordem-do-culto';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
@@ -354,6 +356,32 @@ export async function salvarRepertorio(cultoId: string, equipeId: string, rep: R
   });
   if (error) throw error;
   if (!r?.ok) throw new Error(r?.erro || 'REPERTORIO_NAO_SALVO');
+}
+
+/* =============================================================================
+   105 · A ORDEM DO CULTO — 02/10/2026.
+
+   Grava SÓ a ordem, por RPC, como o repertório. Vai junto a ordem que a tela
+   tinha (`antes`): se outro líder salvou no meio, o banco responde MUDOU com
+   a ordem dele, e esta função devolve essa ordem para a tela mostrar, em vez
+   de gravar por cima. Os outros recusos voltam como erro, com o código.
+   ============================================================================= */
+export type ResultadoDaOrdem = { ok: true; ordem: ItemOrdem[] } | { ok: false; mudou: ItemOrdem[] };
+export async function salvarOrdem(cultoId: string, equipeId: string, ordem: ItemOrdem[], antes: ItemOrdem[]): Promise<ResultadoDaOrdem> {
+  const { data: r, error } = await sb()!.rpc('salvar_ordem', {
+    p_culto: cultoId, p_equipe: equipeId, p_ordem: ordem, p_antes: antes,
+  });
+  if (error) throw error;
+  if (r?.ok) return { ok: true, ordem: ordemDoBanco(r.ordem) };
+  if (r?.erro === 'MUDOU') return { ok: false, mudou: ordemDoBanco(r.ordem) };
+  throw new Error(r?.erro || 'ORDEM_NAO_SALVA');
+}
+
+/** o banco de músicas do ministério, que nasce das ordens já montadas (105) */
+export async function musicasDoMinisterio(equipeId: string): Promise<MusicaDoBanco[]> {
+  const { data, error } = await sb()!.rpc('musicas_do_ministerio', { p_equipe: equipeId });
+  if (error) throw error;
+  return ((data || []) as MusicaDoBanco[]).filter(m => typeof m?.titulo === 'string' && !!m.titulo);
 }
 
 export async function salvarConfig(equipeId: string, dados: any) {

@@ -241,3 +241,65 @@
 @media (min-width:720px){
   .es .es-ec-rep-campos{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+/* 105 · a ordem do culto (02/10/2026): uma lista com a hora na primeira
+   coluna, o item no meio e as setas no fim. O formulário de um item abre
+   dentro da linha dele, na largura inteira. */
+.es .es-ec-ordem{display:grid;gap:var(--es-e2);margin:0 0 var(--es-e5)}
+.es .es-ec-ordem-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--es-e3)}
+.es .es-ec-ordem-resumo{font-size:12px;line-height:17px;color:var(--es-mudo);font-variant-numeric:tabular-nums}
+.es .es-ec-ordem-vazia{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2);max-width:72ch}
+.es .es-ec-ordem-lista{
+  list-style:none;margin:0;padding:0;display:grid;
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);
+}
+.es .es-ec-oi{
+  display:grid;grid-template-columns:48px minmax(0,1fr) auto;align-items:start;gap:var(--es-e1) var(--es-e2);
+  padding:var(--es-e1) var(--es-e2) var(--es-e1) var(--es-e3);border-top:1px solid var(--es-linha);
+}
+.es .es-ec-oi:first-child{border-top:0}
+/* a hora, o título, "Editar" e as setas na mesma altura: a do centro da
+   primeira linha do título (12 + 10 = 22px, o centro das setas de 44) */
+.es .es-ec-oi-hora{font-size:13px;line-height:20px;color:var(--es-mudo);font-variant-numeric:tabular-nums;padding-top:12px}
+/* a linha é o botão que abre o item: o texto à esquerda, "Editar" à direita */
+.es .es-ec-oi-abre{
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:var(--es-e3);
+  width:100%;min-height:var(--es-h);padding:12px var(--es-e2) 8px;border:0;border-radius:var(--es-r2);
+  background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;
+  transition:background var(--es-t);
+}
+.es .es-ec-oi-abre:hover{background:var(--es-sup-3)}
+.es .es-ec-oi-abre:focus-visible{outline:2px solid var(--es-foco);outline-offset:1px}
+.es .es-ec-oi-abre:disabled{cursor:default;background:transparent}
+.es .es-ec-oi-editar{font-size:14px;line-height:20px;font-weight:500;color:var(--es-ink-2)}
+.es .es-ec-oi-abre:disabled .es-ec-oi-editar{color:var(--es-mudo)}
+.es .es-ec-oi-corpo{display:grid;gap:1px;min-width:0}
+.es .es-ec-oi-tit{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-oi-art{font-weight:400;color:var(--es-ink-2)}
+.es .es-ec-oi-meta{font-size:12px;line-height:17px;color:var(--es-ink-2);font-variant-numeric:tabular-nums}
+.es .es-ec-oi-nota{font-size:12px;line-height:17px;color:var(--es-mudo);overflow-wrap:anywhere}
+.es .es-ec-oi-acoes{display:flex;align-items:center;gap:2px;min-height:var(--es-h);margin-top:0}
+.es .es-ec-oi-sobe{transform:rotate(-90deg)}
+.es .es-ec-oi-desce{transform:rotate(90deg)}
+.es .es-ec-oi > .es-ec-of{grid-column:1 / -1;margin-top:var(--es-e1)}
+.es .es-ec-of{
+  display:grid;gap:var(--es-e3);padding:var(--es-e3);
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r3);background:var(--es-sup-2);
+}
+.es .es-ec-of-campos{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3)}
+.es .es-ec-of-campos > .es-campo{margin-bottom:0}
+@media (min-width:720px){
+  /* música: nome, artista e tom / BPM, duração e quem / cifra e nota.
+     Momento: nome, duração e quem / nota na largura toda. Nenhuma linha
+     termina com buraco. */
+  .es .es-ec-of-campos{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .es .es-ec-of-largo{grid-column:span 2}
+  .es .es-ec-of-cheio{grid-column:1 / -1}
+}
+@media (max-width:719px){
+  /* no celular, a linha inteira é o "Editar" (a palavra sai) e as setas
+     ficam ao lado: uma linha de 70px por item, e não três */
+  .es .es-ec-oi{grid-template-columns:44px minmax(0,1fr) auto;padding-left:var(--es-e2);gap:var(--es-e1) 6px}
+  .es .es-ec-oi-editar{display:none}
+  .es .es-ec-oi-abre{grid-template-columns:minmax(0,1fr);padding-left:var(--es-e1);padding-right:var(--es-e1)}
+}

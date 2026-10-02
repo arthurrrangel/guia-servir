@@ -4,7 +4,7 @@
    isso, o Node de linha de comando (que só apaga os tipos, não os resolve)
    tenta importar `Estado` como valor em tempo de execução e o módulo nem
    carrega — foi o que impediu de testar este arquivo. */
-import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio } from './engine';
+import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio, ordemDoBanco } from './engine';
 import type { Estado, Nivel, Repertorio, Status } from './engine';
 
 /* =============================================================================
@@ -79,6 +79,8 @@ export type LinhaRecado = {
   /* o setlist do culto (migração 100). Opcional: antes da 100 a coluna não
      existe, e `select('*')` simplesmente não a traz. */
   repertorio?: Record<string, string> | null;
+  /* 105 · a ordem do culto. Opcional pelo mesmo motivo: antes da 105 não vem. */
+  ordem?: unknown;
 };
 export type LinhaConfig = { id?: number | null; dados: Record<string, any>; equipe_id: string | null };
 
@@ -338,6 +340,10 @@ export function montarEstado(l: LinhasDoBanco): Estado {
       for (const lk of linksDoRepertorio(r.repertorio)) rep[lk.chave] = lk.url;
       abrir(data).repertorio = rep;
     }
+    /* 105 · a ordem do culto: só o item que o banco aceitaria chega ao estado
+       (e chega igual, para a tela salvar por cima sem acusar MUDOU) */
+    const ordem = ordemDoBanco(r.ordem);
+    if (ordem.length) abrir(data).ordem = ordem;
     /* relatório do fim do culto: mora na mesma linha do recado */
     if (r.relatorio || r.problemas) {
       const d = abrir(data);

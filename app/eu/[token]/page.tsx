@@ -20,6 +20,7 @@ import TrocaDoVoluntario from '@/components/escalas/TrocaDoVoluntario';
 import FuncoesDoVoluntario from '@/components/escalas/FuncoesDoVoluntario';
 /* 104 · o aviso no celular */
 import AvisoNoCelular from '@/components/escalas/AvisoNoCelular';
+import OrdemNoLink, { ordensDoLink, type OrdemDoLink } from '@/components/escalas/OrdemNoLink';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
 
 type Item = {
@@ -210,6 +211,10 @@ export default function Eu() {
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [vagaTroca, setVagaTroca] = useState<Vaga | null>(null);
   const [ofertas, setOfertas] = useState<Vaga[]>([]);
+  /* 105 · a ordem dos cultos em que a pessoa serve, de todo ministério que a
+     publicou. Chega depois da tela, como as trocas; antes da 105 no banco a
+     chamada falha e a seção simplesmente não aparece. */
+  const [ordens, setOrdens] = useState<OrdemDoLink[]>([]);
 
   /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
      a seção da troca e os eventos da grade simplesmente não aparecem. */
@@ -217,12 +222,14 @@ export default function Eu() {
     const s = sb();
     if (!s) return;
     try {
-      const [tr, ev] = await Promise.all([
+      const [tr, ev, or] = await Promise.all([
         s.rpc('eu_trocas', { p_token: token }),
         s.rpc('eu_eventos', { p_token: token }),
+        s.rpc('eu_ordens', { p_token: token }),
       ]);
       if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
       if (!ev.error) setEventos((ev.data || []) as Evento[]);
+      if (!or.error) setOrdens(ordensDoLink(or.data));
     } catch { /* a tela fica como estava */ }
   }, [token]);
   /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
@@ -248,6 +255,8 @@ export default function Eu() {
       if (d.trocas) { setTrocas(d.trocas as Troca[]); setTrocasOk(true); }
       if (d.eventos) setEventos(d.eventos as Evento[]);
       if (d.espaco) setEspaco(d.espaco);
+      /* 105 · e a ordem do culto */
+      if ((d as any).ordens) setOrdens(ordensDoLink((d as any).ordens));
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -575,7 +584,7 @@ export default function Eu() {
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em
      estado nenhum, nem no "link inválido" — que é justamente quando a pessoa
      mais precisa de um caminho para algum lugar. */
-  const Barra = ({ perfil = false, repertorio = false }: { perfil?: boolean; repertorio?: boolean }) => (
+  const Barra = ({ perfil = false, repertorio = false, ordem = false }: { perfil?: boolean; repertorio?: boolean; ordem?: boolean }) => (
     <div className="vol-barra" role="banner">
       <div className="vol-barra-in">
         <Link href="/" aria-label="GUIA Church"><Logo className="logo" /></Link>
@@ -584,6 +593,8 @@ export default function Eu() {
             <span className="vol-barra-links">
               {/* 100 · o repertório tem lugar na barra quando existe */}
               {repertorio && <a className="vol-quem" href="#repertorio">Repertório</a>}
+              {/* 105 · e a ordem do culto, quando existe */}
+              {ordem && <a className="vol-quem" href="#ordem">Ordem</a>}
               <a className="vol-quem" href="#meu-perfil">Meu perfil</a>
             </span>
           )
@@ -678,6 +689,11 @@ export default function Eu() {
     }
     return out;
   })();
+  /* 105 · a ordem só dos cultos em que a pessoa ainda serve: quem acabou de
+     tocar em "Não posso" deixa de ver a ordem daquele dia na hora, como deixa
+     de ver o repertório */
+  const ordensVisiveis = ordens.filter(o => itens.some(i =>
+    i.culto_id === o.culto_id && i.data >= hoje && (i.plantao || (i.status || 'pendente') !== 'recusado')));
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
   const restantes = futuras.filter(i =>
     !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
@@ -798,7 +814,7 @@ export default function Eu() {
 
   return (
     <div className="vol">
-      <Barra perfil repertorio={!!setlists.length} />
+      <Barra perfil repertorio={!!setlists.length} ordem={!!ordensVisiveis.length} />
       <div className="vol-in entra" role="main">
 
         {/* 1. O QUE PRECISO FAZER.
@@ -1103,6 +1119,11 @@ export default function Eu() {
             ))}
           </section>
         )}
+
+        {/* 105 · A ORDEM DO CULTO: as músicas com tom, BPM e cifra, e os
+            momentos com a hora de cada um, de todo ministério que publicou
+            a ordem do culto em que a pessoa serve. */}
+        <OrdemNoLink ordens={ordensVisiveis} />
 
         {/* 3. COM QUEM EU SIRVO — fase 7.
 

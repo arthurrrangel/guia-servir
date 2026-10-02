@@ -3501,6 +3501,33 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   background:transparent; color:var(--noite); border-color:var(--linha);
 }
 
+/* 105 · a ordem do culto: a hora na primeira coluna, o item no meio e a
+   cifra no fim. O tom é o que a banda procura: vem em negrito. O momento
+   (abertura, palavra, avisos) fica um tom abaixo da música. */
+.vol-ordem{ padding:var(--e4) 0; border-bottom:1px solid var(--linha) }
+.vol-ordem:last-child{ border-bottom:0 }
+.vol-ordem-lista{ list-style:none; margin:var(--e3) 0 0; padding:0; display:grid }
+.vol-oi{
+  display:grid; grid-template-columns:3.25em minmax(0,1fr) auto; align-items:center;
+  column-gap:var(--e3); padding:var(--e3) 0; border-top:1px solid var(--linha);
+}
+.vol-oi:first-child{ border-top:0; padding-top:var(--e1) }
+.vol-oi-hora{ align-self:start; font-size:var(--t-rot); line-height:1.5; color:var(--cinza); font-variant-numeric:tabular-nums }
+.vol-oi-corpo{ display:grid; gap:2px; min-width:0 }
+.vol-oi-tit{ font-size:var(--t-corpo); font-weight:600; color:var(--noite); overflow-wrap:anywhere }
+.vol-oi-momento .vol-oi-tit{ font-weight:500; color:var(--cinza) }
+.vol-oi-meta{ font-size:var(--t-rot); color:var(--cinza); font-variant-numeric:tabular-nums }
+.vol-oi-meta b{ color:var(--noite); font-weight:700 }
+.vol-oi-nota{ font-size:var(--t-rot); color:var(--cinza); overflow-wrap:anywhere }
+.vol-oi-cifra{
+  display:inline-flex; align-items:center; justify-content:center; min-height:var(--toque); min-width:var(--toque);
+  padding:0 var(--e3); border:1px solid var(--linha); border-radius:var(--r4);
+  font-size:var(--t-rot); font-weight:600; color:var(--noite); text-decoration:none;
+}
+.vol-oi-cifra:hover,
+.vol-oi-cifra:active{ border-color:var(--noite) }
+.vol-oi-cifra:focus-visible{ outline:2px solid var(--noite); outline-offset:2px }
+
 /* a próxima escala: a data é o assunto, então é ela que fica grande */
 .vol-prox{ padding:var(--e5) 0 var(--e1) }
 .vol-prox-fn{

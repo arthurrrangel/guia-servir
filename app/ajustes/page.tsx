@@ -501,6 +501,12 @@ function Ajustes() {
                 do <b>Deezer</b> e do <b>YouTube</b>. Quem está escalado vê os botões na própria
                 página, e a mensagem do grupo leva os links.
               </p>
+              {/* 105 · o mesmo interruptor liga a ordem do culto */}
+              <p className="es-prosa">
+                E ganha a <b>ordem do culto</b>: as músicas com tom, BPM e link da cifra, e os
+                momentos com o tempo de cada um. Quem serve no culto vê a ordem no próprio link,
+                inclusive de outro ministério, e a mensagem do grupo leva as músicas com o tom.
+              </p>
               <div className="es-linha es-aj-rep">
                 <button type="button" className="es-btn" aria-pressed={!!S.config.repertorio}
                   disabled={!equipe?.id || repGravando}

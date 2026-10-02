@@ -124,6 +124,9 @@ export function estadoDemo(): Estado {
       youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG',
     };
   }
+  /* 105 · a ordem do culto no SEGUNDO culto que vem: o primeiro continua
+     desenhando o repertório só com os links, como as provas da 100 conhecem */
+  if (porVir[1] && S.escalas[porVir[1]]) S.escalas[porVir[1]].ordem = ORDEM_DEMO.map(i => ({ ...i }));
   S.voluntarios.forEach((v, i) => {
     if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
     if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
@@ -136,6 +139,17 @@ export function estadoDemo(): Estado {
 export { demoLigado } from './demo-ligado';
 
 /* o setlist do harness (100): as três plataformas, com link de verdade na forma */
+/* 105 · músicas e artistas inventados: a fixture desenha a tela, não toca */
+export const ORDEM_DEMO = [
+  { t: 'momento' as const, titulo: 'Abertura', quem: 'Pastor', min: 5 },
+  { t: 'musica' as const, titulo: 'Canção da Manhã', artista: 'Banda Exemplo', tom: 'G', bpm: 72,
+    cifra: 'https://www.cifraclub.com.br/banda-exemplo/cancao-da-manha/', quem: 'Lia', min: 6,
+    nota: 'Começa só voz e teclado' },
+  { t: 'musica' as const, titulo: 'Rio de Graça', artista: 'Coral Modelo', tom: 'F#m', bpm: 68, min: 5 },
+  { t: 'musica' as const, titulo: 'Luz no Caminho', tom: 'Bb', min: 6 },
+  { t: 'momento' as const, titulo: 'Avisos', min: 5 },
+  { t: 'momento' as const, titulo: 'Palavra', quem: 'Pastor', min: 40 },
+];
 const REP_DEMO = {
   spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX0XUfTFmNBRM',
   deezer: 'https://link.deezer.com/s/30AbCdEfGh',
@@ -228,6 +242,19 @@ export function euDemo(variante: string = '') {
           { funcao: 'EDIÇÃO', nivel: 'reserva', conferido: false },
         ],
       },
+    } : {}),
+    /* 105 · a ordem do culto só na variante `ordem`: a do Louvor (outro
+       ministério) no primeiro culto, e a do segundo culto sem hora de evento.
+       O terceiro é o dia recusado: a ordem dele vem do banco, e a tela não
+       pode mostrá-la. */
+    ...(variante === 'ordem' ? {
+      ordens: [
+        { culto_id: 'c1', data: prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: false, ordem: ORDEM_DEMO },
+        { culto_id: 'c2', data: prox[1] || prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: false,
+          ordem: ORDEM_DEMO.slice(1, 3) },
+        { culto_id: 'c3', data: prox[2] || prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: false,
+          ordem: ORDEM_DEMO.slice(0, 2) },
+      ],
     } : {}),
   };
 }
