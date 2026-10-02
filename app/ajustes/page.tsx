@@ -13,6 +13,7 @@ import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import GruposPorArea from '@/components/escalas/GruposPorArea';
+import ChegadaNosAjustes from '@/components/escalas/ChegadaNosAjustes';
 import { cont } from '@/lib/plural';
 
 /* a ordem é a da página, não a alfabética: o índice é um mapa dela. */
@@ -20,6 +21,8 @@ const SECOES = [
   { id: 'grupo', rot: 'Grupo no WhatsApp' },
   { id: 'grupos', rot: 'Grupos por área' },
   { id: 'repertorio', rot: 'Repertório' },
+  /* 107 · só entra no índice quando o banco tem a 107 (ver a seção) */
+  { id: 'chegada', rot: 'Chegada no dia' },
   { id: 'regras', rot: 'Regras do rodízio' },
   { id: 'aviso', rot: 'Texto do aviso' },
   { id: 'funcoes', rot: 'Funções' },
@@ -79,6 +82,8 @@ function Ajustes() {
   /* nasce na primeira: com a página no topo, nenhuma seção cruzou a faixa do
      meio ainda, e um índice sem nenhum item aceso lê como quebrado. */
   const [ondeEstou, setOndeEstou] = useState(SECOES[0].id);
+  /* 107 · a seção da chegada só existe com a 107 no banco */
+  const [comChegada, setComChegada] = useState(false);
   /* O ITEM CLICADO ACENDE NA HORA (30/09/2026). As duas últimas seções são
      curtas e ficam no fim: pular para "Quem organiza" deixava a faixa do meio
      da tela na seção vizinha, e o índice acendia a vizinha, não a escolhida.
@@ -121,7 +126,9 @@ function Ajustes() {
       obs.disconnect(); removeEventListener('scroll', noFim);
       removeEventListener('wheel', soltar); removeEventListener('touchstart', soltar); removeEventListener('keydown', soltar);
     };
-  }, []);
+    /* 107 · a seção da chegada nasce depois (quando o banco responde): o
+       observador recomeça para enxergá-la também */
+  }, [comChegada]);
 
   const { S, recarregar, aviso, base, equipe, equipes, recarregarEquipes } = useApp();
   const [nova, setNova] = useState('');
@@ -411,7 +418,7 @@ function Ajustes() {
             costuma sair mexendo também no aviso. Aqui tudo continua na página,
             e ele chega em um toque. */}
         <nav className="es-aj-indice" aria-label="Seções dos ajustes">
-          {SECOES.map(x => (
+          {SECOES.filter(x => x.id !== 'chegada' || comChegada).map(x => (
             <a key={x.id} href={'#' + x.id} className="es-nav-item"
                aria-current={ondeEstou === x.id ? 'true' : undefined}
                onClick={() => { travado.current = true; setOndeEstou(x.id); }}>{x.rot}</a>
@@ -522,6 +529,13 @@ function Ajustes() {
               </div>
             </div>
           </section>
+
+          {/* 107 · A CHEGADA NO DIA (02/10/2026): o cartaz com QR para a porta e o
+              recado do dia. Só aparece com a 107 no banco. */}
+          {!!equipe?.id && !!equipe?.slug && (
+            <ChegadaNosAjustes equipeId={equipe.id} slug={equipe.slug} base={base} aviso={aviso}
+              aoSaber={setComChegada} />
+          )}
 
           <section className="es-caixa" id="regras">
             <div className="es-caixa-cab">

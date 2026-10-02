@@ -23,6 +23,10 @@ import AvisoNoCelular from '@/components/escalas/AvisoNoCelular';
 import OrdemNoLink, { ordensDoLink, type OrdemDoLink } from '@/components/escalas/OrdemNoLink';
 import ChamadasDoVoluntario from '@/components/escalas/ChamadasDoVoluntario';
 import type { ChamadaMinha } from '@/lib/chamadas';
+/* 107 · o "Cheguei" do dia e o "Como foi" depois */
+import HojeNoLink from '@/components/escalas/HojeNoLink';
+import ComoFoiNoLink from '@/components/escalas/ComoFoiNoLink';
+import { type CultoDeHoje, type ComoFoiMeu, hojeDoLink, comoFoiDoLink } from '@/lib/chegada';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
 
 type Item = {
@@ -186,13 +190,13 @@ export default function Eu() {
   const [espaco, setEspaco] = useState<any>(null);
   const [fase, setFase] = useState<'carregando' | 'erro' | 'rede' | 'ok'>('carregando');
   /* veio da porta do link do grupo (?porta=c|d): mostra "Não é você?" */
-  const [viaPorta, setViaPorta] = useState<'' | 'confirmar' | 'disponibilidade'>('');
+  const [viaPorta, setViaPorta] = useState<'' | 'confirmar' | 'disponibilidade' | 'cheguei'>('');
   const [slugDaPorta, setSlugDaPorta] = useState('');
   useEffect(() => {
     try {
       const q = new URLSearchParams(window.location.search);
       const v = q.get('porta');
-      setViaPorta(v === 'd' ? 'disponibilidade' : v === 'c' || v === '1' ? 'confirmar' : '');
+      setViaPorta(v === 'd' ? 'disponibilidade' : v === 'h' ? 'cheguei' : v === 'c' || v === '1' ? 'confirmar' : '');
       const m = q.get('m') || '';
       if (/^[a-z0-9-]{1,40}$/.test(m)) setSlugDaPorta(m);
     } catch {}
@@ -220,6 +224,11 @@ export default function Eu() {
   /* 106 · os convites da liderança para cobrir vaga. Mesma regra: sem a 106
      no banco a chamada falha e nada aparece. */
   const [chamadas, setChamadas] = useState<ChamadaMinha[]>([]);
+  /* 107 · o culto de hoje (o "Cheguei" e, para o líder do dia, o time) e os
+     cultos dos últimos sete dias para contar como foi. Mesma regra: sem a 107
+     no banco a chamada falha e nada aparece. */
+  const [hojeLink, setHojeLink] = useState<CultoDeHoje[]>([]);
+  const [comoFoi, setComoFoi] = useState<ComoFoiMeu[]>([]);
 
   /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
      a seção da troca e os eventos da grade simplesmente não aparecem. */
@@ -227,16 +236,20 @@ export default function Eu() {
     const s = sb();
     if (!s) return;
     try {
-      const [tr, ev, or, ch] = await Promise.all([
+      const [tr, ev, or, ch, hj, cf] = await Promise.all([
         s.rpc('eu_trocas', { p_token: token }),
         s.rpc('eu_eventos', { p_token: token }),
         s.rpc('eu_ordens', { p_token: token }),
         s.rpc('eu_chamadas', { p_token: token }),
+        s.rpc('eu_hoje', { p_token: token }),
+        s.rpc('eu_como_foi', { p_token: token }),
       ]);
       if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
       if (!ev.error) setEventos((ev.data || []) as Evento[]);
       if (!or.error) setOrdens(ordensDoLink(or.data));
       if (!ch.error) setChamadas((ch.data || []) as ChamadaMinha[]);
+      if (!hj.error) setHojeLink(hojeDoLink(hj.data));
+      if (!cf.error) setComoFoi(comoFoiDoLink(cf.data));
     } catch { /* a tela fica como estava */ }
   }, [token]);
   /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
@@ -266,6 +279,9 @@ export default function Eu() {
       if ((d as any).ordens) setOrdens(ordensDoLink((d as any).ordens));
       /* 106 · e os convites para cobrir */
       if ((d as any).chamadas) setChamadas((d as any).chamadas as ChamadaMinha[]);
+      /* 107 · e o dia de hoje e o como foi */
+      if ((d as any).hoje) setHojeLink(hojeDoLink((d as any).hoje));
+      if ((d as any).comoFoi) setComoFoi(comoFoiDoLink((d as any).comoFoi));
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -671,6 +687,12 @@ export default function Eu() {
      cobrada por um culto que terminou ontem. */
   const pendentes = agenda.filter(i =>
     (i.status || 'pendente') === 'pendente' && i.data >= hoje);
+  /* 107 · os postos de hoje de cada culto, para o "Cheguei" dizer onde */
+  const postosHoje: Record<string, string[]> = {};
+  for (const i of agenda) {
+    if (i.data !== hoje || (i.status || 'pendente') === 'recusado') continue;
+    (postosHoje[i.culto_id] ||= []).push(i.funcao);
+  }
   /* 82 · quantos DIAS, não quantas linhas. Ver o título logo abaixo. */
   const diasPendentes = new Set(pendentes.map(i => i.data)).size;
   const ordenada = [...agenda].sort((a, b) => a.data.localeCompare(b.data));
@@ -938,6 +960,15 @@ export default function Eu() {
           ))}
         </div>
 
+        {/* 107 · O DIA DO CULTO: "Cheguei" e, para quem lidera o dia, o time
+            chegando. Logo abaixo do bloco escuro: no dia, é o que a pessoa veio
+            fazer aqui, e o cartaz da porta abre a página neste ponto (#hoje). */}
+        <HojeNoLink
+          token={token} hoje={hojeLink} postos={postosHoje}
+          cultoHora={IGREJA.cultoHora} followHora={IGREJA.followHora}
+          aoMudar={async () => { await carregar(false); }}
+          avisar={avisar} errar={errar} />
+
         {/* 106 · OS CONVITES PARA COBRIR. Logo abaixo do "Precisa de você":
             também pedem resposta, e o aviso no celular abre aqui (#chamadas). */}
         <ChamadasDoVoluntario
@@ -1015,6 +1046,14 @@ export default function Eu() {
             })}
           </section>
         ))}
+
+        {/* 107 · COMO FOI. Depois do culto (e por sete dias), uma pergunta de
+            um toque. Abaixo do que pede resposta para hoje, acima da agenda. */}
+        <ComoFoiNoLink
+          token={token} lista={comoFoi} equipe={equipe} artigo={espaco?.artigo}
+          cultoHora={IGREJA.cultoHora} followHora={IGREJA.followHora}
+          aoMudar={async () => { await carregar(false); }}
+          avisar={avisar} errar={errar} />
 
         {/* 2. QUANDO EU SIRVO. A data é o assunto, então é ela que fica grande. */}
         {/* só quando a próxima NÃO é uma das que estão pendentes lá em cima:

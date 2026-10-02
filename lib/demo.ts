@@ -10,7 +10,7 @@
    conferidos) porque densidade falsa esconde problema de layout: uma tela
    linda com 3 pessoas costuma quebrar com 17.
    =========================================================================== */
-import { Estado, Nivel, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia } from './engine';
+import { Estado, Nivel, type Status, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia } from './engine';
 
 const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
   ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any, exigeSexo });
@@ -25,7 +25,7 @@ const P = (
   indisponivel: [] as string[], disponivel: [] as string[],
 });
 
-export function estadoDemo(): Estado {
+export function estadoDemo(variante = ''): Estado {
   const S = estadoVazio();
   S.temAcesso = true;
   S.equipe = 'Mídia';
@@ -131,6 +131,20 @@ export function estadoDemo(): Estado {
     if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
     if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
   });
+  /* 107 · `?demo=hoje`: um evento HOJE e outro ontem, montados, para o
+     harness desenhar a chegada do dia e o "como foi" (o mês do demo quase
+     nunca tem culto no próprio dia). Sem a variante, o estado é o de sempre. */
+  if (variante === 'hoje') {
+    const ontem = new Date(Date.parse(hoje + 'T12:00:00Z') - 86400000).toISOString().slice(0, 10);
+    for (const [d, nome] of [[hoje, 'Culto de teste'], [ontem, 'Ensaio de teste']] as const) {
+      const dia = garantirDia(S, d);
+      dia.cultoId = 'e' + d; dia.evento = nome; dia.inicio = '19:30';
+      const pares: [string, number, Status][] = [['PROJEÇÃO', 0, 'confirmado'], ['ILUMINAÇÃO', 3, 'pendente'],
+                                                  ['FOTO', 6, 'confirmado'], ['FILMAGEM', 8, 'recusado']];
+      for (const [f, i, st] of pares) dia.slots[f] = { vid: S.voluntarios[i].id, status: st, fixo: false };
+      dia.plantao = [];
+    }
+  }
   return S;
 }
 
@@ -187,10 +201,21 @@ export function euDemo(variante: string = '') {
     return '';
   })();
   const agoraISO = new Date().toISOString();
+  /* 107 · o dia do culto (variantes `hoje` e `hoje-lider`) e o "como foi"
+     (variante `comofoi`). As pessoas do time são fictícias. */
+  const diaAntes = (n: number) => new Date(new Date(hoje + 'T12:00:00Z').getTime() - n * 86400000).toISOString().slice(0, 10);
+  /* os dois últimos cultos (sábado ou domingo) dos últimos sete dias */
+  const ultimos = [1, 2, 3, 4, 5, 6, 7].map(diaAntes).filter(d => [0, 6].includes(new Date(d + 'T12:00:00Z').getUTCDay()));
+  const ehHoje = variante === 'hoje' || variante === 'hoje-lider';
+  const chegou = (min: number) => new Date(Date.now() - min * 60000).toISOString();
   return {
     nome: 'Giovana Rosalem',
     equipe: 'Mídia',
     escalas: [
+      ...(ehHoje ? [{ culto_id: 'h1', funcao_id: 'f1', data: hoje, funcao: 'PROJEÇÃO', status: 'confirmado',
+        primeira_vez: false, plantao: false }] : []),
+      ...(variante === 'hoje-lider' ? [{ culto_id: 'h1', funcao_id: 'f9', data: hoje, funcao: 'LÍDER 1', status: 'confirmado',
+        primeira_vez: false, plantao: false, relata: true, relatorio: '', problemas: '' }] : []),
       { culto_id: 'c1', funcao_id: 'f1', data: prox[0], funcao: 'PROJEÇÃO', status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
       { culto_id: 'c1', funcao_id: 'f2', data: prox[0], funcao: doTipo(0, 'CÂMERA 1', 'FILMAGEM'), status: variante === 'confirmado' ? 'confirmado' : 'pendente', primeira_vez: true, plantao: false, repertorio: REP_DEMO },
       /* o segundo culto só com o YouTube: o setlist pode vir parcial */
@@ -255,6 +280,35 @@ export function euDemo(variante: string = '') {
         { id: 'ch3', culto_id: 'c6', funcao_id: 'f4', funcao: 'FOTO', data: todos[6] || todos[todos.length - 1],
           evento: null, inicio: null, status: 'preenchida', aberta: false, impede: null, criado_em: agoraISO },
       ],
+    } : {}),
+    /* 107 · o dia de hoje: na `hoje`, a pessoa ainda não chegou; na
+       `hoje-lider`, ela lidera o dia, já chegou, e o time vem chegando */
+    ...(ehHoje ? {
+      hoje: { ok: true, cultos: [{
+        culto_id: 'h1', data: hoje, evento: null, inicio: null,
+        chegou_em: variante === 'hoje-lider' ? chegou(42) : null,
+        marcado_por: variante === 'hoje-lider' ? 'eu' : null,
+        relata: variante === 'hoje-lider',
+        time: variante === 'hoje-lider' ? [
+          { voluntario_id: '00000000-0000-4000-8000-000000000001', nome: 'Giovana Rosalem', funcoes: ['PROJEÇÃO', 'LÍDER 1'], chegou_em: chegou(42), marcado_por: 'eu', eu: true },
+          { voluntario_id: '00000000-0000-4000-8000-000000000002', nome: 'Marina Teixeira', funcoes: ['CÂMERA 1'], chegou_em: chegou(31), marcado_por: 'eu', eu: false },
+          { voluntario_id: '00000000-0000-4000-8000-000000000003', nome: 'Lucas Andrade', funcoes: ['FOTO'], chegou_em: null, marcado_por: null, eu: false },
+          { voluntario_id: '00000000-0000-4000-8000-000000000004', nome: 'Paula Ribeiro', funcoes: ['ILUMINAÇÃO'], chegou_em: chegou(12), marcado_por: 'lider_do_dia', eu: false },
+          { voluntario_id: '00000000-0000-4000-8000-000000000005', nome: 'Tiago Nunes', funcoes: ['EDIÇÃO'], chegou_em: null, marcado_por: null, eu: false },
+        ] : null,
+      }] },
+    } : {}),
+    /* 107 · como foi: ontem sem resposta, e um culto de seis dias atrás já
+       respondido */
+    ...(variante === 'comofoi' ? {
+      comoFoi: [
+        { culto_id: 'cf1', data: ultimos[0], evento: null, inicio: null, funcoes: ['PROJEÇÃO', 'CÂMERA 1'],
+          resposta: null, texto: null, atualizado_em: null },
+        { culto_id: 'cf2', data: ultimos[1], evento: null, inicio: null, funcoes: ['FOTO'],
+          resposta: 'bom', texto: null, atualizado_em: agoraISO },
+      ],
+      espaco: { ok: true, equipe_slug: 'midia', artigo: 'a', responsavel: 'Arthur', tem_pin: true,
+                voluntario: { desde: '2026-03-01' }, funcoes: [{ funcao: 'PROJEÇÃO', nivel: 'titular', conferido: true }] },
     } : {}),
     /* 105 · a ordem do culto só na variante `ordem`: a do Louvor (outro
        ministério) no primeiro culto, e a do segundo culto sem hora de evento.

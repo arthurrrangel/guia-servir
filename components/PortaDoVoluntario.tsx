@@ -39,9 +39,11 @@ import {
    byte, sem depender de JavaScript.
    ============================================================================= */
 
-export type ParaOnde = 'confirmar' | 'disponibilidade';
-export const ANCORA: Record<ParaOnde, string> = { confirmar: '#confirmar', disponibilidade: '#quando-posso' };
-const MARCA: Record<ParaOnde, string> = { confirmar: 'c', disponibilidade: 'd' };
+/* 107 · `cheguei`: o cartaz da porta da igreja e o recado do dia, que abrem
+   a página da pessoa no "Cheguei" (#hoje) */
+export type ParaOnde = 'confirmar' | 'disponibilidade' | 'cheguei';
+export const ANCORA: Record<ParaOnde, string> = { confirmar: '#confirmar', disponibilidade: '#quando-posso', cheguei: '#hoje' };
+const MARCA: Record<ParaOnde, string> = { confirmar: 'c', disponibilidade: 'd', cheguei: 'h' };
 
 export default function PortaDoVoluntario({ slug, para, base = '' }: {
   slug: string; para: ParaOnde;
@@ -83,7 +85,7 @@ export default function PortaDoVoluntario({ slug, para, base = '' }: {
   return (
     <main className="porta-vol">
       <p className="porta-vol-txt" role="status">
-        {para === 'disponibilidade' ? 'Abrindo os seus dias…' : 'Abrindo a sua escala…'}
+        {para === 'disponibilidade' ? 'Abrindo os seus dias…' : para === 'cheguei' ? 'Abrindo o seu dia…' : 'Abrindo a sua escala…'}
       </p>
       <p className="porta-vol-sub"><a href={base + daEquipe}>Se não abrir sozinho, toque aqui</a></p>
       <style>{`

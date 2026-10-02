@@ -140,7 +140,7 @@ export function esquecerVinculo(token: string) {
    da página (`#h=a.e` diz quem já foi visitado). `onde`: o que o bilhete do
    cookie diz sobre este ministério. Devolve o endereço para onde ir. */
 export function proximoPassoDaPorta(aqui: string, hash: string, onde: string,
-  slug: string, para: 'confirmar' | 'disponibilidade'): string {
+  slug: string, para: 'confirmar' | 'disponibilidade' | 'cheguei'): string {
   const daEquipe = `/equipe/${encodeURIComponent(slug)}?ir=${para}`;
   if (!aqui || !ORIGENS[aqui]) return daEquipe;
   const h = /(?:^|[#&])h=([a-z.]*)/.exec(hash || '')?.[1] || '';

@@ -15,8 +15,10 @@ import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgConfirmar, msgEscala, nomeDe, vol,
   problemas, cultosAte, resumoDia, addDias, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
-  linkDoVoluntario,
+  linkDoVoluntario, diaLongo,
 } from '@/lib/engine';
+/* 107 · o que quem serviu contou nas duas últimas semanas */
+import { ComoFoiNoPainel } from '@/components/escalas/ComoFoiDoDia';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -487,6 +489,7 @@ function Painel() {
 
         <div className="es-pilha">
           <Pendencias />
+          {!!equipe?.id && <ComoFoiNoPainel equipeId={equipe.id} hoje={hoje} aDiaLongo={diaLongo} />}
 
           <Secao titulo="Depois disso">
             <div className="es-fila">

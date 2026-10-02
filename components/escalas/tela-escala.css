@@ -349,3 +349,43 @@
   .es .es-ec-cv-est{grid-row:auto}
   .es .es-ec-cv-acoes{grid-column:1;grid-row:auto;justify-content:flex-start}
 }
+
+/* 107 · a chegada e o como foi (02/10/2026). A chegada vem embaixo dos
+   postos: no dia, aberta, uma linha por pessoa com a hora e quem marcou;
+   depois, uma dobra com a conta. O como foi mora junto do relatório de quem
+   liderou o dia, no mesmo traje de caixa, e no Painel como lista de itens. */
+.es .es-ec-chegada{display:grid;gap:var(--es-e2);margin:var(--es-e5) 0 0}
+.es details.es-ec-chegada{display:block}
+.es .es-ec-cg-lista{
+  list-style:none;margin:0;padding:0;display:grid;
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);
+}
+.es .es-ec-cg{
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:var(--es-e1) var(--es-e3);
+  min-height:var(--es-h);padding:var(--es-e1) var(--es-e2) var(--es-e1) var(--es-e3);border-top:1px solid var(--es-linha);
+}
+.es .es-ec-cg:first-child{border-top:0}
+.es .es-ec-cg-quem{display:grid;gap:1px;min-width:0}
+.es .es-ec-cg-nome{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-cg-quem small,.es .es-ec-cg-est small{font-size:12px;line-height:17px;color:var(--es-ink-2)}
+.es .es-ec-cg-est{display:grid;justify-items:end;gap:1px;text-align:right}
+.es .es-ec-cg-nota{margin:0;font-size:12px;line-height:17px;color:var(--es-mudo);max-width:72ch}
+.es .es-dobra-corpo > .es-ec-cg-nota{margin-top:var(--es-e2)}
+@media (max-width:719px){
+  /* no celular: o nome em cima, a marca e o botão embaixo, sem espremer o nome */
+  .es .es-ec-cg{grid-template-columns:minmax(0,1fr) auto;padding-top:var(--es-e2);padding-bottom:var(--es-e2)}
+  .es .es-ec-cg-quem{grid-column:1 / -1}
+  .es .es-ec-cg-est{justify-items:start;text-align:left}
+}
+.es .es-ec-comofoi{display:grid;gap:var(--es-e2)}
+.es .es-ec-cf-resumo{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2);font-variant-numeric:tabular-nums}
+.es .es-ec-cf-lista{list-style:none;margin:0;padding:0;display:grid;gap:var(--es-e2)}
+.es .es-ec-cf{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:var(--es-e1) var(--es-e3)}
+.es .es-ec-cf-quem{display:grid;gap:1px;min-width:0}
+.es .es-ec-cf-nome{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-cf-quem small{font-size:12px;line-height:17px;color:var(--es-ink-2)}
+.es .es-ec-cf-texto{
+  grid-column:1 / -1;margin:0;font-size:13px;line-height:19px;color:var(--es-ink);
+  white-space:pre-line;overflow-wrap:anywhere;max-width:72ch;
+}
+.es .es-cf-item .es-c-tit .es-ec-cf-texto{display:block;margin-top:2px;font-weight:400}

@@ -9182,3 +9182,27 @@ body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
   .impresso-extra{ margin:1.5mm 0 0; font-size:8.5pt }
   .impresso-pe{ margin-top:4mm; padding-top:2mm; border-top:.4pt solid #bbb; font-size:7.5pt; color:#666 }
 }
+
+/* =============================================================================
+   107 · 02/10/2026 · O "CHEGUEI" DO DIA E O "COMO FOI" NO LINK DO VOLUNTÁRIO
+   Só classes novas; nada do que existe muda de aparência. O "Cheguei" é o
+   botão grande do dia, em tinta sobre papel, da largura da coluna. O time do
+   líder do dia e as respostas do "Como foi" usam as linhas de sempre.
+   ============================================================================= */
+.vol-hoje-chegar{ margin-top:var(--e4) }
+.vol-secao .vol-bt.vol-bt-cheguei{ width:100%; min-height:56px; font-size:17px }
+.vol-hoje-chegar .vol-nota{ margin-top:var(--e2) }
+.vol-hoje-chegou{ margin-top:var(--e2) }
+.vol-hoje-time{ margin-top:var(--e2) }
+.vol-hoje-time-cab{ display:flex; justify-content:space-between; align-items:baseline; gap:var(--e2) var(--e3); flex-wrap:wrap }
+.vol-hoje-conta{ font-family:var(--fonte); font-weight:500; text-transform:none; letter-spacing:0; font-size:var(--t-rot); color:var(--cinza) }
+.vol-hoje-time .vol-nota{ margin-top:var(--e2) }
+/* as três respostas lado a lado; no celular estreito, uma embaixo da outra */
+.vol-comofoi .vol-btns{ margin-top:var(--e3) }
+.vol-secao .vol-comofoi-ops .vol-bt{ flex:1 1 0; min-width:0; padding-left:var(--e3); padding-right:var(--e3) }
+@media (max-width:359px){ .vol-comofoi-ops{ flex-direction:column } }
+.vol-comofoi-nota{ display:grid; gap:var(--e2); margin-top:var(--e4); max-width:48ch }
+.vol-comofoi-nota label{ margin-bottom:0 }
+/* 16px no campo: abaixo disso o iPhone dá zoom na página ao tocar */
+.vol-comofoi-texto{ min-height:96px; font-size:16px; line-height:1.5; resize:vertical }
+.vol-comofoi-conta{ font-size:var(--t-rot); color:var(--cinza) }

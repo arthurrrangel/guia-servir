@@ -4,6 +4,7 @@ import { addDias, Estado, hojeISO, Nivel, Repertorio, Status } from './engine';
 import { ordemDoBanco, type ItemOrdem } from './engine';
 import type { MusicaDoBanco } from './ordem-do-culto';
 import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
+import type { ComoFoiDaEquipe, PresencaDoLider } from './chegada';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
 
@@ -411,6 +412,26 @@ export async function cancelarChamadas(cultoId: string, funcaoId: string) {
   const { data: r, error } = await sb()!.rpc('cancelar_chamadas', { p_culto: cultoId, p_funcao: funcaoId });
   if (error) throw error;
   return r as { ok: boolean; erro?: string; canceladas?: number };
+}
+
+/* =============================================================================
+   107 · A CHEGADA E O COMO FOI (02/10/2026). Mesmo jeito da 106: quem decide
+   (quem pode marcar, até quando, quem lê) é o banco; aqui só se leva e traz.
+   ============================================================================= */
+export async function presencasDoDia(equipeId: string, data: string): Promise<PresencaDoLider[]> {
+  const { data: r, error } = await sb()!.rpc('presencas_do_dia', { p_equipe: equipeId, p_data: data });
+  if (error) throw error;
+  return (r || []) as PresencaDoLider[];
+}
+export async function marcarChegada(cultoId: string, voluntarioId: string, chegou: boolean) {
+  const { data: r, error } = await sb()!.rpc('marcar_chegada', { p_culto: cultoId, p_voluntario: voluntarioId, p_chegou: chegou });
+  if (error) throw error;
+  return r as { ok: boolean; erro?: string; chegou_em?: string | null; marcado_por?: string | null };
+}
+export async function comoFoiDaEquipe(equipeId: string, de: string, ate: string): Promise<ComoFoiDaEquipe[]> {
+  const { data: r, error } = await sb()!.rpc('como_foi_da_equipe', { p_equipe: equipeId, p_de: de, p_ate: ate });
+  if (error) throw error;
+  return (r || []) as ComoFoiDaEquipe[];
 }
 
 export async function salvarConfig(equipeId: string, dados: any) {

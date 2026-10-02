@@ -1883,9 +1883,10 @@ export function sitePublico(base: string) {
       ? 'https://guiaservir.com' : u.origin;
   } catch { return (base || '').replace(/\/+$/, ''); }
 }
-/** O link do grupo: um só por ministério, nunca o token de ninguém. */
+/** O link do grupo: um só por ministério, nunca o token de ninguém.
+    107 · `cheguei` é o do cartaz da porta e do recado do dia. */
 export function linkDoVoluntario(base: string, slug: string | null | undefined,
-  para: 'confirmar' | 'disponibilidade' = 'confirmar') {
+  para: 'confirmar' | 'disponibilidade' | 'cheguei' = 'confirmar') {
   if (!base || !slug) return '';
   return `${sitePublico(base)}/${para}/${encodeURIComponent(slug)}`;
 }

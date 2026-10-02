@@ -208,12 +208,13 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
      /disponibilidade/<ministério> mandam para cá quem o aparelho ainda não
      conhece, com ?ir=. Depois do PIN, a pessoa cai no ponto da página que o
      link prometia, e não no topo. */
-  const [ir, setIr] = useState<'' | 'confirmar' | 'disponibilidade'>('');
+  const [ir, setIr] = useState<'' | 'confirmar' | 'disponibilidade' | 'cheguei'>('');
   useEffect(() => {
     const v = new URLSearchParams(window.location.search).get('ir');
-    if (v === 'confirmar' || v === 'disponibilidade') setIr(v);
+    if (v === 'confirmar' || v === 'disponibilidade' || v === 'cheguei') setIr(v);
   }, []);
-  const ancora = ir === 'confirmar' ? '#confirmar' : ir === 'disponibilidade' ? '#quando-posso' : '';
+  const ancora = ir === 'confirmar' ? '#confirmar' : ir === 'disponibilidade' ? '#quando-posso'
+    : ir === 'cheguei' ? '#hoje' : '';
 
   const ehDemo = () => process.env.NODE_ENV === 'development' && typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).has('demo');
@@ -619,6 +620,7 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     : fase === 'pin-primeiro' ? 'Falta uma coisa só: um PIN de 4 números para você voltar aqui.'
     : ir === 'confirmar' ? 'Ache seu nome e toque nele para confirmar a sua escala.'
     : ir === 'disponibilidade' ? 'Ache seu nome e toque nele para marcar os seus dias.'
+    : ir === 'cheguei' ? 'Ache seu nome e toque nele para marcar que você chegou.'
     : 'Ache seu nome na sua área e toque nele.';
 
   return (

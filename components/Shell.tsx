@@ -310,7 +310,8 @@ export default function Shell({ children }: { children: React.ReactNode }) {
            de ministério no demo cai no carregamento real e falha: o harness
            mede desenho, não navegação. */
         const eqs = equipesDemo();
-        const est = estadoDemo();
+        /* 107 · `?demo=hoje` desenha um culto no próprio dia (ver lib/demo) */
+        const est = estadoDemo(new URLSearchParams(window.location.search).get('demo') || '');
         setEquipes(eqs); _cacheEquipes = eqs;
         setEquipeId('demo');
         setS(est); _cacheEstado.set('demo', est); setFase('pronto');

@@ -12,12 +12,14 @@ import {
   candidatos, cargaDoMes, diaLongo, diasDoMes, esqueceOsDias, fmtDia, fmtLongo, funcoesAtivas, funcoesDoDia, garantirDia, gerarDia, gerarMes,
   hojeISO, MESES, metaFuncao, msgColeta, msgConfirmar, msgEscala, nomeDe, ocupadoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
-  gruposValidos, linkDoVoluntario,
+  gruposValidos, linkDoVoluntario, addDias,
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
 import OrdemDoCulto from '@/components/escalas/OrdemDoCulto';
 import ChamarParaCobrir from '@/components/escalas/ChamarParaCobrir';
+import ChegadaDoDia from '@/components/escalas/ChegadaDoDia';
+import ComoFoiDoDia from '@/components/escalas/ComoFoiDoDia';
 import ImprimirMes from '@/components/escalas/ImprimirMes';
 import { pl, cont } from '@/lib/plural';
 
@@ -995,6 +997,10 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
      contorno, como sempre foi */
   const temGrupos = !passado && gruposValidos(S).length > 0;
   const [mandar, setMandar] = useState(false);
+  /* 107 · a chegada e o como foi: no dia e nos que já passaram (a chegada
+     até 30 dias, que é até onde o banco deixa corrigir) */
+  const hojeAqui = hojeISO();
+  const comChegada = !!dia?.cultoId && !!equipe?.id && d <= hojeAqui && d >= addDias(hojeAqui, -30);
 
   return (
     <>
@@ -1091,6 +1097,10 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
         </div>
       )}
 
+      {/* 107 · O QUE QUEM SERVIU CONTOU (02/10/2026): foi bom, puxado ou teve
+          problema. Só no dia e depois; some sem a 107 no banco ou sem resposta. */}
+      {d <= hojeAqui && !!equipe?.id && <ComoFoiDoDia d={d} equipeId={equipe.id} />}
+
       {/* recado ACIMA da escala: escreve o aviso antes de montar e publicar.
           Ele vai na mensagem do grupo E na tela de quem está escalado. */}
       <label className="es-campo es-ec-recado">
@@ -1143,6 +1153,14 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           </span>
         </div>
       </div>
+
+      {/* 107 · A CHEGADA (02/10/2026): no dia do culto, quem tocou "Cheguei"
+          no próprio link e quem o líder do dia marcou; a liderança marca e
+          desmarca. Some sem a 107 no banco. */}
+      {comChegada && (
+        <ChegadaDoDia S={S} d={d} hoje={hojeAqui} cultoId={dia!.cultoId!} equipeId={equipe!.id}
+          ocupado={ocupado} aviso={aviso} />
+      )}
 
       {/* 106 · CHAMAR QUEM PODE COBRIR (02/10/2026): cada vaga aberta do dia
           ganha "Chamar quem pode". Só com a 106 no banco, em dia que tem
