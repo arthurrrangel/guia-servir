@@ -414,12 +414,22 @@ export function musicasDoDia(S: Estado, data: string): ItemOrdem[] {
   if (!S.config.repertorio) return [];
   return (S.escalas[data]?.ordem || []).filter(i => i?.t === 'musica' && !!i.titulo);
 }
-/** a linha da música na mensagem do grupo: '1. Bondade de Deus (G, 68 BPM)' */
+/** a linha da música na mensagem do grupo: '1. Bondade de Deus · Tom G · 68 BPM'
+
+    02/10/2026, sugestão do Louvor ("Setlist: Tons e BPM / 1 - Leão E
+    137bpm"): era '1. Bondade de Deus (G, 68 BPM)'. O "Tom" escrito evita a
+    leitura de "Leão E 137" como "Leão e 137", e o ponto do meio é o separador
+    do resto do sistema. */
 export function linhaDaMusica(it: ItemOrdem, n: number): string {
   const p: string[] = [];
-  if (it.tom) p.push(it.tom);
+  if (it.tom) p.push(`Tom ${it.tom}`);
   if (it.bpm) p.push(`${it.bpm} BPM`);
-  return `${n}. ${it.titulo}${p.length ? ` (${p.join(', ')})` : ''}`;
+  return [`${n}. ${it.titulo}`, ...p].join(' · ');
+}
+/** as observações do setlist: a nota de cada música, com o número dela
+    ('3. Escape: medley começando da ponte de outra música') */
+export function observacoesDasMusicas(mus: ItemOrdem[]): string[] {
+  return mus.map((it, i) => (it.nota ? `${i + 1}. ${it.titulo}: ${it.nota}` : '')).filter(Boolean);
 }
 
 /* A REGRA DO BANCO (`ordem_valida`, 105), IGUAL. É o que decide o que da
@@ -1937,7 +1947,9 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
   /* 105 · as músicas e o tom também: mudar a música ou o tom depois do envio
      pede mensagem nova. Só entra na conta quando existe, pela mesma razão. */
   const mus = musicasDoDia(S, data);
-  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}`).join(','));
+  /* 02/10/2026: a nota da música passou a ir na mensagem (as observações do
+     setlist), então mudar a nota também pede mensagem nova */
+  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}`).join(','));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
@@ -1978,14 +1990,24 @@ export function msgEscala(S: Estado, data: string,
   /* o setlist do dia, em todos os recortes: a banda, o vocal e o som ensaiam
      a mesma lista */
   const rep = repertorioDoDia(S, data);
-  /* 105 · as músicas da ordem, com o tom e o BPM, antes dos links: é o que a
-     banda precisa ler primeiro. Sem música na ordem, o bloco é o de sempre. */
+  /* 105 · as músicas da ordem, com o tom e o BPM.
+     02/10/2026, sugestão do Louvor: "colocar logo abaixo dos links do
+     setlist" a lista com tom e BPM e as observações. Era a lista ANTES dos
+     links; agora os links (para ouvir) vêm primeiro, depois o setlist com tom
+     e BPM, depois as observações (as notas das músicas). Sem música na ordem,
+     o bloco é o de sempre. */
   const mus = musicasDoDia(S, data);
-  if (rep.length || mus.length) {
+  if (rep.length) {
     L.push('REPERTÓRIO');
-    mus.forEach((it, i) => L.push(linhaDaMusica(it, i + 1)));
     for (const l of rep) L.push(`${l.nome}: ${l.url}`);
     L.push('');
+  }
+  if (mus.length) {
+    L.push('SETLIST: TOM E BPM');
+    mus.forEach((it, i) => L.push(linhaDaMusica(it, i + 1)));
+    L.push('');
+    const obs = observacoesDasMusicas(mus);
+    if (obs.length) { L.push('OBSERVAÇÕES'); obs.forEach(o => L.push(o)); L.push(''); }
   }
   /* quem já salvou os Ajustes alguma vez guardou o rodapé padrão ANTIGO,
      que fala em "link pessoal". Ao lado do link do grupo (que é o mesmo para

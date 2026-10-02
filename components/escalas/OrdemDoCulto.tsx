@@ -255,9 +255,11 @@ export default function OrdemDoCulto({ S, d, cultoId, equipeId, ocupado, pinta, 
           </label>
         )}
         <label className={`es-campo ${rascunho.t === 'musica' ? 'es-ec-of-largo' : 'es-ec-of-cheio'}`} htmlFor={idc('nota')}>
-          <span id={idc('r-nota')}>Nota</span>
+          {/* 02/10/2026: "Observação", a palavra do Louvor; na página de quem
+              serve e na mensagem, a da música vira as Observações do setlist */}
+          <span id={idc('r-nota')}>Observação</span>
           <input className="es-ctl" id={idc('nota')} aria-labelledby={idc('r-nota')} autoComplete="off" enterKeyHint="done" maxLength={TETO.nota + 20}
-            placeholder={rascunho.t === 'musica' ? 'ex: começa só voz e teclado' : 'ex: ceia, batismo, apresentação'}
+            placeholder={rascunho.t === 'musica' ? 'ex: medley com a ponte de outra música' : 'ex: ceia, batismo, apresentação'}
             value={rascunho.nota} onChange={mudar('nota')} />
         </label>
       </div>

@@ -100,11 +100,15 @@ try {
     const meta2 = await itens.nth(1).locator('.es-ec-oi-meta').innerText();
     ok(meta2 === 'G · 72 BPM · Lia · 6 min · com cifra', `${nome}: a música mostra tom, BPM, quem, tempo e cifra`, meta2);
 
-    /* a mensagem do grupo leva as músicas com o tom, antes dos links */
+    /* a mensagem do grupo leva as músicas com o tom e o BPM (02/10/2026,
+       sugestão do Louvor: "Setlist: Tons e BPM", depois dos links, e as
+       observações) */
     await dia.getByRole('button', { name: 'Mandar nos grupos' }).click(); await esperar(400);
     const msgs = await dia.locator('.es-mg-linha a.es-btn').evaluateAll(as => as.map(a => decodeURIComponent(a.getAttribute('href').split('?text=')[1] || '')));
-    ok(msgs.length >= 1 && msgs.every(t => t.includes('REPERTÓRIO\n1. Canção da Manhã (G, 72 BPM)\n2. Rio de Graça (F#m, 68 BPM)\n3. Luz no Caminho (Bb)\n')),
+    ok(msgs.length >= 1 && msgs.every(t => t.includes('SETLIST: TOM E BPM\n1. Canção da Manhã · Tom G · 72 BPM\n2. Rio de Graça · Tom F#m · 68 BPM\n3. Luz no Caminho · Tom Bb\n')),
       `${nome}: toda mensagem do dia leva as músicas com o tom`, (msgs[0] || '').slice(-300));
+    ok(msgs.every(t => t.includes('OBSERVAÇÕES\n1. Canção da Manhã: Começa só voz e teclado')),
+      `${nome}: e as observações, com o número da música`, (msgs[0] || '').slice(-300));
     ok(msgs.every(t => !/Abertura|Avisos|Palavra/.test(t)), `${nome}: os momentos não vão para a mensagem`);
     await dia.getByRole('button', { name: 'Mandar nos grupos' }).click().catch(() => {}); await esperar(300);
 
@@ -112,7 +116,7 @@ try {
     await itens.nth(1).locator('button.es-ec-oi-abre').click(); await esperar(300);
     const fEd = ordem.locator('form.es-ec-of');
     ok(await fEd.count() === 1 && await fEd.getByLabel('Música', { exact: true }).inputValue() === 'Canção da Manhã'
-      && await fEd.getByLabel('Tom').inputValue() === 'G' && await fEd.getByLabel('Nota').inputValue() === 'Começa só voz e teclado',
+      && await fEd.getByLabel('Tom').inputValue() === 'G' && await fEd.getByLabel('Observação').inputValue() === 'Começa só voz e teclado',
       `${nome}: tocar na linha abre o item com o que está salvo`);
     ok(await fEd.getByRole('button', { name: 'Tirar da ordem' }).count() === 1, `${nome}: e oferece tirar da ordem`);
     await fEd.getByRole('button', { name: 'Cancelar' }).click(); await esperar(200);
@@ -125,7 +129,7 @@ try {
     await ordem.getByRole('button', { name: 'Acrescentar momento' }).click(); await esperar(300);
     const fm = ordem.locator('form.es-ec-of');
     const rotulos = (await fm.locator('label > span').allInnerTexts()).join(',');
-    ok(rotulos === 'Momento,Duração (min),Quem,Nota', `${nome}: o momento pede só nome, duração, quem e nota`, rotulos);
+    ok(rotulos === 'Momento,Duração (min),Quem,Observação', `${nome}: o momento pede só nome, duração, quem e observação`, rotulos);
     await fm.getByRole('button', { name: 'Cancelar' }).click(); await esperar(200);
 
     /* acrescentar uma música que o ministério já tocou */
@@ -221,7 +225,7 @@ try {
     resposta = { ok: false, erro: 'MUDOU', ordem: [{ t: 'momento', titulo: 'Oração', min: 5 }, { t: 'momento', titulo: 'Versão da outra líder', min: 10 }] };
     await p.locator('.es-toast').waitFor({ state: 'detached', timeout: 8000 }).catch(() => {});
     await itens.first().locator('button.es-ec-oi-abre').click(); await esperar(300);
-    await form.getByLabel('Nota').fill('mudança minha');
+    await form.getByLabel('Observação').fill('mudança minha');
     const nMud = pedidos.length;
     await form.getByRole('button', { name: 'Salvar' }).click();
     await form.waitFor({ state: 'detached', timeout: 6000 }).catch(() => {}); await esperar(300);

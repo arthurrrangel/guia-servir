@@ -21,6 +21,7 @@ import FuncoesDoVoluntario from '@/components/escalas/FuncoesDoVoluntario';
 /* 104 · o aviso no celular */
 import AvisoNoCelular from '@/components/escalas/AvisoNoCelular';
 import OrdemNoLink, { ordensDoLink, type OrdemDoLink } from '@/components/escalas/OrdemNoLink';
+import SetlistNoLink, { musicasDaOrdem } from '@/components/escalas/SetlistNoLink';
 import ChamadasDoVoluntario from '@/components/escalas/ChamadasDoVoluntario';
 import type { ChamadaMinha } from '@/lib/chamadas';
 /* 107 · o "Cheguei" do dia e o "Como foi" depois */
@@ -723,8 +724,19 @@ export default function Eu() {
   /* 105 · a ordem só dos cultos em que a pessoa ainda serve: quem acabou de
      tocar em "Não posso" deixa de ver a ordem daquele dia na hora, como deixa
      de ver o repertório */
-  const ordensVisiveis = ordens.filter(o => itens.some(i =>
+  const ordensDosMeusCultos = ordens.filter(o => itens.some(i =>
     i.culto_id === o.culto_id && i.data >= hoje && (i.plantao || (i.status || 'pendente') !== 'recusado')));
+  /* 02/10/2026 · O SETLIST LOGO ABAIXO DOS LINKS (sugestão do Louvor): a
+     ordem do PRÓPRIO ministério, no culto que tem links, entra no bloco do
+     repertório com tom, BPM e observações (components/escalas/SetlistNoLink).
+     Se essa ordem é só música, ela já está inteira ali, e a seção "Ordem do
+     culto" não a repete; com momentos (abertura, avisos, palavra), ela segue
+     na seção, que é a linha do tempo do culto. */
+  const setlistDoCulto = (cultoId: string) =>
+    ordensDosMeusCultos.find(o => o.minha && o.culto_id === cultoId && musicasDaOrdem(o.ordem).length) || null;
+  const cultosComLinks = new Set(setlists.map(r => r.culto_id));
+  const ordensVisiveis = ordensDosMeusCultos.filter(o =>
+    !(o.minha && cultosComLinks.has(o.culto_id) && o.ordem.every(it => it.t === 'musica')));
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
   const restantes = futuras.filter(i =>
     !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
@@ -1171,6 +1183,8 @@ export default function Eu() {
                     </a>
                   ))}
                 </div>
+                {/* 02/10/2026 · tom, BPM e observações logo abaixo dos links */}
+                <SetlistNoLink ordem={setlistDoCulto(r.culto_id)?.ordem || []} />
               </div>
             ))}
           </section>

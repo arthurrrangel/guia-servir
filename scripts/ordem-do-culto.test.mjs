@@ -177,25 +177,45 @@ function estadoCom(ordem, ligado = true) {
 }
 caso('a mensagem leva as músicas com tom e BPM, e não os momentos', () => {
   const t = msgEscala(estadoCom(BOA), '2026-10-04');
-  assert.match(t, /REPERTÓRIO\n1\. Bondade de Deus \(G, 68 BPM\)\n2\. Ousado Amor \(F#m, 72 BPM\)/);
+  /* 02/10/2026, sugestão do Louvor: "Setlist: Tons e BPM", com o "Tom" escrito */
+  assert.match(t, /SETLIST: TOM E BPM\n1\. Bondade de Deus · Tom G · 68 BPM\n2\. Ousado Amor · Tom F#m · 72 BPM/);
   assert.doesNotMatch(t, /Abertura|Palavra/);
   assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Sem tom' }, 3), '3. Sem tom');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só tom', tom: 'Bb' }, 1), '1. Só tom · Tom Bb');
+  assert.equal(linhaDaMusica({ t: 'musica', titulo: 'Só BPM', bpm: 90 }, 2), '2. Só BPM · 90 BPM');
 });
-caso('com os links, as músicas vêm antes deles; desligado, nada aparece', () => {
+caso('com os links, os links vêm primeiro e o setlist logo abaixo; desligado, nada aparece', () => {
   const S = estadoCom(BOA);
   S.escalas['2026-10-04'].repertorio = { spotify: 'https://open.spotify.com/playlist/x' };
-  assert.match(msgEscala(S, '2026-10-04'), /REPERTÓRIO\n1\. Bondade de Deus \(G, 68 BPM\)\n2\. Ousado Amor \(F#m, 72 BPM\)\nSpotify: https:\/\/open\.spotify\.com\/playlist\/x/);
-  assert.doesNotMatch(msgEscala(estadoCom(BOA, false), '2026-10-04'), /REPERTÓRIO|Bondade/);
+  assert.match(msgEscala(S, '2026-10-04'),
+    /REPERTÓRIO\nSpotify: https:\/\/open\.spotify\.com\/playlist\/x\n\nSETLIST: TOM E BPM\n1\. Bondade de Deus · Tom G · 68 BPM\n2\. Ousado Amor · Tom F#m · 72 BPM\n/);
+  assert.doesNotMatch(msgEscala(estadoCom(BOA, false), '2026-10-04'), /REPERTÓRIO|SETLIST|Bondade/);
 });
-caso('o envio só "muda" quando música, tom ou BPM mudam', () => {
+caso('as observações: a nota de cada música, com o número dela, depois do setlist', () => {
+  const t = msgEscala(estadoCom(BOA), '2026-10-04');
+  assert.match(t, /2\. Ousado Amor · Tom F#m · 72 BPM\n\nOBSERVAÇÕES\n1\. Bondade de Deus: Comeca so voz e teclado\n/);
+  /* a nota de um momento não é observação do setlist */
+  const comNotaNoMomento = BOA.map(i => (i.titulo === 'Palavra' ? { ...i, nota: 'Pastor convidado' } : i));
+  assert.doesNotMatch(msgEscala(estadoCom(comNotaNoMomento), '2026-10-04'), /Pastor convidado/);
+  /* sem nota nenhuma, sem o cabeçalho */
+  const semNota = BOA.map(i => ({ ...i, nota: undefined }));
+  assert.doesNotMatch(msgEscala(estadoCom(semNota), '2026-10-04'), /OBSERVAÇÕES/);
+  /* o número da observação é o da música no setlist, não o da ordem inteira */
+  const terceira = BOA.map(i => (i.titulo === 'Ousado Amor' ? { ...i, nota: 'Medley com outra música' } : { ...i, nota: undefined }));
+  assert.match(msgEscala(estadoCom(terceira), '2026-10-04'), /OBSERVAÇÕES\n2\. Ousado Amor: Medley com outra música/);
+});
+caso('o envio só "muda" quando música, tom, BPM ou observação mudam', () => {
   const sem = assinaturaDoEnvio(estadoCom(undefined), '2026-10-04');
   assert.equal(assinaturaDoEnvio(estadoCom([BOA[0], BOA[3]]), '2026-10-04'), sem, 'só momentos: a assinatura de antes');
   const com = assinaturaDoEnvio(estadoCom(BOA), '2026-10-04');
   assert.notEqual(com, sem);
   const outroTom = BOA.map(i => (i.titulo === 'Ousado Amor' ? { ...i, tom: 'Gm' } : i));
   assert.notEqual(assinaturaDoEnvio(estadoCom(outroTom), '2026-10-04'), com, 'trocar o tom pede mensagem nova');
+  /* 02/10/2026: a nota da música virou observação na mensagem, então pede */
   const outraNota = BOA.map(i => (i.titulo === 'Bondade de Deus' ? { ...i, nota: 'outra' } : i));
-  assert.equal(assinaturaDoEnvio(estadoCom(outraNota), '2026-10-04'), com, 'mudar a nota não pede');
+  assert.notEqual(assinaturaDoEnvio(estadoCom(outraNota), '2026-10-04'), com, 'mudar a observação pede mensagem nova');
+  const notaDeMomento = BOA.map(i => (i.titulo === 'Palavra' ? { ...i, nota: 'outra' } : i));
+  assert.equal(assinaturaDoEnvio(estadoCom(notaDeMomento), '2026-10-04'), com, 'a nota de um momento não vai na mensagem e não pede');
 });
 
 /* 6 · a ponte -------------------------------------------------------------- */

@@ -3528,6 +3528,22 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-oi-cifra:active{ border-color:var(--noite) }
 .vol-oi-cifra:focus-visible{ outline:2px solid var(--noite); outline-offset:2px }
 
+/* 02/10/2026 · o setlist logo abaixo dos links do repertório (sugestão do
+   Louvor): a mesma linha da ordem do culto, com o número da música no lugar
+   da hora, e as observações embaixo, cada uma com o número da música */
+.vol-setlist{ margin-top:var(--e4) }
+.vol-setlist-tit{
+  font-size:var(--t-rot); font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--cinza);
+}
+.vol-setlist .vol-ordem-lista{ margin-top:var(--e2) }
+/* o número ocupa menos que a hora, e fica na linha do título */
+.vol-sl{ grid-template-columns:1.5em minmax(0,1fr) auto; align-items:start }
+.vol-sl .vol-oi-hora{ font-size:var(--t-corpo); line-height:inherit; font-weight:600; color:var(--noite) }
+.vol-sl .vol-oi-cifra{ align-self:center }
+.vol-setlist-obs{ margin-top:var(--e4); display:grid; gap:var(--e2) }
+.vol-setlist-obs p{ margin:0; font-size:var(--t-rot); line-height:1.5; color:var(--cinza); overflow-wrap:anywhere }
+.vol-setlist-obs p b{ color:var(--noite); font-weight:600 }
+
 /* a próxima escala: a data é o assunto, então é ela que fica grande */
 .vol-prox{ padding:var(--e5) 0 var(--e1) }
 .vol-prox-fn{

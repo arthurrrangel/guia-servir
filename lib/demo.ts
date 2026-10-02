@@ -164,6 +164,16 @@ export const ORDEM_DEMO = [
   { t: 'momento' as const, titulo: 'Avisos', min: 5 },
   { t: 'momento' as const, titulo: 'Palavra', quem: 'Pastor', min: 40 },
 ];
+/* 02/10/2026 · o setlist só de músicas (variante `setlist`): tom e BPM em
+   todas, a cifra em uma, e uma observação de medley na terceira */
+export const SETLIST_DEMO = [
+  { t: 'musica' as const, titulo: 'Canção da Manhã', tom: 'E', bpm: 137,
+    cifra: 'https://www.cifraclub.com.br/banda-exemplo/cancao-da-manha/' },
+  { t: 'musica' as const, titulo: 'Rio de Graça', tom: 'D', bpm: 65 },
+  { t: 'musica' as const, titulo: 'Luz no Caminho', tom: 'C', bpm: 62,
+    nota: 'Medley começando da ponte de Manhã de Sol (Coral Modelo).' },
+  { t: 'musica' as const, titulo: 'Só a Tua Presença', tom: 'C', bpm: 65 },
+];
 const REP_DEMO = {
   spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX0XUfTFmNBRM',
   deezer: 'https://link.deezer.com/s/30AbCdEfGh',
@@ -208,7 +218,7 @@ export function euDemo(variante: string = '') {
   const ultimos = [1, 2, 3, 4, 5, 6, 7].map(diaAntes).filter(d => [0, 6].includes(new Date(d + 'T12:00:00Z').getUTCDay()));
   const ehHoje = variante === 'hoje' || variante === 'hoje-lider';
   const chegou = (min: number) => new Date(Date.now() - min * 60000).toISOString();
-  return {
+  const fixture = {
     nome: 'Giovana Rosalem',
     equipe: 'Mídia',
     escalas: [
@@ -324,6 +334,27 @@ export function euDemo(variante: string = '') {
       ],
     } : {}),
   };
+  /* 02/10/2026 · `?demo=setlist`: alguém do Louvor, com os links do
+     repertório e a ordem do próprio ministério. No primeiro culto a ordem é
+     só música (vai inteira para baixo dos links, com tom, BPM e observações,
+     e a seção "Ordem do culto" não a repete); no segundo ela tem momentos e
+     continua na seção. Nomes e músicas inventados. */
+  if (variante === 'setlist') {
+    return {
+      ...fixture,
+      nome: 'Lia Martins', equipe: 'Louvor',
+      escalas: [
+        { culto_id: 'c1', funcao_id: 'fv1', data: prox[0], funcao: 'VOZ', status: 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
+        { culto_id: 'c2', funcao_id: 'fv2', data: prox[1] || prox[0], funcao: 'VIOLÃO', status: 'confirmado', primeira_vez: false, plantao: false,
+          repertorio: { youtube: 'https://youtube.com/playlist?list=PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG' } },
+      ],
+      ordens: [
+        { culto_id: 'c1', data: prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: true, ordem: SETLIST_DEMO },
+        { culto_id: 'c2', data: prox[1] || prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: true, ordem: ORDEM_DEMO },
+      ],
+    };
+  }
+  return fixture;
 }
 
 /* Fixture da visão da igreja. Cinco áreas, com os cinco estados que a leitura
