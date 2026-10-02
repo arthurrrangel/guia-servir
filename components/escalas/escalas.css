@@ -345,9 +345,20 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
   font-size:12px;font-weight:600;line-height:18px;text-align:center;font-variant-numeric:tabular-nums;
 }
 /* escrevendo no celular, as abas saem da frente: no navegador que encolhe a
-   página quando o teclado abre, elas subiam junto e cobriam o campo */
+   página quando o teclado abre, elas subiam junto e cobriam o campo.
+
+   E VOLTAM DEPOIS DO TOQUE, NÃO NO MEIO DELE (02/10/2026). Eram `display:none`
+   e voltavam no mesmo instante em que o campo perdia o foco, e o campo perde
+   o foco no começo do toque no botão: quem escrevia e tocava em "Salvar"
+   rente ao pé da tela via a barra reaparecer embaixo do dedo, e o toque caía
+   nela. Medido no harness: o "Salvar" da ordem do culto (390px, botão em
+   800-844px) perdia 2 de cada 5 toques. Agora a barra some sem ocupar toque
+   (`visibility`) e reaparece 0,4 s depois, quando o toque já chegou ao botão. */
 @media (max-width:1023px){
-  .es-casca:has(.es-corpo :is(textarea, input:is([type="text"],[type="search"],[type="email"],[type="tel"],[type="url"],[type="number"],:not([type]))):focus) > .es-abas{display:none}
+  .es-abas{transition:visibility 0s linear .4s}
+  .es-casca:has(.es-corpo :is(textarea, input:is([type="text"],[type="search"],[type="email"],[type="tel"],[type="url"],[type="number"],:not([type]))):focus) > .es-abas{
+    visibility:hidden;transition:none;
+  }
 }
 
 /* ------------------------------------------------------------- o corpo */
