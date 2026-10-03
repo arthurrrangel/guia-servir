@@ -173,7 +173,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     try { localStorage.setItem(CHAVE_TEMA, novo === 'escuro' ? 'dark' : 'light'); } catch { /* ok */ }
   }
 
-  /* três voltas possíveis ao abrir a página:
+  /* quatro começos possíveis ao abrir a página:
      1. do cartão: ?fim=cartao&c=FC27XXXXXXXX. A URL só escreve a tela; quem
         prova o pagamento é o painel da Stone.
      2. de um Pix em andamento (a aba foi descartada enquanto a pessoa estava no
@@ -215,6 +215,17 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
       if (fresco && t && CODIGO_OK.test(t.codigo) && t.valor > 0 && (t.meio === 'pixdireto' || linkConhecido)) {
         setTentativa(t);
         setFase(t.meio === 'pixdireto' ? 'pixdireto' : 'cartaoLink');
+        return;
+      }
+    } catch { /* idem */ }
+    /* 4. veio da ficha (/followcamp/inscricao): o campista e o irmão já
+       preenchidos. Só o nome; nada de documento passa de uma tela à outra. */
+    try {
+      const f = JSON.parse(sessionStorage.getItem('fc27-ficha-ultima') || 'null') as { campista?: unknown; irmao?: unknown } | null;
+      if (f && typeof f.campista === 'string' && f.campista) {
+        setCampista(f.campista);
+        if (typeof f.irmao === 'string' && f.irmao) { setReferente('irmaos'); setIrmao(f.irmao); }
+        else setReferente('inscricao');
       }
     } catch { /* idem */ }
   }, []);

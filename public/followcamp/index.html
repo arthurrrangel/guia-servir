@@ -265,7 +265,6 @@ section[id]{scroll-margin-top:84px}
 .condicoes dt{font:700 .86rem/1.4 var(--f-texto);color:var(--tinta)}
 .condicoes dd{margin:0;font-size:.93rem;line-height:1.45;color:var(--tinta-2)}
 @media (max-width:479.98px){.condicoes{gap:14px}.condicoes div{grid-template-columns:1fr;gap:2px}}
-.nota-ficha{margin-top:10px;font-size:.88rem;line-height:1.5;color:rgba(255,255,255,.88)}
 .mapa{display:inline-block;font:700 .9rem/1.2 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;padding:6px 0}
 .pagar-site{display:inline-block;margin-top:14px;font:700 .92rem/1.35 var(--f-texto);color:var(--rubi);text-decoration:underline;text-underline-offset:3px;text-wrap:balance}
 [hidden]{display:none!important}
@@ -364,7 +363,7 @@ section[id]{scroll-margin-top:84px}
         <svg class="i-sol" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M4.9 4.9l1.6 1.6M17.5 17.5l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.9 19.1l1.6-1.6M17.5 6.5l1.6-1.6"/></svg>
         <svg class="i-lua" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.6A8.5 8.5 0 0 1 9.4 3.5a8.5 8.5 0 1 0 11.1 11.1z"/></svg>
       </button>
-      <a class="btn btn-fogo btn-peq so-desk" href="#inscricao" data-ficha>Quero me inscrever</a>
+      <a class="btn btn-fogo btn-peq so-desk" href="/followcamp/inscricao" data-ficha>Quero me inscrever</a>
       <button class="icone-btn so-mob" id="abre-menu" type="button" aria-expanded="false" aria-controls="menu" aria-label="Abrir menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -386,7 +385,7 @@ section[id]{scroll-margin-top:84px}
     <a href="#inscricao" data-fecha>Inscrição</a>
     <a href="#duvidas" data-fecha>Dúvidas</a>
   </nav>
-  <a class="btn btn-fogo" href="#inscricao" data-ficha data-fecha>Quero me inscrever agora <span class="seta" aria-hidden="true">→</span></a>
+  <a class="btn btn-fogo" href="/followcamp/inscricao" data-ficha data-fecha>Quero me inscrever agora <span class="seta" aria-hidden="true">→</span></a>
   <p class="menu-rodape">05 a 10 de fevereiro de 2027 · 13 a 24 anos</p>
 </div>
 
@@ -407,7 +406,7 @@ section[id]{scroll-margin-top:84px}
       </h1>
       <p class="data"><span>05 a 10 de fevereiro de 2027</span><span class="ponto" aria-hidden="true">·</span><span>Carnaval</span></p>
       <div class="acoes">
-        <a class="btn btn-branco" href="#inscricao" data-ficha>Quero me inscrever agora <span class="seta" aria-hidden="true">→</span></a>
+        <a class="btn btn-branco" href="/followcamp/inscricao" data-ficha>Quero me inscrever agora <span class="seta" aria-hidden="true">→</span></a>
         <a class="link-pilula" href="#como-funciona">Como funciona</a>
       </div>
     </div>
@@ -495,7 +494,7 @@ section[id]{scroll-margin-top:84px}
           </ul>
         </article>
       </div>
-      <div class="centro"><a class="btn btn-fogo" href="#inscricao" data-ficha>Quero viver o Follow Camp</a></div>
+      <div class="centro"><a class="btn btn-fogo" href="/followcamp/inscricao" data-ficha>Quero viver o Follow Camp</a></div>
     </div>
   </section>
 
@@ -529,7 +528,7 @@ section[id]{scroll-margin-top:84px}
         <div class="linha"><dt>Quem acompanha</dt><dd><p>Pastores, líderes e monitores adultos acompanham todas as atividades.</p></dd></div>
         <div class="linha"><dt>Onde dormem</dt><dd><p>Dormitórios divididos por gênero e faixa etária. Em cada quarto um monitor ou líder adulto estará presente.</p></dd></div>
         <div class="linha"><dt>Alimentação</dt><dd><p>4 refeições por dia. Restrição alimentar ou alergia vai num campo próprio da ficha, e a equipe se organiza.</p></dd></div>
-        <div class="linha"><dt>Autorização</dt><dd><p>Para menores de 18 anos, a autorização assinada pelos responsáveis é obrigatória. O termo está disponível no formulário de inscrição.</p></dd></div>
+        <div class="linha"><dt>Autorização</dt><dd><p>Para menores de 18 anos, a autorização do responsável é obrigatória. Ela é dada na própria ficha de inscrição: o responsável informa nome e CPF e aceita o termo.</p></dd></div>
         <div class="linha"><dt>Contato</dt><dd><p>WhatsApp da organização: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a></p></dd></div>
       </dl>
     </div>
@@ -553,12 +552,11 @@ section[id]{scroll-margin-top:84px}
       <div class="inscricao-grid">
         <ol class="passos">
           <li><div><h3>Preencha a ficha cadastral</h3><p>Leva menos de cinco minutos.</p>
-            <div class="extra"><a class="btn btn-branco btn-peq" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte data-rotulo-ficha="Abrir a ficha">Quero me inscrever <span class="seta" aria-hidden="true">→</span></a></div>
-            <p class="nota-ficha" data-sem-ficha>O formulário abre em breve. Até lá, a inscrição começa pelo WhatsApp da organização.</p></div></li>
+            <div class="extra"><a class="btn btn-branco btn-peq" href="/followcamp/inscricao" data-converte>Abrir a ficha <span class="seta" aria-hidden="true">→</span></a></div></div></li>
           <li><div><h3>Autorização, se tiver menos de 18</h3><p>O termo de autorização dos responsáveis está no próprio formulário de inscrição.</p></div></li>
           <li><div><h3>Escolha a forma de pagamento</h3><p>Dinheiro, Pix ou cartão de crédito.</p>
             <div class="extra" data-pagar hidden><a class="btn btn-branco btn-peq" href="/followcamp/pagar">Pagar pelo site <span class="seta" aria-hidden="true">→</span></a></div></div></li>
-          <li><div><h3>Fique de olho no e-mail</h3><p>A confirmação da vaga chega por lá, com todas as informações do retiro.</p></div></li>
+          <li><div><h3>Fique de olho no WhatsApp</h3><p>A confirmação da vaga chega por lá, com todas as informações do retiro.</p></div></li>
         </ol>
 
         <div class="painel preco" aria-labelledby="t-preco">
@@ -578,7 +576,7 @@ section[id]{scroll-margin-top:84px}
               <li>Pulseira personalizada</li>
               <li>Diversos brindes especiais</li>
             </ul>
-            <p class="brinde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20M12 8.5C10.6 5 6.5 4.6 6.5 7c0 1.5 2.6 1.5 5.5 1.5zM12 8.5C13.4 5 17.5 4.6 17.5 7c0 1.5-2.6 1.5-5.5 1.5z"/></svg>Brinde especial para os 10 primeiros inscritos.</p>
+            <p class="brinde"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="8.5" width="17" height="4" rx="1"/><path d="M5 12.5V20h14v-7.5M12 8.5V20M12 8.5C10.6 5 6.5 4.6 6.5 7c0 1.5 2.6 1.5 5.5 1.5zM12 8.5C13.4 5 17.5 4.6 17.5 7c0 1.5-2.6 1.5-5.5 1.5z"/></svg>Brinde especial para os 10 primeiros inscritos com pagamento confirmado.</p>
           </div>
           <dl class="condicoes">
             <div><dt>Pagamento</dt><dd>Dinheiro, Pix ou cartão de crédito. Parcelamento no cartão ainda está sendo definido.</dd></div>
@@ -587,7 +585,7 @@ section[id]{scroll-margin-top:84px}
           </dl>
           <p class="nota">O número de campistas é limitado pela capacidade real dos dormitórios. As inscrições fecham quando as vagas acabarem, não quando o calendário mandar.</p>
           <p class="apoio"><b>Se o valor pesar no bolso,</b> existe apoio financeiro. É só conversar com a gente.</p>
-          <a class="btn btn-fogo" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Quero me inscrever agora</a>
+          <a class="btn btn-fogo" href="/followcamp/inscricao" data-converte>Quero me inscrever agora</a>
           <a class="pagar-site" href="/followcamp/pagar" data-pagar data-pagar-como hidden>Já fez a ficha? Pague aqui pelo site.</a>
         </div>
       </div>
@@ -605,9 +603,9 @@ section[id]{scroll-margin-top:84px}
         <details><summary>Quem pode participar?</summary><div class="resp"><p>Jovens de 13 a 24 anos. As dinâmicas são divididas por faixa etária.</p></div></details>
         <details><summary>O que significa “Eu me Rendo”?</summary><div class="resp"><p>É o tema do Follow Camp 2027. Seguir Jesus começa num ponto específico: quando você abre mão de controlar tudo e confia que Deus sabe conduzir a sua vida. Durante o retiro, vamos olhar pra isso de perto, com Romanos 12 como base.</p></div></details>
         <details><summary>Como funciona a alimentação? Tenho restrição, e agora?</summary><div class="resp"><p>São 4 refeições por dia inclusas na inscrição: café da manhã, almoço, lanche e janta. Se você tem restrição alimentar ou alergia, informe na ficha de inscrição: tem um campo próprio pra isso, e a equipe se organiza.</p></div></details>
-        <details><summary>Tem transporte?</summary><div class="resp"><p>Ainda estamos fechando os detalhes. Em breve a organização divulga as informações de transporte.</p></div></details>
-        <details><summary>O que eu levo?</summary><div class="resp"><p>A lista completa está no formulário de inscrição, incluindo o kit básico de higiene. O essencial: Bíblia, caderno, roupas confortáveis pra atividades, agasalho, itens de higiene e roupa de cama e banho.</p></div></details>
-        <details><summary>E se eu não puder mais ir?</summary><div class="resp"><p>Você tem direito de cancelar sem custo em até 7 dias depois de fazer a inscrição, garantido por lei pra compras online. Depois desse prazo, os cancelamentos seguem os prazos definidos pela organização, por conta dos contratos de locação e alimentação.</p><p>Fale com a gente pelo WhatsApp pra resolver: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a>.</p></div></details>
+        <details><summary>Tem transporte?</summary><div class="resp"><p>Não. Cada um chega por conta própria ao Espaço Bethel, na Estrada Roberto Burle Marx, 1245, em Barra de Guaratiba. O check-in é na sexta (05/02) a partir das 19h, e a saída, na quarta (10/02) às 10h.</p></div></details>
+        <details><summary>O que eu levo?</summary><div class="resp"><p>Bíblia, caderno, roupas confortáveis pra atividades, agasalho, itens de higiene e roupa de cama e banho.</p></div></details>
+        <details><summary>E se eu não puder mais ir?</summary><div class="resp"><p>Você pode cancelar sem custo em até 7 dias depois de fazer a inscrição, como a lei garante pra compras online. Depois disso não há devolução, por conta dos contratos de hospedagem e alimentação, mas a vaga pode passar para outro jovem até 05/01/2027.</p><p>Fale com a gente pelo WhatsApp pra resolver: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a>.</p></div></details>
       </div>
     </div>
   </section>
@@ -621,7 +619,7 @@ section[id]{scroll-margin-top:84px}
     <div class="cont">
       <h2 class="adesivo-texto" id="t-final" data-texto="Seguir começa quando eu me rendo.">Seguir começa quando eu me rendo.</h2>
       <p>São cinco noites e uma decisão. Em fevereiro, você pode descobrir o que acontece quando solta o controle e deixa Deus conduzir.</p>
-      <a class="btn btn-branco" href="https://wa.me/5521995946491?text=Oi!%20Quero%20me%20inscrever%20no%20Follow%20Camp%202027." target="_blank" rel="noopener" data-converte>Minha vaga é essa <span class="seta" aria-hidden="true">→</span></a>
+      <a class="btn btn-branco" href="/followcamp/inscricao" data-converte>Minha vaga é essa <span class="seta" aria-hidden="true">→</span></a>
       <p class="duvida">Ficou com alguma dúvida? Fala com a gente no WhatsApp: <a class="zap" href="https://wa.me/5521995946491" target="_blank" rel="noopener">21 99594-6491</a> ou <a class="zap" href="https://wa.me/5521998550229" target="_blank" rel="noopener">21 99855-0229</a>.</p>
     </div>
   </section>
@@ -643,7 +641,7 @@ section[id]{scroll-margin-top:84px}
 
 <div class="barra" id="barra">
   <p class="txt"><b>1º lote: R$ 697</b>até 3 de novembro</p>
-  <a class="btn btn-fogo btn-peq" href="#inscricao" data-ficha tabindex="-1">Inscrever</a>
+  <a class="btn btn-fogo btn-peq" href="/followcamp/inscricao" data-ficha tabindex="-1">Inscrever</a>
 </div>
 
 <script>
@@ -651,7 +649,6 @@ section[id]{scroll-margin-top:84px}
   "use strict";
   // Link do formulário de inscrição. Vazio: os botões de navegação levam à seção de
   // inscrição e os de inscrever abrem o WhatsApp da organização (já no HTML).
-  var FICHA_URL = "";
 
   var root = document.documentElement;
   if (!root.getAttribute("lang")) root.setAttribute("lang", "pt-BR");
@@ -715,18 +712,6 @@ section[id]{scroll-margin-top:84px}
     });
   }
   window.addEventListener("resize", function () { if (window.innerWidth >= 960) fecharMenu(false); });
-
-  /* Botões de inscrição: com a ficha no ar, todos abrem a ficha */
-  if (FICHA_URL) {
-    document.querySelectorAll("[data-ficha], [data-converte]").forEach(function (el) {
-      el.setAttribute("href", FICHA_URL);
-      el.setAttribute("target", "_blank");
-      el.setAttribute("rel", "noopener");
-      var rotulo = el.getAttribute("data-rotulo-ficha");
-      if (rotulo && el.firstChild && el.firstChild.nodeType === 3) el.firstChild.nodeValue = rotulo + " ";
-    });
-    document.querySelectorAll("[data-sem-ficha]").forEach(function (el) { el.hidden = true; });
-  }
 
   /* Pagar pelo site: o botão só aparece quando a Stone, o link de cartão da
      Conta Stone ou a chave Pix estão ligados (app/api/followcamp/meios), e a
