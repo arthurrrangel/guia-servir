@@ -78,27 +78,47 @@ caminho C não leva:
 
 ### B no Mac do Arthur (02/10/2026)
 
-O repositório também está no MacBook do Arthur, em `/Users/rangel/guia-servir`,
-com o git autenticado (osxkeychain). O caminho que funcionou:
+O repositório também está no MacBook do Arthur, em `/Users/rangel/guia-servir`.
+O HTTPS do Mac NÃO tem credencial do GitHub (`could not read Username for
+'https://github.com'`; o Chaves não tem item do github.com). Quem empurra é a
+chave SSH do Mac, que autentica como `arthurrrangel` sem pedir nada. O caminho
+que funcionou (02/10, 23:30, commits `e6428cf` e `5d38096`):
 
-1. No container: `git format-patch --binary origin/master..HEAD --stdout >
-   fase.patch`, testado num clone limpo NA BASE, com a árvore igual nos dois
-   (`git rev-parse "HEAD^{tree}"`).
+1. No container: buscar o `master` de verdade ANTES (`git ls-remote origin
+   refs/heads/master`): outra sessão pode ter empurrado enquanto você
+   trabalhava. Se mudou, `git fetch` + `git rebase origin/master` no container
+   e testar de novo. Depois `git format-patch --binary origin/master..HEAD
+   --stdout > fase.patch`, testado num clone limpo NA BASE, com a árvore igual
+   nos dois (`git rev-parse "HEAD^{tree}"`).
 2. Entregar: copiar para `/mnt/user-data/outputs/` e `device_commit_files` com
    `stagedPath` para `/Users/rangel/guia-servir/tmp/fase.patch` (`tmp/` está
    no `.gitignore`).
-3. Aplicar e empurrar pelo osascript (ferramenta "Control your Mac"), que roda
-   no macOS de verdade:
-   `do shell script "cd /Users/rangel/guia-servir && /usr/bin/git fetch origin master && /usr/bin/git merge --ff-only origin/master && /usr/bin/git -c user.name='Arthur Rangel' -c user.email=arthurrangel427@gmail.com am --3way tmp/fase.patch && /usr/bin/git push origin master && /usr/bin/git rev-parse HEAD"`
-4. Conferir como no Windows (o HEAD do Mac é o `origin/master` do container)
-   e `git reset --hard origin/master` no container.
+3. Conferir no Mac, pelo osascript (ferramenta "Control your Mac", que roda no
+   macOS de verdade), antes de aplicar: `git rev-parse HEAD` igual ao `master`
+   remoto, nada rastreado alterado (`git status --porcelain
+   --untracked-files=no`), sem `.git/index.lock`, sem `am`/`rebase` pela
+   metade. **O `origin/master` local do Mac fica velho** (quem empurra por SSH
+   com URL não atualiza a referência): compare com
+   `GIT_SSH_COMMAND='ssh -o BatchMode=yes' git ls-remote
+   git@github.com:arthurrrangel/guia-servir.git refs/heads/master`.
+4. Aplicar, conferir a árvore e empurrar por SSH:
+   `git -c user.name='Arthur Rangel' -c user.email=arthurrangel427@gmail.com am tmp/fase.patch`,
+   `git rev-parse 'HEAD^{tree}'` igual à do container, e
+   `GIT_SSH_COMMAND='ssh -o BatchMode=yes' git push git@github.com:arthurrrangel/guia-servir.git master:master`.
+   Depois, `git fetch git@github.com:arthurrrangel/guia-servir.git
+   master:refs/remotes/origin/master` para o Mac não ficar com a referência
+   velha. Apagar o patch de `tmp/`.
+5. Conferir como no Windows e `git reset --hard origin/master` no container.
 
-Quando o push responde `could not read Username for 'https://github.com'`, o
-Chaves do Mac não entregou a senha do GitHub: em 02/10 funcionou às 16:58 e
-falhou às 20:30, com o Mac parado havia duas horas, tanto no git da Apple
-quanto no do Homebrew. Não peça nem procure senha ou token. Volte o Mac para
-`origin/master` (o commit continua no patch), deixe o patch em `tmp/` e
-publique quando o Arthur voltar a usar o Mac, ou pelo caminho C.
+**O Mac é compartilhado com outras sessões.** Em 02/10, às 22:44, outra sessão
+deixou um commit no `master` do Mac (`8b87c14`, Follow Camp) e empurrou por
+SSH; o `origin/master` local continuou dizendo `2e227ed`. Nunca `git reset
+--hard` no Mac para "voltar ao origin" sem conferir o remoto de verdade e se
+há commit que não é seu, e nunca empurre um commit que não é seu sem saber se
+está pronto. Se a árvore não bater no passo 4, volte só para o commit em que
+você começou (o `HEAD` conferido no passo 3).
+
+Não peça nem procure senha ou token: o caminho é a chave SSH que já está lá.
 
 **Nunca rode git pelo `device_bash` nessa pasta.** O `device_bash` é uma VM
 Linux com a pasta montada, e a montagem não deixa apagar arquivo: um simples
@@ -206,6 +226,25 @@ git ls-tree --name-only origin/master | grep -E '\.(tsx|css)$'   # tem que sair 
 
 Árvores idênticas e nada solto na raiz. Sem essas duas linhas, você não
 publicou: você torceu.
+
+### O build falhou só no relógio (02/10/2026)
+
+`npm run build` roda `npm test` antes, e `scripts/engine-tempo.test.mjs` tem
+teto absoluto de 15 s para o pior caso do motor. A máquina da Vercel varia: o
+mesmo commit (`5d38096`) levou 15.623 ms num build (reprovou) e 9.331 ms no
+seguinte (passou); no container, 10,1 s com e 10,2 s sem a mudança. Antes de
+chamar de flutuação, PROVE: leia o log e confirme que a única linha FALHOU é
+"pior caso conhecido ... levou N ms", e meça o motor com e sem a mudança. Só
+então refaça o MESMO deploy, que é o do `master` mais recente:
+
+```
+vercel redeploy <url-do-deploy-que-falhou> --scope arthurrrangels-projects --no-wait
+```
+
+pelo osascript no Mac (o CLI de lá está autenticado; não leia nem imprima o
+token). O log sai com `vercel inspect <url> --logs --scope
+arthurrrangels-projects`. O conector da Vercel desta sessão não serve para
+isso: criar deploy de produção dá 403, e ler o log de build dá 404.
 
 ---
 
