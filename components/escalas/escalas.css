@@ -335,6 +335,15 @@ html:has(.es-porta),body:has(.es-porta){background:#f5f5f6}
   min-height:var(--es-abas-alt);padding:6px 2px 4px;position:relative;min-width:0;
   font-size:12px;line-height:14px;font-weight:500;color:var(--es-mudo);text-decoration:none;white-space:nowrap;
 }
+/* SEIS ABAS (109, a aba Culto): a 320px, com 4px de calha e 2px de folga
+   em cada aba, sobram 48px de texto, e "Entradas" a 12px ocupa 50,6px
+   (medido em Inter 500; 51,4px aceso, em 600). Abaixo de 340px a folga sai
+   e a calha vira 2px: 52,6px por aba, e o rótulo continua a 12px, que é o
+   piso da casa (11px foi a primeira tentativa, e a auditoria reprovou). */
+@media (max-width:340px){
+  .es-abas{padding-left:max(env(safe-area-inset-left, 0px), 2px);padding-right:max(env(safe-area-inset-right, 0px), 2px)}
+  .es-aba{padding-left:0;padding-right:0;letter-spacing:-.01em}
+}
 .es-aba > svg{width:22px;height:26px;color:var(--es-icone)}
 .es-aba[aria-current="page"]{color:var(--es-ink);font-weight:600}
 .es-aba[aria-current="page"] > svg{color:var(--es-ink)}

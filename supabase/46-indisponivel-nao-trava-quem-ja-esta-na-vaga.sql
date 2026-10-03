@@ -1,3 +1,22 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     fn_indisponivel (a 101 refez)
+
+   Achado em 03/10/2026: o teste de trancas lia o numero do arquivo pelos dois
+   primeiros caracteres, e "101" virava "10". Toda migracao de tres digitos
+   ficava invisivel para ele, e este arquivo passava sem tranca.
+
+   Por isso ele se recusa a rodar num banco que ja passou da 46. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada. Se voce REALMENTE precisa reaplicar, a mensagem do
+   erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(46);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    46 · "AVISOU QUE NÃO PODE" NÃO TRAVA O DIA INTEIRO
    16/09/2026, 15h.

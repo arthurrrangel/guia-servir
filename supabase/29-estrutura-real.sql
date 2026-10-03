@@ -1,3 +1,22 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     ministerios_publicos (a 109 refez: area fora do site nao aparece em /servir)
+
+   Medido em 03/10/2026, num banco na 109: reaplicar este arquivo so nao
+   desfez a 109 porque parou antes, num CHECK que nasceu depois dele. Isso e
+   sorte, nao protecao.
+
+   Por isso ele se recusa a rodar num banco que ja passou da 29. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada. Se voce REALMENTE precisa reaplicar, a mensagem do
+   erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(29);
+  end if;
+end $tranca$;
+
 -- =============================================================================
 -- 29 — A ESTRUTURA REAL DAS EQUIPES
 --

@@ -13,6 +13,10 @@ const base = { fill: 'none', stroke: 'currentColor', strokeWidth: 1.7, strokeLin
 export const IcPainel = ({ className }: P) => (
   <svg {...base} className={className}><rect x="3" y="3" width="7.5" height="7.5"/><rect x="13.5" y="3" width="7.5" height="7.5"/><rect x="3" y="13.5" width="7.5" height="7.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5"/></svg>
 );
+/* 109 · a prancheta do cronograma do culto: a folha com as linhas */
+export const IcCronograma = ({ className }: P) => (
+  <svg {...base} className={className}><rect x="5" y="4.5" width="14" height="16.5"/><path d="M9 3h6v3H9zM8.5 10.5h7M8.5 14h7M8.5 17.5h4"/></svg>
+);
 export const IcCalendario = ({ className }: P) => (
   <svg {...base} className={className}><rect x="3" y="5" width="18" height="16"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
 );

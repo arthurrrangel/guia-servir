@@ -1,0 +1,108 @@
+/* ==========================================================================
+   tela-cronograma.css · a aba Culto (109, 03/10/2026)
+   Todas sob `.es` e com prefixo `es-cr-` (ver a trava em escalas.css).
+   A folha impressa e a página pública têm folha própria
+   (components/cronograma/folha.css), porque moram fora da casca.
+   ========================================================================== */
+
+/* a folha inteira: as seções guardam o mesmo ritmo das outras telas */
+.es-cr{min-width:0;max-width:960px}
+.es-cr-volta{margin:0 0 var(--es-e3);font-size:13px;line-height:20px}
+.es-cr-volta .es-link{display:inline-flex;align-items:center;gap:2px;min-height:var(--es-h);text-decoration:none;color:var(--es-ink-2)}
+.es-cr-volta .es-link > svg{width:16px;height:16px}
+.es-cr-volta .es-link:hover{color:var(--es-ink)}
+
+.es-cr-estado{display:grid;gap:var(--es-e3);margin-bottom:var(--es-e8)}
+.es-cr-pend .es-item{min-height:56px}
+.es-cr-pend .es-c-acao{gap:var(--es-e2)}
+
+/* campo lido: rótulo à esquerda, valor à direita no desktop; empilhado no celular */
+.es-cr-dl{margin:0;border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup)}
+.es-cr-campo{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;padding:10px var(--es-e4);border-top:1px solid var(--es-linha)}
+.es-cr-campo:first-child{border-top:0}
+.es-cr-campo dt{font-size:12px;line-height:17px;font-weight:500;color:var(--es-mudo)}
+.es-cr-campo dd{margin:0;font-size:15px;line-height:22px;color:var(--es-ink);overflow-wrap:anywhere}
+.es-cr-campo dd.es-cr-forte{font-weight:600}
+@media (min-width:720px){
+  .es-cr-campo{grid-template-columns:150px minmax(0,1fr);gap:var(--es-e4);align-items:baseline}
+}
+.es-cr-falta{display:inline-block;padding:0 6px;font-size:13px;line-height:20px;font-weight:500;color:var(--es-warn);background:var(--es-warn-bg)}
+.es-cr-sem{font-size:14px;line-height:20px;color:var(--es-mudo)}
+.es-cr-salvo{margin:var(--es-e2) 0 0;font-size:12px;line-height:17px;color:var(--es-mudo)}
+
+/* No comando: o nome em peso, a situação ao lado */
+.es-cr-cmd{grid-template-areas:"tit acao" "meta acao"}
+.es-cr-quem{font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+@media (min-width:720px){
+  .es-cr-cmd{grid-template-columns:minmax(0,220px) minmax(0,1fr) auto;grid-template-areas:"tit meta acao"}
+}
+
+/* os horários lidos: a hora em coluna fixa, "quem" embaixo, apagado */
+.es-cr-tab{width:100%;border-collapse:collapse;border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup)}
+.es-cr-tab tr + tr{border-top:1px solid var(--es-linha)}
+.es-cr-tab th{width:72px;padding:10px 0 10px var(--es-e4);vertical-align:top;text-align:left;
+  font-size:14px;line-height:20px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--es-ink)}
+.es-cr-tab td{padding:10px var(--es-e4) 10px var(--es-e2);vertical-align:top}
+.es-cr-o{display:block;font-size:14px;line-height:20px;font-weight:500;color:var(--es-ink);overflow-wrap:anywhere}
+.es-cr-q{display:block;font-size:13px;line-height:18px;color:var(--es-mudo);overflow-wrap:anywhere}
+@media (min-width:720px){
+  .es-cr-tab td{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,40%);gap:var(--es-e4);align-items:baseline}
+  .es-cr-q{text-align:right}
+}
+
+.es-cr-musicas,.es-cr-avisos{margin:0 0 var(--es-e3);padding:var(--es-e3) var(--es-e4) var(--es-e3) calc(var(--es-e4) + 20px);
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);font-size:14px;line-height:20px}
+.es-cr-musicas li + li,.es-cr-avisos li + li{margin-top:6px}
+.es-cr-avisos li{overflow-wrap:anywhere}
+.es-cr-como{margin-left:var(--es-e2);font-size:12px;color:var(--es-mudo);white-space:nowrap}
+.es-cr-nada{margin:0 0 var(--es-e3);font-size:14px;line-height:20px;color:var(--es-mudo)}
+.es-cr-nota{margin:0 0 var(--es-e3);font-size:13px;line-height:19px;color:var(--es-mudo)}
+.es-cr-linkbtn{border:0;background:transparent;padding:0;font:inherit;font-weight:500;cursor:pointer;min-height:var(--es-h);text-align:left}
+.es-cr-final{display:grid;gap:var(--es-e3);justify-items:start}
+.es-cr-final > .es-cr-dl{justify-self:stretch}
+.es-cr-pe{margin:var(--es-e8) 0 0;font-size:12px;line-height:17px;color:var(--es-mudo)}
+
+/* ---------------------------------------------------------- formulários */
+.es-cr-form{display:grid;gap:var(--es-e3);padding:var(--es-e4);border:1px solid var(--es-linha-2);border-radius:var(--es-r3);background:var(--es-sup-2)}
+.es-cr-form .es-campo{margin-bottom:0}
+.es-cr-opc{font-style:normal;font-weight:400;color:var(--es-mudo)}
+.es .es-cr-curta{min-height:64px}
+.es-cr-botoes{margin-top:var(--es-e1)}
+.es-cr-modelo{font-size:14px}
+
+/* as linhas editáveis: hora, o que, quem e o X. No celular, "quem" desce. */
+.es-cr-linhas{list-style:none;margin:0;padding:0;display:grid;gap:var(--es-e2)}
+.es-cr-lin{display:grid;gap:6px var(--es-e2);align-items:start;
+  grid-template-columns:84px minmax(0,1fr) 44px;grid-template-areas:"hora oque tira" "quem quem quem"}
+.es-cr-lin + .es-cr-lin{padding-top:var(--es-e2);border-top:1px dashed var(--es-linha-2)}
+.es-cr-lin-cab{display:none}
+.es .es-cr-hora{grid-area:hora;font-variant-numeric:tabular-nums}
+.es .es-cr-oque{grid-area:oque}
+.es .es-cr-quemfaz{grid-area:quem}
+.es-cr-tira{grid-area:tira;justify-self:end}
+.es-cr-erro{grid-column:1 / -1}
+@media (min-width:720px){
+  .es-cr-lin{grid-template-columns:84px minmax(0,1fr) minmax(0,34%) 44px;grid-template-areas:"hora oque quem tira"}
+  .es-cr-lin + .es-cr-lin{padding-top:0;border-top:0}
+  .es-cr-lin-cab{display:grid;font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo)}
+  .es-cr-lin-cab > span:nth-child(1){grid-area:hora}
+  .es-cr-lin-cab > span:nth-child(2){grid-area:oque}
+  .es-cr-lin-cab > span:nth-child(3){grid-area:quem}
+  .es-cr-lin-cab > span:nth-child(4){grid-area:tira}
+}
+.es-cr-avisos-ed{margin:0}
+.es-cr-av{display:grid;gap:6px var(--es-e2);align-items:start;grid-template-columns:minmax(0,1fr) 44px;grid-template-areas:"texto tira" "como como"}
+.es .es-cr-avtexto{grid-area:texto}
+.es .es-cr-avcomo{grid-area:como;max-width:200px}
+.es-cr-av > .es-cr-tira{grid-area:tira}
+.es-cr-av + .es-cr-av{padding-top:var(--es-e2);border-top:1px dashed var(--es-linha-2)}
+@media (min-width:720px){
+  .es-cr-av{grid-template-columns:minmax(0,1fr) 150px 44px;grid-template-areas:"texto como tira"}
+  .es-cr-av + .es-cr-av{padding-top:0;border-top:0}
+}
+
+/* ------------------------------------------------------- mandar no grupo */
+.es-cr-mandar{margin-bottom:var(--es-e8)}
+.es-cr-mandar .es-caixa-corpo{display:grid;gap:var(--es-e3)}
+.es-cr-msg{margin:0;padding:var(--es-e3) var(--es-e4);border:1px solid var(--es-linha);border-radius:var(--es-r2);background:var(--es-sup-2);
+  font-family:var(--es-fonte);font-size:14px;line-height:21px;color:var(--es-ink);white-space:pre-wrap;overflow-wrap:anywhere;max-width:62ch}

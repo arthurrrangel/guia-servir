@@ -9334,3 +9334,36 @@ button.ingresso-cal:active{ background:transparent; border-bottom-color:var(--no
    todas as telas a partir de 720px. */
 .vol .vol-quem{ font-size:13px }
 @media(min-width:720px){ .vol .vol-quem{ font-size:14px } }
+
+/* =============================================================================
+   O DIRIGENTE DA SEMANA, NO LINK DELE · 109, 03/10/2026
+   O cartão em /eu/<token> (`CronogramaNoLink`) e o formulário em
+   /eu/<token>/culto/<data>: a Palavra e os avisos. Prefixo `vol-cr-`.
+   ============================================================================= */
+.vol-cr .vol-btns{ max-width:360px }
+.vol-cr-falta{ font-weight:600; color:var(--noite) }
+.vol-cr-form{ display:grid; gap:var(--e2); max-width:520px }
+.vol-cr-form > label{ margin:var(--e3) 0 0 }
+.vol-cr-form > label:first-child{ margin-top:0 }
+.vol-cr-form textarea{ min-height:88px; line-height:1.5; resize:vertical }
+.vol-cr-dica{ font-size:var(--t-apoio); line-height:1.5; color:var(--cinza) }
+.vol-cr-form > label.vol-cr-caixa{
+  display:flex; align-items:center; gap:var(--e3); min-height:var(--toque); margin-top:var(--e3);
+  text-transform:none; letter-spacing:normal; font-family:var(--fonte); font-weight:500;
+  font-size:var(--t-ui); color:var(--ink); cursor:pointer;
+}
+.vol-cr-caixa input{ width:20px; height:20px; min-height:0; margin:0; padding:0; flex:none; accent-color:var(--noite) }
+.vol-cr-btns{ margin-top:var(--e3); max-width:360px }
+.vol-cr-avisos{ list-style:none; margin:0; padding:0; display:grid; gap:var(--e3) }
+.vol-cr-aviso{ display:grid; gap:var(--e2); grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"texto texto" "como tira"; align-items:center }
+.vol-cr-aviso > input{ grid-area:texto }
+.vol-cr-aviso > select{ grid-area:como; max-width:200px }
+.vol-cr-aviso > .vol-cr-tira{ grid-area:tira; justify-self:end; margin:0 }
+.vol-cr-aviso + .vol-cr-aviso{ padding-top:var(--e3); border-top:1px solid var(--linha) }
+@media (min-width:560px){
+  .vol-cr-aviso{ grid-template-columns:minmax(0,1fr) 140px auto; grid-template-areas:"texto como tira" }
+  .vol-cr-aviso + .vol-cr-aviso{ padding-top:0; border-top:0 }
+}
+/* a folha inteira, só para ler, na coluna de 640px: uma coluna só */
+.vol-cr-folha .fo{ padding:var(--e4) 0 0; border:0 }
+.vol-cr-folha .fo-duas{ grid-template-columns:minmax(0,1fr); gap:22px }

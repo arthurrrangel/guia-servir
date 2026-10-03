@@ -19,6 +19,8 @@ import {
 } from '@/lib/engine';
 /* 107 · o que quem serviu contou nas duas últimas semanas */
 import { ComoFoiNoPainel } from '@/components/escalas/ComoFoiDoDia';
+/* 109 · o cronograma do culto */
+import { CronogramaNoPainel } from '@/components/escalas/Cronograma';
 import { pl, cont } from '@/lib/plural';
 
 /* =============================================================================
@@ -488,6 +490,9 @@ function Painel() {
         </div>
 
         <div className="es-pilha">
+          {/* 109 · o cronograma do próximo culto: o que falta, e o que é com
+              esta área. Sem a 109 no banco, não aparece. */}
+          <CronogramaNoPainel />
           <Pendencias />
           {!!equipe?.id && <ComoFoiNoPainel equipeId={equipe.id} hoje={hoje} aDiaLongo={diaLongo} />}
 

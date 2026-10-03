@@ -1,3 +1,22 @@
+/* ESTE ARQUIVO E PASSADO. A TRANCA ESTA AQUI PORQUE ELE PODE DESFAZER.
+
+   O que este arquivo consegue reverter, se rodar fora de hora:
+     numeros_publicos (a 109 refez: so conta as areas que o site mostra)
+
+   Medido em 03/10/2026, num banco na 109: reaplicar este arquivo passava em
+   silencio e os numeros da pagina inicial voltavam a contar a Producao e os
+   Dirigentes (5 ministerios viravam 7).
+
+   Por isso ele se recusa a rodar num banco que ja passou da 28. Aplicado na
+   ordem, do zero, `exige_versao_ate` ainda nem existe (ela nasce na 55) e o
+   bloco nao faz nada. Se voce REALMENTE precisa reaplicar, a mensagem do
+   erro diz como. */
+do $tranca$ begin
+  if to_regprocedure('public.exige_versao_ate(int)') is not null then
+    perform public.exige_versao_ate(28);
+  end if;
+end $tranca$;
+
 /* =============================================================================
    28 — OS NÚMEROS DA PORTA PÚBLICA
 

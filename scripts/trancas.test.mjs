@@ -124,17 +124,21 @@ const temTranca = (f) => /exige_versao_ate\s*\(/.test(corpo.get(f))
 
 for (let i = 0; i < arquivos.length; i++) {
   const f = arquivos[i]
-  const n = Number(f.slice(0, 2))
+  /* 03/10/2026 · `Number(f.slice(0, 2))` lia "101" como 10: toda migração
+     de três dígitos ficava fora da comparação, e três arquivos (42, 45, 46)
+     passavam sem tranca com funções que a 101 refez. O número é o prefixo
+     inteiro, como na ordenação lá em cima. */
+  const n = parseInt(f, 10)
   if (temTranca(f)) continue
 
   const colisoes = new Map()
   for (let j = i + 1; j < arquivos.length; j++) {
     const g = arquivos[j]
-    if (Number(g.slice(0, 2)) <= n) continue
+    if (parseInt(g, 10) <= n) continue
     for (const obj of defs.get(f)) {
       if (defs.get(g).has(obj)) {
         if (!colisoes.has(obj)) colisoes.set(obj, [])
-        colisoes.get(obj).push(g.slice(0, 2))
+        colisoes.get(obj).push(String(parseInt(g, 10)))
       }
     }
   }

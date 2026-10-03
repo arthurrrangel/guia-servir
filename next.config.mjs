@@ -79,6 +79,10 @@ const ROTAS_FECHADAS = [
   '/escala', '/escala/:caminho+',
   '/time', '/time/:caminho+',
   '/ajustes', '/ajustes/:caminho+',
+  /* 109 · a aba Culto (o cronograma de cada culto) e a folha pelo link do
+     grupo: a folha tem nome de quem serve e o tema antes do culto */
+  '/cronogramas', '/cronogramas/:caminho+',
+  '/cronograma/:caminho+',
   /* lista de nomes por equipe, e convite de uso único */
   '/equipe/:caminho+',
   '/candidatura/:caminho+',

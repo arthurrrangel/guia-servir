@@ -102,7 +102,7 @@ const anda = (d) => {
     else if (/\.tsx?$/.test(n)) arquivos.push(p);
   }
 };
-['app/painel', 'app/escala', 'app/time', 'app/ajustes', 'app/entrar', 'components/Shell.tsx',
+['app/painel', 'app/escala', 'app/time', 'app/ajustes', 'app/entrar', 'app/cronogramas', 'components/Shell.tsx',
  'components/escalas', 'lib/confirmar.ts'].forEach(anda);
 ok(arquivos.length >= 10, 'os arquivos das telas do líder foram achados', String(arquivos.length));
 

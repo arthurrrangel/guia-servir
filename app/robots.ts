@@ -33,6 +33,10 @@ export default function robots(): MetadataRoute.Robots {
         '/eu/',
         /* a área do gestor */
         '/painel', '/escala', '/time', '/ajustes', '/entrar',
+        /* 109 · a aba Culto e a folha do cronograma pelo link do grupo.
+           '/cronograma/' COM a barra: sem ela, o prefixo pegaria /cronogramas
+           (que já está acima) e nada mais; com ela, fica claro que é a folha */
+        '/cronogramas', '/cronograma/',
         /* listas por equipe e convites: nome de pessoa, ou token de uso único */
         '/equipe/', '/candidatura/',
         /* Demandas: o link pessoal do membro é `/demandas?t=<token>`, e o

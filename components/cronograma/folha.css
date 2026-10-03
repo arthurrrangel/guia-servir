@@ -1,0 +1,160 @@
+/* =============================================================================
+   A FOLHA DO CULTO — 109, 03/10/2026
+
+   Prefixo `fo-`. A folha mora fora da casca do líder (na página pública, no
+   PDF e na página do dirigente), então não usa as peças `es-`. Os tokens são
+   os da casa (globals.css), sempre com reserva escrita: a folha impressa não
+   pode depender de um token que um dia mude de nome.
+
+   Na tela: uma coluna no celular, duas a partir de 640px. No papel: A4, duas
+   colunas sempre, tamanhos em pt (a regra de impressão de globals.css mostra
+   só o `.impresso`).
+   ============================================================================= */
+.fo{
+  --fo-ink:var(--ink, #252525);
+  --fo-ink2:rgba(37,37,37,.84);
+  --fo-mudo:var(--mudo, rgba(37,37,37,.68));
+  --fo-linha:rgba(37,37,37,.12);
+  --fo-linha2:rgba(37,37,37,.22);
+  --fo-ok:var(--ok, #0a6b3f);
+  --fo-ok-bg:var(--ok-bg, rgba(10,107,63,.10));
+  --fo-warn:var(--warn, #7a5005);
+  --fo-warn-bg:var(--warn-bg, rgba(170,112,10,.13));
+  --fo-bad:var(--bad, #a82e24);
+  --fo-bad-bg:var(--bad-bg, rgba(168,46,36,.09));
+  background:#fff; color:var(--fo-ink);
+  font-family:var(--fonte, "Inter", system-ui, sans-serif);
+  max-width:840px; margin:0 auto; padding:32px 36px 22px;
+  border:1px solid var(--fo-linha);
+  font-variant-numeric:tabular-nums;
+  /* o site centraliza tudo dentro de <main> abaixo de 760px (globals.css,
+     `main, footer.casa-pe`); a folha é um documento, e se lê alinhada */
+  text-align:left;
+}
+.fo *{ box-sizing:border-box }
+.fo-topo{ display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding-bottom:14px; border-bottom:1.5px solid var(--fo-ink) }
+.fo-logo{ height:26px; width:auto; display:block; color:var(--fo-ink); flex:none }
+.fo-topo-dir{ text-align:right; min-width:0 }
+.fo-rot{ font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--fo-mudo) }
+.fo-estado{ display:inline-block; margin-top:5px; padding:2px 8px; font-size:12.5px; font-weight:600; line-height:1.4;
+  color:var(--fo-mudo); background:rgba(37,37,37,.06) }
+.fo-estado.fo-ok{ color:var(--fo-ok); background:var(--fo-ok-bg) }
+.fo-estado.fo-warn{ color:var(--fo-warn); background:var(--fo-warn-bg) }
+.fo-estado.fo-bad{ color:var(--fo-bad); background:var(--fo-bad-bg) }
+.fo-titulo{ margin:24px 0 6px; font-size:clamp(26px, 5.2vw, 34px); font-weight:700; letter-spacing:-.02em; line-height:1.08;
+  text-wrap:balance }
+.fo-sub{ margin:0; font-size:15px; line-height:1.45; color:var(--fo-ink2) }
+.fo-sub b{ font-weight:600; color:var(--fo-ink) }
+
+.fo-duas{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:30px; margin-top:26px }
+.fo-bloco h2{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; flex-wrap:wrap;
+  margin:0 0 6px; padding-bottom:6px; border-bottom:1px solid var(--fo-linha2);
+  font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--fo-mudo) }
+.fo-bloco h2 span{ letter-spacing:0; text-transform:none; font-weight:500; font-size:12px }
+.fo-campo{ padding:5px 0 }
+.fo-k{ font-size:12px; color:var(--fo-mudo) }
+.fo-v{ margin:1px 0 0; font-size:15px; line-height:1.42; overflow-wrap:anywhere }
+.fo-tema{ font-size:17px; font-weight:700; letter-spacing:-.01em; line-height:1.3 }
+.fo-frase{ font-style:italic; color:var(--fo-ink2) }
+.fo-nada{ margin:4px 0 0; font-size:14px; color:var(--fo-mudo) }
+
+.fo-lista{ list-style:none; margin:0; padding:0 }
+.fo-lista li{ display:flex; justify-content:space-between; align-items:baseline; gap:12px;
+  padding:7px 0; border-bottom:1px solid var(--fo-linha); font-size:14.5px; line-height:1.35 }
+.fo-lista li:last-child{ border-bottom:0 }
+.fo-p{ color:var(--fo-ink2); min-width:0 }
+.fo-n{ font-weight:600; text-align:right; min-width:0; overflow-wrap:anywhere }
+.fo-check{ display:inline-block; margin-left:4px; vertical-align:-1px; color:var(--fo-ok) }
+
+.fo-falta{ display:inline-block; padding:1px 6px; font-size:12.5px; font-weight:600; line-height:1.45;
+  color:var(--fo-warn); background:var(--fo-warn-bg); text-align:left }
+.fo-falta-dono{ font-weight:500 }
+
+.fo-crono{ margin-top:28px }
+.fo-tab{ width:100%; border-collapse:collapse }
+.fo-tab tr{ border-bottom:1px solid var(--fo-linha) }
+.fo-tab tr:last-child{ border-bottom:0 }
+.fo-tab th, .fo-tab td{ padding:6px 0; vertical-align:top; text-align:left; font-size:14.5px; line-height:1.35 }
+.fo-h{ width:68px; font-weight:700 }
+.fo-o{ font-weight:500; padding-right:12px }
+.fo-tab .fo-q{ width:38%; text-align:right; font-size:13.5px; color:var(--fo-mudo) }
+
+.fo-musicas, .fo-avisos{ margin:2px 0 4px; padding-left:20px; font-size:14.5px; line-height:1.4 }
+.fo-musicas li, .fo-avisos li{ padding:3px 0 }
+.fo-avisos li{ overflow-wrap:anywhere }
+.fo-como{ margin-left:8px; font-size:12px; color:var(--fo-mudo); white-space:nowrap }
+
+.fo-pe{ display:flex; justify-content:space-between; gap:6px 16px; flex-wrap:wrap; margin-top:26px; padding-top:10px;
+  border-top:1px solid var(--fo-linha2); font-size:12px; color:var(--fo-mudo) }
+.fo-so-leitor{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; border:0 }
+
+@media (max-width:640px){
+  .fo{ padding:22px 16px 18px; border-left:0; border-right:0 }
+  .fo-duas{ grid-template-columns:minmax(0,1fr); gap:22px; margin-top:22px }
+  .fo-titulo{ margin-top:20px }
+  .fo-crono{ margin-top:22px }
+}
+/* celular estreito: o "quem" desce para baixo do "o que", em vez de espremer
+   as duas colunas */
+@media (max-width:520px){
+  .fo-tab tr{ display:grid; grid-template-columns:58px minmax(0,1fr); padding:6px 0 }
+  .fo-tab th, .fo-tab td{ padding:0 }
+  .fo-h{ width:auto }
+  .fo-o{ padding-right:0 }
+  .fo-tab .fo-q{ grid-column:2; width:auto; text-align:left; padding-top:1px }
+}
+
+/* --------------------------------------------------------------- o papel ---
+   A4 com as margens da regra geral de impressão (12 mm dos lados). Uma
+   página para o culto comum: até uns 16 horários, 8 músicas e 6 avisos.
+   Mais que isso, a folha continua na página seguinte sem cortar nada. */
+@media print{
+  .impresso-folha .fo{ max-width:none; margin:0; padding:0; border:0; font-size:9.5pt }
+  .impresso-folha .fo-topo{ padding-bottom:3.4mm; border-bottom-width:1.2pt }
+  .impresso-folha .fo-logo{ height:8mm }
+  .impresso-folha .fo-rot{ font-size:7.2pt }
+  .impresso-folha .fo-estado{ font-size:7.8pt; padding:.5mm 2mm; margin-top:1.2mm }
+  .impresso-folha .fo-titulo{ margin:4.5mm 0 1mm; font-size:21pt }
+  .impresso-folha .fo-sub{ font-size:9.6pt }
+  .impresso-folha .fo-duas{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:8mm; margin-top:5mm }
+  .impresso-folha .fo-bloco{ break-inside:avoid; page-break-inside:avoid }
+  .impresso-folha .fo-bloco h2{ font-size:7.2pt; margin-bottom:1.4mm; padding-bottom:1.2mm }
+  .impresso-folha .fo-bloco h2 span{ font-size:7.4pt }
+  .impresso-folha .fo-campo{ padding:1.1mm 0 }
+  .impresso-folha .fo-k{ font-size:7.4pt }
+  .impresso-folha .fo-v{ font-size:9.4pt }
+  .impresso-folha .fo-tema{ font-size:11pt }
+  .impresso-folha .fo-nada{ font-size:8.8pt }
+  .impresso-folha .fo-lista li{ padding:1.25mm 0; font-size:9pt }
+  .impresso-folha .fo-falta{ font-size:7.8pt; padding:.3mm 1.6mm }
+  .impresso-folha .fo-crono{ margin-top:5mm }
+  .impresso-folha .fo-tab tr{ display:table-row; break-inside:avoid }
+  .impresso-folha .fo-tab th, .impresso-folha .fo-tab td{ padding:.95mm 0; font-size:9pt; line-height:1.3 }
+  .impresso-folha .fo-h{ width:15mm }
+  .impresso-folha .fo-tab .fo-q{ width:62mm; font-size:8.3pt; text-align:right }
+  .impresso-folha .fo-musicas, .impresso-folha .fo-avisos{ font-size:9pt; padding-left:5mm }
+  .impresso-folha .fo-musicas li, .impresso-folha .fo-avisos li{ padding:.3mm 0; line-height:1.35 }
+  .impresso-folha .fo-como{ font-size:7.6pt }
+  .impresso-folha .fo-pe{ margin-top:4mm; padding-top:2mm; font-size:7.2pt }
+}
+
+/* ------------------------------------------------ a página do link do grupo */
+/* é um <main>: a regra geral do site (`main{max-width;margin}`) estreitava o
+   fundo cinza numa coluna com branco dos lados */
+.fo-pagina{ max-width:none; margin:0; min-height:100vh; min-height:100dvh; background:#f3f3f2; padding:24px 16px 48px;
+  font-family:var(--fonte, "Inter", system-ui, sans-serif); color:var(--ink, #252525) }
+.fo-barra{ max-width:840px; margin:0 auto 12px; display:flex; justify-content:flex-end; gap:10px }
+.fo-botao{ display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:0 18px;
+  border:1px solid var(--ink, #252525); background:var(--preto, #252525); color:#fff;
+  font:inherit; font-size:15px; font-weight:600; cursor:pointer }
+.fo-botao:hover{ background:var(--preto-toque, #3a3a3a) }
+.fo-botao:focus-visible{ outline:2px solid var(--ink, #252525); outline-offset:3px }
+.fo-pagina-msg{ max-width:520px; margin:12vh auto 0; text-align:center; font-size:16px; line-height:1.5 }
+.fo-pagina-msg h1{ margin:0 0 8px; font-size:24px; letter-spacing:-.01em }
+.fo-pagina-msg p{ margin:0 0 20px; color:var(--mudo, rgba(37,37,37,.68)) }
+@media (max-width:640px){
+  .fo-pagina{ padding:12px 0 32px; background:#fff }
+  .fo-barra{ padding:0 16px; margin-bottom:4px }
+  .fo-pagina-msg{ padding:0 16px }
+}

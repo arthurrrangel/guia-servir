@@ -11,6 +11,7 @@
    linda com 3 pessoas costuma quebrar com 17.
    =========================================================================== */
 import { Estado, Nivel, type Status, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia } from './engine';
+import { type Folha, folhaDoBanco } from './cronograma';
 
 const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
   ({ id: 'f' + ordem, nome, ordem, simultanea, ativa: true, tipos: tipos as any, exigeSexo });
@@ -145,7 +146,14 @@ export function estadoDemo(variante = ''): Estado {
   if (variante === 'hoje') {
     const ontem = new Date(Date.parse(hoje + 'T12:00:00Z') - 86400000).toISOString().slice(0, 10);
     for (const [d, nome] of [[hoje, 'Culto de teste'], [ontem, 'Ensaio de teste']] as const) {
-      const dia = garantirDia(S, d);
+      /* NUM SÁBADO OU DOMINGO O DIA JÁ É DE CULTO NO DEMO, com a escala
+         inteira montada (03/10/2026, um sábado: a prova da chegada contou 4
+         pessoas em vez de 3). O evento de teste começa do zero, igual em
+         qualquer dia da semana. `garantirDia` primeiro: é ele que avisa o
+         cache de datas quando o dia nasce. */
+      garantirDia(S, d);
+      S.escalas[d] = { slots: {}, plantao: [], obs: '' };
+      const dia = S.escalas[d];
       dia.cultoId = 'e' + d; dia.evento = nome; dia.inicio = '19:30';
       const pares: [string, number, Status][] = [['PROJEÇÃO', 0, 'confirmado'], ['ILUMINAÇÃO', 3, 'pendente'],
                                                   ['FOTO', 6, 'confirmado'], ['FILMAGEM', 8, 'recusado']];
@@ -382,6 +390,19 @@ export function euDemo(variante: string = '') {
       ],
     };
   }
+  /* 109 · o dirigente da semana: o cartão com o que falta do bloco dele */
+  if (variante === 'dirigente') {
+    /* a escala é a do dirigente (um culto, o posto DIRIGENTE), no mesmo
+       domingo do cronograma: o harness não desenha um estado que o banco
+       nunca produziria */
+    const cr = euCronogramasDemo() as { data: string }[];
+    return {
+      ...fixture, nome: 'Rui Teixeira', equipe: 'Dirigentes',
+      escalas: [{ culto_id: 'demo-culto', funcao_id: 'cf2', data: cr[0].data, funcao: 'DIRIGENTE', status: 'confirmado',
+                  primeira_vez: false, plantao: false }],
+      cronogramas: cr,
+    };
+  }
   return fixture;
 }
 
@@ -497,4 +518,133 @@ export function painelDemo() {
     sem_disponibilidade: ativos.filter(v => ![...(v.disponivel || []), ...(v.indisponivel || [])].some(d => d >= hoje)).length,
     vagas_pendentes: vagasPendentes, funcoes_sem_gente: funcoesSemGente,
   };
+}
+
+/* =============================================================================
+   109 · O CRONOGRAMA DO CULTO, NO HARNESS
+
+   A folha passa pelo MESMO `folhaDoBanco` que a RPC: a fixture é o JSON que
+   `cronograma_dados` devolve, não um objeto já pronto para a tela. Variantes:
+     '' e 'cheia'  tudo preenchido (o prazo cumprido)
+     'vazia'       nada ainda: o modelo e ninguém no comando
+     'parcial'     a Palavra e a escala pela metade
+     'follow'      um sábado, com o modelo do Follow
+     'longa'       muita coisa (a folha vai para a segunda página no papel)
+     'passou'      um culto que já aconteceu
+   Nomes fictícios. As datas andam com o dia de hoje.
+   ============================================================================= */
+const LINHA_DOMINGO_DEMO = [
+  { h: '09:00', o: 'Líderes chegam e conferem escala e ambientes', q: 'Todos os líderes' },
+  { h: '09:15', o: 'Pílula da Diaconia (20 min)', q: 'Diaconia' },
+  { h: '09:40', o: 'Reunião operacional', q: 'Pastor, Direção e líderes' },
+  { h: '09:50', o: 'Posições assumidas, portas abertas', q: 'Todos' },
+  { h: '10:00', o: 'Louvor', q: 'Louvor e Mídia' },
+  { h: '10:30', o: 'Saudação, leitura e oração', q: 'Dirigente' },
+  { h: '10:38', o: 'Avisos', q: 'Dirigente e Mídia' },
+  { h: '10:47', o: 'Acolhimento aos visitantes', q: 'Dirigente e Recepção' },
+  { h: '10:55', o: 'Transição para a Palavra', q: 'Louvor' },
+  { h: '11:00', o: 'Palavra', q: 'Pastor' },
+  { h: '11:40', o: 'Apelo e ministração', q: 'Pastor, Louvor e Intercessão' },
+  { h: '11:48', o: 'Dízimos e ofertas', q: 'Diaconia e Mídia' },
+  { h: '11:54', o: 'Bênção e louvor final', q: 'Pastor e Louvor' },
+  { h: '12:00', o: 'Encerramento', q: 'Recepção e Diaconia' },
+];
+const LINHA_FOLLOW_DEMO = [
+  { h: '18:00', o: 'Líderes chegam e conferem escala e ambientes', q: 'Todos os líderes' },
+  { h: '18:40', o: 'Reunião operacional', q: 'Direção e líderes' },
+  { h: '19:00', o: 'Louvor', q: 'Louvor e Mídia' },
+  { h: '19:30', o: 'Saudação, leitura e oração', q: 'Dirigente' },
+  { h: '20:00', o: 'Palavra', q: 'Pregador' },
+  { h: '21:00', o: 'Encerramento', q: 'Todos' },
+];
+const COMANDO_DEMO = (tipo: 'domingo' | 'follow', nomes: (string | null)[]) => [
+  { papel: 'direcao', equipe: 'Produção', equipe_id: 'demo-prod', posto: 'COORDENADOR DO DIA', funcao_id: 'cf1', nome: nomes[0], status: nomes[0] ? 'confirmado' : null, convidado: null },
+  { papel: 'dirigente', equipe: 'Dirigentes', equipe_id: 'demo-dir', posto: 'DIRIGENTE', funcao_id: 'cf2', nome: nomes[1], status: nomes[1] ? 'confirmado' : null, convidado: null },
+  { papel: 'lider', equipe: 'Mídia', equipe_id: 'demo', posto: 'HEAD', funcao_id: 'cf3', nome: nomes[2], status: nomes[2] ? 'pendente' : null, convidado: null },
+  { papel: 'lider', equipe: 'Louvor', equipe_id: 'demo-louvor', posto: 'DIRIGENTE', funcao_id: 'cf4', nome: nomes[3], status: nomes[3] ? 'confirmado' : null, convidado: null },
+  ...(tipo === 'domingo'
+    ? [{ papel: 'lider', equipe: 'Connect', equipe_id: 'demo-conn', posto: 'LÍDER 1', funcao_id: 'cf5', nome: nomes[4], status: nomes[4] ? 'confirmado' : null, convidado: null }]
+    : []),
+];
+
+function cronogramaCru(variante: string, data: string) {
+  const tipo = new Date(data + 'T12:00:00Z').getUTCDay() === 6 ? 'follow' : 'domingo';
+  const em = new Date(Date.now() - 26 * 3600 * 1000).toISOString();
+  const cheio = {
+    data, tipo, culto_id: 'demo-culto', inicio: null, fim: null, existe: true, token: '0123456789abcdef01',
+    palavra: { quem: 'Pr. Daniel Moura', tema: 'Peniel: hoje Deus mudará sua identidade', leitura: 'Gênesis 32:30',
+               frase: 'Você pode ter chegado carregando o nome que o passado lhe deu, mas pode sair daqui vivendo a identidade que Deus preparou para você.' },
+    avisos: [{ texto: 'Honra aos voluntários', como: 'falado' }, { texto: 'Batismo no domingo 25', como: 'video' },
+             { texto: 'Inscrições do Follow Camp abertas', como: 'video' }],
+    louvor: { final: 'Bondade de Deus' },
+    linha: tipo === 'follow' ? LINHA_FOLLOW_DEMO : LINHA_DOMINGO_DEMO, linha_propria: false,
+    autoria: {
+      palavra: { por: 'Rui Teixeira', em, via: 'dirigente' },
+      avisos: { por: 'Rui Teixeira', em, via: 'dirigente' },
+      louvor: { por: 'Lia Martins', em, via: 'lider' },
+    },
+    atualizado_em: em,
+    comando: COMANDO_DEMO(tipo, ['Sara Lopes', 'Rui Teixeira', 'Igor Paz', 'Lia Martins', 'Nina Alves']),
+    musicas: [
+      { equipe: 'Louvor', titulo: 'Leão', tom: 'E', bpm: 67, quem: 'Lia' },
+      { equipe: 'Louvor', titulo: 'Bondade de Deus', tom: 'G', bpm: 68 },
+      { equipe: 'Louvor', titulo: 'Ousado Amor', tom: 'F#m', bpm: 72, quem: 'Davi' },
+    ],
+    repertorio: [{ equipe: 'Louvor', equipe_id: 'demo-louvor' }],
+  };
+  if (variante === 'vazia') {
+    return { ...cheio, existe: false, token: null, palavra: null, avisos: null, louvor: null, autoria: {}, atualizado_em: null,
+             comando: COMANDO_DEMO(tipo as any, [null, null, null, null, null]), musicas: [] };
+  }
+  if (variante === 'parcial') {
+    return { ...cheio, palavra: { quem: 'Pr. Daniel Moura', tema: 'Peniel: hoje Deus mudará sua identidade' },
+             avisos: null, louvor: null, autoria: { palavra: cheio.autoria.palavra },
+             comando: COMANDO_DEMO(tipo as any, ['Sara Lopes', 'Rui Teixeira', null, 'Lia Martins', null]) };
+  }
+  if (variante === 'longa') {
+    return { ...cheio,
+      linha: [...LINHA_DOMINGO_DEMO, { h: '12:10', o: 'Batismo nas águas', q: 'Pastor e Diaconia' }, { h: '12:40', o: 'Almoço da liderança', q: 'Todos os líderes' }],
+      musicas: [...cheio.musicas, { equipe: 'Louvor', titulo: 'Grande É o Senhor', tom: 'A', bpm: 70 },
+        { equipe: 'Louvor', titulo: 'Tu És Fiel', tom: 'D', bpm: 64 }, { equipe: 'Louvor', titulo: 'Rendido Estou', tom: 'C', bpm: 60 },
+        { equipe: 'Louvor', titulo: 'Santo Pra Sempre', tom: 'Bb', bpm: 76 }, { equipe: 'Louvor', titulo: 'Te Louvarei', tom: 'E', bpm: 80 }],
+      avisos: [...cheio.avisos, { texto: 'Cantata de Natal: ensaios aos sábados', como: 'falado' },
+        { texto: 'Campanha do agasalho até o fim do mês', como: 'video' }, { texto: 'Pequenas Guias: novas turmas', como: 'falado' }],
+    };
+  }
+  return cheio;
+}
+
+/** a folha do harness. `data` força o dia (a lista monta várias). */
+export function cronogramaDemo(variante = '', data?: string): Folha | null {
+  const hoje = hojeISO();
+  const prox = cultosAte(hoje, 13);
+  const dom = prox.find(d => new Date(d + 'T12:00:00Z').getUTCDay() === 0) || prox[0];
+  const sab = prox.find(d => new Date(d + 'T12:00:00Z').getUTCDay() === 6) || prox[0];
+  const passado = (() => { for (let k = 1; k < 9; k++) { const d = new Date(new Date(hoje + 'T12:00:00Z').getTime() - k * 86400000); if (d.getUTCDay() === 0) return d.toISOString().slice(0, 10); } return hoje; })();
+  const dia = data || (variante === 'follow' ? sab : variante === 'passou' ? passado : dom);
+  return folhaDoBanco(cronogramaCru(variante === 'follow' || variante === 'passou' ? '' : variante, dia));
+}
+
+/** a lista de /cronogramas: os próximos (um de cada estado) e o histórico */
+export function cronogramasDemo(): { proximos: Folha[]; registrados: { data: string; tipo: 'domingo' | 'follow'; tema: string | null; quem: string | null; ceia: boolean }[] } {
+  const hoje = hojeISO();
+  const datas = cultosAte(hoje, 27).slice(0, 8);
+  const variantes = ['parcial', 'cheia', 'vazia', 'vazia', 'vazia', 'vazia', 'vazia', 'vazia'];
+  const proximos = datas.map((d, i) => folhaDoBanco(cronogramaCru(variantes[i] || 'vazia', d))).filter(Boolean) as Folha[];
+  const registrados = [7, 14, 21, 28].map((k, i) => {
+    const d = new Date(new Date(hoje + 'T12:00:00Z').getTime() - k * 86400000);
+    while (d.getUTCDay() !== 0) d.setUTCDate(d.getUTCDate() - 1);
+    return { data: d.toISOString().slice(0, 10), tipo: 'domingo' as const,
+             tema: ['Peniel: hoje Deus mudará sua identidade', 'O pão de cada dia', 'Raízes', null][i],
+             quem: ['Pr. Daniel Moura', 'Pr. Daniel Moura', 'Pra. Ester Lima', null][i], ceia: i === 2 };
+  });
+  return { proximos, registrados };
+}
+
+/** o que `eu_cronogramas` devolve para o dirigente do harness (variante `dirigente`) */
+export function euCronogramasDemo(): unknown[] {
+  const hoje = hojeISO();
+  const dom = cultosAte(hoje, 13).find(d => new Date(d + 'T12:00:00Z').getUTCDay() === 0)!;
+  const f = cronogramaCru('parcial', dom) as any;
+  return [{ ...f, token: null }];
 }

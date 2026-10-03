@@ -8,7 +8,7 @@ import { Equipe, listarEquipes, souLider } from '@/lib/equipes';
 import { Estado, estadoVazio, cultosAte, hojeISO, resumoDia } from '@/lib/engine';
 import { Painel as NumPainel, painelDoMinisterio } from '@/lib/candidaturas';
 import { aviseHumano } from '@/lib/erros';
-import { IcAjustes, IcCalendario, IcCheck, IcEntrada, IcMais, IcPainel, IcPessoa, IcSair, IcSeta, IcTime } from './Icones';
+import { IcAjustes, IcCalendario, IcCheck, IcCronograma, IcEntrada, IcMais, IcPainel, IcPessoa, IcSair, IcSeta, IcTime } from './Icones';
 import { Aviso, Esqueleto } from './escalas/Pecas';
 import { Logo } from './Marca';
 import './escalas/escalas.css';
@@ -16,6 +16,7 @@ import './escalas/tela-painel.css';
 import './escalas/tela-escala.css';
 import './escalas/tela-time.css';
 import './escalas/tela-ajustes.css';
+import './escalas/tela-cronograma.css';
 
 type Ctx = {
   S: Estado; recarregar: () => Promise<Estado | null>;
@@ -53,6 +54,9 @@ export const useApp = () => useContext(C);
 const ABAS = [
   { href: '/painel', rotulo: 'Painel', Ic: IcPainel },
   { href: '/escala', rotulo: 'Escala', Ic: IcCalendario },
+  /* 109 · o cronograma de cada culto, da igreja inteira (não de uma área):
+     depois da Escala, porque a escala de cada área é o que enche a folha */
+  { href: '/cronogramas', rotulo: 'Culto', Ic: IcCronograma },
   { href: '/time', rotulo: 'Time', Ic: IcTime },
   { href: '/painel/candidaturas', rotulo: 'Entradas', Ic: IcEntrada },
   { href: '/ajustes', rotulo: 'Ajustes', Ic: IcAjustes },
@@ -65,6 +69,7 @@ const abaDe = (caminho: string) =>
   : caminho.startsWith('/time') ? '/time'
   : caminho.startsWith('/ajustes') ? '/ajustes'
   : caminho.startsWith('/escala') ? '/escala'
+  : caminho.startsWith('/cronogramas') ? '/cronogramas'
   : caminho.startsWith('/painel') ? '/painel' : '';
 const K_EQUIPE = 'escala.equipe';
 

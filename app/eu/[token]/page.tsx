@@ -26,6 +26,9 @@ import ChamadasDoVoluntario from '@/components/escalas/ChamadasDoVoluntario';
 import type { ChamadaMinha } from '@/lib/chamadas';
 /* 107 · o "Cheguei" do dia e o "Como foi" depois */
 import HojeNoLink from '@/components/escalas/HojeNoLink';
+/* 109 · o dirigente da semana vê aqui o que falta do bloco dele */
+import CronogramaNoLink from '@/components/escalas/CronogramaNoLink';
+import { type Folha as FolhaDoCulto, folhaDoBanco } from '@/lib/cronograma';
 import ComoFoiNoLink from '@/components/escalas/ComoFoiNoLink';
 import { type CultoDeHoje, type ComoFoiMeu, hojeDoLink, comoFoiDoLink } from '@/lib/chegada';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
@@ -233,6 +236,9 @@ export default function Eu() {
      no banco a chamada falha e nada aparece. */
   const [hojeLink, setHojeLink] = useState<CultoDeHoje[]>([]);
   const [comoFoi, setComoFoi] = useState<ComoFoiMeu[]>([]);
+  /* 109 · os cultos em que a pessoa é o dirigente da semana (a Palavra e os
+     avisos são dela). Mesma regra: sem a 109 no banco, nada aparece. */
+  const [cronos, setCronos] = useState<FolhaDoCulto[]>([]);
 
   /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
      a seção da troca e os eventos da grade simplesmente não aparecem. */
@@ -240,13 +246,14 @@ export default function Eu() {
     const s = sb();
     if (!s) return;
     try {
-      const [tr, ev, or, ch, hj, cf] = await Promise.all([
+      const [tr, ev, or, ch, hj, cf, cr] = await Promise.all([
         s.rpc('eu_trocas', { p_token: token }),
         s.rpc('eu_eventos', { p_token: token }),
         s.rpc('eu_ordens', { p_token: token }),
         s.rpc('eu_chamadas', { p_token: token }),
         s.rpc('eu_hoje', { p_token: token }),
         s.rpc('eu_como_foi', { p_token: token }),
+        s.rpc('eu_cronogramas', { p_token: token }),
       ]);
       if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
       if (!ev.error) setEventos((ev.data || []) as Evento[]);
@@ -254,6 +261,7 @@ export default function Eu() {
       if (!ch.error) setChamadas((ch.data || []) as ChamadaMinha[]);
       if (!hj.error) setHojeLink(hojeDoLink(hj.data));
       if (!cf.error) setComoFoi(comoFoiDoLink(cf.data));
+      if (!cr.error && (cr.data as any)?.ok) setCronos((((cr.data as any).cultos || []) as unknown[]).map(folhaDoBanco).filter(Boolean) as FolhaDoCulto[]);
     } catch { /* a tela fica como estava */ }
   }, [token]);
   /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
@@ -286,6 +294,8 @@ export default function Eu() {
       /* 107 · e o dia de hoje e o como foi */
       if ((d as any).hoje) setHojeLink(hojeDoLink((d as any).hoje));
       if ((d as any).comoFoi) setComoFoi(comoFoiDoLink((d as any).comoFoi));
+      /* 109 · e o cartão do dirigente */
+      if ((d as any).cronogramas) setCronos(((d as any).cronogramas as unknown[]).map(folhaDoBanco).filter(Boolean) as FolhaDoCulto[]);
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -1141,6 +1151,10 @@ export default function Eu() {
           cultoHora={IGREJA.cultoHora} followHora={IGREJA.followHora}
           aoMudar={async () => { await carregar(false); }}
           avisar={avisar} errar={errar} />
+
+        {/* 109 · O DIRIGENTE DA SEMANA. Também pede uma coisa com prazo (três
+            dias antes do culto): a Palavra e os avisos. */}
+        <CronogramaNoLink token={token} cultos={cronos} hoje={hojeISO()} />
 
         {/* 103 · A TROCA. Logo abaixo do "Precisa de você", porque pedido de
             colega também pede resposta, e a porta do grupo abre a página aqui
