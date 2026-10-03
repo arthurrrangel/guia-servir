@@ -126,7 +126,8 @@ try {
       });
       await p.getByRole('button', { name: 'Desistir' }).first().click(); await esperar(600);
       ok(/Pedido desfeito\./i.test(await barra(p)), `${nome}: desistir desfaz o pedido`, await barra(p));
-      ok(/EDIÇÃO \(a conferir\)/.test(await p.locator('#meu-perfil').innerText()), `${nome}: "Você faz" marca a função a conferir`);
+      /* "(a conferir)" não quebra no meio: o espaço é U+00A0 (02/10/2026) */
+      ok(/EDIÇÃO \(a conferir\)/.test(await p.locator('#meu-perfil').innerText()), `${nome}: "Você faz" marca a função a conferir`);
       await p.getByRole('button', { name: 'Acrescentar função' }).click(); await esperar(700);
       await p.getByRole('button', { name: /CÂMERA 2/ }).click(); await esperar(200);
       const add = p.getByRole('button', { name: 'Acrescentar CÂMERA 2' });

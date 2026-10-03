@@ -754,7 +754,7 @@ button.claro:active,
   background:var(--preto);border-bottom:0;position:relative;overflow:hidden;
 }
 .eu-topo::after{
-  content:"";position:absolute;top:-60%;right:-20%;width:70%;height:200%;border-radius:50%;
+  content:"";position:absolute;top:-60%;right:0;width:60%;height:200%;border-radius:50%;
   background:radial-gradient(circle,rgba(255,255,255,.09),transparent 62%);filter:blur(50px);
 }
 .eu-topo-in{
@@ -3462,7 +3462,6 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
   font-family:var(--fonte-display); font-weight:var(--p-forte);
   font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
 }
-.vol-pede-dia{ margin-top:var(--e1); font-size:var(--t-corpo); color:rgba(255,255,255,.74) }
 .vol-btns{ display:flex; gap:var(--e3); margin-top:var(--e4); flex-wrap:wrap }
 .vol-bt{
   flex:1 1 auto; min-width:150px; min-height:var(--toque);
@@ -4338,14 +4337,6 @@ html{ scroll-padding-top:88px }
   font-size:var(--t-apoio); line-height:1.6; color:var(--cinza);
 }
 .lid-faixa.fogo .esc-oquefaz{ color:rgba(255,255,255,.72) }
-/* Esta frase mora na faixa PRETA da tela do voluntário, e eu escrevi ela em
-   var(--cinza) — cinza médio sobre preto dá 3,1:1, abaixo do mínimo de
-   leitura. Todos os vizinhos dela nessa faixa usam branco a 72%. Mesmo erro
-   do branco-sobre-branco da escala, do outro lado. */
-.vol-pede-depois{
-  margin:0 0 var(--e4); max-width:52ch;
-  font-size:var(--t-apoio); line-height:1.55; color:rgba(255,255,255,.72);
-}
 
 /* --- 12. O RODAPÉ DEBAIXO DA CTA FLUTUANTE ------------------------------
    Rolando a home até o fim no celular, o último link do rodapé ("Sou da
@@ -7489,7 +7480,6 @@ a.lid-bt-txt{
 }
 .vol-acao::after{ opacity:0; transition:opacity var(--t) }
 .vol-acao:hover::after,.vol-acao:focus-visible::after{ opacity:1 }
-.vol-pede-depois{ font-size:var(--t-apoio); line-height:1.6; opacity:.78 }
 
 /* =============================================================================
    O SITE NO CELULAR: OS PAINÉIS DE FOTO PARAM DE CUSTAR UMA TELA CADA
@@ -9136,13 +9126,6 @@ body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
   font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
 }
 .vol-troca-sub + .vol-troca, .vol-troca-sub + .vol-linha{ padding-top:var(--e3) }
-/* o dia da pessoa na agenda: uma etiqueta quieta, sem cor de estado */
-.vol-dia-tag{
-  display:inline-block; margin-left:var(--e2); padding:1px 6px; vertical-align:middle;
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
-  color:var(--noite); border:1px solid var(--linha3);
-}
 /* acrescentar função */
 .vol-func-abrir{ margin-top:var(--e3) }
 .vol-func-lista{ display:flex; flex-direction:column; margin-top:var(--e3); border-top:1px solid var(--linha2) }
@@ -9222,3 +9205,132 @@ body:has(main > section:first-of-type.g-cheio) main{ background:var(--bg) }
 /* 16px no campo: abaixo disso o iPhone dá zoom na página ao tocar */
 .vol-comofoi-texto{ min-height:96px; font-size:16px; line-height:1.5; resize:vertical }
 .vol-comofoi-conta{ font-size:var(--t-rot); color:var(--cinza) }
+
+/* =============================================================================
+   ÁREA DO VOLUNTÁRIO NO CELULAR: CONFIRMAR E "QUANDO VOCÊ PODE" · 02/10/2026
+   Pedido do Arthur: mais intuitiva e objetiva no celular. A lógica está nas
+   notas de app/eu/[token]/page.tsx (`responderItens`, `dizerDia`).
+============================================================================= */
+
+/* o cartão de cada culto, na faixa escura: a data primeiro e grande, com a
+   hora; os postos embaixo, um tom abaixo. Era o contrário: o posto em caixa
+   alta e a data em cinza, e a data é o que decide a resposta. */
+.vol-pede-quando{
+  font-family:var(--fonte-display); font-weight:700;
+  font-size:clamp(20px,5.4vw,24px); line-height:1.22; letter-spacing:-.02em;
+  color:#fff; text-wrap:balance;
+}
+.vol-pede .vol-pede-fn{ margin-top:var(--e2); color:rgba(255,255,255,.74) }
+
+/* a grade: uma coluna em toda largura. Com as duas respostas por extenso
+   ("Posso" e "Não posso"), duas colunas espremiam a data em 60px a 520px. */
+.vol-mes .vol-disp{ grid-template-columns:1fr }
+/* a linha do dia: a data e as respostas na primeira linha; os postos do dia,
+   quando há, na segunda, em toda a largura. Ao lado dos botões eles tinham
+   140px a 360px e quebravam em três linhas ("na escala ·" / "PROJEÇÃO ·" /
+   "FILMAGEM"). `display:contents` deixa a data e os postos como peças da
+   grade sem mudar o HTML. */
+.vol-dia{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center;
+  column-gap:var(--e3); row-gap:2px; min-height:64px;
+}
+.vol-dia-nome{ display:contents }
+.vol-dia-rot{ grid-column:1; grid-row:1; font-size:var(--t-ui); line-height:1.3; color:var(--ink) }
+.vol-dia .vol-seg{ grid-column:2; grid-row:1 }
+.vol-dia-sub{
+  grid-column:1 / -1; grid-row:2;
+  font-size:var(--t-rot); line-height:1.4; color:var(--cinza); overflow-wrap:anywhere;
+}
+/* o dia que falta responder: a data em peso e um ponto na margem, fora da
+   coluna do texto (dentro dela, o ponto empurrava só as datas sem resposta e
+   a coluna das datas perdia a régua). É o que o olho procura quando a pessoa
+   volta para terminar. */
+.vol-dia-rot{ position:relative }
+.vol-dia.falta .vol-dia-rot{ font-weight:600 }
+.vol-dia.falta .vol-dia-rot::before{
+  content:''; position:absolute; left:-13px; top:.44em; width:7px; height:7px; border-radius:50%;
+  background:rgb(170,112,10);
+}
+
+/* as duas respostas coladas, como uma escolha só. Marcada, ganha a cor do
+   estado (verde posso, vermelho não posso, o mesmo acordo das telas do
+   líder). Enquanto grava, a cor já mudou e o par fica um pouco mais claro. */
+.vol-seg{
+  display:inline-flex; flex:0 0 auto; overflow:hidden;
+  border:1px solid var(--linha2); border-radius:var(--r4); background:var(--bg);
+}
+.vol-seg .vol-seg-bt{
+  min-height:var(--toque); min-width:70px; padding:0 var(--e3); margin:0;
+  border:0; border-radius:0; background:transparent; color:var(--cinza);
+  font-family:var(--fonte-display); font-weight:600; font-size:14.5px; letter-spacing:-.005em; text-transform:none;
+}
+.vol-seg .vol-seg-bt + .vol-seg-bt{ border-left:1px solid var(--linha2) }
+.vol-seg .vol-seg-bt:hover:not(.on):not(:disabled),
+.vol-seg .vol-seg-bt:active:not(.on):not(:disabled){ background:var(--card3); color:var(--ink) }
+.vol-seg .vol-seg-bt:active{ transform:none }
+.vol-seg .vol-seg-bt.sim.on{ background:var(--ok); color:#fff }
+.vol-seg .vol-seg-bt.nao.on{ background:var(--bad); color:#fff }
+.vol-seg .vol-seg-bt:disabled{ opacity:.72; cursor:progress }
+.vol-seg .vol-seg-bt:focus-visible{ outline:2px solid var(--noite); outline-offset:-3px }
+
+/* as ações em massa: botão de verdade, não sublinhado. "Posso no mês" mora
+   na linha do mês; "Posso em todos", quando existe, embaixo do cabeçalho. */
+.vol-mes-cab{ align-items:center; flex-wrap:nowrap; min-height:var(--toque) }
+.vol-mes-cab .vol-mes-nota{ margin-left:auto }
+/* o primeiro mês tinha respiro só quando o "Posso em todos" vinha antes; sem
+   ele (tudo respondido, ou um mês só), "Outubro" encostava no fio da seção.
+   A altura mínima acima faz o mês sem botão medir o mesmo que o mês com. */
+.vol-secao-cab + .vol-mes,
+.vol-secao > .vol-nota + .vol-mes{ margin-top:var(--e5) }
+.vol-mes-cab .vol-mes-todos,
+.vol-tudo .vol-mes-todos{
+  display:inline-flex; align-items:center; justify-content:center; min-height:var(--toque);
+  padding:0 var(--e4); border:1px solid var(--linha2); border-radius:var(--r4); background:transparent;
+  text-decoration:none; font-family:var(--fonte-display); font-weight:600; font-size:14.5px; color:var(--ink);
+}
+.vol-mes-cab .vol-mes-todos{ margin-left:auto }
+.vol-tudo{ margin-top:var(--e4) }
+.vol-tudo .vol-mes-todos{ width:100%; margin:0 }
+.vol-mes-cab .vol-mes-todos:hover:not(:disabled),
+.vol-tudo .vol-mes-todos:hover:not(:disabled),
+.vol-mes-cab .vol-mes-todos:focus-visible,
+.vol-tudo .vol-mes-todos:focus-visible{ border-color:var(--noite); background:var(--card3) }
+.vol-tudo + .vol-mes{ margin-top:var(--e5) }
+
+/* o cartão da próxima escala: "Não vou mais poder" e "Pedir troca" são
+   <button>, herdavam a caixa do botão global com o recuo de 2px do link, e o
+   texto encostava na borda. Agora os três têm o mesmo traje do "Adicionar ao
+   calendário": texto com fio embaixo. */
+button.ingresso-cal{
+  border:0; border-bottom:1px solid var(--linha3); border-radius:0; background:transparent;
+  padding:0 2px; min-height:44px; justify-content:flex-start;
+}
+button.ingresso-cal:hover,
+button.ingresso-cal:active{ background:transparent; border-bottom-color:var(--noite); transform:none }
+
+/* "Depois disso": as ações numa linha própria, na largura toda da linha (no
+   meio da coluna do texto, a 390px, elas nunca ficavam lado a lado). O
+   respiro entre elas é o `gap`, que não sobra no fim quando a segunda desce. */
+.vol-linha-acoes{ grid-column:1 / -1; display:flex; flex-wrap:wrap; gap:0 var(--e4) }
+.vol-linha .vol-linha-acoes .vol-acao{ margin-right:0 }
+/* ação de texto que quebra lê como texto: alinhada à esquerda, não centrada */
+.vol-acao{ text-align:left }
+/* a ação na coluna da direita ("Marcar chegada", "Desmarcar"): numa linha
+   só. "Marcar chegada" quebrava em duas, centradas, com o fio só embaixo da
+   segunda. Numa linha ela tem 118px e a coluna, 7rem (112px): o "a" final
+   ficava para fora. Então nessas linhas a coluna é do tamanho da ação. Os 7rem existem para o ESTADO ficar na mesma coluna em toda linha;
+   ação encostada à direita não precisa disso. */
+.vol-linha > .vol-acao{ white-space:nowrap }
+.vol-linha:has(> .vol-acao){ grid-template-columns:minmax(0,1fr) auto }
+
+/* "Você na GUIA": o rótulo numa linha só. Com o valor longo ("PROJEÇÃO ·
+   FOTO · EDIÇÃO (a conferir)"), "VOCÊ FAZ" quebrava em "VOCÊ" / "FAZ". */
+.vol-eq-rot{ flex:none; white-space:nowrap }
+.vol-eq-val{ min-width:0 }
+
+/* a barra do voluntário: "Repertório", "Ordem" e "Meu perfil" eram 11px no
+   computador e 12px no celular, em caixa de frase (o tamanho vinha do tempo
+   em que eram rótulos em caixa alta). A auditoria de 02/10 mediu 11px em
+   todas as telas a partir de 720px. */
+.vol .vol-quem{ font-size:13px }
+@media(min-width:720px){ .vol .vol-quem{ font-size:14px } }

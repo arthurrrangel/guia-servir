@@ -347,6 +347,26 @@ export function euDemo(variante: string = '') {
      só música (vai inteira para baixo dos links, com tom, BPM e observações,
      e a seção "Ordem do culto" não a repete); no segundo ela tem momentos e
      continua na seção. Nomes e músicas inventados. */
+  /* 02/10/2026 · `?demo=novo`: quem acabou de entrar, sem escala e sem dia
+     respondido (o bloco de cima vira "você está no time" e leva à grade).
+     `?demo=tudo`: tudo confirmado e todos os dias respondidos (o "Tudo certo
+     por aqui" sem nada pendente). Os dois existem para a auditoria ver os
+     estados do bloco de cima que o fixture comum não produz. */
+  if (variante === 'novo') {
+    const tresDias = new Date(Date.now() - 3 * 86400000).toISOString().slice(0, 10);
+    return {
+      ...fixture, escalas: [], indisponivel: [], disponivel: [],
+      espaco: { ok: true, equipe_slug: 'midia', artigo: 'a', responsavel: 'Arthur', tem_pin: false,
+                voluntario: { desde: tresDias }, funcoes: [{ funcao: 'FOTO', nivel: 'reserva', conferido: true }] },
+    };
+  }
+  if (variante === 'tudo') {
+    return {
+      ...fixture,
+      escalas: fixture.escalas.map(e => (e.plantao || e.data < hoje ? e : { ...e, status: e.status === 'recusado' ? 'recusado' : 'confirmado' })),
+      disponivel: fixture.dias.filter(d => d !== (prox[4] || '')), indisponivel: [prox[4] || ''].filter(Boolean),
+    };
+  }
   if (variante === 'setlist') {
     return {
       ...fixture,

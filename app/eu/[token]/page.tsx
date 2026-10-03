@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { sbPublico as sb } from '@/lib/supabase';
@@ -153,8 +153,11 @@ function Relatorio({ item, token, aoSalvar }: { item: Item; token: string; aoSal
       <textarea id={'prob' + item.culto_id} rows={2} value={probs} maxLength={1000}
         onChange={e => setProbs(e.target.value)}
         placeholder="Banheiro masculino sem papel. Bebedouro vazando." />
+      {/* a nota diz por que o botão está apagado. Era vermelha (a classe de
+          alerta da escala), e aparecia assim antes de a pessoa tocar em nada:
+          um erro na tela de quem ainda não errou (auditoria de 02/10). */}
       {!salvando && !texto.trim() && !probs.trim() && (
-        <p className="postos-falta" role="status">
+        <p className="dim pequeno" role="status" style={{ margin: '8px 0 0' }}>
           Escreva pelo menos um dos dois campos. Se o dia foi tranquilo, escrever isso
           já ajuda quem lidera no próximo.
         </p>
@@ -391,12 +394,20 @@ export default function Eu() {
   /* quem já desmarcou em cima da hora e voltou depois continua vendo a lista
      de quem pode cobrir — o pedido não some ao fechar a página. */
   useEffect(() => {
+    /* 02/10/2026 · enquanto uma resposta grava, a tela já mudou (a recusa
+       aparece no toque) mas o banco ainda não: perguntar agora devolveria a
+       lista de antes da vaga abrir. Quando a gravação termina, `ocupado`
+       volta a vazio e este efeito pergunta, uma vez. */
+    if (ocupado) return;
     const abertos = itens.filter(i => !i.plantao && i.status === 'recusado'
       && horasAte(i.data, i.inicio) < TARDIO && horasAte(i.data, i.inicio) > -12 && !cobrem[i.culto_id]);
     if (!abertos.length) return;
+    /* uma pergunta por CULTO: com dois postos recusados no mesmo culto eram
+       duas chamadas iguais */
+    const porCulto = [...new Map(abertos.map(i => [i.culto_id, i] as const)).values()];
     let vivo = true;
     void (async () => {
-      for (const i of abertos) {
+      for (const i of porCulto) {
         const { data, error } = await sb()!.rpc('eu_quem_cobre', { p_token: token, p_culto_id: i.culto_id });
         if (!vivo) return;
         /* 82 · FALHA NÃO VIRA LISTA VAZIA, E NÃO TRANCA A PRÓXIMA TENTATIVA.
@@ -416,7 +427,7 @@ export default function Eu() {
       }
     })();
     return () => { vivo = false; };
-  }, [itens, token]);   // eslint-disable-line react-hooks/exhaustive-deps
+  }, [itens, token, ocupado]);   // eslint-disable-line react-hooks/exhaustive-deps
 
   /* QUEM SERVE COM VOCÊ NO PRÓXIMO DIA — fase 7.
 
@@ -470,74 +481,144 @@ export default function Eu() {
     Math.round((Date.parse(`${data}T${(inicio || '18:00:00').slice(0, 8)}-03:00`) - Date.now()) / 3600000);
   const TARDIO = 48;
 
-  /* 71 · `funcaoId` é o parâmetro que faltava. Ele vem de cada cartão, porque
-     é por cartão que a pessoa decide. Nulo quer dizer "respondo pelo dia
-     inteiro", que é o que a grade de disponibilidade manda. */
-  async function responder(cultoId: string, status: 'confirmado' | 'recusado',
-                           data?: string, funcaoId?: string | null, inicio?: string | null) {
-    setOcupado(cultoId); setErro('');
-    const { data: volta, error } = await sb()!.rpc('eu_responder',
-      { p_token: token, p_culto_id: cultoId, p_status: status, p_funcao_id: funcaoId ?? null });
-    if (error) { setErro(aviseHumano(error, 'salvar')); setOcupado(''); return; }
+  /* =================================================================== 02/10/2026
+     RESPONDER POR DIA, E A TELA MUDA NA HORA.
 
-    /* ============================================================== 75 ===
-       A TELA AGRADECIA MESMO QUANDO NADA TINHA SIDO GRAVADO.
+     Pedido do Arthur: "melhore a intuitividade e objetividade da área do
+     voluntário no celular para posso / não posso e confirmar escala". Três
+     coisas pesavam:
 
-       `eu_responder` devolvia `void`, e voltava em silêncio quando não havia
-       posto daquela pessoa naquele culto — tela velha aberta numa aba, link
-       antigo mandado no grupo, a líder tirou ela do posto entre a tela
-       carregar e ela responder. A pessoa lia "Confirmado. Obrigado!" e
-       fechava o celular achando que tinha confirmado.
+       1. Um cartão POR POSTO. Quem está em PROJEÇÃO e FILMAGEM no mesmo
+          sábado respondia duas vezes a mesma pergunta ("eu vou no sábado?").
+          Agora é um cartão por culto, com os postos dentro, e um toque
+          responde todos os postos que estão esperando resposta. O banco já
+          responde por posto desde a 71: aqui vão uma chamada por posto, em
+          paralelo, e só os postos do cartão (um posto recusado de propósito
+          no mesmo dia não é reconfirmado por tabela).
+       2. A resposta esperava duas viagens ao banco (gravar e reler) para
+          aparecer. Num 4G ruim, um segundo de botão apagado. Agora a tela
+          muda no toque; se o banco recusar, ela volta e a barra diz por quê.
+       3. A grade "Quando você pode" e o cartão diziam coisas diferentes do
+          mesmo dia: "Posso" num dia em que a pessoa está escalada só marcava
+          disponibilidade, e o cartão de cima continuava pedindo confirmação.
+          Ver `dizerDia`, logo abaixo.
 
-       Desde a 75 a função devolve `{ok, mudou, motivo}`. Deploy antigo
-       contra banco novo continua funcionando: `volta` vem indefinido e a
-       tela cai na frase de sempre — por isso o teste é `=== 0` e não
-       `!mudou`. */
-    const mudou = (volta as { mudou?: number } | null)?.mudou;
-    if (mudou === 0) {
+     Os outros caminhos de resposta da página (o cartão da próxima escala e
+     "Depois disso") também passam por aqui, com os postos daquele culto. */
+  const chaveDoPosto = (i: { culto_id: string; funcao_id?: string | null; funcao: string }) =>
+    `${i.culto_id}\u0000${i.funcao_id ?? i.funcao}`;
+  /* a releitura depois de responder: uma só, um instante depois do último
+     toque. Com a tela já certa pelo toque, reler a cada resposta só fazia o
+     dia piscar de volta quando duas respostas se cruzavam. No harness de
+     design não há banco para reler, e reler devolveria o estado inicial. */
+  const recarga = useRef<number | null>(null);
+  const agendarRecarga = () => {
+    if (process.env.NODE_ENV === 'development' && /[?&]demo=/.test(window.location.search)) return;
+    if (recarga.current) window.clearTimeout(recarga.current);
+    recarga.current = window.setTimeout(() => { recarga.current = null; void carregar(false); }, 1200);
+  };
+  useEffect(() => () => { if (recarga.current) window.clearTimeout(recarga.current); }, []);
+
+  async function responderItens(alvo: Item[], status: 'confirmado' | 'recusado', chave = alvo[0]?.culto_id || '') {
+    if (!alvo.length) return;
+    setOcupado(chave); setErro('');
+    const antes = itens;
+    const marcados = new Set(alvo.map(chaveDoPosto));
+    setItens(prev => prev.map(i => (!i.plantao && marcados.has(chaveDoPosto(i))) ? { ...i, status } : i));
+    /* uma chamada por posto; posto antigo sem id (anterior à 71) responde
+       pelo culto inteiro, uma vez só */
+    const chamadas: { culto_id: string; funcao_id: string | null }[] = [];
+    const semId = new Set<string>();
+    for (const i of alvo) {
+      if (i.funcao_id) chamadas.push({ culto_id: i.culto_id, funcao_id: i.funcao_id });
+      else if (!semId.has(i.culto_id)) { semId.add(i.culto_id); chamadas.push({ culto_id: i.culto_id, funcao_id: null }); }
+    }
+    const rs = await Promise.allSettled(chamadas.map(c => sb()!.rpc('eu_responder',
+      { p_token: token, p_culto_id: c.culto_id, p_status: status, p_funcao_id: c.funcao_id })
+      .then((r: any) => { if (r?.error) throw r.error; return r?.data; })));
+    const ruins = rs.filter(r => r.status === 'rejected') as PromiseRejectedResult[];
+    if (ruins.length === rs.length) {
+      setItens(antes);
+      setFlash(''); setErro(aviseHumano(ruins[0].reason, 'salvar'));
+      setOcupado(''); return;
+    }
+    /* 75 · a tela agradecia mesmo quando nada tinha sido gravado. A função
+       devolve `{ok, mudou}`; deploy antigo contra banco novo continua
+       funcionando (`mudou` indefinido cai na frase de sempre). */
+    const mudou = rs.filter(r => r.status === 'fulfilled')
+      .map(r => ((r as PromiseFulfilledResult<any>).value as { mudou?: number } | null)?.mudou);
+    if (mudou.length && mudou.every(m => m === 0)) {
       setFlash('');
       setErro('Esse posto não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.');
       await carregar(false);
-      setOcupado('');
-      return;
+      setOcupado(''); return;
     }
-    /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia a
-       pessoa não avisar por fora, achando que já estava resolvido. */
-    setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
+    if (ruins.length) {
+      setFlash('');
+      setErro(`${aviseHumano(ruins[0].reason, 'salvar')} Uma parte não entrou; confira a lista e toque de novo.`);
+    } else {
+      /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia
+         a pessoa não avisar por fora, achando que já estava resolvido. */
+      setFlash(status === 'confirmado' ? 'Confirmado. Obrigado!' : 'Registrado.');
+    }
     /* 103 · quem acabou de largar uma vaga ganha, logo abaixo do "Precisa de
        você", a oferta de pedir a um colega. Quem voltou atrás perde a oferta. */
-    if (funcaoId) {
-      const it = itens.find(i => i.culto_id === cultoId && i.funcao_id === funcaoId);
-      setOfertas(prev => {
-        const sem = prev.filter(o => !(o.culto_id === cultoId && o.funcao_id === funcaoId));
-        return status === 'recusado' && it && it.data >= hojeISO()
-          ? [...sem, { culto_id: cultoId, funcao_id: funcaoId, funcao: it.funcao, data: it.data,
-                       evento: it.evento ?? null, inicio: it.inicio ?? null }]
-          : sem;
-      });
-    }
-    await carregar(false);
-    /* desmarcou em cima da hora: quem abriu o buraco ajuda a fechar */
-    if (status === 'recusado' && data && horasAte(data, inicio) < TARDIO) {
-      const { data: lista } = await sb()!.rpc('eu_quem_cobre', { p_token: token, p_culto_id: cultoId });
-      setCobrem(prev => ({ ...prev, [cultoId]: (lista || []) as Cobre[] }));
-    }
+    setOfertas(prev => {
+      const sem = prev.filter(o => !alvo.some(i => i.culto_id === o.culto_id && i.funcao_id === o.funcao_id));
+      return status === 'recusado'
+        ? [...sem, ...alvo.filter(i => !!i.funcao_id && i.data >= hojeISO()).map(i => ({
+            culto_id: i.culto_id, funcao_id: i.funcao_id!, funcao: i.funcao, data: i.data,
+            evento: i.evento ?? null, inicio: i.inicio ?? null }))]
+        : sem;
+    });
     setOcupado('');
-    setTimeout(() => setFlash(''), 2600);
+    agendarRecarga();
+    window.setTimeout(() => setFlash(f => (f === 'Confirmado. Obrigado!' || f === 'Registrado.' ? '' : f)), 2600);
+    /* desmarcou em cima da hora: quem abriu o buraco ajuda a fechar. Quem
+       pergunta "quem pode cobrir" é o efeito lá de cima, quando `ocupado`
+       volta a vazio: perguntar aqui também fazia duas chamadas por recusa. */
   }
 
-  /* disponibilidade explícita: cada domingo é posso / não posso, sem meio-termo */
+  /* disponibilidade explícita: cada dia é posso / não posso, sem meio-termo.
+     A cor muda no toque; se o banco recusar, ela volta. */
   async function responderDisp(d: string, resposta: 'posso' | 'nao') {
     setOcupado(d); setErro('');
+    const [antesP, antesN] = [disponivel, indisp];
+    if (resposta === 'posso') { setDisponivel(p => (p.includes(d) ? p : [...p, d])); setIndisp(p => p.filter(x => x !== d)); }
+    else { setIndisp(p => (p.includes(d) ? p : [...p, d])); setDisponivel(p => p.filter(x => x !== d)); }
     const { error } = await sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: resposta });
-    if (error) setErro(aviseHumano(error, 'salvar'));
-    else await carregar(false);
+    if (error) { setDisponivel(antesP); setIndisp(antesN); setFlash(''); setErro(aviseHumano(error, 'salvar')); }
+    else agendarRecarga();
     setOcupado('');
   }
-  /* a mesma coisa de `possoTodos`, restrita a um mês. Não vale extrair as
-     duas para uma só: a de cima responde "tudo", esta responde "isto aqui", e
-     juntá-las custaria um parâmetro que só existe para economizar seis
-     linhas. */
+
+  /* O MESMO DIA, A MESMA RESPOSTA — 02/10/2026.
+
+     Na grade, o dia em que a pessoa está escalada respondia outra pergunta:
+     "Posso" marcava só a disponibilidade, e o cartão "Confirme se você vai"
+     continuava pedindo resposta para o mesmo sábado. Quem tocou "Posso"
+     achava que tinha confirmado; a liderança via "sem resposta".
+
+     Agora, nesse dia, a grade responde a escala: "Posso" confirma os postos
+     que esperam resposta (ou, se ela tinha dito que não podia, todos de
+     volta), e "Não posso" recusa os postos do dia, e o banco marca o dia como
+     indisponível (`eu_responder`, 75). O dia sem escala continua sendo
+     disponibilidade, como sempre. */
+  const escalaDoDia = (d: string) => itens.filter(i => !i.plantao && i.data === d
+    && (i.status || 'pendente') !== 'furou');
+  async function dizerDia(d: string, resposta: 'posso' | 'nao') {
+    const esc = escalaDoDia(d);
+    if (!esc.length) return responderDisp(d, resposta);
+    if (resposta === 'posso') {
+      const alvo = esc.every(i => i.status === 'recusado') ? esc
+        : esc.filter(i => (i.status || 'pendente') === 'pendente');
+      if (alvo.length) await responderItens(alvo, 'confirmado', d);
+      return;
+    }
+    const alvo = esc.filter(i => i.status !== 'recusado');
+    if (alvo.length) await responderItens(alvo, 'recusado', d);
+  }
+
   /* os dias agrupados pelo mês a que pertencem, na ordem em que vêm. Cálculo
      de leitura, não de estado: nada aqui precisa de memo. */
   /* 103 · os dias da grade: sábados e domingos, e os eventos do ministério no
@@ -566,45 +647,60 @@ export default function Eu() {
     }));
   })();
 
+  /* a resposta de cada dia da grade: a da escala, quando ela está escalada
+     nele; a da disponibilidade, quando não */
+  const respostaDoDia = (d: string): 'posso' | 'nao' | '' => {
+    const esc = escalaDoDia(d);
+    if (esc.length) {
+      if (esc.every(i => i.status === 'recusado')) return 'nao';
+      return esc.some(i => (i.status || 'pendente') === 'pendente') ? '' : 'posso';
+    }
+    return disponivel.includes(d) ? 'posso' : indisp.includes(d) ? 'nao' : '';
+  };
+
   /* "POSSO EM TODOS" CUSTAVA QUATRO SEGUNDOS, E PARAVA NO MEIO — 20/09/2026.
 
-     `eu_proximos_domingos` devolve 60 dias de domingos mais os sábados de
-     Follow: 15 a 16 datas. Isto era um laço `for` com `await` dentro, uma RPC
-     por data, uma atrás da outra. Num 4G ruim (RTT de 220 ms), 16 RPCs em
-     série mais a recarga dão 4,0 segundos com o botão travado e sem sinal de
-     progresso — e quem toca de novo dispara tudo outra vez.
+     Era um laço `for` com `await` dentro, uma RPC por data, uma atrás da
+     outra, e um `break` no primeiro erro: num 4G ruim, 4 s de botão travado,
+     e falhar na quarta de oito deixava três gravadas e cinco não. Em
+     paralelo e com `allSettled`, a onda inteira leva o tempo de uma, e a
+     mensagem diz QUAIS datas não entraram.
 
-     Pior que a lentidão: o `break` no primeiro erro. Não há transação aqui,
-     então falhar na quarta de oito deixava três gravadas e cinco não, e a
-     pessoa que tocou um botão só tinha que descobrir sozinha quais.
-
-     Em paralelo, as 16 viagens viram uma onda: 4,0 s caem para 0,44 s. E
-     `allSettled` em vez de `break`: todas são tentadas, e a mensagem diz
-     QUANTAS e QUAIS datas não entraram, em vez de deixar a pessoa adivinhar.
-
-     O certo mesmo é uma RPC `eu_disponibilidade_lote(token, datas[], resposta)`
-     que faça o laço dentro de UMA transação no banco: 16 viagens viram 1, e
-     "gravou parte" deixa de existir. Fica anotado como a próxima migração de
-     Escalas; esta correção é a que cabe do lado de cá sem mexer no banco. */
-  async function marcarPosso(dias: string[], oQue: string) {
-    if (!dias.length) return;
+     02/10/2026: o dia em que ela está escalada entra como confirmação dos
+     postos que esperam resposta (ver `dizerDia`), e a grade muda no toque. */
+  async function marcarPosso(lista: string[], oQue: string) {
+    if (!lista.length) return;
     setOcupado('todos'); setErro('');
-    const rs = await Promise.allSettled(dias.map(d =>
-      sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' })
-        .then((r: any) => { if (r?.error) throw r.error; return r; })));
-    const ruins = rs.map((r, i) => ({ r, d: dias[i] })).filter(o => o.r.status === 'rejected');
+    const soltos = lista.filter(d => !escalaDoDia(d).length);
+    const postos = lista.flatMap(d => escalaDoDia(d).filter(i => (i.status || 'pendente') === 'pendente'));
+    const [antesP, antesN, antesI] = [disponivel, indisp, itens];
+    setDisponivel(p => [...p, ...soltos.filter(d => !p.includes(d))]);
+    setIndisp(p => p.filter(d => !soltos.includes(d)));
+    const marcados = new Set(postos.map(chaveDoPosto));
+    setItens(prev => prev.map(i => (!i.plantao && marcados.has(chaveDoPosto(i))) ? { ...i, status: 'confirmado' } : i));
+    const tarefas = [
+      ...soltos.map(d => ({ d, f: () => sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' }) })),
+      ...postos.map(i => ({ d: i.data, f: () => sb()!.rpc('eu_responder',
+        { p_token: token, p_culto_id: i.culto_id, p_status: 'confirmado', p_funcao_id: i.funcao_id ?? null }) })),
+    ];
+    const rs = await Promise.allSettled(tarefas.map(t => t.f().then((r: any) => { if (r?.error) throw r.error; return r; })));
+    const ruins = rs.map((r, k) => ({ r, d: tarefas[k].d })).filter(o => o.r.status === 'rejected');
     if (ruins.length) {
+      if (ruins.length === rs.length) { setDisponivel(antesP); setIndisp(antesN); setItens(antesI); }
       const e0 = (ruins[0].r as PromiseRejectedResult).reason;
-      const quais = ruins.map(o => fmtDia(o.d)).join(', ');
-      setErro(`${aviseHumano(e0, oQue)} Não entraram: ${quais}.`);
+      const quais = [...new Set(ruins.map(o => fmtDia(o.d)))].join(', ');
+      setFlash(''); setErro(`${aviseHumano(e0, oQue)} Não entraram: ${quais}.`);
+      await carregar(false);
+    } else {
+      setFlash(lista.length === 1 ? 'Registrado.' : `${lista.length} dias marcados como posso.`);
+      window.setTimeout(() => setFlash(f => (/marcados como posso|^Registrado\.$/.test(f) ? '' : f)), 2600);
+      agendarRecarga();
     }
-    await carregar(false);
     setOcupado('');
   }
 
-  const possoNoMes = (dias: string[]) => marcarPosso(dias, 'salvar o mês');
-  const possoTodos = () =>
-    marcarPosso(dias.filter(d => !indisp.includes(d) && !disponivel.includes(d)), 'salvar tudo');
+  const possoNoMes = (lista: string[]) => marcarPosso(lista, 'salvar o mês');
+  const possoTodos = () => marcarPosso(dias.filter(d => !respostaDoDia(d)), 'salvar tudo');
 
   /* ------------------------------------------------------------ os estados
      Todos com a MESMA barra do topo. A tela antiga não tinha cabeçalho em
@@ -644,7 +740,9 @@ export default function Eu() {
         <span className="rot">Espaço do voluntário</span>
         <h1>Sem conexão agora</h1>
         <p className="vol-sub">Seu link continua valendo. Tente de novo quando o sinal voltar.</p>
-        <div className="vol-btns" style={{ maxWidth: 320 }}>
+        {/* a mesma largura (360) do botão único das outras faixas: eram
+            320 aqui, 380 no link inválido e 360 no "Dizer quando eu posso" */}
+        <div className="vol-btns" style={{ maxWidth: 360 }}>
           <button className="vol-bt" style={{ background: 'var(--noite)', color: '#fff', borderColor: 'var(--noite)' }}
             onClick={() => { setFase('carregando'); void carregar(); }}>Tentar de novo</button>
         </div>
@@ -661,7 +759,7 @@ export default function Eu() {
           Links pessoais são únicos e podem ter vindo cortados pelo WhatsApp.
           Dá para achar o seu de novo escolhendo seu nome na lista da sua área.
         </p>
-        <div className="vol-btns" style={{ maxWidth: 380 }}>
+        <div className="vol-btns" style={{ maxWidth: 360 }}>
           <Link href="/eu" className="vol-bt" style={{ background: 'var(--noite)', color: '#fff', borderColor: 'var(--noite)' }}>
             Achar meu link
           </Link>
@@ -673,7 +771,8 @@ export default function Eu() {
   /* ------------------------------------------------------------- os fatos
      Calculados uma vez e usados na ordem em que a pessoa pergunta. */
   const hoje = hojeISO();
-  const primeiro = (nome || '').trim();
+  /* o primeiro nome: "Olá, Giovana", e não o nome inteiro em caixa alta */
+  const primeiro = (nome || '').trim().split(/\s+/)[0] || '';
   const agenda = itens.filter(i => !i.plantao);
   const plantoes = itens.filter(i => i.plantao);
   /* 75 · `i.data >= hoje` JUNTO, e é o que faltava.
@@ -696,6 +795,18 @@ export default function Eu() {
   }
   /* 82 · quantos DIAS, não quantas linhas. Ver o título logo abaixo. */
   const diasPendentes = new Set(pendentes.map(i => i.data)).size;
+  /* 02/10/2026 · um cartão por culto, com os postos dentro: a pergunta é
+     "você vai no sábado?", e a resposta vale para os postos que esperam */
+  const cartoesPend = (() => {
+    const g: { culto_id: string; data: string; evento?: string | null; inicio?: string | null;
+               obs: string | null; itens: Item[] }[] = [];
+    for (const i of [...pendentes].sort((a, b) => a.data.localeCompare(b.data))) {
+      const at = g.find(x => x.culto_id === i.culto_id);
+      if (at) { at.itens.push(i); if (!at.obs && i.obs) at.obs = i.obs; continue; }
+      g.push({ culto_id: i.culto_id, data: i.data, evento: i.evento, inicio: i.inicio, obs: i.obs || null, itens: [i] });
+    }
+    return g;
+  })();
   const ordenada = [...agenda].sort((a, b) => a.data.localeCompare(b.data));
   /* só o que ainda vai acontecer. Sem este filtro, "sua próxima escala"
      mostrava um domingo que já passou, com "você está confirmado" embaixo. */
@@ -738,8 +849,33 @@ export default function Eu() {
   const ordensVisiveis = ordensDosMeusCultos.filter(o =>
     !(o.minha && cultosComLinks.has(o.culto_id) && o.ordem.every(it => it.t === 'musica')));
   const jaMostrados = new Set(pendentes.map(i => i.culto_id + i.funcao));
+  /* 02/10/2026 · O CARTÃO DA PRÓXIMA ESCALA É DO CULTO, NÃO DO POSTO. Quem
+     está em PROJEÇÃO e FILMAGEM no mesmo sábado via só PROJEÇÃO no cartão, e
+     FILMAGEM do mesmo dia aparecia logo abaixo, em "Depois disso", como se
+     fosse outro compromisso. O cartão só aparece quando o culto não está
+     esperando resposta lá em cima (aí ele já está no cartão escuro). */
+  const comPendencia = new Set(cartoesPend.map(g => g.culto_id));
+  const mostraProxima = !!proxima && !comPendencia.has(proxima.culto_id);
+  const proximaPostos = mostraProxima
+    ? futuras.filter(i => i.culto_id === proxima!.culto_id && (i.status || 'pendente') !== 'recusado')
+    : [];
   const restantes = futuras.filter(i =>
-    !jaMostrados.has(i.culto_id + i.funcao) && i !== proxima);
+    !jaMostrados.has(i.culto_id + i.funcao) && !proximaPostos.includes(i));
+  /* "Depois disso" também é por culto: uma linha por culto e situação, com os
+     postos juntos (situação diferente no mesmo culto, como um posto recusado
+     de propósito, fica em linha própria) */
+  const gruposDepois = (() => {
+    const g: { chave: string; culto_id: string; data: string; evento?: string | null;
+               status: string; obs: string | null; itens: Item[] }[] = [];
+    for (const i of restantes) {
+      const st = i.status || 'pendente';
+      const chave = `${i.culto_id}|${st}`;
+      const at = g.find(x => x.chave === chave);
+      if (at) { at.itens.push(i); if (!at.obs && i.obs) at.obs = i.obs; continue; }
+      g.push({ chave, culto_id: i.culto_id, data: i.data, evento: i.evento, status: st, obs: i.obs || null, itens: [i] });
+    }
+    return g;
+  })();
   /* ================================================================ 75 ===
      "QUEM SERVE COM VOCÊ" CONTAVA LINHA ACHANDO QUE CONTAVA GENTE.
 
@@ -759,7 +895,7 @@ export default function Eu() {
      pendente ainda está confirmando, mesmo já tendo confirmado o outro. */
   const gente = agruparQuemServe(juntos);
 
-  const semResposta = dias.filter(d => !indisp.includes(d) && !disponivel.includes(d));
+  const semResposta = dias.filter(d => !respostaDoDia(d));
   /* Alguém que acabou de entrar no time. Não é o mesmo que "não tem escala
      este mês", e as duas situações pedem frases diferentes.
 
@@ -808,7 +944,6 @@ export default function Eu() {
   const errar = (msg: string) => { setFlash(''); setErro(msg); };
   /* 103 · a grade "Quando você pode" com os eventos do ministério dentro */
   const eventosDoDia = (d: string) => eventos.filter(e => e.data === d);
-  const naEscala = (d: string) => agenda.some(i => i.data === d && (i.status || 'pendente') !== 'recusado');
   const dePlantao = (d: string) => plantoes.some(p => p.data === d);
   const est = (i: Item) => {
     const s = i.status || 'pendente';
@@ -883,7 +1018,9 @@ export default function Eu() {
             </p>
           )}
           <span className="rot">
-            {pendentes.length ? 'Precisa de você' : novo ? 'Bem-vindo' : `Olá, ${primeiro}`}
+            {/* "Boas-vindas", e não "Bem-vindo": a tela não sabe se fala com
+                um homem ou com uma mulher (02/10/2026) */}
+            {pendentes.length ? 'Precisa de você' : novo ? 'Boas-vindas' : `Olá, ${primeiro}`}
           </span>
           <h1>
             {pendentes.length
@@ -899,18 +1036,39 @@ export default function Eu() {
                  que tinha respondido por dois compromissos — e quem tivesse
                  combinado outra coisa para "o outro dia" descobria errado. */
               ? (diasPendentes === 1 ? 'Confirme se você vai' : `Confirme ${diasPendentes} dias`)
-              : proxima ? 'Tudo certo por aqui'
+              /* 02/10/2026 · "Tudo certo" só quando está: com a escala
+                 confirmada e dias em branco na grade, o que falta fazer é o
+                 título (a auditoria achou "Tudo certo por aqui" em cima de
+                 "Faltam 8 dias para dizer quando você pode") */
+              : proxima ? (semResposta.length ? 'Diga quando você pode' : 'Tudo certo por aqui')
               : novo ? `${primeiro}, você está no time`
               : 'Você não tem escala agora'}
           </h1>
-          <p className="vol-sub">
-            {pendentes.length
-              ? 'Dois toques e a liderança já sabe com quem contar.'
-              : proxima ? `Sua próxima vez é ${diaLongo(proxima.data, proxima.evento)}.`
-              : novo ? 'Este endereço é seu. É aqui que a sua escala aparece, e é daqui que você avisa quando não pode.'
-              : 'Quando a escala do mês sair, ela aparece aqui.'}
-          </p>
-
+          {/* 02/10/2026 · UMA FRASE SÓ. Eram duas ("Dois toques e a liderança
+              já sabe com quem contar" e "Se não puder, avise: dá tempo de
+              remanejar. Pode mudar de ideia até o dia") antes do primeiro
+              botão. Fica a que tira o medo de dizer "não posso", que é a
+              decisão difícil desta tela. Com a próxima escala no cartão logo
+              abaixo, a frase "Sua próxima vez é..." repetia a data que o
+              cartão mostra em tamanho grande: sai. */}
+          {/* "TUDO CERTO" COM NOVE DIAS SEM RESPOSTA NÃO ESTÁ TUDO CERTO.
+              Sem confirmação pendente, o bloco dizia "Tudo certo por aqui" e
+              parava, com a grade "Quando você pode" inteira em branco três
+              telas abaixo. É a resposta que a liderança usa para montar o mês
+              seguinte: o bloco diz quantos dias faltam e leva até lá. */}
+          {(pendentes.length || novo || !proxima || !!semResposta.length) && (
+            <p className="vol-sub">
+              {pendentes.length
+                ? 'Se não puder, avise agora. Dá para mudar até o dia.'
+                : novo ? 'É aqui que a sua escala aparece e que você avisa quando não pode.'
+                : semResposta.length
+                  /* com o título dizendo o que fazer, a frase só conta */
+                  ? (proxima
+                    ? `${cont(semResposta.length, 'dia', 'dias')} sem resposta.`
+                    : `${pl(semResposta.length, 'Falta', 'Faltam')} ${cont(semResposta.length, 'dia', 'dias')} para dizer quando você pode.`)
+                : 'Quando a escala do mês sair, ela aparece aqui.'}
+            </p>
+          )}
 
           {/* A PRIMEIRA VISITA NÃO PODE SER UM BECO.
               Quem acabou de ser aprovado caía numa tela que dizia "Você não
@@ -918,7 +1076,7 @@ export default function Eu() {
               soava como fim de linha, quando na verdade falta uma coisa e ela
               é justamente a que faz a escala existir: dizer quando dá.
               O botão só aparece quando há dias em aberto para responder. */}
-          {novo && !!semResposta.length && (
+          {!pendentes.length && !!semResposta.length && (
             <div className="vol-btns" style={{ marginTop: 22, maxWidth: 360 }}>
               <a className="vol-bt" href="#quando-posso"
                 style={{ background: 'var(--noite)', color: '#fff', borderColor: 'var(--noite)' }}>
@@ -927,49 +1085,44 @@ export default function Eu() {
             </div>
           )}
 
-          {/* DIZER "NÃO POSSO" É A DECISÃO MAIS DIFÍCIL DESTA TELA, e era a
-              única sem nenhuma frase por perto. Quem não sabe o que acontece
-              depois imagina o pior — que a área vai ficar sem ninguém, e que a
-              culpa vai ser dele. Aí a pessoa não responde, que é o pior
-              resultado possível para todo mundo: a liderança descobre no
-              domingo. Uma linha, uma vez, acima da lista: repetir por item
-              seria a mesma frase três vezes na mesma tela. */}
-          {!!pendentes.length && (
-            <p className="vol-pede-depois">
-              Se não puder, avise: dá tempo de remanejar. Pode mudar de ideia até o dia.
-            </p>
-          )}
-
-          {pendentes.map(i => (
-            <div className="vol-pede" key={i.culto_id + i.funcao}>
-              <div className="vol-pede-fn">
-                {i.funcao}
-                {novidade(i) && <span className="vol-novo">{novidade(i)}</span>}
+          {/* UM CARTÃO POR CULTO (02/10/2026). A data é o que decide a
+              resposta, então ela vem primeiro e grande, com a hora; os postos
+              vêm embaixo. Um toque responde os postos do cartão. */}
+          {cartoesPend.map(g => {
+            const hora = horaDoDia(g.inicio, g.evento, g.data, IGREJA.cultoHora, IGREJA.followHora);
+            const quando = `${diaLongo(g.data, g.evento)}${hora ? `, ${hora}` : ''}`;
+            const primeiras = g.itens.filter(i => i.primeira_vez).map(i => i.funcao);
+            const novo1 = g.itens.map(novidade).find(Boolean);
+            return (
+              <div className="vol-pede" key={g.culto_id}>
+                <div className="vol-pede-quando">{quando}</div>
+                <div className="vol-pede-fn">
+                  {g.itens.map(i => i.funcao).join(' · ')}
+                  {novo1 && <span className="vol-novo">{novo1}</span>}
+                </div>
+                {/* O RECADO DO DIA CHEGA AQUI. A liderança escreve "chegar 18h,
+                    tem batismo" para estas pessoas; ia só para o WhatsApp. */}
+                {g.obs && <p className="vol-pede-obs">{g.obs}</p>}
+                {!!primeiras.length && (
+                  <p className="vol-pede-obs">
+                    Primeira vez em {primeiras.join(' e ')}: chegue 30 minutos antes, alguém vai te receber.
+                  </p>
+                )}
+                <div className="vol-btns">
+                  <button className="vol-bt" disabled={ocupado === g.culto_id}
+                    aria-label={`Eu vou, ${quando}`}
+                    onClick={() => responderItens(g.itens, 'confirmado', g.culto_id)}>
+                    <IcCheck /> Eu vou
+                  </button>
+                  <button className="vol-bt nao" disabled={ocupado === g.culto_id}
+                    aria-label={`Não posso, ${quando}`}
+                    onClick={() => responderItens(g.itens, 'recusado', g.culto_id)}>
+                    Não posso
+                  </button>
+                </div>
               </div>
-              <div className="vol-pede-dia">{diaLongo(i.data, i.evento)}</div>
-              {/* O RECADO DO DIA CHEGA AQUI. Ele existe no banco desde sempre
-                  (três dias já têm um escrito) e ia só para a mensagem do
-                  WhatsApp: a liderança escrevia "chegar 18h, tem batismo" para
-                  estas pessoas, e a tela delas não mostrava. */}
-              {i.obs && <p className="vol-pede-obs">{i.obs}</p>}
-              {i.primeira_vez && (
-                <p className="vol-pede-obs">
-                  É a sua primeira vez nessa função. Chegue 30 minutos mais cedo,
-                  alguém vai te receber e acompanhar.
-                </p>
-              )}
-              <div className="vol-btns">
-                <button className="vol-bt" disabled={ocupado === i.culto_id}
-                  onClick={() => responder(i.culto_id, 'confirmado', undefined, i.funcao_id)}>
-                  <IcCheck /> Eu vou
-                </button>
-                <button className="vol-bt nao" disabled={ocupado === i.culto_id}
-                  onClick={() => responder(i.culto_id, 'recusado', i.data, i.funcao_id, i.inicio)}>
-                  Não posso
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* 107 · O DIA DO CULTO: "Cheguei" e, para quem lidera o dia, o time
@@ -1073,7 +1226,7 @@ export default function Eu() {
             acima", é dizer duas vezes a mesma coisa e empurrar o resto para
             baixo. Se a próxima já está no bloco preto, a pergunta "quando eu
             sirvo" já foi respondida. */}
-        {proxima && !jaMostrados.has(proxima.culto_id + proxima.funcao) && (
+        {proxima && mostraProxima && (
           <section className="vol-secao">
             <div className="vol-secao-cab"><span className="rot">Sua próxima escala</span></div>
             {/* 16/09/2026: O INGRESSO. A data é o assunto, então ela é o
@@ -1087,7 +1240,7 @@ export default function Eu() {
                 <span className="ingresso-mes">{distintivoDoDia(proxima.data, proxima.evento)}</span>
               </div>
               <div className="ingresso-corpo">
-                <div className="vol-prox-fn">{proxima.funcao}</div>
+                <div className="vol-prox-fn">{proximaPostos.map(i => i.funcao).join(' · ') || proxima.funcao}</div>
                 <div className="vol-prox-dia">
                   {diaLongo(proxima.data, proxima.evento)}{(() => {
                     const h = horaDoDia(proxima.inicio, proxima.evento, proxima.data, IGREJA.cultoHora, IGREJA.followHora);
@@ -1095,7 +1248,10 @@ export default function Eu() {
                   })()}
                 </div>
                 <div className="vol-prox-est">
-                  {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.' : `Você está ${est(proxima).txt}.`}
+                  {/* "Presença confirmada", e não "Você está confirmado": a
+                      tela não sabe o gênero de quem lê (02/10/2026) */}
+                  {est(proxima).txt === 'confirmar' ? 'Falta você confirmar, logo acima.'
+                    : est(proxima).txt === 'confirmado' ? 'Presença confirmada.' : ''}
                   {novidade(proxima) ? ` Você ${novidade(proxima)} nessa escala.` : ''}
                   {/* 82 · a frase passa por `agruparQuemServe`, como a seção
                       de baixo já fazia desde a 75. Antes ela contava LINHAS
@@ -1143,17 +1299,18 @@ export default function Eu() {
                       existe: "Plano muda; o sistema tem que deixar." */}
                   {est(proxima).txt !== 'confirmar' && (
                     <button type="button" className="ingresso-cal" disabled={ocupado === proxima.culto_id}
-                      onClick={() => responder(proxima.culto_id, 'recusado', proxima.data, proxima.funcao_id, proxima.inicio)}>
+                      onClick={() => responderItens(proximaPostos.filter(i => i.status !== 'furou'), 'recusado', proxima.culto_id)}>
                       Não vou mais poder
                     </button>
                   )}
                   {/* 103 · pedir a um colega que fique com a vaga: ela continua
-                      sua até alguém aceitar */}
-                  {trocasOk && !!proxima.funcao_id && (
-                    <button type="button" className="ingresso-cal" onClick={() => abrirTroca(proxima)}>
-                      Pedir troca
+                      sua até alguém aceitar. A troca é por posto: com dois
+                      postos no dia, um botão para cada, com o nome. */}
+                  {trocasOk && proximaPostos.filter(i => !!i.funcao_id && i.status !== 'furou').map(i => (
+                    <button type="button" className="ingresso-cal" key={'tr' + i.funcao_id} onClick={() => abrirTroca(i)}>
+                      {proximaPostos.length > 1 ? `Pedir troca: ${i.funcao}` : 'Pedir troca'}
                     </button>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
@@ -1247,40 +1404,60 @@ export default function Eu() {
           </section>
         )}
 
-        {!!restantes.length && (
+        {!!gruposDepois.length && (
           <section className="vol-secao">
             <div className="vol-secao-cab">
               <span className="rot">Depois disso</span>
-              <span className="vol-secao-nota">{restantes.length} {restantes.length === 1 ? 'dia' : 'dias'}</span>
+              {/* conta DIAS: eram as linhas (postos) que viravam "dias" */}
+              {(() => {
+                const n = new Set(gruposDepois.map(g => g.data)).size;
+                return <span className="vol-secao-nota">{n} {n === 1 ? 'dia' : 'dias'}</span>;
+              })()}
             </div>
-            {restantes.map(i => (
-              <div className={`vol-linha ${est(i).cls}`} key={i.culto_id + i.funcao}>
-                <span className="vol-marca" aria-hidden="true" />
-                <span>
-                  <span className="vol-linha-dia">
-                    {diaLongo(i.data, i.evento)}
-                    {novidade(i) && <span className="vol-novo">{novidade(i)}</span>}
+            {gruposDepois.map(g => {
+              const e = est(g.itens[0]);
+              const novo1 = g.itens.map(novidade).find(Boolean);
+              const comId = g.itens.filter(i => !!i.funcao_id);
+              return (
+                <div className={`vol-linha ${e.cls}`} key={g.chave}>
+                  <span className="vol-marca" aria-hidden="true" />
+                  <span>
+                    <span className="vol-linha-dia">
+                      {diaLongo(g.data, g.evento)}
+                      {novo1 && <span className="vol-novo">{novo1}</span>}
+                    </span>
+                    <span className="vol-linha-fn">{g.itens.map(i => i.funcao).join(' · ')}</span>
+                    {g.obs && <span className="vol-linha-obs">{g.obs}</span>}
                   </span>
-                  <span className="vol-linha-fn">{i.funcao}</span>
-                  {i.obs && <span className="vol-linha-obs">{i.obs}</span>}
+                  <span className="vol-linha-est">{e.txt}</span>
                   {/* MUDAR DE IDEIA. Quem tinha respondido "não posso" ficava
                       preso: a linha dizia VOCÊ NÃO PODE e não oferecia nada.
-                      O RPC eu_responder sempre aceitou os dois sentidos e até
-                      limpa a indisponibilidade ao confirmar — faltava só a
-                      tela deixar. Plano muda; o sistema tem que deixar. */}
-                  <button className="vol-acao" disabled={ocupado === i.culto_id}
-                    onClick={() => responder(i.culto_id,
-                      i.status === 'recusado' ? 'confirmado' : 'recusado', i.data, i.funcao_id)}>
-                    {i.status === 'recusado' ? 'Consegui, posso sim' : 'Não vou mais poder'}
-                  </button>
-                  {/* 103 · a troca, também para quem já disse que não pode */}
-                  {trocasOk && !!i.funcao_id && (i.status || 'pendente') !== 'furou' && (
-                    <button className="vol-acao" onClick={() => abrirTroca(i)}>Pedir troca</button>
+                      Plano muda; o sistema tem que deixar. A resposta vale
+                      para os postos da linha (o culto, nessa situação).
+
+                      AS AÇÕES NA LARGURA TODA (02/10/2026). Moravam na coluna
+                      do texto, que a 390px tem 226px (a da direita guarda 7rem
+                      para o estado): "Não vou mais poder" e "Pedir troca"
+                      nunca cabiam lado a lado, e "Consegui, posso sim"
+                      quebrava em duas linhas centradas a 320px. */}
+                  {g.status !== 'furou' && (
+                    <span className="vol-linha-acoes">
+                      <button className="vol-acao" disabled={ocupado === g.culto_id}
+                        onClick={() => responderItens(g.itens, g.status === 'recusado' ? 'confirmado' : 'recusado', g.culto_id)}>
+                        {g.status === 'recusado' ? 'Consegui, posso sim' : 'Não vou mais poder'}
+                      </button>
+                      {/* 103 · a troca, também para quem já disse que não pode;
+                          é por posto, então com dois postos vai o nome */}
+                      {trocasOk && comId.map(i => (
+                        <button className="vol-acao" key={'tr' + i.funcao_id} onClick={() => abrirTroca(i)}>
+                          {comId.length > 1 ? `Pedir troca: ${i.funcao}` : 'Pedir troca'}
+                        </button>
+                      ))}
+                    </span>
                   )}
-                </span>
-                <span className="vol-linha-est">{est(i).txt}</span>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </section>
         )}
 
@@ -1316,67 +1493,83 @@ export default function Eu() {
           <section className="vol-secao" id="quando-posso">
             <div className="vol-secao-cab">
               <span className="rot">Quando você pode</span>
-              {/* a mesma voz de "Posso no mês", 60px abaixo: era .vol-quem (a
-                  classe do link de navegação do topo) com estilo embutido
-                  desfazendo o <button> — a mesma ação em dois trajes. */}
-              {!!semResposta.length && (
-                <button className="vol-mes-todos" disabled={ocupado === 'todos'} onClick={() => possoTodos()}>
-                  Posso em todos
-                </button>
-              )}
+              {/* 02/10/2026 · a contagem sobe para o cabeçalho e a frase de
+                  baixo sai ("É isso que garante seu lugar na escala"): cada
+                  dia que falta tem a própria marca na lista */}
+              <span className="vol-secao-nota">
+                {semResposta.length ? `${pl(semResposta.length, 'falta', 'faltam')} ${cont(semResposta.length, 'dia', 'dias')}` : 'tudo respondido'}
+              </span>
             </div>
-            <p className="vol-nota" style={{ marginTop: 14 }}>
-              {semResposta.length
-                ? `${pl(semResposta.length, 'Falta', 'Faltam')} ${cont(semResposta.length, 'dia', 'dias')} para responder. É isso que garante seu lugar na escala.`
-                : 'Tudo respondido. Pode mudar quando quiser.'}
-              {/* 103 · a agenda do ministério entra na grade */}
-              {!!eventos.length && ' Os eventos da sua área aparecem no dia deles.'}
-            </p>
+            {/* 103 · a agenda do ministério entra na grade */}
+            {!!eventos.length && (
+              <p className="vol-nota" style={{ marginTop: 14 }}>Os eventos da sua área aparecem no dia deles.</p>
+            )}
+            {/* "Posso em todos" só quando há mais de um mês esperando: com um
+                mês só, ele faz o mesmo que o "Posso no mês" ao lado do mês, e
+                dois botões para a mesma coisa é um botão a mais para ler. */}
+            {porMes.filter(g => g.dias.some(d => !respostaDoDia(d))).length > 1 && (
+              <div className="vol-tudo">
+                <button type="button" className="vol-mes-todos" disabled={!!ocupado} onClick={() => possoTodos()}>
+                  Posso em todos os {semResposta.length} dias
+                </button>
+              </div>
+            )}
             {/* POR MÊS, E NÃO NUMA GRADE CORRIDA. 07/09/2026.
-                Eram quinze datas em duas colunas sem separação nenhuma. E o
-                padrão se perdia sozinho: entre 27/09 e 04/10 não existe sábado
-                de Follow, então a coluna da esquerda troca de sábado para
-                domingo no meio da lista. O olho perde a régua e quem quer
-                responder "não posso em outubro" precisa caçar as datas de
-                outubro espalhadas nas duas colunas.
-                Com o mês por cima, a troca de padrão passa a ter explicação, a
-                contagem responde "quanto falta aqui" sem contar na mão, e cada
-                mês ganha a própria ação em massa — que é como as pessoas
-                pensam disponibilidade: por viagem, por período, por mês. */}
+                Eram quinze datas em duas colunas sem separação nenhuma. Com o
+                mês por cima, a troca de padrão (sábado de Follow que não
+                existe numa semana) tem explicação, e cada mês ganha a própria
+                ação em massa: é como as pessoas pensam disponibilidade, por
+                viagem, por período, por mês. */}
             {porMes.map(g => {
-              const faltamNoMes = g.dias.filter(d => !indisp.includes(d) && !disponivel.includes(d));
+              const faltamNoMes = g.dias.filter(d => !respostaDoDia(d));
               return (
                 <div className="vol-mes" key={g.chave}>
                   <div className="vol-mes-cab">
                     <span className="vol-mes-nome">{g.rot}</span>
-                    <span className="vol-mes-nota">
-                      {faltamNoMes.length
-                        ? `${faltamNoMes.length} de ${g.dias.length} sem resposta`
-                        : 'tudo respondido'}
-                    </span>
-                    {faltamNoMes.length > 1 && (
-                      <button type="button" className="vol-mes-todos"
-                        disabled={!!ocupado}
-                        onClick={() => possoNoMes(faltamNoMes)}>Posso no mês</button>
-                    )}
+                    {faltamNoMes.length > 1
+                      ? (
+                        <button type="button" className="vol-mes-todos" disabled={!!ocupado}
+                          onClick={() => possoNoMes(faltamNoMes)}>Posso no mês</button>
+                      )
+                      /* mês respondido fica quieto: "tudo respondido" no
+                         cabeçalho da seção e em cada mês era a mesma notícia
+                         três vezes (auditoria de 02/10) */
+                      : faltamNoMes.length ? <span className="vol-mes-nota">falta 1</span> : null}
                   </div>
                   <div className="vol-disp">
                     {g.dias.map(d => {
-                      const pode = disponivel.includes(d);
-                      const nao = indisp.includes(d);
+                      const r = respostaDoDia(d);
+                      const esc = escalaDoDia(d);
+                      /* no celular estreito a data quebra em duas linhas: o
+                         espaço depois do "·" não quebra, então ela quebra
+                         como "sáb 03" / "· Follow", e não "sáb 03 ·" / "Follow" */
+                      const rot = rotuloDoDia(d, eventosDoDia(d), diaNoMes(d)).replace(' · ', ' ·\u00a0');
+                      const preso = ocupado === d || ocupado === 'todos';
                       return (
-                        <div className="vol-dia" key={d}>
+                        <div className={`vol-dia${r ? '' : ' falta'}`} key={d}>
                           <span className="vol-dia-nome">
-                            {rotuloDoDia(d, eventosDoDia(d), diaNoMes(d))}
-                            {/* 103 · os dias da pessoa, destacados na agenda */}
-                            {naEscala(d) ? <span className="vol-dia-tag">na escala</span>
-                              : dePlantao(d) ? <span className="vol-dia-tag">plantão</span> : null}
+                            <span className="vol-dia-rot">{rot}</span>
+                            {/* 103 · os dias da pessoa na agenda; 02/10/2026:
+                                com os postos, numa linha quieta embaixo (a
+                                etiqueta em caixa quebrava a linha do sábado) */}
+                            {/* a linha dos postos ocupa a largura toda, embaixo
+                                da data e das respostas (ver globals.css); se
+                                ainda assim quebrar, o "·" desce junto com o
+                                posto seguinte, como na data */}
+                            {esc.length
+                              ? <span className="vol-dia-sub">{['na escala', ...new Set(esc.map(i => i.funcao))].join(' · ')}</span>
+                              : dePlantao(d) ? <span className="vol-dia-sub">plantão</span> : null}
                           </span>
-                          <span className="vol-dia-btns">
-                            <button className={`vol-dia-bt sim ${pode ? 'on' : ''}`} disabled={ocupado === d}
-                              onClick={() => responderDisp(d, 'posso')} aria-pressed={pode}>Posso</button>
-                            <button className={`vol-dia-bt nao ${nao ? 'on' : ''}`} disabled={ocupado === d}
-                              onClick={() => responderDisp(d, 'nao')} aria-pressed={nao}>Não</button>
+                          {/* 02/10/2026 · as duas respostas coladas, como uma
+                              escolha só; marcada, ganha a cor (verde posso,
+                              vermelho não posso) */}
+                          <span className="vol-seg" role="group" aria-label={`${rot}: você pode?`}>
+                            <button type="button" className={`vol-seg-bt sim${r === 'posso' ? ' on' : ''}`}
+                              disabled={preso} aria-pressed={r === 'posso'}
+                              onClick={() => dizerDia(d, 'posso')}>Posso</button>
+                            <button type="button" className={`vol-seg-bt nao${r === 'nao' ? ' on' : ''}`}
+                              disabled={preso} aria-pressed={r === 'nao'}
+                              onClick={() => dizerDia(d, 'nao')}>Não posso</button>
                           </span>
                         </div>
                       );
@@ -1429,7 +1622,7 @@ export default function Eu() {
                 {/* 103 · a função que a própria pessoa acrescentou espera a
                     liderança conferir, e a tela diz isso */}
                 <span className="vol-eq-val">
-                  {espaco.funcoes.map((f: any) => f.funcao + (f.conferido === false ? ' (a conferir)' : '')).join(' · ')}
+                  {espaco.funcoes.map((f: any) => f.funcao + (f.conferido === false ? ' (a conferir)' : '')).join(' · ')}
                 </span>
               </div>
             )}
