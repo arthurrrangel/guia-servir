@@ -131,7 +131,15 @@ ok(c2['62'] !== c['62'], 'dois códigos seguidos saíram com o mesmo txid');
 console.log('8. a tela de depois');
 await p.getByRole('button', { name: /Já ofertei/ }).click();
 await p.waitForTimeout(400);
-ok(/Recebemos/i.test(await p.locator('.of-fim').innerText()), 'a tela de fim não confirmou');
+/* No Pix a tela NÃO diz "Recebemos" desde 21/09 (a50dca4): o site não fala
+   com banco nenhum, então a frase é de quem ofertou, e a tela diz onde
+   conferir. Esta linha ainda cobrava o "Recebemos" e reprovava a tela certa
+   (achado em 03/10/2026, ligando a chave da igreja). */
+{
+  const fim = await p.locator('.of-fim').innerText();
+  ok(/Você marcou que já ofertou/.test(fim) && /Confira no app do seu banco/.test(fim) && !/Recebemos/i.test(fim),
+     `a tela de fim do Pix: ${fim.slice(0, 160)}`);
+}
 ok(await p.locator('.of-causa').isVisible(), 'o campo de oração não apareceu');
 /* o aviso de privacidade tem que ser LEGÍVEL, não um rótulo em caixa alta:
    `label{}` da folha global já transformou este texto em caixa alta uma vez */

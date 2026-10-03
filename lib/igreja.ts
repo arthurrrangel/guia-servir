@@ -92,8 +92,15 @@ export const IGREJA = {
 
      `pixNome` é o que aparece no app de quem paga antes de confirmar: no
      máximo 25 caracteres, sem acento (lib/pix.ts corta e limpa sozinho).
+
+     03/10/2026: o CNPJ da igreja, a chave da Conta Stone, que o Arthur mandou
+     ("49.173.580/0001-08 - chave pix"). Conferido: os dois dígitos
+     verificadores batem, e é o mesmo CNPJ que a página do link de pagamento
+     da Stone mostra em "Vendido por" (GUIA CHURCH COMUNIDADE EVANGELICA).
+     scripts/followcamp-pagamento.test.mjs reprova chave com pontuação ou com
+     dígito verificador errado.
      ------------------------------------------------------------------------ */
-  pixChave: null as string | null,
+  pixChave: '49173580000108' as string | null,
   pixNome: 'GUIA CHURCH',
   pixCidade: 'Rio de Janeiro',
 } as const;

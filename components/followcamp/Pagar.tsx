@@ -214,6 +214,15 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
       const linkConhecido = t?.meio === 'cartaoLink' && LINKS_CARTAO.some(l => l.url === t.link);
       if (fresco && t && CODIGO_OK.test(t.codigo) && t.valor > 0 && (t.meio === 'pixdireto' || linkConhecido)) {
         setTentativa(t);
+        /* o formulário volta preenchido com o que gerou esta tela: sem isso,
+           "Voltar e mudar algo" depois de recarregar caía num formulário
+           vazio, e a pessoa redigitava tudo para mudar uma coisa (03/10) */
+        if (typeof t.campista === 'string') setCampista(t.campista);
+        if (t.referente === 'inscricao' || t.referente === 'irmaos' || t.referente === 'parcela') setReferente(t.referente);
+        if (typeof t.irmao === 'string') setIrmao(t.irmao);
+        if (t.referente === 'parcela') setParcelaDig(String(Math.round(t.valor * 100)));
+        setMeio(t.meio);
+        if (typeof t.titular === 'string') setTitular(t.titular);
         setFase(t.meio === 'pixdireto' ? 'pixdireto' : 'cartaoLink');
         return;
       }
@@ -573,11 +582,15 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                 <h2 className={s.cabecaPasso}><span>3</span>Como você quer pagar</h2>
                 <fieldset className={s.opcoes}>
                   <legend>Como você quer pagar</legend>
+                  {/* O Pix vem antes do cartão pela mesma razão de /ofertar: o
+                      cartão paga a taxa da Stone em cada inscrição, e o Pix
+                      direto cai na conta pela chave, sem adquirente no meio.
+                      O cartão continua logo abaixo, visível. */}
                   {([
                     temPagarme && { id: 'pix' as const, nome: 'Pix', dica: 'O QR aparece aqui na tela, e a confirmação chega em segundos.' },
+                    temPixDireto && { id: 'pixdireto' as const, nome: 'Pix direto na conta da igreja', dica: 'Sem taxa. Depois de pagar, mande o comprovante no WhatsApp com o código do pagamento.' },
                     temPagarme && { id: 'cartao' as const, nome: 'Cartão de crédito', dica: 'Em até 12x, com os juros do parcelamento por conta de quem paga. Você digita o cartão na página da Stone.' },
                     temLink && { id: 'cartaoLink' as const, nome: 'Cartão de crédito', dica: dicaLink, fechado: !!referente && !linkAqui },
-                    temPixDireto && { id: 'pixdireto' as const, nome: 'Pix direto na conta da igreja', dica: 'Sem taxa. Depois de pagar, mande o comprovante no WhatsApp com o código do pagamento.' },
                   ].filter(Boolean) as { id: Meio; nome: string; dica: string; fechado?: boolean }[]).map(o => (
                     <label key={o.id} className={s.opcao} data-marcada={meio === o.id} aria-disabled={o.fechado || undefined}>
                       <input type="radio" name="fc-meio" value={o.id} checked={meio === o.id} disabled={o.fechado}

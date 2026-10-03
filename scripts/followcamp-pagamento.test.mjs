@@ -27,6 +27,7 @@ import {
   LINKS_CARTAO, linkInvalido, linkCartaoDe, linkDoLote, temLinkCartao, LOTES,
 } from '../lib/followcamp.ts';
 import { pixCopiaECola, pixValido, pixCampos } from '../lib/pix.ts';
+import { PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '../lib/oferta.ts';
 
 let mal = 0;
 const ok = (cond, queixa) => { if (!cond) { mal++; console.error(`MAL  ${queixa}`); } };
@@ -106,6 +107,32 @@ ok(/irmão inscrito: João Souza/.test(descricaoDe('irmaos', 'Maria Souza', 'Jo�
   ok(pixCampos(cod)['54'] === '627.30', `valor no BR Code: ${pixCampos(cod)['54']}`);
   ok(cod.includes(`05${String(COD.length).padStart(2, '0')}${COD}`), 'txid do campista dentro do campo 62');
 }
+/* A CHAVE DE VERDADE, a que está em lib/igreja.ts (03/10/2026). O BR Code não
+   confere chave nenhuma: "49.173.580/0001-08" com a pontuação, ou um dígito
+   trocado, saem num código "válido" que o banco de quem paga recusa (ou que
+   manda o dinheiro para outro CNPJ). Chave só de dígitos e pontuação é CPF ou
+   CNPJ: tem que vir só com os dígitos, e com os verificadores certos. */
+{
+  const dv = (base, pesos) => { const r = base.reduce((t, n, i) => t + n * pesos[i], 0) % 11; return r < 2 ? 0 : 11 - r; };
+  const cnpjValido = c => {
+    if (!/^\d{14}$/.test(c) || /^(\d)\1{13}$/.test(c)) return false;
+    const n = [...c].map(Number);
+    return dv(n.slice(0, 12), [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) === n[12] && dv(n.slice(0, 13), [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]) === n[13];
+  };
+  ok(cnpjValido('49173580000108') && cnpjValido('11222333000181') && !cnpjValido('49173580000109') && !cnpjValido('49173580000180'), 'conferência de CNPJ');
+  const chave = PIX_CHAVE;
+  if (chave) {
+    if (/^[\d.\-\/ ]+$/.test(chave)) {
+      ok(/^\d+$/.test(chave), `a chave Pix tem pontuação ("${chave}"): CPF e CNPJ vão só com os dígitos`);
+      const so = chave.replace(/\D/g, '');
+      ok(so.length === 14 ? cnpjValido(so) : so.length === 11 ? cpfValido(so) : false, `a chave Pix ${chave} não é CPF nem CNPJ válido`);
+    }
+    const real = pixCopiaECola({ chave, nome: PIX_NOME, cidade: PIX_CIDADE, valor: 697, txid: COD });
+    ok(pixValido(real), 'BR Code com a chave de verdade');
+    ok(pixCampos(real)['26'] === `0014br.gov.bcb.pix01${String(chave.length).padStart(2, '0')}${chave}`, `a chave inteira no campo 26: ${pixCampos(real)['26']}`);
+    ok(pixCampos(real)['54'] === '697.00', 'R$ 697,00 no BR Code');
+  }
+}
 
 /* ------------------------------------------ 7. o cartão pelo link da Stone --- */
 {
@@ -140,7 +167,8 @@ ok(/irmão inscrito: João Souza/.test(descricaoDe('irmaos', 'Maria Souza', 'Jo�
   /* os links DE VERDADE, os que estão no código: todos passam na regra */
   for (const l of LINKS_CARTAO) ok(linkInvalido(l) === null, `link configurado com problema: ${linkInvalido(l)} (${l.url})`);
   const m = mensagemWhatsApp({ campista: 'Maria Souza', ref: 'inscricao', valor: 697, codigo: COD, meio: 'cartaoLink', titular: '  Carlos   Souza ' });
-  ok(/^Oi! Paguei no cartão, pelo link da Stone\./.test(m) && /\nQuem pagou no cartão: Carlos Souza\n/.test(m)
+  /* o link também aceita Pix: a mensagem diz "pelo link", não "no cartão" */
+  ok(/^Oi! Paguei pelo link de pagamento da Stone\./.test(m) && /\nQuem pagou: Carlos Souza\n/.test(m) && !/cartão/.test(m)
     && /Código: FC27-K7P3M9QX/.test(m) && /comprovante vai em seguida/.test(m), `mensagem do cartão por link: ${m}`);
   ok(/^Oi! Paguei pelo Pix do site\./.test(mensagemWhatsApp({ campista: 'Maria Souza', ref: 'inscricao', valor: 697, codigo: COD, meio: 'pix' })), 'mensagem do Pix do site');
 }

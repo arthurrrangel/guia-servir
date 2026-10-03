@@ -238,8 +238,20 @@ export type LinkCartao = {
   url: string;
 };
 
-/** Vazio = o cartão por link fica desligado e a tela nem mostra a opção. */
-export const LINKS_CARTAO: readonly LinkCartao[] = [];
+/** Vazio = o cartão por link fica desligado e a tela nem mostra a opção.
+ *
+ *  03/10/2026: o link que o Arthur mandou. Lido na página pública dele (sem
+ *  pagar nada): vendido por GUIA CHURCH COMUNIDADE EVANGELICA, CNPJ
+ *  49.173.580/0001-08 (o mesmo da chave Pix); R$ 697,00; aceita Pix,
+ *  crédito e débito (o débito só pela carteira digital); crédito SÓ À VISTA
+ *  (a única parcela configurada é 1x de R$ 697,00), e por isso `parcelas: 1`.
+ *  O item do link se chama "Follow Camp 2026": o nome se corrige no app da
+ *  Stone, não aqui.
+ *  Irmãos (R$ 627,30) ainda não têm link: na tela, o cartão fica fechado para
+ *  eles e o Pix direto cobra o valor com desconto. */
+export const LINKS_CARTAO: readonly LinkCartao[] = [
+  { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg' },
+];
 
 const HOST_DO_LINK = /(^|\.)(stone\.com\.br|pagar\.me)$/;
 
@@ -277,12 +289,17 @@ export function temLinkCartao(agora = new Date(), links: readonly LinkCartao[] =
 
 export type MeioDoAviso = 'pix' | 'cartao' | 'pixdireto' | 'cartaoLink';
 
-/** O texto que a pessoa manda para a organização, já pronto. */
+/** O texto que a pessoa manda para a organização, já pronto.
+ *
+ *  O link da Stone não diz "cartão" (03/10/2026): a página dele também
+ *  aceita Pix, e quem escolheu "cartão" aqui pode pagar no Pix lá. A
+ *  mensagem diz por onde a pessoa pagou, que é o que a organização procura
+ *  no app. */
 export function mensagemWhatsApp(p: {
   campista: string; ref: Referente; valor: number; codigo: string; meio: MeioDoAviso; irmao?: string; titular?: string;
 }): string {
   const meio = p.meio === 'cartao' ? 'pelo cartão'
-    : p.meio === 'cartaoLink' ? 'no cartão, pelo link da Stone'
+    : p.meio === 'cartaoLink' ? 'pelo link de pagamento da Stone'
     : p.meio === 'pix' ? 'pelo Pix do site' : 'pelo Pix direto na conta da igreja';
   const linhas = [
     `Oi! Paguei ${meio}.`,
@@ -290,7 +307,7 @@ export function mensagemWhatsApp(p: {
     `${ROTULO[p.ref]}: ${emReais(p.valor)}`,
   ];
   if (p.ref === 'irmaos' && p.irmao) linhas.push(`Irmão inscrito: ${limpaNome(p.irmao)}`);
-  if (p.meio === 'cartaoLink' && p.titular) linhas.push(`Quem pagou no cartão: ${limpaNome(p.titular)}`);
+  if (p.meio === 'cartaoLink' && p.titular) linhas.push(`Quem pagou: ${limpaNome(p.titular)}`);
   linhas.push(`Código: ${codigoLegivel(p.codigo)}`);
   if (p.meio === 'pixdireto' || p.meio === 'cartaoLink') linhas.push('O comprovante vai em seguida.');
   return linhas.join('\n');
