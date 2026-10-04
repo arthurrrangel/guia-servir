@@ -278,10 +278,10 @@ function FichaNaTabela({ x, aberta, alternar, indo, fazer, pagar }: {
           <small className={s.sub}>{[f.idade ? `${f.idade} anos` : '', f.sexo === 'feminino' ? 'F' : f.sexo === 'masculino' ? 'M' : '', f.camisa ? `camisa ${f.camisa}` : '', f.irmao ? `irmão de ${f.irmao}` : ''].filter(Boolean).join(' · ')}</small>
         </td>
         <td>
-          {quem ? <span>{quem}</span> : <span className={s.mudo}>—</span>}
+          {quem ? <span>{quem}</span> : <span className={s.mudo}>sem contato</span>}
           {tel ? <small className={s.sub}>{link ? <a href={link} target="_blank" rel="noopener">{tel}</a> : <span style={{ whiteSpace: 'nowrap' }}>{tel}</span>}</small> : null}
         </td>
-        <td>{f.pagamento ? ROTULO_FORMA_DA_FICHA[f.pagamento] : <span className={s.mudo}>—</span>}</td>
+        <td>{f.pagamento ? ROTULO_FORMA_DA_FICHA[f.pagamento] : <span className={s.mudo}>não disse</span>}</td>
         <td className={s.num}>{x.devido == null ? <span className={s.mudo}>a confirmar</span> : reais(x.devido)}</td>
         <td className={s.num}>
           {reais(x.recebido)}
@@ -412,7 +412,7 @@ function ListaDePagamentos({ lista, estreito, indo, fazer }: { lista: PagamentoB
               <td>{p.campista}<small className={s.sub}>{[ROTULO_REFERENTE[p.referente], p.codigo || ''].filter(Boolean).join(' · ')}</small></td>
               <td>{ROTULO_FORMA[p.forma]}<small className={s.sub}>{ROTULO_ORIGEM[p.origem]}</small></td>
               <td className={s.num}>{reais(centavos(p.valor))}</td>
-              <td>{p.quem_pagou || <span className={s.mudo}>—</span>}</td>
+              <td>{p.quem_pagou || <span className={s.mudo}>não informado</span>}</td>
               <td><Pill tom={p.conferido ? 'ok' : 'info'}>{p.conferido ? 'Conferido' : 'A conferir'}</Pill></td>
               <td className="dm-fim"><div className={s.acoes}>{acoes(p)}</div></td>
             </tr>
