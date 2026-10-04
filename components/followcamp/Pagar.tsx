@@ -327,6 +327,25 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     try { sessionStorage.setItem(CHAVE_ANDAMENTO, JSON.stringify({ tentativa: t, quando: Date.now() })); } catch { /* ok */ }
   }
 
+  /* "PAGUEI" VAI PARA O PAINEL DA ORGANIZAÇÃO — 04/10/2026 (migração 110).
+     Ao tocar em avisar no WhatsApp, o pagamento entra no painel como A
+     CONFERIR (o site não fala com banco nenhum: quem confirma é a
+     organização, no app da Stone). Sem esperar resposta e sem segurar o
+     WhatsApp: `sendBeacon` sobrevive à troca de página. Uma vez por código. */
+  function informar(t: Tentativa | null) {
+    if (!t || !t.campista || (t.meio !== 'pixdireto' && t.meio !== 'cartaoLink')) return;
+    const chave = 'fc27-informado-' + t.codigo;
+    try { if (sessionStorage.getItem(chave)) return; sessionStorage.setItem(chave, '1'); } catch { /* sem sessão: manda mesmo assim */ }
+    const corpo = JSON.stringify({
+      codigo: t.codigo, campista: t.campista, referente: t.referente, irmao: t.irmao,
+      valor: t.valor, meio: t.meio, titular: t.titular || '',
+    });
+    try {
+      if (navigator.sendBeacon && navigator.sendBeacon('/api/followcamp/informado', new Blob([corpo], { type: 'application/json' }))) return;
+    } catch { /* cai no fetch */ }
+    void fetch('/api/followcamp/informado', { method: 'POST', headers: { 'content-type': 'application/json' }, body: corpo, keepalive: true }).catch(() => {});
+  }
+
   async function seguir() {
     if (ocupado) return;
     if (!conferirTudo() || !referente || !meio) return;
@@ -738,7 +757,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
               {erro && <p className={s.erro} role="alert">{erro}</p>}
               {resumo}
               <div className={s.acoes}>
-                <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener">Mandar o comprovante</a>
+                <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener" onClick={() => informar(tentativa)}>Mandar o comprovante</a>
               </div>
               <p className={s.nota}>Este pagamento não é confirmado sozinho: a organização confere o comprovante com o extrato. Mande o comprovante com o código acima.</p>
               <div className={s.acoes}><button type="button" className={s.link} onClick={recomecar}>Voltar e mudar algo</button></div>
@@ -760,7 +779,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
               </ol>
               <div className={s.acoes}>
                 <a className={`${s.btn} ${s.fogo}`} href={tentativa.link} target="_blank" rel="noopener noreferrer">Abrir a página da Stone</a>
-                <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener">Avisar no WhatsApp</a>
+                <a className={`${s.btn} ${s.zap}`} href={zapDoFim} target="_blank" rel="noopener" onClick={() => informar(tentativa)}>Avisar no WhatsApp</a>
               </div>
               {resumo}
               <p className={s.nota}>Este pagamento não é confirmado sozinho: a organização confere na Stone pelo nome de quem pagou, o valor e o horário. Se a página da Stone pedir um valor diferente de {emReais(tentativa.valor)}, não pague e fale com a organização.</p>

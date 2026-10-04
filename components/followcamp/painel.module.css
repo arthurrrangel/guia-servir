@@ -1,0 +1,62 @@
+/* O painel do Follow Camp (04/10/2026) mora dentro da Administração das
+   Demandas e usa a folha de lá (`demandas.css`): as peças, as cores e os
+   espaços são os do sistema. Aqui só o que é deste painel. */
+.painel{display:block}
+/* as margens são as da folha das Demandas; só a seção logo abaixo das abas
+   não leva o respiro de seção nova (as abas já separam), e as duas do Lançar
+   ficam lado a lado sem degrau */
+.painel :global(.dm-subabas) + :global(.dm-secao){margin-top:0}
+.formas > :global(.dm-secao){margin-top:0}
+
+.linhaMeios{display:flex;flex-wrap:wrap;gap:var(--dm-e2) var(--dm-e5);margin:var(--dm-e3) 0 var(--dm-e5);color:var(--dm-ink-2);font-size:14px;line-height:1.5}
+.linhaMeios b{color:var(--dm-ink);font-weight:600}
+
+.busca{width:100%;max-width:360px;min-height:44px;padding:0 var(--dm-e3);margin:0 0 var(--dm-e3);border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);background:var(--dm-sup-2, var(--dm-fundo));color:var(--dm-ink);font:inherit;font-size:15px}
+.busca:focus-visible{outline:2px solid var(--dm-foco);outline-offset:1px}
+
+.tab td{vertical-align:top}
+.num,.tab th.num,.tab td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sub{display:block;margin-top:2px;color:var(--dm-mudo);font-size:13px;line-height:1.35}
+.mudo{color:var(--dm-mudo)}
+.sub a{white-space:nowrap}
+.conferirTxt{color:var(--dm-info)}
+.tab tr[data-cancelada] td{color:var(--dm-mudo)}
+.tab tr[data-cancelada] .nomeBotao{text-decoration:line-through}
+.acoes{display:flex;gap:var(--dm-e1);justify-content:flex-end;flex-wrap:wrap}
+
+.nomeBotao{all:unset;cursor:pointer;font-weight:600;color:var(--dm-ink);border-radius:4px}
+.nomeBotao:hover{text-decoration:underline;text-underline-offset:3px}
+.nomeBotao:focus-visible{outline:2px solid var(--dm-foco);outline-offset:2px}
+
+.linhaDetalhe td{background:var(--dm-sup-2, transparent)}
+.detalhes{display:flex;flex-direction:column;gap:var(--dm-e3);padding:var(--dm-e2) 0}
+.dl{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--dm-e2) var(--dm-e5);margin:0}
+.dl div{min-width:0}
+.dl dt{color:var(--dm-mudo);font-size:12px;letter-spacing:.02em;text-transform:none}
+.dl dd{margin:2px 0 0;color:var(--dm-ink);font-size:14px;line-height:1.45;overflow-wrap:anywhere}
+.pagsDaFicha{margin:0;padding-left:18px;color:var(--dm-ink-2);font-size:14px;line-height:1.6}
+.confirma{display:flex;flex-direction:column;gap:var(--dm-e2);max-width:420px}
+
+.cartoes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--dm-e2)}
+.cartao{display:flex;flex-direction:column;gap:var(--dm-e2);padding:var(--dm-e3) var(--dm-e4);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);background:var(--dm-sup-2, var(--dm-fundo))}
+.cartao[data-cancelada]{opacity:.7}
+.cartaoTopo{all:unset;display:flex;align-items:center;justify-content:space-between;gap:var(--dm-e2);cursor:pointer;min-height:32px}
+div.cartaoTopo{cursor:default}
+.cartaoTopo:focus-visible{outline:2px solid var(--dm-foco);outline-offset:2px;border-radius:4px}
+.nome{font-weight:600;color:var(--dm-ink);overflow-wrap:anywhere}
+.cartaoValores{display:flex;flex-wrap:wrap;gap:var(--dm-e1) var(--dm-e3);color:var(--dm-ink-2);font-size:14px;font-variant-numeric:tabular-nums}
+
+.semFicha{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--dm-e2)}
+.semFicha li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--dm-e2);padding:var(--dm-e2) 0;border-bottom:1px solid var(--dm-linha)}
+.semFicha select{min-height:40px;max-width:100%}
+
+.formas{display:grid;grid-template-columns:1fr;gap:var(--dm-e5)}
+@media (min-width:1080px){.formas{grid-template-columns:1fr 1fr;align-items:start}}
+.form{display:flex;flex-direction:column;gap:var(--dm-e3)}
+.form textarea{min-height:140px;resize:vertical}
+.dupla{display:grid;grid-template-columns:1fr 1fr;gap:var(--dm-e3)}
+.falta{margin:0;color:var(--dm-bad);font-size:14px}
+.previa{display:flex;flex-direction:column;gap:2px;padding:var(--dm-e3);border:1px solid var(--dm-ok-ln);border-radius:var(--dm-r2);background:var(--dm-ok-bg);color:var(--dm-ink);font-size:14px}
+.manual{border-top:1px solid var(--dm-linha);padding-top:var(--dm-e3)}
+.manual summary{cursor:pointer;color:var(--dm-ink-2);font-weight:600;min-height:32px;display:flex;align-items:center}
+.manual[open] summary{margin-bottom:var(--dm-e3)}

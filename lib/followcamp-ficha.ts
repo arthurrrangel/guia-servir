@@ -7,12 +7,12 @@
    para responder na hora; a rota confere de novo porque não confia em
    navegador.
 
-   PARA ONDE VAI: uma planilha do Google, pelo mesmo caminho da Pequena Guia
-   (Apps Script publicado como app da web, URL em PLANILHA_FOLLOWCAMP_URL na
-   Vercel). A regra do site desde o primeiro dia continua: nenhum dado de
-   visitante entra no banco que serve a escala de todo mundo. Sem a planilha
-   ligada, a tela manda a ficha inteira para o WhatsApp da organização e diz
-   isso; nada some em silêncio.
+   PARA ONDE VAI (04/10/2026, migração 110): o banco do site, num esquema só
+   dele (`followcamp`), que nem a chave pública alcança: só o servidor grava,
+   e só a administração lê, pelo painel. Era uma planilha do Google, que nunca
+   foi ligada; o Arthur pediu que o próprio site mostre tudo, e isso exige o
+   dado onde o site lê. Se o banco não gravar, a tela manda a ficha inteira
+   para o WhatsApp da organização e diz isso; nada some em silêncio.
 
    O QUE A FICHA PEDE, e por quê (só o necessário):
      · nome, nascimento e sexo: de 13 a 24 anos NO DIA DO CAMP (05/02/2027), e
@@ -270,7 +270,10 @@ export function valorDaFicha(f: Pick<Ficha, 'irmao'>, agora = new Date()): numbe
 /** O WhatsApp que recebe a confirmação: o do responsável, ou o do campista. */
 export const whatsDaConfirmacao = (f: Pick<Ficha, 'responsavel' | 'whatsCampista'>) => f.responsavel?.whats ?? f.whatsCampista;
 
-/* ----------------------------------------------------------- a planilha --- */
+/* ------------------------------------------------- o banco e a exportação ---
+   04/10/2026 (migração 110): a ficha vai para o banco do site, pelo servidor,
+   e o painel da administração lê de lá. A ordem das colunas abaixo é a da
+   exportação em planilha do painel (lib/followcamp-painel.ts). */
 export const CABECALHO = [
   'Recebido em', 'Campista', 'Nascimento', 'Idade no Camp', 'Sexo', 'Camisa', 'WhatsApp do campista',
   'Alergia ou restrição alimentar', 'Saúde ou remédio', 'Responsável', 'CPF do responsável',
@@ -278,41 +281,38 @@ export const CABECALHO = [
   'Irmão inscrito', 'Valor', 'Pagamento', 'Uso de imagem', 'Termo aceito', 'Versão do termo', 'Origem',
 ] as const;
 
-/** Célula que começa com = + - @ vira FÓRMULA no Google Planilhas: um
- *  "=IMPORTXML(...)" digitado na alergia rodaria na planilha da igreja. O
- *  apóstrofo na frente guarda como texto e não aparece na célula. */
+/** Célula que começa com = + - @ vira FÓRMULA no Excel e no Google Planilhas:
+ *  um "=IMPORTXML(...)" digitado na alergia rodaria na planilha de quem abrir
+ *  a exportação. O apóstrofo na frente guarda como texto. */
 export function semFormula(v: string): string {
   return /^[=+\-@\t\r]/.test(v) ? `'${v}` : v;
 }
 
-/** Uma linha na ordem do CABECALHO, sem a primeira coluna (quem põe a data é o
- *  Apps Script, no relógio do Google). */
-export function linhaDaFicha(f: Ficha, agora = new Date()): (string | number)[] {
-  const valor = valorDaFicha(f, agora);
-  const t = (s: string) => semFormula(s);
-  return [
-    t(f.campista),
-    `'${formataData(f.nascimento)}`, /* texto: planilha em inglês leria 05/02 como 2 de maio */
-    f.idade,
-    f.sexo === 'feminino' ? 'Feminino' : 'Masculino',
-    f.camisa,
-    f.whatsCampista ? formataCelular(f.whatsCampista) : '',
-    t(f.alergias),
-    t(f.saude),
-    f.responsavel ? t(f.responsavel.nome) : '',
-    f.responsavel ? formataCpf(f.responsavel.cpf) : '',
-    f.responsavel ? formataCelular(f.responsavel.whats) : '',
-    f.responsavel ? f.responsavel.parentesco : '',
-    f.emergencia ? t(f.emergencia.nome) : '',
-    f.emergencia ? formataCelular(f.emergencia.whats) : '',
-    t(f.irmao),
-    valor ?? 'a confirmar',
-    rotuloPagamento(f.pagamento),
-    f.imagem ? 'Sim' : 'Não',
-    t(termoDe(f)),
-    VERSAO_TERMO,
-    'site',
-  ];
+/** A ficha conferida no formato de `fc27_ficha_gravar` (supabase/110). O
+ *  valor é o da regra no dia; a data vai em ISO (o banco guarda `date`). */
+export function fichaParaBanco(f: Ficha, agora = new Date()): Record<string, unknown> {
+  return {
+    campista: f.campista,
+    nascimento: `${f.nascimento.ano}-${dois(f.nascimento.mes)}-${dois(f.nascimento.dia)}`,
+    idade: f.idade,
+    sexo: f.sexo,
+    camisa: f.camisa,
+    whats_campista: f.whatsCampista ? formataCelular(f.whatsCampista) : null,
+    alergias: f.alergias || null,
+    saude: f.saude || null,
+    responsavel_nome: f.responsavel ? f.responsavel.nome : null,
+    responsavel_cpf: f.responsavel ? formataCpf(f.responsavel.cpf) : null,
+    responsavel_whats: f.responsavel ? formataCelular(f.responsavel.whats) : null,
+    parentesco: f.responsavel ? f.responsavel.parentesco : null,
+    emergencia_nome: f.emergencia ? f.emergencia.nome : null,
+    emergencia_whats: f.emergencia ? formataCelular(f.emergencia.whats) : null,
+    irmao: f.irmao || null,
+    valor: valorDaFicha(f, agora),
+    pagamento: f.pagamento,
+    imagem: f.imagem,
+    termo: termoDe(f),
+    versao_termo: VERSAO_TERMO,
+  };
 }
 
 /* ------------------------------------------------------------ WhatsApp --- */

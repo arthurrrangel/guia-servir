@@ -352,6 +352,44 @@ export function conferirPedido(c: Record<string, unknown>, agora = new Date()): 
   return { ok: true, dados: { campista, referente, irmao, valor: preco.valor } };
 }
 
+/* ------------------------------------------------------ o aviso de "paguei" ---
+   04/10/2026 (migração 110). Quem pagou no Pix direto ou no link da Stone e
+   toca em "Avisar no WhatsApp" deixa uma linha A CONFERIR no painel da
+   organização: campista, valor, meio, código e quem pagou. Não é
+   confirmação (o site não fala com banco nenhum): é o que a organização
+   procura no app da Stone, e confirma com um toque.
+
+   A rota confere tudo de novo: o valor tem que ser o da regra (Pix direto) ou
+   o do link do lote (cartão), nunca um número vindo do navegador. */
+export type Informado = {
+  codigo: string; campista: string; referente: Referente; irmao: string;
+  valor: number; meio: 'pixdireto' | 'cartaoLink'; titular: string;
+};
+
+export function conferirInformado(c: Record<string, unknown>, agora = new Date(), links: readonly LinkCartao[] = LINKS_CARTAO): Conferido<Informado> {
+  const codigo = String(c.codigo ?? '');
+  if (!CODIGO_OK.test(codigo)) return { ok: false, erro: 'Código do pagamento inválido.' };
+  const meio = c.meio;
+  if (meio !== 'pixdireto' && meio !== 'cartaoLink') return { ok: false, erro: 'Meio de pagamento inválido.' };
+  const valor = typeof c.valor === 'number' ? c.valor : NaN;
+  if (!Number.isFinite(valor)) return { ok: false, erro: 'Valor inválido.' };
+  const pedido = conferirPedido({ campista: c.campista, referente: c.referente, irmao: c.irmao, parcela: c.referente === 'parcela' ? valor : null }, agora);
+  if (!pedido.ok) return pedido;
+  let esperado = pedido.dados.valor;
+  if (meio === 'cartaoLink') {
+    const l = linkCartaoDe(pedido.dados.referente, agora, links);
+    if (!l) return { ok: false, erro: 'Este pagamento não tem link de cartão.' };
+    esperado = l.valor;
+  }
+  if (centavos(esperado) !== centavos(valor)) return { ok: false, erro: 'Valor diferente do combinado.' };
+  const titular = limpaNome(String(c.titular ?? ''));
+  if (titular && nomeInvalido(titular, 'de quem pagou')) return { ok: false, erro: 'Nome de quem pagou inválido.' };
+  return {
+    ok: true,
+    dados: { codigo, campista: pedido.dados.campista, referente: pedido.dados.referente, irmao: pedido.dados.irmao, valor: esperado, meio, titular },
+  };
+}
+
 export type Pagador = { nome: string; email: string; cpf: string; celular: Celular };
 
 export function conferirPagador(c: Record<string, unknown>): Conferido<Pagador> {

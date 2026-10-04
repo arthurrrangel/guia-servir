@@ -246,20 +246,25 @@ const SECOES_ADMIN: { v: string; rot: string; icone: NomeDoIcone }[] = [
   { v: 'panorama', rot: 'Panorama', icone: 'panorama' },
   { v: 'pessoas', rot: 'Pessoas', icone: 'pessoas' }, { v: 'setores', rot: 'Setores', icone: 'setores' },
   { v: 'categorias', rot: 'Categorias', icone: 'categorias' }, { v: 'anexos', rot: 'Anexos', icone: 'anexos' },
+  /* 110 · o painel do Follow Camp: página própria, não seção (`?secao=`) */
+  { v: 'followcamp', rot: 'Follow Camp', icone: 'calendario' },
 ];
+const HREF_ADMIN = (v: string) => v === 'panorama' ? '/demandas/admin'
+  : v === 'followcamp' ? '/demandas/admin/followcamp' : `/demandas/admin?secao=${v}`;
 function SecoesDaAdministracao({ caminho, secaoAberta, forma }: {
   caminho: string; secaoAberta: string | null; forma: 'lateral' | 'fita';
 }) {
   /* a ficha de uma pessoa é filha de Pessoas */
   const secao = caminho === '/demandas/admin' ? (secaoAberta || 'panorama')
-    : caminho.startsWith('/demandas/admin/pessoas') ? 'pessoas' : '';
+    : caminho.startsWith('/demandas/admin/pessoas') ? 'pessoas'
+    : caminho.startsWith('/demandas/admin/followcamp') ? 'followcamp' : '';
   const fita = useFitaQueRola<HTMLElement>();
   return (
     <nav className={`${forma === 'lateral' ? 'dm-nav dm-adm-faixa' : 'dm-subabas dm-adm-fita'}`} aria-label="Seções da administração"
       ref={forma === 'fita' ? fita : undefined}>
       {SECOES_ADMIN.map(x => (
         <Link key={x.v} className={forma === 'lateral' ? 'dm-nav-item' : undefined}
-          href={x.v === 'panorama' ? '/demandas/admin' : `/demandas/admin?secao=${x.v}`}
+          href={HREF_ADMIN(x.v)}
           aria-current={secao === x.v ? 'page' : undefined}>
           {forma === 'lateral' ? <Icone nome={x.icone} /> : null}
           {forma === 'lateral' ? <span>{x.rot}</span> : x.rot}
