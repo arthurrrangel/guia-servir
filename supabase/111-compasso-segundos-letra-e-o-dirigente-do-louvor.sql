@@ -584,16 +584,29 @@ begin
         m := m || jsonb_build_object('rls_alheia', 'entrou');
       exception when insufficient_privilege then m := m || jsonb_build_object('rls_alheia', 'barrou');
       end;
+      /* TROCAR E APAGAR: O QUE SE MEDE É O ARQUIVO, NÃO O JEITO DE BARRAR.
+         Sem política de update e delete, o RLS deixa o comando passar sem
+         achar linha (é o que acontece no banco de teste). No Supabase de
+         verdade o delete direto em `storage.objects` é barrado antes, com
+         erro de privilégio (a proteção da plataforma contra apagar pela
+         tabela): medido na primeira rodada em produção, 05/10/2026, que
+         reprovou só aqui ("rls_apaga: obtido barrou") e foi desfeita
+         inteira. Os dois caminhos deixam o arquivo onde estava. O delete
+         é tentado como a API do Storage apaga (com o apagar pela tabela
+         liberado), para quem decidir ser o RLS: uma política de delete
+         esquecida aparece aqui, em vez de se esconder atrás da proteção. */
       begin
         update storage.objects set name = c_l2 where bucket_id = 'letras' and name = c_l1;
-        m := m || jsonb_build_object('rls_troca', (select count(*) from storage.objects where bucket_id = 'letras' and name = c_l2));
-      exception when insufficient_privilege then m := m || jsonb_build_object('rls_troca', 'barrou');
+      exception when insufficient_privilege then null;
       end;
+      m := m || jsonb_build_object('rls_troca', (select count(*) from storage.objects where bucket_id = 'letras' and name = c_l2));
       begin
+        perform set_config('storage.allow_delete_query', 'true', true);
         delete from storage.objects where bucket_id = 'letras' and name = c_l1;
-        m := m || jsonb_build_object('rls_apaga', (select count(*) from storage.objects where bucket_id = 'letras' and name = c_l1));
-      exception when insufficient_privilege then m := m || jsonb_build_object('rls_apaga', 'barrou');
+        perform set_config('storage.allow_delete_query', 'false', true);
+      exception when insufficient_privilege then null;
       end;
+      m := m || jsonb_build_object('rls_apaga', (select count(*) from storage.objects where bucket_id = 'letras' and name = c_l1));
       reset role;
       set local role anon;
       perform set_config('request.jwt.claims', '{"role":"anon"}', true);

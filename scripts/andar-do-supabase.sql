@@ -118,3 +118,23 @@ begin
   select string_to_array(name, '/') into _parts;
   return _parts[1:array_length(_parts, 1) - 1];
 end $$;
+
+/* APAGAR PELA TABELA É BARRADO, COMO NO SUPABASE — 05/10/2026.
+
+   A primeira rodada da 111 em produção reprovou num ponto só: o `delete`
+   direto em `storage.objects`, que aqui passava sem achar linha (o RLS
+   filtra), lá voltou erro de privilégio (42501). A plataforma barra o
+   delete pela tabela antes do RLS, para ninguém deixar arquivo órfão no
+   armário: quem apaga é a API do Storage. Este gatilho faz o mesmo aqui,
+   para a conferência que passa neste banco passar lá também. */
+create or replace function storage.protect_delete() returns trigger language plpgsql as $$
+begin
+  if coalesce(current_setting('storage.allow_delete_query', true), 'false') <> 'true' then
+    raise exception 'Direct deletion from storage tables is not allowed. Use the Storage API instead.'
+      using errcode = '42501';
+  end if;
+  return null;
+end $$;
+drop trigger if exists protect_objects_delete on storage.objects;
+create trigger protect_objects_delete before delete on storage.objects
+  for each statement execute function storage.protect_delete();
