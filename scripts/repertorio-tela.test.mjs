@@ -15,6 +15,7 @@
    Roda com BASE=http://127.0.0.1:3500 node scripts/repertorio-tela.test.mjs */
 import { chromium } from 'playwright';
 import { chromeDoContainer } from './medida-celular.mjs';
+import { cultosQueVem, mesDe } from './dias-do-demo.mjs';
 import { mkdirSync } from 'node:fs';
 const BASE = process.env.BASE || 'http://127.0.0.1:3500';
 const OUT = '/tmp/repertorio-tela';
@@ -36,9 +37,12 @@ try {
   /* 1. Escala do líder */
   for (const [w, h, toque, nome] of [[1440, 900, false, '1440'], [390, 844, true, '390']]) {
     const c = await ctx(w, h, toque); const p = await c.newPage();
-    await p.goto(`${BASE}/escala?demo=1&m=2026-10#d2026-10-03`, { waitUntil: 'domcontentloaded' });
+    /* o primeiro culto que vem, onde o demo põe o repertório (era 03/10
+       escrito na mão: ver scripts/dias-do-demo.mjs) */
+    const D0 = cultosQueVem[0];
+    await p.goto(`${BASE}/escala?demo=1&m=${mesDe(D0)}#d${D0}`, { waitUntil: 'domcontentloaded' });
     await p.waitForSelector('.es-casca', { timeout: 20000 }); await esperar(2500);
-    const dia = p.locator('#d2026-10-03');
+    const dia = p.locator(`#d${D0}`);
     if (!(await dia.evaluate(e => e.open))) { await dia.locator('summary').click(); await esperar(300); }
     const rep = dia.getByRole('group', { name: 'Repertório' });
     ok(await rep.count() === 1, `${nome}: o dia tem o repertório`);

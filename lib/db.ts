@@ -453,11 +453,72 @@ export async function salvarOrdem(cultoId: string, equipeId: string, ordem: Item
   throw new Error(r?.erro || 'ORDEM_NAO_SALVA');
 }
 
-/** o banco de músicas do ministério, que nasce das ordens já montadas (105) */
+/** o banco de músicas do ministério, que nasce das ordens já montadas (105;
+    com a 111, também o compasso, o tempo e a letra de cada música) */
 export async function musicasDoMinisterio(equipeId: string): Promise<MusicaDoBanco[]> {
   const { data, error } = await sb()!.rpc('musicas_do_ministerio', { p_equipe: equipeId });
   if (error) throw error;
   return ((data || []) as MusicaDoBanco[]).filter(m => typeof m?.titulo === 'string' && !!m.titulo);
+}
+
+/* =============================================================================
+   111 · O QUE A ORDEM ACEITA, E A LETRA NO ARMÁRIO — 05/10/2026.
+
+   A tela pergunta ao PRÓPRIO banco se ele aceita um item com compasso,
+   segundos e letra (`ordem_valida`, a regra do CHECK). Sem a 111 no banco a
+   resposta é falso, e a tela fica como era: duração em minutos, sem
+   compasso e sem letra, para ninguém digitar o que o banco recusaria. A
+   pergunta é feita uma vez por página; se a rede falhar, ela é feita de novo
+   na próxima vez, em vez de travar o "não" para sempre.
+   ============================================================================= */
+const SONDA_DA_111: ItemOrdem[] = [{
+  t: 'musica', titulo: 'sonda', compasso: '4/4', seg: 61,
+  letra: '00000000-0000-4000-8000-000000000000/00000000-0000-4000-8000-000000000000.pdf',
+}];
+let aceitaExtras: Promise<boolean> | null = null;
+export function ordemAceitaExtras(): Promise<boolean> {
+  if (!aceitaExtras) {
+    aceitaExtras = (async () => {
+      const s = sb();
+      if (!s) return false;
+      const { data, error } = await s.rpc('ordem_valida', { p: SONDA_DA_111 });
+      if (error) {
+        /* sem a função ou sem permissão, a resposta é "não" e fica; erro de
+           rede não diz nada sobre o banco, e a próxima pergunta vale */
+        if (!/PGRST202|42883|42501/.test(`${(error as any).code || ''} ${error.message || ''}`)) aceitaExtras = null;
+        return false;
+      }
+      return data === true;
+    })().catch(() => { aceitaExtras = null; return false; });
+  }
+  return aceitaExtras;
+}
+
+/** Envia o PDF da letra para o armário e devolve o caminho que vai na ordem.
+    `caminho` é o da pasta do ministério (`caminhoNovoDaLetra`): o Storage só
+    deixa gravar ali quem lidera esse ministério (política da 111), e nunca
+    por cima de um arquivo que já existe. O erro volta com um código que a
+    tela traduz: LETRA_GRANDE, LETRA_NAO_PDF, LETRA_SEM_PERMISSAO, LETRA_REDE. */
+export async function enviarLetra(caminho: string, arquivo: Blob): Promise<string> {
+  /* O TIPO VAI NO ARQUIVO, NÃO NA OPÇÃO. Com um arquivo (Blob), o
+     storage-js manda um formulário, e o Storage lê o tipo da PARTE do
+     formulário, que é o `type` do próprio arquivo: o `contentType` abaixo é
+     ignorado nesse caminho (storage-js 2.7, `uploadOrUpdate`). PDF que o
+     celular entrega sem tipo iria como `application/octet-stream`, e o
+     armário (só `application/pdf`) recusaria um PDF bom. O conteúdo já foi
+     conferido (`conferirConteudoDoPdf`); aqui ele ganha o rótulo certo. */
+  const pdf = arquivo.slice(0, arquivo.size, 'application/pdf');
+  const { error } = await sb()!.storage.from('letras').upload(caminho, pdf, {
+    contentType: 'application/pdf', upsert: false, cacheControl: '31536000',
+  });
+  if (!error) return caminho;
+  const e = error as any;
+  const st = Number(e.statusCode || e.status || 0);
+  const txt = `${e.error || ''} ${e.message || ''}`;
+  if (st === 413 || /too large|maximum allowed size|exceeded/i.test(txt)) throw new Error('LETRA_GRANDE');
+  if (/mime|content type|invalid_mime/i.test(txt)) throw new Error('LETRA_NAO_PDF');
+  if (st === 403 || st === 401 || /row-level security|unauthorized|not allowed|permission/i.test(txt)) throw new Error('LETRA_SEM_PERMISSAO');
+  throw new Error('LETRA_REDE');
 }
 
 /* =============================================================================

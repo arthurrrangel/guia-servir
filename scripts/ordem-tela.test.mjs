@@ -20,6 +20,7 @@
    Roda com BASE=http://127.0.0.1:3500 node scripts/ordem-tela.test.mjs */
 import { chromium } from 'playwright';
 import { chromeDoContainer } from './medida-celular.mjs';
+import { cultosQueVem } from './dias-do-demo.mjs';
 import { mkdirSync } from 'node:fs';
 const BASE = process.env.BASE || 'http://127.0.0.1:3500';
 const OUT = '/tmp/ordem-tela';
@@ -39,19 +40,11 @@ const responder = (r, corpo) => r.request().method() === 'OPTIONS'
   ? r.fulfill({ status: 204, headers: CORS })
   : r.fulfill({ status: 200, headers: { ...CORS, 'content-type': 'application/json' }, body: JSON.stringify(corpo) });
 
-/* o SEGUNDO culto que vem, onde o harness põe a ordem (sábado ou domingo, a
-   partir de hoje, no mês); o primeiro fica com o repertório só de links */
+/* o SEGUNDO culto que vem, onde o harness põe a ordem (sábado ou domingo,
+   deste mês ou do próximo, como o demo monta: scripts/dias-do-demo.mjs); o
+   primeiro fica com o repertório só de links */
 const hoje = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
-const DIA = (() => {
-  const d = new Date(hoje + 'T12:00:00Z');
-  let achados = 0;
-  for (let k = 0; k < 15; k++) {
-    const x = new Date(d.getTime() + k * 86400000);
-    if (x.getUTCMonth() !== d.getUTCMonth()) break;
-    if ((x.getUTCDay() === 6 || x.getUTCDay() === 0) && ++achados === 2) return x.toISOString().slice(0, 10);
-  }
-  return '';
-})();
+const DIA = cultosQueVem[1] || '';
 /* e o primeiro, que é onde a página do voluntário do harness põe a ordem */
 const DIA1 = (() => {
   const d = new Date(hoje + 'T12:00:00Z');
@@ -71,7 +64,7 @@ const BANCO = [{ titulo: 'Mar Aberto', artista: 'Grupo Teste', tom: 'D', bpm: 80
   cifra: 'https://www.cifras.com.br/cifra/grupo-teste/mar-aberto', vezes: 2, ultima: '2026-09-13', proxima: null }];
 
 try {
-  if (!DIA) throw new Error('o harness não tem dois cultos por vir neste mês: a prova não tem o que olhar');
+  if (!DIA) throw new Error('o harness não tem dois cultos por vir: a prova não tem o que olhar');
 
   /* 1. Escala do líder */
   for (const [w, h, toque, nome] of [[1440, 900, false, '1440'], [390, 844, true, '390']]) {
@@ -98,7 +91,8 @@ try {
     const resumo = await ordem.locator('.es-ec-ordem-resumo').innerText();
     ok(resumo === `3 músicas · 1h07 · termina ${rel(H + 67)}`, `${nome}: o resumo diz músicas, tempo e fim`, resumo);
     const meta2 = await itens.nth(1).locator('.es-ec-oi-meta').innerText();
-    ok(meta2 === 'G · 72 BPM · Lia · 6 min · com cifra', `${nome}: a música mostra tom, BPM, quem, tempo e cifra`, meta2);
+    /* 111 · a música em minuto e segundo (o item antigo, em minutos, também: 6:00) */
+    ok(meta2 === 'G · 72 BPM · Lia · 6:00 · com cifra', `${nome}: a música mostra tom, BPM, quem, tempo e cifra`, meta2);
 
     /* a mensagem do grupo leva as músicas como o Louvor escreve (02/10/2026,
        noite: "as mensagens tem que sair assim"): '1. Canção A (E, 67 BPM) Lead -
@@ -149,7 +143,7 @@ try {
       && await form.getByLabel('BPM').inputValue() === '80' && /cifras\.com\.br/.test(await form.getByLabel('Link da cifra').inputValue()),
       `${nome}: a música já tocada traz nome, tom, BPM e cifra da última vez`,
       [await titulo.inputValue(), await form.getByLabel('Tom').inputValue(), await form.getByLabel('BPM').inputValue()].join(' | '));
-    ok(/Tom, BPM e cifra de 13\/09 \(tocada 2 vezes\)/.test(await form.innerText()), `${nome}: e diz de onde veio`, await form.innerText());
+    ok(/Preenchido como em 13\/09 \(tocada 2 vezes\)/.test(await form.innerText()), `${nome}: e diz de onde veio`, await form.innerText());
     const alturas = await form.locator('input, select').evaluateAll(es => es.map(e => Math.round(e.getBoundingClientRect().height)));
     ok(!toque || alturas.every(a => a >= 44), `${nome}: campos com 44 no dedo`, alturas.join(','));
     await form.screenshot({ path: `${OUT}/escala-form-${nome}.png` });
@@ -259,7 +253,7 @@ try {
     const hs = await blocos.first().locator('.vol-oi-hora').allInnerTexts();
     ok(hs.join(',') === HORAS1.join(','), `${nome}: a hora de cada item`, hs.join(','));
     const m = blocos.first().locator('.vol-oi').nth(1);
-    ok(/Banda Exemplo · Tom G · 72 BPM · Lia · 6 min/.test((await m.locator('.vol-oi-meta').innerText()).replace(/\s+/g, ' '))
+    ok(/Banda Exemplo · Tom G · 72 BPM · Lia · 6:00/.test((await m.locator('.vol-oi-meta').innerText()).replace(/\s+/g, ' '))
       && await m.locator('.vol-oi-meta b').innerText() === 'G', `${nome}: a música diz artista, tom (em destaque), BPM, quem e tempo`);
     ok(/Começa só voz e teclado/.test(await m.innerText()), `${nome}: e a nota`);
     const cifra = m.locator('a.vol-oi-cifra');

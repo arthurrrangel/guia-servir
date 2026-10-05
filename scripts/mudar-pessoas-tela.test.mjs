@@ -91,8 +91,14 @@ const retratoDoDia = dia => dia.locator('.es-ec-posto').evaluateAll(ps => Object
   return [x.querySelector('.es-ec-fn')?.textContent, { vid: sels[0]?.value || '', status: sels[1]?.value || 'pendente' }];
 }).filter(([fn]) => fn)));
 const posto = (dia, fn) => dia.locator('.es-ec-posto').filter({ has: dia.page().locator('.es-ec-fn', { hasText: fn }) }).first();
+/* `atual`: a opção que já está escolhida no posto. Escolher de novo quem já
+   está lá não muda nada (nem pergunta), e o demo às vezes põe no posto
+   alguém que avisou que não pode naquele dia: a cena 3 pegava essa opção e
+   esperava uma pergunta que não vem (medido em 05/10/2026, no master de
+   04/10 também: depende de qual domingo é o segundo que vem). */
 const opcoes = (dia, fn) => posto(dia, fn).locator('.es-ec-quem select').evaluate(s => [...s.options].map(o => ({
-  v: o.value, t: o.textContent, grupo: o.parentElement?.tagName === 'OPTGROUP' ? o.parentElement.label : '' })));
+  v: o.value, t: o.textContent, atual: o.value === s.value,
+  grupo: o.parentElement?.tagName === 'OPTGROUP' ? o.parentElement.label : '' })));
 
 async function abrir(w, h, toque) {
   const c = await nav.newContext({ viewport: { width: w, height: h }, isMobile: toque, hasTouch: toque, deviceScaleFactor: 2 });
@@ -258,7 +264,7 @@ try {
         const ret = await retratoDoDia(dia);
         for (const fn of Object.keys(ret)) {
           if (feito) break;
-          const o = (await opcoes(dia, fn)).find(x => x.grupo === 'Avisaram que não podem nesse dia' && !x.t.startsWith('em '));
+          const o = (await opcoes(dia, fn)).find(x => x.grupo === 'Avisaram que não podem nesse dia' && !x.t.startsWith('em ') && !x.atual);
           if (!o) continue;
           Object.assign(estado, { dia: ret, culto: 'c' + data, data, falharEscrita: falhar ? 'Erro de teste: o banco recusou.' : null });
           pedidos.length = 0;

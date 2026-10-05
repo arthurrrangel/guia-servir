@@ -2,9 +2,10 @@
 import type { ReactNode } from 'react';
 import { diaLongo, horaDoDia } from '@/lib/engine';
 import {
-  type ItemOrdem, duracao, horarios, minutosDe, ordemDoBanco, relogio, siteDaCifra,
+  type ItemOrdem, horarios, minutosDe, ordemDoBanco, relogio, siteDaCifra, tempoDoItem,
 } from '@/lib/ordem-do-culto';
 import { IGREJA } from '@/lib/igreja';
+import { BotaoDaLetra } from '@/components/escalas/SetlistNoLink';
 
 /* =============================================================================
    A ORDEM DO CULTO NA PÁGINA DE QUEM SERVE — 105, 02/10/2026.
@@ -53,9 +54,13 @@ function Meta({ it }: { it: ItemOrdem }) {
     if (it.artista) partes.push(it.artista);
     if (it.tom) partes.push(<>Tom <b>{it.tom}</b></>);
     if (it.bpm) partes.push(`${it.bpm} BPM`);
+    /* 111 · o compasso ao lado do BPM */
+    if (it.compasso) partes.push(it.compasso);
   }
   if (it.quem) partes.push(it.quem);
-  if (it.min) partes.push(duracao(it.min));
+  /* 111 · a música em minuto e segundo (4:35); o momento em minutos */
+  const tempo = tempoDoItem(it);
+  if (tempo) partes.push(tempo);
   if (!partes.length) return null;
   return (
     <span className="vol-oi-meta">
@@ -88,11 +93,16 @@ export default function OrdemNoLink({ ordens }: { ordens: OrdemDoLink[] }) {
                     <Meta it={it} />
                     {it.nota && <span className="vol-oi-nota">{it.nota}</span>}
                   </span>
-                  {it.cifra && (
-                    <a className="vol-oi-cifra" href={it.cifra} target="_blank" rel="noopener noreferrer"
-                      aria-label={`Cifra de ${it.titulo}, no ${siteDaCifra(it.cifra)}`}>
-                      Cifra
-                    </a>
+                  {(it.cifra || it.letra) && (
+                    <span className="vol-oi-acoes">
+                      {it.cifra && (
+                        <a className="vol-oi-cifra" href={it.cifra} target="_blank" rel="noopener noreferrer"
+                          aria-label={`Cifra de ${it.titulo}, no ${siteDaCifra(it.cifra)}`}>
+                          Cifra
+                        </a>
+                      )}
+                      <BotaoDaLetra it={it} />
+                    </span>
                   )}
                 </li>
               ))}

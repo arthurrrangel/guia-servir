@@ -20,7 +20,7 @@
    (supabase/109) confere de novo tudo o que chega: o que este arquivo
    recusa, o banco também recusa, com os mesmos tetos.
    ============================================================================= */
-import { addDias, diffDias, MESES } from './engine';
+import { addDias, compassoValido, diffDias, MESES } from './engine';
 
 export type TipoCulto = 'domingo' | 'follow';
 export type Bloco = 'palavra' | 'avisos' | 'louvor' | 'linha';
@@ -35,7 +35,7 @@ export type Comando = {
   papel: Papel; equipe: string; equipeId: string; posto: string; funcaoId: string;
   nome: string | null; status: 'pendente' | 'confirmado' | null; convidado: string | null;
 };
-export type Musica = { equipe: string; titulo: string; tom?: string; bpm?: number; quem?: string };
+export type Musica = { equipe: string; titulo: string; tom?: string; bpm?: number; compasso?: string; quem?: string };
 export type Autoria = { por: string; em: string; via: 'lider' | 'dirigente' };
 export type Folha = {
   data: string; tipo: TipoCulto; cultoId: string | null;
@@ -162,6 +162,8 @@ export function folhaDoBanco(x: unknown): Folha | null {
     const mu: Musica = { equipe: str(m!.equipe) || '', titulo };
     const tom = str(m!.tom); if (tom) mu.tom = tom;
     if (typeof m!.bpm === 'number' && Number.isFinite(m!.bpm)) mu.bpm = m!.bpm;
+    /* 111 · o compasso vem da ordem do culto; só o que é compasso de verdade */
+    const compasso = str(m!.compasso); if (compassoValido(compasso)) mu.compasso = compasso;
     const quem = str(m!.quem); if (quem) mu.quem = quem;
     musicas.push(mu);
   }
@@ -426,9 +428,10 @@ export function rotuloDaAtualizacao(em: string | null | undefined, fuso = 'Ameri
 }
 
 /* ----------------------------------------------------- a música, curta --- */
-/** "Leão (E, 67 BPM) Lead - Letícia", como o Louvor escreve no grupo */
+/** "Leão (E, 67 BPM, 6/8) Lead - Letícia", como o Louvor escreve no grupo
+    (111: o compasso ao lado do BPM, quando a ordem do culto tem) */
 export function linhaDaMusicaNaFolha(m: Musica): string {
-  const det = [m.tom, m.bpm ? `${m.bpm} BPM` : ''].filter(Boolean).join(', ');
+  const det = [m.tom, m.bpm ? `${m.bpm} BPM` : '', m.compasso || ''].filter(Boolean).join(', ');
   return `${m.titulo}${det ? ` (${det})` : ''}${m.quem ? ` Lead - ${m.quem}` : ''}`;
 }
 

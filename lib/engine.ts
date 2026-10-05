@@ -410,11 +410,27 @@ export type ItemOrdem = {
   artista?: string;
   tom?: string;
   bpm?: number;
+  /** 111 · o compasso, como o músico escreve: '4/4', '6/8', '12/8' */
+  compasso?: string;
   cifra?: string;
+  /** 111 · o caminho do PDF da letra no armário `letras` do Storage:
+      '<id do ministério>/<id do arquivo>.pdf' */
+  letra?: string;
   quem?: string;
+  /** a duração do item de antes da 111, em minutos inteiros */
   min?: number;
+  /** 111 · a duração em segundos (a música em minuto e segundo: 4:35).
+      Um item leva `min` OU `seg`, nunca os dois. */
+  seg?: number;
   nota?: string;
 };
+/** 111 · a duração do item em segundos, venha ela em segundos ou em minutos
+    (o item de antes); undefined quando o item não tem duração */
+export function segundosDoItem(it: Pick<ItemOrdem, 'min' | 'seg'>): number | undefined {
+  if (typeof it.seg === 'number' && it.seg > 0) return it.seg;
+  if (typeof it.min === 'number' && it.min > 0) return it.min * 60;
+  return undefined;
+}
 /** as músicas da ordem do dia, na ordem do culto (vazio com o repertório desligado) */
 export function musicasDoDia(S: Estado, data: string): ItemOrdem[] {
   if (!S.config.repertorio) return [];
@@ -433,6 +449,8 @@ export function linhaDaMusica(it: ItemOrdem, n: number): string {
   const p: string[] = [];
   if (it.tom) p.push(it.tom);
   if (it.bpm) p.push(`${it.bpm} BPM`);
+  /* 111 · o compasso fica ao lado do BPM, como na tela: '(E, 67 BPM, 6/8)' */
+  if (it.compasso) p.push(it.compasso);
   return `${n}. ${it.titulo}${p.length ? ` (${p.join(', ')})` : ''}${it.quem ? ` Lead - ${it.quem}` : ''}`;
 }
 /** as observações das músicas: a nota de cada uma, com o número dela
@@ -511,8 +529,18 @@ export const ORDEM_MAX_ITENS = 40;
 export const ORDEM_TETO = { titulo: 80, artista: 60, quem: 40, nota: 140 } as const;
 export const ORDEM_BPM = [30, 300] as const;
 export const ORDEM_MIN = [1, 240] as const;
+/** 111 · a duração em segundos: até 4 horas */
+export const ORDEM_SEG = [1, 14400] as const;
 const CONTROLE_DA_ORDEM = /[\u0000-\u001f\u007f-\u009f\u2028\u2029]/;
 export const tomValido = (t: unknown): t is string => typeof t === 'string' && /^[A-G](#|b)?m?$/.test(t);
+/** 111 · o compasso que o banco aceita: de 1 a 16 tempos, figura 2, 4, 8 ou 16 */
+export const compassoValido = (c: unknown): c is string =>
+  typeof c === 'string' && /^([1-9]|1[0-6])\/(2|4|8|16)$/.test(c);
+const UUID_MINUSCULO = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+const LETRA_DO_BANCO = new RegExp(`^${UUID_MINUSCULO}/${UUID_MINUSCULO}\\.pdf$`);
+/** 111 · o caminho da letra no armário: '<uuid do ministério>/<uuid>.pdf', e
+    nada além disso (o botão de baixar nunca aponta para fora do armário) */
+export const letraValida = (s: unknown): s is string => typeof s === 'string' && LETRA_DO_BANCO.test(s);
 export const inteiroEntre = (n: unknown, a: number, b: number): n is number =>
   typeof n === 'number' && Number.isInteger(n) && n >= a && n <= b;
 /** texto que o banco aceita: aparado, não vazio, sem controle, dentro do teto
@@ -533,6 +561,8 @@ export function itemDoBanco(x: unknown): ItemOrdem | null {
   const o = x as Record<string, unknown>;
   if (o.t !== 'musica' && o.t !== 'momento') return null;
   if (!textoDaOrdemValido(o.titulo, ORDEM_TETO.titulo)) return null;
+  /* 111 · a duração é uma só: em minutos (o item de antes) ou em segundos */
+  if ('min' in o && 'seg' in o) return null;
   const it: ItemOrdem = { t: o.t, titulo: o.titulo };
   for (const k of Object.keys(o)) {
     const v = o[k];
@@ -543,8 +573,11 @@ export function itemDoBanco(x: unknown): ItemOrdem | null {
       case 'nota': if (!textoDaOrdemValido(v, ORDEM_TETO.nota)) return null; it.nota = v; break;
       case 'tom': if (it.t !== 'musica' || !tomValido(v)) return null; it.tom = v; break;
       case 'bpm': if (it.t !== 'musica' || !inteiroEntre(v, ORDEM_BPM[0], ORDEM_BPM[1])) return null; it.bpm = v; break;
+      case 'compasso': if (it.t !== 'musica' || !compassoValido(v)) return null; it.compasso = v; break;
       case 'min': if (!inteiroEntre(v, ORDEM_MIN[0], ORDEM_MIN[1])) return null; it.min = v; break;
+      case 'seg': if (!inteiroEntre(v, ORDEM_SEG[0], ORDEM_SEG[1])) return null; it.seg = v; break;
       case 'cifra': if (it.t !== 'musica' || !cifraValida(v)) return null; it.cifra = v; break;
+      case 'letra': if (it.t !== 'musica' || !letraValida(v)) return null; it.letra = v; break;
       default: return null;
     }
   }
@@ -2039,7 +2072,9 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
      então mudar a nota também pede mensagem nova. E o Lead (quem conduz),
      à noite: só entra quando existe, para a assinatura de quem não usa
      continuar a mesma. */
-  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}${i.quem ? `/q:${i.quem}` : ''}`).join(','));
+  /* 111 · o compasso vai na mensagem ao lado do BPM: mudar pede mensagem
+     nova. Só entra quando existe, e a assinatura de antes não muda. */
+  if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}${i.quem ? `/q:${i.quem}` : ''}${i.compasso ? `/c:${i.compasso}` : ''}`).join(','));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);

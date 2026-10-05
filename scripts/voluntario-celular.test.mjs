@@ -59,8 +59,24 @@ function banco(p) {
   });
   return b;
 }
-async function abrir(c, demo) {
+/* "EM CIMA DA HORA" DEPENDE DO DIA DA SEMANA — 05/10/2026.
+   O demo põe o primeiro culto no sábado ou domingo que vem, e a lista de
+   quem pode cobrir só vem com menos de 48h para ele. De segunda a quarta
+   ele está mais longe que isso, e a cena 2 reprovava em código intocado
+   (medido no master de 04/10, numa segunda). A cena 2 roda na véspera do
+   primeiro culto: o relógio da página para ao meio-dia desse dia (só o
+   `Date`; os timers seguem andando). */
+const hojeSP = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+const VESPERA = (() => {
+  for (let k = 0; k < 8; k++) {
+    const d = new Date(Date.parse(hojeSP + 'T12:00:00Z') + k * 86400000);
+    if (d.getUTCDay() === 6 || d.getUTCDay() === 0) return new Date(Date.parse(d.toISOString().slice(0, 10) + 'T12:00:00-03:00') - 86400000);
+  }
+  return null;
+})();
+async function abrir(c, demo, relogio = null) {
   const p = await c.newPage();
+  if (relogio) await p.clock.setFixedTime(relogio);
   const b = banco(p);
   await p.goto(`${BASE}/eu/x?demo=${demo}`, { waitUntil: 'domcontentloaded' });
   await p.waitForSelector('#meu-perfil', { timeout: 90000 }); await esperar(1500);
@@ -109,9 +125,9 @@ try {
       await p.close();
     }
 
-    /* 2 · "Não posso" perto do dia, e quem pode cobrir */
+    /* 2 · "Não posso" perto do dia, e quem pode cobrir (na véspera: ver VESPERA) */
     {
-      const { p, b } = await abrir(c, '1');
+      const { p, b } = await abrir(c, '1', VESPERA);
       await p.locator('#confirmar .vol-pede').first().getByRole('button', { name: /^Não posso/ }).click();
       await esperar(900);
       const pedidos = so(b, 'eu_responder');

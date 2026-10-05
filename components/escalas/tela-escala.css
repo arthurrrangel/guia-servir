@@ -302,7 +302,38 @@
   .es .es-ec-oi{grid-template-columns:44px minmax(0,1fr) auto;padding-left:var(--es-e2);gap:var(--es-e1) 6px}
   .es .es-ec-oi-editar{display:none}
   .es .es-ec-oi-abre{grid-template-columns:minmax(0,1fr);padding-left:var(--es-e1);padding-right:var(--es-e1)}
+  /* 111 · no celular cada campo ocupa a linha, menos o par BPM e compasso,
+     que fica lado a lado como na tela grande ("ao lado do BPM") */
+  .es .es-ec-of-campos{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .es .es-ec-of-campos > .es-campo{grid-column:1 / -1}
+  .es .es-ec-of-campos > .es-ec-of-meio{grid-column:auto}
 }
+/* 111 · a duração em minuto e segundo: dois campos e os dois pontos no meio,
+   que é como o tempo da música se escreve (4:35) */
+.es .es-ec-of-tempo{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:6px}
+.es .es-ec-of-tempo > .es-ctl{text-align:center;font-variant-numeric:tabular-nums}
+.es .es-ec-of-tempo-sep{font-size:16px;line-height:20px;font-weight:600;color:var(--es-ink-2)}
+/* 111 · a letra em PDF: o nome do arquivo (ou "Letra salva", que abre o PDF)
+   e os botões ao lado. O campo de arquivo do navegador fica escondido atrás
+   do botão "Escolher PDF", mas continua no Tab e no leitor de tela */
+.es .es-ec-of-letra{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+.es .es-ec-of-letra-acoes{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+.es .es-ec-of-letra-nome{font-size:13px;line-height:18px;color:var(--es-ink-2);overflow-wrap:anywhere;min-width:0}
+.es a.es-ec-of-letra-nome{color:var(--es-ink);font-weight:500;text-decoration:underline;text-underline-offset:2px}
+@media (max-width:719px){
+  /* o nome do PDF na linha dele e os dois botões juntos embaixo: sem isto o
+     "Tirar" caía sozinho numa terceira linha (visto na prova de 05/10).
+     Depois das regras de base, de propósito: mesma força, a de baixo vale */
+  .es .es-ec-of-letra{flex-direction:column;align-items:flex-start}
+}
+/* "Letra salva" com 44 de toque onde há dedo (a regra da casa, como o
+   .es-ec-ir), sem esticar o toque pela linha toda */
+@media (max-width:1023px), (hover:none), (pointer:coarse){
+  .es a.es-ec-of-letra-nome{display:inline-flex;align-items:center;min-height:44px}
+}
+.es .es-ec-of-arquivo{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;opacity:0}
+.es .es-ec-of-arquivo:focus-visible + .es-btn{outline:2px solid var(--es-foco);outline-offset:2px}
+.es .es-ec-of-arquivo:disabled + .es-btn{opacity:.55;cursor:not-allowed}
 
 /* 106 · chamar quem pode cobrir (02/10/2026): embaixo dos postos, uma linha
    por vaga aberta, com os chamados dela embaixo e a escolha de quem chamar

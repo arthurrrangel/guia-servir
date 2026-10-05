@@ -52,9 +52,9 @@ const DO_BANCO = {
   atualizado_em: '2026-09-09T23:05:00+00:00',
   comando: [
     { papel: 'direcao', equipe: 'Produção', equipe_id: 'e-prod', posto: 'COORDENADOR DO DIA', funcao_id: 'f1', nome: 'Rafa Lima', status: 'confirmado', convidado: null },
-    { papel: 'dirigente', equipe: 'Dirigentes', equipe_id: 'e-dir', posto: 'DIRIGENTE', funcao_id: 'f2', nome: 'Paulo Roberto', status: 'confirmado', convidado: null },
+    /* 111 · o dirigente do culto é o DIRIGENTE do Louvor: a área dele é a do Louvor */
+    { papel: 'dirigente', equipe: 'Louvor', equipe_id: 'e-lou', posto: 'DIRIGENTE', funcao_id: 'f2', nome: 'Paulo Roberto', status: 'confirmado', convidado: null },
     { papel: 'lider', equipe: 'Mídia', equipe_id: 'e-mid', posto: 'HEAD', funcao_id: 'f3', nome: null, status: null, convidado: 'Guest Léo' },
-    { papel: 'lider', equipe: 'Louvor', equipe_id: 'e-lou', posto: 'DIRIGENTE', funcao_id: 'f4', nome: 'Letícia Souza', status: 'pendente', convidado: null },
   ],
   musicas: [
     { equipe: 'Louvor', titulo: 'Leão', tom: 'E', bpm: 67, quem: 'Letícia' },
@@ -162,7 +162,7 @@ caso('a folha do banco chega no tipo da tela', () => {
   assert.equal(f.data, '2026-09-13');
   assert.equal(f.tipo, 'domingo');
   assert.equal(f.token, '0123456789abcdef01');
-  assert.equal(f.comando.length, 4);
+  assert.equal(f.comando.length, 3, '111: direção, o dirigente (do Louvor) e a Mídia');
   assert.equal(f.comando[2].convidado, 'Guest Léo');
   assert.equal(f.musicas[0].bpm, 67);
   assert.equal(f.autoria.palavra.via, 'dirigente');
@@ -209,14 +209,14 @@ caso('a folha cheia não tem pendência; o Guest vale como gente', () => {
 caso('a folha vazia: o que falta, na ordem da folha, com o dono', () => {
   const p = pendenciasDaFolha(vazia());
   assert.deepEqual(p.map(x => `${x.texto} | ${x.dono} | ${x.equipeId}`), [
-    'A Palavra: quem prega, tema e leitura | Dirigente | e-dir',
+    /* 111 · o dirigente é o do Louvor: a falta dele é da escala do Louvor */
+    'A Palavra: quem prega, tema e leitura | Dirigente | e-lou',
     'Direção do culto: ninguém escalado | Produção | e-prod',
-    'Dirigente: ninguém escalado | Dirigentes | e-dir',
+    'Dirigente: ninguém escalado | Louvor | e-lou',
     'Mídia: ninguém escalado | Mídia | e-mid',
-    'Louvor: ninguém escalado | Louvor | e-lou',
     'As músicas (na ordem do culto) | Louvor | e-lou',
     'A música final | Louvor | e-lou',
-    'Os avisos | Dirigente | e-dir',
+    'Os avisos | Dirigente | e-lou',
   ]);
 });
 caso('o dono da Palavra ganha o nome do dirigente quando ele está escalado', () => {
@@ -238,8 +238,8 @@ caso('"sem avisos" responde; frase na tela é opcional; sem área de repertório
 caso('o estado de longe', () => {
   assert.deepEqual(estadoDaFolha(cheia(), '2026-09-09'), { tipo: 'pronto', tom: 'ok', texto: 'Tudo pronto' });
   assert.equal(estadoDaFolha(vazia(), '2026-09-14').tipo, 'passou');
-  assert.deepEqual(estadoDaFolha(vazia(), '2026-09-10'), { tipo: 'aberto', tom: 'warn', texto: '8 pendências · até qui, 10/09' });
-  assert.deepEqual(estadoDaFolha(vazia(), '2026-09-11'), { tipo: 'atrasado', tom: 'bad', texto: '8 pendências · prazo era qui, 10/09' });
+  assert.deepEqual(estadoDaFolha(vazia(), '2026-09-10'), { tipo: 'aberto', tom: 'warn', texto: '7 pendências · até qui, 10/09' });
+  assert.deepEqual(estadoDaFolha(vazia(), '2026-09-11'), { tipo: 'atrasado', tom: 'bad', texto: '7 pendências · prazo era qui, 10/09' });
   assert.equal(estadoDaFolha(vazia(), '2026-09-13').tipo, 'atrasado', 'no dia, ainda falta: atrasado, não passou');
   assert.equal(estadoDaFolha(vazia(), '2026-09-05').tipo, 'cedo', 'mais de quatro dias antes do prazo não é alarme');
   assert.equal(estadoDaFolha(vazia(), '2026-09-06').tipo, 'aberto');
@@ -261,7 +261,6 @@ caso('a mensagem do grupo, exata', () => {
     'Direção do culto: Rafa Lima',
     'Dirigente: Paulo Roberto',
     'Mídia: Guest Léo',
-    'Louvor: Letícia Souza',
     '',
     'Cronograma completo e PDF:',
     'https://guiaservir.com/cronograma/0123456789abcdef01',
@@ -279,6 +278,12 @@ caso('a música como o Louvor escreve', () => {
   assert.equal(linhaDaMusicaNaFolha({ titulo: 'Leão', tom: 'E', bpm: 67, quem: 'Letícia', equipe: 'Louvor' }), 'Leão (E, 67 BPM) Lead - Letícia');
   assert.equal(linhaDaMusicaNaFolha({ titulo: 'Ousado Amor', equipe: 'Louvor' }), 'Ousado Amor');
   assert.equal(linhaDaMusicaNaFolha({ titulo: 'X', bpm: 70, equipe: 'Louvor' }), 'X (70 BPM)');
+  /* 111 · o compasso ao lado do BPM, como na mensagem do Louvor */
+  assert.equal(linhaDaMusicaNaFolha({ titulo: 'Leão', tom: 'E', bpm: 67, compasso: '6/8', quem: 'Letícia', equipe: 'Louvor' }),
+    'Leão (E, 67 BPM, 6/8) Lead - Letícia');
+  const comCompasso = folhaDoBanco({ ...JSON.parse(JSON.stringify(DO_BANCO)),
+    musicas: [{ equipe: 'Louvor', titulo: 'A', compasso: '12/8' }, { equipe: 'Louvor', titulo: 'B', compasso: '4/3' }] });
+  assert.deepEqual(comCompasso.musicas.map(m => m.compasso ?? '-'), ['12/8', '-'], 'só o compasso de verdade chega à folha');
 });
 caso('quem gravou e quando, no horário de Brasília', () => {
   assert.equal(rotuloDaAutoria({ por: 'Paulo Roberto', em: '2026-09-09T23:05:00+00:00', via: 'dirigente' }), 'por Paulo Roberto (dirigente), qua 20h05');

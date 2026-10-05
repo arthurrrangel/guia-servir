@@ -14,6 +14,7 @@
    Roda com BASE=http://127.0.0.1:3500 node scripts/grupos-tela.test.mjs */
 import { chromium } from 'playwright';
 import { chromeDoContainer } from './medida-celular.mjs';
+import { fimDeSemana, mesDe } from './dias-do-demo.mjs';
 import { mkdirSync } from 'node:fs';
 const BASE = process.env.BASE || 'http://127.0.0.1:3500';
 const OUT = '/tmp/grupos-tela';
@@ -38,9 +39,12 @@ try {
   /* 1. Escala: o painel do dia */
   for (const [w, h, toque, nome] of [[1440, 900, false, '1440'], [390, 844, true, '390']]) {
     const c = await ctx(w, h, toque); const p = await c.newPage();
-    await p.goto(`${BASE}/escala?demo=1&m=2026-10#d2026-10-04`, { waitUntil: 'domcontentloaded' });
+    /* o primeiro fim de semana que vem (era 03 e 04/10 escrito na mão, e a
+       prova reprovou na virada do dia: ver scripts/dias-do-demo.mjs) */
+    const { sab: SAB, dom: DOM } = fimDeSemana;
+    await p.goto(`${BASE}/escala?demo=1&m=${mesDe(DOM)}#d${DOM}`, { waitUntil: 'domcontentloaded' });
     await p.waitForSelector('.es-casca', { timeout: 20000 }); await esperar(2500);
-    const dia = p.locator('#d2026-10-04');
+    const dia = p.locator(`#d${DOM}`);
     const bt = dia.getByRole('button', { name: 'Mandar nos grupos' });
     ok(await bt.count() === 1, `${nome}: o dia tem "Mandar nos grupos"`);
     const classe = await bt.getAttribute('class');
@@ -57,7 +61,7 @@ try {
     await dia.locator('.es-mg').screenshot({ path: `${OUT}/painel-dia-${nome}.png` });
     await dia.screenshot({ path: `${OUT}/dia-inteiro-${nome}.png` });
     /* sábado: o grupo só de domingo fica sem posto */
-    const sab = p.locator('#d2026-10-03');
+    const sab = p.locator(`#d${SAB}`);
     if (!(await sab.evaluate(e => e.open))) { await sab.locator('summary').click(); await esperar(300); }
     await sab.getByRole('button', { name: 'Mandar nos grupos' }).click(); await esperar(300);
     const tTrans = await sab.locator('.es-mg-linha').nth(3).innerText();

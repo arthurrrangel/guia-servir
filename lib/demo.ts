@@ -126,8 +126,12 @@ export function estadoDemo(variante = ''): Estado {
     };
   }
   /* 105 · a ordem do culto no SEGUNDO culto que vem: o primeiro continua
-     desenhando o repertório só com os links, como as provas da 100 conhecem */
-  if (porVir[1] && S.escalas[porVir[1]]) S.escalas[porVir[1]].ordem = ORDEM_DEMO.map(i => ({ ...i }));
+     desenhando o repertório só com os links, como as provas da 100 conhecem.
+     111 · `?demo=letra`: a mesma ordem com compasso, segundos e a letra em
+     PDF (o editor abre com os campos da 111, porque a ordem já os tem) */
+  if (porVir[1] && S.escalas[porVir[1]]) {
+    S.escalas[porVir[1]].ordem = (variante === 'letra' ? ORDEM_111_DEMO : ORDEM_DEMO).map(i => ({ ...i }));
+  }
   S.voluntarios.forEach((v, i) => {
     if (i % 3 === 0) v.disponivel = porVir.slice(0, 3);
     if (i % 5 === 0) v.indisponivel = [porVir[1]].filter(Boolean);
@@ -179,6 +183,21 @@ export const ORDEM_DEMO = [
   { t: 'musica' as const, titulo: 'Luz no Caminho', tom: 'Bb', min: 6 },
   { t: 'momento' as const, titulo: 'Avisos', min: 5 },
   { t: 'momento' as const, titulo: 'Palavra', quem: 'Pastor', min: 40 },
+];
+/* 111 · a ordem com o que a 111 acrescenta: compasso ao lado do BPM, o tempo
+   em segundos (4:35) e a letra em PDF. Uma música continua em minutos (o
+   item de antes da 111, que a tela mostra como 6:00). O caminho da letra é
+   inventado, no formato do armário: o harness não tem Storage. */
+export const LETRA_DEMO = 'd0000000-0000-4000-8000-000000000001/a0000000-0000-4000-8000-000000000001.pdf';
+export const ORDEM_111_DEMO = [
+  { t: 'momento' as const, titulo: 'Abertura', quem: 'Pastor', seg: 300 },
+  { t: 'musica' as const, titulo: 'Canção da Manhã', artista: 'Banda Exemplo', tom: 'G', bpm: 72, compasso: '6/8',
+    cifra: 'https://www.cifraclub.com.br/banda-exemplo/cancao-da-manha/', letra: LETRA_DEMO, quem: 'Lia', seg: 275,
+    nota: 'Começa só voz e teclado' },
+  { t: 'musica' as const, titulo: 'Rio de Graça', artista: 'Coral Modelo', tom: 'F#m', bpm: 68, compasso: '4/4', seg: 312 },
+  { t: 'musica' as const, titulo: 'Luz no Caminho', tom: 'Bb', min: 6 },
+  { t: 'momento' as const, titulo: 'Avisos', seg: 300 },
+  { t: 'momento' as const, titulo: 'Palavra', quem: 'Pastor', seg: 2400 },
 ];
 /* 02/10/2026 · o setlist só de músicas (variante `setlist`): tom e BPM em
    todas, a cifra em uma, e uma observação de medley na terceira */
@@ -390,14 +409,34 @@ export function euDemo(variante: string = '') {
       ],
     };
   }
-  /* 109 · o dirigente da semana: o cartão com o que falta do bloco dele */
+  /* 111 · o setlist com compasso, minuto e segundo e o botão da letra: no
+     primeiro culto só as músicas (o setlist do repertório), no segundo a
+     ordem inteira, com os momentos (a seção "Ordem do culto") */
+  if (variante === 'letra') {
+    return {
+      ...fixture,
+      nome: 'Lia Martins', equipe: 'Louvor',
+      escalas: [
+        { culto_id: 'c1', funcao_id: 'fv1', data: prox[0], funcao: 'VOZ', status: 'pendente', primeira_vez: false, plantao: false, repertorio: REP_DEMO },
+        { culto_id: 'c2', funcao_id: 'fv2', data: prox[1] || prox[0], funcao: 'VIOLÃO', status: 'confirmado', primeira_vez: false, plantao: false },
+      ],
+      ordens: [
+        { culto_id: 'c1', data: prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: true,
+          ordem: ORDEM_111_DEMO.filter(i => i.t === 'musica') },
+        { culto_id: 'c2', data: prox[1] || prox[0], evento: null, inicio: null, equipe: 'Louvor', minha: true, ordem: ORDEM_111_DEMO },
+      ],
+    };
+  }
+  /* 109 · o dirigente da semana: o cartão com o que falta do bloco dele.
+     111 · o dirigente é o DIRIGENTE do Louvor ("os dirigentes estão no
+     sistema de escalas do ministério de louvor") */
   if (variante === 'dirigente') {
     /* a escala é a do dirigente (um culto, o posto DIRIGENTE), no mesmo
        domingo do cronograma: o harness não desenha um estado que o banco
        nunca produziria */
     const cr = euCronogramasDemo() as { data: string }[];
     return {
-      ...fixture, nome: 'Rui Teixeira', equipe: 'Dirigentes',
+      ...fixture, nome: 'Rui Teixeira', equipe: 'Louvor',
       escalas: [{ culto_id: 'demo-culto', funcao_id: 'cf2', data: cr[0].data, funcao: 'DIRIGENTE', status: 'confirmado',
                   primeira_vez: false, plantao: false }],
       cronogramas: cr,
@@ -557,13 +596,15 @@ const LINHA_FOLLOW_DEMO = [
   { h: '20:00', o: 'Palavra', q: 'Pregador' },
   { h: '21:00', o: 'Encerramento', q: 'Todos' },
 ];
+/* 111 · o dirigente é o DIRIGENTE do Louvor (a área "Dirigentes" da 109
+   saiu): "No comando" tem a direção, o dirigente, a Mídia e o Connect, e o
+   Louvor aparece pelo dirigente. Os nomes: [direção, dirigente, mídia, connect] */
 const COMANDO_DEMO = (tipo: 'domingo' | 'follow', nomes: (string | null)[]) => [
   { papel: 'direcao', equipe: 'Produção', equipe_id: 'demo-prod', posto: 'COORDENADOR DO DIA', funcao_id: 'cf1', nome: nomes[0], status: nomes[0] ? 'confirmado' : null, convidado: null },
-  { papel: 'dirigente', equipe: 'Dirigentes', equipe_id: 'demo-dir', posto: 'DIRIGENTE', funcao_id: 'cf2', nome: nomes[1], status: nomes[1] ? 'confirmado' : null, convidado: null },
+  { papel: 'dirigente', equipe: 'Louvor', equipe_id: 'demo-louvor', posto: 'DIRIGENTE', funcao_id: 'cf2', nome: nomes[1], status: nomes[1] ? 'confirmado' : null, convidado: null },
   { papel: 'lider', equipe: 'Mídia', equipe_id: 'demo', posto: 'HEAD', funcao_id: 'cf3', nome: nomes[2], status: nomes[2] ? 'pendente' : null, convidado: null },
-  { papel: 'lider', equipe: 'Louvor', equipe_id: 'demo-louvor', posto: 'DIRIGENTE', funcao_id: 'cf4', nome: nomes[3], status: nomes[3] ? 'confirmado' : null, convidado: null },
   ...(tipo === 'domingo'
-    ? [{ papel: 'lider', equipe: 'Connect', equipe_id: 'demo-conn', posto: 'LÍDER 1', funcao_id: 'cf5', nome: nomes[4], status: nomes[4] ? 'confirmado' : null, convidado: null }]
+    ? [{ papel: 'lider', equipe: 'Connect', equipe_id: 'demo-conn', posto: 'LÍDER 1', funcao_id: 'cf5', nome: nomes[3], status: nomes[3] ? 'confirmado' : null, convidado: null }]
     : []),
 ];
 
@@ -584,22 +625,22 @@ function cronogramaCru(variante: string, data: string) {
       louvor: { por: 'Lia Martins', em, via: 'lider' },
     },
     atualizado_em: em,
-    comando: COMANDO_DEMO(tipo, ['Sara Lopes', 'Rui Teixeira', 'Igor Paz', 'Lia Martins', 'Nina Alves']),
+    comando: COMANDO_DEMO(tipo, ['Sara Lopes', 'Rui Teixeira', 'Igor Paz', 'Nina Alves']),
     musicas: [
       { equipe: 'Louvor', titulo: 'Leão', tom: 'E', bpm: 67, quem: 'Lia' },
-      { equipe: 'Louvor', titulo: 'Bondade de Deus', tom: 'G', bpm: 68 },
+      { equipe: 'Louvor', titulo: 'Bondade de Deus', tom: 'G', bpm: 68, compasso: '6/8' },
       { equipe: 'Louvor', titulo: 'Ousado Amor', tom: 'F#m', bpm: 72, quem: 'Davi' },
     ],
     repertorio: [{ equipe: 'Louvor', equipe_id: 'demo-louvor' }],
   };
   if (variante === 'vazia') {
     return { ...cheio, existe: false, token: null, palavra: null, avisos: null, louvor: null, autoria: {}, atualizado_em: null,
-             comando: COMANDO_DEMO(tipo as any, [null, null, null, null, null]), musicas: [] };
+             comando: COMANDO_DEMO(tipo as any, [null, null, null, null]), musicas: [] };
   }
   if (variante === 'parcial') {
     return { ...cheio, palavra: { quem: 'Pr. Daniel Moura', tema: 'Peniel: hoje Deus mudará sua identidade' },
              avisos: null, louvor: null, autoria: { palavra: cheio.autoria.palavra },
-             comando: COMANDO_DEMO(tipo as any, ['Sara Lopes', 'Rui Teixeira', null, 'Lia Martins', null]) };
+             comando: COMANDO_DEMO(tipo as any, ['Sara Lopes', 'Rui Teixeira', null, null]) };
   }
   if (variante === 'longa') {
     return { ...cheio,
