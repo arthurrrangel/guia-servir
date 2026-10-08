@@ -50,13 +50,17 @@ export const IGREJA = {
   canalNome: 'GUIA Church TV',
 
   /* ------------------------------------------------------------------------
-     OS DOIS CANAIS QUE AINDA NÃO TÊM DONO DECIDIDO
+     OS DOIS CANAIS DE CONTATO
 
-     WHATSAPP: o número que existe hoje é o da secretaria, e publicar o
-     telefone de uma pessoa numa página indexável é decisão da igreja, não
-     minha. Enquanto for null, todo CTA de contato cai no Instagram, que já é
-     público e confirmado. Preencher aqui liga o botão de WhatsApp em todas as
-     páginas de uma vez — formato: só dígitos, com 55 na frente.
+     WHATSAPP: 08/10/2026. A igreja passou a ter WhatsApp Business próprio
+     (perfil "GUIA CHURCH"), num celular da igreja, e o Arthur autorizou
+     trocar o Instagram por ele em todos os botões de conversa ("Pode
+     trocar"). Antes disso o único número conhecido era o da secretaria, e
+     publicar o telefone de uma pessoa numa página indexável não cabia a
+     mim; por isso o campo ficou null e todo CTA caía no Instagram. Com o
+     número da igreja aqui, todas as páginas abrem o WhatsApp de uma vez, com
+     a mensagem já escrita, e quem chama recebe a saudação automática do
+     aplicativo. Formato: só dígitos, com 55 na frente.
 
      YOUTUBE: a decisão 02 da arquitetura está aberta. O canal que a igreja
      chama de "Guia Church TV" está publicado sob outra marca, e @guiachurchtv
@@ -65,7 +69,7 @@ export const IGREJA = {
      app/sitemap.ts) e a página fala do domingo sem prometer um acervo que a
      pessoa não vai encontrar.
      ------------------------------------------------------------------------ */
-  whatsapp: null as string | null,
+  whatsapp: '5521972976946' as string | null,
   youtube: null as string | null,
 
   /* ------------------------------------------------------------------------

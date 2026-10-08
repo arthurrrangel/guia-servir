@@ -21,9 +21,9 @@ import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
    linguagem de gente.
 
    O QUE FALTA PREENCHER está marcado no texto e listado no fim do arquivo: o
-   canal de contato do titular vira WhatsApp no dia em que IGREJA.whatsapp
-   tiver número; e o prazo de retenção precisa ser decidido por quem responde
-   pela igreja, não por mim.
+   prazo de retenção precisa ser decidido por quem responde pela igreja, não
+   por mim. O canal de contato do titular já é o WhatsApp da igreja desde
+   08/10/2026, quando IGREJA.whatsapp ganhou número.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -142,5 +142,6 @@ export default function Privacidade() {
    2. Nome e canal do encarregado de dados (DPO). A LGPD pede o encarregado
       indicado; para entidade religiosa de pequeno porte a ANPD flexibiliza a
       indicação formal, então a página fica válida sem — mas nomear é melhor.
-   3. IGREJA.whatsapp: enquanto for null, o canal do titular é o Instagram.
-      Para pedido de exclusão isso funciona, mas WhatsApp é o canal certo. */
+   3. (Resolvido em 08/10/2026) IGREJA.whatsapp tem o número da igreja, e o
+      canal do titular passou a ser o WhatsApp, que é o canal certo para
+      pedido de exclusão. */
