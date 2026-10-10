@@ -130,9 +130,15 @@ export default function Topo({ atual, escuro = true }: { atual?: string; escuro?
                   <ul>
                     {g.itens.map(i => (
                       <li key={i.href}>
-                        <Link href={i.href} aria-current={atual === i.href ? 'page' : undefined} onClick={() => setAberto(null)}>
-                          {i.rot}{i.sub && <small>{i.sub}</small>}
-                        </Link>
+                        {/* /followcamp é um HTML estático servido por reescrita, não
+                            uma rota do app: o <Link> pré-carregava o RSC dele e o
+                            servidor respondia 404 no console de toda página. Para
+                            ele, âncora comum (navegação cheia, como o HTML pede). */}
+                        {i.href.startsWith('/followcamp')
+                          ? <a href={i.href} onClick={() => setAberto(null)}>{i.rot}{i.sub && <small>{i.sub}</small>}</a>
+                          : <Link href={i.href} aria-current={atual === i.href ? 'page' : undefined} onClick={() => setAberto(null)}>
+                              {i.rot}{i.sub && <small>{i.sub}</small>}
+                            </Link>}
                       </li>
                     ))}
                   </ul>
@@ -163,7 +169,9 @@ export default function Topo({ atual, escuro = true }: { atual?: string; escuro?
           <nav key={g.rot} className="sv-menu-g" aria-label={g.rot}>
             <h2>{g.rot}</h2>
             {g.itens
-              ? g.itens.map(i => <Link key={i.href} href={i.href} onClick={() => setMenu(false)}>{i.rot}</Link>)
+              ? g.itens.map(i => i.href.startsWith('/followcamp')
+                  ? <a key={i.href} href={i.href} onClick={() => setMenu(false)}>{i.rot}</a>
+                  : <Link key={i.href} href={i.href} onClick={() => setMenu(false)}>{i.rot}</Link>)
               : <Link href={g.href!} onClick={() => setMenu(false)}>{g.rot === 'PGs' ? 'Pequena Guia' : 'Ofertar'}</Link>}
           </nav>
         ))}
