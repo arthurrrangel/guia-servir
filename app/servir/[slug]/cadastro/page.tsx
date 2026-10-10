@@ -291,7 +291,7 @@ export default function Servir() {
   }, [ocupado, slug, nome, tel, email, funcoesReais, resp, K_RASCUNHO]);
 
   if (fase !== 'ok') return (
-    <Tela volta="/servir" voltaRot="Áreas">
+    <Tela volta="/servir" voltaRot="Áreas" identidade>
       <main className="tela-corpo">
         {fase === 'carregando'
           ? <Carregando o="Preparando o cadastro" />
@@ -309,7 +309,7 @@ export default function Servir() {
     /* `cad` é só a roupa (05/09/2026): a cabeça centrada, o título na mesma
        letra das outras páginas públicas, a coluna do formulário estreita no
        desktop. Os quatro passos, os campos e o envio são os mesmos. */
-    <div className="porta wiz cad">
+    <div className="porta wiz cad id tela-id">
       <header className="tela-topo">
         <Link href="/" className="marca-link" aria-label="GUIA Church">
           <Logo className="logo" />

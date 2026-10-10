@@ -397,3 +397,46 @@
 
 /* ---- o "pular" e o fio de progresso da home ---------------------------------- */
 .id .pular{ background:#fff; color:#111; border-radius:8px }
+
+/* =============================================================================
+   AS TELAS QUE O SITE ALCANÇA (Tela identidade): o cadastro de uma área e a
+   porta do espaço do voluntário. A barra escura, o título em duas vozes, as
+   pílulas e os cartões de carvão, sobre o mesmo papel.
+   ============================================================================= */
+.tela-id{ background:var(--papel); color:var(--ink) }
+.tela-id .tela-topo{
+  background:#0e0e10; color:#fff; border-bottom:1px solid rgba(255,255,255,.08);
+  min-height:var(--sv-topo); padding-top:calc(14px + env(safe-area-inset-top,0px)); padding-bottom:14px;
+}
+.tela-id .tela-topo .logo{ height:28px; color:#fff }
+.tela-id .tela-volta{ color:rgba(255,255,255,.72); text-transform:none; letter-spacing:-.01em; font-size:15px; font-weight:600; min-height:42px; padding:0 16px 0 10px; border-radius:999px; border:1px solid rgba(255,255,255,.24); background:rgba(255,255,255,.06) }
+.tela-id .tela-volta:hover,.tela-id .tela-volta:active{ color:#111; background:#fff; border-color:#fff }
+.tela-id .tela-volta svg{ width:14px; height:14px }
+.tela-id .cabeca .rot,.tela-id .wiz-cabeca .rot{ font-family:var(--sv-sans); font-size:15px; font-weight:700; letter-spacing:-.005em; text-transform:none; color:var(--mudo) }
+.tela-id .cabeca h1,.tela-id .cabeca .cabeca-t,.tela-id .wiz-cabeca h1{ font-family:var(--sv-sans); font-weight:800; letter-spacing:-.045em; line-height:.96; font-size:clamp(38px,5.4vw,68px); text-transform:none }
+.tela-id .cabeca-t .pal.it{ font-family:var(--sv-serif); font-style:italic; font-weight:400; letter-spacing:-.01em; font-size:1.06em }
+.tela-id .cabeca-t .pal.it.pt::after{ content:"." }
+.tela-id .cabeca p,.tela-id .wiz-cabeca-sub{ color:var(--cinza); letter-spacing:-.01em }
+.tela-id .migalha a{ color:var(--mudo) }
+.tela-id .btn.pri,.tela-id .acao.cheia{ background:#111; color:#fff; border-color:#111; border-radius:999px; min-height:52px; font-weight:600; letter-spacing:-.012em }
+.tela-id .btn.pri:hover,.tela-id .btn.pri:active{ background:#000; border-color:#000 }
+.tela-id .btn:not(.pri){ border-radius:999px; min-height:48px; border-color:rgba(20,20,21,.22); font-weight:600 }
+.tela-id .btn:not(.pri):hover{ background:#111; color:#fff; border-color:#111 }
+.tela-id input:not([type="checkbox"]):not([type="radio"]),.tela-id select,.tela-id textarea{ border-radius:14px; border-color:rgba(20,20,21,.16); background:#fff }
+.tela-id input:focus-visible,.tela-id select:focus-visible,.tela-id textarea:focus-visible{ border-color:#111; outline:2px solid var(--sv-ouro); outline-offset:2px }
+.tela-id .wiz-passos li.agora .wiz-bola,.tela-id .wiz-op.on .wiz-op-marca{ background:#111; border-color:#111 }
+.tela-id .wiz-passos li.agora{ border-top-color:#111 }
+.tela-id .wiz-op{ border-radius:16px }
+.tela-id .wiz-op.on{ border-color:#111; box-shadow:inset 0 0 0 1px #111 }
+.tela-id .wiz-chips button[aria-pressed="true"],.tela-id .wiz-chips .on{ background:#111; color:#fff; border-color:#111 }
+/* a porta do espaço: cada área é um cartão de carvão */
+.tela-id .escolha{
+  background:var(--sv-carvao); color:#fff; border:0; border-radius:22px; margin-top:12px; padding:22px 24px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.05); transition:transform .5s var(--sv-ease),box-shadow .5s var(--sv-ease);
+}
+.tela-id .escolha:last-child{ border-bottom:0 }
+.tela-id .escolha:hover{ background:var(--sv-carvao); transform:translateY(-4px); box-shadow:inset 0 0 0 1px rgba(240,164,60,.3),0 30px 50px -30px rgba(0,0,0,.65) }
+.tela-id .escolha-nome{ color:#fff; font-weight:800; letter-spacing:-.03em; font-size:22px; text-transform:none }
+.tela-id .escolha-desc{ color:rgba(255,255,255,.72) }
+.tela-id .escolha-fim{ color:rgba(255,255,255,.7) }
+.tela-id .acao:not(.cheia){ border-radius:999px }

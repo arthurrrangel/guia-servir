@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { Logo } from './Marca';
+import { Tit } from './Texto';
 import { IcSeta } from './Icones';
 
 /* =============================================================================
@@ -14,10 +15,14 @@ import { IcSeta } from './Icones';
    três acabamentos para o mesmo cabeçalho.
    ============================================================================= */
 
-export function Tela({ volta, voltaRot = 'Voltar', children, escura }:
-  { volta?: string; voltaRot?: string; children: React.ReactNode; escura?: boolean }) {
+/* `identidade` (10/10/2026): a tela veste a identidade do site público
+   (barra escura, títulos em duas vozes, pílulas, cartões de carvão) — para
+   as telas que a pessoa alcança a partir do site, como o cadastro de uma
+   área e a porta do espaço do voluntário. As telas do sistema não passam. */
+export function Tela({ volta, voltaRot = 'Voltar', children, escura, identidade }:
+  { volta?: string; voltaRot?: string; children: React.ReactNode; escura?: boolean; identidade?: boolean }) {
   return (
-    <div className={'tela' + (escura ? ' tela-escura' : '')}>
+    <div className={'tela' + (escura ? ' tela-escura' : '') + (identidade ? ' id tela-id' : '')}>
       <header className="tela-topo">
         <Link href="/" className="marca-link" aria-label="GUIA Church"><Logo className="logo" /></Link>
         {volta && <Link href={volta} className="tela-volta"><IcSeta />{voltaRot}</Link>}
@@ -28,12 +33,16 @@ export function Tela({ volta, voltaRot = 'Voltar', children, escura }:
 }
 
 /* índice, título, uma linha de apoio. Sempre nessa ordem, nunca mais que isso. */
-export function Cabeca({ rot, titulo, apoio, menor }:
-  { rot?: string; titulo: string; apoio?: string; menor?: boolean }) {
+export function Cabeca({ rot, titulo, apoio, menor, vozes }:
+  { rot?: string; titulo: string; apoio?: string; menor?: boolean; vozes?: boolean }) {
   return (
     <div className="cabeca">
       {rot && <span className="rot">{rot}</span>}
-      <h1 className={menor ? 'menor' : undefined}>{titulo}</h1>
+      {/* `vozes`: o título em duas vozes da identidade (última palavra em
+          serifa itálica, com ponto), como em todo h1 do site público */}
+      {vozes
+        ? <Tit as="h1" className={'cabeca-t' + (menor ? ' menor' : '')} vozes>{titulo}</Tit>
+        : <h1 className={menor ? 'menor' : undefined}>{titulo}</h1>}
       {apoio && <p>{apoio}</p>}
     </div>
   );

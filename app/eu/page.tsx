@@ -46,11 +46,12 @@ export default function PortaDoEspaco() {
   }, []);
 
   return (
-    <Tela volta="/" voltaRot="Início">
+    <Tela volta="/" voltaRot="Início" identidade>
       <main className="tela-corpo tela-estreita">
         <Cabeca
           rot="Espaço do voluntário"
           titulo="Acessar meu espaço"
+          vozes
           apoio="Sua escala, seus dias e seu líder. Comece dizendo em que área você serve."
         />
 
