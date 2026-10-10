@@ -1,6 +1,7 @@
 import { IGREJA } from '@/lib/igreja';
 import './globals.css';
 import './editorial.css';
+import './identidade.css';
 import type { Metadata, Viewport } from 'next';
 import Medidas from '@/components/Medidas';
 import Transicao from '@/components/Transicao';

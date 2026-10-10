@@ -28,21 +28,6 @@
    também a carregam, mas nenhuma regra as alcança: elas não têm `.sv`.
    ============================================================================= */
 
-@font-face{
-  font-family:"Instrument Serif";
-  font-style:italic;
-  font-weight:400;
-  font-display:swap;
-  src:url(/tipos/instrument-serif-italic.woff2) format("woff2");
-}
-@font-face{
-  font-family:"Instrument Serif";
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-  src:url(/tipos/instrument-serif.woff2) format("woff2");
-}
-
 .sv{
   --sv-noite:#121214;
   --sv-grafite:#19191c;
@@ -85,9 +70,6 @@
 .sv h3::before{ content:none }
 .sv label{ display:block; font-size:inherit; font-weight:500; text-transform:none; letter-spacing:0; color:inherit; margin:0 }
 
-/* a coluna */
-.sv-in{ width:100%; max-width:var(--sv-largura); margin:0 auto; padding:0 var(--sv-gutter) }
-
 /* ---- tipografia ------------------------------------------------------------- */
 .sv-h1,.sv-h2,.sv-h3{ margin:0; font-weight:800; letter-spacing:-.045em; line-height:.94; text-wrap:balance }
 .sv-h1{ font-size:clamp(50px,9.2vw,124px); line-height:.9; letter-spacing:-.05em; color:#fff }
@@ -112,27 +94,6 @@
 .sv-sede i{ font-style:normal; opacity:.6; margin:0 5px }
 .sv-escuro .sv-sede{ color:rgba(255,255,255,.7) }
 .sv-escuro .sv-arroba{ color:#fff }
-
-/* ---- botão-pílula, uma altura ------------------------------------------------ */
-.sv-bt{
-  display:inline-flex; align-items:center; justify-content:center; gap:10px;
-  min-height:52px; padding:0 26px; border-radius:999px; border:1px solid transparent;
-  font:600 16px/1 var(--sv-sans); letter-spacing:-.012em; text-decoration:none;
-  cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
-  transition:transform .22s var(--sv-ease),background .18s var(--sv-ease),color .18s var(--sv-ease),box-shadow .22s var(--sv-ease),border-color .18s var(--sv-ease);
-}
-.sv-bt svg{ width:16px; height:16px; flex:none }
-.sv-bt.branco{ background:#fff; color:#111 }
-.sv-bt.branco:hover{ transform:translateY(-1px); box-shadow:0 14px 30px -14px rgba(0,0,0,.6) }
-.sv-bt.preto{ background:#111; color:#fff; border-color:#111 }
-.sv-bt.preto:hover{ background:#000; transform:translateY(-1px); box-shadow:0 12px 28px -14px rgba(0,0,0,.5) }
-.sv-bt.vidro{ background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.32); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px) }
-.sv-bt.vidro:hover{ background:#fff; color:#111; border-color:#fff }
-.sv-bt:active{ transform:translateY(0) scale(.985) }
-.sv-bt:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:3px }
-.sv-bt[aria-busy="true"]{ opacity:.7; pointer-events:none }
-.sv-acoes{ display:flex; flex-wrap:wrap; gap:12px; align-items:center }
-.sv-micro{ margin:16px 0 0; font-size:14px; letter-spacing:-.005em; opacity:.78 }
 
 /* ---- o link "pular" ---------------------------------------------------------- */
 .sv-pular{ position:absolute; left:16px; top:-60px; z-index:200; background:#fff; color:#111; padding:10px 14px; border-radius:8px; font-weight:600; text-decoration:none }
@@ -163,92 +124,6 @@
 .nao-anima .sv .sv-r,.sv.nao-anima .sv-r{ opacity:1!important; transform:none!important; filter:none!important; transition:none!important }
 .sv.nao-anima .sv-vivos svg path{ stroke-dashoffset:0!important }
 .sv.nao-anima .sv-como-tit::after{ transform:none!important }
-
-/* =============================================================================
-   O TOPO: barra fixa, transparente sobre a fachada, escura depois da rolagem
-   ============================================================================= */
-.sv-topo{
-  position:fixed; top:0; left:0; right:0; z-index:90; color:#fff;
-  padding-top:env(safe-area-inset-top,0px);
-  background:linear-gradient(180deg,rgba(8,8,10,.55),rgba(8,8,10,0));
-  transition:background .35s var(--sv-ease),box-shadow .35s var(--sv-ease);
-}
-.sv-topo.solida{
-  background:rgba(12,12,14,.9);
-  box-shadow:0 1px 0 rgba(255,255,255,.06);
-}
-@media(hover:hover) and (pointer:fine){
-  .sv-topo.solida{ background:rgba(12,12,14,.78); -webkit-backdrop-filter:saturate(1.4) blur(16px); backdrop-filter:saturate(1.4) blur(16px) }
-}
-.sv-topo-in{ height:var(--sv-topo); display:flex; align-items:center; gap:28px }
-.sv-logo{ display:inline-flex; align-items:center; color:#fff; flex:none }
-.sv-logo svg{ height:28px; width:auto }
-.sv-nav{ display:none; list-style:none; margin:0 0 0 12px; padding:0; gap:4px; flex:1 }
-.sv-nav > li{ position:relative }
-.sv-nav > li > a,.sv-nav > li > button{
-  display:flex; align-items:center; gap:6px; padding:12px 12px; border:0; background:none;
-  color:#fff; font:600 15px/1 var(--sv-sans); letter-spacing:-.01em; text-decoration:none;
-  border-radius:999px; cursor:pointer; opacity:.94; -webkit-tap-highlight-color:transparent;
-  transition:background .18s var(--sv-ease),opacity .18s var(--sv-ease);
-}
-.sv-nav > li > a:hover,.sv-nav > li > button:hover,.sv-nav > li > button[aria-expanded="true"],.sv-nav > li > a[aria-current="page"]{ background:rgba(255,255,255,.1); opacity:1 }
-.sv-nav > li > button svg{ width:12px; height:12px; opacity:.7; transition:transform .2s var(--sv-ease) }
-.sv-nav > li > button[aria-expanded="true"] svg{ transform:rotate(180deg) }
-.sv-nav > li > a:focus-visible,.sv-nav > li > button:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:2px }
-/* o submenu: uma lâmina escura, com uma ponte invisível de 8px para o
-   ponteiro atravessar da palavra até a lista sem fechar */
-.sv-sub{
-  position:absolute; top:100%; left:0; padding-top:8px; min-width:248px; z-index:5;
-  opacity:0; visibility:hidden; transform:translateY(6px);
-  transition:opacity .2s var(--sv-ease),transform .2s var(--sv-ease),visibility 0s linear .2s;
-}
-.sv-sub > ul{ list-style:none; margin:0; padding:8px; background:#141416; border:1px solid rgba(255,255,255,.1); border-radius:16px; box-shadow:0 24px 50px -24px rgba(0,0,0,.8) }
-.sv-sub a{ display:block; padding:11px 14px; border-radius:10px; color:#fff; font:500 15px/1.2 var(--sv-sans); letter-spacing:-.01em; text-decoration:none; opacity:.9 }
-.sv-sub a:hover,.sv-sub a:focus-visible{ background:rgba(255,255,255,.08); opacity:1; outline:none }
-.sv-sub a small{ display:block; margin-top:3px; font-size:12.5px; color:rgba(255,255,255,.55) }
-.sv-nav > li.aberto .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
-@media(hover:hover) and (pointer:fine){
-  .sv-nav > li:hover .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
-}
-.sv-topo-fim{ margin-left:auto; display:flex; align-items:center; gap:10px }
-.sv-topo-fim .sv-bt{ min-height:42px; padding:0 18px; font-size:14px }
-.sv-topo-fim .sv-bt.cta{ display:none }
-/* o botão do menu: duas linhas que viram X */
-.sv-menu-bt{
-  width:44px; height:44px; border:0; background:none; border-radius:999px; cursor:pointer;
-  display:grid; place-items:center; color:#fff; position:relative; padding:0; -webkit-tap-highlight-color:transparent;
-}
-.sv-menu-bt i{ position:absolute; width:22px; height:2px; background:currentColor; border-radius:2px; transition:transform .28s var(--sv-ease),opacity .2s }
-.sv-menu-bt i:first-child{ transform:translateY(-4px) }
-.sv-menu-bt i:last-child{ transform:translateY(4px) }
-.sv-menu-bt[aria-expanded="true"] i:first-child{ transform:rotate(45deg) }
-.sv-menu-bt[aria-expanded="true"] i:last-child{ transform:rotate(-45deg) }
-.sv-menu-bt:hover,.sv-menu-bt:active{ background:rgba(255,255,255,.1); color:#fff }
-.sv-menu-bt:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:2px }
-
-/* o menu do celular: a cortina inteira, escura, com os grupos e o endereço */
-.sv-menu{
-  position:fixed; inset:0; z-index:85; background:#0e0e10; color:#fff;
-  padding:calc(var(--sv-topo) + env(safe-area-inset-top,0px) + 8px) var(--sv-gutter) calc(32px + env(safe-area-inset-bottom,0px));
-  overflow:auto; -webkit-overflow-scrolling:touch;
-  opacity:0; visibility:hidden; transform:translateY(-8px);
-  transition:opacity .3s var(--sv-ease),transform .3s var(--sv-ease),visibility 0s linear .3s;
-}
-.sv-menu.aberto{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
-.sv-menu-g{ padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1) }
-.sv-menu-g h2{ margin:0 0 6px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5) }
-.sv-menu-g a{ display:block; padding:10px 0; font-size:24px; font-weight:700; letter-spacing:-.03em; line-height:1.1; text-decoration:none; color:#fff }
-.sv-menu-g a:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:4px; border-radius:4px }
-.sv-menu-pe{ padding:24px 0 0; display:grid; gap:10px; color:rgba(255,255,255,.72); font-size:15px }
-.sv-menu-pe a{ color:#fff; text-decoration:none; font-weight:600 }
-.sv-menu .sv-acoes{ padding:24px 0 8px }
-.sv-menu .sv-bt{ width:100% }
-@media(min-width:1000px){
-  .sv-nav{ display:flex }
-  .sv-menu-bt,.sv-menu{ display:none }
-  .sv-topo-fim .sv-bt.cta{ display:inline-flex }
-}
-@media(min-width:1140px){ .sv-nav{ gap:10px; margin-left:20px } .sv-nav > li > a,.sv-nav > li > button{ padding:12px 14px; font-size:15.5px } }
 
 /* =============================================================================
    1 · HERÓI: a fachada, o chapéu laranja, o título em duas vozes
@@ -474,25 +349,3 @@
 @media(min-width:760px){ .sv-form{ grid-template-columns:1fr 1fr } }
 @media(min-width:1000px){ .sv-form{ grid-template-columns:1.1fr 1fr 1fr auto } .sv-form .sv-bt{ width:auto; min-width:180px; padding:0 30px } }
 
-/* =============================================================================
-   O PÉ: a marca, as colunas, o endereço
-   ============================================================================= */
-.sv-pe{ background:#0d0d0f; color:#fff; padding:clamp(48px,6vw,72px) 0 calc(32px + env(safe-area-inset-bottom,0px)); border-top:1px solid rgba(255,255,255,.08) }
-.sv-pe-g{ display:grid; grid-template-columns:1fr; gap:36px }
-.sv-pe-eu .sv-logo svg{ height:34px }
-.sv-pe-frase{ margin:16px 0 0; font-family:var(--sv-serif); font-style:italic; font-size:24px; letter-spacing:-.01em; color:rgba(255,255,255,.8) }
-.sv-pe-onde{ display:grid; gap:4px; margin-top:22px; color:rgba(255,255,255,.72); font-size:15px; text-decoration:none; line-height:1.4 }
-.sv-pe-onde b{ color:#fff; font-weight:700 }
-.sv-pe-onde span.ver{ color:#fff; font-weight:600; display:inline-flex; align-items:center; gap:6px; margin-top:4px }
-.sv-pe-onde span.ver svg{ width:14px; height:14px }
-.sv-pe-onde:hover span.ver{ text-decoration:underline; text-underline-offset:4px }
-.sv-pe-cols{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:28px }
-.sv-pe-cols h2{ margin:0 0 12px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5) }
-.sv-pe-cols a{ display:block; padding:5px 0; color:#fff; text-decoration:none; font-size:15.5px; font-weight:500; letter-spacing:-.01em; opacity:.88 }
-.sv-pe-cols a:hover{ opacity:1; text-decoration:underline; text-underline-offset:4px }
-.sv-pe-linha{ margin-top:clamp(32px,5vw,52px); padding-top:20px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; gap:12px 24px; justify-content:space-between; font-size:13.5px; color:rgba(255,255,255,.6) }
-.sv-pe-linha a{ color:#fff; text-decoration:none; font-weight:500; margin-left:18px }
-.sv-pe-linha a:first-child{ margin-left:0 }
-.sv-pe-linha a:hover{ text-decoration:underline; text-underline-offset:4px }
-@media(min-width:900px){ .sv-pe-g{ grid-template-columns:1.2fr 2fr; gap:48px } }
-.sv .nao-quebra{ white-space:nowrap }

@@ -102,7 +102,7 @@ export default function ComoChegar() {
       </section>
 
       {/* ------------------------------------------------------------ chegando */}
-      <section className="casa-escuro retic rev">
+      <section className="casa-papel rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">

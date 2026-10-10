@@ -108,7 +108,7 @@ export default function Cultos() {
       </section>
 
       {/* ------------------------------------------------- a ordem do culto */}
-      <section className="casa-escuro retic rev">
+      <section className="casa-papel rev">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">
@@ -129,7 +129,7 @@ export default function Cultos() {
       </section>
 
       {/* ------------------------------------------------- a primeira vez */}
-      <section className="casa-papel rev" aria-labelledby="primeira-t">
+      <section className="casa-escuro rev" aria-labelledby="primeira-t">
         <div className="g g-secao">
           <div className="g-cab">
             <div className="g-cab-txt">

@@ -6,9 +6,11 @@ import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { Agora } from '@/components/Agora';
 import { fotoDaArea } from '@/lib/fotos';
-import { Schema } from '@/components/Texto';
 import Movimento from '@/components/Movimento';
-import { Barra, Rodape } from '@/components/Site';
+import Topo from '@/components/Topo';
+import { Schema, Tit } from '@/components/Texto';
+import Pe from '@/components/Pe';
+import { preload } from 'react-dom';
 import { AreasCarregando } from '@/components/Tela';
 import Contador from '@/components/Contador';
 import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
@@ -66,28 +68,9 @@ type Numeros = {
    `inicio` (nasce transparente sobre a foto) e `solida` (fica opaca quando a
    rolagem passa do herói). */
 
-/* o título monta palavra por palavra. Fica em componente porque a quebra em
-   <span> tem que existir no HTML do servidor: se fosse feita no efeito, a
-   primeira pintura sairia com o texto inteiro e depois piscaria. */
-function Tit({ children, className = 'tit', as: Tag = 'h2' }:
-  { children: string; className?: string; as?: 'h1' | 'h2' }) {
-  const pals = children.split(' ');
-  return (
-    <Tag className={className}>
-      {pals.map((p, i) => (
-        /* o espaço fica FORA do span, como nó de texto entre eles. Dentro, o
-           navegador descarta o espaço final de um inline-block e o título sai
-           com as palavras coladas: "RELACIONAMENTO,GENEROSIDADEESERVIÇO". */
-        <span key={i}>
-          <span className="pal" style={{ ['--i' as string]: i }}>{p}</span>
-          {i < pals.length - 1 ? ' ' : ''}
-        </span>
-      ))}
-    </Tag>
-  );
-}
-
 export default function Casa() {
+  /* a serifa itálica do título (identidade nova): preload para não piscar */
+  preload('/tipos/instrument-serif-italic.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   const [mins, setMins] = useState<Min[]>([]);
   const [num, setNum] = useState<Numeros | null>(null);
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
@@ -241,7 +224,7 @@ export default function Casa() {
   }, []);
 
   return (
-    <div ref={raiz} data-movimento>
+    <div ref={raiz} data-movimento className="id">
       {/* a home tem a própria revelação (com parallax); daqui só entram o
           foco de luz no preto e o ímã do botão principal */}
       <Movimento semRevelar />
@@ -285,7 +268,7 @@ export default function Casa() {
           <main> e sem "pular para o conteúdo" — e é a página em que mais se
           chega por teclado, porque é a primeira. */}
       <a href="#conteudo" className="pular">Pular para o conteúdo</a>
-      <Barra inicio solida={solida} />
+      <Topo atual="/" escuro />
 
       <main id="conteudo" style={{ maxWidth: 'none', margin: 0, padding: 0 }}>
       {/* ------------------------------------------------------------ herói
@@ -531,7 +514,7 @@ export default function Casa() {
       </section>
       </main>
 
-      <Rodape />
+      <Pe />
 
     </div>
   );

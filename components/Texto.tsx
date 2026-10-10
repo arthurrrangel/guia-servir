@@ -8,16 +8,27 @@
    A quebra em <span> tem que existir no HTML do servidor. Se fosse feita num
    efeito, a primeira pintura sairia com o texto inteiro e depois piscaria.
 
-   A home tem uma cópia própria disto dentro de `app/page.tsx`. Ela não foi
-   trocada por esta de propósito: a home está no ar e funcionando, e unificar
-   o componente exigiria mexer num arquivo de 591 linhas para ganhar nada que
-   a pessoa veja. Se um dia a home for editada por outro motivo, é o momento
-   de apagar a cópia de lá e importar daqui.
+   10/10/2026: a home, que tinha uma cópia própria disto, passou a importar
+   daqui (o dia chegou junto com a identidade nova).
    ============================================================================= */
 
-export function Tit({ children, className = 'tit', as: Tag = 'h2', id }:
-  { children: string; className?: string; as?: 'h1' | 'h2' | 'h3'; id?: string }) {
+/* AS DUAS VOZES — 10/10/2026, a identidade nova (ApresentaSite.pdf).
+   O título termina numa palavra em serifa itálica, com ponto final:
+   "Existe um lugar / para você.", "Deus se alegra com o seu servir.",
+   "Escolha por onde começar.". A regra vale para todo h1 e para os .g-h2
+   do site público, e só quando a última palavra é uma palavra comum em
+   caixa baixa: "Somos GUIA", "Follow" e "Como chegar até a gente?" não
+   ganham itálico à toa (o "?" já fecha; sigla e nome não viram serifa).
+   O ponto é desenhado pelo CSS (.pal.it.pt::after): a copy fica intacta
+   no HTML, e quem lê por leitor de tela ouve o texto como foi escrito. */
+const comum = (p: string) => /^[a-zà-ú]+[.,:;!?]?$/.test(p) && !/[!?]$/.test(p);
+export function Tit({ children, className = 'tit', as: Tag = 'h2', id, vozes }:
+  { children: string; className?: string; as?: 'h1' | 'h2' | 'h3'; id?: string; vozes?: boolean }) {
   const pals = children.split(' ');
+  const duas = vozes ?? (Tag === 'h1' || /\bg-h[12]\b/.test(className));
+  const ult = pals.length - 1;
+  const italica = duas && pals.length >= 2 && comum(pals[ult]);
+  const ponto = italica && !/[.,:;]$/.test(pals[ult]);
   return (
     <Tag className={className} id={id}>
       {pals.map((p, i) => (
@@ -25,8 +36,8 @@ export function Tit({ children, className = 'tit', as: Tag = 'h2', id }:
            navegador descarta o espaço final de um inline-block e as palavras
            saem coladas. */
         <span key={i}>
-          <span className="pal" style={{ ['--i' as string]: i }}>{p}</span>
-          {i < pals.length - 1 ? ' ' : ''}
+          <span className={'pal' + (italica && i === ult ? ' it' + (ponto ? ' pt' : '') : '')} style={{ ['--i' as string]: i }}>{p}</span>
+          {i < ult ? ' ' : ''}
         </span>
       ))}
     </Tag>

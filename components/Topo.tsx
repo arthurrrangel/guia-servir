@@ -25,8 +25,11 @@ import { IGREJA } from '@/lib/igreja';
    fecha. Esc fecha, tocar fora dos links fecha, o foco vai para o primeiro
    link ao abrir e volta ao botão ao fechar.
 
-   Hoje só a /servir usa esta barra. Quando as outras páginas receberem a
-   identidade nova, ela sobe para o casco de todas.
+   10/10/2026, mais tarde: a barra subiu para o casco de TODAS as páginas
+   públicas (components/Site.tsx e a home). `escuro`: a página abre com foto
+   de ponta a ponta e a barra nasce transparente sobre ela, escurecendo com a
+   rolagem; sem `escuro` (uma página de texto, como /privacidade) ela já
+   nasce escura.
    ============================================================================= */
 
 type Item = { href: string; rot: string; sub?: string; fora?: boolean };
@@ -68,8 +71,8 @@ const Chev = () => (
   </svg>
 );
 
-export default function Topo({ atual = '/servir' }: { atual?: string }) {
-  const [solida, setSolida] = useState(false);
+export default function Topo({ atual, escuro = true }: { atual?: string; escuro?: boolean }) {
+  const [solida, setSolida] = useState(!escuro);
   const [aberto, setAberto] = useState<string | null>(null);
   const [menu, setMenu] = useState(false);
   const nav = useRef<HTMLUListElement>(null);
@@ -79,13 +82,14 @@ export default function Topo({ atual = '/servir' }: { atual?: string }) {
   /* a barra escurece depois da primeira rolagem; medido num rAF, um
      listener só, passivo */
   useEffect(() => {
+    if (!escuro) { setSolida(true); return; }
     let pedindo = false;
     const medir = () => { pedindo = false; setSolida(window.scrollY > 24); };
     const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(medir); } };
     medir();
     window.addEventListener('scroll', aoRolar, { passive: true });
     return () => window.removeEventListener('scroll', aoRolar);
-  }, []);
+  }, [escuro]);
 
   /* submenu aberto por toque/teclado fecha com Esc e com um clique fora */
   useEffect(() => {
@@ -142,7 +146,9 @@ export default function Topo({ atual = '/servir' }: { atual?: string }) {
           </ul>
 
           <div className="sv-topo-fim">
-            <a href="#quero-servir" className="sv-bt branco cta">Quero servir</a>
+            {atual === '/servir'
+              ? <a href="#quero-servir" className="sv-bt branco cta">Quero servir</a>
+              : <Link href="/servir" className="sv-bt branco cta">Quero servir</Link>}
             <button ref={bt} type="button" className="sv-menu-bt" aria-expanded={menu} aria-controls="menu-servir"
                     aria-label={menu ? 'Fechar menu' : 'Abrir menu'} onClick={() => setMenu(v => !v)}>
               <i /><i />
@@ -162,7 +168,9 @@ export default function Topo({ atual = '/servir' }: { atual?: string }) {
           </nav>
         ))}
         <div className="sv-acoes">
-          <a href="#quero-servir" className="sv-bt branco" onClick={() => setMenu(false)}>Quero servir</a>
+          {atual === '/servir'
+            ? <a href="#quero-servir" className="sv-bt branco" onClick={() => setMenu(false)}>Quero servir</a>
+            : <Link href="/servir" className="sv-bt branco" onClick={() => setMenu(false)}>Quero servir</Link>}
         </div>
         <div className="sv-menu-pe">
           <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
