@@ -1,0 +1,498 @@
+/* =============================================================================
+   SERVIR · a identidade nova da porta de quem quer servir — 10/10/2026
+
+   Fonte: a copy "LP GUIA SERVIR" (nove seções) e a apresentação visual
+   "ApresentaSite" que o Arthur mandou em 10/10/2026, com a instrução
+   "refaça com base nesses documentos o site completo". A referência de
+   linguagem citada na copy é a bethel.com.
+
+   O que a apresentação define, e esta folha segue:
+   1. Faixas que alternam escuro e claro, cada uma com uma cor própria:
+      noite (herói, números, objeções, fecho), papel (frase, áreas, FAQ) e
+      areia (como funciona). Não existe modo claro/escuro aqui: a direção de
+      arte É a alternância, e trocar as faixas pelo tema do aparelho a
+      desmontaria. A página é fixa, como a do Follow Camp.
+   2. Dois caracteres: a grotesca pesada e apertada (Inter 800, -0,045em,
+      que é a família escolhida pelo Arthur para o site) e a serifa itálica
+      que arremata a última palavra de cada título ("para você.", "servir.",
+      "vivos.", "começar.", "mais um."). A serifa é a Instrument Serif
+      (OFL), servida de public/tipos/, dois arquivos de 21 kB.
+   3. Laranja só como marca: o chapéu "Servir" do herói e a contagem de
+      postos dos cartões. Nunca em texto corrido, nunca em botão.
+   4. Botão-pílula branco sobre o escuro e preto sobre o claro, uma altura.
+   5. Pouco ornamento: grão nas faixas escuras, cantos de 16 a 28px, nenhuma
+      sombra em repouso.
+
+   ESCOPO. Tudo aqui mora sob `.sv`, a raiz da página. A folha entra pelo
+   layout de /servir, então as páginas filhas (/servir/<área>, o cadastro)
+   também a carregam, mas nenhuma regra as alcança: elas não têm `.sv`.
+   ============================================================================= */
+
+@font-face{
+  font-family:"Instrument Serif";
+  font-style:italic;
+  font-weight:400;
+  font-display:swap;
+  src:url(/tipos/instrument-serif-italic.woff2) format("woff2");
+}
+@font-face{
+  font-family:"Instrument Serif";
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url(/tipos/instrument-serif.woff2) format("woff2");
+}
+
+.sv{
+  --sv-noite:#121214;
+  --sv-grafite:#19191c;
+  --sv-carvao:#141416;
+  --sv-papel:#f4f3ef;
+  --sv-areia:#e9e3da;
+  --sv-tinta:#141415;
+  --sv-corpo:#2b2b2f;
+  --sv-mudo:#6a6a70;
+  --sv-ouro:#f0a43c;
+  --sv-largura:1240px;
+  --sv-gutter:clamp(20px,4vw,48px);
+  --sv-topo:76px;
+  --sv-serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sv-sans:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  --sv-ease:cubic-bezier(.2,.7,.2,1);
+  font-family:var(--sv-sans);
+  color:var(--sv-tinta);
+  background:var(--sv-noite);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+  overflow-x:clip;
+  line-height:1.4;
+}
+.sv *,.sv *::before,.sv *::after{ box-sizing:border-box }
+.sv ::selection{ background:var(--sv-ouro); color:#111 }
+.sv img{ display:block; max-width:100% }
+.sv main{ display:block; max-width:none; margin:0; padding:0 }
+/* a barra é fixa: uma âncora (#quero-servir) para logo abaixo dela, não atrás */
+.sv section[id]{ scroll-margin-top:var(--sv-topo) }
+
+/* ---- o que o globals.css faz com os elementos, desfeito aqui ------------------
+   Lá, `h3` é rótulo (caixa alta, cinza, com "›" na frente), `label` é rótulo
+   de formulário em caixa alta. Nesta página h3 é título e label é texto
+   (os botões já definem tudo o que o global toca). Estas regras vêm
+   ANTES das de cada componente, de propósito: têm a mesma especificidade, e
+   a que vem depois ganha. */
+.sv h3{ font-family:var(--sv-sans); font-size:inherit; font-weight:800; text-transform:none; letter-spacing:-.04em; color:inherit; display:block; gap:0; margin:0; line-height:1.05 }
+.sv h3::before{ content:none }
+.sv label{ display:block; font-size:inherit; font-weight:500; text-transform:none; letter-spacing:0; color:inherit; margin:0 }
+
+/* a coluna */
+.sv-in{ width:100%; max-width:var(--sv-largura); margin:0 auto; padding:0 var(--sv-gutter) }
+
+/* ---- tipografia ------------------------------------------------------------- */
+.sv-h1,.sv-h2,.sv-h3{ margin:0; font-weight:800; letter-spacing:-.045em; line-height:.94; text-wrap:balance }
+.sv-h1{ font-size:clamp(50px,9.2vw,124px); line-height:.9; letter-spacing:-.05em; color:#fff }
+.sv-h2{ font-size:clamp(40px,6.6vw,92px) }
+/* a serifa itálica: a última palavra do título. 1,06em porque a Instrument
+   Serif tem a caixa alta mais baixa que a Inter; nesse tamanho as duas
+   fontes ficam da mesma altura de olho, como na apresentação. */
+.sv-it{ font-family:var(--sv-serif); font-style:italic; font-weight:400; letter-spacing:-.01em; font-size:1.06em; line-height:.9 }
+.sv-lead{ margin:0; letter-spacing:-.016em; line-height:1.34; text-wrap:pretty }
+.sv-chapeu{
+  display:flex; align-items:center; gap:10px; margin:0 0 22px;
+  font-size:15px; font-weight:700; letter-spacing:-.005em; color:var(--sv-ouro);
+}
+.sv-chapeu .ponto{ width:6px; height:6px; border-radius:50%; background:currentColor; flex:none }
+.sv-chapeu .sede{ font-weight:500; opacity:.82 }
+/* "@guiachurch" no alto e "guiachurch | sede" no pé das faixas claras: a
+   assinatura miúda da apresentação. Centradas, sem peso. */
+.sv-arroba{ display:block; text-align:center; font-size:15px; font-weight:700; letter-spacing:-.01em; margin:0 0 clamp(32px,5vw,56px); text-decoration:none; opacity:.9 }
+.sv-arroba:hover{ opacity:1 }
+.sv-sede{ display:block; text-align:center; font-size:13px; color:var(--sv-mudo); letter-spacing:-.005em }
+.sv-sede b{ font-weight:700; color:inherit }
+.sv-sede i{ font-style:normal; opacity:.6; margin:0 5px }
+.sv-escuro .sv-sede{ color:rgba(255,255,255,.7) }
+.sv-escuro .sv-arroba{ color:#fff }
+
+/* ---- botão-pílula, uma altura ------------------------------------------------ */
+.sv-bt{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  min-height:52px; padding:0 26px; border-radius:999px; border:1px solid transparent;
+  font:600 16px/1 var(--sv-sans); letter-spacing:-.012em; text-decoration:none;
+  cursor:pointer; white-space:nowrap; -webkit-tap-highlight-color:transparent;
+  transition:transform .22s var(--sv-ease),background .18s var(--sv-ease),color .18s var(--sv-ease),box-shadow .22s var(--sv-ease),border-color .18s var(--sv-ease);
+}
+.sv-bt svg{ width:16px; height:16px; flex:none }
+.sv-bt.branco{ background:#fff; color:#111 }
+.sv-bt.branco:hover{ transform:translateY(-1px); box-shadow:0 14px 30px -14px rgba(0,0,0,.6) }
+.sv-bt.preto{ background:#111; color:#fff; border-color:#111 }
+.sv-bt.preto:hover{ background:#000; transform:translateY(-1px); box-shadow:0 12px 28px -14px rgba(0,0,0,.5) }
+.sv-bt.vidro{ background:rgba(255,255,255,.1); color:#fff; border-color:rgba(255,255,255,.32); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px) }
+.sv-bt.vidro:hover{ background:#fff; color:#111; border-color:#fff }
+.sv-bt:active{ transform:translateY(0) scale(.985) }
+.sv-bt:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:3px }
+.sv-bt[aria-busy="true"]{ opacity:.7; pointer-events:none }
+.sv-acoes{ display:flex; flex-wrap:wrap; gap:12px; align-items:center }
+.sv-micro{ margin:16px 0 0; font-size:14px; letter-spacing:-.005em; opacity:.78 }
+
+/* ---- o link "pular" ---------------------------------------------------------- */
+.sv-pular{ position:absolute; left:16px; top:-60px; z-index:200; background:#fff; color:#111; padding:10px 14px; border-radius:8px; font-weight:600; text-decoration:none }
+.sv-pular:focus{ top:16px }
+
+/* ---- grão nas faixas escuras -------------------------------------------------- */
+.sv-escuro{ position:relative; isolation:isolate; color:#fff }
+.sv-grao::after{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+  background:url(/grao.png); opacity:.07; mix-blend-mode:screen;
+}
+
+/* ---- a revelação: só os filhos, nunca a faixa ------------------------------- */
+.js-rev .sv .rev .sv-r{
+  opacity:0; transform:translateY(18px);
+  transition:opacity .7s var(--sv-ease),transform .7s var(--sv-ease),filter .7s var(--sv-ease);
+  transition-delay:calc(var(--i,0)*70ms);
+}
+.js-rev .sv .rev .sv-h2.sv-r,.js-rev .sv .rev .sv-como-tit.sv-r{ filter:blur(10px) }
+.js-rev .sv .rev .sv-cartoes > .sv-r{ transform:translateY(28px) scale(.985) }
+.js-rev .sv .rev.visto .sv-r{ opacity:1; transform:none; filter:blur(0) }
+/* o visto de cada número se desenha depois que a linha entra */
+.js-rev .sv .rev .sv-vivos svg path{ stroke-dasharray:26; stroke-dashoffset:26; transition:stroke-dashoffset .6s var(--sv-ease) calc(var(--i,0)*70ms + .45s) }
+.js-rev .sv .rev.visto .sv-vivos svg path{ stroke-dashoffset:0 }
+/* o fio sob "Como funciona?" se estende da esquerda */
+.js-rev .sv .rev .sv-como-tit::after{ transform:scaleX(0) }
+.js-rev .sv .rev.visto .sv-como-tit::after{ transform:none }
+.nao-anima .sv .sv-r,.sv.nao-anima .sv-r{ opacity:1!important; transform:none!important; filter:none!important; transition:none!important }
+.sv.nao-anima .sv-vivos svg path{ stroke-dashoffset:0!important }
+.sv.nao-anima .sv-como-tit::after{ transform:none!important }
+
+/* =============================================================================
+   O TOPO: barra fixa, transparente sobre a fachada, escura depois da rolagem
+   ============================================================================= */
+.sv-topo{
+  position:fixed; top:0; left:0; right:0; z-index:90; color:#fff;
+  padding-top:env(safe-area-inset-top,0px);
+  background:linear-gradient(180deg,rgba(8,8,10,.55),rgba(8,8,10,0));
+  transition:background .35s var(--sv-ease),box-shadow .35s var(--sv-ease);
+}
+.sv-topo.solida{
+  background:rgba(12,12,14,.9);
+  box-shadow:0 1px 0 rgba(255,255,255,.06);
+}
+@media(hover:hover) and (pointer:fine){
+  .sv-topo.solida{ background:rgba(12,12,14,.78); -webkit-backdrop-filter:saturate(1.4) blur(16px); backdrop-filter:saturate(1.4) blur(16px) }
+}
+.sv-topo-in{ height:var(--sv-topo); display:flex; align-items:center; gap:28px }
+.sv-logo{ display:inline-flex; align-items:center; color:#fff; flex:none }
+.sv-logo svg{ height:28px; width:auto }
+.sv-nav{ display:none; list-style:none; margin:0 0 0 12px; padding:0; gap:4px; flex:1 }
+.sv-nav > li{ position:relative }
+.sv-nav > li > a,.sv-nav > li > button{
+  display:flex; align-items:center; gap:6px; padding:12px 12px; border:0; background:none;
+  color:#fff; font:600 15px/1 var(--sv-sans); letter-spacing:-.01em; text-decoration:none;
+  border-radius:999px; cursor:pointer; opacity:.94; -webkit-tap-highlight-color:transparent;
+  transition:background .18s var(--sv-ease),opacity .18s var(--sv-ease);
+}
+.sv-nav > li > a:hover,.sv-nav > li > button:hover,.sv-nav > li > button[aria-expanded="true"],.sv-nav > li > a[aria-current="page"]{ background:rgba(255,255,255,.1); opacity:1 }
+.sv-nav > li > button svg{ width:12px; height:12px; opacity:.7; transition:transform .2s var(--sv-ease) }
+.sv-nav > li > button[aria-expanded="true"] svg{ transform:rotate(180deg) }
+.sv-nav > li > a:focus-visible,.sv-nav > li > button:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:2px }
+/* o submenu: uma lâmina escura, com uma ponte invisível de 8px para o
+   ponteiro atravessar da palavra até a lista sem fechar */
+.sv-sub{
+  position:absolute; top:100%; left:0; padding-top:8px; min-width:248px; z-index:5;
+  opacity:0; visibility:hidden; transform:translateY(6px);
+  transition:opacity .2s var(--sv-ease),transform .2s var(--sv-ease),visibility 0s linear .2s;
+}
+.sv-sub > ul{ list-style:none; margin:0; padding:8px; background:#141416; border:1px solid rgba(255,255,255,.1); border-radius:16px; box-shadow:0 24px 50px -24px rgba(0,0,0,.8) }
+.sv-sub a{ display:block; padding:11px 14px; border-radius:10px; color:#fff; font:500 15px/1.2 var(--sv-sans); letter-spacing:-.01em; text-decoration:none; opacity:.9 }
+.sv-sub a:hover,.sv-sub a:focus-visible{ background:rgba(255,255,255,.08); opacity:1; outline:none }
+.sv-sub a small{ display:block; margin-top:3px; font-size:12.5px; color:rgba(255,255,255,.55) }
+.sv-nav > li.aberto .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
+@media(hover:hover) and (pointer:fine){
+  .sv-nav > li:hover .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
+}
+.sv-topo-fim{ margin-left:auto; display:flex; align-items:center; gap:10px }
+.sv-topo-fim .sv-bt{ min-height:42px; padding:0 18px; font-size:14px }
+.sv-topo-fim .sv-bt.cta{ display:none }
+/* o botão do menu: duas linhas que viram X */
+.sv-menu-bt{
+  width:44px; height:44px; border:0; background:none; border-radius:999px; cursor:pointer;
+  display:grid; place-items:center; color:#fff; position:relative; padding:0; -webkit-tap-highlight-color:transparent;
+}
+.sv-menu-bt i{ position:absolute; width:22px; height:2px; background:currentColor; border-radius:2px; transition:transform .28s var(--sv-ease),opacity .2s }
+.sv-menu-bt i:first-child{ transform:translateY(-4px) }
+.sv-menu-bt i:last-child{ transform:translateY(4px) }
+.sv-menu-bt[aria-expanded="true"] i:first-child{ transform:rotate(45deg) }
+.sv-menu-bt[aria-expanded="true"] i:last-child{ transform:rotate(-45deg) }
+.sv-menu-bt:hover,.sv-menu-bt:active{ background:rgba(255,255,255,.1); color:#fff }
+.sv-menu-bt:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:2px }
+
+/* o menu do celular: a cortina inteira, escura, com os grupos e o endereço */
+.sv-menu{
+  position:fixed; inset:0; z-index:85; background:#0e0e10; color:#fff;
+  padding:calc(var(--sv-topo) + env(safe-area-inset-top,0px) + 8px) var(--sv-gutter) calc(32px + env(safe-area-inset-bottom,0px));
+  overflow:auto; -webkit-overflow-scrolling:touch;
+  opacity:0; visibility:hidden; transform:translateY(-8px);
+  transition:opacity .3s var(--sv-ease),transform .3s var(--sv-ease),visibility 0s linear .3s;
+}
+.sv-menu.aberto{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
+.sv-menu-g{ padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1) }
+.sv-menu-g h2{ margin:0 0 6px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5) }
+.sv-menu-g a{ display:block; padding:10px 0; font-size:24px; font-weight:700; letter-spacing:-.03em; line-height:1.1; text-decoration:none; color:#fff }
+.sv-menu-g a:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:4px; border-radius:4px }
+.sv-menu-pe{ padding:24px 0 0; display:grid; gap:10px; color:rgba(255,255,255,.72); font-size:15px }
+.sv-menu-pe a{ color:#fff; text-decoration:none; font-weight:600 }
+.sv-menu .sv-acoes{ padding:24px 0 8px }
+.sv-menu .sv-bt{ width:100% }
+@media(min-width:1000px){
+  .sv-nav{ display:flex }
+  .sv-menu-bt,.sv-menu{ display:none }
+  .sv-topo-fim .sv-bt.cta{ display:inline-flex }
+}
+@media(min-width:1140px){ .sv-nav{ gap:10px; margin-left:20px } .sv-nav > li > a,.sv-nav > li > button{ padding:12px 14px; font-size:15.5px } }
+
+/* =============================================================================
+   1 · HERÓI: a fachada, o chapéu laranja, o título em duas vozes
+   ============================================================================= */
+.sv-heroi{
+  position:relative; isolation:isolate; overflow:hidden; display:flex; align-items:center; color:#fff;
+  min-height:100svh; min-height:max(100svh,640px);
+  padding:calc(var(--sv-topo) + 48px + env(safe-area-inset-top,0px)) 0 clamp(48px,8vh,96px);
+}
+.sv-heroi > picture,.sv-heroi > picture img{ position:absolute; inset:0; width:100%; height:100%; z-index:-2 }
+.sv-heroi > picture img{ object-fit:cover; object-position:50% 42%; filter:saturate(.86) contrast(1.03) }
+.sv-heroi::before{
+  content:""; position:absolute; inset:0; z-index:-1;
+  background:
+    linear-gradient(90deg,rgba(8,8,10,.84) 0%,rgba(8,8,10,.6) 36%,rgba(8,8,10,.22) 70%,rgba(8,8,10,.1) 100%),
+    linear-gradient(180deg,rgba(8,8,10,.5) 0%,rgba(8,8,10,0) 28%,rgba(8,8,10,.1) 60%,rgba(8,8,10,.72) 100%);
+}
+.sv-heroi .sv-in{ position:relative }
+.sv-heroi .sv-h1{ max-width:11ch }
+.sv-heroi .sv-lead{ font-size:clamp(18px,2.05vw,25px); max-width:41ch; margin:clamp(22px,3vw,32px) 0 clamp(28px,3.4vw,38px); color:rgba(255,255,255,.94) }
+.sv-heroi .sv-micro{ color:rgba(255,255,255,.76) }
+/* a entrada: cada linha do título sobe de dentro de uma máscara, o resto
+   do texto sobe em ordem; nada disso depende de JS para existir. O grão do
+   herói fica num ::after, por cima do véu. */
+.sv-heroi::after{ content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; background:url(/grao.png); opacity:.06; mix-blend-mode:screen }
+.sv-mask{ display:block; overflow:hidden; padding:.14em 0 .3em; margin:-.14em 0 -.3em }
+.sv-linha{ display:block }
+@media(prefers-reduced-motion:no-preference){
+  .sv-heroi .sv-e{ animation:sv-sobe .8s var(--sv-ease) both; animation-delay:calc(var(--i,0)*90ms + 80ms) }
+  .sv-heroi .sv-linha{ transform:translateY(112%); animation:sv-linha 1s var(--sv-ease) both; animation-delay:calc(var(--i,0)*130ms + 120ms) }
+  .sv-heroi > picture img{ animation:sv-foto 1.6s var(--sv-ease) both,sv-respira 22s ease-in-out 1.6s infinite alternate }
+}
+@keyframes sv-sobe{ from{ opacity:0; transform:translateY(16px) } to{ opacity:1; transform:none } }
+@keyframes sv-linha{ to{ transform:none } }
+@keyframes sv-foto{ from{ transform:scale(1.06) } to{ transform:none } }
+@keyframes sv-respira{ from{ transform:scale(1) } to{ transform:scale(1.045) } }
+
+/* ---- rolagem que move a foto (só onde o navegador sabe, e só com movimento) --
+   Scroll-driven animations: o retrato e os círculos deslizam um pouco
+   enquanto atravessam a tela. Sem suporte, nada acontece: a foto fica
+   parada, como sempre. Sem JS também funciona (é CSS). */
+@supports (animation-timeline: view()){
+  @media(prefers-reduced-motion:no-preference){
+    .sv-foto-v img{ scale:1.14; animation:sv-desliza linear both; animation-timeline:view(); animation-range:entry 0% exit 100% }
+    .sv-circ{ animation:sv-flutua linear both; animation-timeline:view(); animation-range:entry 0% exit 100% }
+    .sv-circ.b{ animation-name:sv-flutua-b }
+  }
+}
+@keyframes sv-desliza{ from{ translate:0 -6% } to{ translate:0 6% } }
+@keyframes sv-flutua{ from{ translate:0 28px } to{ translate:0 -28px } }
+@keyframes sv-flutua-b{ from{ translate:0 48px } to{ translate:0 -40px } }
+@media(max-width:759px){
+  .sv-heroi > picture img{ object-position:50% 50% }
+  .sv-heroi::before{
+    background:
+      linear-gradient(180deg,rgba(8,8,10,.55) 0%,rgba(8,8,10,.15) 30%,rgba(8,8,10,.55) 60%,rgba(8,8,10,.9) 100%);
+  }
+  .sv-heroi{ align-items:flex-end }
+  .sv-heroi .sv-acoes .sv-bt{ flex:1 1 auto }
+}
+
+/* =============================================================================
+   2 · FRASE-ÂNCORA: papel, título e um retrato à direita
+   ============================================================================= */
+.sv-frase{ background:var(--sv-papel); color:var(--sv-tinta); padding:clamp(48px,7vw,88px) 0 clamp(36px,5vw,64px) }
+.sv-frase-g{ display:grid; grid-template-columns:1fr; gap:clamp(28px,4vw,56px); align-items:center }
+.sv-frase .sv-h2{ font-size:clamp(36px,5.3vw,74px) }
+.sv-frase .sv-txt{ display:grid; gap:18px; margin-top:clamp(22px,3vw,34px) }
+.sv-frase p{ margin:0; font-size:clamp(17px,1.75vw,22px); line-height:1.38; letter-spacing:-.018em; color:var(--sv-corpo); max-width:52ch; text-wrap:pretty }
+.sv-foto-v{ aspect-ratio:4/5; border-radius:16px; overflow:hidden; background:#dcdad4; width:100%; max-width:520px; justify-self:center; box-shadow:0 34px 70px -40px rgba(20,20,21,.5) }
+@media(min-width:860px){ .sv-foto-v{ justify-self:end } }
+.sv-foto-v img{ width:100%; height:100%; object-fit:cover; object-position:50% 40%; filter:saturate(.9) }
+.sv-frase .sv-sede{ margin-top:clamp(36px,5vw,64px) }
+@media(min-width:860px){ .sv-frase-g{ grid-template-columns:1.15fr .85fr } }
+
+/* =============================================================================
+   3 · NÚMEROS VIVOS: noite, fotos em círculo, quatro linhas com o visto
+   ============================================================================= */
+.sv-numeros{ background:var(--sv-noite); padding:clamp(56px,8vw,104px) 0; overflow:hidden }
+.sv-numeros-g{ display:grid; grid-template-columns:1fr; gap:clamp(36px,5vw,64px); align-items:center }
+.sv-circulos{ position:relative; width:min(100%,520px); aspect-ratio:1/1; margin:0 auto }
+.sv-circ{ position:absolute; border-radius:50%; overflow:hidden; background:#222 }
+.sv-circ img{ width:100%; height:100%; object-fit:cover; filter:saturate(.8) contrast(1.04) }
+.sv-circ.a{ width:68%; height:68%; left:0; top:0 }
+.sv-circ.b{ width:58%; height:58%; right:0; bottom:0; border:8px solid var(--sv-noite) }
+.sv-numeros .sv-h2{ color:#fff; font-size:clamp(40px,5.2vw,72px) }
+.sv-vivos{ list-style:none; margin:clamp(24px,3vw,36px) 0 0; padding:0; display:grid; gap:14px }
+.sv-vivos li{
+  display:flex; align-items:flex-start; gap:12px;
+  font-size:clamp(17px,1.4vw,19.5px); line-height:1.32; letter-spacing:-.016em; color:rgba(255,255,255,.92); text-wrap:pretty;
+}
+.sv-vivos b{ font-weight:700; color:#fff; font-variant-numeric:tabular-nums }
+.sv-vivos svg{ width:22px; height:22px; flex:none; margin-top:.2em; color:#fff }
+.sv-numeros .sv-arroba{ text-align:right; margin-bottom:clamp(20px,3vw,36px) }
+@media(min-width:900px){
+  .sv-numeros-g{ grid-template-columns:.9fr 1.1fr }
+  .sv-numeros .sv-h2,.sv-numeros .sv-vivos li{ text-align:right }
+  .sv-numeros .sv-vivos li{ justify-content:flex-end }
+  .sv-circulos{ margin:0 }
+}
+@media(max-width:899px){ .sv-numeros .sv-arroba{ text-align:center } .sv-numeros .sv-h2{ text-align:center } }
+
+/* =============================================================================
+   4 · AS ÁREAS: papel, cinco cartões escuros
+   ============================================================================= */
+.sv-areas{ background:var(--sv-papel); color:var(--sv-tinta); padding:clamp(48px,7vw,88px) 0 clamp(56px,7vw,96px); text-align:center }
+.sv-areas .sv-sede{ margin-bottom:clamp(20px,3vw,32px) }
+.sv-areas .sv-h2{ margin:0 auto; max-width:14ch }
+.sv-areas .sv-lead{ font-size:clamp(17px,1.65vw,22px); max-width:60ch; margin:clamp(18px,2.5vw,26px) auto clamp(36px,5vw,56px); color:var(--sv-corpo) }
+.sv-cartoes{ display:flex; flex-wrap:wrap; justify-content:center; gap:16px; margin:0; padding:0; list-style:none }
+.sv-cartoes > li{ flex:1 1 230px; max-width:360px; min-width:0; display:flex }
+@media(min-width:1180px){ .sv-cartoes > li{ flex:1 1 0; max-width:none } }
+.sv-cartao{
+  flex:1; display:flex; flex-direction:column; align-items:center; text-align:center;
+  background:var(--sv-carvao); color:#fff; border-radius:22px; padding:clamp(30px,3vw,38px) 22px 28px;
+  text-decoration:none; position:relative; overflow:hidden;
+  transition:transform .32s var(--sv-ease),box-shadow .32s var(--sv-ease);
+}
+.sv-cartao::after{ content:""; position:absolute; inset:0; background:url(/grao.png); opacity:.06; mix-blend-mode:screen; pointer-events:none }
+.sv-cartao::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background:radial-gradient(120% 55% at 50% -8%,rgba(240,164,60,.26),transparent 62%); opacity:0; transition:opacity .45s var(--sv-ease) }
+.sv-cartao{ box-shadow:inset 0 0 0 1px rgba(255,255,255,.05) }
+.sv-cartao:hover{ transform:translateY(-5px); box-shadow:inset 0 0 0 1px rgba(240,164,60,.3),0 34px 60px -34px rgba(0,0,0,.65) }
+.sv-cartao:hover::before{ opacity:1 }
+.sv-cartao > *{ position:relative; z-index:1 }
+.sv-cartao:focus-visible{ outline:3px solid var(--sv-ouro); outline-offset:3px }
+.sv-cartao h3{ margin:0; font-size:clamp(30px,2.5vw,36px); font-weight:800; letter-spacing:-.045em; line-height:1; text-wrap:balance }
+.sv-postos{ margin:8px 0 0; font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--sv-ouro); font-variant-numeric:tabular-nums }
+.sv-tag{ display:inline-block; margin-top:10px; padding:4px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.22); font-size:11.5px; font-weight:600; letter-spacing:.02em; color:rgba(255,255,255,.85) }
+.sv-cartao h4{ margin:22px 0 14px; font-size:17.5px; font-weight:700; font-style:italic; letter-spacing:-.022em; line-height:1.22; max-width:17ch; text-wrap:balance }
+.sv-cartao p{ margin:0; font-size:13.5px; line-height:1.45; letter-spacing:-.004em; color:rgba(255,255,255,.76); text-wrap:pretty }
+.sv-cartao .sv-ir{ margin-top:auto; padding-top:22px; font-size:13px; font-weight:600; color:rgba(255,255,255,.7); display:inline-flex; align-items:center; gap:6px; transition:color .2s }
+.sv-cartao .sv-ir svg{ width:14px; height:14px; transition:transform .25s var(--sv-ease) }
+.sv-cartao:hover .sv-ir{ color:#fff }
+.sv-cartao:hover .sv-ir svg{ transform:translateX(3px) }
+.sv-areas .sv-acoes{ justify-content:center; margin-top:clamp(28px,4vw,44px) }
+/* a lista enquanto o banco não responde: cinco cascas do tamanho dos cartões */
+.sv-cartao.casca{ min-height:380px; background:#1b1b1e; animation:sv-pulsa 1.4s ease-in-out infinite }
+@keyframes sv-pulsa{ 0%,100%{ opacity:.55 } 50%{ opacity:.9 } }
+.sv-aviso{ margin:0 auto; max-width:48ch; font-size:16px; color:var(--sv-corpo); background:#fff; border:1px solid rgba(20,20,20,.1); border-radius:14px; padding:18px 20px }
+
+/* =============================================================================
+   5 · COMO FUNCIONA: areia, serifa romana no título, quatro passos
+   ============================================================================= */
+.sv-como{ background:var(--sv-areia); color:var(--sv-tinta); padding:clamp(56px,8vw,104px) 0; text-align:center }
+.sv-como-tit{ display:inline-block; margin:0; padding:0 .25em .08em; font-family:var(--sv-serif); font-weight:400; font-size:clamp(46px,6.8vw,92px); letter-spacing:-.02em; line-height:1 }
+.sv-como-tit::after{ content:""; display:block; height:1px; margin-top:.06em; background:rgba(20,20,21,.55); transform-origin:left; transition:transform 1s var(--sv-ease) .35s }
+.sv-como-sub{ margin:clamp(14px,2vw,22px) 0 clamp(36px,5vw,60px); font-family:var(--sv-serif); font-style:italic; font-weight:400; font-size:clamp(30px,4.4vw,58px); letter-spacing:-.015em; line-height:1.05 }
+.sv-passos{ list-style:none; margin:0 auto; padding:0; max-width:1020px; display:grid; gap:clamp(22px,3vw,30px); text-align:left }
+.sv-passo{ display:grid; grid-template-columns:1fr; gap:6px; align-items:baseline }
+.sv-passo b{ font-size:clamp(22px,2.2vw,28px); font-weight:800; letter-spacing:-.035em; line-height:1.1; white-space:nowrap }
+.sv-passo b small{ font-size:1em; font-weight:800; font-variant-numeric:tabular-nums }
+.sv-passo p{ margin:0; font-size:clamp(18px,1.85vw,24px); line-height:1.32; letter-spacing:-.016em; color:var(--sv-corpo); text-wrap:pretty }
+@media(min-width:760px){ .sv-passo{ grid-template-columns:220px 1fr; gap:28px } .sv-passo b{ text-align:right } }
+.sv-como .sv-sede{ margin-top:clamp(36px,5vw,60px) }
+
+/* =============================================================================
+   6 · PARA QUEM JÁ SERVE: um cartão de papel dentro da noite
+   ============================================================================= */
+.sv-ja{ background:var(--sv-grafite); padding:clamp(14px,2.4vw,28px) }
+.sv-ja-cartao{
+  background:var(--sv-papel); color:var(--sv-tinta); border-radius:28px; max-width:var(--sv-largura); margin:0 auto;
+  padding:clamp(48px,7vw,96px) var(--sv-gutter); text-align:center;
+}
+.sv-ja .sv-sede{ margin-bottom:clamp(28px,4vw,48px); color:var(--sv-mudo) }
+.sv-ja .sv-h2{ font-size:clamp(32px,4.6vw,66px); letter-spacing:-.045em; line-height:1; margin:0 auto; max-width:22ch }
+.sv-ja .sv-lead{ font-size:clamp(17px,1.9vw,25px); max-width:62ch; margin:clamp(18px,2.5vw,28px) auto clamp(32px,4vw,48px); color:var(--sv-corpo) }
+.sv-ja-q{ display:grid; gap:26px; max-width:660px; margin:0 auto clamp(36px,4vw,48px) }
+.sv-ja-q h3{ margin:0 0 6px; font-size:clamp(20px,2vw,26px); letter-spacing:-.035em; line-height:1.1 }
+.sv-ja-q p{ margin:0; font-size:clamp(16px,1.6vw,21px); line-height:1.38; letter-spacing:-.014em; color:var(--sv-corpo); text-wrap:pretty }
+
+/* =============================================================================
+   7 · QUEBRA DE OBJEÇÃO: noite, à esquerda, três perguntas entre aspas
+   ============================================================================= */
+.sv-obj{ background:#1b1b1e; padding:clamp(56px,8vw,104px) 0 }
+.sv-marca-canto{ position:absolute; top:clamp(24px,4vw,44px); right:var(--sv-gutter); font-size:clamp(30px,3vw,40px); line-height:1; color:#fff; opacity:.9 }
+.sv-obj .sv-h2{ font-size:clamp(30px,3.6vw,48px); letter-spacing:-.045em; line-height:1; color:#fff; max-width:18ch }
+.sv-obj .sv-lead{ font-size:clamp(19px,2.3vw,34px); line-height:1.18; letter-spacing:-.025em; max-width:30ch; margin:clamp(18px,2.5vw,28px) 0 clamp(36px,5vw,56px); color:rgba(255,255,255,.95) }
+.sv-obj-q{ display:grid; gap:clamp(26px,3.5vw,38px); max-width:1000px }
+.sv-obj-q h3{ margin:0 0 10px; font-size:clamp(23px,2.9vw,40px); letter-spacing:-.045em; line-height:1.02; color:#fff; text-wrap:balance }
+.sv-obj-q p{ margin:0; font-size:clamp(15.5px,1.45vw,18.5px); line-height:1.45; letter-spacing:-.01em; color:rgba(255,255,255,.84); max-width:80ch; text-wrap:pretty }
+
+/* =============================================================================
+   8 · PERGUNTAS: papel, o título num bloco escuro, seis respostas em linha
+   ============================================================================= */
+.sv-faq{ background:var(--sv-papel); color:var(--sv-tinta); padding:clamp(56px,8vw,104px) 0; position:relative }
+.sv-faq .sv-marca-canto{ color:var(--sv-tinta) }
+.sv-faq .sv-h2{
+  display:inline; background:#141416; color:#fff; border-radius:12px; padding:.18em .45em;
+  font-size:clamp(22px,2.8vw,36px); letter-spacing:-.045em; line-height:1.4;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone;
+}
+.sv-faq-cab{ margin:0 0 clamp(28px,4vw,44px); padding-right:64px }
+.sv-faq-l{ margin:0; display:grid; gap:clamp(18px,2.4vw,26px); max-width:1000px }
+.sv-faq-l dt,.sv-faq-l dd{ display:inline; margin:0 }
+.sv-faq-l dt{ font-weight:800; letter-spacing:-.03em; font-size:clamp(17px,1.7vw,22px) }
+.sv-faq-l dd{ font-size:clamp(16px,1.6vw,21px); line-height:1.42; letter-spacing:-.012em; color:var(--sv-corpo) }
+.sv-faq-l dd a{ font-weight:600; text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px }
+
+/* =============================================================================
+   9 · O FECHO: noite, "Sempre cabe mais um.", o formulário
+   ============================================================================= */
+.sv-fim{ background:#161618; padding:clamp(56px,8vw,104px) 0 clamp(48px,7vw,88px) }
+.sv-fim .sv-sede{ margin-bottom:clamp(28px,4vw,48px) }
+.sv-fim .sv-h2{ color:#fff; font-size:clamp(46px,7.8vw,108px) }
+.sv-fim .sv-lead{ font-size:clamp(18px,2.2vw,28px); line-height:1.28; letter-spacing:-.02em; max-width:54ch; margin:clamp(20px,3vw,32px) 0 clamp(32px,4.5vw,52px); color:rgba(255,255,255,.94) }
+.sv-form{ display:grid; grid-template-columns:1fr; gap:14px; align-items:start }
+.sv-campo{ position:relative; display:grid; gap:6px }
+.sv-campo label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap }
+.sv-campo input,.sv-campo select{
+  width:100%; height:58px; border-radius:8px; border:1px solid transparent; background:#efefec; color:#141415;
+  padding:0 18px; font:500 16px/1 var(--sv-sans); letter-spacing:-.01em; appearance:none; -webkit-appearance:none;
+  transition:box-shadow .18s var(--sv-ease),border-color .18s var(--sv-ease);
+}
+.sv-campo input::placeholder{ color:#75757c; opacity:1 }
+.sv-campo select{ padding-right:44px; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23141415' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; cursor:pointer }
+.sv-campo select.vazio{ color:#75757c }
+.sv-campo input:focus-visible,.sv-campo select:focus-visible{ outline:none; border-color:var(--sv-ouro); box-shadow:0 0 0 3px rgba(240,164,60,.35) }
+.sv-campo input[aria-invalid="true"],.sv-campo select[aria-invalid="true"]{ border-color:#f08a7a; box-shadow:0 0 0 3px rgba(240,138,122,.3) }
+.sv-campo .sv-dica{ font-size:13px; color:#ffb8ab; min-height:0; padding-left:2px }
+.sv-form .sv-bt{ height:58px; width:100% }
+.sv-form-erro{ margin:14px 0 0; font-size:15px; color:#ffb8ab }
+.sv-fim-micro{ margin:clamp(22px,3vw,32px) 0 0; text-align:center; font-size:14px; color:rgba(255,255,255,.72) }
+@media(min-width:760px){ .sv-form{ grid-template-columns:1fr 1fr } }
+@media(min-width:1000px){ .sv-form{ grid-template-columns:1.1fr 1fr 1fr auto } .sv-form .sv-bt{ width:auto; min-width:180px; padding:0 30px } }
+
+/* =============================================================================
+   O PÉ: a marca, as colunas, o endereço
+   ============================================================================= */
+.sv-pe{ background:#0d0d0f; color:#fff; padding:clamp(48px,6vw,72px) 0 calc(32px + env(safe-area-inset-bottom,0px)); border-top:1px solid rgba(255,255,255,.08) }
+.sv-pe-g{ display:grid; grid-template-columns:1fr; gap:36px }
+.sv-pe-eu .sv-logo svg{ height:34px }
+.sv-pe-frase{ margin:16px 0 0; font-family:var(--sv-serif); font-style:italic; font-size:24px; letter-spacing:-.01em; color:rgba(255,255,255,.8) }
+.sv-pe-onde{ display:grid; gap:4px; margin-top:22px; color:rgba(255,255,255,.72); font-size:15px; text-decoration:none; line-height:1.4 }
+.sv-pe-onde b{ color:#fff; font-weight:700 }
+.sv-pe-onde span.ver{ color:#fff; font-weight:600; display:inline-flex; align-items:center; gap:6px; margin-top:4px }
+.sv-pe-onde span.ver svg{ width:14px; height:14px }
+.sv-pe-onde:hover span.ver{ text-decoration:underline; text-underline-offset:4px }
+.sv-pe-cols{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:28px }
+.sv-pe-cols h2{ margin:0 0 12px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5) }
+.sv-pe-cols a{ display:block; padding:5px 0; color:#fff; text-decoration:none; font-size:15.5px; font-weight:500; letter-spacing:-.01em; opacity:.88 }
+.sv-pe-cols a:hover{ opacity:1; text-decoration:underline; text-underline-offset:4px }
+.sv-pe-linha{ margin-top:clamp(32px,5vw,52px); padding-top:20px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; gap:12px 24px; justify-content:space-between; font-size:13.5px; color:rgba(255,255,255,.6) }
+.sv-pe-linha a{ color:#fff; text-decoration:none; font-weight:500; margin-left:18px }
+.sv-pe-linha a:first-child{ margin-left:0 }
+.sv-pe-linha a:hover{ text-decoration:underline; text-underline-offset:4px }
+@media(min-width:900px){ .sv-pe-g{ grid-template-columns:1.2fr 2fr; gap:48px } }
+.sv .nao-quebra{ white-space:nowrap }

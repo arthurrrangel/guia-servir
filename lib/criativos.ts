@@ -79,8 +79,18 @@ export const CRIATIVOS = {
   'sobre-fecho': { arquivo: '/fotos/pastor-aponta.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /sobre.' },
 
   /* ----------------------------------------------------------- /servir */
-  servir: { arquivo: '/fotos/midia.webp', alt: 'Equipe Creative na mesa de transmissão do culto', proporcao: '16:9', largura: 2400,
-    nota: 'Herói de /servir: quem chega antes, de costas ou de lado, trabalhando.' },
+  /* 10/10/2026 · a identidade nova da /servir (ApresentaSite.pdf): o herói é A
+     FACHADA ao entardecer, foto que o Arthur mandou em 10/10, com o corte
+     vertical para o celular. A mesa da Mídia que estava aqui segue sendo a
+     foto da área (lib/fotos.ts). */
+  servir: { arquivo: '/fotos/fachada.webp', celular: '/fotos/fachada-m.webp', alt: '', proporcao: '16:9', largura: 2000, foco: '50% 42%',
+    nota: 'Herói de /servir: a fachada, de frente, ao entardecer. O texto branco fica à esquerda, sobre um véu; a foto precisa de céu ou área lisa do lado direito.' },
+  'servir-frase': { arquivo: '/fotos/abraco-palco-v.webp', alt: 'Abraço no palco, no fim do culto de domingo', proporcao: '4:3', largura: 1000,
+    nota: 'O retrato ao lado de "Deus se alegra com o seu servir": um abraço, gente perto. Vertical 4:5. A foto atual é um corte de 496×620 da abraco-palco; pedir a original em alta.' },
+  'servir-louvor': { arquivo: '/fotos/louvor-q.webp', alt: '', proporcao: '1:1', largura: 900,
+    nota: 'O círculo grande de "Números vivos": alguém servindo, de corpo inteiro (a apresentação usa a cantora de mão erguida).' },
+  'servir-porta': { arquivo: '/fotos/porta-q.webp', alt: '', proporcao: '1:1', largura: 900,
+    nota: 'O círculo pequeno de "Números vivos": a camiseta "Como posso te ajudar?" de costas, ou a porta. Pedir a foto da apresentação em alta.' },
   encaixo: { arquivo: '/fotos/porta-sorriso.webp', alt: 'Duas pessoas da equipe de recepção conversando na porta da igreja', proporcao: '16:9', largura: 2400,
     nota: 'Herói de /servir/onde-me-encaixo.' },
   'encaixo-fecho': { arquivo: '/fotos/oracao.webp', alt: '', proporcao: '16:9', largura: 2400, nota: 'Fecho de /servir/onde-me-encaixo.' },
