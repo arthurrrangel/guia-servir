@@ -547,7 +547,16 @@ function Time() {
                           defaultValue={v.limiteMes == null ? '' : String(v.limiteMes)}
                           onChange={e => mudar(v.id, { limite_mes: e.target.value === '' ? null : +e.target.value })}>
                           <option value="">segue a equipe ({S.config.limitePadrao} por mês)</option>
-                          {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n} por mês</option>)}
+                          {/* 10/10/2026 · ATÉ 10, NÃO ATÉ 5. Com o Follow no sábado o mês
+                              tem 8 a 10 cultos, e quem é FIXO num posto (Hugo na
+                              transmissão, Dudu e Dourado nas câmeras) serve em todos. Com o
+                              teto em 5, o sorteio do dia 26 tirava essa pessoa do posto a
+                              partir do sexto culto e o líder tinha de recolocar à mão todo
+                              mês. Valor fora da lista (gravado direto no banco) aparece
+                              como está, em vez de a tela mostrar "segue a equipe" e mentir. */}
+                          {Array.from(new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...(v.limiteMes != null ? [v.limiteMes] : [])]))
+                            .sort((a, b) => a - b)
+                            .map(n => <option key={n} value={n}>{n === 10 ? '10 por mês (todo culto)' : `${n} por mês`}</option>)}
                         </select>
                       </label>
                     </div>
