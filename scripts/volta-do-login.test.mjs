@@ -7,7 +7,7 @@
      "to entrando no sistema de demandas e ta direcionando pro painel das
       escalas"
 
-   `app/entrar/page.tsx` tinha `location.href = '/painel'` escrito à mão em
+   `app/(sistema)/entrar/page.tsx` tinha `location.href = '/painel'` escrito à mão em
    três pontos. `/painel` é o painel das ESCALAS. Quem chegava das DEMANDAS
    fazia login e era despejado noutro sistema, sem volta.
 
@@ -30,7 +30,7 @@ const caso = (nome, fn) => { fn(); ok++; console.log('  ok ' + nome) }
 
 const PADRAO = '/painel'
 
-/* A MESMA regra que está em `app/entrar/page.tsx`. Duplicar lógica é ruim, e
+/* A MESMA regra que está em `app/(sistema)/entrar/page.tsx`. Duplicar lógica é ruim, e
    por isso o último caso deste arquivo confere, lendo o arquivo, que as duas
    não se separaram. */
 function destino(volta) {
@@ -99,7 +99,7 @@ caso('o que passa e SEMPRE relativo: nunca sai deste site', () => {
 })
 
 /* ---- e a regra do teste e a do produto sao a mesma? --------------------- */
-const entrar = readFileSync(new URL('../app/entrar/page.tsx', import.meta.url), 'utf8')
+const entrar = readFileSync(new URL('../app/(sistema)/entrar/page.tsx', import.meta.url), 'utf8')
 /* CONTA CODIGO, NAO COMENTARIO. A primeira versao deste arquivo reprovou
    sozinha porque o regex de "nao sobrou `/painel` na mao" casou com o
    COMENTARIO que descreve o defeito antigo. E o mesmo tropeco que a migracao
@@ -158,7 +158,7 @@ caso('a casca das demandas nao tem NENHUM link para as escalas', () => {
      sistema.
 
      Quem cuida do resto e `scripts/demandas-porta-propria.test.mjs`, que
-     varre `app/demandas/` e `components/demandas/` inteiros. */
+     varre `app/(sistema)/demandas/` e `components/demandas/` inteiros. */
   /* 23/09/2026: a casca leva sozinha para a porta (`router.replace`, com o
      `?volta=` de onde a pessoa estava) e o link fica como reserva; os dois
      apontam para `/demandas/entrar` */

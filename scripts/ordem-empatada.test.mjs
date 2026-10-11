@@ -1,7 +1,7 @@
 /* O EMPATE DE `funcoes.ordem` NÃO PODE MUDAR QUEM É ESCALADO — 20/09/2026.
 
    Auditoria de backend. `funcoes.ordem` é `int not null default 0` e não tem
-   unique. Empate é alcançável pela tela (`app/ajustes/page.tsx` cria posto
+   unique. Empate é alcançável pela tela (`app/(sistema)/ajustes/page.tsx` cria posto
    novo com `ordem: S.funcoes.length + 1`, então apagar um e criar outro
    repete a ordem). Sem desempate, a ordem final era a que o banco devolveu,
    que é ordem de heap e muda sozinha a cada UPDATE — e `gerarDia` usa a

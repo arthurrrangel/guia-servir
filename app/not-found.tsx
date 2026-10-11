@@ -1,42 +1,38 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
-import { Site } from '@/components/Site';
-import { Tit } from '@/components/Texto';
-import { IcSeta } from '@/components/Icones';
-import { src as cria } from '@/lib/criativos';
+import './(site)/site.css';
+import Topo from '@/components/site/Topo';
+import Pe from '@/components/site/Pe';
+import { IGREJA } from '@/lib/igreja';
+import { Vozes, Chapeu, Pil, Img } from '@/components/site/Blocos';
 
 /* =============================================================================
    404 — a página que ninguém planeja e todo mundo acaba vendo
 
-   Link velho do Instagram, endereço digitado errado, story de três meses
-   atrás. A pessoa cai aqui vinda de fora, sem contexto, e o padrão do Next é
-   uma tela branca com "404" em Arial — a única página do site que não seria
-   deste site.
-
-   Ela faz o que a home faz em cinco segundos: diz quem somos, quando nos
-   reunimos e por onde entrar. E não pede desculpa: página de erro que se
-   desculpa chama atenção para o erro. */
-
-export const metadata: Metadata = {
-  title: 'Página não encontrada',
-  robots: { index: false, follow: true },
-};
+   Mora na raiz (o Next só aceita o not-found global aqui) e por isso veste
+   o site por conta própria: a folha, a barra e o pé do app/(site). Diz quem
+   somos, quando nos reunimos e por onde entrar. Não pede desculpa.
+   ============================================================================= */
+export const metadata: Metadata = { title: 'Página não encontrada', robots: { index: false, follow: true } };
 
 export default function NaoEncontrada() {
   return (
-    <Site escuro>
-      <section className="g-cheio alta centro rev visto">
-        <img src={cria('nao-encontrada')} alt="" />
-        <div className="g">
-          <p className="g-rot">404</p>
-          <Tit as="h1" className="g-h1">Esse endereço não existe</Tit>
-          <p className="g-ed">Mas o domingo existe.</p>
-          <div className="g-acoes">
-            <Link href="/cultos" className="acao cheia">Ver os cultos <IcSeta /></Link>
-            <Link href="/" className="g-link claro">Ir para o início</Link>
+    <div className="s">
+      <Topo />
+      <main id="conteudo">
+        <section className="s-heroi curto" aria-labelledby="t-404">
+          <Img lugar="chegar-heroi" prioridade />
+          <div className="s-in s-heroi-in">
+            <Chapeu forte="404" resto="Esse endereço não existe" />
+            <Vozes as="h1" id="t-404" className="s-h1" it="existe">Mas o domingo existe</Vozes>
+            <p className="s-lead grande">{IGREJA.cultoDia}, {IGREJA.cultoHora}, na {IGREJA.rua}, {IGREJA.bairro}. Comece por aqui.</p>
+            <div className="s-acoes">
+              <Pil href="/">Ir para o início</Pil>
+              <Pil href="/cultos">Ver os cultos</Pil>
+            </div>
           </div>
-        </div>
-      </section>
-    </Site>
+        </section>
+      </main>
+      <Pe />
+    </div>
   );
 }

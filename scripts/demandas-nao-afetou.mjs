@@ -29,8 +29,8 @@
    elemento por elemento, inclusive no que está fora da tela.
 
    Roda com:
-     rm -rf .next && next build && mv .next .next-antes     (sem app/demandas)
-     rm -rf .next && next build && mv .next .next-depois    (com app/demandas)
+     rm -rf .next && next build && mv .next .next-antes     (sem app/(sistema)/demandas)
+     rm -rf .next && next build && mv .next .next-depois    (com app/(sistema)/demandas)
      node scripts/demandas-nao-afetou.mjs
 
    SEMPRE construa no `.next` padrão e renomeie depois: com NEXT_DIST_DIR

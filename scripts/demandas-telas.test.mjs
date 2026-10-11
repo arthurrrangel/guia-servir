@@ -3,7 +3,7 @@
    ===========================================================================
    POR QUE ESTE ARQUIVO EXISTE
 
-   Até 22/09/2026, NENHUM teste da suíte executava `app/demandas/page.tsx`,
+   Até 22/09/2026, NENHUM teste da suíte executava `app/(sistema)/demandas/page.tsx`,
    `nova/page.tsx`, `numeros/page.tsx` ou `ajustes/page.tsx`. Os que citam
    esses caminhos (`demandas-css`, `classe-que-a-folha-conhece`,
    `demandas-token-na-url`, `demandas-porta-propria`) abrem os arquivos com
@@ -61,7 +61,7 @@
    ===========================================================================
    A FICHA ENTROU — 22/09/2026, E ELA ERA O MAIOR BURACO DA SUÍTE
 
-   Até aqui esta linha dizia: "`app/demandas/d/[numero]/page.tsx`. A ficha tem
+   Até aqui esta linha dizia: "`app/(sistema)/demandas/d/[numero]/page.tsx`. A ficha tem
    dono diferente do desta rodada e não entra aqui." Escrita assim ela parecia
    um recorte de escopo; medida, era o maior buraco de cobertura do sistema.
 
@@ -744,17 +744,17 @@ function mundoNovo() {
 montarMundo();
 await ligarReact();
 
-const Inicio = (await import('@/app/demandas/page.tsx')).default;
-const Atendimento = (await import('@/app/demandas/atendimento/page.tsx')).default;
-const Nova = (await import('@/app/demandas/nova/page.tsx')).default;
-const Numeros = (await import('@/app/demandas/numeros/page.tsx')).default;
-const Admin = (await import('@/app/demandas/admin/page.tsx')).default;
-const FichaPessoa = (await import('@/app/demandas/admin/pessoas/[id]/page.tsx')).default;
-const Perfil = (await import('@/app/demandas/perfil/page.tsx')).default;
-const Avisos = (await import('@/app/demandas/avisos/page.tsx')).default;
-const CadastroPagina = (await import('@/app/demandas/cadastro/page.tsx')).default;
-const Ficha = (await import('@/app/demandas/d/[numero]/page.tsx')).default;
-const EntrarDemandas = (await import('@/app/demandas/entrar/page.tsx')).default;
+const Inicio = (await import('@/app/(sistema)/demandas/page.tsx')).default;
+const Atendimento = (await import('@/app/(sistema)/demandas/atendimento/page.tsx')).default;
+const Nova = (await import('@/app/(sistema)/demandas/nova/page.tsx')).default;
+const Numeros = (await import('@/app/(sistema)/demandas/numeros/page.tsx')).default;
+const Admin = (await import('@/app/(sistema)/demandas/admin/page.tsx')).default;
+const FichaPessoa = (await import('@/app/(sistema)/demandas/admin/pessoas/[id]/page.tsx')).default;
+const Perfil = (await import('@/app/(sistema)/demandas/perfil/page.tsx')).default;
+const Avisos = (await import('@/app/(sistema)/demandas/avisos/page.tsx')).default;
+const CadastroPagina = (await import('@/app/(sistema)/demandas/cadastro/page.tsx')).default;
+const Ficha = (await import('@/app/(sistema)/demandas/d/[numero]/page.tsx')).default;
+const EntrarDemandas = (await import('@/app/(sistema)/demandas/entrar/page.tsx')).default;
 
 /* A LISTA, SOZINHA, COM OS QUATRO RECORTES DE SEMPRE · migração 94.
 

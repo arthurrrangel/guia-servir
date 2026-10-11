@@ -272,7 +272,7 @@ for (const t of ['habilidades', 'indisponibilidades', 'escalacoes', 'plantoes', 
 
    A guarda do cache era a CONTAGEM de dias, apostando que dia nunca é
    apagado. A rotina que restaura o retrato local quando a gravação falha
-   (app/escala/page.tsx) apaga. Apagar um e criar outro mantém a contagem, e
+   (app/(sistema)/escala/page.tsx) apaga. Apagar um e criar outro mantém a contagem, e
    as contagens de carga passam a ler uma lista de datas velha.
 
    Não quebra nada na hora: só muda quem é sorteado, semanas depois. É o

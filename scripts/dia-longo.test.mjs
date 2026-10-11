@@ -1,7 +1,7 @@
 /* QUE DIA A TELA DIZ PARA A PESSOA — 21/09/2026, migração 71.
 
    Este é o teste da frase que manda alguém sair de casa num dia. Ela estava
-   solta dentro de `app/eu/[token]/page.tsx` e escrevia:
+   solta dentro de `app/(sistema)/eu/[token]/page.tsx` e escrevia:
 
        ehSabado(s) ? 'sábado (Follow)' : 'domingo'
 
@@ -293,7 +293,7 @@ const eq = (a, b, rot) => ok(a === b, rot, `disse ${JSON.stringify(a)}, esperava
     [null, null, '2026-10-10'],
   ]) {
     const daTela = H(inicio, evento, data);
-    /* a regra do `.ics` em app/eu/[token]/page.tsx: evento usa `inicio`,
+    /* a regra do `.ics` em app/(sistema)/eu/[token]/page.tsx: evento usa `inicio`,
        culto usa a hora da igreja */
     const doIcs = evento ? inicio : (data === '2026-10-10' ? '18h' : '10h');
     const mesmoRelogio = evento

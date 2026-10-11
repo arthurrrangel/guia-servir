@@ -80,7 +80,7 @@ for (const L of LARGURAS) {
       await instalaRotas(p2);
       await p2.goto(BASE + rota, { waitUntil: 'networkidle', timeout: 60000 }).catch(() => {});
       await p2.evaluate(() => document.documentElement.classList.add('nao-anima'));
-      await p2.evaluate(() => document.querySelectorAll('.rev,.sv-r').forEach(e => e.classList.add('visto')));
+      await p2.evaluate(() => document.querySelectorAll('.rev,.sv-r,.s-rev').forEach(e => e.classList.add('visto')));
       await p2.waitForTimeout(600);
       await p2.screenshot({ path: `${PASTA}/${nome}-2-inteira.png`, fullPage: true });
       await p2.context().close();

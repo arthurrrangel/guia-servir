@@ -1,6 +1,6 @@
 /* CLASSE ESCRITA NO JSX QUE A FOLHA NÃO CONHECE — 20/09/2026.
 
-   Auditoria de tela. `app/demandas/d/[numero]/page.tsx` escrevia
+   Auditoria de tela. `app/(sistema)/demandas/d/[numero]/page.tsx` escrevia
    `className={e.interno ? 'interno' : ''}` e a folha define
    `.dm-hist .dm-interno`. O irmão da linha de cima escrevia `'marco'` e a
    folha define `.dm-hist li.dm-marco::before`. Resultado: o comentário
@@ -24,7 +24,7 @@ import { join } from 'node:path';
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
 
-const folha = readFileSync('app/demandas/demandas.css', 'utf8');
+const folha = readFileSync('app/(sistema)/demandas/demandas.css', 'utf8');
 const naFolha = new Set([...folha.matchAll(/\.(dm-[a-z0-9-]+)/g)].map(m => m[1]));
 ok(naFolha.size > 40, 'a folha tem classes dm- para conferir', String(naFolha.size));
 
@@ -35,7 +35,7 @@ const arquivos = [];
     if (statSync(p).isDirectory()) anda(p);
     else if (/\.tsx?$/.test(n)) arquivos.push(p);
   }
-})('app/demandas');
+})('app/(sistema)/demandas');
 /* TODA a pasta de peças, e não uma lista escrita à mão · 22/09/2026.
 
    Esta linha era `arquivos.push('components/demandas/Ui.tsx',
@@ -70,7 +70,7 @@ ok(faltando.length === 0, 'nenhuma classe dm- do JSX falta na folha', faltando.j
       Escrito à mão de propósito. A varredura acima não pega `'interno'` (sem
       prefixo), porque ela só conhece o que TEM prefixo — e o defeito era
       justamente a ausência dele. */
-const ficha = readFileSync('app/demandas/d/[numero]/page.tsx', 'utf8');
+const ficha = readFileSync('app/(sistema)/demandas/d/[numero]/page.tsx', 'utf8');
 ok(/'dm-interno'/.test(ficha), 'o comentário interno usa a classe com prefixo');
 ok(!/[^-]'interno'/.test(ficha), 'e não a versão sem prefixo, que a folha não conhece');
 ok(/'dm-marco'/.test(ficha), 'o marco do histórico usa a classe com prefixo');
@@ -95,8 +95,8 @@ ok(naFolha.has('dm-interno') && naFolha.has('dm-marco'), 'e as duas existem na f
    entrada aqui aponta ONDE ela nasce, para a próxima pessoa poder conferir em
    vez de acreditar. */
 const PERDOADAS = new Set([
-  /* `'dm-' + tomPill(status)` — app/demandas/page.tsx:167,
-     app/demandas/d/[numero]/page.tsx:87 e components/demandas/Ui.tsx:19.
+  /* `'dm-' + tomPill(status)` — app/(sistema)/demandas/page.tsx:167,
+     app/(sistema)/demandas/d/[numero]/page.tsx:87 e components/demandas/Ui.tsx:19.
      Os valores possíveis estão em lib/demandas/regras.ts:52. */
   'dm-ok', 'dm-warn', 'dm-bad',
   /* `dm-pill dm-${tom}` em components/demandas/Ui.tsx, com `tom` vindo de

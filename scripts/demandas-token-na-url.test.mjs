@@ -49,7 +49,7 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
      a entrada e o Voltar do navegador não voltava ao Início */
   ok(/replaceState\(window\.history\.state,/.test(corpo) && !/replaceState\(null/.test(corpo),
     'e a troca leva junto o estado do histórico (o Voltar continua funcionando)');
-  const inicio = ler('app/demandas/page.tsx');
+  const inicio = ler('app/(sistema)/demandas/page.tsx');
   ok(!/replaceState\(null/.test(inicio), 'o Início também não apaga o estado ao tirar o ?bemvindo');
 }
 
@@ -86,7 +86,7 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
 /* 94 · O LUGAR MUDOU, E A CONTAGEM PASSOU A VARRER TUDO.
 
    O link pessoal saiu dos Ajustes e foi para a ficha da pessoa na
-   administração (`app/demandas/admin/pessoas/[id]/page.tsx`). Com a lista
+   administração (`app/(sistema)/demandas/admin/pessoas/[id]/page.tsx`). Com a lista
    de arquivos escrita à mão, a mudança deu "achei 0": o teste dizia que
    NINGUÉM montava o link, e um segundo lugar novo, num arquivo fora da
    lista, passaria sem ser contado. Agora ele varre as duas pastas inteiras. */
@@ -100,14 +100,14 @@ const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('
       else if (/\.tsx?$/.test(nome)) arquivos.push(rel);
     }
   };
-  anda('app/demandas'); anda('components/demandas'); anda('lib/demandas');
+  anda('app/(sistema)/demandas'); anda('components/demandas'); anda('lib/demandas');
   let n = 0; const onde = [];
   for (const f of arquivos) {
     const achou = (ler(f).match(/\?t=\$\{/g) || []).length;
     if (achou) { n += achou; onde.push(f); }
   }
   ok(n === 1, 'existe UM único lugar que monta o link com ?t= (a ficha da pessoa)', `achei ${n}: ${onde.join(', ')}`);
-  ok(onde[0] === 'app/demandas/admin/pessoas/[id]/page.tsx',
+  ok(onde[0] === 'app/(sistema)/demandas/admin/pessoas/[id]/page.tsx',
     'e ele é a ficha da pessoa, na administração', onde.join(', '));
 }
 

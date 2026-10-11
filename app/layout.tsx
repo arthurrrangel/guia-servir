@@ -1,30 +1,27 @@
 import { IGREJA, SITE_IGREJA } from '@/lib/igreja';
-import './globals.css';
-import './editorial.css';
-import './identidade.css';
 import type { Metadata, Viewport } from 'next';
-import Medidas from '@/components/Medidas';
-import Transicao from '@/components/Transicao';
 
 /* =============================================================================
-   TIPOGRAFIA — uma família, servida daqui
+   A RAIZ — 11/10/2026
 
-   Inter, variável, um arquivo de 48kB em public/tipos/ (SIL OFL, licença ao
-   lado). O @font-face mora no globals.css; aqui só o preload, para o título
-   da primeira tela não piscar na fonte do aparelho.
+   Só o documento: <html>, <body>, os metadados padrão e o preload da Inter.
+   Nenhuma folha de estilo mora aqui. Cada grupo de rotas carrega a sua:
 
-   Até 08/09/2026 este arquivo lia um marca.css gerado no build com as fontes
-   licenciadas do manual (PP Neue Montreal / PP Editorial New), baixadas de
-   uma origem privada por scripts/fontes.mjs. As variáveis de ambiente nunca
-   foram configuradas, o CSS servido era vazio e o site caía na fonte de cada
-   aparelho. O Arthur escolheu a Inter para o site e o sistema; o mecanismo
-   saiu (está no histórico do git, se um dia a marca voltar a pedir).
+   · app/(sistema)/layout.tsx — globals.css, editorial.css, identidade.css,
+     Medidas e Transicao, exatamente como a raiz carregava antes. É o casco
+     do painel, da escala, do /eu, das demandas, do cadastro de área.
+   · app/(site)/layout.tsx — site.css, o site público refeito do zero com
+     base na apresentação ApresentaSite.pdf. Não conhece o CSS do sistema.
+
+   Por que separar: o site público carregava nove mil linhas de CSS do
+   sistema para pintar uma página de igreja, e toda regra de elemento
+   (body, main, h1, a, button, input) do sistema vazava para o site. Agora
+   cada um só paga pelo que usa, e nenhum dos dois quebra o outro.
+
+   TIPOGRAFIA: a Inter (variável, 48kB, SIL OFL, public/tipos/) é a fonte dos
+   dois lados; o @font-face mora em cada folha, o preload mora aqui.
    ============================================================================= */
 
-/* O título era 'Escala de Mídia' e valia para o site inteiro: a aba do Louvor
-   dizia Mídia, a da Diaconia dizia Mídia, e o link que a pessoa recebe no
-   WhatsApp mostrava o nome do ministério errado. Aqui fica o nome do produto;
-   cada tela que sabe de qual ministério é ajusta o próprio título. */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_IGREJA),
   title: { default: 'GUIA Church · Cultivando uma nova cultura', template: '%s · GUIA Church' },
@@ -56,8 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="preload" href="/tipos/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
-      <body><Medidas /><Transicao>{children}</Transicao></body>
+      <body>{children}</body>
     </html>
   );
 }
-

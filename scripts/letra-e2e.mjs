@@ -335,7 +335,7 @@ const objetos = () => sql(`select coalesce(json_agg(json_build_object('nome', na
 
 /* C · QUEM SERVE NO CULTO BAIXA A LETRA QUE SUBIU. Sem link de playlist, as
    músicas aparecem na Ordem do culto; com link, no Repertório, embaixo dos
-   links, e a Ordem (só de músicas) sai para não repetir (app/eu, 02/10). O
+   links, e a Ordem (só de músicas) sai para não repetir (app/(sistema)/eu, 02/10). O
    botão "Letra" mora nos dois, e os dois são provados com o banco. */
 async function quemServe(onde, w, h, toque) {
   const tela = `C ${onde} ${w}`;

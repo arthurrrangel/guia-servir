@@ -19,8 +19,8 @@
      1. a porta `/demandas/entrar` não menciona a rota do painel das escalas
      2. a casca de demandas não aponta para `/entrar`, que é a tela do outro
         sistema ("ESPAÇO DO ORGANIZADOR")
-     3. nada dentro de `app/demandas/` nem de `components/demandas/` importa
-        peça de `components/Shell`, `components/Marca` ou `app/entrar`
+     3. nada dentro de `app/(sistema)/demandas/` nem de `components/demandas/` importa
+        peça de `components/Shell`, `components/Marca` ou `app/(sistema)/entrar`
      4. `destino()` da porta, EXECUTADA de verdade com cargas de ataque, nunca
         devolve caminho fora de `/demandas`
 
@@ -87,7 +87,7 @@ function arquivos(dir, fim = /\.tsx?$/) {
 
 /* ---- 1 · a porta não conhece a rota do outro sistema -------------------- */
 {
-  const bruto = readFileSync('app/demandas/entrar/page.tsx', 'utf8');
+  const bruto = readFileSync('app/(sistema)/demandas/entrar/page.tsx', 'utf8');
   const codigo = soCodigo(bruto);
   ok(!/\/painel/.test(codigo), 'a porta do demandas não tem a rota do painel no código',
      (codigo.match(/.{0,50}\/painel.{0,50}/) || [''])[0]);
@@ -155,7 +155,7 @@ function arquivos(dir, fim = /\.tsx?$/) {
 
 /* ---- 2 · a casca não manda ninguém para a tela do outro sistema --------- */
 {
-  const alvos = [...arquivos('app/demandas'), ...arquivos('components/demandas')];
+  const alvos = [...arquivos('app/(sistema)/demandas'), ...arquivos('components/demandas')];
   ok(alvos.length > 5, 'achei os arquivos do sistema de demandas', 'achei=' + alvos.length);
 
   for (const f of alvos) {
@@ -182,7 +182,7 @@ function arquivos(dir, fim = /\.tsx?$/) {
     /from\s+['"]@?\/?components\/Ui['"]/,
     /from\s+['"]@\/app\/entrar/,
   ];
-  for (const f of [...arquivos('app/demandas'), ...arquivos('components/demandas')]) {
+  for (const f of [...arquivos('app/(sistema)/demandas'), ...arquivos('components/demandas')]) {
     const t = readFileSync(f, 'utf8');
     for (const p of proibidos) {
       ok(!p.test(t), `${f} não importa peça do sistema de escalas`, String(p));

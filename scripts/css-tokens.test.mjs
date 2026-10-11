@@ -61,7 +61,7 @@ function analisar(caminho) {
   return { caminho, definidos, usadosSemReserva, orfaos, css };
 }
 
-const FOLHAS = ['app/globals.css', 'app/demandas/demandas.css'];
+const FOLHAS = ['app/globals.css', 'app/(sistema)/demandas/demandas.css'];
 const analises = FOLHAS.map(analisar);
 
 /* ------------------------------------- 1. nenhum token órfão em nenhuma folha

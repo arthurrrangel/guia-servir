@@ -123,7 +123,7 @@ caso('slot numa funcao que este dia nao tem e ignorado', () => {
 })
 
 caso('posto OCULTADO da escala nao apaga a pendencia de quem ja estava nele', () => {
-  /* 82b · o botao "Ocultar da escala" (app/ajustes) poe `ativa = false`. A
+  /* 82b · o botao "Ocultar da escala" (app/(sistema)/ajustes) poe `ativa = false`. A
      primeira versao de `cobrarDoDia` filtrava so por `funcoesDoDia`, que
      passa por `funcoesAtivas`, e a pessoa escalada sumia da cobranca — com o
      cron declarando o domingo "ok". Antes desta rodada ela era cobrada. */

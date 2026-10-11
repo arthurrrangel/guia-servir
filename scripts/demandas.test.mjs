@@ -1018,7 +1018,7 @@ function servidorAceita(acao, d, eu) {
   }
 
   /* ---- 8b. e a outra ponta: `agir`, na ficha, devolvendo `false` --------- */
-  const ficha = readFileSync('app/demandas/d/[numero]/page.tsx', 'utf8');
+  const ficha = readFileSync('app/(sistema)/demandas/d/[numero]/page.tsx', 'utf8');
   const corpoAgir = corpoDe(ficha, 'async function agir');
   ok(corpoAgir !== null, 'achei o `agir` da ficha para executar');
   /* `setErroDe` (24/09/2026): a recusa lembra de qual gesto veio, para

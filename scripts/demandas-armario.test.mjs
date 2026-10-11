@@ -217,9 +217,9 @@ let CHAVE = null;
      eles dividem sem uma parede no meio. */
   for (const f of ['lib/demandas/api.ts', 'lib/demandas/regras.ts',
                    'components/demandas/Casca.tsx', 'components/demandas/Ui.tsx',
-                   'app/demandas/page.tsx', 'app/demandas/nova/page.tsx',
-                   'app/demandas/ajustes/page.tsx', 'app/demandas/numeros/page.tsx',
-                   'app/demandas/d/[numero]/page.tsx']) {
+                   'app/(sistema)/demandas/page.tsx', 'app/(sistema)/demandas/nova/page.tsx',
+                   'app/(sistema)/demandas/ajustes/page.tsx', 'app/(sistema)/demandas/numeros/page.tsx',
+                   'app/(sistema)/demandas/d/[numero]/page.tsx']) {
     let txt = '';
     try { txt = ler(f); } catch { continue; }
     const encostou = [...txt.matchAll(/localStorage\.\w+\(\s*'(escala\.[^']*)'/g)].map(m => m[1]);

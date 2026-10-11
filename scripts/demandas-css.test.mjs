@@ -43,7 +43,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
-const bruto = readFileSync(join(raiz, 'app/demandas/demandas.css'), 'utf8');
+const bruto = readFileSync(join(raiz, 'app/(sistema)/demandas/demandas.css'), 'utf8');
 const css = bruto.replace(/\/\*[\s\S]*?\*\//g, '');
 
 let falhas = 0, feitas = 0;
@@ -101,7 +101,7 @@ const arquivos = [];
     if (statSync(p).isDirectory()) varrer(p);
     else if (/\.tsx$/.test(n)) arquivos.push(p);
   }
-})(join(raiz, 'app/demandas'));
+})(join(raiz, 'app/(sistema)/demandas'));
 varrerComponentes();
 function varrerComponentes() {
   const d = join(raiz, 'components/demandas');
