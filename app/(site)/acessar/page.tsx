@@ -34,7 +34,7 @@ export default function Acessar() {
         <Img lugar="home-circulo-2" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
-          <Vozes as="h1" id="t-ac" className="s-h1" it="você" semPonto>Quem é você?</Vozes>
+          <Vozes as="h1" id="t-ac" className="s-h1" it="você?" semPonto>Quem é você?</Vozes>
           <p className="s-lead grande">Três caminhos. Nenhum pede cadastro.</p>
         </div>
       </section>
