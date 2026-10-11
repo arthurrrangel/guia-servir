@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { IGREJA, SITE } from './igreja';
+import { IGREJA, SITE_IGREJA as SITE } from './igreja';
 
 /* =============================================================================
    O CARTÃO DO LINK, PÁGINA POR PÁGINA

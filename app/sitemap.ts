@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { SITE } from '@/lib/igreja';
+import { SITE_IGREJA as SITE } from '@/lib/igreja';
 
 /* =============================================================================
    sitemap.xml

@@ -5,7 +5,7 @@ import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
+import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================

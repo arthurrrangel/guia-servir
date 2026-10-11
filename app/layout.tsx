@@ -1,4 +1,4 @@
-import { IGREJA } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA } from '@/lib/igreja';
 import './globals.css';
 import './editorial.css';
 import './identidade.css';
@@ -26,7 +26,7 @@ import Transicao from '@/components/Transicao';
    WhatsApp mostrava o nome do ministério errado. Aqui fica o nome do produto;
    cada tela que sabe de qual ministério é ajusta o próprio título. */
 export const metadata: Metadata = {
-  metadataBase: new URL('https://guiaservir.com'),
+  metadataBase: new URL(SITE_IGREJA),
   title: { default: 'GUIA Church · Cultivando uma nova cultura', template: '%s · GUIA Church' },
   description:
     `${IGREJA.cultoDia} às ${IGREJA.cultoHora} na ${IGREJA.rua}, ${IGREJA.bairro}. Venha visitar, ou entre para uma das áreas de voluntários da ${IGREJA.nome}.`,
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'GUIA Church · Cultivando uma nova cultura',
     description: `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Comece por aqui, visite um culto ou entre para uma das áreas de voluntários.`,
-    url: 'https://guiaservir.com', type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
+    url: SITE_IGREJA, type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
     images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
   },
   twitter: { card: 'summary_large_image', title: 'GUIA Church · Cultivando uma nova cultura', images: ['/og.jpg'] },

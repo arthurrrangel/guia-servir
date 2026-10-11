@@ -14,7 +14,7 @@ import Pe from '@/components/Pe';
 import { preload } from 'react-dom';
 import { AreasCarregando } from '@/components/Tela';
 import Contador from '@/components/Contador';
-import { IGREJA, SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, MAPA as MAPA_SCHEMA } from '@/lib/igreja';
 import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';

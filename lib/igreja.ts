@@ -140,6 +140,15 @@ export const ROTA_WAZE =
 
 export const SITE = 'https://guiaservir.com';
 
+/* 11/10/2026: O SITE DA IGREJA MORA EM guiachurch.com. O Arthur comprou o
+   domínio em 09/10 e decidiu que guiaservir.com fica só como porta dos
+   sistemas (escala, demandas, o link do voluntário). Os dois domínios servem
+   o mesmo app; o que muda é o endereço CANÔNICO que o Google e os cartões de
+   prévia leem para as páginas públicas: canonical, sitemap, robots, JSON-LD
+   e Open Graph apontam para cá. `SITE` continua sendo o endereço dos links
+   do sistema (cron, demandas, ICS), que seguem em guiaservir.com. */
+export const SITE_IGREJA = 'https://guiachurch.com';
+
 /** O canal de conversa que existe hoje. Vira WhatsApp no dia em que o número
  *  entrar em IGREJA.whatsapp — nenhuma página precisa saber qual dos dois é. */
 export function canalDeConversa(texto?: string): { href: string; rot: string } {

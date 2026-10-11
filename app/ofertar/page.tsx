@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
-import { IGREJA, SITE } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
 

@@ -6,7 +6,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import ProximoCulto from '@/components/ProximoCulto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, SITE, CULTO_QUANDO, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, CULTO_QUANDO, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================

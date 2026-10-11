@@ -5,7 +5,7 @@ import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
-import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';

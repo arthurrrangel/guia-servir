@@ -6,7 +6,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema, Luz } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
-import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
