@@ -277,7 +277,9 @@
 .sv-passo b small{ font-size:1em; font-weight:800; font-variant-numeric:tabular-nums }
 .sv-passo p{ margin:0; font-size:clamp(18px,1.85vw,24px); line-height:1.32; letter-spacing:-.016em; color:var(--sv-corpo); text-wrap:pretty }
 @media(min-width:760px){ .sv-passo{ grid-template-columns:220px 1fr; gap:28px } .sv-passo b{ text-align:right } }
-.sv-como .sv-sede{ margin-top:clamp(36px,5vw,60px) }
+/* 11/10/2026: sobre a areia, o cinza mudo ficava em 4,2:1 (Lighthouse); um tom
+   mais escuro passa de 4,5:1 sem deixar de ser a assinatura discreta */
+.sv-como .sv-sede{ margin-top:clamp(36px,5vw,60px); color:#55555b }
 
 /* =============================================================================
    6 · PARA QUEM JÁ SERVE: um cartão de papel dentro da noite
@@ -287,7 +289,7 @@
   background:var(--sv-papel); color:var(--sv-tinta); border-radius:28px; max-width:var(--sv-largura); margin:0 auto;
   padding:clamp(48px,7vw,96px) var(--sv-gutter); text-align:center;
 }
-.sv-ja .sv-sede{ margin-bottom:clamp(28px,4vw,48px); color:var(--sv-mudo) }
+.sv-ja .sv-sede{ margin-bottom:clamp(28px,4vw,48px); color:rgba(255,255,255,.62) }
 .sv-ja .sv-h2{ font-size:clamp(32px,4.6vw,66px); letter-spacing:-.045em; line-height:1; margin:0 auto; max-width:22ch }
 .sv-ja .sv-lead{ font-size:clamp(17px,1.9vw,25px); max-width:62ch; margin:clamp(18px,2.5vw,28px) auto clamp(32px,4vw,48px); color:var(--sv-corpo) }
 .sv-ja-q{ display:grid; gap:26px; max-width:660px; margin:0 auto clamp(36px,4vw,48px) }

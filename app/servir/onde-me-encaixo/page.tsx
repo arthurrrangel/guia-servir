@@ -1,13 +1,14 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
-import { sbPublico as sb } from '@/lib/supabase';
+import { rpc } from '@/lib/publico';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
 import { Perguntas } from '@/components/Perguntas';
 import { Carregando, Vazio } from '@/components/Tela';
-import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
    /servir/onde-me-encaixo — O DEGRAU QUE FALTAVA
@@ -81,14 +82,14 @@ const TRAVAS = [
 ];
 
 export default function OndeMeEncaixo() {
+  preloadHeroi('encaixo');
   const [blocos, setBlocos] = useState<Bloco[]>([]);
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
 
   useEffect(() => {
     let vivo = true;
     void (async () => {
-      const s = sb(); if (!s) { if (vivo) setFase('rede'); return; }
-      const { data, error } = await s.rpc('ministerios_publicos');
+      const { data, error } = await rpc('ministerios_publicos');
       if (!vivo) return;
       if (error) { setFase('rede'); return; }
       const mins = (data || []) as Min[];
@@ -98,7 +99,7 @@ export default function OndeMeEncaixo() {
       const fns = await Promise.all(
         mins.map(async m => {
           try {
-            const r = await s.rpc('equipe_funcoes', { p_slug: m.slug });
+            const r = await rpc('equipe_funcoes', { p_slug: m.slug });
             return r.error ? [] : ((r.data || []) as Fn[]);
           } catch { return [] as Fn[]; }
         }),
@@ -201,7 +202,7 @@ export default function OndeMeEncaixo() {
           Tira o peso, não convence. E devolve a lista completa: esta página é
           atalho, nunca funil. */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('encaixo-fecho')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('encaixo-fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">Em dúvida entre duas?</p>
           <Tit className="g-h2">Escolha qualquer uma das duas.</Tit>

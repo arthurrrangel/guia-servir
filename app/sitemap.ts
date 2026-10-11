@@ -1,5 +1,5 @@
 import type { MetadataRoute } from 'next';
-import { IGREJA, SITE } from '@/lib/igreja';
+import { SITE } from '@/lib/igreja';
 
 /* =============================================================================
    sitemap.xml
@@ -17,7 +17,8 @@ import { IGREJA, SITE } from '@/lib/igreja';
      fecham no banco, e sitemap com URL que some vira erro no Search Console.
      Elas continuam indexáveis pelo link interno a partir de /servir, que é o
      caminho que o Google usa de verdade.
-   · /guia-church-tv — só entra quando houver canal (ver lib/igreja.ts).
+   · /guia-church-tv — deixou de existir em 11/10/2026 (redireciona para
+     /cultos#ao-vivo).
 
    PRIORIDADE E FREQUÊNCIA são dicas fracas: o Google praticamente as ignora
    desde 2023. Ficam aqui porque outros buscadores ainda leem, e porque a
@@ -42,12 +43,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE}/acessar`, changeFrequency: 'yearly', priority: 0.4 },
     { url: `${SITE}/privacidade`, changeFrequency: 'yearly', priority: 0.2 },
   ];
-
-  if (IGREJA.youtube) {
-    paginas.splice(5, 0, {
-      url: `${SITE}/guia-church-tv`, changeFrequency: 'weekly', priority: 0.6,
-    });
-  }
 
   return paginas.map(p => ({ ...p, lastModified: agora }));
 }

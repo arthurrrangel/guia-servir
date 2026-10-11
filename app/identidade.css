@@ -106,25 +106,8 @@
   border-radius:999px; cursor:pointer; opacity:.94; -webkit-tap-highlight-color:transparent;
   transition:background .18s var(--sv-ease),opacity .18s var(--sv-ease);
 }
-.sv-nav > li > a:hover,.sv-nav > li > button:hover,.sv-nav > li > button[aria-expanded="true"],.sv-nav > li > a[aria-current="page"]{ background:rgba(255,255,255,.1); opacity:1 }
-.sv-nav > li > button svg{ width:12px; height:12px; opacity:.7; transition:transform .2s var(--sv-ease) }
-.sv-nav > li > button[aria-expanded="true"] svg{ transform:rotate(180deg) }
+.sv-nav > li > a:hover,.sv-nav > li > a[aria-current="page"]{ background:rgba(255,255,255,.1); opacity:1 }
 .sv-nav > li > a:focus-visible,.sv-nav > li > button:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:2px }
-/* o submenu: uma lâmina escura, com uma ponte invisível de 8px para o
-   ponteiro atravessar da palavra até a lista sem fechar */
-.sv-sub{
-  position:absolute; top:100%; left:0; padding-top:8px; min-width:248px; z-index:5;
-  opacity:0; visibility:hidden; transform:translateY(6px);
-  transition:opacity .2s var(--sv-ease),transform .2s var(--sv-ease),visibility 0s linear .2s;
-}
-.sv-sub > ul{ list-style:none; margin:0; padding:8px; background:#141416; border:1px solid rgba(255,255,255,.1); border-radius:16px; box-shadow:0 24px 50px -24px rgba(0,0,0,.8) }
-.sv-sub a{ display:block; padding:11px 14px; border-radius:10px; color:#fff; font:500 15px/1.2 var(--sv-sans); letter-spacing:-.01em; text-decoration:none; opacity:.9 }
-.sv-sub a:hover,.sv-sub a:focus-visible{ background:rgba(255,255,255,.08); opacity:1; outline:none }
-.sv-sub a small{ display:block; margin-top:3px; font-size:12.5px; color:rgba(255,255,255,.55) }
-.sv-nav > li.aberto .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
-@media(hover:hover) and (pointer:fine){
-  .sv-nav > li:hover .sv-sub{ opacity:1; visibility:visible; transform:none; transition-delay:0s }
-}
 .sv-topo-fim{ margin-left:auto; display:flex; align-items:center; gap:10px }
 .sv-topo-fim .sv-bt{ min-height:42px; padding:0 18px; font-size:14px }
 .sv-topo-fim .sv-bt.cta{ display:none }
@@ -154,6 +137,9 @@
 .sv-menu-g h2{ margin:0 0 6px; font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.5) }
 .sv-menu-g a{ display:block; padding:10px 0; font-size:24px; font-weight:700; letter-spacing:-.03em; line-height:1.1; text-decoration:none; color:#fff }
 .sv-menu-g a:focus-visible{ outline:2px solid var(--sv-ouro); outline-offset:4px; border-radius:4px }
+.sv-menu-g a[aria-current="page"]{ color:var(--sv-ouro) }
+.sv-menu-mais a{ font-size:18px; font-weight:600; padding:12px 0; letter-spacing:-.015em }
+.sv-menu-mais a small{ display:block; margin-top:2px; font-size:13px; font-weight:500; color:rgba(255,255,255,.5) }
 .sv-menu-pe{ padding:24px 0 0; display:grid; gap:10px; color:rgba(255,255,255,.72); font-size:15px }
 .sv-menu-pe a{ color:#fff; text-decoration:none; font-weight:600 }
 .sv-menu .sv-acoes{ padding:24px 0 8px }
@@ -440,3 +426,8 @@
 .tela-id .escolha-desc{ color:rgba(255,255,255,.72) }
 .tela-id .escolha-fim{ color:rgba(255,255,255,.7) }
 .tela-id .acao:not(.cheia){ border-radius:999px }
+
+/* ---- a home sem o rolo (11/10/2026): os azulejos aparecem em qualquer
+   largura, inclusive onde o globals.css os escondia para dar lugar à
+   história em rolagem ---- */
+.id .sigla-azulejos.sempre{ display:block !important }

@@ -13,15 +13,19 @@ import { IGREJA } from '@/lib/igreja';
    três grupos de links por intenção: visitar, a igreja, servir.
    ============================================================================= */
 
+/* 11/10/2026: a barra ficou plana (quatro páginas); o que saiu dela mora
+   aqui, por intenção: visitar, a igreja, servir. /followcamp é HTML estático
+   servido por reescrita: âncora comum, sem pré-carga (dava 404). */
 const GRUPOS = [
   { t: 'Visitar', itens: [
     { href: '/cultos', rot: 'Cultos' },
-    { href: '/como-chegar', rot: 'Como chegar' },
+    { href: '/cultos#como-chegar', rot: 'Como chegar' },
     { href: '/pequena-guia', rot: 'Pequena Guia' },
+    { href: '/followcamp', rot: 'Follow Camp 2027', duro: true },
   ] },
   { t: 'A igreja', itens: [
     { href: '/sobre', rot: 'Quem somos' },
-    { href: '/guia-church-tv', rot: IGREJA.canalNome },
+    { href: '/cultos#ao-vivo', rot: 'Ao vivo' },
     { href: '/ofertar', rot: 'Ofertar' },
   ] },
   { t: 'Servir', itens: [
@@ -30,7 +34,7 @@ const GRUPOS = [
     { href: '/eu', rot: 'Meu espaço' },
     { href: '/acessar', rot: 'Acesso às equipes' },
   ] },
-];
+] as Array<{ t: string; itens: Array<{ href: string; rot: string; duro?: boolean }> }>;
 
 export default function Pe() {
   return (
@@ -40,7 +44,7 @@ export default function Pe() {
           <div className="sv-pe-eu">
             <span className="sv-logo" aria-label={IGREJA.nome}><Logo /></span>
             <p className="sv-pe-frase">{IGREJA.frase}</p>
-            <Link href="/como-chegar" className="sv-pe-onde">
+            <Link href="/cultos#como-chegar" className="sv-pe-onde">
               <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? ` · Follow aos sábados, ${IGREJA.followHora}` : ''}</b>
               <span><span className="nao-quebra">{IGREJA.rua}</span> · <span className="nao-quebra">{IGREJA.bairro}</span>, <span className="nao-quebra">{IGREJA.cidade}</span></span>
               <span className="ver">Ver no mapa <IcSeta /></span>
@@ -50,7 +54,9 @@ export default function Pe() {
             {GRUPOS.map(g => (
               <nav key={g.t} aria-label={g.t}>
                 <h2>{g.t}</h2>
-                {g.itens.map(i => <Link key={i.href} href={i.href}>{i.rot}</Link>)}
+                {g.itens.map(i => i.duro
+                  ? <a key={i.href} href={i.href}>{i.rot}</a>
+                  : <Link key={i.href} href={i.href}>{i.rot}</Link>)}
               </nav>
             ))}
           </div>

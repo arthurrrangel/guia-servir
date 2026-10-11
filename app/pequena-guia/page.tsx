@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
@@ -7,7 +8,7 @@ import { IcSeta } from '@/components/Icones';
 import { IGREJA, SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, MAPA_REGIAO } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
-import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
 
 /* =============================================================================
@@ -41,6 +42,7 @@ const CONVITE = canalDeConversa(
 );
 
 export default function PequenaGuia() {
+  preloadHeroi('grupos');
   const presenciais = PEQUENAS_GUIAS.filter(p => !p.online).length;
   const online = PEQUENAS_GUIAS.length - presenciais;
   return (
@@ -124,7 +126,7 @@ export default function PequenaGuia() {
 
       {/* ------------------------------------------------------------ a conversa */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('grupos-fecho')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('grupos-fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">Achar o seu</p>
           <Tit className="g-h2">Diga onde você mora. A gente diz qual fica perto.</Tit>

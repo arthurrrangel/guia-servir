@@ -139,3 +139,26 @@ export function video(id: IdCriativo): string | null {
 export function celular(id: IdCriativo): string | null {
   return (CRIATIVOS[id] as Criativo).celular ?? null;
 }
+
+/* =============================================================================
+   O HERÓI ENTRA NA FILA ANTES DO CSS — 11/10/2026
+
+   A foto do herói é o maior elemento pintado (LCP) de toda página pública.
+   Sem isto o navegador só descobre o arquivo depois de baixar e aplicar o
+   CSS (que é render-blocking) e de montar a árvore: no 4G simulado do
+   Lighthouse isso dava 3,6 s. O <link rel="preload" as="image"> sai no
+   <head> do HTML do servidor (React Float hospeda o preload chamado durante
+   a renderização, em componente de servidor ou de cliente) e a foto começa a
+   descer junto com o CSS.
+
+   Quando o lugar tem `celular` (um corte diferente abaixo de 900px, servido
+   por <picture media>), o preload NÃO entra: o preload do React não aceita
+   media query, e pré-carregar o corte largo faria o celular baixar duas
+   fotos. Exceção: com `video`, o que o navegador pinta é a capa (`arquivo`)
+   em qualquer largura, e ela é pré-carregada. */
+import { preload as preloadReact } from 'react-dom';
+export function preloadHeroi(id: IdCriativo): void {
+  const c = CRIATIVOS[id] as Criativo;
+  if (c.celular && !c.video) return;
+  preloadReact(c.arquivo, { as: 'image', fetchPriority: 'high' });
+}

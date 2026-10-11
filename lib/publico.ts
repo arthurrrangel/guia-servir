@@ -34,3 +34,40 @@ export async function rpcPublica<T = any>(
     return (await r.json()) as T;
   } catch { return null; }
 }
+
+/* =============================================================================
+   A RPC PÚBLICA NO NAVEGADOR, SEM O CLIENTE DO SUPABASE — 11/10/2026
+
+   As páginas públicas (home, /servir, as áreas, /eu) só leem quatro RPCs
+   abertas ao anon. Para isso elas carregavam o supabase-js inteiro (um
+   chunk de 124 kB, ~40 kB comprimido) e pagavam o custo de analisar ele no
+   celular antes de qualquer coisa. O Lighthouse da home marcava 510 ms de
+   bloqueio da thread principal.
+
+   Um POST com fetch faz o mesmo. A forma do retorno é a do supabase-js
+   ({ data, error }) de propósito: as páginas trocaram `s.rpc(...)` por
+   `rpc(...)` e nada mais. O cliente de verdade continua em lib/supabase.ts
+   para as telas que têm sessão (painel, escala, cadastro com `candidatar`).
+
+   `erro` nunca é lançado: rede fora, 4xx e 5xx viram { data: null, error }
+   e a página decide o que mostrar (a mesma política de antes). */
+export type Resultado<T> = { data: T | null; error: { message: string; status?: number } | null };
+
+export async function rpc<T = unknown>(fn: string, corpo: Record<string, unknown> = {}): Promise<Resultado<T>> {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/rpc/${fn}`, {
+      method: 'POST',
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify(corpo),
+    });
+    if (!r.ok) {
+      let message = `HTTP ${r.status}`;
+      try { const j = await r.json(); if (j && typeof j.message === 'string') message = j.message; } catch { /* corpo não é JSON */ }
+      return { data: null, error: { message, status: r.status } };
+    }
+    const texto = await r.text();
+    return { data: texto ? (JSON.parse(texto) as T) : null, error: null };
+  } catch (e) {
+    return { data: null, error: { message: e instanceof Error ? e.message : 'rede' } };
+  }
+}

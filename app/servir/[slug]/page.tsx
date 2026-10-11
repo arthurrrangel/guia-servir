@@ -1,8 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { Foto } from '@/components/Foto';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { sbPublico as sb } from '@/lib/supabase';
+import { rpc } from '@/lib/publico';
 import { IcSeta } from '@/components/Icones';
 import { Site } from '@/components/Site';
 import { Tit } from '@/components/Texto';
@@ -69,10 +70,10 @@ export default function Area() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
-      const s = sb(); if (!s) { if (vivo) setFase('rede'); return; }
+
       const [lista, funcoes] = await Promise.all([
-        s.rpc('ministerios_publicos'),
-        s.rpc('equipe_funcoes', { p_slug: slug }),
+        rpc('ministerios_publicos'),
+        rpc('equipe_funcoes', { p_slug: slug }),
       ]);
       if (!vivo) return;
       if (lista.error || funcoes.error) { setFase('rede'); return; }
@@ -222,7 +223,7 @@ export default function Area() {
 
       {/* ------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('area-fecho')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('area-fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">O convite</p>
           <Tit className="g-h2">Existe um lugar para você aqui.</Tit>

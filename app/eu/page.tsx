@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { sbPublico as sb } from '@/lib/supabase';
+import { rpc } from '@/lib/publico';
 import { IcSeta } from '@/components/Icones';
 import { Tela, Cabeca, Carregando, Vazio } from '@/components/Tela';
 
@@ -32,12 +32,12 @@ export default function PortaDoEspaco() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
-      const s = sb(); if (!s) { if (vivo) setFase('rede'); return; }
+
       /* 109 · TODAS as áreas, inclusive as que não aparecem no site (a
          Produção, os Dirigentes): quem serve nelas também precisa achar o
          próprio nome. Sem a 109 no banco, a lista do site, como antes. */
-      let { data, error } = await s.rpc('areas_do_espaco');
-      if (error) ({ data, error } = await s.rpc('ministerios_publicos'));
+      let { data, error } = await rpc('areas_do_espaco');
+      if (error) ({ data, error } = await rpc('ministerios_publicos'));
       if (!vivo) return;
       if (error) { setFase('rede'); return; }
       setMins((data || []) as Min[]); setFase('pronto');

@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE } from '@/lib/igreja';
-import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
    /como-chegar — A PÁGINA DE MAIOR INTENÇÃO DO SITE
@@ -49,6 +50,7 @@ export const metadata: Metadata = {
 };
 
 export default function ComoChegar() {
+  preloadHeroi('chegar');
   return (
     <Site atual="/como-chegar" escuro>
       <Schema dados={{
@@ -127,7 +129,7 @@ export default function ComoChegar() {
 
       {/* --------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('chegar-fecho')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('chegar-fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">Antes de vir</p>
           <Tit className="g-h2">O que esperar de um domingo</Tit>

@@ -1,7 +1,8 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
-import { sbPublico as sb } from '@/lib/supabase';
+import { rpc } from '@/lib/publico';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { Agora } from '@/components/Agora';
@@ -18,7 +19,7 @@ import ProximoCulto from '@/components/ProximoCulto';
 import Abertura from '@/components/Abertura';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl } from '@/lib/plural';
-import { src as cria, alt as criaAlt, video as criaVideo, celular as criaCelular } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, video as criaVideo, celular as criaCelular, preloadHeroi } from '@/lib/criativos';
 import { descricaoPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
@@ -71,6 +72,8 @@ type Numeros = {
 export default function Casa() {
   /* a serifa itálica do título (identidade nova): preload para não piscar */
   preload('/tipos/instrument-serif-italic.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
+  /* a capa do herói (o poster do vídeo) é o LCP da home: entra na fila junto com o CSS */
+  preloadHeroi('heroi');
   const [mins, setMins] = useState<Min[]>([]);
   const [num, setNum] = useState<Numeros | null>(null);
   const [fase, setFase] = useState<'carregando' | 'pronto' | 'rede'>('carregando');
@@ -119,10 +122,8 @@ export default function Casa() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
-      const s = sb();
-      if (!s) { if (vivo) setFase('rede'); return; }
       const [lista, n] = await Promise.all([
-        s.rpc('ministerios_publicos'), s.rpc('numeros_publicos'),
+        rpc<Min[]>('ministerios_publicos'), rpc<Numeros | Numeros[]>('numeros_publicos'),
       ]);
       if (!vivo) return;
       if (lista.error) { setFase('rede'); return; }
@@ -294,8 +295,12 @@ export default function Casa() {
           {/* a pílula viva: a próxima coisa que acontece na igreja, calculada
               no aparelho (lib/semana.ts), com a ação certa para o momento */}
           <Agora pill />
-          <Tit as="h1" className="">Existe um lugar para você</Tit>
-          <p className="g-ed casa-heroi-frase">{IGREJA.frase}.</p>
+          {/* 11/10/2026: o título da home era o mesmo da /servir ("Existe um
+              lugar para você", que é a copy da landing de servir). A home
+              passa a abrir com a frase da igreja, em duas vozes, e a linha de
+              apoio vira o fato que a pessoa procura: quando e onde. */}
+          <Tit as="h1" className="">{IGREJA.frase}</Tit>
+          <p className="g-ed casa-heroi-frase">{IGREJA.cultoDia}s às {IGREJA.cultoHora}{IGREJA.followHora ? ` e Follow aos sábados às ${IGREJA.followHora}` : ''}, na {IGREJA.bairro}.</p>
           {/* UM PRIMÁRIO, UMA PALAVRA. 06/09/2026.
               Eram dois botões do mesmo tamanho: um branco sólido e um
               contornado. Sobre foto escura o contornado praticamente some, e
@@ -372,13 +377,13 @@ export default function Casa() {
           </div>
           <div className="casa-areas centro duas c-bloco">
             <Link href="/cultos" className="casa-area corte">
-              <img src={cria('domingo')} alt="" loading="lazy" decoding="async" />
+              <Foto src={cria('domingo')} sizes="(max-width: 759px) 100vw, 50vw" />
               <span className="casa-area-nome">Campus físico</span>
               <p className="casa-area-desc">Na {IGREJA.rua}. Equipe na porta, estacionamento orientado e GUIA Kids para as crianças.</p>
               <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · {IGREJA.bairro}</span>
             </Link>
-            <Link href="/guia-church-tv" className="casa-area corte">
-              <img src={cria('tv')} alt="" loading="lazy" decoding="async" />
+            <Link href="/cultos#ao-vivo" className="casa-area corte">
+              <Foto src={cria('tv')} sizes="(max-width: 759px) 100vw, 50vw" />
               <span className="casa-area-nome">Transmissão ao vivo</span>
               <p className="casa-area-desc">O culto de domingo ao vivo, no mesmo horário, pela GUIA Church TV. Para quem está longe, viajando ou ainda conhecendo a igreja.</p>
               <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · Ao vivo</span>
@@ -388,45 +393,12 @@ export default function Casa() {
       </section>
 
       {/* ------------------------------------------------ 02 · QUEM É A GUIA
-          No desktop, uma história em rolagem: a página trava e G, U, I e >
-          atravessam a tela, uma letra por vez, com a palavra e a frase da
-          igreja (CSS scroll-driven, ver .rolo). Onde não há suporte ou no
-          celular, os quatro azulejos. O texto é o da igreja, palavra por
-          palavra. */}
-      <section id="igreja" className="casa-escuro retic rev">
-        <div className="rolo">
-          <div className="rolo-in">
-            <div className="rolo-cab">
-              <p className="g-rot centro">A igreja</p>
-              {/* 14/09/2026: no desktop com scroll-timeline o `.sigla-azulejos`
-                  (que carrega o <h2>Somos GUIA</h2>) fica display:none, e a
-                  seção mais longa do site ficava sem título nenhum no sumário
-                  de cabeçalhos. O mesmo h2, só para leitor de tela e sumário:
-                  o visual do rolo continua o que era. */}
-              <h2 className="so-leitor">Somos GUIA</h2>
-            </div>
-            <div className="rolo-track">
-              {SIGLA.map((l, i) => (
-                <div key={l.t} className="rolo-p">
-                  <div>
-                    <div className="rolo-l">{l.l === '>' ? <span className="marca-chev"><Chevron /></span> : l.l}</div>
-                    <p className="rolo-t">{l.t}</p>
-                    <p className="rolo-d">{l.d}</p>
-                    {i === SIGLA.length - 1 && (
-                      <div className="g-acoes centro">
-                        <Link href="/sobre" className="acao">Quem somos <IcSeta /></Link>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <span className="rolo-n">Somos GUIA · quatro palavras</span>
-            <div className="rolo-prog"><i /></div>
-          </div>
-        </div>
-
-        <div className="sigla-azulejos">
+          11/10/2026: saiu a história em rolagem (a página travava e G, U, I
+          e > atravessavam a tela, 340vh de rolagem presa). O Arthur pediu
+          "mais objetivo e direto": os quatro azulejos dizem o mesmo em uma
+          tela, e /sobre conta o resto. */}
+      <section id="igreja" className="casa-escuro rev">
+        <div className="sigla-azulejos sempre">
           <div className="g g-secao">
             <div className="c">
               <p className="g-rot">A igreja</p>
@@ -477,7 +449,7 @@ export default function Casa() {
           <div className="casa-areas centro">
             {mins.map(m => (
               <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
-                <img src={fotoDaArea(m.slug)} alt="" loading="lazy" />
+                <Foto src={fotoDaArea(m.slug)} />
                 <span className="casa-area-nome">{m.nome}</span>
                 {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
                 <span className="casa-area-selo">
@@ -498,7 +470,7 @@ export default function Casa() {
 
       {/* --------------------------------------------------------- FECHO */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('fecho')} alt={criaAlt('fecho')} loading="lazy" decoding="async" />
+        <Foto src={cria('fecho')} alt={criaAlt('fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">Sempre cabe mais um</p>
           {/* 09/09/2026: aqui repetia, com as mesmas palavras, os números da

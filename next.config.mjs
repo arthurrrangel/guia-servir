@@ -181,7 +181,10 @@ const nextConfig = {
          O endereço fica válido; quem digita cai onde o trabalho acontece. */
       { source: '/acessar/voluntario', destination: '/eu', permanent: true },
       /* atalhos que a arquitetura usou em rascunho e que alguém vai digitar */
-      { source: '/tv', destination: '/guia-church-tv', permanent: true },
+      /* 11/10/2026: a página da TV (uma tela só) virou a faixa "ao vivo" da
+         /cultos. Os dois endereços antigos caem lá, no ponto certo. */
+      { source: '/tv', destination: '/cultos#ao-vivo', permanent: true },
+      { source: '/guia-church-tv', destination: '/cultos#ao-vivo', permanent: true },
       { source: '/pequenos-grupos', destination: '/pequena-guia', permanent: true },
       { source: '/pg', destination: '/pequena-guia', permanent: true },
       { source: '/contato', destination: '/como-chegar', permanent: false },

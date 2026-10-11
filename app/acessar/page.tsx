@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
@@ -54,7 +55,7 @@ export default function Acessar() {
           <div className="g-tiles tres centro c-larga c-bloco grande">
             {PORTAS.map(p => (
               <Link key={p.href} href={p.href} className="g-tile">
-                <img src={cria(p.foto)} alt="" loading="lazy" decoding="async" />
+                <Foto src={cria(p.foto)} sizes="(max-width: 759px) 50vw, 33vw" />
                 <span className="g-tile-seta" aria-hidden="true"><IcSeta /></span>
                 <span className="g-tile-l num">{p.n}</span>
                 <span><span className="g-tile-t">{p.t}</span><span className="g-tile-d">{p.d}</span></span>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Foto } from '@/components/Foto';
 import Link from 'next/link';
 import { cartao } from '@/lib/meta';
 import { Site } from '@/components/Site';
@@ -6,7 +7,7 @@ import { Tit, Schema, Luz } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { src as cria, alt as criaAlt } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
    /sobre — QUEM SOMOS
@@ -37,6 +38,7 @@ export const metadata: Metadata = {
 };
 
 export default function Sobre() {
+  preloadHeroi('sobre');
   return (
     <Site atual="/sobre" escuro>
       <Schema dados={{
@@ -100,7 +102,7 @@ export default function Sobre() {
 
       {/* -------------------------------------------- o versículo, de ponta a ponta */}
       <section className="g-cheio meio centro rev">
-        <img src={cria('palavra')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('palavra')} sizes="100vw" />
         <div className="g">
           <blockquote className="g-ed g-versiculo">
             <Luz>Eis que o povo é um, e todos têm uma mesma língua; e isto é o que começam a fazer; e, agora, não haverá restrição para tudo o que eles intentarem fazer.</Luz>
@@ -151,7 +153,7 @@ export default function Sobre() {
 
       {/* --------------------------------------------------------------- fecho */}
       <section className="g-cheio centro fecho rev">
-        <img src={cria('sobre-fecho')} alt="" loading="lazy" decoding="async" />
+        <Foto src={cria('sobre-fecho')} sizes="100vw" />
         <div className="g">
           <p className="g-rot">Venha nos visitar</p>
           <Tit className="g-h2">Conheça a GUIA de perto</Tit>

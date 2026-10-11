@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { preload } from 'react-dom';
-import { sbPublico as sb } from '@/lib/supabase';
+import { rpc } from '@/lib/publico';
 import { IcSeta } from '@/components/Icones';
 import { Simbolo } from '@/components/Marca';
 import Movimento from '@/components/Movimento';
@@ -12,7 +12,7 @@ import Pe from '@/components/Pe';
 import { IGREJA } from '@/lib/igreja';
 import { telefoneOk } from '@/lib/nome';
 import { descricaoPublica } from '@/lib/areas-publicas';
-import { src as cria, alt as criaAlt, celular as criaCel } from '@/lib/criativos';
+import { src as cria, alt as criaAlt, celular as criaCel, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
    /servir — "EXISTE UM LUGAR PARA VOCÊ" · 10/10/2026
@@ -148,6 +148,7 @@ function useContagem(alvo: number, ativo: boolean) {
 export default function Servir() {
   preload('/tipos/instrument-serif-italic.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
   preload('/tipos/instrument-serif.woff2', { as: 'font', type: 'font/woff2', crossOrigin: 'anonymous' });
+  preloadHeroi('servir');
 
   const [mins, setMins] = useState<Min[]>(AREAS_COPY);
   const [num, setNum] = useState<Numeros>(NUM_COPY);
@@ -156,8 +157,7 @@ export default function Servir() {
   useEffect(() => {
     let vivo = true;
     void (async () => {
-      const s = sb(); if (!s) { if (vivo) setRede(true); return; }
-      const [lista, n] = await Promise.all([s.rpc('ministerios_publicos'), s.rpc('numeros_publicos')]);
+      const [lista, n] = await Promise.all([rpc('ministerios_publicos'), rpc('numeros_publicos')]);
       if (!vivo) return;
       if (lista.error) setRede(true);
       else if (Array.isArray(lista.data) && lista.data.length) setMins(ordenar(lista.data as Min[]));
@@ -310,7 +310,7 @@ function Areas({ mins, rede }: { mins: Min[]; rede: boolean }) {
             const texto = c?.texto ?? descricaoPublica(m.slug, m.descricao) ?? '';
             return (
               <li key={m.slug} className="sv-r" style={{ ['--i' as string]: 2 + i }}>
-                <Link href={`/servir/${m.slug}`} className="sv-cartao" aria-label={`${m.nome}: ${dois(m.postos)} postos${m.aberto ? '' : ', conversa antes'}`}>
+                <Link href={`/servir/${m.slug}`} className="sv-cartao">
                   <h3>{m.nome}</h3>
                   <span className="sv-postos">{dois(m.postos)} {m.postos === 1 ? 'posto' : 'postos'}</span>
                   {!m.aberto && <span className="sv-tag">conversa antes</span>}
