@@ -23,10 +23,12 @@ import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
    definidos: quadro vazio com "entra aqui depois" é bastidor, não site.
    ============================================================================= */
 
+/* 11/10/2026 ("mais minimalista"): cada pilar ficou com a primeira frase do
+   texto do Arthur; a segunda saiu da tela */
 const PILARES = [
-  { q: 'Relacionamento', r: 'Ninguém foi chamado para caminhar sozinho. Pertencer é parte fundamental da vida cristã.' },
-  { q: 'Generosidade', r: 'Tudo o que temos vem de Deus. Somos generosos com o tempo, os recursos e os dons que Ele colocou em nossas mãos.' },
-  { q: 'Serviço', r: 'Serviço é característica de liderança no Reino. Quem serve se torna protagonista e agente de mudança na sociedade.' },
+  { q: 'Relacionamento', r: 'Ninguém foi chamado para caminhar sozinho.' },
+  { q: 'Generosidade', r: 'Tudo o que temos vem de Deus.' },
+  { q: 'Serviço', r: 'Serviço é característica de liderança no Reino.' },
 ];
 
 export const metadata: Metadata = {
@@ -53,7 +55,7 @@ export default function Sobre() {
         <div className="g">
           <p className="g-rot">Quem somos</p>
           <Tit as="h1" className="g-h1">Uma comunidade que cultiva uma nova cultura</Tit>
-          <p className="g-ed">A GUIA é uma igreja que existe para ajudar pessoas a viverem uma fé prática, construída em relacionamento com Deus e com outras pessoas.</p>
+          <p className="g-ed">Fé prática, em relacionamento com Deus e com outras pessoas.</p>
           <div className="g-acoes">
             <Link href="/cultos" className="acao cheia">Ver os cultos <IcSeta /></Link>
             <Link href="/pequena-guia" className="g-link claro">Pequena Guia</Link>
@@ -63,12 +65,14 @@ export default function Sobre() {
 
       {/* ------------------------------------------------------ o que acreditamos
           O segundo parágrafo do Arthur, sozinho numa faixa clara: é a frase
-          que explica a de cima, e merece respirar antes da sigla. */}
+          que explica a de cima, e merece respirar antes da sigla.
+          11/10/2026 ("mais minimalista"): ficou a primeira oração e o seu
+          complemento; o resto do parágrafo saiu da tela. */}
       <section className="casa-papel rev">
         <div className="g g-secao justa">
           <div className="c">
             <p className="g-rot">O que acreditamos</p>
-            <p className="g-ed g-ed-grande">Acreditamos que a igreja é mais do que um lugar para frequentar. É uma comunidade onde cada pessoa pode encontrar acolhimento, crescer na fé, desenvolver seus dons e participar do que Deus está fazendo.</p>
+            <p className="g-ed g-ed-grande">A igreja é mais do que um lugar para frequentar. É uma comunidade.</p>
           </div>
         </div>
       </section>
@@ -157,7 +161,6 @@ export default function Sobre() {
         <div className="g">
           <p className="g-rot">Venha nos visitar</p>
           <Tit className="g-h2">Conheça a GUIA de perto</Tit>
-          <p className="g-ed">Participe de um culto e descubra uma comunidade preparada para receber você e sua família.</p>
           <div className="g-acoes">
             <Link href="/como-chegar" className="acao cheia">Quero conhecer a GUIA <IcSeta /></Link>
             <Link href="/cultos" className="g-link claro">Ver os cultos</Link>

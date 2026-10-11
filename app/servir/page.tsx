@@ -41,6 +41,13 @@ import { src as cria, alt as criaAlt, celular as criaCel, preloadHeroi } from '@
    as áreas e abre o guia de quem não sabe escolher. Um segundo backend para
    "interesse" seria uma migração que o Arthur precisaria rodar e uma fila
    que ninguém olha hoje.
+
+   11/10/2026, à tarde: "o site tem que ser mais minimalista, menos texto
+   embaixo". As nove seções e os títulos da copy ficaram; o que saiu foi a
+   elaboração: cada parágrafo de apoio virou uma frase (a primeira ou a mais
+   forte da copy), cada cartão de área ficou com título e uma frase, cada
+   passo com uma linha, objeções e perguntas com a resposta curta. O texto
+   inteiro continua no documento do Arthur; a tela mostra o que decide.
    ============================================================================= */
 
 type Min = { slug: string; nome: string; descricao: string | null; postos: number; aberto: boolean; artigo: string };
@@ -61,23 +68,23 @@ const AREAS_COPY: Min[] = [
 const CARTAO: Record<string, { titulo: string; texto: string }> = {
   midia: {
     titulo: 'Faça a mensagem chegar longe',
-    texto: 'Da letra no telão à foto que alcança quem ainda não conhece a casa, passando pela transmissão para quem acompanha de longe. Tem posto até pra quem prefere servir na semana: a edição é a única que não exige estar no domingo.',
+    texto: 'Da letra no telão à transmissão para quem acompanha de longe.',
   },
   louvor: {
     titulo: 'Conduza a igreja à presença de Deus',
-    texto: 'Do dirigente ao som, cada posto sustenta o ambiente pra que alguém tenha um encontro verdadeiro com o Pai. Se você toca, canta ou opera mesa, há um lugar pra você. A liderança conversa com você antes de escalar, porque adoração também se caminha em comunhão.',
+    texto: 'Se você toca, canta ou opera mesa, há um lugar pra você.',
   },
   kids: {
     titulo: 'Plante fé desde pequeno',
-    texto: 'Do berçário à turma de 8 a 12 anos, cada sala precisa de duas voluntárias por culto: uma conduz, outra apoia. Tem também posto de lanche. Servir criança pede preparo, então a conversa vem antes da escala. Sempre. A semente de hoje é a fé de amanhã.',
+    texto: 'Do berçário à turma de 8 a 12 anos. A semente de hoje é a fé de amanhã.',
   },
   servico: {
     titulo: 'Receba cada pessoa como família',
-    texto: 'É a maior equipe da igreja, e não por acaso: recepção, estacionamento, visitantes, segurança, cozinha, setor. Quem chega pela primeira vez encontra um rosto seu antes de encontrar o púlpito. Hospitalidade também é ministério.',
+    texto: 'Recepção, estacionamento, visitantes, segurança, cozinha, setor.',
   },
   livraria: {
     titulo: 'Leve o culto pra fora dele',
-    texto: 'Duas pessoas por domingo: uma abre antes do culto, as duas atendem na saída. Se você gosta de livros e de conversar com gente, é aqui. Cada recurso que sai da sua mão acompanha alguém na caminhada da semana.',
+    texto: 'Se você gosta de livros e de conversar com gente, é aqui.',
   },
 };
 /* a ordem da apresentação; o que o banco publicar além disso entra depois */
@@ -89,25 +96,25 @@ const ordenar = (ms: Min[]) =>
   });
 
 const PASSOS = [
-  { n: '01', t: 'Cadastro', d: 'Você marca as funções que combinam com você e preenche o cadastro. Menos de um minuto.' },
-  { n: '02', t: 'Conversa', d: 'Alguém da liderança fala com você. Pra te conhecer de verdade e te encaixar onde faz sentido, não pra te empurrar num posto.' },
-  { n: '03', t: 'Time', d: 'Seu nome entra na lista da área e o seu espaço pessoal abre.' },
-  { n: '04', t: 'Escala', d: 'Todo mês você diz quando pode. A escala é montada em cima disso, nunca ao contrário.' },
+  { n: '01', t: 'Cadastro', d: 'Marque as funções que combinam com você. Menos de um minuto.' },
+  { n: '02', t: 'Conversa', d: 'Alguém da liderança fala com você.' },
+  { n: '03', t: 'Time', d: 'Seu nome entra na lista da área e o seu espaço abre.' },
+  { n: '04', t: 'Escala', d: 'Todo mês você diz quando pode.' },
 ];
 
 const OBJECOES = [
-  { q: '"E se eu não souber fazer nada?"', r: 'Todo posto da GUIA é ocupado por alguém que um dia não sabia. A pessoa do som aprendeu na mesa, a professora do berçário aprendeu na sala. Você marca no cadastro até o que ainda não sabe fazer, e tem gente pra ensinar. Dom se desenvolve no servir.' },
-  { q: '"E se eu não der conta do compromisso?"', r: 'A escala é montada em cima da sua disponibilidade. Todo mês você marca os dias em que pode, e só. Algo inesperado apareceu? O time cobre, é pra isso que ele existe. Corpo se sustenta em corpo.' },
-  { q: '"E se eu escolher a área errada?"', r: 'A conversa com a liderança existe exatamente pra isso. E mudar de área não é recomeçar do zero: é se encontrar no lugar certo. Deus não se frustra com o nosso processo.' },
+  { q: '"E se eu não souber fazer nada?"', r: 'Todo posto da GUIA é ocupado por alguém que um dia não sabia. Tem gente pra ensinar.' },
+  { q: '"E se eu não der conta do compromisso?"', r: 'A escala é montada em cima da sua disponibilidade. Algo inesperado? O time cobre.' },
+  { q: '"E se eu escolher a área errada?"', r: 'Mudar de área não é recomeçar do zero: é se encontrar no lugar certo.' },
 ];
 
 const PERGUNTAS: { q: string; r: React.ReactNode }[] = [
-  { q: 'Preciso ser membro para servir?', r: 'Não. Se você já frequenta os cultos e quer usar seus dons, o cadastro é aberto. A conversa com a liderança alinha o resto.' },
-  { q: 'Quanto tempo de domingo eu vou gastar?', r: 'Depende do posto. Alguns chegam às 8h30, outros entram junto com a igreja. Na conversa com a liderança você fica sabendo exatamente o que o seu posto pede.' },
-  { q: 'Nunca fiz nada disso. E agora?', r: 'Escolhe mesmo assim. O cadastro aceita o que você quer aprender, e cada área tem gente que ensina no próprio serviço. Ninguém foi chamado já pronto.' },
-  { q: 'Como funciona a escala?', r: 'Todo mês você diz os dias em que pode servir. A escala do mês seguinte é montada em cima disso.' },
-  { q: 'O que é essa "conversa antes" no Louvor e no Kids?', r: 'Duas áreas conversam com cada pessoa antes de escalar. No Louvor, pra entender seu instrumento e sua disponibilidade. No Kids, porque servir à criança pede preparo. Você preenche o cadastro e a liderança chama você.' },
-  { q: 'Posso conhecer antes de me comprometer?', r: <>Pode. Chega no próximo domingo e procura alguém da equipe na porta. Prefere conversar antes? Chama a gente no <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>.</> },
+  { q: 'Preciso ser membro para servir?', r: 'Não. Se você já frequenta os cultos, o cadastro é aberto.' },
+  { q: 'Quanto tempo de domingo eu vou gastar?', r: 'Depende do posto: alguns chegam às 8h30, outros entram junto com a igreja.' },
+  { q: 'Nunca fiz nada disso. E agora?', r: 'Escolhe mesmo assim. Cada área tem gente que ensina no próprio serviço.' },
+  { q: 'Como funciona a escala?', r: 'Todo mês você diz os dias em que pode. A escala do mês seguinte é montada em cima disso.' },
+  { q: 'O que é essa "conversa antes" no Louvor e no Kids?', r: 'As duas áreas conversam com cada pessoa antes de escalar. Você preenche o cadastro e a liderança chama você.' },
+  { q: 'Posso conhecer antes de me comprometer?', r: <>Pode. Chega no próximo domingo e procura alguém da equipe na porta, ou chama a gente no <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>.</> },
 ];
 
 const Visto = () => (
@@ -185,7 +192,7 @@ export default function Servir() {
       <Movimento />
       <Topo atual="/servir" />
       <main id="conteudo">
-        <Heroi pessoas={num.pessoas} />
+        <Heroi />
         <Frase />
         <Numeros num={num} />
         <Areas mins={mins} rede={rede} />
@@ -201,7 +208,7 @@ export default function Servir() {
 }
 
 /* ----------------------------------------------------------------- 1 · herói */
-function Heroi({ pessoas }: { pessoas: number }) {
+function Heroi() {
   return (
     <section className="sv-heroi" aria-labelledby="sv-t">
       <picture>
@@ -217,7 +224,7 @@ function Heroi({ pessoas }: { pessoas: number }) {
           <span className="sv-mask"><span className="sv-linha sv-it" style={{ ['--i' as string]: 1 }}>para você.</span></span>
         </h1>
         <p className="sv-lead sv-e" style={{ ['--i' as string]: 2 }}>
-          Deus semeou dons em cada pessoa. Todo domingo, {pessoas} pessoas cultivam os delas para que o culto aconteça. O seu também tem um posto esperando.
+          Deus semeou dons em cada pessoa. O seu tem um posto esperando.
         </p>
         <div className="sv-acoes sv-e" style={{ ['--i' as string]: 3 }}>
           <a href="#quero-servir" className="sv-bt branco">Quero servir</a>
@@ -241,8 +248,7 @@ function Frase() {
               Deus se alegra<br />com o seu <span className="sv-it">servir.</span>
             </h2>
             <div className="sv-txt">
-              <p className="sv-r" style={{ ['--i' as string]: 2 }}>Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.</p>
-              <p className="sv-r" style={{ ['--i' as string]: 3 }}>O culto começa às {IGREJA.cultoHora}. O serviço, muito antes. É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</p>
+              <p className="sv-r" style={{ ['--i' as string]: 2 }}>O culto começa às {IGREJA.cultoHora}. O serviço, muito antes.</p>
             </div>
           </div>
           <div className="sv-foto-v sv-r" style={{ ['--i' as string]: 2 }}>
@@ -284,10 +290,10 @@ function Numeros({ num }: { num: Numeros }) {
             <span className="sv-arroba sv-r" style={{ ['--i' as string]: 1 }}>Hoje na GUIA</span>
             <h2 id="sv-num-t" className="sv-h2 sv-r" style={{ ['--i' as string]: 2 }}>Números <span className="sv-it">vivos.</span></h2>
             <ul className="sv-vivos">
-              <li className="sv-r" style={{ ['--i' as string]: 3 }}><span><b>{pessoas}</b> pessoas servindo. Cada uma começou sem saber fazer nada.</span><Visto /></li>
-              <li className="sv-r" style={{ ['--i' as string]: 4 }}><span><b>{areas}</b> áreas abertas. Uma delas tem a sua cara.</span><Visto /></li>
-              <li className="sv-r" style={{ ['--i' as string]: 5 }}><span><b>{postos}</b> postos na escala. E sempre cabe mais um.</span><Visto /></li>
-              <li className="sv-r" style={{ ['--i' as string]: 6 }}><span><b>{cultos}</b> encontros no mês. Servir aqui é comunhão, não plantão solitário.</span><Visto /></li>
+              <li className="sv-r" style={{ ['--i' as string]: 3 }}><span><b>{pessoas}</b> pessoas servindo.</span><Visto /></li>
+              <li className="sv-r" style={{ ['--i' as string]: 4 }}><span><b>{areas}</b> áreas abertas.</span><Visto /></li>
+              <li className="sv-r" style={{ ['--i' as string]: 5 }}><span><b>{postos}</b> postos na escala.</span><Visto /></li>
+              <li className="sv-r" style={{ ['--i' as string]: 6 }}><span><b>{cultos}</b> encontros no mês.</span><Visto /></li>
             </ul>
           </div>
         </div>
@@ -303,7 +309,7 @@ function Areas({ mins, rede }: { mins: Min[]; rede: boolean }) {
       <div className="sv-in">
         <span className="sv-sede sv-r"><b>guiachurch</b><i>|</i>sede</span>
         <h2 id="sv-areas-t" className="sv-h2 sv-r" style={{ ['--i' as string]: 1 }}>Escolha por onde <span className="sv-it">começar.</span></h2>
-        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>Você escolhe as funções no cadastro. Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar, porque dom também se discipula.</p>
+        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar.</p>
         <ul className="sv-cartoes">
           {mins.map((m, i) => {
             const c = CARTAO[m.slug];
@@ -360,11 +366,11 @@ function JaServe() {
       <div className="sv-ja-cartao">
         <span className="sv-sede sv-r"><b>guiachurch</b><i>|</i>sede</span>
         <h2 id="sv-ja-t" className="sv-h2 sv-r" style={{ ['--i' as string]: 1 }}>Seu espaço tem sua escala, seus dias e seu líder.</h2>
-        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza.</p>
+        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>Escala, avisos e contato do líder num lugar só.</p>
         <div className="sv-ja-q">
           <div className="sv-r" style={{ ['--i' as string]: 3 }}>
             <h3 className="sv-h3">Ainda não tem PIN?</h3>
-            <p>Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.</p>
+            <p>Ache seu nome na lista da sua área e crie o PIN na hora.</p>
           </div>
           <div className="sv-r" style={{ ['--i' as string]: 4 }}>
             <h3 className="sv-h3">Ainda não serve?</h3>
@@ -386,7 +392,7 @@ function Objecoes() {
       <span className="sv-marca-canto" aria-hidden="true"><Simbolo /></span>
       <div className="sv-in">
         <h2 id="sv-obj-t" className="sv-h2 sv-r">Ninguém aqui começou sabendo.</h2>
-        <p className="sv-lead sv-r" style={{ ['--i' as string]: 1 }}>Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:</p>
+        <p className="sv-lead sv-r" style={{ ['--i' as string]: 1 }}>Até os mais experientes um dia estiveram do seu lado dessa tela.</p>
         <div className="sv-obj-q">
           {OBJECOES.map((o, i) => (
             <div key={o.q} className="sv-r" style={{ ['--i' as string]: 2 + i }}>
@@ -472,7 +478,7 @@ function Fim({ mins, postos }: { mins: Min[]; postos: number }) {
       <div className="sv-in">
         <span className="sv-sede sv-r"><b>guiachurch</b><i>|</i>sede</span>
         <h2 id="sv-fim-t" className="sv-h2 sv-r" style={{ ['--i' as string]: 1 }}>Sempre cabe <span className="sv-it">mais um.</span></h2>
-        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>O próximo domingo tem {postos} postos para ocupar. Um deles pode ser o seu. Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.</p>
+        <p className="sv-lead sv-r" style={{ ['--i' as string]: 2 }}>O próximo domingo tem {postos} postos para ocupar. Um deles pode ser o seu.</p>
         <form className="sv-form sv-r" style={{ ['--i' as string]: 3 }} onSubmit={enviar} noValidate>
           <div className="sv-campo">
             <label htmlFor="sv-nome">Nome</label>
@@ -501,7 +507,7 @@ function Fim({ mins, postos }: { mins: Min[]; postos: number }) {
           </div>
           <button type="submit" className="sv-bt branco" aria-busy={indo}>{indo ? 'Abrindo o cadastro' : 'Quero servir'}</button>
         </form>
-        <p className="sv-fim-micro sv-r" style={{ ['--i' as string]: 4 }}>Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.</p>
+        <p className="sv-fim-micro sv-r" style={{ ['--i' as string]: 4 }}>Seus dados servem só pra te chamar pra essa conversa.</p>
       </div>
     </section>
   );

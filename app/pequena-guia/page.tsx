@@ -60,7 +60,7 @@ export default function PequenaGuia() {
         <div className="g">
           <p className="g-rot">Pequena Guia</p>
           <Tit as="h1" className="g-h1">Relacionamentos que fortalecem sua fé.</Tit>
-          <p className="g-ed">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
+          <p className="g-ed">Compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
           <div className="g-acoes">
             <a href="#encontrar" className="acao cheia">Quero encontrar uma Pequena Guia <IcSeta /></a>
             <Link href="/cultos" className="g-link claro">Prefiro começar pelos cultos</Link>
@@ -109,13 +109,10 @@ export default function PequenaGuia() {
           <div className="c">
             <p className="g-rot">Perto de você</p>
             <Tit className="g-h2" id="encontrar-t">Encontre uma Pequena Guia perto de você</Tit>
-            {/* 09/09/2026: eram oito linhas centradas — parágrafo, não linha de
-                apoio. O texto é o mesmo; muda a régua.
-                10/09/2026: a chamada do formulário volta a ser a do Arthur,
-                palavra por palavra. Ela ecoa o fim do parágrafo ("um grupo
-                próximo da sua casa") de propósito: é o texto dele, e o eco é
-                a instrução repetida no ponto em que a pessoa vai agir. */}
-            <p className="g-ed g-texto">A Pequena Guia é um grupo que se reúne durante a semana para compartilhar a vida, estudar a Palavra e crescer em comunidade. É um espaço de relacionamento, cuidado e fé, onde você pode caminhar com outras pessoas e encontrar um grupo próximo da sua casa.</p>
+            {/* 10/09/2026: a chamada do formulário é a do Arthur, palavra por
+                palavra. 11/10/2026 ("mais minimalista"): o parágrafo que
+                vinha antes dela saiu; o herói já diz o que a Pequena Guia é,
+                e aqui a pessoa veio agir. */}
             <p className="g-form-chamada">Preencha seus dados e encontre um grupo próximo da sua casa.</p>
           </div>
           <div className="c c-bloco">

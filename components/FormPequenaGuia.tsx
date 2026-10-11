@@ -182,7 +182,7 @@ export function FormPequenaGuia() {
         </button>
       </div>
       <p className="g-form-nota">
-        Seus dados servem só para te apontar uma Pequena Guia e nunca são publicados. <Link href="/privacidade">Como cuidamos deles</Link>.
+        Seus dados nunca são publicados. <Link href="/privacidade">Como cuidamos deles</Link>.
       </p>
     </form>
   );

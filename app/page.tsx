@@ -20,7 +20,7 @@ import Abertura from '@/components/Abertura';
 import { SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { pl } from '@/lib/plural';
 import { src as cria, alt as criaAlt, video as criaVideo, celular as criaCelular, preloadHeroi } from '@/lib/criativos';
-import { descricaoPublica } from '@/lib/areas-publicas';
+import { linhaPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
    A HOME
@@ -339,7 +339,7 @@ export default function Casa() {
         <Link href="/pequena-guia" className="fato">
           <span className="fato-r">Comunidade</span>
           <span className="fato-v">Conheça uma Pequena Guia<IcSeta /></span>
-          <span className="fato-d">Um espaço para compartilhar a vida, estudar a Palavra e crescer em comunidade.</span>
+          <span className="fato-d">Grupos durante a semana, perto de você.</span>
         </Link>
       </section>
 
@@ -366,8 +366,10 @@ export default function Casa() {
           08/09/2026, pedido do Arthur: "Participe da nossa comunidade de onde
           estiver", com duas portas — o campus físico e a transmissão ao vivo.
           São dois azulejos de foto (o mesmo componente das áreas), cada um com
-          o texto de apoio e o selo com o essencial. As perguntas de quem nunca
-          foi continuam em /cultos — a home não repete. */}
+          o selo com o essencial. As perguntas de quem nunca foi continuam em
+          /cultos — a home não repete.
+          11/10/2026 ("mais minimalista"): os dois parágrafos de apoio saíram;
+          o selo já diz dia, hora e lugar. */}
       <section id="domingo" className="casa-papel rev">
         <div className="g g-secao">
           <div className="c">
@@ -379,13 +381,11 @@ export default function Casa() {
             <Link href="/cultos" className="casa-area corte">
               <Foto src={cria('domingo')} sizes="(max-width: 759px) 100vw, 50vw" />
               <span className="casa-area-nome">Campus físico</span>
-              <p className="casa-area-desc">Na {IGREJA.rua}. Equipe na porta, estacionamento orientado e GUIA Kids para as crianças.</p>
               <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · {IGREJA.bairro}</span>
             </Link>
             <Link href="/cultos#ao-vivo" className="casa-area corte">
               <Foto src={cria('tv')} sizes="(max-width: 759px) 100vw, 50vw" />
               <span className="casa-area-nome">Transmissão ao vivo</span>
-              <p className="casa-area-desc">O culto de domingo ao vivo, no mesmo horário, pela GUIA Church TV. Para quem está longe, viajando ou ainda conhecendo a igreja.</p>
               <span className="casa-area-selo">{IGREJA.cultoDia} · {IGREJA.cultoHora} · Ao vivo</span>
             </Link>
           </div>
@@ -451,7 +451,10 @@ export default function Casa() {
               <Link key={m.slug} href={`/servir/${m.slug}`} className="casa-area corte">
                 <Foto src={fotoDaArea(m.slug)} />
                 <span className="casa-area-nome">{m.nome}</span>
-                {descricaoPublica(m.slug, m.descricao) && <p className="casa-area-desc">{descricaoPublica(m.slug, m.descricao)}</p>}
+                {/* 11/10/2026: o parágrafo de cada área saiu do azulejo; a
+                    linha curta de lib/areas-publicas.ts diz o que a área faz,
+                    e /servir/<área> conta o resto */}
+                {linhaPublica(m.slug) && <p className="casa-area-desc">{linhaPublica(m.slug)}</p>}
                 <span className="casa-area-selo">
                   {m.postos} {m.postos === 1 ? 'posto' : 'postos'}
                   {!m.aberto && ' · conversa antes'}

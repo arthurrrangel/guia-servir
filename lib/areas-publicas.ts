@@ -41,3 +41,22 @@ const PUBLICA: Record<string, string> = {
 export function descricaoPublica(slug: string, doBanco?: string | null): string | null {
   return PUBLICA[slug] ?? (doBanco?.trim() || null);
 }
+
+/* A LINHA CURTA — 11/10/2026. O Arthur pediu o site "mais minimalista, menos
+   texto embaixo". O parágrafo de cima continua sendo o texto da área (cartão
+   de compartilhamento, descrição da página, o que o Google lê); o que
+   aparece sob o nome da área no azulejo da home e no herói de /servir/<área>
+   é esta linha, cortada do parágrafo dele. Área sem linha aqui não ganha
+   linha nenhuma: melhor nada do que um parágrafo de 150 caracteres. */
+const LINHA: Record<string, string> = {
+  midia: 'Imagem, luz, som e transmissão.',
+  louvor: 'Música e serviço para um encontro com Deus.',
+  kids: 'Fé plantada no coração das crianças.',
+  servico: 'Acolher cada pessoa que chega à nossa casa.',
+  livraria: 'Recursos que prolongam o culto durante a semana.',
+};
+
+/** A linha curta da área, para o lugar onde só cabe uma linha. */
+export function linhaPublica(slug: string): string | null {
+  return LINHA[slug] ?? null;
+}

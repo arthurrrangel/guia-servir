@@ -6,7 +6,7 @@ import {
   TIPOS, TEM_PIX, PIX_CHAVE, PIX_NOME, PIX_CIDADE,
   txidDe, valorDeDigitos, emReais, valorInvalido, fraseDoFim, MIN, MAX, type TipoOferta,
 } from '@/lib/oferta';
-import { IGREJA, canalDeConversa } from '@/lib/igreja';
+import { canalDeConversa } from '@/lib/igreja';
 import { IcCheck, IcSeta } from '@/components/Icones';
 
 /* =============================================================================
@@ -388,8 +388,7 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
       </div>
 
       <p className="g-form-nota dim">
-        {IGREJA.nome} é uma igreja: dízimos e ofertas sustentam o trabalho dela.
-        Nada aqui é cobrança, e você decide o valor.
+        Dízimos e ofertas sustentam o trabalho da igreja. Nada aqui é cobrança.
       </p>
     </div>
   );

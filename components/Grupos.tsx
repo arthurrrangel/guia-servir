@@ -131,7 +131,7 @@ export function Grupos() {
               {estado === 'pedindo' && 'Pedindo a sua posição…'}
               {estado === 'negado' && 'Sem a posição não dá para calcular. Toque num pino do mapa.'}
               {estado === 'sem' && 'Este aparelho não informa a posição. Toque num pino do mapa.'}
-              {estado === '' && 'A posição fica no seu aparelho, e só é usada se você pedir.'}
+              {estado === '' && 'A posição não sai do seu aparelho.'}
             </span>
           </p>
         )}

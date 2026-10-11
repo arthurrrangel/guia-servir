@@ -10,7 +10,7 @@ import { Tit } from '@/components/Texto';
 import { Carregando, linkZap } from '@/components/Tela';
 import { fotoDaArea, focoDaArea } from '@/lib/fotos';
 import { src as cria } from '@/lib/criativos';
-import { descricaoPublica } from '@/lib/areas-publicas';
+import { linhaPublica } from '@/lib/areas-publicas';
 
 /* =============================================================================
    /servir/[slug] — A ÁREA
@@ -55,10 +55,10 @@ const familia = (nome: string) => {
    lista é um aviso do que vem pela frente, não uma barra de progresso. O
    primeiro "feito" aparece na tela de acompanhamento, depois do envio. */
 const PASSOS = [
-  { t: 'Cadastro', d: 'Você marca as funções que combinam com você e preenche o cadastro. Menos de um minuto.' },
-  { t: 'Conversa', d: 'A liderança fala com você para te conhecer e te encaixar onde faz sentido.' },
-  { t: 'Time', d: 'Seu nome passa a aparecer na lista da área, e seu espaço pessoal abre.' },
-  { t: 'Escala', d: 'Todo mês você diz quando pode, e a escala é montada em cima disso.' },
+  { t: 'Cadastro', d: 'Marque as funções que combinam com você. Menos de um minuto.' },
+  { t: 'Conversa', d: 'A liderança fala com você.' },
+  { t: 'Time', d: 'Seu nome entra na lista da área e seu espaço abre.' },
+  { t: 'Escala', d: 'Todo mês você diz quando pode.' },
 ];
 
 export default function Area() {
@@ -142,7 +142,9 @@ export default function Area() {
         <div className="g">
           <p className="g-rot">Servir</p>
           <Tit as="h1" className="g-h1">{min.nome}</Tit>
-          {descricaoPublica(min.slug, min.descricao) && <p className="g-ed menor">{descricaoPublica(min.slug, min.descricao)}</p>}
+          {/* 11/10/2026 ("mais minimalista"): a linha curta da área, não o
+              parágrafo; o parágrafo segue no cartão de compartilhamento */}
+          {linhaPublica(min.slug) && <p className="g-ed">{linhaPublica(min.slug)}</p>}
           <div className="g-acoes">
             <Link href={`/servir/${min.slug}/cadastro`} className="acao cheia">Quero servir {na} {min.nome} <IcSeta /></Link>
             <Link href="/servir" className="g-link claro">Ver todas as áreas</Link>
@@ -157,12 +159,11 @@ export default function Area() {
             <div className="g-cab-txt">
               <p className="g-rot">Onde você pode servir</p>
               <Tit className="g-h2">{`O que se faz ${na} ${min.nome}`}</Tit>
-              <p className="g-ed">Você escolhe as suas no cadastro.</p>
               {/* A TELA MANDAVA FAZER UMA COISA QUE ELA NÃO OFERECE. Dizia "Marque
                   uma ou mais" numa lista de leitura. A marcação existe, mas no
-                  passo 2 do cadastro. Aqui a lista diz o que ela é, e onde a
-                  escolha acontece. */}
-              <p className="g-corpo">Pode escolher o que você ainda não sabe fazer. Tem gente para ensinar.</p>
+                  passo 2 do cadastro. Aqui a lista diz onde a escolha acontece,
+                  em uma linha (11/10/2026). */}
+              <p className="g-ed">Você escolhe as suas no cadastro, até o que ainda não sabe fazer.</p>
             </div>
           </div>
           <div className="cartoes livre resumo c-bloco grande">
@@ -187,7 +188,6 @@ export default function Area() {
             <div className="g-cab-txt">
               <p className="g-rot">Como funciona</p>
               <Tit className="g-h2">Do cadastro à escala</Tit>
-              <p className="g-ed">Quatro passos.</p>
             </div>
           </div>
           <ol className="cartoes quatro c-bloco grande">
@@ -233,7 +233,7 @@ export default function Area() {
             <Link href="/eu" className="g-link claro">Já sirvo aqui</Link>
           </div>
           {!min.aberto && (
-            <p className="g-nota">Essa área conversa com cada pessoa antes de escalar. Você preenche o cadastro e a liderança fala com você.</p>
+            <p className="g-nota">A liderança conversa com você antes de escalar.</p>
           )}
         </div>
       </section>

@@ -6,6 +6,7 @@ import { Site } from '@/components/Site';
 import { Tit, Schema } from '@/components/Texto';
 import { IcSeta } from '@/components/Icones';
 import { IGREJA, MAPA, MAPA_EMBED, ROTA_WAZE, SITE_IGREJA as SITE } from '@/lib/igreja';
+import { MODOS, textoDoModo as texto } from '@/lib/chegar';
 import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
 
 /* =============================================================================
@@ -20,21 +21,8 @@ import { src as cria, alt as criaAlt, preloadHeroi } from '@/lib/criativos';
    navegador e sair de casa.
    ============================================================================= */
 
-/* TRÊS MODOS DE CHEGAR, em cartões iguais. Textos do Arthur (08/09/2026),
-   palavra por palavra; só o endereço sai de lib/igreja.ts, como em todo o
-   site, para nunca divergir entre páginas. */
-const MODOS: Array<{ n: string; t: string; d: string; endereco?: string; d2?: string }> = [
-  { n: '01', t: 'De carro',
-    d: 'Aos domingos pela manhã, nossa equipe estará no local para orientar sua chegada e indicar o melhor lugar para estacionar. Para chegar com tranquilidade, recomendamos que você venha com pelo menos 10 minutos de antecedência.' },
-  /* "o endereço abaixo": o endereço sai numa linha própria, copiável, para a
-     frase ser verdade */
-  { n: '02', t: 'De aplicativo',
-    d: 'Insira o endereço abaixo no seu aplicativo:', endereco: `${IGREJA.rua}, ${IGREJA.bairro}`,
-    d2: 'O desembarque acontece diretamente na entrada da GUIA Church.' },
-  { n: '03', t: 'Chegando na nossa casa',
-    d: 'Nossa equipe estará na entrada para receber você antes do início do culto. Se for sua primeira vez, informe à recepção. Será uma alegria ajudar você e apresentar a GUIA Church.' },
-];
-const texto = (m: typeof MODOS[number]) => [m.d, m.endereco ? `${m.endereco}.` : '', m.d2 || ''].filter(Boolean).join(' ');
+/* TRÊS MODOS DE CHEGAR, em cartões iguais: lib/chegar.ts, os mesmos da
+   /cultos (11/10/2026: uma frase por modo, cortada do texto do Arthur). */
 const PERGUNTAS = [
   { q: 'Onde eu deixo o carro?', r: texto(MODOS[0]) },
   { q: 'Vou de aplicativo. Qual é o destino?', r: texto(MODOS[1]) },
@@ -110,7 +98,6 @@ export default function ComoChegar() {
             <div className="g-cab-txt">
               <p className="g-rot">Chegando</p>
               <Tit className="g-h2">Como chegar até a gente</Tit>
-              <p className="g-ed">De carro, de aplicativo ou a pé: tem alguém na porta esperando você.</p>
             </div>
           </div>
           <div className="cartoes c-bloco grande">
