@@ -440,3 +440,24 @@
    largura, inclusive onde o globals.css os escondia para dar lugar à
    história em rolagem ---- */
 .id .sigla-azulejos.sempre{ display:block !important }
+
+/* ---- cabeçalho de seção centrado: o parágrafo de apoio (.g-corpo) também
+   centra a própria caixa, não só o texto (em /servir/<área> ele ficava
+   encostado à esquerda sob um título centrado) ---- */
+.id .g-cab-txt .g-corpo{ margin-inline:auto; max-width:52ch }
+
+/* ---- listas numeradas (perguntas de /privacidade e dúvidas de
+   /onde-me-encaixo): no desktop o número era uma coluna solta à esquerda
+   de um texto centrado. Vira um chapéu laranja em cima da pergunta, como o
+   resto da identidade. ---- */
+@media(min-width:900px){
+  .id .g-perg li{ grid-template-columns:1fr; gap:8px; justify-items:center }
+  .id .g-perg-n{ font-family:var(--sv-sans); font-size:13px; font-weight:700; letter-spacing:.02em; color:var(--sv-ouro); opacity:1; padding-top:0 }
+  .id .qa summary{ grid-template-columns:1fr; justify-items:center; gap:8px; padding-bottom:10px }
+  .id .qa-n{ font-family:var(--sv-sans); font-size:13px; font-weight:700; letter-spacing:.02em; color:var(--sv-ouro); opacity:1 }
+  .id .qa-r{ margin-left:auto; margin-right:auto }
+}
+
+/* ---- /pequena-guia: no desktop, a tira de filtros centra como o resto da
+   seção (no celular ela rola de lado e começa à esquerda) ---- */
+@media(min-width:760px){ .id .pg-chips{ justify-content:center } }
