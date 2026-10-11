@@ -31,7 +31,7 @@ export function Agora({ pill }: { pill?: boolean } = {}) {
 
   const f = o ? fraseDoAgora(o) : { quando: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, oque: 'Culto de domingo' };
 
-  let acao: { href: string; rot: string; fora?: boolean } = { href: '/como-chegar', rot: 'Como chegar' };
+  let acao: { href: string; rot: string; fora?: boolean } = { href: '/cultos#como-chegar', rot: 'Como chegar' };
   if (o?.evento.tipo === 'grupo' && o.evento.grupo) {
     const g = o.evento.grupo;
     const waze = wazeDaPequenaGuia(g);
