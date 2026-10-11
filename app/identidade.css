@@ -282,8 +282,11 @@
   background:var(--sv-carvao); color:#fff; border:0; border-radius:22px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.05);
   position:relative; isolation:isolate; overflow:hidden;
 }
-.id .casa-papel .cartao::before,.id .casa-areia .cartao::before,.id .casa-papel .ficha > div::before,.id .casa-areia .ficha > div::before,
-.id .fato::before,.id .casa-papel .casa-area::before,.id .casa-areia .casa-area::before,.id .pg::before,.id .casa-papel .g-tile:not(:has(> img))::before{
+.id .casa-papel .cartao::before,.id .casa-areia .cartao::before,.id .casa-papel .ficha > div::before,.id .casa-areia .ficha > div::before,.id .fato::before,.id .casa-papel .casa-area::before,.id .casa-areia .casa-area::before,.id .pg::before{
+  content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; display:block;
+  background:url(/grao.png); opacity:.06; mix-blend-mode:screen;
+}
+.id .casa-papel .g-tile:not(:has(> img))::before{
   content:""; position:absolute; inset:0; z-index:-1; pointer-events:none; display:block;
   background:url(/grao.png); opacity:.06; mix-blend-mode:screen;
 }
@@ -317,17 +320,21 @@
 
 /* no escuro, o cartão é de papel: tinta por dentro, o laranja vira âmbar
    (laranja puro sobre papel não lê) */
-.id .casa-escuro .g-num > div,.id .casa-escuro .cartao,.id .casa-escuro.retic .cartao,.id .casa-escuro .g-tile:not(:has(> img)),.id .casa-escuro .ficha > div,.id .casa-escuro.retic .ficha > div,
-.id .casa-escuro .casa-area,.id .casa-escuro .fato,.id .casa-escuro .g-passo:not(:has(> img)){
+.id .casa-escuro .g-num > div,.id .casa-escuro .cartao,.id .casa-escuro.retic .cartao,.id .casa-escuro .ficha > div,.id .casa-escuro.retic .ficha > div,.id .casa-escuro .casa-area,.id .casa-escuro .fato{
+  background:var(--papel); color:var(--ink); border:0; border-radius:22px; box-shadow:none; transition:transform .5s var(--sv-ease),box-shadow .5s var(--sv-ease),background .3s;
+}
+.id .casa-escuro .g-tile:not(:has(> img)),.id .casa-escuro .g-passo:not(:has(> img)){
   background:var(--papel); color:var(--ink); border:0; border-radius:22px; box-shadow:none; transition:transform .5s var(--sv-ease),box-shadow .5s var(--sv-ease),background .3s;
 }
 .id .casa-escuro .ficha,.id .casa-escuro .cartoes{ background:transparent; border:0; gap:12px }
-.id .casa-escuro .cartao:hover,.id .casa-escuro .g-tile:not(:has(> img)):hover,.id .casa-escuro .casa-area:hover{ background:#fff; transform:translateY(-5px); box-shadow:0 34px 60px -34px rgba(0,0,0,.6) }
-.id .casa-escuro .cartao-t,.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-t,.id .casa-escuro .g-num b,.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-t,
-.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-l,.id .casa-escuro .ficha-v,.id .casa-escuro .casa-area-nome,.id .casa-escuro .cartao-end,.id .casa-escuro .fato-v{ color:var(--ink); font-weight:800; letter-spacing:-.035em }
-.id .casa-escuro .cartao-d,.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-d,.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-d,.id .casa-escuro .ficha-d,
-.id .casa-escuro .casa-area-desc,.id .casa-escuro .casa-area-desc.g-ed,.id .casa-escuro .fato-d{ color:var(--cinza) }
-.id .casa-escuro .cartao-n,.id .casa-escuro .g-num b + span,.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-n{ color:rgba(20,20,21,.5); opacity:1 }
+.id .casa-escuro .cartao:hover,.id .casa-escuro .casa-area:hover{ background:#fff; transform:translateY(-5px); box-shadow:0 34px 60px -34px rgba(0,0,0,.6) }
+.id .casa-escuro .g-tile:not(:has(> img)):hover{ background:#fff; transform:translateY(-5px); box-shadow:0 34px 60px -34px rgba(0,0,0,.6) }
+.id .casa-escuro .cartao-t,.id .casa-escuro .g-num b,.id .casa-escuro .ficha-v,.id .casa-escuro .casa-area-nome,.id .casa-escuro .cartao-end,.id .casa-escuro .fato-v{ color:var(--ink); font-weight:800; letter-spacing:-.035em }
+.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-t,.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-t,.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-l{ color:var(--ink); font-weight:800; letter-spacing:-.035em }
+.id .casa-escuro .cartao-d,.id .casa-escuro .ficha-d,.id .casa-escuro .casa-area-desc,.id .casa-escuro .casa-area-desc.g-ed,.id .casa-escuro .fato-d{ color:var(--cinza) }
+.id .casa-escuro .g-tile:not(:has(> img)) .g-tile-d,.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-d{ color:var(--cinza) }
+.id .casa-escuro .cartao-n,.id .casa-escuro .g-num b + span{ color:rgba(20,20,21,.5); opacity:1 }
+.id .casa-escuro .g-passo:not(:has(> img)) .g-passo-n{ color:rgba(20,20,21,.5); opacity:1 }
 .id .casa-escuro .ficha-r,.id .casa-escuro .casa-area-selo,.id .casa-escuro .fato-r{ color:var(--id-ouro-tinta); font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase }
 .id .casa-escuro .casa-area-cta{ color:var(--ink) } .id .casa-escuro .casa-area-cta svg{ color:var(--mudo) }
 .id .casa-escuro .g-tile:not(:has(> img)) .g-tile-seta{ color:var(--mudo) }
@@ -337,7 +344,9 @@
 .id .g-num b + span{ text-transform:none; letter-spacing:-.01em; font-size:15px; font-weight:600; opacity:1 }
 
 /* o azulejo com foto e o passo com foto são escuros em qualquer faixa: a
-   foto por baixo, o texto branco por cima */
+   foto por baixo, o texto branco por cima. (11/10: os seletores com :has()
+   ficam em regras próprias: num navegador sem :has(), uma lista com ele cai
+   inteira, e levaria os outros seletores junto.) */
 .id .g-tile:has(> img),.id .g-passo:has(> img){ background:var(--sv-carvao); color:#fff; border:0; border-radius:22px; box-shadow:inset 0 0 0 1px rgba(255,255,255,.06) }
 .id .g-tile:has(> img) .g-tile-t,.id .g-passo:has(> img) .g-passo-t{ color:#fff; font-weight:800; letter-spacing:-.035em }
 .id .g-tile:has(> img) .g-tile-d,.id .g-passo:has(> img) .g-passo-d{ color:rgba(255,255,255,.82) }
