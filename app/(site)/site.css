@@ -88,7 +88,7 @@ body{ margin:0 }
 .s .s-h1,.s .s-h2{ font-weight:800; letter-spacing:-.045em; line-height:.95; color:inherit; text-wrap:balance; font-variation-settings:"wght" 800 }
 .s .s-h1{ font-size:clamp(46px,6.6vw,96px) }
 .s .s-h2{ font-size:clamp(38px,5.6vw,84px) }
-.s .s-h2.media{ font-size:clamp(34px,4.6vw,68px) }
+.s .s-h2.media{ font-size:clamp(34px,5vw,74px) }
 .s .s-h2.menor{ font-size:clamp(30px,3.8vw,56px); line-height:1.02 }
 .s .s-h2.minima{ font-size:clamp(26px,2.9vw,42px); line-height:1.08; letter-spacing:-.035em }
 .s .s-h3{ font-weight:800; letter-spacing:-.03em; line-height:1.1; font-size:clamp(22px,2.1vw,30px) }
