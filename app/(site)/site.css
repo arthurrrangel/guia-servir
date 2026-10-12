@@ -42,7 +42,11 @@ body{ margin:0 }
   --s-tinta:#141414;
   --s-branco:#ffffff;
   --s-laranja:#e9942f;
-  --s-mudo:rgba(20,20,20,.58);
+  /* laranja como TEXTO em fundo claro: o vivo dá 1,9 a 2,4:1 (ilegível no sol);
+     este tom passa 4,5:1 em papel, areia e branco. Ponto, fio e fundo seguem vivos */
+  --s-laranja-texto:#91560f;
+  --s-acento-texto:var(--s-laranja);
+  --s-mudo:rgba(20,20,20,.66);
   --s-mudo-claro:rgba(255,255,255,.66);
   --s-linha:rgba(20,20,20,.12);
   /* contorno de coisa que se toca (chip, opção): precisa aparecer no sol;
@@ -55,7 +59,11 @@ body{ margin:0 }
   --s-t:.22s;
   --s-r:18px;
   --s-barra:72px;
-  --s-gutter:clamp(20px,3.6vw,56px);
+  /* margem lateral: nunca menor que o recorte do aparelho (iPhone deitado,
+     a ilha e os cantos arredondados comem a lateral); o maior dos dois lados
+     vale para os dois, e o conteúdo continua no eixo */
+  --s-gutter:max(clamp(20px,3.6vw,56px), env(safe-area-inset-left, 0px), env(safe-area-inset-right, 0px));
+  --s-recorte-topo:env(safe-area-inset-top, 0px);
   --s-largura:1400px;
   --s-bloco:clamp(64px,9vw,128px);
 
@@ -107,7 +115,7 @@ body{ margin:0 }
 .s .s-corpo{ font-weight:300; font-size:clamp(16px,1.25vw,18.5px); line-height:1.5; letter-spacing:-.005em; text-wrap:pretty; max-width:62ch }
 .s .s-micro{ font-weight:300; font-size:clamp(14px,1.2vw,17px); line-height:1.4; letter-spacing:-.005em; text-wrap:balance }
 .s .s-chapeu{ font-size:clamp(15px,1.25vw,18px); font-weight:300; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; flex-wrap:wrap }
-.s .s-chapeu b{ font-weight:700; color:var(--s-laranja) }
+.s .s-chapeu b{ font-weight:700; color:var(--s-acento-texto) }
 .s .s-chapeu i{ width:6px; height:6px; border-radius:50%; background:var(--s-laranja); display:inline-block }
 .s .s-chapeu.mudo b{ color:inherit }
 .s .s-b{ font-weight:700 }
@@ -121,13 +129,14 @@ body{ margin:0 }
 .s .s-sede i{ font-style:normal; font-weight:200; opacity:.7 }
 .s .s-sede span{ font-weight:300; opacity:.85 }
 .s .s-arroba{ font-weight:700; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.025em; line-height:1 }
-.s .s-selo{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--s-laranja) }
+.s .s-selo{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--s-acento-texto) }
 
 /* =============================================================================
    A BARRA (tela 1): preta, fixa no alto, logo à esquerda, cinco grupos com
    seta, a lupa à direita. Abaixo de 1000px: logo, lupa e o botão de menu.
    ============================================================================= */
-.s .s-topo{ position:sticky; top:0; z-index:60; background:var(--s-noite); color:var(--s-papel); height:var(--s-barra); border-bottom:1px solid rgba(255,255,255,.06) }
+/* app instalado na tela inicial: a barra desce o tamanho do relógio do iPhone (no Safari é 0) */
+.s .s-topo{ position:sticky; top:0; z-index:60; background:var(--s-noite); color:var(--s-papel); height:calc(var(--s-barra) + var(--s-recorte-topo)); padding-top:var(--s-recorte-topo); border-bottom:1px solid rgba(255,255,255,.06) }
 .s .s-topo-in{ height:100%; display:flex; align-items:center; gap:clamp(16px,2.6vw,40px) }
 .s .s-logo{ display:flex; align-items:center; height:44px; flex:0 0 auto; margin-right:clamp(8px,2vw,36px) }
 .s .s-logo svg{ height:36px; width:auto }
@@ -135,19 +144,18 @@ body{ margin:0 }
 .s .s-nav > li{ position:relative }
 .s .s-nav-bt{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 10px; font-weight:600; font-size:clamp(16px,1.35vw,19px); letter-spacing:-.02em; border-radius:10px; transition:background var(--s-t) }
 .s .s-nav-bt svg{ width:12px; height:12px; transition:transform var(--s-t) }
-.s .s-nav > li:hover .s-nav-bt,.s .s-nav > li:focus-within .s-nav-bt,.s .s-nav-bt[aria-expanded="true"]{ background:rgba(255,255,255,.08) }
-.s .s-nav > li:hover .s-nav-bt svg,.s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
+.s .s-nav > li:focus-within .s-nav-bt,.s .s-nav-bt[aria-expanded="true"]{ background:rgba(255,255,255,.08) }
+.s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
 .s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-laranja); border-radius:10px 10px 0 0 }
 /* o painel de cada grupo */
 .s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
-.s .s-nav > li:hover .s-sub,.s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
+.s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
 .s .s-sub a{ display:block; padding:10px 12px; border-radius:9px; line-height:1.25; transition:background var(--s-t) }
-.s .s-sub a:hover,.s .s-sub a:focus-visible{ background:rgba(255,255,255,.08) }
+.s .s-sub a:focus-visible{ background:rgba(255,255,255,.08) }
 .s .s-sub a b{ display:block; font-weight:600; font-size:16px; letter-spacing:-.015em }
 .s .s-sub a small{ display:block; font-size:13px; color:var(--s-mudo-claro); margin-top:2px }
 .s .s-topo-fim{ margin-left:auto; display:flex; align-items:center; gap:4px }
 .s .s-ico-bt{ display:grid; place-items:center; width:44px; height:44px; border-radius:50%; transition:background var(--s-t) }
-.s .s-ico-bt:hover{ background:rgba(255,255,255,.1) }
 .s .s-ico-bt svg{ width:22px; height:22px }
 .s .s-menu-bt{ display:none }
 .s .s-menu-bt i{ display:block; width:22px; height:2px; background:currentColor; border-radius:2px; transition:transform var(--s-t) var(--s-ease),opacity var(--s-t) }
@@ -156,7 +164,7 @@ body{ margin:0 }
 .s .s-menu-bt[aria-expanded="true"] i:last-child{ transform:translateY(-4px) rotate(-45deg) }
 
 /* o menu do celular: a cortina inteira, por baixo da barra */
-.s .s-cortina{ position:fixed; inset:var(--s-barra) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:28px var(--s-gutter) 48px; opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
+.s .s-cortina{ position:fixed; inset:calc(var(--s-barra) + var(--s-recorte-topo)) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:28px var(--s-gutter) 48px; opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
 .s .s-cortina.aberta{ opacity:1; pointer-events:auto; transform:none }
 .s .s-cortina-g{ padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1) }
 /* dedo de gente: todo link do menu tem 44px de altura de toque */
@@ -174,14 +182,14 @@ body{ margin:0 }
 .s .s-busca{ position:fixed; inset:0; z-index:70; background:rgba(12,12,13,.985); color:var(--s-papel); overflow:auto; padding:clamp(80px,14vh,140px) var(--s-gutter) 60px; opacity:0; pointer-events:none; transition:opacity var(--s-t) }
 .s .s-busca.aberta{ opacity:1; pointer-events:auto }
 .s .s-busca-in{ width:min(100%,860px); margin-inline:auto }
-.s .s-busca-x{ position:fixed; top:14px; right:var(--s-gutter) }
+.s .s-busca-x{ position:fixed; top:calc(14px + var(--s-recorte-topo)); right:var(--s-gutter) }
 .s .s-busca input{ width:100%; height:72px; background:transparent; border:0; border-bottom:2px solid rgba(255,255,255,.3); font-size:clamp(26px,4vw,44px); font-weight:300; letter-spacing:-.03em; padding:0; color:var(--s-papel); outline:0 }
 .s .s-busca input::placeholder{ color:rgba(255,255,255,.4) }
 .s .s-busca input::-webkit-search-cancel-button,.s .s-busca input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none }
 .s .s-busca input:focus{ border-color:var(--s-papel) }
 .s .s-busca ul{ margin-top:24px; display:grid; gap:2px }
 .s .s-busca li a{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:14px 10px; border-radius:10px; transition:background var(--s-t) }
-.s .s-busca li a:hover,.s .s-busca li a:focus-visible{ background:rgba(255,255,255,.08) }
+.s .s-busca li a:focus-visible{ background:rgba(255,255,255,.08) }
 .s .s-busca li b{ font-weight:600; font-size:clamp(17px,1.5vw,20px); letter-spacing:-.015em }
 .s .s-busca li small{ font-size:14px; color:var(--s-mudo-claro); text-align:right }
 .s .s-busca-nada{ margin-top:24px; color:var(--s-mudo-claro) }
@@ -198,7 +206,6 @@ body{ margin:0 }
 .s .s-pe-g h2{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-mudo-claro); margin-bottom:14px }
 .s .s-pe-g li{ margin:0 0 9px }
 .s .s-pe-g li a{ font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
-.s .s-pe-g li a:hover{ opacity:.7 }
 .s .s-pe-fim{ margin-top:clamp(36px,5vw,60px); padding-top:22px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
 .s .s-pe-fim a{ color:var(--s-papel) }
 .s .s-pe-fim .s-sede{ color:var(--s-papel) }
@@ -265,17 +272,12 @@ body{ margin:0 }
 .s .s-acoes{ display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px }
 .s .s-acoes.centro{ justify-content:center }
 .s .s-pil{ display:inline-flex; align-items:center; justify-content:center; gap:10px; height:46px; padding:0 28px; border-radius:999px; font-weight:500; font-size:clamp(16px,1.3vw,19px); letter-spacing:-.015em; line-height:1; white-space:nowrap; background:var(--s-papel); color:var(--s-tinta); border:1.5px solid var(--s-papel); transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease),background var(--s-t),color var(--s-t),border-color var(--s-t) }
-.s .s-pil:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.22) }
-.s .s-pil:active{ transform:none }
 .s .s-pil.preta{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .s-pil.vidro{ background:rgba(255,255,255,.16); color:var(--s-papel); border-color:rgba(255,255,255,.4); backdrop-filter:blur(10px) }
-.s .s-pil.vidro:hover{ background:rgba(255,255,255,.26) }
 .s .s-pil.contorno{ background:transparent; color:inherit; border-color:currentColor }
-.s .s-pil.contorno:hover{ background:rgba(20,20,20,.06); box-shadow:none }
 .s .s-pil svg{ width:16px; height:16px }
 .s .s-pil[disabled],.s .s-pil[aria-busy="true"]{ opacity:.6; pointer-events:none }
 .s .s-link{ font-weight:500; font-size:clamp(16px,1.3vw,19px); letter-spacing:-.015em; text-decoration:underline; text-underline-offset:5px; text-decoration-thickness:1.5px; transition:opacity var(--s-t) }
-.s .s-link:hover{ opacity:.7 }
 .s .s-link.claro{ color:var(--s-papel) }
 
 /* =============================================================================
@@ -290,12 +292,12 @@ body{ margin:0 }
 .s .s-cartao{ position:relative; display:flex; flex-direction:column; align-items:center; text-align:center; gap:10px; padding:clamp(26px,2.6vw,36px) clamp(18px,1.8vw,26px) clamp(24px,2.4vw,32px); background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); min-height:100%; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease) }
 a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,.28) }
 .s .s-cartao-t{ font-weight:800; font-size:clamp(28px,2.9vw,44px); letter-spacing:-.045em; line-height:.95; text-wrap:balance }
-.s .s-cartao-n{ font-size:13.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--s-laranja); margin-top:-4px }
+.s .s-cartao-n{ font-size:13.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--s-acento-texto); margin-top:-4px }
 .s .s-cartao-f{ font-weight:700; font-style:italic; font-size:clamp(16px,1.3vw,18px); letter-spacing:-.02em; line-height:1.2; text-wrap:balance; margin-top:10px }
 .s .s-cartao-d{ font-weight:300; font-size:clamp(13.5px,1vw,14.5px); line-height:1.45; color:rgba(255,255,255,.86); margin-top:6px; text-wrap:pretty }
 .s .s-cartao-ir{ margin-top:auto; padding-top:18px; font-size:14px; font-weight:500; display:inline-flex; align-items:center; gap:6px; color:var(--s-papel) }
 .s .s-cartao-ir svg{ width:14px; height:14px }
-.s .s-cartao-tag{ font-size:12px; font-weight:600; letter-spacing:.03em; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.86) }
+.s .s-cartao-tag{ font-size:13px; font-weight:600; letter-spacing:.03em; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.86) }
 /* o cartão com foto (lugares onde a foto é o assunto: eventos, áreas na home) */
 .s .s-cartao.foto{ padding:0; overflow:hidden; text-align:left; align-items:stretch; gap:0 }
 .s .s-cartao.foto img{ width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; filter:saturate(.9) }
@@ -374,12 +376,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-faixa.papel .s-campo input,.s .s-faixa.papel .s-campo select,.s .s-faixa.papel .s-campo textarea,
 .s .s-faixa.areia .s-campo input,.s .s-faixa.areia .s-campo select,.s .s-faixa.areia .s-campo textarea{ background:#fff; border-color:var(--s-linha) }
 .s .s-enviar{ height:58px; padding:0 clamp(28px,3vw,48px); background:#0b0b0c; color:var(--s-papel); font-weight:400; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.015em; border-radius:0; transition:background var(--s-t),transform var(--s-t) }
-.s .s-enviar:hover{ background:#000; transform:translateY(-1px) }
 .s .s-faixa.papel .s-enviar,.s .s-faixa.areia .s-enviar{ background:var(--s-noite) }
 /* na faixa escura o bloco preto do "Enviar" (o da apresentação) some no fundo
    quase preto do site: um fio claro desenha o botão sem mudar o desenho */
 .s .s-faixa.noite .s-enviar{ background:#000; border:1.5px solid rgba(255,255,255,.3) }
-.s .s-faixa.noite .s-enviar:hover{ border-color:rgba(255,255,255,.55) }
 .s .s-form-fim{ margin-top:clamp(36px,5vw,70px); display:grid; justify-items:center; gap:clamp(16px,2vw,24px); text-align:center }
 .s .s-form-fim .s-micro{ color:rgba(255,255,255,.8) }
 .s .s-faixa.papel .s-form-fim .s-micro,.s .s-faixa.areia .s-form-fim .s-micro{ color:var(--s-mudo) }
@@ -437,7 +437,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-momento img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.85) }
 .s .s-momento::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.72)) }
 .s .s-momento div{ position:absolute; left:18px; right:18px; bottom:18px; z-index:1 }
-.s .s-momento small{ display:block; font-size:13px; font-weight:700; letter-spacing:.05em; color:var(--s-laranja); margin-bottom:6px }
+.s .s-momento small{ display:block; font-size:13px; font-weight:700; letter-spacing:.05em; color:var(--s-acento-texto); margin-bottom:6px }
 .s .s-momento b{ display:block; font-weight:800; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.03em; line-height:1.05 }
 .s .s-momento p{ font-size:14px; font-weight:300; margin-top:6px; color:rgba(255,255,255,.85); line-height:1.4 }
 /* os fatos em linha (data, endereço, horário) */
@@ -445,7 +445,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-fato{ display:grid; gap:8px; padding:clamp(20px,2.2vw,28px); border-radius:var(--s-r); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); transition:background var(--s-t) }
 a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-faixa.papel .s-fato,.s .s-faixa.areia .s-fato{ background:rgba(20,20,20,.04); border-color:var(--s-linha) }
-.s .s-fato small{ font-size:12.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-laranja) }
+.s .s-fato small{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-acento-texto) }
 .s .s-fato b{ font-weight:800; font-size:clamp(20px,1.9vw,27px); letter-spacing:-.035em; line-height:1.05 }
 .s .s-fato p{ font-size:15px; font-weight:300; color:inherit; opacity:.8 }
 /* a lista de → (de para) */
@@ -466,7 +466,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-faixa.noite .s-sigla p{ color:var(--s-mudo) }
 /* o versículo sobre a faixa */
 .s .s-versiculo{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(24px,3.4vw,48px); line-height:1.15; letter-spacing:-.01em; max-width:30ch; margin-inline:auto; text-wrap:balance }
-.s .s-versiculo-ref{ margin-top:clamp(14px,2vw,24px); font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-laranja) }
+.s .s-versiculo-ref{ margin-top:clamp(14px,2vw,24px); font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-acento-texto) }
 /* os três modos de chegar e o mapa */
 .s .s-mapa{ position:relative; aspect-ratio:16/7; min-height:380px; background:var(--s-noite-2); border-radius:var(--s-r); overflow:hidden; isolation:isolate }
 /* o fundo embaixo do iframe: se o mapa não carregar, a caixa diz o que é em
@@ -475,7 +475,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-mapa iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) contrast(1.05) }
 .s .s-mapa-cartao{ position:absolute; left:clamp(16px,3vw,40px); bottom:clamp(16px,3vw,40px); z-index:2; background:var(--s-noite); color:var(--s-papel); padding:clamp(18px,2vw,26px) clamp(20px,2.2vw,30px); border-radius:14px; display:grid; gap:6px; max-width:min(92%,420px) }
 .s .s-mapa-cartao .s-acoes{ margin-top:12px }
-.s .s-mapa-cartao .s-pil{ height:40px; padding:0 20px; font-size:15px }
+.s .s-mapa-cartao .s-pil{ height:46px; padding:0 22px }
 /* a lista de pessoas / responsável */
 .s .s-pessoa{ display:grid; justify-items:center; text-align:center; gap:10px }
 .s .s-pessoa .s-ini{ width:64px; height:64px; border-radius:50%; display:grid; place-items:center; background:var(--s-noite); color:var(--s-papel); font-weight:800; font-size:22px; letter-spacing:-.03em }
@@ -483,10 +483,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 /* as funções de uma área */
 .s .s-funcoes{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:clamp(10px,1.2vw,16px) }
 .s .s-funcao{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(20px,2vw,26px); display:grid; gap:6px; align-content:start }
-.s .s-funcao small{ font-size:12.5px; font-weight:700; letter-spacing:.06em; color:var(--s-laranja) }
+.s .s-funcao small{ font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--s-acento-texto) }
 .s .s-funcao b{ font-weight:800; font-size:clamp(18px,1.5vw,22px); letter-spacing:-.03em; line-height:1.1 }
 .s .s-funcao p{ font-size:14.5px; font-weight:300; line-height:1.45; color:rgba(255,255,255,.84) }
-.s .s-funcao em{ font-style:normal; font-size:12.5px; font-weight:600; color:rgba(255,255,255,.6) }
+.s .s-funcao em{ font-style:normal; font-size:13px; font-weight:600; color:rgba(255,255,255,.6) }
 /* os "qa" abertos (onde me encaixo, acessar, privacidade) */
 .s .s-abre{ display:grid; gap:10px; max-width:980px; margin-inline:auto }
 .s .s-abre details{ background:rgba(20,20,20,.04); border:1px solid var(--s-linha); border-radius:14px; padding:0 clamp(16px,2vw,24px) }
@@ -513,7 +513,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-faixa.papel .s-aviso,.s .s-faixa.areia .s-aviso{ color:var(--s-mudo) }
 /* a pílula "agora": a próxima coisa da semana */
 .s .s-agora{ display:inline-flex; align-items:center; gap:10px; padding:8px 16px 8px 12px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:var(--s-papel); font-size:14.5px; font-weight:500; backdrop-filter:blur(10px); transition:background var(--s-t) }
-.s .s-agora:hover{ background:rgba(255,255,255,.2) }
 .s .s-agora i{ width:7px; height:7px; border-radius:50%; background:var(--s-laranja); box-shadow:0 0 0 4px rgba(233,148,47,.25) }
 .s .s-agora span{ opacity:.8; font-weight:300 }
 .s .s-agora svg{ width:12px; height:12px; opacity:.8 }
@@ -523,18 +522,15 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
    FormPequenaGuia.tsx e Ofertar.tsx escrevem. A lógica deles não mudou uma
    linha (mapa, distância, planilha, Pix, cartão); o desenho é o daqui.
    ============================================================================= */
-.s .g-rot{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-laranja) }
+.s .g-rot{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-acento-texto) }
 .s .g-h2{ font-weight:800; letter-spacing:-.04em; line-height:1; font-size:clamp(28px,3.4vw,46px); text-wrap:balance }
 .s .g-h3{ font-weight:800; letter-spacing:-.03em; line-height:1.15; font-size:clamp(20px,2vw,27px); text-wrap:balance }
 .s .g-ed{ font-weight:300; font-size:clamp(17px,1.6vw,23px); line-height:1.35; letter-spacing:-.01em; text-wrap:pretty }
 .s .g-acoes{ display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px }
 .s .g-acoes.centro{ justify-content:center }
 .s .g-link{ font-weight:500; font-size:16px; text-decoration:underline; text-underline-offset:4px; transition:opacity var(--s-t) }
-.s .g-link:hover{ opacity:.7 }
-.s .acao{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:44px; padding:0 24px; border-radius:999px; font-weight:500; font-size:16px; letter-spacing:-.01em; white-space:nowrap; border:1.5px solid currentColor; color:inherit; background:transparent; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease),background var(--s-t),color var(--s-t) }
-.s .acao:hover{ transform:translateY(-1px) }
+.s .acao{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 24px; border-radius:999px; font-weight:500; font-size:16px; letter-spacing:-.01em; white-space:nowrap; border:1.5px solid currentColor; color:inherit; background:transparent; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease),background var(--s-t),color var(--s-t) }
 .s .acao.cheia{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
-.s .acao.cheia:hover{ box-shadow:0 10px 26px rgba(0,0,0,.2) }
 .s .acao[disabled]{ opacity:.55; pointer-events:none }
 .s .acao svg{ width:15px; height:15px }
 .s .pg .acao.cheia,.s .s-faixa.noite .acao.cheia{ background:var(--s-papel); color:var(--s-tinta); border-color:var(--s-papel) }
@@ -546,9 +542,8 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 /* --- as Pequenas Guias: os chips de dia, o mapa, o "perto de mim", a lista */
 .s .pg-chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px }
 .s .pg-chip{ height:40px; padding:0 16px; border-radius:999px; border:1.5px solid var(--s-linha-forte); font-size:15px; font-weight:500; letter-spacing:-.01em; background:#fff; color:var(--s-tinta); transition:background var(--s-t),color var(--s-t),border-color var(--s-t) }
-.s .pg-chip:hover{ border-color:var(--s-tinta) }
 .s .pg-chip[aria-pressed="true"]{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
-.s .pg-chip small{ margin-left:8px; opacity:.55; font-size:12px }
+.s .pg-chip small{ margin-left:8px; opacity:.6; font-size:13px }
 .s .pg-mapao{ position:relative; margin-top:clamp(22px,3vw,34px); border-radius:var(--s-r); overflow:hidden; border:1px solid var(--s-linha); background:var(--s-papel-2) }
 .s .pg-mapao-tela{ height:clamp(320px,52vh,560px); width:100% }
 .s .pg-mapao .leaflet-tile-pane{ filter:grayscale(1) brightness(1.06) contrast(.9) }
@@ -556,13 +551,11 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .pg-mapao .leaflet-control-attribution a{ color:var(--s-tinta) }
 .s .pg-mapao .leaflet-bar{ border:1px solid var(--s-linha); border-radius:10px; box-shadow:none; overflow:hidden }
 .s .pg-mapao .leaflet-bar a{ background:#fff; color:var(--s-tinta); border-bottom-color:var(--s-linha) }
-.s .pg-mapao .leaflet-bar a:hover{ background:var(--s-papel-2) }
 .s .pg-mapao .leaflet-tooltip{ font:500 13px/1.3 var(--s-fonte); background:var(--s-noite); color:var(--s-papel); border:0; border-radius:8px; padding:6px 10px; box-shadow:0 8px 20px rgba(0,0,0,.3) }
 .s .pg-mapao .leaflet-tooltip-top::before{ border-top-color:var(--s-noite) }
 .s .pin-guia{ background:none; border:0; display:grid; place-items:center }
 .s .pin-guia-c{ position:relative; display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--s-noite); box-shadow:0 1px 6px rgba(0,0,0,.34); transition:transform var(--s-t),background var(--s-t) }
 .s .pin-guia-c svg{ width:13px; height:auto; fill:#fff; margin-left:2px }
-.s .pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
 .s .pin-guia.on .pin-guia-c{ transform:scale(1.28); background:var(--s-laranja) }
 .s .pin-guia.on .pin-guia-c svg{ fill:var(--s-noite) }
 .s .pin-guia-n{ position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; display:grid; place-items:center; border-radius:9px; background:var(--s-laranja); color:var(--s-noite); font-weight:700; font-size:10.5px; line-height:1 }
@@ -613,7 +606,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .of-tipo{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
 .s .of-tipo > legend{ grid-column:1 / -1; margin-bottom:4px; color:var(--s-mudo) }
 .s .of-tipo-bt{ display:grid; gap:4px; text-align:left; padding:14px 16px; border:1.5px solid var(--s-linha-forte); border-radius:14px; background:#fff; transition:border-color var(--s-t),background var(--s-t) }
-.s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
 .s .of-tipo-bt.on{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .of-tipo-rot{ font-weight:700; font-size:17px; letter-spacing:-.02em }
 .s .of-tipo-dica{ font-size:13.5px; font-weight:300; opacity:.75 }
@@ -621,11 +613,11 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .of-valor .g-rot{ color:var(--s-mudo) }
 .s .of-valor-box{ position:relative; display:block }
 .s .of-valor-cx{ display:flex; align-items:center; height:72px; padding:0 18px; border:1.5px solid var(--s-linha); font-weight:800; font-size:clamp(30px,4vw,44px); letter-spacing:-.04em; background:var(--s-papel) }
-.s .of-valor-cx.vazio{ color:#9a9a9a }
+.s .of-valor-cx.vazio{ color:#868686 }
 .s .of-valor-in{ position:absolute; inset:0; width:100%; height:100%; opacity:0; font-size:16px }
 .s .of-valor-box:focus-within .of-valor-cx{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
 .s .of-meios{ display:grid; gap:10px }
-.s .of-meios .acao{ height:54px; font-size:18px; width:100% }
+.s .of-meios .acao{ width:100% }
 .s .of-copiar{ height:54px; font-size:18px }
 .s .of-codigo{ font:300 13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; user-select:all; background:var(--s-papel); border:1px solid var(--s-linha); border-radius:12px; padding:14px 16px; color:var(--s-mudo) }
 .s .of-ou{ display:flex; align-items:center; gap:14px; color:var(--s-mudo); font-size:13px; text-transform:uppercase; letter-spacing:.06em; font-weight:700 }
@@ -711,9 +703,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-vira svg{ margin-inline:auto; transform:rotate(90deg) }
   .s .s-pe-g{ grid-template-columns:1fr 1fr }
   .s .s-pe-marca{ grid-column:1 / -1 }
-  .s .s-faq-t{ border-radius:8px }
-  .s .s-claro{ border-radius:20px }
-  .s .s-mapa-cartao{ left:12px; right:12px; bottom:12px; max-width:none }
+  .s .s-faq-t{ border-radius:10px }
+  .s .s-claro{ border-radius:var(--s-r) }
+  /* cartão dentro do mapa a 12 px da borda: raio concêntrico (externo − recuo) */
+  .s .s-mapa-cartao{ left:12px; right:12px; bottom:12px; max-width:none; border-radius:calc(var(--s-r) - 12px) }
   .s .s-acoes .s-pil{ flex:1 1 auto }
   .s .g-form-grade{ grid-template-columns:minmax(0,1fr) }
   .s .pg-perto{ flex-direction:column; align-items:stretch }
@@ -739,9 +732,134 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 /* tela estreita de verdade (SE, mini com zoom de tela: 320 a 360): a sigla e
    as pílulas devolvem respiro lateral para as palavras caberem inteiras */
 @media(max-width:380px){
+  .s .s-lead.grande{ font-size:18px }
+  .s .s-lead{ font-size:17px }
   .s .s-sigla{ grid-template-columns:repeat(2,minmax(0,1fr)) }
   .s .s-sigla li{ padding-inline:8px }
   .s .s-sigla b{ font-size:16px }
   .s .s-pil{ padding:0 20px }
   .s .s-claro{ padding-inline:18px }
+}
+
+/* =============================================================================
+   ÂNCORAS · 12/10/2026
+   "Ver os grupos", "Encontrar a minha", "Por que ofertamos" pulam para uma
+   seção da própria página. Sem isto, o começo da seção parava escondido
+   embaixo da barra fixa. A folga é a barra + 12 px (+ o relógio do iPhone
+   quando o site está instalado na tela inicial).
+   ============================================================================= */
+html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
+@media(max-width:999px){ html{ scroll-padding-top:calc(64px + 12px + env(safe-area-inset-top, 0px)) } }
+@media(prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth } }
+
+/* =============================================================================
+   PASSAR O MOUSE SÓ ONDE EXISTE MOUSE · 12/10/2026
+   No iPhone o :hover "gruda" depois do toque (a pílula fica levantada, com
+   sombra, até tocar em outra coisa). Todo efeito de passar o mouse mora
+   aqui, só para aparelho com ponteiro de verdade. No toque, o retorno é o
+   :active (a pílula afunda um pouco enquanto o dedo está nela).
+   ============================================================================= */
+@media(hover:hover){
+  .s .s-nav > li:hover .s-nav-bt{ background:rgba(255,255,255,.08) }
+  .s .s-nav > li:hover .s-nav-bt svg{ transform:rotate(180deg) }
+  .s .s-nav > li:hover .s-sub{ opacity:1; transform:none; pointer-events:auto }
+  .s .s-sub a:hover{ background:rgba(255,255,255,.08) }
+  .s .s-ico-bt:hover{ background:rgba(255,255,255,.1) }
+  .s .s-busca li a:hover{ background:rgba(255,255,255,.08) }
+  .s .s-pe-g li a:hover{ opacity:.7 }
+  .s .s-pil:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.22) }
+  .s .s-pil.vidro:hover{ background:rgba(255,255,255,.26) }
+  .s .s-pil.contorno:hover{ background:rgba(20,20,20,.06); box-shadow:none }
+  .s .s-link:hover{ opacity:.7 }
+  .s .s-enviar:hover{ background:#000; transform:translateY(-1px) }
+  .s .s-faixa.noite .s-enviar:hover{ border-color:rgba(255,255,255,.55) }
+  .s .s-agora:hover{ background:rgba(255,255,255,.2) }
+  .s .g-link:hover{ opacity:.7 }
+  .s .acao:hover{ transform:translateY(-1px) }
+  .s .acao.cheia:hover{ box-shadow:0 10px 26px rgba(0,0,0,.2) }
+  .s .pg-chip:hover{ border-color:var(--s-tinta) }
+  .s .pg-mapao .leaflet-bar a:hover{ background:var(--s-papel-2) }
+  .s .pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
+  .s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
+}
+.s{ -webkit-tap-highlight-color:transparent }
+.s :is(.s-pil, .acao, .s-enviar, .pg-chip, .of-tipo-bt, .s-ico-bt):active{ transform:scale(.97); transition-duration:.08s }
+
+/* =============================================================================
+   ACENTO POR SUPERFÍCIE · 12/10/2026
+   O laranja de texto segue a superfície mais próxima: claro (papel, areia,
+   cartão claro, formulário de oferta) usa o tom fundo; escuro volta ao vivo.
+   ============================================================================= */
+.s .s-faixa.papel,.s .s-faixa.areia,.s .s-claro,.s .of,.s .s-cartao.claro{ --s-acento-texto:var(--s-laranja-texto) }
+.s .s-cartao:not(.claro),.s .s-funcao,.s .pg,.s .s-momento,.s .s-mapa-cartao{ --s-acento-texto:var(--s-laranja) }
+
+/* =============================================================================
+   CELULAR NO EIXO · 12/10/2026
+
+   Abaixo de 760 px o site inteiro fica centralizado: títulos, textos,
+   listas, cartões, pílulas, mapa, rodapé. Medido linha por linha por
+   scripts/site-eixo.mjs (folga da esquerda igual à da direita).
+
+   Uma exceção de propósito: o miolo dos campos de formulário (rótulo e o
+   que a pessoa digita) começa na esquerda do campo, que ocupa a coluna
+   inteira. Texto digitado no centro anda para os dois lados a cada letra.
+   ============================================================================= */
+@media(max-width:759px){
+  /* 1. texto: tudo no eixo, por cima de qualquer alinhamento de desktop */
+  .s main :not(input, select, textarea, option, pre, .leaflet-container, .leaflet-container *, .g-form-campo, .g-form-campo *, .s-campo, .s-campo *),
+  .s .s-pe *{ text-align:center !important }
+
+  /* 2. blocos mais estreitos que a coluna: margem automática dos dois lados */
+  .s main :is(.s-h1, .s-h2, .s-lead, .s-corpo, .s-passos, .s-qa, .s-faq, .s-circs, .s-vira, .s-versiculo, .s-abre, .s-prosa, .of, .s-sigla p, .s-obj p, .s-abre details > div p),
+  .s .s-pe-marca .s-corpo{ margin-inline:auto !important }
+  /* marcas de canto (@guiachurch, guiachurch | sede): no meio da faixa */
+  .s main .s-arroba, .s main .s-sede{ margin-inline:auto !important }
+  .s main .s-arroba{ display:table }
+
+  /* 3. fileiras (flex): itens no meio */
+  .s .s-chapeu, .s .s-acoes, .s .g-acoes, .s .s-cartao-ir, .s .pg-chips, .s .s-sede, .s .s-pe-fim, .s .of-meios, .s .s-form-fim{ justify-content:center }
+  .s .pg-corpo{ align-items:stretch }
+
+  /* 4. rodapé: marca em cima, grupos em duas colunas, o grupo que sobra
+     sozinho na última fileira ocupa as duas e fica no meio */
+  .s .s-pe-g{ justify-items:stretch }
+  .s .s-pe-g > :last-child:nth-child(even){ grid-column:1 / -1 }
+  .s .s-pe-marca{ display:grid; justify-items:center }
+  .s .s-pe-fim{ flex-direction:column; gap:10px }
+
+  /* 5. perguntas que abrem: um "+" invisível à esquerda equilibra o "+" da
+     direita, e a pergunta fica no eixo de verdade (não no meio do que sobra) */
+  .s .s-abre summary::before{ content:"+"; visibility:hidden }
+  .s .s-abre summary::before,.s .s-abre summary::after{ width:18px; flex:0 0 18px; text-align:center; font-weight:300; font-size:26px; line-height:1 }
+
+  /* 5b. separador " · " de endereço e horário vira quebra de linha (o ponto
+     some da tela e continua para quem ouve a página); nos links do pé o
+     ponto sai e o respiro entre eles faz a separação */
+  .s .s-sep{ display:block; height:0; overflow:hidden }
+  .s .s-pe-links{ display:flex; flex-wrap:wrap; justify-content:center; gap:4px 18px }
+  .s .s-pe-links .s-ponto{ display:none }
+
+  /* 5c. menu e busca no celular também no eixo */
+  .s .s-cortina{ text-align:center }
+  .s .s-cortina-pe{ justify-items:center }
+  .s .s-busca li a{ text-align:center }
+  .s .s-busca li small{ text-align:center }
+
+  /* 6. o valor da oferta no meio da caixa, como numa maquininha */
+  .s .of-valor-cx{ justify-content:center }
+
+  /* 8. um respiro só entre título e texto (era 14, 16, 18 ou 22 px conforme
+     a página): 16 px em todo lugar; nome → função no cartão de pessoa e a
+     serifa do "Como funciona?" têm o próprio par */
+  .s main .s-cab{ gap:16px }
+  .s main .s-duas .s-h2{ margin-bottom:0 }
+  .s main :not(.s-cab, .s-pessoa) > .s-h2 + :is(p, .s-lead){ margin-top:16px !important }
+
+  /* 7. linhas equilibradas: texto centralizado com uma palavra sozinha
+     embaixo parece erro. Títulos e textos curtos dividem as linhas por
+     igual; os longos (privacidade, respostas) só evitam a órfã */
+  .s main :is(h1, h2, h3, p, li, b, small, summary, .s-lead, .s-micro, .s-aviso, .s-cartao-t, .s-cartao-d, .s-selo, .s-serifa),
+  .s .s-pe :is(p, li){ text-wrap:balance }
+  /* texto longo de verdade (privacidade, respostas que abrem): sem órfã */
+  .s main .s-abre details > div p, .s .s-prosa p{ text-wrap:pretty }
 }

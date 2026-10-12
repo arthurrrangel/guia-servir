@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, inteiro } from '@/components/site/Blocos';
 
 /* =============================================================================
    /acessar — A PORTA DAS EQUIPES · 11/10/2026
@@ -51,7 +51,7 @@ export default function Acessar() {
                 <span className="s-cartao-n">{p.n}</span>
                 <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{p.t}</span>
                 <span className="s-cartao-f">{p.f}</span>
-                <span className="s-cartao-d">{p.d}</span>
+                <span className="s-cartao-d">{fim(inteiro(p.d))}</span>
                 <span className="s-cartao-ir">Entrar</span>
               </a>
             ))}
@@ -65,7 +65,7 @@ export default function Acessar() {
             <Vozes id="t-chave" className="s-h2 media" it="chave">Você não tem senha aqui. O link é a sua chave</Vozes>
           </div>
           <div className="s-abre s-rev d1">
-            {DUVIDAS.map((d, i) => <details key={d.q} open={i === 0}><summary>{d.q}</summary><div><p>{d.r}</p></div></details>)}
+            {DUVIDAS.map((d, i) => <details key={d.q} open={i === 0}><summary>{inteiro(d.q)}</summary><div><p>{fim(inteiro(d.r))}</p></div></details>)}
           </div>
           <div className="s-acoes centro" style={{ marginTop: 'clamp(28px,4vw,48px)' }}>
             <Pil href="/eu" duro tom="preta">Abrir meu espaço</Pil>

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Chevron, Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, Sep } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -71,7 +71,7 @@ export default function Home() {
             <Pil href="/cultos">Quero conhecer</Pil>
             <Pil href="/servir">Quero servir</Pil>
           </div>
-          <p className="s-micro"><ProximoCulto /> · {IGREJA.rua}</p>
+          <p className="s-micro"><ProximoCulto /><Sep />{IGREJA.rua}</p>
         </div>
       </section>
 

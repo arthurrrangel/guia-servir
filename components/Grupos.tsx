@@ -4,6 +4,7 @@ import { IcSeta } from '@/components/Icones';
 import { canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, wazeDaPequenaGuia, mapaExterno, type PequenaGuia } from '@/lib/pequenas-guias';
 import { MapaGuias } from '@/components/MapaGuias';
+import { pontos } from '@/components/site/Blocos';
 
 /* =============================================================================
    OS GRUPOS, COM FILTRO POR DIA
@@ -162,7 +163,7 @@ export function Grupos() {
                 <span className="pg-nome">{pg.nome}</span>
                 <span className="pg-quando">{pg.dia}, {pg.hora}</span>
                 {(pg.lideres || pg.publico) && (
-                  <span className="pg-nota">{[pg.lideres, pg.publico].filter(Boolean).join(' · ')}</span>
+                  <span className="pg-nota">{pontos([pg.lideres, pg.publico].filter(Boolean).join(' · '))}</span>
                 )}
                 <div className="g-acoes">
                   <a href={conv.href} target="_blank" rel="noreferrer" className="acao cheia">Quero ir nessa <IcSeta /></a>

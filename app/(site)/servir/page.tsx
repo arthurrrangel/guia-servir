@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, fim } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 
@@ -147,7 +147,7 @@ export default function Servir() {
             <p className="s-lead grande" style={{ marginTop: 18 }}>Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:</p>
           </div>
           <div className="s-obj s-rev d1">
-            {OBJECOES.map(o => <div key={o.q}><b>{o.q}</b><p>{o.r}</p></div>)}
+            {OBJECOES.map(o => <div key={o.q}><b>{o.q}</b><p>{fim(o.r)}</p></div>)}
           </div>
         </div>
       </section>
@@ -158,7 +158,7 @@ export default function Servir() {
         <div className="s-in">
           <h2 id="t-faq" className="s-faq-t s-rev">Perguntas que todo mundo tem antes do primeiro domingo</h2>
           <div className="s-faq s-rev d1">
-            {PERGUNTAS.map(p => <p key={p.q}><b>{p.q}</b> {p.r}</p>)}
+            {PERGUNTAS.map(p => <p key={p.q}><b>{p.q}</b> {typeof p.r === 'string' ? fim(p.r) : p.r}</p>)}
           </div>
         </div>
       </section>

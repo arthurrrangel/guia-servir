@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Simbolo } from '@/components/Marca';
 import { MENU, BUSCA, type Item } from '@/lib/site/nav';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
-import { Lupa, Fechar, SetaBaixo } from './Blocos';
+import { Lupa, Fechar, SetaBaixo, Sep } from './Blocos';
 
 /* =============================================================================
    A BARRA (tela 1 da apresentação) · 11/10/2026
@@ -132,8 +132,8 @@ export default function Topo() {
         <div className="s-cortina-pe">
           <a href={conversa.href} target="_blank" rel="noreferrer">{conversa.rot}</a>
           <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-          <span>{IGREJA.rua} · {IGREJA.bairro}</span>
-          <span>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? ` · Follow aos sábados, ${IGREJA.followHora}` : ''}</span>
+          <span>{IGREJA.rua}<Sep />{IGREJA.bairro}</span>
+          <span>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</span>
         </div>
       </div>
 

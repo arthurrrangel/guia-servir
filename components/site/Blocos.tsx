@@ -9,6 +9,35 @@ import { FOTOS, type LugarDeFoto, type Foto } from '@/lib/site/fotos';
    da apresentação de onde ela veio.
    ============================================================================= */
 
+/* SEM VIÚVA: cola a última palavra na penúltima com espaço que não quebra.
+   Texto centralizado que termina com uma palavra sozinha na linha parece
+   erro; o text-wrap:balance resolve até 6 linhas no Chrome, e isto resolve
+   em qualquer tamanho e em qualquer navegador. */
+/* SEPARADOR COLADO: " · " dentro de uma linha de dados ("Will e Lucas · jovens
+   · Follow") nunca fica sobrando no começo ou no fim de uma linha: o ponto
+   gruda nas duas palavras vizinhas, e a quebra acontece num espaço comum */
+export const pontos = (t: string) => t.replace(/ · /g, '\u00a0·\u2060\u00a0');
+
+export const fim = (t: string) => {
+  /* "… RJ · 22793-390": o Chrome quebra depois do "·" mesmo com espaço
+     que não quebra, então o separador gruda nas duas pontas (U+2060 é o
+     "juntador de palavras": invisível, proíbe quebra dos dois lados) */
+  t = pontos(t);
+  const sep = t.match(/^([\s\S]*\S)\s+([^\s\p{L}\p{N}]+)\s+(\S+)\s*$/u);
+  const colado = sep ? `${sep[1]}\u00a0${sep[2]}\u2060\u00a0${sep[3]}` : t.replace(/\s+(\S+)\s*$/, '\u2060\u00a0$1');
+  /* hífen dentro da última palavra (CEP 22793-390) também é ponto de quebra:
+     o juntador depois dele mantém a palavra inteira */
+  return colado.replace(/-(?=[^\s]*$)/g, '-\u2060');
+};
+
+/* SEPARADOR " · " entre dois trechos de uma linha (endereço, horário). No
+   celular, centralizado, o ponto sobrava no começo ou no fim de uma linha:
+   abaixo de 760 px ele vira quebra de linha (e continua sendo lido). */
+export const Sep = () => <span className="s-sep"> · </span>;
+
+/* PALAVRA COM HÍFEN INTEIRA: "e-mail" não parte em "e-" / "mail" */
+export const inteiro = (t: string) => t.replace(/(\p{L})-(?=\p{L})/gu, '$1-\u2060');
+
 /* O TÍTULO EM DUAS VOZES: a grotesca pesada e a última palavra (ou as
    últimas, com `it`) em serifa itálica, que ganha o ponto pelo CSS. A copy
    fica inteira no HTML, sem o ponto, e o leitor de tela lê a frase. */

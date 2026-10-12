@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
 import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
-import { Img, Visto, Arroba, Vozes, Seta } from './Blocos';
+import { Img, Visto, Arroba, Vozes, Seta, fim } from './Blocos';
 
 /* =============================================================================
    AS PEÇAS VIVAS DA /servir · 11/10/2026
@@ -143,7 +143,7 @@ export function Areas({ compacto }: { compacto?: boolean }) {
         <span className="s-cartao-n">{dois(p)} {p === 1 ? 'posto' : 'postos'}</span>
         {!aberto && <span className="s-cartao-tag">conversa antes</span>}
         <span className="s-cartao-f">{a.frase}</span>
-        {!compacto && <span className="s-cartao-d">{a.texto}</span>}
+        {!compacto && <span className="s-cartao-d">{fim(a.texto)}</span>}
         <span className="s-cartao-ir">Escolher esta área <Seta /></span>
       </Link>
     );

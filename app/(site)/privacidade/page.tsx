@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, fim, inteiro } from '@/components/site/Blocos';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL · 11/10/2026
@@ -48,7 +48,7 @@ const BLOCOS: Array<{ n: string; t: string; it: string; itens: Array<{ q: string
 export default function Privacidade() {
   return (
     <>
-      <section className="s-faixa noite s-grao" style={{ paddingTop: 'clamp(56px,8vw,96px)' }}>
+      <section className="s-faixa noite s-grao">
         <div className="s-in">
           <Chapeu forte="Privacidade" resto="LGPD · Lei 13.709/2018" />
           <Vozes as="h1" className="s-h1" it="quê" >O que a gente guarda, e por quê</Vozes>
@@ -67,8 +67,8 @@ export default function Privacidade() {
             <div className="s-abre s-rev d1" style={{ marginInline: 0 }}>
               {b.itens.map((it, j) => (
                 <details key={it.q} open={j === 0}>
-                  <summary>{it.q}</summary>
-                  <div><p>{it.r}</p></div>
+                  <summary>{inteiro(it.q)}</summary>
+                  <div><p>{fim(inteiro(it.r))}</p></div>
                 </details>
               ))}
             </div>
@@ -83,7 +83,7 @@ export default function Privacidade() {
             <h2 id="t-pedir" className="s-h2 menor">O que você pode pedir.</h2>
             <p className="s-lead">Acesso, correção, exclusão. Sem custo, sem justificativa. Diga seu nome completo e a área em que você serve ou serviu. A resposta sai em até 15 dias.</p>
             <div className="s-qa">
-              <div><b>Controladora</b><p>{IGREJA.nome}<br />{ENDERECO_LINHA}</p></div>
+              <div><b>Controladora</b><p>{IGREJA.nome}<br />{fim(ENDERECO_LINHA)}</p></div>
             </div>
             <div className="s-acoes centro"><Pil href={CONTATO.href} fora tom="preta">{CONTATO.rot}</Pil></div>
           </div>

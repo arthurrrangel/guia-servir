@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
 import { type LugarDeFoto } from '@/lib/site/fotos';
-import { Vozes, Sede, Chapeu, Pil, Img } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim } from './Blocos';
 import { FormServir } from './Servir';
 
 /* =============================================================================
@@ -99,7 +99,7 @@ export default function Area() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
           <Vozes as="h1" id="t-area" className="s-h1" it={fixa?.frase ? undefined : nome} semPonto={!fixa?.frase}>{fixa?.frase ?? nome}</Vozes>
-          <p className="s-lead grande">{fixa?.texto ?? min?.descricao ?? ''}</p>
+          <p className="s-lead grande">{fim(fixa?.texto ?? min?.descricao ?? '')}</p>
           <div className="s-acoes">
             <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
             <Pil href="/servir#areas">Ver as outras áreas</Pil>

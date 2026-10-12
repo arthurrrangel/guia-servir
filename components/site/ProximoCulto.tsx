@@ -14,7 +14,9 @@ export default function ProximoCulto({ fixo = CULTO_QUANDO }: { fixo?: string })
     if (dia === 0 && agora.getHours() >= 12) falta = 7;
     d.setDate(d.getDate() + falta);
     const f = d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long' });
-    setTxt(falta === 0 ? `Hoje, ${f} · ${IGREJA.cultoHora}` : `${IGREJA.cultoDia}, ${f} · ${IGREJA.cultoHora}`);
+    /* data e hora não se separam no "·" (o Chrome quebra depois do ponto) */
+    const j = '\u00a0·\u2060\u00a0';
+    setTxt(falta === 0 ? `Hoje, ${f}${j}${IGREJA.cultoHora}` : `${IGREJA.cultoDia}, ${f}${j}${IGREJA.cultoHora}`);
   }, []);
   return <>{txt}</>;
 }

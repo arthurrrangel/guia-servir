@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS } from '@/lib/chegar';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, fim, Sep } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -70,7 +70,7 @@ export default function Cultos() {
             <Pil href="#como-chegar">Como chegar</Pil>
             <Pil href="#ao-vivo">Assistir ao vivo</Pil>
           </div>
-          <p className="s-micro">Próximo culto: <ProximoCulto /> · {IGREJA.rua}</p>
+          <p className="s-micro">Próximo culto: <ProximoCulto /><Sep />{IGREJA.rua}</p>
         </div>
       </section>
 
@@ -123,7 +123,7 @@ export default function Cultos() {
               <div key={m.n} className="s-cartao">
                 <span className="s-cartao-n">{m.n}</span>
                 <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{m.t}</span>
-                <span className="s-cartao-d">{m.d}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{m.d2}</>}</span>
+                <span className="s-cartao-d">{fim(m.d)}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(m.d2)}</>}</span>
               </div>
             ))}
           </div>
@@ -132,7 +132,7 @@ export default function Cultos() {
             <div className="s-mapa-cartao">
               <span className="s-selo">{IGREJA.cultoDia}, {IGREJA.cultoHora}</span>
               <b className="s-h3">{IGREJA.rua}</b>
-              <span className="s-micro">{IGREJA.bairro}, {IGREJA.cidade} · {IGREJA.cep}</span>
+              <span className="s-micro">{fim(`${IGREJA.bairro}, ${IGREJA.cidade} · ${IGREJA.cep}`)}</span>
               <div className="s-acoes">
                 <Pil href={MAPA} fora>Maps</Pil>
                 <Pil href={ROTA_WAZE} fora>Waze</Pil>

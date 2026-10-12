@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, Img, Seta } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, Seta, fim } from '@/components/site/Blocos';
 import { Areas } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 
@@ -55,7 +55,7 @@ export default function OndeMeEncaixo() {
             {DUVIDAS.map((d, i) => (
               <details key={d.q} open={i === 0}>
                 <summary>{d.q}</summary>
-                <div>{d.r.map(p => <p key={p}>{p}</p>)}</div>
+                <div>{d.r.map(p => <p key={p}>{fim(p)}</p>)}</div>
               </details>
             ))}
           </div>
