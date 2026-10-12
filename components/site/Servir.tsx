@@ -205,7 +205,7 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
   }, [indo, nome, tel, area, mins, router]);
 
   return (
-    <form className="s-form" onSubmit={enviar} noValidate>
+    <form className="s-form com-fim" onSubmit={enviar} noValidate>
       <div className="s-campo">
         <label htmlFor="s-nome">Nome</label>
         <input id="s-nome" name="nome" type="text" placeholder="Nome:" autoComplete="name" value={nome}

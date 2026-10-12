@@ -45,6 +45,9 @@ body{ margin:0 }
   --s-mudo:rgba(20,20,20,.58);
   --s-mudo-claro:rgba(255,255,255,.66);
   --s-linha:rgba(20,20,20,.12);
+  /* contorno de coisa que se toca (chip, opção): precisa aparecer no sol;
+     a --s-linha fica para fio decorativo */
+  --s-linha-forte:rgba(20,20,20,.32);
   --s-linha-clara:rgba(255,255,255,.14);
   --s-fonte:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --s-serifa:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
@@ -102,7 +105,7 @@ body{ margin:0 }
 .s .s-lead{ font-weight:300; font-size:clamp(18px,1.85vw,27px); line-height:1.35; letter-spacing:-.012em; text-wrap:pretty; max-width:34em }
 .s .s-lead.grande{ font-size:clamp(20px,2.2vw,31px); line-height:1.3 }
 .s .s-corpo{ font-weight:300; font-size:clamp(16px,1.25vw,18.5px); line-height:1.5; letter-spacing:-.005em; text-wrap:pretty; max-width:62ch }
-.s .s-micro{ font-weight:300; font-size:clamp(14px,1.2vw,17px); line-height:1.4; letter-spacing:-.005em }
+.s .s-micro{ font-weight:300; font-size:clamp(14px,1.2vw,17px); line-height:1.4; letter-spacing:-.005em; text-wrap:balance }
 .s .s-chapeu{ font-size:clamp(15px,1.25vw,18px); font-weight:300; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; flex-wrap:wrap }
 .s .s-chapeu b{ font-weight:700; color:var(--s-laranja) }
 .s .s-chapeu i{ width:6px; height:6px; border-radius:50%; background:var(--s-laranja); display:inline-block }
@@ -156,12 +159,15 @@ body{ margin:0 }
 .s .s-cortina{ position:fixed; inset:var(--s-barra) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:28px var(--s-gutter) 48px; opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
 .s .s-cortina.aberta{ opacity:1; pointer-events:auto; transform:none }
 .s .s-cortina-g{ padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1) }
-.s .s-cortina-g > a{ display:block; font-weight:800; font-size:30px; letter-spacing:-.04em; line-height:1; margin-bottom:12px }
+/* dedo de gente: todo link do menu tem 44px de altura de toque */
+.s .s-cortina-g > a{ display:block; font-weight:800; font-size:30px; letter-spacing:-.04em; line-height:1; padding:7px 0; margin-bottom:5px }
 .s .s-cortina-g ul{ display:grid; gap:4px }
-.s .s-cortina-g li a{ display:block; padding:8px 0; font-size:18px; font-weight:400; letter-spacing:-.01em }
+.s .s-cortina-g li a{ display:block; padding:11px 0; font-size:18px; font-weight:400; letter-spacing:-.01em }
 .s .s-cortina-g li a small{ display:block; font-size:13px; color:var(--s-mudo-claro) }
-.s .s-cortina-pe{ padding-top:24px; display:grid; gap:10px; font-size:15px; color:var(--s-mudo-claro) }
-.s .s-cortina-pe a{ color:var(--s-papel); font-weight:600 }
+.s .s-cortina-pe{ padding-top:20px; display:grid; gap:2px; font-size:15px; color:var(--s-mudo-claro) }
+.s .s-cortina-pe a{ display:block; padding:11px 0; color:var(--s-papel); font-weight:600 }
+.s .s-cortina-pe span{ padding:2px 0 }
+.s .s-cortina-pe span:first-of-type{ margin-top:8px }
 .s .s-cortina .s-pil{ margin-top:20px }
 
 /* a busca: véu inteiro, um campo grande, a lista do que casa */
@@ -208,7 +214,9 @@ body{ margin:0 }
 .s .s-heroi::before{ content:""; position:absolute; inset:0; z-index:-1; background:
   linear-gradient(90deg,rgba(10,10,12,.78) 0%,rgba(10,10,12,.5) 42%,rgba(10,10,12,.16) 75%,rgba(10,10,12,.06) 100%),
   linear-gradient(180deg,rgba(10,10,12,.12) 0%,rgba(10,10,12,0) 30%,rgba(10,10,12,.46) 100%) }
-.s .s-heroi-in{ padding:clamp(96px,12vh,150px) 0 clamp(64px,9vh,110px); display:grid; gap:0 }
+/* minmax(0,1fr): uma palavra comprida no título não alarga a coluna inteira
+   (era o que empurrava chapéu, texto e pílulas até a borda no /pequena-guia) */
+.s .s-heroi-in{ padding:clamp(96px,12vh,150px) 0 clamp(64px,9vh,110px); display:grid; grid-template-columns:minmax(0,1fr); gap:0 }
 .s .s-heroi .s-chapeu{ margin-bottom:clamp(18px,2.6vw,36px) }
 .s .s-heroi .s-h1{ max-width:none }
 /* no herói a segunda voz ganha a própria linha, como na tela 1 */
@@ -368,6 +376,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-enviar{ height:58px; padding:0 clamp(28px,3vw,48px); background:#0b0b0c; color:var(--s-papel); font-weight:400; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.015em; border-radius:0; transition:background var(--s-t),transform var(--s-t) }
 .s .s-enviar:hover{ background:#000; transform:translateY(-1px) }
 .s .s-faixa.papel .s-enviar,.s .s-faixa.areia .s-enviar{ background:var(--s-noite) }
+/* na faixa escura o bloco preto do "Enviar" (o da apresentação) some no fundo
+   quase preto do site: um fio claro desenha o botão sem mudar o desenho */
+.s .s-faixa.noite .s-enviar{ background:#000; border:1.5px solid rgba(255,255,255,.3) }
+.s .s-faixa.noite .s-enviar:hover{ border-color:rgba(255,255,255,.55) }
 .s .s-form-fim{ margin-top:clamp(36px,5vw,70px); display:grid; justify-items:center; gap:clamp(16px,2vw,24px); text-align:center }
 .s .s-form-fim .s-micro{ color:rgba(255,255,255,.8) }
 .s .s-faixa.papel .s-form-fim .s-micro,.s .s-faixa.areia .s-form-fim .s-micro{ color:var(--s-mudo) }
@@ -384,7 +396,9 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    ============================================================================= */
 .s .s-num{ display:grid; grid-template-columns:minmax(260px,.9fr) minmax(0,1.1fr); gap:clamp(28px,5vw,80px); align-items:center }
 .s .s-circs{ position:relative; aspect-ratio:1/1.08; max-width:560px; width:100% }
-.s .s-circ{ position:absolute; border-radius:50%; overflow:hidden; background:var(--s-noite-2); box-shadow:0 20px 60px rgba(0,0,0,.5) }
+/* aspect-ratio é o que mantém círculo círculo: sem ela a altura vem da foto
+   e qualquer imagem fora do quadrado vira elipse */
+.s .s-circ{ position:absolute; aspect-ratio:1/1; border-radius:50%; overflow:hidden; background:var(--s-noite-2); box-shadow:0 20px 60px rgba(0,0,0,.5) }
 .s .s-circ img{ width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
 .s .s-circ.a{ left:0; top:0; width:72% }
 .s .s-circ.b{ right:0; bottom:0; width:66%; outline:6px solid var(--s-noite) }
@@ -455,6 +469,9 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-versiculo-ref{ margin-top:clamp(14px,2vw,24px); font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-laranja) }
 /* os três modos de chegar e o mapa */
 .s .s-mapa{ position:relative; aspect-ratio:16/7; min-height:380px; background:var(--s-noite-2); border-radius:var(--s-r); overflow:hidden; isolation:isolate }
+/* o fundo embaixo do iframe: se o mapa não carregar, a caixa diz o que é em
+   vez de ficar um retângulo preto (o endereço e os botões seguem no cartão) */
+.s .s-mapa::before{ content:"Mapa"; position:absolute; inset:0; z-index:0; display:grid; place-items:center; color:var(--s-mudo-claro); font-size:14px; letter-spacing:.08em; text-transform:uppercase }
 .s .s-mapa iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) contrast(1.05) }
 .s .s-mapa-cartao{ position:absolute; left:clamp(16px,3vw,40px); bottom:clamp(16px,3vw,40px); z-index:2; background:var(--s-noite); color:var(--s-papel); padding:clamp(18px,2vw,26px) clamp(20px,2.2vw,30px); border-radius:14px; display:grid; gap:6px; max-width:min(92%,420px) }
 .s .s-mapa-cartao .s-acoes{ margin-top:12px }
@@ -489,7 +506,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-prosa ul{ display:grid; gap:8px; padding-left:20px; list-style:disc }
 .s .s-prosa a{ text-decoration:underline; text-underline-offset:4px }
 /* o aviso discreto (sem rede, estado) */
-.s .s-aviso{ font-size:14px; color:var(--s-mudo-claro); margin-top:16px }
+/* linha de recado: o link nunca quebra no meio (sublinhado partido em duas
+   linhas é o que mais suja uma tela de celular) */
+.s .s-aviso{ font-size:14px; color:var(--s-mudo-claro); margin-top:16px; text-wrap:balance }
+.s .s-aviso a{ white-space:nowrap }
 .s .s-faixa.papel .s-aviso,.s .s-faixa.areia .s-aviso{ color:var(--s-mudo) }
 /* a pílula "agora": a próxima coisa da semana */
 .s .s-agora{ display:inline-flex; align-items:center; gap:10px; padding:8px 16px 8px 12px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:var(--s-papel); font-size:14.5px; font-weight:500; backdrop-filter:blur(10px); transition:background var(--s-t) }
@@ -518,11 +538,14 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .acao[disabled]{ opacity:.55; pointer-events:none }
 .s .acao svg{ width:15px; height:15px }
 .s .pg .acao.cheia,.s .s-faixa.noite .acao.cheia{ background:var(--s-papel); color:var(--s-tinta); border-color:var(--s-papel) }
+/* cartão claro dentro de faixa escura: o botão volta a ser escuro (sem isso
+   ficava papel sobre papel e o "Encontrar a minha" do /pequena-guia sumia) */
+.s .s-faixa .s-claro .acao.cheia{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .pg .acao{ border-color:rgba(255,255,255,.4); color:var(--s-papel) }
 
 /* --- as Pequenas Guias: os chips de dia, o mapa, o "perto de mim", a lista */
 .s .pg-chips{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px }
-.s .pg-chip{ height:40px; padding:0 16px; border-radius:999px; border:1.5px solid var(--s-linha); font-size:15px; font-weight:500; letter-spacing:-.01em; background:#fff; color:var(--s-tinta); transition:background var(--s-t),color var(--s-t),border-color var(--s-t) }
+.s .pg-chip{ height:40px; padding:0 16px; border-radius:999px; border:1.5px solid var(--s-linha-forte); font-size:15px; font-weight:500; letter-spacing:-.01em; background:#fff; color:var(--s-tinta); transition:background var(--s-t),color var(--s-t),border-color var(--s-t) }
 .s .pg-chip:hover{ border-color:var(--s-tinta) }
 .s .pg-chip[aria-pressed="true"]{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .pg-chip small{ margin-left:8px; opacity:.55; font-size:12px }
@@ -564,9 +587,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .pgs-dica{ display:none }
 
 /* --- o formulário da Pequena Guia (components/FormPequenaGuia.tsx) */
-.s .g-form{ display:grid; gap:18px }
-.s .g-form-grade{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px 16px }
-.s .g-form-campo{ display:grid; gap:7px }
+/* minmax(0,…): nenhum campo ou botão alarga o formulário além do cartão */
+.s .g-form{ display:grid; grid-template-columns:minmax(0,1fr); gap:18px }
+.s .g-form-grade{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 16px }
+.s .g-form-campo{ display:grid; gap:7px; min-width:0 }
 .s .g-form-largo{ grid-column:1 / -1 }
 .s .g-form-campo .g-rot{ color:var(--s-mudo) }
 .s .g-form-campo input,.s .g-form-campo select{ width:100%; height:56px; padding:0 16px; background:#fff; border:1.5px solid var(--s-linha); border-radius:0; font-weight:300; font-size:19px; letter-spacing:-.01em; outline:0; -webkit-appearance:none; appearance:none; transition:border-color var(--s-t),box-shadow var(--s-t) }
@@ -588,7 +612,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .of > .g-ed{ text-align:center }
 .s .of-tipo{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
 .s .of-tipo > legend{ grid-column:1 / -1; margin-bottom:4px; color:var(--s-mudo) }
-.s .of-tipo-bt{ display:grid; gap:4px; text-align:left; padding:14px 16px; border:1.5px solid var(--s-linha); border-radius:14px; background:#fff; transition:border-color var(--s-t),background var(--s-t) }
+.s .of-tipo-bt{ display:grid; gap:4px; text-align:left; padding:14px 16px; border:1.5px solid var(--s-linha-forte); border-radius:14px; background:#fff; transition:border-color var(--s-t),background var(--s-t) }
 .s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
 .s .of-tipo-bt.on{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .of-tipo-rot{ font-weight:700; font-size:17px; letter-spacing:-.02em }
@@ -653,7 +677,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-num{ grid-template-columns:1fr }
   .s .s-circs{ max-width:440px; margin-inline:auto }
   .s .s-vivos,.s .s-num .s-dir{ text-align:left }
-  .s .s-vivos li{ justify-content:flex-start }
+  /* com o texto à esquerda, o visto colado na borda direita fica solto:
+     ele passa a vir logo depois da última palavra */
+  .s .s-vivos li{ display:block }
+  .s .s-vivos li svg{ display:inline-block; vertical-align:middle; margin-left:10px; position:relative; top:-1px }
   .s .s-num .s-arroba{ margin:0 0 clamp(18px,2.4vw,34px) }
   .s .s-num .s-dir .s-lead{ margin-left:0 }
   .s .s-duas,.s .s-duas.inv{ grid-template-columns:1fr }
@@ -664,7 +691,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-cartoes.tres{ grid-template-columns:repeat(2,1fr) }
   .s .s-passos li{ grid-template-columns:1fr; gap:4px }
   .s .s-passos b{ text-align:left; white-space:normal }
-  .s .s-mapa{ aspect-ratio:auto; height:460px }
+  .s .s-mapa{ aspect-ratio:auto; height:380px }
 }
 @media(max-width:759px){
   .s{ font-size:16px }
@@ -688,14 +715,33 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-claro{ border-radius:20px }
   .s .s-mapa-cartao{ left:12px; right:12px; bottom:12px; max-width:none }
   .s .s-acoes .s-pil{ flex:1 1 auto }
-  .s .g-form-grade{ grid-template-columns:1fr }
+  .s .g-form-grade{ grid-template-columns:minmax(0,1fr) }
   .s .pg-perto{ flex-direction:column; align-items:stretch }
   .s .pg-perto .acao{ width:100% }
   .s .s-canto{ display:none }
   .s .s-busca{ padding-top:88px }
   .s .s-busca input{ height:60px }
+  /* resultado em duas colunas não cabe em 390: título em cima, contexto embaixo */
+  .s .s-busca li a{ display:block; padding:12px 10px }
+  .s .s-busca li small{ display:block; text-align:left; margin-top:3px }
+  /* o formulário empilhado não precisa de dois botões que fazem a mesma coisa:
+     no celular fica só a pílula (o "Enviar" da apresentação é da linha larga) */
+  .s .s-form.com-fim .s-enviar{ display:none }
+  .s .s-form.com-fim .s-form-fim{ margin-top:clamp(24px,4vw,36px) }
 }
 @media(max-width:420px){
   .s .s-momentos{ grid-template-columns:1fr 1fr }
   .s .s-h1{ font-size:clamp(40px,12vw,52px) }
+  /* título com palavra de 15 letras ("Relacionamentos"): o corpo cai o
+     bastante para a palavra caber inteira de 320 a 420 (≈7,9 corpos de largura) */
+  .s .s-h1.longa{ font-size:clamp(34px,10.8vw,52px) }
+}
+/* tela estreita de verdade (SE, mini com zoom de tela: 320 a 360): a sigla e
+   as pílulas devolvem respiro lateral para as palavras caberem inteiras */
+@media(max-width:380px){
+  .s .s-sigla{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .s .s-sigla li{ padding-inline:8px }
+  .s .s-sigla b{ font-size:16px }
+  .s .s-pil{ padding:0 20px }
+  .s .s-claro{ padding-inline:18px }
 }

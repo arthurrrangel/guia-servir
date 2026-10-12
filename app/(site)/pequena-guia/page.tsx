@@ -42,7 +42,7 @@ export default function PequenaGuia() {
         <Img lugar="pg-heroi" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
-          <Vozes as="h1" id="t-pg" className="s-h1" it="fé">Relacionamentos que fortalecem sua fé</Vozes>
+          <Vozes as="h1" id="t-pg" className="s-h1 longa" it="fé">Relacionamentos que fortalecem sua fé</Vozes>
           <p className="s-lead grande">Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
           <div className="s-acoes">
             <Pil href="#encontrar">Encontrar a minha</Pil>
