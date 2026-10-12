@@ -224,7 +224,8 @@ const medir = (TOL) => {
   };
 };
 
-const browser = await chromium.launch({ headless: true });
+/* PROXY=1: produção através do proxy da sessão (o NSS do navegador já confia na CA dele) */
+const browser = await chromium.launch({ headless: true, ...(process.env.PROXY ? { proxy: { server: process.env.HTTPS_PROXY } } : {}) });
 let problemas = 0;
 for (const w of LARGURAS) {
   for (const rota of ROTAS) {

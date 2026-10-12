@@ -16,7 +16,8 @@ const W = Number(process.argv[4] || 390);
 const RPC_DIR = process.env.RPC_DIR;
 mkdirSync(PASTA, { recursive: true });
 
-const browser = await chromium.launch({ headless: true });
+/* PROXY=1: produção através do proxy da sessão (o NSS do navegador já confia na CA dele) */
+const browser = await chromium.launch({ headless: true, ...(process.env.PROXY ? { proxy: { server: process.env.HTTPS_PROXY } } : {}) });
 const ctx = await browser.newContext({ viewport: { width: W, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'pt-BR' });
 const page = await ctx.newPage();
 if (RPC_DIR) await page.route('**/rest/v1/rpc/**', async route => {

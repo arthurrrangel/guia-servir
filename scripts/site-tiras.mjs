@@ -18,7 +18,8 @@ const RPC_DIR = process.env.RPC_DIR;
 mkdirSync(PASTA, { recursive: true });
 const nomeArq = (p) => p.replace(/^\//, '').replace(/\//g, '_') || 'home';
 
-const browser = await chromium.launch({ headless: true });
+/* PROXY=1: produção através do proxy da sessão (o NSS do navegador já confia na CA dele) */
+const browser = await chromium.launch({ headless: true, ...(process.env.PROXY ? { proxy: { server: process.env.HTTPS_PROXY } } : {}) });
 for (const rota of ROTAS) {
   const ctx = await browser.newContext({ viewport: { width: W, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, locale: 'pt-BR' });
   const page = await ctx.newPage();
