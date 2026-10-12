@@ -92,19 +92,22 @@ await page.screenshot({ path: `${PASTA}/06-form.png` });
 await medir('form');
 
 /* 6. âncoras: depois do pulo, o começo da seção fica abaixo da barra fixa */
-for (const [rota, alvo] of [['/pequena-guia', '#grupos'], ['/pequena-guia', '#encontrar'], ['/ofertar', '#porque'], ['/ofertar', '#ofertar'], ['/servir', '#areas']]) {
+/* o terceiro item é o link de verdade quando ele mora em outra página: o
+   "Ver as outras áreas" de cada área leva a /servir#areas */
+for (const [rota, alvo, href = alvo] of [['/pequena-guia', '#grupos'], ['/pequena-guia', '#encontrar'], ['/ofertar', '#porque'], ['/ofertar', '#ofertar'], ['/servir/midia', '#areas', '/servir#areas']]) {
   await page.goto(BASE + rota, { waitUntil: 'networkidle' });
   await page.evaluate(() => { document.documentElement.classList.add('nao-anima'); document.querySelectorAll('.s-rev').forEach(e => e.classList.add('visto')); });
-  const link = await page.$(`.s main a[href="${alvo}"]`);
-  if (!link) { console.log(JSON.stringify({ ancora: rota + alvo, erro: 'sem link na página' })); continue; }
+  const link = await page.$(`.s main a[href="${href}"]`);
+  if (!link) { console.log(JSON.stringify({ ancora: rota + ' → ' + href, erro: 'sem link na página' })); continue; }
   await link.click();
+  if (href !== alvo) await page.waitForURL('**' + href, { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(1200);
   const r = await page.evaluate((alvo) => {
     const t = document.querySelector(alvo); const b = document.querySelector('.s-topo');
     if (!t || !b) return { erro: 'sem alvo ou barra' };
     return { topoAlvo: Math.round(t.getBoundingClientRect().top), fimBarra: Math.round(b.getBoundingClientRect().bottom) };
   }, alvo);
-  console.log(JSON.stringify({ ancora: rota + alvo, ...r, ok: r.topoAlvo >= r.fimBarra }));
+  console.log(JSON.stringify({ ancora: href === alvo ? rota + alvo : rota + ' → ' + href, ...r, ok: r.topoAlvo >= r.fimBarra }));
 }
 
 await browser.close();

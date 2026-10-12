@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
 import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
-import { Img, Visto, Arroba, Vozes, Seta, fim, liga } from './Blocos';
+import { Img, Visto, Arroba, Vozes, Seta, fim, liga, ligaTexto } from './Blocos';
 import type { LugarDeFoto } from '@/lib/site/fotos';
 import { Trilho } from './Trilho';
 
@@ -109,10 +109,10 @@ export function NumerosVivos({ num, circulos = ['home-circulo-1', 'home-circulo-
         <Arroba className="dir" />
         <Vozes className="s-h2 media">Números vivos</Vozes>
         <ul className="s-vivos">
-          <li><span><b>{pessoas}</b> {fim(liga('pessoas servindo. Cada uma começou sem saber fazer nada.'))}</span><Visto /></li>
-          <li><span><b>{areas}</b> {fim(liga('áreas abertas. Uma delas tem a sua cara.'))}</span><Visto /></li>
-          <li><span><b>{postos}</b> {fim(liga('postos na escala. E sempre cabe mais um.'))}</span><Visto /></li>
-          <li><span><b>{cultos}</b> {fim(liga('encontros no mês. Servir aqui é comunhão, não plantão solitário.'))}</span><Visto /></li>
+          <li><span><b>{pessoas}</b> {fim(ligaTexto('pessoas servindo. Cada uma começou sem saber fazer nada.'))}</span><Visto /></li>
+          <li><span><b>{areas}</b> {fim(ligaTexto('áreas abertas. Uma delas tem a sua cara.'))}</span><Visto /></li>
+          <li><span><b>{postos}</b> {fim(ligaTexto('postos na escala. E sempre cabe mais um.'))}</span><Visto /></li>
+          <li><span><b>{cultos}</b> {fim(ligaTexto('encontros no mês. Servir aqui é comunhão, não plantão solitário.'))}</span><Visto /></li>
         </ul>
       </div>
     </div>
@@ -147,7 +147,7 @@ export function Areas({ compacto }: { compacto?: boolean }) {
         <span className="s-cartao-n">{dois(p)} {p === 1 ? 'posto' : 'postos'}</span>
         {!aberto && <span className="s-cartao-tag">conversa antes</span>}
         <span className="s-cartao-f">{liga(a.frase)}</span>
-        {!compacto && <span className="s-cartao-d">{fim(liga(a.texto))}</span>}
+        {!compacto && <span className="s-cartao-d">{fim(ligaTexto(a.texto))}</span>}
         <span className="s-cartao-ir">Escolher esta área <Seta /></span>
       </Link>
     );
@@ -238,7 +238,7 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
       <button type="submit" className="s-enviar" aria-busy={indo}>{indo ? 'Abrindo…' : 'Enviar'}</button>
       <div className="s-form-fim" style={{ gridColumn: '1 / -1' }}>
         <button type="submit" className={'s-pil' + (escuro ? '' : ' preta')} aria-busy={indo}>Quero servir</button>
-        <p className="s-micro">{liga("Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.")}</p>
+        <p className="s-micro">{ligaTexto("Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.")}</p>
       </div>
     </form>
   );

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL · 11/10/2026
@@ -52,8 +52,8 @@ export default function Privacidade() {
         <div className="s-in">
           <Chapeu forte="Privacidade" resto="LGPD · Lei 13.709/2018" />
           <Vozes as="h1" className="s-h1" it="quê" >O que a gente guarda, e por quê</Vozes>
-          <p className="s-lead grande" style={{ marginTop: 22 }}>{liga("Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.")}</p>
-          <p className="s-micro" style={{ marginTop: 16, opacity: .7 }}>{liga("Atualizada em outubro de 2026")}</p>
+          <p className="s-lead grande" style={{ marginTop: 22 }}>{ligaTexto("Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.")}</p>
+          <p className="s-micro" style={{ marginTop: 16, opacity: .7 }}>{ligaTexto("Atualizada em outubro de 2026")}</p>
         </div>
       </section>
 
@@ -81,7 +81,7 @@ export default function Privacidade() {
           <div className="s-claro s-rev">
             <Sede />
             <h2 id="t-pedir" className="s-h2 menor">{liga("O que você pode pedir.")}</h2>
-            <p className="s-lead">{liga("Acesso, correção, exclusão. Sem custo, sem justificativa. Diga seu nome completo e a área em que você serve ou serviu. A resposta sai em até 15 dias.")}</p>
+            <p className="s-lead">{ligaTexto("Acesso, correção, exclusão. Sem custo, sem justificativa. Diga seu nome completo e a área em que você serve ou serviu. A resposta sai em até 15 dias.")}</p>
             <div className="s-qa">
               <div><b>Controladora</b><p>{IGREJA.nome}<br />{fim(ENDERECO_LINHA)}</p></div>
             </div>

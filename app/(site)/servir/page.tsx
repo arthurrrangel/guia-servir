@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Perguntas, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import { VideoHeroi } from '@/components/site/VideoHeroi';
@@ -70,7 +70,7 @@ export default function Servir() {
             <Pil href="#quero-servir">Quero servir</Pil>
             <Pil href="/eu" duro>Já sirvo</Pil>
           </div>
-          <p className="s-micro">{liga("Cadastro de menos de um minuto.")}</p>
+          <p className="s-micro">{ligaTexto("Cadastro de menos de um minuto.")}</p>
         </div>
       </section>
 
@@ -81,7 +81,7 @@ export default function Servir() {
           <div className="s-duas">
             <div className="s-rev">
               <Vozes className="s-h2 media">Deus se alegra com o seu servir</Vozes>
-              <p className="s-lead">{liga("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
+              <p className="s-lead">{ligaTexto("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
               <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes. É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</p>
             </div>
             <div className="s-foto v s-rev d1"><Img lugar="servir-abraco" sizes="(max-width: 999px) 90vw, 34vw" /></div>
@@ -101,7 +101,7 @@ export default function Servir() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-areas" className="s-h2">Escolha por onde começar</Vozes>
-            <p className="s-lead">{liga("Você escolhe as funções no cadastro. Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar, porque dom também se discipula.")}</p>
+            <p className="s-lead">{ligaTexto("Você escolhe as funções no cadastro. Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar, porque dom também se discipula.")}</p>
           </div>
           <div className="s-rev d1"><Areas /></div>
           <div className="s-acoes centro s-cartoes-acoes s-rev">
@@ -119,7 +119,7 @@ export default function Servir() {
             <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -131,9 +131,9 @@ export default function Servir() {
           <div className="s-claro s-rev">
             <Sede />
             <h2 id="t-espaco" className="s-h2 menor">{liga("Seu espaço tem sua escala, seus dias e seu líder.")}</h2>
-            <p className="s-lead">{liga("Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza.")}</p>
+            <p className="s-lead">{ligaTexto("Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza.")}</p>
             <div className="s-qa">
-              <div><b>Ainda não tem PIN?</b><p>{liga('Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.')}</p></div>
+              <div><b>Ainda não tem PIN?</b><p>{ligaTexto('Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.')}</p></div>
               <div><b>Ainda não serve?</b><p>O primeiro passo está logo acima.</p></div>
             </div>
             <div className="s-acoes centro"><Pil href="/eu" tom="preta" duro>Abrir meu espaço</Pil></div>
@@ -147,7 +147,7 @@ export default function Servir() {
         <div className="s-in">
           <div className="s-rev">
             <h2 id="t-obj" className="s-h2 minima">Ninguém aqui começou sabendo.</h2>
-            <p className="s-lead grande" style={{ marginTop: 18 }}>{liga("Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:")}</p>
+            <p className="s-lead grande" style={{ marginTop: 18 }}>{ligaTexto("Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:")}</p>
           </div>
           <div className="s-rev d1"><Perguntas itens={OBJECOES} forma="obj" /></div>
         </div>
@@ -168,7 +168,7 @@ export default function Servir() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {liga('Um deles pode ser o seu. Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</p>
+            <p className="s-lead grande" style={{ marginTop: 22 }}>O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {ligaTexto('Um deles pode ser o seu. Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</p>
           </div>
           <div className="s-rev d1"><FormServir /></div>
           <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Prefere escolher a área com calma? <Link href="/servir/onde-me-encaixo" className="s-link claro">Não sei onde me encaixo</Link>.</p>

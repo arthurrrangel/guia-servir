@@ -13,6 +13,7 @@ import { existsSync, readFileSync } from 'fs';
    Uso: node scripts/site-pendura.mjs <base> <larguras> <rota> [rota...]
    RPC_DIR=<pasta> responde as RPCs com JSON gravado; PROXY=1 usa o proxy.
    O que fica de propósito: o herói em duas vozes ("Ofertar é / adorar.").
+   Linha que termina em pontuação de fim de frase ou oração não conta.
    ============================================================================= */
 const [BASE, LARG, ...ROTAS] = process.argv.slice(2);
 const RPC_DIR = process.env.RPC_DIR;
@@ -54,7 +55,11 @@ for (const w of LARG.split(',').map(Number)) {
         const linhas = [];
         for (const p of pal) { const l = linhas[linhas.length - 1]; if (l && Math.abs(l.top - p.firstTop) < 6) l.ws.push(p.w); else linhas.push({ top: p.top, ws: [p.w] }); }
         for (let i = 0; i < linhas.length - 1; i++) {
-          const ult = linhas[i].ws[linhas[i].ws.length - 1].toLowerCase().replace(/[^\p{L}]/gu, '');
+          const bruta = linhas[i].ws[linhas[i].ws.length - 1];
+          /* fim de frase ou de oração ("o seu.", "a gente é:") fecha a linha:
+             a pontuação segura o olho, não é palavra pendurada */
+          if (/[.:;!?]["”)]?$/.test(bruta)) continue;
+          const ult = bruta.toLowerCase().replace(/[^\p{L}]/gu, '');
           if (curtas.has(ult)) achados.push({ tag: el.tagName.toLowerCase() + (el.className && typeof el.className === 'string' ? '.' + el.className.split(' ')[0] : ''), linha: linhas[i].ws.join(' '), texto: el.textContent.trim().slice(0, 70) });
         }
       }

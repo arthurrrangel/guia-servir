@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
-import { Vozes, Sede, Chapeu, Pil, Img, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, liga, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -61,7 +61,7 @@ export default function Pagina() {
             <p className="s-serifa it">{liga("três razões, nenhuma cobrança:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
+            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>

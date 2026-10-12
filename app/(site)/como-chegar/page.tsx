@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS, textoDoModo } from '@/lib/chegar';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 
@@ -38,7 +38,7 @@ export default function ComoChegar() {
             <Pil href={MAPA} fora>Traçar rota no Maps</Pil>
             <Pil href={ROTA_WAZE} fora>Abrir no Waze</Pil>
           </div>
-          <p className="s-micro">{liga("Tem alguém na porta esperando você.")}</p>
+          <p className="s-micro">{ligaTexto("Tem alguém na porta esperando você.")}</p>
         </div>
       </section>
 
@@ -47,7 +47,7 @@ export default function ComoChegar() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-modos" className="s-h2" it="gente">Como chegar até a gente</Vozes>
-            <p className="s-lead">{liga("De carro, de aplicativo ou a pé.")}</p>
+            <p className="s-lead">{ligaTexto("De carro, de aplicativo ou a pé.")}</p>
           </div>
           <div className="s-rev d1">
             <Trilho className="s-cartoes tres" rotulo="Os modos de chegar">
@@ -55,7 +55,7 @@ export default function ComoChegar() {
                 <div key={m.n} className="s-cartao">
                   <span className="s-cartao-n">{m.n}</span>
                   <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{liga(m.t)}</span>
-                  <span className="s-cartao-d">{fim(liga(m.d))}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(liga(m.d2))}</>}</span>
+                  <span className="s-cartao-d">{fim(ligaTexto(m.d))}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(ligaTexto(m.d2))}</>}</span>
                 </div>
               ))}
             </Trilho>
@@ -79,7 +79,7 @@ export default function ComoChegar() {
         <Img lugar="fecho-maos" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="domingo">O que esperar de um domingo</Vozes>
-          <p className="s-lead">{liga("Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.")}</p>
+          <p className="s-lead">{ligaTexto("Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.")}</p>
           <div className="s-acoes centro">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href={conversa.href} fora>Falar no WhatsApp</Pil>

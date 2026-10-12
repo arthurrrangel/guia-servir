@@ -732,6 +732,19 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 /* tela estreita de verdade (SE, mini com zoom de tela: 320 a 360): a sigla e
    as pílulas devolvem respiro lateral para as palavras caberem inteiras */
 @media(max-width:380px){
+  /* títulos com as palavras curtas presas umas às outras (liga) não têm onde
+     quebrar: em 320, "Por onde começar" (38 px) dava 285 px numa coluna de
+     280 e "O que acontece" (40 px) dava 282. O corpo só desce abaixo de
+     338 px de tela; dali para cima nada muda */
+  .s .s-h1{ font-size:clamp(37px,12vw,52px) }
+  .s .s-h2{ font-size:clamp(35px,11.25vw,38px) }
+  /* título do cartão claro: o cartão tira 36 px da coluna (244 px em 320).
+     "da responsabilidade" (275 px em 30) e "É a sua primeira vez?" (282)
+     não cabiam e a linha terminava em "da" ou "sua". Abaixo de 375 px o
+     corpo acompanha a tela (25,6 px em 320) e as duas frases cabem */
+  .s .s-claro .s-h2.menor{ font-size:clamp(25px,8vw,30px) }
+  /* "Por que ofertamos?" em 46 px dava 282 px numa coluna de 280 */
+  .s .s-passos-cab .s-serifa{ font-size:clamp(42px,14vw,46px) }
   .s .s-lead.grande{ font-size:18px }
   .s .s-lead{ font-size:17px }
   .s .s-sigla{ grid-template-columns:repeat(2,minmax(0,1fr)) }

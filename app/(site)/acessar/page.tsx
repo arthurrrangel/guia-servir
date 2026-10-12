@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, inteiro, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 
 /* =============================================================================
    /acessar — A PORTA DAS EQUIPES · 11/10/2026
@@ -35,7 +35,7 @@ export default function Acessar() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
           <Vozes as="h1" id="t-ac" className="s-h1" it="você?" semPonto>Quem é você?</Vozes>
-          <p className="s-lead grande">{liga("Três caminhos. Nenhum pede cadastro.")}</p>
+          <p className="s-lead grande">{ligaTexto("Três caminhos. Nenhum pede cadastro.")}</p>
         </div>
       </section>
 
@@ -51,7 +51,7 @@ export default function Acessar() {
                 <span className="s-cartao-n">{p.n}</span>
                 <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{p.t}</span>
                 <span className="s-cartao-f">{liga(p.f)}</span>
-                <span className="s-cartao-d">{fim(liga(inteiro(p.d)))}</span>
+                <span className="s-cartao-d">{fim(ligaTexto(inteiro(p.d)))}</span>
                 <span className="s-cartao-ir">Entrar</span>
               </a>
             ))}
@@ -63,10 +63,10 @@ export default function Acessar() {
         <div className="s-in">
           <div className="s-cab centro s-rev">
             <Vozes id="t-chave" className="s-h2 media" it="chave">O link é a sua chave</Vozes>
-            <p className="s-lead">{liga("Aqui ninguém tem senha. Quem serve entra pela área, pelo nome e pelo PIN de quatro números.")}</p>
+            <p className="s-lead">{ligaTexto("Aqui ninguém tem senha. Quem serve entra pela área, pelo nome e pelo PIN de quatro números.")}</p>
           </div>
           <div className="s-abre s-rev d1">
-            {DUVIDAS.map((d, i) => <details key={d.q} open={i === 0}><summary>{liga(inteiro(d.q))}</summary><div><p>{fim(liga(inteiro(d.r)))}</p></div></details>)}
+            {DUVIDAS.map((d, i) => <details key={d.q} open={i === 0}><summary>{liga(inteiro(d.q))}</summary><div><p>{fim(ligaTexto(inteiro(d.r)))}</p></div></details>)}
           </div>
           <div className="s-acoes centro" style={{ marginTop: 'clamp(28px,4vw,48px)' }}>
             <Pil href="/eu" duro tom="preta">Abrir meu espaço</Pil>

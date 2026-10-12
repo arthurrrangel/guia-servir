@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, liga } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, ligaTexto } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -46,7 +46,7 @@ export default function Eventos() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Eventos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-ev" className="s-h1" it="na semana">O que acontece na semana</Vozes>
-          <p className="s-lead grande">{liga("Domingo é o centro. Mas a vida da igreja não cabe num dia só.")}</p>
+          <p className="s-lead grande">{ligaTexto("Domingo é o centro. Mas a vida da igreja não cabe num dia só.")}</p>
           <div className="s-acoes">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href="/followcamp" duro>Follow Camp 2027</Pil>
@@ -60,14 +60,14 @@ export default function Eventos() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-agenda" className="s-h2" it="semana">A agenda da semana</Vozes>
-            <p className="s-lead">{liga("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
+            <p className="s-lead">{ligaTexto("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
           </div>
           <div className="s-rev d1">
             <Trilho className="s-cartoes tres" rotulo="A agenda da semana">
               {AGENDA.map(a => (
                 a.href.startsWith('#')
-                  ? <a key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{liga(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></a>
-                  : <Link key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{liga(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></Link>
+                  ? <a key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></a>
+                  : <Link key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></Link>
               ))}
             </Trilho>
           </div>
@@ -82,7 +82,7 @@ export default function Eventos() {
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
-              <p className="s-lead">{liga("Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está.")}</p>
+              <p className="s-lead">{ligaTexto("Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está.")}</p>
               <div className="s-acoes" style={{ marginTop: 26 }}>
                 <Pil href="/cultos#como-chegar">Como chegar</Pil>
                 <Pil href={IGREJA.instagram} fora>{IGREJA.instagramArroba}</Pil>
@@ -99,7 +99,7 @@ export default function Eventos() {
             <div className="s-rev">
               <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
               <Vozes className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
-              <p className="s-lead">{liga("O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.")}</p>
+              <p className="s-lead">{ligaTexto("O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.")}</p>
               <div className="s-acoes" style={{ marginTop: 26 }}>
                 <Pil href="/followcamp" duro tom="preta">Ir para a página do Camp</Pil>
               </div>
@@ -113,7 +113,7 @@ export default function Eventos() {
         <Img lugar="fecho-maos" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="está">Vem como você está</Vozes>
-          <p className="s-lead">{liga("Domingo, sábado ou na semana: tem um lugar pra você em cada um.")}</p>
+          <p className="s-lead">{ligaTexto("Domingo, sábado ou na semana: tem um lugar pra você em cada um.")}</p>
           <div className="s-acoes centro">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href="/pequena-guia">Encontrar uma Pequena Guia</Pil>

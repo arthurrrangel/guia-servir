@@ -36,10 +36,16 @@ export const fim = (t: string) => {
    torta. Regra de composição: a palavra curta gruda na seguinte com espaço
    que não quebra. Duas passadas, para pegar sequências ("e a vida"). */
 const CURTAS = 'o|a|e|é|de|da|do|em|no|na|um|uma|à|ao|os|as|pra|para|por|que|se|com|dos|das|nos|nas|seu|sua|te|me|eu|ou|nem|só|sem|há';
-/* só gruda se a palavra seguinte for curta (até 9 letras): "da
-   responsabilidade" grudado vira um bloco que não cabe numa linha de 320 */
-const RE_CURTA = new RegExp(`(^|[\\s\u00a0("“])(${CURTAS})[ ]+(?=[^\\s]{1,9}(?:[\\s]|$))`, 'giu');
+/* TÍTULO (liga): só gruda se a palavra seguinte for curta (até 9 letras):
+   "da responsabilidade" grudado vira um bloco que não cabe numa linha de 320.
+   TEXTO CORRIDO (ligaTexto, 17 a 20 px): aceita até 16 letras ("uma
+   comunidade:", "sua disponibilidade", "de tecnologia"); no corpo de texto o
+   bloco grudado mais longo dá ~190 px, dois terços da coluna mais estreita. */
+const reCurta = (max: number) => new RegExp(`(^|[\\s\u00a0("“])(${CURTAS})[ ]+(?=[^\\s]{1,${max}}(?:[\\s]|$))`, 'giu');
+const RE_CURTA = reCurta(9);
+const RE_CURTA_TEXTO = reCurta(16);
 export const liga = (t: string) => t.replace(RE_CURTA, '$1$2\u00a0').replace(RE_CURTA, '$1$2\u00a0');
+export const ligaTexto = (t: string) => t.replace(RE_CURTA_TEXTO, '$1$2\u00a0').replace(RE_CURTA_TEXTO, '$1$2\u00a0');
 const CURTA_NO_FIM = new RegExp(`(^|\\s)(${CURTAS})$`, 'iu');
 
 /* SEPARADOR " · " entre dois trechos de uma linha (endereço, horário). No
@@ -171,7 +177,7 @@ export const SetaBaixo = () => (
    só ouve a que está visível. */
 export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
   { itens: ReadonlyArray<{ q: string; r: React.ReactNode }>; forma?: 'faq' | 'obj'; aberta?: number }) {
-  const resp = (r: React.ReactNode) => (typeof r === 'string' ? fim(liga(r)) : r);
+  const resp = (r: React.ReactNode) => (typeof r === 'string' ? fim(ligaTexto(r)) : r);
   return (
     <>
       {forma === 'faq'

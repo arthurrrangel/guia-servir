@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
 import { type LugarDeFoto } from '@/lib/site/fotos';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, liga } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, liga, ligaTexto } from './Blocos';
 import { FormServir } from './Servir';
 import { Trilho } from './Trilho';
 
@@ -101,7 +101,7 @@ export default function Area() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
-          <p className="s-lead grande">{liga("O link pode estar errado. Volte e escolha uma das áreas da lista.")}</p>
+          <p className="s-lead grande">{ligaTexto("O link pode estar errado. Volte e escolha uma das áreas da lista.")}</p>
           <div className="s-acoes"><Pil href="/servir#areas">Ver as áreas</Pil></div>
         </div>
       </section>
@@ -127,13 +127,13 @@ export default function Area() {
             const i = t.search(/[.!?](\s|$)/);
             const primeira = i > 0 ? t.slice(0, i + 1) : t;
             const resto = i > 0 ? t.slice(i + 1).trim() : '';
-            return <p className="s-lead grande">{resto ? <>{liga(primeira)}<span className="s-resto"> {fim(liga(resto))}</span></> : fim(liga(primeira))}</p>;
+            return <p className="s-lead grande">{resto ? <>{ligaTexto(primeira)}<span className="s-resto"> {fim(ligaTexto(resto))}</span></> : fim(ligaTexto(primeira))}</p>;
           })()}
           <div className="s-acoes">
             <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
             <Pil href="/servir#areas">Ver as outras áreas</Pil>
           </div>
-          {fixa?.perfil && <p className="s-micro">{fixa.perfil}</p>}
+          {fixa?.perfil && <p className="s-micro">{ligaTexto(fixa.perfil)}</p>}
         </div>
       </section>
 
@@ -143,7 +143,7 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-funcoes" className="s-h2" it={nome} semPonto>{`O que se faz ${artigo} ${nome}`}</Vozes>
-            <p className="s-lead">{liga("Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar.")}</p>
+            <p className="s-lead">{ligaTexto("Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar.")}</p>
           </div>
           {fase === 'carregando' && <p className="s-aviso s-centro" role="status">Carregando as funções…</p>}
           {fase === 'rede' && <p className="s-aviso s-centro" role="status">Sem conexão agora. Atualize a página pra ver as funções.</p>}
@@ -154,7 +154,7 @@ export default function Area() {
                   <div key={fam} className="s-funcao">
                     <small>{String(i + 1).padStart(2, '0')}</small>
                     <b>{fam}</b>
-                    <p>{liga(g.texto || 'A liderança explica no primeiro contato.')}</p>
+                    <p>{ligaTexto(g.texto || 'A liderança explica no primeiro contato.')}</p>
                     {g.vagas > 1 && <em>{g.vagas} postos</em>}
                   </div>
                 ))}
@@ -172,7 +172,7 @@ export default function Area() {
             <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
           </ol>
         </div>
       </section>
@@ -198,7 +198,7 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="aqui">Existe um lugar para você aqui</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>{fim(liga(fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'))}</p>
+            <p className="s-lead grande" style={{ marginTop: 22 }}>{fim(ligaTexto(fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'))}</p>
             {!aberto && <p className="s-aviso">Essa área conversa com cada pessoa antes de escalar: você preenche o cadastro e a liderança fala com você.</p>}
           </div>
           <div className="s-rev d1"><FormServir areaInicial={slug} /></div>
