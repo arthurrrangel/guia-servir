@@ -5,6 +5,7 @@ import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Img, fim } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
+import { VideoHeroi } from '@/components/site/VideoHeroi';
 
 /* =============================================================================
    /servir — "EXISTE UM LUGAR PARA VOCÊ" · 11/10/2026
@@ -58,7 +59,9 @@ export default function Servir() {
 
       {/* 1 · o herói na fachada */}
       <section className="s-heroi" aria-labelledby="t-servir">
-        <Img lugar="servir-heroi" prioridade />
+        <Img lugar="servir-heroi" prioridade retrato />
+        {/* o vídeo dos voluntários é deitado: no celular em pé fica a foto dos dois embaixo do 534 */}
+        <VideoHeroi largo="/site/servir-largo" />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-servir" className="s-h1" it="para você">Existe um lugar para você</Vozes>

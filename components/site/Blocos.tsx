@@ -87,11 +87,14 @@ export function Pil({ href, children, tom = '', duro, fora, className = '' }:
 }
 
 /* a foto de um lugar do registro, com a versão pequena quando existe */
-export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt }:
-  { lugar: LugarDeFoto; className?: string; sizes?: string; prioridade?: boolean; alt?: string }) {
+export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt, retrato }:
+  { lugar: LugarDeFoto; className?: string; sizes?: string; prioridade?: boolean; alt?: string; retrato?: boolean }) {
   const f: Foto = FOTOS[lugar];
   const srcSet = f.pequena ? `${f.pequena} 640w, ${f.arquivo} ${f.largura}w` : undefined;
-  return (
+  /* o ponto da foto que nunca sai do quadro: variável no estilo, e o CSS
+     troca pelo do retrato quando a tela está em pé */
+  const foco = { ...(f.foco ? { '--foco': f.foco } : {}), ...(f.retrato?.foco ? { '--foco-r': f.retrato.foco } : {}) } as React.CSSProperties;
+  const img = (
     <img
       src={f.arquivo}
       srcSet={srcSet}
@@ -100,12 +103,25 @@ export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt }:
       height={f.altura}
       alt={alt ?? f.alt}
       className={className}
-      style={f.foco ? { objectPosition: f.foco } : undefined}
+      style={Object.keys(foco).length ? foco : undefined}
       loading={prioridade ? 'eager' : 'lazy'}
       decoding="async"
       fetchPriority={prioridade ? 'high' : undefined}
     />
   );
+  /* herói e fecho no celular em pé: o recorte em pé (<picture>), para não
+     ampliar uma faixa estreita da foto deitada */
+  if (retrato && f.retrato) {
+    const r = f.retrato;
+    const rSet = r.pequena ? `${r.pequena} 640w, ${r.arquivo} ${r.largura}w` : `${r.arquivo} ${r.largura}w`;
+    return (
+      <picture>
+        <source media="(orientation: portrait)" srcSet={rSet} sizes={sizes} width={r.largura} height={r.altura} />
+        {img}
+      </picture>
+    );
+  }
+  return img;
 }
 
 /* os dois ícones do site: a seta e o visto */

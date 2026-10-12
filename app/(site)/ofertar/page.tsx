@@ -32,7 +32,7 @@ export default function Pagina() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'DonateAction', name: 'Ofertar para a GUIA Church', recipient: { '@type': 'Church', name: IGREJA.nome, url: SITE }, url: `${SITE}/ofertar` }} />
 
       <section className="s-heroi curto" aria-labelledby="t-of">
-        <Img lugar="ofertar-heroi" prioridade />
+        <Img lugar="ofertar-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Doação" resto="Dízimos e ofertas" />
           <Vozes as="h1" id="t-of" className="s-h1" it="adorar">Ofertar é adorar</Vozes>
@@ -68,7 +68,7 @@ export default function Pagina() {
       </section>
 
       <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" />
+        <Img lugar="fecho" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="semeou">Que Deus multiplique o que você semeou</Vozes>
           <div className="s-acoes centro">

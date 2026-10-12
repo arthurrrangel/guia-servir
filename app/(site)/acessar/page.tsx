@@ -31,7 +31,7 @@ export default function Acessar() {
   return (
     <>
       <section className="s-heroi curto" aria-labelledby="t-ac">
-        <Img lugar="home-circulo-2" prioridade />
+        <Img lugar="acessar-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
           <Vozes as="h1" id="t-ac" className="s-h1" it="você?" semPonto>Quem é você?</Vozes>

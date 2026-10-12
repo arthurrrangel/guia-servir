@@ -40,7 +40,7 @@ export default function Sobre() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-sobre">
-        <Img lugar="sobre-heroi" prioridade />
+        <Img lugar="sobre-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Quem somos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-sobre" className="s-h1" it="cultura">Uma comunidade que cultiva uma nova cultura</Vozes>
@@ -121,7 +121,7 @@ export default function Sobre() {
       </section>
 
       <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" />
+        <Img lugar="fecho" retrato />
         <div className="s-in">
           <Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes id="t-fim" className="s-h2 media" it="perto">Conheça a GUIA de perto</Vozes>

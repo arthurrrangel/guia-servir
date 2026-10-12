@@ -421,7 +421,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 
 /* o fecho das páginas: foto escura de ponta a ponta, frase, pílula */
 .s .s-fecho{ position:relative; isolation:isolate; min-height:min(64svh,620px); display:grid; place-items:center; text-align:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden; padding:var(--s-bloco) 0 }
-.s .s-fecho > img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; filter:saturate(.85) brightness(.9) }
+.s .s-fecho > img,.s .s-fecho > picture img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; filter:saturate(.85) brightness(.9) }
 .s .s-fecho::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,12,.55),rgba(10,10,12,.72)) }
 .s .s-fecho .s-h2{ max-width:14ch; margin-inline:auto }
 .s .s-fecho .s-lead{ margin:clamp(16px,2.2vw,28px) auto 0 }
@@ -742,6 +742,21 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 }
 
 /* =============================================================================
+   FOTO E VÍDEO · 12/10/2026
+   O ponto de cada foto que nunca sai do quadro vem do registro
+   (lib/site/fotos.ts) como variável; em tela em pé vale o do recorte em pé.
+   O vídeo do herói fica entre a foto e o escurecimento, e entra em fade
+   quando o primeiro quadro está pronto (até lá, e sem vídeo, fica a foto).
+   ============================================================================= */
+.s img{ object-position:var(--foco, 50% 50%) }
+@media(orientation:portrait){
+  .s picture img{ object-position:var(--foco-r, var(--foco, 50% 50%)) }
+}
+.s .s-heroi-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:0; transition:opacity .9s var(--s-ease); pointer-events:none }
+.s .s-heroi-video.pronto{ opacity:1 }
+@media(prefers-reduced-motion:reduce){ .s .s-heroi-video{ display:none } }
+
+/* =============================================================================
    ÂNCORAS · 12/10/2026
    "Ver os grupos", "Encontrar a minha", "Por que ofertamos" pulam para uma
    seção da própria página. Sem isto, o começo da seção parava escondido
@@ -844,6 +859,18 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-cortina-pe{ justify-items:center }
   .s .s-busca li a{ text-align:center }
   .s .s-busca li small{ text-align:center }
+
+  /* 5d. herói do celular: o texto desce para o terço de baixo e a foto
+     respira em cima (rosto nunca embaixo do título); o escuro cresce de
+     cima para baixo, onde o texto mora */
+  .s .s-heroi{ align-items:flex-end }
+  .s .s-heroi-in{ padding-top:clamp(140px,34svh,300px); padding-bottom:44px }
+  .s .s-heroi::before,.s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.30) 0%,rgba(10,10,12,.10) 18%,rgba(10,10,12,.58) 42%,rgba(10,10,12,.88) 70%,rgba(10,10,12,.95) 100%) }
+  /* com vídeo por trás, o quadro muda de claro para escuro: uma sombra curta
+     garante o texto em qualquer quadro (não aparece como sombra) */
+  .s .s-heroi :is(.s-chapeu, .s-h1, .s-lead, .s-micro){ text-shadow:0 1px 14px rgba(0,0,0,.38) }
+
+  .s .s-heroi .s-resto{ display:none }
 
   /* 6. o valor da oferta no meio da caixa, como numa maquininha */
   .s .of-valor-cx{ justify-content:center }

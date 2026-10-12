@@ -80,7 +80,7 @@ export default function Area() {
   if (fase === 'erro') {
     return (
       <section className="s-heroi curto" aria-labelledby="t-area">
-        <Img lugar="fecho" prioridade />
+        <Img lugar="fecho" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
@@ -95,11 +95,19 @@ export default function Area() {
     <>
       {/* o herói com a foto da área */}
       <section className="s-heroi" aria-labelledby="t-area">
-        <Img lugar={lugar} prioridade />
+        <Img lugar={lugar} prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
           <Vozes as="h1" id="t-area" className="s-h1" it={fixa?.frase ? undefined : nome} semPonto={!fixa?.frase}>{fixa?.frase ?? nome}</Vozes>
-          <p className="s-lead grande">{fim(fixa?.texto ?? min?.descricao ?? '')}</p>
+          {(() => {
+            /* no celular o herói fica com a primeira frase (a foto respira em
+               cima); o resto continua no computador */
+            const t = fixa?.texto ?? min?.descricao ?? '';
+            const i = t.search(/[.!?](\s|$)/);
+            const primeira = i > 0 ? t.slice(0, i + 1) : t;
+            const resto = i > 0 ? t.slice(i + 1).trim() : '';
+            return <p className="s-lead grande">{resto ? <>{primeira}<span className="s-resto"> {fim(resto)}</span></> : fim(primeira)}</p>;
+          })()}
           <div className="s-acoes">
             <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
             <Pil href="/servir#areas">Ver as outras áreas</Pil>

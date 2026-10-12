@@ -6,6 +6,7 @@ import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, Sep } from '@/components/s
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
+import { VideoHeroi } from '@/components/site/VideoHeroi';
 
 /* =============================================================================
    A HOME · 11/10/2026 — refeita do zero na forma da apresentação
@@ -62,7 +63,8 @@ export default function Home() {
 
       {/* 1 · o herói */}
       <section className="s-heroi" aria-labelledby="t-home">
-        <Img lugar="home-heroi" prioridade sizes="100vw" />
+        <Img lugar="home-heroi" prioridade retrato sizes="100vw" />
+        <VideoHeroi largo="/site/heroi-largo" retrato="/site/heroi-retrato" />
         <div className="s-in s-heroi-in">
           <Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />
           <Vozes as="h1" id="t-home" className="s-h1">{IGREJA.frase}</Vozes>

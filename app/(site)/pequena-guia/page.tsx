@@ -39,7 +39,7 @@ export default function PequenaGuia() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />
 
       <section className="s-heroi" aria-labelledby="t-pg">
-        <Img lugar="pg-heroi" prioridade />
+        <Img lugar="pg-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
           <Vozes as="h1" id="t-pg" className="s-h1 longa" it="fé">Relacionamentos que fortalecem sua fé</Vozes>
@@ -88,7 +88,7 @@ export default function PequenaGuia() {
       </section>
 
       <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" />
+        <Img lugar="fecho" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="perto">Diga onde você mora. A gente diz qual fica perto</Vozes>
           <div className="s-acoes centro">

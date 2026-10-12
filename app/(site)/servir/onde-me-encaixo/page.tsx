@@ -33,7 +33,7 @@ export default function OndeMeEncaixo() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: DUVIDAS.map(d => ({ '@type': 'Question', name: d.q, acceptedAnswer: { '@type': 'Answer', text: d.r.join(' ') } })) }} />
 
       <section className="s-heroi curto" aria-labelledby="t-enc">
-        <Img lugar="home-circulo-2" prioridade />
+        <Img lugar="encaixe-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-enc" className="s-h1" it="encaixo">Não sei onde me encaixo</Vozes>

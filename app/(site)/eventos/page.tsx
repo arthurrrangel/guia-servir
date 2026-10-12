@@ -41,7 +41,7 @@ export default function Eventos() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-ev">
-        <Img lugar="evento-follow" prioridade />
+        <Img lugar="eventos-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Eventos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-ev" className="s-h1" it="semana">O que acontece na semana</Vozes>
@@ -107,7 +107,7 @@ export default function Eventos() {
       </section>
 
       <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" />
+        <Img lugar="fecho" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="está">Vem como você está</Vozes>
           <p className="s-lead">Domingo, sábado ou na semana: tem um lugar pra você em cada um.</p>

@@ -61,7 +61,7 @@ export default function Cultos() {
 
       {/* herói */}
       <section className="s-heroi" aria-labelledby="t-cultos">
-        <Img lugar="cultos-heroi" prioridade />
+        <Img lugar="cultos-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes as="h1" id="t-cultos" className="s-h1" it="pertencer">Um domingo para pertencer</Vozes>
@@ -144,7 +144,7 @@ export default function Cultos() {
 
       {/* ao vivo */}
       <section id="ao-vivo" className="s-fecho s-rev" aria-labelledby="t-vivo">
-        <Img lugar="home-heroi" />
+        <Img lugar="home-heroi" retrato />
         <div className="s-in">
           <Chapeu forte="Ao vivo" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes id="t-vivo" className="s-h2 media" it="domingo">A mensagem de domingo</Vozes>

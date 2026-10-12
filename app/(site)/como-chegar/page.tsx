@@ -28,7 +28,7 @@ export default function ComoChegar() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: MODOS.map(m => ({ '@type': 'Question', name: m.t, acceptedAnswer: { '@type': 'Answer', text: textoDoModo(m) } })) }} />
 
       <section className="s-heroi" aria-labelledby="t-chegar">
-        <Img lugar="chegar-heroi" prioridade />
+        <Img lugar="chegar-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Onde fica" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes as="h1" id="t-chegar" className="s-h1" it="chegar">Como chegar</Vozes>
@@ -73,7 +73,7 @@ export default function ComoChegar() {
       </section>
 
       <section id="conversa" className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" />
+        <Img lugar="fecho" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="domingo">O que esperar de um domingo</Vozes>
           <p className="s-lead">Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.</p>
