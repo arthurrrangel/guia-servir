@@ -11,6 +11,7 @@ grava em public/site/:
   <nome>-s.webp   640 px de largura, para o celular (srcset)
 
 Uso: python3 scripts/site-fotos.py <pasta-dos-posts> <pasta-dos-quadros> [saida]
+(SO=nome1,nome2 gera só esses recortes)
 A lista RECORTES é a fonte da verdade: (nome, arquivo, (x0, y0, x1, y1)).
 Coordenadas no pixel do original. Para conferir, rode com FOLHA=1: monta
 public/site/_folha.jpg com todos os recortes lado a lado (não vai pro ar).
@@ -36,7 +37,7 @@ RECORTES = [
     # -------------------------------------------------------------- servir
     ('servir-heroi', Q('v3-colete.png'), None),                  # voluntário de colete, na porta
     ('area-midia', Q('v3-camera.png'), None),
-    ('area-midia-r', Q('v2-mesa.png'), None),                    # a mesa da transmissão
+    ('area-midia-r', Q('v3-camera3.png'), (600, 0, 1004, 718)),  # a câmera no tripé com o monitor aceso, no terço de cima (era a mesa: metade de cima era parede escura)
     ('area-louvor', Q('v1-cantora.png'), None),
     ('area-kids', Q('v1-menino.png'), None),
     ('area-kids-r', P('1d3a2b42-image.jpg'), (175, 330, 905, 1240)),
@@ -76,6 +77,7 @@ RECORTES = [
     ('chegar-heroi', P('0a9e5a6e-image.jpg'), None, {'max': 1920}),  # a fachada em alta (era 740 px)
     ('chegar-heroi-r', P('0a9e5a6e-image.jpg'), (1000, 560, 1720, 1732)),  # a placa redonda a 1/3 da altura (era só palmeira e céu)
     ('fecho-maos-r', Q('v2-olhar.png'), None),                      # mãos levantadas no escuro (fecho no celular)
+    ('acessar-heroi-r', Q('v2-mesa.png'), (0, 300, 720, 1280)),     # a mesa sem a parede escura de cima: os monitores sobem para o terço de cima
 ]
 
 
@@ -131,8 +133,12 @@ def sem_texto(im, faixas):
 
 from PIL import ImageDraw
 folha = []
+# SO=nome1,nome2 gera só esses (as outras fotos ficam como estão)
+SO = set(filter(None, os.environ.get('SO', '').split(',')))
 for item in RECORTES:
     nome, origem, caixa = item[:3]
+    if SO and nome not in SO:
+        continue
     opc = item[3] if len(item) > 3 else {}
     im = Image.open(origem).convert('RGB')
     if caixa:
