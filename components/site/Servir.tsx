@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
 import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
-import { Img, Visto, Arroba, Vozes, Seta, fim } from './Blocos';
+import { Img, Visto, Arroba, Vozes, Seta, fim, liga } from './Blocos';
+import type { LugarDeFoto } from '@/lib/site/fotos';
+import { Trilho } from './Trilho';
 
 /* =============================================================================
    AS PEÇAS VIVAS DA /servir · 11/10/2026
@@ -76,12 +78,14 @@ export function Numero({ campo }: { campo: keyof Numeros }) {
   const num = useNumeros();
   return <>{num[campo]}</>;
 }
-export function NumerosFaixa() {
+/* os dois círculos são da página: a home e a /servir não repetem foto */
+type Circulos = [LugarDeFoto, LugarDeFoto];
+export function NumerosFaixa({ circulos }: { circulos?: Circulos }) {
   const num = useNumeros();
-  return <NumerosVivos num={num} />;
+  return <NumerosVivos num={num} circulos={circulos} />;
 }
 
-export function NumerosVivos({ num }: { num: Numeros }) {
+export function NumerosVivos({ num, circulos = ['home-circulo-1', 'home-circulo-2'] }: { num: Numeros; circulos?: Circulos }) {
   const faixa = useRef<HTMLDivElement>(null);
   const [ativo, setAtivo] = useState(false);
   useEffect(() => {
@@ -98,17 +102,17 @@ export function NumerosVivos({ num }: { num: Numeros }) {
   return (
     <div ref={faixa} className="s-num">
       <div className="s-circs s-rev" aria-hidden="true">
-        <div className="s-circ a"><Img lugar="home-circulo-1" sizes="(max-width: 999px) 70vw, 32vw" /></div>
-        <div className="s-circ b"><Img lugar="home-circulo-2" sizes="(max-width: 999px) 60vw, 28vw" /></div>
+        <div className="s-circ a"><Img lugar={circulos[0]} sizes="(max-width: 999px) 70vw, 32vw" /></div>
+        <div className="s-circ b"><Img lugar={circulos[1]} sizes="(max-width: 999px) 60vw, 28vw" /></div>
       </div>
       <div className="s-dir s-rev d1">
         <Arroba className="dir" />
         <Vozes className="s-h2 media">Números vivos</Vozes>
         <ul className="s-vivos">
-          <li><span><b>{pessoas}</b> pessoas servindo. Cada uma começou sem saber fazer nada.</span><Visto /></li>
-          <li><span><b>{areas}</b> áreas abertas. Uma delas tem a sua cara.</span><Visto /></li>
-          <li><span><b>{postos}</b> postos na escala. E sempre cabe mais um.</span><Visto /></li>
-          <li><span><b>{cultos}</b> encontros no mês. Servir aqui é comunhão, não plantão solitário.</span><Visto /></li>
+          <li><span><b>{pessoas}</b> {fim(liga('pessoas servindo. Cada uma começou sem saber fazer nada.'))}</span><Visto /></li>
+          <li><span><b>{areas}</b> {fim(liga('áreas abertas. Uma delas tem a sua cara.'))}</span><Visto /></li>
+          <li><span><b>{postos}</b> {fim(liga('postos na escala. E sempre cabe mais um.'))}</span><Visto /></li>
+          <li><span><b>{cultos}</b> {fim(liga('encontros no mês. Servir aqui é comunhão, não plantão solitário.'))}</span><Visto /></li>
         </ul>
       </div>
     </div>
@@ -142,18 +146,18 @@ export function Areas({ compacto }: { compacto?: boolean }) {
         <span className="s-cartao-t">{a.nome}</span>
         <span className="s-cartao-n">{dois(p)} {p === 1 ? 'posto' : 'postos'}</span>
         {!aberto && <span className="s-cartao-tag">conversa antes</span>}
-        <span className="s-cartao-f">{a.frase}</span>
-        {!compacto && <span className="s-cartao-d">{fim(a.texto)}</span>}
+        <span className="s-cartao-f">{liga(a.frase)}</span>
+        {!compacto && <span className="s-cartao-d">{fim(liga(a.texto))}</span>}
         <span className="s-cartao-ir">Escolher esta área <Seta /></span>
       </Link>
     );
   };
   return (
     <>
-      <div className={'s-cartoes' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')}>
+      <Trilho className={'s-cartoes' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')} rotulo="As áreas">
         {AREAS_ORDEM.map(slug => cartao(slug, AREAS[slug]))}
         {extras.map(x => cartao(x.slug, { nome: x.nome, postos: x.postos, aberto: x.aberto, frase: x.descricao || '', texto: '', linha: '', artigo: x.artigo as Area['artigo'] }, x))}
-      </div>
+      </Trilho>
       {rede && <p className="s-aviso" role="status">Sem conexão agora: os postos acima são os últimos conhecidos.</p>}
     </>
   );
@@ -234,7 +238,7 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
       <button type="submit" className="s-enviar" aria-busy={indo}>{indo ? 'Abrindo…' : 'Enviar'}</button>
       <div className="s-form-fim" style={{ gridColumn: '1 / -1' }}>
         <button type="submit" className={'s-pil' + (escuro ? '' : ' preta')} aria-busy={indo}>Quero servir</button>
-        <p className="s-micro">Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.</p>
+        <p className="s-micro">{liga("Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.")}</p>
       </div>
     </form>
   );

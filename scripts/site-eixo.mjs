@@ -48,7 +48,11 @@ function medir() {
   const txt = (s) => (s || '').trim().replace(/\s+/g, ' ').slice(0, 42);
   const raizes = [...document.querySelectorAll('.s main, .s .s-pe')];
   const fora = (e) => !!e.closest('.leaflet-container, input, select, textarea, option, pre, .s-topo, .s-cortina, .s-busca, [hidden], .s-pular, svg title, .g-form-campo, .s-campo');
+  /* trilho de deslizar (celular): o cartão fora da janela não está à vista;
+     ele é medido quando a pessoa desliza (todos têm o mesmo desenho) */
+  const foraDoTrilho = (e) => { const c = e.closest && e.closest('.desliza > *'); if (!c) return false; const r = c.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; };
   const visivel = (e) => {
+    if (foraDoTrilho(e)) return false;
     for (let a = e; a && a !== document.body; a = a.parentElement) {
       const s = getComputedStyle(a);
       if (s.display === 'none' || s.visibility === 'hidden' || Number(s.opacity) < .05) return false;

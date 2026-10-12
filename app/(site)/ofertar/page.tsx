@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
-import { Vozes, Sede, Chapeu, Pil, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, liga } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -36,7 +36,7 @@ export default function Pagina() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Doação" resto="Dízimos e ofertas" />
           <Vozes as="h1" id="t-of" className="s-h1" it="adorar">Ofertar é adorar</Vozes>
-          <p className="s-lead grande">Leva menos de um minuto, e você decide o valor. Pix, cartão, Apple Pay ou Google Pay.</p>
+          <p className="s-lead grande">Leva menos de um minuto, e você decide o valor.<span className="s-resto"> Pix, cartão, Apple Pay ou Google Pay.</span></p>
           <div className="s-acoes">
             <Pil href="#ofertar">Ofertar agora</Pil>
             <Pil href="#porque">Por que ofertamos</Pil>
@@ -57,11 +57,11 @@ export default function Pagina() {
       <section id="porque" className="s-faixa areia" aria-labelledby="t-porque">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-porque" className="s-serifa">Por que ofertamos?</h2>
-            <p className="s-serifa it">três razões, nenhuma cobrança:</p>
+            <h2 id="t-porque" className="s-serifa">{liga("Por que ofertamos?")}</h2>
+            <p className="s-serifa it">{liga("três razões, nenhuma cobrança:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{p.d}</p></li>)}
+            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -70,7 +70,7 @@ export default function Pagina() {
       <section className="s-fecho s-rev" aria-labelledby="t-fim">
         <Img lugar="fecho" retrato />
         <div className="s-in">
-          <Vozes id="t-fim" className="s-h2 media" it="semeou">Que Deus multiplique o que você semeou</Vozes>
+          <Vozes id="t-fim" className="s-h2 media" it="o que você semeou">Que Deus multiplique o que você semeou</Vozes>
           <div className="s-acoes centro">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href="/servir">Quero servir</Pil>

@@ -5,8 +5,9 @@ import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
 import { type LugarDeFoto } from '@/lib/site/fotos';
-import { Vozes, Sede, Chapeu, Pil, Img, fim } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, liga } from './Blocos';
 import { FormServir } from './Servir';
+import { Trilho } from './Trilho';
 
 /* =============================================================================
    /servir/<área> — A PÁGINA DA ÁREA · 11/10/2026
@@ -28,6 +29,22 @@ type Fn = { nome: string; descricao: string | null; descricao_familia: string | 
 const familia = (nome: string) => {
   const p = nome.trim().split(/\s+/); const fim = p[p.length - 1];
   return p.length > 1 && fim.length <= 2 ? p.slice(0, -1).join(' ') : nome;
+};
+
+/* as últimas palavras que vão para o itálico: o mínimo de duas, crescendo
+   enquanto a primeira parte passa de 16 letras e o itálico cabe em 18 */
+const CURTA = /^(o|a|e|de|da|do|em|no|na|um|uma|à|ao|pra|para|por|que|se|com)$/i;
+const segundaVoz = (frase: string) => {
+  const p = frase.trim().split(/\s+/);
+  let k = 2;
+  for (; k < p.length; k++) {
+    if (p.slice(0, -k).join(' ').length <= 16) { if (p.slice(-k).join(' ').length > 18) k = 2; break; }
+  }
+  if (k >= p.length) k = 2;
+  /* a primeira parte nunca termina em palavra curta ("Leve o culto pra /
+     fora dele"): a curta desce para o itálico */
+  while (k < p.length - 1 && CURTA.test(p[p.length - k - 1])) k++;
+  return p.slice(-k).join(' ');
 };
 
 const LUGAR: Record<string, LugarDeFoto> = { midia: 'area-midia', louvor: 'area-louvor', kids: 'area-kids', servico: 'area-servico', livraria: 'area-livraria' };
@@ -84,7 +101,7 @@ export default function Area() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
-          <p className="s-lead grande">O link pode estar errado. Volte e escolha uma das áreas da lista.</p>
+          <p className="s-lead grande">{liga("O link pode estar errado. Volte e escolha uma das áreas da lista.")}</p>
           <div className="s-acoes"><Pil href="/servir#areas">Ver as áreas</Pil></div>
         </div>
       </section>
@@ -98,7 +115,11 @@ export default function Area() {
         <Img lugar={lugar} prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
-          <Vozes as="h1" id="t-area" className="s-h1" it={fixa?.frase ? undefined : nome} semPonto={!fixa?.frase}>{fixa?.frase ?? nome}</Vozes>
+          {/* a segunda voz (a linha em itálico) são as últimas palavras da
+              frase: duas, ou mais até a primeira parte caber numa linha do
+              celular ("Faça a mensagem / chegar mais longe."). Com uma palavra
+              só, o itálico ficava sozinho e a primeira parte quebrava em três */}
+          <Vozes as="h1" id="t-area" className={'s-h1' + ((fixa?.frase ?? nome).length > 24 ? ' longa' : '')} it={fixa?.frase ? segundaVoz(fixa.frase) : nome} semPonto={!fixa?.frase}>{fixa?.frase ?? nome}</Vozes>
           {(() => {
             /* no celular o herói fica com a primeira frase (a foto respira em
                cima); o resto continua no computador */
@@ -106,7 +127,7 @@ export default function Area() {
             const i = t.search(/[.!?](\s|$)/);
             const primeira = i > 0 ? t.slice(0, i + 1) : t;
             const resto = i > 0 ? t.slice(i + 1).trim() : '';
-            return <p className="s-lead grande">{resto ? <>{primeira}<span className="s-resto"> {fim(resto)}</span></> : fim(primeira)}</p>;
+            return <p className="s-lead grande">{resto ? <>{liga(primeira)}<span className="s-resto"> {fim(liga(resto))}</span></> : fim(liga(primeira))}</p>;
           })()}
           <div className="s-acoes">
             <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
@@ -122,20 +143,22 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-funcoes" className="s-h2" it={nome} semPonto>{`O que se faz ${artigo} ${nome}`}</Vozes>
-            <p className="s-lead">Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar.</p>
+            <p className="s-lead">{liga("Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar.")}</p>
           </div>
           {fase === 'carregando' && <p className="s-aviso s-centro" role="status">Carregando as funções…</p>}
           {fase === 'rede' && <p className="s-aviso s-centro" role="status">Sem conexão agora. Atualize a página pra ver as funções.</p>}
           {fase === 'pronto' && (
-            <div className="s-funcoes s-rev d1">
-              {grupos.map(([fam, g], i) => (
-                <div key={fam} className="s-funcao">
-                  <small>{String(i + 1).padStart(2, '0')}</small>
-                  <b>{fam}</b>
-                  <p>{g.texto || 'A liderança explica no primeiro contato.'}</p>
-                  {g.vagas > 1 && <em>{g.vagas} postos</em>}
-                </div>
-              ))}
+            <div className="s-rev d1">
+              <Trilho className="s-funcoes" rotulo={`As funções ${artigo} ${nome}`}>
+                {grupos.map(([fam, g], i) => (
+                  <div key={fam} className="s-funcao">
+                    <small>{String(i + 1).padStart(2, '0')}</small>
+                    <b>{fam}</b>
+                    <p>{liga(g.texto || 'A liderança explica no primeiro contato.')}</p>
+                    {g.vagas > 1 && <em>{g.vagas} postos</em>}
+                  </div>
+                ))}
+              </Trilho>
             </div>
           )}
         </div>
@@ -145,11 +168,11 @@ export default function Area() {
       <section className="s-faixa areia" aria-labelledby="t-como">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-como" className="s-serifa">Como funciona?</h2>
-            <p className="s-serifa it">do cadastro à escala, 4 passos:</p>
+            <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
+            <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{p.d}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
           </ol>
         </div>
       </section>
@@ -175,7 +198,7 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="aqui">Existe um lugar para você aqui</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>{fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'}</p>
+            <p className="s-lead grande" style={{ marginTop: 22 }}>{fim(liga(fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'))}</p>
             {!aberto && <p className="s-aviso">Essa área conversa com cada pessoa antes de escalar: você preenche o cadastro e a liderança fala com você.</p>}
           </div>
           <div className="s-rev d1"><FormServir areaInicial={slug} /></div>

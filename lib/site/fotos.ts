@@ -49,8 +49,17 @@ export const FOTOS = {
     nota: 'Adoração com a camisa GUIA Church Family.' },
   /* -------------------------------------------------------------- servir */
   'servir-heroi': { arquivo: '/site/servir-heroi.webp', pequena: '/site/servir-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '50% 35%', alt: 'Voluntário de colete GUIA recebendo quem chega',
-    retrato: { arquivo: '/site/servir-heroi-r.webp', pequena: '/site/servir-heroi-r-s.webp', largura: 720, altura: 1280, foco: '50% 35%' },
-    nota: 'Voluntários de colete na porta (no celular, os dois embaixo do 534).' },
+    retrato: { arquivo: '/site/servir-heroi-r.webp', pequena: '/site/servir-heroi-r-s.webp', largura: 720, altura: 1080, foco: '50% 22%' },
+    nota: 'Voluntários de colete na porta (no celular, os dois embaixo do 534, sem o número borrado do topo; rostos a 23% da altura).' },
+  /* 12/10 (noite): a /servir tinha a mesma foto e os mesmos círculos da home.
+     Agora a tela 2 é o abraço da apresentação e os círculos são o louvor e
+     o voluntário de colete (como na tela 3 do PDF). */
+  'servir-abraco': { arquivo: '/site/area-servico-r.webp', largura: 632, altura: 745, corte: 'V', foco: '50% 30%', alt: 'Duas mulheres se abraçando na entrada da igreja',
+    nota: '"Deus se alegra com o seu servir": o abraço da tela 2 do PDF.' },
+  'servir-circulo-1': { arquivo: '/site/servir-circulo-1.webp', pequena: '/site/servir-circulo-1-s.webp', largura: 710, altura: 710, corte: 'Q', alt: '',
+    nota: 'O louvor no palco.' },
+  'servir-circulo-2': { arquivo: '/site/servir-circulo-2.webp', pequena: '/site/servir-circulo-2-s.webp', largura: 718, altura: 718, corte: 'Q', foco: '50% 30%', alt: '',
+    nota: 'O voluntário de colete GUIA.' },
   'area-midia': { arquivo: '/site/area-midia.webp', pequena: '/site/area-midia-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '60% 40%', alt: 'Câmera da transmissão operada durante o culto',
     retrato: { arquivo: '/site/area-midia-r.webp', pequena: '/site/area-midia-r-s.webp', largura: 720, altura: 1280, foco: '45% 45%' },
     nota: 'Câmera no tripé; no celular, a mesa da transmissão.' },
@@ -61,8 +70,8 @@ export const FOTOS = {
     retrato: { arquivo: '/site/area-kids-r.webp', pequena: '/site/area-kids-r-s.webp', largura: 730, altura: 910, foco: '50% 40%' },
     nota: 'Sala da GUIA Kids; no celular, a voluntária com as crianças.' },
   'area-servico': { arquivo: '/site/area-servico.webp', pequena: '/site/area-servico-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '35% 45%', alt: 'Dois voluntários de colete acenando na entrada',
-    retrato: { arquivo: '/site/area-servico-r.webp', largura: 632, altura: 745, foco: '55% 40%' },
-    nota: 'Connect: voluntários na entrada; no celular, o abraço na porta.' },
+    retrato: { arquivo: '/site/area-servico-r2.webp', largura: 404, altura: 718, foco: '50% 30%' },
+    nota: 'Connect: voluntários na entrada (no celular, os dois de colete acenando; o abraço ficou na /servir).' },
   'area-livraria': { arquivo: '/fotos/livraria.webp', largura: 1200, altura: 1282, corte: 'H', foco: '50% 45%', alt: 'A mesa da livraria',
     nota: 'Ainda a antiga: falta foto da livraria com alguém atendendo.' },
   /* -------------------------------------------------------------- cultos */
@@ -70,25 +79,25 @@ export const FOTOS = {
     retrato: { arquivo: '/site/cultos-heroi-r.webp', pequena: '/site/cultos-heroi-r-s.webp', largura: 888, altura: 1120, foco: '45% 25%' },
     nota: 'Pregação; no celular, o pastor de olhos fechados, mão no peito.' },
   'cultos-1': { arquivo: '/site/momento-acolhida.webp', largura: 574, altura: 718, corte: 'V', foco: '50% 35%', alt: 'Acolhida na porta', nota: 'Acolhida.' },
-  'cultos-2': { arquivo: '/site/momento-louvor.webp', pequena: '/site/momento-louvor-s.webp', largura: 720, altura: 900, corte: 'V', foco: '45% 35%', alt: 'Louvor', nota: 'Louvor.' },
+  'cultos-2': { arquivo: '/site/momento-louvor.webp', largura: 574, altura: 718, corte: 'V', foco: '50% 35%', alt: 'Louvor', nota: 'Louvor: a cantora no palco azul (o cantor já é o herói da home).' },
   'cultos-3': { arquivo: '/site/momento-palavra.webp', pequena: '/site/momento-palavra-s.webp', largura: 720, altura: 900, corte: 'V', foco: '50% 30%', alt: 'Palavra', nota: 'Palavra.' },
   'cultos-4': { arquivo: '/site/momento-oracao.webp', pequena: '/site/momento-oracao-s.webp', largura: 1000, altura: 1250, corte: 'V', foco: '50% 35%', alt: 'Oração no fim do culto', nota: 'Oração.' },
   /* ----------------------------------------------------------- quem somos */
   'sobre-heroi': { arquivo: '/site/sobre-heroi.webp', pequena: '/site/sobre-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '45% 40%', alt: 'A igreja ouvindo a mensagem',
-    retrato: { arquivo: '/site/sobre-heroi-r.webp', largura: 632, altura: 745, foco: '55% 40%' },
-    nota: 'A igreja na mensagem; no celular, o abraço na porta.' },
+    retrato: { arquivo: '/site/sobre-heroi-r.webp', pequena: '/site/sobre-heroi-r-s.webp', largura: 760, altura: 1028, foco: '45% 18%' },
+    nota: 'A igreja na mensagem; no celular, a líder e as crianças rindo (comunidade).' },
   'sobre-comunidade': { arquivo: '/site/sobre-comunidade.webp', pequena: '/site/sobre-comunidade-s.webp', largura: 1080, altura: 590, corte: 'H', foco: '50% 35%', alt: 'Duas mulheres sorrindo juntas na igreja',
     nota: 'Duas amigas sorrindo.' },
   /* -------------------------------------------------- portas de entrada */
   'acessar-heroi': { arquivo: '/site/servir-heroi.webp', pequena: '/site/servir-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '50% 35%', alt: '',
-    retrato: { arquivo: '/site/servir-heroi-r.webp', pequena: '/site/servir-heroi-r-s.webp', largura: 720, altura: 1280, foco: '50% 35%' },
-    nota: 'Quem já serve: voluntários de colete.' },
+    retrato: { arquivo: '/site/area-midia-r.webp', pequena: '/site/area-midia-r-s.webp', largura: 720, altura: 1280, foco: '45% 40%' },
+    nota: 'Quem já serve: voluntários de colete (no celular, a mesa da transmissão; a porta do 534 é da /servir).' },
   'encaixe-heroi': { arquivo: '/site/encaixe-heroi.webp', pequena: '/site/encaixe-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '45% 40%', alt: '',
-    retrato: { arquivo: '/site/area-servico-r.webp', largura: 632, altura: 745, foco: '55% 40%' },
-    nota: 'Abraço na entrada: ninguém fica sem lugar.' },
+    retrato: { arquivo: '/site/encaixe-heroi-r.webp', pequena: '/site/encaixe-heroi-r-s.webp', largura: 800, altura: 1255, foco: '50% 20%' },
+    nota: 'Abraço na entrada: ninguém fica sem lugar (no celular, a mulher orando; a frase do post foi apagada).' },
   'eventos-heroi': { arquivo: '/site/eventos-heroi.webp', pequena: '/site/eventos-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '60% 35%', alt: '',
-    retrato: { arquivo: '/site/home-heroi-r.webp', pequena: '/site/home-heroi-r-s.webp', largura: 720, altura: 1280, foco: '50% 30%' },
-    nota: 'Palco do culto, para a agenda.' },
+    retrato: { arquivo: '/site/eventos-heroi-r.webp', pequena: '/site/eventos-heroi-r-s.webp', largura: 672, altura: 1344, foco: '50% 10%' },
+    nota: 'Palco do culto, para a agenda (no celular, o louvor com a banda; o cantor da home não se repete).' },
   /* --------------------------------------------------------- pequena guia */
   'pg-heroi': { arquivo: '/site/pg-heroi.webp', pequena: '/site/pg-heroi-s.webp', largura: 1080, altura: 635, corte: 'H', foco: '55% 50%', alt: 'Uma Pequena Guia reunida numa casa',
     nota: 'Um grupo numa sala, em preto e branco.' },
@@ -105,8 +114,16 @@ export const FOTOS = {
   'fecho': { arquivo: '/site/fecho.webp', pequena: '/site/fecho-s.webp', largura: 1080, altura: 685, corte: 'H', foco: '50% 40%', alt: '',
     retrato: { arquivo: '/site/fecho-r.webp', largura: 550, altura: 685, foco: '50% 40%' },
     nota: 'As duas cantoras no escuro, para o bloco final das páginas.' },
-  'chegar-heroi': { arquivo: '/fotos/predio.webp', largura: 740, altura: 498, corte: 'H', alt: 'A fachada da GUIA Church de dia',
-    nota: 'Ainda a antiga: fachada de dia, com a placa, pra pessoa reconhecer a porta.' },
+  'chegar-heroi': { arquivo: '/site/chegar-heroi.webp', pequena: '/site/chegar-heroi-s.webp', largura: 1920, altura: 1291, corte: 'H', foco: '55% 55%', alt: 'A fachada da GUIA Church, com o letreiro na entrada',
+    retrato: { arquivo: '/site/chegar-heroi-r.webp', pequena: '/site/chegar-heroi-r-s.webp', largura: 720, altura: 1172, foco: '50% 30%' },
+    nota: 'A fachada em alta (o arquivo era de 740 px): a casa, a placa redonda e o GUI> no muro.' },
+  /* 12/10 (noite): fotos para não repetir a mesma imagem duas vezes na
+     página (o Follow do /eventos e do /cultos) e um segundo fecho */
+  'follow-palco': { arquivo: '/site/follow-palco.webp', pequena: '/site/follow-palco-s.webp', largura: 1080, altura: 580, corte: 'H', foco: '45% 40%', alt: 'O louvor no palco do Follow',
+    nota: 'Palco com o letreiro "Neste lugar tu és rei", acima da frase gravada no post.' },
+  'fecho-maos': { arquivo: '/site/home-heroi.webp', pequena: '/site/home-heroi-s.webp', largura: 1276, altura: 718, corte: 'H', foco: '55% 40%', alt: '',
+    retrato: { arquivo: '/site/fecho-maos-r.webp', pequena: '/site/fecho-maos-r-s.webp', largura: 720, altura: 1280, foco: '50% 35%' },
+    nota: 'Mãos levantadas no escuro: o fecho das páginas que não usam as cantoras.' },
 } as const satisfies Record<string, Foto>;
 
 export type LugarDeFoto = keyof typeof FOTOS;

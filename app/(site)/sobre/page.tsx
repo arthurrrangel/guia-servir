@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, liga } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -43,8 +43,8 @@ export default function Sobre() {
         <Img lugar="sobre-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Quem somos" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-sobre" className="s-h1" it="cultura">Uma comunidade que cultiva uma nova cultura</Vozes>
-          <p className="s-lead grande">A GUIA existe pra ajudar pessoas a viver uma fé prática, construída em relacionamento com Deus e com outras pessoas.</p>
+          <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="uma nova cultura">Uma comunidade que cultiva uma nova cultura</Vozes>
+          <p className="s-lead grande">A GUIA existe pra ajudar pessoas a viver uma fé prática.<span className="s-resto"> Uma fé construída em relacionamento com Deus e com outras pessoas.</span></p>
           <div className="s-acoes">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href="/servir">Quero servir</Pil>
@@ -57,9 +57,9 @@ export default function Sobre() {
           <Arroba className="topo" />
           <div className="s-duas">
             <div className="s-rev">
-              <Vozes className="s-h2 media" it="frequentar">Mais do que um lugar para frequentar</Vozes>
-              <p className="s-lead">Acreditamos que a igreja é uma comunidade: um lugar onde cada pessoa encontra acolhimento, cresce na fé, desenvolve seus dons e participa do que Deus está fazendo.</p>
-              <p className="s-lead">Não queremos encher bancos. Queremos formar gente comprometida com o Reino.</p>
+              <Vozes className="s-h2 media" it="para frequentar">Mais do que um lugar para frequentar</Vozes>
+              <p className="s-lead">{liga("Acreditamos que a igreja é uma comunidade: um lugar onde cada pessoa encontra acolhimento, cresce na fé, desenvolve seus dons e participa do que Deus está fazendo.")}</p>
+              <p className="s-lead">{liga("Não queremos encher bancos. Queremos formar gente comprometida com o Reino.")}</p>
             </div>
             <div className="s-foto h s-rev d1"><Img lugar="sobre-comunidade" sizes="(max-width: 999px) 90vw, 34vw" /></div>
           </div>
@@ -96,11 +96,11 @@ export default function Sobre() {
       <section className="s-faixa areia" aria-labelledby="t-pilares">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-pilares" className="s-serifa">Em que a gente se apoia?</h2>
-            <p className="s-serifa it">três pilares, uma casa:</p>
+            <h2 id="t-pilares" className="s-serifa">{liga("Em que a gente se apoia?")}</h2>
+            <p className="s-serifa it">{liga("três pilares, uma casa:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PILARES.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{p.d}</p></li>)}
+            {PILARES.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -110,8 +110,8 @@ export default function Sobre() {
         <div className="s-in">
           <div className="s-claro s-rev">
             <Sede />
-            <h2 id="t-alvo" className="s-h2 menor">Plantar cada cristão no solo da responsabilidade do Reino.</h2>
-            <p className="s-lead">É o nosso alvo. E ele muda o que a gente mede:</p>
+            <h2 id="t-alvo" className="s-h2 menor">{liga("Plantar cada cristão no solo da responsabilidade do Reino.")}</h2>
+            <p className="s-lead">{liga("É o nosso alvo. E ele muda o que a gente mede:")}</p>
             <ul className="s-vira" style={{ marginTop: 'clamp(24px,3vw,40px)' }}>
               {VIRA.map(v => <li key={v.de}><span>{v.de}</span><Chevron /><span>{v.para}</span></li>)}
             </ul>
@@ -124,7 +124,7 @@ export default function Sobre() {
         <Img lugar="fecho" retrato />
         <div className="s-in">
           <Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
-          <Vozes id="t-fim" className="s-h2 media" it="perto">Conheça a GUIA de perto</Vozes>
+          <Vozes id="t-fim" className="s-h2 media" it="de perto">Conheça a GUIA de perto</Vozes>
           <div className="s-acoes centro">
             <Pil href="/cultos#como-chegar">Como chegar</Pil>
             <Pil href="/cultos">Ver os cultos</Pil>

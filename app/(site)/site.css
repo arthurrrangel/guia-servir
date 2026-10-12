@@ -890,3 +890,99 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* texto longo de verdade (privacidade, respostas que abrem): sem órfã */
   .s main .s-abre details > div p, .s .s-prosa p{ text-wrap:pretty }
 }
+
+/* =============================================================================
+   CELULAR DE VERDADE · 12/10/2026 (noite)
+
+   As réguas de eixo davam zero erro e o celular continuava ruim: elas medem
+   margem, não desenho. Olhando as 12 páginas inteiras como gente vê, o que
+   pesava era o PDF de computador empilhado numa coluna. Daqui para baixo,
+   o celular deixa de ser a apresentação espremida:
+
+   1. TRILHO: grade de cartões vira faixa de deslizar (components/site/
+      Trilho.tsx). Um cartão no centro, a ponta dos vizinhos, os pontos.
+   2. PERGUNTAS que abrem (Perguntas, em Blocos.tsx); o computador segue
+      com a lista do PDF.
+   3. Os carimbos de slide ("guiachurch | sede", "@guiachurch", o símbolo do
+      canto) saem do celular: no PDF são assinatura de tela; numa página que
+      rola, seis por página viram ruído. O pé continua assinado.
+   4. O pé encolhe para uma linha de atalhos (o menu tem o resto).
+   5. Os números vivos ficam grandes, um por linha, sem o visto torto.
+   6. O herói: a parte de cima da foto fica limpa (era escurecida desde o
+      topo); o escuro nasce logo acima do texto e acompanha o texto, não a
+      altura da tela.
+   ============================================================================= */
+.s .desliza{ position:relative }
+.s .trilho-pontos, .s .s-pe-atalhos{ display:none }
+.s .s-abre.so-celular{ display:none }
+
+@media(max-width:759px){
+  /* 1. o trilho */
+  .s .desliza{
+    --cartao:min(80vw,340px);
+    display:flex; gap:12px;
+    overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory; scrollbar-width:none;
+    margin-inline:calc(var(--s-gutter) * -1);
+    padding:6px calc((100vw - var(--cartao)) / 2) 12px;
+  }
+  .s .desliza::-webkit-scrollbar{ display:none }
+  .s .desliza > *{ flex:0 0 var(--cartao); scroll-snap-align:center; min-height:0 }
+  .s .desliza > .some{ display:none }
+  .s .pgs.desliza{ margin-top:18px }
+  .s .trilho-pontos{ display:flex; justify-content:center; margin-top:4px; color:inherit }
+  .s .trilho-pontos button{ width:26px; height:32px; display:grid; place-items:center }
+  .s .trilho-pontos i{ display:block; width:6px; height:6px; border-radius:3px; background:currentColor; opacity:.28; transition:width var(--s-t) var(--s-ease),opacity var(--s-t) }
+  .s .trilho-pontos [aria-current="true"] i{ width:18px; opacity:.85 }
+
+  /* 1b. os momentos do domingo no trilho: a foto inteira em cima e o texto
+     embaixo, no preto (o texto por cima cobria o rosto das pessoas) */
+  .s .s-momentos.desliza > .s-momento{ aspect-ratio:auto; display:flex; flex-direction:column; background:var(--s-noite) }
+  .s .s-momentos.desliza .s-momento img{ position:static; width:100%; height:auto; aspect-ratio:4/5 }
+  .s .s-momentos.desliza .s-momento::after{ display:none }
+  .s .s-momentos.desliza .s-momento div{ position:static; padding:16px 18px 22px }
+  .s .s-momentos.desliza .s-momento b{ font-size:22px }
+  .s .s-momentos.desliza .s-momento p{ font-size:15px }
+
+  /* 2. as perguntas que abrem */
+  .s .so-largo{ display:none !important }
+  .s .s-abre.so-celular{ display:grid }
+  .s .s-abre.so-celular.obj{ margin-top:26px }
+
+  /* 3. sem carimbo de slide no celular (o display:none antigo do símbolo
+     perdia para o estilo em linha do próprio SVG) */
+  .s main .s-faixa .s-sede, .s main .s-faixa .s-arroba, .s main .s-claro .s-sede{ display:none !important }
+  .s .s-canto{ display:none !important }
+
+  /* 4. o pé curto */
+  .s .s-pe-g > nav{ display:none }
+  .s .s-pe-atalhos{ display:flex; flex-wrap:wrap; justify-content:center; gap:0 22px; margin-top:30px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:16px; font-weight:500; letter-spacing:-.01em }
+  .s .s-pe-atalhos a{ padding:10px 0 }
+  .s .s-pe-links a{ padding:10px 0 }
+  .s .s-pe-fim{ margin-top:22px }
+
+  /* 4b. a foto ao lado do texto (telas 2): numa coluna só, no meio */
+  .s .s-duas .s-foto{ margin-inline:auto; width:100% }
+
+  /* 5. os números vivos: o número grande, a frase embaixo */
+  .s .s-vivos{ gap:26px; margin-top:26px }
+  .s .s-vivos li{ display:block }
+  .s .s-vivos li b{ display:block; font-size:clamp(48px,15vw,64px); font-weight:800; letter-spacing:-.05em; line-height:.92; margin-bottom:8px; font-variant-numeric:tabular-nums }
+  .s .s-vivos li svg{ display:none }
+
+  /* 6. o herói: ocupa a primeira tela (o texto mora embaixo), a foto fica
+     limpa em cima e o escuro nasce 120 px acima do texto e acompanha o
+     texto, não a altura da tela. Os curtos (acessar, ofertar, onde me
+     encaixo) têm a altura do que levam. O texto ficou mais enxuto: no
+     iPhone a área visível é de ~600 px e o texto tomava quase tudo. */
+  .s .s-heroi{ --heroi-topo:clamp(150px,30svh,260px); min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
+  .s .s-heroi.curto{ min-height:0 }
+  .s .s-heroi-in{ position:relative; padding-top:var(--heroi-topo); padding-bottom:32px }
+  .s .s-heroi::before, .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
+  .s .s-heroi-in::before{ content:""; position:absolute; z-index:-1; pointer-events:none; left:calc(var(--s-gutter) * -1); right:calc(var(--s-gutter) * -1); top:calc(var(--heroi-topo) - 120px); bottom:-1px;
+    background:linear-gradient(180deg,rgba(10,10,12,0) 0,rgba(10,10,12,.82) 120px,rgba(10,10,12,.94) 260px,rgba(10,10,12,.97) 100%) }
+  .s .s-heroi .s-chapeu{ margin-bottom:14px }
+  .s .s-heroi .s-lead, .s .s-heroi .s-lead.grande{ margin-top:16px; font-size:18px; line-height:1.38 }
+  .s .s-heroi .s-acoes{ margin-top:24px }
+  .s .s-heroi .s-micro{ margin-top:14px; font-size:14px }
+}

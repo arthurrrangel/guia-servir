@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Chevron, Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, Sep } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, Sep, Perguntas, liga } from '@/components/site/Blocos';
+import { Trilho } from '@/components/site/Trilho';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -67,8 +68,8 @@ export default function Home() {
         <VideoHeroi largo="/site/heroi-largo" retrato="/site/heroi-retrato" />
         <div className="s-in s-heroi-in">
           <Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />
-          <Vozes as="h1" id="t-home" className="s-h1">{IGREJA.frase}</Vozes>
-          <p className="s-lead grande">Uma igreja que existe pra ajudar pessoas a viver uma fé prática: com Deus, com os outros, no dia a dia.</p>
+          <Vozes as="h1" id="t-home" className="s-h1" it="uma nova cultura">{IGREJA.frase}</Vozes>
+          <p className="s-lead grande">{liga("Uma igreja que existe pra ajudar pessoas a viver uma fé prática: com Deus, com os outros, no dia a dia.")}</p>
           <div className="s-acoes">
             <Pil href="/cultos">Quero conhecer</Pil>
             <Pil href="/servir">Quero servir</Pil>
@@ -84,8 +85,8 @@ export default function Home() {
           <div className="s-duas">
             <div className="s-rev">
               <Vozes className="s-h2 media">A igreja não é o prédio</Vozes>
-              <p className="s-lead">É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.</p>
-              <p className="s-lead">Todo domingo, às {IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.</p>
+              <p className="s-lead">{liga("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
+              <p className="s-lead">{liga(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
             <div className="s-foto v s-rev d1"><Img lugar="home-abraco" sizes="(max-width: 999px) 90vw, 34vw" /></div>
           </div>
@@ -104,18 +105,20 @@ export default function Home() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-portas" className="s-h2">Por onde começar</Vozes>
-            <p className="s-lead">Quatro portas. Entre por qualquer uma.</p>
+            <p className="s-lead">{liga("Quatro portas. Entre por qualquer uma.")}</p>
           </div>
-          <div className="s-cartoes quatro s-rev d1">
-            {PORTAS.map(p => (
-              <Link key={p.href} href={p.href} className="s-cartao">
-                <span className="s-cartao-t">{p.t}</span>
-                <span className="s-cartao-n">{p.n}</span>
-                <span className="s-cartao-f">{p.f}</span>
-                <span className="s-cartao-d">{p.d}</span>
-                <span className="s-cartao-ir">Abrir <Seta /></span>
-              </Link>
-            ))}
+          <div className="s-rev d1">
+            <Trilho className="s-cartoes quatro" rotulo="Por onde começar">
+              {PORTAS.map(p => (
+                <Link key={p.href} href={p.href} className="s-cartao">
+                  <span className="s-cartao-t">{p.t}</span>
+                  <span className="s-cartao-n">{p.n}</span>
+                  <span className="s-cartao-f">{liga(p.f)}</span>
+                  <span className="s-cartao-d">{liga(p.d)}</span>
+                  <span className="s-cartao-ir">Abrir <Seta /></span>
+                </Link>
+              ))}
+            </Trilho>
           </div>
         </div>
       </section>
@@ -124,16 +127,18 @@ export default function Home() {
       <section className="s-faixa areia" aria-labelledby="t-domingo">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-domingo" className="s-serifa">Como é um domingo?</h2>
-            <p className="s-serifa it">da porta à oração final, 4 momentos:</p>
+            <h2 id="t-domingo" className="s-serifa">{liga("Como é um domingo?")}</h2>
+            <p className="s-serifa it">{liga("da porta à oração final, 4 momentos:")}</p>
           </div>
-          <div className="s-momentos s-rev d1">
-            {MOMENTOS.map(m => (
-              <div key={m.n} className="s-momento">
-                <Img lugar={m.lugar} sizes="(max-width: 759px) 50vw, 25vw" />
-                <div><small>{m.n}</small><b>{m.t}</b><p>{m.d}</p></div>
-              </div>
-            ))}
+          <div className="s-rev d1">
+            <Trilho className="s-momentos" rotulo="Os quatro momentos do domingo">
+              {MOMENTOS.map(m => (
+                <div key={m.n} className="s-momento">
+                  <Img lugar={m.lugar} sizes="(max-width: 759px) 82vw, 25vw" />
+                  <div><small>{m.n}</small><b>{m.t}</b><p>{liga(m.d)}</p></div>
+                </div>
+              ))}
+            </Trilho>
           </div>
           <div className="s-acoes centro s-cartoes-acoes s-rev"><Pil href="/cultos" tom="preta">Ver os cultos</Pil></div>
         </div>
@@ -144,8 +149,8 @@ export default function Home() {
         <div className="s-in">
           <div className="s-claro s-rev">
             <Sede />
-            <h2 id="t-sigla" className="s-h2 menor">Somos GUIA.</h2>
-            <p className="s-lead">{SIGLA_FRASE}. O nome diz o que a gente é: um povo que caminha junto, se comunica e anda na mesma direção.</p>
+            <h2 id="t-sigla" className="s-h2 menor">{liga("Somos GUIA.")}</h2>
+            <p className="s-lead">{liga(`${SIGLA_FRASE}. O nome diz o que a gente é: um povo que caminha junto, se comunica e anda na mesma direção.`)}</p>
             <ul className="s-sigla" style={{ marginTop: 'clamp(26px,3.6vw,48px)' }}>
               {SIGLA.map(l => (
                 <li key={l.t}>
@@ -164,10 +169,8 @@ export default function Home() {
       <section className="s-faixa papel s-grao" aria-labelledby="t-faq">
         <Simbolo className="s-canto" />
         <div className="s-in">
-          <h2 id="t-faq" className="s-faq-t s-rev">Perguntas de quem vem pela primeira vez</h2>
-          <div className="s-faq s-rev d1">
-            {PERGUNTAS.map(p => <p key={p.q}><b>{p.q}</b> {p.r}</p>)}
-          </div>
+          <h2 id="t-faq" className="s-faq-t s-rev">{liga("Perguntas de quem vem pela primeira vez")}</h2>
+          <div className="s-rev d1"><Perguntas itens={PERGUNTAS} /></div>
         </div>
       </section>
 
@@ -177,7 +180,7 @@ export default function Home() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>Domingo, às {IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.</p>
+            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>{liga(`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`)}</p>
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             <Pil href="/cultos">Quero conhecer</Pil>

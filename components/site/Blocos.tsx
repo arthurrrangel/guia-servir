@@ -30,6 +30,18 @@ export const fim = (t: string) => {
   return colado.replace(/-(?=[^\s]*$)/g, '-\u2060');
 };
 
+/* PALAVRA CURTA NÃO FICA NO FIM DA LINHA · 12/10/2026
+   Em texto centralizado, "o", "a", "de", "que" sozinhos no fim de uma linha
+   ("Que Deus multiplique o / que você semeou") puxam o olho para a borda
+   torta. Regra de composição: a palavra curta gruda na seguinte com espaço
+   que não quebra. Duas passadas, para pegar sequências ("e a vida"). */
+const CURTAS = 'o|a|e|é|de|da|do|em|no|na|um|uma|à|ao|os|as|pra|para|por|que|se|com|dos|das|nos|nas|seu|sua|te|me|eu|ou|nem|só|sem|há';
+/* só gruda se a palavra seguinte for curta (até 9 letras): "da
+   responsabilidade" grudado vira um bloco que não cabe numa linha de 320 */
+const RE_CURTA = new RegExp(`(^|[\\s\u00a0("“])(${CURTAS})[ ]+(?=[^\\s]{1,9}(?:[\\s]|$))`, 'giu');
+export const liga = (t: string) => t.replace(RE_CURTA, '$1$2\u00a0').replace(RE_CURTA, '$1$2\u00a0');
+const CURTA_NO_FIM = new RegExp(`(^|\\s)(${CURTAS})$`, 'iu');
+
 /* SEPARADOR " · " entre dois trechos de uma linha (endereço, horário). No
    celular, centralizado, o ponto sobrava no começo ou no fim de uma linha:
    abaixo de 760 px ele vira quebra de linha (e continua sendo lido). */
@@ -43,18 +55,26 @@ export const inteiro = (t: string) => t.replace(/(\p{L})-(?=\p{L})/gu, '$1-\u206
    fica inteira no HTML, sem o ponto, e o leitor de tela lê a frase. */
 export function Vozes({ children, it, as: Tag = 'h2', className = '', id, semPonto }:
   { children: string; it?: string; as?: 'h1' | 'h2' | 'h3' | 'p'; className?: string; id?: string; semPonto?: boolean }) {
-  const texto = children.trim();
+  const texto = liga(children.trim());
   let antes = '', dep = '';
-  if (it && texto.endsWith(it)) { antes = texto.slice(0, texto.length - it.length).trim(); dep = it; }
-  else if (it) { antes = texto; dep = it; }
+  const itL = it ? liga(it) : it;
+  if (itL && texto.endsWith(itL)) { antes = texto.slice(0, texto.length - itL.length).trim(); dep = itL; }
+  else if (itL) { antes = texto; dep = itL; }
   else {
-    const i = texto.lastIndexOf(' ');
-    if (i > 0) { antes = texto.slice(0, i); dep = texto.slice(i + 1); }
+    /* a última palavra de verdade: o espaço que não quebra (de `liga`) também
+       separa palavra ("com o seu servir" não pode virar o itálico inteiro) */
+    const i = Math.max(texto.lastIndexOf(' '), texto.lastIndexOf('\u00a0'));
+    if (i > 0) { antes = texto.slice(0, i).trim(); dep = texto.slice(i + 1); }
     else { dep = texto; }
   }
   return (
     <Tag id={id} className={className}>
-      {antes && <>{antes} </>}
+      {/* a primeira parte termina em palavra curta ("lugar para"): ela vai
+          junto com o itálico, não fica sozinha no fim da linha; e o itálico
+          de uma palavra só leva a anterior junto (não fica viúvo). No h1 o
+          itálico é bloco (linha própria): lá o espaço comum some no fim da
+          linha, e o que não quebra sobraria como recuo */}
+      {antes && <>{antes}{Tag !== 'h1' && (CURTA_NO_FIM.test(antes) || (!/\s/.test(dep) && dep.length <= 10)) ? '\u00a0' : ' '}</>}
       <span className={'s-it' + (semPonto ? ' sem-ponto' : '')}>{dep}</span>
     </Tag>
   );
@@ -140,6 +160,34 @@ export const Fechar = () => (
 export const SetaBaixo = () => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
 );
+
+/* AS PERGUNTAS · 12/10/2026
+   No computador, a lista da apresentação: a pergunta em negrito e a resposta
+   na mesma linha (forma "faq", telas 8) ou embaixo (forma "obj", tela 7).
+   No celular, cada uma abre e fecha: a pergunta no eixo, a resposta só para
+   quem quer ler. Seis respostas de cinco linhas centralizadas, uma atrás da
+   outra, eram 700 px de texto corrido no meio da tela. As duas formas saem
+   no HTML e o CSS mostra uma (sem JS, sem pulo de layout); o leitor de tela
+   só ouve a que está visível. */
+export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
+  { itens: ReadonlyArray<{ q: string; r: React.ReactNode }>; forma?: 'faq' | 'obj'; aberta?: number }) {
+  const resp = (r: React.ReactNode) => (typeof r === 'string' ? fim(liga(r)) : r);
+  return (
+    <>
+      {forma === 'faq'
+        ? <div className="s-faq so-largo">{itens.map(p => <p key={p.q}><b>{liga(p.q)}</b> {resp(p.r)}</p>)}</div>
+        : <div className="s-obj so-largo">{itens.map(p => <div key={p.q}><b>{liga(p.q)}</b><p>{resp(p.r)}</p></div>)}</div>}
+      <div className={'s-abre so-celular' + (forma === 'obj' ? ' obj' : '')}>
+        {itens.map((p, k) => (
+          <details key={p.q} open={k === aberta}>
+            <summary>{liga(p.q)}</summary>
+            <div><p>{resp(p.r)}</p></div>
+          </details>
+        ))}
+      </div>
+    </>
+  );
+}
 
 /* O FECHO: a foto escura, uma frase, as ações. O último bloco de toda página. */
 export function Fecho({ titulo, it, lead, children, lugar = 'fecho' }:

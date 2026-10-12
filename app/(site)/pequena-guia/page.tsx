@@ -3,7 +3,7 @@ import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, liga } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -42,8 +42,8 @@ export default function PequenaGuia() {
         <Img lugar="pg-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
-          <Vozes as="h1" id="t-pg" className="s-h1 longa" it="fé">Relacionamentos que fortalecem sua fé</Vozes>
-          <p className="s-lead grande">Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida, estudar a Palavra e crescer em comunidade.</p>
+          <Vozes as="h1" id="t-pg" className="s-h1 longa" it="sua fé">Relacionamentos que fortalecem sua fé</Vozes>
+          <p className="s-lead grande">{liga("Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida, estudar a Palavra e crescer em comunidade.")}</p>
           <div className="s-acoes">
             <Pil href="#encontrar">Encontrar a minha</Pil>
             <Pil href="#grupos">Ver os grupos</Pil>
@@ -57,7 +57,7 @@ export default function PequenaGuia() {
           <Arroba className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-grupos" className="s-h2" it="você">Uma perto de você</Vozes>
-            <p className="s-lead">Escolha o dia que você pode. O mapa mostra onde cada grupo se reúne (a região, nunca a casa de ninguém).</p>
+            <p className="s-lead">{liga("Escolha o dia que você pode. O mapa mostra onde cada grupo se reúne (a região, nunca a casa de ninguém).")}</p>
           </div>
           <div className="s-rev d1"><Grupos /></div>
         </div>
@@ -66,11 +66,11 @@ export default function PequenaGuia() {
       <section className="s-faixa areia" aria-labelledby="t-como">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-como" className="s-serifa">Como funciona?</h2>
-            <p className="s-serifa it">uma noite por semana, em 4 momentos:</p>
+            <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
+            <p className="s-serifa it">{liga("uma noite por semana, em 4 momentos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{p.d}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{liga(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -80,8 +80,8 @@ export default function PequenaGuia() {
         <div className="s-in">
           <div className="s-claro s-rev">
             <Sede />
-            <h2 id="t-encontrar" className="s-h2 menor">Encontre uma Pequena Guia perto de você.</h2>
-            <p className="s-lead">Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.</p>
+            <h2 id="t-encontrar" className="s-h2 menor">{liga("Encontre uma Pequena Guia perto de você.")}</h2>
+            <p className="s-lead">{liga("Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.")}</p>
             <div style={{ marginTop: 'clamp(24px,3vw,40px)', textAlign: 'left' }}><FormPequenaGuia /></div>
           </div>
         </div>

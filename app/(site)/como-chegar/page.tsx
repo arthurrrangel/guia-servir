@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS, textoDoModo } from '@/lib/chegar';
-import { Vozes, Sede, Chapeu, Pil, Img, fim } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, fim, liga } from '@/components/site/Blocos';
+import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -32,12 +33,12 @@ export default function ComoChegar() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Onde fica" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes as="h1" id="t-chegar" className="s-h1" it="chegar">Como chegar</Vozes>
-          <p className="s-lead grande"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, {IGREJA.bairro}, {IGREJA.cidade}.</p>
+          <p className="s-lead grande"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, {IGREJA.bairro}, <span style={{ whiteSpace: 'nowrap' }}>{IGREJA.cidade}.</span></p>
           <div className="s-acoes">
             <Pil href={MAPA} fora>Traçar rota no Maps</Pil>
             <Pil href={ROTA_WAZE} fora>Abrir no Waze</Pil>
           </div>
-          <p className="s-micro">Tem alguém na porta esperando você.</p>
+          <p className="s-micro">{liga("Tem alguém na porta esperando você.")}</p>
         </div>
       </section>
 
@@ -46,16 +47,18 @@ export default function ComoChegar() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-modos" className="s-h2" it="gente">Como chegar até a gente</Vozes>
-            <p className="s-lead">De carro, de aplicativo ou a pé.</p>
+            <p className="s-lead">{liga("De carro, de aplicativo ou a pé.")}</p>
           </div>
-          <div className="s-cartoes tres s-rev d1">
-            {MODOS.map(m => (
-              <div key={m.n} className="s-cartao">
-                <span className="s-cartao-n">{m.n}</span>
-                <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{m.t}</span>
-                <span className="s-cartao-d">{fim(m.d)}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(m.d2)}</>}</span>
-              </div>
-            ))}
+          <div className="s-rev d1">
+            <Trilho className="s-cartoes tres" rotulo="Os modos de chegar">
+              {MODOS.map(m => (
+                <div key={m.n} className="s-cartao">
+                  <span className="s-cartao-n">{m.n}</span>
+                  <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{liga(m.t)}</span>
+                  <span className="s-cartao-d">{fim(liga(m.d))}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(liga(m.d2))}</>}</span>
+                </div>
+              ))}
+            </Trilho>
           </div>
           <div className="s-mapa s-rev" style={{ marginTop: 'clamp(16px,2vw,24px)' }}>
             <iframe src={MAPA_EMBED} title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`} loading="lazy" allowFullScreen={false} referrerPolicy="no-referrer-when-downgrade" />
@@ -73,10 +76,10 @@ export default function ComoChegar() {
       </section>
 
       <section id="conversa" className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" retrato />
+        <Img lugar="fecho-maos" retrato />
         <div className="s-in">
           <Vozes id="t-fim" className="s-h2 media" it="domingo">O que esperar de um domingo</Vozes>
-          <p className="s-lead">Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.</p>
+          <p className="s-lead">{liga("Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.")}</p>
           <div className="s-acoes centro">
             <Pil href="/cultos">Ver os cultos</Pil>
             <Pil href={conversa.href} fora>Falar no WhatsApp</Pil>

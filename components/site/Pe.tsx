@@ -9,6 +9,11 @@ import { Sede, Sep } from './Blocos';
    O pé usa a mesma lista da barra (lib/site/nav.ts): um link novo entra nos
    dois de uma vez.
    ============================================================================= */
+const ATALHOS: Array<[string, string]> = [
+  ['Quem somos', '/sobre'], ['Cultos', '/cultos'], ['Como chegar', '/como-chegar'], ['Agenda', '/eventos'],
+  ['Quero servir', '/servir'], ['Pequena Guia', '/pequena-guia'], ['Ofertar', '/ofertar'],
+];
+
 export default function Pe() {
   const conversa = canalDeConversa();
   const ano = new Date().getFullYear();
@@ -42,6 +47,12 @@ export default function Pe() {
             </nav>
           ))}
         </div>
+        {/* no celular os cinco grupos (22 links em duas colunas centralizadas,
+            ~900 px) dão lugar a uma linha de atalhos: o mapa inteiro do site
+            continua no menu, a um toque, no alto da tela */}
+        <nav className="s-pe-atalhos" aria-label="Atalhos">
+          {ATALHOS.map(([rot, href]) => <Link key={href} href={href}>{rot}</Link>)}
+        </nav>
         <div className="s-pe-fim">
           <span>© {ano} {IGREJA.nome}</span>
           <Sede />

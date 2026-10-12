@@ -48,7 +48,11 @@ const medir = (TOL) => {
     const c = typeof e.className === 'string' && e.className ? '.' + e.className.trim().split(/\s+/).slice(0, 3).join('.') : '';
     return e.tagName.toLowerCase() + c + (e.id ? '#' + e.id : '');
   };
+  /* trilho de deslizar (celular): o cartão fora da janela é medido quando
+     entra nela; o trilho em si sangra até a borda de propósito */
+  const foraDoTrilho = (e) => { const c = e.closest && e.closest('.desliza > *'); if (!c) return false; const r = c.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1; };
   const vis = (e) => {
+    if (foraDoTrilho(e)) return false;
     const s = getComputedStyle(e);
     if (s.display === 'none' || s.visibility === 'hidden' || s.position === 'fixed') return false;
     if (Number(s.opacity) < 0.05) return false;
@@ -176,6 +180,7 @@ const medir = (TOL) => {
     const rp = p.getBoundingClientRect();
     const dentro = rp.width - parseFloat(ps.paddingLeft) - parseFloat(ps.paddingRight) - parseFloat(ps.borderLeftWidth) - parseFloat(ps.borderRightWidth);
     const r = e.getBoundingClientRect();
+    if (e.classList.contains('desliza')) return;
     if (r.width > dentro + TOL && !paiRola(p) && !escondido(e)) largo.push(`${nome(e)} ${r.width.toFixed(0)} > ${dentro.toFixed(0)} em ${nome(p)} "${txt(e)}"`);
   });
 

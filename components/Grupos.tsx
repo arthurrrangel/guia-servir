@@ -5,6 +5,7 @@ import { canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS, wazeDaPequenaGuia, mapaExterno, type PequenaGuia } from '@/lib/pequenas-guias';
 import { MapaGuias } from '@/components/MapaGuias';
 import { pontos } from '@/components/site/Blocos';
+import { Trilho } from '@/components/site/Trilho';
 
 /* =============================================================================
    OS GRUPOS, COM FILTRO POR DIA
@@ -99,6 +100,16 @@ export function Grupos() {
     if (DIAS[i].url) u.searchParams.set('dia', DIAS[i].url); else u.searchParams.delete('dia');
     window.history.replaceState(null, '', u.pathname + u.search + u.hash);
   };
+  /* no celular a lista é um trilho de deslizar: o pino tocado no mapa traz o
+     cartão dele para o centro do trilho (só na horizontal; a página não pula) */
+  useEffect(() => {
+    if (!foco) return;
+    const c = document.getElementById(idDoCartao(foco));
+    const t = c?.parentElement;
+    if (!c || !t || t.scrollWidth <= t.clientWidth + 4) return;
+    const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    t.scrollTo({ left: c.offsetLeft - (t.clientWidth - c.offsetWidth) / 2, behavior: quieto ? 'auto' : 'smooth' });
+  }, [foco]);
   const contagens = useMemo(() => DIAS.map(d => PEQUENAS_GUIAS.filter(d.teste).length), []);
   const teste = DIAS[ativo].teste;
   const visiveis = useMemo(() => PEQUENAS_GUIAS.filter(teste), [teste]);
@@ -147,7 +158,7 @@ export function Grupos() {
       <p className="so-leitor" role="status" aria-live="polite">
         {`${PEQUENAS_GUIAS.filter(teste).length} de ${PEQUENAS_GUIAS.length} grupos no filtro atual`}
       </p>
-      <div className="pgs fila">
+      <Trilho className="pgs fila" rotulo="Os grupos">
         {PEQUENAS_GUIAS.map(pg => {
           const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
           const visivel = teste(pg);
@@ -183,7 +194,7 @@ export function Grupos() {
             </article>
           );
         })}
-      </div>
+      </Trilho>
     </>
   );
 }

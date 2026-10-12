@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS } from '@/lib/chegar';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, fim, Sep } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, fim, Sep, Perguntas, liga } from '@/components/site/Blocos';
+import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -64,8 +65,8 @@ export default function Cultos() {
         <Img lugar="cultos-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
-          <Vozes as="h1" id="t-cultos" className="s-h1" it="pertencer">Um domingo para pertencer</Vozes>
-          <p className="s-lead grande">Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.</p>
+          <Vozes as="h1" id="t-cultos" className="s-h1" it="para pertencer">Um domingo para pertencer</Vozes>
+          <p className="s-lead grande">Louvor, Palavra e uma comunidade que recebe você pelo nome.<span className="s-resto"> Se é a sua primeira vez, a gente te espera na porta.</span></p>
           <div className="s-acoes">
             <Pil href="#como-chegar">Como chegar</Pil>
             <Pil href="#ao-vivo">Assistir ao vivo</Pil>
@@ -78,11 +79,11 @@ export default function Cultos() {
       <section className="s-faixa areia" aria-labelledby="t-roteiro">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
-            <h2 id="t-roteiro" className="s-serifa">Como é um domingo?</h2>
-            <p className="s-serifa it">da porta ao café, em 4 momentos:</p>
+            <h2 id="t-roteiro" className="s-serifa">{liga("Como é um domingo?")}</h2>
+            <p className="s-serifa it">{liga("da porta ao café, em 4 momentos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {ROTEIRO.map(p => <li key={p.h}><b>{p.h} - {p.t}</b><p>{p.d}</p></li>)}
+            {ROTEIRO.map(p => <li key={p.h}><b>{p.h} - {p.t}</b><p>{liga(p.d)}</p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -93,10 +94,10 @@ export default function Cultos() {
         <div className="s-in">
           <div className="s-claro s-rev">
             <Sede />
-            <h2 id="t-primeira" className="s-h2 menor">É a sua primeira vez?</h2>
-            <p className="s-lead">Você será recebido por uma equipe preparada pra ajudar em cada etapa. Ninguém fica perdido na GUIA.</p>
+            <h2 id="t-primeira" className="s-h2 menor">{'É a sua primeira\u00a0vez?'}</h2>
+            <p className="s-lead">{liga("Você será recebido por uma equipe preparada pra ajudar em cada etapa. Ninguém fica perdido na GUIA.")}</p>
             <div className="s-qa">
-              {PRIMEIRA.map(p => <div key={p.q}><b>{p.q}</b><p>{p.r}</p></div>)}
+              {PRIMEIRA.map(p => <div key={p.q}><b>{p.q}</b><p>{liga(p.r)}</p></div>)}
             </div>
             <div className="s-acoes centro">
               <Pil href="#como-chegar" tom="preta">Como chegar</Pil>
@@ -112,20 +113,22 @@ export default function Cultos() {
           <Arroba className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-chegar" className="s-h2" it="gente">Como chegar até a gente</Vozes>
-            <p className="s-lead"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, {IGREJA.bairro}, {IGREJA.cidade}.</p>
+            <p className="s-lead"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, {IGREJA.bairro}, <span style={{ whiteSpace: 'nowrap' }}>{IGREJA.cidade}.</span></p>
             <div className="s-acoes centro">
               <Pil href={MAPA} fora tom="preta">Traçar rota no Maps</Pil>
               <Pil href={ROTA_WAZE} fora tom="contorno">Abrir no Waze</Pil>
             </div>
           </div>
-          <div className="s-cartoes tres s-rev d1">
-            {MODOS.map(m => (
-              <div key={m.n} className="s-cartao">
-                <span className="s-cartao-n">{m.n}</span>
-                <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{m.t}</span>
-                <span className="s-cartao-d">{fim(m.d)}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(m.d2)}</>}</span>
-              </div>
-            ))}
+          <div className="s-rev d1">
+            <Trilho className="s-cartoes tres" rotulo="Os modos de chegar">
+              {MODOS.map(m => (
+                <div key={m.n} className="s-cartao">
+                  <span className="s-cartao-n">{m.n}</span>
+                  <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{liga(m.t)}</span>
+                  <span className="s-cartao-d">{fim(liga(m.d))}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(liga(m.d2))}</>}</span>
+                </div>
+              ))}
+            </Trilho>
           </div>
           <div className="s-mapa s-rev" style={{ marginTop: 'clamp(16px,2vw,24px)' }}>
             <iframe src={MAPA_EMBED} title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`} loading="lazy" allowFullScreen={false} referrerPolicy="no-referrer-when-downgrade" />
@@ -161,11 +164,11 @@ export default function Cultos() {
       <section id="follow" className="s-faixa papel" aria-labelledby="t-follow">
         <div className="s-in">
           <div className="s-duas inv">
-            <div className="s-foto h s-rev"><Img lugar="evento-follow" sizes="(max-width: 999px) 90vw, 40vw" /></div>
+            <div className="s-foto h s-rev"><Img lugar="follow-palco" sizes="(max-width: 999px) 90vw, 40vw" /></div>
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={followHora ? `Sábado, ${followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens" >O culto de jovens</Vozes>
-              <p className="s-lead">Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Mesma casa, mesma fé, outra energia.</p>
+              <p className="s-lead">{liga("Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Mesma casa, mesma fé, outra energia.")}</p>
               <div className="s-acoes" style={{ marginTop: 26 }}>
                 <Pil href="/eventos#follow" tom="preta">Sobre o Follow</Pil>
                 <Pil href="/followcamp" duro tom="contorno">Follow Camp 2027</Pil>
@@ -179,10 +182,8 @@ export default function Cultos() {
       <section className="s-faixa areia s-grao" aria-labelledby="t-faq">
         <Simbolo className="s-canto" />
         <div className="s-in">
-          <h2 id="t-faq" className="s-faq-t s-rev">Antes de sair de casa</h2>
-          <div className="s-faq s-rev d1">
-            {PERGUNTAS.map(p => <p key={p.q}><b>{p.q}</b> {p.r}</p>)}
-          </div>
+          <h2 id="t-faq" className="s-faq-t s-rev">{liga("Antes de sair de casa")}</h2>
+          <div className="s-rev d1"><Perguntas itens={PERGUNTAS} /></div>
         </div>
       </section>
 
@@ -192,7 +193,7 @@ export default function Cultos() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="domingo">Vem domingo</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>{IGREJA.cultoDia}, {IGREJA.cultoHora}. Chega a hora que der. Tem alguém na porta esperando você.</p>
+            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>{liga(`${IGREJA.cultoDia}, ${IGREJA.cultoHora}. Chega a hora que der. Tem alguém na porta esperando você.`)}</p>
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             <Pil href="#como-chegar">Como chegar</Pil>
