@@ -284,7 +284,7 @@ function PainelPedir(p: Props & { vaga: Vaga; quando: string; porta: string }) {
             <span className="vol-marca" aria-hidden="true" />
             <span>
               <span className="vol-linha-dia">{c.nome}</span>
-              <span className="vol-linha-fn">{c.disse_que_pode ? 'disse que pode nesse dia' : NIVEL_EM_PALAVRAS[c.nivel]}</span>
+              <span className="vol-linha-fn">{c.disse_que_pode ? 'disse que pode nesse dia' : c.nivel ? NIVEL_EM_PALAVRAS[c.nivel] : 'não marcou esta função'}</span>
               {feito && (
                 <a className="vol-acao" href={linkDoWhatsSemNumero(recado)} target="_blank" rel="noopener noreferrer"
                   aria-label={`Avisar ${primeiro(c.nome)} no WhatsApp`}>

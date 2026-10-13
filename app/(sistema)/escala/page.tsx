@@ -1338,18 +1338,28 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
      separado ("Avisaram que não podem nesse dia"): sumir dela era o líder
      não conseguir escalar quem falou com ele e agora pode. Escolher alguém
      dali pergunta antes (ver `trocar`). */
-  const lista = candidatos(S, f.nome, d, { excluirOcupados: false, ignorarLimite: true, incluirTreino: true, incluirQuemNaoPode: true });
+  /* 13/10/2026 · NO MODO DA LIDERANÇA (Ajustes > Quem escolhe o posto) a
+     lista é o time inteiro: quem marcou o posto em cima, como sempre, e quem
+     não marcou num grupo à parte. Era essa a parte do pedido do Connect que
+     a tela travava: "entendemos que tal posição necessita de outra pessoa,
+     e não a que se inscreveu". */
+  const lista = candidatos(S, f.nome, d, {
+    excluirOcupados: false, ignorarLimite: true, incluirTreino: true, incluirQuemNaoPode: true,
+    aberto: !!S.config.distribuir,
+  });
   const naoPode = (id: string) => {
     const v = S.voluntarios.find((x: any) => x.id === id);
     return !!v && respostaDe(v, d) === 'nao';
   };
   const podem = lista.filter((c: any) => !naoPode(c.id));
   const naoPodem = lista.filter((c: any) => naoPode(c.id));
+  const marcaram = podem.filter((c: any) => c.nivel !== 'livre');
+  const resto = podem.filter((c: any) => c.nivel === 'livre');
   /* se o ocupante atual deixou de ser candidato (pausado, perdeu a
      habilidade), ele sumiria do select e a linha pareceria vazia. */
   const opcoes = slot?.vid && !lista.some((c: any) => c.id === slot.vid)
-    ? [{ id: slot.vid, nome: nomeDe(S, slot.vid), nivel: '', carga: 0, forcado: true } as any, ...podem]
-    : podem;
+    ? [{ id: slot.vid, nome: nomeDe(S, slot.vid), nivel: '', carga: 0, forcado: true } as any, ...marcaram]
+    : marcaram;
   const linhaDe = (c: any, noGrupoNaoPode = false) => {
     if (c.forcado) return `${c.nome} (não está mais disponível)`;
     /* quem já disse que pode neste dia vem marcado: é a informação que
@@ -1359,7 +1369,9 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
     const resp = vol ? respostaDe(vol, d) : 'mudo';
     const em = c.id !== slot?.vid ? postoSimultaneoNoDia(S, d, c.id, f.nome) : null;
     const marca = (em ? `em ${em} · ` : '') + (resp === 'posso' ? 'pode · ' : resp === 'nao' && !noGrupoNaoPode ? 'avisou que não · ' : '');
-    return `${marca}${c.nome} · ${c.nivel} · ${c.carga} escala${c.carga === 1 ? '' : 's'}/${S.config.janelaCarga}d`;
+    /* quem não marcou o posto não tem nível nele: a linha fica sem */
+    const nivel = c.nivel && c.nivel !== 'livre' ? ` · ${c.nivel}` : '';
+    return `${marca}${c.nome}${nivel} · ${c.carga} escala${c.carga === 1 ? '' : 's'}/${S.config.janelaCarga}d`;
   };
 
   /* A COR MORA NA SITUAÇÃO, NÃO NA LINHA (30/09/2026). O fio colorido à
@@ -1381,6 +1393,11 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
           aoMudar={v => trocar(d, f.nome, v)}>
           <option value="">precisa de alguém</option>
           {opcoes.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c)}</option>)}
+          {resto.length > 0 && (
+            <optgroup label="Não marcaram este posto">
+              {resto.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c)}</option>)}
+            </optgroup>
+          )}
           {naoPodem.length > 0 && (
             <optgroup label="Avisaram que não podem nesse dia">
               {naoPodem.map((c: any) => <option key={c.id} value={c.id}>{linhaDe(c, true)}</option>)}

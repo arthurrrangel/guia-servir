@@ -62,6 +62,9 @@
 /* o miolo das seções: um ritmo só entre texto, campos e ações */
 .es-aj-pilha{display:grid;gap:var(--es-e4)}
 .es-aj-pilha > .es-campo,.es-aj-pilha > .es-aviso{margin:0}
+/* quem escolhe o posto (13/10/2026): as duas opções do tamanho delas, não
+   esticadas na largura da caixa */
+.es-aj-pilha > .es-seg{justify-self:start}
 /* os campos lado a lado se alinham pela base: em 1024 "Máximo de escalas
    por pessoa por mês" quebra em duas linhas, e o seletor dele descia 18px
    abaixo do vizinho */

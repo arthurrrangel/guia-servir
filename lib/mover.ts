@@ -78,7 +78,10 @@ function porqueNaoTroca(S: Estado, data: string, de: string, para: string, ocupa
   if (st === 'recusado' || respostaDe(v, data) === 'nao') return `${nome} avisou que não pode nesse dia`;
   if (st === 'furou') return `${nome} está como furou nesse dia`;
   if (!v.ativo) return `${nome} está pausado no time`;
-  if (!nivelEfetivo(v, de)) return `${nome} não faz ${de}`;
+  /* no modo da liderança quem move é a liderança, e ela distribui: o que a
+     pessoa marcou no cadastro não trava a troca (13/10/2026). O resto (não
+     posso, sexo do posto, dois postos ao mesmo tempo) continua valendo. */
+  if (!S.config.distribuir && !nivelEfetivo(v, de)) return `${nome} não faz ${de}`;
   const sexo = porqueNaoPode(S, v, de);
   if (sexo) return sexo.replace(/\.$/, '');
   if (metaFuncao(S, de).simultanea) {

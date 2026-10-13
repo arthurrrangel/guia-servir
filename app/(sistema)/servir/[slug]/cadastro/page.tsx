@@ -51,6 +51,10 @@ export default function Servir() {
   const [fns, setFns] = useState<Fn[]>([]);
   const [perguntas, setPerguntas] = useState<Pergunta[]>([]);
   const [fase, setFase] = useState<'carregando' | 'ok' | 'erro' | 'rede'>('carregando');
+  /* 113 · a liderança deste ministério distribui os postos: o passo 2 diz
+     que o que a pessoa marca é preferência. Sem a 113 no banco a pergunta
+     falha e fica o texto de sempre. */
+  const [distribui, setDistribui] = useState(false);
 
   const [passo, setPasso] = useState(0);
   const [nome, setNome] = useState('');
@@ -115,12 +119,14 @@ export default function Servir() {
     let vivo = true;
     void (async () => {
       const s = sb(); if (!s) { if (vivo) setFase('rede'); return; }
-      const [lista, funcoes, qs] = await Promise.all([
+      const [lista, funcoes, qs, dist] = await Promise.all([
         s.rpc('ministerios_publicos'),
         s.rpc('equipe_funcoes', { p_slug: slug }),
         s.rpc('perguntas_publicas', { p_slug: slug }),
+        s.rpc('equipe_distribui', { p_slug: slug }),
       ]);
       if (!vivo) return;
+      setDistribui(!dist.error && dist.data === true);
       if (lista.error || funcoes.error) { setFase('rede'); return; }
       const m = ((lista.data || []) as Min[]).find(x => x.slug === slug);
       if (!m) { setFase('erro'); return; }
@@ -386,10 +392,13 @@ export default function Servir() {
 
         {passo === 1 && (
           <>
-            <h2>O que combina com você?</h2>
+            <h2>{distribui ? 'Onde você prefere servir?' : 'O que combina com você?'}</h2>
             <p className="dim pequeno">
-              Pode marcar mais de uma. E pode marcar algo que você ainda não sabe fazer, 
-              tem gente para ensinar.
+              {distribui
+                ? <>Pode marcar mais de uma. A liderança distribui os postos a cada culto: começa pelo que
+                    você marcou e, se faltar gente em outro posto, pode te chamar para lá.</>
+                : <>Pode marcar mais de uma. E pode marcar algo que você ainda não sabe fazer,
+                    tem gente para ensinar.</>}
             </p>
             <div className="wiz-opcoes">
               {grupos.map(([fam, g]) => {

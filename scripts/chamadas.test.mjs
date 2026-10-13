@@ -74,6 +74,10 @@ caso('os três primeiros ainda não chamados; nunca quem já recusou ou espera',
     'disse que pode · 1 escala no mês (limite 2) · ajuda quando falta');
   assert.equal(detalheDoCandidato(cand('x', { chamada: 'recusada', no_mes: 3 })),
     'não respondeu o dia · 3 escalas no mês (limite 2) · disse que não pode cobrir');
+  /* 113 · no ministério em que a liderança distribui, quem não marcou o posto
+     também aparece, e a linha diz isso */
+  assert.equal(detalheDoCandidato(cand('x', { nivel: null })),
+    'não respondeu o dia · 0 escalas no mês (limite 2) · não marcou este posto');
 });
 
 /* 4 · as frases */

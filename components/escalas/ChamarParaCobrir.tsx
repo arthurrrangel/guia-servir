@@ -216,9 +216,15 @@ export default function ChamarParaCobrir({ S, d, cultoId, equipeId, ocupado, avi
                 <div className="es-ec-cv-escolha">
                   {cands === null && <p className="es-ec-ordem-vazia" role="status">Procurando quem pode...</p>}
                   {cands !== null && !cands.length && (
+                    /* 13/10/2026 · no modo da liderança a frase de sempre
+                       ("quem faz a função...") acusaria a falta de quem marcou
+                       o posto, e lá em cima a lista do posto tem o time inteiro */
                     <p className="es-ec-ordem-vazia">
-                      Ninguém mais pode cobrir {f.nome} nesse dia: quem faz a função já está em outro posto,
-                      avisou que não pode, ou está pausado.
+                      {S.config.distribuir
+                        ? <>Ninguém para chamar em {f.nome} nesse dia. No posto, lá em cima, a lista tem o time
+                            inteiro: dá para escolher alguém direto.</>
+                        : <>Ninguém mais pode cobrir {f.nome} nesse dia: quem faz a função já está em outro posto,
+                            avisou que não pode, ou está pausado.</>}
                     </p>
                   )}
                   {cands !== null && !!cands.length && (

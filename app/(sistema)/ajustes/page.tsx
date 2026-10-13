@@ -13,6 +13,7 @@ import { funcoesAtivas } from '@/lib/engine';
 import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import GruposPorArea from '@/components/escalas/GruposPorArea';
+import QuemEscolheOPosto from '@/components/escalas/QuemEscolheOPosto';
 import ChegadaNosAjustes from '@/components/escalas/ChegadaNosAjustes';
 import { cont } from '@/lib/plural';
 
@@ -23,6 +24,7 @@ const SECOES = [
   { id: 'repertorio', rot: 'Repertório' },
   /* 107 · só entra no índice quando o banco tem a 107 (ver a seção) */
   { id: 'chegada', rot: 'Chegada no dia' },
+  { id: 'postos', rot: 'Quem escolhe o posto' },
   { id: 'regras', rot: 'Regras do rodízio' },
   { id: 'aviso', rot: 'Texto do aviso' },
   { id: 'funcoes', rot: 'Funções' },
@@ -536,6 +538,20 @@ function Ajustes() {
             <ChegadaNosAjustes equipeId={equipe.id} slug={equipe.slug} base={base} aviso={aviso}
               aoSaber={setComChegada} />
           )}
+
+          {/* QUEM ESCOLHE O POSTO — 13/10/2026, pedido do Connect: a
+              liderança distribui os postos em vez de cada um ficar preso ao
+              que marcou. Logo antes das regras do rodízio, porque é regra do
+              sorteio também. */}
+          <section className="es-caixa" id="postos">
+            <div className="es-caixa-cab">
+              <h2>Quem escolhe o posto</h2>
+              <span className="es-peq es-mudo">Vale para o sorteio e para a lista de cada posto na Escala</span>
+            </div>
+            <div className="es-caixa-corpo">
+              <QuemEscolheOPosto key={equipe?.id || ''} S={S} gravar={m => gravar(m)} />
+            </div>
+          </section>
 
           <section className="es-caixa" id="regras">
             <div className="es-caixa-cab">

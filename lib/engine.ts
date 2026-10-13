@@ -243,7 +243,9 @@ export function quemPodeCobrir(S: Estado, data: string, funcao: string, qtd = 3)
      A assimetria que SOBRA, e que é inerte: `vagou` pega `recusado` E
      `furou`; um filtro por recusa só pegaria `recusado`. Como `ocupadoNoDia`
      cobre os dois, não muda nada. */
-  return candidatos(S, funcao, data, { excluirOcupados: true, ignorarLimite: true })
+  /* no modo da liderança, posto aberto é coberto por quem estiver livre no
+     time; fora dele `aberto` não muda nada (ver `nivelNoSorteio`) */
+  return candidatos(S, funcao, data, { excluirOcupados: true, ignorarLimite: true, aberto: !postoFechado(S, funcao) })
     .filter(c => !vagou.has(c.id))
     .map(c => {
       const v = S.voluntarios.find(x => x.id === c.id)!;
@@ -323,6 +325,14 @@ export type Config = {
   /* o setlist de cada culto no link de quem serve (pedido do Louvor,
      01/10/2026). Desligado = o ministério não vê nada disso. */
   repertorio?: boolean;
+  /* QUEM ESCOLHE O POSTO (pedido do Connect, 13/10/2026). Ligado, o que a
+     pessoa marcou no cadastro vira preferência e a liderança distribui: ver
+     `nivelNoSorteio`. Ausente = cada um entra só onde marcou, como sempre. */
+  distribuir?: boolean;
+  /* com `distribuir`: os postos em que o sorteio só põe quem a liderança
+     marcou (habilidade conferida). Id da função, ou o nome (harness e linha
+     antiga), como em `GrupoZap.funcoes`. */
+  postosFechados?: string[];
 };
 /* GRUPOS POR ÁREA NO WHATSAPP — 01/10/2026.
 
@@ -1505,7 +1515,75 @@ export function nivelEfetivo(v: Voluntario, funcao: string): Nivel | undefined {
   return n === 'titular' && !confirmada(v, funcao) ? 'reserva' : n;
 }
 
-export type Candidato = { id: string; nome: string; nivel: Nivel; carga: number; paradoGeral: number; paradoFuncao: number };
+/* =============================================================================
+   A LIDERANÇA DISTRIBUI OS POSTOS · 13/10/2026
+
+   O pedido do Connect, pelo Arthur: "Hoje cada voluntário escolhe e marca no
+   sistema o local onde quer servir, e isso tem nos deixado sem flexibilidade
+   para montar a escala, pois alguns setores ficam sem voluntário ou
+   entendemos que tal posição necessita de outra pessoa, e não a que se
+   inscreveu."
+
+   Até aqui o posto marcado no cadastro era a ÚNICA porta: o sorteio só punha
+   em SETOR A quem marcou SETOR A, e a lista do posto na Escala só mostrava
+   essas pessoas. Setor que ninguém marcou ficava vazio, e pôr outra pessoa
+   pedia ir à aba Time, achar a pessoa e acender o chip dela.
+
+   Com `config.distribuir` ligado (Ajustes > Quem escolhe o posto), o que a
+   pessoa marcou vira PREFERÊNCIA:
+     · o sorteio roda primeiro como sempre, só com quem marcou; o posto que
+       sobrar vazio é completado com quem estiver livre no time
+       (`completarDia`). Quem marcou nunca perde o posto para quem não marcou;
+     · a lista do posto na Escala mostra o time inteiro: quem marcou em cima,
+       o resto embaixo ("Resto do time");
+     · mudar duas pessoas de posto não pergunta mais se a pessoa "faz" o posto.
+   As regras do prédio continuam valendo para todo mundo: o sexo do posto, o
+   "não posso", o teto do mês, ninguém em dois postos ao mesmo tempo. E quem
+   está como "aprendendo" num posto continua fora do sorteio dele: isso foi a
+   liderança que disse.
+
+   POSTO FECHADO (`config.postosFechados`): o que a liderança não quer que o
+   sorteio decida, como LÍDER 1 e LÍDER 2 no Connect. Nele o sorteio só põe
+   quem a liderança marcou (habilidade conferida: acesa na aba Time ou
+   aprovada na conferência). Quem só marcou no cadastro não entra, e o posto
+   não é completado com qualquer um: vazio, ele espera a liderança. Na lista
+   da Escala a liderança continua podendo escolher qualquer pessoa: fechado
+   vale para o sorteio, não para quem lidera.
+
+   Desligado (o padrão), nada muda: `nivelNoSorteio` devolve o `nivelEfetivo`
+   de sempre e a segunda passada não roda.
+   ============================================================================= */
+
+/** 'livre' = não marcou este posto, mas entra nele porque a liderança distribui */
+export type NivelNoSorteio = Nivel | 'livre';
+
+export function postoFechado(S: Estado, funcao: string): boolean {
+  if (!S.config.distribuir) return false;
+  const lista = S.config.postosFechados;
+  if (!Array.isArray(lista) || !lista.length) return false;
+  if (lista.includes(funcao)) return true;
+  const id = S.funcoes.find(f => f.nome === funcao)?.id;
+  return !!id && lista.includes(id);
+}
+
+/** O nível com que a pessoa disputa o posto. `aberto` = vale o time inteiro
+ *  (a segunda passada do sorteio e a lista que a liderança abre); sem ele,
+ *  só quem marcou o posto, como sempre. Fora do modo da liderança, é o
+ *  `nivelEfetivo` e nada mais. */
+export function nivelNoSorteio(S: Estado, v: Voluntario, funcao: string, aberto = false): NivelNoSorteio | undefined {
+  const n = nivelEfetivo(v, funcao);
+  if (!S.config.distribuir) return n;
+  if (aberto) return n ?? 'livre';
+  if (n && postoFechado(S, funcao) && !confirmada(v, funcao)) return undefined;
+  return n;
+}
+
+/* quem conta como gente do posto nas contas do Time e do Painel: titular,
+   reserva ou, no modo da liderança, qualquer um do time (posto aberto) */
+const contaNoPosto = (S: Estado, v: Voluntario, funcao: string) =>
+  ['titular', 'reserva', 'livre'].includes(nivelNoSorteio(S, v, funcao, !postoFechado(S, funcao)) as string);
+
+export type Candidato = { id: string; nome: string; nivel: NivelNoSorteio; carga: number; paradoGeral: number; paradoFuncao: number };
 
 /* QUEM PODE, SEM PONTUAR NINGUÉM.
 
@@ -1522,16 +1600,19 @@ export type Candidato = { id: string; nome: string; nivel: Nivel; carga: number;
    Filtrar é barato; pontuar e ordenar é que não é. Separar as duas deixa o
    `candidatos` idêntico (ele chama esta e pontua em cima) e dá a `gerarDia`
    uma contagem que custa o que uma contagem deve custar. */
-function elegiveis(
-  S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia; incluirQuemNaoPode?: boolean } = {},
-): Voluntario[] {
+/* `aberto` (13/10/2026): o time inteiro disputa o posto, quem marcou na
+   frente. Só tem efeito no modo da liderança; ver `nivelNoSorteio`. */
+type OpcoesDoPosto = {
+  excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean;
+  fora?: ForaDoDia; incluirQuemNaoPode?: boolean; aberto?: boolean;
+};
+function elegiveis(S: Estado, funcao: string, data: string, o: OpcoesDoPosto = {}): Voluntario[] {
   const excluirOcupados = o.excluirOcupados !== false;
   const [ano, mes] = data.split('-').map(Number);
 
   return S.voluntarios.filter(v => {
     if (!v.ativo) return false;
-    const nivel = nivelEfetivo(v, funcao);
+    const nivel = nivelNoSorteio(S, v, funcao, o.aberto);
     if (!nivel) return false;
     if (nivel === 'treino' && !o.incluirTreino) return false;
     /* a regra do prédio vem antes de qualquer outra: não adianta estar livre,
@@ -1568,19 +1649,16 @@ function elegiveis(
 }
 
 /** Quantas pessoas podem, sem pontuar nenhuma. Mesmo filtro de `candidatos`. */
-export const quantosPodem = (
-  S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia } = {},
-) => elegiveis(S, funcao, data, o).length;
+export const quantosPodem = (S: Estado, funcao: string, data: string, o: Omit<OpcoesDoPosto, 'incluirQuemNaoPode'> = {}) =>
+  elegiveis(S, funcao, data, o).length;
 
-export function candidatos(
-  S: Estado, funcao: string, data: string,
-  o: { excluirOcupados?: boolean; incluirTreino?: boolean; ignorarLimite?: boolean; fora?: ForaDoDia; incluirQuemNaoPode?: boolean } = {},
-): Candidato[] {
-  const peso = (n: Nivel) => (n === 'titular' ? 0 : n === 'reserva' ? 1 : 2);
+export function candidatos(S: Estado, funcao: string, data: string, o: OpcoesDoPosto = {}): Candidato[] {
+  /* 'livre' por último: quem marcou o posto vem sempre antes de quem não
+     marcou, qualquer que seja a carga (13/10/2026) */
+  const peso = (n: NivelNoSorteio) => (n === 'titular' ? 0 : n === 'reserva' ? 1 : n === 'treino' ? 2 : 3);
   return elegiveis(S, funcao, data, o)
     .map(v => ({
-      id: v.id, nome: v.nome, nivel: nivelEfetivo(v, funcao)!,
+      id: v.id, nome: v.nome, nivel: nivelNoSorteio(S, v, funcao, o.aberto)!,
       carga: cargaJanela(S, v.id, data, S.config.janelaCarga),
       paradoGeral: diasDesdeUltima(S, v.id, data),
       paradoFuncao: diasDesdeUltima(S, v.id, data, funcao),
@@ -1601,12 +1679,18 @@ export const vagasDe = (S: Estado, data: string) =>
 /* Plantão só recebe quem é CURINGA: cobre 2+ funções sem depender de treino
    (titular ou reserva). Alguém que só sabe uma coisa não serve de plantão —
    se o furo for em outra função, ele não resolve. */
-export function ehCuringa(v: Voluntario) {
+export function ehCuringa(v: Voluntario, S?: Estado) {
+  /* no modo da liderança, quem está livre entra em qualquer posto aberto
+     que o prédio deixa (sexo do posto): conta o que a pessoa pode pegar,
+     não o que ela marcou (13/10/2026) */
+  if (S?.config.distribuir) {
+    return funcoesAtivas(S).filter(f => podeNoPosto(S, v, f.nome) && contaNoPosto(S, v, f.nome)).length >= 2;
+  }
   return Object.values(v.funcoes || {}).filter(n => n === 'titular' || n === 'reserva').length >= 2;
 }
 export function sugerirPlantao(S: Estado, data: string, qtd: number, fora?: ForaDoDia) {
   return S.voluntarios
-    .filter(v => v.ativo && ehCuringa(v) &&
+    .filter(v => v.ativo && ehCuringa(v, S) &&
       !(v.indisponivel || []).includes(data) && !foraDe(fora, data, v.id) &&
       !ocupadoNoDia(S, data, v.id, null))
     .map(v => ({ id: v.id, nome: v.nome, carga: cargaJanela(S, v.id, data, S.config.janelaCarga), parado: diasDesdeUltima(S, v.id, data) }))
@@ -1669,7 +1753,10 @@ const foraDe = (fora: ForaDoDia | undefined, data: string, vid: string) =>
   !!fora?.get(data)?.has(vid);
 
 /* ------------------------------------------------------------- geração ----- */
-export function gerarDia(S: Estado, data: string, fora?: ForaDoDia) {
+/* `soQuemMarcou`: só a primeira passada (o sorteio de sempre). É o que
+   `gerarMes` pede, para o mês inteiro tentar quem marcou antes de completar
+   qualquer posto com quem não marcou. */
+export function gerarDia(S: Estado, data: string, fora?: ForaDoDia, o: { soQuemMarcou?: boolean } = {}) {
   const dia = garantirDia(S, data);
   /* quem RECUSOU este dia não volta no re-sorteio deste dia. Lido dos slots
      ANTES de o sorteio apagá-los, e carregado à parte — ver `quemRecusou`.
@@ -1707,8 +1794,34 @@ export function gerarDia(S: Estado, data: string, fora?: ForaDoDia) {
     if (c.length) dia.slots[f.nome] = { vid: c[0].id, status: 'pendente', fixo: false };
   }
   repararDia(S, data, F);
+  if (!o.soQuemMarcou) completarDia(S, data, F);
   dia.plantao = sugerirPlantao(S, data, S.config.plantaoQtd, F);
   return { vagas: vagasDe(S, data) };
+}
+
+/* A SEGUNDA PASSADA DO MODO DA LIDERANÇA (13/10/2026): o posto aberto que
+   ninguém que marcou pôde pegar recebe quem está livre no time. Mesma ordem
+   da primeira passada (o posto com menos gente que pode vem antes, para o
+   posto de homens não perder o único homem livre para um setor qualquer) e
+   o mesmo reparo depois, agora com o time inteiro. Posto fechado fica de
+   fora: vazio, quem decide é a liderança. Devolve quantas vagas fechou. */
+export function completarDia(S: Estado, data: string, fora?: ForaDoDia) {
+  if (!S.config.distribuir) return 0;
+  const F: ForaDoDia = fora ?? new Map([[data, quemRecusou(S, data)]]);
+  const dia = garantirDia(S, data);
+  const antes = vagasDe(S, data).length;
+  const ordem = funcoesDoDia(S, data)
+    .filter(f => !postoFechado(S, f.nome))
+    .map((f, i) => ({ f, i, n: quantosPodem(S, f.nome, data, { excluirOcupados: false, fora: F, aberto: true }) }))
+    .sort((a, b) => a.n - b.n || a.i - b.i);
+  for (const { f } of ordem) {
+    const sl = dia.slots[f.nome];
+    if (sl?.vid || travado(sl) || convidadoNoPosto(S, data, f.nome)) continue;
+    const c = candidatos(S, f.nome, data, { fora: F, aberto: true });
+    if (c.length) dia.slots[f.nome] = { vid: c[0].id, status: 'pendente', fixo: false };
+  }
+  repararDia(S, data, F, true);
+  return antes - vagasDe(S, data).length;
 }
 
 /* Slot que o remanejamento não pode desmanchar: travado no cadeado OU já
@@ -1747,12 +1860,14 @@ const travado = (sl?: Slot | null) => !!sl && (sl.fixo || sl.status === 'confirm
    VARIA aquilo que se afirma ser a causa. Eu tinha medido "antes e depois" de
    uma mudança que fez duas coisas ao mesmo tempo e creditei a errada. */
 
-function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[], fora?: ForaDoDia): boolean {
+function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[], fora?: ForaDoDia, aberto = false): boolean {
   /* `ignorarLimite` de propósito: quem já bateu o teto do mês ainda é
      candidato AQUI, porque a linha mais abaixo confere o teto e, se ele
      estourou, tenta liberar um domingo dessa pessoa em outro dia. É esse
-     remanejamento que `aumentar` existe para achar. */
-  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true, fora });
+     remanejamento que `aumentar` existe para achar.
+     `aberto` (13/10/2026): a segunda passada do modo da liderança. Posto
+     fechado nunca abre, nem quando o reparo passa por ele. */
+  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true, fora, aberto: aberto && !postoFechado(S, F) });
   for (const c of lista) {
     const chave = c.id + '|' + data;
     if (visto.has(chave)) continue;
@@ -1775,7 +1890,7 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
       delete S.escalas[data].slots[ocup];
       garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
       if (!meta || meta.ativa === false) return true;      // função morta: não repõe
-      if (aumentar(S, data, ocup, visto, dias, fora)) return true;
+      if (aumentar(S, data, ocup, visto, dias, fora, aberto)) return true;
       delete S.escalas[data].slots[F];
       S.escalas[data].slots[ocup] = s2;
       continue;
@@ -1818,7 +1933,7 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
         if (travado(s)) continue;
         delete S.escalas[d2].slots[F2];
         garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
-        if (aumentar(S, d2, F2, visto, dias, fora)) return true;
+        if (aumentar(S, d2, F2, visto, dias, fora, aberto)) return true;
         delete S.escalas[data].slots[F];
         S.escalas[d2].slots[F2] = s!;
       }
@@ -1827,10 +1942,10 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
   return false;
 }
 
-export function repararDia(S: Estado, data: string, fora?: ForaDoDia) {
+export function repararDia(S: Estado, data: string, fora?: ForaDoDia, aberto = false) {
   const Fo: ForaDoDia = fora ?? new Map([[data, quemRecusou(S, data)]]);
   let n = 0;
-  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data], Fo)) n++;
+  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data], Fo, aberto)) n++;
   return n;
 }
 
@@ -1845,9 +1960,19 @@ export function gerarMes(S: Estado, ano: number, mes: number, aPartirDe?: string
      porque `gerarDia` apaga os slots recusados e o remanejamento do segundo
      laço atravessa dias: ele precisa saber quem recusou o dia de DESTINO. */
   const fora: ForaDoDia = new Map(dias.map(d => [d, quemRecusou(S, d)]));
-  for (const d of dias) gerarDia(S, d, fora);
+  for (const d of dias) gerarDia(S, d, fora, { soQuemMarcou: true });
   for (const D of dias) {
     for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias, fora);
+  }
+  /* modo da liderança (13/10/2026): só depois de o MÊS INTEIRO ter tentado
+     quem marcou cada posto. Completar dia a dia, dentro do primeiro laço,
+     gastaria no domingo 1 o teto de quem é o único que marcou um posto do
+     domingo 3. */
+  if (S.config.distribuir) {
+    for (const d of dias) completarDia(S, d, fora);
+    for (const D of dias) {
+      for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias, fora, true);
+    }
   }
   for (const d of dias) S.escalas[d].plantao = sugerirPlantao(S, d, S.config.plantaoQtd, fora);
   return dias.map(d => ({ data: d, vagas: vagasDe(S, d) }));
@@ -2213,6 +2338,13 @@ function aptosSem(S: Estado, funcao: string, vid: string) {
 }
 
 export function declaracoesSuspeitas(S: Estado): Suspeita[] {
+  /* MODO DA LIDERANÇA (13/10/2026): nenhuma declaração segura a escala. No
+     posto aberto o que a pessoa marcou é só a ordem da fila (quem não marcou
+     entra depois); no fechado, declaração sem conferência nem entra no
+     sorteio. "A escala inteira depende desta declaração" seria mentira, e
+     alerta falso ensina o líder a ignorar o painel. A fila de conferência
+     (`filaDeConferencia`) continua: conferir é como a liderança marca. */
+  if (S.config.distribuir) return [];
   const out: Suspeita[] = [];
   const ativas = funcoesAtivas(S).map(f => f.nome);
   for (const v of S.voluntarios) {
@@ -2278,15 +2410,16 @@ export function pendenciasDeSexo(S: Estado) {
   const comExigencia = funcoesAtivas(S).filter(f => f.exigeSexo);
   const ativos = S.voluntarios.filter(v => v.ativo);
 
+  /* no modo da liderança, quem não marcou também pode ir para o posto
+     aberto que exige: o sexo de todo mundo passa a importar ali (13/10/2026) */
   const semSexo = ativos
-    .filter(v => !v.sexo && comExigencia.some(f => nivelEfetivo(v, f.nome)))
+    .filter(v => !v.sexo && comExigencia.some(f => nivelNoSorteio(S, v, f.nome, !postoFechado(S, f.nome))))
     .map(v => ({ id: v.id, nome: v.nome }))
     .sort(porNome);
 
   /* posto que exige e não tem ninguém que possa: a vaga nunca vai preencher */
   const postosSemNinguem = comExigencia
-    .filter(f => !ativos.some(v => podeNoPosto(S, v, f.nome)
-      && ['titular', 'reserva'].includes(nivelEfetivo(v, f.nome) as string)))
+    .filter(f => !ativos.some(v => podeNoPosto(S, v, f.nome) && contaNoPosto(S, v, f.nome)))
     .map(f => ({ nome: f.nome, exigeSexo: f.exigeSexo! }));
 
   /* já está escalado num posto que não aceita: entrou antes da regra existir */
@@ -2303,6 +2436,17 @@ export function pendenciasDeSexo(S: Estado) {
   return { semSexo, postosSemNinguem, escaladosErrados };
 }
 
+/* OS POSTOS EM QUE NINGUÉM DO TIME PODE ENTRAR, pela regra deste ministério.
+   É a conta que o Painel faz no banco (`painel_ministerio.funcoes_sem_gente`:
+   posto sem ninguém habilitado). No modo da liderança essa conta mente para
+   o posto aberto, que qualquer um do time pega; a tela usa esta (13/10/2026). */
+export function postosSemQuemPossa(S: Estado): string[] {
+  const ativos = S.voluntarios.filter(v => v.ativo);
+  return funcoesAtivas(S)
+    .filter(f => !ativos.some(v => podeNoPosto(S, v, f.nome) && contaNoPosto(S, v, f.nome)))
+    .map(f => f.nome);
+}
+
 /* ----------------------------------------------------------- diagnóstico --- */
 export function saudeDoTime(S: Estado) {
   const ref = hojeISO();
@@ -2312,8 +2456,20 @@ export function saudeDoTime(S: Estado) {
        só 9 podem entrar — o mesmo jeito de mentir que já tinha acontecido
        ao contar declaração não conferida como titular. */
     const ativos = S.voluntarios.filter(v => v.ativo && podeNoPosto(S, v, f.nome));
-    const aptos = ativos.filter(v => ['titular', 'reserva'].includes(nivelEfetivo(v, f.nome) as string));
+    const aptos = ativos.filter(v => contaNoPosto(S, v, f.nome));
     const treino = ativos.filter(v => nivelEfetivo(v, f.nome) === 'treino');
+    /* MODO DA LIDERANÇA (13/10/2026): no posto aberto conta o time inteiro
+       que o prédio deixa entrar; no fechado, quem a liderança marcou. Nos
+       dois o que pesa é QUANTOS, não o nível: "sem titular" num posto que a
+       liderança distribui é cobrar uma coisa que ninguém prometeu. */
+    if (S.config.distribuir) {
+      const fechado = postoFechado(S, f.nome);
+      const n = aptos.length;
+      const grau = n <= 1 ? 'critico' : n === 2 ? 'atencao' : 'ok';
+      const texto = n === 0 ? (fechado ? 'ninguém marcado pela liderança' : 'ninguém pode entrar')
+        : n === 1 ? 'uma pessoa só' : n === 2 ? 'sem folga' : 'ok';
+      return { nome: f.nome, aptos: n, treino: treino.length, titulares: n, declarados: 0, grau, texto };
+    }
     /* quem a gente SABE que segura a área sozinho. Contar declaração como
        titular fazia o painel dizer "ok" para área que na real tem uma pessoa
        só, e o líder só descobria no domingo. */

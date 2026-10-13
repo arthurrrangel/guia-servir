@@ -144,6 +144,16 @@ export function estadoDemo(variante = ''): Estado {
     const d0 = porVir[0] && S.escalas[porVir[0]];
     if (d0) { delete d0.slots['FOTO']; d0.convidados = { FOTO: 'Guest Rafa' }; }
   }
+  /* 13/10/2026 · `?demo=distribuir`: a liderança distribui os postos (o
+     pedido do Connect), com o HEAD fechado (só quem a liderança marcou) e a
+     FILMAGEM do primeiro culto que vem vazia, para o harness desenhar a
+     lista do posto com o time inteiro e o grupo "Não marcaram este posto". */
+  if (variante === 'distribuir') {
+    S.config.distribuir = true;
+    S.config.postosFechados = ['f6'];
+    const d0 = porVir[0] && S.escalas[porVir[0]];
+    if (d0) delete d0.slots['FILMAGEM'];
+  }
   /* 107 · `?demo=hoje`: um evento HOJE e outro ontem, montados, para o
      harness desenhar a chegada do dia e o "como foi" (o mês do demo quase
      nunca tem culto no próprio dia). Sem a variante, o estado é o de sempre. */

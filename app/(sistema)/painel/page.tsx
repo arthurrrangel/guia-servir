@@ -15,7 +15,7 @@ import { aviseHumano } from '@/lib/erros';
 import {
   Status, funcoesAtivas, funcoesDoDia, fmtLongo, hojeISO, msgCobranca, msgConfirmar, msgEscala, nomeDe, vol,
   problemas, cultosAte, resumoDia, addDias, MESES, cultosDoMes, tipoDoDia, SITUACOES, proxMes,
-  linkDoVoluntario, diaLongo,
+  linkDoVoluntario, diaLongo, postosSemQuemPossa,
 } from '@/lib/engine';
 /* 107 · o que quem serviu contou nas duas últimas semanas */
 import { ComoFoiNoPainel } from '@/components/escalas/ComoFoiDoDia';
@@ -135,9 +135,15 @@ function Igreja() {
    ruído diário é como o líder aprende a não olhar o painel. As contas vêm da
    casca (`nums`), a mesma leitura que acende os selos da navegação. */
 function Pendencias() {
-  const { nums: p, numsFalhou } = useApp();
+  const { nums: p, numsFalhou, S } = useApp();
   if (numsFalhou) return <Aviso tom="bad">Não consegui carregar o que espera por você neste ministério. Recarregue a página.</Aviso>;
   if (!p) return null;
+  /* 13/10/2026 · no modo da liderança (Ajustes > Quem escolhe o posto) a
+     conta do banco, posto sem ninguém habilitado, mente: o posto aberto
+     qualquer um do time pega. Vale a conta do motor, com a regra do
+     ministério. */
+  const distribui = !!S?.config?.distribuir;
+  const semGente = distribui ? postosSemQuemPossa(S).length : p.funcoes_sem_gente;
 
   /* cada linha é uma frase inteira e concorda com o número (05/09/2026). O
      número é tinta em todas: nada aqui é falta de gente no culto, e o
@@ -160,9 +166,11 @@ function Pendencias() {
     p.sem_disponibilidade && { n: p.sem_disponibilidade,
       txt: pl(p.sem_disponibilidade, 'pessoa não respondeu a disponibilidade do mês', 'pessoas não responderam a disponibilidade do mês'),
       href: '/time' },
-    p.funcoes_sem_gente && { n: p.funcoes_sem_gente,
-      txt: pl(p.funcoes_sem_gente, 'função sem ninguém que saiba fazer', 'funções sem ninguém que saiba fazer'),
-      href: '/ajustes' },
+    semGente && { n: semGente,
+      txt: distribui
+        ? pl(semGente, 'posto em que ninguém do time pode entrar', 'postos em que ninguém do time pode entrar')
+        : pl(semGente, 'função sem ninguém que saiba fazer', 'funções sem ninguém que saiba fazer'),
+      href: distribui ? '/time' : '/ajustes' },
   ].filter(Boolean) as { n: number; txt: string; href: string }[];
 
   if (!itens.length) return null;

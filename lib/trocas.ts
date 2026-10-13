@@ -25,9 +25,10 @@ export type Troca = {
   impede: string | null; criado_em: string; respondido_em: string | null;
 };
 
-/* uma linha de `eu_troca_candidatos` (sem telefone, de propósito) */
+/* uma linha de `eu_troca_candidatos` (sem telefone, de propósito). `nivel`
+   nulo (113): não marcou o posto, e entra porque a liderança distribui */
 export type Candidato = {
-  voluntario_id: string; nome: string; nivel: Nivel; disse_que_pode: boolean; ja_pedi: boolean;
+  voluntario_id: string; nome: string; nivel: Nivel | null; disse_que_pode: boolean; ja_pedi: boolean;
 };
 
 /* uma linha de `eu_eventos` */

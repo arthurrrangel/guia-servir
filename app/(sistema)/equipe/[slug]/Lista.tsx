@@ -156,6 +156,10 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
      o posto é uma coisa só, "eu faço". */
   const [semNiveis, setSemNiveis] = useState(false);
   const [avisoCadastro, setAvisoCadastro] = useState('');
+  /* 113 · a liderança deste ministério distribui os postos (Ajustes > Quem
+     escolhe o posto): o que a pessoa marca é preferência. Sem a 113 no banco
+     a pergunta falha, e a tela fica com o texto de sempre. */
+  const [distribui, setDistribui] = useState(false);
 
   /* Quem serve em várias áreas aparece uma vez em cada, então a lista fica
      longa de propósito (é assim que o líder pediu). A busca é o que resolve:
@@ -226,10 +230,12 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
        tela em branco. */
     if (ehDemo()) return;
     const s = sb(); if (!s) { setFase('rede'); return; }
-    const [eq, time] = await Promise.all([
+    const [eq, time, dist] = await Promise.all([
       s.rpc('equipe_publica', { p_slug: slug }),
       s.rpc('equipe_time', { p_slug: slug }),
+      s.rpc('equipe_distribui', { p_slug: slug }),
     ]);
+    setDistribui(!dist.error && dist.data === true);
     /* erro de rede não é link inválido: quem abre no metrô não pode concluir
        que foi tirado da equipe */
     if (eq.error) { setFase(/n(a|ã)o encontr|inv(a|á)lid/i.test(eq.error.message || '') ? 'erro' : 'rede'); return; }
@@ -847,7 +853,9 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
 
             <label style={{ marginTop: 22, display: 'block' }}>Onde você serve?</label>
             <p className="dim pequeno" style={{ margin: '-2px 0 12px' }}>
-              {semNiveis
+              {distribui
+                ? 'Toque nos postos em que você prefere servir. A liderança distribui os postos a cada culto e, se faltar gente em outro, pode te chamar para lá.'
+                : semNiveis
                 ? 'Toque no posto que você já faz. Leia o que cada um exige antes de marcar.'
                 : 'Toque no posto para entrar nele. Marque só o que é verdade hoje, quem organiza confere depois.'}
               {misturado && <> Posto <em>só domingo</em> não entra na escala do Follow.</>}

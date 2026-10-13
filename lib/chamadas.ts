@@ -20,9 +20,10 @@ export type ChamadaDoLider = {
   id: string; culto_id: string; funcao_id: string; voluntario_id: string; nome: string;
   status: StatusDaChamada; criado_em: string; respondido_em: string | null;
 };
-/* uma linha de `chamar_candidatos` */
+/* uma linha de `chamar_candidatos`. `nivel` nulo (113): a pessoa não marcou
+   o posto e entra porque a liderança distribui (Ajustes > Quem escolhe o posto) */
 export type CandidatoDaVaga = {
-  voluntario_id: string; nome: string; nivel: string; disse_que_pode: boolean;
+  voluntario_id: string; nome: string; nivel: string | null; disse_que_pode: boolean;
   no_mes: number; limite: number; chamada: StatusDaChamada | null;
 };
 /* uma linha de `eu_chamadas` (o voluntário) */
@@ -79,6 +80,7 @@ export function detalheDoCandidato(c: CandidatoDaVaga): string {
   p.push(c.disse_que_pode ? 'disse que pode' : 'não respondeu o dia');
   p.push(`${c.no_mes} ${c.no_mes === 1 ? 'escala' : 'escalas'} no mês${c.limite ? ` (limite ${c.limite})` : ''}`);
   if (c.nivel === 'reserva') p.push('ajuda quando falta');
+  else if (c.nivel == null) p.push('não marcou este posto');
   if (c.chamada === 'aberta') p.push('já chamado, esperando');
   else if (c.chamada === 'recusada') p.push('disse que não pode cobrir');
   return p.join(' · ');
