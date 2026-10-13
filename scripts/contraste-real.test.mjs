@@ -52,9 +52,12 @@ try {
      O que fica aqui é a forma certa da pergunta: os cartões sobre foto
      ESCURA não podem ser acusados (senão o medidor voltou a mentir) e a
      página inteira tem que passar depois do conserto. */
-  const claros = limpo.fracos.filter(f => /g-tile/.test(f));
+  /* 13/10/2026 · os cartões do site refeito são `.s-cartao`, sem foto: o
+     filtro pelo nome antigo (`g-tile`) não casava com nada e a linha passava
+     sem medir. */
+  const claros = limpo.fracos.filter(f => /s-cartao/.test(f));
   ok(claros.length === 0,
-    'texto branco sobre a foto dos cartões não é acusado',
+    'texto claro dos cartões escuros não é acusado',
     claros.slice(0, 3).join(' | '));
   ok(limpo.fracos.length === 0, 'a página de acesso passa inteira', limpo.fracos.slice(0, 4).join(' | '));
 
@@ -89,13 +92,17 @@ try {
   /* -------------------------------------------------------- 2. o errado */
   await pag.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
   await pag.waitForTimeout(900);
+  /* 13/10/2026 · os alvos são os do site refeito: os cartões escuros do
+     /acessar (`.s-cartao`, título e texto) e o texto da faixa clara (o título
+     da faixa de papel e o parágrafo da faixa de areia). Os de antes
+     (`.g-tile`, `.g-pe-h`) não existem mais, e o estrago não pegava em nada. */
   const estragos = [
-    { por: 'cinza claro no branco',      css: '.g-tile-t{ -webkit-text-fill-color:#c9c9c9!important; color:#c9c9c9!important }' },
-    { por: 'branco no branco',           css: '.g-pe-h{ -webkit-text-fill-color:#fff!important; color:#fff!important }' },
-    { por: 'tinta translúcida demais',   css: '.g-tile-d{ -webkit-text-fill-color:rgba(255,255,255,.18)!important; color:rgba(255,255,255,.18)!important }' },
-    { por: 'fundo de gradiente ruim',    css: '.g-tile{ background-image:linear-gradient(#fff,#fff)!important } .g-tile-t{ -webkit-text-fill-color:#fff!important }' },
-    { por: 'foto clara sob texto claro', css: '.g-tile::after{ content:""!important; position:absolute!important; inset:0!important; background:#f2f2f2!important; z-index:5!important } .g-tile-t,.g-tile-d{ position:relative; z-index:6 }' },
-    { por: 'amarelo em cima do areia',   css: '.g-pe-h{ -webkit-text-fill-color:#ffe08a!important; color:#ffe08a!important }' },
+    { por: 'cinza claro no papel',       css: '#t-portas{ -webkit-text-fill-color:#c9c9c9!important; color:#c9c9c9!important }' },
+    { por: 'branco no papel',            css: '#t-portas{ -webkit-text-fill-color:#fff!important; color:#fff!important }' },
+    { por: 'tinta translúcida demais',   css: '.s .s-cartao-d{ -webkit-text-fill-color:rgba(255,255,255,.18)!important; color:rgba(255,255,255,.18)!important }' },
+    { por: 'fundo de gradiente ruim',    css: '.s .s-cartao{ background-image:linear-gradient(#fff,#fff)!important } .s .s-cartao-t{ -webkit-text-fill-color:#fff!important; color:#fff!important }' },
+    { por: 'foto clara sob texto claro', css: '.s .s-cartao::after{ content:""!important; position:absolute!important; inset:0!important; background:#f2f2f2!important; z-index:5!important } .s .s-cartao-t,.s .s-cartao-d{ position:relative; z-index:6 }' },
+    { por: 'amarelo em cima do areia',   css: '.s .s-faixa.areia .s-lead{ -webkit-text-fill-color:#ffe08a!important; color:#ffe08a!important }' },
   ];
   for (const e of estragos) {
     await pag.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
@@ -112,7 +119,7 @@ try {
   await pag.waitForTimeout(900);
   /* uma faixa clara cobrindo METADE da linha: a média ainda passa, o pior
      ponto não. Isso tem que sair como aviso, nunca como reprovação. */
-  await pag.addStyleTag({ content: '.g-tile::after{content:""!important;position:absolute!important;left:0;right:50%;top:0;bottom:0;background:#fff!important;z-index:5!important} .g-tile-t,.g-tile-d{position:relative;z-index:6}' });
+  await pag.addStyleTag({ content: '.s .s-cartao::after{content:""!important;position:absolute!important;left:0;right:50%;top:0;bottom:0;background:#fff!important;z-index:5!important} .s .s-cartao-t,.s .s-cartao-d{position:relative;z-index:6}' });
   await pag.waitForTimeout(250);
   const meia = await medirContraste(pag);
   ok(meia.sobreFoto.length > 0 || meia.fracos.length > 0,

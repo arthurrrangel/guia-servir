@@ -69,31 +69,40 @@ try {
     m.teclado.join(' | '));
   await pag.evaluate(() => document.getElementById('teste-busca')?.remove());
 
-  /* ------------------------------------------------ 2. o que está errado cai */
+  /* ------------------------------------------------ 2. o que está errado cai
+
+     13/10/2026 · OS ALVOS SEGUEM O SITE DE AGORA. Os estragos do /acessar
+     miravam o rodapé e a barra do site antigo (`.g-pe-rua`, `.g-pe-h`,
+     `.bt-barra`). O site refeito não tem mais essas classes: o CSS injetado
+     não pegava em nada, a medida não via estrago, e o teste reprovava a si
+     mesmo enquanto a régua de verdade ficava sem prova. Agora: o texto do
+     rodapé (`.s-pe-marca .s-corpo`), o rótulo em caixa alta dos cartões
+     (`.s-cartao-n`; os do rodapé somem no celular, e a medida, com razão, não
+     mede o que não aparece) e o botão em pílula (`.s-pil`). */
   const estragos = [
     {
       por: 'frase de 10px',
-      css: '.g-pe-rua{ font-size:10px!important; text-transform:none!important; letter-spacing:normal!important }',
+      css: '.s .s-pe-marca .s-corpo{ font-size:10px!important; text-transform:none!important; letter-spacing:normal!important }',
       balde: 'miudos', rota: '/acessar',
     },
     {
       por: 'rótulo abaixo do piso da casa (9px)',
-      css: '.g-pe-h{ font-size:9px!important }',
+      css: '.s .s-cartao-n{ font-size:9px!important }',
       balde: 'miudos', rota: '/acessar',
     },
     {
       por: 'etiqueta em caixa alta mas sem espaçamento',
-      css: '.g-pe-h{ font-size:11px!important; letter-spacing:normal!important }',
+      css: '.s .s-cartao-n{ font-size:11px!important; letter-spacing:normal!important }',
       balde: 'miudos', rota: '/acessar',
     },
     {
       por: 'botão de 30px de altura',
-      css: '.bt-barra{ min-height:0!important; padding:2px 10px!important }',
+      css: '.s .s-pil{ height:auto!important; min-height:0!important; padding:2px 10px!important }',
       balde: 'pequenos', rota: '/acessar',
     },
     {
       por: 'campo que dá zoom no iOS',
-      css: '.g-pe-cols input, .es .es-ctl, input{ font-size:13px!important }',
+      css: '.es .es-ctl, input{ font-size:13px!important }',
       balde: 'zoomIos', rota: '/escala?demo=1',
     },
     {
