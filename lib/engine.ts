@@ -1533,9 +1533,10 @@ export function nivelEfetivo(v: Voluntario, funcao: string): Nivel | undefined {
    pessoa marcou vira PREFERÊNCIA:
      · o sorteio roda primeiro como sempre, só com quem marcou; o posto que
        sobrar vazio é completado com quem estiver livre no time
-       (`completarDia`). Quem marcou nunca perde o posto para quem não marcou;
+       (`completarDia`). Quem marcou só sai do posto que marcou quando é o
+       jeito de preencher mais uma vaga (ver `semTirarNinguem`);
      · a lista do posto na Escala mostra o time inteiro: quem marcou em cima,
-       o resto embaixo ("Resto do time");
+       o resto embaixo ("Não marcaram este posto");
      · mudar duas pessoas de posto não pergunta mais se a pessoa "faz" o posto.
    As regras do prédio continuam valendo para todo mundo: o sexo do posto, o
    "não posso", o teto do mês, ninguém em dois postos ao mesmo tempo. E quem
@@ -1860,14 +1861,64 @@ const travado = (sl?: Slot | null) => !!sl && (sl.fixo || sl.status === 'confirm
    VARIA aquilo que se afirma ser a causa. Eu tinha medido "antes e depois" de
    uma mudança que fez duas coisas ao mesmo tempo e creditei a errada. */
 
-function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[], fora?: ForaDoDia, aberto = false): boolean {
+/* A ORDEM DA SEGUNDA PASSADA — 13/10/2026, auditoria.
+
+   No modo de sempre, `aumentar` tenta os candidatos na ordem do sorteio, e
+   tanto faz quem ele tira de lugar: todo mundo da lista marcou o posto. Na
+   segunda passada do modo da liderança, não: a lista é o time inteiro, e o
+   primeiro da ordem podia ser alguém que já estava num posto que MARCOU.
+   O reparo tirava a pessoa de lá e punha outra que não marcou, mesmo havendo
+   quem entrasse direto. Medido (revisão independente): RECEPÇÃO marcada só
+   pela Ana, SETOR A sem ninguém, o Bruno livre depois do culto. Saía Ana no
+   SETOR A e Bruno na RECEPÇÃO; com o Bruno chamado "Abel", a Ana ficava. A
+   ordem alfabética decidia quem perdia o posto que marcou.
+
+   Agora, na segunda passada, primeiro quem entra sem tirar ninguém de lugar
+   (sem posto ao mesmo tempo no dia e dentro do teto), na ordem do sorteio;
+   só depois quem precisa de remanejamento. Remanejar alguém para fora do
+   posto que marcou passa a acontecer só quando é o único jeito de preencher
+   mais uma vaga: todo `aumentar` que dá certo preenche uma vaga a mais.
+
+   E A CONTA. A lista do time inteiro era pontuada de novo a cada passo da
+   busca (carga e dias parado de cada pessoa), e no mês com vaga que ninguém
+   pode pegar a busca percorre pessoa × dia inteiro: 30 pessoas, 20 postos,
+   sábado e domingo, ia de 1,1 s para 12,2 s. A ordem de cada posto em cada
+   dia vem uma vez só por passada (`memo`); quem cabe direto é conferido na
+   hora, com o estado de agora. Fora da segunda passada, nada disso roda. */
+type OrdemDaPassada = Map<string, Candidato[]>;
+function semTirarNinguem(S: Estado, data: string, F: string, c: Candidato) {
+  const ehSim = metaFuncao(S, F).simultanea;
+  const slots = S.escalas[data]?.slots || {};
+  let jaNesteDia = false;
+  for (const fn in slots) {
+    if (fn === F || slots[fn]?.vid !== c.id) continue;
+    jaNesteDia = true;
+    if (ehSim && metaFuncao(S, fn).simultanea) return false;
+  }
+  const [ano, mes] = data.split('-').map(Number);
+  const limite = vol(S, c.id)?.limiteMes ?? S.config.limitePadrao;
+  return escalasNoMes(S, c.id, ano, mes) + (jaNesteDia ? 0 : 1) <= limite;
+}
+
+function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: string[], fora?: ForaDoDia, aberto = false, memo?: OrdemDaPassada): boolean {
   /* `ignorarLimite` de propósito: quem já bateu o teto do mês ainda é
      candidato AQUI, porque a linha mais abaixo confere o teto e, se ele
      estourou, tenta liberar um domingo dessa pessoa em outro dia. É esse
      remanejamento que `aumentar` existe para achar.
      `aberto` (13/10/2026): a segunda passada do modo da liderança. Posto
      fechado nunca abre, nem quando o reparo passa por ele. */
-  const lista = candidatos(S, F, data, { excluirOcupados: false, ignorarLimite: true, fora, aberto: aberto && !postoFechado(S, F) });
+  const o = { excluirOcupados: false, ignorarLimite: true, fora, aberto: aberto && !postoFechado(S, F) };
+  let lista: Candidato[];
+  if (aberto) {
+    const k = F + '|' + data;
+    let ordem = memo?.get(k);
+    if (!ordem) { ordem = candidatos(S, F, data, o); memo?.set(k, ordem); }
+    const direto: Candidato[] = [], resto: Candidato[] = [];
+    for (const c of ordem) (semTirarNinguem(S, data, F, c) ? direto : resto).push(c);
+    lista = [...direto, ...resto];
+  } else {
+    lista = candidatos(S, F, data, o);
+  }
   for (const c of lista) {
     const chave = c.id + '|' + data;
     if (visto.has(chave)) continue;
@@ -1890,7 +1941,7 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
       delete S.escalas[data].slots[ocup];
       garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
       if (!meta || meta.ativa === false) return true;      // função morta: não repõe
-      if (aumentar(S, data, ocup, visto, dias, fora, aberto)) return true;
+      if (aumentar(S, data, ocup, visto, dias, fora, aberto, memo)) return true;
       delete S.escalas[data].slots[F];
       S.escalas[data].slots[ocup] = s2;
       continue;
@@ -1933,7 +1984,7 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
         if (travado(s)) continue;
         delete S.escalas[d2].slots[F2];
         garantirDia(S, data).slots[F] = { vid: c.id, status: 'pendente', fixo: false };
-        if (aumentar(S, d2, F2, visto, dias, fora, aberto)) return true;
+        if (aumentar(S, d2, F2, visto, dias, fora, aberto, memo)) return true;
         delete S.escalas[data].slots[F];
         S.escalas[d2].slots[F2] = s!;
       }
@@ -1944,9 +1995,28 @@ function aumentar(S: Estado, data: string, F: string, visto: Set<string>, dias: 
 
 export function repararDia(S: Estado, data: string, fora?: ForaDoDia, aberto = false) {
   const Fo: ForaDoDia = fora ?? new Map([[data, quemRecusou(S, data)]]);
+  const memo: OrdemDaPassada | undefined = aberto ? new Map() : undefined;
   let n = 0;
-  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data], Fo, aberto)) n++;
+  for (const F of vagasDe(S, data)) if (aumentar(S, data, F, new Set(), [data], Fo, aberto, memo)) n++;
   return n;
+}
+
+/* QUANDO A BUSCA DO MÊS NÃO TEM COMO ACHAR NADA (13/10/2026, auditoria).
+
+   Toda vaga que `aumentar` preenche termina em alguém entrando sem tirar
+   ninguém: num dia novo, o que pede folga no teto, ou num segundo posto do
+   mesmo dia, o que só existe com posto que não é ao mesmo tempo (EDIÇÃO,
+   depois do culto). Os remanejamentos no meio do caminho trocam gente de
+   lugar e de dia, mas não criam folga. Então, com todo mundo ativo no teto
+   do mês e todos os postos ao mesmo tempo (o Connect inteiro), não há vaga a
+   preencher, e a busca de cada vaga percorria pessoa × dia à toa: num mês
+   lotado de 36 pessoas e 16 postos, quase um segundo para não mudar nada.
+   O "posto de função desligada" que a busca também descarta não conta: a
+   primeira passada já tirou esses do dia. */
+function aindaCabeAlguem(S: Estado, ano: number, mes: number, dias: string[]) {
+  const temFolga = S.voluntarios.some(v => v.ativo && escalasNoMes(S, v.id, ano, mes) < (v.limiteMes ?? S.config.limitePadrao));
+  if (temFolga) return true;
+  return dias.some(d => funcoesDoDia(S, d).some(f => !f.simultanea));
 }
 
 export function gerarMes(S: Estado, ano: number, mes: number, aPartirDe?: string) {
@@ -1970,8 +2040,12 @@ export function gerarMes(S: Estado, ano: number, mes: number, aPartirDe?: string
      domingo 3. */
   if (S.config.distribuir) {
     for (const d of dias) completarDia(S, d, fora);
+    const memo: OrdemDaPassada = new Map();
     for (const D of dias) {
-      for (const F of vagasDe(S, D)) aumentar(S, D, F, new Set(), dias, fora, true);
+      for (const F of vagasDe(S, D)) {
+        if (!aindaCabeAlguem(S, ano, mes, dias)) break;
+        aumentar(S, D, F, new Set(), dias, fora, true, memo);
+      }
     }
   }
   for (const d of dias) S.escalas[d].plantao = sugerirPlantao(S, d, S.config.plantaoQtd, fora);

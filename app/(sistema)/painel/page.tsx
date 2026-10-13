@@ -168,7 +168,7 @@ function Pendencias() {
       href: '/time' },
     semGente && { n: semGente,
       txt: distribui
-        ? pl(semGente, 'posto em que ninguém do time pode entrar', 'postos em que ninguém do time pode entrar')
+        ? pl(semGente, 'posto que o sorteio não tem como preencher', 'postos que o sorteio não tem como preencher')
         : pl(semGente, 'função sem ninguém que saiba fazer', 'funções sem ninguém que saiba fazer'),
       href: distribui ? '/time' : '/ajustes' },
   ].filter(Boolean) as { n: number; txt: string; href: string }[];

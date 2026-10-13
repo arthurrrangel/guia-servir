@@ -1,6 +1,6 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarConvidado, salvarDia, salvarDias, tirarNaoPosso } from '@/lib/db';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
@@ -1343,10 +1343,15 @@ function Posto({ d, f, S, dia, ocupado, trocar, situacao, travar, marcarPrimeira
      não marcou num grupo à parte. Era essa a parte do pedido do Connect que
      a tela travava: "entendemos que tal posição necessita de outra pessoa,
      e não a que se inscreveu". */
-  const lista = candidatos(S, f.nome, d, {
+  /* pontuar o time inteiro em cada posto de cada dia a cada desenho custava
+     10 vezes o de antes (36 pessoas × 16 postos: de 3 para 30 ms por desenho;
+     60 × 20: 117 ms). A lista só muda quando o estado muda, e todo lugar que
+     mexe no estado chama `pinta()` ou `recarregar()`, que trocam o `S`. */
+  const distribui = !!S.config.distribuir;
+  const lista = useMemo(() => candidatos(S, f.nome, d, {
     excluirOcupados: false, ignorarLimite: true, incluirTreino: true, incluirQuemNaoPode: true,
-    aberto: !!S.config.distribuir,
-  });
+    aberto: distribui,
+  }), [S, f.nome, d, distribui]);
   const naoPode = (id: string) => {
     const v = S.voluntarios.find((x: any) => x.id === id);
     return !!v && respostaDe(v, d) === 'nao';

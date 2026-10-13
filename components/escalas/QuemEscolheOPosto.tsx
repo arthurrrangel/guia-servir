@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import type { Estado } from '@/lib/engine';
-import { funcoesAtivas, postoFechado, nivelNoSorteio } from '@/lib/engine';
+import { funcoesAtivas, postoFechado, nivelNoSorteio, podeNoPosto } from '@/lib/engine';
 import { IcCheck } from '@/components/Icones';
 import { cont } from '@/lib/plural';
 
@@ -87,12 +87,15 @@ export default function QuemEscolheOPosto({ S, gravar }: Props) {
     void mandar({ postosFechados: fechado(f) ? sem : [...sem, k] });
   }
 
-  /* posto fechado sem ninguém marcado: o sorteio vai deixar vazio sempre.
-     A conta é a do motor, com o que está na tela (inclusive o que grava) */
+  /* posto fechado sem ninguém marcado que possa entrar: o sorteio vai deixar
+     vazio sempre. A conta é a do motor, com o que está na tela (inclusive o
+     que grava), e com a regra do prédio: no posto de homens, a mulher
+     marcada não conta (auditoria de 13/10) */
   const comoFica = { ...S, config: { ...S.config, distribuir: true, postosFechados: lista } };
   const ativos = S.voluntarios.filter(v => v.ativo);
   const vazios = funcoes.filter(f => fechado(f) && postoFechado(comoFica, f.nome)
-    && !ativos.some(v => ['titular', 'reserva'].includes(nivelNoSorteio(comoFica, v, f.nome) as string)));
+    && !ativos.some(v => podeNoPosto(comoFica, v, f.nome)
+      && ['titular', 'reserva'].includes(nivelNoSorteio(comoFica, v, f.nome) as string)));
   const nFechados = funcoes.filter(fechado).length;
 
   return (
@@ -120,7 +123,7 @@ export default function QuemEscolheOPosto({ S, gravar }: Props) {
           </p>
           <p className="es-prosa">
             Continua valendo para todo mundo: o sexo do posto, o “não posso”, o máximo por mês e ninguém
-            em dois postos ao mesmo tempo.
+            em dois postos ao mesmo tempo. Quem está como aprendendo num posto não é sorteado para ele.
           </p>
 
           <div className="es-campo">
@@ -143,7 +146,7 @@ export default function QuemEscolheOPosto({ S, gravar }: Props) {
             </div>
             <p className={vazios.length ? 'es-gz-rot es-gz-falta' : 'es-gz-rot'} role="status">
               {vazios.length
-                ? `${vazios.map(f => f.nome).join(', ')}: ninguém marcado pela liderança ainda. `
+                ? `${vazios.map(f => f.nome).join(', ')}: ninguém marcado pela liderança que possa entrar. `
                   + `O sorteio vai deixar ${vazios.length === 1 ? 'esse posto vazio' : 'esses postos vazios'} até você marcar alguém na aba Time.`
                 : nFechados
                   ? `${cont(nFechados, 'posto só', 'postos só')} para quem a liderança marcou.`

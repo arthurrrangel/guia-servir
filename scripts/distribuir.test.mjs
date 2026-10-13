@@ -8,8 +8,10 @@
      1. desligado, nada muda: `aberto` não faz efeito e ninguém vira 'livre';
      2. ligado, o sorteio de sempre roda primeiro (só quem marcou) e o posto
         aberto que sobrar vazio é completado com quem estiver livre;
-     3. quem marcou nunca perde o posto para quem não marcou, nem no dia nem
-        no mês (o teto de quem é o único que marcou não é gasto antes);
+     3. quem marcou só perde o posto que marcou quando isso preenche mais uma
+        vaga (quem entra sem tirar ninguém vem primeiro); no mês, o teto de
+        quem é o único que marcou não é gasto num vazio que outra pessoa
+        preencheria;
      4. as regras do prédio valem para quem não marcou: sexo do posto, não
         posso, teto do mês, dois postos ao mesmo tempo, "aprendendo";
      5. posto fechado: só quem a liderança marcou (conferido), nunca é
@@ -117,6 +119,40 @@ caso('a primeira passada não rouba: o posto que alguém marcou não perde essa 
   gerarDia(S, DOM);
   assert.equal(quem(S, DOM, 'P2'), 'x');
   assert.equal(quem(S, DOM, 'P1'), 'y');
+});
+
+caso('a segunda passada põe quem entra direto antes de tirar quem marcou do lugar', () => {
+  /* achado da auditoria de 13/10: RECEPÇÃO só a Ana marcou, SETOR A ninguém,
+     o Bruno faz EDIÇÃO depois do culto e está livre durante. O reparo tirava a
+     Ana da RECEPÇÃO (primeira no nome) e punha o Bruno lá; com o Bruno chamado
+     "Abel", a Ana ficava. A ordem alfabética decidia quem perdia o posto. */
+  for (const nome of ['Bruno', 'Abel']) {
+    const S = estadoVazio();
+    S.funcoes = [F('RECEPÇÃO', 1), F('SETOR A', 2), F('EDIÇÃO', 3, { simultanea: false })];
+    S.voluntarios = [P('ana', 'Ana', ['RECEPÇÃO']), P('bruno', nome, ['EDIÇÃO'])];
+    S.config.distribuir = true;
+    garantirDia(S, DOM);
+    gerarDia(S, DOM);
+    assert.equal(quem(S, DOM, 'RECEPÇÃO'), 'ana', nome);
+    assert.equal(quem(S, DOM, 'SETOR A'), 'bruno', nome);
+    const M = estadoVazio();
+    M.funcoes = S.funcoes; M.voluntarios = S.voluntarios; M.config.distribuir = true;
+    gerarMes(M, 2030, 3, DOM);
+    assert.equal(quem(M, DOM, 'RECEPÇÃO'), 'ana', 'no mês também: ' + nome);
+  }
+});
+caso('quem marcou só sai do posto que marcou quando isso preenche mais uma vaga', () => {
+  /* X o Caio marcou; Y é de homens e ninguém marcou; o Caio é o único homem
+     e a Wanda está livre. Sem mexer, Y fica vazio. Mexendo, os dois postos
+     ficam cheios: a regra é preencher, e o que a pessoa marcou é preferência. */
+  const S = estadoVazio();
+  S.funcoes = [F('X', 1), F('Y', 2, { exigeSexo: 'M' })];
+  S.voluntarios = [P('c', 'Caio', ['X'], { sexo: 'M' }), P('w', 'Wanda', [])];
+  S.config.distribuir = true;
+  garantirDia(S, DOM);
+  gerarDia(S, DOM);
+  assert.equal(quem(S, DOM, 'Y'), 'c');
+  assert.equal(quem(S, DOM, 'X'), 'w');
 });
 
 /* ---------------------------------------------- 3 · o mês, antes do vazio */

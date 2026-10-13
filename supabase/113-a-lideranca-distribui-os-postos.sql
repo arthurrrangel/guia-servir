@@ -26,8 +26,10 @@
          As outras regras (sexo do posto, não posso, já escalado no dia)
          ficam como estavam.
      3 · `chamar_candidatos` e `eu_troca_candidatos`: a lista deixa de exigir
-         a habilidade (left join); quem marcou o posto vem antes de quem não
-         marcou, e `troca_impede` decide quem entra.
+         a habilidade (left join), e `troca_impede` decide quem entra. A
+         ordem: primeiro quem disse que pode no dia (como sempre: é quem
+         aceita uma vaga em cima da hora, e é o que `quemPodeCobrir` faz no
+         motor), depois quem marcou o posto antes de quem não marcou.
      4 · `chamar_para_cobrir`: sai a segunda conferência de habilidade. Ela
          repetia a de `troca_impede` palavra por palavra no modo de sempre, e
          no da liderança recusaria quem não marcou.
@@ -76,16 +78,18 @@ declare
 begin
   for r in
     select * from (values
-      ('troca_impede(uuid,uuid,uuid)',            'd9d45c7e66c75b8b913418dec5dde14c', '4a46ee95e6aa9c5264110c42aed7edd3'),
-      ('eu_troca_candidatos(text,uuid,uuid)',     '10f05db97320bb74ec5eea81ff78bf5a', 'e8cf56fcd6e91eeb53248f88edc0e036'),
-      ('chamar_candidatos(uuid,uuid)',            '111f926f30cc65f7ace0df8432dfb588', '824afea678d4a141c4906881d4a95e51'),
-      ('chamar_para_cobrir(uuid,uuid,uuid[])',    'ff2e56c5e06d6b61872806def98d8fe4', '71a430f814659eba1850078cdf8a5c38')
-    ) as x(assinatura, antes, depois)
+      /* a terceira coluna é a primeira versão desta 113 (13/10, antes da
+         auditoria): quem já rodou aquela roda esta por cima sem parar */
+      ('troca_impede(uuid,uuid,uuid)',            'd9d45c7e66c75b8b913418dec5dde14c', '4a46ee95e6aa9c5264110c42aed7edd3', '4a46ee95e6aa9c5264110c42aed7edd3'),
+      ('eu_troca_candidatos(text,uuid,uuid)',     '10f05db97320bb74ec5eea81ff78bf5a', 'e8cf56fcd6e91eeb53248f88edc0e036', 'e8cf56fcd6e91eeb53248f88edc0e036'),
+      ('chamar_candidatos(uuid,uuid)',            '111f926f30cc65f7ace0df8432dfb588', '0ce310d489fb3d3e3fea2933935567f5', '824afea678d4a141c4906881d4a95e51'),
+      ('chamar_para_cobrir(uuid,uuid,uuid[])',    'ff2e56c5e06d6b61872806def98d8fe4', '71a430f814659eba1850078cdf8a5c38', '71a430f814659eba1850078cdf8a5c38')
+    ) as x(assinatura, antes, depois, primeira)
   loop
     select md5(prosrc) into v_md5 from pg_proc where oid = to_regprocedure('public.' || r.assinatura);
     if v_md5 is null then
       raise exception '113 PAROU: %() nao existe neste banco', r.assinatura;
-    elsif v_md5 not in (r.antes, r.depois) then
+    elsif v_md5 not in (r.antes, r.depois, r.primeira) then
       raise exception E'113 PAROU: o corpo de %() neste banco nao e o do repositorio (md5 %).\n'
         '  Esta migracao troca corpos inteiros e nao vai adivinhar. Compare com scripts/impressao-digital.sql.',
         r.assinatura, v_md5;
@@ -212,8 +216,9 @@ begin
   select c.data into v_data from cultos c where c.id = p_culto;
   if v_data is null or v_data < v_hoje or not posto_vale_no_culto(p_culto, p_funcao) then return; end if;
 
-  /* 113 · left join, e quem marcou o posto antes de quem não marcou (o
-     motor faz igual): ver `eu_troca_candidatos` */
+  /* 113 · left join: quem não marcou também entra (nivel nulo). A ordem:
+     quem disse que pode no dia, depois quem marcou o posto, depois quem
+     serviu menos no mês. Ver `eu_troca_candidatos`. */
   return query
   select o.id, o.nome, h.nivel::text,
          exists (select 1 from disponibilidade d
