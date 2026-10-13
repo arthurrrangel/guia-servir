@@ -2,12 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Chevron, Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, Sep, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Sep, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
-import { VideoHeroi } from '@/components/site/VideoHeroi';
+import { Fundo, Quadro } from '@/components/site/Midia';
+import { Domingo } from '@/components/site/Domingo';
 
 /* =============================================================================
    A HOME · 11/10/2026 — refeita do zero na forma da apresentação
@@ -19,6 +20,10 @@ import { VideoHeroi } from '@/components/site/VideoHeroi';
    herói · a igreja não é o prédio · números vivos · por onde começar
    (quatro portas) · como é um domingo (quatro momentos) · somos GUIA (a
    sigla) · perguntas de quem vem pela primeira vez · sempre cabe mais um.
+
+   13/10/2026: menos foto, mais vídeo (pedido do Arthur). O herói, o "é
+   gente" e o domingo são trechos dos vídeos da igreja; os números perderam
+   os círculos de foto e viraram quatro números grandes.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -33,10 +38,10 @@ const PORTAS = [
 ];
 
 const MOMENTOS = [
-  { n: '01', t: 'Acolhida', d: 'Alguém recebe você na porta e mostra onde fica tudo.', lugar: 'cultos-1' },
-  { n: '02', t: 'Louvor', d: 'A banda conduz a igreja a adorar, junto.', lugar: 'cultos-2' },
-  { n: '03', t: 'Palavra', d: 'Uma mensagem da Bíblia pra vida real.', lugar: 'cultos-3' },
-  { n: '04', t: 'Oração e saída', d: 'Oramos uns pelos outros. Depois, café e conversa.', lugar: 'cultos-4' },
+  { n: '01', t: 'Acolhida', d: 'Alguém recebe você na porta e mostra onde fica tudo.' },
+  { n: '02', t: 'Louvor', d: 'A banda conduz a igreja a adorar, junto.' },
+  { n: '03', t: 'Palavra', d: 'Uma mensagem da Bíblia pra vida real.' },
+  { n: '04', t: 'Oração e saída', d: 'Oramos uns pelos outros. Depois, café e conversa.' },
 ] as const;
 
 const PERGUNTAS = [
@@ -64,8 +69,7 @@ export default function Home() {
 
       {/* 1 · o herói */}
       <section className="s-heroi" aria-labelledby="t-home">
-        <Img lugar="home-heroi" prioridade retrato sizes="100vw" />
-        <VideoHeroi largo="/site/heroi-largo" retrato="/site/heroi-retrato" />
+        <Fundo video="inicio" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />
           <Vozes as="h1" id="t-home" className="s-h1" it="uma nova cultura">{IGREJA.frase}</Vozes>
@@ -88,7 +92,8 @@ export default function Home() {
               <p className="s-lead">{ligaTexto("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
               <p className="s-lead">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
-            <div className="s-foto v s-rev d1"><Img lugar="home-abraco" sizes="(max-width: 999px) 90vw, 34vw" /></div>
+            {/* a frase em vídeo: quem recebe na porta, a sala das crianças, o violão */}
+            <Quadro video="gente" className="s-rev d1" />
           </div>
           <Sede className="base" />
         </div>
@@ -96,7 +101,7 @@ export default function Home() {
 
       {/* 3 · números vivos */}
       <section className="s-faixa noite s-grao">
-        <div className="s-in"><NumerosFaixa /></div>
+        <div className="s-in"><NumerosFaixa circulos={false} /></div>
       </section>
 
       {/* 4 · por onde começar */}
@@ -130,16 +135,8 @@ export default function Home() {
             <h2 id="t-domingo" className="s-serifa">{liga("Como é um domingo?")}</h2>
             <p className="s-serifa it">{liga("da porta à oração final, 4 momentos:")}</p>
           </div>
-          <div className="s-rev d1">
-            <Trilho className="s-momentos" rotulo="Os quatro momentos do domingo">
-              {MOMENTOS.map(m => (
-                <div key={m.n} className="s-momento">
-                  <Img lugar={m.lugar} sizes="(max-width: 759px) 82vw, 25vw" />
-                  <div><small>{m.n}</small><b>{m.t}</b><p>{ligaTexto(m.d)}</p></div>
-                </div>
-              ))}
-            </Trilho>
-          </div>
+          {/* um vídeo só, em quatro capítulos: o que está passando acende na lista */}
+          <div className="s-rev d1"><Domingo itens={MOMENTOS} rotulo="Os quatro momentos do domingo" /></div>
           <div className="s-acoes centro s-cartoes-acoes s-rev"><Pil href="/cultos" tom="preta">Ver os cultos</Pil></div>
         </div>
       </section>

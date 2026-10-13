@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo, Quadro } from '@/components/site/Midia';
 import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -26,9 +27,9 @@ export const metadata: Metadata = {
 export default function Eventos() {
   const presenciais = PEQUENAS_GUIAS.filter(p => !p.online).length;
   const AGENDA = [
-    { href: '/cultos', lugar: 'cultos-heroi', t: 'Celebração', n: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, d: 'O culto de domingo: louvor, Palavra, oração e café. A porta de entrada da igreja.' },
-    { href: '#follow', lugar: 'evento-follow', t: 'Follow', n: IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado', d: 'O culto de jovens. Mesma casa, mesma fé, outra energia.' },
-    { href: '/pequena-guia', lugar: 'pg-heroi', t: 'Pequenas Guias', n: 'Terça a quinta', d: `${presenciais} grupos pela cidade, numa casa perto da sua. O lugar da semana.` },
+    { href: '/cultos', t: 'Celebração', n: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, d: 'O culto de domingo: louvor, Palavra, oração e café. A porta de entrada da igreja.' },
+    { href: '#follow', t: 'Follow', n: IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado', d: 'O culto de jovens. Mesma casa, mesma fé, outra energia.' },
+    { href: '/pequena-guia', t: 'Pequenas Guias', n: 'Terça a quinta', d: `${presenciais} grupos pela cidade, numa casa perto da sua. O lugar da semana.` },
   ] as const;
   return (
     <>
@@ -42,7 +43,7 @@ export default function Eventos() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-ev">
-        <Img lugar="eventos-heroi" prioridade retrato />
+        <Fundo video="eventos" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Eventos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-ev" className="s-h1" it="na semana">O que acontece na semana</Vozes>
@@ -63,12 +64,14 @@ export default function Eventos() {
             <p className="s-lead">{ligaTexto("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
           </div>
           <div className="s-rev d1">
-            <Trilho className="s-cartoes tres" rotulo="A agenda da semana">
-              {AGENDA.map(a => (
-                a.href.startsWith('#')
-                  ? <a key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></a>
-                  : <Link key={a.t} href={a.href} className="s-cartao foto"><Img lugar={a.lugar} sizes="(max-width: 759px) 82vw, 33vw" /><span className="s-cartao-corpo"><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></span></Link>
-              ))}
+            <Trilho className="s-cartoes tres agenda" rotulo="A agenda da semana">
+              {/* sem foto (13/10/2026): o dia e a hora são o assunto da agenda */}
+              {AGENDA.map(a => {
+                const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
+                return a.href.startsWith('#')
+                  ? <a key={a.t} href={a.href} className="s-cartao">{miolo}</a>
+                  : <Link key={a.t} href={a.href} className="s-cartao">{miolo}</Link>;
+              })}
             </Trilho>
           </div>
         </div>
@@ -78,7 +81,7 @@ export default function Eventos() {
         <div className="s-in">
           <Arroba className="topo" />
           <div className="s-duas inv">
-            <div className="s-foto h s-rev"><Img lugar="follow-palco" sizes="(max-width: 999px) 90vw, 40vw" /></div>
+            <Quadro video="follow" className="s-rev" />
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
@@ -95,31 +98,22 @@ export default function Eventos() {
 
       <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
         <div className="s-in">
-          <div className="s-duas">
-            <div className="s-rev">
-              <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
-              <Vozes className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
-              <p className="s-lead">{ligaTexto("O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.")}</p>
-              <div className="s-acoes" style={{ marginTop: 26 }}>
-                <Pil href="/followcamp" duro tom="preta">Ir para a página do Camp</Pil>
-              </div>
+          {/* sem a foto antiga (não veio material do acampamento): o texto no centro */}
+          <div className="s-so-texto s-rev">
+            <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
+            <Vozes className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
+            <p className="s-lead">{ligaTexto("O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.")}</p>
+            <div className="s-acoes">
+              <Pil href="/followcamp" duro tom="preta">Ir para a página do Camp</Pil>
             </div>
-            <div className="s-foto h s-rev d1"><Img lugar="evento-camp" sizes="(max-width: 999px) 90vw, 40vw" /></div>
           </div>
         </div>
       </section>
 
-      <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho-maos" retrato />
-        <div className="s-in">
-          <Vozes id="t-fim" className="s-h2 media" it="está">Vem como você está</Vozes>
-          <p className="s-lead">{ligaTexto("Domingo, sábado ou na semana: tem um lugar pra você em cada um.")}</p>
-          <div className="s-acoes centro">
-            <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href="/pequena-guia">Encontrar uma Pequena Guia</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho titulo="Vem como você está" it="está" lead="Domingo, sábado ou na semana: tem um lugar pra você em cada um.">
+        <Pil href="/cultos">Ver os cultos</Pil>
+        <Pil href="/pequena-guia">Encontrar uma Pequena Guia</Pil>
+      </Fecho>
     </>
   );
 }

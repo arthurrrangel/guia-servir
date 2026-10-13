@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
-import { Vozes, Sede, Chapeu, Pil, Img, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -32,7 +33,7 @@ export default function Pagina() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'DonateAction', name: 'Ofertar para a GUIA Church', recipient: { '@type': 'Church', name: IGREJA.nome, url: SITE }, url: `${SITE}/ofertar` }} />
 
       <section className="s-heroi curto" aria-labelledby="t-of">
-        <Img lugar="ofertar-heroi" prioridade retrato />
+        <Fundo video="ofertar" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Doação" resto="Dízimos e ofertas" />
           <Vozes as="h1" id="t-of" className="s-h1" it="adorar">Ofertar é adorar</Vozes>
@@ -67,16 +68,10 @@ export default function Pagina() {
         </div>
       </section>
 
-      <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" retrato />
-        <div className="s-in">
-          <Vozes id="t-fim" className="s-h2 media" it="o que você semeou">Que Deus multiplique o que você semeou</Vozes>
-          <div className="s-acoes centro">
-            <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href="/servir">Quero servir</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho titulo="Que Deus multiplique o que você semeou" it="o que você semeou">
+        <Pil href="/cultos">Ver os cultos</Pil>
+        <Pil href="/servir">Quero servir</Pil>
+      </Fecho>
     </>
   );
 }

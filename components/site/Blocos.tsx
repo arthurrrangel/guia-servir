@@ -195,16 +195,23 @@ export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
   );
 }
 
-/* O FECHO: a foto escura, uma frase, as ações. O último bloco de toda página. */
-export function Fecho({ titulo, it, lead, children, lugar = 'fecho' }:
-  { titulo: string; it?: string; lead?: string; children: React.ReactNode; lugar?: LugarDeFoto }) {
+/* O FECHO: a frase e as ações, o último bloco da página. Até 12/10/2026 era
+   uma foto escura de ponta a ponta, a mesma em seis páginas; desde 13/10
+   (menos foto, pedido do Arthur) é a faixa com grão e a frase, como o fim
+   da home. Na noite por padrão; depois de outra faixa escura, papel (as
+   pílulas da página vêm pretas). */
+export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id }:
+  { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia'; id?: string }) {
   return (
-    <section className="s-fecho s-rev">
-      <Img lugar={lugar} />
-      <div className="s-in">
-        <Vozes className="s-h2 media" it={it}>{titulo}</Vozes>
-        {lead && <p className="s-lead">{lead}</p>}
-        <div className="s-acoes centro">{children}</div>
+    <section id={id} className={`s-faixa ${tom} s-grao s-fim`} aria-labelledby="t-fim">
+      <div className="s-in s-centro">
+        <Sede className="topo" />
+        <div className="s-rev">
+          {chapeu}
+          <Vozes id="t-fim" className="s-h2 media" it={it}>{titulo}</Vozes>
+          {lead && <p className="s-lead grande">{ligaTexto(lead)}</p>}
+        </div>
+        <div className="s-acoes centro s-rev d1">{children}</div>
       </div>
     </section>
   );

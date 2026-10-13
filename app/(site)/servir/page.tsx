@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
-import { VideoHeroi } from '@/components/site/VideoHeroi';
+import { Fundo, Quadro } from '@/components/site/Midia';
 
 /* =============================================================================
    /servir — "EXISTE UM LUGAR PARA VOCÊ" · 11/10/2026
@@ -59,9 +59,8 @@ export default function Servir() {
 
       {/* 1 · o herói na fachada */}
       <section className="s-heroi" aria-labelledby="t-servir">
-        <Img lugar="servir-heroi" prioridade retrato />
-        {/* o vídeo dos voluntários é deitado: no celular em pé fica a foto dos dois embaixo do 534 */}
-        <VideoHeroi largo="/site/servir-largo" />
+        {/* o voluntário de colete rindo e os três de polegar para cima (vídeo também no celular) */}
+        <Fundo video="servir" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-servir" className="s-h1" it="para você">Existe um lugar para você</Vozes>
@@ -84,7 +83,8 @@ export default function Servir() {
               <p className="s-lead">{ligaTexto("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
               <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes. É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</p>
             </div>
-            <div className="s-foto v s-rev d1"><Img lugar="servir-abraco" sizes="(max-width: 999px) 90vw, 34vw" /></div>
+            {/* o abraço da tela 2 do PDF, agora o próprio vídeo do abraço */}
+            <Quadro video="abraco" className="s-rev d1" />
           </div>
           <Sede className="base" />
         </div>
@@ -92,7 +92,7 @@ export default function Servir() {
 
       {/* 3 · números vivos */}
       <section className="s-faixa noite s-grao">
-        <div className="s-in"><NumerosFaixa circulos={['servir-circulo-1', 'servir-circulo-2']} /></div>
+        <div className="s-in"><NumerosFaixa circulos={['circ-louvor', 'circ-colete']} /></div>
       </section>
 
       {/* 4 · as áreas */}

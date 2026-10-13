@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
-import { type LugarDeFoto } from '@/lib/site/fotos';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, liga, ligaTexto } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, fim, liga, ligaTexto } from './Blocos';
+import { Fundo } from './Midia';
 import { FormServir } from './Servir';
 import { Trilho } from './Trilho';
 
@@ -19,7 +19,8 @@ import { Trilho } from './Trilho';
    de ministerios_publicos; a copy fixa (frase, convite) vem de
    lib/site/areas.ts.
 
-   A foto não espera o banco: vem do slug, e o herói nasce com ela.
+   O vídeo não espera o banco: vem do slug, e o herói nasce com o pôster
+   dele (13/10/2026: cada área tem o seu trecho dos vídeos da igreja).
    ============================================================================= */
 
 type Min = { slug: string; nome: string; descricao: string | null; convite: string | null; postos: number; aberto: boolean; artigo: string; responsavel?: string | null; whatsapp?: string | null };
@@ -47,7 +48,7 @@ const segundaVoz = (frase: string) => {
   return p.slice(-k).join(' ');
 };
 
-const LUGAR: Record<string, LugarDeFoto> = { midia: 'area-midia', louvor: 'area-louvor', kids: 'area-kids', servico: 'area-servico', livraria: 'area-livraria' };
+const VIDEO: Record<string, string> = { midia: 'midia', louvor: 'louvor', kids: 'kids', servico: 'servico', livraria: 'livraria' };
 
 const PASSOS = [
   { n: '01', t: 'Cadastro', d: 'Marque as funções que combinam com você. Menos de um minuto.' },
@@ -82,7 +83,7 @@ export default function Area() {
   const artigo = (min?.artigo ?? fixa?.artigo ?? 'a') === 'a' ? 'na' : 'no';
   const postos = min?.postos ?? fixa?.postos;
   const aberto = min?.aberto ?? fixa?.aberto ?? true;
-  const lugar = LUGAR[slug] ?? 'fecho';
+  const video = VIDEO[slug] ?? 'servir';
   const grupos = (() => {
     const m = new Map<string, { vagas: number; texto: string }>();
     for (const f of fns) {
@@ -97,7 +98,7 @@ export default function Area() {
   if (fase === 'erro') {
     return (
       <section className="s-heroi curto" aria-labelledby="t-area">
-        <Img lugar="fecho" prioridade retrato />
+        <Fundo video="servir" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
@@ -110,9 +111,9 @@ export default function Area() {
 
   return (
     <>
-      {/* o herói com a foto da área */}
+      {/* o herói com o vídeo da área */}
       <section className="s-heroi" aria-labelledby="t-area">
-        <Img lugar={lugar} prioridade retrato />
+        <Fundo video={video} prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
           {/* a segunda voz (a linha em itálico) são as últimas palavras da

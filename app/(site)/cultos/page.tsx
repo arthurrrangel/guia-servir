@@ -2,7 +2,9 @@ import type { Metadata } from 'next';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS } from '@/lib/chegar';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Seta, fim, Sep, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, fim, Sep, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo, Quadro } from '@/components/site/Midia';
+import { Domingo } from '@/components/site/Domingo';
 import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -14,6 +16,8 @@ import ProximoCulto from '@/components/site/ProximoCulto';
    apresentação: herói · como é um domingo (o roteiro, com as horas) · é a
    sua primeira vez (o cartão claro) · como chegar (os três modos e o mapa)
    · ao vivo · o Follow · perguntas · vem domingo.
+
+   13/10/2026: herói, domingo (em capítulos), mensagem e Follow em vídeo.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -62,7 +66,7 @@ export default function Cultos() {
 
       {/* herói */}
       <section className="s-heroi" aria-labelledby="t-cultos">
-        <Img lugar="cultos-heroi" prioridade retrato />
+        <Fundo video="cultos" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes as="h1" id="t-cultos" className="s-h1" it="para pertencer">Um domingo para pertencer</Vozes>
@@ -82,9 +86,8 @@ export default function Cultos() {
             <h2 id="t-roteiro" className="s-serifa">{liga("Como é um domingo?")}</h2>
             <p className="s-serifa it">{liga("da porta ao café, em 4 momentos:")}</p>
           </div>
-          <ol className="s-passos s-rev d1">
-            {ROTEIRO.map(p => <li key={p.h}><b>{p.h} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
-          </ol>
+          {/* o mesmo vídeo em capítulos da home, aqui com o horário de cada momento */}
+          <div className="s-rev d1"><Domingo itens={ROTEIRO.map(p => ({ n: p.h, t: p.t, d: p.d }))} rotulo="O roteiro do domingo" /></div>
           <Sede className="base" />
         </div>
       </section>
@@ -147,7 +150,7 @@ export default function Cultos() {
 
       {/* ao vivo */}
       <section id="ao-vivo" className="s-fecho s-rev" aria-labelledby="t-vivo">
-        <Img lugar="home-heroi" retrato />
+        <Fundo video="mensagem" />
         <div className="s-in">
           <Chapeu forte="Ao vivo" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes id="t-vivo" className="s-h2 media" it="domingo">A mensagem de domingo</Vozes>
@@ -164,7 +167,7 @@ export default function Cultos() {
       <section id="follow" className="s-faixa papel" aria-labelledby="t-follow">
         <div className="s-in">
           <div className="s-duas inv">
-            <div className="s-foto h s-rev"><Img lugar="follow-palco" sizes="(max-width: 999px) 90vw, 40vw" /></div>
+            <Quadro video="follow" className="s-rev" />
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={followHora ? `Sábado, ${followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens" >O culto de jovens</Vozes>

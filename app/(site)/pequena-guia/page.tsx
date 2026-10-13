@@ -3,7 +3,8 @@ import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -39,7 +40,7 @@ export default function PequenaGuia() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />
 
       <section className="s-heroi" aria-labelledby="t-pg">
-        <Img lugar="pg-heroi" prioridade retrato />
+        <Fundo video="pg" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
           <Vozes as="h1" id="t-pg" className="s-h1 longa" it="sua fé">Relacionamentos que fortalecem sua fé</Vozes>
@@ -87,16 +88,11 @@ export default function PequenaGuia() {
         </div>
       </section>
 
-      <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" retrato />
-        <div className="s-in">
-          <Vozes id="t-fim" className="s-h2 media" it="perto">Diga onde você mora. A gente diz qual fica perto</Vozes>
-          <div className="s-acoes centro">
-            <Pil href="#encontrar">Encontrar a minha</Pil>
-            <Pil href={conversa.href} fora>Prefiro conversar direto</Pil>
-          </div>
-        </div>
-      </section>
+      {/* depois do formulário na noite, o fecho vem no papel */}
+      <Fecho tom="papel" titulo="Diga onde você mora. A gente diz qual fica perto" it="perto">
+        <Pil href="#encontrar" tom="preta">Encontrar a minha</Pil>
+        <Pil href={conversa.href} fora tom="contorno">Prefiro conversar direto</Pil>
+      </Fecho>
     </>
   );
 }

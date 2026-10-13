@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo } from '@/components/site/Midia';
 
 /* =============================================================================
    /acessar — A PORTA DAS EQUIPES · 11/10/2026
@@ -31,7 +32,7 @@ export default function Acessar() {
   return (
     <>
       <section className="s-heroi curto" aria-labelledby="t-ac">
-        <Img lugar="acessar-heroi" prioridade retrato />
+        <Fundo video="acessar" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
           <Vozes as="h1" id="t-ac" className="s-h1" it="você?" semPonto>Quem é você?</Vozes>

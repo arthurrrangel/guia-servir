@@ -294,16 +294,12 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-cartao-t{ font-weight:800; font-size:clamp(28px,2.9vw,44px); letter-spacing:-.045em; line-height:.95; text-wrap:balance }
 .s .s-cartao-n{ font-size:13.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--s-acento-texto); margin-top:-4px }
 .s .s-cartao-f{ font-weight:700; font-style:italic; font-size:clamp(16px,1.3vw,18px); letter-spacing:-.02em; line-height:1.2; text-wrap:balance; margin-top:10px }
-.s .s-cartao-d{ font-weight:300; font-size:clamp(13.5px,1vw,14.5px); line-height:1.45; color:rgba(255,255,255,.86); margin-top:6px; text-wrap:pretty }
+/* 13/10/2026: 13,5 a 14,5 px era letra de rodapé no monitor; o parágrafo do
+   cartão sobe para 14,5 a 16 px (lido a 60 cm, não a 30) */
+.s .s-cartao-d{ font-weight:300; font-size:clamp(14.5px,1.1vw,16px); line-height:1.45; color:rgba(255,255,255,.86); margin-top:6px; text-wrap:pretty }
 .s .s-cartao-ir{ margin-top:auto; padding-top:18px; font-size:14px; font-weight:500; display:inline-flex; align-items:center; gap:6px; color:var(--s-papel) }
 .s .s-cartao-ir svg{ width:14px; height:14px }
 .s .s-cartao-tag{ font-size:13px; font-weight:600; letter-spacing:.03em; padding:5px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.86) }
-/* o cartão com foto (lugares onde a foto é o assunto: eventos, áreas na home) */
-.s .s-cartao.foto{ padding:0; overflow:hidden; text-align:left; align-items:stretch; gap:0 }
-.s .s-cartao.foto img{ width:100%; height:auto; aspect-ratio:4/3; object-fit:cover; filter:saturate(.9) }
-.s .s-cartao.foto .s-cartao-corpo{ padding:clamp(18px,1.8vw,24px) clamp(18px,1.8vw,24px) clamp(20px,2vw,26px); display:flex; flex-direction:column; gap:6px; flex:1 }
-.s .s-cartao.foto .s-cartao-t{ font-size:clamp(24px,2.2vw,32px) }
-.s .s-cartao.foto .s-cartao-d{ margin-top:4px }
 /* cartão claro sobre papel (a inversão) */
 .s .s-cartao.claro{ background:var(--s-papel-2); color:var(--s-tinta) }
 .s .s-cartao.claro .s-cartao-d{ color:var(--s-mudo) }
@@ -431,15 +427,6 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 /* =============================================================================
    LISTAS E COMPOSIÇÕES MENORES
    ============================================================================= */
-/* os momentos do domingo: quatro fotos verticais numeradas */
-.s .s-momentos{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(10px,1.2vw,16px) }
-.s .s-momento{ position:relative; aspect-ratio:4/5; border-radius:var(--s-r); overflow:hidden; background:var(--s-noite-2); color:var(--s-papel) }
-.s .s-momento img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.85) }
-.s .s-momento::after{ content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.72)) }
-.s .s-momento div{ position:absolute; left:18px; right:18px; bottom:18px; z-index:1 }
-.s .s-momento small{ display:block; font-size:13px; font-weight:700; letter-spacing:.05em; color:var(--s-acento-texto); margin-bottom:6px }
-.s .s-momento b{ display:block; font-weight:800; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.03em; line-height:1.05 }
-.s .s-momento p{ font-size:14px; font-weight:300; margin-top:6px; color:rgba(255,255,255,.85); line-height:1.4 }
 /* os fatos em linha (data, endereço, horário) */
 .s .s-fatos{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(12px,1.6vw,20px) }
 .s .s-fato{ display:grid; gap:8px; padding:clamp(20px,2.2vw,28px); border-radius:var(--s-r); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); transition:background var(--s-t) }
@@ -664,7 +651,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-menu-bt{ display:block; width:44px; height:44px; padding:0 11px }
   .s .s-form{ grid-template-columns:1fr 1fr }
   .s .s-form .s-enviar{ grid-column:1 / -1; width:100% }
-  .s .s-momentos{ grid-template-columns:repeat(2,1fr) }
   .s .s-sigla{ grid-template-columns:repeat(2,1fr) }
   .s .s-num{ grid-template-columns:1fr }
   .s .s-circs{ max-width:440px; margin-inline:auto }
@@ -695,7 +681,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-cartao{ min-height:0 }
   .s .s-form,.s .s-form.livre{ grid-template-columns:1fr }
   .s .s-form.livre .largo{ grid-column:auto }
-  .s .s-momentos{ grid-template-columns:repeat(2,1fr) }
   .s .s-sigla{ grid-template-columns:repeat(2,1fr) }
   .s .s-sigla p{ display:none }
   .s .s-vira li{ grid-template-columns:1fr; gap:6px; text-align:center }
@@ -723,7 +708,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-form.com-fim .s-form-fim{ margin-top:clamp(24px,4vw,36px) }
 }
 @media(max-width:420px){
-  .s .s-momentos{ grid-template-columns:1fr 1fr }
   .s .s-h1{ font-size:clamp(40px,12vw,52px) }
   /* título com palavra de 15 letras ("Relacionamentos"): o corpo cai o
      bastante para a palavra caber inteira de 320 a 420 (≈7,9 corpos de largura) */
@@ -819,7 +803,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    cartão claro, formulário de oferta) usa o tom fundo; escuro volta ao vivo.
    ============================================================================= */
 .s .s-faixa.papel,.s .s-faixa.areia,.s .s-claro,.s .of,.s .s-cartao.claro{ --s-acento-texto:var(--s-laranja-texto) }
-.s .s-cartao:not(.claro),.s .s-funcao,.s .pg,.s .s-momento,.s .s-mapa-cartao{ --s-acento-texto:var(--s-laranja) }
+.s .s-cartao:not(.claro),.s .s-funcao,.s .pg,.s .s-mapa-cartao{ --s-acento-texto:var(--s-laranja) }
 
 /* =============================================================================
    CELULAR NO EIXO · 12/10/2026
@@ -948,15 +932,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .trilho-pontos i{ display:block; width:6px; height:6px; border-radius:3px; background:currentColor; opacity:.28; transition:width var(--s-t) var(--s-ease),opacity var(--s-t) }
   .s .trilho-pontos [aria-current="true"] i{ width:18px; opacity:.85 }
 
-  /* 1b. os momentos do domingo no trilho: a foto inteira em cima e o texto
-     embaixo, no preto (o texto por cima cobria o rosto das pessoas) */
-  .s .s-momentos.desliza > .s-momento{ aspect-ratio:auto; display:flex; flex-direction:column; background:var(--s-noite) }
-  .s .s-momentos.desliza .s-momento img{ position:static; width:100%; height:auto; aspect-ratio:4/5 }
-  .s .s-momentos.desliza .s-momento::after{ display:none }
-  .s .s-momentos.desliza .s-momento div{ position:static; padding:16px 18px 22px }
-  .s .s-momentos.desliza .s-momento b{ font-size:22px }
-  .s .s-momentos.desliza .s-momento p{ font-size:15px }
-
   /* 2. as perguntas que abrem */
   .s .so-largo{ display:none !important }
   .s .s-abre.so-celular{ display:grid }
@@ -999,3 +974,104 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-heroi .s-acoes{ margin-top:24px }
   .s .s-heroi .s-micro{ margin-top:14px; font-size:14px }
 }
+
+/* =============================================================================
+   VÍDEO NAS PÁGINAS · 13/10/2026
+
+   Menos foto, mais vídeo (pedido do Arthur): os heróis, o "é gente" da
+   home, o domingo em capítulos, o Follow, a mensagem de domingo, o abraço
+   e os círculos do /servir são trechos dos três vídeos da igreja
+   (components/site/Midia.tsx e Domingo.tsx). Foto ficou só onde ela é a
+   informação (a fachada do /como-chegar) ou é das melhores (as amigas do
+   /sobre). O fecho das páginas deixou de ser foto escura repetida: é a
+   faixa da noite com a frase, como o fim da home.
+   ============================================================================= */
+/* o quadro: o pôster embaixo, o vídeo por cima em fade, os dois do centro */
+.s .s-quadro{ position:relative; overflow:hidden; border-radius:var(--s-r); background:var(--s-noite-2); isolation:isolate; width:100% }
+.s .s-quadro.v{ aspect-ratio:4/5 }
+.s .s-quadro.q{ aspect-ratio:1 }
+.s .s-quadro > img,.s .s-quadro-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover }
+.s .s-quadro-video{ opacity:0; transition:opacity .9s var(--s-ease); pointer-events:none }
+.s .s-quadro-video.pronto{ opacity:1 }
+@media(prefers-reduced-motion:reduce){ .s .s-quadro-video{ display:none } }
+/* o círculo do /servir: o quadro ocupa o círculo inteiro */
+.s .s-circ .s-quadro{ position:absolute; inset:0; aspect-ratio:auto; border-radius:50% }
+
+/* o domingo em quatro capítulos: o vídeo à esquerda, a lista à direita */
+.s .s-dom{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1fr); gap:clamp(28px,5.4vw,96px); align-items:center; max-width:1180px; margin-inline:auto }
+.s .s-dom-quadro{ max-width:500px; justify-self:end }
+.s .s-dom-lista{ display:grid }
+.s .s-dom-lista li > *{ position:relative; display:grid; grid-template-columns:clamp(56px,6vw,96px) minmax(0,1fr); column-gap:clamp(12px,1.6vw,24px); row-gap:6px; align-items:baseline; width:100%; padding:clamp(16px,1.9vw,26px) 0; text-align:left; border-bottom:1px solid var(--s-linha-forte); transition:opacity .45s var(--s-ease) }
+.s .s-dom-lista li:first-child > *{ border-top:1px solid var(--s-linha-forte) }
+.s .s-dom-lista small{ grid-row:1 / span 2; font-size:clamp(14px,1.2vw,17px); font-weight:700; letter-spacing:.02em; color:var(--s-acento-texto); font-variant-numeric:tabular-nums }
+.s .s-dom-lista b{ font-weight:800; font-size:clamp(22px,2.3vw,34px); letter-spacing:-.04em; line-height:1.05 }
+.s .s-dom-lista p{ grid-column:2; font-weight:300; font-size:clamp(16px,1.45vw,21px); line-height:1.35; letter-spacing:-.01em; text-wrap:pretty }
+/* a linha que corre embaixo do capítulo que está passando */
+.s .s-dom-linha{ position:absolute; left:0; right:0; bottom:-1px; height:2px; background:currentColor; transform:scaleX(0); transform-origin:0 50%; transition:transform .3s linear }
+/* o capítulo que não está passando fica mais claro, não ilegível: a .62 a
+   tinta sobre a areia ainda dá 4,6:1 */
+.s .s-dom.vivo .s-dom-lista li:not(.atual) > *{ opacity:.62 }
+.s .s-dom.vivo .s-dom-lista button{ cursor:pointer }
+.s .s-dom-lista button:focus-visible{ outline-offset:-2px }
+@media(hover:hover){ .s .s-dom.vivo .s-dom-lista li:not(.atual) > :hover{ opacity:.75 } }
+/* as barrinhas de "stories" só existem no celular */
+.s .s-dom-barras{ display:none }
+
+/* os números sem os círculos (home): quatro colunas de número grande */
+.s .s-num.so{ grid-template-columns:1fr; text-align:center }
+.s .s-num.so .s-dir{ text-align:center }
+.s .s-num.so .s-arroba{ margin:0 auto clamp(18px,2.4vw,34px) }
+.s .s-num.so .s-vivos{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(24px,3.4vw,56px); margin-top:clamp(34px,4.6vw,64px); text-align:center }
+.s .s-num.so .s-vivos li{ display:block; font-size:clamp(17px,1.5vw,21px); line-height:1.35 }
+.s .s-num.so .s-vivos li b{ display:block; font-size:clamp(64px,7.4vw,118px); font-weight:800; letter-spacing:-.055em; line-height:.9; margin-bottom:clamp(10px,1.2vw,16px); font-variant-numeric:tabular-nums }
+.s .s-num.so .s-vivos svg{ display:none }
+
+/* o fecho sem foto: a faixa da noite com a frase e as pílulas */
+.s .s-fim .s-lead{ margin:22px auto 0 }
+.s .s-fim .s-acoes{ margin-top:clamp(28px,4vw,52px) }
+.s .s-fim .s-h2{ max-width:16ch; margin-inline:auto }
+
+/* o quadro ao lado do texto (telas 2) e o bloco do Camp sem foto */
+.s .s-duas .s-quadro.v{ max-width:520px; justify-self:center }
+.s .s-so-texto{ max-width:900px; margin-inline:auto; text-align:center }
+.s .s-so-texto .s-chapeu{ justify-content:center; margin-bottom:clamp(14px,2vw,24px) }
+.s .s-so-texto .s-lead{ margin:clamp(16px,2.2vw,28px) auto 0 }
+.s .s-so-texto .s-acoes{ justify-content:center; margin-top:clamp(24px,3vw,40px) }
+
+@media(max-width:999px){
+  .s .s-dom{ grid-template-columns:1fr; gap:28px }
+  .s .s-dom-quadro{ justify-self:center; max-width:460px }
+  .s .s-num.so .s-vivos{ grid-template-columns:repeat(2,minmax(0,1fr)) }
+  .s .s-duas .s-quadro.v{ max-width:420px }
+}
+@media(max-width:759px){
+  .s .s-dom{ gap:18px }
+  .s .s-dom-quadro{ max-width:420px }
+  .s .s-dom-texto{ width:100%; max-width:420px; margin-inline:auto }
+  /* stories: quatro barrinhas, um capítulo por vez, todos na mesma célula */
+  .s .s-dom-barras{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px }
+  .s .s-dom-barras button{ position:relative; height:24px }
+  .s .s-dom-barras button::before,.s .s-dom-barras i{ content:""; position:absolute; left:0; right:0; top:50%; height:3px; margin-top:-1.5px; border-radius:2px }
+  .s .s-dom-barras button::before{ background:var(--s-linha-forte) }
+  .s .s-dom-barras i{ background:currentColor; transform-origin:0 50%; transition:transform .3s linear }
+  .s .s-dom-lista{ grid-template-columns:minmax(0,1fr) }
+  .s .s-dom-lista li{ grid-area:1 / 1; opacity:0; visibility:hidden; transition:opacity .35s var(--s-ease),visibility 0s .35s }
+  .s .s-dom-lista li.atual{ opacity:1; visibility:visible; transition:opacity .35s var(--s-ease) }
+  .s .s-dom-lista li > *,.s .s-dom-lista li:first-child > *{ display:block; padding:0; border:0 }
+  .s .s-dom.vivo .s-dom-lista li:not(.atual) > *{ opacity:1 }
+  .s .s-dom-lista small{ display:inline; margin-right:8px }
+  .s .s-dom-lista b{ display:inline; font-size:24px }
+  .s .s-dom-lista p{ margin-top:8px; font-size:17px }
+  .s .s-dom-linha{ display:none }
+  .s .s-num.so .s-vivos{ grid-template-columns:1fr; gap:26px }
+  .s .s-num.so .s-vivos li{ font-size:18px }
+  .s .s-num.so .s-vivos li b{ font-size:clamp(48px,15vw,64px); margin-bottom:8px }
+  .s .s-duas .s-quadro{ margin-inline:auto }
+}
+.s .s-fim .s-chapeu{ justify-content:center; margin-bottom:clamp(14px,2vw,24px) }
+
+/* a agenda do /eventos sem foto: o cartão ganha corpo de quadro de horários */
+.s .s-cartoes.agenda .s-cartao{ padding:clamp(34px,3.4vw,52px) clamp(22px,2.2vw,34px) clamp(28px,2.8vw,40px); gap:12px }
+.s .s-cartoes.agenda .s-cartao-t{ font-size:clamp(32px,3.2vw,48px) }
+.s .s-cartoes.agenda .s-cartao-n{ font-size:clamp(14px,1.1vw,16px) }
+.s .s-cartoes.agenda .s-cartao-d{ font-size:clamp(15.5px,1.25vw,18px); max-width:30ch }

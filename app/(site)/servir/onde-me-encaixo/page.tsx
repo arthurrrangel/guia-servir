@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, Img, Seta, fim, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Seta, fim, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo } from '@/components/site/Midia';
 import { Areas } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 
@@ -33,7 +34,8 @@ export default function OndeMeEncaixo() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: DUVIDAS.map(d => ({ '@type': 'Question', name: d.q, acceptedAnswer: { '@type': 'Answer', text: d.r.join(' ') } })) }} />
 
       <section className="s-heroi curto" aria-labelledby="t-enc">
-        <Img lugar="encaixe-heroi" prioridade retrato />
+        {/* um plano de cada área: a câmera, o palco, a Kids, a porta, a Bíblia */}
+        <Fundo video="encaixe" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-enc" className="s-h1" it="me encaixo">Não sei onde me encaixo</Vozes>

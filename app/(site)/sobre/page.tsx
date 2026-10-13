@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -40,7 +41,7 @@ export default function Sobre() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-sobre">
-        <Img lugar="sobre-heroi" prioridade retrato />
+        <Fundo video="sobre" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Quem somos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="uma nova cultura">Uma comunidade que cultiva uma nova cultura</Vozes>
@@ -120,17 +121,11 @@ export default function Sobre() {
         </div>
       </section>
 
-      <section className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho" retrato />
-        <div className="s-in">
-          <Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
-          <Vozes id="t-fim" className="s-h2 media" it="de perto">Conheça a GUIA de perto</Vozes>
-          <div className="s-acoes centro">
-            <Pil href="/cultos#como-chegar">Como chegar</Pil>
-            <Pil href="/cultos">Ver os cultos</Pil>
-          </div>
-        </div>
-      </section>
+      {/* depois do cartão na noite, o fecho vem no papel */}
+      <Fecho tom="papel" titulo="Conheça a GUIA de perto" it="de perto" chapeu={<Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />}>
+        <Pil href="/cultos#como-chegar" tom="preta">Como chegar</Pil>
+        <Pil href="/cultos" tom="contorno">Ver os cultos</Pil>
+      </Fecho>
     </>
   );
 }

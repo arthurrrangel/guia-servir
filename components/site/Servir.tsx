@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
 import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
-import { Img, Visto, Arroba, Vozes, Seta, fim, liga, ligaTexto } from './Blocos';
-import type { LugarDeFoto } from '@/lib/site/fotos';
+import { Visto, Arroba, Vozes, Seta, fim, liga, ligaTexto } from './Blocos';
+import { Quadro } from './Midia';
 import { Trilho } from './Trilho';
 
 /* =============================================================================
@@ -78,14 +78,16 @@ export function Numero({ campo }: { campo: keyof Numeros }) {
   const num = useNumeros();
   return <>{num[campo]}</>;
 }
-/* os dois círculos são da página: a home e a /servir não repetem foto */
-type Circulos = [LugarDeFoto, LugarDeFoto];
+/* os dois círculos (tela 3 do PDF) são vídeos: o louvor e a voluntária de
+   colete na porta. A home não leva círculo (`false`): os números sozinhos,
+   grandes, em quatro colunas (13/10/2026, menos foto) */
+type Circulos = [string, string] | false;
 export function NumerosFaixa({ circulos }: { circulos?: Circulos }) {
   const num = useNumeros();
   return <NumerosVivos num={num} circulos={circulos} />;
 }
 
-export function NumerosVivos({ num, circulos = ['home-circulo-1', 'home-circulo-2'] }: { num: Numeros; circulos?: Circulos }) {
+export function NumerosVivos({ num, circulos = ['circ-louvor', 'circ-colete'] }: { num: Numeros; circulos?: Circulos }) {
   const faixa = useRef<HTMLDivElement>(null);
   const [ativo, setAtivo] = useState(false);
   useEffect(() => {
@@ -100,11 +102,13 @@ export function NumerosVivos({ num, circulos = ['home-circulo-1', 'home-circulo-
   const postos = useContagem(num.postos, ativo);
   const cultos = useContagem(num.cultos_no_mes, ativo);
   return (
-    <div ref={faixa} className="s-num">
-      <div className="s-circs s-rev" aria-hidden="true">
-        <div className="s-circ a"><Img lugar={circulos[0]} sizes="(max-width: 999px) 70vw, 32vw" /></div>
-        <div className="s-circ b"><Img lugar={circulos[1]} sizes="(max-width: 999px) 60vw, 28vw" /></div>
-      </div>
+    <div ref={faixa} className={'s-num' + (circulos ? '' : ' so')}>
+      {circulos && (
+        <div className="s-circs s-rev" aria-hidden="true">
+          <div className="s-circ a"><Quadro video={circulos[0]} formato="q" /></div>
+          <div className="s-circ b"><Quadro video={circulos[1]} formato="q" /></div>
+        </div>
+      )}
       <div className="s-dir s-rev d1">
         <Arroba className="dir" />
         <Vozes className="s-h2 media">Números vivos</Vozes>

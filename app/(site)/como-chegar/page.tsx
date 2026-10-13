@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS, textoDoModo } from '@/lib/chegar';
-import { Vozes, Sede, Chapeu, Pil, Img, fim, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Img, Fecho, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 
@@ -75,17 +75,10 @@ export default function ComoChegar() {
         </div>
       </section>
 
-      <section id="conversa" className="s-fecho s-rev" aria-labelledby="t-fim">
-        <Img lugar="fecho-maos" retrato />
-        <div className="s-in">
-          <Vozes id="t-fim" className="s-h2 media" it="domingo">O que esperar de um domingo</Vozes>
-          <p className="s-lead">{ligaTexto("Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.")}</p>
-          <div className="s-acoes centro">
-            <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href={conversa.href} fora>Falar no WhatsApp</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho id="conversa" titulo="O que esperar de um domingo" it="domingo" lead="Louvor, Palavra e café. Se é a sua primeira vez, diga na porta.">
+        <Pil href="/cultos">Ver os cultos</Pil>
+        <Pil href={conversa.href} fora>Falar no WhatsApp</Pil>
+      </Fecho>
     </>
   );
 }
