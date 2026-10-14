@@ -4,10 +4,9 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, fim, liga, ligaTexto } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, UmaLinha, fim, liga, ligaTexto } from './Blocos';
 import { Fundo } from './Midia';
 import { FormServir } from './Servir';
-import { Trilho } from './Trilho';
 
 /* =============================================================================
    /servir/<área> — A PÁGINA DA ÁREA · 11/10/2026
@@ -21,6 +20,10 @@ import { Trilho } from './Trilho';
 
    O vídeo não espera o banco: vem do slug, e o herói nasce com o pôster
    dele (13/10/2026: cada área tem o seu trecho dos vídeos da igreja).
+
+   14/10/2026, no celular: as funções em lista (o nome e os postos numa
+   linha, a primeira frase embaixo; o carrossel mostrava uma de oito) e uma
+   frase sob cada título. O computador segue com os cartões.
    ============================================================================= */
 
 type Min = { slug: string; nome: string; descricao: string | null; convite: string | null; postos: number; aberto: boolean; artigo: string; responsavel?: string | null; whatsapp?: string | null };
@@ -144,22 +147,22 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-funcoes" className="s-h2" it={nome} semPonto>{`O que se faz ${artigo} ${nome}`}</Vozes>
-            <p className="s-lead">{ligaTexto("Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar.")}</p>
+            <p className="s-lead"><UmaLinha semFim texto="Você escolhe as suas no cadastro, até o que ainda não sabe fazer. Tem gente pra ensinar." /></p>
           </div>
           {fase === 'carregando' && <p className="s-aviso s-centro" role="status">Carregando as funções…</p>}
           {fase === 'rede' && <p className="s-aviso s-centro" role="status">Sem conexão agora. Atualize a página pra ver as funções.</p>}
           {fase === 'pronto' && (
             <div className="s-rev d1">
-              <Trilho className="s-funcoes" rotulo={`As funções ${artigo} ${nome}`}>
+              <div className="s-funcoes lista" role="group" aria-label={`As funções ${artigo} ${nome}`}>
                 {grupos.map(([fam, g], i) => (
                   <div key={fam} className="s-funcao">
                     <small>{String(i + 1).padStart(2, '0')}</small>
                     <b>{fam}</b>
-                    <p>{ligaTexto(g.texto || 'A liderança explica no primeiro contato.')}</p>
+                    <p><UmaLinha semFim texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
                     {g.vagas > 1 && <em>{g.vagas} postos</em>}
                   </div>
                 ))}
-              </Trilho>
+              </div>
             </div>
           )}
         </div>
@@ -173,7 +176,7 @@ export default function Area() {
             <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
           </ol>
         </div>
       </section>
@@ -199,7 +202,7 @@ export default function Area() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="aqui">Existe um lugar para você aqui</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>{fim(ligaTexto(fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'))}</p>
+            <p className="s-lead grande" style={{ marginTop: 22 }}><UmaLinha texto={fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'} /></p>
             {!aberto && <p className="s-aviso">Essa área conversa com cada pessoa antes de escalar: você preenche o cadastro e a liderança fala com você.</p>}
           </div>
           <div className="s-rev d1"><FormServir areaInicial={slug} /></div>

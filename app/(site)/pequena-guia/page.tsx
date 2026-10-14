@@ -3,7 +3,7 @@ import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
@@ -15,6 +15,12 @@ import { Schema } from '@/components/site/Schema';
    como funciona (em passos) · encontre a sua (o formulário, no cartão
    claro) · o fecho. O formulário grava numa planilha da igreja pela rota
    /api/pequena-guia e abre a conversa com a mensagem pronta.
+
+   14/10/2026, no celular: uma frase sob cada título, e o fecho sai (ele
+   pedia "diga onde você mora" logo depois do formulário que pede isso); o
+   "Prefiro conversar direto" dele desce para baixo do formulário. Os grupos
+   seguem no trilho: ali ele é a lista do mapa (o pino tocado traz o cartão),
+   e o mapa mostra os doze de uma vez.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -58,7 +64,7 @@ export default function PequenaGuia() {
           <Arroba className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-grupos" className="s-h2" it="você">Uma perto de você</Vozes>
-            <p className="s-lead">{ligaTexto("Escolha o dia que você pode. O mapa mostra onde cada grupo se reúne (a região, nunca a casa de ninguém).")}</p>
+            <p className="s-lead"><UmaLinha semFim texto="Escolha o dia que você pode. O mapa mostra onde cada grupo se reúne (a região, nunca a casa de ninguém)." /></p>
           </div>
           <div className="s-rev d1"><Grupos /></div>
         </div>
@@ -71,7 +77,7 @@ export default function PequenaGuia() {
             <p className="s-serifa it">{liga("uma noite por semana, em 4 momentos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -84,12 +90,14 @@ export default function PequenaGuia() {
             <h2 id="t-encontrar" className="s-h2 menor">{liga("Encontre uma Pequena Guia perto de você.")}</h2>
             <p className="s-lead">{ligaTexto("Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.")}</p>
             <div style={{ marginTop: 'clamp(24px,3vw,40px)', textAlign: 'left' }}><FormPequenaGuia /></div>
+            {/* no celular o fecho sai; a conversa direta, que só ele tinha, fica aqui */}
+            <p className="s-aviso so-celular">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
           </div>
         </div>
       </section>
 
-      {/* depois do formulário na noite, o fecho vem no papel */}
-      <Fecho tom="papel" titulo="Diga onde você mora. A gente diz qual fica perto" it="perto">
+      {/* depois do formulário na noite, o fecho vem no papel (no computador) */}
+      <Fecho tom="papel" titulo="Diga onde você mora. A gente diz qual fica perto" it="perto" soLargo>
         <Pil href="#encontrar" tom="preta">Encontrar a minha</Pil>
         <Pil href={conversa.href} fora tom="contorno">Prefiro conversar direto</Pil>
       </Fecho>

@@ -10,6 +10,8 @@
    A busca (lupa) procura nesta mesma lista mais os atalhos de BUSCA, que
    são perguntas que a pessoa digita ("horário", "estacionamento", "pix").
    ============================================================================= */
+import { IGREJA } from '@/lib/igreja';
+
 export type Item = { rot: string; href: string; sub?: string; duro?: boolean };
 export type Grupo = { rot: string; href: string; itens: Item[] };
 
@@ -39,6 +41,24 @@ export const MENU: Grupo[] = [
     { rot: 'Ofertar', href: '/ofertar', sub: 'Pix, cartão, Apple Pay e Google Pay' },
     { rot: 'Por que ofertamos', href: '/ofertar#porque', sub: 'Generosidade é um dos três pilares' },
   ] },
+];
+
+/* O MENU DO CELULAR · 14/10/2026
+   A cortina repetia os cinco grupos da barra: 1.819 px numa janela de 600
+   (três telas de rolagem), 22 links para 12 destinos (o rótulo do grupo e o
+   primeiro item iam para a mesma página) e 15 subtítulos. Servir, PGs e
+   Ofertar só apareciam depois de rolar. No celular o menu é a lista dos
+   destinos, numa tela: o fato ao lado só onde ele é fato (a hora). Os grupos
+   da apresentação continuam na barra do computador (MENU, acima). */
+export const MENU_CELULAR: Item[] = [
+  { rot: 'Cultos', href: '/cultos', sub: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}` },
+  { rot: 'Eventos', href: '/eventos', sub: IGREJA.followHora ? `Follow aos sábados, ${IGREJA.followHora}` : 'Follow e Camp' },
+  { rot: 'Pequena Guia', href: '/pequena-guia' },
+  { rot: 'Servir', href: '/servir' },
+  { rot: 'Ofertar', href: '/ofertar' },
+  { rot: 'Quem somos', href: '/sobre' },
+  { rot: 'Ao vivo', href: '/cultos#ao-vivo' },
+  { rot: 'Como chegar', href: '/como-chegar' },
 ];
 
 /* o que a busca encontra além do menu: a pergunta como a pessoa digita */

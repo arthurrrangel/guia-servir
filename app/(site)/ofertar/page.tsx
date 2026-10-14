@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
-import { Vozes, Sede, Chapeu, Pil, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
@@ -12,6 +12,7 @@ import { Schema } from '@/components/site/Schema';
    herói · o formulário (components/Ofertar.tsx, a lógica de Pix e cartão
    de sempre, no desenho daqui) · por que ofertamos (em passos) · o fecho.
    Nada aqui é cobrança: visitante vem pra receber.
+   14/10/2026, no celular: cada razão com a primeira frase.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -62,7 +63,7 @@ export default function Pagina() {
             <p className="s-serifa it">{liga("três razões, nenhuma cobrança:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
+            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
           </ol>
           <Sede className="base" />
         </div>

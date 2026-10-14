@@ -56,6 +56,24 @@ export const Sep = () => <span className="s-sep"> · </span>;
 /* PALAVRA COM HÍFEN INTEIRA: "e-mail" não parte em "e-" / "mail" */
 export const inteiro = (t: string) => t.replace(/(\p{L})-(?=\p{L})/gu, '$1-\u2060');
 
+/* UMA LINHA NO CELULAR · 14/10/2026
+   A regra do Arthur de 11/10 (título + uma linha; cartão = título + uma
+   frase) tinha se perdido quando o site foi refeito do zero na mesma noite:
+   24 de 26 cartões e metade das faixas voltaram a ter parágrafo. No celular
+   ela volta sem mexer no computador (o computador segue o PDF): a primeira
+   frase fica, o resto vai num .s-resto, que some abaixo de 760 px. O texto
+   inteiro continua no HTML, para o computador, o Google e o leitor de tela
+   do computador. Sem frase seguinte, sai o texto como era. */
+export const primeiraFrase = (t: string): [string, string] => {
+  const m = t.match(/^([\s\S]*?[.!?…])\s+(\S[\s\S]*)$/);
+  return m ? [m[1], m[2].trim()] : [t, ''];
+};
+export function UmaLinha({ texto, semFim }: { texto: string; semFim?: boolean }) {
+  const [a, b] = primeiraFrase(texto);
+  if (!b) return <>{semFim ? ligaTexto(a) : fim(ligaTexto(a))}</>;
+  return <>{ligaTexto(a)}<span className="s-resto"> {semFim ? ligaTexto(b) : fim(ligaTexto(b))}</span></>;
+}
+
 /* O TÍTULO EM DUAS VOZES: a grotesca pesada e a última palavra (ou as
    últimas, com `it`) em serifa itálica, que ganha o ponto pelo CSS. A copy
    fica inteira no HTML, sem o ponto, e o leitor de tela lê a frase. */
@@ -200,16 +218,16 @@ export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
    (menos foto, pedido do Arthur) é a faixa com grão e a frase, como o fim
    da home. Na noite por padrão; depois de outra faixa escura, papel (as
    pílulas da página vêm pretas). */
-export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id }:
-  { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia'; id?: string }) {
+export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo }:
+  { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia'; id?: string; soLargo?: boolean }) {
   return (
-    <section id={id} className={`s-faixa ${tom} s-grao s-fim`} aria-labelledby="t-fim">
+    <section id={id} className={`s-faixa ${tom} s-grao s-fim${soLargo ? ' so-largo' : ''}`} aria-labelledby="t-fim">
       <div className="s-in s-centro">
         <Sede className="topo" />
         <div className="s-rev">
           {chapeu}
           <Vozes id="t-fim" className="s-h2 media" it={it}>{titulo}</Vozes>
-          {lead && <p className="s-lead grande">{ligaTexto(lead)}</p>}
+          {lead && <p className="s-lead grande"><UmaLinha texto={lead} semFim /></p>}
         </div>
         <div className="s-acoes centro s-rev d1">{children}</div>
       </div>

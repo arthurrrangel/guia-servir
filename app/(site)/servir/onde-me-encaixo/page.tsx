@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, Seta, fim, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Seta, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import { Areas } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
@@ -13,6 +13,9 @@ import { Schema } from '@/components/site/Schema';
    "Não sei onde me encaixo" é a resposta mais comum de quem quer servir.
    Esta página responde em três perguntas abertas, mostra o trabalho de
    cada área (não o nome do time) e tira o medo de escolher errado.
+   14/10/2026, no celular: as cinco áreas em lista, cada uma com para quem
+   ela é (a lista de perfis embaixo repetia as cinco e sai), e uma frase sob
+   cada título.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -39,7 +42,7 @@ export default function OndeMeEncaixo() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-enc" className="s-h1" it="me encaixo">Não sei onde me encaixo</Vozes>
-          <p className="s-lead grande">{ligaTexto("É a resposta mais comum. E tem um caminho: três perguntas, cinco áreas e uma conversa.")}</p>
+          <p className="s-lead grande"><UmaLinha semFim texto="É a resposta mais comum. E tem um caminho: três perguntas, cinco áreas e uma conversa." /></p>
           <div className="s-acoes">
             <Pil href="#areas">Ver o que se faz em cada área</Pil>
             <Pil href="/servir#quero-servir">Deixar a liderança me ajudar</Pil>
@@ -68,10 +71,10 @@ export default function OndeMeEncaixo() {
         <div className="s-in">
           <div className="s-cab centro s-rev">
             <Vozes id="t-areas" className="s-h2 media" it="time">O trabalho, não o nome do time</Vozes>
-            <p className="s-lead">{ligaTexto("Com as palavras de quem lidera cada área. Clique numa pra ver as funções.")}</p>
+            <p className="s-lead"><span className="s-resto">{ligaTexto("Com as palavras de quem lidera cada área.")} </span>{ligaTexto("Clique numa pra ver as funções.")}</p>
           </div>
-          <div className="s-rev d1"><Areas /></div>
-          <ul className="s-faq s-rev" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
+          <div className="s-rev d1"><Areas perfil /></div>
+          <ul className="s-faq s-rev so-largo" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             {AREAS_ORDEM.map(s => <li key={s}><p><b>{AREAS[s].nome}.</b> {ligaTexto(AREAS[s].perfil ?? "")} <Link href={`/servir/${s}`} className="s-link">Ver as funções</Link></p></li>)}
           </ul>
         </div>
@@ -82,7 +85,7 @@ export default function OndeMeEncaixo() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-duas" className="s-h2" it="duas">Em dúvida entre duas? Escolha qualquer uma das duas</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>{ligaTexto("A conversa com a liderança existe pra isso, e mudar depois é simples. O que custa caro é ficar parado.")}</p>
+            <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha semFim texto="A conversa com a liderança existe pra isso, e mudar depois é simples. O que custa caro é ficar parado." /></p>
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             <Pil href="/servir#quero-servir">Quero servir <Seta /></Pil>

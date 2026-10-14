@@ -82,8 +82,11 @@ const medir = (TOL) => {
   const paiRola = (p) => { const s = getComputedStyle(p); return s.overflowX !== 'visible'; };
 
   /* 1. a coluna da página: bordas dos blocos dentro de cada .s-in */
+  /* 14/10/2026: só a coluna que aparece. Faixa escondida no celular
+     (.so-largo) tem caixa 0 × 0 em x=0, e entrava como "fora da coluna" */
   const esq = [], dir = [];
   document.querySelectorAll('.s-in').forEach(caixa => {
+    if (!vis(caixa)) return;
     const rc = caixa.getBoundingClientRect();
     esq.push(Math.round(rc.left)); dir.push(Math.round(rc.right));
   });
@@ -93,6 +96,7 @@ const medir = (TOL) => {
 
   const fora = [];
   document.querySelectorAll('.s-in').forEach(caixa => {
+    if (!vis(caixa)) return;
     const r = caixa.getBoundingClientRect();
     if (colEsq !== null && Math.abs(r.left - colEsq) > TOL) fora.push(`${nome(caixa)} esq=${Math.round(r.left)} (coluna ${colEsq})`);
     if (colDir !== null && Math.abs(r.right - colDir) > TOL) fora.push(`${nome(caixa)} dir=${Math.round(r.right)} (coluna ${colDir})`);
@@ -210,6 +214,9 @@ const medir = (TOL) => {
     if (!vis(e)) return;
     const r = e.getBoundingClientRect();
     if (e.closest('.s-prosa, p, li')) return;
+    /* a atribuição do mapa (Leaflet, OpenStreetMap) é exigida pela licença,
+       não é navegação: a WCAG 2.5.8 dispensa o alvo que a lei define */
+    if (e.closest('.leaflet-control-attribution')) return;
     if (r.height < 40) toque.push(`${nome(e)} h=${r.height.toFixed(0)} "${txt(e)}"`);
   });
 

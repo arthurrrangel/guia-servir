@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import { Fundo, Quadro } from '@/components/site/Midia';
@@ -17,6 +17,11 @@ import { Fundo, Quadro } from '@/components/site/Midia';
 
    O que é vivo vem do banco (números e postos); o formulário do fim guarda
    o rascunho e leva ao cadastro da área (components/site/Servir.tsx).
+
+   14/10/2026, no celular: as nove telas continuam, na ordem do PDF; o texto
+   de cada uma fica com a primeira frase (a regra de 11/10), as cinco áreas
+   viram lista (e "Ver todas as áreas" sai: estão todas na tela), os números
+   ficam dois a dois e "Seu espaço" fica com a frase e o botão.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -80,8 +85,8 @@ export default function Servir() {
           <div className="s-duas">
             <div className="s-rev">
               <Vozes className="s-h2 media">Deus se alegra com o seu servir</Vozes>
-              <p className="s-lead">{ligaTexto("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
-              <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes. É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</p>
+              <p className="s-lead so-largo">{ligaTexto("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
+              <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes.<span className="s-resto"> É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</span></p>
             </div>
             {/* o abraço da tela 2 do PDF, agora o próprio vídeo do abraço */}
             <Quadro video="abraco" className="s-rev d1" />
@@ -101,11 +106,12 @@ export default function Servir() {
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
             <Vozes id="t-areas" className="s-h2">Escolha por onde começar</Vozes>
-            <p className="s-lead">{ligaTexto("Você escolhe as funções no cadastro. Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar, porque dom também se discipula.")}</p>
+            <p className="s-lead"><UmaLinha semFim texto="Você escolhe as funções no cadastro. Pode marcar até o que ainda não sabe fazer: tem gente pra ensinar, porque dom também se discipula." /></p>
           </div>
           <div className="s-rev d1"><Areas /></div>
           <div className="s-acoes centro s-cartoes-acoes s-rev">
-            <Pil href="/servir/onde-me-encaixo#areas" tom="preta">Ver todas as áreas</Pil>
+            {/* no celular as cinco estão na lista logo acima */}
+            <Pil href="/servir/onde-me-encaixo#areas" tom="preta" className="so-largo">Ver todas as áreas</Pil>
             <Pil href="/servir/onde-me-encaixo" tom="preta">Não sei qual é a minha</Pil>
           </div>
         </div>
@@ -119,7 +125,7 @@ export default function Servir() {
             <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
+            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
           </ol>
           <Sede className="base" />
         </div>
@@ -131,8 +137,8 @@ export default function Servir() {
           <div className="s-claro s-rev">
             <Sede />
             <h2 id="t-espaco" className="s-h2 menor">{liga("Seu espaço tem sua escala, seus dias e seu líder.")}</h2>
-            <p className="s-lead">{ligaTexto("Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza.")}</p>
-            <div className="s-qa">
+            <p className="s-lead"><UmaLinha semFim texto="Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza." /></p>
+            <div className="s-qa so-largo">
               <div><b>Ainda não tem PIN?</b><p>{ligaTexto('Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.')}</p></div>
               <div><b>Ainda não serve?</b><p>O primeiro passo está logo acima.</p></div>
             </div>
@@ -147,7 +153,7 @@ export default function Servir() {
         <div className="s-in">
           <div className="s-rev">
             <h2 id="t-obj" className="s-h2 minima">Ninguém aqui começou sabendo.</h2>
-            <p className="s-lead grande" style={{ marginTop: 18 }}>{ligaTexto("Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:")}</p>
+            <p className="s-lead grande" style={{ marginTop: 18 }}><UmaLinha semFim texto="Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:" /></p>
           </div>
           <div className="s-rev d1"><Perguntas itens={OBJECOES} forma="obj" /></div>
         </div>
@@ -168,7 +174,7 @@ export default function Servir() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {ligaTexto('Um deles pode ser o seu. Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</p>
+            <p className="s-lead grande" style={{ marginTop: 22 }}>O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {ligaTexto('Um deles pode ser o seu.')}<span className="s-resto"> {ligaTexto('Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</span></p>
           </div>
           <div className="s-rev d1"><FormServir /></div>
           <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Prefere escolher a área com calma? <Link href="/servir/onde-me-encaixo" className="s-link claro">Não sei onde me encaixo</Link>.</p>

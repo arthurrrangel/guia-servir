@@ -78,7 +78,11 @@ try {
      mesmo enquanto a régua de verdade ficava sem prova. Agora: o texto do
      rodapé (`.s-pe-marca .s-corpo`), o rótulo em caixa alta dos cartões
      (`.s-cartao-n`; os do rodapé somem no celular, e a medida, com razão, não
-     mede o que não aparece) e o botão em pílula (`.s-pil`). */
+     mede o que não aparece) e o botão em pílula (`.s-pil`).
+
+     14/10/2026 · no celular o /acessar virou lista e o número dos caminhos
+     (01, 02, 03) saiu da tela: o estrago do rótulo vai para a home, onde o
+     rótulo em caixa alta da lista ("DOMINGO, 10H") está à vista. */
   const estragos = [
     {
       por: 'frase de 10px',
@@ -88,12 +92,12 @@ try {
     {
       por: 'rótulo abaixo do piso da casa (9px)',
       css: '.s .s-cartao-n{ font-size:9px!important }',
-      balde: 'miudos', rota: '/acessar',
+      balde: 'miudos', rota: '/',
     },
     {
       por: 'etiqueta em caixa alta mas sem espaçamento',
       css: '.s .s-cartao-n{ font-size:11px!important; letter-spacing:normal!important }',
-      balde: 'miudos', rota: '/acessar',
+      balde: 'miudos', rota: '/',
     },
     {
       por: 'botão de 30px de altura',

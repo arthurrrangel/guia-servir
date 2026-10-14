@@ -2,9 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo, Quadro } from '@/components/site/Midia';
-import { Trilho } from '@/components/site/Trilho';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -15,6 +14,8 @@ import ProximoCulto from '@/components/site/ProximoCulto';
    página: o que acontece na semana (Celebração, Follow, Pequenas Guias) e
    o que acontece no ano (Follow Camp 2027). Datas que mudam vivem em
    lib/igreja.ts e lib/pequenas-guias.ts; esta página só as mostra.
+   14/10/2026, no celular: a agenda em lista (o dia e a hora na linha do
+   nome, uma frase embaixo) e uma frase sob cada título.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -64,15 +65,15 @@ export default function Eventos() {
             <p className="s-lead">{ligaTexto("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
           </div>
           <div className="s-rev d1">
-            <Trilho className="s-cartoes tres agenda" rotulo="A agenda da semana">
+            <div className="s-cartoes tres agenda lista" role="group" aria-label="A agenda da semana">
               {/* sem foto (13/10/2026): o dia e a hora são o assunto da agenda */}
               {AGENDA.map(a => {
-                const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d">{ligaTexto(a.d)}</span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
+                const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d"><UmaLinha texto={a.d} semFim /></span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
                 return a.href.startsWith('#')
                   ? <a key={a.t} href={a.href} className="s-cartao">{miolo}</a>
                   : <Link key={a.t} href={a.href} className="s-cartao">{miolo}</Link>;
               })}
-            </Trilho>
+            </div>
           </div>
         </div>
       </section>
@@ -85,7 +86,7 @@ export default function Eventos() {
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
-              <p className="s-lead">{ligaTexto("Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está.")}</p>
+              <p className="s-lead"><UmaLinha semFim texto="Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está." /></p>
               <div className="s-acoes" style={{ marginTop: 26 }}>
                 <Pil href="/cultos#como-chegar">Como chegar</Pil>
                 <Pil href={IGREJA.instagram} fora>{IGREJA.instagramArroba}</Pil>
@@ -102,7 +103,7 @@ export default function Eventos() {
           <div className="s-so-texto s-rev">
             <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
             <Vozes className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
-            <p className="s-lead">{ligaTexto("O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.")}</p>
+            <p className="s-lead"><UmaLinha semFim texto="O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro." /></p>
             <div className="s-acoes">
               <Pil href="/followcamp" duro tom="preta">Ir para a página do Camp</Pil>
             </div>

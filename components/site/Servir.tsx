@@ -5,9 +5,8 @@ import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
 import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
-import { Visto, Arroba, Vozes, Seta, fim, liga, ligaTexto } from './Blocos';
+import { Visto, Arroba, Vozes, Seta, UmaLinha, fim, liga, ligaTexto } from './Blocos';
 import { Quadro } from './Midia';
-import { Trilho } from './Trilho';
 
 /* =============================================================================
    AS PEÇAS VIVAS DA /servir · 11/10/2026
@@ -113,18 +112,24 @@ export function NumerosVivos({ num, circulos = ['circ-louvor', 'circ-colete'] }:
         <Arroba className="dir" />
         <Vozes className="s-h2 media">Números vivos</Vozes>
         <ul className="s-vivos">
-          <li><span><b>{pessoas}</b> {fim(ligaTexto('pessoas servindo. Cada uma começou sem saber fazer nada.'))}</span><Visto /></li>
-          <li><span><b>{areas}</b> {fim(ligaTexto('áreas abertas. Uma delas tem a sua cara.'))}</span><Visto /></li>
-          <li><span><b>{postos}</b> {fim(ligaTexto('postos na escala. E sempre cabe mais um.'))}</span><Visto /></li>
-          <li><span><b>{cultos}</b> {fim(ligaTexto('encontros no mês. Servir aqui é comunhão, não plantão solitário.'))}</span><Visto /></li>
+          {/* no celular o número fica só com o rótulo (a regra de 11/10:
+              "números só com rótulo"); a frase segue no computador */}
+          <li><span><b>{pessoas}</b> <UmaLinha texto="pessoas servindo. Cada uma começou sem saber fazer nada." /></span><Visto /></li>
+          <li><span><b>{areas}</b> <UmaLinha texto="áreas abertas. Uma delas tem a sua cara." /></span><Visto /></li>
+          <li><span><b>{postos}</b> <UmaLinha texto="postos na escala. E sempre cabe mais um." /></span><Visto /></li>
+          <li><span><b>{cultos}</b> <UmaLinha texto="encontros no mês. Servir aqui é comunhão, não plantão solitário." /></span><Visto /></li>
         </ul>
       </div>
     </div>
   );
 }
 
-/* os cinco cartões, com o número de postos vindo do banco */
-export function Areas({ compacto }: { compacto?: boolean }) {
+/* os cinco cartões, com o número de postos vindo do banco. No computador,
+   os cartões pretos da tela 4; no celular (14/10/2026), uma lista: o nome e
+   os postos numa linha, a frase embaixo. Com `perfil` (onde me encaixo), a
+   linha do celular é para quem a área é ("Pra quem gosta de gente."), que é
+   a pergunta de quem não sabe escolher. */
+export function Areas({ compacto, perfil }: { compacto?: boolean; perfil?: boolean }) {
   const [postos, setPostos] = useState<Record<string, { postos: number; aberto: boolean }>>({});
   const [extras, setExtras] = useState<Min[]>([]);
   const [rede, setRede] = useState(false);
@@ -150,6 +155,7 @@ export function Areas({ compacto }: { compacto?: boolean }) {
         <span className="s-cartao-t">{a.nome}</span>
         <span className="s-cartao-n">{dois(p)} {p === 1 ? 'posto' : 'postos'}</span>
         {!aberto && <span className="s-cartao-tag">conversa antes</span>}
+        {perfil && a.perfil && <span className="s-cartao-p">{ligaTexto(a.perfil)}</span>}
         <span className="s-cartao-f">{liga(a.frase)}</span>
         {!compacto && <span className="s-cartao-d">{fim(ligaTexto(a.texto))}</span>}
         <span className="s-cartao-ir">Escolher esta área <Seta /></span>
@@ -158,10 +164,10 @@ export function Areas({ compacto }: { compacto?: boolean }) {
   };
   return (
     <>
-      <Trilho className={'s-cartoes' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')} rotulo="As áreas">
+      <div className={'s-cartoes lista' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')} role="group" aria-label="As áreas">
         {AREAS_ORDEM.map(slug => cartao(slug, AREAS[slug]))}
         {extras.map(x => cartao(x.slug, { nome: x.nome, postos: x.postos, aberto: x.aberto, frase: x.descricao || '', texto: '', linha: '', artigo: x.artigo as Area['artigo'] }, x))}
-      </Trilho>
+      </div>
       {rede && <p className="s-aviso" role="status">Sem conexão agora: os postos acima são os últimos conhecidos.</p>}
     </>
   );

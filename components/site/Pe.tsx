@@ -7,13 +7,9 @@ import { Sede, Sep } from './Blocos';
 /* =============================================================================
    O PÉ — a marca, a frase, o endereço e os cinco grupos do menu · 11/10/2026
    O pé usa a mesma lista da barra (lib/site/nav.ts): um link novo entra nos
-   dois de uma vez.
+   dois de uma vez. No celular ficam só horário, endereço, mapa e os links
+   de baixo (14/10/2026).
    ============================================================================= */
-const ATALHOS: Array<[string, string]> = [
-  ['Quem somos', '/sobre'], ['Cultos', '/cultos'], ['Como chegar', '/como-chegar'], ['Agenda', '/eventos'],
-  ['Quero servir', '/servir'], ['Pequena Guia', '/pequena-guia'], ['Ofertar', '/ofertar'],
-];
-
 export default function Pe() {
   const conversa = canalDeConversa();
   const ano = new Date().getFullYear();
@@ -47,12 +43,10 @@ export default function Pe() {
             </nav>
           ))}
         </div>
-        {/* no celular os cinco grupos (22 links em duas colunas centralizadas,
-            ~900 px) dão lugar a uma linha de atalhos: o mapa inteiro do site
-            continua no menu, a um toque, no alto da tela */}
-        <nav className="s-pe-atalhos" aria-label="Atalhos">
-          {ATALHOS.map(([rot, href]) => <Link key={href} href={href}>{rot}</Link>)}
-        </nav>
+        {/* no celular (14/10/2026) o pé é só o que não está no menu: horário,
+            endereço, mapa e os links de baixo. Os grupos, a marca, a frase e
+            os sete atalhos saíram: o menu inteiro está a um toque, no topo
+            fixo, e o pé ocupava uma tela inteira (661 px) em toda página */}
         <div className="s-pe-fim">
           <span>© {ano} {IGREJA.nome}</span>
           <Sede />

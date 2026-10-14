@@ -2,7 +2,7 @@
 import { useCallback, useRef, useState } from 'react';
 import gerado from '@/lib/site/videos.gerado.json';
 import { Video } from './Video';
-import { ligaTexto } from './Blocos';
+import { UmaLinha } from './Blocos';
 
 /* =============================================================================
    COMO É UM DOMINGO · 13/10/2026
@@ -23,6 +23,9 @@ import { ligaTexto } from './Blocos';
    (scripts/site-videos.py grava ao montar o trecho). Sem vídeo (reduzir
    movimento, economia de dados), fica o pôster. A home usa a forma curta;
    o /cultos, a com horário.
+
+   14/10/2026: no celular cada capítulo fica com a primeira frase (o resto
+   segue na lista do computador); as barrinhas têm 44 px de toque.
    ============================================================================= */
 
 type Item = { n: string; t: string; d: string };
@@ -79,7 +82,7 @@ export function Domingo({ itens, rotulo }: { itens: ReadonlyArray<Item>; rotulo:
               <>
                 <small>{it.n}</small>
                 <b>{it.t}</b>
-                <p>{ligaTexto(it.d)}</p>
+                <p><UmaLinha texto={it.d} semFim /></p>
                 <i className="s-dom-linha" aria-hidden="true" style={vivo && atual ? { transform: `scaleX(${prog})` } : undefined} />
               </>
             );

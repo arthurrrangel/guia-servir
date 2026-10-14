@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { SITE_IGREJA as SITE } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Seta, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 
 /* =============================================================================
@@ -8,6 +8,10 @@ import { Fundo } from '@/components/site/Midia';
    Três caminhos, nenhum pede cadastro: o voluntário (/eu), a organização
    (/entrar) e quem ainda não serve (/servir). Tudo que é sistema fica do
    outro lado dessas portas; esta página só aponta.
+   14/10/2026, no celular: os três caminhos cabem na primeira tela (eram de
+   588 a 1.391 px, com a primeira tela só de título): herói mais baixo, sem
+   o segundo título ("Escolha o seu caminho" repetia o "Três caminhos" do
+   herói) e cada caminho numa linha, com o que ele abre embaixo.
    ============================================================================= */
 export const metadata: Metadata = {
   title: 'Acesso às equipes',
@@ -31,7 +35,7 @@ const DUVIDAS = [
 export default function Acessar() {
   return (
     <>
-      <section className="s-heroi curto" aria-labelledby="t-ac">
+      <section className="s-heroi curto porta" aria-labelledby="t-ac">
         <Fundo video="acessar" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
@@ -40,20 +44,20 @@ export default function Acessar() {
         </div>
       </section>
 
-      <section className="s-faixa papel" aria-labelledby="t-portas">
+      <section className="s-faixa papel curta-celular" aria-labelledby="t-portas">
         <div className="s-in">
           <Sede className="topo" />
-          <div className="s-cab centro s-rev">
+          <div className="s-cab centro s-rev so-largo">
             <Vozes id="t-portas" className="s-h2 media" it="caminho">Escolha o seu caminho</Vozes>
           </div>
-          <div className="s-cartoes tres s-rev d1">
+          <div className="s-cartoes tres lista sem-n s-rev d1" role="group" aria-label="Os três caminhos">
             {PORTAS.map(p => (
               <a key={p.href} href={p.href} className="s-cartao">
                 <span className="s-cartao-n">{p.n}</span>
-                <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{p.t}</span>
+                <span className="s-cartao-t medio">{p.t}</span>
                 <span className="s-cartao-f">{liga(p.f)}</span>
                 <span className="s-cartao-d">{fim(ligaTexto(inteiro(p.d)))}</span>
-                <span className="s-cartao-ir">Entrar</span>
+                <span className="s-cartao-ir">Entrar <Seta /></span>
               </a>
             ))}
           </div>

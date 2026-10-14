@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
@@ -11,6 +11,8 @@ import { Schema } from '@/components/site/Schema';
    A identidade da igreja na forma da apresentação: herói · mais do que um
    lugar para frequentar · somos GUIA (a sigla) · o versículo · os pilares
    (em passos) · o alvo (de → para, no cartão claro) · conheça de perto.
+   14/10/2026, no celular: uma frase sob cada título; o "não queremos encher
+   bancos" sai do começo porque o alvo, mais embaixo, diz o mesmo.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -60,7 +62,7 @@ export default function Sobre() {
             <div className="s-rev">
               <Vozes className="s-h2 media" it="para frequentar">Mais do que um lugar para frequentar</Vozes>
               <p className="s-lead">{ligaTexto("Acreditamos que a igreja é uma comunidade: um lugar onde cada pessoa encontra acolhimento, cresce na fé, desenvolve seus dons e participa do que Deus está fazendo.")}</p>
-              <p className="s-lead">{ligaTexto("Não queremos encher bancos. Queremos formar gente comprometida com o Reino.")}</p>
+              <p className="s-lead so-largo">{ligaTexto("Não queremos encher bancos. Queremos formar gente comprometida com o Reino.")}</p>
             </div>
             <div className="s-foto h s-rev d1"><Img lugar="sobre-comunidade" sizes="(max-width: 999px) 90vw, 34vw" /></div>
           </div>
@@ -73,7 +75,7 @@ export default function Sobre() {
           <div className="s-cab centro s-rev">
             <Sede />
             <h2 id="t-sigla" className="s-h2">Somos GUIA.</h2>
-            <p className="s-lead">{SIGLA_FRASE}. O chevron da marca é o avanço.</p>
+            <p className="s-lead">{SIGLA_FRASE}.<span className="s-resto"> O chevron da marca é o avanço.</span></p>
           </div>
           <ul className="s-sigla s-rev d1">
             {SIGLA.map(l => (
@@ -101,7 +103,7 @@ export default function Sobre() {
             <p className="s-serifa it">{liga("três pilares, uma casa:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
-            {PILARES.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p>{ligaTexto(p.d)}</p></li>)}
+            {PILARES.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
           </ol>
           <Sede className="base" />
         </div>

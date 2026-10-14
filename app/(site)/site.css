@@ -163,20 +163,21 @@ body{ margin:0 }
 .s .s-menu-bt[aria-expanded="true"] i:first-child{ transform:translateY(4px) rotate(45deg) }
 .s .s-menu-bt[aria-expanded="true"] i:last-child{ transform:translateY(-4px) rotate(-45deg) }
 
-/* o menu do celular: a cortina inteira, por baixo da barra */
-.s .s-cortina{ position:fixed; inset:calc(var(--s-barra) + var(--s-recorte-topo)) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:28px var(--s-gutter) 48px; opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
+/* o menu do celular (14/10/2026): os oito destinos numa tela só, por baixo
+   da barra. Eram os cinco grupos da barra com 22 links e três telas de
+   rolagem. Oito linhas de 46 px + a fileira de baixo cabem até no iPhone SE
+   (~484 px de cortina) */
+.s .s-cortina{ position:fixed; inset:calc(var(--s-barra) + var(--s-recorte-topo)) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:12px var(--s-gutter) calc(20px + env(safe-area-inset-bottom, 0px)); opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
 .s .s-cortina.aberta{ opacity:1; pointer-events:auto; transform:none }
-.s .s-cortina-g{ padding:18px 0; border-bottom:1px solid rgba(255,255,255,.1) }
-/* dedo de gente: todo link do menu tem 44px de altura de toque */
-.s .s-cortina-g > a{ display:block; font-weight:800; font-size:30px; letter-spacing:-.04em; line-height:1; padding:7px 0; margin-bottom:5px }
-.s .s-cortina-g ul{ display:grid; gap:4px }
-.s .s-cortina-g li a{ display:block; padding:11px 0; font-size:18px; font-weight:400; letter-spacing:-.01em }
-.s .s-cortina-g li a small{ display:block; font-size:13px; color:var(--s-mudo-claro) }
-.s .s-cortina-pe{ padding-top:20px; display:grid; gap:2px; font-size:15px; color:var(--s-mudo-claro) }
-.s .s-cortina-pe a{ display:block; padding:11px 0; color:var(--s-papel); font-weight:600 }
-.s .s-cortina-pe span{ padding:2px 0 }
-.s .s-cortina-pe span:first-of-type{ margin-top:8px }
-.s .s-cortina .s-pil{ margin-top:20px }
+.s .s-cortina-lista{ display:grid }
+.s .s-cortina-lista li{ border-bottom:1px solid rgba(255,255,255,.1) }
+/* dedo de gente: cada linha tem 46 px de altura de toque */
+.s .s-cortina-lista a{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:0 10px; padding:10px 0; font-weight:800; font-size:24px; letter-spacing:-.035em; line-height:1.1 }
+.s .s-cortina-lista small{ font-weight:400; font-size:14px; letter-spacing:-.005em; color:var(--s-mudo-claro) }
+/* a página aberta: o sublinhado laranja da barra do computador */
+.s .s-cortina-lista a[aria-current="page"] span{ text-decoration:underline; text-decoration-color:var(--s-laranja); text-decoration-thickness:2px; text-underline-offset:6px }
+.s .s-cortina-pe{ display:flex; flex-wrap:wrap; justify-content:center; gap:0 24px; padding-top:8px; font-size:15px }
+.s .s-cortina-pe a{ display:block; padding:12px 0; color:var(--s-papel); font-weight:600 }
 
 /* a busca: véu inteiro, um campo grande, a lista do que casa */
 .s .s-busca{ position:fixed; inset:0; z-index:70; background:rgba(12,12,13,.985); color:var(--s-papel); overflow:auto; padding:clamp(80px,14vh,140px) var(--s-gutter) 60px; opacity:0; pointer-events:none; transition:opacity var(--s-t) }
@@ -853,7 +854,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 
   /* 5c. menu e busca no celular também no eixo */
   .s .s-cortina{ text-align:center }
-  .s .s-cortina-pe{ justify-items:center }
   .s .s-busca li a{ text-align:center }
   .s .s-busca li small{ text-align:center }
 
@@ -867,7 +867,9 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      garante o texto em qualquer quadro (não aparece como sombra) */
   .s .s-heroi :is(.s-chapeu, .s-h1, .s-lead, .s-micro){ text-shadow:0 1px 14px rgba(0,0,0,.38) }
 
-  .s .s-heroi .s-resto{ display:none }
+  /* o resto da frase (UmaLinha, em Blocos.tsx) some no celular em
+     qualquer lugar: a regra de 11/10, título + uma linha (14/10/2026) */
+  .s .s-resto{ display:none }
 
   /* 6. o valor da oferta no meio da caixa, como numa maquininha */
   .s .of-valor-cx{ justify-content:center }
@@ -910,7 +912,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
       altura da tela.
    ============================================================================= */
 .s .desliza{ position:relative }
-.s .trilho-pontos, .s .s-pe-atalhos{ display:none }
+.s .trilho-pontos{ display:none }
 .s .s-abre.so-celular{ display:none }
 
 @media(max-width:759px){
@@ -942,12 +944,17 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s main .s-faixa .s-sede, .s main .s-faixa .s-arroba, .s main .s-claro .s-sede{ display:none !important }
   .s .s-canto{ display:none !important }
 
-  /* 4. o pé curto */
+  /* 4. o pé curto (14/10/2026: sem marca, frase, atalhos e carimbo; o
+     menu inteiro está no topo fixo, a um toque) */
+  .s .s-pe{ padding-top:40px }
   .s .s-pe-g > nav{ display:none }
-  .s .s-pe-atalhos{ display:flex; flex-wrap:wrap; justify-content:center; gap:0 22px; margin-top:30px; padding-top:16px; border-top:1px solid rgba(255,255,255,.1); font-size:16px; font-weight:500; letter-spacing:-.01em }
-  .s .s-pe-atalhos a{ padding:10px 0 }
+  /* o logo tem display em linha (components/Marca.tsx): só o !important vence */
+  .s .s-pe-marca > svg{ display:none !important }
+  .s .s-pe-marca .s-frase, .s .s-pe-fim .s-sede{ display:none }
+  .s .s-pe-marca .s-corpo{ margin-top:0 }
+  .s .s-pe-marca .s-corpo a{ display:inline-block; padding:10px 0 }
   .s .s-pe-links a{ padding:10px 0 }
-  .s .s-pe-fim{ margin-top:22px }
+  .s .s-pe-fim{ margin-top:14px }
 
   /* 4b. a foto ao lado do texto (telas 2): numa coluna só, no meio */
   .s .s-duas .s-foto{ margin-inline:auto; width:100% }
@@ -1049,8 +1056,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-dom-quadro{ max-width:420px }
   .s .s-dom-texto{ width:100%; max-width:420px; margin-inline:auto }
   /* stories: quatro barrinhas, um capítulo por vez, todos na mesma célula */
-  .s .s-dom-barras{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px }
-  .s .s-dom-barras button{ position:relative; height:24px }
+  .s .s-dom-barras{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:-10px 0 4px }
+  .s .s-dom-barras button{ position:relative; height:44px }
   .s .s-dom-barras button::before,.s .s-dom-barras i{ content:""; position:absolute; left:0; right:0; top:50%; height:3px; margin-top:-1.5px; border-radius:2px }
   .s .s-dom-barras button::before{ background:var(--s-linha-forte) }
   .s .s-dom-barras i{ background:currentColor; transform-origin:0 50%; transition:transform .3s linear }
@@ -1075,3 +1082,84 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 .s .s-cartoes.agenda .s-cartao-t{ font-size:clamp(32px,3.2vw,48px) }
 .s .s-cartoes.agenda .s-cartao-n{ font-size:clamp(14px,1.1vw,16px) }
 .s .s-cartoes.agenda .s-cartao-d{ font-size:clamp(15.5px,1.25vw,18px); max-width:30ch }
+
+/* =============================================================================
+   CELULAR MINIMALISTA · 14/10/2026
+
+   Medido em produção como um iPhone (390 × 664 úteis): a home tinha 9,1
+   telas, o /servir 11,6, o menu 3 telas, o pé uma tela inteira em toda
+   página, e 24 de 26 cartões com mais que título + uma frase (a regra do
+   Arthur de 11/10, perdida no refeito do zero). O computador segue o PDF;
+   tudo daqui para baixo é abaixo de 760 px, menos três ajustes neutros.
+
+   1. LISTA: grade de cartões vira lista curta (.lista): o nome e o fato
+      numa linha, a frase embaixo, um fio entre as linhas. Substitui o
+      trilho, que resolvia a altura e escondia as opções (sem deslizar se
+      via 1 de 4 portas, 1 de 5 áreas). Fica o trilho só nas Pequenas
+      Guias: ali ele é a lista do mapa.
+   2. .so-largo some no celular; .so-celular só aparece nele.
+   3. Faixa que encosta na outra da mesma cor perde o topo (.junta-celular);
+      a do /acessar fica rente ao herói (.curta-celular).
+   4. Toque: nada abaixo de 44 px de altura no que se aperta.
+   ============================================================================= */
+/* neutros (valem para os dois): o tamanho que estava em estilo na linha, o
+   endereço do "de aplicativo" e a linha de perfil, que só existe na lista */
+.s .s-cartao-t.medio{ font-size:clamp(26px,2.4vw,34px) }
+.s .s-cartao-d b{ font-weight:600; color:var(--s-branco) }
+.s .s-cartao-p{ display:none }
+.s .so-celular{ display:none }
+
+@media(max-width:759px){
+  .s .so-celular{ display:block }
+
+  /* 1. a lista de cartões */
+  .s .s-cartoes.lista{ display:block; border-top:1px solid var(--s-linha) }
+  .s .s-cartoes.lista > .s-cartao{ display:block; min-height:0; padding:15px 0 16px; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:inherit; transition:background var(--s-t) }
+  .s .s-cartoes.lista > a.s-cartao:hover{ transform:none; box-shadow:none }
+  .s .s-cartoes.lista > a.s-cartao:active{ background:rgba(20,20,20,.045) }
+  .s .s-cartoes.lista .s-cartao-t{ display:inline; font-size:23px; line-height:1.15; letter-spacing:-.04em }
+  .s .s-cartoes.lista .s-cartao-n{ display:inline; margin:0 0 0 2px; font-size:13px; letter-spacing:.05em; white-space:nowrap }
+  .s .s-cartoes.lista.sem-n .s-cartao-n{ display:none }
+  .s .s-cartoes.lista .s-cartao-tag{ display:inline; margin:0 0 0 2px; padding:0; border:0; border-radius:0; font-size:13px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:var(--s-mudo); white-space:nowrap }
+  /* entre o nome, os postos e a etiqueta, um espaço onde a linha pode
+     quebrar (em 320 "GUIA Kids 09 POSTOS CONVERSA ANTES" não cabe numa) */
+  .s .s-cartoes.lista .s-cartao-t::after, .s .s-cartoes.lista .s-cartao-n::after{ content:" "; white-space:normal }
+  .s .s-cartoes.lista :is(.s-cartao-f, .s-cartao-d, .s-cartao-p){ display:inline; margin:0; max-width:none; font-style:normal; font-weight:400; font-size:15px; line-height:1.45; letter-spacing:-.01em; color:var(--s-mudo) }
+  /* a frase começa na linha de baixo */
+  .s .s-cartoes.lista :is(.s-cartao-f, .s-cartao-d, .s-cartao-p)::before{ content:"\A"; white-space:pre }
+  /* uma frase só: com a frase, o parágrafo sai; com o perfil, a frase sai */
+  .s .s-cartoes.lista .s-cartao-f ~ .s-cartao-d, .s .s-cartoes.lista .s-cartao-p ~ .s-cartao-f{ display:none }
+  .s .s-cartoes.lista .s-cartao-d b{ color:var(--s-tinta) }
+  /* a seta no fim da frase diz que a linha abre (frase e seta no eixo
+     juntas, como o "Abrir →" das pílulas) */
+  .s .s-cartoes.lista .s-cartao-ir{ display:inline; margin:0 0 0 6px; padding:0; font-size:0; color:inherit; white-space:nowrap }
+  .s .s-cartoes.lista .s-cartao-ir svg{ display:inline-block; width:14px; height:14px; vertical-align:-2px }
+
+  /* as funções de uma área: o nome e os postos numa linha, a frase embaixo */
+  .s .s-funcoes.lista{ display:block; border-top:1px solid var(--s-linha) }
+  .s .s-funcoes.lista > .s-funcao{ display:flex; flex-wrap:wrap; justify-content:center; align-items:baseline; gap:3px 8px; padding:14px 0 15px; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:inherit }
+  .s .s-funcoes.lista .s-funcao small{ display:none }
+  .s .s-funcoes.lista .s-funcao b{ order:1; font-size:20px }
+  .s .s-funcoes.lista .s-funcao em{ order:2; font-size:13px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--s-acento-texto) }
+  .s .s-funcoes.lista .s-funcao p{ order:3; flex-basis:100%; font-size:15px; color:var(--s-mudo) }
+
+  /* os números do /servir dois a dois (só o rótulo embaixo de cada um) */
+  .s .s-num:not(.so) .s-vivos{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:26px 14px }
+
+  /* as dúvidas dentro do cartão claro (o "É a sua primeira vez?"): linha
+     com fio, não caixa (nove caixas dentro de uma caixa eram só borda) */
+  .s .s-claro .s-abre{ margin-top:24px; gap:0; border-top:1px solid var(--s-linha) }
+  .s .s-faixa.noite .s-claro .s-abre details{ background:none; border:0; border-bottom:1px solid var(--s-linha); border-radius:0; padding:0 }
+  .s .s-claro .s-aviso{ color:var(--s-mudo) }
+
+  /* 3. faixas */
+  .s .s-faixa.junta-celular{ padding-top:0 }
+  .s .s-faixa.curta-celular{ padding-top:24px }
+  .s .s-heroi.porta{ --heroi-topo:96px }
+
+  /* 4. toque */
+  .s .pg-chip{ height:44px }
+  .s .pg-mapao .leaflet-bar a{ width:44px; height:44px; line-height:44px; font-size:22px }
+  .s .pg .g-link{ display:inline-flex; align-items:center; min-height:44px }
+  .s .trilho-pontos button{ height:44px }
+}

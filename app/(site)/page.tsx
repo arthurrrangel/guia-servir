@@ -2,8 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Chevron, Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Sep, Perguntas, liga, ligaTexto } from '@/components/site/Blocos';
-import { Trilho } from '@/components/site/Trilho';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Sep, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -90,7 +89,7 @@ export default function Home() {
             <div className="s-rev">
               <Vozes className="s-h2 media">A igreja não é o prédio</Vozes>
               <p className="s-lead">{ligaTexto("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
-              <p className="s-lead">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
+              <p className="s-lead so-largo">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
             {/* a frase em vídeo: quem recebe na porta, a sala das crianças, o violão */}
             <Quadro video="gente" className="s-rev d1" />
@@ -99,13 +98,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3 · números vivos */}
-      <section className="s-faixa noite s-grao">
+      {/* 3 · números vivos (no celular, só no /servir) */}
+      <section className="s-faixa noite s-grao so-largo">
         <div className="s-in"><NumerosFaixa circulos={false} /></div>
       </section>
 
       {/* 4 · por onde começar */}
-      <section className="s-faixa papel" aria-labelledby="t-portas">
+      <section className="s-faixa papel junta-celular" aria-labelledby="t-portas">
         <div className="s-in">
           <Sede className="topo" />
           <div className="s-cab centro s-rev">
@@ -113,7 +112,7 @@ export default function Home() {
             <p className="s-lead">{ligaTexto("Quatro portas. Entre por qualquer uma.")}</p>
           </div>
           <div className="s-rev d1">
-            <Trilho className="s-cartoes quatro" rotulo="Por onde começar">
+            <div className="s-cartoes quatro lista" role="group" aria-label="Por onde começar">
               {PORTAS.map(p => (
                 <Link key={p.href} href={p.href} className="s-cartao">
                   <span className="s-cartao-t">{p.t}</span>
@@ -123,7 +122,7 @@ export default function Home() {
                   <span className="s-cartao-ir">Abrir <Seta /></span>
                 </Link>
               ))}
-            </Trilho>
+            </div>
           </div>
         </div>
       </section>
@@ -142,7 +141,7 @@ export default function Home() {
       </section>
 
       {/* 6 · somos GUIA */}
-      <section className="s-faixa noite s-grao" aria-labelledby="t-sigla">
+      <section className="s-faixa noite s-grao so-largo" aria-labelledby="t-sigla">
         <div className="s-in">
           <div className="s-claro s-rev">
             <Sede />
@@ -163,7 +162,7 @@ export default function Home() {
       </section>
 
       {/* 7 · perguntas de quem vem pela primeira vez */}
-      <section className="s-faixa papel s-grao" aria-labelledby="t-faq">
+      <section className="s-faixa papel s-grao so-largo" aria-labelledby="t-faq">
         <Simbolo className="s-canto" />
         <div className="s-in">
           <h2 id="t-faq" className="s-faq-t s-rev">{liga("Perguntas de quem vem pela primeira vez")}</h2>
@@ -177,7 +176,7 @@ export default function Home() {
           <Sede className="topo" />
           <div className="s-rev">
             <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}>{ligaTexto(`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`)}</p>
+            <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha texto={`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`} semFim /></p>
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             <Pil href="/cultos">Quero conhecer</Pil>

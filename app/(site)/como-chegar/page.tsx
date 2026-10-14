@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS, textoDoModo } from '@/lib/chegar';
-import { Vozes, Sede, Chapeu, Pil, Img, Fecho, fim, liga, ligaTexto } from '@/components/site/Blocos';
-import { Trilho } from '@/components/site/Trilho';
+import { Vozes, Sede, Chapeu, Pil, Img, Fecho, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -10,6 +9,8 @@ import { Schema } from '@/components/site/Schema';
    Quem abre já decidiu ir. Está nas respostas rápidas e no perfil do
    WhatsApp da igreja, por isso continua existindo fora do menu: a fachada,
    o endereço, as duas rotas, os três modos e o mapa. O CTA leva pra fora.
+   14/10/2026, no celular: os modos em lista de uma frase e o cartão do mapa
+   sem o segundo par de Maps e Waze (o primeiro está no herói).
    ============================================================================= */
 export const metadata: Metadata = {
   title: 'Como chegar',
@@ -50,15 +51,15 @@ export default function ComoChegar() {
             <p className="s-lead">{ligaTexto("De carro, de aplicativo ou a pé.")}</p>
           </div>
           <div className="s-rev d1">
-            <Trilho className="s-cartoes tres" rotulo="Os modos de chegar">
+            <div className="s-cartoes tres lista sem-n" role="group" aria-label="Os modos de chegar">
               {MODOS.map(m => (
                 <div key={m.n} className="s-cartao">
                   <span className="s-cartao-n">{m.n}</span>
-                  <span className="s-cartao-t" style={{ fontSize: 'clamp(26px,2.4vw,34px)' }}>{liga(m.t)}</span>
-                  <span className="s-cartao-d">{fim(ligaTexto(m.d))}{m.endereco && <><br /><b style={{ fontWeight: 600, color: '#fff' }}>{m.endereco}</b></>}{m.d2 && <><br />{fim(ligaTexto(m.d2))}</>}</span>
+                  <span className="s-cartao-t medio">{liga(m.t)}</span>
+                  <span className="s-cartao-d"><UmaLinha texto={m.d} />{m.endereco && <><br /><b>{m.endereco}</b></>}{m.d2 && <span className="s-resto"><br />{fim(ligaTexto(m.d2))}</span>}</span>
                 </div>
               ))}
-            </Trilho>
+            </div>
           </div>
           <div className="s-mapa s-rev" style={{ marginTop: 'clamp(16px,2vw,24px)' }}>
             <iframe src={MAPA_EMBED} title={`Mapa: ${IGREJA.nome}, ${IGREJA.rua}, ${IGREJA.bairro}`} loading="lazy" allowFullScreen={false} referrerPolicy="no-referrer-when-downgrade" />
@@ -66,7 +67,7 @@ export default function ComoChegar() {
               <span className="s-selo">{IGREJA.cultoDia}, {IGREJA.cultoHora}</span>
               <b className="s-h3">{IGREJA.rua}</b>
               <span className="s-micro">{fim(`${IGREJA.bairro}, ${IGREJA.cidade} · ${IGREJA.cep}`)}</span>
-              <div className="s-acoes">
+              <div className="s-acoes so-largo">
                 <Pil href={MAPA} fora>Maps</Pil>
                 <Pil href={ROTA_WAZE} fora>Waze</Pil>
               </div>

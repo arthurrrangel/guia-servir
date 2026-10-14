@@ -3,9 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Simbolo } from '@/components/Marca';
-import { MENU, BUSCA, type Item } from '@/lib/site/nav';
+import { MENU, MENU_CELULAR, BUSCA, type Item } from '@/lib/site/nav';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
-import { Lupa, Fechar, SetaBaixo, Sep } from './Blocos';
+import { Lupa, Fechar, SetaBaixo } from './Blocos';
 
 /* =============================================================================
    A BARRA (tela 1 da apresentação) · 11/10/2026
@@ -20,8 +20,9 @@ import { Lupa, Fechar, SetaBaixo, Sep } from './Blocos';
    grupo. Esc fecha tudo e devolve o foco.
 
    ABAIXO DE 1000px a barra guarda o símbolo, a lupa e o botão de menu; o
-   menu é a cortina inteira, com os cinco grupos e os links de cada um,
-   mais WhatsApp, Instagram e o endereço.
+   menu é a cortina com os oito destinos numa tela só (14/10/2026; antes
+   eram os cinco grupos com 22 links e três telas de rolagem), mais
+   WhatsApp, Instagram e "Já sirvo".
 
    A BUSCA é um véu com um campo: filtra o menu e a lista BUSCA de
    lib/site/nav.ts (perguntas como a pessoa digita). Sem rede, sem índice
@@ -30,11 +31,12 @@ import { Lupa, Fechar, SetaBaixo, Sep } from './Blocos';
 
 const normal = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
-function LinkOu({ item, className, onClick, children }: { item: Item; className?: string; onClick?: () => void; children: React.ReactNode }) {
+function LinkOu({ item, className, onClick, atual, children }: { item: Item; className?: string; onClick?: () => void; atual?: boolean; children: React.ReactNode }) {
   const fora = /^https?:/.test(item.href);
+  const aqui = atual ? 'page' as const : undefined;
   if (fora) return <a href={item.href} target="_blank" rel="noreferrer" className={className} onClick={onClick}>{children}</a>;
-  if (item.duro || item.href.includes('#')) return <a href={item.href} className={className} onClick={onClick}>{children}</a>;
-  return <Link href={item.href} className={className} onClick={onClick}>{children}</Link>;
+  if (item.duro || item.href.includes('#')) return <a href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</a>;
+  return <Link href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</Link>;
 }
 
 export default function Topo() {
@@ -117,23 +119,27 @@ export default function Topo() {
         </div>
       </header>
 
-      {/* o menu do celular */}
+      {/* o menu do celular: os destinos numa tela só (lib/site/nav.ts,
+          MENU_CELULAR), a página aberta sublinhada em laranja, e embaixo as
+          três saídas que não são página: WhatsApp, Instagram e o espaço de
+          quem já serve */}
       <div id="s-cortina" className={'s-cortina' + (menu ? ' aberta' : '')} inert={!menu} aria-label="Menu">
-        {MENU.map(g => (
-          <div key={g.rot} className="s-cortina-g">
-            <Link href={g.href} onClick={() => setMenu(false)}>{g.rot}</Link>
-            <ul>
-              {g.itens.map(it => (
-                <li key={it.href + it.rot}><LinkOu item={it} onClick={() => setMenu(false)}>{it.rot}{it.sub && <small>{it.sub}</small>}</LinkOu></li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <ul className="s-cortina-lista">
+          {MENU_CELULAR.map(it => {
+            const aqui = !it.href.includes('#') && (caminho === it.href || caminho.startsWith(it.href + '/'));
+            return (
+              <li key={it.href + it.rot}>
+                <LinkOu item={it} onClick={() => setMenu(false)} atual={aqui}>
+                  <span>{it.rot}</span>{it.sub && <small>{it.sub}</small>}
+                </LinkOu>
+              </li>
+            );
+          })}
+        </ul>
         <div className="s-cortina-pe">
-          <a href={conversa.href} target="_blank" rel="noreferrer">{conversa.rot}</a>
-          <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-          <span>{IGREJA.rua}<Sep />{IGREJA.bairro}</span>
-          <span>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</span>
+          <a href={conversa.href} target="_blank" rel="noreferrer">{IGREJA.whatsapp ? 'WhatsApp' : 'Fale com a gente'}</a>
+          <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>
+          <a href="/eu" onClick={() => setMenu(false)}>Já sirvo</a>
         </div>
       </div>
 

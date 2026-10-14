@@ -89,9 +89,22 @@ try {
   ok(pretos2.length === 0, 'numa tela comprida, os botões pretos de baixo também passam', pretos2.slice(0, 3).join(' | '));
   ok(comprida.fracos.length === 0, 'a tela de escala passa inteira', comprida.fracos.slice(0, 4).join(' | '));
 
-  /* -------------------------------------------------------- 2. o errado */
-  await pag.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
-  await pag.waitForTimeout(900);
+  /* -------------------------------------------------------- 2. o errado
+
+     14/10/2026 · no celular o /acessar virou lista (os caminhos sem cartão
+     escuro, sem o segundo título e sem o parágrafo de cada um): os estragos
+     de cartão escuro e do título da faixa de papel são medidos no
+     computador, onde esses cartões continuam. O medidor é o mesmo; a
+     pergunta (ele acusa o errado?) também. */
+  const largo = await nav.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce' });
+  const pagL = await largo.newPage();
+  await pagL.route('**', r => r.request().url().startsWith(BASE) ? r.continue() : r.abort());
+  /* e o certo dos cartões escuros, lá onde eles existem */
+  await pagL.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
+  await pagL.waitForTimeout(1200);
+  const limpoL = await medirContraste(pagL);
+  const clarosL = limpoL.fracos.filter(f => /s-cartao/.test(f));
+  ok(clarosL.length === 0, 'no computador, o texto claro dos cartões escuros não é acusado', clarosL.slice(0, 3).join(' | '));
   /* 13/10/2026 · os alvos são os do site refeito: os cartões escuros do
      /acessar (`.s-cartao`, título e texto) e o texto da faixa clara (o título
      da faixa de papel e o parágrafo da faixa de areia). Os de antes
@@ -105,27 +118,28 @@ try {
     { por: 'amarelo em cima do areia',   css: '.s .s-faixa.areia .s-lead{ -webkit-text-fill-color:#ffe08a!important; color:#ffe08a!important }' },
   ];
   for (const e of estragos) {
-    await pag.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
-    await pag.waitForTimeout(900);
-    await pag.addStyleTag({ content: e.css });
-    await pag.waitForTimeout(250);
-    const r = await medirContraste(pag);
+    await pagL.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
+    await pagL.waitForTimeout(900);
+    await pagL.addStyleTag({ content: e.css });
+    await pagL.waitForTimeout(250);
+    const r = await medirContraste(pagL);
     ok(r.fracos.length > 0, `estrago "${e.por}" é acusado`,
       `o medidor não viu nada (mediu ${r.medidos} trechos)`);
   }
 
   /* --------------------------- 3. o aviso de foto separado da reprovação */
-  await pag.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
-  await pag.waitForTimeout(900);
+  await pagL.goto(`${BASE}/acessar`, { waitUntil: 'domcontentloaded' });
+  await pagL.waitForTimeout(900);
   /* uma faixa clara cobrindo METADE da linha: a média ainda passa, o pior
      ponto não. Isso tem que sair como aviso, nunca como reprovação. */
-  await pag.addStyleTag({ content: '.s .s-cartao::after{content:""!important;position:absolute!important;left:0;right:50%;top:0;bottom:0;background:#fff!important;z-index:5!important} .s .s-cartao-t,.s .s-cartao-d{position:relative;z-index:6}' });
-  await pag.waitForTimeout(250);
-  const meia = await medirContraste(pag);
+  await pagL.addStyleTag({ content: '.s .s-cartao::after{content:""!important;position:absolute!important;left:0;right:50%;top:0;bottom:0;background:#fff!important;z-index:5!important} .s .s-cartao-t,.s .s-cartao-d{position:relative;z-index:6}' });
+  await pagL.waitForTimeout(250);
+  const meia = await medirContraste(pagL);
   ok(meia.sobreFoto.length > 0 || meia.fracos.length > 0,
     'meia faixa clara aparece em algum lugar do relatório',
     'sumiu dos dois baldes');
 
+  await largo.close();
   await ctx.close();
 } catch (e) {
   estado.falhas++; console.log('  ERRO:', String(e).slice(0, 500));
