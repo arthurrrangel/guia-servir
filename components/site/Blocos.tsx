@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Evento } from '@/lib/site/medir';
 import { FOTOS, type LugarDeFoto, type Foto } from '@/lib/site/fotos';
 
 /* =============================================================================
@@ -126,12 +127,15 @@ export function Chapeu({ forte, resto, mudo }: { forte: string; resto?: string; 
    qualquer âncora também vão de <a>. O <Link> busca a página por fetch: para
    outro domínio o fetch esbarra no CORS, e uma âncora de outra página
    (/servir#areas) que passa por um redirecionamento perde o ponto. */
-export function Pil({ href, children, tom = '', duro, fora, className = '' }:
-  { href: string; children: React.ReactNode; tom?: '' | 'preta' | 'vidro' | 'contorno'; duro?: boolean; fora?: boolean; className?: string }) {
+/* `medir`: o evento que o clique dispara (lib/site/medir.ts), quando a
+   regra do link sozinha não diz (o "Avisar que vou" é WhatsApp, mas vale
+   como "avisou que vai") */
+export function Pil({ href, children, tom = '', duro, fora, className = '', medir }:
+  { href: string; children: React.ReactNode; tom?: '' | 'preta' | 'vidro' | 'contorno'; duro?: boolean; fora?: boolean; className?: string; medir?: Evento }) {
   const cls = `s-pil ${tom} ${className}`.trim();
-  if (fora) return <a href={href} target="_blank" rel="noreferrer" className={cls}>{children}</a>;
-  if (duro || href.includes('#') || /^https?:/.test(href)) return <a href={href} className={cls}>{children}</a>;
-  return <Link href={href} className={cls}>{children}</Link>;
+  if (fora) return <a href={href} target="_blank" rel="noreferrer" className={cls} data-medir={medir}>{children}</a>;
+  if (duro || href.includes('#') || /^https?:/.test(href)) return <a href={href} className={cls} data-medir={medir}>{children}</a>;
+  return <Link href={href} className={cls} data-medir={medir}>{children}</Link>;
 }
 
 /* o cartão (ou qualquer bloco que é link inteiro) com a mesma regra da pílula */

@@ -5,6 +5,7 @@ import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
 import Movimento from '@/components/site/Movimento';
 import Fronteira from '@/components/Fronteira';
+import Medidor from '@/components/site/Medidor';
 
 /* =============================================================================
    O CASCO DO GUIA SERVIR · guiaservir.com · 19/10/2026
@@ -37,6 +38,7 @@ export default function ServirLayout({ children }: { children: React.ReactNode }
       <Topo site="servir" />
       <main id="conteudo">{children}</main>
       <Pe site="servir" />
+      <Medidor />
     </div>
   );
 }

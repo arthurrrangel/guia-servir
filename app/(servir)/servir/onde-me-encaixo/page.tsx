@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   title: 'Não sei onde me encaixo',
   description: 'É a resposta mais comum. Três dúvidas comuns e o que se faz em cada área de voluntários da GUIA Church.',
   alternates: { canonical: '/servir/onde-me-encaixo' },
-  openGraph: { title: 'Não sei onde me encaixo · GUIA Servir', url: `${SITE}/servir/onde-me-encaixo`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
+  openGraph: { title: 'Não sei onde me encaixo · GUIA Servir', url: `${SITE}/servir/onde-me-encaixo`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630 }] },
 };
 
 const DUVIDAS = [

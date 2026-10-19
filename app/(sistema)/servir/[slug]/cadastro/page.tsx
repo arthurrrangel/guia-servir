@@ -7,6 +7,7 @@ import {IcSeta} from '@/components/Icones';
 import { Logo } from '@/components/Marca';
 import { Tela, Carregando, Vazio } from '@/components/Tela';
 import { telefoneOk, TEL_MIN } from '@/lib/nome';
+import { medirAntesDeSair } from '@/lib/site/medir-cliente';
 
 /* =============================================================================
    QUERO SERVIR — o wizard  (§5 a §10)
@@ -272,12 +273,15 @@ export default function Servir() {
        no instante em que ela rodar, quem se cadastra numa área aberta entre
        direto no seu espaço em vez de esperar numa fila. Enquanto não roda, ele
        simplesmente nunca é escolhido. */
+    /* 19/10/2026: o cadastro é a conversão do Servir (lib/site/medir.ts).
+       Só o envio que deu certo conta, e antes da troca de página */
     if (r?.ok && r.pendente === false && r.token) {
       limpaRascunho();
       try { localStorage.setItem('escala.meu-token', r.token); } catch {}
+      await medirAntesDeSair('cadastro_servir', { area: slug });
       location.href = `/eu/${r.token}`; return;
     }
-    if (r?.ok && r.token) { limpaRascunho(); location.href = `/candidatura/${r.token}`; return; }
+    if (r?.ok && r.token) { limpaRascunho(); await medirAntesDeSair('cadastro_servir', { area: slug }); location.href = `/candidatura/${r.token}`; return; }
     /* JA_CANDIDATOU devolve o token da candidatura que já existe: em vez de um
        erro seco, leva a pessoa para o acompanhamento dela. */
     if (r?.erro === 'JA_CANDIDATOU' && r.token) { limpaRascunho(); location.href = `/candidatura/${r.token}`; return; }

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 /* Sem isto, toda aba do líder (Painel, Escala, Time…) mostrava o mesmo título
    genérico no navegador — quem trabalha com duas abas abertas não distinguia
-   qual era qual. O template do layout raiz vira "Escala · GUIA Church". */
+   qual era qual. O template do layout raiz vira "Escala · GUIA Servir" (o modelo do casco do sistema, 19/10/2026). */
 
 /* NOINDEX. O cabeçalho X-Robots-Tag em next.config.mjs já cobre esta rota, e
    é ele que vale para robô que não executa JavaScript. Esta meta é a segunda

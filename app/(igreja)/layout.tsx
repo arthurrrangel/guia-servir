@@ -3,6 +3,7 @@ import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
 import Movimento from '@/components/site/Movimento';
 import Fronteira from '@/components/Fronteira';
+import Medidor from '@/components/site/Medidor';
 
 /* =============================================================================
    O CASCO DO GUIA CHURCH · guiachurch.com · 11/10/2026, separado em 19/10
@@ -26,6 +27,7 @@ export default function IgrejaLayout({ children }: { children: React.ReactNode }
       <Topo site="igreja" />
       <main id="conteudo">{children}</main>
       <Pe site="igreja" />
+      <Medidor />
     </div>
   );
 }

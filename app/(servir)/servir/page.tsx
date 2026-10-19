@@ -27,15 +27,21 @@ import { Fundo, Quadro } from '@/components/site/Midia';
    next.config reescreve "/" para cá; /servir naquele domínio volta para a
    raiz), com a copy final da LP (LP_GUIA_SERVIR.docx): "Já sirvo, abrir meu
    espaço", "Hoje na GUIA" nos números e "quatro passos" por extenso.
+
+   19/10/2026, mais tarde: o título parou de repetir o da home do Guia Church
+   ("Existe um lugar para você", que lá é a primeira frase da igreja). Quem
+   ia de um site ao outro achava que estava na mesma página. Escolha do
+   Arthur, entre duas frases da copy dele: "Encontre o seu lugar pra servir"
+   (site completo, página 7). O cartão do Servir na home diz o mesmo.
    ============================================================================= */
 
 /* o título inteiro, sem o modelo: é a raiz do guiaservir.com, e o canonical
    também */
 export const metadata: Metadata = {
-  title: { absolute: 'Existe um lugar para você · GUIA Servir' },
-  description: 'Existe um lugar para você. Deus semeou dons em cada pessoa; todo domingo, dezenas de pessoas cultivam os delas para que o culto aconteça. Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.',
+  title: { absolute: 'Encontre o seu lugar pra servir · GUIA Servir' },
+  description: 'Encontre o seu lugar pra servir. Deus semeou dons em cada pessoa; todo domingo, dezenas de pessoas cultivam os delas para que o culto aconteça. Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.',
   alternates: { canonical: '/' },
-  openGraph: { title: 'Existe um lugar para você · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
+  openGraph: { title: 'Encontre o seu lugar pra servir · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630, alt: 'GUIA Servir: encontre o seu lugar pra servir' }] },
 };
 
 const PASSOS = [
@@ -82,8 +88,8 @@ export default function Servir() {
         <Fundo video="servir" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-servir" className="s-h1" it="para você">Existe um lugar para você</Vozes>
-          <p className="s-lead grande">Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. O seu também tem um posto esperando.</span></p>
+          <Vozes as="h1" id="t-servir" className="s-h1" it="pra servir">Encontre o seu lugar pra servir</Vozes>
+          <p className="s-lead grande">Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. {ligaTexto('O seu também tem um posto esperando.')}</span></p>
           <div className="s-acoes">
             <Pil href="#quero-servir">Quero servir</Pil>
             <Pil href="/eu" duro>Já sirvo, abrir meu espaço</Pil>
@@ -100,7 +106,7 @@ export default function Servir() {
             <div className="s-rev">
               <Vozes className="s-h2 media">Deus se alegra com o seu servir</Vozes>
               <p className="s-lead so-largo">{ligaTexto("Antes de soar a primeira nota, alguém já preparou a letra no telão, arrumou a sala das crianças e organizou o estacionamento.")}</p>
-              <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes.<span className="s-resto"> É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.</span></p>
+              <p className="s-lead">O culto começa às {IGREJA.cultoHora}. O serviço, muito antes.<span className="s-resto"> {ligaTexto('É assim que a nossa casa se torna santuário: por gente que entendeu que servir é adorar.')}</span></p>
             </div>
             {/* o abraço da tela 2 do PDF, agora o próprio vídeo do abraço */}
             <Quadro video="abraco" className="s-rev d1" />

@@ -36,7 +36,7 @@ export default function PaginaDaFolha() {
     if (!/^[0-9a-f]{18}$/.test(token || '')) { setFase('invalido'); return; }
     try {
       const r = await folhaPublica(token);
-      if (r.ok) { setFolha(r.folha); setFase('ok'); try { document.title = `Cronograma · ${tituloDaFolha(r.folha.data)} · GUIA Church`; } catch {} }
+      if (r.ok) { setFolha(r.folha); setFase('ok'); try { document.title = `Cronograma · ${tituloDaFolha(r.folha.data)} · GUIA Servir`; } catch {} }
       else setFase('invalido');
     } catch (e) {
       setFase(semCronogramaNoBanco(e) ? 'invalido' : 'rede');

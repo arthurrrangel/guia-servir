@@ -14,6 +14,8 @@ Precisa de Pillow e fontTools (com brotli, para ler woff2).
 19/10/2026: a copy final tirou o "Cultivando uma nova cultura" das páginas
 (og.jpg e og-sobre.jpg ganharam os títulos novos), e o /acessar mudou para o
 Guia Servir: o cartão dele leva guiaservir.com no canto, não guiachurch.com.
+Mais tarde, no mesmo dia: og-servir.jpg passou a sair daqui (título próprio
+do Servir) e nasceu og-sistema.jpg, o cartão dos links do sistema.
 """
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from fontTools.ttLib import TTFont
@@ -121,6 +123,18 @@ cartao('og-sobre.jpg', 'abraco-palco.webp', 'Quem somos',
 cartao('og-pequena-guia.jpg', 'acolhida.webp', 'Pequena Guia',
        [P('Relacionamentos'), P('que fortalecem sua') + IT('fé.')],
        'Grupos durante a semana, perto de você', foco=(0.5, 0.4), tam=80)
+# 19/10/2026: o Guia Servir com o título próprio (deixou de repetir o
+# "Existe um lugar para você" da igreja) e o cartão do sistema, para os links
+# que circulam nos grupos (confirmar, seus dias, cheguei, cadastro, /eu):
+# antes eles saíam com o cartão da igreja. Os dois levam guiaservir.com.
+cartao('og-servir.jpg', 'fachada.webp', 'Servir · GUIA Church',
+       [P('Encontre o seu lugar'), IT('pra servir.')],
+       'Deus semeou dons em cada pessoa. O seu também tem um posto esperando.',
+       foco=(0.5, 0.45), tam=84, dominio='guiaservir.com')
+cartao('og-sistema.jpg', 'equipe.webp', 'Voluntários da GUIA Church',
+       [P('GUIA') + IT('Servir.')],
+       'Escalas, confirmações e avisos de quem serve',
+       foco=(0.5, 0.4), dominio='guiaservir.com')
 cartao('og-acessar.jpg', 'midia.webp', 'Acesso às equipes',
        [P('Quem é') + IT('você?')],
        'Sou voluntário · Sou da organização · Quero participar', foco=(0.5, 0.5), dominio='guiaservir.com')

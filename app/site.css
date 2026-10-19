@@ -209,6 +209,8 @@ body{ margin:0 }
 .s .s-pe-g li a{ font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
 .s .s-pe-fim{ margin-top:clamp(36px,5vw,60px); padding-top:22px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
 .s .s-pe-fim a{ color:var(--s-papel) }
+.s .s-pe-botao{ appearance:none; background:none; border:0; padding:0; margin:0; font:inherit; color:var(--s-papel); cursor:pointer }
+.s .s-pe-botao:focus-visible{ outline:2px solid var(--s-laranja, #f0a43c); outline-offset:3px; border-radius:4px }
 .s .s-pe-fim .s-sede{ color:var(--s-papel) }
 
 /* =============================================================================
@@ -231,11 +233,13 @@ body{ margin:0 }
 .s .s-heroi .s-h1 .s-it{ display:block }
 .s .s-heroi .s-lead{ margin-top:clamp(22px,3vw,40px); max-width:42ch; color:rgba(255,255,255,.94) }
 .s .s-heroi .s-acoes{ margin-top:clamp(30px,4.4vw,60px) }
-.s .s-heroi .s-micro{ margin-top:clamp(16px,2.2vw,28px); color:rgba(255,255,255,.86); padding-left:clamp(0px,3.4vw,52px) }
+/* 19/10/2026: o micro (dia e endereço) começava 49 px para dentro do título
+   e dos botões no computador (padding-left herdado da reconstrução de
+   11/10, sem nada na tela que se alinhasse com ele). Agora na mesma linha. */
+.s .s-heroi .s-micro{ margin-top:clamp(16px,2.2vw,28px); color:rgba(255,255,255,.86) }
 .s .s-heroi.centro{ text-align:center }
 .s .s-heroi.centro .s-heroi-in{ justify-items:center }
 .s .s-heroi.centro .s-h1{ max-width:none }
-.s .s-heroi.centro .s-micro{ padding-left:0 }
 .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.5) 0%,rgba(10,10,12,.28) 45%,rgba(10,10,12,.62) 100%) }
 
 /* =============================================================================
@@ -338,7 +342,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    AS OBJEÇÕES (tela 7): título pequeno à esquerda, a linha de apoio grande,
    três perguntas entre aspas com a resposta pequena. O símbolo no canto.
    ============================================================================= */
-.s .s-canto{ position:absolute; top:clamp(24px,4vw,56px); right:var(--s-gutter); width:clamp(30px,3vw,40px); height:auto; z-index:2; opacity:.95 }
+/* 19/10/2026: o símbolo do canto alinhado à coluna do conteúdo (a borda
+   direita do .s-in), e não à borda da janela: acima de 1400 px de coluna ele
+   ficava solto no canto da tela (1920 px: 187 px fora da coluna) */
+.s .s-canto{ position:absolute; top:clamp(24px,4vw,56px); right:max(var(--s-gutter), calc((100% - var(--s-largura)) / 2)); width:clamp(30px,3vw,40px); height:auto; z-index:2; opacity:.95 }
 .s .s-obj{ display:grid; gap:clamp(26px,3.6vw,48px); margin-top:clamp(28px,4vw,56px) }
 .s .s-obj b{ display:block; font-weight:800; font-size:clamp(22px,2.6vw,38px); letter-spacing:-.04em; line-height:1.05 }
 .s .s-obj p{ font-weight:300; font-size:clamp(15.5px,1.35vw,19px); line-height:1.45; margin-top:8px; max-width:78ch; text-wrap:pretty }
@@ -677,7 +684,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-heroi{ min-height:min(88svh,760px) }
   .s .s-heroi-in{ padding-top:64px }
   .s .s-heroi .s-h1{ max-width:none }
-  .s .s-heroi .s-micro{ padding-left:0 }
   .s .s-cartoes,.s .s-cartoes.cinco,.s .s-cartoes.quatro,.s .s-cartoes.tres,.s .s-cartoes.duas{ grid-template-columns:1fr }
   .s .s-cartao{ min-height:0 }
   .s .s-form,.s .s-form.livre{ grid-template-columns:1fr }
@@ -763,6 +769,13 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
    ============================================================================= */
 html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 @media(max-width:999px){ html{ scroll-padding-top:calc(64px + 12px + env(safe-area-inset-top, 0px)) } }
+/* 19/10/2026: faixa inteira com âncora (#primeira-vez, #ao-vivo, #areas...)
+   para encostada na barra. Com os 12 px de folga acima, a faixa de cima
+   aparecia como um fio de outra cor entre a barra e a faixa (o "Vou visitar"
+   da home cai em #primeira-vez, noite logo abaixo de uma faixa areia). A
+   folga continua valendo para âncora de título; a faixa já tem o próprio
+   respiro por dentro. */
+.s .s-faixa[id]{ scroll-margin-top:-12px }
 @media(prefers-reduced-motion:no-preference){ html{ scroll-behavior:smooth } }
 
 /* =============================================================================

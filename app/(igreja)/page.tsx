@@ -31,6 +31,12 @@ import { MOMENTOS } from '@/lib/site/domingo';
    em primeira pessoa; a sigla ganhou as definições que falam com a pessoa.
    "Quero servir" leva ao Guia Servir (guiaservir.com), que virou site
    próprio. Travessões da copy viraram vírgula (regra do Arthur).
+
+   19/10/2026, mais tarde: "Vou visitar" e "Vou conhecer" levam direto ao
+   "É a sua primeira vez?" de /cultos, onde está o "Avisar que vou" (antes
+   caíam no topo de /cultos, e o botão ficava quase três telas abaixo, no
+   celular). O cartão do Servir diz o título do Servir, "Encontre o seu lugar
+   pra servir", e não repete o herói desta página.
    ============================================================================= */
 
 export const metadata: Metadata = {
@@ -41,7 +47,7 @@ const PORTAS = [
   { href: '/cultos', t: 'Cultos', n: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, f: 'Um domingo para pertencer', d: 'Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.', ir: 'Vou participar' },
   { href: '/eventos#follow', t: 'Follow', n: `Sábado, ${IGREJA.followHora}`, f: 'O culto de jovens', d: 'Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Vem como está.', ir: 'Vou no Follow' },
   { href: '/pequena-guia', t: 'Pequena Guia', n: 'Na semana', f: 'Relacionamentos que fortalecem a fé', d: 'Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida e estudar a Palavra durante a semana.', ir: 'Encontrar a minha' },
-  { href: noServir('/'), t: 'Servir', n: 'Todo domingo', f: 'Existe um lugar para você', d: 'Cinco áreas, dezenas de postos e gente pra ensinar. Cadastro de menos de um minuto.', ir: 'Quero servir' },
+  { href: noServir('/'), t: 'Servir', n: 'Todo domingo', f: 'Encontre o seu lugar pra servir', d: 'Cinco áreas, dezenas de postos e gente pra ensinar. Cadastro de menos de um minuto.', ir: 'Quero servir' },
 ];
 
 
@@ -76,7 +82,7 @@ export default function Home() {
           <Vozes as="h1" id="t-home" className="s-h1" it="para você">Existe um lugar para você</Vozes>
           <p className="s-lead grande">{ligaTexto("Uma igreja na Barra da Tijuca feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.")}</p>
           <div className="s-acoes">
-            <Pil href="/cultos">Vou visitar</Pil>
+            <Pil href="/cultos#primeira-vez">Vou visitar</Pil>
             <Pil href={noServir('/')}>Quero servir</Pil>
           </div>
           <p className="s-micro"><ProximoCulto /><Sep />{IGREJA.rua}</p>
@@ -180,7 +186,7 @@ export default function Home() {
             <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha texto={`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`} semFim /></p>
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
-            <Pil href="/cultos">Vou conhecer</Pil>
+            <Pil href="/cultos#primeira-vez">Vou conhecer</Pil>
             <Pil href={noServir('/')}>Quero servir</Pil>
           </div>
         </div>

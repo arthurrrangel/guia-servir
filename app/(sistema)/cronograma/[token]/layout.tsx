@@ -29,7 +29,7 @@ export async function generateMetadata(
     title: titulo,
     description: desc,
     robots: { index: false, follow: false, nocache: true },
-    openGraph: { title: `${titulo} · GUIA Church`, description: desc, type: 'website', locale: 'pt_BR' },
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, type: 'website', locale: 'pt_BR' },
   };
 }
 

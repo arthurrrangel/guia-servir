@@ -52,7 +52,7 @@ export const MENU: Grupo[] = [
   ] },
   /* o grupo inteiro mora no Guia Servir */
   { rot: 'Envolva-se', href: noServir('/'), itens: [
-    { rot: 'Quero servir', href: noServir('/'), sub: 'Existe um lugar para você' },
+    { rot: 'Quero servir', href: noServir('/'), sub: 'Encontre o seu lugar pra servir' },
     { rot: 'As áreas', href: noServir('/#areas'), sub: 'Mídia, Louvor, Kids, Connect, Livraria' },
     { rot: 'Não sei onde me encaixo', href: noServir('/servir/onde-me-encaixo'), sub: 'Três dúvidas comuns' },
     { rot: 'Já sirvo', href: noServir('/eu'), sub: 'Minha escala, meus dias, meu líder', duro: true },

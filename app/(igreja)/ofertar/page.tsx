@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   title: 'Ofertar',
   description: `Dízimos e ofertas da GUIA Church${TEM_CHECKOUT ? ': Pix, cartão, Apple Pay ou Google Pay' : ' pelo Pix'}. Leva menos de um minuto, e você decide o valor.`,
   alternates: { canonical: '/ofertar' },
-  openGraph: { title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og.jpg', width: 1200, height: 630 }] },
 };
 
 const PORQUE = [

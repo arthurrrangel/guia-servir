@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
 import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
+import { pixelValido } from '@/lib/site/medir';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL · 11/10/2026
@@ -13,7 +14,14 @@ import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/compo
 
    PENDENTE, e é decisão de quem responde pela igreja: o prazo exato de
    retenção do histórico de escala, e o nome do encarregado de dados.
+
+   19/10/2026: A MEDIÇÃO (lib/site/medir.ts). Bloco 04 novo: as visitas que a
+   Vercel conta, sem cookie. O texto do Pixel da Meta só existe quando há
+   Pixel no build: sem ele, continua verdade que "não há cookie de
+   rastreamento nem pixel de rede social", e a página continua dizendo isso.
    ============================================================================= */
+
+const PIXEL_ATIVO = !!pixelValido(process.env.NEXT_PUBLIC_META_PIXEL_ID);
 
 export const metadata: Metadata = {
   title: 'Privacidade',
@@ -23,7 +31,19 @@ export const metadata: Metadata = {
 
 const CONTATO = canalDeConversa('Oi! É sobre os meus dados no site da GUIA.');
 
-const BLOCOS: Array<{ n: string; t: string; it: string; itens: Array<{ q: string; r: string }> }> = [
+const NUNCA = PIXEL_ATIVO
+  ? 'Seus dados não são vendidos nem cedidos a terceiros. Cookie de anúncio, só com o seu aceite: é o Pixel da Meta, explicado em O que o site mede, logo abaixo. Fora isso, os mapas nas páginas Cultos, Como chegar e Pequena Guia: ao abri-las, o Google e o OpenStreetMap podem gravar cookies próprios, sob as políticas deles.'
+  : 'Seus dados não são vendidos, não são cedidos a terceiros e não alimentam publicidade. Não há cookie de rastreamento nem pixel de rede social. A única exceção são os mapas nas páginas Cultos, Como chegar e Pequena Guia: ao abri-las, o Google e o OpenStreetMap podem gravar cookies próprios, sob as políticas deles.';
+
+const MEDICAO: Array<{ q: string; r: string }> = [
+  { q: 'As visitas', r: 'A Vercel, que publica o site, conta as visitas às páginas públicas de forma agregada: quantas pessoas, de onde vieram e de qual aparelho. Sem cookie e sem identificar quem visita. As páginas pessoais (o seu espaço, a escala, os links dos grupos) ficam fora dessa conta.' },
+  ...(PIXEL_ATIVO ? [
+    { q: 'Os anúncios, só com o seu aceite', r: 'Se você tocar em Aceitar na faixa de cookies, o Pixel da Meta passa a registrar quando você abre uma página, avisa que vai ao culto, abre o mapa, copia o Pix ou faz o cadastro para servir. Serve para a igreja saber se os anúncios chegam a quem procura uma igreja. Com Agora não, nada da Meta é carregado.' },
+    { q: 'Mudar de ideia', r: 'Em Cookies, no pé de qualquer página, a faixa volta e você escolhe de novo. A escolha fica guardada no seu navegador, separada em cada endereço (guiachurch.com e guiaservir.com).' },
+  ] : []),
+];
+
+const BLOCOS: Array<{ n: string; t: string; it: string; id?: string; itens: Array<{ q: string; r: string }> }> = [
   { n: '01', t: 'O que é coletado', it: 'coletado', itens: [
     { q: 'Quando você se cadastra para servir', r: 'Nome completo, telefone com WhatsApp e, se quiser, e-mail. Junto vai a área escolhida e as funções de interesse. É o mínimo para a liderança daquela área falar com você e montar a escala.' },
     { q: 'Enquanto você serve', r: 'Em quais cultos você foi escalado, se confirmou ou pediu troca, os dias em que marcou indisponibilidade, e as observações que você mesmo escreve. Um PIN de quatro números, escolhido por você, protege esse espaço.' },
@@ -40,9 +60,10 @@ const BLOCOS: Array<{ n: string; t: string; it: string; itens: Array<{ q: string
   { n: '03', t: 'Quem acessa, e onde fica', it: 'fica', itens: [
     { q: 'Quem tem acesso', r: 'A liderança da sua área e a organização das escalas. O acesso é controlado no próprio banco de dados, por regra de permissão: um líder enxerga a equipe dele, não a igreja inteira.' },
     { q: 'Onde os dados ficam', r: 'Num banco de dados hospedado no Supabase; o site é publicado pela Vercel. As duas atuam como operadoras: processam por conta da igreja e não usam esses dados para nada próprio.' },
-    { q: 'O que nunca acontece', r: 'Seus dados não são vendidos, não são cedidos a terceiros e não alimentam publicidade. Não há cookie de rastreamento nem pixel de rede social. A única exceção são os mapas nas páginas Cultos, Como chegar e Pequena Guia: ao abri-las, o Google e o OpenStreetMap podem gravar cookies próprios, sob as políticas deles.' },
+    { q: 'O que nunca acontece', r: NUNCA },
     { q: 'Por quanto tempo ficam', r: 'Enquanto você fizer parte de uma equipe. Quando alguém deixa de servir, o cadastro é encerrado e o histórico de escalas é mantido só pelo tempo necessário à organização da igreja, e apagado a qualquer momento, se você pedir.' },
   ] },
+  { n: '04', t: 'O que o site mede', it: 'mede', id: 'medicao', itens: MEDICAO },
 ];
 
 export default function Privacidade() {
@@ -52,13 +73,13 @@ export default function Privacidade() {
         <div className="s-in">
           <Chapeu forte="Privacidade" resto="LGPD · Lei 13.709/2018" />
           <Vozes as="h1" className="s-h1" it="quê" >O que a gente guarda, e por quê</Vozes>
-          <p className="s-lead grande" style={{ marginTop: 22 }}>{ligaTexto("Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.")}</p>
+          <p className="s-lead grande" style={{ marginTop: 22 }}>{ligaTexto(PIXEL_ATIVO ? 'Só quando você digita, ou aceita. Nunca é vendido nem cedido.' : 'Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.')}</p>
           <p className="s-micro" style={{ marginTop: 16, opacity: .7 }}>{ligaTexto("Atualizada em outubro de 2026")}</p>
         </div>
       </section>
 
       {BLOCOS.map((b, i) => (
-        <section key={b.n} className={'s-faixa ' + (i % 2 === 0 ? 'papel' : 'areia')} aria-labelledby={`t-${b.n}`}>
+        <section key={b.n} id={b.id} className={'s-faixa ' + (i % 2 === 0 ? 'papel' : 'areia')} aria-labelledby={`t-${b.n}`}>
           <div className="s-in">
             <div className="s-cab s-rev">
               <p className="s-selo">{b.n}</p>

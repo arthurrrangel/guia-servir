@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   title: 'Cultos',
   description: `Um domingo para pertencer: culto aos ${IGREJA.cultoDia.toLowerCase()}s, às ${IGREJA.cultoHora}, na ${IGREJA.rua}, ${IGREJA.bairro}. Como é, o que esperar na primeira vez e qual é o próximo passo.`,
   alternates: { canonical: '/cultos' },
-  openGraph: { title: 'Um domingo para pertencer · GUIA Church', description: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, url: `${SITE}/cultos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Um domingo para pertencer · GUIA Church', description: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, url: `${SITE}/cultos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
 };
 
 const PERGUNTAS = [
@@ -104,14 +104,17 @@ export default function Cultos() {
             {/* "Chega... e fala": a copy dizia "fale", e a frase misturava
                 os dois tratamentos (o "chega" é o mesmo do resto do site) */}
             <p className="s-lead"><UmaLinha texto="Chega uns minutos mais cedo e fala na porta. Alguém te acompanha, te mostra a casa e te apresenta quem precisar. Você não vai precisar achar nada sozinho." semFim /></p>
+            {/* 19/10/2026: a ação vem antes das perguntas. O "Vou visitar" da
+                home cai aqui, e no celular as perguntas empurravam o botão
+                para fora da tela de quem acabou de chegar */}
+            <div className="s-acoes centro">
+              <Pil href={conversa.href} fora tom="contorno" medir="avisou_que_vai">Avisar que vou</Pil>
+            </div>
             {/* no celular: as perguntas de "Antes de sair de casa" aqui dentro */}
             <div className="s-abre so-celular">
               {PERGUNTAS.map(p => (
                 <details key={p.q}><summary>{liga(p.q)}</summary><div><p>{fim(ligaTexto(p.r))}</p></div></details>
               ))}
-            </div>
-            <div className="s-acoes centro">
-              <Pil href={conversa.href} fora tom="contorno">Avisar que vou</Pil>
             </div>
           </div>
         </div>

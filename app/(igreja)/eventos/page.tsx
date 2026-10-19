@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: 'Eventos',
   description: `O que acontece na GUIA Church: Celebração aos ${IGREJA.cultoDia.toLowerCase()}s às ${IGREJA.cultoHora}, Follow aos sábados${IGREJA.followHora ? ` às ${IGREJA.followHora}` : ''}, Pequenas Guias durante a semana e o Follow Camp 2027.`,
   alternates: { canonical: '/eventos' },
-  openGraph: { title: 'Eventos · GUIA Church', url: `${SITE}/eventos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Eventos · GUIA Church', url: `${SITE}/eventos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
 };
 
 export default function Eventos() {

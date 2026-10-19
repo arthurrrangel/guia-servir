@@ -10,11 +10,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const a = AREAS[slug];
   const titulo = a ? `${a.nome}: ${a.frase}` : 'Servir';
-  const desc = a ? a.texto : 'Existe um lugar para você. Escolha uma área e preencha o cadastro em menos de um minuto.';
+  const desc = a ? a.texto : 'Encontre o seu lugar pra servir. Escolha uma área e preencha o cadastro em menos de um minuto.';
   return {
     title: titulo, description: desc,
     alternates: { canonical: `/servir/${slug}` },
-    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, url: `${SITE}/servir/${slug}`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, url: `${SITE}/servir/${slug}`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630 }] },
   };
 }
 

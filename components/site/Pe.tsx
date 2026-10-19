@@ -5,6 +5,10 @@ import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { daGuia } from '@/lib/site/sites';
 import { Sede, Sep } from './Blocos';
+import RevisarCookies from './RevisarCookies';
+import { pixelValido } from '@/lib/site/medir';
+
+const PIXEL_ATIVO = !!pixelValido(process.env.NEXT_PUBLIC_META_PIXEL_ID);
 
 /* =============================================================================
    O PÉ: a marca, a frase, o endereço e os grupos do menu · 11/10/2026
@@ -35,7 +39,10 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
             <p className="s-frase">{IGREJA.frase}.</p>
             <p className="s-corpo">
               <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</b><br />
-              {IGREJA.rua}<Sep />{IGREJA.bairro}, {IGREJA.cidade}<br />
+              {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna
+                  estreita do pé a linha única partia o bairro ("Barra da" /
+                  "Tijuca") */}
+              {IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}<br />
               <a href={MAPA} target="_blank" rel="noreferrer">Ver no mapa</a>
             </p>
           </div>
@@ -65,6 +72,12 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
                 <Ir it={it} />
               </Fragment>
             ))}
+            {PIXEL_ATIVO && (
+              <>
+                <i className="s-ponto" aria-hidden="true"> · </i>
+                <RevisarCookies />
+              </>
+            )}
           </span>
         </div>
       </div>

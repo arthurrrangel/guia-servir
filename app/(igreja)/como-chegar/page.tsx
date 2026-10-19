@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   title: 'Como chegar',
   description: `${IGREJA.nome} fica na ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}. Rota no Maps e no Waze, estacionamento e a fachada para você reconhecer a porta.`,
   alternates: { canonical: '/como-chegar' },
-  openGraph: { title: 'Como chegar · GUIA Church', description: `${IGREJA.rua}, ${IGREJA.bairro}.`, url: `${SITE}/como-chegar`, images: [{ url: '/og-como-chegar.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Como chegar · GUIA Church', description: `${IGREJA.rua}, ${IGREJA.bairro}.`, url: `${SITE}/como-chegar`, images: [{ url: '/og-como-chegar.jpg', width: 1200, height: 630 }] },
 };
 
 export default function ComoChegar() {
@@ -40,7 +40,7 @@ export default function ComoChegar() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Onde fica" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
           <Vozes as="h1" id="t-chegar" className="s-h1" it="chegar">Como chegar</Vozes>
-          <p className="s-lead grande"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, {IGREJA.bairro}, <span style={{ whiteSpace: 'nowrap' }}>{IGREJA.cidade}.</span></p>
+          <p className="s-lead grande"><span style={{ whiteSpace: 'nowrap' }}>{IGREJA.rua}</span>, <span style={{ whiteSpace: 'nowrap' }}>{IGREJA.bairro},</span> <span style={{ whiteSpace: 'nowrap' }}>{IGREJA.cidade}.</span></p>
           <div className="s-acoes">
             <Pil href={MAPA} fora>Traçar rota no Maps</Pil>
             <Pil href={ROTA_WAZE} fora>Abrir no Waze</Pil>

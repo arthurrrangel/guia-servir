@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { IGREJA, SITE_IGREJA as SITE } from './igreja';
+import { SITE } from './igreja';
 
 /* =============================================================================
    O CARTÃO DO LINK, PÁGINA POR PÁGINA
@@ -13,24 +13,35 @@ import { IGREJA, SITE_IGREJA as SITE } from './igreja';
    As imagens são a mesma composição do site (foto tratada + marca no canto),
    uma por página. Sem texto, de propósito: o texto do cartão é o título e a
    descrição do meta — e a imagem não depende de fonte nenhuma.
+
+   19/10/2026: quem usa este cartão é o sistema (as portas do grupo, o /eu e o
+   cadastro de área), que mora no guiaservir.com. Ele saía como "· GUIA
+   Church", com o endereço do guiachurch.com e a foto da igreja; agora diz GUIA
+   Servir, aponta para o guiaservir.com e usa /og-sistema.jpg, o cartão neutro
+   dos voluntários (o cadastro pede /og-servir.jpg).
    ============================================================================= */
 
 type Cartao = {
   titulo: string;
   descricao: string;
   caminho: string;
-  /** /og-<nome>.jpg em public; sem isto usa /og.jpg */
+  /** /og-<nome>.jpg em public; sem isto usa /og-sistema.jpg */
   imagem?: string;
 };
 
+export const SERVIR_NOME = 'GUIA Servir';
+/* a versão no endereço da imagem: o WhatsApp e a Meta guardam a prévia por
+   endereço, e o mesmo nome com a foto nova continuaria mostrando a velha */
+const VERSAO = '?v=20261019';
+
 export function cartao({ titulo, descricao, caminho, imagem }: Cartao): Pick<Metadata, 'openGraph' | 'twitter'> {
-  const t = `${titulo} · ${IGREJA.nome}`;
-  const img = imagem ? `/og-${imagem}.jpg` : '/og.jpg';
+  const t = `${titulo} · ${SERVIR_NOME}`;
+  const img = `/og-${imagem || 'sistema'}.jpg${VERSAO}`;
   return {
     openGraph: {
       title: t, description: descricao, url: `${SITE}${caminho}`,
-      type: 'website', locale: 'pt_BR', siteName: IGREJA.nome,
-      images: [{ url: img, width: 1200, height: 630, alt: `${IGREJA.nome}, ${IGREJA.bairro}` }],
+      type: 'website', locale: 'pt_BR', siteName: SERVIR_NOME,
+      images: [{ url: img, width: 1200, height: 630, alt: `${SERVIR_NOME}, voluntários da GUIA Church` }],
     },
     twitter: { card: 'summary_large_image', title: t, description: descricao, images: [img] },
   };

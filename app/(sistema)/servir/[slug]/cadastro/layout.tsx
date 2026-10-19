@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cartao } from '@/lib/meta';
 import { rpcPublica } from '@/lib/publico';
+import Medidor from '@/components/site/Medidor';
 
 /* O wizard é o link que mais vai circular no grupo. A prévia precisa dizer o
    nome da área e um convite — não "GUIA Servir" genérico. */
@@ -19,10 +20,12 @@ export async function generateMetadata(
   return {
     title: titulo,
     description: desc,
-    ...cartao({ titulo, descricao: desc, caminho: '/servir', imagem: 'servir' }),
+    ...cartao({ titulo, descricao: desc, caminho: `/servir/${encodeURIComponent(slug)}/cadastro`, imagem: 'servir' }),
   };
 }
 
+/* o cadastro é a conversão do Servir: o Medidor mede a visita e o envio
+   (components/site/Medidor.tsx); o resto do sistema não tem medição */
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <>{children}<Medidor /></>;
 }

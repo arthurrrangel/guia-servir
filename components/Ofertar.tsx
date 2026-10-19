@@ -8,6 +8,7 @@ import {
 } from '@/lib/oferta';
 import { canalDeConversa } from '@/lib/igreja';
 import { IcCheck, IcSeta } from '@/components/Icones';
+import { medir } from '@/lib/site/medir-cliente';
 
 /* =============================================================================
    OFERTAR — a tela
@@ -257,6 +258,7 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
     try {
       await navigator.clipboard.writeText(codigo);
       setCopiou(true);
+      medir('pix_copiado', { pagina: location.pathname });
     } catch {
       /* clipboard bloqueado (iOS antigo, página sem contexto seguro): seleciona
          o texto para a pessoa copiar com o dedo, em vez de não fazer nada */

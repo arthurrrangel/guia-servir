@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   title: 'Quem somos',
   description: `Uma igreja que parece com a vida de quem chega. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
-  openGraph: { title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg', width: 1200, height: 630 }] },
 };
 
 const PILARES = [

@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   title: 'Pequena Guia',
   description: 'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto.',
   alternates: { canonical: '/pequena-guia' },
-  openGraph: { title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg', width: 1200, height: 630 }] },
 };
 
 const PASSOS = [

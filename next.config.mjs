@@ -131,17 +131,29 @@ const ROTAS_FECHADAS = [
    www.guiachurch.com e www.guiaservir.com nem chegam aqui: a Vercel manda
    para o domínio sem www antes (308, configurado no projeto). O
    escalas.guiaservir.com, o endereço antigo do sistema, conta como Servir.
+
+   O GUIA FOLLOW (guiafollow.com), até a copy do site dele chegar (19/10/2026):
+   o domínio já está pago e liga neste projeto; sem página própria, ele leva
+   para o que já existe. /followcamp e /fc vão para a página do retiro, que
+   continua em guiachurch.com/followcamp (pelo mesmo motivo do pagamento,
+   acima); todo o resto vai para o Follow em guiachurch.com/eventos#follow.
+   Quando o site do Follow existir, estas três regras saem.
    ============================================================================= */
 const IGREJA = 'https://guiachurch.com';
 const SERVIR = 'https://guiaservir.com';
 const NO_SERVIR = [{ type: 'host', value: '(?:escalas\\.)?guiaservir\\.com' }];
 const NA_IGREJA = [{ type: 'host', value: 'guiachurch\\.com' }];
+const NO_FOLLOW = [{ type: 'host', value: '(?:www\\.)?guiafollow\\.com' }];
 /* as páginas da igreja (app/(igreja)/) */
 const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade';
 /* o Servir (app/(servir)/) e o sistema (app/(sistema)/, menos o Follow Camp) */
 const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios';
 
 const REGRAS_DOS_SITES = [
+  /* o Guia Follow, provisório (ver acima) */
+  { source: '/:p(followcamp|fc)', has: NO_FOLLOW, destination: `${IGREJA}/followcamp`, permanent: false },
+  { source: '/followcamp/:resto+', has: NO_FOLLOW, destination: `${IGREJA}/followcamp/:resto+`, permanent: false },
+  { source: '/:resto*', has: NO_FOLLOW, destination: `${IGREJA}/eventos#follow`, permanent: false },
   { source: '/servir', has: NO_SERVIR, destination: '/', permanent: false },
   { source: `/:pagina(${DA_IGREJA})`, has: NO_SERVIR, destination: `${IGREJA}/:pagina`, permanent: false },
   { source: '/servir', has: NA_IGREJA, destination: `${SERVIR}/`, permanent: false },

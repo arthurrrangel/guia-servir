@@ -1,0 +1,107 @@
+/* A faixa de cookies (components/site/Medidor.tsx). Folha própria, e não
+   app/site.css, porque a faixa também aparece no cadastro de área, que é
+   sistema e não conhece a folha do site. As cores vêm das variáveis do site
+   (--s-noite, --s-papel), com o mesmo valor escrito como reserva para o
+   cadastro, onde elas não existem.
+
+   Todo seletor de dentro começa por .faixa: o site zera botão e link com
+   `.s button` e `.s a` (0,1,1), e uma classe sozinha (0,1,0) perdia para
+   eles (os botões saíam como texto solto). */
+
+.faixa {
+  position: fixed;
+  z-index: 58;
+  left: 12px;
+  right: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  margin-inline: auto;
+  max-width: 720px;
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px 20px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--s-noite, #111113);
+  color: var(--s-papel, #f5f5f2);
+  box-shadow: 0 14px 44px rgba(0, 0, 0, .32);
+  border: 1px solid rgba(255, 255, 255, .08);
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.faixa .texto {
+  margin: 0;
+  flex: 1 1 260px;
+  text-align: center;
+  text-wrap: balance;
+}
+
+.faixa .mais {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: rgba(245, 245, 242, .5);
+  white-space: nowrap;
+}
+
+.faixa .botoes {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.faixa .nao,
+.faixa .sim {
+  appearance: none;
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.faixa .nao {
+  background: transparent;
+  color: var(--s-papel, #f5f5f2);
+  border: 1px solid rgba(245, 245, 242, .38);
+}
+
+.faixa .sim {
+  background: var(--s-papel, #f5f5f2);
+  color: var(--s-noite, #111113);
+  border: 1px solid var(--s-papel, #f5f5f2);
+}
+
+.faixa .nao:focus-visible,
+.faixa .sim:focus-visible,
+.faixa .mais:focus-visible {
+  outline: 2px solid #f0a43c;
+  outline-offset: 2px;
+}
+
+/* o fim da página sobe o tanto da faixa, para o pé não ficar por baixo.
+   No site o pé é noite, e o respiro continua o pé; no cadastro, some. */
+.respiro {
+  height: 128px;
+  background: var(--s-noite, transparent);
+}
+
+@media (min-width: 760px) {
+  .faixa .texto { text-align: left; }
+  .respiro { height: 96px; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .faixa { animation: sobe .35s cubic-bezier(.2, .7, .2, 1) both; }
+}
+
+@keyframes sobe {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
