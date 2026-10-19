@@ -176,6 +176,15 @@ const D = em('2026-10-19T12:00:00-03:00');
     }
   }
 
+  /* a ficha em maiúscula: a mensagem não grita */
+  const gritando = { ...base, campista: 'LUCAS ANDRADE', responsavel_nome: 'RENATA LIMA' };
+  t = msg(gritando, [], '2026-10-20T10:00:00-03:00');
+  ok(/^Oi, Renata!/.test(t) && /carnê de Lucas\b/.test(t), `nome em maiúscula vira nome: ${t}`);
+  t = msg({ ...base, campista: 'joão-pedro souza', responsavel_nome: "maria d'ávila" }, [], '2026-10-20T10:00:00-03:00');
+  ok(/^Oi, Maria!/.test(t) && /carnê de João-Pedro\b/.test(t), `minúscula e hífen: ${t}`);
+  t = msg({ ...base, responsavel_nome: 'McKenzie Souza' }, [], '2026-10-20T10:00:00-03:00');
+  ok(/^Oi, McKenzie!/.test(t), `misturado fica como está: ${t}`);
+
   /* o painel: vencida passa na frente */
   const F = [
     { ...base, id: 'a', campista: 'A', parcelas: 3, plano_em: '2026-10-19T15:00:00Z' },

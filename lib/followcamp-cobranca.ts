@@ -34,7 +34,14 @@ export type FichaDoContato = {
 
 export type Contato = { nome: string; whats: string; quem: 'responsavel' | 'campista' | 'emergencia' };
 
-const primeiroNome = (n: string) => (n || '').trim().split(/\s+/)[0] || '';
+/** O primeiro nome como se escreve numa mensagem: a ficha às vezes chega toda
+ *  em maiúscula ("MARIA") ou toda em minúscula, e "Oi, MARIA!" parece grito.
+ *  Nome com maiúscula e minúscula misturadas fica como a pessoa escreveu. */
+const primeiroNome = (n: string) => {
+  const p = (n || '').trim().split(/\s+/)[0] || '';
+  if (p !== p.toLocaleUpperCase('pt-BR') && p !== p.toLocaleLowerCase('pt-BR')) return p;
+  return p.toLocaleLowerCase('pt-BR').replace(/(^|[-'’])(\p{L})/gu, (_, a: string, b: string) => a + b.toLocaleUpperCase('pt-BR'));
+};
 const ehMenor = (f: FichaDoContato) => !!f.responsavel_nome || (f.idade != null && f.idade < 18);
 
 /** Com quem falar sobre esta ficha, e por qual número. Nulo sem número nenhum. */
