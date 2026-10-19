@@ -1,5 +1,7 @@
 import type { MetadataRoute } from 'next';
-import { SITE_IGREJA as SITE } from '@/lib/igreja';
+import { headers } from 'next/headers';
+import { SITE, SITE_IGREJA } from '@/lib/igreja';
+import { ehServir } from '@/lib/site/sites';
 
 /* =============================================================================
    robots.txt
@@ -21,9 +23,17 @@ import { SITE_IGREJA as SITE } from '@/lib/igreja';
    X-Robots-Tag de cabeçalho, em next.config.mjs): robots.txt pede para não
    RASTREAR, o cabeçalho manda não INDEXAR. São coisas diferentes, e uma URL
    descoberta por link externo pode ser indexada sem nunca ter sido rastreada.
+
+   19/10/2026: UM ROBOTS POR DOMÍNIO. Com o Guia Church e o Guia Servir em
+   domínios próprios (next.config.mjs, "OS DOIS SITES"), cada um aponta a
+   lista de páginas e o host do próprio domínio. Ler o host torna esta rota
+   dinâmica: ela roda a cada pedido, e é pedida por robô, poucas vezes por
+   dia. (A palavra da lista não aparece antes do bloqueio, de propósito:
+   scripts/demandas-token-na-url.test.mjs lê o bloqueio por ela.)
    ============================================================================= */
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const base = ehServir((await headers()).get('host')) ? SITE : SITE_IGREJA;
   return {
     rules: [{
       userAgent: '*',
@@ -46,7 +56,7 @@ export default function robots(): MetadataRoute.Robots {
         '/api/',
       ],
     }],
-    sitemap: `${SITE}/sitemap.xml`,
-    host: SITE,
+    sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }

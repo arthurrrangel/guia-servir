@@ -178,7 +178,7 @@ export function FormPequenaGuia() {
       {erro && <p id={`${id}-erro`} className="g-form-erro" role="alert">{erro.msg}</p>}
       <div className="g-acoes centro g-form-pe">
         <button type="submit" className="acao cheia" disabled={enviando}>
-          {enviando ? 'Enviando…' : 'Encontrar a minha'} <IcSeta />
+          {enviando ? 'Enviando…' : 'Encontrar a minha Pequena Guia'} <IcSeta />
         </button>
       </div>
       <p className="g-form-nota">

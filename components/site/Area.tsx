@@ -1,12 +1,12 @@
 'use client';
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
 import { Vozes, Sede, Chapeu, Pil, UmaLinha, fim, liga, ligaTexto } from './Blocos';
 import { Fundo } from './Midia';
 import { FormServir } from './Servir';
+import { lp } from '@/lib/site/sites';
 
 /* =============================================================================
    /servir/<área> — A PÁGINA DA ÁREA · 11/10/2026
@@ -76,7 +76,10 @@ export default function Area() {
       const m = (lista.data || []).find(x => x.slug === slug) || null;
       if (!m) { setFase(fixa ? 'rede' : 'erro'); return; }
       setMin(m); setFns(funcoes.data || []);
-      try { document.title = `${m.nome} · GUIA Church`; } catch {}
+      /* só a área que não tem copy fixa troca o título (o do servidor era
+         o genérico "Servir"); as cinco já nascem com "Mídia: Faça a mensagem
+         chegar longe", que diz mais que "Mídia" */
+      if (!fixa) { try { document.title = `${m.nome} · GUIA Servir`; } catch {} }
       setFase('pronto');
     })();
     return () => { vivo = false; };
@@ -106,7 +109,7 @@ export default function Area() {
           <Chapeu forte="Servir" resto="GUIA Church" />
           <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
           <p className="s-lead grande">{ligaTexto("O link pode estar errado. Volte e escolha uma das áreas da lista.")}</p>
-          <div className="s-acoes"><Pil href="/servir#areas">Ver as áreas</Pil></div>
+          <div className="s-acoes"><Pil href={lp('#areas')}>Ver as áreas</Pil></div>
         </div>
       </section>
     );
@@ -135,7 +138,7 @@ export default function Area() {
           })()}
           <div className="s-acoes">
             <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
-            <Pil href="/servir#areas">Ver as outras áreas</Pil>
+            <Pil href={lp('#areas')}>Ver as outras áreas</Pil>
           </div>
           {fixa?.perfil && <p className="s-micro">{ligaTexto(fixa.perfil)}</p>}
         </div>
@@ -173,7 +176,7 @@ export default function Area() {
         <div className="s-in">
           <div className="s-passos-cab s-rev">
             <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
-            <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
+            <p className="s-serifa it">{liga("do cadastro à escala, quatro passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
             {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
@@ -206,7 +209,8 @@ export default function Area() {
             {!aberto && <p className="s-aviso">Essa área conversa com cada pessoa antes de escalar: você preenche o cadastro e a liderança fala com você.</p>}
           </div>
           <div className="s-rev d1"><FormServir areaInicial={slug} /></div>
-          <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Já serve aqui? <Link href="/eu" className="s-link claro">Abrir meu espaço</Link>.</p>
+          {/* /eu é sistema (outra folha de estilo): link duro, não <Link> */}
+          <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Já serve aqui? <a href="/eu" className="s-link claro">Abrir meu espaço</a>.</p>
         </div>
       </section>
     </>

@@ -8,7 +8,9 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: IGREJA.nome,
     short_name: 'GUIA',
-    description: `${IGREJA.frase}. ${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}.`,
+    /* 19/10/2026: a frase do herói, e não mais o "Cultivando uma nova
+       cultura" (a copy final tirou o conceito de tudo que não é o rodapé) */
+    description: `Existe um lugar para você. ${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}.`,
     start_url: '/',
     display: 'standalone',
     background_color: '#252525',

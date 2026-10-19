@@ -1163,3 +1163,29 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .pg .g-link{ display:inline-flex; align-items:center; min-height:44px }
   .s .trilho-pontos button{ height:44px }
 }
+
+/* =============================================================================
+   19/10/2026 · O CARTÃO COM A AÇÃO DENTRO ("Escolha o seu próximo passo",
+   /cultos): a pílula desce para o pé do cartão, e as duas ficam na mesma
+   altura, por mais que um texto seja mais longo que o outro.
+   ============================================================================= */
+.s .s-cartao-acao{ margin-top:auto; padding-top:clamp(14px,1.6vw,22px) }
+
+/* 19/10/2026 · O AVISO DENTRO DO CARTÃO CLARO no computador também ("Prefiro
+   começar pelos cultos", embaixo do formulário da Pequena Guia). A regra
+   escura só existia no celular, e no computador o aviso saía no cinza claro
+   das faixas de noite: branco sobre o papel do cartão, ilegível. */
+.s .s-claro .s-aviso{ color:var(--s-mudo) }
+
+/* 19/10/2026 · O BOTÃO DO FORMULÁRIO DA PEQUENA GUIA com o texto da copy
+   final ("Encontrar a minha Pequena Guia"): no celular, com o nowrap e o
+   recuo de 24 px, ele passava da largura do cartão (306 px a 390, 276 a
+   360) e a seta saía cortada. No celular ele fica com a largura do cartão,
+   recuo menor e, se ainda não couber, quebra em duas linhas em vez de
+   cortar; abaixo de 380 px a seta sai. */
+@media(max-width:759px){
+  .s .g-form-pe .acao{ width:100%; max-width:100%; padding:11px 14px; height:auto; min-height:46px; font-size:15px; gap:6px; line-height:1.2; white-space:normal; text-wrap:balance; text-align:center }
+}
+@media(max-width:380px){
+  .s .g-form-pe .acao svg{ display:none }
+}

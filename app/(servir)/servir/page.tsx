@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
-import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
+import { IGREJA, SITE, SITE_IGREJA } from '@/lib/igreja';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
@@ -22,13 +22,20 @@ import { Fundo, Quadro } from '@/components/site/Midia';
    de cada uma fica com a primeira frase (a regra de 11/10), as cinco áreas
    viram lista (e "Ver todas as áreas" sai: estão todas na tela), os números
    ficam dois a dois e "Seu espaço" fica com a frase e o botão.
+
+   19/10/2026: O GUIA SERVIR. Esta página é a raiz de guiaservir.com (o
+   next.config reescreve "/" para cá; /servir naquele domínio volta para a
+   raiz), com a copy final da LP (LP_GUIA_SERVIR.docx): "Já sirvo, abrir meu
+   espaço", "Hoje na GUIA" nos números e "quatro passos" por extenso.
    ============================================================================= */
 
+/* o título inteiro, sem o modelo: é a raiz do guiaservir.com, e o canonical
+   também */
 export const metadata: Metadata = {
-  title: 'Quero servir',
+  title: { absolute: 'Existe um lugar para você · GUIA Servir' },
   description: 'Existe um lugar para você. Deus semeou dons em cada pessoa; todo domingo, dezenas de pessoas cultivam os delas para que o culto aconteça. Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.',
-  alternates: { canonical: '/servir' },
-  openGraph: { title: 'Existe um lugar para você · GUIA Church', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/servir`, images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
+  alternates: { canonical: '/' },
+  openGraph: { title: 'Existe um lugar para você · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
 };
 
 const PASSOS = [
@@ -56,6 +63,13 @@ const PERGUNTAS: Array<{ q: string; r: React.ReactNode }> = [
 export default function Servir() {
   return (
     <>
+      {/* o nome do site para o Google (a linha acima do título no resultado):
+          GUIA Servir, da GUIA Church, que é a entidade de guiachurch.com */}
+      <Schema dados={{
+        '@context': 'https://schema.org', '@type': 'WebSite', '@id': `${SITE}/#site`, url: `${SITE}/`,
+        name: 'GUIA Servir', alternateName: 'Servir · GUIA Church', inLanguage: 'pt-BR',
+        publisher: { '@type': 'Church', '@id': `${SITE_IGREJA}/#igreja`, name: IGREJA.nome, url: SITE_IGREJA },
+      }} />
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'FAQPage',
         mainEntity: [...OBJECOES.map(o => ({ '@type': 'Question', name: o.q.replace(/"/g, ''), acceptedAnswer: { '@type': 'Answer', text: o.r } })),
@@ -72,7 +86,7 @@ export default function Servir() {
           <p className="s-lead grande">Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. O seu também tem um posto esperando.</span></p>
           <div className="s-acoes">
             <Pil href="#quero-servir">Quero servir</Pil>
-            <Pil href="/eu" duro>Já sirvo</Pil>
+            <Pil href="/eu" duro>Já sirvo, abrir meu espaço</Pil>
           </div>
           <p className="s-micro">{ligaTexto("Cadastro de menos de um minuto.")}</p>
         </div>
@@ -118,11 +132,11 @@ export default function Servir() {
       </section>
 
       {/* 5 · como funciona */}
-      <section className="s-faixa areia" aria-labelledby="t-como">
+      <section id="como-funciona" className="s-faixa areia" aria-labelledby="t-como">
         <div className="s-in">
           <div className="s-passos-cab s-rev">
             <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
-            <p className="s-serifa it">{liga("do cadastro à escala, 4 passos:")}</p>
+            <p className="s-serifa it">{liga("do cadastro à escala, quatro passos:")}</p>
           </div>
           <ol className="s-passos s-rev d1">
             {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}

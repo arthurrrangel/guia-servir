@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Area from '@/components/site/Area';
 import { AREAS } from '@/lib/site/areas';
-import { SITE_IGREJA as SITE } from '@/lib/igreja';
+import { SITE } from '@/lib/igreja';
 
 /* /servir/<área>: a página da área (components/site/Area.tsx). Os metadados
    saem da copy fixa quando a área é uma das cinco; área nova do banco
@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: titulo, description: desc,
     alternates: { canonical: `/servir/${slug}` },
-    openGraph: { title: `${titulo} · GUIA Church`, description: desc, url: `${SITE}/servir/${slug}`, images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, url: `${SITE}/servir/${slug}`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg', width: 1200, height: 630 }] },
   };
 }
 

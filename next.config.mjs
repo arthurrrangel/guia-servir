@@ -94,6 +94,60 @@ const ROTAS_FECHADAS = [
   '/demandas', '/demandas/:caminho+',
 ];
 
+
+/* =============================================================================
+   OS DOIS SITES · 19/10/2026
+
+   O Arthur separou o site em dois: o Guia Church (guiachurch.com, a igreja)
+   e o Guia Servir (guiaservir.com, a LP de voluntários na raiz, as áreas e o
+   sistema inteiro). Os dois domínios servem ESTE MESMO app (projeto
+   escala-midia na Vercel); quem decide o que cada endereço mostra são as
+   regras abaixo, que só valem para o host delas. Em qualquer outro host
+   (localhost, escala-midia-*.vercel.app) nada muda: o app inteiro responde,
+   como sempre, e a LP do Servir fica em /servir.
+
+   O QUE CADA REGRA FAZ:
+   · guiaservir.com/  →  mostra a LP (reescrita: o endereço continua "/").
+   · guiaservir.com/servir  →  volta para a raiz (a LP não tem dois endereços).
+   · guiaservir.com/<página da igreja>  →  guiachurch.com/<a mesma página>.
+   · guiachurch.com/servir  →  guiaservir.com/ (a LP).
+   · guiachurch.com/<Servir ou sistema>  →  guiaservir.com/<o mesmo caminho>,
+     com a query junto (o Next repassa sozinho; o # o navegador mantém).
+
+   O QUE FICA NOS DOIS, DE PROPÓSITO:
+   · /api/*: webhook, cron, formulários. Webhook que recebe redirecionamento
+     não chega.
+   · /followcamp e o que vem depois dele: a venda do 1º lote está no ar, e a
+     volta do pagamento usa o sessionStorage, que é de cada domínio. Muda de
+     casa junto com o Guia Follow (guiafollow.com), não antes.
+   · /fc, o QR impresso: guiaservir.com/fc continua levando ao Follow Camp.
+   · arquivos (/_next, /fotos, /sw.js, ícones): a regra é por página.
+
+   POR QUE 307 E NÃO 308. O navegador guarda o 308 para sempre. Com o Guia
+   Follow chegando, alguma página ainda pode mudar de domínio; com o 307 a
+   troca vale na hora. Para o Google, o canonical de cada página já diz qual
+   é o endereço certo.
+
+   www.guiachurch.com e www.guiaservir.com nem chegam aqui: a Vercel manda
+   para o domínio sem www antes (308, configurado no projeto). O
+   escalas.guiaservir.com, o endereço antigo do sistema, conta como Servir.
+   ============================================================================= */
+const IGREJA = 'https://guiachurch.com';
+const SERVIR = 'https://guiaservir.com';
+const NO_SERVIR = [{ type: 'host', value: '(?:escalas\\.)?guiaservir\\.com' }];
+const NA_IGREJA = [{ type: 'host', value: 'guiachurch\\.com' }];
+/* as páginas da igreja (app/(igreja)/) */
+const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade';
+/* o Servir (app/(servir)/) e o sistema (app/(sistema)/, menos o Follow Camp) */
+const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios';
+
+const REGRAS_DOS_SITES = [
+  { source: '/servir', has: NO_SERVIR, destination: '/', permanent: false },
+  { source: `/:pagina(${DA_IGREJA})`, has: NO_SERVIR, destination: `${IGREJA}/:pagina`, permanent: false },
+  { source: '/servir', has: NA_IGREJA, destination: `${SERVIR}/`, permanent: false },
+  { source: `/:pagina(${DO_SERVIR})/:resto*`, has: NA_IGREJA, destination: `${SERVIR}/:pagina/:resto*`, permanent: false },
+];
+
 const nextConfig = {
   /* O harness de design roda `next dev` ao mesmo tempo em que eu rodo
      `next build` para conferir o deploy. Com o mesmo distDir, o build apaga os
@@ -167,12 +221,22 @@ const nextConfig = {
      da página são absolutos (/followcamp/a/...) porque, servida em
      /followcamp sem barra no fim, um caminho relativo apontaria para a raiz. */
   async rewrites() {
-    return [
-      { source: '/followcamp', destination: '/followcamp/index.html' },
-    ];
+    return {
+      /* antes dos arquivos: em "/" existe a home da igreja, e no
+         guiaservir.com quem responde é a LP do Servir (OS DOIS SITES) */
+      beforeFiles: [
+        { source: '/', has: NO_SERVIR, destination: '/servir' },
+      ],
+      afterFiles: [
+        { source: '/followcamp', destination: '/followcamp/index.html' },
+      ],
+    };
   },
   async redirects() {
     return [
+      /* primeiro as regras de cada domínio (OS DOIS SITES, acima): elas
+         passam na frente dos atalhos, que valem nos dois */
+      ...REGRAS_DOS_SITES,
       /* O endereço que a arquitetura previu para a porta do voluntário. A
          página que ele descreve já existe e é melhor: /eu não só explica o
          link pessoal como resolve — lista as áreas, leva à lista da equipe e

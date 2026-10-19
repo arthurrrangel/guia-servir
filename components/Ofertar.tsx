@@ -328,10 +328,12 @@ export function Ofertar({ temCartao = false }: { temCartao?: boolean }) {
   return (
     <div className="of" ref={caixa}>
       {vivo}
-      <p className="g-ed">Leva menos de um minuto, e você decide o valor.</p>
-
+      {/* 19/10/2026: a frase "Leva menos de um minuto, e você decide o valor."
+          e o "O que você está entregando" estavam duas vezes na tela: são o
+          subtítulo do herói e o título da faixa (copy final). Aqui o título do
+          grupo fica só para o leitor de tela. */}
       <fieldset className="of-tipo">
-        <legend className="g-rot">O que você está entregando</legend>
+        <legend className="g-rot so-leitor">O que você está entregando</legend>
         {TIPOS.map(t => (
           <button key={t.id} type="button"
             className={`of-tipo-bt${tipo === t.id ? ' on' : ''}`}

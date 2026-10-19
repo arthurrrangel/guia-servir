@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
@@ -21,11 +22,15 @@ import { Schema } from '@/components/site/Schema';
    "Prefiro conversar direto" dele desce para baixo do formulário. Os grupos
    seguem no trilho: ali ele é a lista do mapa (o pino tocado traz o cartão),
    e o mapa mostra os doze de uma vez.
+
+   19/10/2026, a copy final: o texto do herói (conhecido pelo nome no meio
+   da semana), o botão "Encontrar a minha Pequena Guia" no formulário e o
+   link "Prefiro começar pelos cultos" para quem ainda não quer um grupo.
    ============================================================================= */
 
 export const metadata: Metadata = {
   title: 'Pequena Guia',
-  description: 'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida e estudar a Palavra.',
+  description: 'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto.',
   alternates: { canonical: '/pequena-guia' },
   openGraph: { title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg', width: 1200, height: 630 }] },
 };
@@ -50,7 +55,7 @@ export default function PequenaGuia() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
           <Vozes as="h1" id="t-pg" className="s-h1 longa" it="sua fé">Relacionamentos que fortalecem sua fé</Vozes>
-          <p className="s-lead grande">{ligaTexto("Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida, estudar a Palavra e crescer em comunidade.")}</p>
+          <p className="s-lead grande"><UmaLinha semFim texto="A Pequena Guia é um grupo que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto. É onde você é conhecido pelo nome, no meio da semana, não só no domingo." /></p>
           <div className="s-acoes">
             <Pil href="#encontrar">Encontrar a minha</Pil>
             <Pil href="#grupos">Ver os grupos</Pil>
@@ -90,6 +95,8 @@ export default function PequenaGuia() {
             <h2 id="t-encontrar" className="s-h2 menor">{liga("Encontre uma Pequena Guia perto de você.")}</h2>
             <p className="s-lead">{ligaTexto("Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.")}</p>
             <div style={{ marginTop: 'clamp(24px,3vw,40px)', textAlign: 'left' }}><FormPequenaGuia /></div>
+            {/* quem ainda não quer um grupo (copy final, 19/10/2026) */}
+            <p className="s-aviso"><Link href="/cultos" className="s-link">Prefiro começar pelos cultos</Link></p>
             {/* no celular o fecho sai; a conversa direta, que só ele tinha, fica aqui */}
             <p className="s-aviso so-celular">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
           </div>

@@ -146,7 +146,14 @@ export const SITE = 'https://guiaservir.com';
    o mesmo app; o que muda é o endereço CANÔNICO que o Google e os cartões de
    prévia leem para as páginas públicas: canonical, sitemap, robots, JSON-LD
    e Open Graph apontam para cá. `SITE` continua sendo o endereço dos links
-   do sistema (cron, demandas, ICS), que seguem em guiaservir.com. */
+   do sistema (cron, demandas, ICS), que seguem em guiaservir.com.
+
+   19/10/2026: OS DOIS SITES. O Servir saiu do site da igreja e virou o Guia
+   Servir: guiaservir.com mostra a LP na raiz, as áreas e o sistema;
+   guiachurch.com, só a igreja. `SITE` passa a ser também o endereço canônico
+   das páginas do Servir (app/(servir)/layout.tsx). Os links de um site para
+   o outro: lib/site/sites.ts. Quem mostra o quê em cada domínio:
+   next.config.mjs, "OS DOIS SITES". */
 export const SITE_IGREJA = 'https://guiachurch.com';
 
 /** O canal de conversa que existe hoje. Vira WhatsApp no dia em que o número
@@ -176,11 +183,14 @@ export function canalDeConversa(texto?: string): { href: string; rot: string } {
    `l` é a letra ('>' vira o chevron da marca na hora de desenhar), `t` a
    palavra e `d` a linha que ela ganha onde há espaço para descrição.
 ============================================================================= */
+/* 19/10/2026, a copy final: as definições antigas (institucionais, "Somos
+   um povo. Não caminhamos isoladamente.") deram lugar às que falam com a
+   pessoa. Valem para a home e para /sobre, que leem daqui. */
 export const SIGLA = [
-  { l: 'G', t: 'Grupo', d: 'Somos um povo. Não caminhamos isoladamente.' },
-  { l: 'U', t: 'Unido', d: 'Cada pessoa tem um papel na construção de algo maior do que si mesma.' },
-  { l: 'I', t: 'Interagindo', d: 'Cultura se constrói por relacionamento, comunicação e participação.' },
-  { l: '>', t: 'Avançando', d: 'Um povo unido, que se comunica e anda na mesma direção, tem força para avançar.' },
+  { l: 'G', t: 'Grupo', d: 'Aqui, ninguém caminha sozinho.' },
+  { l: 'U', t: 'Unido', d: 'Você tem um nome, um lugar e um papel nessa história.' },
+  { l: 'I', t: 'Interagindo', d: 'Vida em comunidade acontece na conversa, na oração e na presença.' },
+  { l: '>', t: 'Avançando', d: 'Juntos, vamos mais longe do que iríamos sozinhos.' },
 ];
 
 /** A sigla escrita como frase.

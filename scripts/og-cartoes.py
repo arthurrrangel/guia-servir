@@ -8,12 +8,17 @@ apoio. Este script gera todos os outros no mesmo desenho, a partir das fotos
 de public/fotos e das fontes de public/tipos (as mesmas do site).
 
 Uso: python3 scripts/og-cartoes.py        (grava public/og*.jpg, 1200×630)
+     python3 scripts/og-cartoes.py og.jpg   (só os cartões citados)
 Precisa de Pillow e fontTools (com brotli, para ler woff2).
+
+19/10/2026: a copy final tirou o "Cultivando uma nova cultura" das páginas
+(og.jpg e og-sobre.jpg ganharam os títulos novos), e o /acessar mudou para o
+Guia Servir: o cartão dele leva guiaservir.com no canto, não guiachurch.com.
 """
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from fontTools.ttLib import TTFont
 from fontTools.varLib import instancer
-import io, os
+import io, os, sys
 
 RAIZ = os.path.join(os.path.dirname(__file__), '..')
 FOTOS = os.path.join(RAIZ, 'public', 'fotos')
@@ -61,11 +66,10 @@ def foto(nome, foco=(0.5, 0.5)):
         d2.line([(0, j), (W, j)], fill=(8, 8, 10, a))
     return Image.alpha_composite(base, veu2).convert('RGB')
 
-def marca(im):
-    """a marca GUI> CHURCH no canto de baixo à direita, em branco"""
+def marca(im, txt='guiachurch.com'):
+    """o domínio do site no canto de baixo à direita, em branco"""
     d = ImageDraw.Draw(im)
     f = F(INTER_600, 22)
-    txt = 'guiachurch.com'
     w = d.textlength(txt, font=f)
     d.text((W - 64 - w, H - 64 - 22), txt, font=f, fill=(255, 255, 255, 230))
 
@@ -82,7 +86,11 @@ def titulo(d, linhas, y, tam, x=64, cor=(255, 255, 255)):
         y += lh
     return y
 
-def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92):
+SO = set(sys.argv[1:])
+
+def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com'):
+    if SO and nome_saida not in SO:
+        return
     im = foto(arquivo_foto, foco)
     d = ImageDraw.Draw(im)
     n = len(linhas)
@@ -91,7 +99,7 @@ def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam
     d.text((64, y0), chapeu, font=F(INTER_600, 24), fill=OURO)
     y = titulo(d, linhas, y0 + 24 + 20, tam)
     d.text((64, y + round(tam * 0.34)), apoio, font=F(INTER_600, 27), fill=(255, 255, 255))
-    marca(im)
+    marca(im, dominio)
     im.save(os.path.join(SAIDA, nome_saida), 'JPEG', quality=86, optimize=True, progressive=True)
     print(nome_saida)
 
@@ -99,7 +107,7 @@ P = lambda s: [(w, False) for w in s.split(' ')]
 IT = lambda s: [(s, True)]
 
 cartao('og.jpg', 'pregacao.webp', 'GUIA Church · Barra da Tijuca',
-       [P('Cultivando uma'), P('nova') + IT('cultura.')],
+       [P('Existe um lugar'), IT('para você.')],
        'Domingos às 10h · Follow aos sábados às 19h', foco=(0.6, 0.3))
 cartao('og-cultos.jpg', 'louvor-pb.webp', 'Cultos · Domingo, 10h',
        [P('Um domingo'), P('para') + IT('pertencer.')],
@@ -108,11 +116,11 @@ cartao('og-como-chegar.jpg', 'predio.webp', 'Onde fica',
        [P('Como') + IT('chegar.')],
        'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro', foco=(0.5, 0.4))
 cartao('og-sobre.jpg', 'abraco-palco.webp', 'Quem somos',
-       [P('Uma comunidade que'), P('cultiva uma nova') + IT('cultura.')],
+       [P('Uma igreja que parece'), P('com a vida') + IT('de quem chega.')],
        'Grupo Unido, Interagindo e Avançando', foco=(0.5, 0.3), tam=76)
 cartao('og-pequena-guia.jpg', 'acolhida.webp', 'Pequena Guia',
        [P('Relacionamentos'), P('que fortalecem sua') + IT('fé.')],
        'Grupos durante a semana, perto de você', foco=(0.5, 0.4), tam=80)
 cartao('og-acessar.jpg', 'midia.webp', 'Acesso às equipes',
        [P('Quem é') + IT('você?')],
-       'Sou voluntário · Sou da organização · Quero participar', foco=(0.5, 0.5))
+       'Sou voluntário · Sou da organização · Quero participar', foco=(0.5, 0.5), dominio='guiaservir.com')

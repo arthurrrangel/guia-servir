@@ -88,7 +88,7 @@ export default function Eventos() {
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
               <p className="s-lead"><UmaLinha semFim texto="Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está." /></p>
               <div className="s-acoes" style={{ marginTop: 26 }}>
-                <Pil href="/cultos#como-chegar">Como chegar</Pil>
+                <Pil href="/como-chegar">Como chegar</Pil>
                 <Pil href={IGREJA.instagram} fora>{IGREJA.instagramArroba}</Pil>
               </div>
             </div>

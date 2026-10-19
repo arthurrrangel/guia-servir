@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
+import { noServir } from '@/lib/site/sites';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
 import { Vozes, Sede, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
@@ -13,11 +14,17 @@ import { Schema } from '@/components/site/Schema';
    de sempre, no desenho daqui) · por que ofertamos (em passos) · o fecho.
    Nada aqui é cobrança: visitante vem pra receber.
    14/10/2026, no celular: cada razão com a primeira frase.
+
+   19/10/2026: O SITE PROMETIA O QUE NÃO TINHA. Herói, descrição e menu
+   diziam "Pix, cartão, Apple Pay ou Google Pay", e em produção o cartão está
+   desligado: sem a chave do adquirente, TEM_CHECKOUT é falso e o formulário
+   mostra só o Pix (medido no HTML de guiachurch.com/ofertar). A copy final
+   também diz "Forma: Pix". O cartão só aparece nas frases quando existe.
    ============================================================================= */
 
 export const metadata: Metadata = {
   title: 'Ofertar',
-  description: 'Dízimos e ofertas da GUIA Church: Pix, cartão, Apple Pay ou Google Pay. Leva menos de um minuto, e você decide o valor.',
+  description: `Dízimos e ofertas da GUIA Church${TEM_CHECKOUT ? ': Pix, cartão, Apple Pay ou Google Pay' : ' pelo Pix'}. Leva menos de um minuto, e você decide o valor.`,
   alternates: { canonical: '/ofertar' },
   openGraph: { title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og.jpg', width: 1200, height: 630 }] },
 };
@@ -38,7 +45,7 @@ export default function Pagina() {
         <div className="s-in s-heroi-in">
           <Chapeu forte="Doação" resto="Dízimos e ofertas" />
           <Vozes as="h1" id="t-of" className="s-h1" it="adorar">Ofertar é adorar</Vozes>
-          <p className="s-lead grande">Leva menos de um minuto, e você decide o valor.<span className="s-resto"> Pix, cartão, Apple Pay ou Google Pay.</span></p>
+          <p className="s-lead grande">Leva menos de um minuto, e você decide o valor.{TEM_CHECKOUT && <span className="s-resto"> Pix, cartão, Apple Pay ou Google Pay.</span>}</p>
           <div className="s-acoes">
             <Pil href="#ofertar">Ofertar agora</Pil>
             <Pil href="#porque">Por que ofertamos</Pil>
@@ -71,7 +78,7 @@ export default function Pagina() {
 
       <Fecho titulo="Que Deus multiplique o que você semeou" it="o que você semeou">
         <Pil href="/cultos">Ver os cultos</Pil>
-        <Pil href="/servir">Quero servir</Pil>
+        <Pil href={noServir('/')}>Quero servir</Pil>
       </Fecho>
     </>
   );

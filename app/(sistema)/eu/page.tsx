@@ -52,7 +52,7 @@ export default function PortaDoEspaco() {
           rot="Espaço do voluntário"
           titulo="Acessar meu espaço"
           vozes
-          apoio="Sua escala, seus dias e seu líder. Comece dizendo em que área você serve."
+          apoio="Ache seu nome na lista da sua área e entre com seu PIN."
         />
 
         {fase === 'carregando' && <Carregando o="Carregando as áreas" />}
@@ -67,9 +67,11 @@ export default function PortaDoEspaco() {
             <div>
               {mins.map(m => (
                 <Link key={m.slug} href={`/equipe/${m.slug}`} className="escolha">
+                  {/* 19/10/2026: a frase "Ache seu nome na lista e entre com seu
+                      PIN." saiu de cada área: a copy final pôs a mesma frase no
+                      apoio do título, e a tela passou a dizê-la sete vezes */}
                   <span className="escolha-txt">
                     <span className="escolha-nome">{m.nome}</span>
-                    <p className="escolha-desc">Ache seu nome na lista e entre com seu PIN.</p>
                   </span>
                   <span className="escolha-fim" aria-hidden="true"><IcSeta /></span>
                 </Link>

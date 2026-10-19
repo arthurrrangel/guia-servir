@@ -1,7 +1,7 @@
 /* =============================================================================
    AS FOTOS DO SITE — um lugar por foto, uma linha por lugar · 11/10/2026
 
-   O site novo (app/(site)/) não escreve caminho de foto em página nenhuma:
+   O site novo (app/(igreja)/ e app/(servir)/) não escreve caminho de foto em página nenhuma:
    pede `foto('home-heroi')`. Cada lugar está registrado aqui com o arquivo
    ATUAL, o corte que o lugar faz, o ponto que não pode ser cortado e a
    instrução do que a foto precisa mostrar.

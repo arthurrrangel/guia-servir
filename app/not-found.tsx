@@ -47,7 +47,9 @@ export default function NaoEncontrada() {
           <Link href="/" className="nf-pil">Ir para o início</Link>
           <Link href="/cultos" className="nf-pil">Ver os cultos</Link>
         </div>
-        <p className="nf-micro">{IGREJA.frase}.</p>
+        {/* 19/10/2026: era o "Cultivando uma nova cultura", que a copy final
+            tirou de todas as páginas (fica só no rodapé do site) */}
+        <p className="nf-micro">Existe um lugar para você.</p>
       </main>
     </div>
   );

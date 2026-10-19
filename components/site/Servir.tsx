@@ -110,7 +110,8 @@ export function NumerosVivos({ num, circulos = ['circ-louvor', 'circ-colete'] }:
       )}
       <div className="s-dir s-rev d1">
         <Arroba className="dir" />
-        <Vozes className="s-h2 media">Números vivos</Vozes>
+        {/* 19/10/2026: "Hoje na GUIA" (copy da LP do Servir); era "Números vivos" */}
+        <Vozes className="s-h2 media" it="na GUIA">Hoje na GUIA</Vozes>
         <ul className="s-vivos">
           {/* no celular o número fica só com o rótulo (a regra de 11/10:
               "números só com rótulo"); a frase segue no computador */}
@@ -215,7 +216,10 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
     setIndo(true);
     if (area === NAO_SEI) { mins.forEach(m => guardar(m.slug)); router.push('/servir/onde-me-encaixo'); return; }
     guardar(area);
-    router.push(`/servir/${area}/cadastro`);
+    /* o cadastro é sistema (outra folha de estilo): carregamento inteiro, não
+       router.push, senão a folha do sistema fica na página do site quando a
+       pessoa volta (components/Fronteira.tsx) */
+    window.location.assign(`/servir/${area}/cadastro`);
   }, [indo, nome, tel, area, mins, router]);
 
   return (

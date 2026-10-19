@@ -5,7 +5,7 @@ import { FOTOS, type LugarDeFoto, type Foto } from '@/lib/site/fotos';
    OS BLOCOS DO SITE — as peças pequenas que toda página usa · 11/10/2026
 
    Tudo aqui é componente de servidor (sem estado): o HTML já nasce pronto.
-   O desenho de cada peça está em app/(site)/site.css, com o nome da tela
+   O desenho de cada peça está em app/site.css, com o nome da tela
    da apresentação de onde ela veio.
    ============================================================================= */
 
@@ -121,13 +121,23 @@ export function Chapeu({ forte, resto, mudo }: { forte: string; resto?: string; 
   );
 }
 
-/* a pílula: Link para dentro, <a> para fora e para o sistema */
+/* a pílula: Link para dentro, <a> para fora e para o sistema.
+   19/10/2026: endereço completo (o outro site da GUIA, lib/site/sites.ts) e
+   qualquer âncora também vão de <a>. O <Link> busca a página por fetch: para
+   outro domínio o fetch esbarra no CORS, e uma âncora de outra página
+   (/servir#areas) que passa por um redirecionamento perde o ponto. */
 export function Pil({ href, children, tom = '', duro, fora, className = '' }:
   { href: string; children: React.ReactNode; tom?: '' | 'preta' | 'vidro' | 'contorno'; duro?: boolean; fora?: boolean; className?: string }) {
   const cls = `s-pil ${tom} ${className}`.trim();
   if (fora) return <a href={href} target="_blank" rel="noreferrer" className={cls}>{children}</a>;
-  if (duro || href.startsWith('#')) return <a href={href} className={cls}>{children}</a>;
+  if (duro || href.includes('#') || /^https?:/.test(href)) return <a href={href} className={cls}>{children}</a>;
   return <Link href={href} className={cls}>{children}</Link>;
+}
+
+/* o cartão (ou qualquer bloco que é link inteiro) com a mesma regra da pílula */
+export function Ir({ href, className, children, duro }: { href: string; className?: string; children: React.ReactNode; duro?: boolean }) {
+  if (duro || href.includes('#') || /^https?:/.test(href)) return <a href={href} className={className}>{children}</a>;
+  return <Link href={href} className={className}>{children}</Link>;
 }
 
 /* a foto de um lugar do registro, com a versão pequena quando existe */

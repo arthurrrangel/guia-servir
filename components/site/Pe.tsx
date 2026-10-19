@@ -1,16 +1,29 @@
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/Marca';
-import { MENU } from '@/lib/site/nav';
+import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
+import { daGuia } from '@/lib/site/sites';
 import { Sede, Sep } from './Blocos';
 
 /* =============================================================================
-   O PÉ — a marca, a frase, o endereço e os cinco grupos do menu · 11/10/2026
+   O PÉ: a marca, a frase, o endereço e os grupos do menu · 11/10/2026
    O pé usa a mesma lista da barra (lib/site/nav.ts): um link novo entra nos
    dois de uma vez. No celular ficam só horário, endereço, mapa e os links
    de baixo (14/10/2026).
+
+   19/10/2026: o mesmo pé nos dois sites, cada um com os grupos do seu menu.
+   A frase da marca ("Cultivando uma nova cultura") só mora aqui: a copy
+   final tirou o conceito de todas as páginas e deixou no rodapé.
    ============================================================================= */
-export default function Pe() {
+function Ir({ it }: { it: Item }) {
+  if (/^https?:/.test(it.href) && !daGuia(it.href)) return <a href={it.href} target="_blank" rel="noreferrer">{it.rot}</a>;
+  if (/^https?:/.test(it.href) || it.duro || it.href.includes('#')) return <a href={it.href}>{it.rot}</a>;
+  return <Link href={it.href}>{it.rot}</Link>;
+}
+
+export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
+  const { menu, pe } = MAPAS[site];
   const conversa = canalDeConversa();
   const ano = new Date().getFullYear();
   return (
@@ -26,19 +39,11 @@ export default function Pe() {
               <a href={MAPA} target="_blank" rel="noreferrer">Ver no mapa</a>
             </p>
           </div>
-          {MENU.map(g => (
+          {menu.map(g => (
             <nav key={g.rot} aria-label={g.rot}>
               <h2>{g.rot}</h2>
               <ul>
-                {g.itens.map(it => (
-                  <li key={it.href + it.rot}>
-                    {/^https?:/.test(it.href)
-                      ? <a href={it.href} target="_blank" rel="noreferrer">{it.rot}</a>
-                      : it.duro || it.href.includes('#')
-                        ? <a href={it.href}>{it.rot}</a>
-                        : <Link href={it.href}>{it.rot}</Link>}
-                  </li>
-                ))}
+                {g.itens.map(it => <li key={it.href + it.rot}><Ir it={it} /></li>)}
               </ul>
             </nav>
           ))}
@@ -54,10 +59,12 @@ export default function Pe() {
             <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
             <i className="s-ponto" aria-hidden="true"> · </i>
             <a href={conversa.href} target="_blank" rel="noreferrer">WhatsApp</a>
-            <i className="s-ponto" aria-hidden="true"> · </i>
-            <Link href="/acessar">Acesso às equipes</Link>
-            <i className="s-ponto" aria-hidden="true"> · </i>
-            <Link href="/privacidade">Privacidade</Link>
+            {pe.map(it => (
+              <Fragment key={it.rot}>
+                <i className="s-ponto" aria-hidden="true"> · </i>
+                <Ir it={it} />
+              </Fragment>
+            ))}
           </span>
         </div>
       </div>

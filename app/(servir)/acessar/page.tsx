@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { SITE_IGREJA as SITE } from '@/lib/igreja';
+import { SITE } from '@/lib/igreja';
+import { lp } from '@/lib/site/sites';
 import { Vozes, Sede, Chapeu, Pil, Seta, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 
@@ -17,13 +18,13 @@ export const metadata: Metadata = {
   title: 'Acesso às equipes',
   description: 'Sou voluntário, sou da organização ou quero participar: três caminhos, nenhum pede cadastro.',
   alternates: { canonical: '/acessar' },
-  openGraph: { title: 'Acesso às equipes · GUIA Church', url: `${SITE}/acessar`, images: [{ url: '/og-acessar.jpg', width: 1200, height: 630 }] },
+  openGraph: { title: 'Acesso às equipes · GUIA Servir', url: `${SITE}/acessar`, siteName: 'GUIA Servir', images: [{ url: '/og-acessar.jpg', width: 1200, height: 630 }] },
 };
 
 const PORTAS = [
   { href: '/eu', n: '01', t: 'Sou voluntário', f: 'Ver a minha escala', d: 'Escolha a sua área, ache o seu nome e entre com o PIN de quatro números. Sem PIN, você cria na hora.', duro: true },
   { href: '/entrar', n: '02', t: 'Sou da organização', f: 'Administrar escalas e equipes', d: 'A porta da liderança: entra com o e-mail cadastrado e recebe o link de acesso.', duro: true },
-  { href: '/servir', n: '03', t: 'Quero participar', f: 'Começar a servir numa área', d: 'Você escolhe a área, se cadastra, e a liderança fala com você antes de qualquer escala.', duro: false },
+  { href: lp(), n: '03', t: 'Quero participar', f: 'Começar a servir numa área', d: 'Você escolhe a área, se cadastra, e a liderança fala com você antes de qualquer escala.', duro: false },
 ];
 
 const DUVIDAS = [

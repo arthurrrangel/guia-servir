@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
+import { noServir } from '@/lib/site/sites';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
@@ -13,11 +14,19 @@ import { Schema } from '@/components/site/Schema';
    (em passos) · o alvo (de → para, no cartão claro) · conheça de perto.
    14/10/2026, no celular: uma frase sob cada título; o "não queremos encher
    bancos" sai do começo porque o alvo, mais embaixo, diz o mesmo.
+
+   19/10/2026, A COPY FINAL: o título deixa o conceito interno ("cultiva uma
+   nova cultura") e fala com quem chega. O texto final tem três parágrafos,
+   e cada um foi para onde ele conversa com o resto da página: o primeiro no
+   herói; o terceiro (pertencer sem ter a vida resolvida) no "mais do que um
+   lugar para frequentar"; o segundo (o nome) abre a sigla, que vem logo
+   depois e diz o mesmo nome letra por letra. O "não queremos encher bancos"
+   sai de vez: o alvo diz o mesmo, e o terceiro parágrafo já fala do banco.
    ============================================================================= */
 
 export const metadata: Metadata = {
   title: 'Quem somos',
-  description: `Uma comunidade que cultiva uma nova cultura. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
+  description: `Uma igreja que parece com a vida de quem chega. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
   openGraph: { title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg', width: 1200, height: 630 }] },
 };
@@ -46,11 +55,11 @@ export default function Sobre() {
         <Fundo video="sobre" prioridade />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Quem somos" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="uma nova cultura">Uma comunidade que cultiva uma nova cultura</Vozes>
-          <p className="s-lead grande">A GUIA existe pra ajudar pessoas a viver uma fé prática.<span className="s-resto"> Uma fé construída em relacionamento com Deus e com outras pessoas.</span></p>
+          <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="de quem chega">Uma igreja que parece com a vida de quem chega</Vozes>
+          <p className="s-lead grande"><UmaLinha semFim texto="A GUIA existe pra uma coisa simples: ajudar você a viver uma fé prática, com Deus, com as pessoas e no dia a dia. Sem fórmula pronta, sem encenação. Fé que funciona de segunda a segunda." /></p>
           <div className="s-acoes">
             <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href="/servir">Quero servir</Pil>
+            <Pil href="/pequena-guia">Conhecer uma Pequena Guia</Pil>
           </div>
         </div>
       </section>
@@ -61,8 +70,7 @@ export default function Sobre() {
           <div className="s-duas">
             <div className="s-rev">
               <Vozes className="s-h2 media" it="para frequentar">Mais do que um lugar para frequentar</Vozes>
-              <p className="s-lead">{ligaTexto("Acreditamos que a igreja é uma comunidade: um lugar onde cada pessoa encontra acolhimento, cresce na fé, desenvolve seus dons e participa do que Deus está fazendo.")}</p>
-              <p className="s-lead so-largo">{ligaTexto("Não queremos encher bancos. Queremos formar gente comprometida com o Reino.")}</p>
+              <p className="s-lead"><UmaLinha semFim texto="Aqui, você não precisa ter a vida resolvida pra pertencer. Visitante vira família, a fé sai do banco e entra na vida. E sempre cabe mais um." /></p>
             </div>
             <div className="s-foto h s-rev d1"><Img lugar="sobre-comunidade" sizes="(max-width: 999px) 90vw, 34vw" /></div>
           </div>
@@ -75,7 +83,7 @@ export default function Sobre() {
           <div className="s-cab centro s-rev">
             <Sede />
             <h2 id="t-sigla" className="s-h2">Somos GUIA.</h2>
-            <p className="s-lead">{SIGLA_FRASE}.<span className="s-resto"> O chevron da marca é o avanço.</span></p>
+            <p className="s-lead"><UmaLinha semFim texto={`Somos um ${SIGLA_FRASE}. Não é só o nosso nome. É o jeito que escolhemos viver: de perto, em comunidade, caminhando juntos.`} /></p>
           </div>
           <ul className="s-sigla s-rev d1">
             {SIGLA.map(l => (
@@ -118,14 +126,14 @@ export default function Sobre() {
             <ul className="s-vira" style={{ marginTop: 'clamp(24px,3vw,40px)' }}>
               {VIRA.map(v => <li key={v.de}><span>{v.de}</span><Chevron /><span>{v.para}</span></li>)}
             </ul>
-            <div className="s-acoes centro"><Pil href="/servir" tom="preta">Quero servir</Pil></div>
+            <div className="s-acoes centro"><Pil href={noServir('/')} tom="preta">Quero servir</Pil></div>
           </div>
         </div>
       </section>
 
       {/* depois do cartão na noite, o fecho vem no papel */}
       <Fecho tom="papel" titulo="Conheça a GUIA de perto" it="de perto" chapeu={<Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />}>
-        <Pil href="/cultos#como-chegar" tom="preta">Como chegar</Pil>
+        <Pil href="/como-chegar" tom="preta">Como chegar</Pil>
         <Pil href="/cultos" tom="contorno">Ver os cultos</Pil>
       </Fecho>
     </>

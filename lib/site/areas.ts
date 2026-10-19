@@ -29,7 +29,7 @@ export type Area = {
 export const AREAS: Record<string, Area> = {
   midia: {
     nome: 'Mídia', artigo: 'a', postos: 10, aberto: true,
-    frase: 'Faça a mensagem chegar mais longe',
+    frase: 'Faça a mensagem chegar longe',
     texto: 'Da letra no telão à foto que alcança quem ainda não conhece a casa, passando pela transmissão pra quem acompanha de longe. Tem posto até pra quem prefere servir na semana: a edição é a única que não exige estar no domingo.',
     linha: 'Imagem, luz, som e transmissão.',
     convite: 'Você não precisa saber operar nada. Precisa gostar de câmera, de computador ou de edição, e querer aprender. O resto a equipe ensina no próprio domingo.',

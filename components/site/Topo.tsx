@@ -3,8 +3,9 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Simbolo } from '@/components/Marca';
-import { MENU, MENU_CELULAR, BUSCA, type Item } from '@/lib/site/nav';
+import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
+import { daGuia } from '@/lib/site/sites';
 import { Lupa, Fechar, SetaBaixo } from './Blocos';
 
 /* =============================================================================
@@ -27,19 +28,27 @@ import { Lupa, Fechar, SetaBaixo } from './Blocos';
    A BUSCA é um véu com um campo: filtra o menu e a lista BUSCA de
    lib/site/nav.ts (perguntas como a pessoa digita). Sem rede, sem índice
    externo: são 30 linhas, cabem no aparelho.
+
+   19/10/2026: a mesma barra serve aos dois sites (Guia Church e Guia
+   Servir); `site` escolhe o mapa (lib/site/nav.ts). Link para o outro site
+   é endereço completo e abre na mesma aba.
    ============================================================================= */
 
 const normal = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+/* para fora (Instagram, WhatsApp): aba nova. Para o outro site da GUIA, para
+   o sistema (outra folha de estilo) ou para uma âncora: <a> comum. O resto,
+   <Link> (navegação sem recarregar) */
 function LinkOu({ item, className, onClick, atual, children }: { item: Item; className?: string; onClick?: () => void; atual?: boolean; children: React.ReactNode }) {
-  const fora = /^https?:/.test(item.href);
+  const completo = /^https?:/.test(item.href);
   const aqui = atual ? 'page' as const : undefined;
-  if (fora) return <a href={item.href} target="_blank" rel="noreferrer" className={className} onClick={onClick}>{children}</a>;
-  if (item.duro || item.href.includes('#')) return <a href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</a>;
+  if (completo && !daGuia(item.href)) return <a href={item.href} target="_blank" rel="noreferrer" className={className} onClick={onClick}>{children}</a>;
+  if (completo || item.duro || item.href.includes('#')) return <a href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</a>;
   return <Link href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</Link>;
 }
 
-export default function Topo() {
+export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
+  const { menu: MENU, celular: MENU_CELULAR, busca: BUSCA, inicio, jaSirvo, nada } = MAPAS[site];
   const caminho = usePathname() || '/';
   const [aberto, setAberto] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
@@ -85,13 +94,13 @@ export default function Topo() {
       return 0;
     };
     return tudo.map(i => ({ i, p: pontua(i) })).filter(x => x.p > 0).sort((a, b) => b.p - a.p).map(x => x.i).slice(0, 10);
-  }, [q]);
+  }, [q, MENU, BUSCA]);
 
   return (
     <>
       <header className="s-topo">
         <div className="s-in s-topo-in">
-          <Link href="/" className="s-logo" aria-label={IGREJA.nome}><Simbolo /></Link>
+          <Link href={inicio} className="s-logo" aria-label={site === 'servir' ? `Servir · ${IGREJA.nome}` : IGREJA.nome}><Simbolo /></Link>
 
           <ul className="s-nav" aria-label="Seções do site">
             {MENU.map((g, i) => (
@@ -102,7 +111,7 @@ export default function Topo() {
                   {g.rot}<SetaBaixo />
                 </button>
                 <div id={`s-sub-${i}`} className={'s-sub' + (aberto === i ? ' aberto' : '')}>
-                  <Link href={g.href}><b>{g.rot}</b><small>Abrir a página</small></Link>
+                  <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }}><b>{g.rot}</b><small>Abrir a página</small></LinkOu>
                   {g.itens.map(it => (
                     <LinkOu key={it.href + it.rot} item={it}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu>
                   ))}
@@ -139,7 +148,7 @@ export default function Topo() {
         <div className="s-cortina-pe">
           <a href={conversa.href} target="_blank" rel="noreferrer">{IGREJA.whatsapp ? 'WhatsApp' : 'Fale com a gente'}</a>
           <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>
-          <a href="/eu" onClick={() => setMenu(false)}>Já sirvo</a>
+          <a href={jaSirvo} onClick={() => setMenu(false)}>Já sirvo</a>
         </div>
       </div>
 
@@ -151,7 +160,7 @@ export default function Topo() {
           <input ref={campo} id="s-busca-campo" type="search" placeholder="O que você procura?" value={q} onChange={e => setQ(e.target.value)} autoComplete="off" />
           {achados.length
             ? <ul>{achados.map(it => <li key={it.href + it.rot}><LinkOu item={it} onClick={() => setBusca(false)}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu></li>)}</ul>
-            : <p className="s-busca-nada">Nada com esse nome. Tente "culto", "endereço", "servir" ou "pix".</p>}
+            : <p className="s-busca-nada">{nada}</p>}
         </div>
       </div>
     </>

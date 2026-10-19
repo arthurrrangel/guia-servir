@@ -10,8 +10,10 @@ import type { Metadata, Viewport } from 'next';
    · app/(sistema)/layout.tsx — globals.css, editorial.css, identidade.css,
      Medidas e Transicao, exatamente como a raiz carregava antes. É o casco
      do painel, da escala, do /eu, das demandas, do cadastro de área.
-   · app/(site)/layout.tsx — site.css, o site público refeito do zero com
-     base na apresentação ApresentaSite.pdf. Não conhece o CSS do sistema.
+   · app/(igreja)/layout.tsx e app/(servir)/layout.tsx: app/site.css, o
+     site público refeito do zero com base na apresentação ApresentaSite.pdf
+     (até 19/10/2026 um grupo só, app/(site)/; agora o Guia Church e o Guia
+     Servir, a mesma folha). Não conhecem o CSS do sistema.
 
    Por que separar: o site público carregava nove mil linhas de CSS do
    sistema para pintar uma página de igreja, e toda regra de elemento
@@ -22,22 +24,31 @@ import type { Metadata, Viewport } from 'next';
    dois lados; o @font-face mora em cada folha, o preload mora aqui.
    ============================================================================= */
 
+/* 19/10/2026, A COPY FINAL: "Cultivando uma nova cultura" é conceito
+   interno e saiu de todas as páginas (fica só como frase do rodapé). O
+   título padrão diz o que a pessoa procura; o cartão de prévia, a frase do
+   herói. O Guia Servir tem os seus (app/(servir)/layout.tsx).
+
+   O CARTÃO DO TWITTER não leva título nem imagem próprios: com eles aqui,
+   toda página saía com o título da home (o `twitter` da raiz não é trocado
+   pelo `openGraph` de cada página). Sem eles, o X lê o og:title e a
+   og:image de cada uma. */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_IGREJA),
-  title: { default: 'GUIA Church · Cultivando uma nova cultura', template: '%s · GUIA Church' },
+  title: { default: 'GUIA Church · Igreja na Barra da Tijuca', template: '%s · GUIA Church' },
   description:
-    `${IGREJA.cultoDia} às ${IGREJA.cultoHora} na ${IGREJA.rua}, ${IGREJA.bairro}. Venha visitar, ou entre para uma das áreas de voluntários da ${IGREJA.nome}.`,
+    `Uma igreja na ${IGREJA.bairro} feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana. ${IGREJA.cultoDia} às ${IGREJA.cultoHora}, na ${IGREJA.rua}.`,
   appleWebApp: { capable: true, title: 'GUIA', statusBarStyle: 'black-translucent' },
   /* o card que aparece quando alguém cola o link num grupo de WhatsApp. A
      imagem PRECISA ser absoluta (metadataBase resolve isso): com caminho
      relativo, todo link compartilhado sai sem foto. */
   openGraph: {
-    title: 'GUIA Church · Cultivando uma nova cultura',
-    description: `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Comece por aqui, visite um culto ou entre para uma das áreas de voluntários.`,
+    title: 'GUIA Church · Existe um lugar para você',
+    description: `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Uma igreja feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.`,
     url: SITE_IGREJA, type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
     images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
   },
-  twitter: { card: 'summary_large_image', title: 'GUIA Church · Cultivando uma nova cultura', images: ['/og.jpg'] },
+  twitter: { card: 'summary_large_image' },
 };
 /* colorScheme fixo em light: a maioria dos celulares do time está no modo
    escuro do sistema, e sem isso o navegador reescreve campo e select por
