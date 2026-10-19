@@ -145,7 +145,11 @@ const REGRAS_DOS_SITES = [
   { source: '/servir', has: NO_SERVIR, destination: '/', permanent: false },
   { source: `/:pagina(${DA_IGREJA})`, has: NO_SERVIR, destination: `${IGREJA}/:pagina`, permanent: false },
   { source: '/servir', has: NA_IGREJA, destination: `${SERVIR}/`, permanent: false },
-  { source: `/:pagina(${DO_SERVIR})/:resto*`, has: NA_IGREJA, destination: `${SERVIR}/:pagina/:resto*`, permanent: false },
+  /* em duas regras, e não uma com `/:resto*`: na Vercel o resto vazio deixava
+     a barra no fim (guiachurch.com/eu → guiaservir.com/eu/), e o Next ainda
+     dava um segundo salto (308) para tirar a barra. Medido em produção. */
+  { source: `/:pagina(${DO_SERVIR})`, has: NA_IGREJA, destination: `${SERVIR}/:pagina`, permanent: false },
+  { source: `/:pagina(${DO_SERVIR})/:resto+`, has: NA_IGREJA, destination: `${SERVIR}/:pagina/:resto+`, permanent: false },
 ];
 
 const nextConfig = {
