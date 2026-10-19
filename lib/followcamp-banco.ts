@@ -16,7 +16,7 @@
    ============================================================================= */
 if (typeof window !== 'undefined') throw new Error('lib/followcamp-banco.ts é só do servidor');
 
-export type Gravacao = { ok: true; id?: string; repetido?: boolean; novos?: number } | { ok: false; motivo: string };
+export type Gravacao = { ok: true; id?: string; repetido?: boolean; novos?: number; token?: string; repetida?: boolean; comprovantes?: number } | { ok: false; motivo: string; erro?: string };
 
 const URL_PADRAO = 'https://qjtcaijhgldypudzyafz.supabase.co';
 
@@ -29,6 +29,9 @@ function config() {
 }
 
 export const bancoLigado = () => !!config().chave;
+
+/** De qual migração vem cada função, para o motivo dizer o que falta rodar. */
+const MIGRACAO_DE: Record<string, number> = { fc27_minha: 114, fc27_plano_escolher: 114, fc27_comprovante_gravar: 114 };
 
 async function rpcDeServico(nome: string, args: Record<string, unknown>, teto = 8000): Promise<Gravacao> {
   const { url, chave } = config();
@@ -52,10 +55,17 @@ async function rpcDeServico(nome: string, args: Record<string, unknown>, teto = 
         ...(typeof o.id === 'string' ? { id: o.id } : {}),
         ...(o.repetido === true ? { repetido: true } : {}),
         ...(typeof o.novos === 'number' ? { novos: o.novos } : {}),
+        ...(typeof o.token === 'string' ? { token: o.token } : {}),
+        ...(o.repetida === true ? { repetida: true } : {}),
+        ...(typeof o.comprovantes === 'number' ? { comprovantes: o.comprovantes } : {}),
       };
     }
-    if (r.status === 404 || o.code === 'PGRST202') return { ok: false, motivo: 'a migração 110 não rodou (função inexistente)' };
-    return { ok: false, motivo: `banco respondeu ${r.status}${typeof o.erro === 'string' ? ` ${o.erro}` : typeof o.code === 'string' ? ` ${o.code}` : ''}` };
+    if (r.status === 404 || o.code === 'PGRST202') return { ok: false, motivo: `a migração ${MIGRACAO_DE[nome] ?? 110} não rodou (a função ${nome} não existe)` };
+    return {
+      ok: false,
+      motivo: `banco respondeu ${r.status}${typeof o.erro === 'string' ? ` ${o.erro}` : typeof o.code === 'string' ? ` ${o.code}` : ''}`,
+      ...(typeof o.erro === 'string' ? { erro: o.erro } : {}),
+    };
   } catch (e) {
     return { ok: false, motivo: e instanceof Error && e.name === 'AbortError' ? 'banco demorou' : 'banco fora do ar' };
   } finally {
@@ -77,3 +87,53 @@ export const informarPagamento = (p: Record<string, unknown>) => rpcDeServico('f
 
 /** Os pedidos pagos que a API da Stone devolveu, já no formato da 110. */
 export const gravarPedidosDaStone = (lista: Record<string, unknown>[]) => rpcDeServico('fc27_stone_gravar', { p: lista }, 15000);
+
+/* ----------------------------------------------------- 114 · o link pessoal ---
+   A página pessoal (/followcamp/minha/<token>) lê e grava SÓ por aqui: as
+   três funções do banco são da chave de serviço, como as da 110. */
+
+export type MinhaFicha = {
+  campista: string; idade: number | null; irmao: string | null; valor: number | string | null;
+  pagamento: string | null; parcelas: number | null; plano_em: string | null; recebida_em: string;
+};
+export type MeuPagamento = {
+  codigo: string | null; valor: number | string; referente: string; forma: string;
+  conferido: boolean; pago_em: string; criado_em: string; comprovantes: number;
+};
+export type Minha =
+  | { ok: true; agora: string; ficha: MinhaFicha; pagamentos: MeuPagamento[] }
+  | { ok: false; erro: 'LINK_INVALIDO' | 'CANCELADA' | 'FORA_DO_AR' };
+
+/** O que a página pessoal mostra. Nunca lança: banco fora vira FORA_DO_AR. */
+export async function lerMinha(token: string, teto = 8000): Promise<Minha> {
+  const { url, chave } = config();
+  if (!chave) return { ok: false, erro: 'FORA_DO_AR' };
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), teto);
+  try {
+    const r = await fetch(`${url}/rest/v1/rpc/fc27_minha`, {
+      method: 'POST',
+      headers: { apikey: chave, Authorization: `Bearer ${chave}`, 'content-type': 'application/json' },
+      body: JSON.stringify({ p_token: token }),
+      signal: ctl.signal,
+      cache: 'no-store',
+    });
+    const j = await r.json().catch(() => null) as Record<string, unknown> | null;
+    if (r.status === 200 && j && j.ok === true && j.ficha && Array.isArray(j.pagamentos)) {
+      return { ok: true, agora: String(j.agora), ficha: j.ficha as MinhaFicha, pagamentos: j.pagamentos as MeuPagamento[] };
+    }
+    if (r.status === 200 && j && (j.erro === 'LINK_INVALIDO' || j.erro === 'CANCELADA')) return { ok: false, erro: j.erro };
+    return { ok: false, erro: 'FORA_DO_AR' };
+  } catch {
+    return { ok: false, erro: 'FORA_DO_AR' };
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+/** A pessoa escolhe o plano do carnê (uma vez). */
+export const escolherPlano = (token: string, parcelas: number) =>
+  rpcDeServico('fc27_plano_escolher', { p_token: token, p_parcelas: parcelas });
+
+/** O comprovante (e o aviso, se ainda não existe) na ficha do link. */
+export const gravarComprovante = (p: Record<string, unknown>) => rpcDeServico('fc27_comprovante_gravar', { p }, 20000);

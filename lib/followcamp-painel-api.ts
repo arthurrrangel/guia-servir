@@ -21,3 +21,10 @@ export const registrarPagamento = (p: Record<string, unknown>) => rpc<{ id: stri
 export const ajustarPagamento = (id: string, p: Record<string, unknown>) =>
   rpc<Record<string, never>>('fc27_pagamento_ajustar', { p_token: t(), p_id: id, p });
 export const apagarPagamento = (id: string) => rpc<Record<string, never>>('fc27_pagamento_apagar', { p_token: t(), p_id: id });
+
+/* 114 · o comprovante que a pessoa mandou pelo link, e o plano do carnê */
+export type ComprovanteDoBanco = { id: string; tipo: string; criado_em: string; dados: string };
+export const verComprovantes = (pagamento: string) =>
+  rpc<{ comprovantes: ComprovanteDoBanco[] }>('fc27_comprovante_ver', { p_token: t(), p_pagamento: pagamento });
+export const definirPlano = (ficha: string, parcelas: number | null) =>
+  rpc<Record<string, never>>('fc27_ficha_plano', { p_token: t(), p_ficha: ficha, p_parcelas: parcelas });

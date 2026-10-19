@@ -4,7 +4,9 @@
    POST: confere a ficha (lib/followcamp-ficha.ts, as mesmas regras da tela) e
    grava no banco do site pelo servidor (lib/followcamp-banco.ts, migração
    110; até 04/10 era uma planilha que nunca foi ligada). Responde:
-     · { ok:true, guardado:true }  a ficha está no banco, e o painel já mostra;
+     · { ok:true, guardado:true, token } a ficha está no banco, e o painel já
+       mostra; `token` é o link pessoal (114). Com `repetida` (a mesma pessoa
+       já tinha ficha: ela é atualizada, não duplicada) o token NÃO vem;
      · { ok:true, guardado:false } a ficha está certa, mas o banco não gravou
        (a 110 não rodou, fora do ar, demorou). A tela então manda a ficha
        inteira pelo WhatsApp da organização e diz isso.
@@ -51,8 +53,18 @@ export async function POST(req: Request) {
 
   const r = await gravarFicha(fichaParaBanco(v.ficha));
   if (!r.ok) console.error('[followcamp-ficha] o banco não gravou:', r.motivo);
+  /* 114: a ficha NOVA volta com o LINK PESSOAL (o token). A repetida (mesmo
+     nome e nascimento de uma que já existia) NÃO volta com o link: nome e
+     data de nascimento não são segredo, e o link dá acesso aos pagamentos
+     da inscrição. Quem já tinha ficha tem o link da primeira vez; senão, a
+     organização manda pelo botão Cobrar do painel. */
   return NextResponse.json(
-    { ok: true, guardado: r.ok, ...(r.ok ? {} : { motivo: r.motivo }) },
+    {
+      ok: true, guardado: r.ok,
+      ...(r.ok ? {} : { motivo: r.motivo }),
+      ...(r.ok && r.token && !r.repetida ? { token: r.token } : {}),
+      ...(r.ok && r.repetida ? { repetida: true } : {}),
+    },
     { headers: SEM_CACHE });
 }
 

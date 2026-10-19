@@ -60,3 +60,14 @@ div.cartaoTopo{cursor:default}
 .manual{border-top:1px solid var(--dm-linha);padding-top:var(--dm-e3)}
 .manual summary{cursor:pointer;color:var(--dm-ink-2);font-weight:600;min-height:32px;display:flex;align-items:center}
 .manual[open] summary{margin-bottom:var(--dm-e3)}
+
+/* 114 · o link pessoal, o plano e o comprovante */
+.linkEPlano{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--dm-e3) var(--dm-e5);padding-top:var(--dm-e3);border-top:1px solid var(--dm-linha)}
+.linkPessoal{display:flex;flex-wrap:wrap;align-items:center;gap:var(--dm-e1) var(--dm-e2);min-width:0;font-size:14px}
+.linkPessoal a{overflow-wrap:anywhere;color:var(--dm-ink)}
+.planoCampo{display:flex;flex-direction:column;gap:4px;font-size:14px}
+.planoCampo select{min-height:40px;max-width:100%}
+.comprovantes{display:flex;flex-wrap:wrap;gap:var(--dm-e3);padding:var(--dm-e2) 0}
+.comprovantes figure{margin:0;display:flex;flex-direction:column;gap:6px;max-width:min(420px,100%)}
+.comprovantes img{display:block;max-width:100%;max-height:70vh;width:auto;height:auto;border:1px solid var(--dm-linha);border-radius:var(--dm-r2);background:#fff}
+.comprovantes figcaption{font-size:12px}

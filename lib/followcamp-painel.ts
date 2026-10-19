@@ -22,6 +22,7 @@
    ============================================================================= */
 import { semFormula, CABECALHO } from './followcamp-ficha';
 import { emReais, limpaNome, soDigitos } from './followcamp';
+import { contaDaFicha, type Conta } from './followcamp-carne';
 
 export type FormaDaFicha = 'pix' | 'cartao' | 'dinheiro' | 'carne';
 export type Forma = 'pix_direto' | 'link_stone' | 'pix_stone' | 'cartao_stone' | 'dinheiro';
@@ -37,6 +38,8 @@ export type FichaBanco = {
   irmao: string | null; valor: number | null; pagamento: FormaDaFicha | null; imagem: boolean | null;
   termo: string | null; versao_termo: string | null; lancada_por: string | null;
   cancelada_em: string | null; cancelada_por: string | null; motivo: string | null;
+  /** 114: o link pessoal, o plano do carnê e quando a mesma pessoa reenviou a ficha */
+  token?: string | null; parcelas?: number | null; plano_em?: string | null; atualizada_em?: string | null;
 };
 
 export type PagamentoBanco = {
@@ -44,6 +47,8 @@ export type PagamentoBanco = {
   referente: Referente; forma: Forma; valor: number; quem_pagou: string | null; codigo: string | null;
   conferido: boolean; origem: 'manual' | 'site' | 'stone'; stone_pedido: string | null;
   observacao: string | null; registrado_por: string | null;
+  /** 114: quantos comprovantes a pessoa mandou pelo link */
+  comprovantes?: number;
 };
 
 export const ROTULO_FORMA: Record<Forma, string> = {
@@ -78,9 +83,13 @@ export type Situacao = {
   falta: number | null;
   status: Status;
   pagamentos: PagamentoBanco[];
+  /** 114: a conta com o plano do carnê (lib/followcamp-carne.ts) */
+  conta: Conta;
+  /** 114: alguma parcela do carnê venceu sem pagamento nem aviso */
+  atrasado: boolean;
 };
 
-export function situacaoDe(f: FichaBanco, pagamentos: readonly PagamentoBanco[]): Situacao {
+export function situacaoDe(f: FichaBanco, pagamentos: readonly PagamentoBanco[], agora = new Date()): Situacao {
   const meus = pagamentos.filter(p => p.ficha_id === f.id);
   const recebido = meus.filter(p => p.conferido).reduce((s, p) => s + centavos(p.valor), 0);
   const aConferir = meus.filter(p => !p.conferido).reduce((s, p) => s + centavos(p.valor), 0);
@@ -91,7 +100,10 @@ export function situacaoDe(f: FichaBanco, pagamentos: readonly PagamentoBanco[])
     : recebido > 0 ? 'parcial'
     : aConferir > 0 ? 'a_conferir'
     : 'pendente';
-  return { ficha: f, devido, recebido, aConferir, falta, status, pagamentos: meus };
+  const conta = contaDaFicha(
+    { valor: f.valor, pagamento: f.pagamento, parcelas: f.parcelas ?? null, plano_em: f.plano_em ?? null }, meus, agora);
+  const atrasado = !f.cancelada_em && status !== 'quitado' && !!conta.situacao?.atrasada;
+  return { ficha: f, devido, recebido, aConferir, falta, status, pagamentos: meus, conta, atrasado };
 }
 
 export type Resumo = {
@@ -136,7 +148,9 @@ export function resumoDe(fichas: readonly FichaBanco[], pagamentos: readonly Pag
  *  não pagou), quitado depois, desistência no fim; dentro, por nome. */
 const PESO: Record<Status, number> = { a_conferir: 0, parcial: 1, pendente: 2, quitado: 3, cancelada: 4 };
 export function ordenarSituacoes(xs: Situacao[]): Situacao[] {
-  return [...xs].sort((a, b) => PESO[a.status] - PESO[b.status]
+  /* 114: parcela vencida passa na frente de tudo (é cobrança, não conferência) */
+  const peso = (x: Situacao) => (x.atrasado ? -1 : PESO[x.status]);
+  return [...xs].sort((a, b) => peso(a) - peso(b)
     || a.ficha.campista.localeCompare(b.ficha.campista, 'pt-BR', { sensitivity: 'base' }));
 }
 

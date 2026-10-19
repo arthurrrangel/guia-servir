@@ -23,7 +23,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEu } from '@/components/demandas/Casca';
 import { Aviso, Cabecalho, Campo, Esqueleto, Kpi, Kpis, Opcoes, Pill, Secao, Subabas, Vazio, useEstreito } from '@/components/demandas/Ui';
 import {
-  lerPainel, lancarFicha, cancelarFicha, registrarPagamento, ajustarPagamento, apagarPagamento, type DadosDoPainel,
+  lerPainel, lancarFicha, cancelarFicha, registrarPagamento, ajustarPagamento, apagarPagamento, verComprovantes, definirPlano,
+  type DadosDoPainel, type ComprovanteDoBanco,
 } from '@/lib/followcamp-painel-api';
 import {
   resumoDe, situacaoDe, ordenarSituacoes, csvFichas, csvPagamentos, nomeDoArquivo, lerFichaDoWhatsApp, reais, centavos,
@@ -31,6 +32,8 @@ import {
   type Situacao, type PagamentoBanco, type Forma, type Referente, type FormaDaFicha, type FichaLida, type Status,
 } from '@/lib/followcamp-painel';
 import { LOTES, valorIrmaos, soDigitos } from '@/lib/followcamp';
+import { diaMes } from '@/lib/followcamp-carne';
+import { contatoDe, linkDoWhats, linkPessoal, mensagemDeCobranca, numeroWhats } from '@/lib/followcamp-cobranca';
 import s from './painel.module.css';
 
 type Aba = 'campistas' | 'conferir' | 'pagamentos' | 'lancar';
@@ -98,7 +101,11 @@ export default function Painel() {
   const fichas = dados?.fichas ?? [];
   const pagamentos = dados?.pagamentos ?? [];
   const resumo = useMemo(() => resumoDe(fichas, pagamentos), [fichas, pagamentos]);
-  const situacoes = useMemo(() => ordenarSituacoes(fichas.map(f => situacaoDe(f, pagamentos))), [fichas, pagamentos]);
+  const agoraDoBanco = dados?.agora;
+  const situacoes = useMemo(() => {
+    const agora = agoraDoBanco ? new Date(agoraDoBanco) : new Date();
+    return ordenarSituacoes(fichas.map(f => situacaoDe(f, pagamentos, agora)));
+  }, [fichas, pagamentos, agoraDoBanco]);
   const aConferir = useMemo(() => pagamentos.filter(p => !p.conferido), [pagamentos]);
   const semFicha = useMemo(() => pagamentos.filter(p => !p.ficha_id), [pagamentos]);
   const ativas = useMemo(() => fichas.filter(f => !f.cancelada_em).sort((a, b) => a.campista.localeCompare(b.campista, 'pt-BR')), [fichas]);
@@ -168,7 +175,7 @@ export default function Painel() {
           ]} />
 
           {aba === 'campistas' ? (
-            <Secao titulo="Campistas" sub="Quem mais precisa de olho vem primeiro: a conferir, pagou parte, não pagou. Toque no nome para ver a ficha inteira.">
+            <Secao titulo="Campistas" sub="Quem mais precisa de olho vem primeiro: parcela vencida, a conferir, pagou parte, não pagou. Cobrar abre o WhatsApp da pessoa com a mensagem pronta. Toque no nome para ver a ficha inteira.">
               <input className={s.busca} type="search" placeholder="Buscar pelo nome" value={busca}
                 onChange={e => setBusca(e.target.value)} aria-label="Buscar campista pelo nome" />
               {filtradas.length === 0 ? (
@@ -182,13 +189,15 @@ export default function Painel() {
                       <button type="button" className={s.cartaoTopo} onClick={() => setAberta(aberta === x.ficha.id ? null : x.ficha.id)}
                         aria-expanded={aberta === x.ficha.id}>
                         <span className={s.nome}>{x.ficha.campista}</span>
-                        <Pill tom={TOM[x.status]}>{ROTULO_STATUS[x.status]}</Pill>
+                        <Pill tom={x.atrasado ? 'bad' : TOM[x.status]}>{x.atrasado ? 'Atrasado' : ROTULO_STATUS[x.status]}</Pill>
                       </button>
                       <div className={s.cartaoValores}>
                         <span>{x.devido == null ? 'Valor a confirmar' : reais(x.devido)}</span>
                         <span>Recebido {reais(x.recebido)}</span>
                         {x.aConferir ? <span className={s.conferirTxt}>+ {reais(x.aConferir)} a conferir</span> : null}
                       </div>
+                      {textoDoPlano(x) ? <small className={s.sub}>{textoDoPlano(x)}</small> : null}
+                      {!x.ficha.cancelada_em ? <div className="dm-linha"><Cobrar x={x} /></div> : null}
                       {aberta === x.ficha.id ? <Detalhes x={x} indo={indo} fazer={fazer} pagar={() => { setParaPagar(x.ficha.id); setAba('lancar'); }} /> : null}
                     </li>
                   ))}
@@ -287,11 +296,17 @@ function FichaNaTabela({ x, aberta, alternar, indo, fazer, pagar }: {
           {reais(x.recebido)}
           {x.aConferir ? <small className={`${s.sub} ${s.conferirTxt}`}>+ {reais(x.aConferir)} a conferir</small> : null}
         </td>
-        <td><Pill tom={TOM[x.status]}>{ROTULO_STATUS[x.status]}</Pill></td>
+        <td>
+          <Pill tom={x.atrasado ? 'bad' : TOM[x.status]}>{x.atrasado ? 'Atrasado' : ROTULO_STATUS[x.status]}</Pill>
+          {textoDoPlano(x) ? <small className={s.sub}>{textoDoPlano(x)}</small> : null}
+        </td>
         <td className="dm-fim">
-          {!f.cancelada_em && x.status !== 'quitado'
-            ? <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={pagar}>Registrar pagamento</button>
-            : null}
+          <div className={s.acoes}>
+            {!f.cancelada_em ? <Cobrar x={x} /> : null}
+            {!f.cancelada_em && x.status !== 'quitado'
+              ? <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={pagar}>Registrar pagamento</button>
+              : null}
+          </div>
         </td>
       </tr>
       {aberta ? (
@@ -319,19 +334,29 @@ function Detalhes({ x, indo, fazer, pagar }: { x: Situacao; indo: boolean; fazer
     ['Termo', f.termo ? `aceito${f.versao_termo ? ` (${f.versao_termo})` : ''}` : null],
     ['Ficha', `${f.origem === 'site' ? 'pelo site' : f.origem === 'whatsapp' ? 'lançada do WhatsApp' : 'lançada à mão'} em ${dataHoraBr(f.recebida_em)}${f.lancada_por ? ` por ${f.lancada_por}` : ''}`],
     ['Desistência', f.cancelada_em ? `${dataHoraBr(f.cancelada_em)}${f.motivo ? ` · ${f.motivo}` : ''}` : null],
+    ['Reenviou a ficha', f.atualizada_em ? dataHoraBr(f.atualizada_em) : null],
   ];
+  const parcelas = x.conta.situacao?.parcelas ?? [];
   return (
     <div className={s.detalhes}>
       <dl className={s.dl}>
         {itens.filter(([, v]) => v).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
       </dl>
-      {x.pagamentos.length ? (
-        <ul className={s.pagsDaFicha}>
-          {x.pagamentos.map(p => (
-            <li key={p.id}>{dataCurta(p.pago_em)} · {reais(centavos(p.valor))} · {ROTULO_FORMA[p.forma]} · {p.conferido ? 'conferido' : 'a conferir'}</li>
+      {parcelas.length ? (
+        <ul className={s.pagsDaFicha} aria-label="Parcelas do carnê">
+          {parcelas.map(p => (
+            <li key={p.numero}>{p.numero}ª · vence {diaMes(p.vencimento)} · {reais(p.valor)} · {ROTULO_PARCELA[p.estado]}{p.falta && p.falta < p.valor ? ` (faltam ${reais(p.falta)})` : ''}</li>
           ))}
         </ul>
       ) : null}
+      {x.pagamentos.length ? (
+        <ul className={s.pagsDaFicha}>
+          {x.pagamentos.map(p => (
+            <li key={p.id}>{dataCurta(p.pago_em)} · {reais(centavos(p.valor))} · {ROTULO_FORMA[p.forma]} · {p.conferido ? 'conferido' : 'a conferir'}{p.comprovantes ? ' · com comprovante' : ''}</li>
+          ))}
+        </ul>
+      ) : null}
+      {!f.cancelada_em && f.token ? <LinkEPlano x={x} indo={indo} fazer={fazer} /> : null}
       {desistindo ? (
         <div className={s.confirma}>
           <Campo rot={`Desistência de ${f.campista}: motivo (opcional)`}>
@@ -360,6 +385,13 @@ function Detalhes({ x, indo, fazer, pagar }: { x: Situacao; indo: boolean; fazer
 function ListaDePagamentos({ lista, estreito, indo, fazer }: { lista: PagamentoBanco[]; estreito: boolean; indo: boolean; fazer: Fazer }) {
   /* apagar pede o segundo toque no MESMO lugar: sem caixa do navegador */
   const [apagando, setApagando] = useState<string | null>(null);
+  const [vendo, setVendo] = useState<string | null>(null);
+  const botaoComprovante = (p: PagamentoBanco) => (p.comprovantes ?? 0) > 0 ? (
+    <button type="button" className="dm-btn dm-peq" aria-expanded={vendo === p.id}
+      onClick={() => setVendo(vendo === p.id ? null : p.id)}>
+      {vendo === p.id ? 'Fechar comprovante' : (p.comprovantes ?? 0) > 1 ? `Comprovantes (${p.comprovantes})` : 'Comprovante'}
+    </button>
+  ) : null;
   const acoes = (p: PagamentoBanco) => apagando === p.id ? (
     <>
       <button type="button" className="dm-btn dm-perigo dm-peq" disabled={indo}
@@ -368,6 +400,7 @@ function ListaDePagamentos({ lista, estreito, indo, fazer }: { lista: PagamentoB
     </>
   ) : (
     <>
+      {botaoComprovante(p)}
       {p.conferido
         ? <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo}
             onClick={() => void fazer(() => ajustarPagamento(p.id, { conferido: false }), 'desmarcar', 'Voltou para a conferir')}>Desmarcar</button>
@@ -394,6 +427,7 @@ function ListaDePagamentos({ lista, estreito, indo, fazer }: { lista: PagamentoB
             </div>
             <small className={s.sub}>{[ROTULO_REFERENTE[p.referente], p.quem_pagou ? `pagou: ${p.quem_pagou}` : '', p.codigo ? p.codigo : '', ROTULO_ORIGEM[p.origem]].filter(Boolean).join(' · ')}</small>
             <div className="dm-linha">{acoes(p)}</div>
+            {vendo === p.id ? <VerComprovante id={p.id} /> : null}
           </li>
         ))}
       </ul>
@@ -416,7 +450,12 @@ function ListaDePagamentos({ lista, estreito, indo, fazer }: { lista: PagamentoB
               <td><Pill tom={p.conferido ? 'ok' : 'info'}>{p.conferido ? 'Conferido' : 'A conferir'}</Pill></td>
               <td className="dm-fim"><div className={s.acoes}>{acoes(p)}</div></td>
             </tr>
-          ))}
+          )).flatMap((linha, i) => {
+            const p = lista[i];
+            return vendo === p.id
+              ? [linha, <tr key={`${p.id}-comprovante`} className={s.linhaDetalhe}><td colSpan={7}><VerComprovante id={p.id} /></td></tr>]
+              : [linha];
+          })}
         </tbody>
       </table>
     </div>
@@ -555,5 +594,112 @@ function NovaFicha({ indo, fazer }: { indo: boolean; fazer: Fazer }) {
         </details>
       </div>
     </Secao>
+  );
+}
+
+/* ---------------------------------------------------------------- 114 ---
+   O plano, a cobrança e o comprovante. A conta vem pronta em `x.conta`
+   (lib/followcamp-carne.ts); aqui é só o que se vê. */
+const ROTULO_PARCELA = { paga: 'paga', conferindo: 'em conferência', aberta: 'em aberto', vencida: 'vencida' } as const;
+
+function textoDoPlano(x: Situacao): string {
+  if (x.ficha.cancelada_em || !x.conta.carne || x.status === 'quitado') return '';
+  const sit = x.conta.situacao;
+  if (!x.conta.plano || !sit) return 'Carnê sem plano: a pessoa escolhe no link';
+  const n = x.conta.plano.length;
+  const vencida = sit.parcelas.find(p => p.estado === 'vencida');
+  if (vencida) return `Carnê ${n}x · a ${vencida.numero}ª venceu em ${diaMes(vencida.vencimento)} (faltam ${reais(vencida.falta)})`;
+  if (sit.proxima) return `Carnê ${n}x · a ${sit.proxima.numero}ª vence em ${diaMes(sit.proxima.vencimento)}`;
+  return `Carnê ${n}x · em dia`;
+}
+
+/** Abre o WhatsApp da pessoa certa com a mensagem pronta. Quem aperta enviar é a organização. */
+function Cobrar({ x }: { x: Situacao }) {
+  const f = x.ficha;
+  if (f.cancelada_em || !f.token) return null;
+  const contato = contatoDe(f);
+  const numero = contato ? numeroWhats(contato.whats) : null;
+  if (!contato || !numero) return <span className={s.mudo}>sem WhatsApp</span>;
+  const texto = mensagemDeCobranca({ ficha: f, conta: x.conta, pagamentos: x.pagamentos, link: linkPessoal(f.token) });
+  return (
+    <a className="dm-btn dm-peq" href={linkDoWhats(numero, texto)} target="_blank" rel="noopener"
+      aria-label={`Mandar mensagem no WhatsApp para ${contato.nome || f.campista} sobre ${f.campista}`}>
+      {x.status === 'quitado' ? 'Mensagem' : 'Cobrar'}
+    </a>
+  );
+}
+
+function LinkEPlano({ x, indo, fazer }: { x: Situacao; indo: boolean; fazer: Fazer }) {
+  const f = x.ficha;
+  const [copiado, setCopiado] = useState(false);
+  if (!f.token) return null;
+  const url = linkPessoal(f.token);
+  return (
+    <div className={s.linkEPlano}>
+      <div className={s.linkPessoal}>
+        <span className={s.mudo}>Link pessoal</span>
+        <a href={url} target="_blank" rel="noopener">{url.replace('https://', '')}</a>
+        <button type="button" className="dm-btn dm-txt dm-peq"
+          onClick={() => navigator.clipboard?.writeText(url).then(() => setCopiado(true), () => setCopiado(false))}>
+          {copiado ? 'Copiado' : 'Copiar'}
+        </button>
+      </div>
+      <label className={s.planoCampo}>
+        <span className={s.mudo}>Plano do carnê</span>
+        <select value={f.parcelas ?? ''} disabled={indo} aria-label={`Plano do carnê de ${f.campista}`}
+          onChange={e => {
+            const v = e.target.value ? Number(e.target.value) : null;
+            void fazer(() => definirPlano(f.id, v), 'trocar o plano', v ? `Plano em ${v}x` : 'Plano tirado');
+          }}>
+          <option value="">Sem plano (paga inteiro ou escolhe no link)</option>
+          <option value="1">1 parcela</option>
+          <option value="2">2 parcelas</option>
+          <option value="3">3 parcelas</option>
+        </select>
+      </label>
+    </div>
+  );
+}
+
+/** O comprovante como a pessoa mandou: foto na tela, PDF numa aba nova. */
+function VerComprovante({ id }: { id: string }) {
+  const [lista, setLista] = useState<ComprovanteDoBanco[] | null>(null);
+  const [erro, setErro] = useState('');
+  const [pdfs, setPdfs] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let vivo = true;
+    void verComprovantes(id).then(r => {
+      if (!vivo) return;
+      if (r.ok) setLista(r.comprovantes || []);
+      else setErro(recado(r, 'abrir o comprovante'));
+    });
+    return () => { vivo = false; };
+  }, [id]);
+  useEffect(() => {
+    if (!lista) return;
+    const urls: Record<string, string> = {};
+    for (const c of lista) {
+      if (c.tipo !== 'application/pdf') continue;
+      const bin = Uint8Array.from(atob(c.dados.replace(/\s+/g, '')), ch => ch.charCodeAt(0));
+      urls[c.id] = URL.createObjectURL(new Blob([bin], { type: 'application/pdf' }));
+    }
+    setPdfs(urls);
+    return () => { for (const u of Object.values(urls)) URL.revokeObjectURL(u); };
+  }, [lista]);
+  if (erro) return <Aviso tom="bad">{erro}</Aviso>;
+  if (!lista) return <p className={s.mudo}>Abrindo o comprovante…</p>;
+  if (lista.length === 0) return <p className={s.mudo}>Nenhum comprovante neste pagamento.</p>;
+  return (
+    <div className={s.comprovantes}>
+      {lista.map(c => (
+        <figure key={c.id}>
+          {c.tipo === 'application/pdf'
+            ? (pdfs[c.id] ? <a className="dm-btn dm-peq" href={pdfs[c.id]} target="_blank" rel="noopener">Abrir o PDF do comprovante</a> : null)
+            /* eslint-disable-next-line @next/next/no-img-element */
+            : <img src={`data:${c.tipo};base64,${c.dados.replace(/\s+/g, '')}`} alt="Comprovante do pagamento" />}
+          <figcaption className={s.mudo}>Enviado em {dataHoraBr(c.criado_em)}</figcaption>
+        </figure>
+      ))}
+    </div>
   );
 }

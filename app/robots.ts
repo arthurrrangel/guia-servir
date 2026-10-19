@@ -52,6 +52,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
         /* Demandas: o link pessoal do membro é `/demandas?t=<token>`, e o
            token é a credencial inteira. Ficou de fora daqui até 19/09/2026. */
         '/demandas',
+        /* 114 · o link pessoal da inscrição no Follow Camp */
+        '/followcamp/minha/',
         /* rota de serviço */
         '/api/',
       ],

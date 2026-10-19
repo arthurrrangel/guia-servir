@@ -88,6 +88,10 @@ export default function Ficha() {
   const [campoMal, setCampoMal] = useState<string | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const [enviada, setEnviada] = useState<FichaT | null>(null);
+  /* 114: o link pessoal que a rota devolve. A ficha repetida volta SEM ele
+     (nome e nascimento não são segredo): só o aviso de que foi atualizada. */
+  const [link, setLink] = useState<{ token: string | null; repetida: boolean } | null>(null);
+  const [copiado, setCopiado] = useState(false);
   const [pagarNoSite, setPagarNoSite] = useState(false);
   const [anuncio, setAnuncio] = useState('');
   const caixa = useRef<HTMLDivElement>(null);
@@ -203,6 +207,9 @@ export default function Ficha() {
         return;
       }
       setEnviada(v.ficha);
+      const token = typeof j.token === 'string' && /^[0-9a-f]{24}$/.test(j.token) ? j.token : null;
+      setLink(token || j.repetida === true ? { token, repetida: j.repetida === true } : null);
+      setCopiado(false);
       try {
         sessionStorage.removeItem(CHAVE_RASCUNHO);
         /* a página de pagamento já abre com o campista preenchido */
@@ -225,6 +232,7 @@ export default function Ficha() {
       pagamento: x.pagamento, temIrmao: 'sim', irmao: enviada.campista,
     }));
     setEnviada(null);
+    setLink(null);
     setFase('form');
     setPagarNoSite(false);
     window.scrollTo({ top: 0 });
@@ -433,10 +441,30 @@ export default function Ficha() {
                 <li><span>Valor</span><strong>{valor !== null ? emReais(valor) : 'a confirmar'}</strong></li>
                 <li><span>Pagamento</span><strong>{PAGAMENTOS.find(p => p.id === enviada.pagamento)?.rot}</strong></li>
               </ul>
+              {fase === 'enviada' && link?.repetida && (
+                <p className={s.nota}>Já havia uma ficha com este nome e esta data de nascimento: ela foi atualizada, sem criar outra. O link da inscrição é o mesmo da primeira vez; se ele não estiver com você, peça à organização no WhatsApp.</p>
+              )}
+              {fase === 'enviada' && link?.token && (
+                <>
+                  <div className={s.chave}>
+                    <div>
+                      <span>Seu link do Camp</span>
+                      <strong>guiaservir.com/followcamp/minha/{link.token}</strong>
+                    </div>
+                    <button type="button" onClick={() => {
+                      const url = `https://guiaservir.com/followcamp/minha/${link.token}`;
+                      navigator.clipboard?.writeText(url).then(() => setCopiado(true), () => setCopiado(false));
+                    }}>{copiado ? 'Copiado' : 'Copiar'}</button>
+                  </div>
+                  <p className={s.nota}>Guarde este link: por ele você paga (inteiro ou no carnê), manda o comprovante e acompanha o que já foi confirmado.</p>
+                </>
+              )}
               <div className={s.acoes}>
-                {pagarNoSite
-                  ? <a className={`${s.btn} ${fase === 'enviada' ? s.fogo : s.claro}`} href="/followcamp/pagar">Pagar agora</a>
-                  : fase === 'enviada' && <a className={`${s.btn} ${s.zap}`} href={zapAviso} target="_blank" rel="noopener">Combinar o pagamento no WhatsApp</a>}
+                {fase === 'enviada' && link?.token
+                  ? <a className={`${s.btn} ${s.fogo}`} href={`/followcamp/minha/${link.token}`}>Pagar agora</a>
+                  : pagarNoSite
+                    ? <a className={`${s.btn} ${fase === 'enviada' ? s.fogo : s.claro}`} href="/followcamp/pagar">Pagar agora</a>
+                    : fase === 'enviada' && <a className={`${s.btn} ${s.zap}`} href={zapAviso} target="_blank" rel="noopener">Combinar o pagamento no WhatsApp</a>}
                 <button type="button" className={`${s.btn} ${s.claro}`} onClick={inscreverIrmao}>Inscrever um irmão</button>
               </div>
               {!enviada.irmao && <p className={s.nota}>Com irmão, os dois têm 10% de desconto: a organização acerta o valor desta ficha.</p>}

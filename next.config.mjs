@@ -216,6 +216,9 @@ const nextConfig = {
       ...ROTAS_FECHADAS.map(source => ({ source, headers: [NAO_INDEXAR] })),
       { source: '/eu', headers: [NAO_INDEXAR] },
       { source: '/eu/:caminho+', headers: [NAO_INDEXAR_NUNCA] },
+      /* 114 · o link pessoal da inscrição no Follow Camp: o token na URL é a
+         credencial da pessoa, como em /eu/<token> */
+      { source: '/followcamp/minha/:caminho+', headers: [NAO_INDEXAR_NUNCA] },
       /* Follow Camp 2027 (30/09/2026): a página entrou na busca, mas as fotos
          do retiro de 2026 não. São campistas, muitos menores de idade, e foto
          solta no Google Imagens perde o contexto da página. O cabeçalho vai no

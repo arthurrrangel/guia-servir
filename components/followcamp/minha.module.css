@@ -1,0 +1,52 @@
+/* =============================================================================
+   /followcamp/minha/<token> — só o que a página pessoal tem a mais que a de
+   pagamento. Cores, fontes e botões vêm de pagar.module.css (as variáveis do
+   .raiz: --fogo, --cacau, --tinta, --linha, --ok...), então os dois temas
+   funcionam sem nada repetido aqui.
+   ============================================================================= */
+.cabeca{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.h2{margin:0;font:800 1.2rem/1.25 var(--f)}
+
+/* a situação: uma etiqueta, nunca um parágrafo */
+.estado{
+  display:inline-flex;align-items:center;min-height:30px;padding:0 12px;border-radius:999px;
+  font:700 .82rem/1 var(--f);white-space:nowrap;border:2px solid var(--linha);color:var(--tinta);
+  background:var(--campo);
+}
+.estado[data-tom="ok"]{border-color:var(--ok);color:var(--ok);background:var(--ok-fundo)}
+.estado[data-tom="aviso"]{border-color:var(--cacau);background:color-mix(in srgb,var(--sol) 26%,transparent)}
+.estado[data-tom="ruim"]{border-color:var(--rubi);color:var(--rubi);background:color-mix(in srgb,var(--rubi) 10%,transparent)}
+
+/* as parcelas do carnê: número, data, valor e estado na mesma linha */
+.parcelas{list-style:none;margin:16px 0 0;padding:16px 0 0;border-top:2px solid var(--linha);display:grid;gap:10px}
+.parcelas li{
+  display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"num data valor" "num estado estado";
+  align-items:center;gap:2px 12px;padding:10px 12px;border-radius:14px;border:2px solid var(--linha);background:var(--campo);
+}
+.pNum{grid-area:num;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--cacau);font:900 .9rem/1 var(--f)}
+.pData{grid-area:data;font:600 .95rem/1.3 var(--f)}
+.pValor{grid-area:valor;font:800 1rem/1.2 var(--f);font-variant-numeric:tabular-nums;white-space:nowrap}
+.pEstado{grid-area:estado;color:var(--tinta-2);font-size:.86rem;line-height:1.35}
+.parcelas li[data-estado="paga"] .pNum{background:var(--ok);border-color:var(--ok);color:#fff}
+.parcelas li[data-estado="paga"] .pEstado{color:var(--ok);font-weight:700}
+.parcelas li[data-estado="conferindo"] .pNum{background:color-mix(in srgb,var(--sol) 40%,transparent)}
+.parcelas li[data-estado="vencida"]{border-color:var(--rubi)}
+.parcelas li[data-estado="vencida"] .pEstado{color:var(--rubi);font-weight:700}
+
+/* os pagamentos */
+.lista{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}
+.lista li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:2px solid var(--linha)}
+.lista li:last-child{border-bottom:0}
+.lista strong{display:block;font:800 1.02rem/1.2 var(--f);font-variant-numeric:tabular-nums}
+.sub{display:block;margin-top:2px;color:var(--tinta-2);font-size:.86rem;line-height:1.35}
+
+/* o código do pagamento não quebra no meio */
+.codigo{white-space:nowrap}
+
+/* o retorno de uma ação que deu certo */
+.ok{margin:0;padding:12px 14px;border-radius:14px;background:var(--ok-fundo);color:var(--tinta);border:2px solid var(--ok);font-size:.95rem;line-height:1.45}
+
+/* o seletor de arquivo fica dentro do botão (um <label>), invisível */
+.arquivo{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}
+.botaoArquivo{position:relative}
+.botaoArquivo[aria-disabled="true"]{opacity:.6;cursor:progress}
