@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import Link from 'next/link';
-import { Logo } from '@/components/Marca';
+import { Logo, LogoFollow } from '@/components/Marca';
 import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { daGuia } from '@/lib/site/sites';
@@ -35,8 +35,10 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
       <div className="s-in">
         <div className="s-pe-g">
           <div className="s-pe-marca">
-            <Logo />
-            <p className="s-frase">{IGREJA.frase}.</p>
+            {/* a marca de cada site (20/10/2026): o Follow tem a dele (FO»OW) e, embaixo, a
+                frase dele, a que fecha o herói; os outros dois levam a marca e a frase da igreja */}
+            {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Logo />}
+            <p className="s-frase">{site === 'follow' ? 'Um lugar para todos' : IGREJA.frase}.</p>
             <p className="s-corpo">
               <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</b><br />
               {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna

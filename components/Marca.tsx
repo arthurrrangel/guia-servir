@@ -103,3 +103,43 @@ export function Chevron({ className, traco }: { className?: string; traco?: bool
     </svg>
   );
 }
+
+/* =============================================================================
+   A MARCA DO FOLLOW · 20/10/2026, da arte oficial que o Arthur mandou
+
+   Duas artes: o logotipo "FO»OW" (vermelho #ff000c sobre o verde-claro
+   #eef6eb) e o símbolo, só o chevron duplo. O "LL" do nome é o chevron
+   duplo: é a marca inteira num sinal só, e por isso o símbolo é o que vira
+   favicon, ícone de app, canto de seção e a janela do fecho no guiafollow.com.
+
+   Como cheguei no vetor (a arte veio em PNG 1080², letras com 82 px):
+   o chevron é um quadrado S com o braço de 0,464 S de espessura e o entalhe
+   em S − 0,464 S; o segundo começa 1,022 S à direita (medido no símbolo, a
+   310 px, e conferido no logotipo). F e W são polígonos: cada aresta
+   ajustada por mínimos quadrados sobre o contorno ampliado 8×, e o W
+   espelhado no próprio eixo. Os dois O são o mesmo traçado (potrace sobre a
+   ampliação de 12× suavizada: não têm canto, e a suavização só tira o
+   serrilhado). Sobreposição com a arte: 0,984 no logotipo, 0,986 no símbolo;
+   o que sobra é o fio de meio pixel do serrilhado original.
+
+   currentColor, como a marca da GUIA: vermelha no verde-claro e no papel,
+   branca na noite. Não existem duas versões para desencontrar.
+   ============================================================================= */
+export const CHEVRON_DUPLO_VB = '0 0 202.2 100';
+export const CHEVRON_DUPLO_D = 'M0 0L46.4 0L100 50L46.4 100L0 100L53.6 50ZM102.2 0L148.6 0L202.2 50L148.6 100L102.2 100L155.8 50Z';
+
+export function LogoFollow({ className, titulo = 'Follow' }: { className?: string; titulo?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 685.5 85" role="img" aria-label={titulo} fill="currentColor" style={{ display: 'block', width: 'auto' }}>
+      <path d="M0 3L84.13 3L84.13 23L26 23L26 38.5L76.63 38.5L76.63 58.5L26 58.5L26 85L0 85ZM139.92 84.94C134.56 84.71 126.9 83.2 121.72 81.36C103.12 74.77 92.72 60.83 92.71 42.5C92.71 19.28 109.64 3.23 137.19 0.34C141.87 -0.16 161.33 -0.16 166.09 0.33C191.51 2.96 208.18 17.03 210.36 37.71C210.56 39.64 210.56 45.49 210.35 47.38C208.38 65.49 195.57 78.46 174.88 83.28C171.51 84.07 167.03 84.72 163.64 84.92C162.42 84.99 141.47 85.01 139.92 84.94ZM161.82 64.21C175.21 63.03 182.45 55.06 182.19 41.81C181.93 28.79 174.06 21.33 159.96 20.74C156.62 20.6 142.62 20.69 140.96 20.87C126.8 22.35 119.53 31.89 121.34 46.59C122.62 56.95 130.23 63.43 142.09 64.27C143.57 64.38 160.53 64.32 161.82 64.21ZM220.38 3L256.48 3L298.18 41.9L256.48 80.8L220.38 80.8L262.08 41.9ZM299.89 3L335.99 3L377.69 41.9L335.99 80.8L299.89 80.8L341.59 41.9ZM433.55 84.94C428.19 84.71 420.53 83.2 415.35 81.36C396.75 74.77 386.35 60.83 386.34 42.5C386.34 19.28 403.27 3.23 430.82 0.34C435.5 -0.16 454.96 -0.16 459.72 0.33C485.14 2.96 501.81 17.03 503.99 37.71C504.19 39.64 504.19 45.49 503.98 47.38C502.01 65.49 489.2 78.46 468.51 83.28C465.14 84.07 460.66 84.72 457.27 84.92C456.05 84.99 435.1 85.01 433.55 84.94ZM455.45 64.21C468.84 63.03 476.08 55.06 475.82 41.81C475.56 28.79 467.69 21.33 453.59 20.74C450.25 20.6 436.25 20.69 434.59 20.87C420.43 22.35 413.16 31.89 414.97 46.59C416.25 56.95 423.86 63.43 435.72 64.27C437.2 64.38 454.16 64.32 455.45 64.21ZM513.5 3.12L542.9 3.12L563.4 52L587 3.12L612 3.12L635.6 52L656.1 3.12L685.5 3.12L651.9 85L622.1 85L599.5 35L576.9 85L547.1 85Z" />
+    </svg>
+  );
+}
+
+export function SimboloFollow({ className, titulo = 'Follow' }: { className?: string; titulo?: string }) {
+  return (
+    <svg className={className} viewBox={CHEVRON_DUPLO_VB} role="img" aria-label={titulo} fill="currentColor" style={{ display: 'block', height: '1em', width: 'auto' }}>
+      <path d={CHEVRON_DUPLO_D} />
+    </svg>
+  );
+}

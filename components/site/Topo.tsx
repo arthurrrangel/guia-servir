@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Simbolo } from '@/components/Marca';
+import { Simbolo, LogoFollow } from '@/components/Marca';
 import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, canalDeConversa } from '@/lib/igreja';
 import { daGuia } from '@/lib/site/sites';
@@ -106,7 +106,10 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
     <>
       <header className="s-topo">
         <div className="s-in s-topo-in">
-          <Link href={inicio} className="s-logo" aria-label={site === 'servir' ? `Servir · ${IGREJA.nome}` : site === 'follow' ? `Follow · ${IGREJA.nome}` : IGREJA.nome}><Simbolo /></Link>
+          <Link href={inicio} className="s-logo" aria-label={site === 'servir' ? `Servir · ${IGREJA.nome}` : site === 'follow' ? `Follow · ${IGREJA.nome}` : IGREJA.nome}>
+            {/* o Follow tem marca própria (20/10/2026): o logotipo FO»OW, deitado, no lugar do símbolo da GUIA */}
+            {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Simbolo />}
+          </Link>
 
           <ul className="s-nav" aria-label="Seções do site">
             {MENU.map((g, i) => (

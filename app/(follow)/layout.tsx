@@ -15,10 +15,19 @@ import Medidor from '@/components/site/Medidor';
    Grotesque) e o Arthur reprovou na hora em que viu no ar: "esse do Follow
    tá sem id visual". Desde 20/10 é a mesma casa do Guia Church e do Guia
    Servir: app/site.css (noite, papel e areia; Inter 800 com a última
-   palavra em serifa itálica; pílulas; o chapéu laranja), a mesma barra e o
-   mesmo pé, com o mapa do Follow (lib/site/nav.ts). O que é só dele é o
-   herói que anda com o scroll sobre as fotos de verdade do Follow
+   palavra em serifa itálica; pílulas; o chapéu), a mesma barra e o mesmo
+   pé, com o mapa do Follow (lib/site/nav.ts). O que é só dele é o herói que
+   anda com o scroll sobre as fotos de verdade do Follow
    (components/site/Scrub.tsx), e esse também fala na língua da casa.
+
+   A MARCA DELE (mais tarde em 20/10): o Arthur mandou as artes oficiais da
+   GUIA e do Follow ("usa no site, nessas ids, pdf + essas"). O Follow tem
+   logotipo (FO»OW) e símbolo (o chevron duplo), vermelho sobre verde-claro;
+   components/Marca.tsx tem os dois em vetor. A classe `s-follow` no
+   invólucro liga a identidade dele na folha: o claro vira o verde-claro da
+   arte, o acento vira o vermelho, a janela do fecho abre pelo chevron
+   duplo. A barra e o pé mostram o logotipo dele (Topo e Pe olham o `site`),
+   e o favicon, o ícone de app e o manifesto são os dele (public/follow/).
 
    O ENDEREÇO. O next.config reescreve a raiz do guiafollow.com para /follow
    e manda /follow dos outros dois domínios para cá. `metadataBase` faz o
@@ -32,6 +41,14 @@ export const metadata: Metadata = {
   description: `O Follow é o culto de jovens da GUIA Church, todo sábado às ${IGREJA.followHora}, na ${IGREJA.bairro}. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está.`,
   alternates: { canonical: '/' },
   appleWebApp: { capable: true, title: 'Follow', statusBarStyle: 'black-translucent' },
+  /* a marca do Follow (20/10/2026): o favicon e o ícone de app são o chevron
+     duplo dele, vermelho no verde-claro da arte (public/follow/icone*). Os da
+     raiz do app (app/icon.svg, app/apple-icon.png) são a GUIA, e este `icons`
+     os substitui. O favicon.ico e o manifesto (app/favicon.ico, app/manifest.ts)
+     o Next liga em toda página sem perguntar; no guiafollow.com o next.config
+     reescreve os dois para os do Follow (o manifesto dá o nome e as cores
+     certas a quem salva o site na tela inicial). */
+  icons: { icon: [{ url: '/follow/icone.svg', type: 'image/svg+xml' }, { url: '/follow/icone-32.png', sizes: '32x32', type: 'image/png' }], apple: '/follow/icone-180.png' },
   openGraph: {
     title: 'Follow · Um lugar para todos',
     description: `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}. Vem como você está.`,
@@ -50,7 +67,7 @@ export const viewport: Viewport = {
 
 export default function FollowLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="s">
+    <div className="s s-follow">
       <a href="#conteudo" className="s-pular">Pular para o conteúdo</a>
       <Movimento />
       <Fronteira lado="site" />

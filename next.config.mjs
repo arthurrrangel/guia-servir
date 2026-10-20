@@ -257,6 +257,13 @@ const nextConfig = {
         { source: '/', has: NO_SERVIR, destination: '/servir' },
         /* e no guiafollow.com, a página do Follow (O GUIA FOLLOW, acima) */
         { source: '/', has: NO_FOLLOW, destination: '/follow' },
+        /* 20/10/2026: o Follow tem marca própria. O favicon e o manifesto são
+           arquivos da raiz do app (app/favicon.ico, app/manifest.ts), os da
+           GUIA, e o Next os liga em toda página; no guiafollow.com esses dois
+           endereços passam a servir os do Follow (public/follow/). Os outros
+           ícones (SVG, PNG, apple) o casco do Follow aponta direto. */
+        { source: '/favicon.ico', has: NO_FOLLOW, destination: '/follow/favicon.ico' },
+        { source: '/manifest.webmanifest', has: NO_FOLLOW, destination: '/follow/manifest.webmanifest' },
       ],
       afterFiles: [
         { source: '/followcamp', destination: '/followcamp/index.html' },

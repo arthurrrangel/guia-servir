@@ -1,6 +1,6 @@
 import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/igreja';
 import { naIgreja } from '@/lib/site/sites';
-import { Simbolo } from '@/components/Marca';
+import { SimboloFollow } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Fecho, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
 import Scrub, { type Foto } from '@/components/site/Scrub';
@@ -23,7 +23,11 @@ import Contagem from '@/components/follow/Contagem';
    primeira vez, os fatos em linha para quando e onde, a faixa de areia do
    Camp e o fecho da noite. O que é só do Follow é o herói que anda com o
    scroll (components/site/Scrub.tsx), e esse fala a mesma língua: Inter
-   800 com a última palavra em serifa itálica, o chapéu laranja, as pílulas.
+   800 com a última palavra em serifa itálica, o chapéu, as pílulas.
+   Mais tarde no mesmo dia, a marca oficial do Follow entrou (ver o casco,
+   app/(follow)/layout.tsx): o claro é o verde-claro da arte, o acento é o
+   vermelho, e o canto da faixa "quando" e a janela do fecho são o chevron
+   duplo dele.
 
    O HERÓI anda sobre cinco fotos de verdade do Follow (scripts/follow-
    fotos.py: Drive da igreja, 07.02 e 28.02 de 2026, tratamento do
@@ -103,7 +107,7 @@ export default function Follow() {
 
       {/* 3 · quando e onde (os fatos em linha e a contagem) */}
       <section id="quando" className="s-faixa papel" aria-labelledby="t-quando">
-        <Simbolo className="s-canto" />
+        <SimboloFollow className="s-canto duplo" />
         <div className="s-in">
           <Arroba className="topo" />
           <div className="s-cab centro s-rev">

@@ -16,6 +16,13 @@
    · a assinatura "guiachurch | sede" e o "@guiachurch" marcando as faixas;
    · campos de formulário quadrados, claros, grandes.
 
+   AS MARCAS (20/10/2026): a GUIA e o Follow têm cada um a sua arte oficial
+   (components/Marca.tsx). A folha é uma só; o Guia Follow (guiafollow.com)
+   entra com `.s.s-follow` e troca só o que a arte dele define: o claro vira
+   o verde-claro, o acento vira o vermelho, a janela abre pelo chevron duplo
+   (o bloco "O GUIA FOLLOW", logo abaixo dos tokens). A noite, a tipografia
+   e as peças são as mesmas nos três sites.
+
    Tudo aqui vive sob `.s` (o invólucro dos layouts de app/(igreja),
    app/(servir) e app/(follow)). Nenhuma regra pinta elemento solto: o CSS do
    sistema (globals.css) pode ser carregado no mesmo documento numa navegação
@@ -55,11 +62,19 @@ body{ margin:0 }
   --s-areia:#e9e2d6;
   --s-tinta:#141414;
   --s-branco:#ffffff;
-  --s-laranja:#e9942f;
-  /* laranja como TEXTO em fundo claro: o vivo dá 1,9 a 2,4:1 (ilegível no sol);
-     este tom passa 4,5:1 em papel, areia e branco. Ponto, fio e fundo seguem vivos */
-  --s-laranja-texto:#91560f;
-  --s-acento-texto:var(--s-laranja);
+  /* o acento da casa: o laranja do PDF. Vivo no ponto do chapéu, no fio e no
+     foco; como TEXTO em fundo claro o vivo dá 1,9 a 2,4:1 (ilegível no sol),
+     então existe o escurecido, que passa 4,5:1 em papel, areia e branco.
+     --s-acento-texto é o que cada superfície resolve (o vivo na noite, o
+     escurecido no claro; a regra está em "acento", mais abaixo). O halo é o
+     anel do campo em foco. No Guia Follow os três são o vermelho da marca dele */
+  --s-acento:#e9942f;
+  --s-acento-escuro:#91560f;
+  --s-acento-halo:rgba(233,148,47,.22);
+  --s-acento-texto:var(--s-acento);
+  /* a janela do fecho (.s-janela): a foto vista pelo chevron da marca, que
+     cresce com a rolagem. No Follow é o chevron duplo dele */
+  --s-mascara:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 757.5 826.3'><path d='M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z'/></svg>");
   --s-mudo:rgba(20,20,20,.66);
   --s-mudo-claro:rgba(255,255,255,.66);
   --s-linha:rgba(20,20,20,.12);
@@ -96,6 +111,22 @@ body{ margin:0 }
   text-rendering:optimizeLegibility; font-feature-settings:"kern","liga","calt";
   min-height:100vh; display:flex; flex-direction:column;
 }
+/* O GUIA FOLLOW (20/10/2026): a mesma casa, na identidade do Follow. A arte
+   oficial dele define duas coisas, e são as duas que mudam aqui: o claro é
+   o verde-claro da arte (papel, o cartão claro, a areia do Camp, os tons de
+   apoio), e o acento é o vermelho da marca (vivo no ponto, no fio e no foco;
+   escurecido como texto no claro, 5,8:1 sobre o verde). A noite, a tipografia,
+   as pílulas e os blocos são os do PDF. A janela do fecho abre pelo chevron
+   duplo (components/Marca.tsx, CHEVRON_DUPLO_D). */
+.s.s-follow{
+  --s-papel:#eef6eb;
+  --s-papel-2:#e3ede0;
+  --s-areia:#dce8d7;
+  --s-acento:#ff000c;
+  --s-acento-escuro:#c2000a;
+  --s-acento-halo:rgba(255,0,12,.18);
+  --s-mascara:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 202.2 100'><path d='M0 0L46.4 0L100 50L46.4 100L0 100L53.6 50ZM102.2 0L148.6 0L202.2 50L148.6 100L102.2 100L155.8 50Z'/></svg>");
+}
 .s *,.s *::before,.s *::after{ box-sizing:border-box }
 .s img,.s svg,.s video{ display:block; max-width:100% }
 .s a{ color:inherit; text-decoration:none }
@@ -106,7 +137,7 @@ body{ margin:0 }
 .s fieldset{ border:0; min-width:0 }
 .s legend{ float:none; width:auto }
 .s main{ flex:1; display:block }
-.s :focus-visible{ outline:2px solid var(--s-laranja); outline-offset:3px }
+.s :focus-visible{ outline:2px solid var(--s-acento); outline-offset:3px }
 .s .s-so-leitor,.s .so-leitor{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap }
 .s .s-pular{ position:absolute; left:16px; top:-60px; z-index:100; background:var(--s-papel); color:var(--s-tinta); padding:10px 16px; border-radius:999px; font-weight:600; font-size:14px }
 .s .s-pular:focus{ top:12px }
@@ -139,7 +170,7 @@ body{ margin:0 }
 .s .s-micro{ font-weight:300; font-size:clamp(14px,1.2vw,17px); line-height:1.4; letter-spacing:-.005em; text-wrap:balance }
 .s .s-chapeu{ font-size:clamp(15px,1.25vw,18px); font-weight:300; letter-spacing:-.01em; display:flex; align-items:center; gap:10px; flex-wrap:wrap }
 .s .s-chapeu b{ font-weight:700; color:var(--s-acento-texto) }
-.s .s-chapeu i{ width:6px; height:6px; border-radius:50%; background:var(--s-laranja); display:inline-block }
+.s .s-chapeu i{ width:6px; height:6px; border-radius:50%; background:var(--s-acento); display:inline-block }
 .s .s-chapeu.mudo b{ color:inherit }
 .s .s-b{ font-weight:700 }
 /* um trecho que não quebra no meio (a rua, o bairro) */
@@ -167,13 +198,15 @@ body{ margin:0 }
 .s .s-topo-in{ height:100%; display:flex; align-items:center; gap:clamp(16px,2.6vw,40px) }
 .s .s-logo{ display:flex; align-items:center; height:44px; flex:0 0 auto; margin-right:clamp(8px,2vw,36px) }
 .s .s-logo svg{ height:36px; width:auto }
+/* a marca do Follow na barra é o logotipo deitado (FO»OW), na altura de uma linha de texto da barra */
+.s .s-logo .s-marca-follow{ height:22px }
 .s .s-nav{ display:flex; align-items:center; gap:clamp(4px,1.4vw,22px); flex:1 }
 .s .s-nav > li{ position:relative }
 .s .s-nav-bt{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 10px; font-weight:600; font-size:clamp(16px,1.35vw,19px); letter-spacing:-.02em; border-radius:var(--s-r-3); transition:background var(--s-t) }
 .s .s-nav-bt svg{ width:12px; height:12px; transition:transform var(--s-t) }
 .s .s-nav > li:focus-within .s-nav-bt,.s .s-nav-bt[aria-expanded="true"]{ background:rgba(255,255,255,.08) }
 .s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
-.s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-laranja); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
+.s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-acento); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
 /* o painel de cada grupo */
 .s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:var(--s-r-2); box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
 .s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
@@ -202,7 +235,7 @@ body{ margin:0 }
 .s .s-cortina-lista a{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:0 10px; padding:10px 0; font-weight:800; font-size:24px; letter-spacing:-.035em; line-height:1.1 }
 .s .s-cortina-lista small{ font-weight:400; font-size:14px; letter-spacing:-.005em; color:var(--s-mudo-claro) }
 /* a página aberta: o sublinhado laranja da barra do computador */
-.s .s-cortina-lista a[aria-current="page"] span{ text-decoration:underline; text-decoration-color:var(--s-laranja); text-decoration-thickness:2px; text-underline-offset:6px }
+.s .s-cortina-lista a[aria-current="page"] span{ text-decoration:underline; text-decoration-color:var(--s-acento); text-decoration-thickness:2px; text-underline-offset:6px }
 .s .s-cortina-pe{ display:flex; flex-wrap:wrap; justify-content:center; gap:0 24px; padding-top:8px; font-size:15px }
 .s .s-cortina-pe a{ display:block; padding:12px 0; color:var(--s-papel); font-weight:600 }
 
@@ -228,6 +261,7 @@ body{ margin:0 }
 .s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 18px; border-top:1px solid rgba(255,255,255,.06) }
 .s .s-pe-g{ display:grid; grid-template-columns:1.6fr repeat(5,1fr); gap:clamp(20px,2.6vw,40px) }
 .s .s-pe-marca svg{ height:40px; width:auto }
+.s .s-pe-marca .s-marca-follow{ height:28px }
 .s .s-pe-marca .s-frase{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(22px,1.9vw,28px); line-height:1.1; letter-spacing:-.01em; margin-top:22px }
 .s .s-pe-marca .s-corpo{ margin-top:16px; color:var(--s-mudo-claro); font-size:15.5px }
 .s .s-pe-marca .s-corpo b{ color:var(--s-papel); font-weight:600 }
@@ -241,7 +275,7 @@ body{ margin:0 }
 .s .s-pe-fim .s-sede{ padding:10px 0 }
 .s .s-pe-links{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:0 8px }
 .s .s-pe-botao{ appearance:none; background:none; border:0; padding:0; margin:0; font:inherit; color:var(--s-papel); cursor:pointer }
-.s .s-pe-botao:focus-visible{ outline:2px solid var(--s-laranja, #f0a43c); outline-offset:3px; border-radius:4px }
+.s .s-pe-botao:focus-visible{ outline:2px solid var(--s-acento); outline-offset:3px; border-radius:4px }
 .s .s-pe-fim .s-sede{ color:var(--s-papel) }
 
 /* =============================================================================
@@ -521,7 +555,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    14/10 continua (as regras de .lista). */
 @media(min-width:760px){
   .s .s-cartoes.indice{ display:block; border-top:1px solid var(--s-linha) }
-  .s .s-cartoes.indice > .s-cartao{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(140px,.45fr) minmax(0,1.5fr) 11.5rem; grid-template-areas:"t n f ir" "t n d ir"; column-gap:clamp(18px,3vw,56px); row-gap:6px; align-items:baseline; text-align:left; padding:clamp(22px,2.8vw,40px) clamp(14px,1.8vw,28px); min-height:0; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:var(--s-laranja-texto); transition:background var(--s-t),color var(--s-t) }
+  .s .s-cartoes.indice > .s-cartao{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(140px,.45fr) minmax(0,1.5fr) 11.5rem; grid-template-areas:"t n f ir" "t n d ir"; column-gap:clamp(18px,3vw,56px); row-gap:6px; align-items:baseline; text-align:left; padding:clamp(22px,2.8vw,40px) clamp(14px,1.8vw,28px); min-height:0; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:var(--s-acento-escuro); transition:background var(--s-t),color var(--s-t) }
   .s .s-cartoes.indice .s-cartao-t{ grid-area:t; font-size:clamp(36px,3.8vw,60px); line-height:.95 }
   .s .s-cartoes.indice .s-cartao-n{ grid-column:2; grid-row:1; margin:0; align-self:baseline }
   /* a etiqueta ("conversa antes") e o perfil das áreas, embaixo dos postos e da frase */
@@ -534,7 +568,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
   .s .s-cartoes.indice .s-cartao-ir{ grid-area:ir; margin:0; padding:0; align-self:center; justify-self:end; color:inherit; font-size:15px; white-space:nowrap }
   .s .s-cartoes.indice .s-cartao-ir svg{ transition:transform var(--s-t) var(--s-ease) }
   .s .s-faixa.noite .s-cartoes.indice{ border-color:var(--s-linha-clara) }
-  .s .s-faixa.noite .s-cartoes.indice > .s-cartao{ border-color:var(--s-linha-clara); --s-acento-texto:var(--s-laranja) }
+  .s .s-faixa.noite .s-cartoes.indice > .s-cartao{ border-color:var(--s-linha-clara); --s-acento-texto:var(--s-acento) }
   .s .s-faixa.noite .s-cartoes.indice .s-cartao-d{ color:var(--s-mudo-claro) }
 }
 @media(min-width:760px){
@@ -544,11 +578,11 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
   .s .s-cartoes.indice.simples .s-cartao-d{ max-width:none }
 }
 @media(min-width:760px) and (hover:hover){
-  .s .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-noite); color:var(--s-papel); --s-acento-texto:var(--s-laranja); transform:none; box-shadow:none }
+  .s .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-noite); color:var(--s-papel); --s-acento-texto:var(--s-acento); transform:none; box-shadow:none }
   .s .s-cartoes.indice > a.s-cartao:hover .s-cartao-d,.s .s-cartoes.indice > a.s-cartao:hover .s-cartao-p{ color:rgba(255,255,255,.86) }
   .s .s-cartoes.indice > a.s-cartao:hover .s-cartao-tag{ border-color:rgba(255,255,255,.4); color:rgba(255,255,255,.86) }
   .s .s-cartoes.indice > a.s-cartao:hover .s-cartao-ir svg{ transform:translateX(4px) }
-  .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-papel); color:var(--s-tinta); --s-acento-texto:var(--s-laranja-texto) }
+  .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-papel); color:var(--s-tinta); --s-acento-texto:var(--s-acento-escuro) }
   .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover .s-cartao-d{ color:var(--s-mudo) }
 }
 /* tablet: duas colunas, o nome, a frase e o parágrafo à esquerda; o fato, a
@@ -603,6 +637,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    direita do .s-in), e não à borda da janela: acima de 1400 px de coluna ele
    ficava solto no canto da tela (1920 px: 187 px fora da coluna) */
 .s .s-canto{ position:absolute; top:clamp(24px,4vw,56px); right:max(var(--s-gutter), calc((100% - var(--s-largura)) / 2)); width:clamp(30px,3vw,40px); height:auto; z-index:2; opacity:.95 }
+.s .s-canto.duplo{ width:clamp(56px,5.4vw,72px) }
 /* a lista vem depois de um .s-cab, que já traz o respiro */
 .s .s-obj{ display:grid; gap:clamp(26px,3.6vw,48px) }
 /* a lista de perguntas depois do índice (onde me encaixo) */
@@ -633,7 +668,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-campo input::placeholder,.s .s-campo textarea::placeholder{ color:#8d8d8d }
 .s .s-campo select.vazio{ color:#8d8d8d }
 .s .s-campo select{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23555' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; padding-right:40px }
-.s .s-campo input:focus,.s .s-campo select:focus,.s .s-campo textarea:focus{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
+.s .s-campo input:focus,.s .s-campo select:focus,.s .s-campo textarea:focus{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
 .s .s-campo [aria-invalid="true"]{ border-color:#d9534f }
 .s .s-campo-dica{ font-size:13.5px; color:#f0a9a6; font-weight:400 }
 .s .s-faixa.papel .s-campo-dica,.s .s-faixa.areia .s-campo-dica{ color:#b23b36 }
@@ -775,8 +810,8 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-janela-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
 .s .s-janela-foto > picture img{ opacity:calc(var(--jk) * var(--jk)) }
 .s .s-janela-mascara{ position:absolute; inset:0;
-  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 757.5 826.3'><path d='M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z'/></svg>") no-repeat 50% 50% / auto calc(30% + 260% * var(--jk));
-  mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 757.5 826.3'><path d='M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z'/></svg>") no-repeat 50% 50% / auto calc(30% + 260% * var(--jk)) }
+  -webkit-mask:var(--s-mascara) no-repeat 50% 50% / auto calc(30% + 260% * var(--jk));
+  mask:var(--s-mascara) no-repeat 50% 50% / auto calc(30% + 260% * var(--jk)) }
 .s .s-janela::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,12,.5),rgba(10,10,12,.74)); opacity:calc(.55 + .45 * var(--jk)) }
 .s .s-janela .s-in{ position:relative; z-index:1 }
 @media(prefers-reduced-motion:reduce){ .s.js .s-janela.viva{ --jk:1 } }
@@ -816,7 +851,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-faixa.noite .s-vira li{ border-color:var(--s-linha-clara) }
 .s .s-vira li > span:first-child{ text-align:right; font-weight:300; font-size:clamp(17px,1.6vw,23px); text-decoration:line-through; opacity:.6 }
 .s .s-vira li > span:last-child{ font-weight:700; font-size:clamp(17px,1.6vw,23px); letter-spacing:-.025em }
-.s .s-vira svg{ width:18px; height:auto; fill:var(--s-laranja) }
+.s .s-vira svg{ width:18px; height:auto; fill:var(--s-acento) }
 /* a sigla em quatro */
 .s .s-sigla{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(10px,1.2vw,16px) }
 /* 20/10/2026: align-content:start e a mesma caixa para letra e chevron: as quatro etiquetas (Grupo, Unido…) ficam na mesma linha, por mais que um parágrafo tenha três linhas e outro uma */
@@ -926,10 +961,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .pin-guia{ background:none; border:0; display:grid; place-items:center }
 .s .pin-guia-c{ position:relative; display:grid; place-items:center; width:34px; height:34px; border-radius:50%; background:var(--s-noite); box-shadow:0 1px 6px rgba(0,0,0,.34); transition:transform var(--s-t),background var(--s-t) }
 .s .pin-guia-c svg{ width:13px; height:auto; fill:#fff; margin-left:2px }
-.s .pin-guia.on .pin-guia-c{ transform:scale(1.28); background:var(--s-laranja) }
+.s .pin-guia.on .pin-guia-c{ transform:scale(1.28); background:var(--s-acento) }
 .s .pin-guia.on .pin-guia-c svg{ fill:var(--s-noite) }
-.s .pin-guia-n{ position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; display:grid; place-items:center; border-radius:9px; background:var(--s-laranja); color:var(--s-noite); font-weight:700; font-size:10.5px; line-height:1 }
-.s .pin-igreja .pin-guia-c{ width:38px; height:38px; box-shadow:0 0 0 3px var(--s-laranja),0 1px 6px rgba(0,0,0,.34) }
+.s .pin-guia-n{ position:absolute; top:-4px; right:-4px; min-width:17px; height:17px; padding:0 4px; display:grid; place-items:center; border-radius:9px; background:var(--s-acento); color:var(--s-noite); font-weight:700; font-size:10.5px; line-height:1 }
+.s .pin-igreja .pin-guia-c{ width:38px; height:38px; box-shadow:0 0 0 3px var(--s-acento),0 1px 6px rgba(0,0,0,.34) }
 .s .pin-igreja .pin-guia-c svg{ width:15px }
 .s .pin-pessoa{ background:none; border:0 }
 .s .pin-pessoa-c{ display:block; width:18px; height:18px; border-radius:50%; background:#2f6bff; border:3px solid #fff; box-shadow:0 0 0 6px rgba(47,107,255,.22) }
@@ -940,7 +975,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .pgs{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:clamp(10px,1.2vw,16px); margin-top:clamp(22px,3vw,34px) }
 .s .pg{ position:relative; background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); display:flex; flex-direction:column; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease) }
 .s .pg.some{ display:none }
-.s .pg.aceso{ transform:translateY(-3px); box-shadow:0 0 0 2px var(--s-laranja),0 20px 44px rgba(0,0,0,.25) }
+.s .pg.aceso{ transform:translateY(-3px); box-shadow:0 0 0 2px var(--s-acento),0 20px 44px rgba(0,0,0,.25) }
 .s .pg-corpo{ padding:clamp(20px,2.2vw,26px); display:flex; flex-direction:column; gap:6px; flex:1 }
 .s .pg-nome{ font-weight:800; font-size:clamp(20px,1.8vw,24px); letter-spacing:-.035em; line-height:1.1 }
 .s .pg-quando{ font-weight:300; font-size:16px; color:rgba(255,255,255,.86) }
@@ -958,7 +993,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .g-form-campo input,.s .g-form-campo select{ width:100%; height:58px; padding:0 16px; background:#fff; border:1.5px solid var(--s-linha); border-radius:0; font-weight:300; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.015em; outline:0; -webkit-appearance:none; appearance:none; transition:border-color var(--s-t),box-shadow var(--s-t) }
 .s .g-form-campo select{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23555' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; padding-right:40px }
 .s .g-form-campo input::placeholder{ color:#8d8d8d }
-.s .g-form-campo input:focus,.s .g-form-campo select:focus{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
+.s .g-form-campo input:focus,.s .g-form-campo select:focus{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
 .s .g-form-campo [aria-invalid="true"]{ border-color:#b23b36 }
 .s .g-form-isca{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
 .s .g-form-erro{ font-size:15px; font-weight:500; color:#b23b36 }
@@ -983,7 +1018,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .of-valor-cx{ display:flex; align-items:center; height:72px; padding:0 18px; border:1.5px solid var(--s-linha); font-weight:800; font-size:clamp(30px,4vw,44px); letter-spacing:-.04em; background:var(--s-papel) }
 .s .of-valor-cx.vazio{ color:#868686 }
 .s .of-valor-in{ position:absolute; inset:0; width:100%; height:100%; opacity:0; font-size:16px }
-.s .of-valor-box:focus-within .of-valor-cx{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
+.s .of-valor-box:focus-within .of-valor-cx{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
 .s .of-meios{ display:grid; gap:10px }
 .s .of-meios .acao{ width:100% }
 .s .of-copiar{ height:54px; font-size:18px }
@@ -1001,7 +1036,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .of-oracao .g-rot{ color:var(--s-mudo) }
 .s .of-oracao .g-form-nota{ text-align:left }
 .s .of-causa{ width:100%; min-height:110px; padding:14px 16px; border:1.5px solid var(--s-linha); border-radius:0; background:#fff; font-weight:300; font-size:17px; line-height:1.45; resize:vertical; outline:0 }
-.s .of-causa:focus{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
+.s .of-causa:focus{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
 
 /* 19/10/2026 · O BOTÃO DO FORMULÁRIO DA PEQUENA GUIA com o texto da copy
    final ("Encontrar a minha Pequena Guia"): no celular, com o nowrap e o
@@ -1048,8 +1083,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    O laranja de texto segue a superfície mais próxima: claro (papel, areia,
    cartão claro, formulário de oferta) usa o tom fundo; escuro volta ao vivo.
    ============================================================================= */
-.s .s-faixa.papel,.s .s-faixa.areia,.s .s-claro,.s .of,.s .s-cartao.claro{ --s-acento-texto:var(--s-laranja-texto) }
-.s .s-cartao:not(.claro),.s .s-funcao,.s .pg,.s .s-mapa-cartao{ --s-acento-texto:var(--s-laranja) }
+.s .s-faixa.papel,.s .s-faixa.areia,.s .s-claro,.s .of,.s .s-cartao.claro{ --s-acento-texto:var(--s-acento-escuro) }
+.s .s-cartao:not(.claro),.s .s-funcao,.s .pg,.s .s-mapa-cartao{ --s-acento-texto:var(--s-acento) }
 
 /* =============================================================================
    RESPONSIVO

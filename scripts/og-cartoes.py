@@ -103,7 +103,7 @@ def quebra(d, texto, f, largura):
     linhas.append(atual)
     return linhas
 
-def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com'):
+def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com', cor_chapeu=OURO):
     if SO and nome_saida not in SO:
         return
     im = foto(arquivo_foto, foco)
@@ -113,7 +113,7 @@ def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam
     apoios = quebra(d, apoio, f_apoio, W - 64 - 300)
     alt_tit = round(tam * 0.96) * n
     y0 = H - 64 - 40 - 30 - alt_tit - 36 - 24 - round(tam * 0.3) - 34 * (len(apoios) - 1)
-    d.text((64, y0), chapeu, font=F(INTER_600, 24), fill=OURO)
+    d.text((64, y0), chapeu, font=F(INTER_600, 24), fill=cor_chapeu)
     y = titulo(d, linhas, y0 + 24 + 20, tam)
     for k, l in enumerate(apoios):
         d.text((64, y + round(tam * 0.34) + 34 * k), l, font=f_apoio, fill=(255, 255, 255))
@@ -178,3 +178,11 @@ cartao('og-sistema.jpg', 'equipe.webp', 'Voluntários da GUIA Church',
 cartao('og-acessar.jpg', S('servir-midia-l.webp'), 'Acesso às equipes',
        [P('Quem é') + IT('você?')],
        'Sou voluntário · Sou da organização · Quero participar', foco=(0.5, 0.5), dominio='guiaservir.com')
+
+# 20/10/2026: o cartão do guiafollow.com, no mesmo desenho da família, com a
+# foto do Follow (public/follow, scripts/follow-fotos.py) e o chapéu no
+# vermelho da marca dele (o acento do Follow em app/site.css).
+VERMELHO_FOLLOW = (255, 0, 12)
+cartao('follow/og.jpg', os.path.join(RAIZ, 'public', 'follow', 'f2-l.webp'), 'Follow · O culto de jovens da GUIA Church',
+       [P('Um lugar'), P('para') + IT('todos.')],
+       'Todo sábado às 19h · Barra da Tijuca', foco=(0.62, 0.4), dominio='guiafollow.com', cor_chapeu=VERMELHO_FOLLOW)

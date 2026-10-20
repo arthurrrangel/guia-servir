@@ -81,7 +81,8 @@
 .faixa .nao:focus-visible,
 .faixa .sim:focus-visible,
 .faixa .mais:focus-visible {
-  outline: 2px solid #f0a43c;
+  /* o acento do site (laranja na GUIA, vermelho no Follow); fora do .s, o laranja */
+  outline: 2px solid var(--s-acento, #e9942f);
   outline-offset: 2px;
 }
 
