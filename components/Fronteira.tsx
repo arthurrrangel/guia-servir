@@ -26,7 +26,9 @@ import { useEffect } from 'react';
    é um HTML estático (nem site nem sistema): sempre carregamento inteiro.
    ============================================================================= */
 
-const SITE = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[^/]+)\/?$/;
+/* 20/10/2026: /follow é a página do Guia Follow (a raiz do guiafollow.com),
+   na mesma folha do site */
+const SITE = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[^/]+|follow)\/?$/;
 const FORA = /^\/followcamp\/?$/;
 
 export type Lado = 'site' | 'sistema';

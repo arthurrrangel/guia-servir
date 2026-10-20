@@ -31,7 +31,8 @@ import { Lupa, Fechar, SetaBaixo } from './Blocos';
 
    19/10/2026: a mesma barra serve aos dois sites (Guia Church e Guia
    Servir); `site` escolhe o mapa (lib/site/nav.ts). Link para o outro site
-   é endereço completo e abre na mesma aba.
+   é endereço completo e abre na mesma aba. 20/10: e ao terceiro, o Guia
+   Follow.
    ============================================================================= */
 
 const normal = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -100,7 +101,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
     <>
       <header className="s-topo">
         <div className="s-in s-topo-in">
-          <Link href={inicio} className="s-logo" aria-label={site === 'servir' ? `Servir · ${IGREJA.nome}` : IGREJA.nome}><Simbolo /></Link>
+          <Link href={inicio} className="s-logo" aria-label={site === 'servir' ? `Servir · ${IGREJA.nome}` : site === 'follow' ? `Follow · ${IGREJA.nome}` : IGREJA.nome}><Simbolo /></Link>
 
           <ul className="s-nav" aria-label="Seções do site">
             {MENU.map((g, i) => (

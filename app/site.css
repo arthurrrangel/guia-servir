@@ -1202,3 +1202,134 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 @media(max-width:380px){
   .s .g-form-pe .acao svg{ display:none }
 }
+
+/* =============================================================================
+   O HERÓI QUE ANDA COM O SCROLL · 20/10/2026 (components/site/Scrub.tsx)
+
+   Nasceu para o Guia Follow (a skill site-de-10k do Arthur,
+   references/pipeline-scrub.md) e fala a língua da casa: a noite, a Inter
+   800 com a última palavra em serifa itálica e o ponto, o chapéu laranja,
+   as pílulas. Sem JS, a página mostra a última foto com a chamada (um
+   herói de uma tela, logo abaixo da barra). Com JS e sem portão,
+   `.s.js .s-scrub` cresce para a distância de scroll e o palco fica preso
+   embaixo da barra enquanto a pilha de fotos anda. Em `.estatico` (menos
+   movimento), volta a uma tela com o pouso.
+
+   A PILHA: cada <picture> traz a janela em que entra (--a → --b) e em que
+   cresce (--za → --z); o JS escreve um número só, --p, no palco. A foto de
+   baixo nunca apaga, fica coberta: sem o vão de duas transparências.
+
+   AS FAIXAS DE LEGENDA ficam centradas no palco, à altura do peito das
+   fotos (os rostos moram no terço de cima dos cortes de computador, como
+   no herói .centro); em pé, no terço de baixo, onde o escuro da casa já
+   mora (o mesmo desenho do herói do celular). `--op` e `--k` são escritos
+   pelo JS só quando mudam.
+   ============================================================================= */
+.s .s-scrub{ position:relative; z-index:1; color:var(--s-papel); background:var(--s-noite); --s-scrub-vh:450;
+  height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
+.s.js .s-scrub:not(.estatico){ height:calc(var(--s-scrub-vh) * 1vh); height:calc(var(--s-scrub-vh) * 1svh); min-height:0 }
+.s .s-scrub-palco{ position:sticky; top:calc(var(--s-barra) + var(--s-recorte-topo)); overflow:hidden; background:var(--s-noite); isolation:isolate;
+  height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
+.s.js .s-scrub:not(.estatico) .s-scrub-palco{ min-height:0 }
+.s .s-scrub-fotos,.s .s-scrub-quadro{ position:absolute; inset:0 }
+.s .s-scrub-foto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; display:block; user-select:none; -webkit-user-drag:none;
+  opacity:var(--o,1); transform:scale(var(--s,1)) translateZ(0); transform-origin:50% 50%; will-change:opacity,transform; backface-visibility:hidden }
+.s.js .s-scrub:not(.estatico) .s-scrub-foto{
+  --t:clamp(0,(var(--p,0) - var(--a)) / (var(--b) - var(--a)),1);
+  --u:clamp(0,(var(--p,0) - var(--za)) / (var(--z) - var(--za)),1);
+  --o:calc(var(--t) * var(--t) * (3 - 2 * var(--t)));
+  --s:calc(1 + .06 * var(--u)) }
+/* o escurecimento da casa (o do herói .centro) e, no pé, a noite subindo:
+   nenhum quadro cru atrás do texto */
+.s .s-scrub-scrim{ position:absolute; inset:0; pointer-events:none; background:linear-gradient(180deg,rgba(10,10,12,.5) 0%,rgba(10,10,12,.22) 45%,rgba(10,10,12,.6) 100%) }
+.s .s-scrub-scrim::after{ content:""; position:absolute; inset:auto 0 0 0; height:34%; background:linear-gradient(to top,rgba(17,17,19,.94),rgba(17,17,19,0)) }
+
+/* o anel de carregamento das fotos (some quando a pilha inteira chegou) */
+.s .s-scrub-anel{ position:absolute; right:calc(var(--s-gutter) + 2px); bottom:calc(26px + env(safe-area-inset-bottom,0px)); width:34px; height:34px; color:var(--s-papel); opacity:.9; transition:opacity .4s var(--s-ease) }
+.s .s-scrub-anel circle{ transition:stroke-dashoffset .2s linear }
+.s .s-scrub-palco.pronto .s-scrub-anel,.s .s-scrub.estatico .s-scrub-anel{ opacity:0 }
+
+/* a seta: dois chevrons apontando para baixo; some assim que a pessoa rola */
+.s .s-scrub-seta{ position:absolute; left:50%; bottom:calc(22px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); width:24px; height:28px; color:var(--s-papel); opacity:var(--seta,.9); transition:opacity .5s var(--s-ease); animation:s-scrub-seta 2.6s var(--s-ease) -.8s infinite }
+.s .s-scrub-seta path{ fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round }
+@keyframes s-scrub-seta{ 0%,100%{ translate:0 0 } 50%{ translate:0 6px } }
+.s .s-scrub.estatico .s-scrub-seta{ display:none }
+
+/* as faixas */
+.s .s-scrub-faixa{ position:absolute; z-index:2; left:50%; top:50%; transform:translate(-50%,-50%); width:min(960px,100% - 2*var(--s-gutter)); text-align:center; opacity:1; pointer-events:none;
+  text-shadow:0 1px 2px rgba(0,0,0,.45),0 6px 30px rgba(0,0,0,.42) }
+.s.js .s-scrub:not(.estatico) .s-scrub-faixa{ opacity:var(--op,0) }
+/* o pouso tem as pílulas: clicável e focável só quando está na tela (o JS
+   marca `inert` enquanto a faixa está apagada) */
+.s .s-scrub-faixa.pouso{ pointer-events:auto }
+.s .s-scrub-faixa::before{ content:""; position:absolute; inset:-22% -14%; z-index:-1; pointer-events:none; opacity:calc(.25 + .75 * var(--k,1));
+  background:radial-gradient(ellipse 70% 64% at 50% 50%,rgba(10,10,12,.66) 0%,rgba(10,10,12,.42) 46%,rgba(10,10,12,0) 76%) }
+.s .s-scrub-faixa.pouso::before{ inset:-18% -14%; background:radial-gradient(ellipse 76% 70% at 50% 50%,rgba(10,10,12,.72) 0%,rgba(10,10,12,.46) 46%,rgba(10,10,12,0) 76%) }
+/* as frases: a legenda no corpo do h2, o pouso no do h1, com a segunda voz
+   na própria linha (como na tela 1) */
+.s .s-scrub-frase{ margin-inline:auto }
+.s .s-scrub .s-h1 .s-it{ display:block }
+.s .s-scrub-faixa .s-chapeu{ justify-content:center; margin-bottom:clamp(16px,2.2vw,30px) }
+.s .s-scrub-sub{ margin:clamp(18px,2.4vw,30px) auto 0; max-width:34ch; color:rgba(255,255,255,.94) }
+.s .s-scrub-faixa .s-acoes{ margin-top:clamp(26px,3.6vw,44px) }
+.s .s-scrub-faixa .s-pil{ text-shadow:none }
+
+/* a coreografia das palavras: só transform e opacity, guiados por --k.
+   Faixa 1 deriva de cima (a câmera desce), faixa 2 sobe palavra por
+   palavra (a luz acende), o pouso sobe em etapas: chapéu, título, frase,
+   pílulas. */
+.s .s-scrub-faixa .w{ display:inline-block; --kc:clamp(0,(var(--k,1) - var(--th,0)) * 2.8,1); opacity:var(--kc); transform:translateY(calc((1 - var(--kc)) * -22px)); will-change:transform,opacity }
+.s .s-scrub-faixa.sobe .w{ transform:translateY(calc((1 - var(--kc)) * 18px)) }
+.s .s-scrub-faixa.pouso .w{ --kc:clamp(0,(var(--k,1) - var(--th,0)) * 3,1); transform:translateY(calc((1 - var(--kc)) * 24px)) }
+.s .s-scrub-faixa.pouso .s-chapeu{ --kh:clamp(0,var(--k,1) * 4,1); opacity:var(--kh) }
+.s .s-scrub-faixa.pouso .s-scrub-sub{ --ks:clamp(0,(var(--k,1) - .62) * 4,1); opacity:var(--ks); transform:translateY(calc((1 - var(--ks)) * 14px)) }
+.s .s-scrub-faixa.pouso .s-acoes{ --kb:clamp(0,(var(--k,1) - .76) * 5,1); opacity:var(--kb); transform:translateY(calc((1 - var(--kb)) * 12px)) }
+
+/* ESTÁTICO: uma tela, a última foto (a pilha inteira opaca), só o pouso
+   visível e montado */
+.s .s-scrub.estatico .s-scrub-foto,.s:not(.js) .s-scrub-foto{ --o:1; --s:1 }
+.s .s-scrub.estatico .s-scrub-faixa:not(.pouso){ display:none }
+.s .s-scrub.estatico .s-scrub-faixa.pouso{ --op:1; --k:1; opacity:1 }
+.s:not(.js) .s-scrub-faixa:not(.pouso){ display:none }
+.s:not(.js) .s-scrub-faixa.pouso{ --k:1 }
+.s:not(.js) .s-scrub-seta,.s:not(.js) .s-scrub-anel{ display:none }
+
+/* EM PÉ (celular e tablet em retrato): as faixas no terço de baixo (os
+   rostos ficam em cima nos cortes 9:16) e o escuro nasce acima do texto e
+   acompanha o texto, como no herói do celular */
+@media (orientation:portrait),(max-width:720px){
+  .s .s-scrub-faixa{ left:var(--s-gutter); right:var(--s-gutter); top:auto; bottom:calc(10svh + env(safe-area-inset-bottom,0px)); transform:none; width:auto }
+  .s .s-scrub-faixa::before{ inset:-16% -10% }
+  .s .s-scrub-scrim{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
+  .s .s-scrub-scrim::after{ height:58%; background:linear-gradient(to top,rgba(10,10,12,.96) 0%,rgba(10,10,12,.9) 30%,rgba(10,10,12,.66) 58%,rgba(10,10,12,0) 100%) }
+  .s .s-scrub-sub{ max-width:none }
+}
+/* uma janela baixa de computador: segue com o scrub, mas sem os detalhes
+   pequenos, que não têm espaço */
+@media (max-height:560px){ .s .s-scrub-seta,.s .s-scrub-anel{ display:none } }
+
+/* MENOS MOVIMENTO: uma tela, tudo no estado final, nenhum motor (o JS lê a
+   mesma consulta e nem liga o scroll) */
+@media (prefers-reduced-motion:reduce){
+  .s.js .s-scrub:not(.estatico){ height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
+  .s .s-scrub-foto{ --o:1; --s:1 }
+  .s .s-scrub-faixa:not(.pouso){ display:none }
+  .s .s-scrub-faixa.pouso{ --op:1; --k:1; opacity:1 }
+  .s .s-scrub-seta{ display:none }
+  .s .s-scrub-faixa .w,.s .s-scrub-faixa .s-chapeu,.s .s-scrub-sub,.s .s-scrub-faixa .s-acoes{ transition:none; animation:none }
+}
+
+/* =============================================================================
+   OS FATOS EM LINHA NO CELULAR · 20/10/2026 (.s-fatos.lista)
+   As três caixas (onde, quanto tempo, inscrição, no Guia Follow) viram três
+   linhas com fio, como a lista de cartões: no celular, três caixas de 120 px
+   eram uma tela só de borda.
+   ============================================================================= */
+@media(max-width:759px){
+  .s .s-fatos.lista{ display:block; border-top:1px solid var(--s-linha) }
+  .s .s-fatos.lista > .s-fato{ display:block; padding:14px 0 15px; background:none; border:0; border-bottom:1px solid var(--s-linha); border-radius:0 }
+  .s .s-fatos.lista > a.s-fato:active{ background:rgba(20,20,20,.045) }
+  .s .s-fatos.lista .s-fato small{ display:block; margin-bottom:3px }
+  .s .s-fatos.lista .s-fato b{ display:block; font-size:22px }
+  .s .s-fatos.lista .s-fato p{ margin-top:3px }
+}

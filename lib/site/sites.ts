@@ -1,4 +1,4 @@
-import { SITE, SITE_IGREJA } from '@/lib/igreja';
+import { SITE, SITE_FOLLOW, SITE_IGREJA } from '@/lib/igreja';
 
 /* =============================================================================
    OS DOIS SITES · 19/10/2026
@@ -41,6 +41,23 @@ export function naIgreja(caminho = '/'): string {
  *  (o arquivo mora em /servir; o next.config reescreve). '#areas' → '/#areas'. */
 export function lp(ancora = ''): string {
   return (LOCAL ? '/servir' : '/') + ancora;
+}
+
+/* 20/10/2026: O TERCEIRO SITE. O Guia Follow (guiafollow.com) é a página do
+   culto de jovens, na raiz do domínio (o arquivo mora em app/(follow)/follow/
+   e o next.config reescreve). Os dois ajudantes seguem a forma dos de cima:
+   `noFollow` é o endereço visto dos outros sites, `follow` é a própria
+   página vista de dentro (uma âncora: '#quando' → '/#quando'). */
+
+/** Um endereço do Guia Follow, a partir do Guia Church ou do Guia Servir. */
+export function noFollow(caminho = '/'): string {
+  if (LOCAL) return caminho === '/' || caminho.startsWith('/#') ? '/follow' + caminho.slice(1) : caminho;
+  return SITE_FOLLOW + caminho;
+}
+
+/** A página do Follow vista de dentro do próprio Follow: a raiz do domínio. */
+export function follow(ancora = ''): string {
+  return (LOCAL ? '/follow' : '/') + ancora;
 }
 
 /** O endereço é de um dos sites da GUIA: abre na mesma aba, sem o

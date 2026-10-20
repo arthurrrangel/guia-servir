@@ -15,7 +15,7 @@ cada um centrado no ponto de interesse da foto. WebP q82.
 
   scripts/follow-fotos.py <pasta com bruto/ e orig/>   → public/follow/f1-l.webp … f5-p.webp
 
-Ordem e papel de cada foto no scroll (ver components/follow/HeroFotos.tsx):
+Ordem e papel de cada foto no scroll (ver components/site/Scrub.tsx e a página):
   f1  _MG_7665  sofás, conversa                    "Vem como você está."
   f2  _MG_7669  três na porta, rindo               (a gente te espera na porta)
   f3  _MG_8167  adoração, mãos levantadas          "Jesus no centro."

@@ -3,12 +3,16 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 
 /* =============================================================================
-   O HERO DE SCROLL DO GUIA FOLLOW, EM FOTOS DE VERDADE · 20/10/2026
+   O HERÓI QUE ANDA COM O SCROLL, EM FOTOS DE VERDADE · 20/10/2026
 
-   O Arthur reprovou o hero gerado por IA ("não quero vídeo de IA") e pediu
-   os materiais reais. Este hero anda com o scroll sobre cinco fotos do
-   Follow (scripts/follow-fotos.py), na mecânica da skill site-de-10k
-   (references/pipeline-scrub.md), trocando o vídeo por uma pilha de fotos:
+   A peça do site que a skill site-de-10k pede (references/pipeline-scrub.md),
+   na língua da casa (app/site.css, "O HERÓI QUE ANDA COM O SCROLL"). Nasceu
+   para o Guia Follow (components/follow/HeroFotos.tsx, 20/10 de manhã, hoje só no git) e
+   veio para cá quando o Follow entrou na identidade dos outros dois sites;
+   serve a qualquer herói da GUIA que queira andar sobre fotos.
+
+   O Arthur reprovou vídeo gerado por IA ("não quero vídeo de IA"): aqui só
+   entram fotos de verdade (as do fotógrafo da igreja, scripts/follow-fotos.py).
 
    · as fotos ficam empilhadas na ordem do DOM; cada uma entra com fusão
      numa janela de progresso (--a → --b) e cresce devagar (--za → --z)
@@ -16,20 +20,24 @@ import { useEffect, useRef, type ReactNode } from 'react';
      isso é CSS puro a partir de um só número, `--p`, que o JS escreve no
      palco só quando muda;
    · o progresso exibido é interpolado num loop rAF normalizado por dt, que
-     descansa quando converge e quando o hero sai da tela;
+     descansa quando converge e quando o herói sai da tela;
    · as faixas de legenda vivem em progresso de scroll, com smoothstep nas
-     bordas, e o DOM só é tocado quando o valor muda;
+     bordas, e o DOM só é tocado quando o valor muda. Cada frase é um título
+     em duas vozes (a grotesca pesada e a última palavra em serifa itálica
+     com o ponto), palavra por palavra;
    · <picture> escolhe o corte 16:9 ou 9:16 pela orientação, ao vivo;
    · a primeira foto é o pôster: vem no HTML, com prioridade alta (LCP);
      as outras chegam atrás de um anel de progresso;
-   · "menos movimento" vira o hero estático (uma tela, a última foto, só o
+   · "menos movimento" vira o herói estático (uma tela, a última foto, só o
      pouso visível). Sem JS, a mesma tela. Nada depende de JS para existir.
 
    O texto de cada faixa vem da página; aqui só a mecânica.
    ============================================================================= */
 
-export type Faixa = { texto: string; a: number; b: number; sobe?: boolean };
-export type Pouso = { titulo: string; sub: string; a: number };
+/** uma legenda: a frase (sem o ponto final), a palavra em itálico, a janela */
+export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean };
+/** o pouso: o título em duas vozes, a linha de apoio e onde começa */
+export type Pouso = { titulo: string; it?: string; sub: string; a: number };
 /** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
 export type Foto = { l: string; p: string; a: number; b: number; alt: string };
 
@@ -46,20 +54,30 @@ function rng(semente: number) {
 }
 
 /** A frase em spans de palavra, com o limiar de montagem (--th) em ordem de
- *  leitura. A frase inteira fica num span só para o leitor de tela. */
-function Palavras({ texto, espalha = 0.45 }: { texto: string; espalha?: number }) {
-  const r = rng(texto.length * 7919 + texto.charCodeAt(0));
-  const palavras = texto.split(' ');
+ *  leitura, e as últimas palavras (`it`) na segunda voz, em serifa itálica
+ *  com o ponto. As palavras são texto de verdade, com espaço entre elas: o
+ *  leitor de tela e o Google leem a frase inteira, uma vez só (a versão de
+ *  19/10 duplicava a frase num span escondido, e o h1 saía em dobro). */
+function Palavras({ texto, it, espalha = 0.45 }: { texto: string; it?: string; espalha?: number }) {
+  const limpo = texto.trim().replace(/\.$/, '');
+  const r = rng(limpo.length * 7919 + limpo.charCodeAt(0));
+  const palavras = limpo.split(' ');
+  /* quantas palavras do fim vão em itálico: as de `it`, se a frase termina
+     nelas; senão só a última */
+  const itL = (it || '').trim().replace(/\.$/, '');
+  const nIt = itL && limpo.endsWith(itL) ? itL.split(' ').length : 1;
+  const corte = palavras.length - nIt;
+  const th = (i: number) => ((i / palavras.length) * espalha + r() * 0.05).toFixed(3);
+  const w = (p: string, i: number) => <span key={i} className="w" style={{ '--th': th(i) } as React.CSSProperties}>{p}</span>;
   return (
     <>
-      <span className="f-sr">{texto}</span>
-      <span aria-hidden="true">
-        {palavras.map((p, i) => (
-          <span key={i}>
-            <span className="w" style={{ '--th': ((i / palavras.length) * espalha + r() * 0.05).toFixed(3) } as React.CSSProperties}>{p}</span>
-            {i < palavras.length - 1 ? ' ' : ''}
-          </span>
-        ))}
+      {palavras.slice(0, corte).map((p, i) => <span key={i}>{w(p, i)} </span>)}
+      <span className="s-it sem-ponto">
+        {palavras.slice(corte).map((p, j) => {
+          const i = corte + j;
+          const ultima = i === palavras.length - 1;
+          return <span key={i}>{w(ultima ? p + '.' : p, i)}{ultima ? '' : ' '}</span>;
+        })}
       </span>
     </>
   );
@@ -71,18 +89,18 @@ const suave = (p: number, e0: number, e1: number) => {
 };
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-export default function HeroFotos({ fotos, faixas, pouso, children }:
-  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; children: ReactNode }) {
+export default function Scrub({ fotos, faixas, pouso, chapeu, rotulo, children }:
+  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; rotulo: string; children: ReactNode }) {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const hero = heroRef.current;
     if (!hero) return;
-    const raiz = hero.closest<HTMLElement>('.f');
-    const palco = hero.querySelector<HTMLElement>('.f-palco');
-    const anel = hero.querySelector<SVGCircleElement>('.f-anel circle');
-    const imgs = Array.from(hero.querySelectorAll<HTMLImageElement>('.f-foto'));
-    const els = Array.from(hero.querySelectorAll<HTMLElement>('.f-faixa'));
+    const raiz = hero.closest<HTMLElement>('.s');
+    const palco = hero.querySelector<HTMLElement>('.s-scrub-palco');
+    const anel = hero.querySelector<SVGCircleElement>('.s-scrub-anel circle');
+    const imgs = Array.from(hero.querySelectorAll<HTMLImageElement>('.s-scrub-foto'));
+    const els = Array.from(hero.querySelectorAll<HTMLElement>('.s-scrub-faixa'));
     if (!raiz || !palco || !anel || imgs.length === 0) return;
     raiz.classList.add('js');
 
@@ -222,9 +240,9 @@ export default function HeroFotos({ fotos, faixas, pouso, children }:
   }, [fotos, faixas, pouso]);
 
   return (
-    <section ref={heroRef} className="f-hero" aria-label="Follow">
-      <div className="f-palco">
-        <div className="f-fotos">
+    <section ref={heroRef} className="s-scrub" aria-label={rotulo}>
+      <div className="s-scrub-palco">
+        <div className="s-scrub-fotos">
           {fotos.map((f, i) => {
             const prox = fotos[i + 1];
             const vars = {
@@ -232,29 +250,30 @@ export default function HeroFotos({ fotos, faixas, pouso, children }:
               '--za': i === 0 ? 0 : f.a, '--z': prox ? prox.b : 1,
             } as React.CSSProperties;
             return (
-              <picture key={f.l} style={vars} className="f-quadro">
+              <picture key={f.l} style={vars} className="s-scrub-quadro">
                 <source media="(orientation: portrait)" srcSet={f.p} type="image/webp" />
-                <img className="f-foto" src={f.l} alt={f.alt} width={1920} height={1080} decoding="async" loading="eager"
+                <img className="s-scrub-foto" src={f.l} alt={f.alt} width={1920} height={1080} decoding="async" loading="eager"
                   fetchPriority={i === 0 ? 'high' : 'low'} draggable={false} />
               </picture>
             );
           })}
         </div>
-        <div className="f-scrim" aria-hidden="true" />
+        <div className="s-scrub-scrim" aria-hidden="true" />
         {faixas.map((f, i) => (
-          <div key={i} className={`f-faixa${f.sobe ? ' sobe' : ''}`} data-faixa={i}>
-            <p className="f-frase"><Palavras texto={f.texto} /></p>
+          <div key={i} className={`s-scrub-faixa${f.sobe ? ' sobe' : ''}`} data-faixa={i}>
+            <p className="s-h2 s-scrub-frase"><Palavras texto={f.texto} it={f.it} /></p>
           </div>
         ))}
-        <div className="f-faixa pouso" data-faixa={faixas.length}>
-          <h1 className="f-frase"><Palavras texto={pouso.titulo} espalha={0.4} /></h1>
-          <p className="f-sub">{pouso.sub}</p>
-          <div className="f-acoes">{children}</div>
+        <div className="s-scrub-faixa pouso" data-faixa={faixas.length}>
+          {chapeu}
+          <h1 className="s-h1 s-scrub-frase"><Palavras texto={pouso.titulo} it={pouso.it} espalha={0.4} /></h1>
+          <p className="s-lead grande s-scrub-sub">{pouso.sub}</p>
+          <div className="s-acoes centro s-scrub-acoes">{children}</div>
         </div>
-        <svg className="f-anel" viewBox="0 0 48 48" aria-hidden="true">
+        <svg className="s-scrub-anel" viewBox="0 0 48 48" aria-hidden="true">
           <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={ANEL} strokeLinecap="round" transform="rotate(-90 24 24)" style={{ strokeDashoffset: ANEL }} />
         </svg>
-        <svg className="f-seta" viewBox="0 0 26 30" aria-hidden="true">
+        <svg className="s-scrub-seta" viewBox="0 0 26 30" aria-hidden="true">
           <path d="M3 4l10 10L23 4" />
           <path d="M3 15l10 10 10-10" />
         </svg>

@@ -1,27 +1,30 @@
-import '../follow.css';
+import '../site.css';
 import type { Metadata, Viewport } from 'next';
 import { IGREJA, SITE_FOLLOW } from '@/lib/igreja';
+import Topo from '@/components/site/Topo';
+import Pe from '@/components/site/Pe';
+import Movimento from '@/components/site/Movimento';
+import Fronteira from '@/components/Fronteira';
 import Medidor from '@/components/site/Medidor';
-import Vida from '@/components/follow/Vida';
 
 /* =============================================================================
-   O CASCO DO GUIA FOLLOW · guiafollow.com · 19/10/2026
+   O CASCO DO GUIA FOLLOW · guiafollow.com · 19/10/2026, refeito em 20/10
 
-   O terceiro site da GUIA, de uma página só (app/(follow)/follow/page.tsx),
-   construído com a skill site-de-10k do Arthur. Tem a própria folha
-   (app/follow.css) e não conhece a da igreja nem o CSS do sistema: a sala do
-   Follow é azul-marinho e creme, a igreja é areia e laranja, e as duas não
-   dividem uma página. Todo link para fora daqui é <a> inteiro (endereço
-   completo em produção, via lib/site/sites.ts), nunca <Link>: a folha de um
-   site não pode ficar carregada no outro (components/Fronteira.tsx explica).
+   O terceiro site da GUIA, de uma página só (app/(follow)/follow/page.tsx).
+   Nasceu em 19/10 com folha própria (azul-marinho e creme, Bricolage
+   Grotesque) e o Arthur reprovou na hora em que viu no ar: "esse do Follow
+   tá sem id visual". Desde 20/10 é a mesma casa do Guia Church e do Guia
+   Servir: app/site.css (noite, papel e areia; Inter 800 com a última
+   palavra em serifa itálica; pílulas; o chapéu laranja), a mesma barra e o
+   mesmo pé, com o mapa do Follow (lib/site/nav.ts). O que é só dele é o
+   herói que anda com o scroll sobre as fotos de verdade do Follow
+   (components/site/Scrub.tsx), e esse também fala na língua da casa.
 
    O ENDEREÇO. O next.config reescreve a raiz do guiafollow.com para /follow
    e manda /follow dos outros dois domínios para cá. `metadataBase` faz o
-   canonical ('/') e o cartão de prévia saírem em guiafollow.com.
-
-   O Medidor é o mesmo dos outros sites: Vercel Web Analytics nas páginas
-   públicas ('/follow' está em lib/site/medir.ts) e a faixa de cookies
-   quando houver Pixel.
+   canonical ('/') e o cartão de prévia saírem em guiafollow.com. O Follow
+   Camp continua em guiachurch.com (o pagamento usa sessionStorage do
+   domínio): daqui é link inteiro.
    ============================================================================= */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_FOLLOW),
@@ -38,20 +41,22 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image' },
 };
 
-/* a sala é escura: a barra do celular acompanha, e o esquema é escuro para o
-   navegador não clarear campo nem rolagem */
+/* a barra do celular na cor da barra do site (a noite); o esquema fica claro
+   como na raiz, para o navegador não reescrever campo nem rolagem */
 export const viewport: Viewport = {
-  width: 'device-width', initialScale: 1, themeColor: '#071a33',
-  colorScheme: 'dark', viewportFit: 'cover',
+  width: 'device-width', initialScale: 1, themeColor: '#111113',
+  colorScheme: 'light', viewportFit: 'cover',
 };
 
 export default function FollowLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="f">
-      <a href="#conteudo" className="f-pular">Pular para o conteúdo</a>
-      <div className="f-leds" aria-hidden="true" />
-      <Vida />
+    <div className="s">
+      <a href="#conteudo" className="s-pular">Pular para o conteúdo</a>
+      <Movimento />
+      <Fronteira lado="site" />
+      <Topo site="follow" />
       <main id="conteudo">{children}</main>
+      <Pe site="follow" />
       <Medidor />
     </div>
   );

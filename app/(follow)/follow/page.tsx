@@ -1,9 +1,9 @@
 import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/igreja';
 import { naIgreja } from '@/lib/site/sites';
-import { PIXEL } from '@/lib/site/medir-cliente';
+import { Simbolo } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
-import RevisarCookies from '@/components/site/RevisarCookies';
-import HeroFotos, { type Foto } from '@/components/follow/HeroFotos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
+import Scrub, { type Foto } from '@/components/site/Scrub';
 import Contagem from '@/components/follow/Contagem';
 
 /* =============================================================================
@@ -15,22 +15,31 @@ import Contagem from '@/components/follow/Contagem';
    centro), a página é uma chegada, e pousa na frase dele, "Um lugar para
    todos". Cada linha de texto aqui veio do pacote ao pé da letra.
 
-   O HERO (components/follow/HeroFotos.tsx) anda com o scroll sobre cinco
-   fotos de verdade do Follow (scripts/follow-fotos.py: Drive da igreja,
-   07.02 e 28.02 de 2026, tratamento do fotógrafo). Nada gerado por IA: o
-   Arthur reprovou o vídeo gerado em 20/10 e pediu os materiais reais. Duas
-   faixas de legenda, uma foto em silêncio (os braços abertos) e o pouso
-   com a única chamada da página: avisar que vai, pelo WhatsApp da igreja
-   (medido como avisou_que_vai). Abaixo, só o que quem nunca foi precisa:
-   as quatro perguntas, quando e onde (com a contagem até o próximo
-   sábado), o Follow Camp e o fecho. Sem formulário.
+   20/10/2026: NA IDENTIDADE DA CASA. A primeira versão tinha folha própria
+   (azul-marinho, creme, outra fonte) e o Arthur reprovou assim que viu no
+   ar: "esse do Follow tá sem id visual". A página passou para a mesma
+   folha, a mesma barra e o mesmo pé do Guia Church e do Guia Servir, com os
+   blocos da apresentação: o cartão claro sobre a noite (tela 6) para a
+   primeira vez, os fatos em linha para quando e onde, a faixa de areia do
+   Camp e o fecho da noite. O que é só do Follow é o herói que anda com o
+   scroll (components/site/Scrub.tsx), e esse fala a mesma língua: Inter
+   800 com a última palavra em serifa itálica, o chapéu laranja, as pílulas.
+
+   O HERÓI anda sobre cinco fotos de verdade do Follow (scripts/follow-
+   fotos.py: Drive da igreja, 07.02 e 28.02 de 2026, tratamento do
+   fotógrafo). Nada gerado por IA: o Arthur reprovou o vídeo gerado em 20/10
+   e pediu os materiais reais. Duas faixas de legenda, uma foto em silêncio
+   (os braços abertos) e o pouso com a única chamada da página: avisar que
+   vai, pelo WhatsApp da igreja (medido como avisou_que_vai). Abaixo, só o
+   que quem nunca foi precisa: as quatro dúvidas, quando e onde (com a
+   contagem até o próximo sábado), o Follow Camp e o fecho. Sem formulário.
 
    O FOLLOW CAMP continua em guiachurch.com/followcamp (o pagamento usa
    sessionStorage do domínio); daqui é um link inteiro.
    ============================================================================= */
 
 const CONVERSA = canalDeConversa('Oi! Quero ir no Follow no sábado.');
-const CAMP = `${SITE_IGREJA}/followcamp`;
+const CAMP = naIgreja('/followcamp');
 
 /* as cinco fotos, na ordem do scroll: cada uma entra com fusão entre a e b */
 const FOTOS: Foto[] = [
@@ -41,118 +50,108 @@ const FOTOS: Foto[] = [
   { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0.74, b: 0.82, alt: 'A sala do Follow cheia, todo mundo de pé' },
 ];
 
-/* o chevron da marca, que se traça quando a seção chega (components/follow/Vida.tsx) */
-function Chev() {
-  return (
-    <svg className="f-chev" viewBox="0 0 64 32" aria-hidden="true">
-      <path pathLength={100} d="M6 4l16 12L6 28" />
-      <path pathLength={100} d="M34 4l16 12-16 12" />
-    </svg>
-  );
-}
-
-function AvisarQueVou({ className = '' }: { className?: string }) {
-  return <a href={CONVERSA.href} target="_blank" rel="noreferrer" className={`f-btn ${className}`.trim()} data-medir="avisou_que_vai">Avisar que vou</a>;
-}
+/* as quatro dúvidas de quem nunca foi (o pacote, ao pé da letra) */
+const DUVIDAS = [
+  { q: 'Não sou de igreja.', r: 'Vem assim mesmo. O Follow é pra quem está chegando.' },
+  { q: 'Vou sozinho.', r: 'Avisa que vai e a gente te espera na porta.' },
+  { q: 'O que eu visto?', r: 'O que você já estava usando.' },
+  { q: 'Quanto tempo dura?', r: 'Mais ou menos uma hora e meia.' },
+];
 
 export default function Follow() {
   return (
     <>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Event', name: 'Follow',
-        description: 'O culto de jovens da GUIA Church. Todo sábado, 19h, na Barra da Tijuca.',
+        description: `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`,
         url: SITE_FOLLOW, eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
         eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Saturday', startTime: '19:00', scheduleTimezone: 'America/Sao_Paulo' },
         location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: IGREJA.cidade, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
         organizer: { '@type': 'Organization', name: IGREJA.nome, url: SITE_IGREJA },
       }} />
 
-      <header className="f-topo">
-        <a href="#conteudo" className="f-marca" aria-label="Follow">FO<b aria-hidden="true">{'>>'}</b>OW</a>
-        <span className="f-quando-topo">Sábado · {IGREJA.followHora}</span>
-        <AvisarQueVou />
-      </header>
-
-      <HeroFotos
+      {/* 1 · o herói que anda com o scroll: a chegada */}
+      <Scrub
+        rotulo="Follow"
         fotos={FOTOS}
         faixas={[
-          { texto: 'Vem como você está.', a: 0, b: 0.26 },
-          { texto: 'Jesus no centro. Uma família em volta.', a: 0.38, b: 0.62, sobe: true },
+          { texto: 'Vem como você está', it: 'está', a: 0, b: 0.26 },
+          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.38, b: 0.62, sobe: true },
         ]}
-        pouso={{ titulo: 'Um lugar para todos.', sub: `Follow. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`, a: 0.76 }}
+        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: `Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`, a: 0.76 }}
+        chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
-        <AvisarQueVou />
-        <a href={MAPA} target="_blank" rel="noreferrer" className="f-btn linha">Como chegar</a>
-      </HeroFotos>
+        <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
+        <Pil href={MAPA} fora tom="vidro" medir="mapa">Como chegar</Pil>
+      </Scrub>
 
-      <section className="f-secao" id="primeira-vez" aria-labelledby="t-pv">
-        <div className="f-in">
-          <Chev />
-          <p className="f-chapeu f-rev"><b>Primeira vez?</b></p>
-          <h2 id="t-pv" className="f-h2 f-rev" style={{ '--d': '.06s' } as React.CSSProperties}>Não precisa ser de igreja. <i>Não precisa conhecer ninguém.</i></h2>
-          <dl className="f-perguntas">
-            <div className="f-pergunta f-rev"><dt>Não sou de igreja.</dt><dd>Vem assim mesmo. <strong>O Follow é pra quem está chegando.</strong></dd></div>
-            <div className="f-pergunta f-rev" style={{ '--d': '.08s' } as React.CSSProperties}><dt>Vou sozinho.</dt><dd>Avisa que vai e <strong>a gente te espera na porta.</strong></dd></div>
-            <div className="f-pergunta f-rev" style={{ '--d': '.16s' } as React.CSSProperties}><dt>O que eu visto?</dt><dd>O que você já estava usando.</dd></div>
-            <div className="f-pergunta f-rev" style={{ '--d': '.24s' } as React.CSSProperties}><dt>Quanto tempo dura?</dt><dd>Mais ou menos uma hora e meia.</dd></div>
-          </dl>
+      {/* 2 · é a sua primeira vez? (o cartão claro sobre a noite, tela 6) */}
+      <section id="primeira-vez" className="s-faixa noite s-grao justa" aria-labelledby="t-pv">
+        <div className="s-in">
+          <div className="s-claro s-rev">
+            <Sede />
+            <h2 id="t-pv" className="s-h2 menor">{liga('É a sua primeira vez no Follow?')}</h2>
+            <p className="s-lead"><UmaLinha semFim texto="Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está." /></p>
+            <div className="s-qa so-largo">
+              {DUVIDAS.map(d => <div key={d.q}><b>{liga(d.q)}</b><p>{fim(ligaTexto(d.r))}</p></div>)}
+            </div>
+            <div className="s-acoes centro">
+              <Pil href={CONVERSA.href} fora tom="preta" medir="avisou_que_vai">Avisar que vou</Pil>
+            </div>
+            {/* no celular: as dúvidas abrem e fecham, embaixo da chamada */}
+            <div className="s-abre so-celular">
+              {DUVIDAS.map(d => (
+                <details key={d.q}><summary>{liga(d.q)}</summary><div><p>{fim(ligaTexto(d.r))}</p></div></details>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="f-secao painel" id="quando" aria-labelledby="t-quando">
-        <div className="f-in">
-          <Chev />
-          <div className="f-quando">
-            <div>
-              <p className="f-chapeu f-rev"><b>Quando e onde</b></p>
-              <h2 id="t-quando" className="f-hora f-rev" style={{ '--d': '.06s' } as React.CSSProperties}>Sábado, {IGREJA.followHora}<small>Não precisa de inscrição</small></h2>
-              <p className="f-endereco f-rev" style={{ '--d': '.12s' } as React.CSSProperties}><strong>{IGREJA.nome}</strong>{IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}</p>
-              <div className="f-acoes f-rev" style={{ '--d': '.18s' } as React.CSSProperties}>
-                <a href={MAPA} target="_blank" rel="noreferrer" className="f-btn linha">Abrir no mapa</a>
-                <AvisarQueVou />
-              </div>
-            </div>
+      {/* 3 · quando e onde (os fatos em linha e a contagem) */}
+      <section id="quando" className="s-faixa papel" aria-labelledby="t-quando">
+        <Simbolo className="s-canto" />
+        <div className="s-in">
+          <Arroba className="topo" />
+          <div className="s-cab centro s-rev">
+            <Chapeu forte="Quando e onde" />
+            <Vozes id="t-quando" className="s-h2" it={IGREJA.followHora || undefined}>{`Todo sábado às ${IGREJA.followHora}`}</Vozes>
             <Contagem />
           </div>
+          {/* os três fatos (o quando já é o título): onde, quanto tempo, inscrição.
+              No celular viram três linhas com fio (.lista), não três caixas */}
+          <div className="s-fatos lista s-rev d1">
+            <a className="s-fato" href={MAPA} target="_blank" rel="noreferrer" data-medir="mapa"><small>Onde</small><b>{IGREJA.nome}</b><p>{IGREJA.rua}, {IGREJA.bairro}</p></a>
+            <div className="s-fato"><small>Quanto tempo</small><b>Uma hora e meia</b><p>Mais ou menos</p></div>
+            <div className="s-fato"><small>Inscrição</small><b>Não precisa</b><p>É só chegar</p></div>
+          </div>
+          <div className="s-acoes centro s-cartoes-acoes s-rev">
+            <Pil href={MAPA} fora tom="preta" medir="mapa">Abrir no mapa</Pil>
+            <Pil href={CONVERSA.href} fora tom="contorno" medir="avisou_que_vai">Avisar que vou</Pil>
+          </div>
+          <Sede className="base" />
         </div>
       </section>
 
-      <section className="f-secao" id="camp" aria-labelledby="t-camp">
-        <div className="f-in">
-          <div className="f-camp f-rev">
-            <div>
-              <p className="f-chapeu"><b>Follow Camp 2027</b> 05 a 10 de fevereiro</p>
-              <h2 id="t-camp">Seis dias fora da rotina, juntos.</h2>
-              <p>O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro.</p>
+      {/* 4 · Follow Camp 2027 (a faixa de areia, como no /eventos) */}
+      <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
+        <div className="s-in">
+          <div className="s-so-texto s-rev">
+            <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
+            <Vozes id="t-camp" className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
+            <p className="s-lead"><UmaLinha semFim texto="O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro." /></p>
+            <div className="s-acoes">
+              <Pil href={CAMP} duro tom="preta">Ir para a página do Camp</Pil>
             </div>
-            <a href={CAMP} className="f-btn linha">Ir para a página do Camp</a>
           </div>
         </div>
       </section>
 
-      <section className="f-secao f-fecho" id="vem" aria-labelledby="t-vem">
-        <div className="f-in">
-          <Chev />
-          <h2 id="t-vem" className="f-h2 f-rev">E se um culto pudesse mudar <i>toda a sua vida?</i></h2>
-          <p className="f-lead f-rev" style={{ '--d': '.08s' } as React.CSSProperties}>Sábado tem Follow. A gente te espera.</p>
-          <div className="f-acoes f-rev" style={{ '--d': '.16s' } as React.CSSProperties}>
-            <AvisarQueVou />
-            <a href={IGREJA.instagram} target="_blank" rel="noreferrer" className="f-btn linha">{IGREJA.instagramArroba}</a>
-          </div>
-        </div>
-      </section>
-
-      <footer className="f-pe">
-        <div className="f-in">
-          <p><strong>Follow · {IGREJA.nome}</strong>{IGREJA.rua}, {IGREJA.bairro}, {IGREJA.cidade}</p>
-          <nav aria-label="Mais">
-            <a href={naIgreja('/')}>GUIA Church</a>
-            <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>
-            <a href={naIgreja('/privacidade')}>Privacidade</a>
-            {PIXEL && <RevisarCookies />}
-          </nav>
-        </div>
-      </footer>
+      {/* 5 · o fecho */}
+      <Fecho id="vem" titulo="E se um culto pudesse mudar toda a sua vida" it="vida" lead="Sábado tem Follow. A gente te espera.">
+        <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
+        <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
+      </Fecho>
     </>
   );
 }

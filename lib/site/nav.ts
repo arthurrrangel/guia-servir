@@ -15,10 +15,15 @@
    celular e a sua busca, no mesmo desenho. Um aponta para o outro com
    endereço completo (lib/site/sites.ts): "Envolva-se" leva ao Servir, e o
    Servir tem o grupo "GUIA Church" de volta.
+
+   20/10/2026: TRÊS. O Guia Follow (guiafollow.com, a página do culto de
+   jovens) entrou na mesma barra e no mesmo pé, com o seu mapa: a própria
+   página (âncoras), o Follow Camp, a igreja e o Servir. O "Follow" do menu
+   da igreja passou a levar ao site dele.
    ============================================================================= */
-import { IGREJA } from '@/lib/igreja';
+import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
-import { noServir, naIgreja, lp } from '@/lib/site/sites';
+import { noServir, naIgreja, noFollow, follow, lp } from '@/lib/site/sites';
 
 export type Item = { rot: string; href: string; sub?: string; duro?: boolean };
 export type Grupo = { rot: string; href: string; itens: Item[]; duro?: boolean };
@@ -47,7 +52,8 @@ export const MENU: Grupo[] = [
   ] },
   { rot: 'Eventos', href: '/eventos', itens: [
     { rot: 'Agenda', href: '/eventos', sub: 'O que acontece na semana' },
-    { rot: 'Follow', href: '/eventos#follow', sub: 'Sábado, 19h' },
+    /* 20/10/2026: o Follow tem site próprio (guiafollow.com) */
+    { rot: 'Follow', href: noFollow('/'), sub: 'Sábado, 19h' },
     { rot: 'Follow Camp 2027', href: '/followcamp', sub: '05 a 10 de fevereiro', duro: true },
   ] },
   /* o grupo inteiro mora no Guia Servir */
@@ -174,5 +180,71 @@ export const SITE_SERVIR_MAPA: Mapa = {
   nada: 'Nada com esse nome. Tente "área", "escala", "PIN" ou "culto".',
 };
 
-export type QualSite = 'igreja' | 'servir';
-export const MAPAS: Record<QualSite, Mapa> = { igreja: SITE_IGREJA_MAPA, servir: SITE_SERVIR_MAPA };
+/* ---------------------------------------------------------------- follow --- */
+
+/* A BARRA DO FOLLOW · 20/10/2026. O site é uma página só: o primeiro grupo
+   são as paradas dela (âncoras), e os outros três são as portas da rede da
+   GUIA: o Follow Camp (que mora no guiachurch.com, pagamento no domínio),
+   a igreja e o Servir. */
+const CONVERSA_FOLLOW = canalDeConversa('Oi! Quero ir no Follow no sábado.');
+const CAMP = naIgreja('/followcamp');
+
+export const MENU_FOLLOW: Grupo[] = [
+  { rot: 'Follow', href: follow(), itens: [
+    { rot: 'Primeira vez', href: follow('#primeira-vez'), sub: 'Não precisa ser de igreja' },
+    { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
+    { rot: 'Avisar que vou', href: CONVERSA_FOLLOW.href, sub: 'A gente te espera na porta', duro: true },
+  ] },
+  { rot: 'Follow Camp', href: CAMP, duro: true, itens: [
+    { rot: 'Follow Camp 2027', href: CAMP, sub: '05 a 10 de fevereiro · inscrição e pagamento', duro: true },
+  ] },
+  { rot: 'GUIA Church', href: naIgreja('/'), itens: [
+    { rot: 'Cultos', href: naIgreja('/cultos'), sub: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}` },
+    { rot: 'Como chegar', href: naIgreja('/como-chegar'), sub: IGREJA.rua },
+    { rot: 'Pequena Guia', href: naIgreja('/pequena-guia'), sub: 'O grupo da semana' },
+    { rot: 'Quem somos', href: naIgreja('/sobre'), sub: 'A igreja' },
+  ] },
+  { rot: 'Servir', href: noServir('/'), itens: [
+    { rot: 'Quero servir', href: noServir('/'), sub: 'Encontre o seu lugar pra servir' },
+    { rot: 'As áreas', href: noServir('/#areas'), sub: 'Mídia, Louvor, Kids, Connect, Livraria' },
+    { rot: 'Já sirvo', href: noServir('/eu'), sub: 'Minha escala, meus dias, meu líder', duro: true },
+  ] },
+];
+
+export const MENU_CELULAR_FOLLOW: Item[] = [
+  { rot: 'Primeira vez', href: follow('#primeira-vez') },
+  { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
+  { rot: 'Follow Camp 2027', href: CAMP, sub: '05 a 10 de fevereiro', duro: true },
+  { rot: 'Como chegar', href: naIgreja('/como-chegar') },
+  { rot: 'GUIA Church', href: naIgreja('/'), sub: `Cultos aos domingos, ${IGREJA.cultoHora}` },
+  { rot: 'Servir', href: noServir('/') },
+];
+
+export const BUSCA_FOLLOW: Item[] = [
+  { rot: 'Que horas é o Follow?', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
+  { rot: 'Onde fica?', href: follow('#quando'), sub: `${IGREJA.rua}, ${IGREJA.bairro}` },
+  { rot: 'Não sou de igreja', href: follow('#primeira-vez'), sub: 'Vem assim mesmo' },
+  { rot: 'Vou sozinho', href: follow('#primeira-vez'), sub: 'A gente te espera na porta' },
+  { rot: 'O que eu visto?', href: follow('#primeira-vez'), sub: 'O que você já estava usando' },
+  { rot: 'Quanto tempo dura?', href: follow('#primeira-vez'), sub: 'Mais ou menos uma hora e meia' },
+  { rot: 'Preciso de inscrição?', href: follow('#quando'), sub: 'Não' },
+  { rot: 'Abrir no mapa', href: MAPA, sub: IGREJA.rua, duro: true },
+  { rot: 'WhatsApp', href: CONVERSA_FOLLOW.href, sub: 'Avisar que vou', duro: true },
+  { rot: 'Instagram', href: IGREJA.instagram, sub: IGREJA.instagramArroba, duro: true },
+  { rot: 'Culto de domingo', href: naIgreja('/cultos'), sub: `GUIA Church · ${IGREJA.cultoDia}, ${IGREJA.cultoHora}` },
+  { rot: 'Privacidade', href: naIgreja('/privacidade'), sub: 'O que fazemos com os seus dados' },
+];
+
+export const SITE_FOLLOW_MAPA: Mapa = {
+  inicio: follow(), menu: MENU_FOLLOW, celular: MENU_CELULAR_FOLLOW, busca: BUSCA_FOLLOW,
+  jaSirvo: noServir('/eu'),
+  pe: [
+    { rot: 'GUIA Church', href: naIgreja('/') },
+    { rot: 'Servir', href: noServir('/') },
+    { rot: 'Privacidade', href: naIgreja('/privacidade') },
+  ],
+  nada: 'Nada com esse nome. Tente "sábado", "camp", "chegar" ou "igreja".',
+};
+
+export type QualSite = 'igreja' | 'servir' | 'follow';
+export const MAPAS: Record<QualSite, Mapa> = { igreja: SITE_IGREJA_MAPA, servir: SITE_SERVIR_MAPA, follow: SITE_FOLLOW_MAPA };
