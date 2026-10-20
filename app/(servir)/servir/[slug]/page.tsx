@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: titulo, description: desc,
     alternates: { canonical: `/servir/${slug}` },
-    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, url: `${SITE}/servir/${slug}`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630 }] },
+    openGraph: { title: `${titulo} · GUIA Servir`, description: desc, url: `${SITE}/servir/${slug}`, siteName: 'GUIA Servir', images: [{ url: a ? `/og-servir-${slug}.jpg?v=20261020` : '/og-servir.jpg?v=20261020', width: 1200, height: 630 }] },
   };
 }
 

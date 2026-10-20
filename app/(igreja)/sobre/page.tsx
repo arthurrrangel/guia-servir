@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Heroi, Passos, Claro, Fecho, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   title: 'Quem somos',
   description: `Uma igreja que parece com a vida de quem chega. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const PILARES = [
@@ -50,18 +50,11 @@ export default function Sobre() {
         about: { '@type': 'Church', name: IGREJA.nome, slogan: IGREJA.frase, url: SITE, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
       }} />
 
-      <section className="s-heroi" aria-labelledby="t-sobre">
-        <Img lugar="sobre-heroi" prioridade retrato />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Quem somos" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="de quem chega">Uma igreja que parece com a vida de quem chega</Vozes>
-          <p className="s-lead grande"><UmaLinha semFim texto="A GUIA existe pra uma coisa simples: ajudar você a viver uma fé prática, com Deus, com as pessoas e no dia a dia. Sem fórmula pronta, sem encenação. Fé que funciona de segunda a segunda." /></p>
-          <div className="s-acoes">
-            <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href="/pequena-guia">Conhecer uma Pequena Guia</Pil>
-          </div>
-        </div>
-      </section>
+      <Heroi id="t-sobre" lugar="sobre-heroi" chapeu={<Chapeu forte="Quem somos" resto={IGREJA.nome} />} titulo="Uma igreja que parece com a vida de quem chega" it="de quem chega" longa
+             lead={<UmaLinha semFim texto="A GUIA existe pra uma coisa simples: ajudar você a viver uma fé prática, com Deus, com as pessoas e no dia a dia. Sem fórmula pronta, sem encenação. Fé que funciona de segunda a segunda." />}>
+        <Pil href="/cultos">Ver os cultos</Pil>
+        <Pil href="/pequena-guia" tom="vidro">Conhecer uma Pequena Guia</Pil>
+      </Heroi>
 
       <section className="s-faixa papel">
         <div className="s-in">
@@ -79,8 +72,8 @@ export default function Sobre() {
 
       <section className="s-faixa noite s-grao" aria-labelledby="t-sigla">
         <div className="s-in">
+          <Sede className="topo" />
           <div className="s-cab centro s-rev">
-            <Sede />
             <h2 id="t-sigla" className="s-h2">Somos GUIA.</h2>
             <p className="s-lead"><UmaLinha semFim texto={`Somos um ${SIGLA_FRASE}. Não é só o nosso nome. É o jeito que escolhemos viver: de perto, em comunidade, caminhando juntos.`} /></p>
           </div>
@@ -103,32 +96,14 @@ export default function Sobre() {
         </div>
       </section>
 
-      <section className="s-faixa areia" aria-labelledby="t-pilares">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-pilares" className="s-serifa">{liga("Em que a gente se apoia?")}</h2>
-            <p className="s-serifa it">{liga("três pilares, uma casa:")}</p>
-          </div>
-          <ol className="s-passos s-rev d1">
-            {PILARES.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
-          </ol>
-          <Sede className="base" />
-        </div>
-      </section>
+      <Passos tid="t-pilares" titulo="Em que a gente se apoia?" sub="três pilares, uma casa:" itens={PILARES} />
 
-      <section className="s-faixa noite s-grao justa" aria-labelledby="t-alvo">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-alvo" className="s-h2 menor">{liga("Plantar cada cristão no solo da\u00a0responsabilidade do Reino.")}</h2>
-            <p className="s-lead">{ligaTexto("É o nosso alvo. E ele muda o que a gente mede:")}</p>
-            <ul className="s-vira" style={{ marginTop: 'clamp(24px,3vw,40px)' }}>
-              {VIRA.map(v => <li key={v.de}><span>{v.de}</span><Chevron /><span>{v.para}</span></li>)}
-            </ul>
-            <div className="s-acoes centro"><Pil href={noServir('/')} tom="preta">Quero servir</Pil></div>
-          </div>
-        </div>
-      </section>
+      <Claro tid="t-alvo" titulo={"Plantar cada cristão no solo da\u00a0responsabilidade do Reino."} lead={ligaTexto("É o nosso alvo. E ele muda o que a gente mede:")}>
+        <ul className="s-vira s-miolo">
+          {VIRA.map(v => <li key={v.de}><span>{v.de}</span><Chevron /><span>{v.para}</span></li>)}
+        </ul>
+        <div className="s-acoes centro"><Pil href={noServir('/')} tom="preta">Quero servir</Pil></div>
+      </Claro>
 
       {/* depois do cartão na noite, o fecho vem no papel */}
       <Fecho tom="papel" titulo="Conheça a GUIA de perto" it="de perto" chapeu={<Chapeu forte="Venha nos visitar" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />}>

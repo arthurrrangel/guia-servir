@@ -57,7 +57,16 @@ body{ margin:0 }
   --s-serifa:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;
   --s-ease:cubic-bezier(.2,.7,.2,1);
   --s-t:.22s;
+  /* os três raios da casa (20/10/2026): o cartão e a foto, o painel e a
+     pergunta que abre, o canto curto do título em bloco e do botão da barra */
   --s-r:18px;
+  --s-r-2:14px;
+  --s-r-3:10px;
+  /* os dois respiros que toda seção repete (20/10/2026): do título para a
+     linha de apoio, e do texto para as pílulas. No celular o título e a
+     linha ficam a 16 px (a regra do eixo, mais abaixo) */
+  --s-respiro:clamp(16px,1.8vw,24px);
+  --s-acoes-topo:clamp(28px,4vw,52px);
   --s-barra:72px;
   /* margem lateral: nunca menor que o recorte do aparelho (iPhone deitado,
      a ilha e os cantos arredondados comem a lateral); o maior dos dois lados
@@ -119,6 +128,8 @@ body{ margin:0 }
 .s .s-chapeu i{ width:6px; height:6px; border-radius:50%; background:var(--s-laranja); display:inline-block }
 .s .s-chapeu.mudo b{ color:inherit }
 .s .s-b{ font-weight:700 }
+/* um trecho que não quebra no meio (a rua, o bairro) */
+.s .s-inteiro{ white-space:nowrap }
 .s .s-centro{ text-align:center }
 .s .s-centro .s-lead,.s .s-centro .s-corpo{ margin-inline:auto }
 .s .s-dir{ text-align:right }
@@ -128,7 +139,9 @@ body{ margin:0 }
 .s .s-sede b{ font-weight:700 }
 .s .s-sede i{ font-style:normal; font-weight:200; opacity:.7 }
 .s .s-sede span{ font-weight:300; opacity:.85 }
-.s .s-arroba{ font-weight:700; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.025em; line-height:1 }
+.s .s-arroba{ font-weight:700; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.025em; line-height:1; position:relative }
+/* área de toque de 44 px por fora da caixa (o carimbo é link para o Instagram) */
+.s a.s-arroba::before{ content:""; position:absolute; inset:-12px -8px }
 .s .s-selo{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--s-acento-texto) }
 
 /* =============================================================================
@@ -142,15 +155,15 @@ body{ margin:0 }
 .s .s-logo svg{ height:36px; width:auto }
 .s .s-nav{ display:flex; align-items:center; gap:clamp(4px,1.4vw,22px); flex:1 }
 .s .s-nav > li{ position:relative }
-.s .s-nav-bt{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 10px; font-weight:600; font-size:clamp(16px,1.35vw,19px); letter-spacing:-.02em; border-radius:10px; transition:background var(--s-t) }
+.s .s-nav-bt{ display:inline-flex; align-items:center; gap:7px; height:44px; padding:0 10px; font-weight:600; font-size:clamp(16px,1.35vw,19px); letter-spacing:-.02em; border-radius:var(--s-r-3); transition:background var(--s-t) }
 .s .s-nav-bt svg{ width:12px; height:12px; transition:transform var(--s-t) }
 .s .s-nav > li:focus-within .s-nav-bt,.s .s-nav-bt[aria-expanded="true"]{ background:rgba(255,255,255,.08) }
 .s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
-.s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-laranja); border-radius:10px 10px 0 0 }
+.s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-laranja); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
 /* o painel de cada grupo */
-.s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:14px; box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
+.s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:var(--s-r-2); box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
 .s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
-.s .s-sub a{ display:block; padding:10px 12px; border-radius:9px; line-height:1.25; transition:background var(--s-t) }
+.s .s-sub a{ display:block; padding:10px 12px; border-radius:var(--s-r-3); line-height:1.25; transition:background var(--s-t) }
 .s .s-sub a:focus-visible{ background:rgba(255,255,255,.08) }
 .s .s-sub a b{ display:block; font-weight:600; font-size:16px; letter-spacing:-.015em }
 .s .s-sub a small{ display:block; font-size:13px; color:var(--s-mudo-claro); margin-top:2px }
@@ -189,7 +202,7 @@ body{ margin:0 }
 .s .s-busca input::-webkit-search-cancel-button,.s .s-busca input::-webkit-search-decoration{ -webkit-appearance:none; appearance:none }
 .s .s-busca input:focus{ border-color:var(--s-papel) }
 .s .s-busca ul{ margin-top:24px; display:grid; gap:2px }
-.s .s-busca li a{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:14px 10px; border-radius:10px; transition:background var(--s-t) }
+.s .s-busca li a{ display:flex; align-items:baseline; justify-content:space-between; gap:16px; padding:14px 10px; border-radius:var(--s-r-3); transition:background var(--s-t) }
 .s .s-busca li a:focus-visible{ background:rgba(255,255,255,.08) }
 .s .s-busca li b{ font-weight:600; font-size:clamp(17px,1.5vw,20px); letter-spacing:-.015em }
 .s .s-busca li small{ font-size:14px; color:var(--s-mudo-claro); text-align:right }
@@ -198,7 +211,7 @@ body{ margin:0 }
 /* =============================================================================
    O PÉ
    ============================================================================= */
-.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 28px; border-top:1px solid rgba(255,255,255,.06) }
+.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 18px; border-top:1px solid rgba(255,255,255,.06) }
 .s .s-pe-g{ display:grid; grid-template-columns:1.6fr repeat(5,1fr); gap:clamp(20px,2.6vw,40px) }
 .s .s-pe-marca svg{ height:40px; width:auto }
 .s .s-pe-marca .s-frase{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(22px,1.9vw,28px); line-height:1.1; letter-spacing:-.01em; margin-top:22px }
@@ -207,8 +220,12 @@ body{ margin:0 }
 .s .s-pe-g h2{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-mudo-claro); margin-bottom:14px }
 .s .s-pe-g li{ margin:0 0 9px }
 .s .s-pe-g li a{ font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
-.s .s-pe-fim{ margin-top:clamp(36px,5vw,60px); padding-top:22px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
+.s .s-pe-fim{ margin-top:clamp(36px,5vw,60px); padding-top:12px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
 .s .s-pe-fim a{ color:var(--s-papel) }
+/* 20/10/2026: cada link da última linha com 44 px de altura de toque (eram 17 px no computador) */
+.s .s-pe-links a,.s .s-pe-links .s-pe-botao,.s .s-pe-fim > span:first-child{ display:inline-block; padding:10px 0 }
+.s .s-pe-fim .s-sede{ padding:10px 0 }
+.s .s-pe-links{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:0 8px }
 .s .s-pe-botao{ appearance:none; background:none; border:0; padding:0; margin:0; font:inherit; color:var(--s-papel); cursor:pointer }
 .s .s-pe-botao:focus-visible{ outline:2px solid var(--s-laranja, #f0a43c); outline-offset:3px; border-radius:4px }
 .s .s-pe-fim .s-sede{ color:var(--s-papel) }
@@ -259,13 +276,14 @@ body{ margin:0 }
 .s .s-faixa .s-sede.base{ margin-top:clamp(32px,5vw,72px) }
 .s .s-faixa .s-arroba.dir{ margin:0 0 clamp(26px,4vw,56px) auto }
 .s .s-faixa .s-sede.esq{ margin:clamp(32px,5vw,72px) 0 0 }
-.s .s-cab{ display:grid; gap:clamp(14px,1.8vw,22px); margin-bottom:clamp(30px,4.2vw,56px) }
+.s .s-cab{ display:grid; gap:var(--s-respiro); margin-bottom:clamp(30px,4.2vw,56px) }
+.s .s-cab:last-child{ margin-bottom:0 }
 .s .s-cab.centro{ justify-items:center; text-align:center }
 .s .s-cab .s-lead{ max-width:46em }
 
 /* tela 2: título e dois parágrafos à esquerda, a foto vertical à direita */
 .s .s-duas{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(280px,.75fr); gap:clamp(28px,5vw,80px); align-items:center }
-.s .s-duas .s-h2{ margin-bottom:clamp(18px,2.4vw,30px) }
+.s .s-duas .s-h2{ margin-bottom:var(--s-respiro) }
 .s .s-duas .s-lead + .s-lead{ margin-top:clamp(14px,1.6vw,22px) }
 .s .s-duas.inv{ grid-template-columns:minmax(280px,.75fr) minmax(0,1.3fr) }
 .s .s-duas.inv > :first-child{ order:2 }
@@ -298,7 +316,8 @@ body{ margin:0 }
 a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,.28) }
 .s .s-cartao-t{ font-weight:800; font-size:clamp(28px,2.9vw,44px); letter-spacing:-.045em; line-height:.95; text-wrap:balance }
 .s .s-cartao-n{ font-size:13.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--s-acento-texto); margin-top:-4px }
-.s .s-cartao-f{ font-weight:700; font-style:italic; font-size:clamp(16px,1.3vw,18px); letter-spacing:-.02em; line-height:1.2; text-wrap:balance; margin-top:10px }
+/* 20/10/2026: a frase na segunda voz da casa (serifa itálica), a mesma do índice; era Inter itálica pesada */
+.s .s-cartao-f{ font-family:var(--s-serifa); font-style:italic; font-weight:400; font-size:clamp(19px,1.5vw,23px); letter-spacing:-.01em; line-height:1.15; text-wrap:balance; margin-top:10px }
 /* 13/10/2026: 13,5 a 14,5 px era letra de rodapé no monitor; o parágrafo do
    cartão sobe para 14,5 a 16 px (lido a 60 cm, não a 30) */
 .s .s-cartao-d{ font-weight:300; font-size:clamp(14.5px,1.1vw,16px); line-height:1.45; color:rgba(255,255,255,.86); margin-top:6px; text-wrap:pretty }
@@ -310,7 +329,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-cartao.claro .s-cartao-d{ color:var(--s-mudo) }
 .s .s-cartao.claro .s-cartao-ir{ color:var(--s-tinta) }
 .s .s-cartao.claro .s-cartao-tag{ border-color:var(--s-linha); color:var(--s-mudo) }
-.s .s-cartoes-acoes{ margin-top:clamp(28px,3.6vw,48px) }
+.s .s-cartoes-acoes{ margin-top:var(--s-acoes-topo) }
 
 /* =============================================================================
    OS PASSOS (tela 5): a areia, "Como funciona?" em serifa com a régua
@@ -332,11 +351,14 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-claro{ background:var(--s-papel); color:var(--s-tinta); border-radius:clamp(22px,3vw,40px); padding:clamp(40px,6vw,88px) clamp(22px,5vw,80px); text-align:center; position:relative; z-index:1 }
 .s .s-claro .s-sede{ display:block; width:max-content; margin:0 auto clamp(26px,4vw,56px) }
 .s .s-claro .s-h2{ max-width:20ch; margin-inline:auto }
-.s .s-claro .s-lead{ margin:clamp(18px,2.4vw,30px) auto 0; max-width:50em }
-.s .s-qa{ display:grid; gap:clamp(18px,2.4vw,30px); margin:clamp(28px,4vw,52px) auto 0; max-width:50em }
+.s .s-claro .s-lead{ margin:var(--s-respiro) auto 0; max-width:50em }
+/* o miolo do cartão (as perguntas, a lista de → , a sigla, o formulário): um respiro só depois da linha de apoio */
+.s .s-qa{ display:grid; gap:clamp(18px,2.4vw,30px); margin:var(--s-acoes-topo) auto 0; max-width:50em }
+.s .s-claro .s-miolo{ margin-top:var(--s-acoes-topo) }
+.s .s-claro .s-miolo.esq{ text-align:left }
 .s .s-qa b{ display:block; font-weight:800; font-size:clamp(20px,2vw,28px); letter-spacing:-.035em; line-height:1.1 }
 .s .s-qa p{ font-weight:300; font-size:clamp(17px,1.7vw,25px); line-height:1.32; letter-spacing:-.01em; margin-top:8px; text-wrap:pretty }
-.s .s-claro .s-acoes{ margin-top:clamp(28px,4vw,52px) }
+.s .s-claro .s-acoes{ margin-top:var(--s-acoes-topo) }
 
 /* =============================================================================
    AS OBJEÇÕES (tela 7): título pequeno à esquerda, a linha de apoio grande,
@@ -346,7 +368,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    direita do .s-in), e não à borda da janela: acima de 1400 px de coluna ele
    ficava solto no canto da tela (1920 px: 187 px fora da coluna) */
 .s .s-canto{ position:absolute; top:clamp(24px,4vw,56px); right:max(var(--s-gutter), calc((100% - var(--s-largura)) / 2)); width:clamp(30px,3vw,40px); height:auto; z-index:2; opacity:.95 }
-.s .s-obj{ display:grid; gap:clamp(26px,3.6vw,48px); margin-top:clamp(28px,4vw,56px) }
+/* a lista vem depois de um .s-cab, que já traz o respiro */
+.s .s-obj{ display:grid; gap:clamp(26px,3.6vw,48px) }
+/* a lista de perguntas depois do índice (onde me encaixo) */
+.s .s-faq.depois{ margin-top:var(--s-acoes-topo) }
 .s .s-obj b{ display:block; font-weight:800; font-size:clamp(22px,2.6vw,38px); letter-spacing:-.04em; line-height:1.05 }
 .s .s-obj p{ font-weight:300; font-size:clamp(15.5px,1.35vw,19px); line-height:1.45; margin-top:8px; max-width:78ch; text-wrap:pretty }
 
@@ -354,7 +379,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    AS PERGUNTAS (tela 8): o título dentro de um bloco preto de canto curto,
    e cada pergunta em negrito seguida da resposta leve, na mesma linha.
    ============================================================================= */
-.s .s-faq-t{ display:inline-block; background:var(--s-noite); color:var(--s-papel); padding:.22em .5em .26em; border-radius:10px; font-weight:800; font-size:clamp(22px,3vw,44px); letter-spacing:-.04em; line-height:1.05; margin-bottom:clamp(22px,3vw,40px); max-width:100%; text-wrap:balance }
+.s .s-faq-t{ display:inline-block; background:var(--s-noite); color:var(--s-papel); padding:.22em .5em .26em; border-radius:var(--s-r-3); font-weight:800; font-size:clamp(22px,3vw,44px); letter-spacing:-.04em; line-height:1.05; margin-bottom:clamp(22px,3vw,40px); max-width:100%; text-wrap:balance }
 .s .s-faixa.noite .s-faq-t{ background:var(--s-papel); color:var(--s-tinta) }
 .s .s-faq{ display:grid; gap:clamp(16px,2vw,26px); max-width:1180px }
 .s .s-faq p{ font-weight:300; font-size:clamp(17px,1.7vw,25px); line-height:1.32; letter-spacing:-.012em; text-wrap:pretty }
@@ -384,11 +409,9 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 /* na faixa escura o bloco preto do "Enviar" (o da apresentação) some no fundo
    quase preto do site: um fio claro desenha o botão sem mudar o desenho */
 .s .s-faixa.noite .s-enviar{ background:#000; border:1.5px solid rgba(255,255,255,.3) }
-.s .s-form-fim{ margin-top:clamp(36px,5vw,70px); display:grid; justify-items:center; gap:clamp(16px,2vw,24px); text-align:center }
-.s .s-form-fim .s-micro{ color:rgba(255,255,255,.8) }
+.s .s-form-fim{ grid-column:1 / -1; margin-top:clamp(36px,5vw,70px); display:grid; justify-items:center; gap:clamp(16px,2vw,24px); text-align:center }
+.s .s-form-fim .s-micro{ color:rgba(255,255,255,.86) }
 .s .s-faixa.papel .s-form-fim .s-micro,.s .s-faixa.areia .s-form-fim .s-micro{ color:var(--s-mudo) }
-.s .s-form-erro{ grid-column:1 / -1; font-size:15px; font-weight:500; color:#f0a9a6 }
-.s .s-faixa.papel .s-form-erro,.s .s-faixa.areia .s-form-erro{ color:#b23b36 }
 .s .s-form.livre{ grid-template-columns:repeat(2,1fr) }
 .s .s-form.livre .largo{ grid-column:1 / -1 }
 .s .s-form.livre .s-acoes{ grid-column:1 / -1; justify-content:center; margin-top:8px }
@@ -421,16 +444,15 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-foto.h{ aspect-ratio:3/2 }
 .s .s-foto.q{ aspect-ratio:1 }
 .s .s-foto.larga{ aspect-ratio:16/8 }
-.s .s-foto.pb img{ filter:grayscale(1) contrast(1.05) }
 
 /* o fecho das páginas: foto escura de ponta a ponta, frase, pílula */
 .s .s-fecho{ position:relative; isolation:isolate; min-height:min(64svh,620px); display:grid; place-items:center; text-align:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden; padding:var(--s-bloco) 0 }
 .s .s-fecho > img,.s .s-fecho > picture img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; filter:saturate(.85) brightness(.9) }
 .s .s-fecho::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,12,.55),rgba(10,10,12,.72)) }
 .s .s-fecho .s-h2{ max-width:14ch; margin-inline:auto }
-.s .s-fecho .s-lead{ margin:clamp(16px,2.2vw,28px) auto 0 }
+.s .s-fecho .s-lead{ margin:var(--s-respiro) auto 0 }
 .s .s-fecho .s-chapeu{ justify-content:center; margin-bottom:clamp(14px,2vw,24px) }
-.s .s-fecho .s-acoes{ margin-top:clamp(26px,3.6vw,48px) }
+.s .s-fecho .s-acoes{ margin-top:var(--s-acoes-topo) }
 
 /* =============================================================================
    LISTAS E COMPOSIÇÕES MENORES
@@ -438,7 +460,6 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 /* os fatos em linha (data, endereço, horário) */
 .s .s-fatos{ display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(12px,1.6vw,20px) }
 .s .s-fato{ display:grid; gap:8px; padding:clamp(20px,2.2vw,28px); border-radius:var(--s-r); background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.08); transition:background var(--s-t) }
-a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-faixa.papel .s-fato,.s .s-faixa.areia .s-fato{ background:rgba(20,20,20,.04); border-color:var(--s-linha) }
 .s .s-fato small{ font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-acento-texto) }
 .s .s-fato b{ font-weight:800; font-size:clamp(20px,1.9vw,27px); letter-spacing:-.035em; line-height:1.05 }
@@ -452,9 +473,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-vira svg{ width:18px; height:auto; fill:var(--s-laranja) }
 /* a sigla em quatro */
 .s .s-sigla{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(10px,1.2vw,16px) }
-.s .s-sigla li{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(24px,2.6vw,36px) clamp(16px,1.6vw,24px); text-align:center; display:grid; gap:8px; justify-items:center }
-.s .s-sigla .s-letra{ font-weight:800; font-size:clamp(54px,6vw,92px); letter-spacing:-.06em; line-height:.9 }
-.s .s-sigla .s-letra svg{ width:.62em; height:auto; fill:currentColor; margin-top:.1em }
+/* 20/10/2026: align-content:start e a mesma caixa para letra e chevron: as quatro etiquetas (Grupo, Unido…) ficam na mesma linha, por mais que um parágrafo tenha três linhas e outro uma */
+.s .s-sigla li{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(24px,2.6vw,36px) clamp(16px,1.6vw,24px); text-align:center; display:grid; gap:8px; justify-items:center; align-content:start }
+.s .s-sigla .s-letra{ font-weight:800; font-size:clamp(54px,6vw,92px); letter-spacing:-.06em; line-height:.9; height:.9em; display:flex; align-items:center; justify-content:center }
+.s .s-sigla .s-letra svg{ width:.62em; height:auto; fill:currentColor }
 .s .s-sigla b{ font-weight:800; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.03em }
 .s .s-sigla p{ font-size:14px; font-weight:300; color:rgba(255,255,255,.82); line-height:1.4; max-width:26ch }
 .s .s-faixa.noite .s-sigla li{ background:var(--s-papel); color:var(--s-tinta) }
@@ -463,12 +485,12 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-versiculo{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(24px,3.4vw,48px); line-height:1.15; letter-spacing:-.01em; max-width:30ch; margin-inline:auto; text-wrap:balance }
 .s .s-versiculo-ref{ margin-top:clamp(14px,2vw,24px); font-size:14px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-acento-texto) }
 /* os três modos de chegar e o mapa */
-.s .s-mapa{ position:relative; aspect-ratio:16/7; min-height:380px; background:var(--s-noite-2); border-radius:var(--s-r); overflow:hidden; isolation:isolate }
+.s .s-mapa{ position:relative; margin-top:clamp(16px,2vw,24px); aspect-ratio:16/7; min-height:380px; background:var(--s-noite-2); border-radius:var(--s-r); overflow:hidden; isolation:isolate }
 /* o fundo embaixo do iframe: se o mapa não carregar, a caixa diz o que é em
    vez de ficar um retângulo preto (o endereço e os botões seguem no cartão) */
 .s .s-mapa::before{ content:"Mapa"; position:absolute; inset:0; z-index:0; display:grid; place-items:center; color:var(--s-mudo-claro); font-size:14px; letter-spacing:.08em; text-transform:uppercase }
 .s .s-mapa iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; filter:grayscale(1) contrast(1.05) }
-.s .s-mapa-cartao{ position:absolute; left:clamp(16px,3vw,40px); bottom:clamp(16px,3vw,40px); z-index:2; background:var(--s-noite); color:var(--s-papel); padding:clamp(18px,2vw,26px) clamp(20px,2.2vw,30px); border-radius:14px; display:grid; gap:6px; max-width:min(92%,420px) }
+.s .s-mapa-cartao{ position:absolute; left:clamp(16px,3vw,40px); bottom:clamp(16px,3vw,40px); z-index:2; background:var(--s-noite); color:var(--s-papel); padding:clamp(18px,2vw,26px) clamp(20px,2.2vw,30px); border-radius:var(--s-r-2); display:grid; gap:6px; max-width:min(92%,420px) }
 .s .s-mapa-cartao .s-acoes{ margin-top:12px }
 .s .s-mapa-cartao .s-pil{ height:46px; padding:0 22px }
 /* a lista de pessoas / responsável */
@@ -484,7 +506,9 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-funcao em{ font-style:normal; font-size:13px; font-weight:600; color:rgba(255,255,255,.6) }
 /* os "qa" abertos (onde me encaixo, acessar, privacidade) */
 .s .s-abre{ display:grid; gap:10px; max-width:980px; margin-inline:auto }
-.s .s-abre details{ background:rgba(20,20,20,.04); border:1px solid var(--s-linha); border-radius:14px; padding:0 clamp(16px,2vw,24px) }
+/* alinhada à esquerda, embaixo de um cabeçalho à esquerda (privacidade) */
+.s .s-abre.esq{ margin-inline:0 }
+.s .s-abre details{ background:rgba(20,20,20,.04); border:1px solid var(--s-linha); border-radius:var(--s-r-2); padding:0 clamp(16px,2vw,24px) }
 .s .s-faixa.noite .s-abre details{ background:rgba(255,255,255,.05); border-color:var(--s-linha-clara) }
 .s .s-abre summary{ cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center; gap:16px; padding:clamp(16px,1.8vw,22px) 0; font-weight:700; font-size:clamp(17px,1.5vw,22px); letter-spacing:-.025em; line-height:1.2 }
 .s .s-abre summary::-webkit-details-marker{ display:none }
@@ -494,23 +518,12 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .s-abre details > div p{ font-weight:300; font-size:clamp(16px,1.3vw,19px); line-height:1.5; max-width:70ch }
 .s .s-abre details > div p + p{ margin-top:10px }
 .s .s-abre details > div a{ text-decoration:underline; text-underline-offset:4px }
-/* o texto corrido (privacidade) */
-.s .s-prosa{ max-width:72ch; display:grid; gap:14px }
-.s .s-prosa h2{ font-weight:800; font-size:clamp(22px,2.2vw,30px); letter-spacing:-.035em; line-height:1.1; margin-top:22px }
-.s .s-prosa p,.s .s-prosa li{ font-weight:300; font-size:clamp(16px,1.3vw,19px); line-height:1.55 }
-.s .s-prosa ul{ display:grid; gap:8px; padding-left:20px; list-style:disc }
-.s .s-prosa a{ text-decoration:underline; text-underline-offset:4px }
 /* o aviso discreto (sem rede, estado) */
 /* linha de recado: o link nunca quebra no meio (sublinhado partido em duas
    linhas é o que mais suja uma tela de celular) */
 .s .s-aviso{ font-size:14px; color:var(--s-mudo-claro); margin-top:16px; text-wrap:balance }
 .s .s-aviso a{ white-space:nowrap }
 .s .s-faixa.papel .s-aviso,.s .s-faixa.areia .s-aviso{ color:var(--s-mudo) }
-/* a pílula "agora": a próxima coisa da semana */
-.s .s-agora{ display:inline-flex; align-items:center; gap:10px; padding:8px 16px 8px 12px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); color:var(--s-papel); font-size:14.5px; font-weight:500; backdrop-filter:blur(10px); transition:background var(--s-t) }
-.s .s-agora i{ width:7px; height:7px; border-radius:50%; background:var(--s-laranja); box-shadow:0 0 0 4px rgba(233,148,47,.25) }
-.s .s-agora span{ opacity:.8; font-weight:300 }
-.s .s-agora svg{ width:12px; height:12px; opacity:.8 }
 
 /* =============================================================================
    COMPONENTES REAPROVEITADOS: as classes que Grupos.tsx, MapaGuias.tsx,
@@ -524,10 +537,11 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .g-acoes{ display:flex; flex-wrap:wrap; align-items:center; gap:12px 18px }
 .s .g-acoes.centro{ justify-content:center }
 .s .g-link{ font-weight:500; font-size:16px; text-decoration:underline; text-underline-offset:4px; transition:opacity var(--s-t) }
-.s .acao{ display:inline-flex; align-items:center; justify-content:center; gap:8px; height:46px; padding:0 24px; border-radius:999px; font-weight:500; font-size:16px; letter-spacing:-.01em; white-space:nowrap; border:1.5px solid currentColor; color:inherit; background:transparent; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease),background var(--s-t),color var(--s-t) }
+.s .acao{ display:inline-flex; align-items:center; justify-content:center; gap:10px; height:46px; padding:0 28px; border-radius:999px; font-weight:500; font-size:clamp(16px,1.3vw,19px); letter-spacing:-.015em; white-space:nowrap; border:1.5px solid currentColor; color:inherit; background:transparent; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease),background var(--s-t),color var(--s-t) }
 .s .acao.cheia{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .acao[disabled]{ opacity:.55; pointer-events:none }
-.s .acao svg{ width:15px; height:15px }
+/* 20/10/2026: pílula não leva seta em lugar nenhum do site (a seta é dos links de índice) */
+.s .acao svg{ display:none }
 .s .pg .acao.cheia,.s .s-faixa.noite .acao.cheia{ background:var(--s-papel); color:var(--s-tinta); border-color:var(--s-papel) }
 /* cartão claro dentro de faixa escura: o botão volta a ser escuro (sem isso
    ficava papel sobre papel e o "Encontrar a minha" do /pequena-guia sumia) */
@@ -544,7 +558,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .pg-mapao .leaflet-tile-pane{ filter:grayscale(1) brightness(1.06) contrast(.9) }
 .s .pg-mapao .leaflet-control-attribution{ font:11px var(--s-fonte); background:rgba(245,245,242,.9); color:var(--s-mudo) }
 .s .pg-mapao .leaflet-control-attribution a{ color:var(--s-tinta) }
-.s .pg-mapao .leaflet-bar{ border:1px solid var(--s-linha); border-radius:10px; box-shadow:none; overflow:hidden }
+.s .pg-mapao .leaflet-bar{ border:1px solid var(--s-linha); border-radius:var(--s-r-3); box-shadow:none; overflow:hidden }
 .s .pg-mapao .leaflet-bar a{ background:#fff; color:var(--s-tinta); border-bottom-color:var(--s-linha) }
 .s .pg-mapao .leaflet-tooltip{ font:500 13px/1.3 var(--s-fonte); background:var(--s-noite); color:var(--s-papel); border:0; border-radius:8px; padding:6px 10px; box-shadow:0 8px 20px rgba(0,0,0,.3) }
 .s .pg-mapao .leaflet-tooltip-top::before{ border-top-color:var(--s-noite) }
@@ -571,8 +585,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .pg-quando{ font-weight:300; font-size:16px; color:rgba(255,255,255,.86) }
 .s .pg-nota{ font-size:14px; font-weight:300; color:rgba(255,255,255,.64); line-height:1.45 }
 .s .pg-corpo .g-acoes{ margin-top:auto; padding-top:16px }
-.s .pg .g-link{ color:rgba(255,255,255,.85); font-size:15px }
-.s .pgs-dica{ display:none }
+.s .pg .g-link{ color:rgba(255,255,255,.85); font-size:15px; display:inline-flex; align-items:center; min-height:44px }
 
 /* --- o formulário da Pequena Guia (components/FormPequenaGuia.tsx) */
 /* minmax(0,…): nenhum campo ou botão alarga o formulário além do cartão */
@@ -581,7 +594,7 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .g-form-campo{ display:grid; gap:7px; min-width:0 }
 .s .g-form-largo{ grid-column:1 / -1 }
 .s .g-form-campo .g-rot{ color:var(--s-mudo) }
-.s .g-form-campo input,.s .g-form-campo select{ width:100%; height:56px; padding:0 16px; background:#fff; border:1.5px solid var(--s-linha); border-radius:0; font-weight:300; font-size:19px; letter-spacing:-.01em; outline:0; -webkit-appearance:none; appearance:none; transition:border-color var(--s-t),box-shadow var(--s-t) }
+.s .g-form-campo input,.s .g-form-campo select{ width:100%; height:58px; padding:0 16px; background:#fff; border:1.5px solid var(--s-linha); border-radius:0; font-weight:300; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.015em; outline:0; -webkit-appearance:none; appearance:none; transition:border-color var(--s-t),box-shadow var(--s-t) }
 .s .g-form-campo select{ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23555' stroke-width='1.8'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 16px center; padding-right:40px }
 .s .g-form-campo input::placeholder{ color:#8d8d8d }
 .s .g-form-campo input:focus,.s .g-form-campo select:focus{ border-color:var(--s-laranja); box-shadow:0 0 0 3px rgba(233,148,47,.22) }
@@ -591,16 +604,15 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .g-form-pe{ margin-top:4px }
 .s .g-form-nota{ font-size:14px; font-weight:300; color:var(--s-mudo); text-align:center; line-height:1.5 }
 .s .g-form-nota a{ text-decoration:underline; text-underline-offset:3px }
-.s .g-form-nota.dim{ opacity:.85 }
 .s .g-form-fim{ display:grid; gap:16px; justify-items:center; text-align:center }
-.s .g-form-msg{ font:300 15px/1.5 var(--s-fonte); white-space:pre-wrap; background:#fff; border:1px solid var(--s-linha); border-radius:14px; padding:16px 18px; max-width:100%; text-align:left }
+.s .g-form-msg{ font:300 15px/1.5 var(--s-fonte); white-space:pre-wrap; background:#fff; border:1px solid var(--s-linha); border-radius:var(--s-r-2); padding:16px 18px; max-width:100%; text-align:left }
 
 /* --- ofertar (components/Ofertar.tsx) */
 .s .of{ display:grid; gap:clamp(18px,2.2vw,26px); max-width:620px; margin-inline:auto; padding:clamp(26px,3vw,40px) clamp(20px,3vw,40px); background:#fff; border:1px solid var(--s-linha); border-radius:clamp(18px,2.4vw,28px) }
 .s .of > .g-ed{ text-align:center }
 .s .of-tipo{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
 .s .of-tipo > legend{ grid-column:1 / -1; margin-bottom:4px; color:var(--s-mudo) }
-.s .of-tipo-bt{ display:grid; gap:4px; text-align:left; padding:14px 16px; border:1.5px solid var(--s-linha-forte); border-radius:14px; background:#fff; transition:border-color var(--s-t),background var(--s-t) }
+.s .of-tipo-bt{ display:grid; gap:4px; text-align:left; padding:14px 16px; border:1.5px solid var(--s-linha-forte); border-radius:var(--s-r-2); background:#fff; transition:border-color var(--s-t),background var(--s-t) }
 .s .of-tipo-bt.on{ background:var(--s-noite); color:var(--s-papel); border-color:var(--s-noite) }
 .s .of-tipo-rot{ font-weight:700; font-size:17px; letter-spacing:-.02em }
 .s .of-tipo-dica{ font-size:13.5px; font-weight:300; opacity:.75 }
@@ -614,10 +626,10 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
 .s .of-meios{ display:grid; gap:10px }
 .s .of-meios .acao{ width:100% }
 .s .of-copiar{ height:54px; font-size:18px }
-.s .of-codigo{ font:300 13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; user-select:all; background:var(--s-papel); border:1px solid var(--s-linha); border-radius:12px; padding:14px 16px; color:var(--s-mudo) }
+.s .of-codigo{ font:300 13.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; word-break:break-all; user-select:all; background:var(--s-papel); border:1px solid var(--s-linha); border-radius:var(--s-r-2); padding:14px 16px; color:var(--s-mudo) }
 .s .of-ou{ display:flex; align-items:center; gap:14px; color:var(--s-mudo); font-size:13px; text-transform:uppercase; letter-spacing:.06em; font-weight:700 }
 .s .of-ou::before,.s .of-ou::after{ content:""; flex:1; height:1px; background:var(--s-linha) }
-.s .of-qr{ width:min(100%,260px); margin-inline:auto; border:1px solid var(--s-linha); border-radius:12px }
+.s .of-qr{ width:min(100%,260px); margin-inline:auto; border:1px solid var(--s-linha); border-radius:var(--s-r-2) }
 .s .of .acao{ justify-self:center }
 .s .of .acao.cheia{ width:100%; justify-self:stretch }
 .s .of-fim{ text-align:center; justify-items:center }
@@ -641,9 +653,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s.js .s-rev{ opacity:1; transform:none; transition:none }
   .s .s-pil,.s .acao,.s .s-cartao,.s .pg{ transition:none }
 }
-.s .s-entra{ animation:s-entra .5s var(--s-ease) both }
-@keyframes s-entra{ from{ opacity:0 } to{ opacity:1 } }
-@media(prefers-reduced-motion:reduce){ .s .s-entra{ animation:none } }
 
 /* =============================================================================
    RESPONSIVO
@@ -695,7 +704,6 @@ a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-vira svg{ margin-inline:auto; transform:rotate(90deg) }
   .s .s-pe-g{ grid-template-columns:1fr 1fr }
   .s .s-pe-marca{ grid-column:1 / -1 }
-  .s .s-faq-t{ border-radius:10px }
   .s .s-claro{ border-radius:var(--s-r) }
   /* cartão dentro do mapa a 12 px da borda: raio concêntrico (externo − recuo) */
   .s .s-mapa-cartao{ left:12px; right:12px; bottom:12px; max-width:none; border-radius:calc(var(--s-r) - 12px) }
@@ -793,13 +801,19 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-ico-bt:hover{ background:rgba(255,255,255,.1) }
   .s .s-busca li a:hover{ background:rgba(255,255,255,.08) }
   .s .s-pe-g li a:hover{ opacity:.7 }
+  /* 20/10/2026: todo link e botão responde ao mouse. O que faltava: o logo da
+     barra, o carimbo @guiachurch, os links do pé (mapa e a última linha), as
+     perguntas que abrem, os links dentro de resposta e de nota */
+  .s .s-logo:hover,.s a.s-arroba:hover,.s .s-pe-marca .s-corpo a:hover,.s .s-pe-fim a:hover,.s .s-pe-botao:hover,.s .s-abre summary:hover,
+  .s .s-faq p a:hover,.s .s-abre details > div a:hover,.s .g-form-nota a:hover,.s .s-aviso a:hover{ opacity:.7 }
+  .s a.s-fato:hover{ background:rgba(255,255,255,.1) }
+  .s .s-faixa.papel a.s-fato:hover,.s .s-faixa.areia a.s-fato:hover{ background:rgba(20,20,20,.08) }
   .s .s-pil:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.22) }
   .s .s-pil.vidro:hover{ background:rgba(255,255,255,.26) }
   .s .s-pil.contorno:hover{ background:rgba(20,20,20,.06); box-shadow:none }
   .s .s-link:hover{ opacity:.7 }
   .s .s-enviar:hover{ background:#000; transform:translateY(-1px) }
   .s .s-faixa.noite .s-enviar:hover{ border-color:rgba(255,255,255,.55) }
-  .s .s-agora:hover{ background:rgba(255,255,255,.2) }
   .s .g-link:hover{ opacity:.7 }
   .s .acao:hover{ transform:translateY(-1px) }
   .s .acao.cheia:hover{ box-shadow:0 10px 26px rgba(0,0,0,.2) }
@@ -808,6 +822,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
   .s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
 }
+.s .s-logo,.s a.s-arroba,.s .s-pe-marca .s-corpo a,.s .s-pe-fim a,.s .s-pe-botao,.s .s-abre summary,.s .s-faq p a,.s .s-abre details > div a,.s .g-form-nota a,.s .s-aviso a{ transition:opacity var(--s-t) }
 .s{ -webkit-tap-highlight-color:transparent }
 .s :is(.s-pil, .acao, .s-enviar, .pg-chip, .of-tipo-bt, .s-ico-bt):active{ transform:scale(.97); transition-duration:.08s }
 
@@ -836,7 +851,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-pe *{ text-align:center !important }
 
   /* 2. blocos mais estreitos que a coluna: margem automática dos dois lados */
-  .s main :is(.s-h1, .s-h2, .s-lead, .s-corpo, .s-passos, .s-qa, .s-faq, .s-circs, .s-vira, .s-versiculo, .s-abre, .s-prosa, .of, .s-sigla p, .s-obj p, .s-abre details > div p),
+  .s main :is(.s-h1, .s-h2, .s-lead, .s-corpo, .s-passos, .s-qa, .s-faq, .s-circs, .s-vira, .s-versiculo, .s-abre, .of, .s-sigla p, .s-obj p, .s-abre details > div p),
   .s .s-pe-marca .s-corpo{ margin-inline:auto !important }
   /* marcas de canto (@guiachurch, guiachurch | sede): no meio da faixa */
   .s main .s-arroba, .s main .s-sede{ margin-inline:auto !important }
@@ -900,7 +915,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s main :is(h1, h2, h3, p, li, b, small, summary, .s-lead, .s-micro, .s-aviso, .s-cartao-t, .s-cartao-d, .s-selo, .s-serifa),
   .s .s-pe :is(p, li){ text-wrap:balance }
   /* texto longo de verdade (privacidade, respostas que abrem): sem órfã */
-  .s main .s-abre details > div p, .s .s-prosa p{ text-wrap:pretty }
+  .s main .s-abre details > div p{ text-wrap:pretty }
 }
 
 /* =============================================================================
@@ -950,7 +965,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* 2. as perguntas que abrem */
   .s .so-largo{ display:none !important }
   .s .s-abre.so-celular{ display:grid }
-  .s .s-abre.so-celular.obj{ margin-top:26px }
 
   /* 3. sem carimbo de slide no celular (o display:none antigo do símbolo
      perdia para o estilo em linha do próprio SVG) */
@@ -1047,16 +1061,22 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 .s .s-num.so .s-vivos svg{ display:none }
 
 /* o fecho sem foto: a faixa da noite com a frase e as pílulas */
-.s .s-fim .s-lead{ margin:22px auto 0 }
-.s .s-fim .s-acoes{ margin-top:clamp(28px,4vw,52px) }
+.s .s-fim .s-lead{ margin:var(--s-respiro) auto 0 }
+.s .s-fim .s-acoes{ margin-top:var(--s-acoes-topo) }
+/* o aviso depois do formulário do fecho ("Prefere escolher com calma?") */
+.s .s-fim .s-rev + .s-aviso{ margin-top:28px }
+/* a foto ao lado do texto com pílulas embaixo (o Follow no /eventos) */
+.s .s-duas .s-acoes{ margin-top:var(--s-acoes-topo) }
 .s .s-fim .s-h2{ max-width:16ch; margin-inline:auto }
+/* o cabeçalho de texto na noite (privacidade): o micro embaixo da linha */
+.s .s-faixa.noite .s-cab .s-micro{ color:var(--s-mudo-claro) }
 
 /* o quadro ao lado do texto (telas 2) e o bloco do Camp sem foto */
 .s .s-duas .s-quadro.v{ max-width:520px; justify-self:center }
 .s .s-so-texto{ max-width:900px; margin-inline:auto; text-align:center }
 .s .s-so-texto .s-chapeu{ justify-content:center; margin-bottom:clamp(14px,2vw,24px) }
-.s .s-so-texto .s-lead{ margin:clamp(16px,2.2vw,28px) auto 0 }
-.s .s-so-texto .s-acoes{ justify-content:center; margin-top:clamp(24px,3vw,40px) }
+.s .s-so-texto .s-lead{ margin:var(--s-respiro) auto 0 }
+.s .s-so-texto .s-acoes{ justify-content:center; margin-top:var(--s-acoes-topo) }
 
 @media(max-width:999px){
   .s .s-dom{ grid-template-columns:1fr; gap:28px }
@@ -1090,11 +1110,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 }
 .s .s-fim .s-chapeu{ justify-content:center; margin-bottom:clamp(14px,2vw,24px) }
 
-/* a agenda do /eventos sem foto: o cartão ganha corpo de quadro de horários */
-.s .s-cartoes.agenda .s-cartao{ padding:clamp(34px,3.4vw,52px) clamp(22px,2.2vw,34px) clamp(28px,2.8vw,40px); gap:12px }
-.s .s-cartoes.agenda .s-cartao-t{ font-size:clamp(32px,3.2vw,48px) }
-.s .s-cartoes.agenda .s-cartao-n{ font-size:clamp(14px,1.1vw,16px) }
-.s .s-cartoes.agenda .s-cartao-d{ font-size:clamp(15.5px,1.25vw,18px); max-width:30ch }
 
 /* =============================================================================
    CELULAR MINIMALISTA · 14/10/2026
@@ -1137,7 +1152,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* entre o nome, os postos e a etiqueta, um espaço onde a linha pode
      quebrar (em 320 "GUIA Kids 09 POSTOS CONVERSA ANTES" não cabe numa) */
   .s .s-cartoes.lista .s-cartao-t::after, .s .s-cartoes.lista .s-cartao-n::after{ content:" "; white-space:normal }
-  .s .s-cartoes.lista :is(.s-cartao-f, .s-cartao-d, .s-cartao-p){ display:inline; margin:0; max-width:none; font-style:normal; font-weight:400; font-size:15px; line-height:1.45; letter-spacing:-.01em; color:var(--s-mudo) }
+  .s .s-cartoes.lista :is(.s-cartao-f, .s-cartao-d, .s-cartao-p){ display:inline; margin:0; max-width:none; font-family:var(--s-fonte); font-style:normal; font-weight:400; font-size:15px; line-height:1.45; letter-spacing:-.01em; color:var(--s-mudo) }
   /* a frase começa na linha de baixo */
   .s .s-cartoes.lista :is(.s-cartao-f, .s-cartao-d, .s-cartao-p)::before{ content:"\A"; white-space:pre }
   /* uma frase só: com a frase, o parágrafo sai; com o perfil, a frase sai */
@@ -1173,16 +1188,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* 4. toque */
   .s .pg-chip{ height:44px }
   .s .pg-mapao .leaflet-bar a{ width:44px; height:44px; line-height:44px; font-size:22px }
-  .s .pg .g-link{ display:inline-flex; align-items:center; min-height:44px }
   .s .trilho-pontos button{ height:44px }
 }
-
-/* =============================================================================
-   19/10/2026 · O CARTÃO COM A AÇÃO DENTRO ("Escolha o seu próximo passo",
-   /cultos): a pílula desce para o pé do cartão, e as duas ficam na mesma
-   altura, por mais que um texto seja mais longo que o outro.
-   ============================================================================= */
-.s .s-cartao-acao{ margin-top:auto; padding-top:clamp(14px,1.6vw,22px) }
 
 /* 19/10/2026 · O AVISO DENTRO DO CARTÃO CLARO no computador também ("Prefiro
    começar pelos cultos", embaixo do formulário da Pequena Guia). A regra
@@ -1198,9 +1205,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    cortar; abaixo de 380 px a seta sai. */
 @media(max-width:759px){
   .s .g-form-pe .acao{ width:100%; max-width:100%; padding:11px 14px; height:auto; min-height:46px; font-size:15px; gap:6px; line-height:1.2; white-space:normal; text-wrap:balance; text-align:center }
-}
-@media(max-width:380px){
-  .s .g-form-pe .acao svg{ display:none }
 }
 
 /* =============================================================================
@@ -1360,7 +1364,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    cima recortado pelo chevron, que cresce. O escurecimento da casa garante
    o texto em qualquer ponto do caminho. */
 .s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite); min-height:min(72svh,700px); display:grid; align-content:center }
-.s .s-janela .s-h2{ max-width:16ch; margin-inline:auto }
 .s.js .s-janela.viva{ --jk:0 }
 .s .s-janela-foto{ position:absolute; inset:0; z-index:-2; pointer-events:none }
 .s .s-janela-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
@@ -1375,7 +1378,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 /* O TRIO: três retratos 4:5 que ilustram uma frase, em escada (quem chega
    mais cedo, a sala das crianças, o violão). No celular, a faixa de deslizar. */
 .s .s-gente{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:clamp(28px,5vw,88px); align-items:center }
-.s .s-gente .s-h2{ margin-bottom:clamp(18px,2.4vw,30px) }
+.s .s-gente .s-h2{ margin-bottom:var(--s-respiro) }
 .s .s-gente .s-lead + .s-lead{ margin-top:clamp(14px,1.6vw,22px) }
 .s .s-trio{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(10px,1.4vw,18px); align-items:start }
 .s .s-trio figure:nth-child(2){ margin-top:clamp(28px,4.5vw,72px) }
@@ -1398,6 +1401,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-cartoes.indice .s-cartao-p{ display:block; grid-column:3; grid-row:3; margin:4px 0 0; color:var(--s-mudo); font-size:clamp(14px,1.05vw,16px); max-width:46ch }
   .s .s-cartoes.indice .s-cartao-f{ grid-area:f; margin:0; font-family:var(--s-serifa); font-style:italic; font-weight:400; font-size:clamp(20px,1.9vw,28px); letter-spacing:-.01em; line-height:1.1 }
   .s .s-cartoes.indice .s-cartao-d{ grid-area:d; margin:0; color:var(--s-mudo); max-width:46ch; font-size:clamp(14.5px,1.1vw,16.5px) }
+  /* linha sem a frase em itálico (a agenda do /eventos): o parágrafo sobe para a primeira linha */
+  .s .s-cartoes.indice .s-cartao-n + .s-cartao-d{ grid-row:1 / span 2; grid-column:3 }
   .s .s-cartoes.indice .s-cartao-ir{ grid-area:ir; margin:0; padding:0; align-self:center; justify-self:end; color:inherit; font-size:15px; white-space:nowrap }
   .s .s-cartoes.indice .s-cartao-ir svg{ transition:transform var(--s-t) var(--s-ease) }
   .s .s-faixa.noite .s-cartoes.indice{ border-color:var(--s-linha-clara) }
@@ -1418,8 +1423,15 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-papel); color:var(--s-tinta); --s-acento-texto:var(--s-laranja-texto) }
   .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover .s-cartao-d{ color:var(--s-mudo) }
 }
+/* tablet: duas colunas, o nome, a frase e o parágrafo à esquerda; o fato, a
+   etiqueta e a seta à direita (cada peça com a própria área, nada se sobrepõe) */
 @media(max-width:999px) and (min-width:760px){
-  .s .s-cartoes.indice > .s-cartao{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"t ir" "n ir" "f ir" "d ir"; row-gap:4px }
+  .s .s-cartoes.indice > .s-cartao{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"t n" "f tag" "p p" "d ir"; row-gap:6px; column-gap:clamp(18px,3vw,40px) }
+  .s .s-cartoes.indice .s-cartao-n{ grid-area:n; justify-self:end; align-self:start; margin-top:.5em }
+  .s .s-cartoes.indice .s-cartao-tag{ grid-area:tag; justify-self:end; align-self:start }
+  .s .s-cartoes.indice .s-cartao-p{ grid-area:p }
+  .s .s-cartoes.indice .s-cartao-ir{ grid-area:ir; align-self:end }
+  .s .s-cartoes.indice.simples > .s-cartao{ grid-template-areas:"t ir" "d ir" }
 }
 @media(max-width:999px){
   .s .s-gente{ grid-template-columns:1fr }

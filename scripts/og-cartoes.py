@@ -5,7 +5,8 @@ mostram quando alguém cola o link) eram só a foto com a marca em cima. O da
 /servir já tinha a identidade do ApresentaSite.pdf: chapéu laranja, título em
 duas vozes (Inter 800 + Instrument Serif itálica com ponto) e uma linha de
 apoio. Este script gera todos os outros no mesmo desenho, a partir das fotos
-de public/fotos e das fontes de public/tipos (as mesmas do site).
+dos heróis em public/site (20/10/2026; antes, public/fotos) e das fontes de
+public/tipos (as mesmas do site).
 
 Uso: python3 scripts/og-cartoes.py        (grava public/og*.jpg, 1200×630)
      python3 scripts/og-cartoes.py og.jpg   (só os cartões citados)
@@ -45,7 +46,7 @@ def F(dados, tam):
     return ImageFont.truetype(io.BytesIO(dados), tam)
 
 def foto(nome, foco=(0.5, 0.5)):
-    im = Image.open(os.path.join(FOTOS, nome)).convert('RGB')
+    im = Image.open(nome if os.path.isabs(nome) else os.path.join(FOTOS, nome)).convert('RGB')
     # cobre 1200×630 como object-fit: cover, com o foco
     r = max(W / im.width, H / im.height)
     im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
@@ -90,17 +91,32 @@ def titulo(d, linhas, y, tam, x=64, cor=(255, 255, 255)):
 
 SO = set(sys.argv[1:])
 
+def quebra(d, texto, f, largura):
+    """a linha de apoio em até duas linhas, quebrando por palavra"""
+    linhas, atual = [], ''
+    for pal in texto.split(' '):
+        tent = (atual + ' ' + pal).strip()
+        if d.textlength(tent, font=f) <= largura or not atual:
+            atual = tent
+        else:
+            linhas.append(atual); atual = pal
+    linhas.append(atual)
+    return linhas
+
 def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com'):
     if SO and nome_saida not in SO:
         return
     im = foto(arquivo_foto, foco)
     d = ImageDraw.Draw(im)
     n = len(linhas)
+    f_apoio = F(INTER_600, 27)
+    apoios = quebra(d, apoio, f_apoio, W - 64 - 300)
     alt_tit = round(tam * 0.96) * n
-    y0 = H - 64 - 40 - 30 - alt_tit - 36 - 24 - round(tam * 0.3)
+    y0 = H - 64 - 40 - 30 - alt_tit - 36 - 24 - round(tam * 0.3) - 34 * (len(apoios) - 1)
     d.text((64, y0), chapeu, font=F(INTER_600, 24), fill=OURO)
     y = titulo(d, linhas, y0 + 24 + 20, tam)
-    d.text((64, y + round(tam * 0.34)), apoio, font=F(INTER_600, 27), fill=(255, 255, 255))
+    for k, l in enumerate(apoios):
+        d.text((64, y + round(tam * 0.34) + 34 * k), l, font=f_apoio, fill=(255, 255, 255))
     marca(im, dominio)
     im.save(os.path.join(SAIDA, nome_saida), 'JPEG', quality=86, optimize=True, progressive=True)
     print(nome_saida)
@@ -108,33 +124,57 @@ def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam
 P = lambda s: [(w, False) for w in s.split(' ')]
 IT = lambda s: [(s, True)]
 
-cartao('og.jpg', 'pregacao.webp', 'GUIA Church · Barra da Tijuca',
+# 20/10/2026: os cartões saem das fotos do acervo do fotógrafo, as mesmas dos
+# heróis (public/site, scripts/site-fotos-drive.py), e cada página pública
+# tem o seu: a prévia no WhatsApp mostra a mesma foto que a página abre.
+# Só o og-sistema.jpg (os links do sistema) segue com a foto da equipe em
+# public/fotos.
+SITE = os.path.join(RAIZ, 'public', 'site')
+def S(nome): return os.path.join(SITE, nome)
+
+cartao('og.jpg', S('home-1-l.webp'), 'GUIA Church · Barra da Tijuca',
        [P('Existe um lugar'), IT('para você.')],
-       'Domingos às 10h · Follow aos sábados às 19h', foco=(0.6, 0.3))
-cartao('og-cultos.jpg', 'louvor-pb.webp', 'Cultos · Domingo, 10h',
+       'Domingos às 10h · Follow aos sábados às 19h', foco=(0.42, 0.55))
+cartao('og-cultos.jpg', S('cultos-5-l.webp'), 'Cultos · Domingo, 10h',
        [P('Um domingo'), P('para') + IT('pertencer.')],
-       'Rua Pedra de Itaúna, 534 · Barra da Tijuca', foco=(0.5, 0.25))
-cartao('og-como-chegar.jpg', 'predio.webp', 'Onde fica',
+       'Rua Pedra de Itaúna, 534 · Barra da Tijuca', foco=(0.55, 0.42))
+cartao('og-como-chegar.jpg', S('chegar-heroi.webp'), 'Onde fica',
        [P('Como') + IT('chegar.')],
-       'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro', foco=(0.5, 0.4))
-cartao('og-sobre.jpg', 'abraco-palco.webp', 'Quem somos',
+       'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro', foco=(0.55, 0.55))
+cartao('og-sobre.jpg', S('sobre-heroi-l.webp'), 'Quem somos',
        [P('Uma igreja que parece'), P('com a vida') + IT('de quem chega.')],
-       'Grupo Unido, Interagindo e Avançando', foco=(0.5, 0.3), tam=76)
-cartao('og-pequena-guia.jpg', 'acolhida.webp', 'Pequena Guia',
-       [P('Relacionamentos'), P('que fortalecem sua') + IT('fé.')],
-       'Grupos durante a semana, perto de você', foco=(0.5, 0.4), tam=80)
-# 19/10/2026: o Guia Servir com o título próprio (deixou de repetir o
-# "Existe um lugar para você" da igreja) e o cartão do sistema, para os links
-# que circulam nos grupos (confirmar, seus dias, cheguei, cadastro, /eu):
-# antes eles saíam com o cartão da igreja. Os dois levam guiaservir.com.
-cartao('og-servir.jpg', 'fachada.webp', 'Servir · GUIA Church',
+       'Grupo Unido, Interagindo e Avançando', foco=(0.64, 0.5), tam=76)
+cartao('og-eventos.jpg', S('eventos-heroi-l.webp'), 'Eventos · GUIA Church',
+       [P('O que acontece'), IT('na semana.')],
+       'Domingo é o centro. Mas a vida da igreja não cabe num dia só.', foco=(0.5, 0.42))
+cartao('og-pequena-guia.jpg', S('pg-heroi-l.webp'), 'Pequena Guia',
+       [P('Relacionamentos'), P('que fortalecem') + IT('sua fé.')],
+       'Grupos durante a semana, perto de você', foco=(0.45, 0.45), tam=80)
+cartao('og-ofertar.jpg', S('ofertar-heroi-l.webp'), 'Doação · Dízimos e ofertas',
+       [P('Ofertar é') + IT('adorar.')],
+       'Leva menos de um minuto, e você decide o valor.', foco=(0.55, 0.5))
+# o Guia Servir (guiaservir.com): a LP, as cinco áreas, o encaixo e o acesso
+cartao('og-servir.jpg', S('servir-pouso-l.webp'), 'Servir · GUIA Church',
        [P('Encontre o seu lugar'), IT('pra servir.')],
        'Deus semeou dons em cada pessoa. O seu também tem um posto esperando.',
-       foco=(0.5, 0.45), tam=84, dominio='guiaservir.com')
+       foco=(0.5, 0.48), tam=84, dominio='guiaservir.com')
+# a frase de cada área e a primeira frase do texto dela (lib/site/areas.ts, ao pé da letra)
+AREAS = [
+    ('midia', 'servir-midia-l.webp', 'Mídia', [P('Faça a mensagem'), IT('chegar longe.')], 'Da letra no telão à foto que alcança quem ainda não conhece a casa, passando pela transmissão pra quem acompanha de longe.'),
+    ('louvor', 'servir-louvor-l.webp', 'Louvor', [P('Conduza a igreja'), P('à presença') + IT('de Deus.')], 'Do dirigente ao som, cada posto sustenta o ambiente pra que alguém tenha um encontro verdadeiro com o Pai.'),
+    ('kids', 'servir-kids-l.webp', 'GUIA Kids', [P('Plante fé'), IT('desde pequeno.')], 'Do berçário à turma de 8 a 12 anos, cada sala precisa de duas voluntárias por culto: uma conduz, outra apoia.'),
+    ('servico', 'servir-connect-l.webp', 'Connect', [P('Receba cada pessoa'), IT('como família.')], 'É a maior equipe da igreja, e não por acaso: recepção, estacionamento, visitantes, segurança, cozinha, setor.'),
+    ('livraria', 'servir-livraria-l.webp', 'Livraria', [P('Leve o culto'), IT('pra fora dele.')], 'Duas pessoas por domingo: uma abre antes do culto, as duas atendem na saída.'),
+]
+for slug, arq, nome, linhas, apoio in AREAS:
+    cartao(f'og-servir-{slug}.jpg', S(arq), f'Servir · {nome}', linhas, apoio, foco=(0.5, 0.45), tam=84, dominio='guiaservir.com')
+cartao('og-encaixo.jpg', S('v/encaixe-l.webp'), 'Servir · GUIA Church',
+       [P('Não sei onde'), P('me') + IT('encaixo.')],
+       'É a resposta mais comum. E tem um caminho: três dúvidas, cinco áreas e uma conversa.', foco=(0.5, 0.45), dominio='guiaservir.com')
 cartao('og-sistema.jpg', 'equipe.webp', 'Voluntários da GUIA Church',
        [P('GUIA') + IT('Servir.')],
        'Escalas, confirmações e avisos de quem serve',
        foco=(0.5, 0.4), dominio='guiaservir.com')
-cartao('og-acessar.jpg', 'midia.webp', 'Acesso às equipes',
+cartao('og-acessar.jpg', S('servir-midia-l.webp'), 'Acesso às equipes',
        [P('Quem é') + IT('você?')],
        'Sou voluntário · Sou da organização · Quero participar', foco=(0.5, 0.5), dominio='guiaservir.com')

@@ -3,7 +3,7 @@ import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
 import { Ofertar } from '@/components/Ofertar';
 import { TEM_CHECKOUT } from '@/lib/checkout';
-import { Vozes, Sede, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, Fecho } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: 'Ofertar',
   description: `Dízimos e ofertas da GUIA Church${TEM_CHECKOUT ? ': Pix, cartão, Apple Pay ou Google Pay' : ' pelo Pix'}. Leva menos de um minuto, e você decide o valor.`,
   alternates: { canonical: '/ofertar' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og-ofertar.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const PORQUE = [
@@ -39,18 +39,11 @@ export default function Pagina() {
     <>
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'DonateAction', name: 'Ofertar para a GUIA Church', recipient: { '@type': 'Church', name: IGREJA.nome, url: SITE }, url: `${SITE}/ofertar` }} />
 
-      <section className="s-heroi curto" aria-labelledby="t-of">
-        <Img lugar="ofertar-heroi" prioridade retrato />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Doação" resto="Dízimos e ofertas" />
-          <Vozes as="h1" id="t-of" className="s-h1" it="adorar">Ofertar é adorar</Vozes>
-          <p className="s-lead grande">Leva menos de um minuto, e você decide o valor.{TEM_CHECKOUT && <span className="s-resto"> Pix, cartão, Apple Pay ou Google Pay.</span>}</p>
-          <div className="s-acoes">
-            <Pil href="#ofertar">Ofertar agora</Pil>
-            <Pil href="#porque">Por que ofertamos</Pil>
-          </div>
-        </div>
-      </section>
+      <Heroi id="t-of" lugar="ofertar-heroi" curto chapeu={<Chapeu forte="Doação" resto="Dízimos e ofertas" />} titulo="Ofertar é adorar" it="adorar"
+             lead={<>Leva menos de um minuto, e você decide o valor.{TEM_CHECKOUT && <span className="s-resto"> Pix, cartão, Apple Pay ou Google Pay.</span>}</>}>
+        <Pil href="#ofertar">Ofertar agora</Pil>
+        <Pil href="#porque" tom="vidro">Por que ofertamos</Pil>
+      </Heroi>
 
       <section id="ofertar" className="s-faixa papel" aria-labelledby="t-form">
         <div className="s-in">
@@ -62,22 +55,11 @@ export default function Pagina() {
         </div>
       </section>
 
-      <section id="porque" className="s-faixa areia" aria-labelledby="t-porque">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-porque" className="s-serifa">{liga("Por que ofertamos?")}</h2>
-            <p className="s-serifa it">{liga("três razões, nenhuma cobrança:")}</p>
-          </div>
-          <ol className="s-passos s-rev d1">
-            {PORQUE.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
-          </ol>
-          <Sede className="base" />
-        </div>
-      </section>
+      <Passos id="porque" tid="t-porque" titulo="Por que ofertamos?" sub="três razões, nenhuma cobrança:" itens={PORQUE} />
 
       <Fecho titulo="Que Deus multiplique o que você semeou" it="o que você semeou">
         <Pil href="/cultos">Ver os cultos</Pil>
-        <Pil href={noServir('/')}>Quero servir</Pil>
+        <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
       </Fecho>
     </>
   );

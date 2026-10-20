@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 """FOTOS DO SITE: recorta, trata e gera as versões web (12/10/2026)
 
+20/10/2026: dos recortes daqui só a fachada (chegar-heroi e chegar-heroi-r)
+continua no ar; os outros heróis passaram para as fotos do acervo do
+fotógrafo (scripts/site-fotos-drive.py) e os arquivos saíram de public/site.
+A lista fica como registro de onde cada recorte veio.
+
 Os originais chegam como posts do Instagram (1080x1350, com logo e texto
 gravados por cima) e quadros dos vídeos (1276x718 e 720x1280). Este script
 recorta SÓ a área de foto limpa de cada um, aplica um tratamento leve e igual

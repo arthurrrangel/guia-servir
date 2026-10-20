@@ -56,7 +56,8 @@ FOTOS = [
     ('pg-heroi', '3105-20', (0.45, 0.45), 'lp'),       # uma família na calçada
     ('ofertar-heroi', '0706-04', (0.55, 0.50), 'lp'),  # o cálice da ceia
     # o Guia Servir: as cinco áreas no herói (Mídia e Livraria vêm das fotos
-    # de 12/10, em public/fotos, cortadas por scripts/site-fotos-areas.py) e o pouso
+    # de 12/10, public/fotos/midia.webp e livraria.webp, cortadas a 1600x900 e
+    # 720x1280 direto da foto, sem o acervo do Drive) e o pouso
     ('servir-louvor', '1503-16', (0.55, 0.45), 'lp', 68),  # o Louvor no palco (grão de ISO alto: q68)
     ('servir-kids', '0803-10', (0.58, 0.45), 'lp'),      # o Kids, com o bebê no colo
     ('servir-connect', '1503-09', (0.60, 0.45), 'lp'),   # o Connect recebe na porta

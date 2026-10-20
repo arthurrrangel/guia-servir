@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { SITE } from '@/lib/igreja';
 import { lp } from '@/lib/site/sites';
-import { Vozes, Sede, Chapeu, Pil, Seta, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
-import { Fundo } from '@/components/site/Midia';
+import { Vozes, Sede, Chapeu, Pil, Seta, Heroi, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 
 /* =============================================================================
    /acessar — A PORTA DAS EQUIPES · 11/10/2026
@@ -18,7 +17,7 @@ export const metadata: Metadata = {
   title: 'Acesso às equipes',
   description: 'Sou voluntário, sou da organização ou quero participar: três caminhos, nenhum pede cadastro.',
   alternates: { canonical: '/acessar' },
-  openGraph: { title: 'Acesso às equipes · GUIA Servir', url: `${SITE}/acessar`, siteName: 'GUIA Servir', images: [{ url: '/og-acessar.jpg', width: 1200, height: 630 }] },
+  openGraph: { title: 'Acesso às equipes · GUIA Servir', url: `${SITE}/acessar`, siteName: 'GUIA Servir', images: [{ url: '/og-acessar.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const PORTAS = [
@@ -36,14 +35,8 @@ const DUVIDAS = [
 export default function Acessar() {
   return (
     <>
-      <section className="s-heroi curto porta" aria-labelledby="t-ac">
-        <Fundo video="acessar" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Acesso às equipes" resto="GUIA Church" />
-          <Vozes as="h1" id="t-ac" className="s-h1" it="você?" semPonto>Quem é você?</Vozes>
-          <p className="s-lead grande">{ligaTexto("Três caminhos. Nenhum pede cadastro.")}</p>
-        </div>
-      </section>
+      <Heroi id="t-ac" video="acessar" curto porta chapeu={<Chapeu forte="Acesso às equipes" resto="GUIA Church" />} titulo="Quem é você?" it="você?" semPonto
+             lead={ligaTexto("Três caminhos. Nenhum pede cadastro.")} />
 
       <section className="s-faixa papel curta-celular" aria-labelledby="t-portas">
         <div className="s-in">
@@ -74,7 +67,7 @@ export default function Acessar() {
           <div className="s-abre s-rev d1">
             {DUVIDAS.map((d, i) => <details key={d.q} open={i === 0}><summary>{liga(inteiro(d.q))}</summary><div><p>{fim(ligaTexto(inteiro(d.r)))}</p></div></details>)}
           </div>
-          <div className="s-acoes centro" style={{ marginTop: 'clamp(28px,4vw,48px)' }}>
+          <div className="s-acoes centro s-cartoes-acoes">
             <Pil href="/eu" duro tom="preta">Abrir meu espaço</Pil>
           </div>
         </div>

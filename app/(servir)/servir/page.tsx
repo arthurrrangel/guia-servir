@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE, SITE_IGREJA } from '@/lib/igreja';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, Passos, Claro, FaixaPerguntas, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import { Quadro } from '@/components/site/Midia';
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   title: { absolute: 'Encontre o seu lugar pra servir · GUIA Servir' },
   description: 'Encontre o seu lugar pra servir. Deus semeou dons em cada pessoa; todo domingo, dezenas de pessoas cultivam os delas para que o culto aconteça. Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.',
   alternates: { canonical: '/' },
-  openGraph: { title: 'Encontre o seu lugar pra servir · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630, alt: 'GUIA Servir: encontre o seu lugar pra servir' }] },
+  openGraph: { title: 'Encontre o seu lugar pra servir · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg?v=20261020', width: 1200, height: 630, alt: 'GUIA Servir: encontre o seu lugar pra servir' }] },
 };
 
 const PASSOS = [
@@ -154,72 +154,49 @@ export default function Servir() {
           <div className="s-acoes centro s-cartoes-acoes s-rev">
             {/* no celular as cinco estão na lista logo acima */}
             <Pil href="/servir/onde-me-encaixo#areas" tom="preta" className="so-largo">Ver todas as áreas</Pil>
-            <Pil href="/servir/onde-me-encaixo" tom="preta">Não sei qual é a minha</Pil>
+            <Pil href="/servir/onde-me-encaixo" tom="contorno">Não sei qual é a minha</Pil>
           </div>
         </div>
       </section>
 
       {/* 5 · como funciona */}
-      <section id="como-funciona" className="s-faixa areia" aria-labelledby="t-como">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
-            <p className="s-serifa it">{liga("do cadastro à escala, quatro passos:")}</p>
-          </div>
-          <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
-          </ol>
-          <Sede className="base" />
-        </div>
-      </section>
+      <Passos id="como-funciona" tid="t-como" titulo="Como funciona?" sub="do cadastro à escala, quatro passos:" itens={PASSOS} />
 
       {/* 6 · seu espaço */}
-      <section id="ja-sirvo" className="s-faixa noite s-grao justa" aria-labelledby="t-espaco">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-espaco" className="s-h2 menor">{liga("Seu espaço tem sua escala, seus dias e seu líder.")}</h2>
-            <p className="s-lead"><UmaLinha semFim texto="Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza." /></p>
-            <div className="s-qa so-largo">
-              <div><b>Ainda não tem PIN?</b><p>{ligaTexto('Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.')}</p></div>
-              <div><b>Ainda não serve?</b><p>O primeiro passo está logo acima.</p></div>
-            </div>
-            <div className="s-acoes centro"><Pil href="/eu" tom="preta" duro>Abrir meu espaço</Pil></div>
-          </div>
+      <Claro id="ja-sirvo" tid="t-espaco" titulo="Seu espaço tem sua escala, seus dias e seu líder." lead={<UmaLinha semFim texto="Ache seu nome na lista da sua área, entre com seu PIN de 4 números e pronto: escala, avisos e contato do líder num lugar só. Fidelidade nos pequenos também se organiza." />}>
+        <div className="s-qa so-largo">
+          <div><b>Ainda não tem PIN?</b><p>{ligaTexto('Sem problema. Ache seu nome na lista da sua área e crie o PIN na hora, com quatro números.')}</p></div>
+          <div><b>Ainda não serve?</b><p>O primeiro passo está logo acima.</p></div>
         </div>
-      </section>
+        <div className="s-acoes centro"><Pil href="/eu" tom="preta" duro>Abrir meu espaço</Pil></div>
+      </Claro>
 
-      {/* 7 · ninguém começou sabendo */}
+      {/* 7 · ninguém começou sabendo (tela 7: título pequeno à esquerda, a
+          linha de apoio grande, as três objeções) */}
       <section className="s-faixa noite s-grao" aria-labelledby="t-obj">
         <Simbolo className="s-canto" />
         <div className="s-in">
-          <div className="s-rev">
+          <div className="s-cab s-rev">
             <h2 id="t-obj" className="s-h2 minima">Ninguém aqui começou sabendo.</h2>
-            <p className="s-lead grande" style={{ marginTop: 18 }}><UmaLinha semFim texto="Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:" /></p>
+            <p className="s-lead grande"><UmaLinha semFim texto="Se você espera se sentir pronto para servir, é assim mesmo que começa. Até os mais experientes um dia estiveram do seu lado dessa tela. Olha o que mais a gente ouve:" /></p>
           </div>
           <div className="s-rev d1"><Perguntas itens={OBJECOES} forma="obj" /></div>
         </div>
       </section>
 
       {/* 8 · perguntas */}
-      <section id="perguntas" className="s-faixa papel s-grao" aria-labelledby="t-faq">
-        <Simbolo className="s-canto" />
-        <div className="s-in">
-          <h2 id="t-faq" className="s-faq-t s-rev">{liga("Perguntas que todo mundo tem antes do primeiro domingo")}</h2>
-          <div className="s-rev d1"><Perguntas itens={PERGUNTAS} /></div>
-        </div>
-      </section>
+      <FaixaPerguntas id="perguntas" tid="t-faq" titulo="Perguntas que todo mundo tem antes do primeiro domingo" itens={PERGUNTAS} />
 
-      {/* 9 · sempre cabe mais um */}
-      <section id="quero-servir" className="s-faixa noite s-grao" aria-labelledby="t-fim">
+      {/* 9 · sempre cabe mais um: o fecho com o formulário dentro */}
+      <section id="quero-servir" className="s-faixa noite s-grao s-fim" aria-labelledby="t-fim">
         <div className="s-in">
           <Sede className="topo" />
-          <div className="s-rev">
+          <div className="s-centro s-rev">
             <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}>O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {ligaTexto('Um deles pode ser o seu.')}<span className="s-resto"> {ligaTexto('Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</span></p>
+            <p className="s-lead grande">O próximo domingo tem <Numero campo="postos" /> postos para ocupar. {ligaTexto('Um deles pode ser o seu.')}<span className="s-resto"> {ligaTexto('Preenche aí embaixo e a liderança te chama pra conversar. Servir é a forma mais bonita de dizer sim a Deus.')}</span></p>
           </div>
           <div className="s-rev d1"><FormServir /></div>
-          <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Prefere escolher a área com calma? <Link href="/servir/onde-me-encaixo" className="s-link claro">Não sei onde me encaixo</Link>.</p>
+          <p className="s-aviso s-centro">Prefere escolher a área com calma? <Link href="/servir/onde-me-encaixo" className="s-link claro">Não sei onde me encaixo</Link>.</p>
         </div>
       </section>
     </>

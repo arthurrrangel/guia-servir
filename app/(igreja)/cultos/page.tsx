@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { MOMENTOS } from '@/lib/site/domingo';
-import { Vozes, Sede, Chapeu, Pil, Seta, fim, Sep, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Chapeu, Pil, Seta, fim, Sep, Claro, FaixaPerguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import { Schema } from '@/components/site/Schema';
@@ -52,7 +51,7 @@ export const metadata: Metadata = {
   title: 'Cultos',
   description: `Um domingo para pertencer: culto aos ${IGREJA.cultoDia.toLowerCase()}s, às ${IGREJA.cultoHora}, na ${IGREJA.rua}, ${IGREJA.bairro}. Como é, o que esperar na primeira vez e qual é o próximo passo.`,
   alternates: { canonical: '/cultos' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Um domingo para pertencer · GUIA Church', description: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, url: `${SITE}/cultos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Um domingo para pertencer · GUIA Church', description: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, url: `${SITE}/cultos`, images: [{ url: '/og-cultos.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const PERGUNTAS = [
@@ -101,39 +100,26 @@ export default function Cultos() {
         <Pil href="#ao-vivo" tom="vidro">Assistir ao vivo</Pil>
       </Scrub>
 
-      {/* é a sua primeira vez? */}
-      <section id="primeira-vez" className="s-faixa noite s-grao justa" aria-labelledby="t-primeira">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-primeira" className="s-h2 menor">{'É a sua primeira vez?'}</h2>
-            {/* "Chega... e fala": a copy dizia "fale", e a frase misturava
-                os dois tratamentos (o "chega" é o mesmo do resto do site) */}
-            <p className="s-lead"><UmaLinha texto="Chega uns minutos mais cedo e fala na porta. Alguém te acompanha, te mostra a casa e te apresenta quem precisar. Você não vai precisar achar nada sozinho." semFim /></p>
-            {/* 19/10/2026: a ação vem antes das perguntas. O "Vou visitar" da
-                home cai aqui, e no celular as perguntas empurravam o botão
-                para fora da tela de quem acabou de chegar */}
-            <div className="s-acoes centro">
-              <Pil href={conversa.href} fora tom="contorno" medir="avisou_que_vai">Avisar que vou</Pil>
-            </div>
-            {/* no celular: as perguntas de "Antes de sair de casa" aqui dentro */}
-            <div className="s-abre so-celular">
-              {PERGUNTAS.map(p => (
-                <details key={p.q}><summary>{liga(p.q)}</summary><div><p>{fim(ligaTexto(p.r))}</p></div></details>
-              ))}
-            </div>
-          </div>
+      {/* é a sua primeira vez? ("Chega... e fala": a copy dizia "fale", e a
+          frase misturava os dois tratamentos; o "chega" é o do resto do site) */}
+      <Claro id="primeira-vez" tid="t-primeira" titulo={'É a sua primeira\u00a0vez?'}
+             lead={<UmaLinha texto="Chega uns minutos mais cedo e fala na porta. Alguém te acompanha, te mostra a casa e te apresenta quem precisar. Você não vai precisar achar nada sozinho." semFim />}>
+        {/* 19/10/2026: a ação vem antes das perguntas. O "Vou visitar" da
+            home cai aqui, e no celular as perguntas empurravam o botão
+            para fora da tela de quem acabou de chegar */}
+        <div className="s-acoes centro">
+          <Pil href={conversa.href} fora tom="preta" medir="avisou_que_vai">Avisar que vou</Pil>
         </div>
-      </section>
+        {/* no celular: as perguntas de "Antes de sair de casa" aqui dentro */}
+        <div className="s-abre so-celular">
+          {PERGUNTAS.map(p => (
+            <details key={p.q}><summary>{liga(p.q)}</summary><div><p>{fim(ligaTexto(p.r))}</p></div></details>
+          ))}
+        </div>
+      </Claro>
 
       {/* perguntas (no celular, dentro do "É a sua primeira vez?") */}
-      <section className="s-faixa areia s-grao so-largo" aria-labelledby="t-faq">
-        <Simbolo className="s-canto" />
-        <div className="s-in">
-          <h2 id="t-faq" className="s-faq-t s-rev">{liga("Antes de sair de casa")}</h2>
-          <div className="s-rev d1"><Perguntas itens={PERGUNTAS} /></div>
-        </div>
-      </section>
+      <FaixaPerguntas tid="t-faq" titulo="Antes de sair de casa" itens={PERGUNTAS} tom="areia" soLargo />
 
       {/* ao vivo (o /tv e o /guia-church-tv antigos caem aqui) */}
       <section id="ao-vivo" className="s-fecho s-rev" aria-labelledby="t-vivo">
@@ -144,8 +130,8 @@ export default function Cultos() {
           <p className="s-lead"><UmaLinha semFim texto={IGREJA.youtube ? `Ao vivo todo ${IGREJA.cultoDia.toLowerCase()}, às ${IGREJA.cultoHora}, e pra ver de novo quando quiser.` : `Toda semana, em ${IGREJA.instagramArroba}. Pra quem está longe, viajando ou ainda conhecendo a igreja.`} /></p>
           <div className="s-acoes centro">
             {IGREJA.youtube
-              ? <Pil href={IGREJA.youtube} fora>Assistir no canal <Seta /></Pil>
-              : <Pil href={IGREJA.instagram} fora>Acompanhar no Instagram <Seta /></Pil>}
+              ? <Pil href={IGREJA.youtube} fora>Assistir no canal</Pil>
+              : <Pil href={IGREJA.instagram} fora>Acompanhar no Instagram</Pil>}
           </div>
         </div>
       </section>

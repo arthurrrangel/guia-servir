@@ -4,7 +4,7 @@ import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto, Img } from '@/components/site/Blocos';
+import { Vozes, Arroba, Chapeu, Pil, Heroi, Passos, Claro, Fecho, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   title: 'Pequena Guia',
   description: 'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto.',
   alternates: { canonical: '/pequena-guia' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const PASSOS = [
@@ -49,19 +49,12 @@ export default function PequenaGuia() {
     <>
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />
 
-      <section className="s-heroi" aria-labelledby="t-pg">
-        <Img lugar="pg-heroi" prioridade retrato />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
-          <Vozes as="h1" id="t-pg" className="s-h1 longa" it="sua fé">Relacionamentos que fortalecem sua fé</Vozes>
-          <p className="s-lead grande"><UmaLinha semFim texto="A Pequena Guia é um grupo que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto. É onde você é conhecido pelo nome, no meio da semana, não só no domingo." /></p>
-          <div className="s-acoes">
-            <Pil href="#encontrar">Encontrar a minha</Pil>
-            <Pil href="#grupos">Ver os grupos</Pil>
-          </div>
-          <p className="s-micro">{presenciais} grupos na cidade{online ? `, ${online} por vídeo` : ''}. Nenhum precisa de inscrição.</p>
-        </div>
-      </section>
+      <Heroi id="t-pg" lugar="pg-heroi" chapeu={<Chapeu forte="Pequena Guia" resto="O grupo da semana" />} titulo="Relacionamentos que fortalecem sua fé" it="sua fé" longa
+             lead={<UmaLinha semFim texto="A Pequena Guia é um grupo que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto. É onde você é conhecido pelo nome, no meio da semana, não só no domingo." />}
+             micro={<>{presenciais} grupos na cidade{online ? `, ${online} por vídeo` : ''}. Nenhum precisa de inscrição.</>}>
+        <Pil href="#encontrar">Encontrar a minha</Pil>
+        <Pil href="#grupos" tom="vidro">Ver os grupos</Pil>
+      </Heroi>
 
       <section id="grupos" className="s-faixa papel" aria-labelledby="t-grupos">
         <div className="s-in">
@@ -74,33 +67,15 @@ export default function PequenaGuia() {
         </div>
       </section>
 
-      <section className="s-faixa areia" aria-labelledby="t-como">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
-            <p className="s-serifa it">{liga("uma noite por semana, em 4 momentos:")}</p>
-          </div>
-          <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
-          </ol>
-          <Sede className="base" />
-        </div>
-      </section>
+      <Passos tid="t-como" titulo="Como funciona?" sub="uma noite por semana, em 4 momentos:" itens={PASSOS} />
 
-      <section id="encontrar" className="s-faixa noite s-grao justa" aria-labelledby="t-encontrar">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-encontrar" className="s-h2 menor">{liga("Encontre uma Pequena Guia perto de você.")}</h2>
-            <p className="s-lead">{ligaTexto("Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.")}</p>
-            <div style={{ marginTop: 'clamp(24px,3vw,40px)', textAlign: 'left' }}><FormPequenaGuia /></div>
-            {/* quem ainda não quer um grupo (copy final, 19/10/2026) */}
-            <p className="s-aviso"><Link href="/cultos" className="s-link">Prefiro começar pelos cultos</Link></p>
-            {/* no celular o fecho sai; a conversa direta, que só ele tinha, fica aqui */}
-            <p className="s-aviso so-celular">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
-          </div>
-        </div>
-      </section>
+      <Claro id="encontrar" tid="t-encontrar" titulo="Encontre uma Pequena Guia perto de você." lead={ligaTexto("Preencha seus dados e a gente aponta o grupo mais perto da sua casa. Leva um minuto.")}>
+        <div className="s-miolo esq"><FormPequenaGuia /></div>
+        {/* quem ainda não quer um grupo (copy final, 19/10/2026) */}
+        <p className="s-aviso"><Link href="/cultos" className="s-link">Prefiro começar pelos cultos</Link></p>
+        {/* no celular o fecho sai; a conversa direta, que só ele tinha, fica aqui */}
+        <p className="s-aviso so-celular">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
+      </Claro>
 
       {/* depois do formulário na noite, o fecho vem no papel (no computador) */}
       <Fecho tom="papel" titulo="Diga onde você mora. A gente diz qual fica perto" it="perto" soLargo>

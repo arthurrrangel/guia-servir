@@ -6,12 +6,11 @@
    ATUAL, o corte que o lugar faz, o ponto que não pode ser cortado e a
    instrução do que a foto precisa mostrar.
 
-   11/10/2026: o Arthur vai mandar fotos novas ("não quero fotos antigas").
-   A lista que ele recebeu é a deste arquivo, na mesma ordem. Enquanto não
-   chegam, cada lugar aponta para a melhor foto que já existe em
-   public/fotos/. Trocar é: salvar a nova em public/site/<nome>.webp (o
-   script scripts/site-fotos.py recorta, trata e gera a versão pequena) e
-   trocar UMA linha aqui.
+   20/10/2026: as fotos são do acervo do fotógrafo (scripts/site-fotos-
+   drive.py grava public/site/<nome>-<l|p|h|v|s>.webp). Trocar uma foto é
+   gerar os arquivos pelo script e trocar UMA linha aqui. Os heróis que
+   andam com o scroll (home, cultos, servir, follow) listam as próprias
+   fotos na página, na ordem do scroll.
 
    `corte`: H = horizontal (3:2 a 16:9), V = vertical (4:5), Q = quadrada
    (vira círculo). `foco`: o ponto da imagem que fica no centro quando o
@@ -42,8 +41,6 @@ export const FOTOS = {
   'chegar-heroi': { arquivo: '/site/chegar-heroi.webp', pequena: '/site/chegar-heroi-s.webp', largura: 1920, altura: 1291, corte: 'H', foco: '55% 55%', alt: 'A fachada da GUIA Church, com o letreiro na entrada',
     retrato: { arquivo: '/site/chegar-heroi-r.webp', pequena: '/site/chegar-heroi-r-s.webp', largura: 720, altura: 1172, foco: '50% 30%' },
     nota: 'A fachada em alta: a casa, a placa redonda e o GUI> no muro.' },
-  'sobre-comunidade': { arquivo: '/site/sobre-comunidade.webp', pequena: '/site/sobre-comunidade-s.webp', largura: 1080, altura: 590, corte: 'H', foco: '50% 35%', alt: 'Duas mulheres sorrindo juntas na igreja',
-    nota: 'Duas amigas sorrindo.' },
 
   /* 20/10/2026: O ACERVO DO FOTÓGRAFO (Drive MKT/CULTOS/2026), tratado por
      scripts/site-fotos-drive.py: os heróis das páginas da igreja deixam o
@@ -64,6 +61,19 @@ export const FOTOS = {
   'ofertar-heroi': { arquivo: '/site/ofertar-heroi-l.webp', largura: 1920, altura: 1080, corte: 'H', foco: '55% 50%', alt: 'Mãos segurando o cálice da ceia, na luz azul do culto',
     retrato: { arquivo: '/site/ofertar-heroi-p.webp', largura: 1080, altura: 1920, foco: '55% 50%' },
     nota: 'O cálice da ceia nas mãos (07.06, 04).' },
+
+  /* 20/10/2026: os heróis das cinco áreas do Guia Servir (as mesmas fotos do
+     herói da LP; Mídia e Livraria vêm das fotos de 12/10, em public/fotos) */
+  'servir-midia': { arquivo: '/site/servir-midia-l.webp', largura: 1600, altura: 900, corte: 'H', alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo',
+    retrato: { arquivo: '/site/servir-midia-p.webp', largura: 720, altura: 1280 }, nota: 'A mesa de corte (fotos de 12/10).' },
+  'servir-louvor': { arquivo: '/site/servir-louvor-l.webp', largura: 1920, altura: 1080, corte: 'H', alt: 'Uma cantora e um guitarrista do Louvor no palco',
+    retrato: { arquivo: '/site/servir-louvor-p.webp', largura: 1080, altura: 1920 }, nota: 'O Louvor no palco (15.03, 16).' },
+  'servir-kids': { arquivo: '/site/servir-kids-l.webp', largura: 1920, altura: 1080, corte: 'H', alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo',
+    retrato: { arquivo: '/site/servir-kids-p.webp', largura: 1080, altura: 1920 }, nota: 'O Kids, com o bebê no colo (08.03, 10).' },
+  'servir-connect': { arquivo: '/site/servir-connect-l.webp', largura: 1920, altura: 1080, corte: 'H', alt: 'A equipe do Connect abraçando quem chega na porta',
+    retrato: { arquivo: '/site/servir-connect-p.webp', largura: 1080, altura: 1920 }, nota: 'O Connect recebe na porta (15.03, 09).' },
+  'servir-livraria': { arquivo: '/site/servir-livraria-l.webp', largura: 1600, altura: 900, corte: 'H', alt: 'Mãos folheando uma Bíblia na livraria',
+    retrato: { arquivo: '/site/servir-livraria-p.webp', largura: 720, altura: 1280 }, nota: 'A Bíblia na livraria (fotos de 12/10).' },
 } as const satisfies Record<string, Foto>;
 
 export type LugarDeFoto = keyof typeof FOTOS;

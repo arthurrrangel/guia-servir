@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, UmaLinha, fim, liga, ligaTexto } from './Blocos';
-import { Fundo } from './Midia';
+import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, UmaLinha, fim, ligaTexto } from './Blocos';
+import type { LugarDeFoto } from '@/lib/site/fotos';
 import { FormServir } from './Servir';
 import { lp } from '@/lib/site/sites';
 
@@ -51,17 +51,10 @@ const segundaVoz = (frase: string) => {
   return p.slice(-k).join(' ');
 };
 
-const VIDEO: Record<string, string> = { midia: 'midia', louvor: 'louvor', kids: 'kids', servico: 'servico', livraria: 'livraria' };
 /* 20/10/2026: o herói de cada área é a foto de quem serve nela (as mesmas
-   do herói do Guia Servir, scripts/site-fotos-drive.py); uma área nova sem
-   foto fica com o vídeo */
-const FOTO: Record<string, { id: string; alt: string }> = {
-  midia: { id: 'servir-midia', alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo' },
-  louvor: { id: 'servir-louvor', alt: 'Uma cantora e um guitarrista do Louvor no palco' },
-  kids: { id: 'servir-kids', alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo' },
-  servico: { id: 'servir-connect', alt: 'A equipe do Connect abraçando quem chega na porta' },
-  livraria: { id: 'servir-livraria', alt: 'Mãos folheando uma Bíblia na livraria' },
-};
+   do herói do Guia Servir, no registro lib/site/fotos.ts); uma área nova sem
+   foto fica com o vídeo "servir" */
+const FOTO: Record<string, LugarDeFoto> = { midia: 'servir-midia', louvor: 'servir-louvor', kids: 'servir-kids', servico: 'servir-connect', livraria: 'servir-livraria' };
 
 const PASSOS = [
   { n: '01', t: 'Cadastro', d: 'Marque as funções que combinam com você. Menos de um minuto.' },
@@ -99,7 +92,6 @@ export default function Area() {
   const artigo = (min?.artigo ?? fixa?.artigo ?? 'a') === 'a' ? 'na' : 'no';
   const postos = min?.postos ?? fixa?.postos;
   const aberto = min?.aberto ?? fixa?.aberto ?? true;
-  const video = VIDEO[slug] ?? 'servir';
   const grupos = (() => {
     const m = new Map<string, { vagas: number; texto: string }>();
     for (const f of fns) {
@@ -113,51 +105,35 @@ export default function Area() {
 
   if (fase === 'erro') {
     return (
-      <section className="s-heroi curto" aria-labelledby="t-area">
-        <Fundo video="servir" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Servir" resto="GUIA Church" />
-          <Vozes as="h1" id="t-area" className="s-h1" it="encontrada">Área não encontrada</Vozes>
-          <p className="s-lead grande">{ligaTexto("O link pode estar errado. Volte e escolha uma das áreas da lista.")}</p>
-          <div className="s-acoes"><Pil href={lp('#areas')}>Ver as áreas</Pil></div>
-        </div>
-      </section>
+      <Heroi id="t-area" video="servir" curto chapeu={<Chapeu forte="Servir" resto="GUIA Church" />} titulo="Área não encontrada" it="encontrada"
+             lead={ligaTexto("O link pode estar errado. Volte e escolha uma das áreas da lista.")}>
+        <Pil href={lp('#areas')}>Ver as áreas</Pil>
+      </Heroi>
     );
   }
 
+  /* no celular o herói fica com a primeira frase (a foto respira em cima);
+     o resto continua no computador */
+  const texto = fixa?.texto ?? min?.descricao ?? '';
+  const corte = texto.search(/[.!?](\s|$)/);
+  const primeira = corte > 0 ? texto.slice(0, corte + 1) : texto;
+  const resto = corte > 0 ? texto.slice(corte + 1).trim() : '';
+
   return (
     <>
-      {/* o herói com a foto da área (ou o vídeo, para uma área sem foto) */}
-      <section className="s-heroi" aria-labelledby="t-area">
-        {FOTO[slug]
-          ? <picture>
-              <source media="(orientation: portrait)" srcSet={`/site/${FOTO[slug].id}-p.webp`} />
-              <img src={`/site/${FOTO[slug].id}-l.webp`} width={1920} height={1080} alt="" loading="eager" decoding="async" fetchPriority="high" />
-            </picture>
-          : <Fundo video={video} prioridade />}
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
-          {/* a segunda voz (a linha em itálico) são as últimas palavras da
-              frase: duas, ou mais até a primeira parte caber numa linha do
-              celular ("Faça a mensagem / chegar mais longe."). Com uma palavra
-              só, o itálico ficava sozinho e a primeira parte quebrava em três */}
-          <Vozes as="h1" id="t-area" className={'s-h1' + ((fixa?.frase ?? nome).length > 24 ? ' longa' : '')} it={fixa?.frase ? segundaVoz(fixa.frase) : nome} semPonto={!fixa?.frase}>{fixa?.frase ?? nome}</Vozes>
-          {(() => {
-            /* no celular o herói fica com a primeira frase (a foto respira em
-               cima); o resto continua no computador */
-            const t = fixa?.texto ?? min?.descricao ?? '';
-            const i = t.search(/[.!?](\s|$)/);
-            const primeira = i > 0 ? t.slice(0, i + 1) : t;
-            const resto = i > 0 ? t.slice(i + 1).trim() : '';
-            return <p className="s-lead grande">{resto ? <>{ligaTexto(primeira)}<span className="s-resto"> {fim(ligaTexto(resto))}</span></> : fim(ligaTexto(primeira))}</p>;
-          })()}
-          <div className="s-acoes">
-            <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
-            <Pil href={lp('#areas')}>Ver as outras áreas</Pil>
-          </div>
-          {fixa?.perfil && <p className="s-micro">{ligaTexto(fixa.perfil)}</p>}
-        </div>
-      </section>
+      {/* o herói com a foto da área (ou o vídeo, para uma área sem foto). A
+          segunda voz (a linha em itálico) são as últimas palavras da frase:
+          duas, ou mais até a primeira parte caber numa linha do celular
+          ("Faça a mensagem / chegar mais longe."). Com uma palavra só, o
+          itálico ficava sozinho e a primeira parte quebrava em três */}
+      <Heroi id="t-area" lugar={FOTO[slug]} video={FOTO[slug] ? undefined : 'servir'}
+             chapeu={<Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />}
+             titulo={fixa?.frase ?? nome} it={fixa?.frase ? segundaVoz(fixa.frase) : nome} semPonto={!fixa?.frase} longa={(fixa?.frase ?? nome).length > 24}
+             lead={resto ? <>{ligaTexto(primeira)}<span className="s-resto"> {fim(ligaTexto(resto))}</span></> : fim(ligaTexto(primeira))}
+             micro={fixa?.perfil ? ligaTexto(fixa.perfil) : undefined}>
+        <Pil href={`/servir/${slug}/cadastro`} duro>Quero servir {artigo} {nome}</Pil>
+        <Pil href={lp('#areas')} tom="vidro">Ver as outras áreas</Pil>
+      </Heroi>
 
       {/* as funções */}
       <section className="s-faixa papel" aria-labelledby="t-funcoes">
@@ -187,17 +163,7 @@ export default function Area() {
       </section>
 
       {/* como funciona */}
-      <section className="s-faixa areia" aria-labelledby="t-como">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-como" className="s-serifa">{liga("Como funciona?")}</h2>
-            <p className="s-serifa it">{liga("do cadastro à escala, quatro passos:")}</p>
-          </div>
-          <ol className="s-passos s-rev d1">
-            {PASSOS.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
-          </ol>
-        </div>
-      </section>
+      <Passos tid="t-como" titulo="Como funciona?" sub="do cadastro à escala, quatro passos:" itens={PASSOS} sede={false} />
 
       {/* quem responde */}
       {min?.responsavel && (
@@ -214,18 +180,18 @@ export default function Area() {
         </section>
       )}
 
-      {/* o convite e o formulário */}
-      <section id="quero-servir" className="s-faixa noite s-grao" aria-labelledby="t-fim">
+      {/* o convite e o formulário: o fecho com o formulário dentro */}
+      <section id="quero-servir" className="s-faixa noite s-grao s-fim" aria-labelledby="t-fim">
         <div className="s-in">
           <Sede className="topo" />
-          <div className="s-rev">
+          <div className="s-centro s-rev">
             <Vozes id="t-fim" className="s-h2" it="aqui">Existe um lugar para você aqui</Vozes>
-            <p className="s-lead grande" style={{ marginTop: 22 }}><UmaLinha texto={fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'} /></p>
+            <p className="s-lead grande"><UmaLinha texto={fixa?.convite ?? min?.convite ?? 'Preenche aí embaixo e a liderança te chama pra conversar.'} /></p>
             {!aberto && <p className="s-aviso">Essa área conversa com cada pessoa antes de escalar: você preenche o cadastro e a liderança fala com você.</p>}
           </div>
           <div className="s-rev d1"><FormServir areaInicial={slug} /></div>
           {/* /eu é sistema (outra folha de estilo): link duro, não <Link> */}
-          <p className="s-aviso s-centro" style={{ marginTop: 28 }}>Já serve aqui? <a href="/eu" className="s-link claro">Abrir meu espaço</a>.</p>
+          <p className="s-aviso s-centro">Já serve aqui? <a href="/eu" className="s-link claro">Abrir meu espaço</a>.</p>
         </div>
       </section>
     </>

@@ -21,6 +21,7 @@ const CSS = `
 .nf *{box-sizing:border-box}
 .nf a{color:inherit;text-decoration:none}
 .nf-topo{height:72px;display:flex;align-items:center;padding:0 clamp(20px,3.6vw,56px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nf-topo a{display:flex;align-items:center;height:44px;padding:0 4px;margin-left:-4px}
 .nf-topo svg{height:36px;width:auto}
 .nf-in{flex:1;display:flex;flex-direction:column;justify-content:center;padding:clamp(48px,8vw,96px) clamp(20px,3.6vw,56px);max-width:1400px;width:100%;margin-inline:auto}
 .nf-chapeu{margin:0 0 clamp(18px,2.6vw,36px);font-size:clamp(15px,1.25vw,18px);display:flex;gap:10px;align-items:center}

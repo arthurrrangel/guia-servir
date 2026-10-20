@@ -252,7 +252,7 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
         {erro.area && <span id="s-area-e" className="s-campo-dica" role="alert">{erro.area}</span>}
       </div>
       <button type="submit" className="s-enviar" aria-busy={indo}>{indo ? 'Abrindo…' : 'Enviar'}</button>
-      <div className="s-form-fim" style={{ gridColumn: '1 / -1' }}>
+      <div className="s-form-fim">
         <button type="submit" className={'s-pil' + (escuro ? '' : ' preta')} aria-busy={indo}>Quero servir</button>
         <p className="s-micro">{ligaTexto("Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.")}</p>
       </div>

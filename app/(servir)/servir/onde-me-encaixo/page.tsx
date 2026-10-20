@@ -3,8 +3,7 @@ import Link from 'next/link';
 import { SITE } from '@/lib/igreja';
 import { lp } from '@/lib/site/sites';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, Seta, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
-import { Fundo } from '@/components/site/Midia';
+import { Vozes, Sede, Chapeu, Pil, Heroi, Fecho, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Areas } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
   title: 'Não sei onde me encaixo',
   description: 'É a resposta mais comum. Três dúvidas comuns e o que se faz em cada área de voluntários da GUIA Church.',
   alternates: { canonical: '/servir/onde-me-encaixo' },
-  openGraph: { title: 'Não sei onde me encaixo · GUIA Servir', url: `${SITE}/servir/onde-me-encaixo`, siteName: 'GUIA Servir', images: [{ url: '/og-servir.jpg?v=20261019', width: 1200, height: 630 }] },
+  openGraph: { title: 'Não sei onde me encaixo · GUIA Servir', url: `${SITE}/servir/onde-me-encaixo`, siteName: 'GUIA Servir', images: [{ url: '/og-encaixo.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 const DUVIDAS = [
@@ -40,19 +39,12 @@ export default function OndeMeEncaixo() {
     <>
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: DUVIDAS.map(d => ({ '@type': 'Question', name: d.q, acceptedAnswer: { '@type': 'Answer', text: d.r.join(' ') } })) }} />
 
-      <section className="s-heroi curto" aria-labelledby="t-enc">
-        {/* um plano de cada área: a câmera, o palco, a Kids, a porta, a Bíblia */}
-        <Fundo video="encaixe" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Servir" resto="GUIA Church" />
-          <Vozes as="h1" id="t-enc" className="s-h1" it="me encaixo">Não sei onde me encaixo</Vozes>
-          <p className="s-lead grande"><UmaLinha semFim texto="É a resposta mais comum. E tem um caminho: três dúvidas, cinco áreas e uma conversa." /></p>
-          <div className="s-acoes">
-            <Pil href="#areas">Ver as áreas</Pil>
-            <Pil href={lp('#quero-servir')}>Deixar a liderança me ajudar</Pil>
-          </div>
-        </div>
-      </section>
+      {/* o herói: um plano de cada área (a câmera, o palco, a Kids, a porta, a Bíblia) */}
+      <Heroi id="t-enc" video="encaixe" curto chapeu={<Chapeu forte="Servir" resto="GUIA Church" />} titulo="Não sei onde me encaixo" it="me encaixo"
+             lead={<UmaLinha semFim texto="É a resposta mais comum. E tem um caminho: três dúvidas, cinco áreas e uma conversa." />}>
+        <Pil href="#areas">Ver as áreas</Pil>
+        <Pil href={lp('#quero-servir')} tom="vidro">Deixar a liderança me ajudar</Pil>
+      </Heroi>
 
       <section className="s-faixa papel" aria-labelledby="t-duvidas">
         <div className="s-in">
@@ -78,25 +70,16 @@ export default function OndeMeEncaixo() {
             <p className="s-lead"><span className="s-resto">{ligaTexto("Com as palavras de quem lidera cada área.")} </span>{ligaTexto("Clique numa pra ver as funções.")}</p>
           </div>
           <div className="s-rev d1"><Areas perfil /></div>
-          <ul className="s-faq s-rev so-largo" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
+          <ul className="s-faq depois s-rev so-largo">
             {AREAS_ORDEM.map(s => <li key={s}><p><b>{AREAS[s].nome}.</b> {ligaTexto(AREAS[s].perfil ?? "")} <Link href={`/servir/${s}`} className="s-link">Ver as funções</Link></p></li>)}
           </ul>
         </div>
       </section>
 
-      <section className="s-faixa noite s-grao" aria-labelledby="t-duas">
-        <div className="s-in s-centro">
-          <Sede className="topo" />
-          <div className="s-rev">
-            <Vozes id="t-duas" className="s-h2" it="duas">Em dúvida entre duas? Escolha qualquer uma das duas</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha semFim texto="A conversa com a liderança existe pra isso, e mudar depois é simples. O que custa caro é ficar parado." /></p>
-          </div>
-          <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
-            <Pil href={lp('#quero-servir')}>Quero servir <Seta /></Pil>
-            <Pil href="/servir/servico">Começar pelo Connect</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho titulo="Em dúvida entre duas? Escolha qualquer uma das duas" it="duas" lead="A conversa com a liderança existe pra isso, e mudar depois é simples. O que custa caro é ficar parado.">
+        <Pil href={lp('#quero-servir')}>Quero servir</Pil>
+        <Pil href="/servir/servico" tom="vidro">Começar pelo Connect</Pil>
+      </Fecho>
     </>
   );
 }

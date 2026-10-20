@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
-import { Chevron, Simbolo } from '@/components/Marca';
+import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Claro, SerifaCab, FaixaPerguntas, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 import Scrub, { type Foto } from '@/components/site/Scrub';
-import Janela from '@/components/site/Janela';
 import { Domingo } from '@/components/site/Domingo';
 import { MOMENTOS } from '@/lib/site/domingo';
 
@@ -125,7 +124,8 @@ export default function Home() {
               <p className="s-lead">{ligaTexto("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
               <p className="s-lead so-largo">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
-            <div className="s-trio desliza" role="group" aria-label="Quem chega mais cedo">
+            {/* tabIndex: no celular o trio desliza, e quem navega pelo teclado precisa chegar nele */}
+            <div className="s-trio desliza" role="group" aria-label="Quem chega mais cedo" tabIndex={0}>
               {GENTE.map((g, i) => (
                 <figure key={g.id} className={`s-rev d${i + 1}`}>
                   <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 759px) 80vw, 24vw" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
@@ -171,10 +171,7 @@ export default function Home() {
       {/* 5 · como é um domingo */}
       <section className="s-faixa areia" aria-labelledby="t-domingo">
         <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-domingo" className="s-serifa">{liga("Como é um domingo?")}</h2>
-            <p className="s-serifa it">{liga("da porta à oração final, 4 momentos:")}</p>
-          </div>
+          <SerifaCab id="t-domingo" titulo="Como é um domingo?" sub="da porta à oração final, 4 momentos:" />
           {/* um vídeo só, em quatro capítulos: o que está passando acende na lista */}
           <div className="s-rev d1"><Domingo itens={MOMENTOS} rotulo="Os quatro momentos do domingo" /></div>
           <div className="s-acoes centro s-cartoes-acoes s-rev"><Pil href="/cultos" tom="preta">Ver os cultos</Pil></div>
@@ -182,62 +179,28 @@ export default function Home() {
       </section>
 
       {/* 6 · somos GUIA */}
-      <section className="s-faixa noite s-grao so-largo" aria-labelledby="t-sigla">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-sigla" className="s-h2 menor">{liga("Somos GUIA.")}</h2>
-            <p className="s-lead">{ligaTexto(`${SIGLA_FRASE}.`)}</p>
-            <ul className="s-sigla" style={{ marginTop: 'clamp(26px,3.6vw,48px)' }}>
-              {SIGLA.map(l => (
-                <li key={l.t}>
-                  <span className="s-letra">{l.l === '>' ? <Chevron /> : l.l}</span>
-                  <b>{l.t}</b>
-                  <p>{l.d}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+      <Claro tid="t-sigla" titulo="Somos GUIA." lead={ligaTexto(`${SIGLA_FRASE}.`)} soLargo>
+        <ul className="s-sigla s-miolo">
+          {SIGLA.map(l => (
+            <li key={l.t}>
+              <span className="s-letra">{l.l === '>' ? <Chevron /> : l.l}</span>
+              <b>{l.t}</b>
+              <p>{l.d}</p>
+            </li>
+          ))}
+        </ul>
+      </Claro>
 
       {/* 7 · perguntas de quem vem pela primeira vez */}
-      <section className="s-faixa papel s-grao so-largo" aria-labelledby="t-faq">
-        <Simbolo className="s-canto" />
-        <div className="s-in">
-          <h2 id="t-faq" className="s-faq-t s-rev">{liga("Perguntas de quem vem pela primeira vez")}</h2>
-          <div className="s-rev d1"><Perguntas itens={PERGUNTAS} /></div>
-        </div>
-      </section>
+      <FaixaPerguntas tid="t-faq" titulo="Perguntas de quem vem pela primeira vez" itens={PERGUNTAS} soLargo />
 
       {/* 8 · sempre cabe mais um: a igreja de pé, vista pelo chevron da marca,
           que abre com a rolagem até a foto inteira */}
-      <section className="s-faixa noite s-janela" aria-labelledby="t-fim">
-        <div className="s-janela-foto" aria-hidden="true">
-          <picture>
-            <source media="(orientation: portrait)" srcSet="/site/fecho-igreja-p.webp" type="image/webp" />
-            <img src="/site/fecho-igreja-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
-          </picture>
-          <div className="s-janela-mascara">
-            <picture>
-              <source media="(orientation: portrait)" srcSet="/site/fecho-igreja-p.webp" type="image/webp" />
-              <img src="/site/fecho-igreja-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
-            </picture>
-          </div>
-        </div>
-        <Janela />
-        <div className="s-in s-centro">
-          <Sede className="topo" />
-          <div className="s-rev">
-            <Vozes id="t-fim" className="s-h2" it="mais um">Sempre cabe mais um</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha texto={`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`} semFim /></p>
-          </div>
-          <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
-            <Pil href="/cultos#primeira-vez">Vou conhecer</Pil>
-            <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho tom="janela" foto={{ l: '/site/fecho-igreja-l.webp', p: '/site/fecho-igreja-p.webp' }} titulo="Sempre cabe mais um" it="mais um"
+             lead={`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`}>
+        <Pil href="/cultos#primeira-vez">Vou conhecer</Pil>
+        <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
+      </Fecho>
     </>
   );
 }

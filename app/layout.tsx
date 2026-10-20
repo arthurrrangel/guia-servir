@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     title: 'GUIA Church · Existe um lugar para você',
     description: `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Uma igreja feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.`,
     url: SITE_IGREJA, type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
-    images: [{ url: '/og.jpg', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
+    images: [{ url: '/og.jpg?v=20261020', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
   },
   twitter: { card: 'summary_large_image' },
 };

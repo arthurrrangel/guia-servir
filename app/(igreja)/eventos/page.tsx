@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { noFollow } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, UmaLinha, liga, ligaTexto, Img } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Heroi, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   title: 'Eventos',
   description: `O que acontece na GUIA Church: Celebração aos ${IGREJA.cultoDia.toLowerCase()}s às ${IGREJA.cultoHora}, Follow aos sábados${IGREJA.followHora ? ` às ${IGREJA.followHora}` : ''}, Pequenas Guias durante a semana e o Follow Camp 2027.`,
   alternates: { canonical: '/eventos' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Eventos · GUIA Church', url: `${SITE}/eventos`, images: [{ url: '/og-cultos.jpg', width: 1200, height: 630 }] },
+  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Eventos · GUIA Church', url: `${SITE}/eventos`, images: [{ url: '/og-eventos.jpg?v=20261020', width: 1200, height: 630 }] },
 };
 
 export default function Eventos() {
@@ -43,19 +43,11 @@ export default function Eventos() {
         ],
       }} />
 
-      <section className="s-heroi" aria-labelledby="t-ev">
-        <Img lugar="eventos-heroi" prioridade retrato />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Eventos" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-ev" className="s-h1" it="na semana">O que acontece na semana</Vozes>
-          <p className="s-lead grande">{ligaTexto("Domingo é o centro. Mas a vida da igreja não cabe num dia só.")}</p>
-          <div className="s-acoes">
-            <Pil href="/cultos">Ver os cultos</Pil>
-            <Pil href="/followcamp" duro>Follow Camp 2027</Pil>
-          </div>
-          <p className="s-micro">Próximo culto: <ProximoCulto /></p>
-        </div>
-      </section>
+      <Heroi id="t-ev" lugar="eventos-heroi" chapeu={<Chapeu forte="Eventos" resto={IGREJA.nome} />} titulo="O que acontece na semana" it="na semana"
+             lead={ligaTexto("Domingo é o centro. Mas a vida da igreja não cabe num dia só.")} micro={<>Próximo culto: <ProximoCulto /></>}>
+        <Pil href="/cultos">Ver os cultos</Pil>
+        <Pil href="/followcamp" duro tom="vidro">Follow Camp 2027</Pil>
+      </Heroi>
 
       <section className="s-faixa papel" aria-labelledby="t-agenda">
         <div className="s-in">
@@ -65,8 +57,7 @@ export default function Eventos() {
             <p className="s-lead">{ligaTexto("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
           </div>
           <div className="s-rev d1">
-            <div className="s-cartoes tres agenda lista indice" role="group" aria-label="A agenda da semana">
-              {/* sem foto (13/10/2026): o dia e a hora são o assunto da agenda */}
+            <div className="s-cartoes tres lista indice" role="group" aria-label="A agenda da semana">
               {AGENDA.map(a => {
                 const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d"><UmaLinha texto={a.d} semFim /></span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
                 return a.href.startsWith('#')
@@ -89,9 +80,9 @@ export default function Eventos() {
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
               <p className="s-lead"><UmaLinha semFim texto="Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está." /></p>
               {/* 20/10/2026: o Follow tem site próprio; o rótulo é o da porta da home */}
-              <div className="s-acoes" style={{ marginTop: 26 }}>
+              <div className="s-acoes">
                 <Pil href={noFollow('/')}>Vou no Follow</Pil>
-                <Pil href={IGREJA.instagram} fora>{IGREJA.instagramArroba}</Pil>
+                <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
               </div>
             </div>
           </div>
@@ -115,7 +106,7 @@ export default function Eventos() {
 
       <Fecho titulo="Vem como você está" it="está" lead="Domingo, sábado ou na semana: tem um lugar pra você em cada um.">
         <Pil href="/cultos">Ver os cultos</Pil>
-        <Pil href="/pequena-guia">Encontrar uma Pequena Guia</Pil>
+        <Pil href="/pequena-guia" tom="vidro">Encontrar uma Pequena Guia</Pil>
       </Fecho>
     </>
   );

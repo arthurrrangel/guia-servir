@@ -2,9 +2,8 @@ import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/i
 import { naIgreja } from '@/lib/site/sites';
 import { Simbolo } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
-import { Vozes, Sede, Arroba, Chapeu, Pil, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Fecho, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
 import Scrub, { type Foto } from '@/components/site/Scrub';
-import Janela from '@/components/site/Janela';
 import Contagem from '@/components/follow/Contagem';
 
 /* =============================================================================
@@ -87,27 +86,20 @@ export default function Follow() {
       </Scrub>
 
       {/* 2 · é a sua primeira vez? (o cartão claro sobre a noite, tela 6) */}
-      <section id="primeira-vez" className="s-faixa noite s-grao justa" aria-labelledby="t-pv">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-pv" className="s-h2 menor">{liga('É a sua primeira vez no Follow?')}</h2>
-            <p className="s-lead"><UmaLinha semFim texto="Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está." /></p>
-            <div className="s-qa so-largo">
-              {DUVIDAS.map(d => <div key={d.q}><b>{liga(d.q)}</b><p>{fim(ligaTexto(d.r))}</p></div>)}
-            </div>
-            <div className="s-acoes centro">
-              <Pil href={CONVERSA.href} fora tom="preta" medir="avisou_que_vai">Avisar que vou</Pil>
-            </div>
-            {/* no celular: as dúvidas abrem e fecham, embaixo da chamada */}
-            <div className="s-abre so-celular">
-              {DUVIDAS.map(d => (
-                <details key={d.q}><summary>{liga(d.q)}</summary><div><p>{fim(ligaTexto(d.r))}</p></div></details>
-              ))}
-            </div>
-          </div>
+      <Claro id="primeira-vez" tid="t-pv" titulo="É a sua primeira vez no Follow?" lead={<UmaLinha semFim texto="Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está." />}>
+        <div className="s-qa so-largo">
+          {DUVIDAS.map(d => <div key={d.q}><b>{liga(d.q)}</b><p>{fim(ligaTexto(d.r))}</p></div>)}
         </div>
-      </section>
+        <div className="s-acoes centro">
+          <Pil href={CONVERSA.href} fora tom="preta" medir="avisou_que_vai">Avisar que vou</Pil>
+        </div>
+        {/* no celular: as dúvidas abrem e fecham, embaixo da chamada */}
+        <div className="s-abre so-celular">
+          {DUVIDAS.map(d => (
+            <details key={d.q}><summary>{liga(d.q)}</summary><div><p>{fim(ligaTexto(d.r))}</p></div></details>
+          ))}
+        </div>
+      </Claro>
 
       {/* 3 · quando e onde (os fatos em linha e a contagem) */}
       <section id="quando" className="s-faixa papel" aria-labelledby="t-quando">
@@ -151,32 +143,10 @@ export default function Follow() {
       {/* 5 · o fecho: a sala do Follow cheia, vista pelo chevron da marca, que
           abre com a rolagem até a foto inteira (a assinatura da casa, como na
           home do Guia Church) */}
-      <section id="vem" className="s-faixa noite s-janela" aria-labelledby="t-fim">
-        <div className="s-janela-foto" aria-hidden="true">
-          <picture>
-            <source media="(orientation: portrait)" srcSet="/follow/f5-p.webp" type="image/webp" />
-            <img src="/follow/f5-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
-          </picture>
-          <div className="s-janela-mascara">
-            <picture>
-              <source media="(orientation: portrait)" srcSet="/follow/f5-p.webp" type="image/webp" />
-              <img src="/follow/f5-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
-            </picture>
-          </div>
-        </div>
-        <Janela />
-        <div className="s-in s-centro">
-          <Sede className="topo" />
-          <div className="s-rev">
-            <Vozes id="t-fim" className="s-h2 media" it="vida">E se um culto pudesse mudar toda a sua vida</Vozes>
-            <p className="s-lead grande" style={{ margin: '22px auto 0' }}><UmaLinha texto="Sábado tem Follow. A gente te espera." semFim /></p>
-          </div>
-          <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
-            <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
-            <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
-          </div>
-        </div>
-      </section>
+      <Fecho id="vem" tom="janela" foto={{ l: '/follow/f5-l.webp', p: '/follow/f5-p.webp' }} titulo="E se um culto pudesse mudar toda a sua vida" it="vida" lead="Sábado tem Follow. A gente te espera.">
+        <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
+        <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
+      </Fecho>
     </>
   );
 }

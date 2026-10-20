@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import type { Evento } from '@/lib/site/medir';
 import { FOTOS, type LugarDeFoto, type Foto } from '@/lib/site/fotos';
+import { Simbolo } from '@/components/Marca';
+import { Fundo } from './Midia';
+import Janela from './Janela';
 
 /* =============================================================================
    OS BLOCOS DO SITE — as peças pequenas que toda página usa · 11/10/2026
@@ -227,20 +230,127 @@ export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
   );
 }
 
+/* =============================================================================
+   AS SEÇÕES QUE TODA PÁGINA REPETE · 20/10/2026
+   O herói, o cartão claro, os passos em serifa, a faixa de perguntas e o
+   fecho eram escritos à mão em cada página, cada um com o seu recuo. Aqui
+   cada um tem UMA anatomia (a mesma ordem, as mesmas classes, o mesmo
+   respiro, que mora em app/site.css) e a página só passa o texto.
+   ============================================================================= */
+
+/* O HERÓI DE FOTO (ou de vídeo, no /acessar e no /onde-me-encaixo): o chapéu,
+   o título em duas vozes, a linha de apoio, as pílulas e o micro. A foto vem
+   do registro (lib/site/fotos.ts), com o recorte em pé para o celular. */
+export function Heroi({ id, lugar, video, chapeu, titulo, it, semPonto, longa, lead, micro, curto, porta, children }:
+  { id: string; lugar?: LugarDeFoto; video?: string; chapeu: React.ReactNode; titulo: string; it?: string; semPonto?: boolean; longa?: boolean;
+    lead?: React.ReactNode; micro?: React.ReactNode; curto?: boolean; porta?: boolean; children?: React.ReactNode }) {
+  return (
+    <section className={'s-heroi' + (curto ? ' curto' : '') + (porta ? ' porta' : '')} aria-labelledby={id}>
+      {lugar ? <Img lugar={lugar} prioridade retrato /> : video ? <Fundo video={video} prioridade /> : null}
+      <div className="s-in s-heroi-in">
+        {chapeu}
+        <Vozes as="h1" id={id} className={'s-h1' + (longa ? ' longa' : '')} it={it} semPonto={semPonto}>{titulo}</Vozes>
+        {lead && <p className="s-lead grande">{lead}</p>}
+        {children && <div className="s-acoes">{children}</div>}
+        {micro && <p className="s-micro">{micro}</p>}
+      </div>
+    </section>
+  );
+}
+
+/* O CARTÃO CLARO (tela 6): sobre a noite, o papel de canto redondo com a
+   assinatura, o título e a linha de apoio; o miolo (perguntas, lista,
+   formulário, pílulas) vem da página, na ordem que ela precisa. */
+export function Claro({ id, tid, titulo, lead, soLargo, children }:
+  { id?: string; tid: string; titulo: string; lead?: React.ReactNode; soLargo?: boolean; children?: React.ReactNode }) {
+  return (
+    <section id={id} className={'s-faixa noite s-grao justa' + (soLargo ? ' so-largo' : '')} aria-labelledby={tid}>
+      <div className="s-in">
+        <div className="s-claro s-rev">
+          <Sede />
+          <h2 id={tid} className="s-h2 menor">{liga(titulo)}</h2>
+          {lead && <p className="s-lead">{lead}</p>}
+          {children}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* O CABEÇALHO EM SERIFA (tela 5): "Como funciona?" com a régua embaixo e a
+   linha itálica; e OS PASSOS, a lista "01 - Cadastro" com a frase ao lado. */
+export function SerifaCab({ id, titulo, sub }: { id: string; titulo: string; sub: string }) {
+  return (
+    <div className="s-passos-cab s-rev">
+      <h2 id={id} className="s-serifa">{liga(titulo)}</h2>
+      <p className="s-serifa it">{liga(sub)}</p>
+    </div>
+  );
+}
+export function Passos({ id, tid, titulo, sub, itens, tom = 'areia', sede = true }:
+  { id?: string; tid: string; titulo: string; sub: string; itens: ReadonlyArray<{ n: string; t: string; d: string }>; tom?: 'areia' | 'papel'; sede?: boolean }) {
+  return (
+    <section id={id} className={`s-faixa ${tom}`} aria-labelledby={tid}>
+      <div className="s-in">
+        <SerifaCab id={tid} titulo={titulo} sub={sub} />
+        <ol className="s-passos s-rev d1">
+          {itens.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
+        </ol>
+        {sede && <Sede className="base" />}
+      </div>
+    </section>
+  );
+}
+
+/* A FAIXA DE PERGUNTAS (tela 8): o símbolo no canto, o título no bloco preto
+   e a lista (no celular, as perguntas que abrem). */
+export function FaixaPerguntas({ id, tid, titulo, itens, tom = 'papel', soLargo }:
+  { id?: string; tid: string; titulo: string; itens: ReadonlyArray<{ q: string; r: React.ReactNode }>; tom?: 'papel' | 'areia' | 'noite'; soLargo?: boolean }) {
+  return (
+    <section id={id} className={`s-faixa ${tom} s-grao` + (soLargo ? ' so-largo' : '')} aria-labelledby={tid}>
+      <Simbolo className="s-canto" />
+      <div className="s-in">
+        <h2 id={tid} className="s-faq-t s-rev">{liga(titulo)}</h2>
+        <div className="s-rev d1"><Perguntas itens={itens} /></div>
+      </div>
+    </section>
+  );
+}
+
 /* O FECHO: a frase e as ações, o último bloco da página. Até 12/10/2026 era
    uma foto escura de ponta a ponta, a mesma em seis páginas; desde 13/10
    (menos foto, pedido do Arthur) é a faixa com grão e a frase, como o fim
    da home. Na noite por padrão; depois de outra faixa escura, papel (as
-   pílulas da página vêm pretas). */
-export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo }:
-  { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia'; id?: string; soLargo?: boolean }) {
+   pílulas da página vêm pretas).
+   20/10/2026: a JANELA, o fecho de assinatura da página principal de cada
+   site (home, Follow): a foto vista pelo chevron da marca, que abre com a
+   rolagem até a foto inteira (components/site/Janela.tsx, .s-janela em
+   app/site.css). O título vai no corpo cheio; o resto é o mesmo fecho. */
+export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo, foto }:
+  { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia' | 'janela'; id?: string; soLargo?: boolean;
+    /** só com tom "janela": a foto deitada e em pé (1920x1080 e 1080x1920) */
+    foto?: { l: string; p: string } }) {
+  const janela = tom === 'janela' && foto;
+  const quadro = janela && (
+    <picture>
+      <source media="(orientation: portrait)" srcSet={foto.p} type="image/webp" />
+      <img src={foto.l} width={1920} height={1080} alt="" loading="lazy" decoding="async" />
+    </picture>
+  );
   return (
-    <section id={id} className={`s-faixa ${tom} s-grao s-fim${soLargo ? ' so-largo' : ''}`} aria-labelledby="t-fim">
+    <section id={id} className={(janela ? 's-faixa noite s-janela' : `s-faixa ${tom} s-grao`) + ' s-fim' + (soLargo ? ' so-largo' : '')} aria-labelledby="t-fim">
+      {janela && (
+        <>
+          <div className="s-janela-foto" aria-hidden="true">{quadro}<div className="s-janela-mascara">{quadro}</div></div>
+          <Janela />
+        </>
+      )}
       <div className="s-in s-centro">
         <Sede className="topo" />
         <div className="s-rev">
           {chapeu}
-          <Vozes id="t-fim" className="s-h2 media" it={it}>{titulo}</Vozes>
+          {/* a janela leva o corpo cheio quando a frase é curta ("Sempre cabe mais um"); uma frase longa fica no corpo médio, como todo fecho */}
+          <Vozes id="t-fim" className={janela && titulo.length <= 26 ? 's-h2' : 's-h2 media'} it={it}>{titulo}</Vozes>
           {lead && <p className="s-lead grande"><UmaLinha texto={lead} semFim /></p>}
         </div>
         <div className="s-acoes centro s-rev d1">{children}</div>

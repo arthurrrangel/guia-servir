@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
-import { Vozes, Sede, Chapeu, Pil, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Chapeu, Pil, Claro, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 import { pixelValido } from '@/lib/site/medir';
 
 /* =============================================================================
@@ -69,12 +69,16 @@ const BLOCOS: Array<{ n: string; t: string; it: string; id?: string; itens: Arra
 export default function Privacidade() {
   return (
     <>
-      <section className="s-faixa noite s-grao">
+      {/* o cabeçalho de texto (sem foto: é a página da lei), na anatomia do
+          cabeçalho de seção: chapéu, título, linha de apoio e o micro */}
+      <section className="s-faixa noite s-grao" aria-labelledby="t-priv">
         <div className="s-in">
-          <Chapeu forte="Privacidade" resto="LGPD · Lei 13.709/2018" />
-          <Vozes as="h1" className="s-h1" it="quê" >O que a gente guarda, e por quê</Vozes>
-          <p className="s-lead grande" style={{ marginTop: 22 }}>{ligaTexto(PIXEL_ATIVO ? 'Só quando você digita, ou aceita. Nunca é vendido nem cedido.' : 'Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.')}</p>
-          <p className="s-micro" style={{ marginTop: 16, opacity: .7 }}>{ligaTexto("Atualizada em outubro de 2026")}</p>
+          <div className="s-cab">
+            <Chapeu forte="Privacidade" resto="LGPD · Lei 13.709/2018" />
+            <Vozes as="h1" id="t-priv" className="s-h1" it="quê">O que a gente guarda, e por quê</Vozes>
+            <p className="s-lead grande">{ligaTexto(PIXEL_ATIVO ? 'Só quando você digita, ou aceita. Nunca é vendido nem cedido.' : 'Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.')}</p>
+            <p className="s-micro">{ligaTexto("Atualizada em outubro de 2026")}</p>
+          </div>
         </div>
       </section>
 
@@ -85,7 +89,7 @@ export default function Privacidade() {
               <p className="s-selo">{b.n}</p>
               <Vozes id={`t-${b.n}`} className="s-h2 media" it={b.it}>{b.t}</Vozes>
             </div>
-            <div className="s-abre s-rev d1" style={{ marginInline: 0 }}>
+            <div className="s-abre esq s-rev d1">
               {b.itens.map((it, j) => (
                 <details key={it.q} open={j === 0}>
                   <summary>{liga(inteiro(it.q))}</summary>
@@ -97,19 +101,12 @@ export default function Privacidade() {
         </section>
       ))}
 
-      <section className="s-faixa noite s-grao justa" aria-labelledby="t-pedir">
-        <div className="s-in">
-          <div className="s-claro s-rev">
-            <Sede />
-            <h2 id="t-pedir" className="s-h2 menor">{liga("O que você pode pedir.")}</h2>
-            <p className="s-lead">{ligaTexto("Acesso, correção, exclusão. Sem custo, sem justificativa. Diga seu nome completo e a área em que você serve ou serviu. A resposta sai em até 15 dias.")}</p>
-            <div className="s-qa">
-              <div><b>Controladora</b><p>{IGREJA.nome}<br />{fim(ENDERECO_LINHA)}</p></div>
-            </div>
-            <div className="s-acoes centro"><Pil href={CONTATO.href} fora tom="preta">{CONTATO.rot}</Pil></div>
-          </div>
+      <Claro tid="t-pedir" titulo="O que você pode pedir." lead={ligaTexto("Acesso, correção, exclusão. Sem custo, sem justificativa. Diga seu nome completo e a área em que você serve ou serviu. A resposta sai em até 15 dias.")}>
+        <div className="s-qa">
+          <div><b>Controladora</b><p>{IGREJA.nome}<br />{fim(ENDERECO_LINHA)}</p></div>
         </div>
-      </section>
+        <div className="s-acoes centro"><Pil href={CONTATO.href} fora tom="preta">{CONTATO.rot}</Pil></div>
+      </Claro>
     </>
   );
 }

@@ -29,7 +29,7 @@ lib/site/videos.gerado.json com tamanho, duração e, no trecho com
 capítulos (o domingo), o segundo em que cada capítulo começa.
 
 Uso: python3 scripts/site-videos.py [pasta-dos-videos]
-     SO=inicio,cultos  gera só esses trechos
+     SO=servir,encaixe gera só esses trechos
      FOLHA=1           monta public/site/v/_folha.jpg com os pôsteres (não vai pro ar)
 """
 import json, os, subprocess, sys, tempfile
@@ -57,83 +57,19 @@ TAM = {'L': (1280, 720), 'P': (720, 1280), 'V': (720, 900), 'Q': (640, 640)}
 # e nenhum herói repete o plano de outro herói.
 # --------------------------------------------------------------------------
 T = {
+    # 20/10/2026: os heróis de foto (home, cultos, sobre, eventos, PG, ofertar,
+    # Follow, as cinco áreas) deixaram o vídeo pelas fotos do acervo do
+    # fotógrafo (scripts/site-fotos-drive.py); os trechos deles saíram daqui e
+    # de public/site/v. Ficam os que seguem no ar: o herói de /acessar e de
+    # /onde-me-encaixo, a área sem foto ('servir'), o domingo em capítulos, a
+    # mensagem, o abraço e os dois círculos do Guia Servir.
     # ------------------------------------------------------------- heróis
-    # home: mãos para cima, a cantora, o homem de olhos para o alto
-    'inicio': {
-        'L': [('va', 5.0, 6.9), ('va', 7.0, 9.4), ('va', 0.8, 2.9)],
-        # celular: o cantor de braço erguido (o v2 inteiro, sem recorte)
-        'P': [('v2', 7.0, 9.4), ('v2', 5.5, 6.9), ('v2', 14.5, 15.9)],
-    },
-    # cultos: a igreja ouvindo, gente sentada junto ("pertencer")
-    'cultos': {
-        'L': [('va', 23.5, 25.9), ('va', 26.0, 27.9)],
-        'P': [('va', 23.5, 25.9, .42), ('va', 26.0, 27.9, .44)],
-    },
-    # quem somos: rostos da comunidade
-    'sobre': {
-        'L': [('vb', 2.5, 3.9), ('vb', 4.0, 5.9), ('vb', 1.0, 2.4)],
-        'P': [('vb', 2.5, 3.9, .50), ('vb', 4.0, 5.9, .42), ('vb', 1.0, 2.4, .47)],
-    },
-    # eventos: o palco e a celebração
-    'eventos': {
-        # a celebração: os dois pastores no palco. Sem o palco largo: a letra
-        # no telão ficava atrás do título do herói
-        # no computador começa no pastor à direita (o título mora à esquerda);
-        # no celular, no pastor de azul, o mais iluminado
-        'L': [('vb', 31.0, 33.9), ('va', 18.5, 20.9)],
-        'P': [('va', 18.5, 20.9, .45), ('vb', 31.0, 33.9, .56)],
-    },
-    # pequena guia: o abraço e o abraço da roda (relacionamento)
-    'pg': {
-        # começa no abraço da roda (rostos); o abraço de costas vem depois
-        'L': [('vb', 6.0, 7.4), ('va', 9.5, 12.9)],
-        'P': [('vb', 6.0, 7.4, .48), ('va', 9.5, 12.9, .40)],
-    },
-    # ofertar é adorar: a silhueta e a mão erguida
-    'ofertar': {
-        'L': [('va', 15.0, 18.4), ('va', 3.0, 4.9)],
-        'P': [('v2', 12.0, 14.4), ('va', 15.0, 18.4, .40)],
-    },
-    # servir: o voluntário de colete rindo, os três de polegar para cima
     'servir': {
         'L': [('vb', 16.0, 18.9), ('vb', 14.5, 15.9)],
         # no celular só o voluntário rindo, um plano: o recorte em pé dos três
         # de polegar para cima pegava o braço, não os rostos
         'P': [('vb', 16.0, 18.9, .50)],
     },
-    # mídia: a câmera no tripé, a segunda câmera e a mesa da transmissão.
-    # Sem o versículo no telão: letra grande atrás do título do herói
-    # brigava com ele (13/10, captura do computador)
-    'midia': {
-        'L': [('vb', 9.0, 9.9), ('vb', 24.5, 25.4), ('v2', 3.5, 4.4, .36)],
-        # celular: a mesa da transmissão e o switcher (v2), depois a câmera
-        # (a moça na sala da transmissão, v2 1,5 s, ficou de fora: quase preta)
-        'P': [('v2', 3.5, 4.4), ('v2', 4.5, 5.4), ('vb', 9.0, 9.9, .44)],
-        'lento': 0.6, 'mci': True,
-    },
-    # louvor: a cantora de branco, o cantor, as mãos
-    'louvor': {
-        'L': [('vb', 29.0, 30.9), ('vb', 27.5, 28.9), ('vb', 25.5, 27.4)],
-        'P': [('vb', 29.0, 30.9, .58), ('v2', 9.5, 10.4), ('v2', 17.5, 18.4)],
-    },
-    # kids: a professora rindo, o menino de capa, o de casaco, a menina
-    'kids': {
-        'L': [('va', 28.0, 28.9), ('va', 30.0, 31.9), ('va', 33.5, 34.9), ('va', 35.0, 37.0)],
-        'P': [('va', 28.0, 28.9, .46), ('va', 30.0, 31.9, .50), ('va', 33.5, 34.9, .47), ('va', 35.0, 37.0, .55)],
-    },
-    # connect (serviço): quem acena na porta; no celular começa pela camiseta
-    'servico': {
-        'L': [('vb', 19.0, 19.9), ('vb', 20.0, 20.9), ('vb', 21.0, 21.9), ('vb', 34.0, 36.1)],
-        'P': [('v2', 0.5, 1.4), ('vb', 19.0, 19.9, .45), ('vb', 20.0, 20.9, .42), ('vb', 34.0, 36.1, .50)],
-    },
-    # livraria: a Bíblia aberta no celular, no colo (o único plano de leitura)
-    'livraria': {
-        'L': [('va', 21.0, 23.4)],
-        'P': [('va', 21.0, 23.4, .45)],
-        'lento': 0.6, 'mci': True,
-    },
-    # não sei onde me encaixo: um plano de cada área (câmera, palco, Kids,
-    # porta, Bíblia) — a página é a escolha entre elas
     'encaixe': {
         'L': [('vb', 24.5, 25.4), ('vb', 27.5, 28.9), ('va', 30.0, 31.4), ('vb', 20.0, 20.9), ('va', 21.0, 22.2)],
         'P': [('vb', 24.5, 25.4, .45), ('vb', 27.5, 28.9, .55), ('va', 30.0, 31.4, .50), ('vb', 20.0, 20.9, .42), ('va', 21.0, 22.2, .45)],
@@ -154,15 +90,6 @@ T = {
               ('v2', 12.0, 13.9, .42), ('va', 15.0, 16.4, .40)],
         'capitulos': [0, 2, 4, 5],
     },
-    # "é gente": a porta, a sala das crianças, o violão
-    'gente': {
-        'V': [('vb', 19.0, 19.9, .45), ('vb', 20.0, 20.9, .42), ('va', 28.0, 28.9, .46), ('va', 30.0, 30.9, .50), ('v2', 17.5, 18.4, .55), ('v2', 9.5, 10.4, .40)],
-    },
-    # o Follow: o cantor do sábado e o guitarrista
-    'follow': {
-        'V': [('v2', 7.0, 9.4, .42), ('v2', 9.5, 10.4, .40)],
-    },
-    # a mensagem de domingo (faixa do /cultos)
     'mensagem': {
         'L': [('va', 18.5, 20.9), ('va', 13.0, 14.9)],
         'P': [('v2', 26.0, 27.9), ('v2', 16.0, 17.4)],
