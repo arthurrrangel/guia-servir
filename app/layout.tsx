@@ -1,5 +1,6 @@
 import { IGREJA, SITE_IGREJA } from '@/lib/igreja';
 import type { Metadata, Viewport } from 'next';
+import { og } from '@/lib/site/meta';
 
 /* =============================================================================
    A RAIZ — 11/10/2026
@@ -42,12 +43,9 @@ export const metadata: Metadata = {
   /* o card que aparece quando alguém cola o link num grupo de WhatsApp. A
      imagem PRECISA ser absoluta (metadataBase resolve isso): com caminho
      relativo, todo link compartilhado sai sem foto. */
-  openGraph: {
-    title: 'GUIA Church · Existe um lugar para você',
-    description: `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Uma igreja feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.`,
-    url: SITE_IGREJA, type: 'website', locale: 'pt_BR', siteName: 'GUIA Church',
-    images: [{ url: '/og.jpg?v=20261020', width: 1200, height: 630, alt: 'GUIA Church, Barra da Tijuca' }],
-  },
+  openGraph: og('igreja', '/', 'GUIA Church · Existe um lugar para você',
+    `${IGREJA.cultoDia} às ${IGREJA.cultoHora}, ${IGREJA.bairro}. Uma igreja feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.`,
+    '/og.jpg', 'GUIA Church, Barra da Tijuca'),
   twitter: { card: 'summary_large_image' },
 };
 /* colorScheme fixo em light: a maioria dos celulares do time está no modo

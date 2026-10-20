@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import Link from 'next/link';
-import { SITE } from '@/lib/igreja';
 import { lp } from '@/lib/site/sites';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
 import { Vozes, Sede, Chapeu, Pil, Heroi, Fecho, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: 'Não sei onde me encaixo',
   description: 'É a resposta mais comum. Três dúvidas comuns e o que se faz em cada área de voluntários da GUIA Church.',
   alternates: { canonical: '/servir/onde-me-encaixo' },
-  openGraph: { title: 'Não sei onde me encaixo · GUIA Servir', url: `${SITE}/servir/onde-me-encaixo`, siteName: 'GUIA Servir', images: [{ url: '/og-encaixo.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('servir', '/servir/onde-me-encaixo', 'Não sei onde me encaixo', 'É a resposta mais comum. Três dúvidas comuns e o que se faz em cada área.', '/og-encaixo.jpg'),
 };
 
 const DUVIDAS = [

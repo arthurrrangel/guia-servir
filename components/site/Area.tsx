@@ -147,7 +147,8 @@ export default function Area() {
           {fase === 'rede' && <p className="s-aviso s-centro" role="status">Sem conexão agora. Atualize a página pra ver as funções.</p>}
           {fase === 'pronto' && (
             <div className="s-rev d1">
-              <div className="s-funcoes lista" role="group" aria-label={`As funções ${artigo} ${nome}`}>
+              {/* com uma ou duas funções (a Livraria), os cartões ficam no centro, não encostados à esquerda */}
+              <div className={'s-funcoes lista' + (grupos.length <= 2 ? ' poucas' : '')} role="group" aria-label={`As funções ${artigo} ${nome}`}>
                 {grupos.map(([fam, g], i) => (
                   <div key={fam} className="s-funcao">
                     <small>{String(i + 1).padStart(2, '0')}</small>

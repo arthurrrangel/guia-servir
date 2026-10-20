@@ -251,9 +251,13 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
         </select>
         {erro.area && <span id="s-area-e" className="s-campo-dica" role="alert">{erro.area}</span>}
       </div>
-      <button type="submit" className="s-enviar" aria-busy={indo}>{indo ? 'Abrindo…' : 'Enviar'}</button>
+      {/* UM botão só, com a chamada da copy ("Quero servir"): no computador, o da ponta da
+          linha de campos (tela 9 da apresentação); no celular, a pílula abaixo deles (a linha
+          vira duas colunas e o botão da ponta some, em app/site.css). 20/10/2026: os dois
+          apareciam juntos no computador, "Enviar" e "Quero servir", a 110 px um do outro. */}
+      <button type="submit" className="s-enviar" aria-busy={indo}>{indo ? 'Abrindo…' : 'Quero servir'}</button>
       <div className="s-form-fim">
-        <button type="submit" className={'s-pil' + (escuro ? '' : ' preta')} aria-busy={indo}>Quero servir</button>
+        <button type="submit" className={'s-pil' + (escuro ? '' : ' preta')} aria-busy={indo}>{indo ? 'Abrindo…' : 'Quero servir'}</button>
         <p className="s-micro">{ligaTexto("Seus dados servem só pra te chamar pra essa conversa. Nunca são publicados.")}</p>
       </div>
     </form>

@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Arroba, Chapeu, Pil, Heroi, Passos, Claro, Fecho, UmaLinha, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Arroba, Chapeu, Pil, Heroi, Passos, Claro, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
   title: 'Pequena Guia',
   description: 'Relacionamentos que fortalecem sua fé. A Pequena Guia é o grupo da GUIA Church que se reúne durante a semana, numa casa perto da sua, pra compartilhar a vida como ela é, estudar a Palavra e crescer junto.',
   alternates: { canonical: '/pequena-guia' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Pequena Guia · GUIA Church', description: 'Um grupo perto de onde você mora.', url: `${SITE}/pequena-guia`, images: [{ url: '/og-pequena-guia.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('igreja', '/pequena-guia', 'Pequena Guia', 'Um grupo perto de onde você mora.', '/og-pequena-guia.jpg'),
 };
 
 const PASSOS = [
@@ -73,15 +74,11 @@ export default function PequenaGuia() {
         <div className="s-miolo esq"><FormPequenaGuia /></div>
         {/* quem ainda não quer um grupo (copy final, 19/10/2026) */}
         <p className="s-aviso"><Link href="/cultos" className="s-link">Prefiro começar pelos cultos</Link></p>
-        {/* no celular o fecho sai; a conversa direta, que só ele tinha, fica aqui */}
-        <p className="s-aviso so-celular">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
+        {/* a conversa direta, para quem prefere o WhatsApp ao formulário. 20/10/2026: o fecho
+            que vinha depois ("Diga onde você mora...") mandava de volta para este formulário,
+            uma tela acima; saiu, e a página termina no próprio formulário, como no celular */}
+        <p className="s-aviso">Prefere conversar direto? <a href={conversa.href} target="_blank" rel="noreferrer" className="s-link">{conversa.rot.replace('Falar no ', 'Chamar no ')}</a></p>
       </Claro>
-
-      {/* depois do formulário na noite, o fecho vem no papel (no computador) */}
-      <Fecho tom="papel" titulo="Diga onde você mora. A gente diz qual fica perto" it="perto" soLargo>
-        <Pil href="#encontrar" tom="preta">Encontrar a minha</Pil>
-        <Pil href={conversa.href} fora tom="contorno">Prefiro conversar direto</Pil>
-      </Fecho>
     </>
   );
 }

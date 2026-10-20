@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { MOMENTOS } from '@/lib/site/domingo';
@@ -51,7 +52,7 @@ export const metadata: Metadata = {
   title: 'Cultos',
   description: `Um domingo para pertencer: culto aos ${IGREJA.cultoDia.toLowerCase()}s, às ${IGREJA.cultoHora}, na ${IGREJA.rua}, ${IGREJA.bairro}. Como é, o que esperar na primeira vez e qual é o próximo passo.`,
   alternates: { canonical: '/cultos' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Um domingo para pertencer · GUIA Church', description: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, url: `${SITE}/cultos`, images: [{ url: '/og-cultos.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('igreja', '/cultos', 'Um domingo para pertencer', `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, '/og-cultos.jpg'),
 };
 
 const PERGUNTAS = [

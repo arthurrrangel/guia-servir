@@ -206,7 +206,7 @@ body{ margin:0 }
 .s .s-nav-bt svg{ width:12px; height:12px; transition:transform var(--s-t) }
 .s .s-nav > li:focus-within .s-nav-bt,.s .s-nav-bt[aria-expanded="true"]{ background:rgba(255,255,255,.08) }
 .s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
-.s .s-nav-bt[aria-current="true"]{ box-shadow:inset 0 -2px 0 var(--s-acento); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
+.s .s-nav-bt[aria-current="true"],.s a.s-nav-bt[aria-current="page"]{ box-shadow:inset 0 -2px 0 var(--s-acento); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
 /* o painel de cada grupo */
 .s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:var(--s-r-2); box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
 .s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
@@ -680,6 +680,9 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    quase preto do site: um fio claro desenha o botão sem mudar o desenho */
 .s .s-faixa.noite .s-enviar{ background:#000; border:1.5px solid rgba(255,255,255,.3) }
 .s .s-form-fim{ grid-column:1 / -1; margin-top:clamp(36px,5vw,70px); display:grid; justify-items:center; gap:clamp(16px,2vw,24px); text-align:center }
+/* um botão só por largura (20/10/2026): no computador vale o da ponta da linha (.s-enviar);
+   a pílula do pé do formulário é a do celular (abaixo de 760px, onde .s-enviar some) */
+@media(min-width:760px){ .s .s-form.com-fim .s-form-fim .s-pil{ display:none } }
 .s .s-form-fim .s-micro{ color:rgba(255,255,255,.86) }
 .s .s-faixa.papel .s-form-fim .s-micro,.s .s-faixa.areia .s-form-fim .s-micro{ color:var(--s-mudo) }
 .s .s-form.livre{ grid-template-columns:repeat(2,1fr) }
@@ -880,6 +883,8 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-faixa.noite .s-pessoa .s-ini{ background:var(--s-papel); color:var(--s-tinta) }
 /* as funções de uma área */
 .s .s-funcoes{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:clamp(10px,1.2vw,16px) }
+/* uma ou duas funções: cartões de largura fixa, no centro (a Livraria tem uma; sozinha à esquerda parecia faltar o resto) */
+.s .s-funcoes.poucas{ grid-template-columns:repeat(auto-fit,minmax(230px,300px)); justify-content:center }
 .s .s-funcao{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(20px,2vw,26px); display:grid; gap:6px; align-content:start }
 .s .s-funcao small{ font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--s-acento-texto) }
 .s .s-funcao b{ font-weight:800; font-size:clamp(18px,1.5vw,22px); letter-spacing:-.03em; line-height:1.1 }

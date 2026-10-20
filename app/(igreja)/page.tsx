@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { Chevron } from '@/components/Marca';
-import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
-import { noServir } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Claro, SerifaCab, FaixaPerguntas, Fecho, liga, ligaTexto } from '@/components/site/Blocos';
+import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA_FRASE } from '@/lib/igreja';
+import { noServir, noFollow } from '@/lib/site/sites';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Claro, SerifaCab, FaixaPerguntas, Fecho, Sigla, liga, ligaTexto } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -45,7 +44,8 @@ export const metadata: Metadata = {
 
 const PORTAS = [
   { href: '/cultos', t: 'Cultos', n: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}`, f: 'Um domingo para pertencer', d: 'Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.', ir: 'Vou participar' },
-  { href: '/eventos#follow', t: 'Follow', n: `Sábado, ${IGREJA.followHora}`, f: 'O culto de jovens', d: 'Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Vem como está.', ir: 'Vou no Follow' },
+  /* 20/10/2026: o Follow tem site próprio (guiafollow.com); a porta abre nele */
+  { href: noFollow('/'), t: 'Follow', n: `Sábado, ${IGREJA.followHora}`, f: 'O culto de jovens', d: 'Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Vem como está.', ir: 'Vou no Follow' },
   { href: '/pequena-guia', t: 'Pequena Guia', n: 'Na semana', f: 'Relacionamentos que fortalecem a fé', d: 'Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida e estudar a Palavra durante a semana.', ir: 'Encontrar a minha' },
   { href: noServir('/'), t: 'Servir', n: 'Todo domingo', f: 'Encontre o seu lugar pra servir', d: 'Cinco áreas, dezenas de postos e gente pra ensinar. Cadastro de menos de um minuto.', ir: 'Quero servir' },
 ];
@@ -180,15 +180,7 @@ export default function Home() {
 
       {/* 6 · somos GUIA */}
       <Claro tid="t-sigla" titulo="Somos GUIA." lead={ligaTexto(`${SIGLA_FRASE}.`)} soLargo>
-        <ul className="s-sigla s-miolo">
-          {SIGLA.map(l => (
-            <li key={l.t}>
-              <span className="s-letra">{l.l === '>' ? <Chevron /> : l.l}</span>
-              <b>{l.t}</b>
-              <p>{l.d}</p>
-            </li>
-          ))}
-        </ul>
+        <Sigla className="s-miolo" />
       </Claro>
 
       {/* 7 · perguntas de quem vem pela primeira vez */}

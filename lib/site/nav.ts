@@ -24,9 +24,11 @@
 import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
 import { noServir, naIgreja, noFollow, follow, lp } from '@/lib/site/sites';
+import { FC27 } from '@/lib/followcamp';
 
 export type Item = { rot: string; href: string; sub?: string; duro?: boolean };
-export type Grupo = { rot: string; href: string; itens: Item[]; duro?: boolean };
+/** `sub`: a linha sob a entrada do próprio grupo no painel, quando nenhum item já leva à página dele (Topo.tsx) */
+export type Grupo = { rot: string; href: string; itens: Item[]; duro?: boolean; sub?: string };
 export type Mapa = {
   /** a página de entrada do site (o símbolo da barra leva para cá) */
   inicio: string;
@@ -54,7 +56,7 @@ export const MENU: Grupo[] = [
     { rot: 'Agenda', href: '/eventos', sub: 'O que acontece na semana' },
     /* 20/10/2026: o Follow tem site próprio (guiafollow.com) */
     { rot: 'Follow', href: noFollow('/'), sub: 'Sábado, 19h' },
-    { rot: 'Follow Camp 2027', href: '/followcamp', sub: '05 a 10 de fevereiro', duro: true },
+    { rot: FC27.nome, href: '/followcamp', sub: FC27.datas, duro: true },
   ] },
   /* o grupo inteiro mora no Guia Servir */
   { rot: 'Envolva-se', href: noServir('/'), itens: [
@@ -104,7 +106,7 @@ export const BUSCA: Item[] = [
   { rot: 'Crianças no culto', href: '/como-chegar#antes-de-vir', sub: 'GUIA Kids, do berçário aos 12 anos' },
   { rot: 'Pix da igreja', href: '/ofertar', sub: 'Dízimos e ofertas' },
   { rot: 'WhatsApp da igreja', href: '/como-chegar#conversa', sub: 'Fale com a gente' },
-  { rot: 'Instagram', href: 'https://instagram.com/guiachurch', sub: '@guiachurch', duro: true },
+  { rot: 'Instagram', href: IGREJA.instagram, sub: IGREJA.instagramArroba, duro: true },
   ...AREAS_ORDEM.map(s => ({ rot: AREAS[s].nome, href: noServir(`/servir/${s}`), sub: `Servir · ${AREAS[s].frase}` })),
   { rot: 'Perdi meu link de voluntário', href: noServir('/acessar'), sub: 'Acesso às equipes' },
   { rot: 'Privacidade', href: '/privacidade', sub: 'O que fazemos com os seus dados' },
@@ -131,7 +133,7 @@ export const MENU_SERVIR: Grupo[] = [
     { rot: 'Como funciona', href: lp('#como-funciona'), sub: 'Do cadastro à escala, quatro passos' },
     { rot: 'Perguntas', href: lp('#perguntas'), sub: 'Antes do primeiro domingo' },
   ] },
-  { rot: 'Áreas', href: lp('#areas'), itens: [
+  { rot: 'Áreas', href: lp('#areas'), sub: 'As cinco, lado a lado', itens: [
     ...AREAS_ORDEM.map(s => ({ rot: AREAS[s].nome, href: `/servir/${s}`, sub: AREAS[s].frase })),
     { rot: 'Não sei onde me encaixo', href: '/servir/onde-me-encaixo', sub: 'Três dúvidas comuns' },
   ] },
@@ -140,7 +142,7 @@ export const MENU_SERVIR: Grupo[] = [
     { rot: 'Abrir meu espaço', href: '/eu', sub: 'Sua escala, seus dias e seu líder', duro: true },
     { rot: 'Acesso às equipes', href: '/acessar', sub: 'Voluntários e liderança' },
   ] },
-  { rot: 'GUIA Church', href: naIgreja('/'), itens: [
+  { rot: 'GUIA Church', href: naIgreja('/'), sub: 'O site da igreja', itens: [
     { rot: 'Cultos', href: naIgreja('/cultos'), sub: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}` },
     { rot: 'Como chegar', href: naIgreja('/como-chegar'), sub: IGREJA.rua },
     { rot: 'Quem somos', href: naIgreja('/sobre'), sub: 'A igreja' },
@@ -196,9 +198,9 @@ export const MENU_FOLLOW: Grupo[] = [
     { rot: 'Avisar que vou', href: CONVERSA_FOLLOW.href, sub: 'A gente te espera na porta', duro: true },
   ] },
   { rot: 'Follow Camp', href: CAMP, duro: true, itens: [
-    { rot: 'Follow Camp 2027', href: CAMP, sub: '05 a 10 de fevereiro · inscrição e pagamento', duro: true },
+    { rot: FC27.nome, href: CAMP, sub: `${FC27.datas} · inscrição e pagamento`, duro: true },
   ] },
-  { rot: 'GUIA Church', href: naIgreja('/'), itens: [
+  { rot: 'GUIA Church', href: naIgreja('/'), sub: 'O site da igreja', itens: [
     { rot: 'Cultos', href: naIgreja('/cultos'), sub: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}` },
     { rot: 'Como chegar', href: naIgreja('/como-chegar'), sub: IGREJA.rua },
     { rot: 'Pequena Guia', href: naIgreja('/pequena-guia'), sub: 'O grupo da semana' },
@@ -214,7 +216,7 @@ export const MENU_FOLLOW: Grupo[] = [
 export const MENU_CELULAR_FOLLOW: Item[] = [
   { rot: 'Primeira vez', href: follow('#primeira-vez') },
   { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
-  { rot: 'Follow Camp 2027', href: CAMP, sub: '05 a 10 de fevereiro', duro: true },
+  { rot: FC27.nome, href: CAMP, sub: FC27.datas, duro: true },
   { rot: 'Como chegar', href: naIgreja('/como-chegar') },
   { rot: 'GUIA Church', href: naIgreja('/'), sub: `Cultos aos domingos, ${IGREJA.cultoHora}` },
   { rot: 'Servir', href: noServir('/') },

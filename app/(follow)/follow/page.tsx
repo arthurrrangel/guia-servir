@@ -2,7 +2,7 @@ import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/i
 import { naIgreja } from '@/lib/site/sites';
 import { SimboloFollow } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Fecho, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Fecho, FaixaCamp, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import Contagem from '@/components/follow/Contagem';
 
@@ -86,7 +86,8 @@ export default function Follow() {
         chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
-        <Pil href={MAPA} fora tom="vidro" medir="mapa">Como chegar</Pil>
+        {/* 20/10/2026: "Abrir no mapa", como na faixa "quando e onde": no menu, "Como chegar" é a página da igreja */}
+        <Pil href={MAPA} fora tom="vidro" medir="mapa">Abrir no mapa</Pil>
       </Scrub>
 
       {/* 2 · é a sua primeira vez? (o cartão claro sobre a noite, tela 6) */}
@@ -130,19 +131,8 @@ export default function Follow() {
         </div>
       </section>
 
-      {/* 4 · Follow Camp 2027 (a faixa de areia, como no /eventos) */}
-      <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
-        <div className="s-in">
-          <div className="s-so-texto s-rev">
-            <Chapeu forte="Follow Camp 2027" resto="05 a 10 de fevereiro" />
-            <Vozes id="t-camp" className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
-            <p className="s-lead"><UmaLinha semFim texto="O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro." /></p>
-            <div className="s-acoes">
-              <Pil href={CAMP} duro tom="preta">Ir para a página do Camp</Pil>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 4 · Follow Camp 2027 (a mesma faixa de areia do /eventos) */}
+      <FaixaCamp href={CAMP} />
 
       {/* 5 · o fecho: a sala do Follow cheia, vista pelo chevron da marca, que
           abre com a rolagem até a foto inteira (a assinatura da casa, como na

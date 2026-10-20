@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { SITE } from '@/lib/igreja';
+import { og } from '@/lib/site/meta';
 import { lp } from '@/lib/site/sites';
 import { Vozes, Sede, Chapeu, Pil, Seta, Heroi, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   title: 'Acesso às equipes',
   description: 'Sou voluntário, sou da organização ou quero participar: três caminhos, nenhum pede cadastro.',
   alternates: { canonical: '/acessar' },
-  openGraph: { title: 'Acesso às equipes · GUIA Servir', url: `${SITE}/acessar`, siteName: 'GUIA Servir', images: [{ url: '/og-acessar.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('servir', '/acessar', 'Acesso às equipes', 'Sou voluntário, sou da organização ou quero participar: três caminhos, nenhum pede cadastro.', '/og-acessar.jpg'),
 };
 
 const PORTAS = [

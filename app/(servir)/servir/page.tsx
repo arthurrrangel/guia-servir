@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE, SITE_IGREJA } from '@/lib/igreja';
@@ -62,7 +63,7 @@ export const metadata: Metadata = {
   title: { absolute: 'Encontre o seu lugar pra servir · GUIA Servir' },
   description: 'Encontre o seu lugar pra servir. Deus semeou dons em cada pessoa; todo domingo, dezenas de pessoas cultivam os delas para que o culto aconteça. Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.',
   alternates: { canonical: '/' },
-  openGraph: { title: 'Encontre o seu lugar pra servir · GUIA Servir', description: 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', url: `${SITE}/`, siteName: 'GUIA Servir', type: 'website', locale: 'pt_BR', images: [{ url: '/og-servir.jpg?v=20261020', width: 1200, height: 630, alt: 'GUIA Servir: encontre o seu lugar pra servir' }] },
+  openGraph: og('servir', '/', 'Encontre o seu lugar pra servir', 'Mídia, Louvor, GUIA Kids, Connect e Livraria. Cadastro de menos de um minuto.', '/og-servir.jpg', 'GUIA Servir: encontre o seu lugar pra servir'),
 };
 
 const PASSOS = [

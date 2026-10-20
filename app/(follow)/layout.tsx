@@ -1,5 +1,6 @@
 import '../site.css';
 import type { Metadata, Viewport } from 'next';
+import { og } from '@/lib/site/meta';
 import { IGREJA, SITE_FOLLOW } from '@/lib/igreja';
 import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
@@ -49,12 +50,9 @@ export const metadata: Metadata = {
      reescreve os dois para os do Follow (o manifesto dá o nome e as cores
      certas a quem salva o site na tela inicial). */
   icons: { icon: [{ url: '/follow/icone.svg', type: 'image/svg+xml' }, { url: '/follow/icone-32.png', sizes: '32x32', type: 'image/png' }], apple: '/follow/icone-180.png' },
-  openGraph: {
-    title: 'Follow · Um lugar para todos',
-    description: `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}. Vem como você está.`,
-    url: SITE_FOLLOW, type: 'website', locale: 'pt_BR', siteName: 'Follow',
-    images: [{ url: '/follow/og.jpg', width: 1200, height: 630, alt: 'Follow, o culto de jovens da GUIA Church' }],
-  },
+  openGraph: og('follow', '/', 'Follow · Um lugar para todos',
+    `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}. Vem como você está.`,
+    '/follow/og.jpg', 'Follow, o culto de jovens da GUIA Church'),
   twitter: { card: 'summary_large_image' },
 };
 

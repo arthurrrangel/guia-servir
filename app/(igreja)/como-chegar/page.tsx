@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import { IGREJA, SITE_IGREJA as SITE, MAPA, MAPA_EMBED, ROTA_WAZE, canalDeConversa } from '@/lib/igreja';
 import { MODOS, ANTES, textoDoModo } from '@/lib/chegar';
 import { Vozes, Sede, Chapeu, Pil, Heroi, Fecho, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   title: 'Como chegar',
   description: `${IGREJA.nome} fica na ${IGREJA.rua}, ${IGREJA.bairro}, ${IGREJA.cidade}. Rota no Maps e no Waze, estacionamento e a fachada para você reconhecer a porta.`,
   alternates: { canonical: '/como-chegar' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Como chegar · GUIA Church', description: `${IGREJA.rua}, ${IGREJA.bairro}.`, url: `${SITE}/como-chegar`, images: [{ url: '/og-como-chegar.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('igreja', '/como-chegar', 'Como chegar', `${IGREJA.rua}, ${IGREJA.bairro}.`, '/og-como-chegar.jpg'),
 };
 
 export default function ComoChegar() {

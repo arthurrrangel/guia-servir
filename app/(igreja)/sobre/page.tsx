@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import { Chevron } from '@/components/Marca';
-import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, SIGLA_FRASE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Heroi, Passos, Claro, Fecho, UmaLinha, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Heroi, Passos, Claro, Fecho, Sigla, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   title: 'Quem somos',
   description: `Uma igreja que parece com a vida de quem chega. GUIA é sigla: ${SIGLA_FRASE}. Uma igreja na Barra da Tijuca construída sobre relacionamento, generosidade e serviço.`,
   alternates: { canonical: '/sobre' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Quem somos · GUIA Church', description: `${SIGLA_FRASE}.`, url: `${SITE}/sobre`, images: [{ url: '/og-sobre.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('igreja', '/sobre', 'Quem somos', `${SIGLA_FRASE}.`, '/og-sobre.jpg'),
 };
 
 const PILARES = [
@@ -77,15 +78,7 @@ export default function Sobre() {
             <h2 id="t-sigla" className="s-h2">Somos GUIA.</h2>
             <p className="s-lead"><UmaLinha semFim texto={`Somos um ${SIGLA_FRASE}. Não é só o nosso nome. É o jeito que escolhemos viver: de perto, em comunidade, caminhando juntos.`} /></p>
           </div>
-          <ul className="s-sigla s-rev d1">
-            {SIGLA.map(l => (
-              <li key={l.t}>
-                <span className="s-letra">{l.l === '>' ? <Chevron /> : l.l}</span>
-                <b>{l.t}</b>
-                <p>{l.d}</p>
-              </li>
-            ))}
-          </ul>
+          <Sigla className="s-rev d1" />
         </div>
       </section>
 

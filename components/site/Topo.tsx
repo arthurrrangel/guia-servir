@@ -112,21 +112,39 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
           </Link>
 
           <ul className="s-nav" aria-label="Seções do site">
-            {MENU.map((g, i) => (
-              <li key={g.rot}>
-                <button type="button" className="s-nav-bt" aria-expanded={aberto === i} aria-controls={`s-sub-${i}`}
-                        aria-current={atual === i ? 'true' : undefined}
-                        onClick={() => setAberto(v => v === i ? null : i)}>
-                  {g.rot}<SetaBaixo />
-                </button>
-                <div id={`s-sub-${i}`} className={'s-sub' + (aberto === i ? ' aberto' : '')}>
-                  <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }}><b>{g.rot}</b><small>Abrir a página</small></LinkOu>
-                  {g.itens.map(it => (
-                    <LinkOu key={it.href + it.rot} item={it}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu>
-                  ))}
-                </div>
-              </li>
-            ))}
+            {MENU.map((g, i) => {
+              /* 20/10/2026: o painel abria com "<grupo> · Abrir a página" e, logo abaixo, o
+                 primeiro item indo para a MESMA página (Igreja → /sobre e Quem somos → /sobre,
+                 nos cinco grupos). A entrada do grupo só existe quando nenhum item já leva à
+                 página dele. E um grupo de um item só, que é a própria página (Follow Camp),
+                 não é grupo: é um link na barra, sem painel. */
+              const itemDoGrupo = g.itens.some(it => it.href === g.href);
+              /* o grupo que é a própria entrada do site (Servir no Guia Servir, Follow no
+                 guiafollow.com) também não ganha a entrada: o símbolo da barra já leva lá */
+              const semEntrada = itemDoGrupo || g.href === inicio;
+              if (g.itens.length === 1 && itemDoGrupo) {
+                return (
+                  <li key={g.rot}>
+                    <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }} className="s-nav-bt" atual={atual === i}>{g.rot}</LinkOu>
+                  </li>
+                );
+              }
+              return (
+                <li key={g.rot}>
+                  <button type="button" className="s-nav-bt" aria-expanded={aberto === i} aria-controls={`s-sub-${i}`}
+                          aria-current={atual === i ? 'true' : undefined}
+                          onClick={() => setAberto(v => v === i ? null : i)}>
+                    {g.rot}<SetaBaixo />
+                  </button>
+                  <div id={`s-sub-${i}`} className={'s-sub' + (aberto === i ? ' aberto' : '')}>
+                    {!semEntrada && <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }}><b>{g.rot}</b><small>{g.sub ?? 'Abrir a página'}</small></LinkOu>}
+                    {g.itens.map(it => (
+                      <LinkOu key={it.href + it.rot} item={it}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu>
+                    ))}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
 
           <div className="s-topo-fim">

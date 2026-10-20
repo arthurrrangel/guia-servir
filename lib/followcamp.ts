@@ -27,6 +27,12 @@ export const FC27 = {
   nome: 'Follow Camp 2027',
   tema: 'Eu me Rendo',
   quando: '05 a 10 de fevereiro de 2027',
+  /* 20/10/2026: as datas como o site escreve (o ano já está no nome) e as
+     datas ISO do evento (o Schema de /eventos). Antes estavam escritas à
+     mão em quatro lugares (nav, /eventos, guiafollow.com) */
+  datas: '05 a 10 de fevereiro',
+  inicio: '2027-02-05',
+  fim: '2027-02-10',
   /* o WhatsApp da organização, o mesmo da página do Camp */
   whatsapp: '5521995946491',
   whatsappTexto: '21 99594-6491',

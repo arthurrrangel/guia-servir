@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { og } from '@/lib/site/meta';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
 import { Ofertar } from '@/components/Ofertar';
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
   title: 'Ofertar',
   description: `Dízimos e ofertas da GUIA Church${TEM_CHECKOUT ? ': Pix, cartão, Apple Pay ou Google Pay' : ' pelo Pix'}. Leva menos de um minuto, e você decide o valor.`,
   alternates: { canonical: '/ofertar' },
-  openGraph: { siteName: 'GUIA Church', type: 'website', locale: 'pt_BR', title: 'Ofertar · GUIA Church', description: 'Leva menos de um minuto, e você decide o valor.', url: `${SITE}/ofertar`, images: [{ url: '/og-ofertar.jpg?v=20261020', width: 1200, height: 630 }] },
+  openGraph: og('igreja', '/ofertar', 'Ofertar', 'Leva menos de um minuto, e você decide o valor.', '/og-ofertar.jpg'),
 };
 
 const PORQUE = [

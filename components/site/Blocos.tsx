@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import type { Evento } from '@/lib/site/medir';
 import { FOTOS, type LugarDeFoto, type Foto } from '@/lib/site/fotos';
-import { Simbolo } from '@/components/Marca';
+import { Simbolo, Chevron } from '@/components/Marca';
+import { SIGLA } from '@/lib/igreja';
+import { FC27 } from '@/lib/followcamp';
 import { Fundo } from './Midia';
 import Janela from './Janela';
 
@@ -356,5 +358,43 @@ export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, s
         <div className="s-acoes centro s-rev d1">{children}</div>
       </div>
     </section>
+  );
+}
+
+/* O FOLLOW CAMP (a faixa de areia): a mesma peça em /eventos e no
+   guiafollow.com. 20/10/2026: estava escrita duas vezes, e as duas já
+   tinham divergido (uma sem o id do título, com o aria-labelledby quebrado).
+   O nome e as datas vêm de lib/followcamp.ts, com o resto do Camp. */
+export function FaixaCamp({ href }: { href: string }) {
+  return (
+    <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
+      <div className="s-in">
+        <div className="s-so-texto s-rev">
+          <Chapeu forte={FC27.nome} resto={FC27.datas} />
+          <Vozes id="t-camp" className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
+          <p className="s-lead"><UmaLinha semFim texto="O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro." /></p>
+          <div className="s-acoes">
+            <Pil href={href} duro tom="preta">Ir para a página do Camp</Pil>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* A SIGLA (G · U · I · >): as quatro letras com a definição de cada uma,
+   na home (dentro do cartão claro) e em /sobre (na noite). Os textos moram
+   em lib/igreja.ts (SIGLA); aqui só a peça, uma vez. */
+export function Sigla({ className = '' }: { className?: string }) {
+  return (
+    <ul className={`s-sigla ${className}`.trim()}>
+      {SIGLA.map(l => (
+        <li key={l.t}>
+          <span className="s-letra">{l.l === '>' ? <Chevron /> : l.l}</span>
+          <b>{l.t}</b>
+          <p>{l.d}</p>
+        </li>
+      ))}
+    </ul>
   );
 }
