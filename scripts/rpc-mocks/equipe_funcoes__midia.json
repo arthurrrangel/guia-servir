@@ -1,0 +1,10 @@
+[{"nome":"PROJEÇÃO","ordem":1,"tipos":["domingo","follow"],"relata":false,"descricao":"Passa a letra do louvor e os slides da pregação no telão, acompanhando o culto inteiro.","descricao_familia":null}, 
+ {"nome":"ILUMINAÇÃO","ordem":2,"tipos":["domingo","follow"],"relata":false,"descricao":"Comanda a mesa de luz durante todo o culto, seguindo os momentos da programação.","descricao_familia":null}, 
+ {"nome":"EDIÇÃO","ordem":3,"tipos":["domingo","follow"],"relata":false,"descricao":"Edita o material depois do culto, durante a semana. É o único posto que não exige estar presente no domingo.","descricao_familia":null}, 
+ {"nome":"FOTO","ordem":4,"tipos":["domingo","follow"],"relata":false,"descricao":"Fotografa o culto e entrega as fotos para as redes.","descricao_familia":null}, 
+ {"nome":"FILMAGEM","ordem":5,"tipos":["domingo","follow"],"relata":false,"descricao":"Grava com a câmera na mão, andando pelo salão. É diferente das câmeras fixas da transmissão.","descricao_familia":null}, 
+ {"nome":"HEAD","ordem":6,"tipos":["domingo","follow"],"relata":false,"descricao":"Coordena a equipe da mídia no domingo: confere quem chegou, cobre o que falta e resolve problema na hora. Chega antes de todo mundo.","descricao_familia":null}, 
+ {"nome":"TRANSMISSÃO (CORTE + PTZ)","ordem":7,"tipos":["domingo","follow"],"relata":false,"descricao":"Faz o corte ao vivo entre as câmeras e comanda as PTZ. É quem decide o que quem assiste de casa vê.","descricao_familia":null}, 
+ {"nome":"CÂMERA 1","ordem":8,"tipos":["domingo","follow"],"relata":false,"descricao":"Câmera fixa, posição principal. Fica no posto o culto inteiro.","descricao_familia":null}, 
+ {"nome":"CÂMERA 2","ordem":9,"tipos":["domingo","follow"],"relata":false,"descricao":"Câmera fixa, segunda posição. Fica no posto o culto inteiro.","descricao_familia":null}, 
+ {"nome":"FILMAGEM 2","ordem":10,"tipos":["domingo","follow"],"relata":false,"descricao":null,"descricao_familia":null}]

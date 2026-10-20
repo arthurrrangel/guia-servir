@@ -1,14 +1,14 @@
 /* AUDITORIA · Tipografia do site público: tamanhos por classe em 390 e 1440; uma classe com mais de um tamanho na mesma largura aparece (as exceções intencionais têm nome: .g-h2.nome, .cartao-t.fn, .qa-areas .qa-q, .g-tile-l.num).
    Requer o dev server: PORTA=3700 node scripts/auditoria-tipos-site.mjs  (ver claude/site-v4-volta-ao-modelo-startup-08-09-2026.md no Project) */
 import { chromium } from 'playwright';
+import { rotear } from './_rpc-mock.mjs';
 import { readFileSync, existsSync } from 'node:fs';
 const B = `http://localhost:${process.env.PORTA || 3000}`;
-async function serveRpc(route) { const req = route.request(), u = req.url(); const fn = u.split('/rpc/')[1]?.split('?')[0]; let slug=''; try { slug=(JSON.parse(req.postData()||'{}').p_slug)||''; } catch {} for (const nome of [slug?`${fn}__${slug}`:null, fn]) { if (!nome) continue; const f=`/tmp/rpc/${nome}.json`; if (existsSync(f)) return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:readFileSync(f,'utf8')}); } return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'[]'}); }
-const ROTAS = ['/', '/cultos', '/como-chegar', '/pequena-guia', '/sobre', '/servir', '/servir/midia', '/servir/onde-me-encaixo', '/acessar', '/guia-church-tv', '/privacidade'];
+const ROTAS = ['/', '/cultos', '/como-chegar', '/eventos', '/pequena-guia', '/sobre', '/ofertar', '/privacidade', '/servir', '/servir/midia', '/servir/louvor', '/servir/kids', '/servir/servico', '/servir/livraria', '/servir/onde-me-encaixo', '/acessar', '/follow'];
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 for (const W of [390, 1440]) {
   const ctx = await b.newContext({ viewport: { width: W, height: 900 } });
-  await ctx.route('**', r => { const u = r.request().url(); if (u.includes('/rest/v1/rpc/')) return serveRpc(r); return u.startsWith(B) ? r.continue() : r.abort(); });
+  await ctx.route('**', r => rotear(r, B));
   const porClasse = new Map(); const tamanhos = new Map();
   for (const rota of ROTAS) {
     const p = await ctx.newPage(); await p.goto(B + rota, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1500);

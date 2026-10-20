@@ -1,0 +1,5 @@
+[{"id":"3c0dbc14-017a-4c31-984c-c5bc329f2256","texto":"Você já serve em alguma outra área da igreja?","ajuda":null,"tipo":"sim_nao","opcoes":[],"obrigatoria":false}, 
+ {"id":"bf4b925e-624b-4cd9-9f62-d82830f455c9","texto":"Com que frequência você consegue servir?","ajuda":"Dá para mudar depois: isso é só para a liderança se organizar.","tipo":"escolha","opcoes":["Todo domingo","Dois domingos por mês","Um domingo por mês","Só quando precisarem"],"obrigatoria":true}, 
+ {"id":"be350179-3916-4db3-a86e-526bf7e6b867","texto":"Você já mexeu com câmera, foto, edição ou projeção?","ajuda":"Vale qualquer experiência, inclusive fora da igreja.","tipo":"sim_nao","opcoes":[],"obrigatoria":true}, 
+ {"id":"34c90582-1aa6-4c37-8250-e5cabc2ba342","texto":"Conte rapidamente o que você já fez","ajuda":"Uma ou duas linhas. Se nunca fez nada, escreva \"nunca fiz\": tem gente para ensinar.","tipo":"texto_longo","opcoes":[],"obrigatoria":false}, 
+ {"id":"a1dfca79-2490-4f94-bdb0-2cc73e3f9113","texto":"Você tem equipamento próprio?","ajuda":null,"tipo":"escolha","opcoes":["Câmera","Notebook","Os dois","Nenhum"],"obrigatoria":false}]

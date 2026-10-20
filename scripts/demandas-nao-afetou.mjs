@@ -45,7 +45,7 @@ import { existsSync, readdirSync, writeFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 
 const ROTAS = ['/', '/servir', '/servir/onde-me-encaixo', '/sobre', '/como-chegar',
-  '/pequena-guia', '/ofertar', '/entrar', '/guia-church-tv', '/privacidade'];
+  '/pequena-guia', '/ofertar', '/entrar', '/eventos', '/privacidade'];
 const TELAS = [{ nome: 'celular', width: 390, height: 844 }, { nome: 'desktop', width: 1280, height: 900 }];
 
 /* o que uma folha de estilo pinta. Largura e altura ficam de fora: elas

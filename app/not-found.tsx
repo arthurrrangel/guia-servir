@@ -39,7 +39,7 @@ export default function NaoEncontrada() {
   return (
     <div className="nf">
       <style dangerouslySetInnerHTML={{ __html: CSS }} />
-      <div className="nf-topo"><Link href="/" aria-label={IGREJA.nome}><Simbolo /></Link></div>
+      <header className="nf-topo"><Link href="/" aria-label={IGREJA.nome}><Simbolo /></Link></header>
       <main className="nf-in">
         <p className="nf-chapeu"><b>404</b><i aria-hidden="true" /><span>Esse endereço não existe</span></p>
         <h1>Mas o domingo <em>existe.</em></h1>

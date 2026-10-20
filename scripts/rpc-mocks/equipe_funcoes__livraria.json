@@ -1,0 +1,2 @@
+[{"nome":"LIVRARIA 1","ordem":10,"tipos":["domingo"],"relata":false,"descricao":"Atende a livraria antes e depois do culto.","descricao_familia":"Duas pessoas por domingo: uma abre antes do culto, as duas atendem na saída."}, 
+ {"nome":"LIVRARIA 2","ordem":11,"tipos":["domingo"],"relata":false,"descricao":"Atende a livraria antes e depois do culto.","descricao_familia":null}]

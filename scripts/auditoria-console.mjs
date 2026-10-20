@@ -17,7 +17,7 @@ const PORTA = process.env.PORTA || '3000';
 const BASE = `http://localhost:${PORTA}`;
 const ROTAS = process.argv.slice(2).length ? process.argv.slice(2) : [
   '/', '/cultos', '/sobre', '/servir', '/servir/onde-me-encaixo', '/servir/midia',
-  '/pequena-guia', '/pequena-guia?dia=qua', '/como-chegar', '/acessar', '/guia-church-tv',
+  '/pequena-guia', '/pequena-guia?dia=qua', '/como-chegar', '/eventos', '/ofertar', '/follow', '/acessar',
   '/privacidade', '/entrar', '/eu', '/uma-rota-que-nao-existe',
 ];
 const LARGURAS = [390, 1280];

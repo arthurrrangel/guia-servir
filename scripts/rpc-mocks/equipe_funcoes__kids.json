@@ -1,0 +1,9 @@
+[{"nome":"BERÇÁRIO PROFESSORA","ordem":10,"tipos":["domingo"],"relata":false,"descricao":"Conduz a turma dos bebês, de 0 a 1 ano e 11 meses.","descricao_familia":"Sala dos bebês, de 0 a 1 ano e 11 meses. Duas voluntárias por culto."}, 
+ {"nome":"BERÇÁRIO AUXILIAR","ordem":11,"tipos":["domingo"],"relata":false,"descricao":"Apoia a professora, as crianças e a organização da sala.","descricao_familia":null}, 
+ {"nome":"TURMA 2-4 PROFESSORA","ordem":20,"tipos":["domingo"],"relata":false,"descricao":"Conduz a turma de 2 a 4 anos: ensino e atividades.","descricao_familia":"Turma de 2 a 4 anos. Duas voluntárias por culto: uma conduz, outra apoia."}, 
+ {"nome":"TURMA 2-4 AUXILIAR","ordem":21,"tipos":["domingo"],"relata":false,"descricao":"Apoia a professora, as crianças e a organização da sala.","descricao_familia":null}, 
+ {"nome":"TURMA 5-7 PROFESSORA","ordem":30,"tipos":["domingo"],"relata":false,"descricao":"Conduz a turma de 5 a 7 anos: ensino e atividades.","descricao_familia":"Turma de 5 a 7 anos. Duas voluntárias por culto: uma conduz, outra apoia."}, 
+ {"nome":"TURMA 5-7 AUXILIAR","ordem":31,"tipos":["domingo"],"relata":false,"descricao":"Apoia a professora, as crianças e a organização da sala.","descricao_familia":null}, 
+ {"nome":"TURMA 8-12 PROFESSORA","ordem":40,"tipos":["domingo"],"relata":false,"descricao":"Conduz a turma de 8 a 12 anos: ensino e atividades.","descricao_familia":"Turma de 8 a 12 anos. Duas voluntárias por culto: uma conduz, outra apoia."}, 
+ {"nome":"TURMA 8-12 AUXILIAR","ordem":41,"tipos":["domingo"],"relata":false,"descricao":"Apoia a professora, as crianças e a organização da sala.","descricao_familia":null}, 
+ {"nome":"LANCHE","ordem":50,"tipos":["domingo"],"relata":false,"descricao":"Prepara e organiza o lanche das crianças.","descricao_familia":"Prepara e organiza o lanche das crianças. Uma pessoa por culto."}]

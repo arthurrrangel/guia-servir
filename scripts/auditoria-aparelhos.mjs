@@ -21,13 +21,14 @@
    Sai com código 1 se qualquer medição acusar. As capturas ficam em
    /tmp/audit/<largura>/<rota>.png e o resumo em /tmp/audit/medidas.json.       */
 import { chromium } from 'playwright';
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { rotear } from './_rpc-mock.mjs';
+import { mkdirSync, writeFileSync } from 'node:fs';
 
 const B = `http://localhost:${process.env.PORTA || 3000}`;
 const CHROME = process.env.CHROMIUM || undefined;
 
 const ROTAS = process.argv.slice(2).length ? process.argv.slice(2) : [
-  '/', '/cultos', '/como-chegar', '/pequena-guia', '/sobre', '/guia-church-tv', '/privacidade',
+  '/', '/cultos', '/como-chegar', '/eventos', '/pequena-guia', '/sobre', '/privacidade', '/follow',
   '/servir', '/servir/onde-me-encaixo',
   '/servir/midia', '/servir/louvor', '/servir/kids', '/servir/servico', '/servir/livraria',
   '/servir/midia/cadastro',
@@ -47,18 +48,7 @@ const APARELHOS = [
   [1920, 1080, 'monitor'],
 ];
 
-/* as RPCs vêm de arquivo: o Chromium do container não alcança o Supabase */
-function serveRpc(r) {
-  const u = r.request().url();
-  const fn = u.split('/rpc/')[1]?.split('?')[0];
-  let slug = '';
-  try { slug = JSON.parse(r.request().postData() || '{}').p_slug || ''; } catch {}
-  for (const n of [slug ? `${fn}__${slug}` : null, fn].filter(Boolean)) {
-    const f = `/tmp/rpc/${n}.json`;
-    if (existsSync(f)) return r.fulfill({ status: 200, contentType: 'application/json', body: readFileSync(f, 'utf8') });
-  }
-  return r.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
-}
+/* as RPCs vêm de arquivo (scripts/_rpc-mock.mjs): o Chromium das auditorias não alcança o Supabase */
 
 const nav = await chromium.launch({ executablePath: CHROME });
 const medidas = [];
@@ -70,11 +60,7 @@ async function umaLargura([W, H, nome]) {
   mkdirSync(`/tmp/audit/${W}`, { recursive: true });
   const ctx = await nav.newContext({ viewport: { width: W, height: H }, deviceScaleFactor: W < 800 ? 2 : 1,
     isMobile: W < 800, hasTouch: W < 800 });
-  await ctx.route('**', r => {
-    const u = r.request().url();
-    if (u.includes('/rest/v1/rpc/')) return serveRpc(r);
-    return u.startsWith(B) ? r.continue() : r.abort();
-  });
+  await ctx.route('**', r => rotear(r, B));
 
   for (const rota of ROTAS) {
     const p = await ctx.newPage();

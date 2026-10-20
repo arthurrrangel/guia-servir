@@ -27,7 +27,7 @@ import { readFileSync, existsSync } from 'node:fs';
 const B = `http://localhost:${process.env.PORTA || 3000}`;
 const LARGURA = +(process.env.W || 390);
 const TELAS = process.argv.slice(2).length ? process.argv.slice(2) : [
-  '', 'sobre', 'cultos', 'como-chegar', 'pequena-guia', 'guia-church-tv',
+  '', 'sobre', 'cultos', 'como-chegar', 'eventos', 'pequena-guia', 'ofertar', 'follow',
   'servir', 'servir/midia', 'servir/onde-me-encaixo', 'acessar', 'privacidade',
 ];
 

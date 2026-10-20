@@ -17,7 +17,7 @@ import { mkdirSync, readFileSync, existsSync } from 'node:fs';
 
 const BASE = process.argv[2] || 'http://localhost:3000';
 const PASTA = process.argv[3] || '/tmp/site-capturas';
-const ROTAS = (process.argv[4] || '/,/cultos,/sobre,/como-chegar,/pequena-guia,/ofertar,/guia-church-tv,/acessar,/servir,/servir/midia,/servir/onde-me-encaixo,/servir/midia/cadastro,/eu,/privacidade').split(',');
+const ROTAS = (process.argv[4] || '/,/cultos,/sobre,/como-chegar,/eventos,/pequena-guia,/ofertar,/follow,/acessar,/servir,/servir/midia,/servir/onde-me-encaixo,/servir/midia/cadastro,/eu,/privacidade').split(',');
 mkdirSync(PASTA, { recursive: true });
 
 const LARGURAS = [

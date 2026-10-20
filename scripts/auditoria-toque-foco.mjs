@@ -1,14 +1,14 @@
 /* AUDITORIA · Alvos de toque abaixo de 44px e foco invisível, em 360 e 1440 (só os links de atribuição do Leaflet ficam abaixo de 44).
    Requer o dev server: PORTA=3700 node scripts/auditoria-toque-foco.mjs  (ver claude/site-v4-volta-ao-modelo-startup-08-09-2026.md no Project) */
 import { chromium } from 'playwright';
+import { rotear } from './_rpc-mock.mjs';
 import { readFileSync, existsSync } from 'node:fs';
 const B=`http://localhost:${process.env.PORTA || 3000}`;
-async function serveRpc(route) { const req = route.request(), u = req.url(); const fn = u.split('/rpc/')[1]?.split('?')[0]; let slug=''; try { slug=(JSON.parse(req.postData()||'{}').p_slug)||''; } catch {} for (const nome of [slug?`${fn}__${slug}`:null, fn]) { if (!nome) continue; const f=`/tmp/rpc/${nome}.json`; if (existsSync(f)) return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:readFileSync(f,'utf8')}); } return route.fulfill({status:200,contentType:'application/json',headers:{'access-control-allow-origin':'*'},body:'[]'}); }
-const ROTAS = ['/', '/cultos', '/como-chegar', '/pequena-guia', '/sobre', '/guia-church-tv', '/servir', '/servir/midia', '/servir/midia/cadastro', '/servir/onde-me-encaixo', '/acessar', '/privacidade', '/entrar', '/eu/x?demo=1', '/painel?demo=1', '/painel/candidaturas?demo=1', '/escala?demo=1', '/time?demo=1', '/time/conferir?demo=1', '/ajustes?demo=1', '/ajustes/ministerios?demo=1'];
+const ROTAS = ['/', '/cultos', '/como-chegar', '/pequena-guia', '/sobre', '/eventos', '/ofertar', '/follow', '/servir', '/servir/louvor', '/servir/kids', '/servir/servico', '/servir/livraria', '/servir/midia', '/servir/midia/cadastro', '/servir/onde-me-encaixo', '/acessar', '/privacidade', '/entrar', '/eu/x?demo=1', '/painel?demo=1', '/painel/candidaturas?demo=1', '/escala?demo=1', '/time?demo=1', '/time/conferir?demo=1', '/ajustes?demo=1', '/ajustes/ministerios?demo=1'];
 const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
 for (const W of [360, 1440]) {
   const ctx = await b.newContext({ viewport: { width: W, height: 740 } });
-  await ctx.route('**', r => { const u = r.request().url(); if (u.includes('/rest/v1/rpc/')) return serveRpc(r); return u.startsWith(B) ? r.continue() : r.abort(); });
+  await ctx.route('**', r => rotear(r, B));
   for (const rota of ROTAS) {
     const p = await ctx.newPage();
     await p.goto(B + rota, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1800);
