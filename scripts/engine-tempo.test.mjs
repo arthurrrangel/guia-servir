@@ -37,8 +37,28 @@
 
 import * as E from '../lib/engine.ts';
 
-let falhas = 0, feitas = 0;
+let falhas = 0, feitas = 0, avisos = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
+
+/* 20/10/2026: NA VERCEL, O TETO DE TEMPO É AVISO, NÃO DERRUBA O BUILD.
+   Três builds seguidos foram derrubados por este arquivo sem uma linha
+   mudada no motor: a máquina de build da Vercel deu 3,0 e 3,5 s onde a
+   régua é 2,5 s, e 21 a 24 s onde é 15 s, enquanto o mesmo código na
+   mesma hora passava folgado aqui. Teto de tempo medido numa máquina que
+   não se conhece é exatamente o teste que reprova sozinho (o comentário
+   acima da mediana explica por que isso é pior que não ter teste). Lá a
+   medida fica registrada no log como AVISO, com o número; no Mac e no
+   ambiente de desenvolvimento (onde a máquina é conhecida) o teto continua
+   derrubando. Só os tetos de TEMPO usam `okTempo`; as checagens de
+   resultado (ninguém indisponível, ninguém em dois postos, cobertura)
+   seguem com `ok` e derrubam em qualquer lugar. Autorizado pelo Arthur em
+   20/10 ("pode mudar"). */
+const NA_VERCEL = !!process.env.VERCEL;
+const okTempo = (c, rot, extra = '') => {
+  if (!NA_VERCEL) return ok(c, rot, extra);
+  feitas++;
+  if (!c) { avisos++; console.log('  AVISO (máquina da Vercel, não derruba):', rot, extra); }
+};
 
 /* Estado com histórico, como o que a carga entrega de verdade. */
 function caso({ postos, pessoas, limite, densidade, meses }) {
@@ -160,7 +180,7 @@ function medirGerarMes(c, vezes = 3) {
 
 for (const c of CASOS) {
   const { mediana, ts } = medirGerarMes(c);
-  ok(mediana < LIMITE_MS,
+  okTempo(mediana < LIMITE_MS,
     `${c.postos} postos / ${c.pessoas} pessoas / ${c.meses} meses de historico sai em menos de ${LIMITE_MS}ms`,
     `mediana ${mediana}ms de [${ts.join(', ')}]`);
   console.log(`  [medida] ${String(c.postos).padStart(2)} postos / ${c.pessoas} pessoas / limite ${c.limite}: ${mediana}ms`);
@@ -181,7 +201,7 @@ for (const c of CASOS) {
 {
   const TETO_PIOR_CASO = 15000;
   const { mediana } = medirGerarMes({ postos: 40, pessoas: 60, limite: 2, densidade: 3, meses: 7 }, 1);
-  ok(mediana < TETO_PIOR_CASO,
+  okTempo(mediana < TETO_PIOR_CASO,
     `pior caso conhecido (40 postos / 60 pessoas / limite 2) fica abaixo de ${TETO_PIOR_CASO}ms`,
     `levou ${mediana}ms`);
   console.log(`  [medida] pior caso conhecido: ${mediana}ms`);
@@ -277,5 +297,5 @@ ok(preenchidos >= 128, 'a cobertura não caiu do patamar medido em 20/09', `${pr
 const total = Object.values(vezes).reduce((a, n) => a + n, 0);
 ok(total >= 128, 'o motor escalou gente de verdade no caso grande', `escalou ${total}`);
 
-console.log(falhas ? `\nengine-tempo: ${falhas} falha(s) em ${feitas}` : `\nengine-tempo: ${feitas}/${feitas} ok`);
+console.log(falhas ? `\nengine-tempo: ${falhas} falha(s) em ${feitas}` : `\nengine-tempo: ${feitas - avisos}/${feitas} ok${avisos ? ` (${avisos} aviso(s) de tempo na máquina da Vercel)` : ''}`);
 process.exit(falhas ? 1 : 0);
