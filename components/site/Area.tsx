@@ -52,6 +52,16 @@ const segundaVoz = (frase: string) => {
 };
 
 const VIDEO: Record<string, string> = { midia: 'midia', louvor: 'louvor', kids: 'kids', servico: 'servico', livraria: 'livraria' };
+/* 20/10/2026: o herói de cada área é a foto de quem serve nela (as mesmas
+   do herói do Guia Servir, scripts/site-fotos-drive.py); uma área nova sem
+   foto fica com o vídeo */
+const FOTO: Record<string, { id: string; alt: string }> = {
+  midia: { id: 'servir-midia', alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo' },
+  louvor: { id: 'servir-louvor', alt: 'Uma cantora e um guitarrista do Louvor no palco' },
+  kids: { id: 'servir-kids', alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo' },
+  servico: { id: 'servir-connect', alt: 'A equipe do Connect abraçando quem chega na porta' },
+  livraria: { id: 'servir-livraria', alt: 'Mãos folheando uma Bíblia na livraria' },
+};
 
 const PASSOS = [
   { n: '01', t: 'Cadastro', d: 'Marque as funções que combinam com você. Menos de um minuto.' },
@@ -117,9 +127,14 @@ export default function Area() {
 
   return (
     <>
-      {/* o herói com o vídeo da área */}
+      {/* o herói com a foto da área (ou o vídeo, para uma área sem foto) */}
       <section className="s-heroi" aria-labelledby="t-area">
-        <Fundo video={video} prioridade />
+        {FOTO[slug]
+          ? <picture>
+              <source media="(orientation: portrait)" srcSet={`/site/${FOTO[slug].id}-p.webp`} />
+              <img src={`/site/${FOTO[slug].id}-l.webp`} width={1920} height={1080} alt="" loading="eager" decoding="async" fetchPriority="high" />
+            </picture>
+          : <Fundo video={video} prioridade />}
         <div className="s-in s-heroi-in">
           <Chapeu forte="Servir" resto={`${postos ?? ''} ${postos === 1 ? 'posto' : 'postos'}${aberto ? '' : ' · conversa antes'}`} />
           {/* a segunda voz (a linha em itálico) são as últimas palavras da

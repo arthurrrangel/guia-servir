@@ -165,7 +165,9 @@ export function Areas({ compacto, perfil }: { compacto?: boolean; perfil?: boole
   };
   return (
     <>
-      <div className={'s-cartoes lista' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')} role="group" aria-label="As áreas">
+      {/* 20/10/2026: no computador as áreas são linhas de um índice (nome,
+          postos, frase, parágrafo, a seta), como as portas da home */}
+      <div className={'s-cartoes lista indice' + (AREAS_ORDEM.length + extras.length === 5 ? ' cinco' : '')} role="group" aria-label="As áreas">
         {AREAS_ORDEM.map(slug => cartao(slug, AREAS[slug]))}
         {extras.map(x => cartao(x.slug, { nome: x.nome, postos: x.postos, aberto: x.aberto, frase: x.descricao || '', texto: '', linha: '', artigo: x.artigo as Area['artigo'] }, x))}
       </div>

@@ -55,17 +55,13 @@ FOTOS = [
     ('eventos-heroi', '3105-04', (0.50, 0.42), 'lp'),  # o louvor, braços abertos
     ('pg-heroi', '3105-20', (0.45, 0.45), 'lp'),       # uma família na calçada
     ('ofertar-heroi', '0706-04', (0.55, 0.50), 'lp'),  # o cálice da ceia
-    # o Guia Servir: quem serve
-    ('servir-1', '1503-09', (0.55, 0.45), 'lp'),       # o Connect recebe na porta
-    ('servir-2', '0803-10', (0.55, 0.45), 'lp'),       # o Kids, com o bebê no colo
-    ('servir-3', '1503-16', (0.55, 0.45), 'lp'),       # o Louvor no palco
-    ('servir-4', '0706-14', (0.50, 0.45), 'lp'),       # dois meninos do Kids
-    ('servir-5', '1503-08', (0.55, 0.45), 'lp'),       # o abraço na recepção
-    ('area-louvor', '3105-01', (0.45, 0.45), 'vs'),
-    ('area-kids', '0803-10', (0.55, 0.45), 'vs'),
-    ('area-connect', '1503-09', (0.55, 0.45), 'vs'),
-    ('servir-adora', '1406-15', (0.50, 0.45), 'hs'),   # "Deus se alegra com o seu servir"
-    ('servir-equipe', '1503-56', (0.50, 0.45), 'hs'),  # a equipe de preto na porta
+    # o Guia Servir: as cinco áreas no herói (Mídia e Livraria vêm das fotos
+    # de 12/10, em public/fotos, cortadas por scripts/site-fotos-areas.py) e o pouso
+    ('servir-louvor', '1503-16', (0.55, 0.45), 'lp', 68),  # o Louvor no palco (grão de ISO alto: q68)
+    ('servir-kids', '0803-10', (0.58, 0.45), 'lp'),      # o Kids, com o bebê no colo
+    ('servir-connect', '1503-09', (0.60, 0.45), 'lp'),   # o Connect recebe na porta
+    ('servir-pouso', '1503-49', (0.50, 0.48), 'lp'),     # a equipe do Kids: "eu amo minha igreja"
+    ('servir-adora', '1406-15', (0.50, 0.45), 'hs'),     # "Deus se alegra com o seu servir"
 ]
 
 def achar(pasta, codigo):

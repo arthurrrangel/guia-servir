@@ -5,7 +5,9 @@ import { IGREJA, SITE, SITE_IGREJA } from '@/lib/igreja';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Numero, NumerosFaixa, Areas, FormServir } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
-import { Fundo, Quadro } from '@/components/site/Midia';
+import { Quadro } from '@/components/site/Midia';
+import Scrub, { type Foto } from '@/components/site/Scrub';
+import { AREAS } from '@/lib/site/areas';
 
 /* =============================================================================
    /servir — "EXISTE UM LUGAR PARA VOCÊ" · 11/10/2026
@@ -33,7 +35,26 @@ import { Fundo, Quadro } from '@/components/site/Midia';
    ia de um site ao outro achava que estava na mesma página. Escolha do
    Arthur, entre duas frases da copy dele: "Encontre o seu lugar pra servir"
    (site completo, página 7). O cartão do Servir na home diz o mesmo.
+
+   20/10/2026, A CAMADA DE CIMA: o herói anda com o scroll pelas cinco
+   áreas, cada uma sobre uma foto de quem serve nela (a mesa da Mídia, o
+   Louvor no palco, o Kids com o bebê no colo, o Connect recebendo na porta,
+   a Bíblia da Livraria), com o nome e a frase de cada área (lib/site/
+   areas.ts), e pousa em "Encontre o seu lugar pra servir" sobre a equipe do
+   Kids. As áreas, mais abaixo, viram linhas de índice no computador.
    ============================================================================= */
+
+/* as cinco áreas no herói, na ordem do site (scripts/site-fotos-drive.py e
+   scripts/site-fotos-areas: Mídia e Livraria vêm das fotos de 12/10) */
+const QUEM_SERVE: Foto[] = [
+  { l: '/site/servir-midia-l.webp', p: '/site/servir-midia-p.webp', a: 0, b: 0, alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo' },
+  { l: '/site/servir-louvor-l.webp', p: '/site/servir-louvor-p.webp', a: 0.18, b: 0.26, alt: 'Uma cantora e um guitarrista do Louvor no palco' },
+  { l: '/site/servir-kids-l.webp', p: '/site/servir-kids-p.webp', a: 0.36, b: 0.44, alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo' },
+  { l: '/site/servir-connect-l.webp', p: '/site/servir-connect-p.webp', a: 0.54, b: 0.62, alt: 'A equipe do Connect abraçando quem chega na porta' },
+  { l: '/site/servir-livraria-l.webp', p: '/site/servir-livraria-p.webp', a: 0.70, b: 0.78, alt: 'Mãos folheando uma Bíblia na livraria' },
+  { l: '/site/servir-pouso-l.webp', p: '/site/servir-pouso-p.webp', a: 0.84, b: 0.9, alt: 'A equipe do GUIA Kids reunida, de camiseta preta, diante do painel "Eu amo minha igreja"' },
+];
+const ORDEM_HEROI = ['midia', 'louvor', 'kids', 'servico', 'livraria'] as const;
 
 /* o título inteiro, sem o modelo: é a raiz do guiaservir.com, e o canonical
    também */
@@ -82,21 +103,22 @@ export default function Servir() {
           ...PERGUNTAS.filter(p => typeof p.r === 'string').map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: String(p.r) } }))],
       }} />
 
-      {/* 1 · o herói na fachada */}
-      <section className="s-heroi" aria-labelledby="t-servir">
-        {/* o voluntário de colete rindo e os três de polegar para cima (vídeo também no celular) */}
-        <Fundo video="servir" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Servir" resto={IGREJA.nome} />
-          <Vozes as="h1" id="t-servir" className="s-h1" it="pra servir">Encontre o seu lugar pra servir</Vozes>
-          <p className="s-lead grande">Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. {ligaTexto('O seu também tem um posto esperando.')}</span></p>
-          <div className="s-acoes">
-            <Pil href="#quero-servir">Quero servir</Pil>
-            <Pil href="/eu" duro>Já sirvo, abrir meu espaço</Pil>
-          </div>
-          <p className="s-micro">{ligaTexto("Cadastro de menos de um minuto.")}</p>
-        </div>
-      </section>
+      {/* 1 · o herói: as cinco áreas, foto a foto, e o pouso */}
+      <Scrub
+        rotulo="GUIA Servir"
+        fotos={QUEM_SERVE}
+        faixas={ORDEM_HEROI.map((slug, i) => ({
+          rotulo: AREAS[slug].nome, texto: AREAS[slug].frase,
+          a: [0, 0.2, 0.38, 0.56, 0.72][i], b: [0.17, 0.35, 0.53, 0.69, 0.83][i], sobe: i % 2 === 1, baixo: true,
+        }))}
+        pouso={{ titulo: 'Encontre o seu lugar pra servir', it: 'pra servir', a: 0.86,
+          sub: <>Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. {ligaTexto('O seu também tem um posto esperando.')}</span></> }}
+        chapeu={<Chapeu forte="Servir" resto={IGREJA.nome} />}
+        micro={<p className="s-micro">{ligaTexto("Cadastro de menos de um minuto.")}</p>}
+      >
+        <Pil href="#quero-servir">Quero servir</Pil>
+        <Pil href="/eu" duro tom="vidro">Já sirvo, abrir meu espaço</Pil>
+      </Scrub>
 
       {/* 2 · Deus se alegra com o seu servir */}
       <section className="s-faixa papel">

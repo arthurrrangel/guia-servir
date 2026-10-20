@@ -39,7 +39,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
  *  inteira se desenrola por várias faixas, uma foto por vez. */
 export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean; vozes?: boolean; /** no computador, a faixa desce para o terço de baixo (rostos no meio da foto) */ baixo?: boolean; /** o rótulo pequeno acima da frase ("01 · Acolhida") */ rotulo?: string };
 /** o pouso: o título em duas vozes, a linha de apoio (opcional) e onde começa */
-export type Pouso = { titulo: string; it?: string; sub?: string; a: number };
+export type Pouso = { titulo: string; it?: string; sub?: ReactNode; a: number };
 /** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
 export type Foto = { l: string; p: string; a: number; b: number; alt: string };
 
