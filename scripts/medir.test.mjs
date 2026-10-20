@@ -22,13 +22,13 @@ const ok = (cond, queixa) => { if (!cond) { mal++; console.error(`MAL  ${queixa}
 
 /* ------------------------------------------- 1. as páginas que podem entrar --- */
 for (const p of ['/', '/sobre', '/cultos', '/como-chegar', '/eventos', '/pequena-guia', '/ofertar', '/privacidade', '/acessar',
-  '/servir', '/servir/', '/servir/onde-me-encaixo', '/servir/midia', '/servir/kids', '/servir/midia/cadastro', '/followcamp']) {
+  '/servir', '/servir/', '/servir/onde-me-encaixo', '/servir/midia', '/servir/kids', '/servir/midia/cadastro', '/followcamp', '/follow']) {
   ok(paginaPublica(p), `página pública ficou de fora: ${p}`);
 }
 for (const p of ['/eu', '/eu/ab12cd34ef', '/eu/ab12cd34ef/culto/2026-10-25', '/candidatura/xyz789', '/cronograma/tok123',
   '/cronogramas', '/confirmar/midia', '/cheguei/midia', '/disponibilidade/midia', '/demandas', '/demandas/admin',
   '/escala', '/painel', '/painel/candidaturas', '/time', '/time/conferir', '/ajustes', '/entrar', '/equipe/midia',
-  '/followcamp/painel', '/followcamp/pagar', '/followcamp/inscricao', '/servir/midia/cadastro/extra', '/api/cron',
+  '/followcamp/painel', '/followcamp/pagar', '/followcamp/inscricao', '/servir/midia/cadastro/extra', '/api/cron', '/follow/extra',
   '/sobre/../eu/abc', '//eu/abc', '/eu/abc?x=1']) {
   ok(!paginaPublica(p), `página do sistema passou como pública: ${p}`);
 }

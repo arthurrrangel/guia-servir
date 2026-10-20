@@ -156,6 +156,14 @@ export const SITE = 'https://guiaservir.com';
    next.config.mjs, "OS DOIS SITES". */
 export const SITE_IGREJA = 'https://guiachurch.com';
 
+/* 19/10/2026, à noite: O GUIA FOLLOW. O culto de jovens ganhou site próprio
+   em guiafollow.com (app/(follow)/, a página de uma tela só com o hero de
+   scroll). O domínio já estava ligado ao projeto desde a manhã, só
+   redirecionando; agora responde com a página. É o endereço canônico dela
+   e o que o cartão de prévia lê. O Follow Camp continua em guiachurch.com
+   (o pagamento usa sessionStorage do domínio). */
+export const SITE_FOLLOW = 'https://guiafollow.com';
+
 /** O canal de conversa que existe hoje. Vira WhatsApp no dia em que o número
  *  entrar em IGREJA.whatsapp — nenhuma página precisa saber qual dos dois é. */
 export function canalDeConversa(texto?: string): { href: string; rot: string } {

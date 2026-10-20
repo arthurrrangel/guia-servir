@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next';
 import { headers } from 'next/headers';
-import { SITE, SITE_IGREJA } from '@/lib/igreja';
+import { SITE, SITE_FOLLOW, SITE_IGREJA } from '@/lib/igreja';
 import { AREAS_ORDEM } from '@/lib/site/areas';
-import { ehServir } from '@/lib/site/sites';
+import { ehFollow, ehServir } from '@/lib/site/sites';
 
 /* =============================================================================
    sitemap.xml
@@ -38,9 +38,14 @@ import { ehServir } from '@/lib/site/sites';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const agora = new Date();
-  const servir = ehServir((await headers()).get('host'));
+  const host = (await headers()).get('host');
+  const servir = ehServir(host);
 
-  const paginas: MetadataRoute.Sitemap = servir ? [
+  /* 19/10/2026, à noite: o Guia Follow (guiafollow.com) é uma página só, na
+     raiz. O Follow Camp continua listado no sitemap da igreja, onde mora. */
+  const paginas: MetadataRoute.Sitemap = ehFollow(host) ? [
+    { url: `${SITE_FOLLOW}/`, changeFrequency: 'weekly', priority: 1.0 },
+  ] : servir ? [
     { url: `${SITE}/`, changeFrequency: 'weekly', priority: 1.0 },
     ...AREAS_ORDEM.map(s => ({ url: `${SITE}/servir/${s}`, changeFrequency: 'monthly' as const, priority: 0.7 })),
     { url: `${SITE}/servir/onde-me-encaixo`, changeFrequency: 'monthly', priority: 0.6 },

@@ -132,15 +132,18 @@ const ROTAS_FECHADAS = [
    para o domínio sem www antes (308, configurado no projeto). O
    escalas.guiaservir.com, o endereço antigo do sistema, conta como Servir.
 
-   O GUIA FOLLOW (guiafollow.com), até a copy do site dele chegar (19/10/2026):
-   o domínio já está pago e liga neste projeto; sem página própria, ele leva
-   para o que já existe. /followcamp e /fc vão para a página do retiro, que
-   continua em guiachurch.com/followcamp (pelo mesmo motivo do pagamento,
-   acima); todo o resto vai para o Follow em guiachurch.com/eventos#follow.
-   Quando o site do Follow existir, estas três regras saem.
+   O GUIA FOLLOW (guiafollow.com), 19/10/2026 à noite: o terceiro site. A
+   página do Follow mora em app/(follow)/follow/page.tsx e é a raiz do
+   domínio (reescrita, como a LP do Servir): guiafollow.com/ mostra a
+   página, e /follow naquele domínio volta para a raiz. /followcamp e /fc
+   continuam indo para a página do retiro em guiachurch.com (o pagamento
+   usa sessionStorage do domínio; muda de casa de propósito, não por
+   arrasto). Qualquer outro endereço no guiafollow.com cai na raiz: é um site
+   de uma página. Nos outros dois domínios, /follow leva ao guiafollow.com.
    ============================================================================= */
 const IGREJA = 'https://guiachurch.com';
 const SERVIR = 'https://guiaservir.com';
+const FOLLOW = 'https://guiafollow.com';
 const NO_SERVIR = [{ type: 'host', value: '(?:escalas\\.)?guiaservir\\.com' }];
 const NA_IGREJA = [{ type: 'host', value: 'guiachurch\\.com' }];
 const NO_FOLLOW = [{ type: 'host', value: '(?:www\\.)?guiafollow\\.com' }];
@@ -150,10 +153,17 @@ const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privaci
 const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios';
 
 const REGRAS_DOS_SITES = [
-  /* o Guia Follow, provisório (ver acima) */
+  /* o Guia Follow (ver acima): o retiro fica na igreja, a página é a raiz,
+     e o que não existe lá cai na raiz. A terceira regra não pega arquivos
+     (/_next, /follow/, /tipos, ícones) nem o /api: eles têm ponto no nome ou
+     estão listados, e um site de uma página não tem outro endereço válido. */
   { source: '/:p(followcamp|fc)', has: NO_FOLLOW, destination: `${IGREJA}/followcamp`, permanent: false },
   { source: '/followcamp/:resto+', has: NO_FOLLOW, destination: `${IGREJA}/followcamp/:resto+`, permanent: false },
-  { source: '/:resto*', has: NO_FOLLOW, destination: `${IGREJA}/eventos#follow`, permanent: false },
+  { source: '/follow', has: NO_FOLLOW, destination: '/', permanent: false },
+  { source: '/:pagina((?!api|_next|follow|tipos|fotos|site|_vercel)[^./]+)', has: NO_FOLLOW, destination: '/', permanent: false },
+  /* o Follow visto dos outros dois sites */
+  { source: '/follow', has: NA_IGREJA, destination: `${FOLLOW}/`, permanent: false },
+  { source: '/follow', has: NO_SERVIR, destination: `${FOLLOW}/`, permanent: false },
   { source: '/servir', has: NO_SERVIR, destination: '/', permanent: false },
   { source: `/:pagina(${DA_IGREJA})`, has: NO_SERVIR, destination: `${IGREJA}/:pagina`, permanent: false },
   { source: '/servir', has: NA_IGREJA, destination: `${SERVIR}/`, permanent: false },
@@ -245,6 +255,8 @@ const nextConfig = {
          guiaservir.com quem responde é a LP do Servir (OS DOIS SITES) */
       beforeFiles: [
         { source: '/', has: NO_SERVIR, destination: '/servir' },
+        /* e no guiafollow.com, a página do Follow (O GUIA FOLLOW, acima) */
+        { source: '/', has: NO_FOLLOW, destination: '/follow' },
       ],
       afterFiles: [
         { source: '/followcamp', destination: '/followcamp/index.html' },

@@ -52,3 +52,7 @@ export const daGuia = (href: string) =>
  *  como o antigo escalas.guiaservir.com). Para robots e sitemap. */
 export const ehServir = (host: string | null) =>
   /(^|\.)guiaservir\.com$/i.test((host || '').split(':')[0]);
+
+/** O host do pedido é do Guia Follow (guiafollow.com). Para robots e sitemap. */
+export const ehFollow = (host: string | null) =>
+  /(^|\.)guiafollow\.com$/i.test((host || '').split(':')[0]);

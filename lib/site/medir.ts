@@ -53,8 +53,9 @@ export const ehEvento = (s: string | null | undefined): s is Evento => !!s && Ob
    /confirmar, /candidatura/<código>, /cronograma/<código>, /demandas), e um
    código desses no painel da Vercel ou na Meta seria a credencial de alguém
    fora de casa. Página nova do site entra aqui de propósito, ou não é medida.
-   '/' e '/servir' são a mesma LP (o guiaservir.com reescreve a raiz). */
-const PUBLICAS = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[a-z0-9-]+|servir\/[a-z0-9-]+\/cadastro|followcamp)\/?$/;
+   '/' e '/servir' são a mesma LP (o guiaservir.com reescreve a raiz), e
+   '/follow' é a raiz do guiafollow.com, pelo mesmo caminho. */
+const PUBLICAS = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[a-z0-9-]+|servir\/[a-z0-9-]+\/cadastro|followcamp|follow)\/?$/;
 
 export function paginaPublica(caminho: string): boolean {
   return PUBLICAS.test(caminho);

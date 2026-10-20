@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { headers } from 'next/headers';
-import { SITE, SITE_IGREJA } from '@/lib/igreja';
-import { ehServir } from '@/lib/site/sites';
+import { SITE, SITE_FOLLOW, SITE_IGREJA } from '@/lib/igreja';
+import { ehFollow, ehServir } from '@/lib/site/sites';
 
 /* =============================================================================
    robots.txt
@@ -33,7 +33,9 @@ import { ehServir } from '@/lib/site/sites';
    ============================================================================= */
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
-  const base = ehServir((await headers()).get('host')) ? SITE : SITE_IGREJA;
+  const host = (await headers()).get('host');
+  /* 19/10/2026, à noite: o terceiro domínio, o Guia Follow (guiafollow.com) */
+  const base = ehFollow(host) ? SITE_FOLLOW : ehServir(host) ? SITE : SITE_IGREJA;
   return {
     rules: [{
       userAgent: '*',
