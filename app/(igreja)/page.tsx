@@ -6,7 +6,8 @@ import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Perguntas, UmaLinha, l
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
-import { Fundo, Quadro } from '@/components/site/Midia';
+import Scrub, { type Foto } from '@/components/site/Scrub';
+import Janela from '@/components/site/Janela';
 import { Domingo } from '@/components/site/Domingo';
 import { MOMENTOS } from '@/lib/site/domingo';
 
@@ -51,6 +52,25 @@ const PORTAS = [
 ];
 
 
+/* A CHEGADA: as cinco fotos do herói, na ordem do scroll (scripts/site-fotos-
+   drive.py, acervo do fotógrafo no Drive, cultos de 15.03 e 10.05 de 2026).
+   Cada uma entra com fusão entre a e b. */
+const CHEGADA: Foto[] = [
+  { l: '/site/home-1-l.webp', p: '/site/home-1-p.webp', a: 0, b: 0, alt: 'Pessoas chegando pela calçada, diante do muro da GUIA Church, num domingo de sol' },
+  { l: '/site/home-2-l.webp', p: '/site/home-2-p.webp', a: 0.18, b: 0.26, alt: 'Dois homens se abraçando na porta da igreja' },
+  { l: '/site/home-3-l.webp', p: '/site/home-3-p.webp', a: 0.36, b: 0.44, alt: 'Um pai com o filho no colo, rindo com uma amiga na entrada' },
+  { l: '/site/home-4-l.webp', p: '/site/home-4-p.webp', a: 0.54, b: 0.62, alt: 'A igreja em adoração, de olhos fechados' },
+  { l: '/site/home-5-l.webp', p: '/site/home-5-p.webp', a: 0.72, b: 0.80, alt: 'O pastor diante da igreja, durante a Palavra' },
+];
+
+/* as três fotos da frase "é gente": a porta, a sala das crianças, o violão.
+   As legendas são os pedaços da própria frase, ao pé da letra. */
+const GENTE = [
+  { id: 'gente-porta', legenda: 'chega mais cedo pra receber você na porta', alt: 'Uma mulher recebendo as pessoas na porta da igreja, sorrindo' },
+  { id: 'gente-kids', legenda: 'prepara a sala das crianças', alt: 'Uma professora do GUIA Kids mostrando um livro para as crianças' },
+  { id: 'gente-violao', legenda: 'afina o violão antes da primeira nota', alt: 'Um músico tocando guitarra no palco, antes do culto' },
+];
+
 const PERGUNTAS = [
   { q: 'Que horas é o culto?', r: `${IGREJA.cultoDia}, ${IGREJA.cultoHora}. Chegue uns minutos antes pra conhecer a casa com calma.` },
   { q: 'Onde fica?', r: `${IGREJA.rua}, ${IGREJA.bairro}. Tem estacionamento, e a equipe orienta onde parar.` },
@@ -74,33 +94,45 @@ export default function Home() {
         ],
       }} />
 
-      {/* 1 · o herói */}
-      <section className="s-heroi" aria-labelledby="t-home">
-        <Fundo video="inicio" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />
-          <Vozes as="h1" id="t-home" className="s-h1" it="para você">Existe um lugar para você</Vozes>
-          <p className="s-lead grande">{ligaTexto("Uma igreja na Barra da Tijuca feita de pessoas reais, histórias reais e um domingo que pode mudar a sua semana.")}</p>
-          <div className="s-acoes">
-            <Pil href="/cultos#primeira-vez">Vou visitar</Pil>
-            <Pil href={noServir('/')}>Quero servir</Pil>
-          </div>
-          <p className="s-micro"><ProximoCulto /><Sep />{IGREJA.rua}</p>
-        </div>
-      </section>
+      {/* 1 · o herói: a chegada num domingo, em cinco fotos de verdade. A frase
+          de apoio da copy se desenrola sobre as fotos, um pedaço por vez, e
+          a página pousa no título. Nenhuma palavra fora da copy final. */}
+      <Scrub
+        rotulo={IGREJA.nome}
+        fotos={CHEGADA}
+        faixas={[
+          { texto: 'Uma igreja na Barra da Tijuca', vozes: false, a: 0, b: 0.24 },
+          { texto: 'feita de pessoas reais,', vozes: false, a: 0.27, b: 0.43, baixo: true },
+          { texto: 'histórias reais', vozes: false, a: 0.46, b: 0.61, sobe: true, baixo: true },
+          { texto: 'e um domingo que pode mudar a sua semana', it: 'semana', a: 0.64, b: 0.77, sobe: true, baixo: true },
+        ]}
+        pouso={{ titulo: 'Existe um lugar para você', it: 'para você', a: 0.79 }}
+        chapeu={<Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />}
+        micro={<p className="s-micro"><ProximoCulto /><Sep />{IGREJA.rua}</p>}
+      >
+        <Pil href="/cultos#primeira-vez">Vou visitar</Pil>
+        <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
+      </Scrub>
 
-      {/* 2 · a igreja não é o prédio */}
-      <section className="s-faixa papel">
+      {/* 2 · a igreja não é o prédio: a frase e as três fotos que ela descreve
+          (a porta, a sala das crianças, o violão), em escada */}
+      <section className="s-faixa papel" aria-labelledby="t-gente">
         <div className="s-in">
           <Arroba className="topo" />
-          <div className="s-duas">
+          <div className="s-gente">
             <div className="s-rev">
-              <Vozes className="s-h2 media">A igreja não é o prédio</Vozes>
+              <Vozes id="t-gente" className="s-h2 media" it="prédio">A igreja não é o prédio</Vozes>
               <p className="s-lead">{ligaTexto("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
               <p className="s-lead so-largo">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
-            {/* a frase em vídeo: quem recebe na porta, a sala das crianças, o violão */}
-            <Quadro video="gente" className="s-rev d1" />
+            <div className="s-trio desliza" role="group" aria-label="Quem chega mais cedo">
+              {GENTE.map((g, i) => (
+                <figure key={g.id} className={`s-rev d${i + 1}`}>
+                  <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 759px) 80vw, 24vw" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
+                  <figcaption>{g.legenda}</figcaption>
+                </figure>
+              ))}
+            </div>
           </div>
           <Sede className="base" />
         </div>
@@ -111,7 +143,8 @@ export default function Home() {
         <div className="s-in"><NumerosFaixa circulos={false} /></div>
       </section>
 
-      {/* 4 · por onde começar */}
+      {/* 4 · por onde começar: as quatro portas como linhas de um índice (no
+          celular, a lista de 14/10) */}
       <section className="s-faixa papel junta-celular" aria-labelledby="t-portas">
         <div className="s-in">
           <Sede className="topo" />
@@ -120,7 +153,7 @@ export default function Home() {
             <p className="s-lead">{ligaTexto("Quatro portas. Entre por qualquer uma.")}</p>
           </div>
           <div className="s-rev d1">
-            <div className="s-cartoes quatro lista" role="group" aria-label="Por onde começar">
+            <div className="s-cartoes quatro lista indice" role="group" aria-label="Por onde começar">
               {PORTAS.map(p => (
                 <Ir key={p.href} href={p.href} className="s-cartao">
                   <span className="s-cartao-t">{p.t}</span>
@@ -177,8 +210,22 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 8 · sempre cabe mais um */}
-      <section className="s-faixa noite s-grao" aria-labelledby="t-fim">
+      {/* 8 · sempre cabe mais um: a igreja de pé, vista pelo chevron da marca,
+          que abre com a rolagem até a foto inteira */}
+      <section className="s-faixa noite s-janela" aria-labelledby="t-fim">
+        <div className="s-janela-foto" aria-hidden="true">
+          <picture>
+            <source media="(orientation: portrait)" srcSet="/site/fecho-igreja-p.webp" type="image/webp" />
+            <img src="/site/fecho-igreja-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
+          </picture>
+          <div className="s-janela-mascara">
+            <picture>
+              <source media="(orientation: portrait)" srcSet="/site/fecho-igreja-p.webp" type="image/webp" />
+              <img src="/site/fecho-igreja-l.webp" width={1920} height={1080} alt="" loading="lazy" decoding="async" />
+            </picture>
+          </div>
+        </div>
+        <Janela />
         <div className="s-in s-centro">
           <Sede className="topo" />
           <div className="s-rev">
@@ -187,7 +234,7 @@ export default function Home() {
           </div>
           <div className="s-acoes centro s-rev d1" style={{ marginTop: 'clamp(28px,4vw,52px)' }}>
             <Pil href="/cultos#primeira-vez">Vou conhecer</Pil>
-            <Pil href={noServir('/')}>Quero servir</Pil>
+            <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
           </div>
         </div>
       </section>

@@ -34,10 +34,12 @@ import { useEffect, useRef, type ReactNode } from 'react';
    O texto de cada faixa vem da página; aqui só a mecânica.
    ============================================================================= */
 
-/** uma legenda: a frase (sem o ponto final), a palavra em itálico, a janela */
-export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean };
-/** o pouso: o título em duas vozes, a linha de apoio e onde começa */
-export type Pouso = { titulo: string; it?: string; sub: string; a: number };
+/** uma legenda: a frase (sem o ponto final), a palavra em itálico, a janela.
+ *  `vozes: false` é um pedaço de frase (sem itálico e sem ponto): a frase
+ *  inteira se desenrola por várias faixas, uma foto por vez. */
+export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean; vozes?: boolean; /** no computador, a faixa desce para o terço de baixo (rostos no meio da foto) */ baixo?: boolean };
+/** o pouso: o título em duas vozes, a linha de apoio (opcional) e onde começa */
+export type Pouso = { titulo: string; it?: string; sub?: string; a: number };
 /** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
 export type Foto = { l: string; p: string; a: number; b: number; alt: string };
 
@@ -58,17 +60,19 @@ function rng(semente: number) {
  *  com o ponto. As palavras são texto de verdade, com espaço entre elas: o
  *  leitor de tela e o Google leem a frase inteira, uma vez só (a versão de
  *  19/10 duplicava a frase num span escondido, e o h1 saía em dobro). */
-function Palavras({ texto, it, espalha = 0.45 }: { texto: string; it?: string; espalha?: number }) {
-  const limpo = texto.trim().replace(/\.$/, '');
+function Palavras({ texto, it, espalha = 0.45, vozes = true }: { texto: string; it?: string; espalha?: number; vozes?: boolean }) {
+  const limpo = vozes ? texto.trim().replace(/\.$/, '') : texto.trim();
   const r = rng(limpo.length * 7919 + limpo.charCodeAt(0));
   const palavras = limpo.split(' ');
+  const th = (i: number) => ((i / palavras.length) * espalha + r() * 0.05).toFixed(3);
+  const w = (p: string, i: number) => <span key={i} className="w" style={{ '--th': th(i) } as React.CSSProperties}>{p}</span>;
+  /* um pedaço de frase: todas as palavras na primeira voz, como estão */
+  if (!vozes) return <>{palavras.map((p, i) => <span key={i}>{w(p, i)}{i < palavras.length - 1 ? ' ' : ''}</span>)}</>;
   /* quantas palavras do fim vão em itálico: as de `it`, se a frase termina
      nelas; senão só a última */
   const itL = (it || '').trim().replace(/\.$/, '');
   const nIt = itL && limpo.endsWith(itL) ? itL.split(' ').length : 1;
   const corte = palavras.length - nIt;
-  const th = (i: number) => ((i / palavras.length) * espalha + r() * 0.05).toFixed(3);
-  const w = (p: string, i: number) => <span key={i} className="w" style={{ '--th': th(i) } as React.CSSProperties}>{p}</span>;
   return (
     <>
       {palavras.slice(0, corte).map((p, i) => <span key={i}>{w(p, i)} </span>)}
@@ -89,8 +93,8 @@ const suave = (p: number, e0: number, e1: number) => {
 };
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-export default function Scrub({ fotos, faixas, pouso, chapeu, rotulo, children }:
-  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; rotulo: string; children: ReactNode }) {
+export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, children }:
+  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; micro?: ReactNode; rotulo: string; children: ReactNode }) {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -260,15 +264,16 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, rotulo, children }
         </div>
         <div className="s-scrub-scrim" aria-hidden="true" />
         {faixas.map((f, i) => (
-          <div key={i} className={`s-scrub-faixa${f.sobe ? ' sobe' : ''}`} data-faixa={i}>
-            <p className="s-h2 s-scrub-frase"><Palavras texto={f.texto} it={f.it} /></p>
+          <div key={i} className={`s-scrub-faixa${f.sobe ? ' sobe' : ''}${f.baixo ? ' baixo' : ''}`} data-faixa={i}>
+            <p className="s-h2 s-scrub-frase"><Palavras texto={f.texto} it={f.it} vozes={f.vozes} /></p>
           </div>
         ))}
         <div className="s-scrub-faixa pouso" data-faixa={faixas.length}>
           {chapeu}
           <h1 className="s-h1 s-scrub-frase"><Palavras texto={pouso.titulo} it={pouso.it} espalha={0.4} /></h1>
-          <p className="s-lead grande s-scrub-sub">{pouso.sub}</p>
+          {pouso.sub && <p className="s-lead grande s-scrub-sub">{pouso.sub}</p>}
           <div className="s-acoes centro s-scrub-acoes">{children}</div>
+          {micro}
         </div>
         <svg className="s-scrub-anel" viewBox="0 0 48 48" aria-hidden="true">
           <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={ANEL} strokeLinecap="round" transform="rotate(-90 24 24)" style={{ strokeDashoffset: ANEL }} />

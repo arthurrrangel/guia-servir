@@ -1259,6 +1259,9 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 .s .s-scrub-faixa{ position:absolute; z-index:2; left:50%; top:50%; transform:translate(-50%,-50%); width:min(960px,100% - 2*var(--s-gutter)); text-align:center; opacity:1; pointer-events:none;
   text-shadow:0 1px 2px rgba(0,0,0,.45),0 6px 30px rgba(0,0,0,.42) }
 .s.js .s-scrub:not(.estatico) .s-scrub-faixa{ opacity:var(--op,0) }
+/* a faixa que desce para o terço de baixo no computador: a foto tem rostos
+   no meio (o abraço, a família); o escuro do pé já mora ali */
+.s .s-scrub-faixa.baixo{ top:auto; bottom:9%; transform:translateX(-50%) }
 /* o pouso tem as pílulas: clicável e focável só quando está na tela (o JS
    marca `inert` enquanto a faixa está apagada) */
 .s .s-scrub-faixa.pouso{ pointer-events:auto }
@@ -1298,7 +1301,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    rostos ficam em cima nos cortes 9:16) e o escuro nasce acima do texto e
    acompanha o texto, como no herói do celular */
 @media (orientation:portrait),(max-width:720px){
-  .s .s-scrub-faixa{ left:var(--s-gutter); right:var(--s-gutter); top:auto; bottom:calc(10svh + env(safe-area-inset-bottom,0px)); transform:none; width:auto }
+  .s .s-scrub-faixa,.s .s-scrub-faixa.baixo{ left:var(--s-gutter); right:var(--s-gutter); top:auto; bottom:calc(10svh + env(safe-area-inset-bottom,0px)); transform:none; width:auto }
   .s .s-scrub-faixa::before{ inset:-16% -10% }
   .s .s-scrub-scrim{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
   .s .s-scrub-scrim::after{ height:58%; background:linear-gradient(to top,rgba(10,10,12,.96) 0%,rgba(10,10,12,.9) 30%,rgba(10,10,12,.66) 58%,rgba(10,10,12,0) 100%) }
@@ -1332,4 +1335,84 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-fatos.lista .s-fato small{ display:block; margin-bottom:3px }
   .s .s-fatos.lista .s-fato b{ display:block; font-size:22px }
   .s .s-fatos.lista .s-fato p{ margin-top:3px }
+}
+
+/* =============================================================================
+   A CAMADA DE CIMA · 20/10/2026
+   O pedido do Arthur: os sites sem cara de apresentação empilhada, com
+   assinatura própria e a mesma identidade. Os blocos abaixo são a
+   composição nova por cima do mesmo sistema: a frase que se desenrola sobre
+   as fotos (o herói que anda com o scroll), a janela do chevron abrindo para
+   a foto, o trio de retratos que ilustra uma frase, o índice de portas no
+   lugar dos cartões em série. Os tokens, as vozes e as regras do celular
+   são os mesmos.
+   ============================================================================= */
+
+/* o micro do pouso (dia, hora, endereço): entra por último */
+.s .s-scrub-faixa .s-micro{ margin-top:clamp(16px,2.2vw,28px); color:rgba(255,255,255,.86) }
+.s .s-scrub-faixa.pouso .s-micro{ --km:clamp(0,(var(--k,1) - .82) * 6,1); opacity:var(--km) }
+
+/* A JANELA (components/site/Janela.tsx): a foto vista pelo chevron da marca,
+   que cresce com a rolagem até a foto inteira aparecer por trás. Dois
+   quadros da mesma foto: o de baixo inteiro, que acende com --jk, e o de
+   cima recortado pelo chevron, que cresce. O escurecimento da casa garante
+   o texto em qualquer ponto do caminho. */
+.s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite) }
+.s.js .s-janela.viva{ --jk:0 }
+.s .s-janela-foto{ position:absolute; inset:0; z-index:-2; pointer-events:none }
+.s .s-janela-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
+.s .s-janela-foto > picture img{ opacity:calc(var(--jk) * var(--jk)) }
+.s .s-janela-mascara{ position:absolute; inset:0;
+  -webkit-mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 757.5 826.3'><path d='M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z'/></svg>") no-repeat 50% 50% / auto calc(30% + 260% * var(--jk));
+  mask:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 757.5 826.3'><path d='M0 10.5A10.5 10.5 0 0 1 14.6 0.8L747.1 312.2A17 17 0 0 1 757.5 327.8L757.5 498.4A17 17 0 0 1 747.1 514.1L14.6 825.4A10.5 10.5 0 0 1 0 815.8L0 644.1A12 12 0 0 1 7.3 633L508.1 419.6A7 7 0 0 0 508.1 406.7L7.3 193.2A12 12 0 0 1 0 182.2Z'/></svg>") no-repeat 50% 50% / auto calc(30% + 260% * var(--jk)) }
+.s .s-janela::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,12,.5),rgba(10,10,12,.74)); opacity:calc(.55 + .45 * var(--jk)) }
+.s .s-janela .s-in{ position:relative; z-index:1 }
+@media(prefers-reduced-motion:reduce){ .s.js .s-janela.viva{ --jk:1 } }
+
+/* O TRIO: três retratos 4:5 que ilustram uma frase, em escada (quem chega
+   mais cedo, a sala das crianças, o violão). No celular, a faixa de deslizar. */
+.s .s-gente{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:clamp(28px,5vw,88px); align-items:center }
+.s .s-gente .s-h2{ margin-bottom:clamp(18px,2.4vw,30px) }
+.s .s-gente .s-lead + .s-lead{ margin-top:clamp(14px,1.6vw,22px) }
+.s .s-trio{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(10px,1.4vw,18px); align-items:start }
+.s .s-trio figure:nth-child(2){ margin-top:clamp(28px,4.5vw,72px) }
+.s .s-trio figure:nth-child(3){ margin-top:clamp(56px,9vw,144px) }
+.s .s-trio .s-foto{ aspect-ratio:4/5 }
+.s .s-trio figcaption{ margin-top:10px; font-size:clamp(13px,1vw,15px); font-weight:400; letter-spacing:-.005em; color:var(--s-mudo); text-wrap:balance }
+
+/* O ÍNDICE (no computador): as portas da home como linhas grandes de um
+   índice, no lugar dos quatro cartões pretos. O nome em corpo de título, o
+   fato em laranja, a frase na segunda voz, o parágrafo e a seta; a linha
+   inteira é o link e vira noite ao passar o mouse. No celular a lista de
+   14/10 continua (as regras de .lista). */
+@media(min-width:760px){
+  .s .s-cartoes.indice{ display:block; border-top:1px solid var(--s-linha) }
+  .s .s-cartoes.indice > .s-cartao{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(140px,.45fr) minmax(0,1.5fr) 11.5rem; grid-template-areas:"t n f ir" "t n d ir"; column-gap:clamp(18px,3vw,56px); row-gap:6px; align-items:baseline; text-align:left; padding:clamp(22px,2.8vw,40px) clamp(14px,1.8vw,28px); min-height:0; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:var(--s-laranja-texto); transition:background var(--s-t),color var(--s-t) }
+  .s .s-cartoes.indice .s-cartao-t{ grid-area:t; font-size:clamp(36px,3.8vw,60px); line-height:.95 }
+  .s .s-cartoes.indice .s-cartao-n{ grid-area:n; margin:0; align-self:baseline }
+  .s .s-cartoes.indice .s-cartao-f{ grid-area:f; margin:0; font-family:var(--s-serifa); font-style:italic; font-weight:400; font-size:clamp(20px,1.9vw,28px); letter-spacing:-.01em; line-height:1.1 }
+  .s .s-cartoes.indice .s-cartao-d{ grid-area:d; margin:0; color:var(--s-mudo); max-width:46ch; font-size:clamp(14.5px,1.1vw,16.5px) }
+  .s .s-cartoes.indice .s-cartao-ir{ grid-area:ir; margin:0; padding:0; align-self:center; justify-self:end; color:inherit; font-size:15px; white-space:nowrap }
+  .s .s-cartoes.indice .s-cartao-ir svg{ transition:transform var(--s-t) var(--s-ease) }
+  .s .s-faixa.noite .s-cartoes.indice{ border-color:var(--s-linha-clara) }
+  .s .s-faixa.noite .s-cartoes.indice > .s-cartao{ border-color:var(--s-linha-clara); --s-acento-texto:var(--s-laranja) }
+  .s .s-faixa.noite .s-cartoes.indice .s-cartao-d{ color:var(--s-mudo-claro) }
+}
+@media(min-width:760px) and (hover:hover){
+  .s .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-noite); color:var(--s-papel); --s-acento-texto:var(--s-laranja); transform:none; box-shadow:none }
+  .s .s-cartoes.indice > a.s-cartao:hover .s-cartao-d{ color:rgba(255,255,255,.86) }
+  .s .s-cartoes.indice > a.s-cartao:hover .s-cartao-ir svg{ transform:translateX(4px) }
+  .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover{ background:var(--s-papel); color:var(--s-tinta); --s-acento-texto:var(--s-laranja-texto) }
+  .s .s-faixa.noite .s-cartoes.indice > a.s-cartao:hover .s-cartao-d{ color:var(--s-mudo) }
+}
+@media(max-width:999px) and (min-width:760px){
+  .s .s-cartoes.indice > .s-cartao{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"t ir" "n ir" "f ir" "d ir"; row-gap:4px }
+}
+@media(max-width:999px){
+  .s .s-gente{ grid-template-columns:1fr }
+}
+@media(max-width:759px){
+  .s .s-trio{ display:flex }
+  .s .s-trio figure{ margin-top:0 !important }
+  .s .s-trio figcaption{ margin-top:8px }
 }
