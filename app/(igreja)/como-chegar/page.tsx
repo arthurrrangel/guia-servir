@@ -39,7 +39,8 @@ export default function ComoChegar() {
       <Heroi id="t-chegar" lugar="chegar-heroi" chapeu={<Chapeu forte="Onde fica" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />} titulo="Como chegar" it="chegar"
              lead={<><span className="s-inteiro">{IGREJA.rua}</span>, <span className="s-inteiro">{IGREJA.bairro},</span> <span className="s-inteiro">{IGREJA.cidade}.</span></>}
              micro={ligaTexto("Tem alguém na porta esperando você.")}>
-        <Pil href={MAPA} fora>Traçar rota no Maps</Pil>
+        {/* o rótulo da copy ("Traçar rota no mapa"), o mesmo do bloco "Antes de vir": um destino, um nome */}
+        <Pil href={MAPA} fora>Traçar rota no mapa</Pil>
         <Pil href={ROTA_WAZE} fora tom="vidro">Abrir no Waze</Pil>
       </Heroi>
 
