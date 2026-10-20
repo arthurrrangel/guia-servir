@@ -1359,7 +1359,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    quadros da mesma foto: o de baixo inteiro, que acende com --jk, e o de
    cima recortado pelo chevron, que cresce. O escurecimento da casa garante
    o texto em qualquer ponto do caminho. */
-.s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite) }
+.s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite); min-height:min(72svh,700px); display:grid; align-content:center }
+.s .s-janela .s-h2{ max-width:16ch; margin-inline:auto }
 .s.js .s-janela.viva{ --jk:0 }
 .s .s-janela-foto{ position:absolute; inset:0; z-index:-2; pointer-events:none }
 .s .s-janela-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
