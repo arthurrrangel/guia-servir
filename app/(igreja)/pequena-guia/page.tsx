@@ -4,8 +4,7 @@ import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { Grupos } from '@/components/Grupos';
 import { FormPequenaGuia } from '@/components/FormPequenaGuia';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
-import { Fundo } from '@/components/site/Midia';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Fecho, UmaLinha, liga, ligaTexto, Img } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -51,7 +50,7 @@ export default function PequenaGuia() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'WebPage', name: 'Pequena Guia · grupos da GUIA Church', url: `${SITE}/pequena-guia`, isPartOf: { '@type': 'WebSite', name: IGREJA.nome, url: SITE } }} />
 
       <section className="s-heroi" aria-labelledby="t-pg">
-        <Fundo video="pg" prioridade />
+        <Img lugar="pg-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Pequena Guia" resto="O grupo da semana" />
           <Vozes as="h1" id="t-pg" className="s-h1 longa" it="sua fé">Relacionamentos que fortalecem sua fé</Vozes>

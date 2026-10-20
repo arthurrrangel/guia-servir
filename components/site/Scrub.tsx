@@ -37,7 +37,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 /** uma legenda: a frase (sem o ponto final), a palavra em itálico, a janela.
  *  `vozes: false` é um pedaço de frase (sem itálico e sem ponto): a frase
  *  inteira se desenrola por várias faixas, uma foto por vez. */
-export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean; vozes?: boolean; /** no computador, a faixa desce para o terço de baixo (rostos no meio da foto) */ baixo?: boolean };
+export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean; vozes?: boolean; /** no computador, a faixa desce para o terço de baixo (rostos no meio da foto) */ baixo?: boolean; /** o rótulo pequeno acima da frase ("01 · Acolhida") */ rotulo?: string };
 /** o pouso: o título em duas vozes, a linha de apoio (opcional) e onde começa */
 export type Pouso = { titulo: string; it?: string; sub?: string; a: number };
 /** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
@@ -265,7 +265,9 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
         <div className="s-scrub-scrim" aria-hidden="true" />
         {faixas.map((f, i) => (
           <div key={i} className={`s-scrub-faixa${f.sobe ? ' sobe' : ''}${f.baixo ? ' baixo' : ''}`} data-faixa={i}>
-            <p className="s-h2 s-scrub-frase"><Palavras texto={f.texto} it={f.it} vozes={f.vozes} /></p>
+            {f.rotulo && <p className="s-chapeu s-scrub-rotulo"><b>{f.rotulo}</b></p>}
+            {/* uma frase longa (duas orações) desce um corpo, para caber em três linhas */}
+            <p className={`s-h2 s-scrub-frase${f.texto.length > 60 ? ' menor' : ''}`}><Palavras texto={f.texto} it={f.it} vozes={f.vozes} /></p>
           </div>
         ))}
         <div className="s-scrub-faixa pouso" data-faixa={faixas.length}>

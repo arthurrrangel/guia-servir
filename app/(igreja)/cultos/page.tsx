@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Simbolo } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
 import { MOMENTOS } from '@/lib/site/domingo';
 import { Vozes, Sede, Chapeu, Pil, Seta, fim, Sep, Perguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
-import { Domingo } from '@/components/site/Domingo';
+import Scrub, { type Foto } from '@/components/site/Scrub';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -28,7 +29,24 @@ import ProximoCulto from '@/components/site/ProximoCulto';
    Follow (é a agenda, /eventos#follow). As três fichas do cartão "primeira
    vez" (ao chegar, durante o culto, com crianças) também: o texto novo diz
    as duas primeiras, e as crianças viraram uma pergunta.
+
+   20/10/2026, A CAMADA DE CIMA: o herói anda com o scroll por um domingo
+   inteiro, nos quatro momentos da copy (acolhida, louvor, Palavra, oração e
+   saída), cada um sobre uma foto de verdade do fotógrafo da igreja, e
+   pousa em "Um domingo para pertencer". A faixa "como é um domingo aqui?"
+   (o vídeo em capítulos, que a home continua tendo) sai: o herói É o
+   domingo, com os mesmos quatro textos. O "próximo passo" deixa os dois
+   cartões e vira duas linhas de índice.
    ============================================================================= */
+
+/* o domingo em quatro momentos, nas fotos do Drive (scripts/site-fotos-drive.py) */
+const DOMINGO: Foto[] = [
+  { l: '/site/cultos-1-l.webp', p: '/site/cultos-1-p.webp', a: 0, b: 0, alt: 'Uma mulher sorrindo na entrada da igreja, recebendo quem chega' },
+  { l: '/site/cultos-2-l.webp', p: '/site/cultos-2-p.webp', a: 0.2, b: 0.28, alt: 'A igreja adorando, de pé, durante o louvor' },
+  { l: '/site/cultos-3-l.webp', p: '/site/cultos-3-p.webp', a: 0.4, b: 0.48, alt: 'O pastor no púlpito, durante a mensagem' },
+  { l: '/site/cultos-4-l.webp', p: '/site/cultos-4-p.webp', a: 0.58, b: 0.66, alt: 'Pessoas orando de olhos fechados, lado a lado' },
+  { l: '/site/cultos-5-l.webp', p: '/site/cultos-5-p.webp', a: 0.74, b: 0.82, alt: 'O pastor de braços abertos diante da igreja' },
+];
 
 export const metadata: Metadata = {
   title: 'Cultos',
@@ -67,33 +85,21 @@ export default function Cultos() {
       }} />
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })) }} />
 
-      {/* herói */}
-      <section className="s-heroi" aria-labelledby="t-cultos">
-        <Fundo video="cultos" prioridade />
-        <div className="s-in s-heroi-in">
-          <Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />
-          <Vozes as="h1" id="t-cultos" className="s-h1" it="para pertencer">Um domingo para pertencer</Vozes>
-          <p className="s-lead grande">{ligaTexto("Louvor, Palavra e uma comunidade que recebe você pelo nome.")}<span className="s-resto"> {ligaTexto("Se é a sua primeira vez, a gente te espera na porta.")}</span></p>
-          <div className="s-acoes">
-            <Pil href="/como-chegar">Como chegar</Pil>
-            <Pil href="#ao-vivo">Assistir ao vivo</Pil>
-          </div>
-          <p className="s-micro">Próximo culto: <ProximoCulto /><Sep />{IGREJA.rua}</p>
-        </div>
-      </section>
-
-      {/* como é um domingo aqui: os quatro momentos da home */}
-      <section className="s-faixa areia" aria-labelledby="t-roteiro">
-        <div className="s-in">
-          <div className="s-passos-cab s-rev">
-            <h2 id="t-roteiro" className="s-serifa">{liga("Como é um domingo aqui?")}</h2>
-            <p className="s-serifa it">{liga("da porta à oração final, 4 momentos:")}</p>
-          </div>
-          {/* o mesmo vídeo em capítulos da home */}
-          <div className="s-rev d1"><Domingo itens={MOMENTOS} rotulo="Os quatro momentos do domingo" /></div>
-          <Sede className="base" />
-        </div>
-      </section>
+      {/* o herói: um domingo inteiro, nos quatro momentos da copy, foto a foto */}
+      <Scrub
+        rotulo="Cultos"
+        fotos={DOMINGO}
+        faixas={MOMENTOS.map((m, i) => ({
+          rotulo: `${m.n} · ${m.t}`, texto: m.d,
+          a: [0.0, 0.22, 0.42, 0.6][i], b: [0.19, 0.39, 0.57, 0.73][i], sobe: i % 2 === 1, baixo: true,
+        }))}
+        pouso={{ titulo: 'Um domingo para pertencer', it: 'para pertencer', sub: 'Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.', a: 0.77 }}
+        chapeu={<Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />}
+        micro={<p className="s-micro">Próximo culto: <ProximoCulto /><Sep />{IGREJA.rua}</p>}
+      >
+        <Pil href="/como-chegar">Como chegar</Pil>
+        <Pil href="#ao-vivo" tom="vidro">Assistir ao vivo</Pil>
+      </Scrub>
 
       {/* é a sua primeira vez? */}
       <section id="primeira-vez" className="s-faixa noite s-grao justa" aria-labelledby="t-primeira">
@@ -151,13 +157,13 @@ export default function Cultos() {
           <div className="s-cab centro s-rev">
             <Vozes id="t-fim" className="s-h2" it="próximo passo">Escolha o seu próximo passo</Vozes>
           </div>
-          <div className="s-cartoes duas s-rev d1" role="group" aria-label="O seu próximo passo">
+          <div className="s-cartoes duas lista indice simples s-rev d1" role="group" aria-label="O seu próximo passo">
             {PASSO.map(p => (
-              <div key={p.t} className="s-cartao">
+              <Link key={p.t} href={p.href} className="s-cartao">
                 <span className="s-cartao-t medio">{liga(p.t)}</span>
                 <span className="s-cartao-d">{fim(ligaTexto(p.d))}</span>
-                <div className="s-acoes centro s-cartao-acao"><Pil href={p.href}>{p.ir}</Pil></div>
-              </div>
+                <span className="s-cartao-ir">{p.ir} <Seta /></span>
+              </Link>
             ))}
           </div>
         </div>

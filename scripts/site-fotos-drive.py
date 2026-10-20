@@ -43,14 +43,18 @@ FOTOS = [
     ('gente-violao', '1503-05', (0.50, 0.40), 'vs', 72),  # foto com grão de ISO alto: q72 segura o peso
     # o fecho da home e o convite: a igreja de pé, mãos abertas
     ('fecho-igreja', '1005-16', (0.50, 0.50), 'lp'),
+    # /cultos: um domingo em quatro momentos (o herói anda sobre eles) e o pouso
+    ('cultos-1', '1503-56', (0.42, 0.45), 'lp'),   # acolhida: a porta, o sorriso
+    ('cultos-2', '1005-13', (0.55, 0.42), 'lp'),   # louvor: a igreja adora junto
+    ('cultos-3', '0706-07', (0.45, 0.42), 'lp'),   # palavra: a mensagem
+    ('cultos-4', '1406-15', (0.45, 0.45), 'lp'),   # oração: uns pelos outros
+    ('cultos-5', '1503-43', (0.55, 0.42), 'lp'),   # o pouso: um domingo para pertencer
     # as outras páginas da igreja
-    ('cultos-heroi', '1503-43', (0.55, 0.42), 'lp'),   # a Palavra, braços abertos
-    ('sobre-heroi', '1503-49', (0.50, 0.48), 'lp'),    # a equipe do Kids: "eu amo minha igreja"
+    ('sobre-heroi', '1503-65', (0.64, 0.50), 'lp'),    # cinco mulheres no muro do GUI>, de manhã
     ('sobre-geracoes', '1503-52', (0.45, 0.45), 'hs'), # três gerações na porta
     ('eventos-heroi', '3105-04', (0.50, 0.42), 'lp'),  # o louvor, braços abertos
     ('pg-heroi', '3105-20', (0.45, 0.45), 'lp'),       # uma família na calçada
     ('ofertar-heroi', '0706-04', (0.55, 0.50), 'lp'),  # o cálice da ceia
-    ('chegar-chegada', '1503-62', (0.50, 0.50), 'hs'), # chegando pela rampa
     # o Guia Servir: quem serve
     ('servir-1', '1503-09', (0.55, 0.45), 'lp'),       # o Connect recebe na porta
     ('servir-2', '0803-10', (0.55, 0.45), 'lp'),       # o Kids, com o bebê no colo

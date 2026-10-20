@@ -3,7 +3,6 @@ import { Chevron } from '@/components/Marca';
 import { IGREJA, SITE_IGREJA as SITE, SIGLA, SIGLA_FRASE } from '@/lib/igreja';
 import { noServir } from '@/lib/site/sites';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Img, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
-import { Fundo } from '@/components/site/Midia';
 import { Schema } from '@/components/site/Schema';
 
 /* =============================================================================
@@ -52,7 +51,7 @@ export default function Sobre() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-sobre">
-        <Fundo video="sobre" prioridade />
+        <Img lugar="sobre-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Quem somos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-sobre" className="s-h1 longa" it="de quem chega">Uma igreja que parece com a vida de quem chega</Vozes>
@@ -72,7 +71,7 @@ export default function Sobre() {
               <Vozes className="s-h2 media" it="para frequentar">Mais do que um lugar para frequentar</Vozes>
               <p className="s-lead"><UmaLinha semFim texto="Aqui, você não precisa ter a vida resolvida pra pertencer. Visitante vira família, a fé sai do banco e entra na vida. E sempre cabe mais um." /></p>
             </div>
-            <div className="s-foto h s-rev d1"><Img lugar="sobre-comunidade" sizes="(max-width: 999px) 90vw, 34vw" /></div>
+            <div className="s-foto h s-rev d1"><Img lugar="sobre-geracoes" sizes="(max-width: 999px) 90vw, 34vw" /></div>
           </div>
           <Sede className="base" />
         </div>

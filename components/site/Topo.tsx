@@ -50,7 +50,12 @@ function LinkOu({ item, className, onClick, atual, children }: { item: Item; cla
 
 export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
   const { menu: MENU, celular: MENU_CELULAR, busca: BUSCA, inicio, jaSirvo, nada } = MAPAS[site];
-  const caminho = usePathname() || '/';
+  /* 20/10/2026: em produção a raiz do guiaservir.com e do guiafollow.com é
+     reescrita para /servir e /follow (next.config.mjs), e o usePathname
+     devolve o caminho reescrito. A página de entrada de cada site conta
+     como a entrada dele (o `inicio` do mapa), senão o grupo nunca acende. */
+  const bruto = usePathname() || '/';
+  const caminho = (site === 'servir' && bruto === '/servir') || (site === 'follow' && bruto === '/follow') ? inicio : bruto;
   const [aberto, setAberto] = useState<number | null>(null);
   const [menu, setMenu] = useState(false);
   const [busca, setBusca] = useState(false);

@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
-import { Fundo, Quadro } from '@/components/site/Midia';
+import { noFollow } from '@/lib/site/sites';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Fecho, UmaLinha, liga, ligaTexto, Img } from '@/components/site/Blocos';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
@@ -44,7 +44,7 @@ export default function Eventos() {
       }} />
 
       <section className="s-heroi" aria-labelledby="t-ev">
-        <Fundo video="eventos" prioridade />
+        <Img lugar="eventos-heroi" prioridade retrato />
         <div className="s-in s-heroi-in">
           <Chapeu forte="Eventos" resto={IGREJA.nome} />
           <Vozes as="h1" id="t-ev" className="s-h1" it="na semana">O que acontece na semana</Vozes>
@@ -65,7 +65,7 @@ export default function Eventos() {
             <p className="s-lead">{ligaTexto("Três encontros fixos. Nenhum precisa de inscrição.")}</p>
           </div>
           <div className="s-rev d1">
-            <div className="s-cartoes tres agenda lista" role="group" aria-label="A agenda da semana">
+            <div className="s-cartoes tres agenda lista indice" role="group" aria-label="A agenda da semana">
               {/* sem foto (13/10/2026): o dia e a hora são o assunto da agenda */}
               {AGENDA.map(a => {
                 const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d"><UmaLinha texto={a.d} semFim /></span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
@@ -82,13 +82,15 @@ export default function Eventos() {
         <div className="s-in">
           <Arroba className="topo" />
           <div className="s-duas inv">
-            <Quadro video="follow" className="s-rev" />
+            {/* 20/10/2026: a foto do Follow (a mesma do site dele, guiafollow.com) */}
+            <div className="s-foto v s-rev"><img src="/follow/f3-p.webp" width={1080} height={1920} alt="Jovens em adoração no Follow, de mãos levantadas" loading="lazy" decoding="async" style={{ '--foco': '50% 40%' } as React.CSSProperties} /></div>
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado'} />
               <Vozes className="s-h2 media" it="jovens">O culto de jovens</Vozes>
               <p className="s-lead"><UmaLinha semFim texto="Todo sábado à noite, a geração que está chegando adora, ouve a Palavra e se encontra. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como está." /></p>
+              {/* 20/10/2026: o Follow tem site próprio; o rótulo é o da porta da home */}
               <div className="s-acoes" style={{ marginTop: 26 }}>
-                <Pil href="/como-chegar">Como chegar</Pil>
+                <Pil href={noFollow('/')}>Vou no Follow</Pil>
                 <Pil href={IGREJA.instagram} fora>{IGREJA.instagramArroba}</Pil>
               </div>
             </div>
