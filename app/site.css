@@ -429,6 +429,17 @@ body{ margin:0 }
 /* uma janela baixa de computador: segue com o scrub, mas sem os detalhes
    pequenos, que não têm espaço */
 @media (max-height:560px){ .s .s-scrub-seta,.s .s-scrub-anel{ display:none } }
+/* e o pouso de uma janela baixa de computador (o notebook de 1366×768 com
+   as barras do navegador deixa uns 600px): o título segue a altura e os
+   respiros encolhem, para chapéu, título, frase, pílulas e a linha de baixo
+   caberem no palco. Abaixo de 500px de altura vale a régua do celular deitado. */
+@media (min-width:760px) and (max-height:620px){
+  .s .s-scrub .s-h1{ font-size:clamp(46px,12svh,96px) }
+  .s .s-scrub-faixa .s-chapeu{ margin-bottom:14px }
+  .s .s-scrub .s-scrub-sub{ margin-top:14px }
+  .s .s-scrub-faixa .s-acoes{ margin-top:22px }
+  .s .s-scrub-faixa.pouso .s-micro{ margin-top:12px }
+}
 
 /* MENOS MOVIMENTO: uma tela, tudo no estado final, nenhum motor (o JS lê a
    mesma consulta e nem liga o scroll) */
@@ -1392,6 +1403,15 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-heroi .s-lead,.s .s-heroi .s-lead.grande{ margin-top:12px; font-size:16px; line-height:1.38; max-width:62ch }
   .s .s-heroi .s-resto,.s .s-heroi .s-micro{ display:none }
   .s .s-heroi .s-acoes{ margin-top:16px }
+  /* o herói de scroll, pela mesma régua: uma tela (sem o piso de 480px do
+     computador) e o pouso no corpo acima, para título e pílulas caberem no
+     palco com e sem "reduzir movimento" */
+  .s .s-scrub,.s .s-scrub-palco{ min-height:0 }
+  .s .s-scrub-faixa .s-chapeu{ margin-bottom:10px }
+  .s .s-scrub .s-h1{ font-size:clamp(30px,11svh,46px) }
+  .s .s-scrub .s-scrub-sub{ margin-top:12px; font-size:16px; line-height:1.38; max-width:62ch }
+  .s .s-scrub-faixa .s-acoes{ margin-top:16px }
+  .s .s-scrub-faixa .s-resto,.s .s-scrub-faixa .s-micro{ display:none }
 }
 
 /* =============================================================================
