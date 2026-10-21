@@ -194,6 +194,7 @@ const CAMP = naIgreja('/followcamp');
 export const MENU_FOLLOW: Grupo[] = [
   { rot: 'Follow', href: follow(), itens: [
     { rot: 'Primeira vez', href: follow('#primeira-vez'), sub: 'Não precisa ser de igreja' },
+    { rot: 'Como é', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
     { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
     { rot: 'Avisar que vou', href: CONVERSA_FOLLOW.href, sub: 'A gente te espera na porta', duro: true },
   ] },
@@ -215,6 +216,7 @@ export const MENU_FOLLOW: Grupo[] = [
 
 export const MENU_CELULAR_FOLLOW: Item[] = [
   { rot: 'Primeira vez', href: follow('#primeira-vez') },
+  { rot: 'Como é', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
   { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
   { rot: FC27.nome, href: CAMP, sub: FC27.datas, duro: true },
   { rot: 'Como chegar', href: naIgreja('/como-chegar') },
@@ -225,10 +227,12 @@ export const MENU_CELULAR_FOLLOW: Item[] = [
 export const BUSCA_FOLLOW: Item[] = [
   { rot: 'Que horas é o Follow?', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
   { rot: 'Onde fica?', href: follow('#quando'), sub: `${IGREJA.rua}, ${IGREJA.bairro}` },
-  { rot: 'Não sou de igreja', href: follow('#primeira-vez'), sub: 'Vem assim mesmo' },
-  { rot: 'Vou sozinho', href: follow('#primeira-vez'), sub: 'A gente te espera na porta' },
-  { rot: 'O que eu visto?', href: follow('#primeira-vez'), sub: 'O que você já estava usando' },
+  { rot: 'Não sou de igreja', href: follow('#primeira-vez'), sub: 'Melhor ainda' },
+  { rot: 'Vou sozinho', href: follow('#primeira-vez'), sub: 'Um líder te espera na porta' },
+  { rot: 'O que eu visto?', href: follow('#primeira-vez'), sub: 'O que usaria pra sair com os amigos' },
   { rot: 'Quanto tempo dura?', href: follow('#primeira-vez'), sub: 'Mais ou menos uma hora e meia' },
+  { rot: 'Como é o Follow?', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
+  { rot: 'Programação', href: follow('#quando'), sub: 'Noite de louvor, talk, festa temática' },
   { rot: 'Preciso de inscrição?', href: follow('#quando'), sub: 'Não' },
   { rot: 'Abrir no mapa', href: MAPA, sub: IGREJA.rua, duro: true },
   { rot: 'WhatsApp', href: CONVERSA_FOLLOW.href, sub: 'Avisar que vou', duro: true },

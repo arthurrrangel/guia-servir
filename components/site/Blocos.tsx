@@ -370,11 +370,13 @@ export function FaixaCamp({ href }: { href: string }) {
     <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
       <div className="s-in">
         <div className="s-so-texto s-rev">
-          <Chapeu forte={FC27.nome} resto={FC27.datas} />
-          <Vozes id="t-camp" className="s-h2 media" it="juntos">Seis dias fora da rotina, juntos</Vozes>
-          <p className="s-lead"><UmaLinha semFim texto="O acampamento do Follow. Inscrição, pagamento e as regras estão na página do retiro." /></p>
+          <Chapeu forte={FC27.nome} resto={`${FC27.datas}, no Carnaval`} />
+          {/* 21/10/2026: as palavras da própria página do Camp ("cinco noites longe da rotina",
+              13 a 24 anos, Espaço Bethel); dizia "seis dias", que a página do Camp não diz */}
+          <Vozes id="t-camp" className="s-h2 media" it="rotina">Cinco noites longe da rotina</Vozes>
+          <p className="s-lead"><UmaLinha semFim texto="O retiro de verão do Follow, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp." /></p>
           <div className="s-acoes">
-            <Pil href={href} duro tom="preta">Ir para a página do Camp</Pil>
+            <Pil href={href} duro tom="preta">Quero ir no Camp</Pil>
           </div>
         </div>
       </div>

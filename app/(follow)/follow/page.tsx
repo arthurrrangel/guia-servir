@@ -2,7 +2,7 @@ import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/i
 import { naIgreja } from '@/lib/site/sites';
 import { SimboloFollow } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Fecho, FaixaCamp, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Passos, Fecho, FaixaCamp, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import Contagem from '@/components/follow/Contagem';
 
@@ -35,8 +35,15 @@ import Contagem from '@/components/follow/Contagem';
    e pediu os materiais reais. Duas faixas de legenda, uma foto em silêncio
    (os braços abertos) e o pouso com a única chamada da página: avisar que
    vai, pelo WhatsApp da igreja (medido como avisou_que_vai). Abaixo, só o
-   que quem nunca foi precisa: as quatro dúvidas, quando e onde (com a
-   contagem até o próximo sábado), o Follow Camp e o fecho. Sem formulário.
+   que quem nunca foi precisa: as quatro dúvidas, como é um sábado (21/10),
+   quando e onde (com a contagem até o próximo sábado), o Follow Camp e o
+   fecho. Sem formulário.
+
+   A COPY (21/10/2026): o Arthur reprovou a primeira ("tá muito ruim"): era
+   slogan sobre slogan, com respostas de uma linha e nada sobre o que
+   acontece num sábado. A de agora diz o que acontece (louvor, Palavra,
+   encontro; a programação que muda), responde de verdade às dúvidas e só
+   afirma o que é fato ou já estava aprovado na copy da igreja.
 
    O FOLLOW CAMP continua em guiachurch.com/followcamp (o pagamento usa
    sessionStorage do domínio); daqui é um link inteiro.
@@ -54,12 +61,27 @@ const FOTOS: Foto[] = [
   { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0.74, b: 0.82, alt: 'A sala do Follow cheia, todo mundo de pé' },
 ];
 
-/* as quatro dúvidas de quem nunca foi (o pacote, ao pé da letra) */
+/* as quatro dúvidas de quem nunca foi, nas palavras de quem pergunta. 21/10/2026:
+   o Arthur reprovou a copy anterior ("tá muito ruim"): as respostas eram de
+   uma linha seca ("O que você já estava usando."). Agora respondem de verdade,
+   com o que é fato: o líder na porta (ele, 19/10), a hora e meia (ele, 19/10),
+   e as frases já aprovadas da casa ("Ninguém vai olhar pra sua roupa",
+   "Atrasou? Entra assim mesmo") */
 const DUVIDAS = [
-  { q: 'Não sou de igreja.', r: 'Vem assim mesmo. O Follow é pra quem está chegando.' },
-  { q: 'Vou sozinho.', r: 'Avisa que vai e a gente te espera na porta.' },
-  { q: 'O que eu visto?', r: 'O que você já estava usando.' },
-  { q: 'Quanto tempo dura?', r: 'Mais ou menos uma hora e meia.' },
+  { q: 'Não sou de igreja.', r: 'Melhor ainda. O Follow existe pra quem está chegando, não pra quem já sabe tudo. Ninguém vai te cobrar nada.' },
+  { q: 'Vou sozinho.', r: 'Avisa que vai. Um líder do Follow te espera na porta e te apresenta pra galera. Você não fica perdido nem um minuto.' },
+  { q: 'O que eu visto?', r: 'O que você usaria pra sair com os amigos. Ninguém vai olhar pra sua roupa.' },
+  { q: 'Quanto tempo dura?', r: 'Mais ou menos uma hora e meia. Atrasou? Entra assim mesmo, ninguém vai olhar a hora.' },
+];
+
+/* como é um sábado: o que a copy da igreja diz do Follow ("a geração que
+   está chegando adora, ouve e se encontra"), em três momentos; as frases do
+   louvor e da Palavra são as da home da igreja (aprovadas) */
+const SABADO = [
+  /* uma frase cada: no celular só a primeira frase aparece (UmaLinha), e ela tem que dizer tudo */
+  { n: '01', t: 'Louvor', d: 'A banda toca e a galera canta; você canta junto ou fica em silêncio, do seu jeito.' },
+  { n: '02', t: 'Palavra', d: 'Uma mensagem da Bíblia pra vida real: o futuro, a família, a ansiedade, a fé que você quer que seja de verdade.' },
+  { n: '03', t: 'Encontro', d: 'Antes e depois, conversa: é aí que o Follow deixa de ser um culto que você visita e vira uma família que você tem.' },
 ];
 
 export default function Follow() {
@@ -67,7 +89,7 @@ export default function Follow() {
     <>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'Event', name: 'Follow',
-        description: `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`,
+        description: `O culto de jovens da GUIA Church: louvor, uma palavra pra vida real e gente da sua idade. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`,
         url: SITE_FOLLOW, eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
         eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Saturday', startTime: '19:00', scheduleTimezone: 'America/Sao_Paulo' },
         location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: IGREJA.cidade, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
@@ -80,9 +102,9 @@ export default function Follow() {
         fotos={FOTOS}
         faixas={[
           { texto: 'Vem como você está', it: 'está', a: 0, b: 0.26 },
-          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.38, b: 0.62, sobe: true },
+          { texto: 'Adora. Ouve. Se encontra', it: 'Se encontra', a: 0.38, b: 0.62, sobe: true },
         ]}
-        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: `Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`, a: 0.76 }}
+        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: `Follow, o culto de jovens da ${IGREJA.nome}. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`, a: 0.76 }}
         chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
@@ -91,7 +113,7 @@ export default function Follow() {
       </Scrub>
 
       {/* 2 · é a sua primeira vez? (o cartão claro sobre a noite, tela 6) */}
-      <Claro id="primeira-vez" tid="t-pv" titulo="É a sua primeira vez no Follow?" lead={<UmaLinha semFim texto="Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está." />}>
+      <Claro id="primeira-vez" tid="t-pv" titulo="É a sua primeira vez no Follow?" lead={<UmaLinha semFim texto="Não precisa ser de igreja, não precisa conhecer ninguém, não precisa entender de nada. Chega, que o resto a gente te mostra." />}>
         <div className="s-qa so-largo">
           {DUVIDAS.map(d => <div key={d.q}><b>{liga(d.q)}</b><p>{fim(ligaTexto(d.r))}</p></div>)}
         </div>
@@ -106,7 +128,10 @@ export default function Follow() {
         </div>
       </Claro>
 
-      {/* 3 · quando e onde (os fatos em linha e a contagem) */}
+      {/* 3 · como é um sábado no Follow: louvor, Palavra, encontro */}
+      <Passos id="como-e" tid="t-como" titulo="Como é um sábado no Follow?" sub="toda semana, três coisas:" itens={SABADO} />
+
+      {/* 4 · quando e onde (os fatos em linha e a contagem) */}
       <section id="quando" className="s-faixa papel" aria-labelledby="t-quando">
         <SimboloFollow className="s-canto duplo" />
         <div className="s-in">
@@ -114,13 +139,15 @@ export default function Follow() {
           <div className="s-cab centro s-rev">
             <Chapeu forte="Quando e onde" />
             <Vozes id="t-quando" className="s-h2" it={IGREJA.followHora || undefined}>{`Todo sábado às ${IGREJA.followHora}`}</Vozes>
+            {/* a programação varia (o Arthur, ago/2026: talk, noite de louvor, festa temática); a hora e o lugar não */}
+            <p className="s-lead"><UmaLinha semFim texto="Nem todo sábado é igual: tem noite de louvor, tem talk, tem festa temática. A hora e o lugar não mudam." /></p>
             <Contagem />
           </div>
           {/* os três fatos (o quando já é o título): onde, quanto tempo, inscrição.
               No celular viram três linhas com fio (.lista), não três caixas */}
           <div className="s-fatos lista s-rev d1">
             <a className="s-fato" href={MAPA} target="_blank" rel="noreferrer" data-medir="mapa"><small>Onde</small><b>{IGREJA.nome}</b><p>{IGREJA.rua}, {IGREJA.bairro}</p></a>
-            <div className="s-fato"><small>Quanto tempo</small><b>Uma hora e meia</b><p>Mais ou menos</p></div>
+            <div className="s-fato"><small>Quanto tempo</small><b>Uma hora e meia</b><p>Atrasou? Entra assim mesmo</p></div>
             <div className="s-fato"><small>Inscrição</small><b>Não precisa</b><p>É só chegar</p></div>
           </div>
           <div className="s-acoes centro s-cartoes-acoes s-rev">
@@ -131,13 +158,13 @@ export default function Follow() {
         </div>
       </section>
 
-      {/* 4 · Follow Camp 2027 (a mesma faixa de areia do /eventos) */}
+      {/* 5 · Follow Camp 2027 (a mesma faixa de areia do /eventos) */}
       <FaixaCamp href={CAMP} />
 
-      {/* 5 · o fecho: a sala do Follow cheia, vista pelo chevron da marca, que
+      {/* 6 · o fecho: a sala do Follow cheia, vista pelo chevron da marca, que
           abre com a rolagem até a foto inteira (a assinatura da casa, como na
           home do Guia Church) */}
-      <Fecho id="vem" tom="janela" foto={{ l: '/follow/f5-l.webp', p: '/follow/f5-p.webp' }} titulo="E se um culto pudesse mudar toda a sua vida" it="vida" lead="Sábado tem Follow. A gente te espera.">
+      <Fecho id="vem" tom="janela" foto={{ l: '/follow/f5-l.webp', p: '/follow/f5-p.webp' }} titulo="E se um culto pudesse mudar toda a sua vida" it="vida" lead={`Sábado, ${IGREJA.followHora}, tem um lugar guardado pra você. Avisa que vai, ou só aparece.`}>
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
         <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
       </Fecho>

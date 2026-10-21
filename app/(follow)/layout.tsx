@@ -39,7 +39,7 @@ import Medidor from '@/components/site/Medidor';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_FOLLOW),
   title: { absolute: 'Follow · O culto de jovens da GUIA Church' },
-  description: `O Follow é o culto de jovens da GUIA Church, todo sábado às ${IGREJA.followHora}, na ${IGREJA.bairro}. Não precisa ser de igreja. Não precisa conhecer ninguém. Vem como você está.`,
+  description: `O Follow é o culto de jovens da GUIA Church: todo sábado às ${IGREJA.followHora}, na ${IGREJA.bairro}. Louvor, uma palavra pra vida real e gente da sua idade. Não precisa ser de igreja nem conhecer ninguém.`,
   alternates: { canonical: '/' },
   appleWebApp: { capable: true, title: 'Follow', statusBarStyle: 'black-translucent' },
   /* a marca do Follow (20/10/2026): o favicon e o ícone de app são o chevron
