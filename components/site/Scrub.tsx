@@ -170,7 +170,12 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
       fotosEm(mostrado);
       legendas(mostrado);
     }
-    const acordar = () => { if (raf === null && naTela) raf = requestAnimationFrame(tick); };
+    /* 21/10/2026: só com o scrub ligado. Com "reduzir movimento" o observador da tela
+       acordava o laço mesmo assim, e a primeira passada escrevia --op:0, --k:0 e
+       inert no pouso (progresso 0, o topo do scroll): em linha, isso vence a folha
+       (.estatico), e o herói ficava sem título nem pílulas para quem tem o ajuste
+       ligado no iPhone */
+    const acordar = () => { if (ligado && raf === null && naTela) raf = requestAnimationFrame(tick); };
     const aoRolar = () => { alvo = progresso(); acordar(); };
 
     /* ----------------------------------------------- ligar e desligar o scrub */
@@ -217,7 +222,8 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
       if (mqReduz.matches) {
         desligar();
         hero!.classList.add('estatico');
-        els.forEach(el => el.removeAttribute('inert'));
+        /* o que o scrub escreveu em linha sai: quem manda no estático é a folha */
+        els.forEach(el => { el.removeAttribute('inert'); el.style.removeProperty('--op'); el.style.removeProperty('--k'); });
         return;
       }
       hero!.classList.remove('estatico');

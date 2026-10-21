@@ -232,7 +232,7 @@ export const BUSCA_FOLLOW: Item[] = [
   { rot: 'O que eu visto?', href: follow('#primeira-vez'), sub: 'O que usaria pra sair com os amigos' },
   { rot: 'Quanto tempo dura?', href: follow('#primeira-vez'), sub: 'Mais ou menos uma hora e meia' },
   { rot: 'Como é o Follow?', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
-  { rot: 'Programação', href: follow('#quando'), sub: 'Noite de louvor, talk, festa temática' },
+  { rot: 'Programação', href: follow('#quando'), sub: 'Cada sábado tem a sua cara' },
   { rot: 'Preciso de inscrição?', href: follow('#quando'), sub: 'Não' },
   { rot: 'Abrir no mapa', href: MAPA, sub: IGREJA.rua, duro: true },
   { rot: 'WhatsApp', href: CONVERSA_FOLLOW.href, sub: 'Avisar que vou', duro: true },

@@ -1,4 +1,5 @@
 import '../site.css';
+import type { Viewport } from 'next';
 import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
 import Movimento from '@/components/site/Movimento';
@@ -18,6 +19,14 @@ import Medidor from '@/components/site/Medidor';
    sistema (app/(sistema)/) não passa por aqui e não conhece esta folha.
    Qual domínio mostra o quê: next.config.mjs, "OS DOIS SITES".
    ============================================================================= */
+/* a barra do navegador no celular (o iOS pinta a faixa de cima e a de baixo com
+   isto) na cor da barra do site, a noite: com o #252525 do sistema, herdado da raiz,
+   ficava uma emenda cinza em cima do preto da barra (21/10/2026) */
+export const viewport: Viewport = {
+  width: 'device-width', initialScale: 1, themeColor: '#111113',
+  colorScheme: 'light', viewportFit: 'cover',
+};
+
 export default function IgrejaLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="s">

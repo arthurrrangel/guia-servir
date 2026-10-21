@@ -258,7 +258,7 @@ body{ margin:0 }
 /* =============================================================================
    O PÉ
    ============================================================================= */
-.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 18px; border-top:1px solid rgba(255,255,255,.06) }
+.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 calc(18px + env(safe-area-inset-bottom, 0px)); border-top:1px solid rgba(255,255,255,.06) }
 .s .s-pe-g{ display:grid; grid-template-columns:1.6fr repeat(5,1fr); gap:clamp(20px,2.6vw,40px) }
 .s .s-pe-marca svg{ height:40px; width:auto }
 .s .s-pe-marca .s-marca-follow{ height:28px }
@@ -1158,6 +1158,9 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      no celular fica só a pílula (o "Enviar" da apresentação é da linha larga) */
   .s .s-form.com-fim .s-enviar{ display:none }
   .s .s-form.com-fim .s-form-fim{ margin-top:clamp(24px,4vw,36px) }
+  /* o botão do formulário tem a largura dos campos (21/10/2026): era uma pílula estreita
+     no meio, embaixo de três campos de ponta a ponta */
+  .s .s-form.com-fim .s-form-fim .s-pil{ width:100% }
 }
 @media(max-width:420px){
   .s .s-h1{ font-size:clamp(40px,12vw,52px) }
@@ -1215,6 +1218,11 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 
   /* 3. fileiras (flex): itens no meio */
   .s .s-chapeu, .s .s-acoes, .s .g-acoes, .s .s-cartao-ir, .s .pg-chips, .s .s-sede, .s .s-pe-fim, .s .of-meios, .s .s-form-fim{ justify-content:center }
+  /* 21/10/2026: a pílula sozinha vai de ponta a ponta, em toda parte. Duas não iam:
+     o "Pix" do /ofertar (numa grade, o centro encolhia a coluna até o tamanho do botão)
+     e o "Chamar no WhatsApp" de quem responde pela área (o bloco centraliza os filhos) */
+  .s .of-meios{ justify-content:stretch }
+  .s .s-pessoa .s-acoes{ justify-self:stretch }
   .s .pg-corpo{ align-items:stretch }
 
   /* 4. rodapé: marca em cima, grupos em duas colunas, o grupo que sobra
@@ -1354,8 +1362,13 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      texto, não a altura da tela. Os curtos (acessar, ofertar, onde me
      encaixo) têm a altura do que levam. O texto ficou mais enxuto: no
      iPhone a área visível é de ~600 px e o texto tomava quase tudo. */
-  .s .s-heroi{ --heroi-topo:clamp(150px,30svh,260px); min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
-  .s .s-heroi.curto{ min-height:0 }
+  /* 21/10/2026: a reserva de cima (a foto limpa) só pesa quando o texto é longo, porque
+     o texto mora embaixo e o herói tem a altura da tela. Com 30svh, os heróis de texto
+     longo (Pequena Guia, Quem somos) passavam da primeira tela, e no iPhone SE a primeira
+     pílula ficava abaixo da dobra. Com 18svh eles cabem; os de texto curto não mudam.
+     Os curtos (.curto) têm a altura do que levam e mantêm a reserva de antes. */
+  .s .s-heroi{ --heroi-topo:clamp(96px,18svh,260px); min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
+  .s .s-heroi.curto{ --heroi-topo:clamp(150px,30svh,260px); min-height:0 }
   .s .s-heroi-in{ position:relative; padding-top:var(--heroi-topo); padding-bottom:32px }
   .s .s-heroi::before, .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
   .s .s-heroi-in::before{ content:""; position:absolute; z-index:-1; pointer-events:none; left:calc(var(--s-gutter) * -1); right:calc(var(--s-gutter) * -1); top:calc(var(--heroi-topo) - 120px); bottom:-1px;
@@ -1364,6 +1377,21 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-heroi .s-lead, .s .s-heroi .s-lead.grande{ margin-top:16px; font-size:18px; line-height:1.38 }
   .s .s-heroi .s-acoes{ margin-top:24px }
   .s .s-heroi .s-micro{ margin-top:14px; font-size:14px }
+}
+
+/* CELULAR DEITADO · 21/10/2026: ~330 px úteis de altura. O herói de foto media a
+   letra pela largura (vw) e jogava a linha de apoio e as pílulas para baixo da dobra
+   (o da Mídia em 549 px, o da Pequena Guia em 602). Aqui a letra e os respiros medem
+   pela altura, a linha de apoio fica só com a primeira frase (como em pé) e o rodapé
+   do herói sai: título, linha e pílulas na primeira tela. */
+@media (orientation:landscape) and (max-height:500px){
+  .s .s-heroi{ min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); align-items:center }
+  .s .s-heroi-in{ padding:20px 0 24px }
+  .s .s-heroi .s-chapeu{ margin-bottom:10px }
+  .s .s-heroi .s-h1{ font-size:clamp(30px,11svh,46px) }
+  .s .s-heroi .s-lead,.s .s-heroi .s-lead.grande{ margin-top:12px; font-size:16px; line-height:1.38; max-width:62ch }
+  .s .s-heroi .s-resto,.s .s-heroi .s-micro{ display:none }
+  .s .s-heroi .s-acoes{ margin-top:16px }
 }
 
 /* =============================================================================

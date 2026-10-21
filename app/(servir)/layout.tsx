@@ -1,5 +1,5 @@
 import '../site.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { SITE } from '@/lib/igreja';
 import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
@@ -23,6 +23,13 @@ import Medidor from '@/components/site/Medidor';
    O TÍTULO É `absolute`: um `default` aqui ainda passaria pelo modelo da
    raiz ("%s · GUIA Church") e a aba diria "... · GUIA Servir · GUIA Church".
    ============================================================================= */
+/* a barra do navegador no celular na cor da barra do site (a noite), como no Guia
+   Church e no Follow; o sistema (app/(sistema)) segue com o #252525 da raiz */
+export const viewport: Viewport = {
+  width: 'device-width', initialScale: 1, themeColor: '#111113',
+  colorScheme: 'light', viewportFit: 'cover',
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE),
   title: { absolute: 'GUIA Servir', template: '%s · GUIA Servir' },

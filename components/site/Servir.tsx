@@ -235,7 +235,7 @@ export function FormServir({ escuro = true, areaInicial = '' }: { escuro?: boole
       </div>
       <div className="s-campo">
         <label htmlFor="s-tel">WhatsApp</label>
-        <input id="s-tel" name="whatsapp" type="tel" inputMode="tel" placeholder="Whatsapp:" autoComplete="tel" value={tel}
+        <input id="s-tel" name="whatsapp" type="tel" inputMode="tel" placeholder="WhatsApp:" autoComplete="tel" value={tel}
                aria-invalid={!!erro.tel} aria-describedby={erro.tel ? 's-tel-e' : undefined}
                onChange={e => { setTel(e.target.value); if (erro.tel) setErro(x => ({ ...x, tel: undefined })); }} />
         {erro.tel && <span id="s-tel-e" className="s-campo-dica" role="alert">{erro.tel}</span>}

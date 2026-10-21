@@ -67,7 +67,7 @@ export default function OndeMeEncaixo() {
         <div className="s-in">
           <div className="s-cab centro s-rev">
             <Vozes id="t-areas" className="s-h2 media" it="time">O trabalho, não o nome do time</Vozes>
-            <p className="s-lead"><span className="s-resto">{ligaTexto("Com as palavras de quem lidera cada área.")} </span>{ligaTexto("Clique numa pra ver as funções.")}</p>
+            <p className="s-lead"><span className="s-resto">{ligaTexto("Com as palavras de quem lidera cada área.")} </span>{/* "Escolha", e não "Clique": no celular ninguém clica (21/10/2026) */}{ligaTexto("Escolha uma pra ver as funções.")}</p>
           </div>
           <div className="s-rev d1"><Areas perfil /></div>
           <ul className="s-faq depois s-rev so-largo">

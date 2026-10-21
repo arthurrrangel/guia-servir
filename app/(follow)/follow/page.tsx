@@ -75,8 +75,8 @@ const DUVIDAS = [
 ];
 
 /* como é um sábado: o que a copy da igreja diz do Follow ("a geração que
-   está chegando adora, ouve e se encontra"), em três momentos; as frases do
-   louvor e da Palavra são as da home da igreja (aprovadas) */
+   está chegando adora, ouve e se encontra"), em três momentos; a frase do
+   louvor e a "Palavra pra vida real" vêm da home da igreja (aprovadas) */
 const SABADO = [
   /* uma frase cada: no celular só a primeira frase aparece (UmaLinha), e ela tem que dizer tudo */
   { n: '01', t: 'Louvor', d: 'A banda toca e a galera canta; você canta junto ou fica em silêncio, do seu jeito.' },
@@ -102,9 +102,9 @@ export default function Follow() {
         fotos={FOTOS}
         faixas={[
           { texto: 'Vem como você está', it: 'está', a: 0, b: 0.26 },
-          { texto: 'Adora. Ouve. Se encontra', it: 'Se encontra', a: 0.38, b: 0.62, sobe: true },
+          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.38, b: 0.62, sobe: true },
         ]}
-        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: `Follow, o culto de jovens da ${IGREJA.nome}. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`, a: 0.76 }}
+        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: ligaTexto(`Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`), a: 0.76 }}
         chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
@@ -129,7 +129,8 @@ export default function Follow() {
       </Claro>
 
       {/* 3 · como é um sábado no Follow: louvor, Palavra, encontro */}
-      <Passos id="como-e" tid="t-como" titulo="Como é um sábado no Follow?" sub="toda semana, três coisas:" itens={SABADO} />
+      {/* "do que a noite é feita", e não "toda semana": a programação varia (a faixa seguinte diz) */}
+      <Passos id="como-e" tid="t-como" titulo="Como é um sábado no Follow?" sub="do que a noite é feita:" itens={SABADO} />
 
       {/* 4 · quando e onde (os fatos em linha e a contagem) */}
       <section id="quando" className="s-faixa papel" aria-labelledby="t-quando">
@@ -140,19 +141,20 @@ export default function Follow() {
             <Chapeu forte="Quando e onde" />
             <Vozes id="t-quando" className="s-h2" it={IGREJA.followHora || undefined}>{`Todo sábado às ${IGREJA.followHora}`}</Vozes>
             {/* a programação varia (o Arthur, ago/2026: talk, noite de louvor, festa temática); a hora e o lugar não */}
-            <p className="s-lead"><UmaLinha semFim texto="Nem todo sábado é igual: tem noite de louvor, tem talk, tem festa temática. A hora e o lugar não mudam." /></p>
+            <p className="s-lead"><UmaLinha semFim texto="Cada sábado tem a sua cara: noite de louvor, talk, surpresa. A hora e o lugar não mudam." /></p>
             <Contagem />
           </div>
           {/* os três fatos (o quando já é o título): onde, quanto tempo, inscrição.
               No celular viram três linhas com fio (.lista), não três caixas */}
           <div className="s-fatos lista s-rev d1">
             <a className="s-fato" href={MAPA} target="_blank" rel="noreferrer" data-medir="mapa"><small>Onde</small><b>{IGREJA.nome}</b><p>{IGREJA.rua}, {IGREJA.bairro}</p></a>
-            <div className="s-fato"><small>Quanto tempo</small><b>Uma hora e meia</b><p>Atrasou? Entra assim mesmo</p></div>
+            {/* "Atrasou? Entra assim mesmo" já está na resposta de "Quanto tempo dura?": aqui, a conversa de depois (o "Encontro") */}
+            <div className="s-fato"><small>Quanto tempo</small><b>Uma hora e meia</b><p>E a conversa depois</p></div>
             <div className="s-fato"><small>Inscrição</small><b>Não precisa</b><p>É só chegar</p></div>
           </div>
+          {/* uma ação aqui: o mapa. "Avisar que vou" fica no cartão da primeira vez e no fecho */}
           <div className="s-acoes centro s-cartoes-acoes s-rev">
             <Pil href={MAPA} fora tom="preta" medir="mapa">Abrir no mapa</Pil>
-            <Pil href={CONVERSA.href} fora tom="contorno" medir="avisou_que_vai">Avisar que vou</Pil>
           </div>
           <Sede className="base" />
         </div>
@@ -164,7 +166,7 @@ export default function Follow() {
       {/* 6 · o fecho: a sala do Follow cheia, vista pelo chevron da marca, que
           abre com a rolagem até a foto inteira (a assinatura da casa, como na
           home do Guia Church) */}
-      <Fecho id="vem" tom="janela" foto={{ l: '/follow/f5-l.webp', p: '/follow/f5-p.webp' }} titulo="E se um culto pudesse mudar toda a sua vida" it="vida" lead={`Sábado, ${IGREJA.followHora}, tem um lugar guardado pra você. Avisa que vai, ou só aparece.`}>
+      <Fecho id="vem" tom="janela" foto={{ l: '/follow/f5-l.webp', p: '/follow/f5-p.webp' }} titulo="E se um culto pudesse mudar toda a sua vida?" it="vida?" lead={`Sábado, ${IGREJA.followHora}, tem um lugar guardado pra você. Avisa que vai, ou só aparece.`}>
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
         <Pil href={IGREJA.instagram} fora tom="vidro">{IGREJA.instagramArroba}</Pil>
       </Fecho>

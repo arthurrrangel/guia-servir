@@ -40,7 +40,10 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
             {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Logo />}
             <p className="s-frase">{site === 'follow' ? 'Um lugar para todos' : IGREJA.frase}.</p>
             <p className="s-corpo">
-              <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</b><br />
+              {/* no guiafollow.com o sábado vem primeiro (21/10/2026); o domingo é a Celebração, como na agenda da igreja */}
+              {site === 'follow' && IGREJA.followHora
+                ? <b>Follow aos sábados, {IGREJA.followHora}<Sep />Celebração aos {IGREJA.cultoDia.toLowerCase()}s, {IGREJA.cultoHora}</b>
+                : <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</b>}<br />
               {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna
                   estreita do pé a linha única partia o bairro ("Barra da" /
                   "Tijuca") */}

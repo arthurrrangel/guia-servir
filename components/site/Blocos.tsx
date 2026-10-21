@@ -28,7 +28,7 @@ export const fim = (t: string) => {
   /* "… RJ · 22793-390": o Chrome quebra depois do "·" mesmo com espaço
      que não quebra, então o separador gruda nas duas pontas (U+2060 é o
      "juntador de palavras": invisível, proíbe quebra dos dois lados) */
-  t = pontos(t);
+  t = nomes(pontos(t));
   const sep = t.match(/^([\s\S]*\S)\s+([^\s\p{L}\p{N}]+)\s+(\S+)\s*$/u);
   const colado = sep ? `${sep[1]}\u00a0${sep[2]}\u2060\u00a0${sep[3]}` : t.replace(/\s+(\S+)\s*$/, '\u2060\u00a0$1');
   /* hífen dentro da última palavra (CEP 22793-390) também é ponto de quebra:
@@ -50,8 +50,13 @@ const CURTAS = 'o|a|e|é|de|da|do|em|no|na|um|uma|à|ao|os|as|pra|para|por|que|s
 const reCurta = (max: number) => new RegExp(`(^|[\\s\u00a0("“])(${CURTAS})[ ]+(?=[^\\s]{1,${max}}(?:[\\s]|$))`, 'giu');
 const RE_CURTA = reCurta(9);
 const RE_CURTA_TEXTO = reCurta(16);
-export const liga = (t: string) => t.replace(RE_CURTA, '$1$2\u00a0').replace(RE_CURTA, '$1$2\u00a0');
-export const ligaTexto = (t: string) => t.replace(RE_CURTA_TEXTO, '$1$2\u00a0').replace(RE_CURTA_TEXTO, '$1$2\u00a0');
+/* NOME NÃO SE PARTE · 21/10/2026: no celular "na GUIA / Church, Barra da Tijuca"
+   quebrava o nome da igreja no meio. Os nomes próprios de duas ou três palavras
+   que o site repete viram um bloco só (espaço que não quebra) */
+const NOMES = /GUIA Church|GUIA Kids|GUIA Servir|Follow Camp|Pequenas? Guias?|Barra da Tijuca|Pedra de Itaúna/gu;
+const nomes = (t: string) => t.replace(NOMES, m => m.replace(/ /g, '\u00a0'));
+export const liga = (t: string) => nomes(t).replace(RE_CURTA, '$1$2\u00a0').replace(RE_CURTA, '$1$2\u00a0');
+export const ligaTexto = (t: string) => nomes(t).replace(RE_CURTA_TEXTO, '$1$2\u00a0').replace(RE_CURTA_TEXTO, '$1$2\u00a0');
 const CURTA_NO_FIM = new RegExp(`(^|\\s)(${CURTAS})$`, 'iu');
 
 /* SEPARADOR " · " entre dois trechos de uma linha (endereço, horário). No
@@ -105,7 +110,9 @@ export function Vozes({ children, it, as: Tag = 'h2', className = '', id, semPon
           itálico é bloco (linha própria): lá o espaço comum some no fim da
           linha, e o que não quebra sobraria como recuo */}
       {antes && <>{antes}{Tag !== 'h1' && (CURTA_NO_FIM.test(antes) || (!/\s/.test(dep) && dep.length <= 10)) ? '\u00a0' : ' '}</>}
-      <span className={'s-it' + (semPonto ? ' sem-ponto' : '')}>{dep}</span>
+      {/* a frase que já termina em ? ou ! não ganha o ponto da folha (21/10/2026: "E se um
+          culto pudesse mudar toda a sua vida?" saía com ponto, uma pergunta virando afirmação) */}
+      <span className={'s-it' + (semPonto || /[?!]$/.test(dep) ? ' sem-ponto' : '')}>{dep}</span>
     </Tag>
   );
 }
@@ -370,11 +377,11 @@ export function FaixaCamp({ href }: { href: string }) {
     <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
       <div className="s-in">
         <div className="s-so-texto s-rev">
-          <Chapeu forte={FC27.nome} resto={`${FC27.datas}, no Carnaval`} />
+          <Chapeu forte={FC27.nome} resto={FC27.datas} />
           {/* 21/10/2026: as palavras da própria página do Camp ("cinco noites longe da rotina",
               13 a 24 anos, Espaço Bethel); dizia "seis dias", que a página do Camp não diz */}
           <Vozes id="t-camp" className="s-h2 media" it="rotina">Cinco noites longe da rotina</Vozes>
-          <p className="s-lead"><UmaLinha semFim texto="O retiro de verão do Follow, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp." /></p>
+          <p className="s-lead"><UmaLinha semFim texto="O retiro do Follow no Carnaval, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp." /></p>
           <div className="s-acoes">
             <Pil href={href} duro tom="preta">Quero ir no Camp</Pil>
           </div>
