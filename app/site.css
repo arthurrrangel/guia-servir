@@ -111,6 +111,12 @@ body{ margin:0 }
   text-rendering:optimizeLegibility; font-feature-settings:"kern","liga","calt";
   min-height:100vh; display:flex; flex-direction:column;
 }
+/* A ALTURA QUE SE VÊ (21/10/2026, lib/site/tela.ts): o herói, o palco do
+   scroll e as faixas medem --s-alt, não 100svh. No Safari 26, 100svh vale a
+   tela inteira e a barra flutuante cobre o pé: lá o script grava --s-tela com
+   a altura que se vê. Nos outros navegadores, --s-alt é o próprio 100svh. */
+.s{ --s-alt:var(--s-tela, 100vh) }
+@supports (height:100svh){ .s{ --s-alt:var(--s-tela, 100svh) } }
 /* O GUIA FOLLOW (20/10/2026): a mesma casa, na identidade do Follow. A arte
    oficial dele define duas coisas, e são as duas que mudam aqui: o claro é
    o verde-claro da arte (papel, o cartão claro, a areia do Camp, os tons de
@@ -258,13 +264,22 @@ body{ margin:0 }
 /* =============================================================================
    O PÉ
    ============================================================================= */
-.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(48px,6vw,80px) 0 calc(18px + env(safe-area-inset-bottom, 0px)); border-top:1px solid rgba(255,255,255,.06) }
+.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(56px,6vw,88px) 0 calc(20px + env(safe-area-inset-bottom, 0px)); border-top:1px solid rgba(255,255,255,.06) }
 .s .s-pe-g{ display:grid; grid-template-columns:1.6fr repeat(5,1fr); gap:clamp(20px,2.6vw,40px) }
-.s .s-pe-marca svg{ height:40px; width:auto }
-.s .s-pe-marca .s-marca-follow{ height:28px }
+.s .s-pe-marca > svg{ height:40px; width:auto }
+.s .s-pe-marca > .s-marca-follow{ height:28px }
 .s .s-pe-marca .s-frase{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(22px,1.9vw,28px); line-height:1.1; letter-spacing:-.01em; margin-top:22px }
-.s .s-pe-marca .s-corpo{ margin-top:16px; color:var(--s-mudo-claro); font-size:15.5px }
-.s .s-pe-marca .s-corpo b{ color:var(--s-papel); font-weight:600 }
+/* quando e onde (21/10/2026): o rótulo pequeno em cima, a linha forte e a de
+   apoio embaixo, o mapa como link de verdade */
+.s .s-pe-info{ margin:26px 0 0; display:grid; gap:20px }
+.s .s-pe-info dt{ font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--s-mudo-claro); margin:0 0 6px }
+.s .s-pe-info dd{ margin:0; font-size:15.5px; line-height:1.55; color:var(--s-mudo-claro) }
+.s .s-pe-info dd b{ color:var(--s-papel); font-weight:600 }
+.s .s-pe-mapa{ display:inline-flex; align-items:center; gap:6px; margin-top:2px; color:var(--s-papel); font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:rgba(255,255,255,.35); text-underline-offset:4px }
+.s .s-pe-mapa svg{ width:14px; height:14px; flex:0 0 14px }
+/* as redes: duas pílulas de contorno, claras sobre a noite */
+.s .s-pe-redes{ display:flex; flex-wrap:wrap; gap:10px; margin-top:24px }
+.s .s-pe-redes .s-pil{ height:42px; padding:0 22px; font-size:15px; color:var(--s-papel); border-color:rgba(255,255,255,.32) }
 .s .s-pe-g h2{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-mudo-claro); margin-bottom:14px }
 .s .s-pe-g li{ margin:0 0 9px }
 .s .s-pe-g li a{ font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
@@ -283,8 +298,8 @@ body{ margin:0 }
    vozes, a linha de apoio, duas pílulas e a nota pequena. Texto à esquerda,
    na margem da apresentação.
    ============================================================================= */
-.s .s-heroi{ position:relative; isolation:isolate; min-height:min(92svh,920px); display:flex; align-items:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden }
-.s .s-heroi.curto{ min-height:min(72svh,680px) }
+.s .s-heroi{ position:relative; isolation:isolate; min-height:min(calc(var(--s-alt) * .92),920px); display:flex; align-items:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden }
+.s .s-heroi.curto{ min-height:min(calc(var(--s-alt) * .72),680px) }
 .s .s-heroi > img,.s .s-heroi > picture img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; filter:saturate(.9) }
 .s .s-heroi::before{ content:""; position:absolute; inset:0; z-index:-1; background:
   linear-gradient(90deg,rgba(10,10,12,.78) 0%,rgba(10,10,12,.5) 42%,rgba(10,10,12,.16) 75%,rgba(10,10,12,.06) 100%),
@@ -318,6 +333,11 @@ body{ margin:0 }
 @media(orientation:portrait){
   .s picture img{ object-position:var(--foco-r, var(--foco, 50% 50%)) }
 }
+/* no celular em pé, o ponto do celular quando a foto tem um (fotos.ts, `celular`):
+   o texto do herói ocupa mais da tela e a foto sobe para o rosto ficar acima dele */
+@media(orientation:portrait) and (max-width:759px){
+  .s picture img{ object-position:var(--foco-c, var(--foco-r, var(--foco, 50% 50%))) }
+}
 .s .s-heroi-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:0; transition:opacity .9s var(--s-ease); pointer-events:none }
 .s .s-heroi-video.pronto{ opacity:1 }
 @media(prefers-reduced-motion:reduce){ .s .s-heroi-video{ display:none } }
@@ -345,10 +365,10 @@ body{ margin:0 }
    pelo JS só quando mudam.
    ============================================================================= */
 .s .s-scrub{ position:relative; z-index:1; color:var(--s-papel); background:var(--s-noite); --s-scrub-vh:450;
-  height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
-.s.js .s-scrub:not(.estatico){ height:calc(var(--s-scrub-vh) * 1vh); height:calc(var(--s-scrub-vh) * 1svh); min-height:0 }
+  height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
+.s.js .s-scrub:not(.estatico){ height:calc(var(--s-scrub-vh) * var(--s-alt) / 100); min-height:0 }
 .s .s-scrub-palco{ position:sticky; top:calc(var(--s-barra) + var(--s-recorte-topo)); overflow:hidden; background:var(--s-noite); isolation:isolate;
-  height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
+  height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
 .s.js .s-scrub:not(.estatico) .s-scrub-palco{ min-height:0 }
 .s .s-scrub-fotos,.s .s-scrub-quadro{ position:absolute; inset:0 }
 .s .s-scrub-foto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; display:block; user-select:none; -webkit-user-drag:none;
@@ -420,7 +440,7 @@ body{ margin:0 }
    rostos ficam em cima nos cortes 9:16) e o escuro nasce acima do texto e
    acompanha o texto, como no herói do celular */
 @media (orientation:portrait),(max-width:720px){
-  .s .s-scrub-faixa,.s .s-scrub-faixa.baixo{ left:var(--s-gutter); right:var(--s-gutter); top:auto; bottom:calc(10svh + env(safe-area-inset-bottom,0px)); transform:none; width:auto }
+  .s .s-scrub-faixa,.s .s-scrub-faixa.baixo{ left:var(--s-gutter); right:var(--s-gutter); top:auto; bottom:calc(var(--s-alt) * .1 + env(safe-area-inset-bottom,0px)); transform:none; width:auto }
   .s .s-scrub-faixa::before{ inset:-16% -10% }
   .s .s-scrub-scrim{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
   .s .s-scrub-scrim::after{ height:58%; background:linear-gradient(to top,rgba(10,10,12,.96) 0%,rgba(10,10,12,.9) 30%,rgba(10,10,12,.66) 58%,rgba(10,10,12,0) 100%) }
@@ -434,7 +454,7 @@ body{ margin:0 }
    respiros encolhem, para chapéu, título, frase, pílulas e a linha de baixo
    caberem no palco. Abaixo de 500px de altura vale a régua do celular deitado. */
 @media (min-width:760px) and (max-height:620px){
-  .s .s-scrub .s-h1{ font-size:clamp(46px,12svh,96px) }
+  .s .s-scrub .s-h1{ font-size:clamp(46px,calc(var(--s-alt) * .12),96px) }
   .s .s-scrub-faixa .s-chapeu{ margin-bottom:14px }
   .s .s-scrub .s-scrub-sub{ margin-top:14px }
   .s .s-scrub-faixa .s-acoes{ margin-top:22px }
@@ -444,7 +464,7 @@ body{ margin:0 }
 /* MENOS MOVIMENTO: uma tela, tudo no estado final, nenhum motor (o JS lê a
    mesma consulta e nem liga o scroll) */
 @media (prefers-reduced-motion:reduce){
-  .s.js .s-scrub:not(.estatico){ height:calc(100vh - var(--s-barra) - var(--s-recorte-topo)); height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
+  .s.js .s-scrub:not(.estatico){ height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)) }
   .s .s-scrub-foto{ --o:1; --s:1 }
   .s .s-scrub-faixa:not(.pouso){ display:none }
   .s .s-scrub-faixa.pouso{ --op:1; --k:1; opacity:1 }
@@ -747,7 +767,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-foto.larga{ aspect-ratio:16/8 }
 
 /* o fecho das páginas: foto escura de ponta a ponta, frase, pílula */
-.s .s-fecho{ position:relative; isolation:isolate; min-height:min(64svh,620px); display:grid; place-items:center; text-align:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden; padding:var(--s-bloco) 0 }
+.s .s-fecho{ position:relative; isolation:isolate; min-height:min(calc(var(--s-alt) * .64),620px); display:grid; place-items:center; text-align:center; color:var(--s-papel); background:var(--s-noite); overflow:hidden; padding:var(--s-bloco) 0 }
 .s .s-fecho > img,.s .s-fecho > picture img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; filter:saturate(.85) brightness(.9) }
 .s .s-fecho::before{ content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(180deg,rgba(10,10,12,.55),rgba(10,10,12,.72)) }
 .s .s-fecho .s-h2{ max-width:14ch; margin-inline:auto }
@@ -818,7 +838,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    quadros da mesma foto: o de baixo inteiro, que acende com --jk, e o de
    cima recortado pelo chevron, que cresce. O escurecimento da casa garante
    o texto em qualquer ponto do caminho. */
-.s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite); min-height:min(72svh,700px); display:grid; align-content:center }
+.s .s-janela{ --jk:1; position:relative; isolation:isolate; overflow:hidden; color:var(--s-papel); background:var(--s-noite); min-height:min(calc(var(--s-alt) * .72),700px); display:grid; align-content:center }
 .s.js .s-janela.viva{ --jk:0 }
 .s .s-janela-foto{ position:absolute; inset:0; z-index:-2; pointer-events:none }
 .s .s-janela-foto img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
@@ -1138,7 +1158,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 }
 @media(max-width:759px){
   .s{ font-size:16px }
-  .s .s-heroi{ min-height:min(88svh,760px) }
+  .s .s-heroi{ min-height:min(calc(var(--s-alt) * .88),760px) }
   .s .s-heroi-in{ padding-top:64px }
   .s .s-heroi .s-h1{ max-width:none }
   .s .s-cartoes,.s .s-cartoes.cinco,.s .s-cartoes.quatro,.s .s-cartoes.tres,.s .s-cartoes.duas{ grid-template-columns:1fr }
@@ -1221,8 +1241,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-pe *{ text-align:center !important }
 
   /* 2. blocos mais estreitos que a coluna: margem automática dos dois lados */
-  .s main :is(.s-h1, .s-h2, .s-lead, .s-corpo, .s-passos, .s-qa, .s-faq, .s-circs, .s-vira, .s-versiculo, .s-abre, .of, .s-sigla p, .s-obj p, .s-abre details > div p),
-  .s .s-pe-marca .s-corpo{ margin-inline:auto !important }
+  .s main :is(.s-h1, .s-h2, .s-lead, .s-corpo, .s-passos, .s-qa, .s-faq, .s-circs, .s-vira, .s-versiculo, .s-abre, .of, .s-sigla p, .s-obj p, .s-abre details > div p){ margin-inline:auto !important }
   /* marcas de canto (@guiachurch, guiachurch | sede): no meio da faixa */
   .s main .s-arroba, .s main .s-sede{ margin-inline:auto !important }
   .s main .s-arroba{ display:table }
@@ -1264,7 +1283,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      respira em cima (rosto nunca embaixo do título); o escuro cresce de
      cima para baixo, onde o texto mora */
   .s .s-heroi{ align-items:flex-end }
-  .s .s-heroi-in{ padding-top:clamp(140px,34svh,300px); padding-bottom:44px }
+  .s .s-heroi-in{ padding-top:clamp(140px,calc(var(--s-alt) * .34),300px); padding-bottom:44px }
   .s .s-heroi::before,.s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.30) 0%,rgba(10,10,12,.10) 18%,rgba(10,10,12,.58) 42%,rgba(10,10,12,.88) 70%,rgba(10,10,12,.95) 100%) }
   /* com vídeo por trás, o quadro muda de claro para escuro: uma sombra curta
      garante o texto em qualquer quadro (não aparece como sombra) */
@@ -1347,17 +1366,26 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s main .s-faixa .s-sede, .s main .s-faixa .s-arroba, .s main .s-claro .s-sede{ display:none !important }
   .s .s-canto{ display:none !important }
 
-  /* 4. o pé curto (14/10/2026: sem marca, frase, atalhos e carimbo; o
-     menu inteiro está no topo fixo, a um toque) */
-  .s .s-pe{ padding-top:40px }
+  /* 4. o pé. 14/10/2026: curto, sem os grupos (o menu inteiro está no topo
+     fixo, a um toque). 21/10/2026, "o pé tem que estar mais profissional":
+     a marca e a frase voltam e fecham a página; quando e onde em dois blocos
+     com rótulo, o mapa como link, Instagram e WhatsApp em duas pílulas da
+     mesma largura; embaixo, os links numa linha e o © por último */
+  .s .s-pe{ padding-top:56px }
   .s .s-pe-g > nav{ display:none }
-  /* o logo tem display em linha (components/Marca.tsx): só o !important vence */
-  .s .s-pe-marca > svg{ display:none !important }
-  .s .s-pe-marca .s-frase, .s .s-pe-fim .s-sede{ display:none }
-  .s .s-pe-marca .s-corpo{ margin-top:0 }
-  .s .s-pe-marca .s-corpo a{ display:inline-block; padding:10px 0 }
-  .s .s-pe-links a{ padding:10px 0 }
-  .s .s-pe-fim{ margin-top:14px }
+  .s .s-pe-marca > svg{ height:34px }
+  .s .s-pe-marca > .s-marca-follow{ height:22px }
+  .s .s-pe-marca .s-frase{ margin-top:16px; font-size:24px }
+  .s .s-pe-fim .s-sede{ display:none }
+  .s .s-pe-info{ justify-self:stretch; margin-top:32px; padding-top:30px; border-top:1px solid rgba(255,255,255,.1); gap:26px }
+  .s .s-pe-info dd{ font-size:16px }
+  .s .s-pe-mapa{ padding:10px 0 2px; margin-top:0 }
+  .s .s-pe-redes{ justify-self:stretch; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px }
+  .s .s-pe-redes .s-pil{ width:100%; height:46px; padding:0 12px }
+  .s .s-pe-fim{ margin-top:32px; padding-top:12px; gap:0 }
+  .s .s-pe-links{ order:-1; gap:0 22px }
+  .s .s-pe-links a,.s .s-pe-links .s-pe-botao{ font-size:14px; padding:12px 0 }
+  .s .s-pe-fim > .s-pe-copy{ padding:2px 0 8px; font-size:13px }
 
   /* 4b. a foto ao lado do texto (telas 2): numa coluna só, no meio */
   .s .s-duas .s-foto{ margin-inline:auto; width:100% }
@@ -1378,8 +1406,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      longo (Pequena Guia, Quem somos) passavam da primeira tela, e no iPhone SE a primeira
      pílula ficava abaixo da dobra. Com 18svh eles cabem; os de texto curto não mudam.
      Os curtos (.curto) têm a altura do que levam e mantêm a reserva de antes. */
-  .s .s-heroi{ --heroi-topo:clamp(96px,18svh,260px); min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)) }
-  .s .s-heroi.curto{ --heroi-topo:clamp(150px,30svh,260px); min-height:0 }
+  .s .s-heroi{ --heroi-topo:clamp(96px,calc(var(--s-alt) * .18),260px); min-height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)) }
+  .s .s-heroi.curto{ --heroi-topo:clamp(150px,calc(var(--s-alt) * .3),260px); min-height:0 }
   .s .s-heroi-in{ position:relative; padding-top:var(--heroi-topo); padding-bottom:32px }
   .s .s-heroi::before, .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.3) 0%,rgba(10,10,12,0) 20%) }
   .s .s-heroi-in::before{ content:""; position:absolute; z-index:-1; pointer-events:none; left:calc(var(--s-gutter) * -1); right:calc(var(--s-gutter) * -1); top:calc(var(--heroi-topo) - 120px); bottom:-1px;
@@ -1396,10 +1424,10 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    pela altura, a linha de apoio fica só com a primeira frase (como em pé) e o rodapé
    do herói sai: título, linha e pílulas na primeira tela. */
 @media (orientation:landscape) and (max-height:500px){
-  .s .s-heroi{ min-height:calc(100svh - var(--s-barra) - var(--s-recorte-topo)); align-items:center }
+  .s .s-heroi{ min-height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)); align-items:center }
   .s .s-heroi-in{ padding:20px 0 24px }
   .s .s-heroi .s-chapeu{ margin-bottom:10px }
-  .s .s-heroi .s-h1{ font-size:clamp(30px,11svh,46px) }
+  .s .s-heroi .s-h1{ font-size:clamp(30px,calc(var(--s-alt) * .11),46px) }
   .s .s-heroi .s-lead,.s .s-heroi .s-lead.grande{ margin-top:12px; font-size:16px; line-height:1.38; max-width:62ch }
   .s .s-heroi .s-resto,.s .s-heroi .s-micro{ display:none }
   .s .s-heroi .s-acoes{ margin-top:16px }
@@ -1408,7 +1436,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      palco com e sem "reduzir movimento" */
   .s .s-scrub,.s .s-scrub-palco{ min-height:0 }
   .s .s-scrub-faixa .s-chapeu{ margin-bottom:10px }
-  .s .s-scrub .s-h1{ font-size:clamp(30px,11svh,46px) }
+  .s .s-scrub .s-h1{ font-size:clamp(30px,calc(var(--s-alt) * .11),46px) }
   .s .s-scrub .s-scrub-sub{ margin-top:12px; font-size:16px; line-height:1.38; max-width:62ch }
   .s .s-scrub-faixa .s-acoes{ margin-top:16px }
   .s .s-scrub-faixa .s-resto,.s .s-scrub-faixa .s-micro{ display:none }
@@ -1505,13 +1533,14 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* 20/10/2026: todo link e botão responde ao mouse. O que faltava: o logo da
      barra, o carimbo @guiachurch, os links do pé (mapa e a última linha), as
      perguntas que abrem, os links dentro de resposta e de nota */
-  .s .s-logo:hover,.s a.s-arroba:hover,.s .s-pe-marca .s-corpo a:hover,.s .s-pe-fim a:hover,.s .s-pe-botao:hover,.s .s-abre summary:hover,
+  .s .s-logo:hover,.s a.s-arroba:hover,.s .s-pe-mapa:hover,.s .s-pe-fim a:hover,.s .s-pe-botao:hover,.s .s-abre summary:hover,
   .s .s-faq p a:hover,.s .s-abre details > div a:hover,.s .g-form-nota a:hover,.s .s-aviso a:hover{ opacity:.7 }
   .s a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-faixa.papel a.s-fato:hover,.s .s-faixa.areia a.s-fato:hover{ background:rgba(20,20,20,.08) }
   .s .s-pil:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.22) }
   .s .s-pil.vidro:hover{ background:rgba(255,255,255,.26) }
   .s .s-pil.contorno:hover{ background:rgba(20,20,20,.06); box-shadow:none }
+  .s .s-pe-redes .s-pil.contorno:hover{ background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.6) }
   .s .s-link:hover{ opacity:.7 }
   .s .s-enviar:hover{ background:#000; transform:translateY(-1px) }
   .s .s-faixa.noite .s-enviar:hover{ border-color:rgba(255,255,255,.55) }
@@ -1523,7 +1552,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
   .s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
 }
-.s .s-logo,.s a.s-arroba,.s .s-pe-marca .s-corpo a,.s .s-pe-fim a,.s .s-pe-botao,.s .s-abre summary,.s .s-faq p a,.s .s-abre details > div a,.s .g-form-nota a,.s .s-aviso a{ transition:opacity var(--s-t) }
+.s .s-logo,.s a.s-arroba,.s .s-pe-mapa,.s .s-pe-fim a,.s .s-pe-botao,.s .s-abre summary,.s .s-faq p a,.s .s-abre details > div a,.s .g-form-nota a,.s .s-aviso a{ transition:opacity var(--s-t) }
 .s{ -webkit-tap-highlight-color:transparent }
 .s :is(.s-pil, .acao, .s-enviar, .pg-chip, .of-tipo-bt, .s-ico-bt):active{ transform:scale(.97); transition-duration:.08s }
 

@@ -4,7 +4,7 @@ import { Logo, LogoFollow } from '@/components/Marca';
 import { MAPAS, type Item, type QualSite } from '@/lib/site/nav';
 import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { daGuia } from '@/lib/site/sites';
-import { Sede, Sep } from './Blocos';
+import { Sede } from './Blocos';
 import RevisarCookies from './RevisarCookies';
 import { pixelValido } from '@/lib/site/medir';
 
@@ -26,6 +26,11 @@ function Ir({ it }: { it: Item }) {
   return <Link href={it.href}>{it.rot}</Link>;
 }
 
+/* a seta de "abre em outra aba", a mesma da pílula de fora */
+function Seta() {
+  return <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 11 11 5M6 5h5v5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+}
+
 export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
   const { menu, pe } = MAPAS[site];
   const conversa = canalDeConversa();
@@ -39,17 +44,30 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
                 frase dele, a que fecha o herói; os outros dois levam a marca e a frase da igreja */}
             {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Logo />}
             <p className="s-frase">{site === 'follow' ? 'Um lugar para todos' : IGREJA.frase}.</p>
-            <p className="s-corpo">
-              {/* no guiafollow.com o sábado vem primeiro (21/10/2026); o domingo é a Celebração, como na agenda da igreja */}
-              {site === 'follow' && IGREJA.followHora
-                ? <b>Follow aos sábados, {IGREJA.followHora}<Sep />Celebração aos {IGREJA.cultoDia.toLowerCase()}s, {IGREJA.cultoHora}</b>
-                : <b>{IGREJA.cultoDia}, {IGREJA.cultoHora}{IGREJA.followHora ? <><Sep />Follow aos sábados, {IGREJA.followHora}</> : null}</b>}<br />
-              {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna
-                  estreita do pé a linha única partia o bairro ("Barra da" /
-                  "Tijuca") */}
-              {IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}<br />
-              <a href={MAPA} target="_blank" rel="noreferrer">Ver no mapa</a>
-            </p>
+            {/* 21/10/2026, "o pé tem que estar mais profissional": quando e onde
+                viram dois blocos com rótulo, o mapa vira um link de verdade e o
+                Instagram e o WhatsApp, duas pílulas. A ordem do horário segue o
+                site: no guiafollow.com o sábado vem primeiro (21/10/2026) */}
+            <dl className="s-pe-info">
+              <div>
+                <dt>Quando</dt>
+                {site === 'follow' && IGREJA.followHora
+                  ? <dd><b>Follow aos sábados, {IGREJA.followHora}</b><br />Celebração aos {IGREJA.cultoDia.toLowerCase()}s, {IGREJA.cultoHora}</dd>
+                  : <dd><b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b>{IGREJA.followHora ? <><br />Follow aos sábados, {IGREJA.followHora}</> : null}</dd>}
+              </div>
+              <div>
+                <dt>Onde</dt>
+                {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna
+                    estreita do pé a linha única partia o bairro ("Barra da" / "Tijuca") */}
+                <dd>{IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}<br />
+                  <a className="s-pe-mapa" href={MAPA} target="_blank" rel="noreferrer">Ver no mapa<Seta /></a>
+                </dd>
+              </div>
+            </dl>
+            <div className="s-pe-redes">
+              <a className="s-pil contorno" href={IGREJA.instagram} target="_blank" rel="noreferrer" aria-label={`Instagram ${IGREJA.instagramArroba}`}>Instagram</a>
+              <a className="s-pil contorno" href={conversa.href} target="_blank" rel="noreferrer">WhatsApp</a>
+            </div>
           </div>
           {menu.map(g => (
             <nav key={g.rot} aria-label={g.rot}>
@@ -65,15 +83,12 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
             os sete atalhos saíram: o menu inteiro está a um toque, no topo
             fixo, e o pé ocupava uma tela inteira (661 px) em toda página */}
         <div className="s-pe-fim">
-          <span>© {ano} {IGREJA.nome}</span>
+          <span className="s-pe-copy">© {ano} {IGREJA.nome}</span>
           <Sede />
           <span className="s-pe-links">
-            <a href={IGREJA.instagram} target="_blank" rel="noreferrer">{IGREJA.instagramArroba}</a>
-            <i className="s-ponto" aria-hidden="true"> · </i>
-            <a href={conversa.href} target="_blank" rel="noreferrer">WhatsApp</a>
-            {pe.map(it => (
+            {pe.map((it, i) => (
               <Fragment key={it.rot}>
-                <i className="s-ponto" aria-hidden="true"> · </i>
+                {i > 0 && <i className="s-ponto" aria-hidden="true"> · </i>}
                 <Ir it={it} />
               </Fragment>
             ))}

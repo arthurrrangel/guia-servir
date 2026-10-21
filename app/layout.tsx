@@ -58,7 +58,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    /* suppressHydrationWarning só vale para os atributos do próprio <html>: o
+       script de components/site/Tela.tsx grava --s-tela no estilo dele antes de o
+       React hidratar (no Safari 26), e o React não deve reclamar nem desfazer */
+    <html lang="pt-BR" suppressHydrationWarning>
       <head>
         <link rel="preload" href="/tipos/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>

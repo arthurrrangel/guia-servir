@@ -163,7 +163,8 @@ export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt, r
   const srcSet = f.pequena ? `${f.pequena} 640w, ${f.arquivo} ${f.largura}w` : undefined;
   /* o ponto da foto que nunca sai do quadro: variável no estilo, e o CSS
      troca pelo do retrato quando a tela está em pé */
-  const foco = { ...(f.foco ? { '--foco': f.foco } : {}), ...(f.retrato?.foco ? { '--foco-r': f.retrato.foco } : {}) } as React.CSSProperties;
+  const r0: { foco?: string; celular?: string } | undefined = f.retrato;
+  const foco = { ...(f.foco ? { '--foco': f.foco } : {}), ...(r0?.foco ? { '--foco-r': r0.foco } : {}), ...(r0?.celular ? { '--foco-c': r0.celular } : {}) } as React.CSSProperties;
   const img = (
     <img
       src={f.arquivo}

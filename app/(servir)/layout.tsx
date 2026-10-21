@@ -4,6 +4,7 @@ import { SITE } from '@/lib/igreja';
 import Topo from '@/components/site/Topo';
 import Pe from '@/components/site/Pe';
 import Movimento from '@/components/site/Movimento';
+import Tela from '@/components/site/Tela';
 import Fronteira from '@/components/Fronteira';
 import Medidor from '@/components/site/Medidor';
 
@@ -39,6 +40,7 @@ export const metadata: Metadata = {
 export default function ServirLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="s">
+      <Tela />
       <a href="#conteudo" className="s-pular">Pular para o conteúdo</a>
       <Movimento />
       <Fronteira lado="site" />
