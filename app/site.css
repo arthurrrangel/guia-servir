@@ -1165,6 +1165,11 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    linhas é o que mais suja uma tela de celular) */
 .s .s-aviso{ font-size:14px; color:var(--s-mudo-claro); margin-top:16px; text-wrap:balance }
 .s .s-aviso a{ white-space:nowrap }
+/* 22/10/2026: o aviso com pergunta e link ("Prefere escolher a área com calma? Não
+   sei onde me encaixo."): com o balance, o celular partia a pergunta ("com /
+   calma?") para igualar as linhas; com a quebra comum, a pergunta fica inteira e o
+   link (que não quebra) desce para a linha dele */
+.s .s-aviso:has(.s-link){ text-wrap:wrap }
 .s .s-faixa.papel .s-aviso,.s .s-faixa.areia .s-aviso{ color:var(--s-mudo) }
 
 /* =============================================================================
