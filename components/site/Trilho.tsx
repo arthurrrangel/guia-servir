@@ -20,7 +20,7 @@ import { Children, useCallback, useEffect, useRef, useState } from 'react';
      conta: o trilho remede quando a classe de um filho muda e volta ao
      começo se a lista mudou de tamanho.
    ============================================================================= */
-export function Trilho({ className = '', rotulo, children }: { className?: string; rotulo: string; children: React.ReactNode }) {
+export function Trilho({ className = '', rotulo, style, children }: { className?: string; rotulo: string; style?: React.CSSProperties; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [n, setN] = useState(() => Children.toArray(children).length);
   const [i, setI] = useState(0);
@@ -69,7 +69,7 @@ export function Trilho({ className = '', rotulo, children }: { className?: strin
 
   return (
     <>
-      <div ref={ref} className={`${className} desliza`.trim()} role="group" aria-label={rotulo}>
+      <div ref={ref} className={`${className} desliza`.trim()} style={style} role="group" aria-label={rotulo}>
         {children}
       </div>
       {n > 1 && rola && (

@@ -3,7 +3,7 @@ import { og } from '@/lib/site/meta';
 import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { noFollow } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Heroi, Fecho, FaixaCamp, Ir, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Heroi, Fecho, FaixaCamp, Ir, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { FC27 } from '@/lib/followcamp';
 import { Schema } from '@/components/site/Schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
@@ -61,7 +61,10 @@ export default function Eventos() {
           <div className="s-rev d1">
             <div className="s-cartoes tres lista indice" role="group" aria-label="A agenda da semana">
               {AGENDA.map(a => {
-                const miolo = <><span className="s-cartao-t">{liga(a.t)}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d"><UmaLinha texto={a.d} semFim /></span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
+                /* o nome sem o liga(), como nas portas da home: "Pequenas Guias" pode
+                   quebrar em duas linhas na coluna do nome (21/10/2026; colado, ele
+                   alargava só a sua linha e as colunas da agenda saíam desalinhadas) */
+                const miolo = <><span className="s-cartao-t">{a.t}</span><span className="s-cartao-n">{a.n}</span><span className="s-cartao-d"><UmaLinha texto={a.d} semFim /></span><span className="s-cartao-ir">Saber mais <Seta /></span></>;
                 return <Ir key={a.t} href={a.href} className="s-cartao">{miolo}</Ir>;
               })}
             </div>

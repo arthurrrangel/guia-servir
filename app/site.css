@@ -53,6 +53,14 @@
 
 /* o documento: só o que a raiz não define */
 body{ margin:0 }
+/* o fundo da raiz nas páginas do site (21/10/2026): a raiz transparente vira
+   branco no Safari, e puxar a página para baixo no topo (ou para cima no fim)
+   mostrava uma faixa branca acima da barra preta e embaixo do pé. O sistema
+   tem a folha dele (globals.css) e não passa por aqui: o :has prende a regra
+   às páginas que têm o casco do site. O ajuste de texto impede o Safari de
+   aumentar a letra sozinho com o celular deitado. */
+html:has(> body > .s), body:has(> .s){ background:#111113 }
+html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 
 .s{
   --s-noite:#111113;
@@ -133,6 +141,13 @@ body{ margin:0 }
   --s-acento-halo:rgba(255,0,12,.18);
   --s-mascara:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 202.2 100'><path d='M0 0L46.4 0L100 50L46.4 100L0 100L53.6 50ZM102.2 0L148.6 0L202.2 50L148.6 100L102.2 100L155.8 50Z'/></svg>");
 }
+/* O SELO DO FOLLOW (21/10/2026): no guiafollow.com a assinatura das faixas é o
+   chevron duplo da marca dele (a arte oficial, o mesmo da janela do fecho e do
+   canto da faixa "quando"), e não o "guiachurch | sede" da GUIA, que fica só no
+   pé, como o endosso da casa. Cada site com o seu carimbo */
+.s.s-follow main .s-sede{ font-size:0; line-height:0; width:30px; height:15px; background:currentColor; opacity:.9;
+  -webkit-mask:var(--s-mascara) center / contain no-repeat; mask:var(--s-mascara) center / contain no-repeat }
+.s.s-follow main .s-sede > *{ display:none }
 .s *,.s *::before,.s *::after{ box-sizing:border-box }
 .s img,.s svg,.s video{ display:block; max-width:100% }
 .s a{ color:inherit; text-decoration:none }
@@ -191,8 +206,15 @@ body{ margin:0 }
 .s .s-sede i{ font-style:normal; font-weight:200; opacity:.7 }
 .s .s-sede span{ font-weight:300; opacity:.85 }
 .s .s-arroba{ font-weight:700; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.025em; line-height:1; position:relative }
-/* área de toque de 44 px por fora da caixa (o carimbo é link para o Instagram) */
+/* o carimbo é link para o Instagram: 44 px de toque. 21/10/2026: na própria
+   caixa, e não só no ::before (que segue alargando para os lados). O respiro
+   de cima e de baixo é o que falta para os 44 px no corpo daquela tela
+   (line-height 1: a caixa do texto tem 1em; com 18 px eram 38 px de alvo no
+   tablet e no notebook), e a margem negativa devolve o mesmo tanto: o desenho
+   não se move */
+.s a.s-arroba{ --s-arroba-pad:max(10px,calc((44px - 1em) / 2)) }
 .s a.s-arroba::before{ content:""; position:absolute; inset:-12px -8px }
+.s .s-faixa a.s-arroba,.s .s-num a.s-arroba{ padding-block:var(--s-arroba-pad,10px) }
 .s .s-selo{ display:inline-block; font-size:13px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--s-acento-texto) }
 
 /* =============================================================================
@@ -233,7 +255,7 @@ body{ margin:0 }
    da barra. Eram os cinco grupos da barra com 22 links e três telas de
    rolagem. Oito linhas de 46 px + a fileira de baixo cabem até no iPhone SE
    (~484 px de cortina) */
-.s .s-cortina{ position:fixed; inset:calc(var(--s-barra) + var(--s-recorte-topo)) 0 0 0; z-index:59; background:var(--s-noite); color:var(--s-papel); overflow:auto; padding:12px var(--s-gutter) calc(20px + env(safe-area-inset-bottom, 0px)); opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
+.s .s-cortina{ position:fixed; inset:calc(var(--s-barra) + var(--s-recorte-topo)) 0 0 0; z-index:59; display:flex; flex-direction:column; background:var(--s-noite); color:var(--s-papel); overflow:auto; overscroll-behavior:contain; padding:12px var(--s-gutter) calc(20px + env(safe-area-inset-bottom, 0px)); opacity:0; pointer-events:none; transform:translateY(-8px); transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease) }
 .s .s-cortina.aberta{ opacity:1; pointer-events:auto; transform:none }
 .s .s-cortina-lista{ display:grid }
 .s .s-cortina-lista li{ border-bottom:1px solid rgba(255,255,255,.1) }
@@ -242,8 +264,11 @@ body{ margin:0 }
 .s .s-cortina-lista small{ font-weight:400; font-size:14px; letter-spacing:-.005em; color:var(--s-mudo-claro) }
 /* a página aberta: o sublinhado laranja da barra do computador */
 .s .s-cortina-lista a[aria-current="page"] span{ text-decoration:underline; text-decoration-color:var(--s-acento); text-decoration-thickness:2px; text-underline-offset:6px }
-.s .s-cortina-pe{ display:flex; flex-wrap:wrap; justify-content:center; gap:0 24px; padding-top:8px; font-size:15px }
-.s .s-cortina-pe a{ display:block; padding:12px 0; color:var(--s-papel); font-weight:600 }
+/* 21/10/2026: as três saídas que não são página descem para o pé do menu, onde o
+   polegar alcança: WhatsApp, Instagram e Já sirvo, três pílulas numa fileira (as
+   mesmas do pé do site). Numa fileira só o menu continua numa tela no iPhone SE */
+.s .s-cortina-pe{ margin-top:auto; padding-top:24px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; font-size:15px }
+.s .s-cortina-pe a{ display:flex; align-items:center; justify-content:center; height:46px; padding:0 8px; border:1.5px solid rgba(255,255,255,.32); border-radius:999px; color:var(--s-papel); font-weight:500; letter-spacing:-.01em; white-space:nowrap }
 
 /* a busca: véu inteiro, um campo grande, a lista do que casa */
 .s .s-busca{ position:fixed; inset:0; z-index:70; background:rgba(12,12,13,.985); color:var(--s-papel); overflow:auto; padding:clamp(80px,14vh,140px) var(--s-gutter) 60px; opacity:0; pointer-events:none; transition:opacity var(--s-t) }
@@ -264,34 +289,78 @@ body{ margin:0 }
 /* =============================================================================
    O PÉ
    ============================================================================= */
-.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(56px,6vw,88px) 0 calc(20px + env(safe-area-inset-bottom, 0px)); border-top:1px solid rgba(255,255,255,.06) }
-.s .s-pe-g{ display:grid; grid-template-columns:1.6fr repeat(5,1fr); gap:clamp(20px,2.6vw,40px) }
+.s .s-pe{ background:var(--s-noite); color:var(--s-papel); padding:clamp(56px,6vw,88px) 0 calc(20px + env(safe-area-inset-bottom, 0px)); border-top:1px solid rgba(255,255,255,.1) }
+/* a última seção escura encosta no pé escuro (21/10/2026): os dois respiros somavam
+   ~200 px de preto vazio antes da marca; a seção fica com o respiro do pé e o fio
+   do pé faz a divisa */
+.s main > .s-faixa.noite:last-child:not(.s-janela):not(.justa){ padding-bottom:clamp(56px,6vw,80px) }
+/* 21/10/2026: três andares, os mesmos em qualquer tela (components/site/Pe.tsx).
+   1. a marca e os grupos: tantas colunas quantos grupos (--n), nunca uma vazia */
+.s .s-pe-topo{ display:grid; grid-template-columns:minmax(220px,1fr) minmax(0,2.8fr); gap:clamp(32px,4vw,80px); align-items:start }
 .s .s-pe-marca > svg{ height:40px; width:auto }
 .s .s-pe-marca > .s-marca-follow{ height:28px }
-.s .s-pe-marca .s-frase{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(22px,1.9vw,28px); line-height:1.1; letter-spacing:-.01em; margin-top:22px }
-/* quando e onde (21/10/2026): o rótulo pequeno em cima, a linha forte e a de
-   apoio embaixo, o mapa como link de verdade */
-.s .s-pe-info{ margin:26px 0 0; display:grid; gap:20px }
+.s .s-pe-marca .s-frase{ font-family:var(--s-serifa); font-style:italic; font-size:clamp(22px,1.9vw,28px); line-height:1.1; letter-spacing:-.01em; margin-top:22px; max-width:14em }
+.s .s-pe-grupos{ display:grid; grid-template-columns:repeat(var(--n,5),minmax(0,1fr)); gap:clamp(20px,2.4vw,40px) }
+.s .s-pe-grupos h2{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-mudo-claro); margin-bottom:14px }
+.s .s-pe-grupos li{ margin:0 0 9px }
+.s .s-pe-grupos li a{ display:inline-block; padding-block:10px; margin-block:-10px; font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
+/* 2. a faixa: quando e onde (o rótulo pequeno em cima, a linha forte e a de
+   apoio embaixo, o mapa como link de verdade) e as redes em duas pílulas */
+.s .s-pe-faixa{ margin-top:clamp(40px,5vw,64px); padding-top:clamp(28px,3vw,40px); border-top:1px solid rgba(255,255,255,.1); display:grid; grid-template-columns:minmax(0,1fr) auto; gap:24px clamp(24px,3vw,48px); align-items:center }
+.s .s-pe-info{ margin:0; display:grid; grid-template-columns:repeat(2,max-content); gap:20px clamp(40px,6vw,104px); align-items:start }
 .s .s-pe-info dt{ font-size:12px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--s-mudo-claro); margin:0 0 6px }
 .s .s-pe-info dd{ margin:0; font-size:15.5px; line-height:1.55; color:var(--s-mudo-claro) }
 .s .s-pe-info dd b{ color:var(--s-papel); font-weight:600 }
-.s .s-pe-mapa{ display:inline-flex; align-items:center; gap:6px; margin-top:2px; color:var(--s-papel); font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:rgba(255,255,255,.35); text-underline-offset:4px }
+.s .s-pe-mapa{ display:inline-flex; align-items:center; gap:6px; min-height:44px; margin:-8px 0 -10px; color:var(--s-papel); font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:rgba(255,255,255,.35); text-underline-offset:4px }
 .s .s-pe-mapa svg{ width:14px; height:14px; flex:0 0 14px }
-/* as redes: duas pílulas de contorno, claras sobre a noite */
-.s .s-pe-redes{ display:flex; flex-wrap:wrap; gap:10px; margin-top:24px }
+.s .s-pe-redes{ display:flex; flex-wrap:wrap; gap:10px }
 .s .s-pe-redes .s-pil{ height:42px; padding:0 22px; font-size:15px; color:var(--s-papel); border-color:rgba(255,255,255,.32) }
-.s .s-pe-g h2{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-mudo-claro); margin-bottom:14px }
-.s .s-pe-g li{ margin:0 0 9px }
-.s .s-pe-g li a{ font-size:16px; font-weight:400; letter-spacing:-.01em; transition:opacity var(--s-t) }
-.s .s-pe-fim{ margin-top:clamp(36px,5vw,60px); padding-top:12px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
+/* as colunas da faixa nas mesmas linhas dos grupos de cima (21/10/2026, "tudo
+   alinhado"): no computador largo a marca é a primeira coluna e os grupos as
+   outras (o invólucro dos grupos some da grade); a faixa usa a mesma grade e o
+   "Quando" e o "Onde" caem nas duas primeiras colunas (subgrid). Entre 1000 e
+   1280 a marca fica em cima e a grade é só a dos grupos */
+@media(min-width:1281px){
+  .s .s-pe-topo{ grid-template-columns:minmax(220px,1.15fr) repeat(var(--n,5),minmax(0,1fr)); column-gap:clamp(20px,2.4vw,40px) }
+  .s .s-pe-grupos{ display:contents }
+  .s .s-pe-faixa{ grid-template-columns:minmax(220px,1.15fr) repeat(var(--n,5),minmax(0,1fr)); column-gap:clamp(20px,2.4vw,40px) }
+}
+@media(min-width:1000px){
+  /* o "Onde" ocupa duas colunas: numa só (150 px no Guia Church, com cinco grupos)
+     o endereço partia "Rio de / Janeiro" */
+  .s .s-pe-info{ grid-column:1 / span 3; grid-template-columns:subgrid; column-gap:inherit }
+  .s .s-pe-info > div:last-child{ grid-column:2 / span 2 }
+  .s .s-pe-redes{ grid-column:4 / -1; justify-self:end }
+}
+@media(min-width:1000px) and (max-width:1280px){
+  .s .s-pe-faixa{ grid-template-columns:repeat(var(--n,5),minmax(0,1fr)); column-gap:clamp(20px,2.4vw,40px) }
+}
+/* no tablet (760 a 999) o "Quando" nas duas primeiras colunas dos grupos e o
+   "Onde" a partir da terceira (numa coluna só o horário partia em duas linhas);
+   as redes embaixo, na mesma margem */
+@media(min-width:760px) and (max-width:999px){
+  .s .s-pe .s-pe-faixa{ grid-template-columns:repeat(var(--n,5),minmax(0,1fr)); column-gap:16px }
+  .s .s-pe .s-pe-info{ grid-column:1 / -1; grid-template-columns:subgrid; column-gap:inherit }
+  .s .s-pe .s-pe-info > div:first-child{ grid-column:1 / span 2 }
+  .s .s-pe .s-pe-info > div:last-child{ grid-column:3 / -1 }
+  .s .s-pe .s-pe-redes{ grid-column:1 / -1; justify-self:start }
+}
+/* 3. embaixo: © à esquerda, a sede no centro da página, os links à direita
+   (era flex com espaço entre: a sede caía 40 a 90 px fora do centro) */
+.s .s-pe-fim{ margin-top:clamp(32px,4vw,48px); padding-top:12px; border-top:1px solid rgba(255,255,255,.1); display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:12px 24px; font-size:14px; color:var(--s-mudo-claro) }
+.s .s-pe-fim > .s-pe-copy{ justify-self:start }
+.s .s-pe-fim > .s-sede{ justify-self:center }
+.s .s-pe-fim > .s-pe-links{ justify-self:end }
 .s .s-pe-fim a{ color:var(--s-papel) }
 /* 20/10/2026: cada link da última linha com 44 px de altura de toque (eram 17 px no computador) */
-.s .s-pe-links a,.s .s-pe-links .s-pe-botao,.s .s-pe-fim > span:first-child{ display:inline-block; padding:10px 0 }
-.s .s-pe-fim .s-sede{ padding:10px 0 }
-.s .s-pe-links{ display:inline-flex; flex-wrap:wrap; align-items:center; gap:0 8px }
+.s .s-pe-links a,.s .s-pe-links .s-pe-botao,.s .s-pe-fim > .s-pe-copy{ display:inline-block; padding:10px 0 }
+.s .s-pe-fim .s-sede{ padding:10px 0; color:var(--s-papel) }
+.s .s-pe-links{ display:inline-flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:0 8px }
+/* os links que já estão num grupo (o "GUIA Church" do Servir e do Follow) só no
+   celular, onde os grupos não aparecem */
+.s .s-pe-links.curto{ display:none }
 .s .s-pe-botao{ appearance:none; background:none; border:0; padding:0; margin:0; font:inherit; color:var(--s-papel); cursor:pointer }
 .s .s-pe-botao:focus-visible{ outline:2px solid var(--s-acento); outline-offset:3px; border-radius:4px }
-.s .s-pe-fim .s-sede{ color:var(--s-papel) }
 
 /* =============================================================================
    O HERÓI (tela 1): a foto de ponta a ponta, o chapéu, o título em duas
@@ -321,6 +390,20 @@ body{ margin:0 }
 .s .s-heroi.centro .s-heroi-in{ justify-items:center }
 .s .s-heroi.centro .s-h1{ max-width:none }
 .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.5) 0%,rgba(10,10,12,.28) 45%,rgba(10,10,12,.62) 100%) }
+/* A JANELA BAIXA (21/10/2026): o notebook de 1366 x 768 mostra uns 650 px de
+   página, e o tablet deitado, 820. Em /sobre, /pequena-guia e nas áreas do
+   Servir o título de três linhas e a linha de apoio de quatro empurravam as
+   pílulas para baixo da dobra (auditoria-primeira-tela). Aqui o título segue
+   a altura, os respiros encolhem e a linha de apoio fica com a primeira
+   frase, como no celular (o resto continua no HTML) */
+@media (min-width:760px) and (max-height:860px){
+  .s .s-heroi .s-h1{ font-size:clamp(46px,min(6.6vw,calc(var(--s-alt) * .1)),96px) }
+  .s .s-heroi-in{ padding:clamp(64px,9vh,150px) 0 clamp(40px,6vh,110px) }
+  .s .s-heroi .s-chapeu{ margin-bottom:clamp(14px,2.2vh,36px) }
+  .s .s-heroi .s-lead{ margin-top:clamp(16px,2.6vh,40px) }
+  .s .s-heroi .s-lead .s-resto{ display:none }
+  .s .s-heroi .s-acoes{ margin-top:clamp(22px,3.6vh,60px) }
+}
 
 /* =============================================================================
    FOTO E VÍDEO · 12/10/2026
@@ -435,6 +518,12 @@ body{ margin:0 }
 .s:not(.js) .s-scrub-faixa:not(.pouso){ display:none }
 .s:not(.js) .s-scrub-faixa.pouso{ --k:1 }
 .s:not(.js) .s-scrub-seta,.s:not(.js) .s-scrub-anel{ display:none }
+/* 21/10/2026: com o pouso abrindo o herói (pouso.primeiro), o estático e o sem
+   JS mostram a foto do pouso, a primeira, que é a que vem com prioridade (o
+   LCP) e a mesma da primeira tela com movimento; a última foto ficava por
+   cima e chegava por último */
+.s .s-scrub.estatico.pouso-primeiro .s-scrub-quadro:not(:first-child),
+.s:not(.js) .s-scrub.pouso-primeiro .s-scrub-quadro:not(:first-child){ display:none }
 
 /* EM PÉ (celular e tablet em retrato): as faixas no terço de baixo (os
    rostos ficam em cima nos cortes 9:16) e o escuro nasce acima do texto e
@@ -449,12 +538,32 @@ body{ margin:0 }
 /* uma janela baixa de computador: segue com o scrub, mas sem os detalhes
    pequenos, que não têm espaço */
 @media (max-height:560px){ .s .s-scrub-seta,.s .s-scrub-anel{ display:none } }
+/* 21/10/2026: com o pouso abrindo o herói, numa janela de notebook (1366 x 768
+   mostra ~657 px; o MacBook com o Dock, ~760) o pouso ocupa o palco quase
+   inteiro e a seta pousava em cima da nota ("Cadastro de menos de um minuto",
+   no Guia Servir). A seta fica para as telas com folga */
+@media (min-width:760px) and (max-height:780px){ .s .s-scrub-seta{ display:none } }
+/* 21/10/2026: e o título do pouso segue a altura também nessas janelas. No
+   notebook de 1366 x 768 (uns 657 px de página) o título do Guia Servir, a
+   frase de quatro linhas, as pílulas e a nota ocupavam o palco inteiro e a
+   nota terminava a 17 px da borda de baixo. Com 12% da altura (o mesmo da
+   janela baixa, abaixo), o título desce de 90 para 79 px ali; em 1280 x 720
+   continua com os 6,6vw de sempre (84 px) */
+@media (min-width:760px) and (max-height:780px){ .s .s-scrub .s-h1{ font-size:clamp(46px,min(6.6vw,calc(var(--s-alt) * .12)),96px) } }
+/* e, abaixo de 700 px de altura, a frase do pouso fica com a primeira oração,
+   como no celular e no herói parado das páginas internas (o resto continua no
+   HTML). Só o Guia Servir tem o resto ("Todo domingo, 81 pessoas..."): no
+   notebook a nota ainda terminava a 29 px da borda; o número segue nos
+   números vivos, mais abaixo na página */
+@media (min-width:760px) and (max-height:700px){ .s .s-scrub-sub .s-resto{ display:none } }
 /* e o pouso de uma janela baixa de computador (o notebook de 1366×768 com
    as barras do navegador deixa uns 600px): o título segue a altura e os
    respiros encolhem, para chapéu, título, frase, pílulas e a linha de baixo
    caberem no palco. Abaixo de 500px de altura vale a régua do celular deitado. */
 @media (min-width:760px) and (max-height:620px){
-  .s .s-scrub .s-h1{ font-size:clamp(46px,calc(var(--s-alt) * .12),96px) }
+  /* min() com os 6,6vw: numa janela estreita e baixa (800 x 600) a altura
+     sozinha dava 72 px, maior que o título de sempre (53) */
+  .s .s-scrub .s-h1{ font-size:clamp(46px,min(6.6vw,calc(var(--s-alt) * .12)),96px) }
   .s .s-scrub-faixa .s-chapeu{ margin-bottom:14px }
   .s .s-scrub .s-scrub-sub{ margin-top:14px }
   .s .s-scrub-faixa .s-acoes{ margin-top:22px }
@@ -477,6 +586,24 @@ body{ margin:0 }
 /* o micro do pouso (dia, hora, endereço): entra por último */
 .s .s-scrub-faixa .s-micro{ margin-top:clamp(16px,2.2vw,28px); color:rgba(255,255,255,.86) }
 .s .s-scrub-faixa.pouso .s-micro{ --km:clamp(0,(var(--k,1) - .82) * 6,1); opacity:var(--km) }
+/* o link da nota do pouso ("Dúvidas? Fale no WhatsApp", 21/10/2026): sublinhado
+   claro, com altura de toque */
+.s .s-scrub-faixa .s-micro a{ display:inline-block; padding:12px 0; margin:-4px 0; color:var(--s-papel); font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:rgba(255,255,255,.5); text-underline-offset:3px }
+
+/* O CHAPÉU SOBRE FOTO (21/10/2026). A medida nos pixels
+   (scripts/auditoria-contraste-foto.mjs) achou o chapéu abaixo de 4,5:1 onde a
+   foto é clara atrás dele: "Servir" a 2:1 sobre a parede do Kids no celular,
+   "GUIA Church" a 3,3:1 sobre a fachada ao sol no computador, "Quem somos" a
+   4,4:1. O escurecimento do pouso é mais forte no meio da faixa, e o chapéu
+   mora na borda de cima. Ele ganha uma sombra própria, macia e do tamanho do
+   texto (a caixa encolhe para o conteúdo): some nas fotos escuras e segura o
+   laranja nas claras, sem mudar a cor da marca nem o lugar do texto. Vale
+   para os chapéus do herói que anda (o do pouso e os rótulos das faixas) e
+   do herói parado das páginas internas. */
+.s :is(.s-scrub-faixa, .s-heroi) .s-chapeu{ position:relative; isolation:isolate; width:fit-content; max-width:100% }
+.s .s-scrub-faixa .s-chapeu,.s .s-heroi.centro .s-chapeu{ margin-inline:auto }
+.s :is(.s-scrub-faixa, .s-heroi) .s-chapeu::before{ content:""; position:absolute; z-index:-1; inset:-.8em -1.6em; pointer-events:none;
+  background:radial-gradient(closest-side,rgba(10,10,12,.66) 0%,rgba(10,10,12,.56) 70%,rgba(10,10,12,0) 100%) }
 
 /* =============================================================================
    AS FAIXAS
@@ -492,8 +619,10 @@ body{ margin:0 }
 .s .s-grao > *{ position:relative; z-index:1 }
 .s .s-faixa .s-sede,.s .s-faixa .s-arroba{ display:block; text-align:center; width:max-content; margin-inline:auto }
 .s .s-faixa .s-sede.topo,.s .s-faixa .s-arroba.topo{ margin-bottom:clamp(26px,4vw,56px) }
+.s .s-faixa a.s-arroba{ margin-top:calc(-1 * var(--s-arroba-pad,10px)) }
+.s .s-faixa a.s-arroba.topo{ margin-bottom:calc(clamp(26px,4vw,56px) - var(--s-arroba-pad,10px)) }
 .s .s-faixa .s-sede.base{ margin-top:clamp(32px,5vw,72px) }
-.s .s-faixa .s-arroba.dir{ margin:0 0 clamp(26px,4vw,56px) auto }
+.s .s-faixa .s-arroba.dir{ margin:calc(-1 * var(--s-arroba-pad,10px)) 0 calc(clamp(26px,4vw,56px) - var(--s-arroba-pad,10px)) auto }
 .s .s-faixa .s-sede.esq{ margin:clamp(32px,5vw,72px) 0 0 }
 .s .s-cab{ display:grid; gap:var(--s-respiro); margin-bottom:clamp(30px,4.2vw,56px) }
 .s .s-cab:last-child{ margin-bottom:0 }
@@ -586,7 +715,11 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    14/10 continua (as regras de .lista). */
 @media(min-width:760px){
   .s .s-cartoes.indice{ display:block; border-top:1px solid var(--s-linha) }
-  .s .s-cartoes.indice > .s-cartao{ display:grid; grid-template-columns:minmax(0,1.05fr) minmax(140px,.45fr) minmax(0,1.5fr) 11.5rem; grid-template-areas:"t n f ir" "t n d ir"; column-gap:clamp(18px,3vw,56px); row-gap:6px; align-items:baseline; text-align:left; padding:clamp(22px,2.8vw,40px) clamp(14px,1.8vw,28px); min-height:0; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:var(--s-acento-escuro); transition:background var(--s-t),color var(--s-t) }
+  /* 21/10/2026: a coluna do nome nunca é mais estreita que o pedaço do nome que
+     não quebra. "Pequenas Guias" colado (o espaço que não quebra, de nomes() em
+     Blocos.tsx) invadia o "Terça a quinta" da coluna do lado em toda largura de
+     760 a 1920; a agenda passou a mandar o nome solto, e esta regra fica como rede */
+  .s .s-cartoes.indice > .s-cartao{ display:grid; grid-template-columns:minmax(min-content,1.05fr) minmax(140px,.45fr) minmax(0,1.5fr) 11.5rem; grid-template-areas:"t n f ir" "t n d ir"; column-gap:clamp(18px,3vw,56px); row-gap:6px; align-items:baseline; text-align:left; padding:clamp(22px,2.8vw,40px) clamp(14px,1.8vw,28px); min-height:0; background:none; color:inherit; border-radius:0; border-bottom:1px solid var(--s-linha); --s-acento-texto:var(--s-acento-escuro); transition:background var(--s-t),color var(--s-t) }
   .s .s-cartoes.indice .s-cartao-t{ grid-area:t; font-size:clamp(36px,3.8vw,60px); line-height:.95 }
   .s .s-cartoes.indice .s-cartao-n{ grid-column:2; grid-row:1; margin:0; align-self:baseline }
   /* a etiqueta ("conversa antes") e o perfil das áreas, embaixo dos postos e da frase */
@@ -624,7 +757,13 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
   .s .s-cartoes.indice .s-cartao-tag{ grid-area:tag; justify-self:end; align-self:start }
   .s .s-cartoes.indice .s-cartao-p{ grid-area:p }
   .s .s-cartoes.indice .s-cartao-ir{ grid-area:ir; align-self:end }
-  .s .s-cartoes.indice.simples > .s-cartao{ grid-template-areas:"t ir" "d ir" }
+  /* 21/10/2026, duas regras do computador vazavam para o tablet: a linha sem
+     frase (a agenda do /eventos) mandava o parágrafo para uma terceira coluna
+     que aqui não existe (o nome e o dia se sobrepunham), e o índice simples
+     (o "próximo passo" de /cultos) ficava com as três colunas do computador e
+     o parágrafo espremido em 200 px. Aqui, cada um na sua área, em duas colunas */
+  .s .s-cartoes.indice .s-cartao-n + .s-cartao-d{ grid-area:d }
+  .s .s-cartoes.indice.simples > .s-cartao{ grid-template-columns:minmax(0,1fr) auto; grid-template-areas:"t ir" "d ir" }
 }
 
 /* =============================================================================
@@ -636,6 +775,14 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-passos-cab .s-serifa.it{ display:block; border:0; font-size:clamp(28px,4.2vw,62px); margin-top:clamp(14px,2vw,26px); padding:0 }
 .s .s-passos{ display:grid; gap:clamp(22px,3vw,40px); max-width:1180px; margin-inline:auto }
 .s .s-passos li{ display:grid; grid-template-columns:minmax(170px,270px) 1fr; gap:clamp(14px,3vw,40px); align-items:baseline }
+/* 21/10/2026: no computador a coluna do rótulo é a do rótulo mais largo da
+   lista (subgrid: os rótulos e as frases continuam alinhados entre si).
+   Com 270 px fixos, "01 - Relacionamento" (/sobre) quebrava em "01 -" e
+   "Relacionamento" */
+@media(min-width:1000px){
+  .s .s-passos{ grid-template-columns:minmax(170px,max-content) minmax(0,1fr); column-gap:clamp(14px,3vw,40px) }
+  .s .s-passos li{ grid-column:1 / -1; grid-template-columns:subgrid }
+}
 .s .s-passos b{ font-weight:800; font-size:clamp(20px,2.1vw,30px); letter-spacing:-.04em; line-height:1.1; text-align:right; text-wrap:balance }
 .s .s-passos p{ font-weight:300; font-size:clamp(18px,1.9vw,27px); line-height:1.3; letter-spacing:-.012em; text-wrap:pretty }
 
@@ -671,8 +818,6 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-canto.duplo{ width:clamp(56px,5.4vw,72px) }
 /* a lista vem depois de um .s-cab, que já traz o respiro */
 .s .s-obj{ display:grid; gap:clamp(26px,3.6vw,48px) }
-/* a lista de perguntas depois do índice (onde me encaixo) */
-.s .s-faq.depois{ margin-top:var(--s-acoes-topo) }
 .s .s-obj b{ display:block; font-weight:800; font-size:clamp(22px,2.6vw,38px); letter-spacing:-.04em; line-height:1.05 }
 .s .s-obj p{ font-weight:300; font-size:clamp(15.5px,1.35vw,19px); line-height:1.45; margin-top:8px; max-width:78ch; text-wrap:pretty }
 
@@ -737,17 +882,19 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-vivos li{ display:flex; justify-content:flex-end; align-items:baseline; gap:12px; font-weight:300; font-size:clamp(18px,1.9vw,27px); line-height:1.25; letter-spacing:-.012em }
 .s .s-vivos b{ font-weight:600 }
 .s .s-vivos svg{ width:.8em; height:.8em; flex:0 0 auto; align-self:center }
-.s .s-num .s-arroba{ margin:0 0 clamp(18px,2.4vw,34px) auto }
+.s .s-num .s-arroba{ margin:calc(-1 * var(--s-arroba-pad,10px)) 0 calc(clamp(18px,2.4vw,34px) - var(--s-arroba-pad,10px)) auto }
 
 /* os números sem os círculos (home): quatro colunas de número grande */
 .s .s-num.so{ grid-template-columns:1fr; text-align:center }
 .s .s-num.so .s-dir{ text-align:center }
-.s .s-num.so .s-arroba{ margin:0 auto clamp(18px,2.4vw,34px) }
+.s .s-num.so .s-arroba{ margin:calc(-1 * var(--s-arroba-pad,10px)) auto calc(clamp(18px,2.4vw,34px) - var(--s-arroba-pad,10px)) }
 .s .s-num.so .s-vivos{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(24px,3.4vw,56px); margin-top:clamp(34px,4.6vw,64px); text-align:center }
 .s .s-num.so .s-vivos li{ display:block; font-size:clamp(17px,1.5vw,21px); line-height:1.35 }
 .s .s-num.so .s-vivos li b{ display:block; font-size:clamp(64px,7.4vw,118px); font-weight:800; letter-spacing:-.055em; line-height:.9; margin-bottom:clamp(10px,1.2vw,16px); font-variant-numeric:tabular-nums }
 .s .s-num.so .s-vivos svg{ display:none }
-@media(max-width:999px){
+/* 21/10/2026: dois a dois até 1279 px. Em quatro colunas, de 1000 a 1279, cada
+   frase ficava com 200 a 260 px e quebrava em quatro, cinco linhas de duas palavras */
+@media(max-width:1279px){
   .s .s-num.so .s-vivos{ grid-template-columns:repeat(2,minmax(0,1fr)) }
 }
 @media(max-width:759px){
@@ -916,6 +1063,12 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-funcoes{ display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:clamp(10px,1.2vw,16px) }
 /* uma ou duas funções: cartões de largura fixa, no centro (a Livraria tem uma; sozinha à esquerda parecia faltar o resto) */
 .s .s-funcoes.poucas{ grid-template-columns:repeat(auto-fit,minmax(230px,300px)); justify-content:center }
+/* 21/10/2026: o número de colunas que fecha as linhas vem da página da área
+   (components/site/Area.tsx, `fecha`): no monitor, até cinco; de 1000 a 1179,
+   até quatro; no tablet, três ou duas. No celular a lista de 14/10 continua */
+@media(min-width:1180px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols,5),minmax(0,1fr)) } }
+@media(min-width:1000px) and (max-width:1179px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-m,4),minmax(0,1fr)) } }
+@media(min-width:760px) and (max-width:999px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-t,3),minmax(0,1fr)) } }
 .s .s-funcao{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(20px,2vw,26px); display:grid; gap:6px; align-content:start }
 .s .s-funcao small{ font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--s-acento-texto) }
 .s .s-funcao b{ font-weight:800; font-size:clamp(18px,1.5vw,22px); letter-spacing:-.03em; line-height:1.1 }
@@ -992,6 +1145,8 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .pg-mapao .leaflet-control-attribution a{ color:var(--s-tinta) }
 .s .pg-mapao .leaflet-bar{ border:1px solid var(--s-linha); border-radius:var(--s-r-3); box-shadow:none; overflow:hidden }
 .s .pg-mapao .leaflet-bar a{ background:#fff; color:var(--s-tinta); border-bottom-color:var(--s-linha) }
+/* os botões de zoom do mapa com 44 px em qualquer tela (21/10/2026; no computador eram 30) */
+.s .pg-mapao .leaflet-bar a{ width:44px; height:44px; line-height:44px; font-size:22px }
 .s .pg-mapao .leaflet-tooltip{ font:500 13px/1.3 var(--s-fonte); background:var(--s-noite); color:var(--s-papel); border:0; border-radius:8px; padding:6px 10px; box-shadow:0 8px 20px rgba(0,0,0,.3) }
 .s .pg-mapao .leaflet-tooltip-top::before{ border-top-color:var(--s-noite) }
 .s .pin-guia{ background:none; border:0; display:grid; place-items:center }
@@ -1009,6 +1164,13 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .pg-perto-txt b{ font-weight:800; font-size:clamp(17px,1.5vw,21px); letter-spacing:-.03em }
 .s .pg-perto-txt span{ font-size:14.5px; font-weight:300; color:var(--s-mudo) }
 .s .pgs{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:clamp(10px,1.2vw,16px); margin-top:clamp(22px,3vw,34px) }
+/* 21/10/2026: as colunas que fecham as linhas para os grupos que o filtro mostra
+   (components/Grupos.tsx, lib/site/grade.ts): até cinco no monitor largo, até
+   quatro no notebook, até três de 1000 a 1179. O mínimo de 260 px de cartão vale
+   em todas */
+@media(min-width:1500px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c5,4),minmax(0,1fr)) } }
+@media(min-width:1180px) and (max-width:1499px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c4,4),minmax(0,1fr)) } }
+@media(min-width:1000px) and (max-width:1179px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c3,3),minmax(0,1fr)) } }
 .s .pg{ position:relative; background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); display:flex; flex-direction:column; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease) }
 .s .pg.some{ display:none }
 .s .pg.aceso{ transform:translateY(-3px); box-shadow:0 0 0 2px var(--s-acento),0 20px 44px rgba(0,0,0,.25) }
@@ -1125,10 +1287,18 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 /* =============================================================================
    RESPONSIVO
    ============================================================================= */
+/* o pé entre 1000 e 1280 px (21/10/2026): a marca em cima dos grupos, para os
+   grupos terem a largura toda ("Não sei onde me encaixo" partia em duas linhas) */
+@media(max-width:1280px){
+  .s .s-pe-topo{ grid-template-columns:minmax(0,1fr) }
+}
+@media(max-width:999px){
+  .s .s-pe-grupos{ gap:16px }
+  .s .s-pe-grupos li a{ font-size:15px }
+}
 @media(max-width:1180px){
   .s .s-cartoes.cinco{ grid-template-columns:repeat(3,1fr) }
-  .s .s-pe-g{ grid-template-columns:repeat(3,1fr) }
-  .s .s-pe-marca{ grid-column:1 / -1 }
+  .s .s-pe-topo{ grid-template-columns:minmax(0,1fr) }
 }
 @media(max-width:999px){
   .s{ --s-barra:64px }
@@ -1136,6 +1306,13 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-menu-bt{ display:block; width:44px; height:44px; padding:0 11px }
   .s .s-form{ grid-template-columns:1fr 1fr }
   .s .s-form .s-enviar{ grid-column:1 / -1; width:100% }
+}
+/* 21/10/2026, no tablet: nome e WhatsApp numa linha, a área e o botão na
+   outra (era a área sozinha em meia linha e o botão embaixo, de ponta a ponta) */
+@media(min-width:760px) and (max-width:999px){
+  .s .s-form.com-fim .s-enviar{ grid-column:auto }
+}
+@media(max-width:999px){
   .s .s-sigla{ grid-template-columns:repeat(2,1fr) }
   .s .s-num{ grid-template-columns:1fr }
   .s .s-circs{ max-width:440px; margin-inline:auto }
@@ -1170,8 +1347,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-vira li{ grid-template-columns:1fr; gap:6px; text-align:center }
   .s .s-vira li > span:first-child{ text-align:center }
   .s .s-vira svg{ margin-inline:auto; transform:rotate(90deg) }
-  .s .s-pe-g{ grid-template-columns:1fr 1fr }
-  .s .s-pe-marca{ grid-column:1 / -1 }
+  .s .s-pe-faixa{ grid-template-columns:minmax(0,1fr) }
   .s .s-claro{ border-radius:var(--s-r) }
   /* cartão dentro do mapa a 12 px da borda: raio concêntrico (externo − recuo) */
   .s .s-mapa-cartao{ left:12px; right:12px; bottom:12px; max-width:none; border-radius:calc(var(--s-r) - 12px) }
@@ -1257,10 +1433,8 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 
   /* 4. rodapé: marca em cima, grupos em duas colunas, o grupo que sobra
      sozinho na última fileira ocupa as duas e fica no meio */
-  .s .s-pe-g{ justify-items:stretch }
-  .s .s-pe-g > :last-child:nth-child(even){ grid-column:1 / -1 }
   .s .s-pe-marca{ display:grid; justify-items:center }
-  .s .s-pe-fim{ flex-direction:column; gap:10px }
+  .s .s-pe-fim{ display:flex; flex-direction:column; gap:10px }
 
   /* 5. perguntas que abrem: um "+" invisível à esquerda equilibra o "+" da
      direita, e a pergunta fica no eixo de verdade (não no meio do que sobra) */
@@ -1288,6 +1462,9 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   /* com vídeo por trás, o quadro muda de claro para escuro: uma sombra curta
      garante o texto em qualquer quadro (não aparece como sombra) */
   .s .s-heroi :is(.s-chapeu, .s-h1, .s-lead, .s-micro){ text-shadow:0 1px 14px rgba(0,0,0,.38) }
+  /* o chapéu sobre foto encolhe para o conteúdo (a sombra própria, ver "O
+     CHAPÉU SOBRE FOTO"); no celular tudo fica no eixo */
+  .s .s-heroi .s-chapeu{ margin-inline:auto }
 
   /* o resto da frase (UmaLinha, em Blocos.tsx) some no celular em
      qualquer lugar: a regra de 11/10, título + uma linha (14/10/2026) */
@@ -1372,18 +1549,22 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
      com rótulo, o mapa como link, Instagram e WhatsApp em duas pílulas da
      mesma largura; embaixo, os links numa linha e o © por último */
   .s .s-pe{ padding-top:56px }
-  .s .s-pe-g > nav{ display:none }
+  .s .s-pe-grupos{ display:none }
   .s .s-pe-marca > svg{ height:34px }
   .s .s-pe-marca > .s-marca-follow{ height:22px }
   .s .s-pe-marca .s-frase{ margin-top:16px; font-size:24px }
   .s .s-pe-fim .s-sede{ display:none }
-  .s .s-pe-info{ justify-self:stretch; margin-top:32px; padding-top:30px; border-top:1px solid rgba(255,255,255,.1); gap:26px }
+  .s .s-pe-faixa{ margin-top:32px; padding-top:30px; gap:24px }
+  .s .s-pe-info{ grid-template-columns:minmax(0,1fr); gap:26px }
   .s .s-pe-info dd{ font-size:16px }
-  .s .s-pe-mapa{ padding:10px 0 2px; margin-top:0 }
-  .s .s-pe-redes{ justify-self:stretch; display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:24px }
+  /* 44 px de toque (21/10/2026; eram 37) */
+  .s .s-pe-mapa{ min-height:44px; padding:0; margin-top:0 }
+  .s .s-pe-redes{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
   .s .s-pe-redes .s-pil{ width:100%; height:46px; padding:0 12px }
   .s .s-pe-fim{ margin-top:32px; padding-top:12px; gap:0 }
   .s .s-pe-links{ order:-1; gap:0 22px }
+  .s .s-pe-links.largo{ display:none }
+  .s .s-pe-links.curto{ display:flex }
   .s .s-pe-links a,.s .s-pe-links .s-pe-botao{ font-size:14px; padding:12px 0 }
   .s .s-pe-fim > .s-pe-copy{ padding:2px 0 8px; font-size:13px }
 
@@ -1416,6 +1597,13 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-heroi .s-lead, .s .s-heroi .s-lead.grande{ margin-top:16px; font-size:18px; line-height:1.38 }
   .s .s-heroi .s-acoes{ margin-top:24px }
   .s .s-heroi .s-micro{ margin-top:14px; font-size:14px }
+}
+
+/* o pé no Android estreito (360, 21/10/2026): os três links do Servir numa
+   linha só, sem o "Privacidade" sozinho embaixo */
+@media(max-width:380px){
+  .s .s-pe-links{ gap:0 16px }
+  .s .s-pe-links a,.s .s-pe-links .s-pe-botao{ font-size:13.5px }
 }
 
 /* CELULAR DEITADO · 21/10/2026: ~330 px úteis de altura. O herói de foto media a
@@ -1511,7 +1699,6 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 
   /* 4. toque */
   .s .pg-chip{ height:44px }
-  .s .pg-mapao .leaflet-bar a{ width:44px; height:44px; line-height:44px; font-size:22px }
   .s .trilho-pontos button{ height:44px }
 }
 
@@ -1529,12 +1716,12 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-sub a:hover{ background:rgba(255,255,255,.08) }
   .s .s-ico-bt:hover{ background:rgba(255,255,255,.1) }
   .s .s-busca li a:hover{ background:rgba(255,255,255,.08) }
-  .s .s-pe-g li a:hover{ opacity:.7 }
+  .s .s-pe-grupos li a:hover{ opacity:.7 }
   /* 20/10/2026: todo link e botão responde ao mouse. O que faltava: o logo da
      barra, o carimbo @guiachurch, os links do pé (mapa e a última linha), as
      perguntas que abrem, os links dentro de resposta e de nota */
   .s .s-logo:hover,.s a.s-arroba:hover,.s .s-pe-mapa:hover,.s .s-pe-fim a:hover,.s .s-pe-botao:hover,.s .s-abre summary:hover,
-  .s .s-faq p a:hover,.s .s-abre details > div a:hover,.s .g-form-nota a:hover,.s .s-aviso a:hover{ opacity:.7 }
+  .s .s-faq p a:hover,.s .s-abre details > div a:hover,.s .g-form-nota a:hover,.s .s-aviso a:hover,.s .s-scrub-faixa .s-micro a:hover{ opacity:.7 }
   .s a.s-fato:hover{ background:rgba(255,255,255,.1) }
   .s .s-faixa.papel a.s-fato:hover,.s .s-faixa.areia a.s-fato:hover{ background:rgba(20,20,20,.08) }
   .s .s-pil:hover{ transform:translateY(-1px); box-shadow:0 10px 26px rgba(0,0,0,.22) }
@@ -1552,7 +1739,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .pin-guia:hover .pin-guia-c{ transform:scale(1.12) }
   .s .of-tipo-bt:hover{ border-color:var(--s-tinta) }
 }
-.s .s-logo,.s a.s-arroba,.s .s-pe-mapa,.s .s-pe-fim a,.s .s-pe-botao,.s .s-abre summary,.s .s-faq p a,.s .s-abre details > div a,.s .g-form-nota a,.s .s-aviso a{ transition:opacity var(--s-t) }
+.s .s-logo,.s a.s-arroba,.s .s-pe-mapa,.s .s-pe-fim a,.s .s-pe-botao,.s .s-abre summary,.s .s-faq p a,.s .s-abre details > div a,.s .g-form-nota a,.s .s-aviso a,.s .s-scrub-faixa .s-micro a{ transition:opacity var(--s-t) }
 .s{ -webkit-tap-highlight-color:transparent }
 .s :is(.s-pil, .acao, .s-enviar, .pg-chip, .of-tipo-bt, .s-ico-bt):active{ transform:scale(.97); transition-duration:.08s }
 

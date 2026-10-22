@@ -40,8 +40,9 @@ export const fim = (t: string) => {
    Em texto centralizado, "o", "a", "de", "que" sozinhos no fim de uma linha
    ("Que Deus multiplique o / que você semeou") puxam o olho para a borda
    torta. Regra de composição: a palavra curta gruda na seguinte com espaço
-   que não quebra. Duas passadas, para pegar sequências ("e a vida"). */
-const CURTAS = 'o|a|e|é|de|da|do|em|no|na|um|uma|à|ao|os|as|pra|para|por|que|se|com|dos|das|nos|nas|seu|sua|te|me|eu|ou|nem|só|sem|há';
+   que não quebra. Duas passadas, para pegar sequências ("e a vida").
+   21/10/2026: "às" entrou ("Culto todo domingo, às / 10h" partia a hora). */
+const CURTAS = 'o|a|e|é|de|da|do|em|no|na|um|uma|à|às|ao|os|as|pra|para|por|que|se|com|dos|das|nos|nas|seu|sua|te|me|eu|ou|nem|só|sem|há';
 /* TÍTULO (liga): só gruda se a palavra seguinte for curta (até 9 letras):
    "da responsabilidade" grudado vira um bloco que não cabe numa linha de 320.
    TEXTO CORRIDO (ligaTexto, 17 a 20 px): aceita até 16 letras ("uma
@@ -79,10 +80,16 @@ export const primeiraFrase = (t: string): [string, string] => {
   const m = t.match(/^([\s\S]*?[.!?…])\s+(\S[\s\S]*)$/);
   return m ? [m[1], m[2].trim()] : [t, ''];
 };
-export function UmaLinha({ texto, semFim }: { texto: string; semFim?: boolean }) {
+/* `estreita` (21/10/2026): numa coluna estreita (os cartões das funções de cada
+   área, 14,5 px em ~170 px de linha numa janela de 1000 px) o bloco grudado do texto
+   corrido (até 16 letras, ~190 px) é maior que a linha, e sobrava uma palavra
+   sozinha no meio do parágrafo ("necessários," / "com uma pluralidade"). Ali
+   vale a régua do título: a curta só gruda numa palavra de até 9 letras */
+export function UmaLinha({ texto, semFim, estreita }: { texto: string; semFim?: boolean; estreita?: boolean }) {
+  const ligar = estreita ? liga : ligaTexto;
   const [a, b] = primeiraFrase(texto);
-  if (!b) return <>{semFim ? ligaTexto(a) : fim(ligaTexto(a))}</>;
-  return <>{ligaTexto(a)}<span className="s-resto"> {semFim ? ligaTexto(b) : fim(ligaTexto(b))}</span></>;
+  if (!b) return <>{semFim ? ligar(a) : fim(ligar(a))}</>;
+  return <>{ligar(a)}<span className="s-resto"> {semFim ? ligar(b) : fim(ligar(b))}</span></>;
 }
 
 /* O TÍTULO EM DUAS VOZES: a grotesca pesada e a última palavra (ou as
@@ -117,9 +124,12 @@ export function Vozes({ children, it, as: Tag = 'h2', className = '', id, semPon
   );
 }
 
-/* a assinatura das faixas */
+/* a assinatura das faixas (o carimbo do PDF): ornamento, não conteúdo. 21/10/2026:
+   o leitor de tela lia "guiachurch, barra, sede" em quase toda faixa dos três
+   sites; agora ela é só visual (aria-hidden). No Guia Follow a folha troca o
+   desenho pelo chevron duplo da marca dele (app/site.css, "O SELO DO FOLLOW") */
 export function Sede({ className = '' }: { className?: string }) {
-  return <span className={'s-sede ' + className}><b>guiachurch</b><i>|</i><span>sede</span></span>;
+  return <span className={'s-sede ' + className} aria-hidden="true"><b>guiachurch</b><i>|</i><span>sede</span></span>;
 }
 export function Arroba({ className = '' }: { className?: string }) {
   return <a href="https://instagram.com/guiachurch" target="_blank" rel="noreferrer" className={'s-arroba ' + className}>@guiachurch</a>;
@@ -304,7 +314,8 @@ export function Passos({ id, tid, titulo, sub, itens, tom = 'areia', sede = true
       <div className="s-in">
         <SerifaCab id={tid} titulo={titulo} sub={sub} />
         <ol className="s-passos s-rev d1">
-          {itens.map(p => <li key={p.n}><b>{p.n} - {p.t}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
+          {/* o número e o nome não se separam ("01 -" sozinho numa linha): espaços que não quebram */}
+          {itens.map(p => <li key={p.n}><b>{`${p.n} - ${p.t}`}</b><p><UmaLinha texto={p.d} semFim /></p></li>)}
         </ol>
         {sede && <Sede className="base" />}
       </div>

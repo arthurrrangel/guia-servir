@@ -35,70 +35,85 @@ export default function Pe({ site = 'igreja' }: { site?: QualSite }) {
   const { menu, pe } = MAPAS[site];
   const conversa = canalDeConversa();
   const ano = new Date().getFullYear();
+  /* 21/10/2026: no computador os links de baixo que já estão num grupo do pé (o
+     "GUIA Church" e o "Acesso às equipes" do Servir, o "GUIA Church" do Follow)
+     não se repetem; no celular, onde os grupos não aparecem, vão todos */
+  const nosGrupos = new Set(menu.flatMap(g => [g.href, ...g.itens.map(it => it.href)]));
+  const peLargo = pe.filter(it => !nosGrupos.has(it.href));
+  const deBaixo = (lista: readonly Item[], qual: string) => (
+    <span className={'s-pe-links ' + qual}>
+      {lista.map((it, i) => (
+        <Fragment key={it.rot}>
+          {i > 0 && <i className="s-ponto" aria-hidden="true"> · </i>}
+          <Ir it={it} />
+        </Fragment>
+      ))}
+      {PIXEL_ATIVO && (
+        <>
+          {lista.length > 0 && <i className="s-ponto" aria-hidden="true"> · </i>}
+          <RevisarCookies />
+        </>
+      )}
+    </span>
+  );
   return (
-    <footer className="s-pe">
+    <footer className="s-pe" style={{ '--n': menu.length } as React.CSSProperties}>
       <div className="s-in">
-        <div className="s-pe-g">
+        {/* 21/10/2026, "tá tudo meio desorganizado e desajustado": o pé em três
+            andares, os mesmos em qualquer tela. Em cima, a marca e os grupos do
+            menu, tantas colunas quantos grupos (eram seis colunas fixas e o
+            Servir e o Follow, com quatro grupos, deixavam uma vazia); no meio, a
+            faixa de quando, onde e as redes; embaixo, © | sede | links, com a
+            sede no centro da página. No celular os grupos saem (o menu inteiro
+            está no topo, a um toque) e tudo fica no eixo */}
+        <div className="s-pe-topo">
           <div className="s-pe-marca">
-            {/* a marca de cada site (20/10/2026): o Follow tem a dele (FO»OW) e, embaixo, a
-                frase dele, a que fecha o herói; os outros dois levam a marca e a frase da igreja */}
+            {/* a marca de cada site (20/10/2026): o Follow tem a dele (FO»OW) e a
+                frase dele, a que fecha o herói; os outros dois, a marca e a frase da igreja */}
             {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Logo />}
             <p className="s-frase">{site === 'follow' ? 'Um lugar para todos' : IGREJA.frase}.</p>
-            {/* 21/10/2026, "o pé tem que estar mais profissional": quando e onde
-                viram dois blocos com rótulo, o mapa vira um link de verdade e o
-                Instagram e o WhatsApp, duas pílulas. A ordem do horário segue o
-                site: no guiafollow.com o sábado vem primeiro (21/10/2026) */}
-            <dl className="s-pe-info">
-              <div>
-                <dt>Quando</dt>
-                {site === 'follow' && IGREJA.followHora
-                  ? <dd><b>Follow aos sábados, {IGREJA.followHora}</b><br />Celebração aos {IGREJA.cultoDia.toLowerCase()}s, {IGREJA.cultoHora}</dd>
-                  : <dd><b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b>{IGREJA.followHora ? <><br />Follow aos sábados, {IGREJA.followHora}</> : null}</dd>}
-              </div>
-              <div>
-                <dt>Onde</dt>
-                {/* 19/10/2026: rua numa linha, bairro e cidade na outra. Na coluna
-                    estreita do pé a linha única partia o bairro ("Barra da" / "Tijuca") */}
-                <dd>{IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}<br />
-                  <a className="s-pe-mapa" href={MAPA} target="_blank" rel="noreferrer">Ver no mapa<Seta /></a>
-                </dd>
-              </div>
-            </dl>
-            <div className="s-pe-redes">
-              <a className="s-pil contorno" href={IGREJA.instagram} target="_blank" rel="noreferrer" aria-label={`Instagram ${IGREJA.instagramArroba}`}>Instagram</a>
-              <a className="s-pil contorno" href={conversa.href} target="_blank" rel="noreferrer">WhatsApp</a>
-            </div>
           </div>
-          {menu.map(g => (
-            <nav key={g.rot} aria-label={g.rot}>
-              <h2>{g.rot}</h2>
-              <ul>
-                {g.itens.map(it => <li key={it.href + it.rot}><Ir it={it} /></li>)}
-              </ul>
-            </nav>
-          ))}
+          <div className="s-pe-grupos">
+            {menu.map(g => (
+              <nav key={g.rot} aria-label={g.rot}>
+                <h2>{g.rot}</h2>
+                <ul>
+                  {g.itens.map(it => <li key={it.href + it.rot}><Ir it={it} /></li>)}
+                </ul>
+              </nav>
+            ))}
+          </div>
         </div>
-        {/* no celular (14/10/2026) o pé é só o que não está no menu: horário,
-            endereço, mapa e os links de baixo. Os grupos, a marca, a frase e
-            os sete atalhos saíram: o menu inteiro está a um toque, no topo
-            fixo, e o pé ocupava uma tela inteira (661 px) em toda página */}
+        <div className="s-pe-faixa">
+          {/* quando e onde, com rótulo; a ordem do horário segue o site: no
+              guiafollow.com o sábado vem primeiro */}
+          <dl className="s-pe-info">
+            <div>
+              <dt>Quando</dt>
+              {site === 'follow' && IGREJA.followHora
+                ? <dd><b>Follow aos sábados, {IGREJA.followHora}</b><br />Celebração aos {IGREJA.cultoDia.toLowerCase()}s, {IGREJA.cultoHora}</dd>
+                : <dd><b>{IGREJA.cultoDia}, {IGREJA.cultoHora}</b>{IGREJA.followHora ? <><br />Follow aos sábados, {IGREJA.followHora}</> : null}</dd>}
+            </div>
+            <div>
+              <dt>Onde</dt>
+              {/* rua numa linha, bairro e cidade na outra (19/10/2026: a linha
+                  única partia o bairro, "Barra da" / "Tijuca") */}
+              <dd>{IGREJA.rua}<br />{IGREJA.bairro}, {IGREJA.cidade}<br />
+                <a className="s-pe-mapa" href={MAPA} target="_blank" rel="noreferrer">Ver no mapa<Seta /></a>
+              </dd>
+            </div>
+          </dl>
+          <div className="s-pe-redes">
+            <a className="s-pil contorno" href={IGREJA.instagram} target="_blank" rel="noreferrer" aria-label={`Instagram ${IGREJA.instagramArroba}`}>Instagram</a>
+            <a className="s-pil contorno" href={conversa.href} target="_blank" rel="noreferrer">WhatsApp</a>
+          </div>
+        </div>
         <div className="s-pe-fim">
           <span className="s-pe-copy">© {ano} {IGREJA.nome}</span>
           <Sede />
-          <span className="s-pe-links">
-            {pe.map((it, i) => (
-              <Fragment key={it.rot}>
-                {i > 0 && <i className="s-ponto" aria-hidden="true"> · </i>}
-                <Ir it={it} />
-              </Fragment>
-            ))}
-            {PIXEL_ATIVO && (
-              <>
-                <i className="s-ponto" aria-hidden="true"> · </i>
-                <RevisarCookies />
-              </>
-            )}
-          </span>
+          {peLargo.length === pe.length
+            ? deBaixo(pe, 'todos')
+            : <>{deBaixo(peLargo, 'largo')}{deBaixo(pe, 'curto')}</>}
         </div>
       </div>
     </footer>

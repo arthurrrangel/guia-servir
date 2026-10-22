@@ -38,8 +38,12 @@ import { useEffect, useRef, type ReactNode } from 'react';
  *  `vozes: false` é um pedaço de frase (sem itálico e sem ponto): a frase
  *  inteira se desenrola por várias faixas, uma foto por vez. */
 export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: boolean; vozes?: boolean; /** no computador, a faixa desce para o terço de baixo (rostos no meio da foto) */ baixo?: boolean; /** o rótulo pequeno acima da frase ("01 · Acolhida") */ rotulo?: string };
-/** o pouso: o título em duas vozes, a linha de apoio (opcional) e onde começa */
-export type Pouso = { titulo: string; it?: string; sub?: ReactNode; a: number };
+/** o pouso: o título em duas vozes, a linha de apoio (opcional) e onde começa.
+ *  `primeiro` (21/10/2026): o pouso abre o herói, montado na primeira tela, e sai
+ *  em `b` quando a história começa; a última legenda é que fica no fim. Pedido do
+ *  Arthur para a home: sem rolar, quem é a GUIA, onde fica, a hora do culto e o
+ *  convite com como chegar e as dúvidas. */
+export type Pouso = { titulo: string; it?: string; sub?: ReactNode; a: number; primeiro?: boolean; b?: number };
 /** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
 export type Foto = { l: string; p: string; a: number; b: number; alt: string };
 
@@ -93,8 +97,13 @@ const suave = (p: number, e0: number, e1: number) => {
 };
 const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, children }:
-  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; micro?: ReactNode; rotulo: string; children: ReactNode }) {
+/* `altura` (21/10/2026): a distância de scroll do herói, em alturas de tela (o
+   padrão da folha é 450). A skill mede o herói em distância, não em segundos:
+   cada faixa precisa de uns quatro a seis toques de rolagem inteira (o teste de
+   flick, scripts/auditoria-flick.mjs), e um herói com cinco ou seis faixas precisa de
+   mais chão que um de três */
+export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, altura, children }:
+  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; micro?: ReactNode; rotulo: string; altura?: number; children: ReactNode }) {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -108,8 +117,12 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
     if (!raiz || !palco || !anel || imgs.length === 0) return;
     raiz.classList.add('js');
 
-    /* a configuração das faixas, na ordem do DOM: as legendas e, por último, o pouso */
-    const cfg = [...faixas.map(f => ({ a: f.a, b: f.b, ultima: false })), { a: pouso.a, b: 1, ultima: true }];
+    /* a configuração das faixas, na ordem do DOM: as legendas e, por último, o pouso;
+       com `pouso.primeiro`, o pouso vem antes (abre a tela) e a última legenda fica */
+    const cfg = pouso.primeiro
+      ? [{ a: 0, b: pouso.b ?? 0.16, ultima: false, ehPouso: true },
+         ...faixas.map((f, i) => ({ a: f.a, b: f.b, ultima: i === faixas.length - 1, ehPouso: false }))]
+      : [...faixas.map(f => ({ a: f.a, b: f.b, ultima: false, ehPouso: false })), { a: pouso.a, b: 1, ultima: true, ehPouso: true }];
     /* `ativa` começa indefinida para a primeira passada marcar o `inert` do
        pouso: no topo ele está apagado e não pode receber clique nem foco */
     const estado = cfg.map(() => ({ op: -1, k: -1, ativa: null as boolean | null }));
@@ -141,7 +154,8 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
         if (i === 0) k = Math.max(k, cargaK);
         if (Math.abs(op - st.op) > 0.004 || ((op === 0 || op === 1) && op !== st.op)) { st.op = op; el.style.setProperty('--op', op.toFixed(3)); }
         if (Math.abs(k - st.k) > 0.008 || ((k === 0 || k === 1) && k !== st.k)) { st.k = k; el.style.setProperty('--k', k.toFixed(3)); }
-        if (f.ultima) {
+        /* o pouso tem as pílulas: clicável e focável só quando está na tela */
+        if (f.ehPouso) {
           const ativa = op > 0.5;
           if (ativa !== st.ativa) { st.ativa = ativa; el.toggleAttribute('inert', !ativa); }
         }
@@ -186,7 +200,9 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
       window.addEventListener('resize', aoRolar);
       estado.forEach(s => { s.op = -1; s.k = -1; s.ativa = null; });
       setaAtual = -1; pAtual = -1;
-      cargaT0 = performance.now(); cargaK = 0;
+      /* o pouso que abre o herói já nasce montado (é a primeira tela, vem no HTML):
+         sem a rampa, ele não some e volta na hidratação */
+      cargaT0 = performance.now(); cargaK = pouso.primeiro ? 1 : 0;
       alvo = progresso(); mostrado = alvo;
       fotosEm(mostrado);
       legendas(mostrado);
@@ -249,8 +265,18 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
     };
   }, [fotos, faixas, pouso]);
 
+  const oPouso = (
+    <div className={'s-scrub-faixa pouso' + (pouso.primeiro ? ' primeiro' : '')}>
+      {chapeu}
+      <h1 className="s-h1 s-scrub-frase"><Palavras texto={pouso.titulo} it={pouso.it} espalha={0.4} /></h1>
+      {pouso.sub && <p className="s-lead grande s-scrub-sub">{pouso.sub}</p>}
+      <div className="s-acoes centro s-scrub-acoes">{children}</div>
+      {micro}
+    </div>
+  );
   return (
-    <section ref={heroRef} className="s-scrub" aria-label={rotulo}>
+    <section ref={heroRef} className={'s-scrub' + (pouso.primeiro ? ' pouso-primeiro' : '')} aria-label={rotulo}
+             style={altura ? { '--s-scrub-vh': altura } as React.CSSProperties : undefined}>
       <div className="s-scrub-palco">
         <div className="s-scrub-fotos">
           {fotos.map((f, i) => {
@@ -269,6 +295,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
           })}
         </div>
         <div className="s-scrub-scrim" aria-hidden="true" />
+        {pouso.primeiro && oPouso}
         {faixas.map((f, i) => (
           <div key={i} className={`s-scrub-faixa${f.sobe ? ' sobe' : ''}${f.baixo ? ' baixo' : ''}`} data-faixa={i}>
             {f.rotulo && <p className="s-chapeu s-scrub-rotulo"><b>{f.rotulo}</b></p>}
@@ -276,13 +303,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, chi
             <p className={`s-h2 s-scrub-frase${f.texto.length > 60 ? ' menor' : ''}`}><Palavras texto={f.texto} it={f.it} vozes={f.vozes} /></p>
           </div>
         ))}
-        <div className="s-scrub-faixa pouso" data-faixa={faixas.length}>
-          {chapeu}
-          <h1 className="s-h1 s-scrub-frase"><Palavras texto={pouso.titulo} it={pouso.it} espalha={0.4} /></h1>
-          {pouso.sub && <p className="s-lead grande s-scrub-sub">{pouso.sub}</p>}
-          <div className="s-acoes centro s-scrub-acoes">{children}</div>
-          {micro}
-        </div>
+        {!pouso.primeiro && oPouso}
         <svg className="s-scrub-anel" viewBox="0 0 48 48" aria-hidden="true">
           <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray={ANEL} strokeLinecap="round" transform="rotate(-90 24 24)" style={{ strokeDashoffset: ANEL }} />
         </svg>

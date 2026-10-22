@@ -11,7 +11,11 @@ for (const W of [360, 1440]) {
   await ctx.route('**', r => rotear(r, B));
   for (const rota of ROTAS) {
     const p = await ctx.newPage();
-    await p.goto(B + rota, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1800);
+    /* 21/10/2026: uma página que não abre (o sistema compilando no dev server) não
+       derruba a auditoria inteira: vira uma linha e a próxima rota segue */
+    const ok = await p.goto(B + rota, { waitUntil: 'domcontentloaded', timeout: 60000 }).then(() => true).catch(e => { console.log(W, rota, 'NÃO ABRIU:', String(e.message).split('\n')[0]); return false; });
+    if (!ok) { await p.close(); continue; }
+    await p.waitForTimeout(1800);
     await p.evaluate(() => document.querySelectorAll('details').forEach(d => d.open = true));
     await p.waitForTimeout(200);
     const r = await p.evaluate((W) => {

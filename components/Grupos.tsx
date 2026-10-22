@@ -6,6 +6,7 @@ import { PEQUENAS_GUIAS, wazeDaPequenaGuia, mapaExterno, type PequenaGuia } from
 import { MapaGuias } from '@/components/MapaGuias';
 import { pontos } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
+import { colunasQueFecham } from '@/lib/site/grade';
 
 /* =============================================================================
    OS GRUPOS, COM FILTRO POR DIA
@@ -112,6 +113,7 @@ export function Grupos() {
   }, [foco]);
   const contagens = useMemo(() => DIAS.map(d => PEQUENAS_GUIAS.filter(d.teste).length), []);
   const teste = DIAS[ativo].teste;
+  const nVisiveis = PEQUENAS_GUIAS.filter(teste).length;
   const visiveis = useMemo(() => PEQUENAS_GUIAS.filter(teste), [teste]);
   return (
     <>
@@ -156,9 +158,11 @@ export function Grupos() {
           uma região viva, e o leitor de tela lia todos os que apareceram. Agora
           a lista é só lista, e uma frase curta anuncia o resultado do filtro. */}
       <p className="so-leitor" role="status" aria-live="polite">
-        {`${PEQUENAS_GUIAS.filter(teste).length} de ${PEQUENAS_GUIAS.length} grupos no filtro atual`}
+        {`${nVisiveis} de ${PEQUENAS_GUIAS.length} grupos no filtro atual`}
       </p>
-      <Trilho className="pgs fila" rotulo="Os grupos">
+      {/* 21/10/2026: as colunas que fecham as linhas para quantos grupos o filtro
+          mostra (12 = 4 + 4 + 4; com cinco colunas no monitor largo eram 5 + 5 + 2) */}
+      <Trilho className="pgs fila" rotulo="Os grupos" style={{ '--pg-c5': colunasQueFecham(nVisiveis, [5, 4, 3]), '--pg-c4': colunasQueFecham(nVisiveis, [4, 3]), '--pg-c3': colunasQueFecham(nVisiveis, [3, 2]) } as React.CSSProperties}>
         {PEQUENAS_GUIAS.map(pg => {
           const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
           const visivel = teste(pg);

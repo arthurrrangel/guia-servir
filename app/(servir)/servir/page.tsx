@@ -46,14 +46,20 @@ import { AREAS } from '@/lib/site/areas';
    ============================================================================= */
 
 /* as cinco áreas no herói, na ordem do site (scripts/site-fotos-drive.py e
-   scripts/site-fotos-areas: Mídia e Livraria vêm das fotos de 12/10) */
+   scripts/site-fotos-areas: Mídia e Livraria vêm das fotos de 12/10).
+   21/10/2026: O POUSO ABRE O HERÓI, como na home e em /cultos. Quem chega no
+   guiaservir.com via a Mídia ("Faça a mensagem chegar longe") e só descobria
+   que site era aquele no fim do scroll; agora a primeira tela diz o que é
+   (o título do Servir sobre a equipe reunida), tem as duas portas (Quero
+   servir, Já sirvo) e a nota do cadastro. As cinco áreas vêm depois, uma
+   foto por vez, e a Livraria fica até o fim do herói */
 const QUEM_SERVE: Foto[] = [
-  { l: '/site/servir-midia-l.webp', p: '/site/servir-midia-p.webp', a: 0, b: 0, alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo' },
-  { l: '/site/servir-louvor-l.webp', p: '/site/servir-louvor-p.webp', a: 0.18, b: 0.26, alt: 'Uma cantora e um guitarrista do Louvor no palco' },
-  { l: '/site/servir-kids-l.webp', p: '/site/servir-kids-p.webp', a: 0.36, b: 0.44, alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo' },
-  { l: '/site/servir-connect-l.webp', p: '/site/servir-connect-p.webp', a: 0.54, b: 0.62, alt: 'A equipe do Connect abraçando quem chega na porta' },
-  { l: '/site/servir-livraria-l.webp', p: '/site/servir-livraria-p.webp', a: 0.70, b: 0.78, alt: 'Mãos folheando uma Bíblia na livraria' },
-  { l: '/site/servir-pouso-l.webp', p: '/site/servir-pouso-p.webp', a: 0.84, b: 0.9, alt: 'A equipe do GUIA Kids reunida, de camiseta preta, diante do painel "Eu amo minha igreja"' },
+  { l: '/site/servir-pouso-l.webp', p: '/site/servir-pouso-p.webp', a: 0, b: 0, alt: 'A equipe do GUIA Kids reunida, de camiseta preta, diante do painel "Eu amo minha igreja"' },
+  { l: '/site/servir-midia-l.webp', p: '/site/servir-midia-p.webp', a: 0.12, b: 0.17, alt: 'Um voluntário da Mídia de fone, na mesa de corte, com o telão ao fundo' },
+  { l: '/site/servir-louvor-l.webp', p: '/site/servir-louvor-p.webp', a: 0.3, b: 0.35, alt: 'Uma cantora e um guitarrista do Louvor no palco' },
+  { l: '/site/servir-kids-l.webp', p: '/site/servir-kids-p.webp', a: 0.48, b: 0.53, alt: 'Uma voluntária do GUIA Kids com um bebê no colo, sorrindo' },
+  { l: '/site/servir-connect-l.webp', p: '/site/servir-connect-p.webp', a: 0.66, b: 0.71, alt: 'A equipe do Connect abraçando quem chega na porta' },
+  { l: '/site/servir-livraria-l.webp', p: '/site/servir-livraria-p.webp', a: 0.84, b: 0.89, alt: 'Mãos folheando uma Bíblia na livraria' },
 ];
 const ORDEM_HEROI = ['midia', 'louvor', 'kids', 'servico', 'livraria'] as const;
 
@@ -105,14 +111,17 @@ export default function Servir() {
       }} />
 
       {/* 1 · o herói: as cinco áreas, foto a foto, e o pouso */}
+      {/* 640 alturas de tela (21/10/2026, o teste de flick): seis faixas, cada uma
+          com quatro a seis toques de rolagem inteira (com 450 eram dois a quatro) */}
       <Scrub
         rotulo="GUIA Servir"
+        altura={640}
         fotos={QUEM_SERVE}
         faixas={ORDEM_HEROI.map((slug, i) => ({
           rotulo: AREAS[slug].nome, texto: AREAS[slug].frase,
-          a: [0, 0.2, 0.38, 0.56, 0.72][i], b: [0.17, 0.35, 0.53, 0.69, 0.83][i], sobe: i % 2 === 1, baixo: true,
+          a: [0.15, 0.33, 0.51, 0.69, 0.87][i], b: [0.31, 0.49, 0.67, 0.85, 1][i], sobe: i % 2 === 1, baixo: true,
         }))}
-        pouso={{ titulo: 'Encontre o seu lugar pra servir', it: 'pra servir', a: 0.86,
+        pouso={{ titulo: 'Encontre o seu lugar pra servir', it: 'pra servir', a: 0, primeiro: true, b: 0.12,
           sub: <>Deus semeou dons em cada pessoa.<span className="s-resto"> Todo domingo, <Numero campo="pessoas" /> pessoas cultivam os delas para que o culto aconteça. {ligaTexto('O seu também tem um posto esperando.')}</span></> }}
         chapeu={<Chapeu forte="Servir" resto={IGREJA.nome} />}
         micro={<p className="s-micro">{ligaTexto("Cadastro de menos de um minuto.")}</p>}

@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import { og } from '@/lib/site/meta';
-import Link from 'next/link';
 import { lp } from '@/lib/site/sites';
-import { AREAS, AREAS_ORDEM } from '@/lib/site/areas';
 import { Vozes, Sede, Chapeu, Pil, Heroi, Fecho, UmaLinha, fim, liga, ligaTexto } from '@/components/site/Blocos';
 import { Areas } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
@@ -69,10 +67,11 @@ export default function OndeMeEncaixo() {
             <Vozes id="t-areas" className="s-h2 media" it="time">O trabalho, não o nome do time</Vozes>
             <p className="s-lead"><span className="s-resto">{ligaTexto("Com as palavras de quem lidera cada área.")} </span>{/* "Escolha", e não "Clique": no celular ninguém clica (21/10/2026) */}{ligaTexto("Escolha uma pra ver as funções.")}</p>
           </div>
+          {/* 21/10/2026: a lista de perfis que vinha embaixo saiu também do computador
+              (no celular saiu em 14/10). O índice logo acima já traz, em cada área, a
+              mesma linha de perfil ("Pra quem gosta de...") e o mesmo link: eram as
+              cinco áreas duas vezes na mesma faixa */}
           <div className="s-rev d1"><Areas perfil /></div>
-          <ul className="s-faq depois s-rev so-largo">
-            {AREAS_ORDEM.map(s => <li key={s}><p><b>{AREAS[s].nome}.</b> {ligaTexto(AREAS[s].perfil ?? "")} <Link href={`/servir/${s}`} className="s-link">Ver as funções</Link></p></li>)}
-          </ul>
         </div>
       </section>
 

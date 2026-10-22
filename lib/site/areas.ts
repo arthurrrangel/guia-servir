@@ -70,3 +70,11 @@ export const AREAS: Record<string, Area> = {
 };
 
 export const AREAS_ORDEM = ['midia', 'louvor', 'kids', 'servico', 'livraria'];
+
+/* 21/10/2026, pedido do Arthur: quando a copy fala em "áreas", diz quais são.
+   Os nomes saem daqui, na ordem do site: "Mídia, Louvor, GUIA Kids, Connect e
+   Livraria" (a frase de cada uma, quando cabe, é a `linha`) */
+export const NOMES_AREAS: readonly string[] = AREAS_ORDEM.map(k => AREAS[k].nome);
+export function listaDeNomes(nomes: readonly string[]): string {
+  return nomes.length < 2 ? nomes.join('') : `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}`;
+}

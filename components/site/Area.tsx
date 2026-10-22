@@ -7,6 +7,7 @@ import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, UmaLinha, fim, ligaTexto } fro
 import type { LugarDeFoto } from '@/lib/site/fotos';
 import { FormServir } from './Servir';
 import { lp } from '@/lib/site/sites';
+import { colunasQueFecham } from '@/lib/site/grade';
 
 /* =============================================================================
    /servir/<área> — A PÁGINA DA ÁREA · 11/10/2026
@@ -147,13 +148,18 @@ export default function Area() {
           {fase === 'rede' && <p className="s-aviso s-centro" role="status">Sem conexão agora. Atualize a página pra ver as funções.</p>}
           {fase === 'pronto' && (
             <div className="s-rev d1">
-              {/* com uma ou duas funções (a Livraria), os cartões ficam no centro, não encostados à esquerda */}
-              <div className={'s-funcoes lista' + (grupos.length <= 2 ? ' poucas' : '')} role="group" aria-label={`As funções ${artigo} ${nome}`}>
+              {/* com uma ou duas funções (a Livraria), os cartões ficam no centro, não encostados à esquerda.
+                  21/10/2026: com três ou mais, a grade escolhe o número de colunas que fecha as
+                  linhas (8 = 4 + 4, 9 = 3 + 3 + 3, 10 = 5 + 5); as colunas automáticas davam 5 + 3 e
+                  5 + 4, com a última linha cheia de buracos */}
+              <div className={'s-funcoes lista' + (grupos.length <= 2 ? ' poucas' : '')} role="group" aria-label={`As funções ${artigo} ${nome}`}
+                   data-cols={grupos.length > 2 ? '' : undefined}
+                   style={grupos.length > 2 ? { '--cols': colunasQueFecham(grupos.length, [5, 4, 3]), '--cols-m': colunasQueFecham(grupos.length, [4, 3]), '--cols-t': colunasQueFecham(grupos.length, [3, 2]) } as React.CSSProperties : undefined}>
                 {grupos.map(([fam, g], i) => (
                   <div key={fam} className="s-funcao">
                     <small>{String(i + 1).padStart(2, '0')}</small>
                     <b>{fam}</b>
-                    <p><UmaLinha semFim texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
+                    <p><UmaLinha semFim estreita texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
                     {g.vagas > 1 && <em>{g.vagas} postos</em>}
                   </div>
                 ))}

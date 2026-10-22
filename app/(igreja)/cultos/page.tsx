@@ -40,12 +40,15 @@ import ProximoCulto from '@/components/site/ProximoCulto';
    ============================================================================= */
 
 /* o domingo em quatro momentos, nas fotos do Drive (scripts/site-fotos-drive.py) */
+/* 21/10/2026: o pouso abre o herói (a primeira tela diz quando, onde e como chegar)
+   e os quatro momentos vêm depois, cada um sobre a sua foto: a acolhida ainda na
+   foto da porta, o louvor, a Palavra, a oração; a última foto fecha */
 const DOMINGO: Foto[] = [
   { l: '/site/cultos-1-l.webp', p: '/site/cultos-1-p.webp', a: 0, b: 0, alt: 'Uma mulher sorrindo na entrada da igreja, recebendo quem chega' },
-  { l: '/site/cultos-2-l.webp', p: '/site/cultos-2-p.webp', a: 0.2, b: 0.28, alt: 'A igreja adorando, de pé, durante o louvor' },
-  { l: '/site/cultos-3-l.webp', p: '/site/cultos-3-p.webp', a: 0.4, b: 0.48, alt: 'O pastor no púlpito, durante a mensagem' },
-  { l: '/site/cultos-4-l.webp', p: '/site/cultos-4-p.webp', a: 0.58, b: 0.66, alt: 'Pessoas orando de olhos fechados, lado a lado' },
-  { l: '/site/cultos-5-l.webp', p: '/site/cultos-5-p.webp', a: 0.74, b: 0.82, alt: 'O pastor de braços abertos diante da igreja' },
+  { l: '/site/cultos-2-l.webp', p: '/site/cultos-2-p.webp', a: 0.35, b: 0.41, alt: 'A igreja adorando, de pé, durante o louvor' },
+  { l: '/site/cultos-3-l.webp', p: '/site/cultos-3-p.webp', a: 0.57, b: 0.63, alt: 'O pastor no púlpito, durante a mensagem' },
+  { l: '/site/cultos-4-l.webp', p: '/site/cultos-4-p.webp', a: 0.79, b: 0.85, alt: 'Pessoas orando de olhos fechados, lado a lado' },
+  { l: '/site/cultos-5-l.webp', p: '/site/cultos-5-p.webp', a: 0.93, b: 0.98, alt: 'O pastor de braços abertos diante da igreja' },
 ];
 
 export const metadata: Metadata = {
@@ -86,14 +89,17 @@ export default function Cultos() {
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })) }} />
 
       {/* o herói: um domingo inteiro, nos quatro momentos da copy, foto a foto */}
+      {/* 600 alturas de tela (21/10/2026, o teste de flick): os quatro momentos são frases
+          inteiras e cada um fica uns seis toques de rolagem; com 450, o louvor e a Palavra ficavam dois */}
       <Scrub
+        altura={600}
         rotulo="Cultos"
         fotos={DOMINGO}
         faixas={MOMENTOS.map((m, i) => ({
           rotulo: `${m.n} · ${m.t}`, texto: m.d,
-          a: [0.0, 0.22, 0.42, 0.6][i], b: [0.19, 0.39, 0.57, 0.73][i], sobe: i % 2 === 1, baixo: true,
+          a: [0.16, 0.39, 0.61, 0.83][i], b: [0.36, 0.58, 0.8, 1][i], sobe: i % 2 === 1, baixo: true,
         }))}
-        pouso={{ titulo: 'Um domingo para pertencer', it: 'para pertencer', sub: 'Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.', a: 0.77 }}
+        pouso={{ titulo: 'Um domingo para pertencer', it: 'para pertencer', sub: 'Louvor, Palavra e uma comunidade que recebe você pelo nome. Se é a sua primeira vez, a gente te espera na porta.', a: 0, primeiro: true, b: 0.13 }}
         chapeu={<Chapeu forte="Cultos" resto={`${IGREJA.cultoDia}, ${IGREJA.cultoHora}`} />}
         micro={<p className="s-micro">Próximo culto: <ProximoCulto /><Sep />{IGREJA.rua}</p>}
       >

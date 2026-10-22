@@ -52,13 +52,18 @@ import Contagem from '@/components/follow/Contagem';
 const CONVERSA = canalDeConversa('Oi! Quero ir no Follow no sábado.');
 const CAMP = naIgreja('/followcamp');
 
-/* as cinco fotos, na ordem do scroll: cada uma entra com fusão entre a e b */
+/* as cinco fotos, na ordem do scroll: cada uma entra com fusão entre a e b.
+   21/10/2026: O POUSO ABRE O HERÓI (como nos outros dois sites): quem chega
+   pelo Instagram, no celular, vê na primeira tela o que é, quando e onde, e
+   o "Avisar que vou". A sala cheia (a foto do pouso) abre; depois vem a
+   chegada: a conversa nos sofás e as risadas na entrada com "Vem como você
+   está", a adoração e o ministro de braços abertos com "Jesus no centro" */
 const FOTOS: Foto[] = [
-  { l: '/follow/f1-l.webp', p: '/follow/f1-p.webp', a: 0, b: 0, alt: 'Jovens conversando nos sofás antes do Follow' },
-  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.18, b: 0.26, alt: 'Três jovens rindo na entrada do Follow' },
-  { l: '/follow/f3-l.webp', p: '/follow/f3-p.webp', a: 0.36, b: 0.44, alt: 'Jovens em adoração, de mãos levantadas' },
-  { l: '/follow/f4-l.webp', p: '/follow/f4-p.webp', a: 0.60, b: 0.68, alt: 'Ministro de louvor de braços abertos diante do telão' },
-  { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0.74, b: 0.82, alt: 'A sala do Follow cheia, todo mundo de pé' },
+  { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0, b: 0, alt: 'A sala do Follow cheia, todo mundo de pé' },
+  { l: '/follow/f1-l.webp', p: '/follow/f1-p.webp', a: 0.16, b: 0.24, alt: 'Jovens conversando nos sofás antes do Follow' },
+  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.36, b: 0.44, alt: 'Três jovens rindo na entrada do Follow' },
+  { l: '/follow/f3-l.webp', p: '/follow/f3-p.webp', a: 0.56, b: 0.64, alt: 'Jovens em adoração, de mãos levantadas' },
+  { l: '/follow/f4-l.webp', p: '/follow/f4-p.webp', a: 0.76, b: 0.84, alt: 'Ministro de louvor de braços abertos diante do telão' },
 ];
 
 /* as quatro dúvidas de quem nunca foi, nas palavras de quem pergunta. 21/10/2026:
@@ -101,10 +106,10 @@ export default function Follow() {
         rotulo="Follow"
         fotos={FOTOS}
         faixas={[
-          { texto: 'Vem como você está', it: 'está', a: 0, b: 0.26 },
-          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.38, b: 0.62, sobe: true },
+          { texto: 'Vem como você está', it: 'está', a: 0.2, b: 0.52 },
+          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.56, b: 1, sobe: true },
         ]}
-        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: ligaTexto(`Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`), a: 0.76 }}
+        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: ligaTexto(`Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`), a: 0, primeiro: true, b: 0.16 }}
         chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>

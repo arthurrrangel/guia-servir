@@ -29,6 +29,16 @@ const IGNORAR = [
   /webpack-hmr/, /_next\/webpack-hmr/,
   /favicon\.ico.*404/,
 ];
+/* 21/10/2026: rodando contra o build de produção (`next start`, como as
+   outras auditorias depois do OOM do dev server), aparecem duas coisas que só
+   existem fora da Vercel, e elas são contadas à parte (aparecem no fim, não
+   somem): o script da Web Analytics da Vercel (/_vercel/insights e
+   /_vercel/speed-insights só existem no deploy; aqui dão 404 e o navegador
+   recusa o HTML no lugar do script) e o pré-carregamento das páginas pelos
+   <Link> (pedidos ?_rsc=) cortado com ERR_ABORTED quando a auditoria fecha a
+   página. Qualquer outra falha nesses endereços continua contando. */
+const DA_VERCEL = /\/_vercel\/(speed-)?insights\//;
+let ambiente = 0;
 
 /* o contêiner não alcança a internet: as chamadas ao banco recebem as
    fixtures de /tmp/rpc (as mesmas dos outros scripts) e o resto de fora é
@@ -59,6 +69,7 @@ for (const rota of ROTAS) {
       if (t !== 'error' && t !== 'warning') return;
       const txt = m.text();
       if (IGNORAR.some(r => r.test(txt))) return;
+      if (DA_VERCEL.test(txt) || DA_VERCEL.test(m.location()?.url || '')) { ambiente++; return; }
       /* recurso de fora abortado pelo próprio script (tiles do mapa), e o
          documento 404 da rota inexistente: não são defeitos do site */
       const onde = m.location()?.url || '';
@@ -70,12 +81,15 @@ for (const rota of ROTAS) {
       if (/webpack-hmr/.test(u)) return;
       /* tiles de mapa e hosts externos: o contêiner não alcança a internet */
       if (!u.startsWith(BASE)) return;
-      achados.push(`REDE.falhou ${u.replace(BASE, '')} ${r.failure()?.errorText || ''}`);
+      const erro = r.failure()?.errorText || '';
+      if (DA_VERCEL.test(u) || (/[?&]_rsc=/.test(u) && /ERR_ABORTED/.test(erro))) { ambiente++; return; }
+      achados.push(`REDE.falhou ${u.replace(BASE, '')} ${erro}`);
     });
     pg.on('response', r => {
       const u = r.url();
       if (!u.startsWith(BASE)) return;
       const s = r.status();
+      if (s === 404 && DA_VERCEL.test(u)) { ambiente++; return; }
       if (s >= 400 && !(rota === '/uma-rota-que-nao-existe' && u === BASE + rota)) achados.push(`REDE.${s} ${u.replace(BASE, '')}`);
     });
     try {
@@ -108,4 +122,5 @@ for (const rota of ROTAS) {
 }
 await nav.close();
 console.log(`\n${problemas ? `${problemas} problema(s)` : 'console e rede limpos'} em ${ROTAS.length} rotas × ${LARGURAS.length} larguras`);
+if (ambiente) console.log(`(à parte, ${ambiente} ocorrência(s) que só existem fora da Vercel: o script /_vercel/insights e pré-carregamentos ?_rsc= cortados ao fechar a página)`);
 process.exit(problemas ? 1 : 0);

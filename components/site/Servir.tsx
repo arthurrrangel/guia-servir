@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { telefoneOk } from '@/lib/nome';
-import { AREAS, AREAS_ORDEM, type Area } from '@/lib/site/areas';
+import { AREAS, AREAS_ORDEM, NOMES_AREAS, listaDeNomes, type Area } from '@/lib/site/areas';
 import { Visto, Arroba, Vozes, Seta, UmaLinha, fim, liga, ligaTexto } from './Blocos';
 import { Quadro } from './Midia';
 
@@ -116,7 +116,7 @@ export function NumerosVivos({ num, circulos = ['circ-louvor', 'circ-colete'] }:
           {/* no celular o número fica só com o rótulo (a regra de 11/10:
               "números só com rótulo"); a frase segue no computador */}
           <li><span><b>{pessoas}</b> <UmaLinha texto="pessoas servindo. Cada uma começou sem saber fazer nada." /></span><Visto /></li>
-          <li><span><b>{areas}</b> <UmaLinha texto="áreas abertas. Uma delas tem a sua cara." /></span><Visto /></li>
+          <li><span><b>{areas}</b> <UmaLinha texto={num.ministerios === NOMES_AREAS.length ? `áreas abertas. ${listaDeNomes(NOMES_AREAS)}: uma delas tem a sua cara.` : 'áreas abertas. Uma delas tem a sua cara.'} /></span><Visto /></li>
           <li><span><b>{postos}</b> <UmaLinha texto="postos na escala. E sempre cabe mais um." /></span><Visto /></li>
           <li><span><b>{cultos}</b> <UmaLinha texto="encontros no mês. Servir aqui é comunhão, não plantão solitário." /></span><Visto /></li>
         </ul>

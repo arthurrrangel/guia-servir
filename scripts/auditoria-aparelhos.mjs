@@ -167,7 +167,14 @@ async function umaLargura([W, H, nome]) {
       for (const e of document.querySelectorAll('a[href], button, input, select, textarea, [role=button], summary')) {
         if (!vis(e)) continue;
         if (e.type === 'hidden') continue;
+        /* 21/10/2026: fora da conta o que não é para gente tocar: a isca dos
+           formulários (aria-hidden, fora da tela, tabIndex -1) e o que mora
+           dentro de aria-hidden */
+        if (e.closest('[aria-hidden="true"]')) continue;
         const r = e.getBoundingClientRect();
+        if (r.right < 0 || r.left > innerWidth) continue;
+        /* a atribuição do mapa é texto corrido (a exceção do WCAG 2.5.8), nas duas contas */
+        if (e.closest('.leaflet-control-attribution')) continue;
         /* área tocável real: a caixa OU o padding negativo que a folha usa para
            crescer o alvo sem mexer no layout (inline-block com margin negativa) */
         const alt = Math.max(r.height, parseFloat(getComputedStyle(e).paddingTop) * 2 + r.height * 0);

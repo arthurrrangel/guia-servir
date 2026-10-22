@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA_FRASE } from '@/lib/igreja';
+import { IGREJA, SITE_IGREJA as SITE, MAPA, SIGLA_FRASE, canalDeConversa } from '@/lib/igreja';
 import { noServir, noFollow } from '@/lib/site/sites';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Claro, SerifaCab, FaixaPerguntas, Fecho, Sigla, liga, ligaTexto } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
@@ -8,6 +8,7 @@ import ProximoCulto from '@/components/site/ProximoCulto';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import { Domingo } from '@/components/site/Domingo';
 import { MOMENTOS } from '@/lib/site/domingo';
+import { NOMES_AREAS, listaDeNomes } from '@/lib/site/areas';
 
 /* =============================================================================
    A HOME · 11/10/2026 — refeita do zero na forma da apresentação
@@ -47,7 +48,7 @@ const PORTAS = [
   /* 20/10/2026: o Follow tem site próprio (guiafollow.com); a porta abre nele */
   { href: noFollow('/'), t: 'Follow', n: `Sábado, ${IGREJA.followHora}`, f: 'O culto de jovens', d: 'Todo sábado à noite, a geração que está chegando adora, ouve e se encontra. Vem como está.', ir: 'Vou no Follow' },
   { href: '/pequena-guia', t: 'Pequena Guia', n: 'Na semana', f: 'Relacionamentos que fortalecem a fé', d: 'Um grupo pequeno, numa casa perto da sua, pra compartilhar a vida e estudar a Palavra durante a semana.', ir: 'Encontrar a minha' },
-  { href: noServir('/'), t: 'Servir', n: 'Todo domingo', f: 'Encontre o seu lugar pra servir', d: 'Cinco áreas, dezenas de postos e gente pra ensinar. Cadastro de menos de um minuto.', ir: 'Quero servir' },
+  { href: noServir('/'), t: 'Servir', n: 'Todo domingo', f: 'Encontre o seu lugar pra servir', d: `${listaDeNomes(NOMES_AREAS)}: cinco áreas, dezenas de postos e gente pra ensinar. Cadastro de menos de um minuto.`, ir: 'Quero servir' },
 ];
 
 
@@ -56,10 +57,10 @@ const PORTAS = [
    Cada uma entra com fusão entre a e b. */
 const CHEGADA: Foto[] = [
   { l: '/site/home-1-l.webp', p: '/site/home-1-p.webp', a: 0, b: 0, alt: 'Pessoas chegando pela calçada, diante do muro da GUIA Church, num domingo de sol' },
-  { l: '/site/home-2-l.webp', p: '/site/home-2-p.webp', a: 0.18, b: 0.26, alt: 'Dois homens se abraçando na porta da igreja' },
-  { l: '/site/home-3-l.webp', p: '/site/home-3-p.webp', a: 0.36, b: 0.44, alt: 'Um pai com o filho no colo, rindo com uma amiga na entrada' },
-  { l: '/site/home-4-l.webp', p: '/site/home-4-p.webp', a: 0.54, b: 0.62, alt: 'A igreja em adoração, de olhos fechados' },
-  { l: '/site/home-5-l.webp', p: '/site/home-5-p.webp', a: 0.72, b: 0.80, alt: 'O pastor diante da igreja, durante a Palavra' },
+  { l: '/site/home-2-l.webp', p: '/site/home-2-p.webp', a: 0.17, b: 0.24, alt: 'Dois homens se abraçando na porta da igreja' },
+  { l: '/site/home-3-l.webp', p: '/site/home-3-p.webp', a: 0.38, b: 0.45, alt: 'Um pai com o filho no colo, rindo com uma amiga na entrada' },
+  { l: '/site/home-4-l.webp', p: '/site/home-4-p.webp', a: 0.6, b: 0.67, alt: 'A igreja em adoração, de olhos fechados' },
+  { l: '/site/home-5-l.webp', p: '/site/home-5-p.webp', a: 0.8, b: 0.87, alt: 'O pastor diante da igreja, durante a Palavra' },
 ];
 
 /* as três fotos da frase "é gente": a porta, a sala das crianças, o violão.
@@ -96,21 +97,33 @@ export default function Home() {
       {/* 1 · o herói: a chegada num domingo, em cinco fotos de verdade. A frase
           de apoio da copy se desenrola sobre as fotos, um pedaço por vez, e
           a página pousa no título. Nenhuma palavra fora da copy final. */}
+      {/* 21/10/2026, pedido do Arthur: "na primeira tela da home, sem rolar, deixe
+          claro o que é a GUIA e onde fica, o horário do culto principal e um convite
+          explícito para visitar, com acesso rápido a como chegar ou tirar dúvidas".
+          O pouso abre o herói (pouso.primeiro): o chapéu diz o que e onde, a linha diz
+          quando e convida, as pílulas levam ao "É a sua primeira vez?" e ao como
+          chegar, e a nota tem a rua e o WhatsApp. A história das fotos vem depois,
+          ao rolar, com os pedaços da frase da copy ("pessoas reais, histórias reais
+          e um domingo que pode mudar a sua semana"); o "Quero servir" segue nas
+          portas e no fecho. */}
+      {/* 520 alturas de tela (21/10/2026, o teste de flick): cada pedaço da frase
+          fica inteiro por uns cinco toques de rolagem; com 450 eram três */}
       <Scrub
         rotulo={IGREJA.nome}
+        altura={520}
         fotos={CHEGADA}
         faixas={[
-          { texto: 'Uma igreja na Barra da Tijuca', vozes: false, a: 0, b: 0.24 },
-          { texto: 'feita de pessoas reais,', vozes: false, a: 0.27, b: 0.43, baixo: true },
-          { texto: 'histórias reais', vozes: false, a: 0.46, b: 0.61, sobe: true, baixo: true },
-          { texto: 'e um domingo que pode mudar a sua semana', it: 'semana', a: 0.64, b: 0.77, sobe: true, baixo: true },
+          { texto: 'Pessoas reais,', vozes: false, a: 0.2, b: 0.42, baixo: true },
+          { texto: 'histórias reais', vozes: false, a: 0.45, b: 0.66, sobe: true, baixo: true },
+          { texto: 'e um domingo que pode mudar a sua semana', it: 'semana', a: 0.69, b: 1, sobe: true, baixo: true },
         ]}
-        pouso={{ titulo: 'Existe um lugar para você', it: 'para você', a: 0.79 }}
-        chapeu={<Chapeu forte={IGREJA.nome} resto={IGREJA.bairro} />}
-        micro={<p className="s-micro"><ProximoCulto /><Sep />{IGREJA.rua}</p>}
+        pouso={{ titulo: 'Existe um lugar para você', it: 'para você', a: 0, primeiro: true, b: 0.16,
+                 sub: ligaTexto(`Culto todo ${IGREJA.cultoDia.toLowerCase()}, às ${IGREJA.cultoHora}. Venha nos visitar.`) }}
+        chapeu={<Chapeu forte={IGREJA.nome} resto={`Igreja na ${IGREJA.bairro}`} />}
+        micro={<p className="s-micro">{IGREJA.rua}<Sep />Dúvidas? <a href={canalDeConversa('Oi! Tenho uma dúvida sobre o culto de domingo.').href} target="_blank" rel="noreferrer">Fale no WhatsApp</a></p>}
       >
         <Pil href="/cultos#primeira-vez">Vou visitar</Pil>
-        <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>
+        <Pil href="/como-chegar" tom="vidro">Como chegar</Pil>
       </Scrub>
 
       {/* 2 · a igreja não é o prédio: a frase e as três fotos que ela descreve
