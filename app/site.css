@@ -149,6 +149,11 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
   -webkit-mask:var(--s-mascara) center / contain no-repeat; mask:var(--s-mascara) center / contain no-repeat }
 .s.s-follow main .s-sede > *{ display:none }
 .s *,.s *::before,.s *::after{ box-sizing:border-box }
+/* 22/10/2026 (WCAG 1.4.12): a palavra que não cabe na linha quebra em vez de sair
+   da tela. Com o espaçamento de sempre nenhuma palavra passa da coluna (as
+   auditorias de colisões e aparelhos); com letras a 0,12 em, "acontece" no título
+   do /eventos e "Relacionamentos" no da Pequena Guia passavam dos 390 px */
+.s{ overflow-wrap:break-word }
 .s img,.s svg,.s video{ display:block; max-width:100% }
 .s a{ color:inherit; text-decoration:none }
 .s button{ font:inherit; color:inherit; background:none; border:0; padding:0; cursor:pointer }
@@ -377,7 +382,12 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
    (era o que empurrava chapéu, texto e pílulas até a borda no /pequena-guia) */
 .s .s-heroi-in{ padding:clamp(96px,12vh,150px) 0 clamp(64px,9vh,110px); display:grid; grid-template-columns:minmax(0,1fr); gap:0 }
 .s .s-heroi .s-chapeu{ margin-bottom:clamp(18px,2.6vw,36px) }
-.s .s-heroi .s-h1{ max-width:none }
+/* 22/10/2026: 100% e não "none" (WCAG 1.4.12): centrado (margem automática no
+   celular, justify-items no .centro) o título encolhe para o próprio conteúdo, e
+   com letras a 0,12 em uma palavra longa o alargava além da coluna; com o teto da
+   coluna, a palavra quebra (overflow-wrap no .s). Com o espaçamento de sempre,
+   nenhum título chega perto da coluna: nada muda */
+.s .s-heroi .s-h1{ max-width:100% }
 /* no herói a segunda voz ganha a própria linha, como na tela 1 */
 .s .s-heroi .s-h1 .s-it{ display:block }
 .s .s-heroi .s-lead{ margin-top:clamp(22px,3vw,40px); max-width:42ch; color:rgba(255,255,255,.94) }
@@ -388,7 +398,7 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 .s .s-heroi .s-micro{ margin-top:clamp(16px,2.2vw,28px); color:rgba(255,255,255,.86) }
 .s .s-heroi.centro{ text-align:center }
 .s .s-heroi.centro .s-heroi-in{ justify-items:center }
-.s .s-heroi.centro .s-h1{ max-width:none }
+.s .s-heroi.centro .s-h1{ max-width:100% }
 .s .s-heroi.centro::before{ background:linear-gradient(180deg,rgba(10,10,12,.5) 0%,rgba(10,10,12,.28) 45%,rgba(10,10,12,.62) 100%) }
 /* A JANELA BAIXA (21/10/2026): o notebook de 1366 x 768 mostra uns 650 px de
    página, e o tablet deitado, 820. Em /sobre, /pequena-guia e nas áreas do
@@ -453,7 +463,22 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 .s .s-scrub-palco{ position:sticky; top:calc(var(--s-barra) + var(--s-recorte-topo)); overflow:hidden; background:var(--s-noite); isolation:isolate;
   height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)); min-height:480px }
 .s.js .s-scrub:not(.estatico) .s-scrub-palco{ min-height:0 }
+/* A DISTÂNCIA DESDE A PRIMEIRA PINTURA (21/10/2026). Antes de o React hidratar,
+   o herói tinha uma tela (o estado sem JS), e o que vem depois dele ficava logo
+   abaixo: o navegador baixava as fotos "lazy" da faixa seguinte (o violão da
+   home, 310 kB) junto com a foto do pouso, e no 4G lento ela só pintava aos
+   6,6 s. Com JS disponível (html.s-pre, posto pelo script da altura,
+   lib/site/tela.ts) o herói já nasce com a altura de scroll, a mesma que o
+   .js dá depois (nada pula na hidratação). Sem JS e com "menos movimento",
+   continua uma tela */
+@media (prefers-reduced-motion:no-preference){
+  html.s-pre .s:not(.js) .s-scrub{ height:calc(var(--s-scrub-vh) * var(--s-alt) / 100); min-height:0 }
+  html.s-pre .s:not(.js) .s-scrub .s-scrub-palco{ min-height:0 }
+}
 .s .s-scrub-fotos,.s .s-scrub-quadro{ position:absolute; inset:0 }
+/* a foto que ainda não ganhou o src (as de depois do pôster, components/site/Scrub.tsx)
+   não desenha nada, nem o texto alternativo */
+.s .s-scrub-foto:not([src]){ visibility:hidden }
 .s .s-scrub-foto{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center; display:block; user-select:none; -webkit-user-drag:none;
   opacity:var(--o,1); transform:scale(var(--s,1)) translateZ(0); transform-origin:50% 50%; will-change:opacity,transform; backface-visibility:hidden }
 .s.js .s-scrub:not(.estatico) .s-scrub-foto{
@@ -579,6 +604,23 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
   .s .s-scrub-faixa.pouso{ --op:1; --k:1; opacity:1 }
   .s .s-scrub-seta{ display:none }
   .s .s-scrub-faixa .w,.s .s-scrub-faixa .s-chapeu,.s .s-scrub-sub,.s .s-scrub-faixa .s-acoes{ transition:none; animation:none }
+}
+
+/* O HERÓI PARADO CRESCE COM O POUSO (22/10/2026, WCAG 1.4.12). Quem lê com o
+   espaçamento de texto maior (altura de linha 1,5, letras a 0,12 em, palavras a
+   0,16 em, parágrafos com 2 em) perdia o começo do pouso: o palco tem a altura
+   da tela e esconde o que passa dela (no celular, o chapéu e o título do
+   /cultos ficavam embaixo da barra; no monitor, o chapéu e as pílulas do Guia
+   Servir saíam do palco). No herói parado ("reduzir movimento" e sem JS) o
+   pouso entra no fluxo e o palco cresce com ele; com o espaçamento de sempre,
+   fica onde estava (no meio no computador, no terço de baixo em pé). O herói
+   que anda segue com o palco da altura da tela. */
+:is(.s .s-scrub.estatico, html:not(.s-pre) .s:not(.js) .s-scrub){ height:auto; min-height:calc(var(--s-alt) - var(--s-barra) - var(--s-recorte-topo)) }
+:is(.s .s-scrub.estatico, html:not(.s-pre) .s:not(.js) .s-scrub) .s-scrub-palco{ position:relative; top:auto; height:auto; min-height:inherit; display:flex; flex-direction:column; justify-content:center }
+:is(.s .s-scrub.estatico, html:not(.s-pre) .s:not(.js) .s-scrub) .s-scrub-faixa.pouso{ position:relative; inset:auto; transform:none; margin:clamp(24px,5vh,56px) auto }
+@media (orientation:portrait),(max-width:720px){
+  :is(.s .s-scrub.estatico, html:not(.s-pre) .s:not(.js) .s-scrub) .s-scrub-palco{ justify-content:flex-end }
+  :is(.s .s-scrub.estatico, html:not(.s-pre) .s:not(.js) .s-scrub) .s-scrub-faixa.pouso{ width:auto; margin:24px var(--s-gutter) calc(var(--s-alt) * .1 + env(safe-area-inset-bottom, 0px)) }
 }
 
 /* o rótulo pequeno de uma faixa ("01 · Acolhida"): entra junto com a frase */
@@ -838,7 +880,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    ============================================================================= */
 .s .s-form{ display:grid; grid-template-columns:repeat(3,1fr) auto; gap:clamp(10px,1.4vw,20px); margin-top:clamp(30px,4.4vw,62px); align-items:start }
 .s .s-campo{ display:grid; gap:6px; position:relative }
-.s .s-campo label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0) }
+/* 22/10/2026: white-space:nowrap, como o .s-so-leitor. Com o overflow-wrap do .s,
+   o rótulo de 1 px quebrava letra a letra ("Área de interesse" em 15 linhas):
+   invisível, mas leitor de tela que lê por linha leria letra por letra */
+.s .s-campo label{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap }
 .s .s-campo input,.s .s-campo select,.s .s-campo textarea{ width:100%; height:58px; padding:0 16px; background:var(--s-papel); color:var(--s-tinta); border:1.5px solid transparent; border-radius:0; font-weight:300; font-size:clamp(18px,1.6vw,24px); letter-spacing:-.015em; outline:0; -webkit-appearance:none; appearance:none; transition:border-color var(--s-t),box-shadow var(--s-t) }
 .s .s-campo textarea{ height:auto; min-height:120px; padding:14px 16px; line-height:1.4; resize:vertical }
 .s .s-campo input::placeholder,.s .s-campo textarea::placeholder{ color:#8d8d8d }
@@ -908,6 +953,16 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
    ============================================================================= */
 .s .s-foto{ overflow:hidden; border-radius:var(--s-r); background:var(--s-noite-2) }
 .s .s-foto img{ width:100%; height:100%; object-fit:cover; filter:saturate(.9) }
+/* AS FOTOS QUE CHEGAM (22/10/2026): a foto "lazy" (abaixo da primeira tela) entra
+   com fusão quando termina de baixar, em vez de surgir de uma vez sobre a caixa
+   escura. Só com JS (o Movimento, components/site/Movimento.tsx, marca .s-chegou
+   na que já estava pronta e em cada uma que chega ou falha depois) e só sem
+   "reduzir movimento". A janela do fecho fica de fora: a opacidade dela segue a
+   rolagem e não pode ter transição */
+@media (prefers-reduced-motion:no-preference){
+  .s.js main img[loading="lazy"]:not(.s-chegou, .s-janela-foto img){ opacity:0 }
+  .s.js main img[loading="lazy"]:not(.s-janela-foto img){ transition:opacity .5s var(--s-ease) }
+}
 .s .s-foto.v{ aspect-ratio:4/5 }
 .s .s-foto.h{ aspect-ratio:3/2 }
 .s .s-foto.q{ aspect-ratio:1 }
@@ -1002,6 +1057,10 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .s-gente{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:clamp(28px,5vw,88px); align-items:center }
 .s .s-gente .s-h2{ margin-bottom:var(--s-respiro) }
 .s .s-gente .s-lead + .s-lead{ margin-top:clamp(14px,1.6vw,22px) }
+/* a caixa da faixa de fotos e dos pontos (22/10/2026): min-width 0, senão a grade
+   mede a faixa inteira (as três fotos lado a lado, ~1000 px no celular) e a coluna
+   alarga junto */
+.s .s-gente-fotos{ min-width:0 }
 .s .s-trio{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(10px,1.4vw,18px); align-items:start }
 .s .s-trio figure:nth-child(2){ margin-top:clamp(28px,4.5vw,72px) }
 .s .s-trio figure:nth-child(3){ margin-top:clamp(56px,9vw,144px) }
@@ -1064,11 +1123,24 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 /* uma ou duas funções: cartões de largura fixa, no centro (a Livraria tem uma; sozinha à esquerda parecia faltar o resto) */
 .s .s-funcoes.poucas{ grid-template-columns:repeat(auto-fit,minmax(230px,300px)); justify-content:center }
 /* 21/10/2026: o número de colunas que fecha as linhas vem da página da área
-   (components/site/Area.tsx, `fecha`): no monitor, até cinco; de 1000 a 1179,
-   até quatro; no tablet, três ou duas. No celular a lista de 14/10 continua */
-@media(min-width:1180px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols,5),minmax(0,1fr)) } }
-@media(min-width:1000px) and (max-width:1179px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-m,4),minmax(0,1fr)) } }
-@media(min-width:760px) and (max-width:999px){ .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-t,3),minmax(0,1fr)) } }
+   (components/site/Area.tsx e lib/site/grade.ts, gradeQueFecha): no monitor,
+   até cinco; de 1000 a 1179, até quatro; no tablet, três ou duas. As trilhas
+   são dobradas (cada cartão ocupa duas) para a última linha que não fecha
+   (7 = 4 + 3) ficar no centro: o primeiro cartão dela começa na trilha que a
+   página calcula. No celular a lista de 14/10 continua */
+@media(min-width:760px){ .s .s-funcoes[data-cols] > .s-funcao{ grid-column:span 2 } }
+@media(min-width:1180px){
+  .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols2,10),minmax(0,1fr)) }
+  .s .s-funcoes[data-cols] > [data-ini-g]{ grid-column:var(--ini-g) / span 2 }
+}
+@media(min-width:1000px) and (max-width:1179px){
+  .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-m2,8),minmax(0,1fr)) }
+  .s .s-funcoes[data-cols] > [data-ini-m]{ grid-column:var(--ini-m) / span 2 }
+}
+@media(min-width:760px) and (max-width:999px){
+  .s .s-funcoes[data-cols]{ grid-template-columns:repeat(var(--cols-t2,6),minmax(0,1fr)) }
+  .s .s-funcoes[data-cols] > [data-ini-t]{ grid-column:var(--ini-t) / span 2 }
+}
 .s .s-funcao{ background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); padding:clamp(20px,2vw,26px); display:grid; gap:6px; align-content:start }
 .s .s-funcao small{ font-size:13px; font-weight:700; letter-spacing:.06em; color:var(--s-acento-texto) }
 .s .s-funcao b{ font-weight:800; font-size:clamp(18px,1.5vw,22px); letter-spacing:-.03em; line-height:1.1 }
@@ -1166,11 +1238,22 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .pgs{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:clamp(10px,1.2vw,16px); margin-top:clamp(22px,3vw,34px) }
 /* 21/10/2026: as colunas que fecham as linhas para os grupos que o filtro mostra
    (components/Grupos.tsx, lib/site/grade.ts): até cinco no monitor largo, até
-   quatro no notebook, até três de 1000 a 1179. O mínimo de 260 px de cartão vale
-   em todas */
-@media(min-width:1500px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c5,4),minmax(0,1fr)) } }
-@media(min-width:1180px) and (max-width:1499px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c4,4),minmax(0,1fr)) } }
-@media(min-width:1000px) and (max-width:1179px){ .s .pgs{ grid-template-columns:repeat(var(--pg-c3,3),minmax(0,1fr)) } }
+   quatro no notebook, até três de 1000 a 1179. As trilhas são dobradas (cada
+   cartão ocupa duas) para a última linha que não fecha ficar no centro (um grupo
+   só na terça não fica encostado à esquerda com duas colunas vazias) */
+@media(min-width:1000px){ .s .pgs > .pg{ grid-column:span 2 } }
+@media(min-width:1500px){
+  .s .pgs{ grid-template-columns:repeat(var(--pg-c5x2,8),minmax(0,1fr)) }
+  .s .pgs > [data-ini-5]{ grid-column:var(--ini-5) / span 2 }
+}
+@media(min-width:1180px) and (max-width:1499px){
+  .s .pgs{ grid-template-columns:repeat(var(--pg-c4x2,8),minmax(0,1fr)) }
+  .s .pgs > [data-ini-4]{ grid-column:var(--ini-4) / span 2 }
+}
+@media(min-width:1000px) and (max-width:1179px){
+  .s .pgs{ grid-template-columns:repeat(var(--pg-c3x2,6),minmax(0,1fr)) }
+  .s .pgs > [data-ini-3]{ grid-column:var(--ini-3) / span 2 }
+}
 .s .pg{ position:relative; background:var(--s-noite); color:var(--s-papel); border-radius:var(--s-r); display:flex; flex-direction:column; transition:transform var(--s-t) var(--s-ease),box-shadow var(--s-t) var(--s-ease) }
 .s .pg.some{ display:none }
 .s .pg.aceso{ transform:translateY(-3px); box-shadow:0 0 0 2px var(--s-acento),0 20px 44px rgba(0,0,0,.25) }
@@ -1193,7 +1276,7 @@ a.s-cartao:hover{ transform:translateY(-3px); box-shadow:0 20px 44px rgba(0,0,0,
 .s .g-form-campo input::placeholder{ color:#8d8d8d }
 .s .g-form-campo input:focus,.s .g-form-campo select:focus{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
 .s .g-form-campo [aria-invalid="true"]{ border-color:#b23b36 }
-.s .g-form-isca{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden }
+.s .g-form-isca{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; white-space:nowrap }
 .s .g-form-erro{ font-size:15px; font-weight:500; color:#b23b36 }
 .s .g-form-pe{ margin-top:4px }
 .s .g-form-nota{ font-size:14px; font-weight:300; color:var(--s-mudo); text-align:center; line-height:1.5 }
@@ -1308,20 +1391,31 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-form .s-enviar{ grid-column:1 / -1; width:100% }
 }
 /* 21/10/2026, no tablet: nome e WhatsApp numa linha, a área e o botão na
-   outra (era a área sozinha em meia linha e o botão embaixo, de ponta a ponta) */
+   outra (era a área sozinha em meia linha e o botão embaixo, de ponta a ponta).
+   E os três cartões em duas colunas (os caminhos do /acessar): o terceiro no
+   centro da segunda linha, da mesma largura dos outros, e não sozinho à
+   esquerda com meia linha vazia (a agenda do /eventos, .indice, é lista) */
 @media(min-width:760px) and (max-width:999px){
   .s .s-form.com-fim .s-enviar{ grid-column:auto }
+  .s .s-cartoes.tres:not(.indice) > :nth-child(3):last-child{ grid-column:1 / -1; justify-self:center; width:calc((100% - clamp(10px,1.2vw,16px)) / 2) }
 }
 @media(max-width:999px){
   .s .s-sigla{ grid-template-columns:repeat(2,1fr) }
   .s .s-num{ grid-template-columns:1fr }
-  .s .s-circs{ max-width:440px; margin-inline:auto }
+  /* 21/10/2026: no tablet o texto dos números vai à esquerda (abaixo), e os
+     círculos e o @guiachurch iam um no meio e o outro à direita: três eixos
+     numa faixa só. Agora tudo na margem da esquerda (no celular, abaixo de
+     760, tudo volta ao centro) */
+  .s .s-circs{ max-width:440px; margin-inline:0 auto }
   .s .s-vivos,.s .s-num .s-dir{ text-align:left }
   /* com o texto à esquerda, o visto colado na borda direita fica solto:
      ele passa a vir logo depois da última palavra */
   .s .s-vivos li{ display:block }
   .s .s-vivos li svg{ display:inline-block; vertical-align:middle; margin-left:10px; position:relative; top:-1px }
-  .s .s-num .s-arroba{ margin:0 0 clamp(18px,2.4vw,34px) }
+  /* o .dir do carimbo (0,4,0) vencia esta regra e o mandava para a direita;
+     e o respiro de 44 px de toque (--s-arroba-pad) volta pela margem. Os
+     números da home (.so) seguem no centro */
+  .s .s-num .s-arroba,.s .s-faixa .s-num:not(.so) .s-arroba.dir{ margin:calc(-1 * var(--s-arroba-pad,10px)) 0 calc(clamp(18px,2.4vw,34px) - var(--s-arroba-pad,10px)) }
   .s .s-num .s-dir .s-lead{ margin-left:0 }
   .s .s-duas,.s .s-duas.inv{ grid-template-columns:1fr }
   .s .s-duas.inv > :first-child{ order:1 } .s .s-duas.inv > :last-child{ order:2 }
@@ -1337,7 +1431,7 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s{ font-size:16px }
   .s .s-heroi{ min-height:min(calc(var(--s-alt) * .88),760px) }
   .s .s-heroi-in{ padding-top:64px }
-  .s .s-heroi .s-h1{ max-width:none }
+  .s .s-heroi .s-h1{ max-width:100% }
   .s .s-cartoes,.s .s-cartoes.cinco,.s .s-cartoes.quatro,.s .s-cartoes.tres,.s .s-cartoes.duas{ grid-template-columns:1fr }
   .s .s-cartao{ min-height:0 }
   .s .s-form,.s .s-form.livre{ grid-template-columns:1fr }
@@ -1452,6 +1546,9 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
   .s .s-cortina{ text-align:center }
   .s .s-busca li a{ text-align:center }
   .s .s-busca li small{ text-align:center }
+  /* 22/10/2026: o "Nada com esse nome" ficava encostado à esquerda embaixo da
+     lista no eixo (o campo, onde se digita, segue a exceção dos formulários) */
+  .s .s-busca-nada{ text-align:center }
 
   /* 5d. herói do celular: o texto desce para o terço de baixo e a foto
      respira em cima (rosto nunca embaixo do título); o escuro cresce de

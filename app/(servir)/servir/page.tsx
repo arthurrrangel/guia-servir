@@ -111,11 +111,14 @@ export default function Servir() {
       }} />
 
       {/* 1 · o herói: as cinco áreas, foto a foto, e o pouso */}
-      {/* 640 alturas de tela (21/10/2026, o teste de flick): seis faixas, cada uma
-          com quatro a seis toques de rolagem inteira (com 450 eram dois a quatro) */}
+      {/* 720 alturas de tela (22/10/2026, o teste de flick): seis faixas, cada uma
+          com cinco a seis toques de rolagem inteira no celular e cinco a sete no
+          monitor (com 450 eram dois a quatro; com 640 e com 680, uma faixa ficava
+          em quatro no celular, a do Louvor e depois a da Mídia: o patamar de cada
+          faixa media 4,9 toques e o resto caía de um lado ou do outro) */}
       <Scrub
         rotulo="GUIA Servir"
-        altura={640}
+        altura={720}
         fotos={QUEM_SERVE}
         faixas={ORDEM_HEROI.map((slug, i) => ({
           rotulo: AREAS[slug].nome, texto: AREAS[slug].frase,

@@ -38,10 +38,14 @@ for (const W of LARGURAS) {
       const caixas = [];
       const andar = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       const fixo = el => { for (let e = el; e && e !== document.body; e = e.parentElement) { const s = getComputedStyle(e).position; if (s === 'fixed' || s === 'sticky') return true; } return false; };
-      const recorte = el => { /* o retângulo visível: a interseção dos pais que cortam */
+      const recorte = el => { /* o retângulo visível: a interseção dos que cortam,
+           22/10/2026: a começar pelo próprio elemento do texto (o ponto escondido do
+           endereço, .s-sep, tem altura 0 e overflow hidden; o rótulo só para leitor
+           de tela tem 1 px e clip), e não só pelos pais */
         let x0 = -1e9, y0 = -1e9, x1 = 1e9, y1 = 1e9;
-        for (let e = el.parentElement; e && e !== document.documentElement; e = e.parentElement) {
+        for (let e = el; e && e !== document.documentElement; e = e.parentElement) {
           const s = getComputedStyle(e);
+          if (s.clip === 'rect(0px, 0px, 0px, 0px)' || s.clipPath === 'inset(50%)') return [0, 0, 0, 0];
           if (/(hidden|clip|auto|scroll)/.test(s.overflowX + s.overflowY)) { const q = e.getBoundingClientRect(); x0 = Math.max(x0, q.left); y0 = Math.max(y0, q.top); x1 = Math.min(x1, q.right); y1 = Math.min(y1, q.bottom); }
         }
         return [x0, y0, x1, y1];
@@ -76,6 +80,13 @@ for (const W of LARGURAS) {
         for (let j = i + 1; j < caixas.length && caixas[j].t < a.b; j++) {
           const c = caixas[j];
           if (a.el === c.el || a.el.contains(c.el) || c.el.contains(a.el)) continue;
+          /* 22/10/2026: as linhas do mesmo título não colidem entre si. O título de
+             tela tem a entrelinha apertada de propósito (0,95, a segunda voz em serifa
+             itálica), e as caixas da fonte de uma linha e da outra se encostam uns
+             3 px sem nenhuma letra tocar a outra (o herói parado ficou fora do
+             position:sticky, que a auditoria pula, e passou a ser medido) */
+          const tit = a.el.closest('h1,h2,h3');
+          if (tit && tit === c.el.closest('h1,h2,h3')) continue;
           const dx = Math.min(a.r, c.r) - Math.max(a.l, c.l), dy = Math.min(a.b, c.b) - Math.max(a.t, c.t);
           if (dx > 3 && dy > 3) ach.push(`"${a.txt}" (${nome(a.el)}) × "${c.txt}" (${nome(c.el)}) em ${Math.round(Math.max(a.l, c.l))},${Math.round(Math.max(a.t, c.t))}`);
         }

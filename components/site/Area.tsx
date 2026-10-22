@@ -7,7 +7,7 @@ import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, UmaLinha, fim, ligaTexto } fro
 import type { LugarDeFoto } from '@/lib/site/fotos';
 import { FormServir } from './Servir';
 import { lp } from '@/lib/site/sites';
-import { colunasQueFecham } from '@/lib/site/grade';
+import { gradeQueFecha } from '@/lib/site/grade';
 
 /* =============================================================================
    /servir/<área> — A PÁGINA DA ÁREA · 11/10/2026
@@ -101,6 +101,13 @@ export default function Area() {
     }
     return [...m.entries()];
   })();
+  /* a grade das funções (três ou mais): as colunas que fecham as linhas em cada
+     tela e, quando nenhuma fecha (7 = 4 + 3), onde começa a última linha */
+  const grade = grupos.length > 2 ? {
+    g: gradeQueFecha(grupos.length, [5, 4, 3]),
+    m: gradeQueFecha(grupos.length, [4, 3]),
+    t: gradeQueFecha(grupos.length, [3, 2]),
+  } : null;
   const zap = min?.whatsapp ? `https://wa.me/${min.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Oi! Quero saber mais sobre servir ${artigo} ${nome} na GUIA.`)}` : null;
   const iniciais = (min?.responsavel || '').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
 
@@ -153,16 +160,23 @@ export default function Area() {
                   linhas (8 = 4 + 4, 9 = 3 + 3 + 3, 10 = 5 + 5); as colunas automáticas davam 5 + 3 e
                   5 + 4, com a última linha cheia de buracos */}
               <div className={'s-funcoes lista' + (grupos.length <= 2 ? ' poucas' : '')} role="group" aria-label={`As funções ${artigo} ${nome}`}
-                   data-cols={grupos.length > 2 ? '' : undefined}
-                   style={grupos.length > 2 ? { '--cols': colunasQueFecham(grupos.length, [5, 4, 3]), '--cols-m': colunasQueFecham(grupos.length, [4, 3]), '--cols-t': colunasQueFecham(grupos.length, [3, 2]) } as React.CSSProperties : undefined}>
-                {grupos.map(([fam, g], i) => (
-                  <div key={fam} className="s-funcao">
-                    <small>{String(i + 1).padStart(2, '0')}</small>
-                    <b>{fam}</b>
-                    <p><UmaLinha semFim estreita texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
-                    {g.vagas > 1 && <em>{g.vagas} postos</em>}
-                  </div>
-                ))}
+                   data-cols={grade ? '' : undefined}
+                   style={grade ? { '--cols2': grade.g.c * 2, '--cols-m2': grade.m.c * 2, '--cols-t2': grade.t.c * 2 } as React.CSSProperties : undefined}>
+                {grupos.map(([fam, g], i) => {
+                  /* o primeiro cartão da última linha, quando ela não fecha, começa
+                     deslocado para a linha ficar no centro (uma por tela: g ≥ 1180,
+                     m 1000 a 1179, t 760 a 999) */
+                  const ini = grade ? (['g', 'm', 't'] as const).filter(k => grade[k].ini?.i === i) : [];
+                  return (
+                    <div key={fam} className="s-funcao" {...Object.fromEntries(ini.map(k => [`data-ini-${k}`, '']))}
+                         style={ini.length ? Object.fromEntries(ini.map(k => [`--ini-${k}`, grade![k].ini!.t])) as React.CSSProperties : undefined}>
+                      <small>{String(i + 1).padStart(2, '0')}</small>
+                      <b>{fam}</b>
+                      <p><UmaLinha semFim estreita texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
+                      {g.vagas > 1 && <em>{g.vagas} postos</em>}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

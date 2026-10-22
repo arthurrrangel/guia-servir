@@ -15,9 +15,20 @@ export default function Movimento() {
   useEffect(() => {
     const raiz = document.querySelector<HTMLElement>('.s');
     if (!raiz) return;
+    /* AS FOTOS QUE CHEGAM (22/10/2026): a foto "lazy" entra com fusão quando
+       termina de baixar (app/site.css, "AS FOTOS QUE CHEGAM"). A que já está
+       pronta é marcada antes do .js, no mesmo passo (nenhum quadro sem ela); toda
+       que chegar depois, ou falhar, é marcada pelo evento, ouvido no documento
+       (pega também as que um componente desenhar mais tarde) */
+    const chegou = (im: HTMLImageElement) => im.classList.add('s-chegou');
+    raiz.querySelectorAll<HTMLImageElement>('main img').forEach(im => { if (im.complete) chegou(im); });
+    const aoChegar = (e: Event) => { const t = e.target; if (t instanceof HTMLImageElement && raiz.contains(t)) chegou(t); };
+    document.addEventListener('load', aoChegar, true);
+    document.addEventListener('error', aoChegar, true);
+    const largarFotos = () => { document.removeEventListener('load', aoChegar, true); document.removeEventListener('error', aoChegar, true); };
     raiz.classList.add('js');
     const tudo = () => raiz.querySelectorAll('.s-rev:not(.visto)').forEach(e => e.classList.add('visto'));
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { tudo(); return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { tudo(); return largarFotos; }
     const obs = new IntersectionObserver(es => es.forEach(e => {
       if (e.isIntersecting) { e.target.classList.add('visto'); obs.unobserve(e.target); }
     }), { rootMargin: '0px 0px 18% 0px' });
@@ -37,7 +48,7 @@ export default function Movimento() {
     const aoRolar = () => { if (!pedindo) { pedindo = true; requestAnimationFrame(varre); } };
     window.addEventListener('scroll', aoRolar, { passive: true });
     const rede = setTimeout(tudo, 1200);
-    return () => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); };
+    return () => { obs.disconnect(); clearTimeout(rede); window.removeEventListener('scroll', aoRolar); largarFotos(); };
   }, [caminho]);
   return null;
 }

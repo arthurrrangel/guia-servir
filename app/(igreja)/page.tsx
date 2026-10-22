@@ -4,6 +4,7 @@ import { noServir, noFollow } from '@/lib/site/sites';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Ir, Seta, Sep, Claro, SerifaCab, FaixaPerguntas, Fecho, Sigla, liga, ligaTexto } from '@/components/site/Blocos';
 import { NumerosFaixa } from '@/components/site/Servir';
 import { Schema } from '@/components/site/Schema';
+import { Trilho } from '@/components/site/Trilho';
 import ProximoCulto from '@/components/site/ProximoCulto';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import { Domingo } from '@/components/site/Domingo';
@@ -137,14 +138,20 @@ export default function Home() {
               <p className="s-lead">{ligaTexto("É gente. Gente que chega mais cedo pra receber você na porta, que prepara a sala das crianças, que afina o violão antes da primeira nota.")}</p>
               <p className="s-lead so-largo">{ligaTexto(`Todo domingo, às ${IGREJA.cultoHora}, a nossa casa vira santuário. E tem um lugar guardado pra você nela.`)}</p>
             </div>
-            {/* tabIndex: no celular o trio desliza, e quem navega pelo teclado precisa chegar nele */}
-            <div className="s-trio desliza" role="group" aria-label="Quem chega mais cedo" tabIndex={0}>
-              {GENTE.map((g, i) => (
-                <figure key={g.id} className={`s-rev d${i + 1}`}>
-                  <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 759px) 80vw, 24vw" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
-                  <figcaption>{g.legenda}</figcaption>
-                </figure>
-              ))}
+            {/* no celular o trio desliza; 22/10/2026: pelo Trilho, com os pontos embaixo
+                como a faixa dos grupos da Pequena Guia (era a única faixa sem eles), e
+                focável, porque quem navega pelo teclado precisa chegar nele. A faixa e
+                os pontos numa caixa só: soltos na grade do .s-gente, os pontos ganhavam
+                o vão da grade (28 px a mais que nos grupos das PGs) */}
+            <div className="s-gente-fotos">
+              <Trilho className="s-trio" rotulo="Quem chega mais cedo" focavel>
+                {GENTE.map((g, i) => (
+                  <figure key={g.id} className={`s-rev d${i + 1}`}>
+                    <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 759px) 80vw, 24vw" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
+                    <figcaption>{g.legenda}</figcaption>
+                  </figure>
+                ))}
+              </Trilho>
             </div>
           </div>
           <Sede className="base" />

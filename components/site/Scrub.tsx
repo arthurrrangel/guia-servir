@@ -27,7 +27,8 @@ import { useEffect, useRef, type ReactNode } from 'react';
      com o ponto), palavra por palavra;
    · <picture> escolhe o corte 16:9 ou 9:16 pela orientação, ao vivo;
    · a primeira foto é o pôster: vem no HTML, com prioridade alta (LCP);
-     as outras chegam atrás de um anel de progresso;
+     as outras chegam atrás de um anel de progresso e, com o pouso abrindo
+     o herói, só depois do pôster (ver "AS FOTOS DE DEPOIS DO PÔSTER");
    · "menos movimento" vira o herói estático (uma tela, a última foto, só o
      pouso visível). Sem JS, a mesma tela. Nada depende de JS para existir.
 
@@ -233,6 +234,34 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
     /* uma foto travada nunca segura o anel para sempre */
     const cao = setTimeout(() => { while (feitas < total) chegou(); }, 15000);
 
+    /* AS FOTOS DE DEPOIS DO PÔSTER (21/10/2026): com `pouso.primeiro`, as fotos
+       2 em diante vêm sem src (data-src, data-srcset) e só começam a baixar
+       quando a primeira terminou, com a banda toda para ela. Com "menos
+       movimento" elas nem baixam: o estático mostra só a primeira. O source
+       ganha o srcset antes do img ganhar o src, para o <picture> escolher o
+       corte certo já no primeiro pedido */
+    let soltas = false, esperaSoltar: ReturnType<typeof setTimeout> | undefined;
+    const soltar = () => {
+      if (soltas) return;
+      soltas = true;
+      clearTimeout(esperaSoltar);
+      hero.querySelectorAll<HTMLImageElement>('img.s-scrub-foto[data-src]').forEach(im => {
+        const fonte = im.parentElement?.querySelector<HTMLSourceElement>('source[data-srcset]');
+        if (fonte?.dataset.srcset) { fonte.srcset = fonte.dataset.srcset; fonte.removeAttribute('data-srcset'); }
+        if (im.dataset.src) { im.src = im.dataset.src; im.removeAttribute('data-src'); }
+      });
+    };
+    function soltarQuandoPuder() {
+      if (soltas) return;
+      const poster = imgs[0];
+      if (poster.complete) { soltar(); return; }
+      poster.addEventListener('load', soltar, { once: true });
+      poster.addEventListener('error', soltar, { once: true });
+      /* a primeira travada não segura as outras para sempre */
+      esperaSoltar = setTimeout(soltar, 4000);
+      limpezas.push(() => { poster.removeEventListener('load', soltar); poster.removeEventListener('error', soltar); clearTimeout(esperaSoltar); });
+    }
+
     /* -------------------------------------------- os portões, decididos ao vivo */
     function aplicarModo() {
       if (mqReduz.matches) {
@@ -245,6 +274,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
       hero!.classList.remove('estatico');
       ligar();
       aoRolar();
+      soltarQuandoPuder();
     }
     mqReduz.addEventListener('change', aplicarModo);
 
@@ -285,10 +315,15 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
               '--a': i === 0 ? -2 : f.a, '--b': i === 0 ? -1 : f.b,
               '--za': i === 0 ? 0 : f.a, '--z': prox ? prox.b : 1,
             } as React.CSSProperties;
+            /* 21/10/2026: com o pouso abrindo o herói, só a primeira foto é da primeira
+               tela; as outras chegam depois dela (o JS solta o src quando ela termina).
+               Medido em produção no celular com 4G lento: as cinco baixando juntas
+               dividiam a banda e a do pouso só pintava aos 6,6 s (LCP) */
+            const adiar = !!pouso.primeiro && i > 0;
             return (
               <picture key={f.l} style={vars} className="s-scrub-quadro">
-                <source media="(orientation: portrait)" srcSet={f.p} type="image/webp" />
-                <img className="s-scrub-foto" src={f.l} alt={f.alt} width={1920} height={1080} decoding="async" loading="eager"
+                <source media="(orientation: portrait)" {...(adiar ? { 'data-srcset': f.p } : { srcSet: f.p })} type="image/webp" />
+                <img className="s-scrub-foto" {...(adiar ? { 'data-src': f.l } : { src: f.l })} alt={f.alt} width={1920} height={1080} decoding="async" loading="eager"
                   fetchPriority={i === 0 ? 'high' : 'low'} draggable={false} />
               </picture>
             );

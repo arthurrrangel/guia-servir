@@ -20,7 +20,11 @@ import { Children, useCallback, useEffect, useRef, useState } from 'react';
      conta: o trilho remede quando a classe de um filho muda e volta ao
      começo se a lista mudou de tamanho.
    ============================================================================= */
-export function Trilho({ className = '', rotulo, style, children }: { className?: string; rotulo: string; style?: React.CSSProperties; children: React.ReactNode }) {
+/* `focavel` (22/10/2026): para a faixa sem nada clicável dentro (as três fotos da
+   home), que precisa receber o foco do teclado para rolar sem dedo. Só enquanto
+   ela rola (no celular): no computador a grade não rola, e uma parada de Tab
+   sem nada para fazer só atrasa quem navega pelo teclado */
+export function Trilho({ className = '', rotulo, style, focavel, children }: { className?: string; rotulo: string; style?: React.CSSProperties; focavel?: boolean; children: React.ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
   const [n, setN] = useState(() => Children.toArray(children).length);
   const [i, setI] = useState(0);
@@ -69,7 +73,7 @@ export function Trilho({ className = '', rotulo, style, children }: { className?
 
   return (
     <>
-      <div ref={ref} className={`${className} desliza`.trim()} style={style} role="group" aria-label={rotulo}>
+      <div ref={ref} className={`${className} desliza`.trim()} style={style} role="group" aria-label={rotulo} tabIndex={focavel && rola ? 0 : undefined}>
         {children}
       </div>
       {n > 1 && rola && (

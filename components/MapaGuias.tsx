@@ -116,7 +116,13 @@ export function MapaGuias({ grupos, focoNome, aoEscolher, igreja, pessoa, zoomMa
       mapa.current = m;
       /* a junção dos pinos depende do zoom: refaz a cada mudança, sem reenquadrar */
       m.on('zoomend', () => desenharAtual.current(false));
-      desenhar(true);
+      /* 22/10/2026: pela referência, não pelo `desenhar` desta montagem. Com o
+         dia no endereço (/pequena-guia?dia=qua: o próprio filtro escreve o dia
+         no endereço, então é o link compartilhado, o recarregar, o voltar), o
+         filtro muda a lista enquanto o Leaflet ainda carrega; o `desenhar` preso
+         na montagem desenhava os dez grupos da primeira lista, e a lista
+         mostrava quatro */
+      desenharAtual.current(true);
     })();
     return () => {
       vivo = false;

@@ -21,7 +21,10 @@
    ao rolar e o teclado mudam a altura, mas não podem mexer no herói: seria a
    página pulando embaixo do dedo.
    ============================================================================= */
-export const TELA_JS = `(function(){try{var d=document.documentElement,w=-1;
+/* 21/10/2026: o mesmo script marca <html class="s-pre"> (há JS, o React ainda
+   vai hidratar): com isso o herói que anda com o scroll já nasce com a altura
+   de scroll (app/site.css, "A DISTÂNCIA DESDE A PRIMEIRA PINTURA") */
+export const TELA_JS = `(function(){try{var d=document.documentElement,w=-1;d.classList.add('s-pre');
 function medir(){var r=document.createElement('div');
 r.style.cssText='position:absolute;top:0;left:0;width:1px;height:100svh;visibility:hidden;pointer-events:none';
 d.appendChild(r);var s=r.getBoundingClientRect().height;d.removeChild(r);

@@ -6,7 +6,7 @@ import { PEQUENAS_GUIAS, wazeDaPequenaGuia, mapaExterno, type PequenaGuia } from
 import { MapaGuias } from '@/components/MapaGuias';
 import { pontos } from '@/components/site/Blocos';
 import { Trilho } from '@/components/site/Trilho';
-import { colunasQueFecham } from '@/lib/site/grade';
+import { gradeQueFecha } from '@/lib/site/grade';
 
 /* =============================================================================
    OS GRUPOS, COM FILTRO POR DIA
@@ -33,9 +33,11 @@ import { colunasQueFecham } from '@/lib/site/grade';
    `wazeDaPequenaGuia`.
    ============================================================================= */
 
-/* `url` é o valor de ?dia= que a home usa nas colunas da semana
-   (/pequena-guia?dia=qua): o filtro nasce já no dia certo, e mudar o filtro
-   escreve a URL de volta, para o link ser compartilhável. */
+/* `url` é o valor de ?dia= no endereço (/pequena-guia?dia=qua): o filtro nasce
+   já no dia certo, e mudar o filtro escreve a URL de volta, para o link ser
+   compartilhável. (A home levava para cá pelas colunas da semana; em 22/10/2026
+   nenhuma página do site tem mais esse link: o dia chega pelo link compartilhado,
+   pelo recarregar e pelo voltar.) */
 const idDoCartao = (nome: string) => `pg-${nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\W+/g, '-')}`;
 
 const DIAS: Array<{ rot: string; url: string; teste: (p: PequenaGuia) => boolean }> = [
@@ -81,9 +83,13 @@ export function Grupos() {
         }
         setAchado(melhor); setEstado('');
         if (melhor) {
-          /* o filtro volta para "todos": o mais perto pode ser de outro dia */
-          setAtivo(0); setFoco(melhor.grupo.nome);
-          document.getElementById(idDoCartao(melhor.grupo.nome))?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+          /* o filtro volta para "todos": o mais perto pode ser de outro dia.
+             22/10/2026: pelo escolher(), que também tira o ?dia= do endereço (o
+             endereço dizia terça com a lista em "todos", e recarregar voltava à
+             terça); e sem animação para quem pediu menos movimento */
+          escolher(0); setFoco(melhor.grupo.nome);
+          const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          document.getElementById(idDoCartao(melhor.grupo.nome))?.scrollIntoView({ block: 'center', behavior: quieto ? 'auto' : 'smooth' });
         }
       },
       err => { setEstado(err.code === 1 ? 'negado' : 'sem'); },
@@ -113,8 +119,18 @@ export function Grupos() {
   }, [foco]);
   const contagens = useMemo(() => DIAS.map(d => PEQUENAS_GUIAS.filter(d.teste).length), []);
   const teste = DIAS[ativo].teste;
-  const nVisiveis = PEQUENAS_GUIAS.filter(teste).length;
   const visiveis = useMemo(() => PEQUENAS_GUIAS.filter(teste), [teste]);
+  const nVisiveis = visiveis.length;
+  const noMapa = visiveis.some(g => g.coord);
+  /* a grade dos grupos que o filtro mostra, por tela (5: ≥ 1500, 4: 1180 a 1499,
+     3: 1000 a 1179): as colunas que fecham as linhas e, quando nenhuma fecha (um
+     grupo só na terça, dois online), o grupo que abre a última linha e a trilha
+     em que ele começa, para a linha ficar no centro (lib/site/grade.ts) */
+  const grades = { 5: gradeQueFecha(nVisiveis, [5, 4, 3]), 4: gradeQueFecha(nVisiveis, [4, 3]), 3: gradeQueFecha(nVisiveis, [3, 2]) } as const;
+  const abreUltima = (nome: string) => {
+    const vi = visiveis.findIndex(p => p.nome === nome);
+    return ([5, 4, 3] as const).filter(k => vi >= 0 && grades[k].ini?.i === vi).map(k => [k, grades[k].ini!.t] as const);
+  };
   return (
     <>
       {/* pg- porque `.chips`/`.chip` sem prefixo são o controle de nível do
@@ -128,31 +144,36 @@ export function Grupos() {
         ))}
       </div>
 
-      <MapaGuias grupos={visiveis} focoNome={foco} aoEscolher={setFoco} igreja pessoa={pessoa} />
-      {/* a resposta de "qual fica perto de mim": o botão pede a posição; o
-          resultado diz o grupo, a distância e o dia, e acende o cartão */}
-      <div className="pg-perto">
-        {achado ? (
-          <p className="pg-perto-txt">
-            <span className="g-rot">Mais perto de você</span>
-            <b>{achado.grupo.nome}</b>
-            <span>a {fmtKm(achado.dist)} · {achado.grupo.dia}, {achado.grupo.hora}{achado.grupo.bairro ? ` · ${achado.grupo.bairro}` : ''}</span>
-          </p>
-        ) : (
-          <p className="pg-perto-txt">
-            <b>Qual fica perto de mim?</b>
-            <span>
-              {estado === 'pedindo' && 'Pedindo a sua posição…'}
-              {estado === 'negado' && 'Sem a posição não dá para calcular. Toque num pino do mapa.'}
-              {estado === 'sem' && 'Este aparelho não informa a posição. Toque num pino do mapa.'}
-              {estado === '' && 'A posição não sai do seu aparelho.'}
-            </span>
-          </p>
-        )}
-        <button type="button" className={'acao' + (achado ? '' : ' cheia')} onClick={acharPerto} disabled={estado === 'pedindo'}>
-          {achado ? 'Calcular de novo' : 'Achar o mais perto de mim'} <IcSeta />
-        </button>
-      </div>
+      {/* 22/10/2026: o mapa e o "qual fica perto de mim" só quando o filtro tem
+          grupo com endereço. No "Online" o mapa mostrava só a igreja e empurrava
+          os dois cartões uns 600 px para baixo no celular */}
+      {noMapa && (<>
+        <MapaGuias grupos={visiveis} focoNome={foco} aoEscolher={setFoco} igreja pessoa={pessoa} />
+        {/* a resposta de "qual fica perto de mim": o botão pede a posição; o
+            resultado diz o grupo, a distância e o dia, e acende o cartão */}
+        <div className="pg-perto">
+          {achado ? (
+            <p className="pg-perto-txt">
+              <span className="g-rot">Mais perto de você</span>
+              <b>{achado.grupo.nome}</b>
+              <span>a {fmtKm(achado.dist)} · {achado.grupo.dia}, {achado.grupo.hora}{achado.grupo.bairro ? ` · ${achado.grupo.bairro}` : ''}</span>
+            </p>
+          ) : (
+            <p className="pg-perto-txt">
+              <b>Qual fica perto de mim?</b>
+              <span>
+                {estado === 'pedindo' && 'Pedindo a sua posição…'}
+                {estado === 'negado' && 'Sem a posição não dá para calcular. Toque num pino do mapa.'}
+                {estado === 'sem' && 'Este aparelho não informa a posição. Toque num pino do mapa.'}
+                {estado === '' && 'A posição não sai do seu aparelho.'}
+              </span>
+            </p>
+          )}
+          <button type="button" className={'acao' + (achado ? '' : ' cheia')} onClick={acharPerto} disabled={estado === 'pedindo'}>
+            {achado ? 'Calcular de novo' : 'Achar o mais perto de mim'} <IcSeta />
+          </button>
+        </div>
+      </>)}
       {/* 14/09/2026: a live region ERA a lista inteira de cartões. Trocar o
           filtro mudava a visibilidade de vários cartões de uma vez dentro de
           uma região viva, e o leitor de tela lia todos os que apareceram. Agora
@@ -162,7 +183,7 @@ export function Grupos() {
       </p>
       {/* 21/10/2026: as colunas que fecham as linhas para quantos grupos o filtro
           mostra (12 = 4 + 4 + 4; com cinco colunas no monitor largo eram 5 + 5 + 2) */}
-      <Trilho className="pgs fila" rotulo="Os grupos" style={{ '--pg-c5': colunasQueFecham(nVisiveis, [5, 4, 3]), '--pg-c4': colunasQueFecham(nVisiveis, [4, 3]), '--pg-c3': colunasQueFecham(nVisiveis, [3, 2]) } as React.CSSProperties}>
+      <Trilho className="pgs fila" rotulo="Os grupos" style={{ '--pg-c5x2': grades[5].c * 2, '--pg-c4x2': grades[4].c * 2, '--pg-c3x2': grades[3].c * 2 } as React.CSSProperties}>
         {PEQUENAS_GUIAS.map(pg => {
           const conv = canalDeConversa(`Oi! Vi o site da GUIA e quero ir na ${pg.nome} (${pg.dia}, ${pg.hora}). Meu nome é: `);
           const visivel = teste(pg);
@@ -170,6 +191,8 @@ export function Grupos() {
           const verNoMapa = mapaExterno(pg);
           return (
             <article key={pg.nome} id={idDoCartao(pg.nome)}
+              {...Object.fromEntries(abreUltima(pg.nome).map(([k]) => [`data-ini-${k}`, '']))}
+              style={abreUltima(pg.nome).length ? Object.fromEntries(abreUltima(pg.nome).map(([k, t]) => [`--ini-${k}`, t])) as React.CSSProperties : undefined}
               className={'pg' + (visivel ? '' : ' some') + (foco === pg.nome ? ' aceso' : '')}
               aria-hidden={!visivel}
               onMouseEnter={() => pg.coord && setFoco(pg.nome)}>

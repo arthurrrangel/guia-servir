@@ -60,10 +60,10 @@ const CAMP = naIgreja('/followcamp');
    está", a adoração e o ministro de braços abertos com "Jesus no centro" */
 const FOTOS: Foto[] = [
   { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0, b: 0, alt: 'A sala do Follow cheia, todo mundo de pé' },
-  { l: '/follow/f1-l.webp', p: '/follow/f1-p.webp', a: 0.16, b: 0.24, alt: 'Jovens conversando nos sofás antes do Follow' },
-  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.36, b: 0.44, alt: 'Três jovens rindo na entrada do Follow' },
-  { l: '/follow/f3-l.webp', p: '/follow/f3-p.webp', a: 0.56, b: 0.64, alt: 'Jovens em adoração, de mãos levantadas' },
-  { l: '/follow/f4-l.webp', p: '/follow/f4-p.webp', a: 0.76, b: 0.84, alt: 'Ministro de louvor de braços abertos diante do telão' },
+  { l: '/follow/f1-l.webp', p: '/follow/f1-p.webp', a: 0.26, b: 0.32, alt: 'Jovens conversando nos sofás antes do Follow' },
+  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.44, b: 0.5, alt: 'Três jovens rindo na entrada do Follow' },
+  { l: '/follow/f3-l.webp', p: '/follow/f3-p.webp', a: 0.62, b: 0.68, alt: 'Jovens em adoração, de mãos levantadas' },
+  { l: '/follow/f4-l.webp', p: '/follow/f4-p.webp', a: 0.8, b: 0.86, alt: 'Ministro de louvor de braços abertos diante do telão' },
 ];
 
 /* as quatro dúvidas de quem nunca foi, nas palavras de quem pergunta. 21/10/2026:
@@ -105,11 +105,17 @@ export default function Follow() {
       <Scrub
         rotulo="Follow"
         fotos={FOTOS}
+        /* 21/10/2026, o teste de flick: o pouso ficava inteiro por 4 toques de rolagem no
+           celular e a última frase por 10 a 12 (450 alturas de tela, a frase final com
+           quase metade do herói). Com 340 e as janelas repartidas, cada um dos três
+           momentos fica uns 5 a 7 toques; cada frase entra com uma foto nova e troca de
+           foto no meio */
+        altura={340}
         faixas={[
-          { texto: 'Vem como você está', it: 'está', a: 0.2, b: 0.52 },
-          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.56, b: 1, sobe: true },
+          { texto: 'Vem como você está', it: 'está', a: 0.31, b: 0.62 },
+          { texto: 'Jesus no centro. Uma família em volta', it: 'volta', a: 0.67, b: 1, sobe: true },
         ]}
-        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: ligaTexto(`Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`), a: 0, primeiro: true, b: 0.16 }}
+        pouso={{ titulo: 'Um lugar para todos', it: 'todos', sub: ligaTexto(`Todo sábado, ${IGREJA.followHora}, na ${IGREJA.nome}, ${IGREJA.bairro}.`), a: 0, primeiro: true, b: 0.26 }}
         chapeu={<Chapeu forte="Follow" resto="O culto de jovens" />}
       >
         <Pil href={CONVERSA.href} fora medir="avisou_que_vai">Avisar que vou</Pil>
