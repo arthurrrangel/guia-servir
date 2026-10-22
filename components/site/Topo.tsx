@@ -168,6 +168,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
 
   useEffect(() => { if (busca) setTimeout(() => campo.current?.focus(), 30); }, [busca]);
 
+
   /* clicar fora fecha o painel aberto por toque/teclado */
   useEffect(() => {
     if (aberto === null) return;
@@ -189,6 +190,16 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
     };
     return tudo.map(i => ({ i, p: pontua(i) })).filter(x => x.p > 0).sort((a, b) => b.p - a.p).map(x => x.i).slice(0, 10);
   }, [q, MENU, BUSCA]);
+  /* 22/10/2026, WCAG 4.1.3: quem usa leitor de tela ouve quantos resultados a
+     busca achou, sem tirar o foco do campo; espera a pessoa parar de digitar
+     (700 ms), para não falar a cada letra */
+  const [aviso, setAviso] = useState('');
+  useEffect(() => {
+    if (!busca) { setAviso(''); return; }
+    const termo = q.trim();
+    const t = setTimeout(() => setAviso(!termo ? '' : achados.length ? `${achados.length} ${achados.length === 1 ? 'resultado' : 'resultados'} para ${termo}` : nada), 700);
+    return () => clearTimeout(t);
+  }, [busca, q, achados, nada]);
 
   return (
     <>
@@ -285,6 +296,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
         <div className="s-busca-in">
           <label htmlFor="s-busca-campo" className="s-so-leitor">O que você procura?</label>
           <input ref={campo} id="s-busca-campo" type="search" placeholder="O que você procura?" value={q} onChange={e => setQ(e.target.value)} autoComplete="off" />
+          <p className="s-so-leitor" role="status">{aviso}</p>
           {achados.length
             ? <ul>{achados.map(it => <li key={it.href + it.rot}><LinkOu item={it} onClick={() => setBusca(false)}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu></li>)}</ul>
             : <p className="s-busca-nada">{nada}</p>}

@@ -152,14 +152,16 @@ export function Grupos() {
         {/* a resposta de "qual fica perto de mim": o botão pede a posição; o
             resultado diz o grupo, a distância e o dia, e acende o cartão */}
         <div className="pg-perto">
-          {achado ? (
-            <p className="pg-perto-txt">
+          {/* 22/10/2026: um parágrafo só, que é região viva (role="status", WCAG 4.1.3):
+              quem usa leitor de tela ouve "Pedindo a sua posição…", a recusa ou o grupo
+              mais perto. Eram dois parágrafos trocados, e região viva que é trocada
+              inteira não é lida */}
+          <p className="pg-perto-txt" role="status">
+            {achado ? (<>
               <span className="g-rot">Mais perto de você</span>
               <b>{achado.grupo.nome}</b>
               <span>a {fmtKm(achado.dist)} · {achado.grupo.dia}, {achado.grupo.hora}{achado.grupo.bairro ? ` · ${achado.grupo.bairro}` : ''}</span>
-            </p>
-          ) : (
-            <p className="pg-perto-txt">
+            </>) : (<>
               <b>Qual fica perto de mim?</b>
               <span>
                 {estado === 'pedindo' && 'Pedindo a sua posição…'}
@@ -167,8 +169,8 @@ export function Grupos() {
                 {estado === 'sem' && 'Este aparelho não informa a posição. Toque num pino do mapa.'}
                 {estado === '' && 'A posição não sai do seu aparelho.'}
               </span>
-            </p>
-          )}
+            </>)}
+          </p>
           <button type="button" className={'acao' + (achado ? '' : ' cheia')} onClick={acharPerto} disabled={estado === 'pedindo'}>
             {achado ? 'Calcular de novo' : 'Achar o mais perto de mim'} <IcSeta />
           </button>
