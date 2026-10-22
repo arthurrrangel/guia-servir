@@ -104,7 +104,8 @@ export function NumerosVivos({ num, circulos = ['circ-louvor', 'circ-colete'] }:
     <div ref={faixa} className={'s-num' + (circulos ? '' : ' so')}>
       {circulos && (
         <div className="s-circs s-rev" aria-hidden="true">
-          <div className="s-circ a"><Quadro video={circulos[0]} formato="q" /></div>
+          {/* o botão de pausar fica só no círculo de cima (o b cobre o canto do a) */}
+          <div className="s-circ a"><Quadro video={circulos[0]} formato="q" controle={false} /></div>
           <div className="s-circ b"><Quadro video={circulos[1]} formato="q" /></div>
         </div>
       )}

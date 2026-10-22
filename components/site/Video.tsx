@@ -23,7 +23,20 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 're
    - aparece com um fade quando o primeiro quadro está pronto.
    - `aoTempo`: o relógio do vídeo para quem acompanha (os capítulos do
      domingo).
+   - 22/10/2026, PAUSAR (WCAG 2.2.2): o que se mexe sozinho por mais de cinco
+     segundos, ao lado de texto, precisa de um jeito de parar. Cada vídeo que
+     toca ganha um botão redondo no canto ("Pausar os vídeos", de alternar):
+     ele para TODOS os vídeos da página e a escolha vale até fechar a aba
+     (sessionStorage), em todas as páginas. Parado, fica o pôster. Sem vídeo
+     (reduzir movimento, economia de dados), não há botão: nada se mexe.
+     `controle={false}` tira o botão de um vídeo que divide a cena com outro
+     (os dois círculos do Guia Servir: o botão fica no de cima).
    ============================================================================= */
+
+const CHAVE = 's-videos-parados';
+const EVENTO = 's-videos';
+const lerParados = () => { try { return sessionStorage.getItem(CHAVE) === '1'; } catch { return false; } };
+const gravarParados = (v: boolean) => { try { if (v) sessionStorage.setItem(CHAVE, '1'); else sessionStorage.removeItem(CHAVE); } catch { /* sem armazenamento: vale só nesta página */ } };
 
 export function podeTocar() {
   if (typeof window === 'undefined') return false;
@@ -40,20 +53,27 @@ type Props = {
   perto?: boolean;
   aoTempo?: (t: number, duracao: number) => void;
   aoTocar?: () => void;
+  /** o botão de pausar (padrão: sim) */
+  controle?: boolean;
 };
 
 export const Video = forwardRef<HTMLVideoElement | null, Props>(function Video(
-  { largo, retrato, src, className = '', perto, aoTempo, aoTocar }, fora,
+  { largo, retrato, src, className = '', perto, aoTempo, aoTocar, controle = true }, fora,
 ) {
   const ref = useRef<HTMLVideoElement>(null);
   useImperativeHandle(fora, () => ref.current as HTMLVideoElement, []);
   const [url, setUrl] = useState<string | null>(null);
   const [pronto, setPronto] = useState(false);
+  /* parado por quem visita (o botão): lido antes de escolher o arquivo, para o
+     vídeo nem começar a tocar quando a pessoa já parou em outra página */
+  const [parado, setParado] = useState(false);
+  const paradoRef = useRef(false);
 
   /* 1. qual arquivo, e quando */
   useEffect(() => {
     const v = ref.current;
     if (!v || !podeTocar()) return;
+    paradoRef.current = lerParados(); setParado(paradoRef.current);
     const ext = v.canPlayType('video/mp4; codecs="avc1.640028"') ? 'mp4'
       : v.canPlayType('video/webm; codecs="vp9"') ? 'webm' : null;
     if (!ext) return;
@@ -84,30 +104,48 @@ export const Video = forwardRef<HTMLVideoElement | null, Props>(function Video(
     v.muted = true; v.setAttribute('muted', '');
     const tocar = () => { v.play().catch(() => {}); };
     const visivel = { tela: true, aba: !document.hidden };
-    const decidir = () => (visivel.tela && visivel.aba ? tocar() : v.pause());
+    const decidir = () => (!paradoRef.current && visivel.tela && visivel.aba ? tocar() : v.pause());
     const obs = new IntersectionObserver(es => { visivel.tela = es.some(e => e.isIntersecting); decidir(); }, { threshold: 0.05 });
     obs.observe(v);
     const aba = () => { visivel.aba = !document.hidden; decidir(); };
     document.addEventListener('visibilitychange', aba);
-    tocar();
-    return () => { obs.disconnect(); document.removeEventListener('visibilitychange', aba); };
+    /* o botão de qualquer vídeo da página para (ou solta) todos */
+    const mudou = (e: Event) => { paradoRef.current = !!(e as CustomEvent<boolean>).detail; setParado(paradoRef.current); decidir(); };
+    window.addEventListener(EVENTO, mudou);
+    decidir();
+    return () => { obs.disconnect(); document.removeEventListener('visibilitychange', aba); window.removeEventListener(EVENTO, mudou); };
   }, [url]);
 
+  const alternar = () => {
+    const novo = !paradoRef.current;
+    gravarParados(novo);
+    window.dispatchEvent(new CustomEvent(EVENTO, { detail: novo }));
+  };
+
   return (
-    <video
-      ref={ref}
-      className={(className + (pronto ? ' pronto' : '')).trim()}
-      src={url ?? undefined}
-      muted
-      loop
-      playsInline
-      autoPlay={!!url}
-      preload={url ? 'auto' : 'none'}
-      aria-hidden="true"
-      tabIndex={-1}
-      disablePictureInPicture
-      onPlaying={() => { setPronto(true); aoTocar?.(); }}
-      onTimeUpdate={aoTempo ? e => aoTempo(e.currentTarget.currentTime, e.currentTarget.duration) : undefined}
-    />
+    <>
+      <video
+        ref={ref}
+        className={(className + (pronto ? ' pronto' : '')).trim()}
+        src={url ?? undefined}
+        muted
+        loop
+        playsInline
+        autoPlay={!!url && !parado}
+        preload={url ? 'auto' : 'none'}
+        aria-hidden="true"
+        tabIndex={-1}
+        disablePictureInPicture
+        onPlaying={() => { setPronto(true); aoTocar?.(); }}
+        onTimeUpdate={aoTempo ? e => aoTempo(e.currentTarget.currentTime, e.currentTarget.duration) : undefined}
+      />
+      {url && controle && (
+        <button type="button" className="s-video-pausa" aria-label="Pausar os vídeos" aria-pressed={parado} onClick={alternar}>
+          {parado
+            ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor" /></svg>
+            : <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6.5" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" /><rect x="13.9" y="5.5" width="3.6" height="13" rx="1" fill="currentColor" /></svg>}
+        </button>
+      )}
+    </>
   );
 });

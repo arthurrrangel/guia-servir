@@ -38,13 +38,13 @@ export function Fundo({ video, prioridade, alt = '' }: { video: string; priorida
   );
 }
 
-export function Quadro({ video, formato = 'v', className = '', alt = '' }:
-  { video: string; formato?: 'v' | 'q'; className?: string; alt?: string }) {
+export function Quadro({ video, formato = 'v', className = '', alt = '', controle = true }:
+  { video: string; formato?: 'v' | 'q'; className?: string; alt?: string; controle?: boolean }) {
   const [w, h] = TAM[formato];
   return (
     <div className={`s-quadro ${formato} ${className}`.trim()}>
       <img src={`${V(video, formato)}.webp`} width={w} height={h} alt={alt} loading="lazy" decoding="async" />
-      <Video src={V(video, formato)} perto className="s-quadro-video" />
+      <Video src={V(video, formato)} perto className="s-quadro-video" controle={controle} />
     </div>
   );
 }

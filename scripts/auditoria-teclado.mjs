@@ -7,7 +7,8 @@
         ao conteúdo;
      B. a página inteira no Tab (até 90): cada parada visível, com indicador de foco (contorno ou
         sombra), sem cair dentro de painel fechado, de coisa escondida ou atrás
-        de um painel aberto;
+        de um painel aberto; e B2, de trás para a frente (Shift+Tab): quem sobe
+        da página não pode ficar escondido debaixo da barra fixa (WCAG 2.4.11);
      C. o submenu da barra (computador): o foco no botão sozinho não abre; Enter
         abre, Tab entra, Esc fecha (o painel some) e o foco volta para o botão do
         grupo; fechado, o Tab pula os links do painel; o Tab que sai do grupo
@@ -94,6 +95,23 @@ for (const rota of ['/', '/servir', '/follow']) {
       if (f.atras) ruinsB.push(`#${i + 1} ${f.desc} atrás de outra coisa`);
     }
     res(!ruinsB.length, `B ${rota}: ${volta ? `a página inteira em ${volta - 1} Tabs (o seguinte volta ao começo)` : '60 Tabs'}, ${vistos.size} paradas diferentes${ruinsB.length ? ' · ' + ruinsB.slice(0, 4).join(' · ') : ', todas visíveis e com marca'}`);
+    await ctx.close();
+  }
+  /* B2. de trás para a frente: o foco que sobe não some debaixo da barra fixa */
+  {
+    const { ctx, p } = await abrir(1440, 900, rota);
+    const ruinsB2 = [];
+    let n = 0;
+    for (let i = 0; i < 90; i++) {
+      await tab(p, true);
+      const f = await foco(p);
+      if (f.nada) continue;
+      n++;
+      if (!f.naTela) ruinsB2.push(`${f.desc} fora da tela`);
+      else if (f.atras) ruinsB2.push(`${f.desc} escondido atrás de outra coisa`);
+      if (/Pular para o conteúdo/.test(f.desc)) break;
+    }
+    res(!ruinsB2.length, `B2 ${rota}: ${n} paradas de trás para a frente${ruinsB2.length ? ' · ' + ruinsB2.slice(0, 4).join(' · ') : ', nenhuma escondida debaixo da barra'}`);
     await ctx.close();
   }
   /* C. o submenu da barra */
