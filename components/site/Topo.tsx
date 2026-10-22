@@ -55,12 +55,18 @@ const normal = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLower
 /* para fora (Instagram, WhatsApp): aba nova. Para o outro site da GUIA, para
    o sistema (outra folha de estilo) ou para uma âncora: <a> comum. O resto,
    <Link> (navegação sem recarregar) */
-function LinkOu({ item, className, onClick, atual, children }: { item: Item; className?: string; onClick?: () => void; atual?: boolean; children: React.ReactNode }) {
+/* `quieto` (22/10/2026): o link não pré-carrega a página enquanto está
+   escondido. A cortina, os painéis da barra e a lista da busca ficam no DOM
+   e na área da tela mesmo fechados (opacidade 0, visibility, inert), e o
+   <Link> do Next pré-carregava todos eles a cada página aberta: 126 a 230 kB
+   (sem compressão) de páginas que a pessoa nem viu. Agora pré-carregam quando
+   abrem (o menu, o painel, a busca) ou quando o mouse chega no grupo. */
+function LinkOu({ item, className, onClick, atual, quieto, children }: { item: Item; className?: string; onClick?: () => void; atual?: boolean; quieto?: boolean; children: React.ReactNode }) {
   const completo = /^https?:/.test(item.href);
   const aqui = atual ? 'page' as const : undefined;
   if (completo && !daGuia(item.href)) return <a href={item.href} target="_blank" rel="noreferrer" className={className} onClick={onClick}>{children}</a>;
   if (completo || item.duro || item.href.includes('#')) return <a href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</a>;
-  return <Link href={item.href} className={className} onClick={onClick} aria-current={aqui}>{children}</Link>;
+  return <Link href={item.href} className={className} onClick={onClick} aria-current={aqui} prefetch={quieto ? false : undefined}>{children}</Link>;
 }
 
 export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
@@ -77,6 +83,8 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
   const [q, setQ] = useState('');
   /* o grupo que o mouse abriu e o Esc calou (até o mouse sair dele) */
   const [calado, setCalado] = useState<number | null>(null);
+  /* o grupo em que o mouse chegou: o painel dele pode pré-carregar */
+  const [quente, setQuente] = useState<number | null>(null);
   const campo = useRef<HTMLInputElement>(null);
   const lupaBt = useRef<HTMLButtonElement>(null);
   const menuBt = useRef<HTMLButtonElement>(null);
@@ -233,6 +241,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
               }
               return (
                 <li key={g.rot} data-calado={calado === i ? '' : undefined}
+                    onPointerEnter={() => setQuente(i)}
                     onPointerLeave={() => setCalado(c => (c === i ? null : c))}
                     onBlur={e => {
                       /* o foco foi para fora do grupo (o Tab passou do último link): o
@@ -247,9 +256,9 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
                     {g.rot}<SetaBaixo />
                   </button>
                   <div id={`s-sub-${i}`} className={'s-sub' + (aberto === i ? ' aberto' : '')}>
-                    {!semEntrada && <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }}><b>{g.rot}</b><small>{g.sub ?? 'Abrir a página'}</small></LinkOu>}
+                    {!semEntrada && <LinkOu item={{ rot: g.rot, href: g.href, duro: g.duro }} quieto={aberto !== i && quente !== i}><b>{g.rot}</b><small>{g.sub ?? 'Abrir a página'}</small></LinkOu>}
                     {g.itens.map(it => (
-                      <LinkOu key={it.href + it.rot} item={it}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu>
+                      <LinkOu key={it.href + it.rot} item={it} quieto={aberto !== i && quente !== i}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu>
                     ))}
                   </div>
                 </li>
@@ -276,7 +285,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
             const aqui = !it.href.includes('#') && (caminho === it.href || caminho.startsWith(it.href + '/'));
             return (
               <li key={it.href + it.rot}>
-                <LinkOu item={it} onClick={() => setMenu(false)} atual={aqui}>
+                <LinkOu item={it} onClick={() => setMenu(false)} atual={aqui} quieto={!menu}>
                   <span>{it.rot}</span>{it.sub && <small>{it.sub}</small>}
                 </LinkOu>
               </li>
@@ -298,7 +307,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
           <input ref={campo} id="s-busca-campo" type="search" placeholder="O que você procura?" value={q} onChange={e => setQ(e.target.value)} autoComplete="off" />
           <p className="s-so-leitor" role="status">{aviso}</p>
           {achados.length
-            ? <ul>{achados.map(it => <li key={it.href + it.rot}><LinkOu item={it} onClick={() => setBusca(false)}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu></li>)}</ul>
+            ? <ul>{achados.map(it => <li key={it.href + it.rot}><LinkOu item={it} onClick={() => setBusca(false)} quieto={!busca}><b>{it.rot}</b>{it.sub && <small>{it.sub}</small>}</LinkOu></li>)}</ul>
             : <p className="s-busca-nada">{nada}</p>}
         </div>
       </div>
