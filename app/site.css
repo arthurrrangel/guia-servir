@@ -1871,3 +1871,55 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 .s{ -webkit-tap-highlight-color:transparent }
 .s :is(.s-pil, .acao, .s-enviar, .pg-chip, .of-tipo-bt, .s-ico-bt):active{ transform:scale(.97); transition-duration:.08s }
 
+
+/* AS CORES FORÇADAS (22/10/2026): no alto contraste do Windows (e em todo modo
+   de cores forçadas) o sistema troca as cores pelas do tema da pessoa, apaga
+   as sombras e pinta todo FUNDO com a cor do papel do tema. O que o site
+   desenhava só com fundo ou só com sombra sumia: o hambúrguer e o X do menu,
+   as barrinhas do domingo e os pontos dos trilhos (botões que ninguém via), o
+   filtro escolhido das Pequenas Guias e a seção aberta na barra (o ligado
+   igual ao desligado), os pinos do mapa no tema claro, a marca do foco nos
+   campos (a borda que mudava de cor deixa de mudar) e a caixa dos cartões.
+   Aqui, só nesse modo, cada um ganha a cor de sistema certa; fora dele nada
+   muda (as capturas do modo normal ficam idênticas) */
+@media (forced-colors:active){
+  /* o hambúrguer e o X: dois traços de fundo */
+  .s .s-menu-bt i{ forced-color-adjust:none; background:ButtonText }
+  /* as barrinhas do domingo (celular): o trilho e o cheio; a linha que anda (computador) */
+  .s .s-dom-barras button::before,.s .s-dom-barras i{ forced-color-adjust:none }
+  .s .s-dom-barras button::before{ background:GrayText }
+  .s .s-dom-barras i{ background:ButtonText }
+  .s .s-dom-linha{ forced-color-adjust:none; background:Highlight }
+  /* os pontos dos trilhos: o atual, mais largo e cheio */
+  .s .trilho-pontos i{ forced-color-adjust:none; background:ButtonText; opacity:.6 }
+  .s .trilho-pontos [aria-current="true"] i{ opacity:1 }
+  /* a seção aberta na barra: o traço de baixo era sombra */
+  .s .s-nav-bt[aria-current="true"],.s a.s-nav-bt[aria-current="page"]{ text-decoration:underline; text-decoration-thickness:2px; text-underline-offset:7px }
+  /* o escolhido: o filtro das Pequenas Guias e o dízimo ou a oferta */
+  .s .pg-chip[aria-pressed="true"],.s .of-tipo-bt[aria-pressed="true"]{ forced-color-adjust:none; background:Highlight; color:HighlightText; border-color:Highlight }
+  .s .of-tipo-bt[aria-pressed="true"] *{ color:HighlightText }
+  /* a placa que o modo põe atrás de cada linha de texto cobria o pé da linha de
+     cima nos títulos de entrelinha apertada (.9 e .95: "Encontre o seu lugar"
+     cortado pela placa de "pra servir."): ali a entrelinha volta à da fonte */
+  .s :is(.s-h1, .s-h2, .s-it, .s-serifa, .s-cartao-t, .g-h2){ line-height:normal }
+  /* a marca do foco nos campos */
+  .s .s-busca input:focus,.s .s-campo :is(input,select,textarea):focus,.s .g-form-campo :is(input,select):focus,.s .of-causa:focus{ outline:2px solid Highlight; outline-offset:2px }
+  .s .of-valor-box:focus-within .of-valor-cx{ outline:2px solid Highlight; outline-offset:2px }
+  /* os cartões cheios e as Pequenas Guias: a caixa era só fundo (a lista do
+     celular e o índice do computador já são linhas, e continuam linhas: as
+     duas regras logo depois deste bloco) */
+  .s .s-cartao,.s .pg{ border:1px solid CanvasText }
+  .s .pg.aceso{ outline:2px solid Highlight; outline-offset:2px }
+  /* os pinos do mapa: círculo com borda e o símbolo na cor do texto; o escolhido em destaque */
+  .s .pin-guia-c{ forced-color-adjust:none; background:Canvas; border:2px solid CanvasText; box-shadow:none }
+  .s .pin-guia-c svg{ fill:CanvasText }
+  .s .pin-guia.on .pin-guia-c{ background:Highlight; border-color:Highlight }
+  .s .pin-guia.on .pin-guia-c svg{ fill:HighlightText }
+  .s .pin-igreja .pin-guia-c{ box-shadow:0 0 0 3px Highlight }
+  .s .pin-guia-n{ forced-color-adjust:none; background:CanvasText; color:Canvas }
+  .s .pin-pessoa-c{ forced-color-adjust:none; background:Highlight; border-color:Canvas; box-shadow:0 0 0 2px Highlight }
+  /* o selo do Follow (o chevron duplo é uma máscara sobre fundo) */
+  .s.s-follow main .s-sede{ forced-color-adjust:none; background:CanvasText }
+}
+@media (forced-colors:active) and (max-width:759px){ .s .s-cartoes.lista > .s-cartao{ border-width:0 0 1px } }
+@media (forced-colors:active) and (min-width:760px){ .s .s-cartoes.indice > .s-cartao{ border-width:0 0 1px } }
