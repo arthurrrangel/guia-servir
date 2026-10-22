@@ -12,6 +12,10 @@
       do Guia Church varia de propósito: "Vou visitar" / "Vou conhecer").
    3. O QUE QUEBRA SEM NINGUÉM VER: aria-labelledby apontando para id que não
       existe (o axe não acusa) e id repetido na mesma página. Isto reprova.
+   4. OS MARCOS (22/10/2026): quem usa leitor de tela pula de marco em marco
+      (cabeçalho, navegação, conteúdo, rodapé). Cada página precisa de um
+      header de topo, um main, um footer e a barra como navegação com nome
+      (<nav aria-label>), não só uma lista. Isto também reprova.
 
      PORTA=3700 node scripts/auditoria-estrutura.mjs [/rota ...]
    ============================================================================= */
@@ -47,13 +51,20 @@ for (const rota of ROTAS) {
     const existe = new Set(ids);
     const repetidos = [...new Set(ids.filter((x, i) => ids.indexOf(x) !== i))];
     const semAlvo = [...document.querySelectorAll('[aria-labelledby]')].flatMap(e => e.getAttribute('aria-labelledby').split(/\s+/)).filter(x => !existe.has(x));
-    return { h1: document.querySelectorAll('h1').length, titulo: document.title, secoes, chamadas, repetidos, semAlvo };
+    /* os marcos: o header e o footer que não estão dentro de article/section/main (os que valem como banner e contentinfo) */
+    const doTopo = sel => [...document.querySelectorAll(sel)].filter(e => !e.parentElement.closest('article, aside, main, nav, section'));
+    const navBarra = document.querySelector('.s-topo nav[aria-label] .s-nav, .s-topo nav[aria-labelledby] .s-nav');
+    const marcos = { banner: doTopo('header').length, main: document.querySelectorAll('main').length, contentinfo: doTopo('footer').length, barra: navBarra ? navBarra.closest('nav').getAttribute('aria-label') : null, navs: [...document.querySelectorAll('nav')].map(n => n.getAttribute('aria-label') || '(sem nome)') };
+    return { h1: document.querySelectorAll('h1').length, titulo: document.title, secoes, chamadas, repetidos, semAlvo, marcos };
   });
   console.log(`\n#### ${rota}  "${o.titulo}"  h1=${o.h1}`);
   for (const s of o.secoes) console.log('   ', s);
   if (o.repetidos.length) { quebrados++; console.log('    !! id repetido:', o.repetidos.join(', ')); }
   if (o.semAlvo.length) { quebrados++; console.log('    !! aria-labelledby sem alvo:', o.semAlvo.join(', ')); }
   if (o.h1 !== 1) { quebrados++; console.log('    !! h1:', o.h1); }
+  const m = o.marcos;
+  console.log(`    marcos: banner ${m.banner} · main ${m.main} · contentinfo ${m.contentinfo} · navegação da barra ${m.barra ? '"' + m.barra + '"' : 'NENHUMA'} · navs: ${m.navs.join(', ')}`);
+  if (m.banner !== 1 || m.main !== 1 || m.contentinfo !== 1 || !m.barra) { quebrados++; console.log('    !! marcos incompletos'); }
   for (const c of o.chamadas) {
     if (c.href === '(botão)') continue;
     const d = c.href.replace(/^https?:\/\/(www\.)?/, '').replace(/^localhost:\d+/, '');
@@ -74,5 +85,5 @@ for (const [d, r] of Object.entries(porDestino).sort()) {
   const rots = new Set([...r].map(x => x.split(' [')[0]));
   if (rots.size > 1) console.log(`  ${d.slice(0, 90)}\n     ${[...r].join('\n     ')}`);
 }
-console.log(quebrados ? `\n${quebrados} problema(s) de estrutura` : '\nestrutura íntegra (ids, aria-labelledby, um h1 por página)');
+console.log(quebrados ? `\n${quebrados} problema(s) de estrutura` : '\nestrutura íntegra (ids, aria-labelledby, um h1 por página, os marcos)');
 process.exit(quebrados ? 1 : 0);

@@ -45,8 +45,12 @@ export type Faixa = { texto: string; it?: string; a: number; b: number; sobe?: b
  *  Arthur para a home: sem rolar, quem é a GUIA, onde fica, a hora do culto e o
  *  convite com como chegar e as dúvidas. */
 export type Pouso = { titulo: string; it?: string; sub?: ReactNode; a: number; primeiro?: boolean; b?: number };
-/** uma foto da pilha: os dois cortes e a janela em que entra (a → b) */
-export type Foto = { l: string; p: string; a: number; b: number; alt: string };
+/** uma foto da pilha: os dois cortes e a janela em que entra (a → b).
+ *  `xp` (22/10/2026): de 0 a 100, onde o corte em pé encosta quando a tela é
+ *  mais comprida que ele (o celular de 390x844 mostra uns 82% da largura do
+ *  9:16; o iPad em pé e o iPhone SE mostram tudo). Sem ele, o centro. Serve
+ *  para tirar da borda um rosto que ficaria em meia fatia. */
+export type Foto = { l: string; p: string; a: number; b: number; alt: string; xp?: number };
 
 const REDUZ = '(prefers-reduced-motion: reduce)';
 const SUAVIZACAO = 0.16;           /* por quadro de 60 fps; a sensação do scrub */
@@ -314,6 +318,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
             const vars = {
               '--a': i === 0 ? -2 : f.a, '--b': i === 0 ? -1 : f.b,
               '--za': i === 0 ? 0 : f.a, '--z': prox ? prox.b : 1,
+              ...(f.xp != null ? { '--fx': `${f.xp}%` } : {}),
             } as React.CSSProperties;
             /* 21/10/2026: com o pouso abrindo o herói, só a primeira foto é da primeira
                tela; as outras chegam depois dela (o JS solta o src quando ela termina).

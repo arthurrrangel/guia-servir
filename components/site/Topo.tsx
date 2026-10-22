@@ -199,7 +199,10 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
             {site === 'follow' ? <LogoFollow className="s-marca-follow" /> : <Simbolo />}
           </Link>
 
-          <ul className="s-nav" aria-label="Seções do site">
+          {/* 22/10/2026: a barra é um marco de navegação (<nav>), e não só uma
+              lista: quem usa leitor de tela pula para ela pelos marcos */}
+          <nav className="s-nav-casca" aria-label="Seções do site">
+          <ul className="s-nav">
             {MENU.map((g, i) => {
               /* 20/10/2026: o painel abria com "<grupo> · Abrir a página" e, logo abaixo, o
                  primeiro item indo para a MESMA página (Igreja → /sobre e Quem somos → /sobre,
@@ -242,6 +245,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
               );
             })}
           </ul>
+          </nav>
 
           <div className="s-topo-fim">
             <button ref={lupaBt} type="button" className="s-ico-bt" aria-label="Buscar no site" onClick={() => { setMenu(false); setBusca(true); }}><Lupa /></button>
@@ -255,7 +259,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
           MENU_CELULAR), a página aberta sublinhada em laranja, e embaixo as
           três saídas que não são página: WhatsApp, Instagram e o espaço de
           quem já serve */}
-      <div id="s-cortina" className={'s-cortina' + (menu ? ' aberta' : '')} inert={!menu} aria-label="Menu">
+      <nav id="s-cortina" className={'s-cortina' + (menu ? ' aberta' : '')} inert={!menu} aria-label="Menu">
         <ul className="s-cortina-lista">
           {MENU_CELULAR.map(it => {
             const aqui = !it.href.includes('#') && (caminho === it.href || caminho.startsWith(it.href + '/'));
@@ -273,7 +277,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
           <a href={IGREJA.instagram} target="_blank" rel="noreferrer">Instagram</a>
           <a href={jaSirvo} onClick={() => setMenu(false)}>Já sirvo</a>
         </div>
-      </div>
+      </nav>
 
       {/* a busca */}
       <div className={'s-busca' + (busca ? ' aberta' : '')} inert={!busca} role="dialog" aria-label="Buscar no site" aria-modal="true">

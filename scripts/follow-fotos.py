@@ -21,6 +21,19 @@ Ordem e papel de cada foto no scroll (ver components/site/Scrub.tsx e a página)
   f3  _MG_8167  adoração, mãos levantadas          "Jesus no centro."
   f4  _MG_8156  braços abertos diante do GUI>      "Uma família em volta."
   f5  _MG_8177  a sala inteira                     "Um lugar para todos."
+
+22/10/2026, A REVISÃO DOS CORTES EM PÉ. O corte em pé (9:16) aparece inteiro
+no iPad em pé e no iPhone SE; nos celulares mais compridos (390x844, o Android
+com a barra) a tela mostra só 80 a 95% da largura dele, e o que sobra sai das
+bordas (object-fit: cover). Três fotos deixavam um rosto partido na borda:
+  f1: o foco x 0,50 → 0,56 (sai o rosto da moça de coque, cortado ao meio;
+      ficam a moça de verde e as mãos da conversa);
+  f3: 0,70 → 0,81 (o rosto da moça que ora, de mãos juntas, entra inteiro;
+      era o mais forte da foto e estava partido na borda direita);
+  f2: o corte fica (0,60: no iPad o rapaz da direita aparece quase inteiro);
+      no celular a foto encosta na borda direita (xp 100 na página), e o
+      rosto dele não vira meia fatia.
+Os cortes deitados não mudam (usam o y). SAIDA=<pasta> grava em outra pasta.
 """
 import os, sys, glob
 import numpy as np
@@ -28,14 +41,14 @@ from PIL import Image, ImageOps
 from skimage.exposure import match_histograms
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else '.'
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public', 'follow')
+OUT = os.environ.get('SAIDA') or os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'public', 'follow')
 os.makedirs(OUT, exist_ok=True)
 
 # nome do RAW, nome da editada, foco (x, y) em fração: deitado usa o y, em pé usa o x
 FOTOS = [
-    ('f1', '_MG_7665', '0702-01', (0.50, 0.52)),
+    ('f1', '_MG_7665', '0702-01', (0.56, 0.52)),
     ('f2', '_MG_7669', '0702-03', (0.60, 0.42)),
-    ('f3', '_MG_8167', '2802-10', (0.70, 0.45)),
+    ('f3', '_MG_8167', '2802-10', (0.81, 0.45)),
     ('f4', '_MG_8156', '2802-04', (0.50, 0.42)),
     ('f5', '_MG_8177', '2802-13', (0.55, 0.52)),
 ]

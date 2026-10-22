@@ -61,7 +61,9 @@ const CAMP = naIgreja('/followcamp');
 const FOTOS: Foto[] = [
   { l: '/follow/f5-l.webp', p: '/follow/f5-p.webp', a: 0, b: 0, alt: 'A sala do Follow cheia, todo mundo de pé' },
   { l: '/follow/f1-l.webp', p: '/follow/f1-p.webp', a: 0.26, b: 0.32, alt: 'Jovens conversando nos sofás antes do Follow' },
-  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.44, b: 0.5, alt: 'Três jovens rindo na entrada do Follow' },
+  /* 22/10/2026: no celular a foto em pé encosta à direita (xp 100): no centro, o rosto
+     do rapaz da direita virava meia fatia na borda; assim os dois que riem ficam inteiros */
+  { l: '/follow/f2-l.webp', p: '/follow/f2-p.webp', a: 0.44, b: 0.5, alt: 'Três jovens rindo na entrada do Follow', xp: 100 },
   { l: '/follow/f3-l.webp', p: '/follow/f3-p.webp', a: 0.62, b: 0.68, alt: 'Jovens em adoração, de mãos levantadas' },
   { l: '/follow/f4-l.webp', p: '/follow/f4-p.webp', a: 0.8, b: 0.86, alt: 'Ministro de louvor de braços abertos diante do telão' },
 ];
