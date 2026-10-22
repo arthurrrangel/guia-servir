@@ -33,6 +33,21 @@ import { Lupa, Fechar, SetaBaixo } from './Blocos';
    Servir); `site` escolhe o mapa (lib/site/nav.ts). Link para o outro site
    é endereço completo e abre na mesma aba. 20/10: e ao terceiro, o Guia
    Follow.
+
+   O TECLADO (22/10/2026, auditoria-teclado.mjs). Antes: o painel abria só
+   de o foco passar pelo botão (:focus-within) e não fechava com Esc; o Tab
+   atravessava os 22 links dos cinco painéis; com a busca ou a cortina
+   abertas, o Tab ia para a página escondida atrás delas; e o Esc largava o
+   foco no corpo da página. Agora:
+     · o painel é um botão que abre e fecha (o padrão "disclosure"): fechado,
+       os links dele não recebem Tab; Esc fecha e o foco volta ao botão; o
+       foco que sai do grupo fecha o painel; e o painel que o mouse abriu
+       também some com Esc, até o mouse sair dele (WCAG 1.4.13);
+     · busca e cortina: o resto da página fica `inert` e o Tab dá a volta
+       dentro (na busca, o diálogo; na cortina, a cortina e a barra); Esc
+       fecha e devolve o foco a quem abriu (a lupa, o botão de menu);
+     · a cortina aberta fecha sozinha se a tela passa de 1000 px (o iPad que
+       deita): sem isso a página ficaria inerte sem botão para fechar.
    ============================================================================= */
 
 const normal = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -60,8 +75,14 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
   const [menu, setMenu] = useState(false);
   const [busca, setBusca] = useState(false);
   const [q, setQ] = useState('');
+  /* o grupo que o mouse abriu e o Esc calou (até o mouse sair dele) */
+  const [calado, setCalado] = useState<number | null>(null);
   const campo = useRef<HTMLInputElement>(null);
   const lupaBt = useRef<HTMLButtonElement>(null);
+  const menuBt = useRef<HTMLButtonElement>(null);
+  /* quem recebe o foco quando a busca ou a cortina fecham (depois de a
+     página deixar de ser inerte: foco em elemento inerte não pega) */
+  const devolver = useRef<HTMLElement | null>(null);
   const conversa = canalDeConversa();
 
   /* qual grupo é o da página aberta (o sublinhado laranja) */
@@ -70,13 +91,80 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
   /* tudo fecha ao navegar */
   useEffect(() => { setAberto(null); setMenu(false); setBusca(false); setQ(''); }, [caminho]);
 
-  /* a cortina e a busca travam a rolagem; Esc fecha */
+  /* a cortina e a busca travam a rolagem */
   useEffect(() => {
     document.body.style.overflow = menu || busca ? 'hidden' : '';
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { setAberto(null); setMenu(false); if (busca) { setBusca(false); lupaBt.current?.focus(); } } };
-    window.addEventListener('keydown', esc);
-    return () => { document.body.style.overflow = ''; window.removeEventListener('keydown', esc); };
+    return () => { document.body.style.overflow = ''; };
   }, [menu, busca]);
+
+  /* Esc fecha o que estiver aberto e devolve o foco a quem abriu; com a
+     busca ou a cortina abertas, o Tab dá a volta dentro delas */
+  useEffect(() => {
+    const tecla = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (busca) { devolver.current = lupaBt.current; setBusca(false); return; }
+        if (menu) { devolver.current = menuBt.current; setMenu(false); return; }
+        if (aberto !== null) {
+          const bt = document.querySelector<HTMLButtonElement>(`.s-nav-bt[aria-controls="s-sub-${aberto}"]`);
+          const dentro = !!bt?.parentElement?.contains(document.activeElement);
+          setAberto(null);
+          if (bt && dentro) bt.focus();
+        }
+        const sobre = document.querySelector('.s-nav > li:hover');
+        if (sobre?.parentElement) setCalado(Array.from(sobre.parentElement.children).indexOf(sobre));
+        return;
+      }
+      if (e.key !== 'Tab' || (!menu && !busca)) return;
+      const zonas = busca ? ['.s-busca'] : ['.s-topo', '#s-cortina'];
+      const alvos = zonas.flatMap(z => Array.from(document.querySelectorAll<HTMLElement>(`${z} :is(a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"]))`)))
+        .filter(el => !el.closest('[inert]') && !(el as HTMLButtonElement).disabled && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden');
+      if (!alvos.length) return;
+      const ativo = document.activeElement as HTMLElement | null;
+      const fora = !ativo || !alvos.includes(ativo);
+      if (e.shiftKey ? (fora || ativo === alvos[0]) : (fora || ativo === alvos[alvos.length - 1])) {
+        e.preventDefault();
+        (e.shiftKey ? alvos[alvos.length - 1] : alvos[0]).focus();
+      }
+    };
+    window.addEventListener('keydown', tecla);
+    return () => window.removeEventListener('keydown', tecla);
+  }, [menu, busca, aberto]);
+
+  /* com a busca ou a cortina abertas, o resto da página fica inerte (sem
+     foco, sem clique, fora da leitura): a busca cobre a tela inteira, barra
+     incluída; a cortina deixa a barra (a lupa e o botão que fecha). Os
+     irmãos da barra dentro de .s: o "Pular", o <main>, o pé. O que o React
+     já marca como inerte (a cortina fechada, a busca fechada) fica como está */
+  useEffect(() => {
+    if (!menu && !busca) return;
+    const raiz = document.getElementById('s-cortina')?.parentElement;
+    if (!raiz) return;
+    const fica = busca ? '.s-busca' : '.s-topo, #s-cortina';
+    const postos: Element[] = [];
+    for (const el of Array.from(raiz.children)) {
+      if (el.matches(fica) || el.hasAttribute('inert')) continue;
+      el.setAttribute('inert', '');
+      postos.push(el);
+    }
+    return () => {
+      postos.forEach(el => el.removeAttribute('inert'));
+      const d = devolver.current;
+      devolver.current = null;
+      if (d && d.isConnected) d.focus();
+    };
+  }, [menu, busca]);
+
+  /* a cortina é do celular e do tablet em pé: se a tela passa de 1000 px com
+     ela aberta (o iPad que deita), ela fecha; senão a página ficaria inerte
+     sem o botão de fechar, que some nessa largura */
+  useEffect(() => {
+    if (!menu) return;
+    const largo = window.matchMedia('(min-width: 1000px)');
+    const ve = () => { if (largo.matches) setMenu(false); };
+    ve();
+    largo.addEventListener('change', ve);
+    return () => largo.removeEventListener('change', ve);
+  }, [menu]);
 
   useEffect(() => { if (busca) setTimeout(() => campo.current?.focus(), 30); }, [busca]);
 
@@ -130,7 +218,15 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
                 );
               }
               return (
-                <li key={g.rot}>
+                <li key={g.rot} data-calado={calado === i ? '' : undefined}
+                    onPointerLeave={() => setCalado(c => (c === i ? null : c))}
+                    onBlur={e => {
+                      /* o foco foi para fora do grupo (o Tab passou do último link): o
+                         painel fecha. Sem destino (clique no Safari, que não dá foco a
+                         link), fica como está: o clique ainda vai chegar no link */
+                      const para = e.relatedTarget as Node | null;
+                      if (para && !e.currentTarget.contains(para)) setAberto(v => (v === i ? null : v));
+                    }}>
                   <button type="button" className="s-nav-bt" aria-expanded={aberto === i} aria-controls={`s-sub-${i}`}
                           aria-current={atual === i ? 'true' : undefined}
                           onClick={() => setAberto(v => v === i ? null : i)}>
@@ -149,7 +245,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
 
           <div className="s-topo-fim">
             <button ref={lupaBt} type="button" className="s-ico-bt" aria-label="Buscar no site" onClick={() => { setMenu(false); setBusca(true); }}><Lupa /></button>
-            <button type="button" className="s-ico-bt s-menu-bt" aria-expanded={menu} aria-controls="s-cortina" aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
+            <button ref={menuBt} type="button" className="s-ico-bt s-menu-bt" aria-expanded={menu} aria-controls="s-cortina" aria-label={menu ? 'Fechar menu' : 'Abrir menu'}
                     onClick={() => setMenu(v => !v)}><i /><i /></button>
           </div>
         </div>
@@ -181,7 +277,7 @@ export default function Topo({ site = 'igreja' }: { site?: QualSite }) {
 
       {/* a busca */}
       <div className={'s-busca' + (busca ? ' aberta' : '')} inert={!busca} role="dialog" aria-label="Buscar no site" aria-modal="true">
-        <button type="button" className="s-ico-bt s-busca-x" aria-label="Fechar a busca" onClick={() => { setBusca(false); lupaBt.current?.focus(); }}><Fechar /></button>
+        <button type="button" className="s-ico-bt s-busca-x" aria-label="Fechar a busca" onClick={() => { devolver.current = lupaBt.current; setBusca(false); }}><Fechar /></button>
         <div className="s-busca-in">
           <label htmlFor="s-busca-campo" className="s-so-leitor">O que você procura?</label>
           <input ref={campo} id="s-busca-campo" type="search" placeholder="O que você procura?" value={q} onChange={e => setQ(e.target.value)} autoComplete="off" />

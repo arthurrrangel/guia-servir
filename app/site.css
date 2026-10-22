@@ -241,8 +241,13 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 .s .s-nav-bt[aria-expanded="true"] svg{ transform:rotate(180deg) }
 .s .s-nav-bt[aria-current="true"],.s a.s-nav-bt[aria-current="page"]{ box-shadow:inset 0 -2px 0 var(--s-acento); border-radius:var(--s-r-3) var(--s-r-3) 0 0 }
 /* o painel de cada grupo */
-.s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:var(--s-r-2); box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease); z-index:5 }
-.s .s-nav > li:focus-within .s-sub,.s .s-sub.aberto{ opacity:1; transform:none; pointer-events:auto }
+/* 22/10/2026: fechado, o painel também fica invisível de verdade (visibility),
+   para os links dele não receberem Tab; o visibility espera o esmaecer acabar
+   para sumir e aparece na hora. Abre pelo botão (.aberto) ou pelo mouse; não
+   abre mais só de o foco passar pelo botão (era :focus-within, que não fechava
+   com Esc). Ver Topo.tsx, "O TECLADO" */
+.s .s-sub{ position:absolute; left:0; top:calc(100% + 6px); min-width:290px; padding:8px; background:var(--s-noite-2); border:1px solid rgba(255,255,255,.08); border-radius:var(--s-r-2); box-shadow:0 24px 60px rgba(0,0,0,.45); opacity:0; visibility:hidden; transform:translateY(-6px); pointer-events:none; transition:opacity var(--s-t) var(--s-ease),transform var(--s-t) var(--s-ease),visibility 0s linear var(--s-t); z-index:5 }
+.s .s-sub.aberto{ opacity:1; visibility:visible; transform:none; pointer-events:auto; transition-delay:0s }
 .s .s-sub a{ display:block; padding:10px 12px; border-radius:var(--s-r-3); line-height:1.25; transition:background var(--s-t) }
 .s .s-sub a:focus-visible{ background:rgba(255,255,255,.08) }
 .s .s-sub a b{ display:block; font-weight:600; font-size:16px; letter-spacing:-.015em }
@@ -1814,7 +1819,10 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 @media(hover:hover){
   .s .s-nav > li:hover .s-nav-bt{ background:rgba(255,255,255,.08) }
   .s .s-nav > li:hover .s-nav-bt svg{ transform:rotate(180deg) }
-  .s .s-nav > li:hover .s-sub{ opacity:1; transform:none; pointer-events:auto }
+  .s .s-nav > li:hover .s-sub{ opacity:1; visibility:visible; transform:none; pointer-events:auto; transition-delay:0s }
+  /* o painel que o mouse abriu some com Esc até o mouse sair do grupo (WCAG 1.4.13) */
+  .s .s-nav > li[data-calado]:hover .s-sub:not(.aberto){ opacity:0; visibility:hidden; pointer-events:none }
+  .s .s-nav > li[data-calado]:hover .s-nav-bt[aria-expanded="false"] svg{ transform:none }
   .s .s-sub a:hover{ background:rgba(255,255,255,.08) }
   .s .s-ico-bt:hover{ background:rgba(255,255,255,.1) }
   .s .s-busca li a:hover{ background:rgba(255,255,255,.08) }
