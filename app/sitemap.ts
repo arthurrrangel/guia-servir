@@ -19,6 +19,13 @@ import { ehFollow, ehServir } from '@/lib/site/sites';
    · /guia-church-tv — deixou de existir em 11/10/2026 (redireciona para
      /cultos#ao-vivo).
 
+   SEM LASTMOD (23/10/2026, o 22f): cada URL saía com a hora do pedido (o
+   sitemap é dinâmico), ou seja, toda página "mudou agora" a cada leitura. O
+   Google só usa o lastmod quando ele confere com a mudança de verdade; um
+   lastmod que mente sempre ensina o robô a ignorá-lo. A data real de cada
+   página não é registrada em lugar nenhum, e sem a data o protocolo vale do
+   mesmo jeito (o lastmod é opcional): melhor nenhuma do que uma falsa.
+
    PRIORIDADE E FREQUÊNCIA são dicas fracas: o Google praticamente as ignora
    desde 2023. Ficam aqui porque outros buscadores ainda leem, e porque a
    ordem relativa documenta a hierarquia real do site — /cultos e /como-chegar
@@ -37,7 +44,6 @@ import { ehFollow, ehServir } from '@/lib/site/sites';
    ============================================================================= */
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const agora = new Date();
   const host = (await headers()).get('host');
   const servir = ehServir(host);
 
@@ -65,5 +71,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_IGREJA}/privacidade`, changeFrequency: 'yearly', priority: 0.2 },
   ];
 
-  return paginas.map(p => ({ ...p, lastModified: agora }));
+  return paginas;
 }

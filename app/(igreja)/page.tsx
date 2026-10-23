@@ -145,9 +145,15 @@ export default function Home() {
                 o vão da grade (28 px a mais que nos grupos das PGs) */}
             <div className="s-gente-fotos">
               <Trilho className="s-trio" rotulo="Quem chega mais cedo" focavel>
+                {/* 23/10/2026 (o 22f): o sizes diz a largura que a foto ocupa de verdade
+                    (medida de 360 a 2560: 80vw até 424, 340 px até 759, 30vw até 999,
+                    16vw até ~1520 e 245 px dali para cima; arredondado para cima). Dizia
+                    24vw no computador, 50% a mais que os 234 px reais a 1440: na tela
+                    de escala 2 o navegador baixava as três de 1000 px (457 kB) quando
+                    as de 640 bastam (166 kB). A mesma foto, a mesma nitidez */}
                 {GENTE.map((g, i) => (
                   <figure key={g.id} className={`s-rev d${i + 1}`}>
-                    <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 759px) 80vw, 24vw" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
+                    <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 424px) 80vw, (max-width: 759px) 340px, (max-width: 999px) 31vw, (max-width: 1519px) 17vw, 250px" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
                     <figcaption>{g.legenda}</figcaption>
                   </figure>
                 ))}
