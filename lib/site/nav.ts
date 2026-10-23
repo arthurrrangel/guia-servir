@@ -187,14 +187,16 @@ export const SITE_SERVIR_MAPA: Mapa = {
 /* A BARRA DO FOLLOW · 20/10/2026. O site é uma página só: o primeiro grupo
    são as paradas dela (âncoras), e os outros três são as portas da rede da
    GUIA: o Follow Camp (que mora no guiachurch.com, pagamento no domínio),
-   a igreja e o Servir. */
+   a igreja e o Servir. 23/10/2026, a copy do Arthur (o PDF da LP): o "Como é"
+   passa a "Louvor, Palavra e conversa" (a terceira parte do sábado é a
+   conversa, não mais o "encontro"); as outras entradas ficam como estavam. */
 const CONVERSA_FOLLOW = canalDeConversa('Oi! Quero ir no Follow no sábado.');
 const CAMP = naIgreja('/followcamp');
 
 export const MENU_FOLLOW: Grupo[] = [
   { rot: 'Follow', href: follow(), itens: [
     { rot: 'Primeira vez', href: follow('#primeira-vez'), sub: 'Não precisa ser de igreja' },
-    { rot: 'Como é', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
+    { rot: 'Louvor, Palavra e conversa', href: follow('#como-e'), sub: 'Como é um sábado no Follow' },
     { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
     { rot: 'Avisar que vou', href: CONVERSA_FOLLOW.href, sub: 'A gente te espera na porta', duro: true },
   ] },
@@ -216,7 +218,7 @@ export const MENU_FOLLOW: Grupo[] = [
 
 export const MENU_CELULAR_FOLLOW: Item[] = [
   { rot: 'Primeira vez', href: follow('#primeira-vez') },
-  { rot: 'Como é', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
+  { rot: 'Louvor, Palavra e conversa', href: follow('#como-e'), sub: 'Como é um sábado no Follow' },
   { rot: 'Quando e onde', href: follow('#quando'), sub: `Sábado, ${IGREJA.followHora}` },
   { rot: FC27.nome, href: CAMP, sub: FC27.datas, duro: true },
   { rot: 'Como chegar', href: naIgreja('/como-chegar') },
@@ -231,7 +233,7 @@ export const BUSCA_FOLLOW: Item[] = [
   { rot: 'Vou sozinho', href: follow('#primeira-vez'), sub: 'Um líder te espera na porta' },
   { rot: 'O que eu visto?', href: follow('#primeira-vez'), sub: 'O que usaria pra sair com os amigos' },
   { rot: 'Quanto tempo dura?', href: follow('#primeira-vez'), sub: 'Mais ou menos uma hora e meia' },
-  { rot: 'Como é o Follow?', href: follow('#como-e'), sub: 'Louvor, Palavra e encontro' },
+  { rot: 'Como é o Follow?', href: follow('#como-e'), sub: 'Louvor, Palavra e conversa' },
   { rot: 'Programação', href: follow('#quando'), sub: 'Cada sábado tem a sua cara' },
   { rot: 'Preciso de inscrição?', href: follow('#quando'), sub: 'Não' },
   { rot: 'Abrir no mapa', href: MAPA, sub: IGREJA.rua, duro: true },

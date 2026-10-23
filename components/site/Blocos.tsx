@@ -390,7 +390,9 @@ export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, s
    guiafollow.com. 20/10/2026: estava escrita duas vezes, e as duas já
    tinham divergido (uma sem o id do título, com o aria-labelledby quebrado).
    O nome e as datas vêm de lib/followcamp.ts, com o resto do Camp. */
-export function FaixaCamp({ href }: { href: string }) {
+/* `lead` (23/10/2026): o guiafollow.com passa a frase da copy dele (o PDF do
+   Arthur); o /eventos continua com a de sempre, que é a padrão aqui */
+export function FaixaCamp({ href, lead }: { href: string; lead?: string }) {
   return (
     <section id="camp" className="s-faixa areia" aria-labelledby="t-camp">
       <div className="s-in">
@@ -399,7 +401,7 @@ export function FaixaCamp({ href }: { href: string }) {
           {/* 21/10/2026: as palavras da própria página do Camp ("cinco noites longe da rotina",
               13 a 24 anos, Espaço Bethel); dizia "seis dias", que a página do Camp não diz */}
           <Vozes id="t-camp" className="s-h2 media" it="rotina">Cinco noites longe da rotina</Vozes>
-          <p className="s-lead"><UmaLinha semFim texto="O retiro do Follow no Carnaval, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp." /></p>
+          <p className="s-lead"><UmaLinha semFim texto={lead ?? 'O retiro do Follow no Carnaval, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp.'} /></p>
           <div className="s-acoes">
             <Pil href={href} duro tom="preta">Quero ir no Camp</Pil>
           </div>

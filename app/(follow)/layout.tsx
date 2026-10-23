@@ -51,7 +51,8 @@ export const metadata: Metadata = {
      reescreve os dois para os do Follow (o manifesto dá o nome e as cores
      certas a quem salva o site na tela inicial). */
   icons: { icon: [{ url: '/follow/icone.svg', type: 'image/svg+xml' }, { url: '/follow/icone-32.png', sizes: '32x32', type: 'image/png' }], apple: '/follow/icone-180.png' },
-  openGraph: og('follow', '/', 'Follow · Um lugar para todos',
+  /* o título do cartão de prévia (23/10/2026): o da copy do Arthur, o mesmo do herói */
+  openGraph: og('follow', '/', 'Follow · Um lugar pra você',
     `O culto de jovens da GUIA Church. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}. Vem como você está.`,
     '/follow/og.jpg', 'Follow, o culto de jovens da GUIA Church'),
   twitter: { card: 'summary_large_image' },
