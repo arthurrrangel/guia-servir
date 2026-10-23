@@ -38,7 +38,8 @@ const ROTAS = process.argv.slice(2).length ? process.argv.slice(2) : [
 ];
 
 /* largura × altura de aparelhos reais, do menor para o maior */
-const APARELHOS = [
+/* APARELHOS='[[280,653,"galaxy-fold"]]' troca a matriz (23/10/2026: as telas abaixo de 320) */
+const APARELHOS = process.env.APARELHOS ? JSON.parse(process.env.APARELHOS) : [
   [320, 568, 'iphone-se'],
   [390, 844, 'iphone-15'],
   [430, 932, 'iphone-pro-max'],

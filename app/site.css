@@ -1923,3 +1923,44 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 }
 @media (forced-colors:active) and (max-width:759px){ .s .s-cartoes.lista > .s-cartao{ border-width:0 0 1px } }
 @media (forced-colors:active) and (min-width:760px){ .s .s-cartoes.indice > .s-cartao{ border-width:0 0 1px } }
+
+/* ABAIXO DE 320 PX (23/10/2026): o Galaxy Fold fechado (280 px) e o zoom de
+   500% do computador (256). Só o que quebra nessa faixa; de 320 para cima nada
+   muda (as telas aprovadas ficam como estão).
+   1. A barra do Follow: o logotipo FO»OW (177 px de largura em 22 de altura),
+      a lupa e o menu pedem 325 px; abaixo de 320 o menu saía da tela (em 280,
+      só 11 px dele à vista). Aqui o logotipo acompanha a tela até caber.
+   2. "Por onde começar" (as três palavras presas pela liga, 262 px em 35) não
+      cabe na coluna abaixo de 302 px: em 280 passava 22 px da coluna e 2 da
+      tela, fora do centro. O título desce o bastante para caber.
+   3. As perguntas que abrem (/privacidade): a grade da lista media a coluna
+      pela pergunta mais larga e, em 256, passava 34 px da coluna. A coluna
+      volta a ser a da página (só muda alguma coisa quando passava).
+   E só abaixo de 280 (o zoom de 500%; nenhum celular é tão estreito): as três
+   pílulas do pé do menu (WhatsApp, Instagram e Já sirvo) não cabiam numa linha
+   e o nome saía cortado com o menu aberto; uma pílula ou um botão com rótulo longo ("Conhecer uma Pequena
+   Guia", "Achar o mais perto de mim") passava da tela; e os títulos médios
+   ("Mais do que um lugar para frequentar") também. */
+@media(max-width:319px){
+  /* margem de 20 + logotipo + 24 + lupa e menu (92) + margem de 20; o logotipo
+     é 8,06 vezes mais largo que alto (685,5 por 85): com a altura em
+     (tela - 157) × 0,124, a largura dele é a tela menos 157 e o menu termina
+     1 px antes da margem, alinhado com o resto da página */
+  .s .s-logo .s-marca-follow{ height:clamp(12px,calc((100vw - 157px) * .124),22px) }
+}
+@media(max-width:301px){
+  .s .s-h2{ font-size:clamp(28px,11vw,38px) }
+}
+@media(max-width:319px){
+  .s .s-abre{ grid-template-columns:minmax(0,1fr) }
+}
+@media(max-width:279px){
+  /* o pé do menu: as três pílulas em uma linha davam 65 px para "WhatsApp" (69):
+     duas em cima e "Já sirvo" embaixo, de ponta a ponta */
+  .s .s-cortina-pe{ grid-template-columns:1fr 1fr }
+  .s .s-cortina-pe a:last-child{ grid-column:1 / -1 }
+  /* o rótulo que não cabe numa linha desce para a segunda, dentro da pílula
+     (as que cabem ficam iguais: a mesma altura de 46 e as mesmas margens dos lados) */
+  .s .s-pil,.s .acao{ white-space:normal; height:auto; min-height:46px; padding-block:10px; line-height:1.2; text-align:center; text-wrap:balance }
+  .s .s-h2.media{ font-size:clamp(26px,11vw,34px) }
+}

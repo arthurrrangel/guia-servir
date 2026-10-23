@@ -52,8 +52,10 @@ const B = `http://localhost:${process.env.PORTA || 3000}`;
 const SAIDA = process.argv[2] || 'impressao.json';
 const nav = await chromium.launch();
 const out = {};
-for (const W of [390, 1440]) {
-  const ctx = await nav.newContext({ viewport: { width: W, height: 900 }, reducedMotion: 'reduce' });
+/* LARGURAS=320,280 troca as larguras (23/10/2026: as telas abaixo de 320, com toque) */
+const LARGURAS = process.env.LARGURAS ? process.env.LARGURAS.split(',').map(Number) : [390, 1440];
+for (const W of LARGURAS) {
+  const ctx = await nav.newContext({ viewport: { width: W, height: 900 }, reducedMotion: 'reduce', ...(process.env.LARGURAS ? { isMobile: true, hasTouch: true } : {}) });
   await ctx.route('**', r => rotear(r, B));
   for (const rota of ROTAS_SITE) {
     const p = await ctx.newPage();
