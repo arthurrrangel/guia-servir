@@ -27,8 +27,8 @@ const PORTAS = [
 ];
 
 const DUVIDAS = [
-  { q: 'Perdi o meu link. E agora?', r: 'Entre por "Sou voluntário", escolha a sua área, ache o seu nome e entre com o seu PIN de quatro números. Sem PIN, você cria na hora.' },
-  { q: 'Tentei entrar pelo e-mail e não recebi nada', r: 'Aquela porta é da organização. Se você serve numa equipe, o seu caminho é o primeiro: "Sou voluntário".' },
+  { q: 'Perdi o meu link. E agora?', r: 'Entre por “Sou voluntário”, escolha a sua área, ache o seu nome e entre com o seu PIN de quatro números. Sem PIN, você cria na hora.' },
+  { q: 'Tentei entrar pelo e-mail e não recebi nada', r: 'Aquela porta é da organização. Se você serve numa equipe, o seu caminho é o primeiro: “Sou voluntário”.' },
   { q: 'Ainda não sirvo, mas quero', r: 'O terceiro caminho. Você escolhe a área, se cadastra, e a liderança fala com você antes de qualquer escala.' },
 ];
 

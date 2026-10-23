@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
 import { Vozes, Chapeu, Pil, Claro, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 import { pixelValido } from '@/lib/site/medir';
+import { og } from '@/lib/site/meta';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL · 11/10/2026
@@ -27,6 +28,9 @@ export const metadata: Metadata = {
   title: 'Privacidade',
   description: 'Como a GUIA Church trata os dados de quem se cadastra para servir e de quem entra em contato pelo site. O que é coletado, por quanto tempo fica e como pedir exclusão.',
   alternates: { canonical: '/privacidade' },
+  /* 23/10/2026: sem o bloco próprio, a prévia do link (WhatsApp, redes) herdava
+     o título e a frase da home ("Existe um lugar para você"); agora é a da página */
+  openGraph: og('igreja', '/privacidade', 'Privacidade', PIXEL_ATIVO ? 'Só quando você digita, ou aceita. Nunca é vendido nem cedido.' : 'Só quando você digita. Nunca é vendido, cedido nem usado em publicidade.', '/og.jpg'),
 };
 
 const CONTATO = canalDeConversa('Oi! É sobre os meus dados no site da GUIA.');
