@@ -3,6 +3,7 @@ import { IGREJA, ENDERECO_LINHA, canalDeConversa } from '@/lib/igreja';
 import { Vozes, Chapeu, Pil, Claro, fim, inteiro, liga, ligaTexto } from '@/components/site/Blocos';
 import { pixelValido } from '@/lib/site/medir';
 import { og } from '@/lib/site/meta';
+import { adiantarSerifa } from '@/components/site/fontes';
 
 /* =============================================================================
    /privacidade — OBRIGATÓRIA, NÃO OPCIONAL · 11/10/2026
@@ -71,6 +72,10 @@ const BLOCOS: Array<{ n: string; t: string; it: string; id?: string; itens: Arra
 ];
 
 export default function Privacidade() {
+  /* a fonte do "quê" do título pedida no começo do <head>, de 690 px para cima:
+     sem ela o título trocava de duas linhas para uma quando a fonte chegava e a
+     página subia até 90 px (CLS 0,25 a 0,28); components/site/fontes.ts */
+  adiantarSerifa();
   return (
     <>
       {/* o cabeçalho de texto (sem foto: é a página da lei), na anatomia do

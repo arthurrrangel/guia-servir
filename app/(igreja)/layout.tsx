@@ -6,7 +6,6 @@ import Movimento from '@/components/site/Movimento';
 import Tela from '@/components/site/Tela';
 import Fronteira from '@/components/Fronteira';
 import Medidor from '@/components/site/Medidor';
-import { adiantarSerifa } from '@/components/site/fontes';
 
 /* =============================================================================
    O CASCO DO GUIA CHURCH · guiachurch.com · 11/10/2026, separado em 19/10
@@ -30,8 +29,6 @@ export const viewport: Viewport = {
 };
 
 export default function IgrejaLayout({ children }: { children: React.ReactNode }) {
-  /* a serifa itálica dos títulos pedida junto com o HTML (components/site/fontes.ts) */
-  adiantarSerifa();
   return (
     <div className="s">
       <Tela />
