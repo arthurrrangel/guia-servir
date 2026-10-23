@@ -1,7 +1,8 @@
-import { IGREJA, MAPA, SITE_FOLLOW, SITE_IGREJA, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, MAPA, canalDeConversa } from '@/lib/igreja';
 import { naIgreja } from '@/lib/site/sites';
 import { SimboloFollow } from '@/components/Marca';
 import { Schema } from '@/components/site/Schema';
+import { follows } from '@/lib/site/eventos-schema';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Claro, Passos, Fecho, FaixaCamp, UmaLinha, liga, ligaTexto, fim } from '@/components/site/Blocos';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import Contagem from '@/components/follow/Contagem';
@@ -91,17 +92,16 @@ const SABADO = [
   { n: '03', t: 'Encontro', d: 'Antes e depois, conversa: é aí que o Follow deixa de ser um culto que você visita e vira uma família que você tem.' },
 ];
 
+/* 23/10/2026: a página se refaz uma vez por dia, para as datas dos próximos
+   sábados no JSON-LD (o Google só aceita evento com data) não ficarem no
+   passado entre um deploy e outro. Na tela nada muda. */
+export const revalidate = 86400;
+
 export default function Follow() {
   return (
     <>
-      <Schema dados={{
-        '@context': 'https://schema.org', '@type': 'Event', name: 'Follow',
-        description: `O culto de jovens da GUIA Church: louvor, uma palavra pra vida real e gente da sua idade. Todo sábado, ${IGREJA.followHora}, na ${IGREJA.bairro}.`,
-        url: SITE_FOLLOW, eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
-        eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Saturday', startTime: '19:00', scheduleTimezone: 'America/Sao_Paulo' },
-        location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: IGREJA.cidade, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
-        organizer: { '@type': 'Organization', name: IGREJA.nome, url: SITE_IGREJA },
-      }} />
+      {/* os próximos sábados, um evento cada (lib/site/eventos-schema.ts) */}
+      {IGREJA.followHora && <Schema dados={{ '@context': 'https://schema.org', '@graph': follows(new Date()) }} />}
 
       {/* 1 · o herói que anda com o scroll: a chegada */}
       <Scrub

@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
 import { og } from '@/lib/site/meta';
 import Link from 'next/link';
-import { IGREJA, SITE_IGREJA as SITE, canalDeConversa } from '@/lib/igreja';
+import { IGREJA, canalDeConversa } from '@/lib/igreja';
 import { MOMENTOS } from '@/lib/site/domingo';
 import { Vozes, Sede, Chapeu, Pil, Seta, fim, Sep, Claro, FaixaPerguntas, UmaLinha, liga, ligaTexto } from '@/components/site/Blocos';
 import { Fundo } from '@/components/site/Midia';
 import Scrub, { type Foto } from '@/components/site/Scrub';
 import { Schema } from '@/components/site/Schema';
+import { cultosDeDomingo } from '@/lib/site/eventos-schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
 /* =============================================================================
@@ -58,6 +59,11 @@ export const metadata: Metadata = {
   openGraph: og('igreja', '/cultos', 'Um domingo para pertencer', `${IGREJA.cultoDia}, ${IGREJA.cultoHora}, ${IGREJA.bairro}.`, '/og-cultos.jpg'),
 };
 
+/* 23/10/2026: a página se refaz uma vez por dia, para as datas dos próximos
+   domingos no JSON-LD (o Google só aceita evento com data) não ficarem no
+   passado entre um deploy e outro. Na tela nada muda. */
+export const revalidate = 86400;
+
 const PERGUNTAS = [
   { q: 'Quanto tempo dura?', r: 'Cerca de uma hora e meia. Começa às 10h e, lá pelas 11h30, estamos no café.' },
   { q: 'Como me visto?', r: 'Como você estiver confortável. Não existe roupa certa pra encontrar com Deus.' },
@@ -78,14 +84,8 @@ export default function Cultos() {
   const conversa = canalDeConversa('Oi! Vou pela primeira vez no culto da GUIA e queria uma orientação. ');
   return (
     <>
-      <Schema dados={{
-        '@context': 'https://schema.org', '@type': 'Event',
-        name: `Culto de domingo · ${IGREJA.nome}`, description: 'Culto público semanal, aberto a visitantes.',
-        eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Sunday', startTime: '10:00', scheduleTimezone: 'America/Sao_Paulo' },
-        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', isAccessibleForFree: true,
-        organizer: { '@type': 'Church', name: IGREJA.nome, url: SITE },
-        location: { '@type': 'Place', name: IGREJA.nome, address: { '@type': 'PostalAddress', streetAddress: IGREJA.rua, addressLocality: `${IGREJA.bairro}, ${IGREJA.cidade}`, addressRegion: IGREJA.uf, postalCode: IGREJA.cep, addressCountry: 'BR' } },
-      }} />
+      {/* os próximos domingos, um evento cada (lib/site/eventos-schema.ts) */}
+      <Schema dados={{ '@context': 'https://schema.org', '@graph': cultosDeDomingo(new Date()) }} />
       <Schema dados={{ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: PERGUNTAS.map(p => ({ '@type': 'Question', name: p.q, acceptedAnswer: { '@type': 'Answer', text: p.r } })) }} />
 
       {/* o herói: um domingo inteiro, nos quatro momentos da copy, foto a foto */}

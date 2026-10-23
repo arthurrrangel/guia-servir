@@ -61,6 +61,40 @@ export function textoDaContagem(agora: Date): { forte: string; resto: string } {
 /* depois do meio-dia de domingo (o culto é das 10h ao meio-dia), o próximo é o da outra semana */
 const FIM_DO_CULTO_H = 12;
 
+/* --------------------------------------------- as próximas datas, para o Google */
+/* 23/10/2026: o Google só aceita evento com data de início (startDate), e a
+   agenda semanal (eventSchedule) do schema.org não tem data: os cultos saíam
+   sem valer para a busca. Aqui saem as próximas ocorrências de um encontro
+   semanal, no horário de Brasília, em ISO com o fuso ("2026-10-25T10:00:00-03:00").
+   A que está acontecendo agora ainda conta; a que já acabou passa para a
+   semana seguinte. */
+
+/** "10h" → { h: 10, m: 0 }; "19h30" → { h: 19, m: 30 }; outro formato → null */
+export function horaDoTexto(texto: string): { h: number; m: number } | null {
+  const r = /^(\d{1,2})h(\d{2})?$/.exec(texto.trim());
+  return r ? { h: Number(r[1]), m: r[2] ? Number(r[2]) : 0 } : null;
+}
+/* o relógio de parede em ISO: os campos UTC já são os do Rio, então o fuso é o da casa */
+const isoDaCasa = (p: Date) => `${p.toISOString().slice(0, 19)}-03:00`;
+
+/** as próximas `n` ocorrências de um encontro semanal (`dia`: 0 = domingo … 6 = sábado;
+ *  `hora` no formato do site, "10h"), com início e fim em ISO no horário de Brasília */
+export function proximasOcorrencias(agora: Date, dia: number, hora: string, duracaoMin: number, n: number): { startDate: string; endDate: string }[] {
+  const hh = horaDoTexto(hora);
+  if (!hh) return [];
+  const p = parede(agora);
+  const d = new Date(p);
+  d.setUTCHours(hh.h, hh.m, 0, 0);
+  let falta = (dia - d.getUTCDay() + 7) % 7;
+  if (falta === 0 && p.getTime() >= d.getTime() + duracaoMin * 60000) falta = 7;
+  d.setUTCDate(d.getUTCDate() + falta);
+  return Array.from({ length: n }, (_, i) => {
+    const ini = new Date(d);
+    ini.setUTCDate(d.getUTCDate() + 7 * i);
+    return { startDate: isoDaCasa(ini), endDate: isoDaCasa(new Date(ini.getTime() + duracaoMin * 60000)) };
+  });
+}
+
 /** "Domingo, 25 de outubro · 10h" (ou "Hoje, 25 de outubro · 10h" no domingo de manhã) */
 export function textoDoProximoCulto(agora: Date): string {
   const d = parede(agora);

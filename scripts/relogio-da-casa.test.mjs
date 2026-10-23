@@ -12,7 +12,8 @@
    Uso: node --import ./scripts/_ts.mjs scripts/relogio-da-casa.test.mjs
    ============================================================================= */
 import { spawnSync } from 'node:child_process';
-import { textoDaContagem, textoDoProximoCulto, proximoFollow } from '../lib/site/relogio.ts';
+import { textoDaContagem, textoDoProximoCulto, proximoFollow, proximasOcorrencias } from '../lib/site/relogio.ts';
+import { cultosDeDomingo, follows, followCamp } from '../lib/site/eventos-schema.ts';
 
 let n = 0, f = 0;
 const ok = (c, nome, extra) => {
@@ -57,9 +58,36 @@ console.log(`\n2. O próximo culto (aparelho em ${fuso})`);
   }
 }
 
+console.log(`\n3. As próximas datas para o Google (aparelho em ${fuso})`);
+{
+  const datas = (iso, dia, hora, dur, n) => proximasOcorrencias(em(iso), dia, hora, dur, n).map(o => `${o.startDate}/${o.endDate.slice(11, 16)}`).join(' ');
+  const casos = [
+    ['2026-10-23T05:00:00Z', 0, '10h', 90, 3, 'sexta, 02h do Rio: os três domingos seguintes',
+      '2026-10-25T10:00:00-03:00/11:30 2026-11-01T10:00:00-03:00/11:30 2026-11-08T10:00:00-03:00/11:30'],
+    ['2026-10-25T02:00:00Z', 0, '10h', 90, 1, 'sábado, 23h do Rio (já domingo em UTC): o domingo de amanhã', '2026-10-25T10:00:00-03:00/11:30'],
+    ['2026-10-25T13:30:00Z', 0, '10h', 90, 1, 'domingo, 10h30 do Rio (durante): o de hoje ainda conta', '2026-10-25T10:00:00-03:00/11:30'],
+    ['2026-10-25T14:30:00Z', 0, '10h', 90, 1, 'domingo, 11h30 do Rio (acabou): o da outra semana', '2026-11-01T10:00:00-03:00/11:30'],
+    ['2026-10-24T22:00:00Z', 6, '19h', 90, 1, 'sábado, 19h do Rio (começando): o Follow de hoje', '2026-10-24T19:00:00-03:00/20:30'],
+    ['2026-10-24T23:31:00Z', 6, '19h', 90, 2, 'sábado, 20h31 do Rio (acabou): os dois sábados seguintes',
+      '2026-10-31T19:00:00-03:00/20:30 2026-11-07T19:00:00-03:00/20:30'],
+    ['2026-12-28T12:00:00Z', 0, '10h', 90, 2, 'segunda, 28/12: o domingo do outro ano', '2027-01-03T10:00:00-03:00/11:30 2027-01-10T10:00:00-03:00/11:30'],
+    ['2026-10-23T05:00:00Z', 6, '19h30', 60, 1, 'a hora com minutos ("19h30")', '2026-10-24T19:30:00-03:00/20:30'],
+    ['2026-10-23T05:00:00Z', 6, '19:00', 90, 1, 'hora fora do formato do site: nenhuma data (não inventa)', ''],
+  ];
+  for (const [iso, dia, hora, dur, n, rot, esperado] of casos) {
+    const veio = datas(iso, dia, hora, dur, n);
+    ok(veio === esperado, `${rot}: ${esperado || '(nenhuma)'}`, `veio: ${veio || '(nenhuma)'}`);
+  }
+  const agora = em('2026-10-23T05:00:00Z');
+  const todos = [...cultosDeDomingo(agora), ...follows(agora), followCamp()];
+  const faltando = todos.filter(e => !e.name || !e.startDate || !e.location?.address || !e.location?.name);
+  ok(faltando.length === 0 && todos.length === 13, `os eventos do JSON-LD: ${todos.length} (6 domingos, 6 sábados e o Follow Camp), todos com nome, início e lugar`, JSON.stringify(faltando).slice(0, 200));
+  ok(todos.every(e => !('eventSchedule' in e)), 'nenhum evento com a agenda semanal sem data (eventSchedule)');
+}
+
 /* o mesmo arquivo com o aparelho em outros fusos */
 if (!process.env.RELOGIO_FILHO) {
-  console.log('\n3. As mesmas respostas com o aparelho em outros fusos');
+  console.log('\n4. As mesmas respostas com o aparelho em outros fusos');
   for (const tz of ['America/Manaus', 'Asia/Tokyo', 'America/Sao_Paulo']) {
     const r = spawnSync(process.execPath, ['--import', './scripts/_ts.mjs', 'scripts/relogio-da-casa.test.mjs'], { env: { ...process.env, TZ: tz, RELOGIO_FILHO: '1' }, encoding: 'utf8' });
     const falhas = (r.stdout.match(/^ {2}FAIL /gm) || []).length;

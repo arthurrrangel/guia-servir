@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { og } from '@/lib/site/meta';
-import { IGREJA, SITE_IGREJA as SITE } from '@/lib/igreja';
+import { IGREJA } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { noFollow } from '@/lib/site/sites';
 import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Heroi, Fecho, FaixaCamp, Ir, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { FC27 } from '@/lib/followcamp';
 import { Schema } from '@/components/site/Schema';
+import { cultosDeDomingo, follows, followCamp } from '@/lib/site/eventos-schema';
 import ProximoCulto from '@/components/site/ProximoCulto';
 
 /* =============================================================================
@@ -26,6 +27,10 @@ export const metadata: Metadata = {
   openGraph: og('igreja', '/eventos', 'Eventos', undefined, '/og-eventos.jpg'),
 };
 
+/* 23/10/2026: refeita uma vez por dia, para o próximo culto e o próximo Follow
+   do JSON-LD não ficarem no passado entre um deploy e outro (na tela nada muda) */
+export const revalidate = 86400;
+
 export default function Eventos() {
   const presenciais = PEQUENAS_GUIAS.filter(p => !p.online).length;
   const AGENDA = [
@@ -38,11 +43,8 @@ export default function Eventos() {
     <>
       <Schema dados={{
         '@context': 'https://schema.org', '@type': 'ItemList', name: 'Agenda da GUIA Church',
-        itemListElement: [
-          { '@type': 'Event', name: 'Celebração', eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Sunday', startTime: '10:00', scheduleTimezone: 'America/Sao_Paulo' }, location: { '@type': 'Place', name: IGREJA.nome, address: IGREJA.rua } },
-          { '@type': 'Event', name: 'Follow', eventSchedule: { '@type': 'Schedule', byDay: 'https://schema.org/Saturday', startTime: '19:00', scheduleTimezone: 'America/Sao_Paulo' }, location: { '@type': 'Place', name: IGREJA.nome, address: IGREJA.rua } },
-          { '@type': 'Event', name: FC27.nome, startDate: FC27.inicio, endDate: FC27.fim, url: `${SITE}/followcamp` },
-        ],
+        /* o próximo de cada encontro e o Follow Camp, cada um com data e lugar (lib/site/eventos-schema.ts) */
+        itemListElement: [...cultosDeDomingo(new Date(), 1), ...follows(new Date(), 1), followCamp()],
       }} />
 
       <Heroi id="t-ev" lugar="eventos-heroi" chapeu={<Chapeu forte="Eventos" resto={IGREJA.nome} />} titulo="O que acontece na semana" it="na semana"
