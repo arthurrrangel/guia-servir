@@ -68,6 +68,12 @@ export const Sep = () => <span className="s-sep"> · </span>;
 /* PALAVRA COM HÍFEN INTEIRA: "e-mail" não parte em "e-" / "mail" */
 export const inteiro = (t: string) => t.replace(/(\p{L})-(?=\p{L})/gu, '$1-\u2060');
 
+/* FAIXA DE NÚMEROS INTEIRA (23/10/2026, o 22e): "TURMA 2-4 PROFESSORA", nas funções
+   do GUIA Kids, partia em "2-" / "4 PROFESSORA" abaixo de 320 (o hífen é ponto de
+   quebra). O juntador depois do hífen mantém a faixa num pedaço só; o nome vem do
+   banco e não muda, só a quebra */
+export const faixaInteira = (t: string) => t.replace(/(\d)-(?=\d)/g, '$1-\u2060');
+
 /* UMA LINHA NO CELULAR · 14/10/2026
    A regra do Arthur de 11/10 (título + uma linha; cartão = título + uma
    frase) tinha se perdido quando o site foi refeito do zero na mesma noite:

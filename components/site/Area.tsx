@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { rpc } from '@/lib/publico';
 import { AREAS, type Area as AreaFixa } from '@/lib/site/areas';
-import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, UmaLinha, fim, ligaTexto } from './Blocos';
+import { Vozes, Sede, Chapeu, Pil, Heroi, Passos, UmaLinha, fim, ligaTexto, faixaInteira } from './Blocos';
 import type { LugarDeFoto } from '@/lib/site/fotos';
 import { FormServir } from './Servir';
 import { lp } from '@/lib/site/sites';
@@ -171,7 +171,7 @@ export default function Area() {
                     <div key={fam} className="s-funcao" {...Object.fromEntries(ini.map(k => [`data-ini-${k}`, '']))}
                          style={ini.length ? Object.fromEntries(ini.map(k => [`--ini-${k}`, grade![k].ini!.t])) as React.CSSProperties : undefined}>
                       <small>{String(i + 1).padStart(2, '0')}</small>
-                      <b>{fam}</b>
+                      <b>{faixaInteira(fam)}</b>
                       <p><UmaLinha semFim estreita texto={g.texto || 'A liderança explica no primeiro contato.'} /></p>
                       {g.vagas > 1 && <em>{g.vagas} postos</em>}
                     </div>

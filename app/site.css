@@ -1936,11 +1936,13 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    3. As perguntas que abrem (/privacidade): a grade da lista media a coluna
       pela pergunta mais larga e, em 256, passava 34 px da coluna. A coluna
       volta a ser a da página (só muda alguma coisa quando passava).
-   E só abaixo de 280 (o zoom de 500%; nenhum celular é tão estreito): as três
-   pílulas do pé do menu (WhatsApp, Instagram e Já sirvo) não cabiam numa linha
-   e o nome saía cortado com o menu aberto; uma pílula ou um botão com rótulo longo ("Conhecer uma Pequena
-   Guia", "Achar o mais perto de mim") passava da tela; e os títulos médios
-   ("Mais do que um lugar para frequentar") também. */
+   4. As três pílulas do pé do menu (WhatsApp, Instagram e Já sirvo) não cabiam
+      numa linha e o nome saía cortado com o menu aberto; uma pílula ou um botão
+      com rótulo longo ("Conhecer uma Pequena Guia", "Achar o mais perto de mim")
+      passava da tela. Era só abaixo de 280; no 22e (23/10) vale abaixo de 320,
+      porque de 280 a 310 o texto ainda encostava na borda.
+   E só abaixo de 280 (o zoom de 500%; nenhum celular é tão estreito): os títulos
+   médios ("Mais do que um lugar para frequentar"). */
 @media(max-width:319px){
   /* margem de 20 + logotipo + 24 + lupa e menu (92) + margem de 20; o logotipo
      é 8,06 vezes mais largo que alto (685,5 por 85): com a altura em
@@ -1954,13 +1956,28 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 @media(max-width:319px){
   .s .s-abre{ grid-template-columns:minmax(0,1fr) }
 }
-@media(max-width:279px){
+@media(max-width:319px){
   /* o pé do menu: as três pílulas em uma linha davam 65 px para "WhatsApp" (69):
-     duas em cima e "Já sirvo" embaixo, de ponta a ponta */
+     duas em cima e "Já sirvo" embaixo, de ponta a ponta.
+     23/10/2026 (o 22e): valia só abaixo de 280, e de 280 a 310 o texto ainda
+     encostava na borda (folga de 0,5 a 2 px; a pílula de 75 px deixa 59 entre as
+     margens de 8 para os 69 de "WhatsApp"). A grade abaixo de 320 mostrou, a régua
+     nova (palavras-partidas.mjs) mediu. Agora vale abaixo de 320 */
   .s .s-cortina-pe{ grid-template-columns:1fr 1fr }
   .s .s-cortina-pe a:last-child{ grid-column:1 / -1 }
   /* o rótulo que não cabe numa linha desce para a segunda, dentro da pílula
-     (as que cabem ficam iguais: a mesma altura de 46 e as mesmas margens dos lados) */
-  .s .s-pil,.s .acao{ white-space:normal; height:auto; min-height:46px; padding-block:10px; line-height:1.2; text-align:center; text-wrap:balance }
+     (as que cabem ficam iguais: a mesma altura de 46 e as mesmas margens dos lados).
+     23/10/2026 (o 22e): também abaixo de 320, e não só de 280: a 280 "Achar o mais
+     perto de mim" (/pequena-guia) passava das margens e encostava na borda (1,6 px).
+     A entrelinha é 1,25 e não 1,2: a 16 px dá 20 px, o mesmo que a Inter pede
+     (ascendente mais descendente), e o rótulo de uma linha fica no mesmo pixel da
+     pílula de 46 de cima de 320; com 1,2 (19,2 px) a meia entrelinha fracionária
+     subia o rótulo 1 px (medido na captura, antes e depois). As pílulas de altura
+     fixa (as redes no pé, o Maps e o Waze do mapa) não quebram o rótulo e ficam
+     com a entrelinha delas, pelo mesmo motivo */
+  .s .s-pil,.s .acao{ white-space:normal; height:auto; min-height:46px; padding-block:10px; line-height:1.25; text-align:center; text-wrap:balance }
+  .s .s-pe-redes .s-pil,.s .s-mapa-cartao .s-pil{ line-height:1 }
+}
+@media(max-width:279px){
   .s .s-h2.media{ font-size:clamp(26px,11vw,34px) }
 }
