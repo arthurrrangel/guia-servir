@@ -916,7 +916,14 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
                             <span className="posto-marca" aria-hidden="true">{n ? '✓' : '+'}</span>
                             <span className="cresce">
                               <span className="posto-titulo">
-                                {varios ? (sufixo(nome) || nome) : nome}
+                                {/* 24/10/2026 · na família, a tela mostra só o número
+                                    ("2"), porque o nome da família está logo acima.
+                                    O leitor de tela não via esse título: o botão se
+                                    chamava "2". O nome da família vai junto, só para
+                                    o leitor, e a tela não muda. */}
+                                {varios && sufixo(nome)
+                                  ? <><span className="so-leitor">{fam}</span> {sufixo(nome)}</>
+                                  : varios ? (sufixo(nome) || nome) : nome}
                                 {misturado && !soDomFamilia && !tipos.includes('follow')
                                   && <i className="posto-tag">só domingo</i>}
                               </span>
