@@ -305,7 +305,7 @@ export default function Servir() {
       <main className="tela-corpo">
         {fase === 'carregando'
           ? <Carregando o="Preparando o cadastro" />
-          : <Vazio
+          : <Vazio h1
               titulo={fase === 'erro' ? 'Área não encontrada' : 'Sem conexão agora'}
               texto={fase === 'erro'
                 ? 'O link pode estar errado. Volte e escolha uma das áreas.'

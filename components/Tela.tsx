@@ -95,11 +95,18 @@ export function AreasCarregando({ n = 5 }: { n?: number }) {
   );
 }
 
-export function Vazio({ titulo, texto, acao }:
-  { titulo: string; texto: string; acao?: { href: string; rot: string } }) {
+/* `h1` (24/10/2026): quando o estado É a página (o cadastro de uma área que
+   não existe, ou sem conexão), o título dele é o h1 da tela. O axe acusava o
+   cadastro sem h1 nenhum nesses estados (page-has-heading-one). Mesma letra:
+   o .rot pinta o h1 como pintava o span, e a entrelinha herdada desfaz a
+   única regra do h1 global que o .rot não cobre (line-height 1.15). */
+export function Vazio({ titulo, texto, acao, h1 }:
+  { titulo: string; texto: string; acao?: { href: string; rot: string }; h1?: boolean }) {
   return (
     <div className="estado-tela">
-      <span className="rot">{titulo}</span>
+      {h1
+        ? <h1 className="rot" style={{ lineHeight: 'inherit' }}>{titulo}</h1>
+        : <span className="rot">{titulo}</span>}
       <p>{texto}</p>
       {acao && (/^https?:/.test(acao.href)
         ? <a href={acao.href} target="_blank" rel="noreferrer" className="acao">{acao.rot}</a>

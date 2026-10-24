@@ -587,13 +587,20 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
   const soTel = (v: string) => v.replace(/\D/g, '').slice(0, 13);
   const telOk = soTel(fTel).length >= 10;
 
+  /* 24/10/2026 · OS TRÊS ESTADOS DE ANTES DA LISTA COM O <main> DELES. Na
+     tela normal o topo é o banner e a lista é o main; aqui o topo é a página
+     inteira (o carregando, o sem conexão, o link inválido) e não estava em
+     região nenhuma: o leitor de tela não achava o conteúdo principal, e o axe
+     acusava (landmark-one-main e region) na produção, inclusive nas portas
+     do grupo quando o ministério não existe. O papel vai no próprio topo:
+     nada muda na tela. */
   if (fase === 'carregando') return (
-    <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
+    <div className="eu-fundo"><div className="eu-topo" role="main"><div className="eu-topo-in">
       <span className="overline">Escala</span><h1 className="eu-titulo">carregando…</h1>
     </div></div></div>
   );
   if (fase === 'rede') return (
-    <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
+    <div className="eu-fundo"><div className="eu-topo" role="main"><div className="eu-topo-in">
       <span className="overline">Escala</span><h1 className="eu-titulo">Sem conexão</h1>
       <p className="eu-sub">Não consegui carregar agora. O link continua valendo, tente de novo.</p>
       <button className="claro" style={{ marginTop: 14 }} onClick={() => { setFase('carregando'); void carregar(); }}>
@@ -602,7 +609,7 @@ export default function Lista({ nomes }: { nomes: Record<string, string> }) {
     </div></div></div>
   );
   if (fase === 'erro') return (
-    <div className="eu-fundo"><div className="eu-topo"><div className="eu-topo-in">
+    <div className="eu-fundo"><div className="eu-topo" role="main"><div className="eu-topo-in">
       <span className="overline">Escala</span><h1 className="eu-titulo">Link inválido</h1>
       <p className="eu-sub">Peça o link certo para quem organiza a escala do ministério.</p>
     </div></div></div>

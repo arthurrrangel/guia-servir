@@ -73,8 +73,14 @@ export default function Candidatura() {
 
   useEffect(() => { void carregar(); }, [carregar]);
 
+  /* 24/10/2026 · AS REGIÕES DA PÁGINA, IGUAIS ÀS DO /eu/<token>. Esta tela
+     veste as mesmas peças do espaço do voluntário (.vol, .vol-barra, .vol-in),
+     mas sem os papéis que lá existem: nenhum estado tinha banner nem main, e o
+     axe acusava (landmark-one-main e region). A barra é o banner; o conteúdo,
+     o main. No estado normal o main abraça o herói e o resto, porque o h1 está
+     no herói. Só papéis e um invólucro sem classe: nada muda na tela. */
   const Barra = () => (
-    <div className="vol-barra">
+    <div className="vol-barra" role="banner">
       <div className="vol-barra-in">
         <Link href="/" aria-label="GUIA Church"><Logo className="logo" /></Link>
         <Link className="vol-quem" href="/servir">Ver as áreas</Link>
@@ -84,7 +90,7 @@ export default function Candidatura() {
 
   if (fase === 'carregando') return (
     <div className="vol"><Barra />
-      <div className="vol-in"><div className="vol-chamada">
+      <div className="vol-in" role="main"><div className="vol-chamada">
         <span className="rot">Seu cadastro</span><h1>Carregando</h1>
       </div></div>
     </div>
@@ -92,7 +98,7 @@ export default function Candidatura() {
 
   if (fase !== 'ok' || !d) return (
     <div className="vol"><Barra />
-      <div className="vol-in"><div className="vol-chamada">
+      <div className="vol-in" role="main"><div className="vol-chamada">
         <span className="rot">Seu cadastro</span>
         <h1>{fase === 'erro' ? 'Esse link não vale' : 'Sem conexão agora'}</h1>
         <p className="vol-sub">
@@ -128,6 +134,7 @@ export default function Candidatura() {
     <div className="vol">
       <Barra />
 
+      <div role="main">
       {/* a área que a pessoa escolheu, para ela reconhecer onde está */}
       <section className="porta-hero porta-hero-min">
         <img className="porta-hero-foto" src={fotoDaArea(d.equipe_slug)}
@@ -248,6 +255,7 @@ export default function Candidatura() {
             </Link>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
