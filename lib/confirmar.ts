@@ -90,6 +90,20 @@ function montar(): HTMLDialogElement {
       </div>
     </form>`;
 
+  /* 24/10/2026 · O NOME E A DESCRIÇÃO DO DIÁLOGO, como no Demandas
+     (components/demandas/Confirmar.ts). Sem eles, o leitor de tela abria a
+     pergunta anunciando só "diálogo, Voltar, botão", sem dizer o que se ia
+     apagar. O nome é o título; a descrição é montada a cada chamada com o que
+     está à vista (o texto e o "Não dá para desfazer" só quando aparecem: um
+     parágrafo escondido e apontado pelo aria-describedby ainda seria lido). */
+  /* os ids não começam com es- de propósito: es- é prefixo de classe, e o
+     scripts/escalas-css.test.mjs cobra que toda es- do código exista na folha */
+  const titulo = d.querySelector('.es-dialogo-titulo')!;
+  titulo.id = 'escalas-confirmar-titulo';
+  d.setAttribute('aria-labelledby', titulo.id);
+  d.querySelector('.es-dialogo-texto')!.id = 'escalas-confirmar-texto';
+  d.querySelector('.es-dialogo-sem-volta')!.id = 'escalas-confirmar-sem-volta';
+
   d.querySelector<HTMLButtonElement>('[data-nao]')!.onclick = () => fechar(false);
   d.querySelector<HTMLButtonElement>('[data-sim]')!.onclick = () => fechar(true);
 
@@ -146,6 +160,11 @@ function montarD(): HTMLDialogElement {
         <button type="button" class="es-btn" data-nao autofocus>Voltar</button>
       </div>
     </form>`;
+  /* 24/10/2026 · nome e descrição para o leitor de tela (ver montar()) */
+  const titulo = d.querySelector('.es-dialogo-titulo')!;
+  titulo.id = 'escalas-decidir-titulo';
+  d.setAttribute('aria-labelledby', titulo.id);
+  d.querySelector('.es-dialogo-texto')!.id = 'escalas-decidir-texto';
   d.querySelector<HTMLButtonElement>('[data-nao]')!.onclick = () => fecharD(null);
   d.addEventListener('cancel', e => { e.preventDefault(); fecharD(null); });
   d.addEventListener('click', e => { if (e.target === d) fecharD(null); });
@@ -166,6 +185,7 @@ export function decidir(c: Decisao): Promise<string | null> {
   const txt = d.querySelector<HTMLParagraphElement>('.es-dialogo-texto')!;
   txt.textContent = c.texto || '';
   txt.hidden = !c.texto;
+  if (c.texto) d.setAttribute('aria-describedby', txt.id); else d.removeAttribute('aria-describedby');
 
   /* as saídas: um botão por jeito de fazer, com o efeito por extenso. Texto
      entra por textContent, nunca por innerHTML: nome de pessoa é dado. */
@@ -236,6 +256,8 @@ export function confirmar(c: Confirmacao): Promise<boolean> {
   txt.hidden = !c.texto;
 
   d.querySelector<HTMLParagraphElement>('.es-dialogo-sem-volta')!.hidden = !c.perigo;
+  const desc = [c.texto ? 'escalas-confirmar-texto' : '', c.perigo ? 'escalas-confirmar-sem-volta' : ''].filter(Boolean).join(' ');
+  if (desc) d.setAttribute('aria-describedby', desc); else d.removeAttribute('aria-describedby');
   const sim = d.querySelector<HTMLButtonElement>('[data-sim]')!;
   sim.textContent = c.acao || 'Confirmar';
   /* o que apaga fica vermelho; o resto, a ação cheia de sempre */
@@ -298,6 +320,11 @@ function montarE(): HTMLDialogElement {
         <button type="submit" class="es-btn es-pri" data-sim>Salvar</button>
       </div>
     </form>`;
+  /* 24/10/2026 · nome e descrição para o leitor de tela (ver montar()) */
+  const titulo = d.querySelector('.es-dialogo-titulo')!;
+  titulo.id = 'escalas-escrever-titulo';
+  d.setAttribute('aria-labelledby', titulo.id);
+  d.querySelector('.es-dialogo-texto')!.id = 'escalas-escrever-texto';
   const form = d.querySelector<HTMLFormElement>('form')!;
   const campo = d.querySelector<HTMLInputElement>('input')!;
   form.addEventListener('submit', e => {
@@ -326,6 +353,7 @@ export function escrever(c: Escrita): Promise<string | null> {
   const txt = d.querySelector<HTMLParagraphElement>('.es-dialogo-texto')!;
   txt.textContent = c.texto || '';
   txt.hidden = !c.texto;
+  if (c.texto) d.setAttribute('aria-describedby', txt.id); else d.removeAttribute('aria-describedby');
   d.querySelector('[data-rotulo]')!.textContent = c.rotulo;
   const dica = d.querySelector<HTMLElement>('[data-dica]')!;
   dica.textContent = c.dica || '';

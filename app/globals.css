@@ -4219,6 +4219,14 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    isso qualquer âncora entrega o alvo escondido embaixo da barra. */
 .menu{ overscroll-behavior:contain }
 html{ scroll-padding-top:88px }
+/* 24/10/2026 · O FOCO NÃO CAI ATRÁS DO RODAPÉ FIXO DO CADASTRO (WCAG 2.4.11).
+   Com Tab, o navegador rolava só até o campo entrar na janela, e a janela
+   inclui a faixa que o .wiz-pe cobre: no 320×640 e no 360×640 o "Nome
+   completo" e o "WhatsApp" recebiam o foco inteiros atrás da barra, e no
+   390×844 o "E-mail". O cadastro já mede a barra e põe a altura no html
+   (--wiz-pe, em servir/[slug]/cadastro); a mesma medida vira a folga de
+   baixo da rolagem. Parada, a tela não muda: só muda onde a rolagem para. */
+html:has(.wiz-pe){ scroll-padding-bottom:calc(var(--wiz-pe, 104px) + 16px) }
 
 /* --- 7. TRÊS CAMADAS DE TOQUE EMPILHADAS EM 1px -------------------------
    Na linha do posto da escala moram três alvos, um debaixo do outro: quem
