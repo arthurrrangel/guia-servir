@@ -19,6 +19,7 @@ import {
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
 import { linhasDaCobranca } from '@/lib/cobranca-do-dia';
+import { contextoDaCobranca } from '@/lib/contexto-da-cobranca';
 
 export const dynamic = 'force-dynamic';
 
@@ -555,20 +556,11 @@ async function rodar(req: Request) {
     ])].sort();
 
     for (const data of alvos) {
-      /* o rótulo do evento sai do estado de quem o tem; se ninguém tiver
-         (não acontece, mas o tipo permite), cai no rótulo do dia da semana */
-      const nomeEvento = [...estados.values()]
-        .map(S => S.escalas[data]?.evento).find(Boolean);
-      const rotulo = nomeEvento ? `${nomeEvento} · ${fmtDia(data)}`
-        : tipoDoDia(data) === 'follow' ? `Follow sáb ${fmtDia(data)}` : `domingo ${fmtDia(data)}`;
-      /* é um culto REGULAR (domingo ou Follow), pelo mesmo calendário que
-         `diasDoMes` usa para montar o mês? Se não é, o dia só está em `alvos`
-         porque é evento de ALGUM ministério, e aí o silêncio abaixo é certo. */
-      const regular = !nomeEvento;
       for (const e of equipes) {
         const S = estados.get(e.id);
         if (!S) continue;
         const dia = S.escalas[data];
+        const { nomeEvento, rotulo, regular } = contextoDaCobranca(S, data);
         if (!dia) {
           /* O PIOR ESTADO ERA O ÚNICO MUDO — 21/09/2026, auditoria do robô.
 
