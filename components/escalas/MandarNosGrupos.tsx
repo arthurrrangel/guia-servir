@@ -8,6 +8,7 @@ import { copiar } from '@/components/Shell';
 import { Pilula } from '@/components/escalas/Pecas';
 import { IcCopiar, IcEnviar } from '@/components/Icones';
 import { cont, pl } from '@/lib/plural';
+import PeloRobo from '@/components/escalas/PeloRobo';
 
 /* =============================================================================
    MANDAR NOS GRUPOS — 01/10/2026
@@ -76,6 +77,8 @@ export default function MandarNosGrupos({ S, d, base, slug, equipeId, aviso, id 
   aviso: (t: string) => void; id: string;
 }) {
   const [envios, setEnvios] = useState<Record<string, Envio>>(() => lerEnvios(equipeId, d));
+  /* o que o robô mandou (PeloRobo), por linha: { em, ass } */
+  const [peloRobo, setPeloRobo] = useState<Record<string, { em: string; ass: string | null }>>({});
   /* abriu pelo teclado: o foco entra no painel, e não três botões antes dele */
   const refCab = useRef<HTMLDivElement | null>(null);
   useEffect(() => { refCab.current?.focus({ preventScroll: true }); }, []);
@@ -115,10 +118,21 @@ export default function MandarNosGrupos({ S, d, base, slug, equipeId, aviso, id 
         </span>
       </div>
 
+      {/* o robô do WhatsApp da igreja manda tudo de uma vez (115, 26/10/2026) */}
+      <PeloRobo equipeId={equipeId} d={d} aviso={aviso} envios={envios} aoMarcas={setPeloRobo}
+        linhas={linhas.filter(l => !l.vazio).map(l => ({ gid: l.gid, nome: l.nome, ass: l.ass }))} />
+
       <ul className="es-mg-lista">
         {linhas.map(l => {
-          const e = envios[l.gid];
-          const mudou = !!e && e.ass !== l.ass;
+          /* a marca mais nova: a do envio à mão (este aparelho) ou a do robô */
+          const aMao = envios[l.gid];
+          const doRobo = peloRobo[l.nome];
+          const emRobo = doRobo ? Date.parse(doRobo.em) : NaN;
+          const e = doRobo && Number.isFinite(emRobo) && (!aMao || emRobo > aMao.em)
+            ? { em: emRobo, ass: doRobo.ass, robo: true }
+            : aMao ? { ...aMao, robo: false } : undefined;
+          /* sem a assinatura (robô de antes), não dá para dizer que mudou */
+          const mudou = !!e && e.ass !== null && e.ass !== l.ass;
           return (
             <li key={l.gid} className={l.vazio ? 'es-mg-linha es-mg-vazio' : 'es-mg-linha'}>
               <span className="es-mg-tit">
@@ -129,7 +143,7 @@ export default function MandarNosGrupos({ S, d, base, slug, equipeId, aviso, id 
                 <span className="es-mg-est">
                   {mudou
                     ? <Pilula tom="warn">mudou depois do envio</Pilula>
-                    : <Pilula tom="ok">enviado {quando(e.em)}</Pilula>}
+                    : <Pilula tom="ok">{e.robo ? 'pelo robô' : 'enviado'} {quando(e.em)}</Pilula>}
                 </span>
               )}
               {!l.vazio && (

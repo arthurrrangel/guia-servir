@@ -5,6 +5,10 @@
    da Mídia sai sozinha nos 8 grupos da Multimídia, pelo número da igreja,
    2 dias antes de cada culto, e o grupo geral é cobrado com @ até todos
    confirmarem. Roda no MacBook dele, como serviço do macOS (launchd).
+   Depois: "Gostaria de na aba do sistema ter a opção de disparar escala,
+   através desse robo" e "Para todos os ministérios". O serviço passa a cada
+   30 s no sistema e atende o botão "Mandar agora pelo robô" de qualquer
+   ministério da tabela (config.mjs; pedidos.mjs).
 
    Modos:
      node robo.mjs                  o serviço (o launchd chama assim)
@@ -13,11 +17,13 @@
      node robo.mjs --grupos         confere os grupos da tabela (com o serviço parado)
      node robo.mjs --grupos --refixar  aceita os grupos de agora como os certos
                                     (depois de recriar ou renomear um grupo de propósito)
-     node robo.mjs --ensaio [datas] lê a escala no sistema e diz o que faria, sem WhatsApp
+     node robo.mjs --ensaio [ministério] [datas]
+                                    lê a escala no sistema e diz o que faria, sem WhatsApp
+                                    (ministério: midia, louvor, servico; sem ele, midia)
      node robo.mjs --status         resumo do serviço (conexão, grupos, última rodada)
      node robo.mjs --conferido AAAA-MM-DD "<nome do grupo>"|cobranca saiu|nao-saiu
                                     depois de conferir um envio incerto no grupo
-     node robo.mjs --mandar-agora AAAA-MM-DD
+     node robo.mjs --mandar-agora AAAA-MM-DD [ministério]
                                     manda já a escala daquele dia (pedido do Arthur);
                                     quem manda é o serviço, na próxima volta (até 30 s)
      node robo.mjs --a-partir-de AAAA-MM-DDTHH:MM-03:00
@@ -36,6 +42,7 @@ import { execFile, execFileSync, spawn } from 'node:child_process';
 import { CONFIG } from './config.mjs';
 import * as R from './regras.mjs';
 import { executarRodada } from './rodada.mjs';
+import * as P from './pedidos.mjs';
 
 const PASTA = dirname(fileURLToPath(import.meta.url));
 const ARQ = {
@@ -102,7 +109,9 @@ function lerSegredo() {
 /* O ESTADO É O QUE IMPEDE MANDAR DUAS VEZES. Arquivo estragado nunca vira
    "estado vazio" (isso mandaria tudo de novo): usa a cópia da gravação
    anterior, avisando, ou para tudo até alguém conferir. */
-const normalizarEstado = (e) => ({ inicio: e.inicio || null, envios: e.envios || {}, cobrancas: e.cobrancas || {}, rodadas: e.rodadas || {} });
+/* 26/10: os outros ministérios (a Mídia segue no topo), os pedidos do botão
+   já atendidos e os relatos que o sistema ainda não confirmou (regras.mjs) */
+const normalizarEstado = (e) => R.normalizarEstado(e);
 function carregarEstado() {
   const ler = (f) => normalizarEstado(JSON.parse(readFileSync(f, 'utf8')));
   if (existsSync(ARQ.estado)) {
@@ -208,9 +217,20 @@ function pausar(motivo) {
   try { writeFileSync(ARQ.pausa, `${new Date().toISOString()} ${motivo}\n`); } catch { /* segue */ }
 }
 
-async function lerDia(segredo, data) {
-  const url = `${CONFIG.site}/api/robo/grupos?equipe=${encodeURIComponent(CONFIG.equipe)}&data=${data}`;
+async function lerDia(segredo, slug, data) {
+  const url = `${CONFIG.site}/api/robo/grupos?equipe=${encodeURIComponent(slug)}&data=${data}`;
   const r = await fetch(url, { headers: { Authorization: `Bearer ${segredo}` }, signal: AbortSignal.timeout(30000) });
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.ok) throw new Error(`o sistema respondeu ${r.status}${j?.erro ? ' ' + j.erro : ''}`);
+  return j;
+}
+
+/* a passada no sistema: conta que está vivo, devolve relatos, leva pedidos */
+async function passarNoSistema(segredo, corpo) {
+  const r = await fetch(`${CONFIG.site}/api/robo/pedidos`, {
+    method: 'POST', body: JSON.stringify(corpo), signal: AbortSignal.timeout(20000),
+    headers: { Authorization: `Bearer ${segredo}`, 'Content-Type': 'application/json' },
+  });
   const j = await r.json().catch(() => null);
   if (!r.ok || !j?.ok) throw new Error(`o sistema respondeu ${r.status}${j?.erro ? ' ' + j.erro : ''}`);
   return j;
@@ -230,33 +250,36 @@ const hhmm = (min) => `${String(Math.floor(min / 60)).padStart(2, '0')}:${String
 const ehDaIgreja = (conta) => !!conta && R.variantesBR(CONFIG.numeroDaIgreja).includes(conta);
 
 /* ------------------------------------------------------------- ensaio --- */
-async function ensaio(segredo, datas) {
+async function ensaio(segredo, slug, datas) {
   const agora = R.agoraSP();
-  const estado = carregarEstado();
+  const cfgM = R.configDoMinisterio(CONFIG, slug);
+  if (!cfgM) { console.log(`ministério "${slug}" não está na tabela do robô (${Object.keys(CONFIG.ministerios).join(', ')})`); return; }
+  const estadoTodo = carregarEstado();
+  const estado = R.visaoDoMinisterio(estadoTodo, slug, CONFIG.principal);
   const alvo = datas.length ? datas : [0, 1, 2, 3, 4, 5, 6].map((n) => R.somaDias(agora.data, n));
   const inicioMs = Date.parse(estado.inicio || '') || Date.now();
-  console.log(`ENSAIO · nada é mandado · ${agora.data} ${hhmm(agora.min)} · robô ${estado.inicio ? 'ligado desde ' + estado.inicio.slice(0, 16) : 'ainda não ligado (conta a partir de agora)'}`);
+  console.log(`ENSAIO · ${slug}${cfgM.automatico ? ' (sai sozinho)' : ' (só a pedido, pelo botão)'} · nada é mandado · ${agora.data} ${hhmm(agora.min)} · robô ${estado.inicio ? 'ligado desde ' + estado.inicio.slice(0, 16) : 'ainda não ligado (conta a partir de agora)'}`);
   for (const data of alvo) {
     let resp;
-    try { resp = await lerDia(segredo, data); } catch (e) { console.log(`${data} · ERRO: ${e.message}`); continue; }
-    if (!resp.culto?.preenchidos) { console.log(`${data} · sem escala da ${resp.equipe?.nome || CONFIG.equipe}${resp.culto?.existe ? ' (culto sem ninguém escalado)' : ''}`); continue; }
+    try { resp = await lerDia(segredo, slug, data); } catch (e) { console.log(`${data} · ERRO: ${e.message}`); continue; }
+    if (!resp.culto?.preenchidos) { console.log(`${data} · sem escala da ${resp.equipe?.nome || slug}${resp.culto?.existe ? ' (culto sem ninguém escalado)' : ''}`); continue; }
     const c = resp.culto;
     console.log(`${data} · ${c.evento || 'culto'} ${c.hora || 'sem hora'} · ${c.preenchidos} de ${c.postos} postos com gente`);
     const momento = R.momentoDaPrimeira(data, CONFIG.rodadas, CONFIG.diasDeAntecedencia);
     const dono = momento == null || momento >= inicioMs;
     const quando = `${R.somaDias(data, -CONFIG.diasDeAntecedencia)} às ${CONFIG.rodadas.find((r) => r.primeira)?.hhmm}`;
     for (const l of resp.linhas) {
-      const grupo = CONFIG.grupos[l.nome];
+      const grupo = cfgM.grupos[l.nome];
       const e = estado.envios[data]?.[l.gid];
       const r = R.resumoSemDados(l.texto);
       const situacao = l.vazio ? 'nada neste dia'
         : !grupo ? 'SEM GRUPO NA TABELA (seria pulado)'
           : e?.situacao === 'incerto' ? 'INCERTO: parado até conferir'
-            : !e ? (dono ? `primeira postagem em ${quando}` : `não é do robô (a hora de sair, ${quando}, foi antes de ele começar)`)
-              : e.ass !== l.ass ? 'mudou depois do envio: vai a versão nova na próxima rodada' : `já postado (${e.em.slice(0, 16)})`;
+            : !e ? (!cfgM.automatico ? 'sai quando a liderança apertar o botão' : dono ? `primeira postagem em ${quando}` : `não é do robô (a hora de sair, ${quando}, foi antes de ele começar)`)
+              : e.ass !== l.ass ? (cfgM.automatico ? 'mudou depois do envio: vai a versão nova na próxima rodada' : 'mudou depois do envio: vai a versão nova no próximo pedido') : `já postado (${e.em.slice(0, 16)})`;
       console.log(`  ${l.nome} → ${grupo || '?'} · ${r.linhas} linhas, ${r.caracteres} caracteres · ${situacao}`);
     }
-    if (resp.cobranca) {
+    if (resp.cobranca && cfgM.grupoDaCobranca) {
       console.log(`  cobrança: ${resp.cobranca.pendentes} ${resp.cobranca.pendentes === 1 ? 'pessoa falta' : 'pessoas faltam'} confirmar, ${resp.cobranca.mencoes.length} com telefone para o @`);
     }
   }
@@ -280,6 +303,16 @@ async function servico(segredo) {
     c.unref();
   } catch { /* sem caffeinate, segue */ }
   const { abrirWhatsApp } = await import('./whatsapp.mjs');
+
+  /* configuração com erro (grupo em dois ministérios, cobrança fora dos
+     grupos): não sai nada até alguém arrumar config.mjs */
+  const errosDaConfig = R.conferirConfig(CONFIG);
+  if (errosDaConfig.length) {
+    avisar(`A configuração do robô tem erro: ${errosDaConfig.join('; ')}. Nada sai até arrumar o config.mjs.`, 'config');
+    salvarStatus({ conectado: false, motivo: 'configuração com erro' });
+    setInterval(() => {}, 3600000);
+    return;
+  }
 
   /* sem sessão, ou com a sessão recusada, o serviço fica parado (sem
      reiniciar em laço e sem notificar a cada minuto) até o pareamento */
@@ -333,6 +366,83 @@ async function servico(segredo) {
   let ultima = null;
   let gruposConferidos = false;
   let inicioConferido = false;
+  let ultimaPassada = 0;
+
+  /* como o robô está, para a tela do líder */
+  const comoEsta = () => ({
+    conectado: wa.aberto() && ehDaIgreja(wa.conta()), pausado: existsSync(ARQ.pausa), versao: CONFIG.versao,
+  });
+
+  /* O BOTÃO "MANDAR AGORA PELO ROBÔ" (115, pedidos.mjs). Uma passada: o
+     batimento e os relatos que faltam; o sistema devolve os pedidos abertos.
+     Cada pedido roda com a trava do estado, como uma rodada. */
+  const enviarRelatos = async () => {
+    let fila = [];
+    try { fila = carregarEstado().relatos || []; } catch (e) { avisar(e.message, 'estado'); return null; }
+    const resp = await passarNoSistema(segredo, P.corpoDaPassada({ ...comoEsta(), cfg: CONFIG, relatos: fila }));
+    if (resp.vistos?.length) {
+      await comTrava(async () => { const e = carregarEstado(); P.tirarVistos(e, resp.vistos); salvarEstado(e); }, 60000)
+        .catch((e) => log('não consegui tirar os relatos já vistos:', e.message));
+    }
+    /* o relato final que não pegou: o sistema já tinha fechado o pedido (venceu
+       ou o robô ficou fora do ar). A tela diz o que o sistema decidiu; o
+       registro guarda o que o robô fez */
+    for (const r of fila) {
+      if (r.status !== 'enviando' && resp.vistos?.includes(r.id) && !resp.aplicados?.includes(r.id)) {
+        log(`relato ${r.id.slice(0, 8)} (${r.status}) chegou com o pedido já fechado no sistema: ${r.resultado?.resumo || ''}`);
+      }
+    }
+    return resp;
+  };
+  const atenderOBotao = async () => {
+    let resp;
+    try { resp = await enviarRelatos(); } catch (e) { log('pedidos: o sistema não respondeu:', e.message); return; }
+    if (!resp) return;
+    let atendeu = false;
+    for (const pedido of (resp.pedidos || []).slice(0, 5)) {
+      if (encerrando || caiu) break;
+      let estado0;
+      try { estado0 = carregarEstado(); } catch (e) { avisar(e.message, 'estado'); return; }
+      const d = P.decidirPedido(pedido, {
+        cfg: CONFIG, estado: estado0, pausado: existsSync(ARQ.pausa), conectado: wa.aberto() && ehDaIgreja(wa.conta()), hoje: R.agoraSP().data,
+        agoraMs: Date.parse(resp.agora) || Date.now(),
+      });
+      if (d.tipo === 'ignorar') { log(`pedido ${pedido.equipe} ${pedido.data}: velho demais; o sistema fecha`); continue; }
+      if (d.tipo === 'repetir' || d.tipo === 'final') {
+        if (d.tipo === 'final') log(`pedido ${pedido.equipe} ${pedido.data}: recusado (${d.relato.resultado?.resumo})`);
+        await comTrava(async () => { const e = carregarEstado(); P.guardarRelato(e, d.relato, new Date().toISOString()); salvarEstado(e); }, 60000)
+          .catch((e) => log('não consegui guardar o relato:', e.message));
+        atendeu = true;
+        continue;
+      }
+      log(`pedido do sistema: ${pedido.equipe} ${pedido.data}`);
+      /* SÓ MANDA O QUE CONSEGUIU MARCAR. O "mandando agora" vai antes e
+         espera a resposta: pedido que venceu enquanto o robô mandava outro, ou
+         que um segundo toque fechou, não pega a marca, e não sai */
+      let marca = null;
+      try {
+        marca = await passarNoSistema(segredo, P.corpoDaPassada({ ...comoEsta(), cfg: CONFIG, relatos: [{ id: pedido.id, status: 'enviando' }] }));
+      } catch (e) { log(`pedido ${pedido.equipe} ${pedido.data}: não consegui marcar no sistema (${e.message}); fica para a próxima`); continue; }
+      if (!marca.aplicados?.includes(pedido.id)) { log(`pedido ${pedido.equipe} ${pedido.data}: o sistema já fechou este pedido; não mando`); continue; }
+      const relato = await comTrava(async () => {
+        const estado = carregarEstado();
+        const rel = await P.atenderPedido({
+          pedido, estado, cfg: CONFIG, wa: waFixo, lerDia: (slug, data) => lerDia(segredo, slug, data),
+          avisar, log, pausado: () => encerrando || existsSync(ARQ.pausa), pausar,
+          espera: (faixa) => espera(entre(faixa)), salvar: () => salvarEstado(estado), agora: R.agoraSP(),
+        });
+        /* parar o serviço no meio (configurar.command) não fecha o pedido:
+           ele continua aberto no sistema e o robô termina quando voltar */
+        if (!encerrando) P.guardarRelato(estado, rel, new Date().toISOString());
+        salvarEstado(R.podar(estado, R.agoraSP().data));
+        return rel;
+      }, 120000).catch((e) => { log(`pedido ${pedido.equipe} ${pedido.data}: não começou:`, e.message); return null; });
+      if (relato) { log(`pedido ${pedido.equipe} ${pedido.data}: ${relato.status} (${relato.resultado?.resumo || ''})`); atendeu = true; }
+    }
+    if (atendeu && !encerrando) {
+      try { await enviarRelatos(); } catch (e) { log('relatos: o sistema não respondeu (sigo tentando):', e.message); }
+    }
+  };
 
   const tick = async () => {
     if (ocupado || caiu || encerrando) return;
@@ -353,7 +463,7 @@ async function servico(segredo) {
       }
       if (wa.aberto() && !gruposConferidos) {
         try {
-          const mapa = await waFixo.mapearGrupos([...new Set([...Object.values(CONFIG.grupos), CONFIG.grupoDaCobranca])]);
+          const mapa = await waFixo.mapearGrupos(R.todosOsGrupos(CONFIG));
           salvarStatus({ grupos: Object.fromEntries(Object.entries(mapa).map(([n, g]) => [n, g.jid
             ? { ok: true, participantes: g.participantes, soAdmin: g.soAdmin, admin: g.admin, lid: g.lid } : { ok: false, erro: g.erro }])) });
           gruposConferidos = true;
@@ -363,7 +473,10 @@ async function servico(segredo) {
       }
       let feitas;
       try { feitas = carregarEstado().rodadas; } catch (e) { avisar(e.message, 'estado'); return; }
-      for (const rodada of R.rodadasDevidas(CONFIG.rodadas, agora, feitas, CONFIG.toleranciaMin)) {
+      /* as rodadas do horário são só do ministério automático (a Mídia) */
+      const principal = CONFIG.principal;
+      const automatico = !!CONFIG.ministerios[principal]?.automatico;
+      for (const rodada of automatico ? R.rodadasDevidas(CONFIG.rodadas, agora, feitas, CONFIG.toleranciaMin) : []) {
         const chave = `${agora.data} ${rodada.hhmm}`;
         const ult = tentativas.get(chave);
         if (ult && Date.now() - ult < CONFIG.retentarAposMin * 60000) continue;
@@ -373,7 +486,8 @@ async function servico(segredo) {
           let r;
           try {
             r = await executarRodada({
-              wa: waFixo, lerDia: (d) => lerDia(segredo, d), rodada, agora: R.agoraSP(), estado, cfg: CONFIG,
+              wa: waFixo, lerDia: (d) => lerDia(segredo, principal, d), rodada, agora: R.agoraSP(),
+              estado: R.visaoDoMinisterio(estado, principal, principal), cfg: R.configDoMinisterio(CONFIG, principal),
               avisar, log, pausado: () => encerrando || existsSync(ARQ.pausa), pausar,
               espera: (faixa) => espera(entre(faixa)), salvar: () => salvarEstado(estado),
             });
@@ -396,7 +510,9 @@ async function servico(segredo) {
       if (existsSync(ARQ.pedido)) {
         let pedido = null;
         try { pedido = JSON.parse(readFileSync(ARQ.pedido, 'utf8')); } catch { /* estragado */ }
-        const ok = /^\d{4}-\d{2}-\d{2}$/.test(pedido?.data || '') && pedido.data >= agora.data && pedido.data <= R.somaDias(agora.data, CONFIG.diasDeVigia);
+        const slugDoPedido = pedido?.equipe || CONFIG.principal;
+        const ok = /^\d{4}-\d{2}-\d{2}$/.test(pedido?.data || '') && pedido.data >= agora.data && pedido.data <= R.somaDias(agora.data, CONFIG.diasDeVigia)
+          && !!CONFIG.ministerios[slugDoPedido];
         const ult = tentativas.get('pedido');
         if (!ok) {
           log('pedido de envio antecipado inválido ou de data passada: descartado');
@@ -410,8 +526,9 @@ async function servico(segredo) {
             let r;
             try {
               r = await executarRodada({
-                wa: waFixo, lerDia: (d) => lerDia(segredo, d), rodada: { hhmm: 'pedido', primeira: false, cobrar: false },
-                agora: R.agoraSP(), estado, cfg: CONFIG, antecipar: [pedido.data],
+                wa: waFixo, lerDia: (d) => lerDia(segredo, slugDoPedido, d), rodada: P.RODADA_DO_PEDIDO,
+                agora: R.agoraSP(), estado: R.visaoDoMinisterio(estado, slugDoPedido, CONFIG.principal),
+                cfg: R.configDoMinisterio(CONFIG, slugDoPedido), soDatas: [pedido.data],
                 avisar, log, pausado: () => encerrando || existsSync(ARQ.pausa), pausar,
                 espera: (faixa) => espera(entre(faixa)), salvar: () => salvarEstado(estado),
               });
@@ -422,13 +539,18 @@ async function servico(segredo) {
             salvarEstado(R.podar(estado, agora.data));
             return r;
           }, 120000).catch((e) => ({ completa: false, motivo: e.message }));
-          log(`pedido ${pedido.data}: ${res.completa ? 'atendido' : 'incompleto'}${res.motivo ? ' (' + res.motivo + ')' : ''}`);
+          log(`pedido ${slugDoPedido} ${pedido.data}: ${res.completa ? 'atendido' : 'incompleto'}${res.motivo ? ' (' + res.motivo + ')' : ''}`);
           if (res.completa && res.motivo !== 'pausado' && !encerrando) {
             /* só apaga se o pedido ainda é o mesmo (um pedido novo no meio fica) */
             try { if (JSON.parse(readFileSync(ARQ.pedido, 'utf8')).em === pedido.em) rmSync(ARQ.pedido, { force: true }); } catch { /* já saiu */ }
             tentativas.delete('pedido');
           }
         }
+      }
+      /* O BOTÃO DO SISTEMA (115): a cada 30 s, a passada no sistema */
+      if (!encerrando && Date.now() - ultimaPassada >= CONFIG.pedidosACadaS * 1000) {
+        ultimaPassada = Date.now();
+        await atenderOBotao();
       }
       /* rodada que passou da tolerância sem completar: avisa uma vez e fecha */
       for (const r of CONFIG.rodadas) {
@@ -438,7 +560,7 @@ async function servico(segredo) {
           avisar(`A rodada das ${r.hhmm} não conseguiu terminar. O que ficou para trás sai na próxima rodada.`, `fim:${r.hhmm}`);
         }
       }
-      const proxima = CONFIG.rodadas.map((r) => r.hhmm).find((h) => R.minutos(h) > agora.min) || `${CONFIG.rodadas[0].hhmm} de amanhã`;
+      const proxima = !automatico ? null : CONFIG.rodadas.map((r) => r.hhmm).find((h) => R.minutos(h) > agora.min) || `${CONFIG.rodadas[0].hhmm} de amanhã`;
       salvarStatus({ conectado: wa.aberto(), conta: wa.conta(), ultimaRodada: ultima, proximaRodada: proxima, pausado: existsSync(ARQ.pausa) });
     } catch (e) {
       log('ERRO', e.message);
@@ -446,9 +568,16 @@ async function servico(segredo) {
       ocupado = false;
     }
   };
-  log(`serviço no ar · ${CONFIG.equipe} · rodadas ${CONFIG.rodadas.map((r) => r.hhmm).join(', ')}`);
+  log(`serviço no ar · ${Object.entries(CONFIG.ministerios).map(([k, m]) => `${k}${m.automatico ? ' (sozinho)' : ' (a pedido)'}`).join(', ')} · rodadas ${CONFIG.rodadas.map((r) => r.hhmm).join(', ')}`);
   setInterval(tick, 30000);
   setTimeout(tick, 15000);
+  /* com uma rodada ou um pedido em andamento (minutos), o tick está ocupado:
+     o batimento sai por fora, para a tela não dizer "robô desligado" */
+  setInterval(async () => {
+    if (!ocupado || caiu || encerrando || Date.now() - ultimaPassada < 50000) return;
+    ultimaPassada = Date.now();
+    try { await passarNoSistema(segredo, P.corpoDaPassada({ ...comoEsta(), cfg: CONFIG })); } catch (e) { log('batimento: o sistema não respondeu:', e.message); }
+  }, 20000);
   const sair = async () => {
     if (encerrando) return;
     encerrando = true;
@@ -540,7 +669,7 @@ async function parearOuConferir(modo, comCodigo, refixar) {
   await espera(3000);
   if (refixar) { rmSync(ARQ.fixos, { force: true }); console.log('Endereços dos grupos refeitos a partir de agora.'); }
   let mapa;
-  try { mapa = await comFixos(wa).mapearGrupos([...new Set([...Object.values(CONFIG.grupos), CONFIG.grupoDaCobranca])]); } catch (e) {
+  try { mapa = await comFixos(wa).mapearGrupos(R.todosOsGrupos(CONFIG)); } catch (e) {
     console.log(`\nNão consegui ler os grupos: ${e.message}. Rode de novo.`);
     await wa.fechar();
     process.exit(1);
@@ -557,14 +686,14 @@ async function parearOuConferir(modo, comCodigo, refixar) {
 /* PEDE AO SERVIÇO PARA MANDAR JÁ A ESCALA DE UM DIA e acompanha até sair.
    Quem manda é o serviço (a sessão do WhatsApp é dele); aqui só fica o
    pedido e o acompanhamento pelo estado gravado. */
-async function mandarAgora([data]) {
+async function mandarAgora([data, slug = CONFIG.principal]) {
   const hoje = R.agoraSP().data;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(data || '') || data < hoje || data > R.somaDias(hoje, CONFIG.diasDeVigia)) {
-    console.log(`uso: node robo.mjs --mandar-agora AAAA-MM-DD (de hoje até ${CONFIG.diasDeVigia} dias à frente)`);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data || '') || data < hoje || data > R.somaDias(hoje, CONFIG.diasDeVigia) || !CONFIG.ministerios[slug]) {
+    console.log(`uso: node robo.mjs --mandar-agora AAAA-MM-DD [ministério] (de hoje até ${CONFIG.diasDeVigia} dias à frente; ministérios: ${Object.keys(CONFIG.ministerios).join(', ')})`);
     process.exit(1);
   }
   const tmp = ARQ.pedido + '.tmp';
-  writeFileSync(tmp, JSON.stringify({ data, em: new Date().toISOString() }));
+  writeFileSync(tmp, JSON.stringify({ data, equipe: slug, em: new Date().toISOString() }));
   renameSync(tmp, ARQ.pedido);
   if (!pidDoServico()) {
     console.log('Pedido guardado, mas o serviço não está rodando: a escala sai quando ele voltar.');
@@ -581,7 +710,7 @@ async function mandarAgora([data]) {
     await espera(5000);
     let e = null;
     try { e = carregarEstado(); } catch { /* lendo no meio de uma gravação */ }
-    const dia = e?.envios?.[data] || {};
+    const dia = (e ? R.visaoDoMinisterio(e, slug, CONFIG.principal).envios[data] : null) || {};
     const linhas = Object.values(dia).map((x) => `${x.grupo}: ${x.situacao}`);
     const agoraVisto = linhas.join(' | ');
     if (agoraVisto !== visto) { visto = agoraVisto; console.log(`  ${linhas.length} grupo(s): ${agoraVisto}`); }
@@ -616,15 +745,24 @@ async function conferido([data, gid, resultado]) {
   }
   const msg = await comTrava(async () => {
     const estado = carregarEstado();
-    const alvo = gid === 'cobranca' ? estado.cobrancas : (estado.envios[data] ||= {});
-    let chave = gid === 'cobranca' ? data : gid;
-    /* o aviso mostra o nome do grupo no WhatsApp: vale o nome ou o código */
-    if (gid !== 'cobranca' && !alvo[chave]) chave = Object.keys(alvo).find((k) => R.mesmoNome(alvo[k]?.grupo, gid)) || chave;
-    const e = alvo[chave];
+    let alvo; let chave;
+    if (gid === 'cobranca') { alvo = estado.cobrancas; chave = data; } else {
+      /* o aviso mostra o nome do grupo no WhatsApp: vale o nome, em qualquer
+         ministério; o código interno ("geral") existe em todos, e só vale se
+         for de um ministério só */
+      const achados = [];
+      for (const slug of Object.keys(CONFIG.ministerios)) {
+        const dia = R.visaoDoMinisterio(estado, slug, CONFIG.principal).envios[data] || {};
+        for (const k of Object.keys(dia)) if (k === gid || R.mesmoNome(dia[k]?.grupo, gid)) achados.push([dia, k]);
+      }
+      if (achados.length > 1) return 'mais de um envio com esse código; use o nome do grupo do WhatsApp, entre aspas';
+      [alvo, chave] = achados[0] || [null, null];
+    }
+    const e = alvo?.[chave];
     if (!e) return 'não há registro desse envio';
     if (resultado === 'saiu') { e.situacao = 'postado'; delete e.erro; } else delete alvo[chave];
     salvarEstado(estado);
-    return resultado === 'saiu' ? 'marcado como postado' : 'liberado para sair de novo na próxima rodada';
+    return resultado === 'saiu' ? 'marcado como postado' : 'liberado para sair de novo (na próxima rodada, ou no próximo pedido do botão)';
   }, 15 * 60000);
   console.log(msg);
 }
@@ -643,8 +781,12 @@ function mostrarStatus() {
     precisaParear: existsSync(ARQ.precisaParear), pareado: pareado(),
     estado: erroEstado || 'ok', inicio: e?.inicio ?? null,
     ultimaRodada: st?.ultimaRodada ?? null, proximaRodada: st?.proximaRodada ?? null, grupos: st?.grupos ?? null,
-    envios: e ? Object.fromEntries(Object.entries(e.envios).map(([d, g]) => [d, Object.entries(g).map(([gid, x]) => `${x.grupo} (${gid}): ${x.situacao} v${x.versao}${x.erro ? ' · ' + x.erro : ''}`)])) : null,
+    envios: e ? Object.fromEntries(Object.keys(CONFIG.ministerios).map((slug) => [slug,
+      Object.fromEntries(Object.entries(R.visaoDoMinisterio(e, slug, CONFIG.principal).envios).map(([d, g]) => [d,
+        Object.entries(g).map(([gid, x]) => `${x.grupo} (${gid}): ${x.situacao} v${x.versao}${x.erro ? ' · ' + x.erro : ''}`)]))])) : null,
     cobrancas: e?.cobrancas ?? null, rodadas: e?.rodadas ?? null,
+    pedidosDoBotao: e ? Object.entries(e.pedidos || {}).map(([id, p]) => `${id.slice(0, 8)} ${p.em?.slice(0, 16)} ${p.status}: ${p.resultado?.resumo || ''}`) : null,
+    relatosParaOSistema: e ? (e.relatos || []).length : null,
     avisos: (st?.avisos || []).slice(-10), atualizadoEm: st?.atualizadoEm ?? null,
   }, null, 1));
 }
@@ -666,7 +808,8 @@ if (args[0] === '--conferido' || args[0] === '--a-partir-de' || args[0] === '--m
   const segredo = lerSegredo();
   if (args[0] === '--ensaio') {
     if (!segredo) { console.log('Falta o segredo do robô (.env). Rode o configurar.command.'); process.exit(1); }
-    try { await ensaio(segredo, args.slice(1).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x))); } catch (e) { console.log(`Não deu: ${e.message}`); process.exit(1); }
+    const slug = args.slice(1).find((x) => !/^\d{4}-\d{2}-\d{2}$/.test(x)) || CONFIG.principal;
+    try { await ensaio(segredo, slug, args.slice(1).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x))); } catch (e) { console.log(`Não deu: ${e.message}`); process.exit(1); }
   } else if (!segredo) {
     /* o serviço sem segredo fica parado e avisa uma vez (sair faria o launchd
        religar em laço, com uma notificação a cada religada) */

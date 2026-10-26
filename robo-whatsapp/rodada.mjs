@@ -12,9 +12,15 @@
    travamento), o envio fica incerto e não se repete sozinho; se o estado não
    puder ser gravado, nada sai.
 
-   Devolve { completa, motivo }. Rodada incompleta (sem conexão, sistema fora,
-   envio que não saiu) roda de novo dentro da tolerância; o que já saiu fica
-   gravado e não sai de novo. */
+   Devolve { completa, motivo, relatorio }. Rodada incompleta (sem conexão,
+   sistema fora, envio que não saiu) roda de novo dentro da tolerância; o que
+   já saiu fica gravado e não sai de novo. `relatorio` diz, por data, o que
+   aconteceu em cada grupo (é o que o líder vê depois de apertar o botão).
+
+   `soDatas`: só estas datas (o pedido do botão é de um dia só; sem isto, a
+   rodada também mandaria o que ficou para trás em outros dias). `cfg` é a
+   configuração de UM ministério (regras.mjs, configDoMinisterio), e
+   `estado`, a visão dele (visaoDoMinisterio). */
 
 import * as R from './regras.mjs';
 
@@ -22,20 +28,21 @@ const PAROU_NO_MEIO = 'o robô parou no meio do envio';
 
 export async function executarRodada({
   wa, lerDia, rodada, agora, estado, cfg, avisar, log, pausado, pausar, espera, salvar,
-  agoraMs = () => Date.now(), antecipar = [],
+  agoraMs = () => Date.now(), antecipar = [], soDatas = null, prazoMs = null,
 }) {
+  const relatorio = {};
   log(`rodada ${rodada.hhmm} de ${agora.data}`);
-  if (pausado()) { log('PAUSADO: nada sai nesta rodada'); return { completa: true, motivo: 'pausado' }; }
+  if (pausado()) { log('PAUSADO: nada sai nesta rodada'); return { completa: true, motivo: 'pausado', relatorio }; }
   if (!wa.aberto()) {
     try { await wa.esperarAberto(cfg.esperaConexaoS * 1000); } catch {
       avisar(`Sem conexão com o WhatsApp na rodada das ${rodada.hhmm}. Tento de novo em alguns minutos.`, 'conexao');
-      return { completa: false, motivo: 'sem conexão' };
+      return { completa: false, motivo: 'sem conexão', relatorio };
     }
   }
   let mapa;
-  try { mapa = await wa.mapearGrupos([...new Set([...Object.values(cfg.grupos), cfg.grupoDaCobranca])]); } catch (e) {
+  try { mapa = await wa.mapearGrupos([...new Set([...Object.values(cfg.grupos), cfg.grupoDaCobranca].filter(Boolean))]); } catch (e) {
     avisar(`Não consegui ler os grupos do WhatsApp (${e.message}). Tento de novo em alguns minutos.`, 'mapear');
-    return { completa: false, motivo: 'grupos' };
+    return { completa: false, motivo: 'grupos', relatorio };
   }
 
   const inicioMs = Number.isFinite(Date.parse(estado.inicio)) ? Date.parse(estado.inicio) : agoraMs();
@@ -88,20 +95,35 @@ export async function executarRodada({
   }
 
   const cobrar = [];
+  const desde = agoraIso();
   /* os dias da janela, as datas já postadas mais à frente (trocas) e as que
-     o Arthur mandou antecipar (pedido --mandar-agora) */
-  for (const data of R.datasDaRodada(agora.data, cfg.diasDeAntecedencia, estado.envios, antecipar, cfg.diasDeVigia)) {
+     foram pedidas (o botão do sistema, ou --mandar-agora); ou só as pedidas */
+  const limite = R.somaDias(agora.data, cfg.diasDeVigia);
+  const datas = soDatas
+    ? [...new Set(soDatas)].filter((d) => /^\d{4}-\d{2}-\d{2}$/.test(d) && d >= agora.data && d <= limite).sort()
+    : R.datasDaRodada(agora.data, cfg.diasDeAntecedencia, estado.envios, antecipar, cfg.diasDeVigia);
+  for (const data of datas) {
     const n = R.diasEntre(agora.data, data);
-    const pedida = (antecipar || []).includes(data);
+    const pedida = (antecipar || []).includes(data) || !!soDatas;
     let resp;
     try { resp = await lerDia(data); } catch (e) {
       avisar(`Não consegui ler a escala de ${data}: ${e.message}`, `leitura:${data}`);
       incompleta ||= 'leitura';
+      relatorio[data] = { erro: 'leitura' };
       continue;
     }
-    if (!resp?.culto?.preenchidos) continue;
+    if (!resp?.culto?.preenchidos) { relatorio[data] = { semEscala: true }; continue; }
     const comecou = R.cultoJaComecou(data, resp.culto.hora, agora);
     const estadoDoDia = (estado.envios[data] ||= {});
+    const motivos = {};
+    const fechar = () => {
+      relatorio[data] = {
+        comecou, avisos: [],
+        grupos: R.relatorioDoDia({ resposta: resp, estadoDoDia, grupos: cfg.grupos, desde, motivos, maxVersoes: cfg.maxVersoes }),
+        ...relatorio[data],
+      };
+    };
+    relatorio[data] = { comecou, avisos: [] };
     const momento = R.momentoDaPrimeira(data, cfg.rodadas, cfg.diasDeAntecedencia);
     const permitida = pedida || R.primeiraPermitida(n, rodada, cfg.diasDeAntecedencia, momento, inicioMs);
     if (pedida) log(`${data}: escala antecipada a pedido (${n} dias antes)`);
@@ -112,33 +134,57 @@ export async function executarRodada({
       resposta: resp, estadoDoDia, grupos: cfg.grupos, comecou, primeiraPermitida: permitida, maxVersoes: cfg.maxVersoes,
     });
     for (const a of plano.avisos) avisar(`${data}: ${a.texto}`, `${data}:${a.chave}`);
+    relatorio[data].avisos = plano.avisos.map((a) => a.texto);
 
     for (const acao of plano.acoes) {
       const alvo = mapa[acao.grupo];
-      if (!alvo?.jid) { avisar(`${data}: grupo "${acao.grupo}": ${alvo?.erro || 'não achei'}. Pulei.`, `${data}:alvo:${acao.grupo}`); continue; }
-      if (alvo.soAdmin && !alvo.admin) { avisar(`${data}: "${acao.grupo}" só deixa administrador escrever, e o número da igreja não é. Pulei.`, `${data}:admin:${acao.grupo}`); continue; }
+      if (!alvo?.jid) {
+        avisar(`${data}: grupo "${acao.grupo}": ${alvo?.erro || 'não achei'}. Pulei.`, `${data}:alvo:${acao.grupo}`);
+        motivos[acao.gid] = 'o robô não achou o grupo no WhatsApp';
+        continue;
+      }
+      if (alvo.soAdmin && !alvo.admin) {
+        avisar(`${data}: "${acao.grupo}" só deixa administrador escrever, e o número da igreja não é. Pulei.`, `${data}:admin:${acao.grupo}`);
+        motivos[acao.gid] = 'só administrador escreve no grupo, e o número da igreja não é';
+        continue;
+      }
+      /* cada mensagem leva até um minuto: o culto pode começar no meio, e um
+         pedido não continua depois do prazo (Mac que dormiu no meio) */
+      if (prazoMs != null && agoraMs() > prazoMs) { fechar(); return { completa: false, motivo: 'prazo', relatorio }; }
+      if (R.cultoJaComecou(data, resp.culto.hora, R.agoraSP(new Date(agoraMs())))) {
+        for (const resto of plano.acoes.slice(plano.acoes.indexOf(acao))) motivos[resto.gid] = 'o culto começou antes da vez deste grupo';
+        log(`${data}: o culto começou no meio da rodada; o resto não sai`);
+        break;
+      }
       const versao = (estadoDoDia[acao.gid]?.versao || 0) + 1;
       const r = await postarEGravar(alvo, acao.texto, [], [{
         pai: estadoDoDia, chave: acao.gid,
         novo: (id) => ({ ass: acao.ass, em: agoraIso(), versao, grupo: acao.grupo, id }),
       }], `${data} ${acao.grupo}`);
       if (r === 'ok') { log(`${data} ${acao.tipo} → ${acao.grupo}: postado`, JSON.stringify(R.resumoSemDados(acao.texto))); continue; }
-      if (r === 'pausado' || r === 'recusado') return { completa: true, motivo: r };
-      return { completa: false, motivo: r };
+      fechar();
+      if (r === 'pausado' || r === 'recusado') return { completa: true, motivo: r, relatorio };
+      return { completa: false, motivo: r, relatorio };
     }
+    fechar();
 
     /* a cobrança fica na janela de sempre (até 2 dias antes), mesmo com a
        escala postada mais cedo: cedo demais, viraria uma semana de @ */
     if (rodada.cobrar && n <= cfg.diasDeAntecedencia
       && R.deveCobrar({ resposta: resp, estadoDoDia, cobranca: estado.cobrancas[data], agoraMs: agoraMs(), cfg, comecou })) {
-      cobrar.push({ data, cobranca: resp.cobranca });
+      cobrar.push({ data, cobranca: resp.cobranca, hora: resp.culto.hora });
     }
   }
 
   /* a cobrança: uma mensagem só no grupo geral, mesmo com dois cultos. Com
-     algum dia sem leitura, espera a nova tentativa (senão sairiam duas) */
+     algum dia sem leitura, espera a nova tentativa (senão sairiam duas).
+     Culto que começou enquanto a rodada mandava as escalas sai da cobrança */
+  const agoraDaCobranca = R.agoraSP(new Date(agoraMs()));
+  for (let i = cobrar.length - 1; i >= 0; i--) if (R.cultoJaComecou(cobrar[i].data, cobrar[i].hora, agoraDaCobranca)) cobrar.splice(i, 1);
   if (cobrar.length && incompleta) {
     log('cobrança adiada: falta ler algum dia; sai junto na próxima tentativa');
+  } else if (cobrar.length && !cfg.grupoDaCobranca) {
+    log('cobrança: este ministério não tem grupo da cobrança no robô');
   } else if (cobrar.length) {
     const alvo = mapa[cfg.grupoDaCobranca];
     if (!alvo?.jid) {
@@ -164,11 +210,11 @@ export async function executarRodada({
         log(`cobrança → ${cfg.grupoDaCobranca}: postada (${datas.join(' e ')})`,
           JSON.stringify({ pendentes: cobrar.reduce((s, c) => s + c.cobranca.pendentes, 0), mencoes: mentions.length, semMencao: telefones.length - resolvidos.filter((x) => x.jid).length }));
       } else if (r === 'pausado' || r === 'recusado') {
-        return { completa: true, motivo: r };
+        return { completa: true, motivo: r, relatorio };
       } else {
-        return { completa: false, motivo: r };
+        return { completa: false, motivo: r, relatorio };
       }
     }
   }
-  return incompleta ? { completa: false, motivo: incompleta } : { completa: true };
+  return incompleta ? { completa: false, motivo: incompleta, relatorio } : { completa: true, relatorio };
 }

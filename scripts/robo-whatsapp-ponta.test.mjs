@@ -21,7 +21,12 @@ import { respostaDoRobo } from '@/lib/robo-grupos';
 import { IGREJA } from '@/lib/igreja';
 import { executarRodada } from '../robo-whatsapp/rodada.mjs';
 import * as R from '../robo-whatsapp/regras.mjs';
-import { CONFIG } from '../robo-whatsapp/config.mjs';
+import { CONFIG as CONFIG_TODA } from '../robo-whatsapp/config.mjs';
+import * as Pedidos from '../robo-whatsapp/pedidos.mjs';
+import { lerCorpoDoRobo, limparResultado, leituraDoPedido } from '@/lib/robo-pedidos';
+
+/* a Mídia, com as regras gerais (o robô tem a configuração por ministério) */
+const CONFIG = R.configDoMinisterio(CONFIG_TODA, 'midia');
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -135,6 +140,39 @@ const NOITE = CONFIG.rodadas.find(r => r.primeira), MEIO_DIA = CONFIG.rodadas.fi
   ok(saiu.length === antes + 1 && c.texto.includes('(31/10)') && c.texto.includes('(01/11)'), 'sábado 12:00: as duas cobranças numa mensagem', `\n${c.texto}`);
   ok(!c.texto.includes('Carla Dias') || c.texto.indexOf('Carla Dias') < c.texto.indexOf('(01/11)'), 'a Carla, que confirmou o domingo, só aparece no sábado');
   ok(saiu.every(m => !/@55\d{10,11}\b/.test(m.texto.split('@5521977776666').join(''))), 'nenhum telefone cru (fora o do grupo antigo, que é o próprio endereço)');
+}
+
+/* O BOTÃO DO SISTEMA (115): o relato do robô passa inteiro pela rota e vira
+   o que a tela mostra. Um pedido da Mídia para um domingo novo, com a mesma
+   resposta da rota; o relato atravessa lerCorpoDoRobo (o que a rota aceita)
+   sem perder nada, e a tela lê grupo por grupo */
+{
+  const DOM2 = '2026-11-08';
+  garantirDia(S, DOM2).slots['PROJEÇÃO'] = { vid: 'vanalima', status: 'confirmado', fixo: false, primeiraVez: false };
+  const antes = saiu.length;
+  const est2 = { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {}, equipes: {}, pedidos: {}, relatos: [] };
+  const iso = '2026-11-03T21:00:00Z';
+  const relato = await Pedidos.atenderPedido({
+    pedido: { id: '0b8f6c1e-1d2a-4c3b-9e4f-5a6b7c8d9e0f', equipe: 'midia', data: DOM2 },
+    estado: est2, cfg: CONFIG_TODA, wa, lerDia: async (slug, d) => rota(d), avisar: () => {}, log: () => {},
+    pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
+    agora: R.agoraSP(new Date(iso)), agoraMs: () => Date.parse(iso),
+  });
+  const novos = saiu.slice(antes);
+  ok(relato.status === 'enviado' && novos.length >= 2 && novos[0].grupo === 'Multimídia · Geral' && novos[0].texto === msgEscala(S, DOM2, { link }),
+    'pedido do botão: a escala do domingo sai com o texto exato do "Mandar nos grupos"', `${relato.status} ${novos.length}`);
+  ok(!novos.some(m => m.texto.includes('falta confirmar')), 'e sem cobrança');
+  const corpo = lerCorpoDoRobo(Pedidos.corpoDaPassada({ conectado: true, pausado: false, versao: CONFIG_TODA.versao, cfg: CONFIG_TODA, relatos: [relato] }));
+  ok(!!corpo && corpo.relatos.length === 1, 'a rota aceita a passada do robô', JSON.stringify(corpo?.relatos?.length));
+  ok(JSON.stringify(corpo?.relatos[0].resultado) === JSON.stringify(relato.resultado), 'o relato atravessa a rota sem perder nada', JSON.stringify(relato.resultado));
+  ok(JSON.stringify(limparResultado(relato.resultado)) === JSON.stringify(relato.resultado), 'cada situação do robô é uma que o sistema conhece');
+  const tela = leituraDoPedido({ id: relato.id, status: relato.status, criado_em: '2026-11-03T20:59:00Z', atualizado_em: iso, pedido_por: 'Arthur', resultado: relato.resultado }, Date.parse(iso));
+  ok(tela.titulo === relato.resultado.resumo.replace(/\.$/, '') && tela.grupos.length === relato.resultado.grupos.length && tela.grupos.every(g => g.texto === 'mandada agora'),
+    'a tela mostra o resumo e cada grupo "mandada agora"', JSON.stringify(tela));
+  /* as cinco situações do robô são as cinco da tela */
+  for (const sit of ['postado', 'ja_estava', 'incerto', 'pulado', 'erro']) {
+    ok(limparResultado({ resumo: 'x', grupos: [{ nome: 'G', situacao: sit }], avisos: [] }).grupos.length === 1, `a situação "${sit}" do robô passa pela rota`);
+  }
 }
 
 console.log(`robô do WhatsApp de ponta a ponta: ${feitas - falhas}/${feitas}`);

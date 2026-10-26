@@ -45,11 +45,11 @@ rm -f "$PARA/robo.pid" "$PARA/estado.trava"
 passo "2/5 · Instalando o robô em $PARA"
 mkdir -p "$PARA/testes" "$PARA/logs"
 if [ "$DE" != "$PARA" ]; then
-  for f in package.json package-lock.json config.mjs regras.mjs rodada.mjs whatsapp.mjs robo.mjs qr.mjs \
+  for f in package.json package-lock.json config.mjs regras.mjs rodada.mjs pedidos.mjs whatsapp.mjs robo.mjs qr.mjs \
            LEIAME.md configurar.command pausar.command retomar.command; do
     cp "$DE/$f" "$PARA/$f" || falha "não consegui copiar $f"
   done
-  cp "$DE/testes/regras.test.mjs" "$DE/testes/whatsapp.test.mjs" "$PARA/testes/" || falha "não consegui copiar os testes"
+  cp "$DE/testes/regras.test.mjs" "$DE/testes/whatsapp.test.mjs" "$DE/testes/pedidos.test.mjs" "$PARA/testes/" || falha "não consegui copiar os testes"
 fi
 chmod +x "$PARA"/*.command
 # arquivos que vieram de fora ganham a "quarentena" do macOS, que pode
@@ -60,7 +60,7 @@ if ! cmp -s package-lock.json node_modules/.lock-instalado 2>/dev/null; then
   npm ci --omit=dev --no-audit --no-fund || falha "a instalação das bibliotecas falhou"
   cp package-lock.json node_modules/.lock-instalado
 fi
-node testes/regras.test.mjs && node testes/whatsapp.test.mjs || falha "os testes do robô falharam"
+node testes/regras.test.mjs && node testes/whatsapp.test.mjs && node testes/pedidos.test.mjs || falha "os testes do robô falharam"
 
 passo "3/5 · Segredo do robô (fica neste Mac e na Vercel, nunca na tela)"
 umask 077

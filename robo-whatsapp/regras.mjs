@@ -231,11 +231,148 @@ export function resumoSemDados(texto) {
   return { linhas: t.split('\n').length, caracteres: t.length, mencoes: (t.match(/@\d{8,20}/g) || []).length };
 }
 
-/* tira do estado o que ficou para trás há mais de N dias */
+/* tira do estado o que ficou para trás há mais de N dias (de todos os
+   ministérios), os pedidos do botão com mais de 2 dias e relatos demais */
 export function podar(estado, hoje, dias = 30) {
   const limite = somaDias(hoje, -dias);
-  for (const k of ['envios', 'cobrancas']) {
-    for (const d of Object.keys(estado[k] || {})) if (d < limite) delete estado[k][d];
-  }
+  const podarDe = (alvo) => {
+    for (const k of ['envios', 'cobrancas']) {
+      for (const d of Object.keys(alvo?.[k] || {})) if (d < limite) delete alvo[k][d];
+    }
+  };
+  podarDe(estado);
+  for (const eq of Object.values(estado.equipes || {})) podarDe(eq);
+  const limitePedidos = Date.parse(`${somaDias(hoje, -2)}T00:00:00-03:00`);
+  for (const [id, p] of Object.entries(estado.pedidos || {})) if (!(Date.parse(p?.em) >= limitePedidos)) delete estado.pedidos[id];
+  if (Array.isArray(estado.relatos) && estado.relatos.length > 20) estado.relatos = estado.relatos.slice(-20);
   return estado;
+}
+
+/* O ESTADO GRAVADO, de qualquer versão do robô: o de 26/10 (só a Mídia, no
+   topo) continua valendo sem mudar de lugar; o que falta vira vazio */
+export function normalizarEstado(e = {}) {
+  return {
+    inicio: e.inicio || null, envios: e.envios || {}, cobrancas: e.cobrancas || {}, rodadas: e.rodadas || {},
+    equipes: e.equipes || {}, pedidos: e.pedidos || {}, relatos: Array.isArray(e.relatos) ? e.relatos : [],
+  };
+}
+
+/* ===================================================== vários ministérios
+   26/10/2026. O Arthur: "Para todos os ministérios". A Mídia continua onde
+   sempre esteve no estado (envios e cobranças no topo: o que já foi gravado
+   não muda de lugar, e um erro de mudança faria o robô repostar tudo); os
+   outros ministérios ficam em estado.equipes[<slug>]. A visão devolve os
+   mesmos objetos, então o que a rodada grava nela fica no estado. */
+export function visaoDoMinisterio(estado, slug, principal) {
+  if (slug === principal) return estado;
+  estado.equipes ||= {};
+  const eq = (estado.equipes[slug] ||= {});
+  eq.envios ||= {};
+  eq.cobrancas ||= {};
+  return { inicio: estado.inicio, envios: eq.envios, cobrancas: eq.cobrancas };
+}
+
+/* a configuração de um ministério, com as regras gerais */
+export function configDoMinisterio(cfg, slug) {
+  const m = cfg.ministerios?.[slug];
+  if (!m) return null;
+  return { ...cfg, ...m, equipe: slug };
+}
+
+/* os grupos de todos os ministérios (para conferir e prender os endereços) */
+export function todosOsGrupos(cfg) {
+  const nomes = [];
+  for (const m of Object.values(cfg.ministerios || {})) {
+    nomes.push(...Object.values(m.grupos || {}));
+    if (m.grupoDaCobranca) nomes.push(m.grupoDaCobranca);
+  }
+  return [...new Set(nomes)];
+}
+
+/* o que precisa estar certo na configuração antes de o robô sair */
+export function conferirConfig(cfg) {
+  const erros = [];
+  const ms = Object.entries(cfg.ministerios || {});
+  if (!ms.length) erros.push('nenhum ministério na configuração');
+  if (!cfg.ministerios?.[cfg.principal]) erros.push(`o ministério principal "${cfg.principal}" não está na configuração`);
+  const dono = new Map();
+  for (const [slug, m] of ms) {
+    if (!/^[a-z0-9-]{2,40}$/.test(slug)) erros.push(`ministério com nome inválido: "${slug}"`);
+    const grupos = Object.entries(m.grupos || {});
+    if (!grupos.length) erros.push(`${slug}: sem grupos`);
+    for (const [linha, g] of grupos) {
+      if (typeof g !== 'string' || !g.trim()) { erros.push(`${slug}: a linha "${linha}" sem grupo`); continue; }
+      /* um grupo do WhatsApp pertence a um ministério só: o mesmo grupo em
+         dois faria a mesma escala ter dois registros de envio */
+      if (dono.has(g) && dono.get(g) !== slug) erros.push(`o grupo "${g}" está em ${dono.get(g)} e em ${slug}`);
+      dono.set(g, slug);
+    }
+    if (m.automatico) {
+      if (slug !== cfg.principal) erros.push(`${slug}: só o ministério principal (${cfg.principal}) sai sozinho`);
+      if (!m.grupoDaCobranca || !Object.values(m.grupos || {}).includes(m.grupoDaCobranca)) erros.push(`${slug}: o grupo da cobrança precisa ser um dos grupos dele`);
+    }
+  }
+  return erros;
+}
+
+/* O QUE ACONTECEU EM CADA GRUPO, para o líder ver na tela depois de um
+   pedido. Sai do estado gravado (a fonte da verdade do que saiu), da
+   resposta do sistema e dos motivos que a rodada anotou. `desde` = a hora em
+   que o pedido começou: o que foi gravado depois disso saiu agora. */
+export function relatorioDoDia({ resposta, estadoDoDia = {}, grupos, desde, motivos = {}, maxVersoes = 4 }) {
+  const out = [];
+  const desdeMs = Date.parse(desde);
+  for (const l of resposta?.linhas || []) {
+    if (l.vazio || !l.texto) continue;
+    const grupo = grupos[l.nome];
+    if (!grupo) { out.push({ nome: l.nome, situacao: 'pulado', detalhe: 'sem grupo do WhatsApp no robô' }); continue; }
+    const e = estadoDoDia[l.gid];
+    if (e?.situacao === 'incerto') { out.push({ nome: grupo, situacao: 'incerto' }); continue; }
+    if (motivos[l.gid]) { out.push({ nome: grupo, situacao: 'pulado', detalhe: motivos[l.gid] }); continue; }
+    if (!e) { out.push({ nome: grupo, situacao: 'pulado', detalhe: 'o envio parou antes deste grupo' }); continue; }
+    if (e.ass !== l.ass) {
+      out.push({ nome: grupo, situacao: 'pulado', detalhe: (e.versao || 1) >= maxVersoes ? `mudou depois de ${e.versao} versões; mande à mão se precisar` : 'a versão nova não saiu' });
+      continue;
+    }
+    /* a linha e a assinatura vão junto: a tela marca a linha como mandada
+       pelo robô, e "mudou depois do envio" se a escala mudar depois */
+    const marca = { linha: l.nome, ass: l.ass };
+    const agora = Date.parse(e.em) >= desdeMs;
+    if (agora) out.push((e.versao || 1) > 1 ? { nome: grupo, situacao: 'postado', detalhe: 'versão nova', ...marca } : { nome: grupo, situacao: 'postado', ...marca });
+    else out.push({ nome: grupo, situacao: 'ja_estava', ...marca });
+  }
+  return out;
+}
+
+const plural = (n, um, varios) => `${n} ${n === 1 ? um : varios}`;
+
+/* O RESULTADO DE UM PEDIDO DO BOTÃO, como a tela mostra (lib/robo-pedidos.ts
+   limpa e corta de novo do lado do sistema). `r` é o que executarRodada
+   devolveu; `dia` é o relatório daquela data. */
+export function resultadoDoPedido(r, dia) {
+  const grupos = (dia?.grupos || []).slice(0, 30);
+  const avisos = (dia?.avisos || []).slice(0, 10);
+  const conta = (s) => grupos.filter((g) => g.situacao === s).length;
+  const postados = conta('postado'), jaEstavam = conta('ja_estava'), incertos = conta('incerto'), pulados = conta('pulado') + conta('erro');
+  const partes = [];
+  if (postados) partes.push(`mandado em ${plural(postados, 'grupo', 'grupos')}`);
+  if (jaEstavam) partes.push(`${plural(jaEstavam, 'já tinha', 'já tinham')}`);
+  if (incertos) partes.push(`${plural(incertos, 'para conferir', 'para conferir')}`);
+  if (pulados) partes.push(`${plural(pulados, 'não mandado', 'não mandados')}`);
+  const conta1 = partes.join('; ');
+  const frase = (t) => t.charAt(0).toUpperCase() + t.slice(1) + '.';
+  const falhou = (resumo) => ({ status: 'falhou', resultado: { resumo, grupos, avisos } });
+
+  if (r?.motivo === 'recusado') return falhou('O WhatsApp recusou uma mensagem e o robô se pausou. Avise o Arthur.');
+  if (r?.motivo === 'pausado') return falhou(`O robô foi pausado${conta1 ? ` no meio (${conta1})` : ''}. Nada mais sai até ele ser retomado.`);
+  if (dia?.erro === 'leitura') return falhou('Não consegui ler a escala no sistema. Peça de novo em alguns minutos.');
+  if (dia?.comecou) return falhou('O culto deste dia já começou: o robô não manda mais esta escala.');
+  if (dia?.semEscala) return falhou('Este dia não tem escala com gente no sistema.');
+  if (!r?.completa) {
+    const porque = { 'sem conexão': 'sem conexão com o WhatsApp', grupos: 'não consegui ler os grupos do WhatsApp', gravar: 'não consegui gravar o registro do robô', antes: 'uma mensagem não saiu', durante: 'uma mensagem ficou incerta', prazo: 'passou do prazo de um pedido' }[r?.motivo] || 'parou no meio';
+    return falhou(`Não terminou (${porque})${conta1 ? `: ${conta1}` : ''}. Peça de novo em alguns minutos; o que já saiu não repete.`);
+  }
+  if (!grupos.length) return falhou('Nenhuma linha deste dia tem grupo do WhatsApp no robô.');
+  if (!postados && !incertos && !pulados) return { status: 'enviado', resultado: { resumo: `Nada novo: a escala já estava ${jaEstavam === 1 ? 'no grupo' : `nos ${jaEstavam} grupos`}.`, grupos, avisos } };
+  return { status: 'enviado', resultado: { resumo: frase(conta1), grupos, avisos } };
 }

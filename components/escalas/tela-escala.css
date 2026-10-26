@@ -222,6 +222,28 @@
 .es-mg-vazio .es-mg-tit b{color:var(--es-mudo)}
 .es-mg-dica{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2)}
 .es-mg-dica a{color:var(--es-ink);text-underline-offset:3px}
+/* pelo robô (26/10/2026): o estado do robô do WhatsApp da igreja, o botão,
+   a confirmação e o andamento do pedido, grupo por grupo. Fica acima das
+   linhas de envio à mão, separado delas por uma linha. */
+.es-mg-robo{display:grid;gap:var(--es-e2);padding-bottom:var(--es-e3);border-bottom:1px solid var(--es-linha)}
+.es-mg-robo-cab{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+.es-mg-robo-cab b{font-size:14px;line-height:20px;font-weight:600}
+.es-mg-robo-txt{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2);max-width:72ch}
+.es-mg-robo-acoes{display:flex;flex-wrap:wrap;gap:var(--es-e1)}
+.es-mg-robo-conf{display:grid;gap:var(--es-e2);padding:var(--es-e3);border:1px solid var(--es-linha);border-radius:var(--es-r2);background:var(--es-sup)}
+.es-mg-robo-conf p{margin:0;font-size:13px;line-height:19px;max-width:72ch}
+/* o aviso do que já foi à mão: o robô manda de novo nesses grupos */
+.es-mg-robo-conf p.es-mg-robo-amao{padding:var(--es-e2) var(--es-e3);border:1px solid var(--es-warn-ln);border-radius:var(--es-r1);background:var(--es-warn-bg);color:var(--es-ink)}
+.es-mg-robo-ped{display:grid;gap:var(--es-e2)}
+.es-mg-robo-ped:empty{display:none}
+.es-mg-robo-ped-cab{display:grid;gap:2px;justify-items:start}
+.es-mg-robo-ped-cab small{font-size:12px;line-height:17px;color:var(--es-mudo)}
+/* no computador, o nome do grupo e a pílula não ficam a uma tela de distância */
+.es-mg-robo-grupos{list-style:none;margin:0;padding:0;display:grid;gap:var(--es-e1);max-width:560px}
+.es-mg-robo-grupos li{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e1) var(--es-e3);font-size:13px;line-height:19px}
+.es-mg-robo-grupos li > span:first-child{min-width:0;overflow-wrap:anywhere}
+.es-mg-robo-avisos{margin:0;padding-left:var(--es-e4);font-size:12px;line-height:17px;color:var(--es-ink-2)}
+.es-mg-robo-ou{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2)}
 @media (max-width:719px){
   .es-mg{padding:var(--es-e3)}
   /* no celular, uma coisa por linha: o nome do grupo inteiro em cima, a

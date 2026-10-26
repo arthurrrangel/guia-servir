@@ -9,6 +9,7 @@ import { ordemDoBanco, type ItemOrdem } from './engine';
 import type { MusicaDoBanco } from './ordem-do-culto';
 import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
 import type { ComoFoiDaEquipe, PresencaDoLider } from './chegada';
+import type { PedidoNaTela, RoboNaTela } from './robo-pedidos';
 import { planoDeMover, type LinhaDaVaga, type PedidoDeMover } from './mover';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
@@ -567,6 +568,30 @@ export async function comoFoiDaEquipe(equipeId: string, de: string, ate: string)
   const { data: r, error } = await sb()!.rpc('como_foi_da_equipe', { p_equipe: equipeId, p_de: de, p_ate: ate });
   if (error) throw error;
   return (r || []) as ComoFoiDaEquipe[];
+}
+
+/* O ROBÔ DO WHATSAPP, VISTO PELA LIDERANÇA (115, 26/10/2026). As duas
+   funções conferem `lidera_equipe` no banco. `null` = não há o que mostrar:
+   a 115 ainda não rodou, sem conexão de líder, ou o banco recusou; a tela
+   esconde o bloco do robô e o "Mandar nos grupos" segue como antes. */
+export async function roboSituacao(equipeId: string, data: string): Promise<{ robo: RoboNaTela; pedidos: PedidoNaTela[] } | null> {
+  const s = sb();
+  if (!s) return null;
+  const { data: r, error } = await s.rpc('robo_situacao', { p_equipe: equipeId, p_data: data });
+  if (error) {
+    if (/PGRST202|42883|42501/.test(`${(error as any).code || ''} ${error.message || ''}`)) return null;
+    throw error;
+  }
+  if (!r || (r as any).ok !== true) return null;
+  return { robo: (r as any).robo as RoboNaTela, pedidos: ((r as any).pedidos || []) as PedidoNaTela[] };
+}
+
+export async function roboPedir(equipeId: string, data: string): Promise<{ ok: true } | { ok: false; erro: string }> {
+  const s = sb();
+  if (!s) return { ok: false, erro: 'SEM_CONEXAO' };
+  const { data: r, error } = await s.rpc('robo_pedir', { p_equipe: equipeId, p_data: data });
+  if (error) throw error;
+  return (r as any)?.ok === true ? { ok: true } : { ok: false, erro: String((r as any)?.erro || 'FALHA') };
 }
 
 export async function salvarConfig(equipeId: string, dados: any) {

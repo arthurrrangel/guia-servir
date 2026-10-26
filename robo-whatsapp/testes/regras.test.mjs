@@ -13,6 +13,9 @@ import { executarRodada } from '../rodada.mjs';
 import { CONFIG } from '../config.mjs';
 import { matriz, paraPagina, paraTerminal } from '../qr.mjs';
 
+/* a configuração da Mídia (o ministério que sai sozinho), com as regras gerais */
+const MIDIA = R.configDoMinisterio(CONFIG, 'midia');
+
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
 const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -147,7 +150,7 @@ const igual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 /* ===================================================== a semana de mentira === */
 
 const JID = (n) => `120363${String(n).padStart(12, '0')}@g.us`;
-const GRUPOS_WA = Object.fromEntries([...new Set(Object.values(CONFIG.grupos))].map((nome, i) => [nome, { jid: JID(i + 1), soAdmin: false, admin: true, participantes: 20 }]));
+const GRUPOS_WA = Object.fromEntries([...new Set(Object.values(MIDIA.grupos))].map((nome, i) => [nome, { jid: JID(i + 1), soAdmin: false, admin: true, participantes: 20 }]));
 const PARTICIPANTES_GERAL = [
   { id: '111111111111111@lid', phoneNumber: '552188887777@s.whatsapp.net' },
   { id: '5521977776666@s.whatsapp.net' },
@@ -214,7 +217,7 @@ async function semana({ inicio, dias, sis = sistema(), wa = whatsapp(), pular = 
       antes(dia, rodada.hhmm, sis, wa, estado);
       const agora = R.agoraSP(new Date(quando));
       const res = await executarRodada({
-        wa, lerDia: sis.ler, rodada, agora, estado, cfg: CONFIG,
+        wa, lerDia: sis.ler, rodada, agora, estado, cfg: MIDIA,
         avisar: (t, k) => avisos.push({ t, k, dia, hh: rodada.hhmm }), log: () => {},
         pausado: () => !!pausadoEm, pausar: (m) => { pausadoEm = m; }, espera: async () => {}, salvar: () => {},
         agoraMs: () => quando,
@@ -269,7 +272,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   sis.ass['2026-10-31'].g2 = 's5f';
   const antes = r.saiu.length;
   const res = await executarRodada({
-    wa: r.wa, lerDia: sis.ler, rodada: CONFIG.rodadas[0], agora: R.agoraSP(new Date('2026-10-31T12:00:00Z')), estado: r.estado, cfg: CONFIG,
+    wa: r.wa, lerDia: sis.ler, rodada: CONFIG.rodadas[0], agora: R.agoraSP(new Date('2026-10-31T12:00:00Z')), estado: r.estado, cfg: MIDIA,
     avisar: (t, k) => r.avisos.push({ t, k }), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
     agoraMs: () => Date.parse('2026-10-31T12:00:00Z'),
   });
@@ -304,7 +307,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   const estado = { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} };
   const rodar = (iso) => executarRodada({
-    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG,
+    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse(iso),
   });
   const r1 = await rodar('2026-10-29T22:58:00Z');
@@ -321,7 +324,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   const estado = { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} };
   const rodar = (iso) => executarRodada({
-    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG,
+    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
     avisar: (t, k) => avisos.push(k), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse(iso),
   });
   const r1 = await rodar('2026-10-29T22:58:00Z');
@@ -370,7 +373,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   const estado = { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} };
   const res = await executarRodada({
-    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T22:58:00Z')), estado, cfg: CONFIG,
+    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T22:58:00Z')), estado, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => pausa, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse('2026-10-29T22:58:00Z'),
   });
   ok(wa.saiu.length === 1 && res.motivo === 'pausado', 'PAUSADO no meio: só a mensagem que já tinha saído', JSON.stringify(res));
@@ -382,7 +385,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   await executarRodada({
     wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T22:58:00Z')),
-    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: CONFIG,
+    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async (faixa) => { pausas++; ok(igual(faixa, CONFIG.intervaloEntreMensagensS), 'a pausa usa a faixa da configuração'); },
     salvar: () => {}, agoraMs: () => Date.parse('2026-10-29T22:58:00Z'),
   });
@@ -396,7 +399,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   const res = await executarRodada({
     wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T22:58:00Z')),
-    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: CONFIG,
+    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.now(),
   });
   ok(!res.completa && wa.saiu.length === 0 && sis.lidos.length === 0, 'sem conexão: nada lido, nada mandado, tenta de novo');
@@ -412,7 +415,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const orig = wa.postar;
   wa.postar = async (...a) => { visto.push(JSON.parse(JSON.stringify(disco))); return orig(...a); };
   const rodar = (iso, extra = {}) => executarRodada({
-    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG,
+    wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {},
     salvar: () => { disco = JSON.parse(JSON.stringify(estado)); }, agoraMs: () => Date.parse(iso), ...extra,
   });
@@ -426,7 +429,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const wa2 = whatsapp();
   const avisos = [];
   const res = await executarRodada({
-    wa: wa2, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T23:05:00Z')), estado: morto, cfg: CONFIG,
+    wa: wa2, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T23:05:00Z')), estado: morto, cfg: MIDIA,
     avisar: (t, k) => avisos.push(k), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
     agoraMs: () => Date.parse('2026-10-29T23:05:00Z'),
   });
@@ -439,7 +442,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const avisos = [];
   const res = await executarRodada({
     wa, lerDia: sis.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date('2026-10-29T22:58:00Z')),
-    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: CONFIG,
+    estado: { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} }, cfg: MIDIA,
     avisar: (t, k) => avisos.push(k), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {},
     salvar: () => { throw new Error('ENOSPC: disco cheio'); }, agoraMs: () => Date.parse('2026-10-29T22:58:00Z'),
   });
@@ -451,7 +454,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const sis = sistema();
   const estado = { inicio: '2026-10-26T18:00:00.000Z', envios: {}, cobrancas: {}, rodadas: {} };
   const rodar = (iso, rod = CONFIG.rodadas[2]) => executarRodada({
-    wa, lerDia: sis.ler, rodada: rod, agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG,
+    wa, lerDia: sis.ler, rodada: rod, agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse(iso),
   });
   await rodar('2026-10-29T22:58:00Z');
@@ -472,7 +475,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   sis.falhaEm.add('2026-11-01');
   const antes = r.saiu.length;
   const rodar = (iso) => executarRodada({
-    wa: r.wa, lerDia: sis.ler, rodada: CONFIG.rodadas[1], agora: R.agoraSP(new Date(iso)), estado: r.estado, cfg: CONFIG,
+    wa: r.wa, lerDia: sis.ler, rodada: CONFIG.rodadas[1], agora: R.agoraSP(new Date(iso)), estado: r.estado, cfg: MIDIA,
     avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse(iso),
   });
   const r1 = await rodar('2026-10-31T15:00:00Z');
@@ -502,7 +505,7 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const estado = { inicio: '2026-10-26T20:38:54.000Z', envios: {}, cobrancas: {}, rodadas: {} };
   const avisos = [];
   const rodar = (iso, rodada, antecipar = []) => executarRodada({
-    wa, lerDia: sis.ler, rodada, agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG, antecipar,
+    wa, lerDia: sis.ler, rodada, agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA, antecipar,
     avisar: (t, k) => avisos.push(k), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
     agoraMs: () => Date.parse(iso),
   });
@@ -529,6 +532,135 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   ok(wa.saiu.length === antes, 'pedido depois de o culto começar: nada sai');
 }
 
+/* H · vários ministérios no mesmo estado (26/10: "Para todos os ministérios") */
+{
+  const e = { inicio: 'x', envios: { '2026-11-01': { geral: { situacao: 'postado' } } }, cobrancas: {}, rodadas: {} };
+  ok(R.visaoDoMinisterio(e, 'midia', 'midia') === e, 'a Mídia continua no topo do estado (nada muda de lugar)');
+  const v = R.visaoDoMinisterio(e, 'louvor', 'midia');
+  v.envios['2026-11-01'] = { geral: { situacao: 'postado', grupo: 'Louvor · Equipe' } };
+  v.cobrancas['2026-11-01'] = { vezes: 1 };
+  ok(e.equipes.louvor.envios['2026-11-01'].geral.grupo === 'Louvor · Equipe' && e.equipes.louvor.cobrancas['2026-11-01'].vezes === 1,
+    'o que a rodada grava na visão do Louvor fica em estado.equipes.louvor');
+  ok(e.envios['2026-11-01'].geral.grupo === undefined, 'e não mistura com a Mídia (o "geral" de cada um é outro grupo)');
+  ok(R.visaoDoMinisterio(e, 'louvor', 'midia').envios === e.equipes.louvor.envios, 'a segunda visão é a mesma');
+  ok(v.inicio === 'x', 'a visão leva o começo do robô');
+  const c = R.configDoMinisterio(CONFIG, 'louvor');
+  ok(c.equipe === 'louvor' && c.grupos['Grupo geral'] === 'Louvor · Equipe' && !c.automatico && !c.grupoDaCobranca && c.diasDeVigia === CONFIG.diasDeVigia,
+    'a configuração do Louvor: os grupos dele, sem cobrança, com as regras gerais');
+  ok(R.configDoMinisterio(CONFIG, 'kids') === null, 'ministério fora da tabela: nada');
+  const base = { principal: 'aa', ministerios: { aa: { automatico: true, grupos: { 'Grupo geral': 'A' }, grupoDaCobranca: 'A' }, bb: { grupos: { 'Grupo geral': 'B' } } } };
+  ok(igual(R.conferirConfig(base), []), 'configuração boa: nenhum erro');
+  const erros = (m) => R.conferirConfig({ ...base, ministerios: { ...base.ministerios, ...m } }).join(' | ');
+  ok(/está em aa e em bb/.test(erros({ bb: { grupos: { 'Grupo geral': 'A' } } })), 'o mesmo grupo em dois ministérios: erro');
+  ok(/só o ministério principal/.test(erros({ bb: { automatico: true, grupos: { 'Grupo geral': 'B' }, grupoDaCobranca: 'B' } })), 'outro ministério automático: erro');
+  ok(/grupo da cobrança/.test(erros({ aa: { automatico: true, grupos: { 'Grupo geral': 'A' }, grupoDaCobranca: 'Z' } })), 'cobrança fora dos grupos: erro');
+  ok(/sem grupos/.test(erros({ bb: { grupos: {} } })) && /sem grupo/.test(erros({ bb: { grupos: { x: '' } } })), 'ministério sem grupo ou linha vazia: erro');
+  ok(/nome inválido/.test(erros({ 'B B': { grupos: { 'Grupo geral': 'C' } } })), 'ministério com nome fora do padrão do sistema: erro');
+  ok(/principal/.test(R.conferirConfig({ ...base, principal: 'zz' }).join()), 'principal fora da lista: erro');
+  /* podar: todos os ministérios, os pedidos velhos e a fila */
+  const p = {
+    envios: { '2026-09-01': {}, '2026-10-30': {} }, cobrancas: {}, rodadas: {},
+    equipes: { louvor: { envios: { '2026-09-01': {}, '2026-10-29': {} }, cobrancas: { '2026-09-01': {} } } },
+    pedidos: { velho: { em: '2026-10-27T10:00:00.000Z' }, novo: { em: '2026-10-29T10:00:00.000Z' }, torto: {} },
+    relatos: Array.from({ length: 25 }, (_, i) => ({ id: 'r' + i })),
+  };
+  R.podar(p, '2026-10-30', 30);
+  ok(igual(Object.keys(p.equipes.louvor.envios), ['2026-10-29']) && igual(Object.keys(p.equipes.louvor.cobrancas), []), 'podar tira o velho dos outros ministérios também');
+  ok(igual(Object.keys(p.pedidos), ['novo']), 'e os pedidos do botão com mais de 2 dias', JSON.stringify(Object.keys(p.pedidos)));
+  ok(p.relatos.length === 20 && p.relatos[0].id === 'r5', 'a fila de relatos guarda os 20 mais novos');
+}
+
+/* o estado gravado em 26/10 (só a Mídia, no topo) é lido como estava */
+{
+  const velho = { inicio: '2026-10-26T20:38:54.000Z', envios: { '2026-11-01': { geral: { situacao: 'postado', ass: 'x' } } }, cobrancas: { '2026-10-31': { vezes: 1 } }, rodadas: { '19:58': '2026-10-26' } };
+  const n = R.normalizarEstado(velho);
+  ok(n.envios === velho.envios && n.cobrancas === velho.cobrancas && n.rodadas === velho.rodadas && n.inicio === velho.inicio, 'o estado antigo fica onde estava (nada muda de lugar)');
+  ok(igual(n.equipes, {}) && igual(n.pedidos, {}) && igual(n.relatos, []), 'e ganha o que falta, vazio');
+  ok(igual(R.normalizarEstado({ relatos: 'torto' }).relatos, []), 'fila torta vira vazia');
+}
+
+/* I · o relatório de cada grupo e o resultado do pedido, como a tela mostra */
+{
+  const linhas = [
+    { gid: 'geral', nome: 'Grupo geral', texto: 'a', ass: 'a1', vazio: false },
+    { gid: 'g1', nome: 'Multimídia · Projeção', texto: 'b', ass: 'b1', vazio: false },
+    { gid: 'g2', nome: 'Multimídia · Foto', texto: 'c', ass: 'c2', vazio: false },
+    { gid: 'g3', nome: 'Multimídia · Head', texto: '', ass: 'h', vazio: true },
+    { gid: 'g4', nome: 'Multimídia · Áudio', texto: 'd', ass: 'd1', vazio: false },
+    { gid: 'g5', nome: 'Multimídia · Edição', texto: 'e', ass: 'e1', vazio: false },
+    { gid: 'g6', nome: 'Multimídia · Transmissão', texto: 'f', ass: 'f1', vazio: false },
+    { gid: 'g7', nome: 'Multimídia · Iluminação', texto: 'g', ass: 'g9', vazio: false },
+  ];
+  const desde = '2026-10-30T22:00:00.000Z';
+  const estadoDoDia = {
+    geral: { ass: 'a1', situacao: 'postado', em: '2026-10-30T22:01:00.000Z', versao: 1 },
+    g1: { ass: 'b1', situacao: 'postado', em: '2026-10-29T22:58:00.000Z', versao: 1 },
+    g2: { ass: 'c2', situacao: 'postado', em: '2026-10-30T22:02:00.000Z', versao: 2 },
+    g5: { ass: 'e1', situacao: 'incerto', em: '2026-10-30T22:03:00.000Z', versao: 1 },
+    g7: { ass: 'g1', situacao: 'postado', em: '2026-10-29T22:58:00.000Z', versao: 4 },
+  };
+  const rel = R.relatorioDoDia({ resposta: { linhas }, estadoDoDia, grupos: MIDIA.grupos, desde, motivos: { g6: 'só administrador escreve no grupo, e o número da igreja não é' } });
+  ok(rel[0].linha === 'Grupo geral' && rel[0].ass === 'a1' && rel[1].linha === 'Multimídia · Projeção' && !('linha' in rel[3]), 'o mandado e o que já estava levam a linha e a assinatura (o pulado, não)', JSON.stringify(rel.slice(0, 4)));
+  ok(igual(rel.map((g) => `${g.nome}:${g.situacao}${g.detalhe ? ':' + g.detalhe : ''}`), [
+    'Multimídia · Geral:postado', 'Multimídia · Projeção:ja_estava', 'Multimídia · Foto:postado:versão nova',
+    'Multimídia · Áudio:pulado:sem grupo do WhatsApp no robô', 'Multimídia · Edição:incerto',
+    'Multimídia · Transmissão:pulado:só administrador escreve no grupo, e o número da igreja não é',
+    'Multimídia · Iluminação:pulado:mudou depois de 4 versões; mande à mão se precisar',
+  ]), 'cada grupo com o que aconteceu (o vazio fica de fora)', JSON.stringify(rel));
+  const ok1 = R.resultadoDoPedido({ completa: true }, { grupos: rel, avisos: ['x'] });
+  ok(ok1.status === 'enviado' && ok1.resultado.resumo === 'Mandado em 2 grupos; 1 já tinha; 1 para conferir; 3 não mandados.', 'o resumo conta cada situação', ok1.resultado.resumo);
+  ok(igual(ok1.resultado.avisos, ['x']), 'os avisos do dia vão junto');
+  const nada = R.resultadoDoPedido({ completa: true }, { grupos: [{ nome: 'A', situacao: 'ja_estava' }, { nome: 'B', situacao: 'ja_estava' }] });
+  ok(nada.status === 'enviado' && nada.resultado.resumo === 'Nada novo: a escala já estava nos 2 grupos.', 'tudo já estava: nada novo', nada.resultado.resumo);
+  ok(R.resultadoDoPedido({ completa: true }, { grupos: [{ nome: 'A', situacao: 'postado' }] }).resultado.resumo === 'Mandado em 1 grupo.', 'um grupo, no singular');
+  const f = (r, dia) => { const x = R.resultadoDoPedido(r, dia); return `${x.status}|${x.resultado.resumo}`; };
+  ok(/^falhou\|O culto deste dia já começou/.test(f({ completa: true }, { comecou: true, grupos: [] })), 'culto começado: falhou, com o motivo');
+  ok(/^falhou\|Este dia não tem escala/.test(f({ completa: true }, { semEscala: true })), 'sem escala: falhou');
+  ok(/^falhou\|Não consegui ler a escala/.test(f({ completa: false, motivo: 'leitura' }, { erro: 'leitura' })), 'sistema fora: falhou');
+  ok(/^falhou\|Não terminou \(sem conexão com o WhatsApp\)\. Peça de novo/.test(f({ completa: false, motivo: 'sem conexão' }, undefined)), 'sem conexão: falhou, pede de novo');
+  ok(f({ completa: false, motivo: 'durante' }, { grupos: [{ nome: 'A', situacao: 'postado' }, { nome: 'B', situacao: 'incerto' }] })
+    === 'falhou|Não terminou (uma mensagem ficou incerta): mandado em 1 grupo; 1 para conferir. Peça de novo em alguns minutos; o que já saiu não repete.', 'parou no meio: o que saiu e o que faltou');
+  ok(/^falhou\|O robô foi pausado no meio \(mandado em 1 grupo\)/.test(f({ completa: true, motivo: 'pausado' }, { grupos: [{ nome: 'A', situacao: 'postado' }] })), 'pausado no meio');
+  ok(/^falhou\|O WhatsApp recusou/.test(f({ completa: true, motivo: 'recusado' }, { grupos: [] })), 'recusado: falhou e avisa o Arthur');
+  ok(/^falhou\|Nenhuma linha deste dia tem grupo/.test(f({ completa: true }, { grupos: [] })), 'nenhuma linha com grupo: falhou');
+  const muitos = R.resultadoDoPedido({ completa: true }, { grupos: Array.from({ length: 40 }, (_, i) => ({ nome: 'G' + i, situacao: 'postado' })), avisos: Array.from({ length: 15 }, () => 'a') });
+  ok(muitos.resultado.grupos.length === 30 && muitos.resultado.avisos.length === 10, 'no máximo 30 grupos e 10 avisos (o limite do sistema)');
+}
+
+/* J · o pedido do botão é de um dia só: não manda o que ficou para trás em outro */
+{
+  const sis = sistema();
+  const wa = whatsapp();
+  const estado = { inicio: '2026-10-26T20:38:54.000Z', envios: {}, cobrancas: {}, rodadas: {} };
+  const iso = '2026-10-30T21:00:00-03:00';
+  const r = await executarRodada({
+    wa, lerDia: sis.ler, rodada: { hhmm: 'pedido', primeira: false, cobrar: false }, agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
+    soDatas: ['2026-11-01'], avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
+    agoraMs: () => Date.parse(iso),
+  });
+  ok(r.completa && igual(resumo(wa.saiu), ['Multimídia · Geral | ESCALA 2026-11-01 d1', 'Multimídia · Projeção | PROJEÇÃO 2026-11-01 d1p', 'Multimídia · Foto | FOTO 2026-11-01 d1f']),
+    'sexta 21:00, pedido do domingo: só o domingo, e não o sábado que ficou para trás', JSON.stringify(resumo(wa.saiu)));
+  ok(igual(sis.lidos, ['2026-11-01']), 'e nem lê o sábado', JSON.stringify(sis.lidos));
+  ok(igual(Object.keys(r.relatorio), ['2026-11-01']) && r.relatorio['2026-11-01'].grupos.every((g) => g.situacao === 'postado') && r.relatorio['2026-11-01'].grupos.length === 3,
+    'o relatório do dia: três grupos mandados agora', JSON.stringify(r.relatorio));
+  const r2 = await executarRodada({
+    wa, lerDia: sis.ler, rodada: { hhmm: 'pedido', primeira: false, cobrar: false }, agora: R.agoraSP(new Date(iso)), estado, cfg: MIDIA,
+    soDatas: ['2026-11-01', '2026-10-01', 'x', '2026-12-31'], avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
+    agoraMs: () => Date.parse(iso) + 60000,
+  });
+  ok(wa.saiu.length === 3 && r2.relatorio['2026-11-01'].grupos.every((g) => g.situacao === 'ja_estava') && Object.keys(r2.relatorio).length === 1,
+    'o mesmo pedido de novo: nada sai, tudo "já estava"; data passada, torta ou além da vigia fica de fora', JSON.stringify(r2.relatorio));
+  /* um ministério sem grupo da cobrança, numa rodada que cobra: não cobra */
+  const sis2 = sistema();
+  const wa2 = whatsapp();
+  const semCobranca = { ...MIDIA, grupoDaCobranca: undefined };
+  const est2 = { inicio: '2026-10-26T20:38:54.000Z', envios: {}, cobrancas: {}, rodadas: {} };
+  for (const hh of ['19:58']) await executarRodada({ wa: wa2, lerDia: sis2.ler, rodada: CONFIG.rodadas[2], agora: R.agoraSP(new Date(`2026-10-29T${hh}:00-03:00`)), estado: est2, cfg: semCobranca, avisar: () => {}, log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse(`2026-10-29T${hh}:00-03:00`) });
+  const lg = [];
+  await executarRodada({ wa: wa2, lerDia: sis2.ler, rodada: CONFIG.rodadas[1], agora: R.agoraSP(new Date('2026-10-30T12:00:00-03:00')), estado: est2, cfg: semCobranca, avisar: () => {}, log: (...x) => lg.push(x.join(' ')), pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {}, agoraMs: () => Date.parse('2026-10-30T12:00:00-03:00') });
+  ok(!wa2.saiu.some((m) => m.texto.includes('falta confirmar')) && lg.some((x) => /não tem grupo da cobrança/.test(x)), 'sem grupo da cobrança: a cobrança não sai, e fica no registro');
+}
+
 /* o QR do pareamento: cores fixas no terminal (preto sobre branco) e a página do navegador */
 {
   const m = [[true, false], [false, true]];
@@ -548,11 +680,20 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   }
 }
 
-/* a configuração: só os grupos da Multimídia, nunca outro */
+/* a configuração: só os grupos da tabela de 08/10, nunca outro */
 {
-  const destinos = new Set([...Object.values(CONFIG.grupos), CONFIG.grupoDaCobranca]);
-  ok([...destinos].every((g) => g.startsWith('Multimídia · ')), 'todos os destinos são grupos da Multimídia', JSON.stringify([...destinos]));
-  ok(destinos.size === 8, 'os oito grupos da tabela de 08/10');
+  ok(igual(R.conferirConfig(CONFIG), []), 'a configuração do robô confere', JSON.stringify(R.conferirConfig(CONFIG)));
+  const midia = new Set([...Object.values(MIDIA.grupos), MIDIA.grupoDaCobranca]);
+  ok([...midia].every((g) => g.startsWith('Multimídia · ')) && midia.size === 8, 'Mídia: os oito grupos da Multimídia', JSON.stringify([...midia]));
+  const TABELA_DE_08_10 = [
+    'Louvor · Equipe', 'Louvor · Banda', 'Louvor · Vocal', 'Louvor · Dirigentes', 'Louvor · Som e Palco',
+    'Multimídia · Geral', 'Multimídia · Projeção', 'Multimídia · Iluminação', 'Multimídia · Edição', 'Multimídia · Foto',
+    'Multimídia · Filmagem e Câmeras', 'Multimídia · Head', 'Multimídia · Transmissão', 'GUI> | CONNECT/DIACONIA',
+  ];
+  ok(igual([...R.todosOsGrupos(CONFIG)].sort(), [...TABELA_DE_08_10].sort()), 'todos os destinos são os 14 grupos da tabela de 08/10', JSON.stringify(R.todosOsGrupos(CONFIG)));
+  ok(!R.todosOsGrupos(CONFIG).some((g) => /L[IÍ]DERES|Claudio/i.test(g)), 'nunca LÍDERES GUIA nem o privado do Claudio');
+  ok(igual(Object.entries(CONFIG.ministerios).filter(([, m]) => m.automatico).map(([k]) => k), ['midia']), 'só a Mídia sai sozinha (o Arthur desligou o Louvor em 16/10)');
+  ok(igual(Object.keys(CONFIG.ministerios), ['midia', 'louvor', 'servico']), 'Mídia, Louvor e Connect (servico); Kids e Livraria não têm grupo na tabela');
   ok(CONFIG.numeroDaIgreja === '5521972976946', 'o número da igreja');
   ok(CONFIG.rodadas.filter((r) => r.primeira).length === 1, 'uma rodada só manda a primeira vez');
 }

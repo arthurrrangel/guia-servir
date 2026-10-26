@@ -1,11 +1,32 @@
-# Robô do WhatsApp da escala (Mídia)
+# Robô do WhatsApp da escala
 
-Posta a escala da Mídia nos 8 grupos da Multimídia pelo número da igreja
-(+55 21 97297-6946) e cobra no Multimídia · Geral, com @, quem ainda não
-confirmou. Roda neste MacBook, sozinho, como serviço do macOS. Decisão do
-Arthur em 26/10/2026: "tá tudo liberado, eu quero tudo automatizado".
+Posta a escala nos grupos do WhatsApp pelo número da igreja
+(+55 21 97297-6946). Roda neste MacBook, sozinho, como serviço do macOS.
+Decisões do Arthur em 26/10/2026: "tá tudo liberado, eu quero tudo
+automatizado"; depois, "Gostaria de na aba do sistema ter a opção de
+disparar escala, através desse robo" e "Para todos os ministérios".
 
-## O que ele faz e quando
+- **Mídia**: sai sozinha nos 8 grupos da Multimídia (horários abaixo) e cobra
+  no Multimídia · Geral, com @, quem ainda não confirmou. Também a pedido.
+- **Louvor e Connect**: só a pedido, pelo botão do sistema (o Arthur desligou
+  o envio automático do Louvor em 16/10).
+- **GUIA Kids e Livraria**: sem grupo na tabela; o botão diz isso.
+
+## O botão "Mandar agora pelo robô"
+
+No sistema, na Escala, cada dia tem "Mandar nos grupos". Com o robô ligado,
+aparece em cima "Pelo robô": a liderança do ministério aperta, confirma, e o
+robô manda a escala daquele dia em todos os grupos do ministério (as mesmas
+mensagens das linhas de baixo), uma a cada 15 a 40 segundos. A tela mostra o
+andamento e o que aconteceu em cada grupo. Grupo que já tem a escala não
+recebe de novo. Sem cobrança: a cobrança com @ é só da Mídia, no horário.
+
+O robô passa no sistema a cada 30 segundos. Se ele não passar por 3 minutos
+(Mac desligado, dormindo, sem internet), a tela diz "Robô desligado agora" e
+o botão some: aí vale mandar à mão, pelas linhas de baixo. Um pedido que o
+robô não pegou em 30 minutos vence sem mandar nada.
+
+## O que ele faz sozinho (só a Mídia) e quando
 
 - **Quinta 19:58**: a escala do Follow de sábado, no geral e em cada grupo.
 - **Sexta 19:58**: a escala de domingo, do mesmo jeito.
@@ -27,7 +48,7 @@ envio, aquele grupo fica "incerto" e o robô não manda de novo sozinho.
 
 ## O que ele nunca faz
 
-Conversa privada, grupo fora da tabela (Louvor, Connect, LÍDERES GUIA...),
+Conversa privada, grupo fora da tabela (LÍDERES GUIA, qualquer outro),
 apagar mensagem, entrar ou sair de grupo, mexer em configuração. Ligado a
 qualquer número que não seja o da igreja, não manda nada. Uma escala cuja
 hora de sair veio antes de o robô começar fica com quem já mandava. Cada
@@ -46,7 +67,7 @@ mais sai até alguém conferir o número da igreja e rodar o `retomar.command`.
 
 | Aviso | O que fazer |
 |---|---|
-| Envio INCERTO em um grupo | Olhe o grupo. Saiu: `node robo.mjs --conferido 2026-10-31 "Multimídia · Foto" saiu`. Não saiu: troque `saiu` por `nao-saiu` (sai na próxima rodada). Ou avise o Claude. |
+| Envio INCERTO em um grupo | Olhe o grupo. Saiu: `node robo.mjs --conferido 2026-10-31 "Multimídia · Foto" saiu`. Não saiu: troque `saiu` por `nao-saiu` (sai na próxima rodada, ou no próximo aperto do botão). Vale para qualquer ministério, pelo nome do grupo. Ou avise o Claude. |
 | O grupo não é mais o mesmo do começo | Alguém renomeou ou recriou o grupo. Se foi de propósito: `node robo.mjs --grupos --refixar` (com o robô parado; o `configurar.command` para e religa). |
 | Estado estragado | Avise o Claude. Nada sai enquanto isso, para não mandar em dobro. |
 | Desligado do número da igreja | Rode o `configurar.command` e leia o QR com o celular da igreja. |
@@ -57,8 +78,8 @@ mais sai até alguém conferir o número da igreja e rodar o `retomar.command`.
 ## Comandos (no Terminal, dentro de `~/robo-whatsapp-guia`)
 
 - `node robo.mjs --status`: conexão, grupos, último envio, avisos.
-- `node robo.mjs --ensaio`: lê a escala dos próximos 7 dias e diz o que faria, sem mandar nada.
-- `node robo.mjs --mandar-agora AAAA-MM-DD`: manda já a escala daquele dia (geral e grupos). Depois disso o robô repõe as trocas dela todo dia; a cobrança com @ continua só nos 2 dias antes do culto.
+- `node robo.mjs --ensaio [louvor|servico] [AAAA-MM-DD]`: lê a escala (dos próximos 7 dias, ou do dia) e diz o que faria, sem mandar nada. Sem ministério, a Mídia.
+- `node robo.mjs --mandar-agora AAAA-MM-DD [louvor|servico]`: o mesmo que o botão, pelo Terminal. Na Mídia, depois disso o robô repõe as trocas dela todo dia; a cobrança com @ continua só nos 2 dias antes do culto.
 - `node robo.mjs --a-partir-de AAAA-MM-DDTHH:MM-03:00`: de quando o robô cuida das escalas.
 - `./configurar.command`: reinstala, confere o segredo, pareia de novo se precisar e religa o serviço.
 
