@@ -8,7 +8,8 @@ import { cont } from '@/lib/plural';
                idempotente: não sobrescreve o que o líder já montou
    · quinta  → pendentes do próximo domingo, com link de WhatsApp 1-toque
 
-   Um email por ação (quando há RESEND_API_KEY), com uma seção por ministério.
+   Um e-mail por ação para cada líder (quando há RESEND_API_KEY), com uma
+   seção por ministério, do domínio da igreja (lib/email-do-robo.ts).
    Sem a chave, o trabalho de banco acontece igual e aparece no app.
    ============================================================================= */
 import { createClient } from '@supabase/supabase-js';
@@ -20,6 +21,7 @@ import {
 import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
 import { linhasDaCobranca } from '@/lib/cobranca-do-dia';
 import { contextoDaCobranca } from '@/lib/contexto-da-cobranca';
+import { enviarEmail as enviar } from '@/lib/email-do-robo';
 
 export const dynamic = 'force-dynamic';
 
@@ -101,26 +103,9 @@ const paraEquipe = (ls: Lider[], equipeId: string) =>
   ls.filter(l => l.equipe_id === null || l.equipe_id === equipeId).map(l => l.email);
 const soGlobais = (ls: Lider[]) =>
   ls.filter(l => l.equipe_id === null).map(l => l.email);
-async function enviar(para: string[], assunto: string, corpo: string) {
-  const chave = process.env.RESEND_API_KEY;
-  if (!chave || !para.length) return { enviado: false, motivo: chave ? 'sem destinatário' : 'sem RESEND_API_KEY' };
-  /* 14/09/2026: o fetch pode REJEITAR (DNS, rede), não só responder mal. Sem o
-     try, o primeiro email que falhasse estourava a rota inteira DEPOIS de as
-     escalas já estarem no banco: nenhum líder recebia nada, o alerta de
-     "não montado" não saía, e no dia seguinte o jaTem pulava tudo — os emails
-     simplesmente nunca aconteciam. Falha de email é dado do relatório, não
-     exceção. */
-  try {
-    const r = await fetch('https://api.resend.com/emails', {
-      method: 'POST', headers: { Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: 'Escala <onboarding@resend.dev>', to: para, subject: assunto, text: corpo }),
-      signal: AbortSignal.timeout(15_000),
-    });
-    return { enviado: r.ok, motivo: r.ok ? 'ok' : `resend ${r.status}` };
-  } catch (e) {
-    return { enviado: false, motivo: `rede: ${String((e as Error)?.message || e).slice(0, 80)}` };
-  }
-}
+/* O envio de e-mail mora em lib/email-do-robo.ts desde 26/10/2026: o domínio
+   da igreja, um e-mail por pessoa e o recuo para o remetente de teste só
+   quando a Resend recusa o domínio. O contrato é o mesmo de antes. */
 /* `proxMes` mora em lib/engine.ts desde 20/09: ele decide qual mês o robô
    monta, e o painel usa a mesma conta. Duas cópias divergirem e o líder
    montar outubro enquanto o robô monta novembro. */
