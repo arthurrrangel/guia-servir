@@ -12,6 +12,10 @@
    Este teste usa um dublê de Supabase que recusa exatamente as colunas que
    lhe mandarem recusar, com o código 42501 que o Postgres devolve de
    verdade, e mede quais colunas SOBREVIVEM.
+
+   26/10/2026 · lote 6: os seis casos com o dublê rodam sempre. O sétimo,
+   que consulta o Postgres local pelo `psql`, só roda com a opção explícita
+   `--com-banco` (ver o fim do arquivo). A cadeia `test` não passa a opção.
    ============================================================================= */
 import { strict as assert } from 'node:assert'
 import { montarEstado, linhasDaEquipe } from '../lib/ponte.ts'
@@ -120,10 +124,24 @@ await casoAsync('coluna ESSENCIAL recusada: o erro SOBE, nao vira tela vazia', a
   assert.ok(subiu, 'carga com coluna essencial recusada tem que estourar')
 })
 
-/* ---- e o banco de verdade concorda? -------------------------------------
-   Este caso le o catalogo do Postgres local, se ele estiver no ar. Sem
-   banco, ele se pula em vez de mentir — e diz que se pulou. */
-await casoAsync('o GRANT do banco local cobre as tres opcionais (ou o caso se pula)', async () => {
+/* ---- e o banco de verdade concorda? SÓ COM --com-banco ------------------
+   Este caso le o catalogo do Postgres local pelo `psql`, se ele estiver no
+   ar. Sem banco, ele se pula em vez de mentir, e diz que se pulou.
+
+   26/10/2026 · lote 6: o caso inteiro, inclusive o import de
+   `node:child_process`, fica atrás da opção explícita `--com-banco`. A
+   cadeia `test` (e o build da Vercel, que chama `npm test`) rodava este
+   caso: ele invocava o `psql` e, sem banco, se pulava contando como ok, e o
+   registro dizia "7/7 casos". Agora, sem a opção, nada aqui roda, e a última
+   linha diz que a integração não foi executada. Variável de ambiente não
+   liga o modo, só a opção na linha de comando, e com autorização para usar
+   um banco local:
+     node --import ./scripts/_ts.mjs scripts/coluna-sem-grant.test.mjs --com-banco
+   Com a opção e sem banco, o caso se pula e não conta como ok. */
+const puros = ok
+const COM_BANCO = process.argv.slice(2).includes('--com-banco')
+let integracao = 'NÃO executada (só roda com --com-banco)'
+if (COM_BANCO) {
   const { execSync } = await import('node:child_process')
   let saida = null
   try {
@@ -132,10 +150,15 @@ await casoAsync('o GRANT do banco local cobre as tres opcionais (ou o caso se pu
       { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'], timeout: 15000 }).trim()
   } catch {
     console.log('     (pulei: sem Postgres local na 5439 — rode bash scripts/banco-do-zero.sh)')
-    return
   }
-  assert.equal(saida, '',
-    'voluntarios_grant_conferir() achou coluna com GRANT errado: ' + saida)
-})
+  if (saida === null) integracao = 'PULADA, sem Postgres local na 5439'
+  else {
+    await casoAsync('o GRANT do banco local cobre as tres opcionais', async () => {
+      assert.equal(saida, '',
+        'voluntarios_grant_conferir() achou coluna com GRANT errado: ' + saida)
+    })
+    integracao = `executada, ${ok - puros}/${ok - puros}`
+  }
+}
 
-console.log(`\ncoluna-sem-grant: ${ok}/${ok} casos.`)
+console.log(`\ncoluna-sem-grant: ${puros}/${puros} casos puros. Integração com o banco: ${integracao}.`)
