@@ -195,6 +195,19 @@ const PORBANCO: Tradutor[] = [
      sem acento (ver `semAcento` no corpo de `aviseHumano`). */
   [/^Voce nao e o lider deste culto/i,
    () => 'Só quem organiza este ministério pode relatar este culto.'],
+  /* 26/10/2026 · as duas recusas de `eu_relatorio` (75) chegavam cruas no
+     link do líder do dia. A primeira dizia "o culto ainda não começou" ao
+     fim do culto das 10h, porque sem hora cadastrada o banco conta 18h: a
+     frase diz só o que é verdade em qualquer horário.
+     A segunda sai quando a pessoa não tem, neste culto, posto que relata
+     fora de `recusado` e `furou` (75:314-319): pode ter recusado, pode ter
+     sido marcada como falta pela liderança, pode ter saído do posto. O texto
+     cru do banco ("voce marcou que nao ia") erra em dois desses casos, então
+     a frase diz só o que a escala registra, sem afirmar recusa nem presença. */
+  [/^RELATORIO_ANTES_DA_HORA/i,
+   () => 'O relatório deste culto ainda não abriu. Tente de novo mais tarde.'],
+  [/^RELATORIO_DE_QUEM_NAO_FOI/i,
+   () => 'Pela escala, você não está como líder deste culto, então o relatório não pode ser enviado por este link. Se a escala estiver errada, fale com quem organiza o ministério.'],
   [/^Resposta invalida/i,
    () => 'Essa resposta não vale. Responda se você pode ou não pode servir no dia.'],
   [/^funcao sem nome/i,

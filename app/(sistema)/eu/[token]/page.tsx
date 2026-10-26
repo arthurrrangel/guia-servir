@@ -968,8 +968,12 @@ export default function Eu() {
             && diasDeCasa !== null && diasDeCasa <= 30;
   /* relatório só quando é posto de relato E o dia já passou: escrever o
      relatório do culto antes do culto não faz sentido, e mostrar dois campos
-     de texto abertos em toda visita empurrava o resto da tela para baixo. */
-  const paraRelatar = agenda.filter(i => i.relata && i.data <= hoje);
+     de texto abertos em toda visita empurrava o resto da tela para baixo.
+     26/10/2026: e só depois que o culto começou pela conta do banco
+     (`eu_relatorio`, 75: a hora do culto, ou 18h sem hora cadastrada). O
+     formulário aparecia desde a meia-noite do dia, e quem escrevia ao fim do
+     culto das 10h recebia a recusa do banco. scripts/relatorio-tela.test.mjs */
+  const paraRelatar = agenda.filter(i => i.relata && i.data <= hoje && horasAte(i.data, i.inicio) <= 0);
   /* 103 · as vagas que ainda são da pessoa, para a troca. `furou` não troca:
      é fato de quem estava lá. */
   const minhasVagas = new Set(agenda
