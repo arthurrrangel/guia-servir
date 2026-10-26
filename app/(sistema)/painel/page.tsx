@@ -284,6 +284,16 @@ function Painel() {
   const pendentes = dia
     ? Object.entries(dia.slots).filter(([, s]) => s?.vid && (s.status || 'pendente') === 'pendente')
     : [];
+  /* A mensagem individual já reúne os postos da pessoa neste dia. Uma ação
+     por vínculo evita cobrar duas vezes quem tem dois postos pendentes;
+     as contas da escala continuam contando os postos, como antes. */
+  const cobrancas = [...pendentes.reduce((porPessoa, [fn, s]) => {
+    const vid = s.vid!;
+    const pessoa = porPessoa.get(vid);
+    if (pessoa) pessoa.funcoes.push(fn);
+    else porPessoa.set(vid, { vid, funcoes: [fn] });
+    return porPessoa;
+  }, new Map<string, { vid: string; funcoes: string[] }>()).values()];
 
   async function marcar(funcao: string, status: Status) {
     const f = S.funcoes.find(x => x.nome === funcao);
@@ -343,7 +353,7 @@ function Painel() {
         acao: { tipo: 'link', label: 'Resolver agora', href: linkDoDia } }
     : pend
     ? { urg: '', titulo: pend === 1 ? 'Falta 1 confirmação' : `Faltam ${pend} confirmações`,
-        sub: `${pend === 1 ? '1 pessoa ainda não respondeu' : `${pend} pessoas ainda não responderam`} para ${fmtLongo(prox)}. Um toque abre o WhatsApp de cada um com a cobrança pronta.`,
+        sub: `${cobrancas.length === 1 ? '1 pessoa ainda não respondeu' : `${cobrancas.length} pessoas ainda não responderam`} para ${fmtLongo(prox)}. Um toque abre o WhatsApp de cada um com a cobrança pronta.`,
         acao: { tipo: 'rolar', label: 'Ver quem falta' } }
     : cutucaProxMes
     ? { urg: '', titulo: `Hora de montar ${mesDe(pm.mes)}`,
@@ -453,7 +463,7 @@ function Painel() {
           )}
 
           {!!pendentes.length && (
-            <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem resposta" n={pendentes.length}
+            <Secao id="cobrar" className="es-pn-cobrar" titulo="Sem resposta" n={cobrancas.length}
               sub="O botão abre o WhatsApp da pessoa com a cobrança já escrita. Você só aperta enviar."
               acoes={
                 /* ERA "COPIAR TODAS" (até 01/10/2026): juntava a cobrança de
@@ -466,17 +476,17 @@ function Painel() {
                   'Cobrança copiada. Cole no grupo.')}><IcCopiar />Cobrar no grupo</button>
               }>
               <div className="es-fila">
-                {pendentes.map(([fn, s]) => {
-                  const v = vol(S, s.vid);
+                {cobrancas.map(({ vid, funcoes }) => {
+                  const v = vol(S, vid);
                   const tel = (v?.tel || '').replace(/\D/g, '');
-                  const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgCobranca(S, s.vid!, prox, base))}` : null;
+                  const zap = tel ? `https://wa.me/${tel.length <= 11 ? '55' + tel : tel}?text=${encodeURIComponent(msgCobranca(S, vid, prox, base))}` : null;
                   return (
-                    <div className="es-item" key={fn}>
-                      <span className="es-c-tit"><b>{v?.nome}</b><small>{fn}</small></span>
+                    <div className="es-item" key={vid}>
+                      <span className="es-c-tit"><b>{v?.nome}</b><small>{funcoes.join(' · ')}</small></span>
                       <span className="es-c-acao">
                         {zap
                           ? <a className="es-btn es-peq es-zap" href={zap} target="_blank" rel="noopener"><IcSino />Cobrar no WhatsApp</a>
-                          : <button className="es-btn es-peq" onClick={() => copiar(msgCobranca(S, s.vid!, prox, base), aviso, 'Cobrança copiada.')}><IcCopiar />Copiar</button>}
+                          : <button className="es-btn es-peq" onClick={() => copiar(msgCobranca(S, vid, prox, base), aviso, 'Cobrança copiada.')}><IcCopiar />Copiar</button>}
                       </span>
                     </div>
                   );
