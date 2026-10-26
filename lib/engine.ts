@@ -2104,12 +2104,16 @@ export function problemas(S: Estado, data: string): Problema[] {
    WhatsApp por pessoa, no painel) ou era sobre DISPONIBILIDADE do mês, que é
    outra pergunta. Cobrar confirmação de um domingo, no grupo, de uma vez, não
    tinha botão em lugar nenhum, e é o que o líder faz na terça de manhã. */
-export function msgConfirmar(S: Estado, data: string, link = '') {
+/* 26/10/2026 · `rotulo`: como cada pessoa aparece na frase. O padrão é o nome,
+   que é o que o líder cola no grupo. O robô do WhatsApp passa o @ do telefone,
+   para a menção avisar a pessoa (lib/robo-grupos.ts). O resto da frase é o mesmo. */
+export function msgConfirmar(S: Estado, data: string, link = '',
+  rotulo: (vid: string) => string = (vid) => nomeDe(S, vid)) {
   const dia = S.escalas[data];
   const faltam = funcoesDoDia(S, data)
     .map(f => dia?.slots?.[f.nome])
     .filter(sl => sl?.vid && (sl.status || 'pendente') === 'pendente')
-    .map(sl => nomeDe(S, sl!.vid!));
+    .map(sl => rotulo(sl!.vid!));
   const nomes = [...new Set(faltam)];
   if (!nomes.length) return '';
   const quem = nomes.length === 1 ? nomes[0]
