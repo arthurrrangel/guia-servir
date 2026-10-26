@@ -18,6 +18,7 @@ import {
   cobrarDoDia, linkDoVoluntario,
 } from '@/lib/engine';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, inteira, CONTA, DIAS_DE_HISTORICO } from '@/lib/ponte';
+import { linhasDaCobranca } from '@/lib/cobranca-do-dia';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,10 +120,6 @@ async function enviar(para: string[], assunto: string, corpo: string) {
     return { enviado: false, motivo: `rede: ${String((e as Error)?.message || e).slice(0, 80)}` };
   }
 }
-const linkZap = (tel?: string, texto?: string) => {
-  const n = String(tel || '').replace(/\D/g, '');
-  return n ? `https://wa.me/${n.length <= 11 ? '55' + n : n}${texto ? `?text=${encodeURIComponent(texto)}` : ''}` : null;
-};
 /* `proxMes` mora em lib/engine.ts desde 20/09: ele decide qual mês o robô
    monta, e o painel usa a mesma conta. Duas cópias divergirem e o líder
    montar outubro enquanto o robô monta novembro. */
@@ -628,14 +625,11 @@ async function rodar(req: Request) {
         }
         resumo.push({ equipe: e.nome, culto: rotulo,
                       pendentes: pendentes.length, vagou: vagou.length, vagas: vagas.length });
-        const linhas = pendentes.map(({ funcao: fn, vid }) => {
-          const v = S.voluntarios.find(x => x.id === vid);
-          const onde = nomeEvento ? `o ${nomeEvento}`
-            : tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo';
-          const texto = `${(v?.nome || '').trim()}, você está na escala d${onde} (${fmtDia(data)}) em ${fn}. Confirma? ${SITE}/eu/${v?.token}`;
-          const zap = linkZap(v?.tel, texto);
-          return `• ${nomeDe(S, vid)} — ${fn}\n  ${zap ? `1 toque: ${zap}` : `sem telefone: ${SITE}/eu/${v?.token}`}`;
-        }).join('\n\n');
+        const linhas = linhasDaCobranca(pendentes, S.voluntarios, {
+          onde: nomeEvento ? `o ${nomeEvento}`
+            : tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'e domingo',
+          dia: fmtDia(data), site: SITE,
+        });
         /* o bloco de quem já respondeu que não vem. Sem link de cobrança de
            propósito: mandar "confirma?" para quem acabou de dizer que não
            pode é o robô não ter lido a resposta. */
