@@ -47,6 +47,7 @@ const ARQ = {
   precisaParear: join(PASTA, 'PRECISA-PAREAR'),
   pid: join(PASTA, 'robo.pid'),
   trava: join(PASTA, 'estado.trava'),
+  qr: join(PASTA, 'qr.html'),
 };
 const NO_SERVICO = process.env.ROBO_SERVICO === '1';
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -439,7 +440,15 @@ async function parearOuConferir(modo, comCodigo, refixar) {
   };
   if (modo === 'parear' && existsSync(ARQ.precisaParear)) guardarSessaoAntiga();
   if (modo === 'grupos' && !pareado()) { console.log('Ainda não pareado: rode --parear.'); process.exit(1); }
-  const qrcode = modo === 'parear' && !comCodigo ? (await import('qrcode-terminal')).default : null;
+  /* o QR sai no terminal (cores fixas, preto sobre branco) e numa página que
+     abre no navegador e se atualiza sozinha (qr.mjs) */
+  const desenho = modo === 'parear' && !comCodigo ? await import('./qr.mjs') : null;
+  let paginaAberta = false;
+  const pagina = (html) => { try { writeFileSync(ARQ.qr, html, { mode: 0o600 }); } catch { /* segue */ } };
+  const paginaFinal = (texto) => {
+    if (!paginaAberta) return;
+    pagina(`<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><title>Robô do WhatsApp</title></head><body style="font:18px -apple-system,system-ui,sans-serif;display:grid;place-items:center;min-height:90vh;text-align:center"><p>${texto}</p></body></html>\n`);
+  };
   const wa = await abrirWhatsApp({
     pastaSessao: ARQ.sessao, log, cfg: CONFIG,
     codigoPara: modo === 'parear' && comCodigo ? CONFIG.numeroDaIgreja : null,
@@ -448,22 +457,32 @@ async function parearOuConferir(modo, comCodigo, refixar) {
       console.log(`Digite este código: ${String(c).slice(0, 4)}-${String(c).slice(4)}\n`);
     },
     aoQR: (qr) => {
-      if (!qrcode) return;
+      if (!desenho) return;
+      let m;
+      try { m = desenho.matriz(qr); } catch (e) { console.log('não consegui desenhar o QR:', e.message); return; }
+      pagina(desenho.paraPagina(m));
+      if (!paginaAberta) { paginaAberta = true; execFile('/usr/bin/open', [ARQ.qr], () => {}); }
       console.clear();
-      console.log('No celular da IGREJA (+55 21 97297-6946): WhatsApp Business > Dispositivos conectados > Conectar dispositivo.');
-      console.log('Leia este QR code (ele troca a cada 20 segundos):\n');
-      qrcode.generate(qr, { small: true });
+      console.log('No celular da IGREJA (+55 21 97297-6946): WhatsApp Business > Configurações > Dispositivos conectados > Conectar dispositivo.');
+      console.log('Leia o QR na página que abriu no navegador (ou este aqui). Ele troca a cada 20 segundos.\n');
+      console.log(desenho.paraTerminal(m));
     },
     aoSairDeVez: (motivo) => {
+      paginaFinal('O pareamento não terminou. Volte ao Terminal.');
       if (motivo === 'logout' || motivo === 'sessao') { guardarSessaoAntiga(); console.log('\nO WhatsApp recusou a sessão antiga. Rode de novo para ler um QR novo.'); }
       else if (motivo === 'barrado') console.log('\nO WhatsApp barrou a conexão (403). O número da igreja pode estar bloqueado: confira no celular.');
       else console.log('\nOutra conexão com a mesma sessão tomou o lugar. Pare o serviço e rode de novo.');
       process.exit(1);
     },
   });
-  try { await wa.esperarAberto(modo === 'parear' ? 600000 : 90000); } catch (e) { console.log(`\n${e.message}. Rode de novo.`); process.exit(1); }
+  try { await wa.esperarAberto(modo === 'parear' ? 600000 : 90000); } catch (e) {
+    paginaFinal('O pareamento não terminou. Volte ao Terminal.');
+    console.log(`\n${e.message}. Rode de novo.`);
+    process.exit(1);
+  }
   const conta = wa.conta();
   if (!ehDaIgreja(conta)) {
+    paginaFinal('Esse não é o celular da igreja. Volte ao Terminal.');
     console.log(`\nATENÇÃO: este aparelho ficou ligado ao número ${conta}, que NÃO é o da igreja (${CONFIG.numeroDaIgreja}).`);
     console.log('Vou desligar e apagar esta sessão. Rode de novo e leia o QR com o celular da igreja.');
     await wa.desligarAparelho();
@@ -471,6 +490,7 @@ async function parearOuConferir(modo, comCodigo, refixar) {
     guardarSessaoAntiga();
     process.exit(1);
   }
+  paginaFinal('Conectado ao WhatsApp da igreja. Pode fechar esta aba.');
   console.log(`\nConectado ao número da igreja (${conta}).`);
   if (modo === 'parear') rmSync(ARQ.precisaParear, { force: true });
   await espera(3000);

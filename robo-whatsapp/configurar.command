@@ -45,7 +45,7 @@ rm -f "$PARA/robo.pid" "$PARA/estado.trava"
 passo "2/5 · Instalando o robô em $PARA"
 mkdir -p "$PARA/testes" "$PARA/logs"
 if [ "$DE" != "$PARA" ]; then
-  for f in package.json package-lock.json config.mjs regras.mjs rodada.mjs whatsapp.mjs robo.mjs \
+  for f in package.json package-lock.json config.mjs regras.mjs rodada.mjs whatsapp.mjs robo.mjs qr.mjs \
            LEIAME.md configurar.command pausar.command retomar.command; do
     cp "$DE/$f" "$PARA/$f" || falha "não consegui copiar $f"
   done
@@ -93,8 +93,9 @@ PAREADO=0
 node -e 'const c=JSON.parse(require("fs").readFileSync("sessao/creds.json","utf8"));process.exit(c&&c.account&&c.me&&c.me.id?0:1)' 2>/dev/null && PAREADO=1
 if [ "$PAREADO" != 1 ] || [ -f PRECISA-PAREAR ]; then
   echo "Pegue o CELULAR DA IGREJA (+55 21 97297-6946), com o WhatsApp Business aberto."
-  echo "Vai aparecer um QR code aqui. No celular: Configurações > Dispositivos conectados > Conectar dispositivo,"
-  echo "e aponte a câmera para o QR. (Se o celular disser que já tem aparelhos demais, desconecte um antigo.)"
+  echo "Vai abrir uma página com o QR code no navegador (ele também aparece aqui). No celular:"
+  echo "Configurações > Dispositivos conectados > Conectar dispositivo, e aponte a câmera para o QR."
+  echo "(Se o celular disser que já tem aparelhos demais, desconecte um antigo.)"
   read -r -p "Aperte Enter quando estiver com o celular da igreja na mão... " _
   node robo.mjs --parear || falha "o pareamento não terminou"
 else

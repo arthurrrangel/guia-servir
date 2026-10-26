@@ -11,6 +11,7 @@
 import * as R from '../regras.mjs';
 import { executarRodada } from '../rodada.mjs';
 import { CONFIG } from '../config.mjs';
+import { matriz, paraPagina, paraTerminal } from '../qr.mjs';
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -489,6 +490,25 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   const p2 = R.conferirFixos({ A: { jid: 'a@g.us' }, B: { jid: 'x@g.us' }, C: { jid: 'c@g.us' } }, p1.fixos);
   ok(p2.mapa.A.jid === 'a@g.us' && !p2.mapa.B.jid && /não é mais o mesmo/.test(p2.mapa.B.erro) && igual(p2.trocados, ['B']), 'outro grupo com o nome B: não posta nele', JSON.stringify(p2.mapa.B));
   ok(p2.fixos.B === 'b@g.us' && p2.fixos.C === 'c@g.us', 'o endereço antigo continua guardado; o novo grupo C entra');
+}
+
+/* o QR do pareamento: cores fixas no terminal (preto sobre branco) e a página do navegador */
+{
+  const m = [[true, false], [false, true]];
+  ok(paraTerminal(m, 0) === '\x1b[30;47m\u2580\u2584\x1b[0m', 'terminal: meio bloco de cima e de baixo, com as cores escritas', JSON.stringify(paraTerminal(m, 0)));
+  const t = paraTerminal(m, 2).split('\n');
+  ok(t.length === 3 && t.every((l) => l.startsWith('\x1b[30;47m') && l.endsWith('\x1b[0m')) && t[0].includes('      '), 'terminal: margem branca em volta', JSON.stringify(t));
+  const p = paraPagina(m);
+  ok(p.includes('http-equiv="refresh"') && p.includes('viewBox="0 0 100 100"') && (p.match(/h10v10h-10z/g) || []).length === 2, 'página: SVG com um quadrado por módulo escuro e recarga sozinha');
+  ok(!/97297-6946/.test(paraTerminal(m)) && /97297-6946/.test(p), 'a página diz qual celular usar');
+  let real = null;
+  try { real = matriz('2@robo-guia-teste,abc,def,ghi'); } catch { /* sem a biblioteca (no repositório) */ }
+  if (real) {
+    ok(real.length >= 21 && real.every((l) => l.length === real.length), 'QR de verdade: quadrado', String(real.length));
+    ok([0, 1, 2, 3, 4, 5, 6].every((c) => real[0][c]) && real[0][7] === false, 'QR de verdade: o quadrado de canto no lugar');
+  } else {
+    console.log('  (qrcode-terminal não instalado aqui: QR de verdade pulado)');
+  }
 }
 
 /* a configuração: só os grupos da Multimídia, nunca outro */
