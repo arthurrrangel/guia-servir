@@ -146,11 +146,15 @@ export const MIN_CULTO_DOMINGO = 10 * 60;   // 10h — IGREJA.cultoHora
 export const MIN_FOLLOW_PALPITE = 19 * 60;
 
 /** Hora de início deste dia, em minutos. Um evento com `inicio` informado
- *  manda; senão vale o tipo do dia. */
+ *  manda; senão vale o tipo do dia. Aceita `19h30` e `HH:mm[:ss]` do banco.
+ *  A ficha mantém precisão em minutos: segundos válidos são ignorados. */
 export function minutosDoCulto(S: Estado, data: string): number {
   const inicio = S.escalas[data]?.inicio;
-  const m = inicio ? /^(\d{1,2})h(\d{2})?$/.exec(String(inicio).trim()) : null;
+  const texto = String(inicio ?? '').trim();
+  const m = /^(\d{1,2})h(\d{2})?$/.exec(texto);
   if (m) return +m[1] * 60 + (m[2] ? +m[2] : 0);
+  const relogio = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d)?$/.exec(texto);
+  if (relogio) return +relogio[1] * 60 + +relogio[2];
   return tipoDoDia(data) === 'follow' ? MIN_FOLLOW_PALPITE : MIN_CULTO_DOMINGO;
 }
 
