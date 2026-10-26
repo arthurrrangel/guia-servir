@@ -10,7 +10,8 @@
    $CRON_SECRET`. Sem as chaves do aviso no Vercel, não faz nada e diz isso.
    ============================================================================= */
 import { clienteDeServico, mandarParaTodos, pushConfigurado } from '@/lib/push';
-import { mensagemDoLembrete, type LinhaDoLembrete } from '@/lib/aviso';
+import { type LinhaDoLembrete } from '@/lib/aviso';
+import { lembreteParaMandar } from '@/lib/tag-do-lembrete';
 import { PRINCIPAL } from '@/lib/meu-token';
 import { IGREJA } from '@/lib/igreja';
 
@@ -39,7 +40,7 @@ export async function GET(req: Request) {
   const linhas = (data || []) as (LinhaDoLembrete & { endpoint: string; p256dh: string; auth: string })[];
   const conta = await mandarParaTodos(s, linhas.map(l => ({
     aparelho: { endpoint: l.endpoint, p256dh: l.p256dh, auth: l.auth },
-    msg: mensagemDoLembrete(l, PRINCIPAL, IGREJA.cultoHora, IGREJA.followHora),
+    msg: lembreteParaMandar(l, PRINCIPAL, IGREJA.cultoHora, IGREJA.followHora),
   })));
   return Response.json({ hoje, avisos: linhas.length, enviados: conta.ok, sumiram: conta.sumiu, falharam: conta.falhou });
 }
