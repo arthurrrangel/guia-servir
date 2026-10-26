@@ -697,24 +697,49 @@ export default function Eu() {
     setOcupado('todos'); setErro('');
     const soltos = lista.filter(d => !escalaDoDia(d).length);
     const postos = lista.flatMap(d => escalaDoDia(d).filter(i => (i.status || 'pendente') === 'pendente'));
-    const [antesP, antesN, antesI] = [disponivel, indisp, itens];
+    const [antesP, antesN] = [disponivel, indisp];
     setDisponivel(p => [...p, ...soltos.filter(d => !p.includes(d))]);
     setIndisp(p => p.filter(d => !soltos.includes(d)));
     const marcados = new Set(postos.map(chaveDoPosto));
     setItens(prev => prev.map(i => (!i.plantao && marcados.has(chaveDoPosto(i))) ? { ...i, status: 'confirmado' } : i));
     const tarefas = [
-      ...soltos.map(d => ({ d, f: () => sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' }) })),
-      ...postos.map(i => ({ d: i.data, f: () => sb()!.rpc('eu_responder',
+      ...soltos.map(d => ({ d, posto: null as Item | null, f: () => sb()!.rpc('eu_disponibilidade', { p_token: token, p_data: d, p_resposta: 'posso' }) })),
+      ...postos.map(i => ({ d: i.data, posto: i as Item | null, f: () => sb()!.rpc('eu_responder',
         { p_token: token, p_culto_id: i.culto_id, p_status: 'confirmado', p_funcao_id: i.funcao_id ?? null }) })),
     ];
     const rs = await Promise.allSettled(tarefas.map(t => t.f().then((r: any) => { if (r?.error) throw r.error; return r; })));
-    const ruins = rs.map((r, k) => ({ r, d: tarefas[k].d })).filter(o => o.r.status === 'rejected');
+    /* 26/10/2026 · O QUE NÃO ENTROU VOLTA, UM POR UM, E SÓ ELE. Na falha
+       parcial, a data e o posto que falharam ficavam marcados (sem "Posso no
+       mês" nem cartão para tentar de novo); na total, a foto da lista inteira
+       voltava e desfazia o que a releitura de fundo trouxe nesse meio-tempo.
+       Não entrou: a chamada falhou, ou `eu_responder` devolveu `mudou:0`.
+       `eu_disponibilidade` não devolve nada (dado nulo é sucesso), e a
+       resposta antiga de `eu_responder`, sem `mudou`, segue valendo. */
+    const ruins = tarefas.filter((t, k) => {
+      const r = rs[k];
+      return r.status === 'rejected' || (!!t.posto && r.value?.data?.mudou === 0);
+    });
     if (ruins.length) {
-      if (ruins.length === rs.length) { setDisponivel(antesP); setIndisp(antesN); setItens(antesI); }
-      const e0 = (ruins[0].r as PromiseRejectedResult).reason;
-      const quais = [...new Set(ruins.map(o => fmtDia(o.d)))].join(', ');
-      setFlash(''); setErro(`${aviseHumano(e0, oQue)} Não entraram: ${quais}.`);
+      const dias = new Set(ruins.filter(t => !t.posto).map(t => t.d));
+      const voltam = new Map(ruins.filter(t => t.posto).map(t => [chaveDoPosto(t.posto!), t.posto!.status]));
+      if (dias.size) {
+        setDisponivel(p => p.filter(d => !dias.has(d) || antesP.includes(d)));
+        setIndisp(p => [...p, ...antesN.filter(d => dias.has(d) && !p.includes(d))]);
+      }
+      if (voltam.size) setItens(prev => prev.map(i => {
+        const k = chaveDoPosto(i);
+        return !i.plantao && voltam.has(k) && i.status === 'confirmado' ? { ...i, status: voltam.get(k)! } : i;
+      }));
+      const falha = rs.find(r => r.status === 'rejected') as PromiseRejectedResult | undefined;
+      const quais = [...new Set(ruins.map(t => fmtDia(t.d)))].join(', ');
+      const aviso = falha
+        ? `${aviseHumano(falha.reason, oQue)} Não entraram: ${quais}.`
+        : `Uma parte dos postos não está mais com você. Não entraram: ${quais}. Recarregue a página; se continuar, fale com quem organiza a sua área.`;
+      setFlash(''); setErro(aviso);
+      /* a releitura apaga o aviso quando dá certo e o troca por "Salvou!"
+         quando falha; o que não entrou continua sendo a notícia */
       await carregar(false);
+      setFlash(''); setErro(aviso);
     } else {
       setFlash(lista.length === 1 ? 'Registrado.' : `${lista.length} dias marcados como posso.`);
       window.setTimeout(() => setFlash(f => (/marcados como posso|^Registrado\.$/.test(f) ? '' : f)), 2600);
