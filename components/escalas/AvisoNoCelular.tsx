@@ -107,7 +107,13 @@ export default function AvisoNoCelular({ token, avisar, errar }: {
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
-      if (sub) await sb()!.rpc('eu_aviso_desligar', { p_token: token, p_endpoint: sub.endpoint });
+      if (sub) {
+        const { data, error } = await sb()!.rpc('eu_aviso_desligar', { p_token: token, p_endpoint: sub.endpoint });
+        if (error || (data as { ok?: boolean } | null)?.ok !== true) {
+          errar('Não consegui desligar agora. Tente de novo.');
+          return;
+        }
+      }
       setEstado('desligado');
       avisar('Aviso desligado neste celular.');
     } catch {
