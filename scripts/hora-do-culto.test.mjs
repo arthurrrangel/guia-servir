@@ -85,5 +85,25 @@ console.log('\n3. E a conta de antecedência usa a hora certa');
   ok(E.horasDeAntecedencia(domingo, 'isto não é data') === null, 'data ilegível não vira número');
 }
 
+console.log('\n4. A cobertura respeita a fronteira exata de 48h');
+{
+  const inicio = Date.parse('2026-10-28T08:00:00-03:00');
+  const horas = msAntes => E.horasAteCulto('2026-10-28', '08:00:00', inicio - msAntes);
+  ok(horas(47.75 * 3600000) === 47.75,
+     '47h45 continuam dentro da janela de cobertura', String(horas(47.75 * 3600000)));
+  ok(horas(48 * 3600000 - 1) < 48, 'um milissegundo antes de completar 48h permite consultar');
+  ok(horas(48 * 3600000) === 48, 'exatamente 48h continuam fora da janela estrita');
+  ok(horas(48 * 3600000 + 1) > 48, 'mais de 48h continuam fora da janela');
+  ok(horas(-11.75 * 3600000) > -12, '11h45 depois do início respeitam o limite inferior da tela');
+  ok(horas(-12 * 3600000) === -12, 'exatamente 12h depois do início continuam no limite excluído');
+  const inicioPadrao = Date.parse('2026-10-28T18:00:00-03:00');
+  for (const semHora of [null, undefined, '']) {
+    ok(E.horasAteCulto('2026-10-28', semHora, inicioPadrao - 47.75 * 3600000) === 47.75,
+       `sem horário (${String(semHora)}), a cobertura mantém o fallback de 18h`);
+  }
+  ok(Number.isNaN(E.horasAteCulto('data inválida', '08:00:00', inicio)),
+     'data inválida não produz antecedência que abra a janela');
+}
+
 console.log(`\n================  ${n - f}/${n} testes passaram  ================\n`);
 process.exit(f ? 1 : 0);

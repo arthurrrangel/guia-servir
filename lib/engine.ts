@@ -164,6 +164,13 @@ export function horasDeAntecedencia(data: string, respondidoEm?: string | null, 
   return Math.round((culto - quando) / 3600000);
 }
 
+/** Antecedência exata para consultar cobertura no link pessoal. Arredondar
+ *  47h45 para 48h escondia a consulta que eu_quem_cobre já permite. O horário
+ *  ausente segue seu contrato de 18h; `agora` permite testar sem banco. */
+export function horasAteCulto(data: string, inicio?: string | null, agora = Date.now()) {
+  return (Date.parse(`${data}T${(inicio || '18:00:00').slice(0, 8)}-03:00`) - agora) / 3600000;
+}
+
 /* Desmarque em cima da hora: recusou dentro da janela de horasTardio. */
 export function desmarqueTardio(S: Estado, data: string, sl?: Slot | null) {
   if (!sl || sl.status !== 'recusado') return false;

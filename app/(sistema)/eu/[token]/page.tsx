@@ -6,7 +6,7 @@ import { sbPublico as sb } from '@/lib/supabase';
 import Instalar from '@/components/Instalar';
 import { icsDaEscala } from '@/lib/ics';
 import { IGREJA } from '@/lib/igreja';
-import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe, distintivoDoDia, horaDoDia, linksDoRepertorio } from '@/lib/engine';
+import { MESES, fmtDia, diaLongo, diffDias, agruparQuemServe, distintivoDoDia, horaDoDia, linksDoRepertorio, horasAteCulto as horasAte } from '@/lib/engine';
 import { Aviso } from '@/components/Ui';
 import { IcCheck, IcSeta, IcCalendario } from '@/components/Icones';
 import { Logo } from '@/components/Marca';
@@ -487,8 +487,6 @@ export default function Eu() {
      lado SQL usa a zona `America/Sao_Paulo`, que é o que sobrevive a uma
      volta do horário de verão. Hoje dá no mesmo, e está escrito para o dia
      em que não der. */
-  const horasAte = (data: string, inicio?: string | null) =>
-    Math.round((Date.parse(`${data}T${(inicio || '18:00:00').slice(0, 8)}-03:00`) - Date.now()) / 3600000);
   const TARDIO = 48;
 
   /* =================================================================== 02/10/2026
