@@ -69,6 +69,19 @@ export function momentoDaPrimeira(data, rodadas, antecedencia) {
   return Date.parse(`${somaDias(data, -antecedencia)}T${r.hhmm}:00-03:00`);
 }
 
+/* AS DATAS QUE UMA RODADA OLHA: os dias da janela (hoje até a antecedência),
+   as datas futuras que o robô já postou (para repor trocas mesmo quando a
+   escala saiu antes da hora, a pedido) e as datas que o Arthur mandou
+   antecipar nesta rodada. Nada além de `vigiaDias` à frente. */
+export function datasDaRodada(hoje, antecedencia, envios = {}, antecipar = [], vigiaDias = 14) {
+  const limite = somaDias(hoje, vigiaDias);
+  const datas = new Set();
+  for (let n = 0; n <= antecedencia; n++) datas.add(somaDias(hoje, n));
+  for (const d of Object.keys(envios || {})) if (d >= hoje && d <= limite && Object.keys(envios[d] || {}).length) datas.add(d);
+  for (const d of antecipar || []) if (/^\d{4}-\d{2}-\d{2}$/.test(d) && d >= hoje && d <= limite) datas.add(d);
+  return [...datas].sort();
+}
+
 /* a escala deste dia pode sair pela primeira vez nesta rodada? Na rodada da
    noite, a de daqui a 2 dias; em qualquer rodada, a que ficou para trás
    (daqui a 1 dia, ou hoje antes do culto). Nunca a de um culto cuja hora de

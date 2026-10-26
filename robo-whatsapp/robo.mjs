@@ -17,6 +17,9 @@
      node robo.mjs --status         resumo do serviço (conexão, grupos, última rodada)
      node robo.mjs --conferido AAAA-MM-DD "<nome do grupo>"|cobranca saiu|nao-saiu
                                     depois de conferir um envio incerto no grupo
+     node robo.mjs --mandar-agora AAAA-MM-DD
+                                    manda já a escala daquele dia (pedido do Arthur);
+                                    quem manda é o serviço, na próxima volta (até 30 s)
      node robo.mjs --a-partir-de AAAA-MM-DDTHH:MM-03:00
                                     de quando o robô cuida das escalas (o que
                                     saía antes disso fica com quem mandava)
@@ -48,6 +51,7 @@ const ARQ = {
   pid: join(PASTA, 'robo.pid'),
   trava: join(PASTA, 'estado.trava'),
   qr: join(PASTA, 'qr.html'),
+  pedido: join(PASTA, 'pedido-mandar-agora.json'),
 };
 const NO_SERVICO = process.env.ROBO_SERVICO === '1';
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -386,6 +390,46 @@ async function servico(segredo) {
         log(`rodada ${rodada.hhmm}: ${res.completa ? 'completa' : 'incompleta'}${res.motivo ? ' (' + res.motivo + ')' : ''}`);
         if (res.completa) ultima = chave;
       }
+      /* PEDIDO DO ARTHUR: mandar já a escala de um dia (--mandar-agora). Roda
+         fora do horário, só para aquela data, sem cobrança; o que sai fica
+         gravado como qualquer envio (sexta às 19:58 não repete) */
+      if (existsSync(ARQ.pedido)) {
+        let pedido = null;
+        try { pedido = JSON.parse(readFileSync(ARQ.pedido, 'utf8')); } catch { /* estragado */ }
+        const ok = /^\d{4}-\d{2}-\d{2}$/.test(pedido?.data || '') && pedido.data >= agora.data && pedido.data <= R.somaDias(agora.data, CONFIG.diasDeVigia);
+        const ult = tentativas.get('pedido');
+        if (!ok) {
+          log('pedido de envio antecipado inválido ou de data passada: descartado');
+          rmSync(ARQ.pedido, { force: true });
+        } else if (existsSync(ARQ.pausa)) {
+          avisar(`O pedido de mandar a escala de ${pedido.data} está esperando: o robô está pausado.`, `pedido-pausado:${pedido.data}`);
+        } else if (!ult || Date.now() - ult >= CONFIG.retentarAposMin * 60000) {
+          tentativas.set('pedido', Date.now());
+          const res = await comTrava(async () => {
+            const estado = carregarEstado();
+            let r;
+            try {
+              r = await executarRodada({
+                wa: waFixo, lerDia: (d) => lerDia(segredo, d), rodada: { hhmm: 'pedido', primeira: false, cobrar: false },
+                agora: R.agoraSP(), estado, cfg: CONFIG, antecipar: [pedido.data],
+                avisar, log, pausado: () => encerrando || existsSync(ARQ.pausa), pausar,
+                espera: (faixa) => espera(entre(faixa)), salvar: () => salvarEstado(estado),
+              });
+            } catch (e) {
+              avisar(`O envio antecipado de ${pedido.data} parou no meio: ${e.message}`, `pedido-erro:${pedido.data}`);
+              r = { completa: false, motivo: e.message };
+            }
+            salvarEstado(R.podar(estado, agora.data));
+            return r;
+          }, 120000).catch((e) => ({ completa: false, motivo: e.message }));
+          log(`pedido ${pedido.data}: ${res.completa ? 'atendido' : 'incompleto'}${res.motivo ? ' (' + res.motivo + ')' : ''}`);
+          if (res.completa && res.motivo !== 'pausado' && !encerrando) {
+            /* só apaga se o pedido ainda é o mesmo (um pedido novo no meio fica) */
+            try { if (JSON.parse(readFileSync(ARQ.pedido, 'utf8')).em === pedido.em) rmSync(ARQ.pedido, { force: true }); } catch { /* já saiu */ }
+            tentativas.delete('pedido');
+          }
+        }
+      }
       /* rodada que passou da tolerância sem completar: avisa uma vez e fecha */
       for (const r of CONFIG.rodadas) {
         const chave = `${agora.data} ${r.hhmm}`;
@@ -510,6 +554,45 @@ async function parearOuConferir(modo, comCodigo, refixar) {
   process.exit(0);
 }
 
+/* PEDE AO SERVIÇO PARA MANDAR JÁ A ESCALA DE UM DIA e acompanha até sair.
+   Quem manda é o serviço (a sessão do WhatsApp é dele); aqui só fica o
+   pedido e o acompanhamento pelo estado gravado. */
+async function mandarAgora([data]) {
+  const hoje = R.agoraSP().data;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(data || '') || data < hoje || data > R.somaDias(hoje, CONFIG.diasDeVigia)) {
+    console.log(`uso: node robo.mjs --mandar-agora AAAA-MM-DD (de hoje até ${CONFIG.diasDeVigia} dias à frente)`);
+    process.exit(1);
+  }
+  const tmp = ARQ.pedido + '.tmp';
+  writeFileSync(tmp, JSON.stringify({ data, em: new Date().toISOString() }));
+  renameSync(tmp, ARQ.pedido);
+  if (!pidDoServico()) {
+    console.log('Pedido guardado, mas o serviço não está rodando: a escala sai quando ele voltar.');
+    return;
+  }
+  if (existsSync(ARQ.pausa)) {
+    console.log('Pedido guardado, mas o robô está PAUSADO: a escala sai quando ele for retomado.');
+    return;
+  }
+  console.log(`Pedido feito: a escala de ${data} sai pelo serviço em até 30 segundos, com intervalo entre os grupos.`);
+  const ate = Date.now() + 10 * 60000;
+  let visto = '';
+  while (Date.now() < ate) {
+    await espera(5000);
+    let e = null;
+    try { e = carregarEstado(); } catch { /* lendo no meio de uma gravação */ }
+    const dia = e?.envios?.[data] || {};
+    const linhas = Object.values(dia).map((x) => `${x.grupo}: ${x.situacao}`);
+    const agoraVisto = linhas.join(' | ');
+    if (agoraVisto !== visto) { visto = agoraVisto; console.log(`  ${linhas.length} grupo(s): ${agoraVisto}`); }
+    if (!existsSync(ARQ.pedido)) {
+      console.log(Object.values(dia).some((x) => x.situacao !== 'postado') ? 'Terminou com envio incerto: confira o grupo.' : 'Pronto: a escala saiu.');
+      return;
+    }
+  }
+  console.log('Ainda não terminou: o serviço tenta de novo sozinho. Veja depois com --status.');
+}
+
 /* declara de quando o robô passa a cuidar das escalas (depois de um tempo
    fora do ar em que alguém mandou à mão, por exemplo) */
 async function aPartirDe([quando]) {
@@ -568,9 +651,9 @@ function mostrarStatus() {
 
 /* -------------------------------------------------------------- início --- */
 const args = process.argv.slice(2);
-if (args[0] === '--conferido' || args[0] === '--a-partir-de') {
+if (args[0] === '--conferido' || args[0] === '--a-partir-de' || args[0] === '--mandar-agora') {
   try {
-    await (args[0] === '--conferido' ? conferido : aPartirDe)(args.slice(1));
+    await ({ '--conferido': conferido, '--a-partir-de': aPartirDe, '--mandar-agora': mandarAgora })[args[0]](args.slice(1));
   } catch (e) {
     console.log(`Não deu: ${e.message}`);
     process.exit(1);

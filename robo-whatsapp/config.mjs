@@ -44,6 +44,9 @@ export const CONFIG = {
     { hhmm: '19:58', primeira: true, cobrar: true },
   ],
   diasDeAntecedencia: 2,
+  /* escala postada antes da hora (a pedido, --mandar-agora): o robô continua
+     repondo as trocas dela até esta distância; a cobrança segue na janela */
+  diasDeVigia: 14,
 
   /* uma rodada perdida (Mac dormindo) ainda roda até este atraso; depois, só a próxima */
   toleranciaMin: 90,

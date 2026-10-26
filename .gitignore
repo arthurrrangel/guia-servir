@@ -40,5 +40,7 @@ robo-whatsapp/logs/
 robo-whatsapp/PAUSADO
 robo-whatsapp/PRECISA-PAREAR
 robo-whatsapp/qr.html
+robo-whatsapp/pedido-mandar-agora.json
+robo-whatsapp/pedido-mandar-agora.json.tmp
 robo-whatsapp/grupos-fixos.json
 robo-whatsapp/estado.anterior.json

@@ -22,7 +22,7 @@ const PAROU_NO_MEIO = 'o robô parou no meio do envio';
 
 export async function executarRodada({
   wa, lerDia, rodada, agora, estado, cfg, avisar, log, pausado, pausar, espera, salvar,
-  agoraMs = () => Date.now(),
+  agoraMs = () => Date.now(), antecipar = [],
 }) {
   log(`rodada ${rodada.hhmm} de ${agora.data}`);
   if (pausado()) { log('PAUSADO: nada sai nesta rodada'); return { completa: true, motivo: 'pausado' }; }
@@ -88,8 +88,11 @@ export async function executarRodada({
   }
 
   const cobrar = [];
-  for (let n = 0; n <= cfg.diasDeAntecedencia; n++) {
-    const data = R.somaDias(agora.data, n);
+  /* os dias da janela, as datas já postadas mais à frente (trocas) e as que
+     o Arthur mandou antecipar (pedido --mandar-agora) */
+  for (const data of R.datasDaRodada(agora.data, cfg.diasDeAntecedencia, estado.envios, antecipar, cfg.diasDeVigia)) {
+    const n = R.diasEntre(agora.data, data);
+    const pedida = (antecipar || []).includes(data);
     let resp;
     try { resp = await lerDia(data); } catch (e) {
       avisar(`Não consegui ler a escala de ${data}: ${e.message}`, `leitura:${data}`);
@@ -100,7 +103,8 @@ export async function executarRodada({
     const comecou = R.cultoJaComecou(data, resp.culto.hora, agora);
     const estadoDoDia = (estado.envios[data] ||= {});
     const momento = R.momentoDaPrimeira(data, cfg.rodadas, cfg.diasDeAntecedencia);
-    const permitida = R.primeiraPermitida(n, rodada, cfg.diasDeAntecedencia, momento, inicioMs);
+    const permitida = pedida || R.primeiraPermitida(n, rodada, cfg.diasDeAntecedencia, momento, inicioMs);
+    if (pedida) log(`${data}: escala antecipada a pedido (${n} dias antes)`);
     if (!permitida && momento != null && momento < inicioMs && !Object.keys(estadoDoDia).length && !comecou) {
       log(`${data}: a hora de mandar esta escala foi antes de o robô começar; fica com quem já mandava`);
     }
@@ -123,7 +127,10 @@ export async function executarRodada({
       return { completa: false, motivo: r };
     }
 
-    if (rodada.cobrar && R.deveCobrar({ resposta: resp, estadoDoDia, cobranca: estado.cobrancas[data], agoraMs: agoraMs(), cfg, comecou })) {
+    /* a cobrança fica na janela de sempre (até 2 dias antes), mesmo com a
+       escala postada mais cedo: cedo demais, viraria uma semana de @ */
+    if (rodada.cobrar && n <= cfg.diasDeAntecedencia
+      && R.deveCobrar({ resposta: resp, estadoDoDia, cobranca: estado.cobrancas[data], agoraMs: agoraMs(), cfg, comecou })) {
       cobrar.push({ data, cobranca: resp.cobranca });
     }
   }

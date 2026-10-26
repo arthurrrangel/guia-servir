@@ -58,6 +58,7 @@ mais sai até alguém conferir o número da igreja e rodar o `retomar.command`.
 
 - `node robo.mjs --status`: conexão, grupos, último envio, avisos.
 - `node robo.mjs --ensaio`: lê a escala dos próximos 7 dias e diz o que faria, sem mandar nada.
+- `node robo.mjs --mandar-agora AAAA-MM-DD`: manda já a escala daquele dia (geral e grupos). Depois disso o robô repõe as trocas dela todo dia; a cobrança com @ continua só nos 2 dias antes do culto.
 - `node robo.mjs --a-partir-de AAAA-MM-DDTHH:MM-03:00`: de quando o robô cuida das escalas.
 - `./configurar.command`: reinstala, confere o segredo, pareia de novo se precisar e religa o serviço.
 

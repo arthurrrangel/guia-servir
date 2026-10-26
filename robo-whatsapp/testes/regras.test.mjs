@@ -492,6 +492,43 @@ const resumo = (saiu) => saiu.map((m) => `${nomeDoJid(m.jid)} | ${m.texto.split(
   ok(p2.fixos.B === 'b@g.us' && p2.fixos.C === 'c@g.us', 'o endereço antigo continua guardado; o novo grupo C entra');
 }
 
+/* G · pedido do Arthur: mandar a escala de domingo já na segunda (--mandar-agora) */
+{
+  ok(igual(R.datasDaRodada('2026-10-26', 2, {}, []), ['2026-10-26', '2026-10-27', '2026-10-28']), 'datas da rodada: só a janela');
+  ok(igual(R.datasDaRodada('2026-10-26', 2, { '2026-11-01': { geral: {} }, '2026-10-20': { geral: {} }, '2026-11-30': { geral: {} } }, ['2026-10-31', '2026-10-01', 'x']),
+    ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-31', '2026-11-01']), 'mais as já postadas à frente e a pedida; nada do passado nem além da vigia');
+  const sis = sistema();
+  const wa = whatsapp();
+  const estado = { inicio: '2026-10-26T20:38:54.000Z', envios: {}, cobrancas: {}, rodadas: {} };
+  const avisos = [];
+  const rodar = (iso, rodada, antecipar = []) => executarRodada({
+    wa, lerDia: sis.ler, rodada, agora: R.agoraSP(new Date(iso)), estado, cfg: CONFIG, antecipar,
+    avisar: (t, k) => avisos.push(k), log: () => {}, pausado: () => false, pausar: () => {}, espera: async () => {}, salvar: () => {},
+    agoraMs: () => Date.parse(iso),
+  });
+  const PEDIDO = { hhmm: 'pedido', primeira: false, cobrar: false };
+  const r0 = await rodar('2026-10-26T21:00:00Z', PEDIDO, ['2026-11-01']);
+  ok(r0.completa && igual(resumo(wa.saiu), ['Multimídia · Geral | ESCALA 2026-11-01 d1', 'Multimídia · Projeção | PROJEÇÃO 2026-11-01 d1p', 'Multimídia · Foto | FOTO 2026-11-01 d1f']),
+    'segunda 18:00: o domingo sai no geral e nos grupos, sem cobrança e sem o sábado', JSON.stringify(resumo(wa.saiu)));
+  /* a semana segue: terça a escala de domingo muda e a troca sai na rodada seguinte */
+  sis.ass['2026-11-01'].g2 = 'd2f';
+  for (const dia of ['2026-10-27', '2026-10-28']) for (const rod of CONFIG.rodadas) await rodar(`${dia}T${rod.hhmm}:00-03:00`, rod);
+  const ateQuarta = resumo(wa.saiu).slice(3);
+  ok(igual(ateQuarta, ['Multimídia · Foto | FOTO 2026-11-01 d2f']), 'a troca do domingo sai na terça 09:00, mesmo fora da janela de 2 dias', JSON.stringify(ateQuarta));
+  ok(!wa.saiu.some((m) => m.texto.includes('falta confirmar')), 'e nenhuma cobrança do domingo antes de sexta');
+  for (const rod of CONFIG.rodadas) await rodar(`2026-10-29T${rod.hhmm}:00-03:00`, rod);
+  for (const rod of CONFIG.rodadas) await rodar(`2026-10-30T${rod.hhmm}:00-03:00`, rod);
+  const s2 = resumo(wa.saiu).slice(4);
+  ok(s2.filter((x) => x.includes('ESCALA 2026-11-01')).length === 0, 'sexta 19:58 não manda o domingo de novo', JSON.stringify(s2));
+  ok(s2.filter((x) => x.includes('ESCALA 2026-10-31')).length === 1, 'o sábado sai na quinta 19:58, como sempre');
+  const cob = wa.saiu.filter((m) => m.texto.includes('falta confirmar'));
+  ok(cob.length === 2 && cob[0].texto.includes('2026-10-31') && cob[0].texto.includes('2026-11-01'), 'a cobrança do domingo começa na sexta 12:00 (janela de 2 dias), junto com a do sábado', JSON.stringify(cob.map((m) => m.texto.slice(0, 40))));
+  /* pedido de dia que já começou: nada */
+  const antes = wa.saiu.length;
+  await rodar('2026-11-01T14:00:00Z', PEDIDO, ['2026-11-01']);
+  ok(wa.saiu.length === antes, 'pedido depois de o culto começar: nada sai');
+}
+
 /* o QR do pareamento: cores fixas no terminal (preto sobre branco) e a página do navegador */
 {
   const m = [[true, false], [false, true]];
