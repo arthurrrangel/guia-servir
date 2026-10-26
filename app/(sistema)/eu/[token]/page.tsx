@@ -530,7 +530,6 @@ export default function Eu() {
   async function responderItens(alvo: Item[], status: 'confirmado' | 'recusado', chave = alvo[0]?.culto_id || '') {
     if (!alvo.length) return;
     setOcupado(chave); setErro('');
-    const antes = itens;
     const marcados = new Set(alvo.map(chaveDoPosto));
     setItens(prev => prev.map(i => (!i.plantao && marcados.has(chaveDoPosto(i))) ? { ...i, status } : i));
     /* uma chamada por posto; posto antigo sem id (anterior à 71) responde
@@ -545,8 +544,22 @@ export default function Eu() {
       { p_token: token, p_culto_id: c.culto_id, p_status: status, p_funcao_id: c.funcao_id })
       .then((r: any) => { if (r?.error) throw r.error; return r?.data; })));
     const ruins = rs.filter(r => r.status === 'rejected') as PromiseRejectedResult[];
+    /* Uma falha parcial também precisa desfazer o otimismo, por posto.
+       `mudou:0` não gravou; a resposta antiga, sem `mudou`, segue compatível.
+       Sem id, a chamada representa todos os postos-alvo daquele culto. */
+    const naoGravadas = chamadas.filter((_, k) => {
+      const r = rs[k];
+      return r.status === 'rejected' || r.value?.mudou === 0;
+    });
+    const falhou = (i: Item) => naoGravadas.some(c =>
+      c.culto_id === i.culto_id && (c.funcao_id === null || c.funcao_id === i.funcao_id));
+    const gravados = alvo.filter(i => !falhou(i));
+    const restaurar = new Map(alvo.filter(falhou).map(i => [chaveDoPosto(i), i.status]));
+    if (restaurar.size) setItens(prev => prev.map(i => {
+      const k = chaveDoPosto(i);
+      return !i.plantao && restaurar.has(k) && i.status === status ? { ...i, status: restaurar.get(k)! } : i;
+    }));
     if (ruins.length === rs.length) {
-      setItens(antes);
       setFlash(''); setErro(aviseHumano(ruins[0].reason, 'salvar'));
       setOcupado(''); return;
     }
@@ -564,6 +577,9 @@ export default function Eu() {
     if (ruins.length) {
       setFlash('');
       setErro(`${aviseHumano(ruins[0].reason, 'salvar')} Uma parte não entrou; confira a lista e toque de novo.`);
+    } else if (naoGravadas.length) {
+      setFlash('');
+      setErro('Uma parte dos postos não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.');
     } else {
       /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia
          a pessoa não avisar por fora, achando que já estava resolvido. */
@@ -572,9 +588,9 @@ export default function Eu() {
     /* 103 · quem acabou de largar uma vaga ganha, logo abaixo do "Precisa de
        você", a oferta de pedir a um colega. Quem voltou atrás perde a oferta. */
     setOfertas(prev => {
-      const sem = prev.filter(o => !alvo.some(i => i.culto_id === o.culto_id && i.funcao_id === o.funcao_id));
+      const sem = prev.filter(o => !gravados.some(i => i.culto_id === o.culto_id && i.funcao_id === o.funcao_id));
       return status === 'recusado'
-        ? [...sem, ...alvo.filter(i => !!i.funcao_id && i.data >= hojeISO()).map(i => ({
+        ? [...sem, ...gravados.filter(i => !!i.funcao_id && i.data >= hojeISO()).map(i => ({
             culto_id: i.culto_id, funcao_id: i.funcao_id!, funcao: i.funcao, data: i.data,
             evento: i.evento ?? null, inicio: i.inicio ?? null }))]
         : sem;
