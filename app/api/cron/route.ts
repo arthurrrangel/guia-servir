@@ -379,8 +379,14 @@ async function rodar(req: Request) {
            · alguns montados     → não monta sozinho, mas AVISA, porque
              completar por conta própria re-sortearia o que o líder pôs à mão
              (`gerarDia` só respeita o que está travado ou confirmado). */
-      /* por equipe, porque os eventos são de UM ministério (migração 54) */
-      const dias = diasDoMes(S, prox.ano, prox.mes);
+      /* por equipe, porque os eventos são de UM ministério (migração 54).
+         26/10/2026: só os dias em que o ministério tem posto. `diasDoMes` traz
+         todo sábado de Follow, e quem só serve no domingo (Connect, Kids,
+         Livraria) nunca tem gente no sábado: o mês montado inteiro dava
+         "5 de 9", virava 'parcial', alerta e 500. É a pergunta que a cobrança
+         de quinta já faz (`avisarDiaSemNinguem`); dia de evento continua
+         contando. Ver scripts/robo-dias-com-posto.test.mjs. */
+      const dias = diasDoMes(S, prox.ano, prox.mes).filter(d => funcoesDoDia(S, d).length > 0);
       const montados = dias.filter(d => Object.values(S.escalas[d]?.slots || {}).some((x: any) => x?.vid));
       /* a regra mora em lib/engine.ts (`decisaoDoRobo`), com o motivo escrito
          e com teste: ela é o que segura a divergência de gravação explicada
