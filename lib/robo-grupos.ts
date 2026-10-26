@@ -15,10 +15,15 @@
    Quem não tem telefone no cadastro continua pelo nome, sem menção.
 
    Tudo aqui é puro: recebe o Estado, devolve texto. A rota só autentica
-   (lib/robo-segredo.ts) e carrega o Estado com a mesma consulta do navegador. */
+   (lib/robo-segredo.ts) e carrega o Estado com a mesma consulta do navegador.
+
+   CUIDADO AO MUDAR assinaturaDoEnvio (lib/engine.ts): o robô guarda a
+   assinatura de cada envio. Mudar o jeito de calcular muda a assinatura dos
+   dias já mandados, e o robô manda de novo todas as escalas dos próximos
+   dias, em todos os grupos (até o limite de versões do robô). */
 
 import {
-  type Estado, assinaturaDoEnvio, funcoesDoDia, gruposDoDia, msgConfirmar, msgEscala,
+  type Estado, assinaturaDoEnvio, funcoesDoDia, gruposDoDia, horaDoDia, msgConfirmar, msgEscala,
   convidadoNoPosto,
 } from './engine';
 
@@ -67,4 +72,31 @@ export function cobrancaDoRobo(S: Estado, d: string, link: string): CobrancaDoRo
     return '@' + tel;
   });
   return { texto, mencoes: [...mencoes.values()], pendentes: pessoas.size };
+}
+
+/* A RESPOSTA INTEIRA DA ROTA, PURA. A rota /api/robo/grupos só autentica,
+   carrega o Estado e devolve isto; o teste de ponta a ponta
+   (scripts/robo-whatsapp-ponta.test.mjs) passa a mesma resposta ao robô
+   (robo-whatsapp/rodada.mjs) e confere o que sairia em cada grupo. Um
+   contrato só: a rota e o teste não podem divergir. */
+export function respostaDoRobo(
+  S: Estado, data: string, equipe: { slug: string; nome: string }, link: string,
+  cultoHora: string, followHora: string | null,
+) {
+  const dia = S.escalas[data];
+  const preenchidos = preenchidosDoDia(S, data);
+  return {
+    ok: true as const,
+    equipe,
+    data,
+    culto: {
+      existe: !!dia,
+      evento: dia?.evento || null,
+      hora: horaDoDia(dia?.inicio, dia?.evento, data, cultoHora, followHora),
+      postos: funcoesDoDia(S, data).length,
+      preenchidos,
+    },
+    linhas: preenchidos ? linhasDoRobo(S, data, link) : [],
+    cobranca: preenchidos ? cobrancaDoRobo(S, data, link) : null,
+  };
 }

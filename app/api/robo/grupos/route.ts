@@ -8,9 +8,9 @@
    líder naquele dia, mais a cobrança com @ (lib/robo-grupos.ts). Não grava
    nada, não manda nada: quem posta é o robô, no MacBook do Arthur. */
 import { createClient } from '@supabase/supabase-js';
-import { addDias, funcoesDoDia, horaDoDia, linkDoVoluntario } from '@/lib/engine';
+import { addDias, linkDoVoluntario } from '@/lib/engine';
 import { montarEstado, linhasDaEquipe, DIAS_DE_HISTORICO } from '@/lib/ponte';
-import { cobrancaDoRobo, linhasDoRobo, preenchidosDoDia } from '@/lib/robo-grupos';
+import { respostaDoRobo } from '@/lib/robo-grupos';
 import { autorizado } from '@/lib/robo-segredo';
 import { IGREJA } from '@/lib/igreja';
 
@@ -53,22 +53,7 @@ export async function GET(req: Request) {
 
     const S = montarEstado(await linhasDaEquipe(s, equipe.id, addDias(hojeSP(), DIAS_DE_HISTORICO), equipe.nome));
     const link = linkDoVoluntario(SITE, equipe.slug, 'confirmar');
-    const dia = S.escalas[data];
-    const preenchidos = preenchidosDoDia(S, data);
-    return responde({
-      ok: true,
-      equipe: { slug: equipe.slug, nome: equipe.nome },
-      data,
-      culto: {
-        existe: !!dia,
-        evento: dia?.evento || null,
-        hora: horaDoDia(dia?.inicio, dia?.evento, data, IGREJA.cultoHora, IGREJA.followHora),
-        postos: funcoesDoDia(S, data).length,
-        preenchidos,
-      },
-      linhas: preenchidos ? linhasDoRobo(S, data, link) : [],
-      cobranca: preenchidos ? cobrancaDoRobo(S, data, link) : null,
-    });
+    return responde(respostaDoRobo(S, data, { slug: equipe.slug, nome: equipe.nome }, link, IGREJA.cultoHora, IGREJA.followHora));
   } catch {
     /* sem detalhe na resposta: o robô só precisa saber que não deu, e tenta depois */
     return responde({ ok: false, erro: 'FALHA_AO_LER' }, 502);

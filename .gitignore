@@ -22,3 +22,20 @@ tmp/
 # no repositorio por descuido.
 __pycache__/
 *.pyc
+
+# 26/10/2026: o robô do WhatsApp (robo-whatsapp/) roda no MacBook do Arthur.
+# A sessão é a chave do número da igreja; o .env tem o segredo da rota; o
+# resto é estado e registro de uma máquina. Nada disso é fonte.
+robo-whatsapp/sessao/
+robo-whatsapp/sessao-antiga-*/
+robo-whatsapp/.env
+robo-whatsapp/.segredo-na-vercel
+robo-whatsapp/estado.json
+robo-whatsapp/estado.json.tmp
+robo-whatsapp/estado.trava
+robo-whatsapp/status.json
+robo-whatsapp/status.json.tmp
+robo-whatsapp/robo.pid
+robo-whatsapp/logs/
+robo-whatsapp/PAUSADO
+robo-whatsapp/PRECISA-PAREAR
