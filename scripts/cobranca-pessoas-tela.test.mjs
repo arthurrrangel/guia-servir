@@ -1,11 +1,11 @@
 /* Uma ação de cobrança por vínculo e culto, sem alterar a conta dos postos.
    Usa a tela real e a injeção sintética de estado do harness existente.
    Não abre links do WhatsApp nem consulta banco. Só aceita servidor local.
-   BASE=http://127.0.0.1:3497 CHROME_BIN=/caminho/chrome node scripts/cobranca-pessoas-tela.test.mjs */
+   BASE=http://127.0.0.1:3500 CHROME_BIN=/caminho/chrome node scripts/cobranca-pessoas-tela.test.mjs */
 import assert from 'node:assert/strict';
 import { chromium } from 'playwright';
 
-const BASE = process.env.BASE || 'http://127.0.0.1:3497';
+const BASE = process.env.BASE || 'http://127.0.0.1:3500';
 const origem = new URL(BASE);
 if (!['127.0.0.1', 'localhost', '[::1]'].includes(origem.hostname)) throw new Error('BASE precisa ser local');
 const browser = await chromium.launch({ ...(process.env.CHROME_BIN ? { executablePath: process.env.CHROME_BIN } : {}) });
