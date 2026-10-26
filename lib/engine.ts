@@ -2110,8 +2110,8 @@ export function msgConfirmar(S: Estado, data: string, link = '') {
   if (!nomes.length) return '';
   const quem = nomes.length === 1 ? nomes[0]
     : nomes.slice(0, -1).join(', ') + ' e ' + nomes[nomes.length - 1];
-  const dia_ = tipoDoDia(data) === 'follow' ? 'o Follow de sábado' : 'domingo';
-  const cab = `${quem}: vocês estão na escala d${dia_ === 'domingo' ? 'e domingo' : 'o Follow de sábado'} (${fmtDia(data)}) `
+  const deQue = dia?.evento ? `do ${dia.evento}` : tipoDoDia(data) === 'follow' ? 'do Follow de sábado' : 'de domingo';
+  const cab = `${quem}: vocês estão na escala ${deQue} (${fmtDia(data)}) `
     + `e ainda falta confirmar. `;
   const fim = `Se não puder, marca "não posso" que eu chamo outra pessoa, sem problema.`;
   return link
@@ -2367,8 +2367,10 @@ export function msgConvite(S: Estado, vid: string, base: string) {
 
 export function msgCobranca(S: Estado, vid: string, data: string, base: string) {
   const v = vol(S, vid);
-  const fns = Object.entries(S.escalas[data]?.slots || {}).filter(([, s]) => s?.vid === vid).map(([f]) => f);
-  return `${(v?.nome || '').trim()}, você está na escala d${tipoDoDia(data) === 'follow' ? `o Follow de sábado` : 'e domingo'} (${fmtDia(data)}) em ${fns.join(' e ')}. `
+  const dia = S.escalas[data];
+  const fns = Object.entries(dia?.slots || {}).filter(([, s]) => s?.vid === vid).map(([f]) => f);
+  const deQue = dia?.evento ? `do ${dia.evento}` : tipoDoDia(data) === 'follow' ? 'do Follow de sábado' : 'de domingo';
+  return `${(v?.nome || '').trim()}, você está na escala ${deQue} (${fmtDia(data)}) em ${fns.join(' e ')}. `
     + `Confirma no seu link até ${prazoDoDia(S, data)}?\n${base}/eu/${v?.token}#confirmar`;
 }
 
