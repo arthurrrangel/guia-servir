@@ -317,12 +317,15 @@ export type DressCode = {
   orientacoes: string;
   imagens: ImagemDoDress[];
 };
+/* `ingles`: o estilo no pedido à IA (lib/dress-code.ts). Calça sempre
+   "full-length": com "chinos" solto, o gerador desenhou bermuda de sarja (a
+   prova em produção, 27/10/2026). O líder muda isso nas orientações. */
 export const ESTILOS: { chave: EstiloDoDress; nome: string; ingles: string }[] = [
-  { chave: 'social', nome: 'Social', ingles: 'formal (blazer or dress shirt, tailored trousers or midi dress)' },
-  { chave: 'esporte-fino', nome: 'Esporte fino', ingles: 'smart casual (button-down or polo, chinos, clean shoes)' },
-  { chave: 'casual-arrumado', nome: 'Casual arrumado', ingles: 'polished casual (plain tee or knit, dark jeans, clean sneakers)' },
-  { chave: 'casual', nome: 'Casual', ingles: 'casual (t-shirt, jeans, sneakers)' },
-  { chave: 'tematico', nome: 'Temático', ingles: 'themed outfit (follow the notes)' },
+  { chave: 'social', nome: 'Social', ingles: 'formal (blazer or dress shirt, full-length tailored trousers, or a midi dress)' },
+  { chave: 'esporte-fino', nome: 'Esporte fino', ingles: 'smart casual (button-down or polo shirt, full-length chino trousers, clean shoes)' },
+  { chave: 'casual-arrumado', nome: 'Casual arrumado', ingles: 'polished casual (plain tee or knit, full-length dark jeans, clean sneakers)' },
+  { chave: 'casual', nome: 'Casual', ingles: 'casual (t-shirt, full-length jeans, sneakers)' },
+  { chave: 'tematico', nome: 'Temático', ingles: "themed outfit (follow the leader's rules)" },
 ];
 export const nomeDoEstilo = (e: string | null | undefined) => ESTILOS.find(x => x.chave === e)?.nome || null;
 export const LIMITES_DO_DRESS = { combinacoes: 3, cores: 5, imagens: 8, orientacoes: 400, nomeDaCor: 30, bytes: 5 * 1024 * 1024, ladoMaior: 1600, iaPorDia: 12 };

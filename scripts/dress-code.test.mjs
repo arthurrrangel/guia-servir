@@ -176,6 +176,19 @@ function louvor() {
     'o pedido à IA: as cores com o nome e o hex, o estilo, sem gente e sem link', p);
   const p2 = promptDaInspiracao({ ...DRESS, combinacoes: [...DRESS.combinacoes, { cores: [{ hex: '#111111', nome: 'Preto' }] }] }, 1);
   ok(p2.includes('Preto (#111111)') && !p2.includes('Bege'), 'a combinação escolhida');
+  /* as orientações do líder como regra, logo depois da cena e antes das cores
+     e do estilo (no fim, como "notas", o gerador desenhou bermuda com
+     "Calça comprida": a prova em produção, 27/10/2026) */
+  const p3 = promptDaInspiracao({ ...DRESS, orientacoes: 'Calça comprida; camisa "lisa" sem estampa.' });
+  const iRegra = p3.indexOf('MANDATORY'), iCores = p3.indexOf('Color palette'), iEstilo = p3.indexOf('Style:');
+  ok(iRegra > 0 && iRegra < iCores && iCores < iEstilo && p3.includes("Calça comprida; camisa 'lisa' sem estampa.") && /take priority over the style/.test(p3),
+    'as orientações vêm como regra, antes das cores e do estilo, sem aspas que quebrem o pedido', p3);
+  ok(/full-length chino trousers/.test(p3) && /No people, no faces/.test(p3), 'Esporte fino pede calça (e não "chinos" solto); sem gente continua', p3);
+  const p4 = promptDaInspiracao({ ...DRESS, estilo: null, orientacoes: '' });
+  ok(!p4.includes('MANDATORY') && /full-length trousers or a knee-length or longer skirt/.test(p4), 'sem orientações: nada de regra vazia; sem estilo: o modesto, com calça ou saia na altura', p4);
+  const comCalca = E.ESTILOS.filter(e => /trousers|jeans/.test(e.ingles));
+  ok(comCalca.length === 4 && comCalca.every(e => /full-length/.test(e.ingles)),
+    'todo estilo com calça pede calça comprida', JSON.stringify(E.ESTILOS.map(e => e.ingles)));
 }
 
 /* ------------------------------------------------------------ o que as portas devolvem */

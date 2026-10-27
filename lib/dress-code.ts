@@ -187,17 +187,24 @@ const semLinks = (t: string) => t.replace(/https?:\/\/\S+/g, ' ').replace(/\s+/g
 /** O pedido ao gerador de imagens. Roupas sem gente (flat lay / cabide):
     nada de rosto, corpo ou marca, que é onde os filtros dos geradores
     barram, e é o que serve de referência para a equipe. Em inglês: é a
-    língua em que esses modelos seguem melhor as instruções. */
+    língua em que esses modelos seguem melhor as instruções.
+
+    AS ORIENTAÇÕES DO LÍDER VÊM LOGO DEPOIS DA CENA, COMO REGRA. No fim do
+    pedido, entre aspas e como "notas", o gerador passou por cima delas: com
+    "Calça comprida; camisa lisa sem estampa." e o estilo Esporte fino,
+    desenhou bermuda (a prova em produção, 27/10/2026). Elas mandam no
+    estilo, mas não na cena: sem gente, sem texto e sem marca continua. */
 export function promptDaInspiracao(r: Pick<RascunhoDoDress, 'combinacoes' | 'estilo' | 'orientacoes'>, combinacao = 0): string {
   const c = r.combinacoes[Math.min(Math.max(combinacao, 0), r.combinacoes.length - 1)] || { cores: [] };
   const cores = c.cores.map(k => `${k.nome.trim()} (${k.hex})`).join(', ');
-  const estilo = ESTILOS.find(e => e.chave === r.estilo)?.ingles || 'modest, modern church worship team outfit';
-  const notas = semLinks(r.orientacoes || '').slice(0, 220);
+  const estilo = ESTILOS.find(e => e.chave === r.estilo)?.ingles
+    || 'modest, modern church worship team outfit (shirt or blouse, full-length trousers or a knee-length or longer skirt or dress, clean shoes)';
+  const notas = semLinks(r.orientacoes || '').replace(/"/g, "'").slice(0, 220);
   return [
-    'Editorial flat lay photograph of a complete outfit for a church worship team member (unisex options side by side), laid out neatly on a clean light neutral surface, soft natural daylight, high detail.',
+    'Editorial flat lay photograph of complete outfits for church worship team members (unisex options side by side), laid out neatly on a clean light neutral surface, soft natural daylight, high detail.',
+    notas ? `MANDATORY clothing rules from the team leader, written in Brazilian Portuguese. Understand them and follow every one of them exactly; they take priority over the style below: "${notas}".` : '',
     `Color palette strictly limited to: ${cores || 'neutral tones'}. Use these colors as the main garment colors.`,
     `Style: ${estilo}. Modest and appropriate for a church service.`,
-    notas ? `Leader notes (in Portuguese, follow them): "${notas}".` : '',
     'No people, no faces, no hands, no mannequins with faces, no text, no letters, no logos, no brand names.',
   ].filter(Boolean).join(' ');
 }
