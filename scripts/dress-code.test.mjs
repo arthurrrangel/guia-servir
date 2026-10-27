@@ -182,14 +182,23 @@ function louvor() {
      "Calça comprida"; com "opções" soltas, uma roupa seguiu a regra e a
      outra o estilo) */
   const p3 = promptDaInspiracao({ ...DRESS, orientacoes: 'Calça comprida; camisa "lisa" sem estampa.' });
-  const iRegra = p3.indexOf('MANDATORY'), iCores = p3.indexOf('Color palette'), iEstilo = p3.indexOf('Style, only for what the rules above do not specify:');
+  const iRegra = p3.indexOf('MANDATORY'), iCores = p3.indexOf('Color palette'), iEstilo = p3.indexOf('Overall style, only where the rules above leave room:');
   ok(iRegra > 0 && iRegra < iCores && iCores < iEstilo && p3.includes("Calça comprida; camisa 'lisa' sem estampa.") && /take priority over the style/.test(p3),
     'as orientações vêm como regra, antes das cores e do estilo, sem aspas que quebrem o pedido', p3);
   ok(/apply every rule to BOTH outfits and to every garment/.test(p3) && /two complete outfits/.test(p3) && /one for a man, one for a woman/.test(p3),
     'a regra vale para as duas roupas (e a cena pede uma de homem e uma de mulher)', p3);
-  ok(/full-length chino trousers/.test(p3) && /No people, no faces/.test(p3), 'Esporte fino pede calça (e não "chinos" solto); sem gente continua', p3);
+  /* com orientações, o estilo vai só pelo nome: a lista de peças do estilo
+     batia de frente com a regra (o "sneakers" do Casual contra o "sem tênis",
+     a prova em produção de 9750f7f) */
+  ok(p3.includes('leave room: smart casual.') && !/chino|polo/.test(p3)
+    && /full-length trousers, and skirts or dresses knee-length or longer, unless the rules above say otherwise/.test(p3) && /No people, no faces/.test(p3),
+    'com orientações: o estilo só pelo nome, a calça comprida como o modesto (a regra pode mudar); sem gente continua', p3);
+  const p5 = promptDaInspiracao({ ...DRESS, estilo: 'casual', orientacoes: 'Camisa social de manga longa; calça comprida; sapato, sem tênis.' });
+  const p6 = promptDaInspiracao({ ...DRESS, estilo: 'casual', orientacoes: '' });
+  ok(!/sneakers|t-shirt/.test(p5) && /leave room: casual\./.test(p5) && /Style: casual \(t-shirt, full-length jeans, sneakers\)\./.test(p6),
+    'o "sneakers" do Casual só vai quando não há orientações', `${p5}\n${p6}`);
   const p4 = promptDaInspiracao({ ...DRESS, estilo: null, orientacoes: '' });
-  ok(!p4.includes('MANDATORY') && !p4.includes('only for what the rules') && /Style: modest/.test(p4) && /full-length trousers or a knee-length or longer skirt/.test(p4),
+  ok(!p4.includes('MANDATORY') && !p4.includes('leave room') && !p4.includes('unless the rules') && /Style: modest/.test(p4) && /full-length trousers or a knee-length or longer skirt/.test(p4),
     'sem orientações: nada de regra vazia, e o estilo vale inteiro; sem estilo: o modesto, com calça ou saia na altura', p4);
   const comCalca = E.ESTILOS.filter(e => /trousers|jeans/.test(e.ingles));
   ok(comCalca.length === 4 && comCalca.every(e => /full-length/.test(e.ingles)),

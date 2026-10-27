@@ -198,7 +198,14 @@ const semLinks = (t: string) => t.replace(/https?:\/\/\S+/g, ' ').replace(/\s+/g
       · como regra, mas com "opções" soltas, uma roupa seguiu a regra e a
         outra o estilo: com o Casual e "Camisa social de manga longa; calça
         comprida; sapato, sem tênis.", saiu uma camisa social com sapato e
-        uma camiseta com tênis.
+        uma camiseta com tênis;
+      · com a regra valendo para as duas roupas, camisa e calça saíram
+        certas nas duas, mas uma veio de tênis: o "sneakers" da lista do
+        Casual competia com o "sem tênis".
+    Por isso, com orientações, o estilo vai só pelo nome ("casual"), sem a
+    lista de peças, que pode bater de frente com a regra; a calça comprida e
+    a saia na altura ficam como o modesto da igreja, "a não ser que a regra
+    diga outra coisa". Sem orientações, o estilo vai inteiro, com as peças.
     A cena pede duas roupas, de homem e de mulher (a equipe tem os dois).
     As regras não mandam na cena: sem gente, sem texto e sem marca continua. */
 export function promptDaInspiracao(r: Pick<RascunhoDoDress, 'combinacoes' | 'estilo' | 'orientacoes'>, combinacao = 0): string {
@@ -206,13 +213,15 @@ export function promptDaInspiracao(r: Pick<RascunhoDoDress, 'combinacoes' | 'est
   const cores = c.cores.map(k => `${k.nome.trim()} (${k.hex})`).join(', ');
   const estilo = ESTILOS.find(e => e.chave === r.estilo)?.ingles
     || 'modest, modern church worship team outfit (shirt or blouse, full-length trousers or a knee-length or longer skirt or dress, clean shoes)';
+  const estiloSoONome = estilo.replace(/\s*\(.*\)\s*$/, '');
   const notas = semLinks(r.orientacoes || '').replace(/"/g, "'").slice(0, 220);
   return [
     'Editorial flat lay photograph of two complete outfits for church worship team members, side by side (one for a man, one for a woman), laid out neatly on a clean light neutral surface, soft natural daylight, high detail.',
     notas ? `MANDATORY clothing rules from the team leader, written in Brazilian Portuguese: "${notas}". Understand them and apply every rule to BOTH outfits and to every garment in the image; they take priority over the style below.` : '',
     `Color palette strictly limited to: ${cores || 'neutral tones'}. Use these colors as the main garment colors.`,
-    notas ? `Style, only for what the rules above do not specify: ${estilo}.` : `Style: ${estilo}.`,
-    'Modest and appropriate for a church service.',
+    notas ? `Overall style, only where the rules above leave room: ${estiloSoONome}.` : `Style: ${estilo}.`,
+    notas ? 'Modest and appropriate for a church service: full-length trousers, and skirts or dresses knee-length or longer, unless the rules above say otherwise.'
+      : 'Modest and appropriate for a church service.',
     'No people, no faces, no hands, no mannequins with faces, no text, no letters, no logos, no brand names.',
   ].filter(Boolean).join(' ');
 }
