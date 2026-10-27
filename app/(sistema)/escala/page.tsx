@@ -18,6 +18,8 @@ import {
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
 import OrdemDoCulto from '@/components/escalas/OrdemDoCulto';
+import DressCodeDoDia from '@/components/escalas/DressCodeDoDia';
+import { temDressCode } from '@/lib/dress-code';
 import ChamarParaCobrir from '@/components/escalas/ChamarParaCobrir';
 import ChegadaDoDia from '@/components/escalas/ChegadaDoDia';
 import ComoFoiDoDia from '@/components/escalas/ComoFoiDoDia';
@@ -1276,6 +1278,15 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
           em dia que tem culto no banco e que ainda não passou. */}
       {!!S.config.repertorio && !passado && !!dia?.cultoId && !!equipe?.id && (
         <OrdemDoCulto S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id}
+          ocupado={ocupado} pinta={pinta} aviso={aviso} />
+      )}
+
+      {/* 116 · O DRESS CODE (26/10/2026): as cores, o estilo e as inspirações
+          de roupa do culto. Só no Louvor (o banco confere o mesmo), em dia que
+          tem culto no banco e que ainda não passou. Vai na mensagem do grupo
+          e no link de quem está escalado. */}
+      {temDressCode(equipe?.slug) && !passado && !!dia?.cultoId && !!equipe?.id && (
+        <DressCodeDoDia S={S} d={d} cultoId={dia.cultoId} equipeId={equipe.id} base={base}
           ocupado={ocupado} pinta={pinta} aviso={aviso} />
       )}
 

@@ -4,7 +4,7 @@
    isso, o Node de linha de comando (que só apaga os tipos, não os resolve)
    tenta importar `Estado` como valor em tempo de execução e o módulo nem
    carrega — foi o que impediu de testar este arquivo. */
-import { CONFIG_PADRAO, estadoVazio, garantirDia, linksDoRepertorio, ordemDoBanco, textoDeConvidadoValido } from './engine';
+import { CONFIG_PADRAO, estadoVazio, garantirDia, lerDressCode, linksDoRepertorio, ordemDoBanco, textoDeConvidadoValido } from './engine';
 import type { Estado, Nivel, Repertorio, Status } from './engine';
 
 /* =============================================================================
@@ -84,6 +84,8 @@ export type LinhaRecado = {
   /* 108 · quem é de fora da lista em cada posto ({id da função: texto}).
      Antes da 108 a coluna não existe e a chave não vem. */
   convidados?: Record<string, unknown> | null;
+  /* 116 · o dress code (só o Louvor). Antes da 116 a chave não vem. */
+  dress_code?: unknown;
 };
 export type LinhaConfig = { id?: number | null; dados: Record<string, any>; equipe_id: string | null };
 
@@ -347,6 +349,20 @@ export function montarEstado(l: LinhasDoBanco): Estado {
       if (!donoDoDia(data, r.culto_id) && jaVeioDe < r.culto_id) continue;
     }
     recadoVeioDe.set(data, r.culto_id);
+    /* 116 · A LINHA QUE GANHA LEVA TUDO, TAMBÉM O QUE ELA NÃO TEM. Uma linha
+       que perdeu deixava para trás o que a vencedora não trazia: com o
+       domingo regular lido antes do evento do Louvor no mesmo dia, o dia
+       apontava para o evento (`cultoId`) e mostrava o dress code, o recado,
+       o setlist e a ordem do domingo. A tela abria com a versão errada (o
+       dress code acusava MUDOU ao salvar), a mensagem levava o link errado,
+       e a resposta mudava com a ordem do heap (achado da revisão de 26/10).
+       Quando uma linha toma o lugar de outra, o que veio da outra sai. */
+    if (jaVeioDe !== undefined && S.escalas[data]) {
+      const d = S.escalas[data];
+      d.obs = '';
+      delete d.repertorio; delete d.ordem; delete d.convidados; delete d.dressCode;
+      delete d.relatorio; delete d.problemas; delete d.relatadoEm; delete d.relatadoPor;
+    }
     if ((r.obs || '').trim()) abrir(data).obs = r.obs;
     /* o setlist: só o que é link de playlist de verdade chega ao estado */
     if (linksDoRepertorio(r.repertorio).length) {
@@ -368,6 +384,9 @@ export function montarEstado(l: LinhasDoBanco): Estado {
       }
       if (Object.keys(conv).length) abrir(data).convidados = conv;
     }
+    /* 116 · o dress code: só o formato que o banco aceita chega ao estado */
+    const dress = lerDressCode(r.dress_code);
+    if (dress) abrir(data).dressCode = dress;
     /* relatório do fim do culto: mora na mesma linha do recado */
     if (r.relatorio || r.problemas) {
       const d = abrir(data);

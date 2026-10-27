@@ -83,6 +83,9 @@ const ROTAS_FECHADAS = [
      grupo: a folha tem nome de quem serve e o tema antes do culto */
   '/cronogramas', '/cronogramas/:caminho+',
   '/cronograma/:caminho+',
+  /* 116 · o dress code pelo link do grupo: um culto de um ministério, por um
+     id que não se adivinha. Não é página do site */
+  '/dress/:caminho+',
   /* lista de nomes por equipe, e convite de uso único */
   '/equipe/:caminho+',
   '/candidatura/:caminho+',
@@ -150,7 +153,7 @@ const NO_FOLLOW = [{ type: 'host', value: '(?:www\\.)?guiafollow\\.com' }];
 /* as páginas da igreja (app/(igreja)/) */
 const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade';
 /* o Servir (app/(servir)/) e o sistema (app/(sistema)/, menos o Follow Camp) */
-const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios';
+const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios|dress';
 
 const REGRAS_DOS_SITES = [
   /* o Guia Follow (ver acima): o retiro fica na igreja, a página é a raiz,

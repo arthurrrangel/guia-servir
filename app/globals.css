@@ -3551,6 +3551,109 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 .vol-setlist-obs p{ margin:0; font-size:var(--t-rot); line-height:1.5; color:var(--cinza); overflow-wrap:anywhere }
 .vol-setlist-obs p b{ color:var(--noite); font-weight:600 }
 
+/* 116 · O DRESS CODE (26/10/2026), na página de quem serve e na do link do
+   grupo (/dress/<id>), a mesma peça (components/DressCodeVisual.tsx).
+
+   As cores são amostras redondas (CAIXA NÃO TEM CANTO, MARCA É CÍRCULO),
+   com o nome embaixo: é o nome que a pessoa procura no armário, e o hex não
+   diz nada a ninguém. Combinações separadas por "ou", numa linha que corta a
+   largura. O estilo é uma etiqueta; as orientações, texto de ler. As
+   inspirações ficam em duas colunas no celular e três com espaço, e um toque
+   abre a imagem inteira, por cima de tudo. */
+.vol-dress{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e4); padding:var(--e4) 0 var(--e5); border-bottom:1px solid var(--linha) }
+.vol-dress:last-child{ border-bottom:0; padding-bottom:0 }
+.dc{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e5); min-width:0 }
+.dc-tit{ font-size:var(--t-corpo); font-weight:600; color:var(--noite) }
+.dc-bloco{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e3); min-width:0 }
+.dc-cores{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e3) }
+.dc-comb{ display:grid; grid-template-columns:minmax(0,1fr); gap:var(--e3) }
+.dc-ou{
+  display:flex; align-items:center; gap:var(--e3);
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase; color:var(--cinza);
+}
+.dc-ou::before,.dc-ou::after{ content:''; flex:1 1 0; height:1px; background:var(--linha) }
+/* 92px por cor: três por linha no celular, com o nome inteiro ("Azul-marinho"
+   numa linha só); cinco numa linha com a largura da página */
+.dc-amostras{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:var(--e4) var(--e3);
+}
+.dc-cor{ display:grid; justify-items:center; align-content:start; gap:var(--e2); min-width:0; text-align:center }
+/* o contorno de sombra separa do papel a cor que é quase ele (branco,
+   off-white, prata): sem ele a amostra branca some na página branca */
+.dc-bola{ display:block; width:56px; height:56px; border-radius:50%; box-shadow:inset 0 0 0 1px rgba(37,37,37,.12) }
+.dc-bola-clara{ box-shadow:inset 0 0 0 1px var(--linha3) }
+.dc-nome{ font-size:var(--t-apoio); line-height:1.3; font-weight:600; color:var(--noite); overflow-wrap:anywhere }
+.dc-texto{ display:grid; gap:var(--e3); justify-items:start; min-width:0 }
+.dc-estilo{
+  display:inline-flex; align-items:center; min-height:32px; padding:0 var(--e3);
+  border:1px solid var(--noite); color:var(--noite);
+  font-family:var(--fonte-display); font-weight:var(--p-forte);
+  font-size:var(--t-rot); letter-spacing:var(--tr); text-transform:uppercase;
+}
+.dc-ori{ margin:0; font-size:var(--t-ui); line-height:1.6; color:var(--noite); white-space:pre-line; overflow-wrap:anywhere; max-width:60ch }
+.dc-galeria{
+  list-style:none; margin:0; padding:0;
+  display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--e2);
+}
+.dc-galeria-1{ grid-template-columns:minmax(0,1fr); max-width:420px }
+@media (min-width:600px){ .dc-galeria-3{ grid-template-columns:repeat(3,minmax(0,1fr)) } }
+/* a miniatura é um botão (abre a imagem inteira): o botão da casa vem com
+   borda, enchimento e altura mínima, e aqui ele é só a foto */
+.dc-mini{
+  position:relative; display:block; width:100%; min-height:0; padding:0; border:0;
+  border-radius:var(--r4-foto); overflow:hidden; background:var(--card2); aspect-ratio:4/5; cursor:zoom-in;
+}
+.dc-mini:hover,.dc-mini:active{ background:var(--card2) }
+/* o fio por cima da foto: a inspiração de fundo branco não some no papel */
+.dc-mini::after{ content:''; position:absolute; inset:0; border-radius:inherit; box-shadow:inset 0 0 0 1px rgba(37,37,37,.1); pointer-events:none }
+.dc-mini:focus-visible{ outline:2px solid var(--noite); outline-offset:3px }
+.dc-mini img{ display:block; width:100%; height:100%; object-fit:cover }
+.dc-ia{
+  position:absolute; top:var(--e2); left:var(--e2); padding:2px 6px;
+  background:rgba(18,18,18,.72); color:#fff;
+  font-size:var(--t-rot); line-height:1.4; font-weight:var(--p-forte); letter-spacing:.06em;
+}
+/* a imagem inteira: por cima de tudo, escuro, a foto no meio sem cortar, o
+   fechar no alto e o anterior/próxima embaixo, onde o polegar alcança */
+.dc-inteira{
+  position:fixed; inset:0; z-index:90; width:100%; height:100%; max-width:none; max-height:none;
+  margin:0; border:0; background:#0e0e0e; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  padding:calc(var(--e7) + env(safe-area-inset-top, 0px)) var(--e3) calc(var(--e7) + var(--e3) + env(safe-area-inset-bottom, 0px));
+  overscroll-behavior:contain;
+}
+.dc-inteira:not([open]){ display:none }
+.dc-inteira::backdrop{ background:#0e0e0e }
+.dc-inteira-img{ display:block; max-width:100%; max-height:100%; object-fit:contain; user-select:none; -webkit-user-drag:none }
+.dc-inteira-bt{
+  position:absolute; display:inline-flex; align-items:center; justify-content:center;
+  width:var(--toque); height:var(--toque); min-height:var(--toque); padding:0;
+  border:1px solid rgba(255,255,255,.3); background:rgba(0,0,0,.35); color:#fff;
+}
+.dc-inteira-bt:hover,.dc-inteira-bt:active{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.55) }
+.dc-inteira-bt:focus-visible{ outline:2px solid #fff; outline-offset:2px }
+.dc-inteira-bt svg{ width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round }
+.dc-inteira-fechar{ top:calc(var(--e3) + env(safe-area-inset-top, 0px)); right:var(--e3) }
+.dc-inteira-ant{ bottom:calc(var(--e3) + env(safe-area-inset-bottom, 0px)); left:var(--e3) }
+.dc-inteira-prox{ bottom:calc(var(--e3) + env(safe-area-inset-bottom, 0px)); right:var(--e3) }
+.dc-inteira-conta{
+  position:absolute; left:50%; bottom:calc(var(--e3) + env(safe-area-inset-bottom, 0px)); transform:translateX(-50%);
+  display:inline-flex; align-items:center; min-height:var(--toque);
+  font-size:var(--t-apoio); font-weight:600; color:rgba(255,255,255,.82); font-variant-numeric:tabular-nums;
+}
+/* a página do link do grupo: o chapéu com o ministério, a data grande, e a
+   peça logo embaixo (sem nada para tocar além das imagens) */
+.dc-cab{ padding:var(--e6) 0 var(--e5); margin-bottom:var(--e5); border-bottom:1px solid var(--noite) }
+.dc-cab h1{
+  font-family:var(--fonte-display); font-weight:700; font-size:var(--d-secao); line-height:1.1;
+  letter-spacing:-.02em; margin:var(--e2) 0 0; color:var(--noite); text-wrap:balance;
+}
+.dc-cab h1::first-letter{ text-transform:uppercase }
+.dc-cab .vol-sub{ margin-top:var(--e2) }
+.dc-pe{ margin:var(--e6) 0 0; font-size:var(--t-apoio); line-height:1.6; color:var(--cinza); max-width:52ch }
+
 /* a próxima escala: a data é o assunto, então é ela que fica grande */
 .vol-prox{ padding:var(--e5) 0 var(--e1) }
 .vol-prox-fn{

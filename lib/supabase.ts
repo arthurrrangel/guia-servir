@@ -15,14 +15,12 @@
    expressão regular, que foi como `cron-guarda.test.mjs` ficou verde uma vez
    com o guarda removido. Uma palavra aqui destrava testar de verdade. */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { PADRAO_DO_SUPABASE } from './supabase-chaves';
 
 /* A chave "anon" é pública por design: ela só diz QUAL projeto é. Quem decide o
    que cada pessoa pode ver é o RLS dentro do banco, que já está fechado:
    nenhuma tabela é legível sem login de líder autorizado. */
-const PADRAO = {
-  url: 'https://qjtcaijhgldypudzyafz.supabase.co',
-  key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqdGNhaWpoZ2xkeXB1ZHp5YWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5MzkzMzcsImV4cCI6MjEwMTUxNTMzN30.9SHDqeDMkiNCr5pJdFoQMO87EcKRgusaAyCM10ojJKU',
-};
+const PADRAO = PADRAO_DO_SUPABASE;
 const K = 'escala.credenciais';
 
 export type Credenciais = { url: string; key: string };

@@ -49,6 +49,8 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
            '/cronograma/' COM a barra: sem ela, o prefixo pegaria /cronogramas
            (que já está acima) e nada mais; com ela, fica claro que é a folha */
         '/cronogramas', '/cronograma/',
+        /* 116 · o dress code pelo link do grupo */
+        '/dress/',
         /* listas por equipe e convites: nome de pessoa, ou token de uso único */
         '/equipe/', '/candidatura/',
         /* Demandas: o link pessoal do membro é `/demandas?t=<token>`, e o

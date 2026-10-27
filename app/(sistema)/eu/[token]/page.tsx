@@ -32,6 +32,10 @@ import { type Folha as FolhaDoCulto, folhaDoBanco } from '@/lib/cronograma';
 import ComoFoiNoLink from '@/components/escalas/ComoFoiNoLink';
 import { type CultoDeHoje, type ComoFoiMeu, hojeDoLink, comoFoiDoLink } from '@/lib/chegada';
 import { type Troca, type Evento, type Vaga, diasDaGrade, rotuloDoDia } from '@/lib/trocas';
+/* 116 · o dress code do Louvor */
+import DressCodeVisual from '@/components/DressCodeVisual';
+import { type DressDoLink, dressDoLink } from '@/lib/dress-code';
+import { lerCredenciais } from '@/lib/supabase';
 
 type Item = {
   culto_id: string; data: string; funcao: string; status: string; obs: string | null;
@@ -239,6 +243,9 @@ export default function Eu() {
   /* 109 · os cultos em que a pessoa é o dirigente da semana (a Palavra e os
      avisos são dela). Mesma regra: sem a 109 no banco, nada aparece. */
   const [cronos, setCronos] = useState<FolhaDoCulto[]>([]);
+  /* 116 · o dress code dos cultos em que a pessoa serve (só o Louvor tem).
+     Mesma regra: sem a 116 no banco a chamada falha e nada aparece. */
+  const [dressCodes, setDressCodes] = useState<DressDoLink[]>([]);
 
   /* 103 · as trocas e a agenda do ministério. Falha aqui não derruba nada:
      a seção da troca e os eventos da grade simplesmente não aparecem. */
@@ -246,7 +253,7 @@ export default function Eu() {
     const s = sb();
     if (!s) return;
     try {
-      const [tr, ev, or, ch, hj, cf, cr] = await Promise.all([
+      const [tr, ev, or, ch, hj, cf, cr, dc] = await Promise.all([
         s.rpc('eu_trocas', { p_token: token }),
         s.rpc('eu_eventos', { p_token: token }),
         s.rpc('eu_ordens', { p_token: token }),
@@ -254,6 +261,7 @@ export default function Eu() {
         s.rpc('eu_hoje', { p_token: token }),
         s.rpc('eu_como_foi', { p_token: token }),
         s.rpc('eu_cronogramas', { p_token: token }),
+        s.rpc('eu_dress_codes', { p_token: token }),
       ]);
       if (!tr.error) { setTrocas((tr.data || []) as Troca[]); setTrocasOk(true); }
       if (!ev.error) setEventos((ev.data || []) as Evento[]);
@@ -262,6 +270,7 @@ export default function Eu() {
       if (!hj.error) setHojeLink(hojeDoLink(hj.data));
       if (!cf.error) setComoFoi(comoFoiDoLink(cf.data));
       if (!cr.error && (cr.data as any)?.ok) setCronos((((cr.data as any).cultos || []) as unknown[]).map(folhaDoBanco).filter(Boolean) as FolhaDoCulto[]);
+      if (!dc.error) setDressCodes(dressDoLink(dc.data));
     } catch { /* a tela fica como estava */ }
   }, [token]);
   /* 103 · depois de acrescentar ou tirar função, "Você faz" relê o banco */
@@ -296,6 +305,8 @@ export default function Eu() {
       if ((d as any).comoFoi) setComoFoi(comoFoiDoLink((d as any).comoFoi));
       /* 109 · e o cartão do dirigente */
       if ((d as any).cronogramas) setCronos(((d as any).cronogramas as unknown[]).map(folhaDoBanco).filter(Boolean) as FolhaDoCulto[]);
+      /* 116 · e o dress code */
+      if ((d as any).dressCodes) setDressCodes(dressDoLink((d as any).dressCodes));
       setDomingos(d.dias); setFase('ok');
       return;
     }
@@ -1371,6 +1382,28 @@ export default function Eu() {
                 </div>
               </div>
             </div>
+          </section>
+        )}
+
+        {/* 116 · O DRESS CODE. Pedido do Louvor: "que ninguém precise ficar
+            perguntando no grupo quais roupas ou cores deverá utilizar". As
+            cores de cada culto em que a pessoa serve, o estilo, as
+            orientações e as imagens de inspiração, logo depois de quando ela
+            serve. */}
+        {!!dressCodes.length && (
+          <section className="vol-secao" id="dress-code">
+            <div className="vol-secao-cab">
+              <span className="rot">Dress code</span>
+              <span className="vol-secao-nota">
+                {dressCodes.length === 1 ? '1 culto' : `${dressCodes.length} cultos`}
+              </span>
+            </div>
+            {dressCodes.map(x => (
+              <div className="vol-dress" key={x.culto_id}>
+                <div className="vol-rep-dia">{diaLongo(x.data, x.evento)}</div>
+                <DressCodeVisual dress={x.dress} supabaseUrl={lerCredenciais()?.url || ''} />
+              </div>
+            ))}
           </section>
         )}
 

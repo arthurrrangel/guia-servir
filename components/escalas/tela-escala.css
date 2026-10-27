@@ -442,3 +442,136 @@
   white-space:pre-line;overflow-wrap:anywhere;max-width:72ch;
 }
 .es .es-cf-item .es-c-tit .es-ec-cf-texto{display:block;margin-top:2px;font-weight:400}
+
+/* 116 · o dress code do Louvor (26/10/2026). Fechado, um resumo numa caixa:
+   as cores em pontos com os nomes ao lado (combinações separadas por "ou"),
+   o estilo e as orientações numa linha, e as miniaturas. Aberto, o
+   formulário numa caixa cinza, em partes empilhadas na ordem em que se
+   pensa: cores (com a paleta dentro da combinação marcada), estilo,
+   orientações, inspirações e a prévia da mensagem do grupo. */
+/* cada grade com a coluna presa na largura dela (minmax(0,1fr)): a paleta tem
+   um teto de 560px, e sem isto a coluna automática crescia até ele no
+   celular, e a paleta saía pela direita (a prova de ponta a ponta pegou) */
+.es .es-ec-dc{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e2);margin:0 0 var(--es-e5)}
+.es .es-ec-dc-cab{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px var(--es-e3)}
+/* o título recebe o foco quando o formulário abre: contorno só pelo teclado */
+.es .es-ec-dc-cab > .es-ec-rep-tit:focus{outline:none}
+.es .es-ec-dc-cab > .es-ec-rep-tit:focus-visible{outline:2px solid var(--es-foco);outline-offset:4px}
+.es .es-ec-dc-nota{font-size:12px;line-height:17px;color:var(--es-mudo)}
+.es .es-ec-dc-vazio{margin:0;font-size:13px;line-height:19px;color:var(--es-ink-2);max-width:72ch}
+.es .es-ec-dc-resumo{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3);padding:var(--es-e3);
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);
+}
+.es .es-ec-dc-linhas{list-style:none;margin:0;padding:0;display:grid;gap:var(--es-e2)}
+.es .es-ec-dc-linha{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e1) var(--es-e2);min-width:0}
+.es .es-ec-dc-ou{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--es-mudo)}
+.es .es-ec-dc-pontos{display:inline-flex;flex-wrap:wrap;gap:4px}
+/* marca é círculo: a cor num ponto, com um fio que separa o branco do branco */
+.es .es-ec-dc-ponto{display:inline-block;flex:none;width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(24,24,27,.14)}
+.es .es-ec-dc-ponto-peq{width:14px;height:14px}
+.es .es-ec-dc-ponto-claro{box-shadow:inset 0 0 0 1px var(--es-linha-3)}
+.es .es-ec-dc-nomes{min-width:0;font-size:14px;line-height:20px;font-weight:600;color:var(--es-ink);overflow-wrap:anywhere}
+.es .es-ec-dc-ori{
+  margin:0;max-width:72ch;font-size:13px;line-height:19px;color:var(--es-ink-2);overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;
+}
+.es .es-ec-dc-minis{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.es .es-ec-dc-minis img{display:block;width:48px;height:60px;object-fit:cover;border-radius:var(--es-r2);background:var(--es-sup-3);outline:1px solid var(--es-linha);outline-offset:-1px}
+
+/* o formulário */
+.es .es-ec-dc-ed{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e5);min-width:0;padding:var(--es-e4);
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r3);background:var(--es-sup-2);
+}
+.es .es-ec-dc-parte{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e2);min-width:0}
+.es .es-ec-dc-rot{font-size:13px;line-height:18px;font-weight:600;color:var(--es-ink)}
+.es .es-ec-dc-dica{margin:0;max-width:72ch;font-size:12px;line-height:17px;color:var(--es-mudo)}
+.es .es-ec-dc-combs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e2)}
+.es .es-ec-dc-comb{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e3);min-width:0;padding:var(--es-e3);
+  border:1px solid var(--es-linha);border-radius:var(--es-r3);background:var(--es-sup);
+}
+/* a combinação que a paleta está pintando: contorno em tinta, como a ficha escolhida */
+.es .es-ec-dc-comb-ativa{border-color:var(--es-ink);box-shadow:inset 0 0 0 1px var(--es-ink)}
+.es .es-ec-dc-comb-cab{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:var(--es-e1) var(--es-e3)}
+.es .es-ec-dc-comb-tit{font-size:13px;line-height:18px;font-weight:600;color:var(--es-ink)}
+.es .es-ec-dc-comb-acoes{display:flex;flex-wrap:wrap;gap:2px;margin-right:-6px}
+.es .es-ec-dc-escolhidas{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+/* a cor escolhida é o botão que a tira (o x diz isso), com 44 de toque no dedo */
+.es .es-ec-dc-escolhida{
+  display:inline-flex;align-items:center;gap:6px;min-height:var(--es-h-peq);padding:0 10px 0 6px;
+  border:1px solid var(--es-linha-2);border-radius:22px;background:var(--es-sup-2);
+  font-size:13px;line-height:18px;font-weight:500;color:var(--es-ink);
+  transition:border-color var(--es-t),background var(--es-t);
+}
+.es .es-ec-dc-escolhida:hover{border-color:var(--es-bad-ln);background:var(--es-bad-bg)}
+.es .es-ec-dc-escolhida:disabled{cursor:not-allowed;opacity:.6}
+.es .es-ec-dc-escolhida svg{width:14px;height:14px;color:var(--es-mudo)}
+.es .es-ec-dc-escolhida:hover svg{color:var(--es-bad)}
+.es .es-ec-dc-escolhida-nome{overflow-wrap:anywhere}
+.es .es-ec-dc-sem{margin:0;font-size:13px;line-height:19px;color:var(--es-mudo)}
+/* a paleta: amostras de 32px num alvo de 44, sete por linha num celular */
+.es .es-ec-dc-escolha{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--es-e2);padding-top:var(--es-e3);border-top:1px solid var(--es-linha)}
+.es .es-ec-dc-paleta{display:grid;grid-template-columns:repeat(auto-fill,minmax(44px,1fr));gap:2px;max-width:560px}
+.es .es-ec-dc-tinta{display:flex;align-items:center;justify-content:center;width:100%;height:44px;border-radius:var(--es-r2);transition:background var(--es-t)}
+.es .es-ec-dc-tinta:hover{background:var(--es-sup-3)}
+.es .es-ec-dc-tinta:disabled{cursor:not-allowed;opacity:.55}
+.es .es-ec-dc-tinta-bola{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(24,24,27,.14)}
+.es .es-ec-dc-tinta-bola.es-ec-dc-ponto-claro{box-shadow:inset 0 0 0 1px var(--es-linha-3)}
+.es .es-ec-dc-tinta[aria-pressed="true"] .es-ec-dc-tinta-bola{box-shadow:0 0 0 2px var(--es-sup),0 0 0 4px var(--es-ink)}
+.es .es-ec-dc-tinta-bola svg{width:16px;height:16px;stroke-width:2.6}
+.es .es-ec-dc-mais{justify-self:start;margin-left:-10px}
+.es .es-ec-dc-outra{display:flex;flex-wrap:wrap;align-items:flex-end;gap:var(--es-e2) var(--es-e3)}
+.es .es-ec-dc-seletor-rot{display:inline-flex}
+.es .es-ec-dc-seletor{
+  width:var(--es-h);height:var(--es-h);min-height:0;padding:0;
+  border:1px solid var(--es-linha-2);border-radius:var(--es-r2);background:var(--es-sup);cursor:pointer;
+}
+.es .es-ec-dc-seletor::-webkit-color-swatch-wrapper{padding:5px}
+.es .es-ec-dc-seletor::-webkit-color-swatch{border:0;border-radius:50%}
+.es .es-ec-dc-seletor::-moz-color-swatch{border:0;border-radius:50%}
+.es .es-ec-dc-outra-nome{flex:1 1 180px;margin-bottom:0}
+.es .es-ec-dc-outra-acoes{display:flex;flex-wrap:wrap;gap:var(--es-e1)}
+.es .es-ec-dc-campo{margin-bottom:0}
+/* as inspirações: a foto em 4 por 5 (o formato da roupa) e as duas saídas
+   embaixo dela, com o toque inteiro */
+.es .es-ec-dc-imgs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:var(--es-e3) var(--es-e2);max-width:760px}
+.es .es-ec-dc-img{display:grid;grid-template-columns:minmax(0,1fr);gap:2px;align-content:start;min-width:0}
+.es .es-ec-dc-foto{
+  position:relative;display:block;aspect-ratio:4 / 5;overflow:hidden;
+  border-radius:var(--es-r3);background:var(--es-sup-3);outline:1px solid var(--es-linha);outline-offset:-1px;
+}
+.es .es-ec-dc-foto img{display:block;width:100%;height:100%;object-fit:cover}
+.es .es-ec-dc-espera{
+  display:flex;align-items:center;justify-content:center;padding:var(--es-e3);text-align:center;
+  font-size:12px;line-height:17px;color:var(--es-ink-2);
+  background:repeating-linear-gradient(-45deg,var(--es-sup-3) 0 8px,var(--es-sup-2) 8px 16px);
+}
+.es .es-ec-dc-selo{
+  position:absolute;top:6px;left:6px;padding:1px 6px;border-radius:var(--es-r1);
+  background:rgba(24,24,27,.8);color:#fff;font-size:11px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+}
+.es .es-ec-dc-img-acoes{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px}
+.es .es-ec-dc-img-acoes > .es-btn{flex:1 1 auto;padding:0 6px}
+.es .es-ec-dc-acoes{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2)}
+/* os campos de arquivo do navegador ficam atrás dos botões "Enviar fotos" e
+   "Trocar" (o botão é que entra no Tab e no leitor de tela) */
+.es .es-ec-dc-arquivo{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap;opacity:0;pointer-events:none}
+.es .es-ec-dc-para{display:inline-flex;align-items:center;gap:var(--es-e2);font-size:13px;line-height:18px;color:var(--es-ink-2)}
+.es .es-ec-dc-msg > summary{
+  display:inline-flex;align-items:center;min-height:var(--es-h-peq);font-size:13px;line-height:18px;color:var(--es-ink-2);
+  cursor:pointer;text-decoration:underline;text-underline-offset:3px;
+}
+.es .es-ec-dc-msg > summary::-webkit-details-marker{display:none}
+.es .es-ec-dc-msg > summary:focus-visible{outline:2px solid var(--es-foco);outline-offset:2px}
+.es .es-ec-dc-msg[open] > summary{margin-bottom:var(--es-e2)}
+.es .es-ec-dc-erro{margin:0}
+.es .es-ec-dc-pe{display:flex;flex-wrap:wrap;align-items:center;gap:var(--es-e2);padding-top:var(--es-e4);border-top:1px solid var(--es-linha)}
+.es .es-ec-dc-tirar{margin-left:auto}
+@media (max-width:719px){
+  .es .es-ec-dc-ed{padding:var(--es-e3);gap:var(--es-e4)}
+  /* no celular, salvar é a linha inteira, e tirar vem logo depois do cancelar */
+  .es .es-ec-dc-pe > .es-btn.es-pri{flex:1 1 100%}
+  .es .es-ec-dc-tirar{margin-left:0}
+}

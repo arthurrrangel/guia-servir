@@ -297,6 +297,91 @@ export type Slot = {
      o líder ou o sorteio refez nasce sem ele, porque é decisão nova. */
   vidNoBanco?: string | null;
 };
+/* =============================================================================
+   116 · O DRESS CODE DO LOUVOR (26/10/2026)
+
+   O líder do Louvor pediu, e o Arthur trouxe: definir antes como quem está
+   escalado se veste em cada culto. O resto do dress code (a paleta, o
+   formato, a IA) mora em lib/dress-code.ts; aqui ficam os tipos e o que a
+   mensagem do grupo e a assinatura do envio precisam, porque o motor não
+   importa nada.
+   ============================================================================= */
+export type CorDoDress = { hex: string; nome: string };
+export type CombinacaoDoDress = { cores: CorDoDress[] };
+export type ImagemDoDress = { caminho: string; ia?: boolean };
+export type EstiloDoDress = 'social' | 'esporte-fino' | 'casual-arrumado' | 'casual' | 'tematico';
+export type DressCode = {
+  v: 1; id: string; atualizado_em?: string;
+  combinacoes: CombinacaoDoDress[];
+  estilo: EstiloDoDress | null;
+  orientacoes: string;
+  imagens: ImagemDoDress[];
+};
+export const ESTILOS: { chave: EstiloDoDress; nome: string; ingles: string }[] = [
+  { chave: 'social', nome: 'Social', ingles: 'formal (blazer or dress shirt, tailored trousers or midi dress)' },
+  { chave: 'esporte-fino', nome: 'Esporte fino', ingles: 'smart casual (button-down or polo, chinos, clean shoes)' },
+  { chave: 'casual-arrumado', nome: 'Casual arrumado', ingles: 'polished casual (plain tee or knit, dark jeans, clean sneakers)' },
+  { chave: 'casual', nome: 'Casual', ingles: 'casual (t-shirt, jeans, sneakers)' },
+  { chave: 'tematico', nome: 'Temático', ingles: 'themed outfit (follow the notes)' },
+];
+export const nomeDoEstilo = (e: string | null | undefined) => ESTILOS.find(x => x.chave === e)?.nome || null;
+export const LIMITES_DO_DRESS = { combinacoes: 3, cores: 5, imagens: 8, orientacoes: 400, nomeDaCor: 30, bytes: 5 * 1024 * 1024, ladoMaior: 1600, iaPorDia: 12 };
+const UUID_DO_DRESS = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const CAMINHO_DO_DRESS = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(webp|jpg|png)$/;
+const HEX_DO_DRESS = /^#[0-9a-f]{6}$/;
+export const caminhoDoDressValido = (c: unknown): c is string => typeof c === 'string' && CAMINHO_DO_DRESS.test(c);
+
+/** O dress code que veio do banco, como a tela usa. Formato torto não chega
+    (null): o banco já confere (dress_code_valido), e isto é a segunda trava. */
+export function lerDressCode(x: unknown): DressCode | null {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
+  const o = x as Record<string, any>;
+  if (typeof o.id !== 'string' || !UUID_DO_DRESS.test(o.id) || !Array.isArray(o.combinacoes) || !o.combinacoes.length) return null;
+  const L = LIMITES_DO_DRESS;
+  const combinacoes: CombinacaoDoDress[] = [];
+  for (const c of o.combinacoes.slice(0, L.combinacoes)) {
+    const cores = (Array.isArray(c?.cores) ? c.cores : [])
+      .filter((k: any) => k && typeof k.hex === 'string' && HEX_DO_DRESS.test(k.hex) && typeof k.nome === 'string' && k.nome.trim())
+      .slice(0, L.cores)
+      .map((k: any) => ({ hex: k.hex, nome: k.nome.trim().slice(0, L.nomeDaCor) }));
+    if (cores.length) combinacoes.push({ cores });
+  }
+  if (!combinacoes.length) return null;
+  const estilo = ESTILOS.some(e => e.chave === o.estilo) ? (o.estilo as EstiloDoDress) : null;
+  const orientacoes = typeof o.orientacoes === 'string' ? o.orientacoes.slice(0, L.orientacoes) : '';
+  const imagens = (Array.isArray(o.imagens) ? o.imagens : [])
+    .filter((im: any) => caminhoDoDressValido(im?.caminho))
+    .slice(0, L.imagens)
+    .map((im: any) => (im.ia === true ? { caminho: im.caminho, ia: true } : { caminho: im.caminho }));
+  return { v: 1, id: o.id, atualizado_em: typeof o.atualizado_em === 'string' ? o.atualizado_em : undefined, combinacoes, estilo, orientacoes, imagens };
+}
+export const linkDoDressCode = (site: string, id: string) => `${site.replace(/\/+$/, '')}/dress/${id}`;
+
+const combinacaoEmTexto = (c: CombinacaoDoDress) => c.cores.map(k => k.nome.trim()).join(' + ');
+/* orientações: as quebras do líder viram frases na mesma linha */
+const orientacoesEmLinha = (t: string) => t.split('\n').map(x => x.trim()).filter(Boolean).join(' ');
+
+/** As linhas do bloco DRESS CODE da mensagem do WhatsApp. `site`: o
+    endereço público (https://guiaservir.com); sem ele, sem a linha do link. */
+export function linhasDoDressCode(d: DressCode, site?: string | null): string[] {
+  const L = ['DRESS CODE'];
+  d.combinacoes.forEach((c, i) => L.push(i === 0 ? combinacaoEmTexto(c) : `ou ${combinacaoEmTexto(c)}`));
+  const estilo = nomeDoEstilo(d.estilo);
+  const ori = orientacoesEmLinha(d.orientacoes || '');
+  if (estilo || ori) L.push([estilo ? `${estilo}.` : '', ori].filter(Boolean).join(' '));
+  if (site) L.push(`${d.imagens.length ? 'Cores e inspirações' : 'Ver as cores'}: ${linkDoDressCode(site, d.id)}`);
+  return L;
+}
+
+/** O pedaço do dress code na assinatura do envio. É o texto do bloco SEM o
+    endereço (o da tela e o do robô são de ambientes diferentes e não podem
+    dar assinaturas diferentes), mais o que muda o texto do link: o id e se
+    há imagens. Imagem nova não pede mensagem nova: ela aparece no link que
+    já foi para o grupo. */
+export function parteDaAssinaturaDoDress(d: DressCode): string {
+  return `${linhasDoDressCode(d, null).join('/')}|${d.id}|${d.imagens.length ? 'i' : '-'}`;
+}
+
 export type Dia = {
   cultoId?: string; slots: Record<string, Slot>; plantao: string[]; obs: string;
   /* relatório que o líder escalado escreve no fim do culto */
@@ -322,6 +407,9 @@ export type Dia = {
      conta como coberto. Só vale enquanto ninguém da lista está no posto
      (ver `convidadoNoPosto`). */
   convidados?: Record<string, string>;
+  /* 116 · o dress code do culto (só o Louvor): as cores, o estilo, as
+     orientações e as imagens de inspiração. Vai na mensagem do grupo. */
+  dressCode?: DressCode;
 };
 export type Config = {
   limitePadrao: number; janelaCarga: number; plantaoQtd: number;
@@ -2289,6 +2377,10 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
   /* 111 · o compasso vai na mensagem ao lado do BPM: mudar pede mensagem
      nova. Só entra quando existe, e a assinatura de antes não muda. */
   if (mus.length) partes.push('m=' + mus.map(i => `${i.titulo}/${i.tom || ''}/${i.bpm || ''}/${i.nota || ''}${i.quem ? `/q:${i.quem}` : ''}${i.compasso ? `/c:${i.compasso}` : ''}`).join(','));
+  /* 116 · o dress code vai na mensagem: mudar a cor, o estilo ou as
+     orientações depois do envio pede mensagem nova. Só entra quando existe:
+     o dia sem dress code guarda a assinatura de antes (e o robô não reenvia) */
+  if (dia?.dressCode) partes.push('d=' + parteDaAssinaturaDoDress(dia.dressCode));
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
@@ -2351,6 +2443,15 @@ export function msgEscala(S: Estado, data: string,
   }
   const obs = observacoesDasMusicas(mus);
   if (obs.length) { L.push('OBSERVAÇÕES'); obs.forEach(o => L.push(o)); L.push(''); }
+  /* 116 · o dress code, em todos os recortes (a banda, o vocal e o som se
+     vestem igual), com o link das cores e das inspirações. O endereço é o
+     do link de confirmar (já o público: guiaservir.com) */
+  if (dia.dressCode) {
+    let site: string | null = null;
+    try { site = opts.link ? new URL(opts.link).origin : null; } catch { site = null; }
+    linhasDoDressCode(dia.dressCode, site).forEach(l => L.push(l));
+    L.push('');
+  }
   /* quem já salvou os Ajustes alguma vez guardou o rodapé padrão ANTIGO,
      que fala em "link pessoal". Ao lado do link do grupo (que é o mesmo para
      todos), ele vira o novo; texto que o líder escreveu fica como está. */

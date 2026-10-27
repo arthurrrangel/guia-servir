@@ -10,6 +10,7 @@ import type { MusicaDoBanco } from './ordem-do-culto';
 import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
 import type { ComoFoiDaEquipe, PresencaDoLider } from './chegada';
 import type { PedidoNaTela, RoboNaTela } from './robo-pedidos';
+import { type DressCode, type RascunhoDoDress, ARMARIO as ARMARIO_DO_DRESS, caminhoNovoDaImagem, lerDressCode, uuidV4 } from './dress-code';
 import { planoDeMover, type LinhaDaVaga, type PedidoDeMover } from './mover';
 import { montarEstado, paraSalvarDia, linhasDaEquipe, DIAS_DE_HISTORICO } from './ponte';
 import { planoDoDia, planoDoPlantao, type SlotDesejado, type LinhaAtual } from './escala-diff';
@@ -520,6 +521,66 @@ export async function enviarLetra(caminho: string, arquivo: Blob): Promise<strin
   if (/mime|content type|invalid_mime/i.test(txt)) throw new Error('LETRA_NAO_PDF');
   if (st === 403 || st === 401 || /row-level security|unauthorized|not allowed|permission/i.test(txt)) throw new Error('LETRA_SEM_PERMISSAO');
   throw new Error('LETRA_REDE');
+}
+
+/* =============================================================================
+   116 · O DRESS CODE DO LOUVOR — 26/10/2026.
+
+   Gravar é `salvar_dress_code`: o banco confere a liderança, o Louvor e o
+   formato, e devolve MUDOU (com o que está lá) se outra pessoa gravou depois
+   que a tela abriu. As imagens vão para o armário `dress-code`, na pasta do
+   ministério, ANTES de gravar: o dress code só aponta para arquivo que já
+   está lá. A imagem gerada por IA vem pela rota do servidor (o gerador
+   custa, e quem conta é o banco).
+   ============================================================================= */
+export type ResultadoDoDress = { ok: true; dress: DressCode | null } | { ok: false; erro: string; atual?: DressCode | null };
+
+export async function salvarDressCode(cultoId: string, equipeId: string, rascunho: RascunhoDoDress | null, antes: DressCode | null): Promise<ResultadoDoDress> {
+  const p_dress = rascunho && {
+    combinacoes: rascunho.combinacoes.map(c => ({ cores: c.cores.map(k => ({ hex: k.hex.toLowerCase(), nome: k.nome.trim() })) })),
+    estilo: rascunho.estilo, orientacoes: rascunho.orientacoes.replace(/\r\n?/g, '\n').trim(),
+    imagens: rascunho.imagens.map(i => (i.ia ? { caminho: i.caminho, ia: true } : { caminho: i.caminho })),
+  };
+  const { data: r, error } = await sb()!.rpc('salvar_dress_code', { p_culto: cultoId, p_equipe: equipeId, p_dress, p_antes: antes });
+  if (error) throw error;
+  const o = (r || {}) as any;
+  if (o.ok === true) return { ok: true, dress: lerDressCode(o.dress) };
+  return { ok: false, erro: String(o.erro || 'FALHA'), atual: o.erro === 'MUDOU' ? lerDressCode(o.atual) : undefined };
+}
+
+/** Sobe uma imagem já preparada (lib/dress-code-imagem.ts) e devolve o caminho. */
+export async function enviarImagemDoDress(equipeId: string, blob: Blob, ext: 'webp' | 'jpg' | 'png'): Promise<string> {
+  const tipo = ext === 'webp' ? 'image/webp' : ext === 'png' ? 'image/png' : 'image/jpeg';
+  const caminho = caminhoNovoDaImagem(equipeId, ext, uuidV4());
+  /* o tipo vai no próprio arquivo (o storage-js ignora a opção num Blob; ver enviarLetra) */
+  const arquivo = blob.slice(0, blob.size, tipo);
+  const { error } = await sb()!.storage.from(ARMARIO_DO_DRESS).upload(caminho, arquivo, { contentType: tipo, upsert: false, cacheControl: '31536000' });
+  if (!error) return caminho;
+  const e = error as any;
+  const st = Number(e.statusCode || e.status || 0);
+  const txt = `${e.error || ''} ${e.message || ''}`;
+  /* o armário ainda não existe (a 116 não foi aplicada): dito com palavras,
+     e não como se fosse a internet */
+  if (/bucket not found/i.test(txt) || Number(e.statusCode) === 404) throw new Error('IMAGEM_SEM_ARMARIO');
+  if (st === 413 || /too large|maximum allowed size|exceeded/i.test(txt)) throw new Error('IMAGEM_GRANDE');
+  if (/mime|content type|invalid_mime/i.test(txt)) throw new Error('IMAGEM_FORMATO');
+  if (st === 403 || st === 401 || /row-level security|unauthorized|not allowed|permission/i.test(txt)) throw new Error('IMAGEM_SEM_PERMISSAO');
+  throw new Error('IMAGEM_REDE');
+}
+
+/** A imagem de inspiração gerada por IA (a rota /api/dress-code/gerar). */
+export async function gerarInspiracao(equipeId: string, rascunho: RascunhoDoDress, combinacao: number): Promise<{ ok: true; caminho: string; restam: number | null } | { ok: false; erro: string }> {
+  const { data } = await sb()!.auth.getSession();
+  const jwt = data.session?.access_token;
+  if (!jwt) return { ok: false, erro: 'SEM_LOGIN' };
+  const r = await fetch('/api/dress-code/gerar', {
+    method: 'POST', headers: { authorization: `Bearer ${jwt}`, 'content-type': 'application/json' },
+    body: JSON.stringify({ equipe: equipeId, combinacao, rascunho: { combinacoes: rascunho.combinacoes, estilo: rascunho.estilo, orientacoes: rascunho.orientacoes } }),
+  }).catch(() => null);
+  if (!r) return { ok: false, erro: 'REDE' };
+  const j = await r.json().catch(() => null);
+  if (j?.ok && typeof j.caminho === 'string') return { ok: true, caminho: j.caminho, restam: typeof j.restam === 'number' ? j.restam : null };
+  return { ok: false, erro: String(j?.erro || 'FALHA') };
 }
 
 /* =============================================================================

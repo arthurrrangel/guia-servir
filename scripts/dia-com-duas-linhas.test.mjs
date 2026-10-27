@@ -110,4 +110,31 @@ caso('duas linhas SEM evento (legado): o desempate e estavel, nao cara ou coroa'
   assert.equal(a.escalas[DIA].slots['VOZ'].vid, b.escalas[DIA].slots['VOZ'].vid)
 })
 
+caso('116 · a linha que ganha leva tudo, tambem o que ela NAO tem (dress code, recado, setlist, ordem)', () => {
+  /* o domingo regular tem dress code, recado, setlist e ordem; o evento do
+     Louvor no mesmo dia (a linha que `cultoId` aponta) nao tem nada. Antes,
+     lido nessa ordem, o dia apontava para o evento e mostrava o que era do
+     domingo (achado da revisao de 26/10/2026) */
+  const DRESS = { v: 1, id: '3f2a1b0c-9d8e-4f7a-8b6c-5d4e3f2a1b0c', combinacoes: [{ cores: [{ hex: '#111111', nome: 'Preto' }] }],
+    estilo: null, orientacoes: '', imagens: [] }
+  const doDomingo = { culto_id: 'c-regular', equipe_id: 'e1', obs: 'RECADO DO DOMINGO', dress_code: DRESS,
+    repertorio: { spotify: 'https://open.spotify.com/playlist/37i9dQZF1DX0XUsuxWHRQd' },
+    ordem: [{ t: 'momento', titulo: 'Abertura', dur: 5 }] }
+  const doEvento = { culto_id: 'c-evento', equipe_id: 'e1', obs: '' }
+  for (const [rot, recados] of [['domingo antes', [doDomingo, doEvento]], ['evento antes', [doEvento, doDomingo]]]) {
+    const d = montarEstado(base([], [], recados)).escalas[DIA]
+    assert.equal(d.cultoId, 'c-evento', rot)
+    assert.equal(d.dressCode, undefined, `${rot}: sem o dress code do domingo`)
+    assert.equal(d.obs, '', `${rot}: sem o recado do domingo`)
+    assert.equal(d.repertorio, undefined, `${rot}: sem o setlist do domingo`)
+    assert.equal(d.ordem, undefined, `${rot}: sem a ordem do domingo`)
+  }
+  /* e o contrario: o evento tem dress code, o domingo nao; nas duas ordens, o do evento */
+  const comDress = { ...doEvento, dress_code: { ...DRESS, id: '00000000-0000-4000-8000-000000000009' } }
+  const a = montarEstado(base([], [], [doDomingo, comDress])).escalas[DIA]
+  const b = montarEstado(base([], [], [comDress, doDomingo])).escalas[DIA]
+  assert.equal(a.dressCode?.id, '00000000-0000-4000-8000-000000000009')
+  assert.equal(b.dressCode?.id, '00000000-0000-4000-8000-000000000009')
+})
+
 console.log(`\ndia-com-duas-linhas: ${ok}/${ok} casos.`)
