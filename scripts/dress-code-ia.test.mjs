@@ -10,7 +10,7 @@
      · cada falha volta com um código que a tela traduz, sem detalhe.
 
    Roda com `npm test`. */
-import { atenderGeracao, lerPedidoDaGeracao, erroDaGeracao } from '@/lib/dress-code-ia';
+import { atenderGeracao, lerPedidoDaGeracao, erroDaGeracao, OPCOES_DA_IA } from '@/lib/dress-code-ia';
 
 let falhas = 0, feitas = 0;
 const ok = (c, rot, extra = '') => { feitas++; if (!c) { falhas++; console.log('  FALHOU:', rot, extra); } };
@@ -110,6 +110,33 @@ for (const [rot, falha, erro] of [
   const { m: m2, deps: d2 } = mundo({ upErro: { message: 'mime type not supported' } });
   const j2 = await (await atenderGeracao(pedido({ equipe: EQ, rascunho: RASCUNHO }), d2)).json();
   ok(j2.erro === 'ARMARIO' && m2.subiu.length === 1, 'o armário recusa: ARMARIO');
+}
+
+/* as opções do gerador: os nomes do AI SDK (camelCase). Com os nomes da API
+   da OpenAI (output_format), o schema do @ai-sdk/openai 4.x descarta sem
+   aviso e a imagem sai PNG de 2 MB (a prova em produção, 27/10/2026) */
+{
+  const o = OPCOES_DA_IA.openai || {};
+  ok(JSON.stringify(Object.keys(o).sort()) === JSON.stringify(['outputCompression', 'outputFormat', 'quality'])
+    && Object.keys(OPCOES_DA_IA).join() === 'openai' && !Object.keys(o).some(k => k.includes('_')),
+    'as opções do gerador com os nomes do AI SDK (sem output_format)', JSON.stringify(OPCOES_DA_IA));
+  ok(o.outputFormat === 'webp' && o.quality === 'medium' && Number.isInteger(o.outputCompression) && o.outputCompression >= 50 && o.outputCompression <= 95,
+    'pede WebP de qualidade média, com compressão de verdade', JSON.stringify(o));
+}
+/* o gerador devolveu PNG (as opções não pegaram): a imagem serve, e o
+   servidor registra; em WebP, silêncio */
+{
+  const reg = [];
+  const { m, deps } = mundo({ gerar: async () => ({ bytes: new Uint8Array(2_000), tipo: 'image/png' }) });
+  const r = await atenderGeracao(pedido({ equipe: EQ, rascunho: RASCUNHO }), { ...deps, log: (...x) => reg.push(x.join(' ')) });
+  const j = await r.json();
+  ok(r.status === 200 && j.ok && j.caminho.endsWith('.png') && m.subiu.length === 1 && m.subiu[0].op.contentType === 'image/png',
+    'PNG do gerador: sobe com o tipo certo', JSON.stringify(j));
+  ok(reg.length === 1 && reg[0].includes('image/png') && reg[0].includes('2000 bytes'), 'PNG do gerador: fica no registro do servidor', JSON.stringify(reg));
+  const reg2 = [];
+  const { deps: d2 } = mundo();
+  const r2 = await atenderGeracao(pedido({ equipe: EQ, rascunho: RASCUNHO }), { ...d2, log: (...x) => reg2.push(x.join(' ')) });
+  ok(r2.status === 200 && reg2.length === 0, 'WebP do gerador: nada no registro', JSON.stringify(reg2));
 }
 
 /* o que a rota aceita, e as mensagens da tela */

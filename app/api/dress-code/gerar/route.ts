@@ -12,7 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import { createClient } from '@supabase/supabase-js';
 import { generateImage } from 'ai';
-import { atenderGeracao, type Gerado } from '@/lib/dress-code-ia';
+import { atenderGeracao, OPCOES_DA_IA, type Gerado } from '@/lib/dress-code-ia';
 import { projetoDoSupabase } from '@/lib/supabase-chaves';
 
 export const dynamic = 'force-dynamic';
@@ -34,12 +34,13 @@ function doServidor() {
 }
 
 async function gerarDeVerdade(prompt: string, sinal: AbortSignal): Promise<Gerado> {
-  /* WebP de qualidade média: leve no celular de quem vê. Se o gateway não
-     aceitar as opções do modelo, tenta uma vez sem elas (sai PNG) */
+  /* WebP de qualidade média: leve no celular de quem vê (as opções e o
+     porquê dos nomes em lib/dress-code-ia.ts). Se o gateway não aceitar as
+     opções do modelo, tenta uma vez sem elas (sai PNG) */
   try {
     const r = await generateImage({
       model: MODELO, prompt, n: 1, size: '1024x1536', abortSignal: sinal, maxRetries: 1,
-      providerOptions: { openai: { quality: 'medium', output_format: 'webp', output_compression: 82 } },
+      providerOptions: OPCOES_DA_IA,
     });
     return { bytes: r.image.uint8Array, tipo: r.image.mediaType };
   } catch (e) {

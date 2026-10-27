@@ -43,6 +43,17 @@ export type DepsDaGeracao = {
 
 const EXT: Record<string, 'webp' | 'png' | 'jpg'> = { 'image/webp': 'webp', 'image/png': 'png', 'image/jpeg': 'jpg' };
 
+/* As opções do gerador (o `providerOptions` do AI SDK), com os nomes do AI
+   SDK, em camelCase. O provedor da OpenAI (@ai-sdk/openai 4.x, o que o AI
+   Gateway usa) lê as opções por um schema que DESCARTA, sem aviso, a chave
+   que não conhece: com `output_format`/`output_compression` (os nomes da API
+   da OpenAI) só a qualidade passava, e a imagem saía PNG de 2 MB em vez de
+   WebP leve. A prova em produção pegou (27/10/2026); a prova sem rede com o
+   provedor de verdade mostrou o corpo que vai para a OpenAI nos dois jeitos. */
+export const OPCOES_DA_IA: Record<string, Record<string, string | number>> = {
+  openai: { quality: 'medium', outputFormat: 'webp', outputCompression: 82 },
+};
+
 /* o rascunho que chega: só cores, estilo e orientações, no formato do banco */
 export function lerPedidoDaGeracao(x: unknown): { equipe: string; combinacoes: CombinacaoDoDress[]; estilo: EstiloDoDress | null; orientacoes: string; combinacao: number } | null {
   if (!x || typeof x !== 'object' || Array.isArray(x)) return null;
@@ -113,6 +124,9 @@ export async function atenderGeracao(req: Request, deps: DepsDaGeracao): Promise
   }
   const ext = EXT[img.tipo];
   if (!ext || !img.bytes?.length || img.bytes.length > LIMITES_DO_DRESS.bytes) return responde({ ok: false, erro: 'IA_INDISPONIVEL' }, 502);
+  /* a imagem serve, mas não veio no formato pedido (WebP): fica no registro
+     do servidor, para ninguém descobrir só pelo peso no celular de quem vê */
+  if (ext !== 'webp') deps.log?.('dress-code: o gerador devolveu', img.tipo, `${img.bytes.length} bytes`, '(o pedido é WebP; confira OPCOES_DA_IA)');
 
   /* 3 · o armário do ministério */
   const servidor = deps.doServidor();
