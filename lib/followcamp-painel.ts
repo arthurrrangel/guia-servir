@@ -196,14 +196,8 @@ export function csvFichas(fichas: readonly FichaBanco[], pagamentos: readonly Pa
   return '﻿' + [linhaCsv(cab), ...linhas].join('\r\n') + '\r\n';
 }
 
-export function csvPagamentos(pagamentos: readonly PagamentoBanco[]): string {
-  const cab = ['Data', 'Campista', 'Referente', 'Forma', 'Valor', 'Quem pagou', 'Código', 'Conferido', 'Origem', 'Observação', 'Registrado por', 'Pedido na Stone'];
-  const linhas = pagamentos.map(p => linhaCsv([
-    dataBr(p.pago_em), p.campista, ROTULO_REFERENTE[p.referente], ROTULO_FORMA[p.forma], p.valor, p.quem_pagou,
-    p.codigo, p.conferido, ROTULO_ORIGEM[p.origem], p.observacao, p.registrado_por, p.stone_pedido,
-  ]));
-  return '﻿' + [linhaCsv(cab), ...linhas].join('\r\n') + '\r\n';
-}
+/* 29/10/2026: os PAGAMENTOS saem numa planilha .xlsx de verdade, com abas,
+   cores e totais (lib/followcamp-planilha.ts). O CSV ficou só para as fichas. */
 
 /* ------------------------------------------------- a ficha que veio no zap ---
    O texto que a própria ficha manda quando o banco não grava
@@ -294,8 +288,9 @@ export function lerFichaDoWhatsApp(texto: string): { ok: true; ficha: FichaLida 
   };
 }
 
-/** O nome do arquivo da exportação: "follow-camp-fichas-2026-10-04.csv". */
-export function nomeDoArquivo(qual: 'fichas' | 'pagamentos', agora = new Date()): string {
+/** O nome do arquivo da exportação: "follow-camp-fichas-2026-10-04.csv",
+ *  "follow-camp-pagamentos-2026-10-29.xlsx". */
+export function nomeDoArquivo(qual: 'fichas' | 'pagamentos', agora = new Date(), ext: 'csv' | 'xlsx' = 'csv'): string {
   const d = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(agora);
-  return `follow-camp-${qual}-${d}.csv`;
+  return `follow-camp-${qual}-${d}.${ext}`;
 }

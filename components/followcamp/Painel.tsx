@@ -27,13 +27,15 @@ import {
   type DadosDoPainel, type ComprovanteDoBanco,
 } from '@/lib/followcamp-painel-api';
 import {
-  resumoDe, situacaoDe, ordenarSituacoes, csvFichas, csvPagamentos, nomeDoArquivo, lerFichaDoWhatsApp, reais, centavos,
+  resumoDe, situacaoDe, ordenarSituacoes, csvFichas, nomeDoArquivo, lerFichaDoWhatsApp, reais, centavos,
   dataHoraBr, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS, ROTULO_ORIGEM, FORMAS,
   type Situacao, type PagamentoBanco, type Forma, type Referente, type FormaDaFicha, type FichaLida, type Status,
 } from '@/lib/followcamp-painel';
 import { LOTES, valorIrmaos, soDigitos, type LinkCartao } from '@/lib/followcamp';
 import { diaMes } from '@/lib/followcamp-carne';
 import { contatoDe, linkDoWhats, linkPessoal, mensagemDeCobranca, numeroWhats } from '@/lib/followcamp-cobranca';
+import { planilhaDePagamentos } from '@/lib/followcamp-planilha';
+import { TIPO_XLSX } from '@/lib/xlsx';
 import s from './painel.module.css';
 
 /* 29/10/2026: o cartão por link morreu sem ninguém saber, e a mensagem do
@@ -58,8 +60,8 @@ const zap = (tel: string | null) => {
 };
 const plural = (n: number, um: string, varios: string) => `${n} ${n === 1 ? um : varios}`;
 
-function baixar(nome: string, texto: string) {
-  const url = URL.createObjectURL(new Blob([texto], { type: 'text/csv;charset=utf-8' }));
+function baixar(nome: string, conteudo: string | Uint8Array, tipo = 'text/csv;charset=utf-8') {
+  const url = URL.createObjectURL(new Blob([conteudo as BlobPart], { type: tipo }));
   const a = document.createElement('a');
   a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 2000);
@@ -158,7 +160,11 @@ export default function Painel() {
           <>
             <button type="button" className="dm-btn dm-peq" disabled={indo} onClick={() => void carregar()}>Atualizar</button>
             <button type="button" className="dm-btn dm-peq" onClick={() => baixar(nomeDoArquivo('fichas'), csvFichas(fichas, pagamentos))}>Exportar fichas</button>
-            <button type="button" className="dm-btn dm-peq" onClick={() => baixar(nomeDoArquivo('pagamentos'), csvPagamentos(pagamentos))}>Exportar pagamentos</button>
+            <button type="button" className="dm-btn dm-peq" onClick={() => {
+              /* 29/10/2026: planilha .xlsx com Resumo, Pagamentos e Por campista (lib/followcamp-planilha.ts) */
+              const agora = dados.agora ? new Date(dados.agora) : new Date();
+              baixar(nomeDoArquivo('pagamentos', agora, 'xlsx'), planilhaDePagamentos(fichas, pagamentos, agora), TIPO_XLSX);
+            }}>Exportar pagamentos</button>
           </>
         ) : null}
       />
