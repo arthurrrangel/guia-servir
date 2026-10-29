@@ -104,12 +104,14 @@ const D = em('2026-10-19T12:00:00-03:00');
   ok(!conferirPagamentoDoLink(pede({ meio: 'boleto' }), fichaCarne, pagos, D).ok, 'meio fora da lista');
   r = conferirPagamentoDoLink({ codigo: 'FC27X2EQXKKR', meio: 'pixdireto', valor: 9999 }, fichaCarne, pagos, D);
   ok(r.ok && r.dados.repetido && r.dados.valor === 120, 'mais um comprovante do mesmo código: vale o valor do aviso');
-  ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaCarne, [], D).ok, 'carnê não paga no link do cartão');
-  const l = LINKS_CARTAO.find(x => x.ref === 'inscricao');
-  if (l) {
-    ok(conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: l.valor }), fichaVista, [], D).ok, 'à vista: cartão no valor do link');
-    ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 300 }), fichaVista, [], D).ok, 'cartão com outro valor');
-  }
+  /* o link do cartão é injetado: a lista real pode estar vazia (29/10/2026,
+     o link da Stone morreu) e o teste não pode depender de existir um */
+  const LINK = [{ lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_TESTE' }];
+  ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaCarne, [], D, LINK).ok, 'carnê não paga no link do cartão');
+  ok(conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaVista, [], D, LINK).ok, 'à vista: cartão no valor do link');
+  ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 300 }), fichaVista, [], D, LINK).ok, 'cartão com outro valor');
+  ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaVista, [], D, []).ok, 'sem link configurado: o cartão é recusado');
+  ok(LINKS_CARTAO.every(x => x.url !== 'https://payment-link-v3.stone.com.br/pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg'), 'o link morto de 03/10 não volta');
   ok(!conferirPagamentoDoLink(pede({}), fichaVista, [{ valor: 697, conferido: true, codigo: 'FC27AAAAAAAA', referente: 'inscricao', forma: 'pix_direto' }], D).ok, 'quitado: nada a pagar');
   ok(!conferirPagamentoDoLink(pede({ titular: 'X' }), fichaVista, [], D).ok, 'nome de quem pagou inválido');
 
@@ -166,6 +168,18 @@ const D = em('2026-10-19T12:00:00-03:00');
   const vista = { ...adulto, pagamento: 'cartao', valor: 697 };
   t = msg(vista, [], '2026-10-20T10:00:00-03:00');
   ok(/Oi, Pedro!/.test(t) && /A sua inscrição \(R\$\s697,00\) ainda está em aberto/.test(t) && /parcelar no carnê/.test(t), `à vista em aberto, falando com o próprio: ${t}`);
+  {
+    /* 29/10/2026: "ou no cartão" só com link do cartão para a ficha e nada pago */
+    const LINK = [{ lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_TESTE' }];
+    const quando = '2026-10-20T10:00:00-03:00';
+    const cobra = (f, pags, links) => { const x = sit(f, pags, quando); return mensagemDeCobranca({ ficha: f, conta: x.conta, pagamentos: x.pagamentos, link: linkPessoal(f.token), links, agora: em(quando) }); };
+    const so = { ...vista, irmao: null };
+    const com = cobra(so, [], LINK), sem = cobra(so, [], []);
+    ok(/paga no Pix ou no cartão e manda/.test(com), `com link: oferece o cartão. ${com}`);
+    ok(/paga no Pix e manda/.test(sem) && !/cartão/.test(sem), `sem link: não promete cartão. ${sem}`);
+    ok(!/cartão/.test(cobra({ ...so, irmao: 'Beatriz Lima' }, [], LINK)), 'irmão sem link de irmãos: não promete cartão');
+    ok(!/cartão/.test(cobra(so, [pag(100, { conferido: true, referente: 'inscricao' })], LINK)), 'já pagou parte: não promete cartão');
+  }
   t = msg(vista, [pag(697, { conferido: true, referente: 'inscricao' })], '2026-10-20T10:00:00-03:00');
   ok(/quitada/.test(t), `quitada: ${t}`);
   for (const f of [base, comPlano, vista, adulto]) {

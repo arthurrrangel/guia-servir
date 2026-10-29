@@ -14,7 +14,7 @@
    pagou e não mandou o comprovante; carnê sem plano; parcela vencida;
    próxima parcela; inscrição em aberto; em conferência.
    ============================================================================= */
-import { soDigitos } from './followcamp';
+import { soDigitos, linkCartaoDe, LINKS_CARTAO, type LinkCartao } from './followcamp';
 import { centavos, diaMes, type Conta } from './followcamp-carne';
 
 export const LINK_PESSOAL = 'https://guiaservir.com/followcamp/minha/';
@@ -30,6 +30,8 @@ export type FichaDoContato = {
   whats_campista: string | null;
   emergencia_nome: string | null;
   emergencia_whats: string | null;
+  /** com irmão, o link do cartão é o de irmãos (se existir) */
+  irmao?: string | null;
 };
 
 export type Contato = { nome: string; whats: string; quem: 'responsavel' | 'campista' | 'emergencia' };
@@ -76,6 +78,9 @@ export function mensagemDeCobranca(p: {
   conta: Conta;
   pagamentos: readonly PagamentoDaCobranca[];
   link: string;
+  /** os links do cartão da Stone (padrão: os do código); injetável no teste */
+  links?: readonly LinkCartao[];
+  agora?: Date;
 }): string {
   const { ficha, conta, link } = p;
   const contato = contatoDe(ficha);
@@ -104,7 +109,12 @@ export function mensagemDeCobranca(p: {
     return `${oi} A parcela ${prox.numero} ${doCarne} (${reais(prox.falta)}) vence em ${diaMes(prox.vencimento)}. Para pagar no Pix e mandar o comprovante: ${link}`;
   }
   if (conta.falta != null && conta.falta > 0) {
-    return `${oi} ${De} (${reais(conta.falta)}) ainda está em aberto. Pelo link você paga no Pix ou no cartão e manda o comprovante, e também dá para parcelar no carnê: ${link}`;
+    /* 29/10/2026: "ou no cartão" só quando existe link do cartão para esta
+       ficha e nada foi pago (a página pessoal só mostra o cartão assim). O
+       link da Stone morreu e a mensagem seguia prometendo cartão. */
+    const comCartao = conta.pago + conta.conferindo === 0
+      && linkCartaoDe(ficha.irmao ? 'irmaos' : 'inscricao', p.agora ?? new Date(), p.links ?? LINKS_CARTAO) !== null;
+    return `${oi} ${De} (${reais(conta.falta)}) ainda está em aberto. Pelo link você paga no Pix${comCartao ? ' ou no cartão' : ''} e manda o comprovante, e também dá para parcelar no carnê: ${link}`;
   }
   return `${oi} Recebemos os comprovantes de ${de} e estamos conferindo. Você acompanha tudo por este link: ${link}`;
 }

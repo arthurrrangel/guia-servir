@@ -256,7 +256,14 @@ export type LinkCartao = {
  *  Irmãos (R$ 627,30) ainda não têm link: na tela, o cartão fica fechado para
  *  eles e o Pix direto cobra o valor com desconto. */
 export const LINKS_CARTAO: readonly LinkCartao[] = [
-  { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg' },
+  /* 29/10/2026: SAIU. Uma pessoa avisou que o cartão "manda para outro site
+     que dá inválido". Medido: a página da Stone mostra "Não encontramos seu
+     link de pagamento. Esse link de pagamento não existe ou expirou", e a
+     consulta que ela faz (checkout-bff-prd.pagar.me/paymentlinks/<id>)
+     responde 404. O link pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg expirou ou foi
+     cancelado no app (o motivo só aparece lá). Até o Arthur criar outro, o
+     cartão some da tela e o Pix direto continua. Link novo: sem limite de
+     pagamentos e com validade até o fim do lote (ou sem prazo). */
 ];
 
 const HOST_DO_LINK = /(^|\.)(stone\.com\.br|pagar\.me)$/;

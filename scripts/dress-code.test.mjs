@@ -95,7 +95,11 @@ function louvor() {
 {
   const S = louvor();
   const link = 'https://guiaservir.com/confirmar/louvor';
-  const antes = E.msgEscala(S, '2026-11-01', { link });
+  /* 29/10/2026: a saudação segue a hora de Brasília (saudacaoNaHora). Sem
+     hora fixa, este teste só passava à noite, e o build da Vercel (que roda o
+     npm test) reprovava de dia: "Bom dia galera" contra "Boa noite galera" */
+  const NOITE = new Date('2026-10-31T21:00:00-03:00');
+  const antes = E.msgEscala(S, '2026-11-01', { link, agora: NOITE });
   const assAntes = E.assinaturaDoEnvio(S, '2026-11-01');
   const assGrupoAntes = E.assinaturaDoEnvio(S, '2026-11-01', S.config.grupos[0]);
   ok(!antes.includes('DRESS CODE'), 'sem dress code, a mensagem é a de sempre');
@@ -106,7 +110,7 @@ function louvor() {
      uma mutação que carimbava "d=" em todo dia passou) */
   ok(assAntes === 'j3povq' && assGrupoAntes === '1ptvmcu', 'sem dress code, a assinatura é a mesma do motor de antes da 116', `${assAntes} ${assGrupoAntes}`);
   ok(antes === 'Boa noite galera\nEscala de domingo (01/11)\n\nDIRIGENTE\n*** PRECISO DE ALGUÉM ***\n\nVOCAL 1\nPessoa Um (confirmou)\n\nGUITARRA\n*** PRECISO DE ALGUÉM ***\n\nConfirma até sábado.\nConfirma por aqui: https://guiaservir.com/confirmar/louvor'
-    && E.msgEscala(S, '2026-11-01', { link, grupo: S.config.grupos[0] }) === 'Boa noite galera\nEscala de domingo (01/11) · Louvor · Banda\n\nGUITARRA\n*** PRECISO DE ALGUÉM ***\n\nConfirma até sábado.\nConfirma por aqui: https://guiaservir.com/confirmar/louvor',
+    && E.msgEscala(S, '2026-11-01', { link, grupo: S.config.grupos[0], agora: NOITE }) === 'Boa noite galera\nEscala de domingo (01/11) · Louvor · Banda\n\nGUITARRA\n*** PRECISO DE ALGUÉM ***\n\nConfirma até sábado.\nConfirma por aqui: https://guiaservir.com/confirmar/louvor',
     'e a mensagem também (a do grupo geral e a do recorte)');
   S.escalas['2026-11-01'].dressCode = lerDressCode(DRESS);
   const com = E.msgEscala(S, '2026-11-01', { link });
