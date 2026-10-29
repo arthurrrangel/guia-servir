@@ -80,6 +80,13 @@ export function dataDoExcel(s: string | null | undefined): number | null {
 const linhaDe = (i: number, e: Estilo = {}): Estilo => ({ bordaBaixo: FIO, recuo: 1, alinhar: 'esquerda', ...(i % 2 ? { fundo: FAIXA } : {}), ...e });
 const comTom = (base: Estilo, t: Tom): Estilo => ({ ...base, negrito: true, cor: TOM[t].cor, fundo: TOM[t].fundo, alinhar: 'centro' });
 
+/** Largura da coluna pelo texto mais comprido dela (o nome inteiro sempre
+ *  aparece: um nome de 35 letras cortava na largura fixa de 32), com piso e teto. */
+function larguraPara(textos: readonly string[], minimo: number, maximo: number, negrito = false): number {
+  const maior = Math.max(0, ...textos.map(t => t.length));
+  return Math.min(maximo, Math.max(minimo, Math.ceil(maior * (negrito ? 1.12 : 1.02)) + 3));
+}
+
 /** Altura da linha para um texto que quebra numa coluna de `largura` caracteres. */
 function alturaPara(texto: string, largura: number, minimo = 20): number {
   const porLinha = Math.max(10, Math.floor(largura * 1.15));
@@ -174,17 +181,17 @@ function abaPagamentos(pagamentos: readonly PagamentoBanco[], geradoEm: string):
   type Col = { t: string; w: number; a?: Estilo['alinhar']; v: (p: PagamentoBanco, e: Estilo) => Celula };
   const cols: Col[] = [
     { t: 'Data', w: 12, a: 'centro', v: (p, e) => ({ v: dataDoExcel(p.pago_em), e: { ...e, formato: DATA } }) },
-    { t: 'Campista', w: 32, v: (p, e) => ({ v: p.campista, e: { ...e, negrito: true } }) },
+    { t: 'Campista', w: larguraPara(ps.map(p => p.campista), 24, 50, true), v: (p, e) => ({ v: p.campista, e: { ...e, negrito: true } }) },
     { t: 'Referente', w: 18, v: (p, e) => ({ v: ROTULO_REFERENTE[p.referente], e }) },
     { t: 'Forma', w: 17, v: (p, e) => ({ v: ROTULO_FORMA[p.forma], e }) },
     { t: 'Valor', w: 15, a: 'direita', v: (p, e) => ({ v: reaisDe(Math.round(Number(p.valor) * 100)), e: { ...e, formato: MOEDA, negrito: true } }) },
-    ...(tem(p => p.quem_pagou) ? [{ t: 'Quem pagou', w: 28, v: (p: PagamentoBanco, e: Estilo) => ({ v: p.quem_pagou || '', e }) }] : []),
+    ...(tem(p => p.quem_pagou) ? [{ t: 'Quem pagou', w: larguraPara(ps.map(p => p.quem_pagou || ''), 16, 44), v: (p: PagamentoBanco, e: Estilo) => ({ v: p.quem_pagou || '', e }) }] : []),
     { t: 'Situação', w: 14, a: 'centro', v: (p, e) => ({ v: p.conferido ? 'Conferido' : 'A conferir', e: comTom(e, p.conferido ? 'ok' : 'info') }) },
     { t: 'Origem', w: 19, v: (p, e) => ({ v: ORIGEM[p.origem], e: { ...e, cor: MUDO } }) },
     { t: 'Código', w: 17, a: 'centro', v: (p, e) => ({ v: p.codigo ? codigoLegivel(p.codigo) : '', e: { ...e, cor: MUDO } }) },
     ...(tem(p => (p.comprovantes ?? 0) > 0) ? [{ t: 'Comprovante', w: 14, a: 'centro' as const, v: (p: PagamentoBanco, e: Estilo) => ({ v: (p.comprovantes ?? 0) > 0 ? 'Sim' : '', e }) }] : []),
     ...(tem(p => p.observacao) ? [{ t: 'Observação', w: 36, v: (p: PagamentoBanco, e: Estilo) => ({ v: p.observacao || '', e: { ...e, quebrar: true } }) }] : []),
-    ...(tem(p => p.registrado_por) ? [{ t: 'Registrado por', w: 20, v: (p: PagamentoBanco, e: Estilo) => ({ v: p.registrado_por || '', e: { ...e, cor: MUDO } }) }] : []),
+    ...(tem(p => p.registrado_por) ? [{ t: 'Registrado por', w: larguraPara(ps.map(p => p.registrado_por || ''), 16, 36), v: (p: PagamentoBanco, e: Estilo) => ({ v: p.registrado_por || '', e: { ...e, cor: MUDO } }) }] : []),
     ...(tem(p => p.stone_pedido) ? [{ t: 'Pedido na Stone', w: 24, v: (p: PagamentoBanco, e: Estilo) => ({ v: p.stone_pedido || '', e: { ...e, cor: MUDO } }) }] : []),
   ];
   const iValor = cols.findIndex(c => c.t === 'Valor');
@@ -239,6 +246,15 @@ function reaisFmt(centavos: number): string {
 }
 
 /* ============================================================= Por campista */
+/** Com quem falar sobre o pagamento (o mesmo contato do botão Cobrar). */
+function contatoTexto(x: Situacao): string {
+  const c = contatoDe(x.ficha);
+  if (!c) return '';
+  if (c.quem === 'responsavel') return `${c.nome}${x.ficha.parentesco ? ` (${x.ficha.parentesco.toLocaleLowerCase('pt-BR')})` : ' (responsável)'}`;
+  if (c.quem === 'emergencia') return `${c.nome} (emergência)`;
+  return 'Próprio campista';
+}
+
 function abaPorCampista(fichas: readonly FichaBanco[], pagamentos: readonly PagamentoBanco[], agora: Date, geradoEm: string): Aba {
   const ativas = ordenarSituacoes(fichas.filter(f => !f.cancelada_em).map(f => situacaoDe(f, pagamentos, agora)));
   /* desistência só entra se tiver dinheiro no meio (devolução é conversa) */
@@ -249,7 +265,7 @@ function abaPorCampista(fichas: readonly FichaBanco[], pagamentos: readonly Paga
   const money = (c: number | null, base: Estilo, extra: Estilo = {}): Celula =>
     c == null ? { v: 'a confirmar', e: { ...base, cor: MUDO, alinhar: 'direita' } } : { v: reaisDe(c), e: { ...base, formato: MOEDA, alinhar: 'direita', ...extra } };
   const cols: Col[] = [
-    { t: 'Campista', w: 32, v: (x, e) => ({ v: x.ficha.campista, e: { ...e, negrito: true } }) },
+    { t: 'Campista', w: larguraPara(sits.map(x => x.ficha.campista), 24, 50, true), v: (x, e) => ({ v: x.ficha.campista, e: { ...e, negrito: true } }) },
     { t: 'Idade', w: 7, a: 'centro', v: (x, e) => ({ v: x.ficha.idade ?? null, e: { ...e, formato: INTEIRO, alinhar: 'centro' } }) },
     { t: 'Na ficha', w: 14, v: (x, e) => ({ v: x.ficha.pagamento ? ROTULO_FORMA_DA_FICHA[x.ficha.pagamento] : '', e }) },
     { t: 'Plano', w: 17, v: (x, e) => {
@@ -271,12 +287,8 @@ function abaPorCampista(fichas: readonly FichaBanco[], pagamentos: readonly Paga
       const vencida = p.estado === 'vencida';
       return { v: dataDoExcel(p.vencimento), e: { ...e, formato: DATA, alinhar: 'centro', ...(vencida ? { cor: TOM.bad.cor, negrito: true } : {}) } };
     } },
-    { t: 'Contato', w: 30, v: (x, e) => {
-      const c = contatoDe(x.ficha);
-      const quem = c?.quem === 'responsavel' ? `${c.nome}${x.ficha.parentesco ? ` (${x.ficha.parentesco.toLocaleLowerCase('pt-BR')})` : ' (responsável)'}`
-        : c?.quem === 'emergencia' ? `${c.nome} (emergência)` : c ? 'Próprio campista' : '';
-      return { v: quem, e: c?.quem === 'campista' ? { ...e, cor: MUDO } : e };
-    } },
+    { t: 'Contato', w: larguraPara(sits.map(contatoTexto), 18, 56), v: (x, e) =>
+      ({ v: contatoTexto(x), e: contatoDe(x.ficha)?.quem === 'campista' ? { ...e, cor: MUDO } : e }) },
     { t: 'WhatsApp', w: 17, v: (x, e) => ({ v: contatoDe(x.ficha)?.whats ?? '', e }) },
   ];
   const n = cols.length;
