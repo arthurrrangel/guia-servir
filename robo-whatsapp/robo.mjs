@@ -59,8 +59,12 @@ const ARQ = {
   trava: join(PASTA, 'estado.trava'),
   qr: join(PASTA, 'qr.html'),
   pedido: join(PASTA, 'pedido-mandar-agora.json'),
+  noServidor: join(PASTA, 'NO-SERVIDOR'),
 };
 const NO_SERVICO = process.env.ROBO_SERVICO === '1';
+/* Mac (launchd, notificação, caffeinate) ou servidor Linux (systemd) */
+const NO_MAC = process.platform === 'darwin';
+const CONFIGURAR = NO_MAC ? 'o configurar.command' : 'o servidor/configurar-servidor.sh';
 const espera = (ms) => new Promise((r) => setTimeout(r, ms));
 const entre = ([a, b]) => (a + Math.random() * (b - a)) * 1000;
 
@@ -94,8 +98,9 @@ function avisar(texto, chave = texto) {
   if (avisados.size > 500) avisados.delete(avisados.keys().next().value);
   avisos.push({ em: new Date().toISOString(), texto });
   if (avisos.length > 30) avisos.shift();
-  /* a notificação do Mac, para o Arthur ver sem abrir nada */
-  execFile('/usr/bin/osascript', ['-e', `display notification ${JSON.stringify(texto)} with title "Robô do WhatsApp"`], () => {});
+  /* a notificação do Mac, para o Arthur ver sem abrir nada (no servidor, o
+     aviso fica no registro e no --status) */
+  if (NO_MAC) execFile('/usr/bin/osascript', ['-e', `display notification ${JSON.stringify(texto)} with title "Robô do WhatsApp"`], () => {});
 }
 
 /* -------------------------------------------------------------- arquivos --- */
@@ -289,7 +294,7 @@ async function ensaio(segredo, slug, datas) {
 async function servico(segredo) {
   const outro = pidDoServico();
   if (outro) {
-    avisar(`Já existe um robô rodando neste Mac (processo ${outro}); este segundo saiu.`, 'duplicado');
+    avisar(`Já existe um robô rodando ${NO_MAC ? 'neste Mac' : 'neste servidor'} (processo ${outro}); este segundo saiu.`, 'duplicado');
     await espera(1500);
     process.exit(0);
   }
@@ -297,11 +302,13 @@ async function servico(segredo) {
   girarLog();
   /* o Mac não dorme sozinho enquanto o robô roda (tampa aberta). O
      caffeinate acompanha este processo e acaba junto com ele */
-  try {
-    const c = spawn('/usr/bin/caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore' });
-    c.on('error', () => log('sem caffeinate: o Mac pode dormir com o robô ligado'));
-    c.unref();
-  } catch { /* sem caffeinate, segue */ }
+  if (NO_MAC) {
+    try {
+      const c = spawn('/usr/bin/caffeinate', ['-i', '-w', String(process.pid)], { stdio: 'ignore' });
+      c.on('error', () => log('sem caffeinate: o Mac pode dormir com o robô ligado'));
+      c.unref();
+    } catch { /* sem caffeinate, segue */ }
+  }
   const { abrirWhatsApp } = await import('./whatsapp.mjs');
 
   /* configuração com erro (grupo em dois ministérios, cobrança fora dos
@@ -318,7 +325,7 @@ async function servico(segredo) {
      reiniciar em laço e sem notificar a cada minuto) até o pareamento */
   const parado = (motivo) => {
     try { writeFileSync(ARQ.precisaParear, motivo + '\n'); } catch { /* segue */ }
-    avisar(`O robô está desligado do número da igreja (${motivo}). Rode o configurar.command para parear de novo.`, 'parear');
+    avisar(`O robô está desligado do número da igreja (${motivo}). Rode ${CONFIGURAR} para parear de novo.`, 'parear');
     salvarStatus({ conectado: false, motivo });
     setInterval(() => {}, 3600000);
   };
@@ -352,7 +359,7 @@ async function servico(segredo) {
     const conta = wa.conta();
     if (conta && !ehDaIgreja(conta)) {
       caiu = true;
-      avisar(`O robô está ligado a OUTRO número, não ao da igreja. Nada sai. Rode o configurar.command e leia o QR com o celular da igreja.`, 'conta');
+      avisar(`O robô está ligado a OUTRO número, não ao da igreja. Nada sai. Rode ${CONFIGURAR} e leia o QR com o celular da igreja.`, 'conta');
       salvarStatus({ conectado: false, motivo: 'número errado' });
       wa.fechar();
       return false;
@@ -598,7 +605,7 @@ async function servico(segredo) {
 function servicoRodando() {
   const pid = pidDoServico();
   if (!pid) return false;
-  console.log(`O serviço do robô está rodando (pid ${pid}). Pare antes (o configurar.command faz isso) ou veja o resumo com --status.`);
+  console.log(`O serviço do robô está rodando (pid ${pid}). Pare antes (${CONFIGURAR} faz isso) ou veja o resumo com --status.`);
   return true;
 }
 
@@ -634,7 +641,7 @@ async function parearOuConferir(modo, comCodigo, refixar) {
       let m;
       try { m = desenho.matriz(qr); } catch (e) { console.log('não consegui desenhar o QR:', e.message); return; }
       pagina(desenho.paraPagina(m));
-      if (!paginaAberta) { paginaAberta = true; execFile('/usr/bin/open', [ARQ.qr], () => {}); }
+      if (!paginaAberta) { paginaAberta = true; if (NO_MAC) execFile('/usr/bin/open', [ARQ.qr], () => {}); }
       console.clear();
       console.log('No celular da IGREJA (+55 21 97297-6946): WhatsApp Business > Configurações > Dispositivos conectados > Conectar dispositivo.');
       console.log('Leia o QR na página que abriu no navegador (ou este aqui). Ele troca a cada 20 segundos.\n');
@@ -776,6 +783,7 @@ function mostrarStatus() {
   const pid = pidDoServico();
   console.log(JSON.stringify({
     servico: pid ? `rodando (pid ${pid})` : 'parado',
+    ...(noServidor() ? { noServidor: noServidor() } : {}),
     conectado: st?.conectado ?? null, conta: st?.conta ?? null, motivo: st?.motivo,
     pausado: existsSync(ARQ.pausa) ? readFileSync(ARQ.pausa, 'utf8').trim() : false,
     precisaParear: existsSync(ARQ.precisaParear), pareado: pareado(),
@@ -791,9 +799,35 @@ function mostrarStatus() {
   }, null, 1));
 }
 
+/* ---------------------------------------------- o robô mudou de casa --- */
+/* 29/10/2026. No Mac, o robô parava toda vez que a tampa fechava: o macOS
+   dorme e leva o robô junto (em 28/10 o Mac dormiu das 18:10 às 21:57, e a
+   rodada das 19:58 não saiu). O Arthur escolheu um servidor sempre ligado. O
+   levar-para-o-servidor.command deixa nesta pasta do Mac o arquivo
+   NO-SERVIDOR, com o endereço do servidor. Com ele, esta cópia não liga no
+   WhatsApp de jeito nenhum: dois robôs com a mesma sessão derrubam um ao
+   outro, e cada um mandaria a escala por conta própria. O estado daqui também
+   parou no dia da mudança, então o ensaio e os acertos de envio (--conferido,
+   --a-partir-de, --mandar-agora) são no servidor. Só o --status continua. */
+function noServidor() {
+  try { return readFileSync(ARQ.noServidor, 'utf8').trim() || 'outro aparelho'; } catch { return null; }
+}
+
 /* -------------------------------------------------------------- início --- */
 const args = process.argv.slice(2);
-if (args[0] === '--conferido' || args[0] === '--a-partir-de' || args[0] === '--mandar-agora') {
+const longe = noServidor();
+if (longe && args[0] !== '--status') {
+  const frase = `O robô agora roda no servidor (${longe}). Esta cópia não liga no WhatsApp.`;
+  if (!args[0]) {
+    /* o serviço antigo, se alguém religar: parado, sem religar em laço */
+    avisar(frase, 'no-servidor');
+    salvarStatus({ conectado: false, motivo: `o robô roda no servidor (${longe})` });
+    setInterval(() => {}, 3600000);
+  } else {
+    console.log(`${frase} Use o servidor.`);
+    process.exit(1);
+  }
+} else if (args[0] === '--conferido' || args[0] === '--a-partir-de' || args[0] === '--mandar-agora') {
   try {
     await ({ '--conferido': conferido, '--a-partir-de': aPartirDe, '--mandar-agora': mandarAgora })[args[0]](args.slice(1));
   } catch (e) {
@@ -807,13 +841,13 @@ if (args[0] === '--conferido' || args[0] === '--a-partir-de' || args[0] === '--m
 } else {
   const segredo = lerSegredo();
   if (args[0] === '--ensaio') {
-    if (!segredo) { console.log('Falta o segredo do robô (.env). Rode o configurar.command.'); process.exit(1); }
+    if (!segredo) { console.log(`Falta o segredo do robô (.env). Rode ${CONFIGURAR}.`); process.exit(1); }
     const slug = args.slice(1).find((x) => !/^\d{4}-\d{2}-\d{2}$/.test(x)) || CONFIG.principal;
     try { await ensaio(segredo, slug, args.slice(1).filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x))); } catch (e) { console.log(`Não deu: ${e.message}`); process.exit(1); }
   } else if (!segredo) {
     /* o serviço sem segredo fica parado e avisa uma vez (sair faria o launchd
        religar em laço, com uma notificação a cada religada) */
-    avisar('Falta o segredo do robô (.env). Rode o configurar.command.', 'segredo');
+    avisar(`Falta o segredo do robô (.env). Rode ${CONFIGURAR}.`, 'segredo');
     salvarStatus({ conectado: false, motivo: 'sem segredo' });
     setInterval(() => {}, 3600000);
   } else {

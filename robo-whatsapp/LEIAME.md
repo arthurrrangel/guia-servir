@@ -1,7 +1,9 @@
 # Robô do WhatsApp da escala
 
 Posta a escala nos grupos do WhatsApp pelo número da igreja
-(+55 21 97297-6946). Roda neste MacBook, sozinho, como serviço do macOS.
+(+55 21 97297-6946). Roda sozinho, como serviço: primeiro no MacBook do Arthur
+(macOS, launchd) e, desde 29/10/2026, num servidor sempre ligado (Linux,
+systemd). Veja "No servidor", abaixo.
 Decisões do Arthur em 26/10/2026: "tá tudo liberado, eu quero tudo
 automatizado"; depois, "Gostaria de na aba do sistema ter a opção de
 disparar escala, através desse robo" e "Para todos os ministérios".
@@ -95,10 +97,37 @@ rm ~/Library/LaunchAgents/com.guiachurch.robo-whatsapp.plist
 Depois, no celular da igreja, remova o aparelho "Mac OS" em Dispositivos
 conectados.
 
+## No servidor (desde 29/10/2026)
+
+No Mac, o robô parava toda vez que a tampa fechava: o macOS dorme e leva o
+robô junto. Medido em 28/10: o Mac dormiu das 18:10 às 21:57 e a rodada das
+19:58 não saiu; as das 09:00 e 12:00 saíram mais de uma hora atrasadas. O
+Arthur escolheu um servidor que nunca dorme (Ubuntu 24.04, 1 GB).
+
+- **Levar**: `levar-para-o-servidor.command <IP>`, no Mac, depois de o
+  servidor existir e aceitar a chave SSH do Mac. Ele prepara o servidor
+  (`servidor/configurar-servidor.sh preparar`: Node 22, usuário `robo`,
+  firewall só com SSH, atualizações de segurança automáticas), para o robô do
+  Mac, copia por SSH o estado (o que já saiu em cada grupo), a sessão do
+  WhatsApp, o segredo e o código novo, e liga o robô lá (`ligar`: bibliotecas,
+  testes, conferência dos grupos e o serviço). Se o servidor não ligar, o
+  robô volta a rodar no Mac como antes.
+- **Depois**: o Mac fica com o arquivo `NO-SERVIDOR` (o endereço do servidor)
+  e não liga mais o robô, nem depois de reiniciar: dois robôs com a mesma
+  sessão derrubam um ao outro. O `pausar.command`, o `retomar.command` e o
+  `ver-o-robo.command` do Mac agem no servidor, pela chave SSH.
+- **No servidor** (`ssh robo@<IP>`, pasta `~/robo-whatsapp-guia`): os mesmos
+  comandos de sempre (`node robo.mjs --status`, `--ensaio`...). O serviço:
+  `sudo systemctl status robo-whatsapp-guia`; o registro: `logs/robo.log`.
+- **Se o WhatsApp não aceitar a sessão no servidor**: pareie de novo lá
+  (`node robo.mjs --parear --codigo`, com o serviço parado, e o código no
+  celular da igreja).
+
 ## Riscos que o Arthur aceitou
 
 - Não é a API oficial da Meta: o WhatsApp pode bloquear o número da igreja.
   Por isso o robô manda pouco, devagar e só nos grupos.
-- Só roda com o MacBook ligado e com a tampa aberta.
+- No Mac, só roda com o MacBook ligado e com a tampa aberta (por isso o
+  servidor, desde 29/10/2026).
 - A pasta `sessao/` é a chave do número da igreja. Não copie, não mande para
   ninguém, não ponha no Git.

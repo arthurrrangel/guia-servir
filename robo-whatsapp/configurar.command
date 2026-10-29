@@ -26,6 +26,11 @@ falha() {
   exit 1
 }
 
+# desde 29/10/2026 o robô pode morar num servidor sempre ligado
+# (levar-para-o-servidor.command): aí este Mac não liga mais o robô, porque dois
+# robôs com a mesma sessão derrubam um ao outro
+[ -f "$PARA/NO-SERVIDOR" ] && falha "o robô agora roda no servidor $(head -1 "$PARA/NO-SERVIDOR"). Este Mac não liga mais o robô"
+
 NODE="$(command -v node || true)"
 [ -n "$NODE" ] || falha "não achei o Node neste Mac"
 command -v npm >/dev/null || falha "não achei o npm"
