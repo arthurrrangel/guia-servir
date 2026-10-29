@@ -3,6 +3,7 @@ import localFont from 'next/font/local';
 import Pagar from '@/components/followcamp/Pagar';
 import { TEM_PAGARME } from '@/lib/pagarme';
 import { TEM_PIX } from '@/lib/oferta';
+import { linksNaTela } from '@/lib/followcamp-link-vivo';
 
 /* =============================================================================
    /followcamp/pagar — 01/10/2026
@@ -17,6 +18,10 @@ import { TEM_PIX } from '@/lib/oferta';
    `TEM_PAGARME` e `TEM_PIX` são lidos no build, como em /ofertar: ligar a
    chave da Stone na Vercel pede um novo deploy, e é o deploy que acende os
    botões.
+
+   29/10/2026: o cartão por link só vai para a tela se a Stone disser que o
+   link ainda abre (lib/followcamp-link-vivo.ts). A página se refaz a cada 5
+   minutos: link que morre some daqui em até 5 minutos, sem deploy.
    ============================================================================= */
 const poppins = localFont({
   src: [
@@ -45,10 +50,13 @@ export const viewport: Viewport = {
   themeColor: '#F32402', colorScheme: 'light dark',
 };
 
-export default function Pagina() {
+export const revalidate = 300;
+
+export default async function Pagina() {
+  const links = TEM_PAGARME ? [] : await linksNaTela();
   return (
     <div className={`${poppins.variable} ${pixel.variable}`}>
-      <Pagar temPagarme={TEM_PAGARME} temPixDireto={TEM_PIX} />
+      <Pagar temPagarme={TEM_PAGARME} temPixDireto={TEM_PIX} links={links} />
     </div>
   );
 }

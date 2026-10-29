@@ -15,8 +15,9 @@
    para o WhatsApp da organização e diz isso; nada some em silêncio.
 
    O QUE A FICHA PEDE, e por quê (só o necessário):
-     · nome, nascimento e sexo: de 13 a 24 anos NO DIA DO CAMP (05/02/2027), e
-       os dormitórios são divididos por gênero;
+     · nome, nascimento e sexo: de 13 a 30 anos NO DIA DO CAMP (05/02/2027), e
+       os dormitórios são divididos por gênero (o teto era 24; o Arthur abriu
+       para 30 em 29/10/2026: "liberar para pessoas com até 30 anos");
      · tamanho da camisa: a camisa oficial está inclusa;
      · alergia ou restrição alimentar: a página promete "um campo próprio";
      · saúde e remédio: a equipe cuida de quem está lá;
@@ -33,7 +34,7 @@ import {
 /** A idade conta no primeiro dia do retiro. */
 export const DIA_DO_CAMP = { dia: 5, mes: 2, ano: 2027 } as const;
 export const IDADE_MIN = 13;
-export const IDADE_MAX = 24;
+export const IDADE_MAX = 30;
 export const TEXTO_MAX = 300;
 
 export const SEXOS = [

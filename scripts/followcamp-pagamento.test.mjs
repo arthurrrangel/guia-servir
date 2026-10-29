@@ -18,7 +18,9 @@
         Stone ecoa o pedido inteiro no erro.
      7. O CARTÃO PELO LINK DA CONTA STONE. Só link https da Stone, do lote
         vigente, nunca mais barato que o lote nem 30% acima; o do 1º lote some
-        em 04/11; e os links que estão no código passam todos nessa regra.   */
+        em 04/11; e os links que estão no código passam todos nessa regra.
+     8. A TRAVA DO LINK MORTO (29/10/2026). 404 da Stone tira o link da tela;
+        valor, parcelas ou crédito diferentes do código também; rede fora não. */
 import http from 'node:http';
 import {
   precoDe, valorIrmaos, loteVigente, carneAberto, cpfValido, celularDe, nomeInvalido, emailValido,
@@ -285,6 +287,93 @@ ok(pg.jurosDe('') === null && pg.jurosDe('3') === 3 && pg.jurosDe('2.99') === nu
 ok(pg.parcelasDe(697, 3).interest_rate === 3 && !('customer_fee' in pg.parcelasDe(697, 3)), 'juro fixo troca o customer_fee');
 ok(pg.parcelasDe(100, null).max_installments === 2, 'R$ 100 no cartão: até 2x');
 servidor.close();
+
+/* ------------------------------------------- 8. a trava do link morto ---
+   29/10/2026: o link da Stone morreu e o site continuou mandando gente para
+   ele. Os corpos abaixo têm a forma do que a Stone respondeu em 29/10
+   (checkout-bff-prd.pagar.me/paymentlinks/<id>): 200 com o link no ar, 404
+   com o link expirado. Nada aqui vai à rede: a consulta usa um dublê. */
+{
+  const lv = await import('../lib/followcamp-link-vivo.ts');
+  const URL_NO_AR = 'https://payment-link-v3.stone.com.br/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo';
+  const L = { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: URL_NO_AR };
+  const NO_AR = {
+    id: 'pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo', url: URL_NO_AR, payment_link_type: 'order',
+    payment_settings: {
+      accepted_payment_methods: ['pix', 'credit_card', 'debit_card', 'boleto'],
+      credit_card_settings: { operation_type: 'auth_and_capture', installments: [{ number: 1, total: 69700 }] },
+    },
+    cart_settings: { items_total_cost: 69700, total_cost: 69700, items: [{ name: 'Inscrição Follow Camp 2027', amount: 69700 }] },
+  };
+  const NAO_ACHOU = { title: 'Not Found', status: 404 };
+  const resposta = (status, corpo) => new Response(JSON.stringify(corpo), { status, headers: { 'content-type': 'application/json' } });
+
+  ok(lv.idDoLink(URL_NO_AR) === 'pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo', 'id do link');
+  ok(lv.idDoLink('https://payment-link-v3.stone.com.br/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo/') === 'pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo', 'barra no fim');
+  ok(lv.idDoLink('https://payment-link-v3.stone.com.br/x/pl_abc12345') === null && lv.idDoLink('nada') === null
+    && lv.idDoLink('https://payment-link-v3.stone.com.br/pl_ab') === null, 'endereço que não é de link: sem id');
+
+  /* o que a resposta diz */
+  ok(lv.lerResposta(L, 200, NO_AR).situacao === 'vivo', 'o link de 29/10 como a Stone respondeu: vivo');
+  ok(lv.lerResposta(L, 200, null).situacao === 'vivo', '200 sem corpo legível: o link abre');
+  ok(lv.lerResposta(L, 404, NAO_ACHOU).situacao === 'morto' && lv.lerResposta(L, 410, null).situacao === 'morto', '404 e 410: morto');
+  for (const st of [429, 500, 502, 503, 301, 0]) ok(lv.lerResposta(L, st, null).situacao === 'sem_resposta', `${st} não derruba o link`);
+  const caro = lv.lerResposta(L, 200, { ...NO_AR, cart_settings: { ...NO_AR.cart_settings, total_cost: 70000 } });
+  ok(caro.situacao === 'divergente' && /700,00/.test(caro.motivo) && /697,00/.test(caro.motivo), `valor diferente do código: ${JSON.stringify(caro)}`);
+  ok(lv.lerResposta(L, 200, { ...NO_AR, payment_settings: { ...NO_AR.payment_settings, accepted_payment_methods: ['pix', 'boleto'] } }).situacao === 'divergente',
+    'link sem crédito: a tela diria "Cartão de crédito" e a Stone não aceitaria');
+  const em3 = lv.lerResposta(L, 200, { ...NO_AR, payment_settings: { ...NO_AR.payment_settings, credit_card_settings: { installments: [1, 2, 3].map(n => ({ number: n, total: 69700 })) } } });
+  ok(em3.situacao === 'divergente' && /3x/.test(em3.motivo), 'parcelas diferentes do código');
+  ok(lv.lerResposta(L, 200, { ...NO_AR, id: 'pl_outroLinkQualquer' }).situacao === 'sem_resposta', 'resposta sobre outro link: não julga');
+
+  /* a consulta: o endereço certo, com prazo, e a memória de 5 minutos */
+  let chamadas = 0;
+  let pedido = null;
+  const dubleDe = (status, corpo) => async (u, init) => { chamadas++; pedido = { u: String(u), init }; return resposta(status, corpo); };
+  lv.esquecerConferencias();
+  let c = await lv.conferirLink(L, dubleDe(200, NO_AR), 1_000);
+  ok(c.situacao === 'vivo' && c.link === L, 'conferirLink: vivo');
+  ok(pedido.u === 'https://checkout-bff-prd.pagar.me/paymentlinks/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo', `pergunta no endereço da Stone: ${pedido.u}`);
+  ok(pedido.init?.signal instanceof AbortSignal && pedido.init?.next?.revalidate === 300, 'com prazo (signal) e cache de 5 minutos');
+  c = await lv.conferirLink(L, dubleDe(404, NAO_ACHOU), 1_000 + 4 * 60_000);
+  ok(chamadas === 1 && c.situacao === 'vivo', 'dentro de 5 minutos não pergunta de novo');
+  c = await lv.conferirLink(L, dubleDe(404, NAO_ACHOU), 1_000 + 5 * 60_000 + 1);
+  ok(chamadas === 2 && c.situacao === 'morto', 'depois de 5 minutos pergunta, e o link morto é morto');
+  lv.esquecerConferencias();
+  c = await lv.conferirLink(L, async () => { chamadas++; throw new Error('rede fora'); }, 1_000);
+  ok(c.situacao === 'sem_resposta', 'rede fora: sem resposta, nunca lança');
+  c = await lv.conferirLink(L, dubleDe(404, NAO_ACHOU), 1_000 + 61_000);
+  ok(c.situacao === 'morto', 'sem resposta só vale 1 minuto');
+  lv.esquecerConferencias();
+  c = await lv.conferirLink({ ...L, url: 'https://payment-link-v3.stone.com.br/' }, dubleDe(404, NAO_ACHOU));
+  ok(c.situacao === 'sem_resposta', 'endereço sem id: não pergunta e não derruba');
+
+  /* da consulta à tela */
+  lv.esquecerConferencias();
+  const morto = await lv.linksNaTela([L], dubleDe(404, NAO_ACHOU));
+  ok(morto.length === 0 && linkCartaoDe('inscricao', ANTES, morto) === null && !temLinkCartao(ANTES, morto), 'link morto: o cartão some da tela');
+  lv.esquecerConferencias();
+  const vivo = await lv.linksNaTela([L], dubleDe(200, NO_AR));
+  ok(vivo.length === 1 && linkCartaoDe('inscricao', ANTES, vivo)?.url === URL_NO_AR, 'link vivo: o cartão fica');
+  lv.esquecerConferencias();
+  const falhou = await lv.linksNaTela([L], async () => { throw new Error('x'); });
+  ok(falhou.length === 1, 'Stone fora do ar: o link fica (a trava só tira link morto)');
+
+  /* o resumo que o painel mostra */
+  const conf = (situacao, motivo) => ({ link: L, situacao, ...(motivo ? { motivo } : {}) });
+  ok(lv.resumoDoCartao([conf('vivo')], ANTES).estado === 'vivo', 'resumo: vivo');
+  const parado = lv.resumoDoCartao([conf('morto', 'a Stone diz que o link não existe mais')], ANTES);
+  ok(parado.estado === 'parado' && /não existe/.test(parado.motivo), 'resumo: parado, com o motivo');
+  ok(lv.resumoDoCartao([conf('divergente', 'x')], ANTES).estado === 'parado', 'divergente também para');
+  ok(lv.resumoDoCartao([conf('sem_resposta')], ANTES).estado === 'sem_resposta', 'resumo: sem resposta');
+  ok(lv.resumoDoCartao([], ANTES).estado === 'sem_link' && lv.resumoDoCartao([conf('morto')], DIA_4).estado === 'sem_link', 'sem link do lote vigente');
+  ok(lv.resumoDoCartao([{ ...conf('morto'), link: { ...L, url: 'https://golpe.com/pl_x' } }], ANTES).estado === 'sem_link', 'link inválido nem conta');
+
+  /* os links do código: o de 29/10 está, os dois mortos não */
+  ok(LINKS_CARTAO.some(l => l.url === URL_NO_AR && l.valor === 697 && l.parcelas === 1 && l.ref === 'inscricao' && l.lote === '1º lote'), 'o link de 29/10 está no código, como a Stone diz');
+  ok(!LINKS_CARTAO.some(l => /pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg|pl_LOm8gN6yVarlNRvSB5c5ld9zq307A2Wv/.test(l.url)), 'os links mortos não voltam');
+  ok(lv.lerResposta(LINKS_CARTAO[0], 200, NO_AR).situacao === 'vivo', 'o link do código bate com o que a Stone respondeu em 29/10');
+}
 
 if (mal) { console.error(`\n${mal} problema(s) no pagamento do Follow Camp.`); process.exit(1); }
 console.log('ok  followcamp-pagamento: valor, pedido à Stone, conferência, estado, Pix direto, cartão por link e log');

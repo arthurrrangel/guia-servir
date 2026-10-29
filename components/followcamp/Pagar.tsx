@@ -10,7 +10,9 @@
                       O número do cartão é digitado na página da Stone.
      (os dois acima pedem a API da Stone, STONE_SECRET_KEY na Vercel)
      Cartão por link  sem a API: o link de pagamento FIXO criado no app da
-                      Conta Stone (lib/followcamp.ts, LINKS_CARTAO). Ninguém
+                      Conta Stone (lib/followcamp.ts, LINKS_CARTAO), e só o
+                      que a Stone diz que ainda abre: a página recebe a lista
+                      já conferida (lib/followcamp-link-vivo.ts). Ninguém
                       confirma sozinho: a pessoa avisa no WhatsApp com o código
                       e o nome de quem pagou, que é como a organização acha o
                       pagamento no app.
@@ -34,7 +36,7 @@ import { PIX_CHAVE, PIX_NOME, PIX_CIDADE, valorDeDigitos } from '@/lib/oferta';
 import {
   FC27, LOTES, ROTULO, PARCELA_MIN, PARCELA_MAX, loteVigente, carneAberto, valorIrmaos, emReais,
   conferirPedido, conferirPagador, codigoFC27, codigoLegivel, mensagemWhatsApp, linkWhatsApp,
-  CODIGO_OK, soDigitos, limpaNome, nomeInvalido, linkDoLote, LINKS_CARTAO, type Referente, type LinkCartao,
+  CODIGO_OK, soDigitos, limpaNome, nomeInvalido, linkDoLote, type Referente, type LinkCartao,
 } from '@/lib/followcamp';
 import s from './pagar.module.css';
 
@@ -109,7 +111,7 @@ function mmss(ms: number) {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 }
 
-export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolean; temPixDireto: boolean }) {
+export default function Pagar({ temPagarme, temPixDireto, links }: { temPagarme: boolean; temPixDireto: boolean; links: readonly LinkCartao[] }) {
   const [tema, setTema] = useState<'claro' | 'escuro' | null>(null);
   const [sistemaEscuro, setSistemaEscuro] = useState(false);
   const [agora, setAgora] = useState<Date | null>(null);
@@ -211,7 +213,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
       const fresco = salvo && Date.now() - salvo.quando < ANDAMENTO_VALE;
       /* o link que volta da sessão tem que ser um dos links do código: a tela
          nunca abre um endereço só porque ele estava guardado */
-      const linkConhecido = t?.meio === 'cartaoLink' && LINKS_CARTAO.some(l => l.url === t.link);
+      const linkConhecido = t?.meio === 'cartaoLink' && links.some(l => l.url === t.link);
       if (fresco && t && CODIGO_OK.test(t.codigo) && t.valor > 0 && (t.meio === 'pixdireto' || linkConhecido)) {
         setTentativa(t);
         /* o formulário volta preenchido com o que gerou esta tela: sem isso,
@@ -263,9 +265,9 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
   /* o cartão por link só entra quando a API da Stone NÃO está ligada: com a
      API, o link nasce na hora, para esta pessoa, com o juro de quem paga */
   const porLink = !temPagarme;
-  const linksDoLote = porLink ? [linkDoLote('inscricao', lote), linkDoLote('irmaos', lote)].filter((l): l is LinkCartao => l !== null) : [];
+  const linksDoLote = porLink ? [linkDoLote('inscricao', lote, links), linkDoLote('irmaos', lote, links)].filter((l): l is LinkCartao => l !== null) : [];
   const temLink = linksDoLote.length > 0;
-  const linkAqui = porLink ? linkDoLote(referente, lote) : null;
+  const linkAqui = porLink ? linkDoLote(referente, lote, links) : null;
   /* no cartão por link o valor é o do link, que pode ter o custo do cartão
      embutido; a opção do cartão diz a diferença antes */
   const total = meio === 'cartaoLink' && linkAqui ? linkAqui.valor : valor;
@@ -302,7 +304,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     }
     if (!meio) return mal('Escolha como você quer pagar.');
     if (meio === 'cartaoLink') {
-      if (!linkDoLote(referente, loteVigente(new Date()))) return mal('O cartão não está disponível para esta opção. Escolha o Pix.');
+      if (!linkDoLote(referente, loteVigente(new Date()), links)) return mal('O cartão não está disponível para esta opção. Escolha o Pix.');
       const m = nomeInvalido(titular, 'de quem vai pagar no cartão');
       if (m) return mal(m, 'fc-titular');
     }
@@ -372,7 +374,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
     if (meio === 'cartaoLink') {
       /* o link é o do lote NA HORA DO CLIQUE: a aba aberta desde 03/11 não
          manda ninguém para o link do 1º lote em 04/11 */
-      const l = linkDoLote(referente, loteVigente(new Date()));
+      const l = linkDoLote(referente, loteVigente(new Date()), links);
       if (!l) { mal('O cartão não está disponível agora. Use o Pix ou fale com a organização.'); return; }
       const t: Tentativa = { ...base, codigo: codigoFC27(), valor: l.valor, titular: limpaNome(titular), link: l.url, parcelas: l.parcelas };
       guardar(t);
@@ -569,7 +571,7 @@ export default function Pagar({ temPagarme, temPixDireto }: { temPagarme: boolea
                     <div key={o.id}>
                       <label className={s.opcao} data-marcada={referente === o.id} aria-disabled={o.fechado || undefined}>
                         <input type="radio" name="fc-ref" value={o.id} checked={referente === o.id} disabled={o.fechado}
-                          onChange={() => { setReferente(o.id); setErro(null); if (meio === 'cartaoLink' && !linkDoLote(o.id, lote)) setMeio(null); }} />
+                          onChange={() => { setReferente(o.id); setErro(null); if (meio === 'cartaoLink' && !linkDoLote(o.id, lote, links)) setMeio(null); }} />
                         <span className={s.bola} aria-hidden="true" />
                         <span className={s.opNome}>{o.nome}</span>
                         <span className={s.opPreco}>{o.preco}</span>

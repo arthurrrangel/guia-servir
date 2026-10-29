@@ -245,25 +245,29 @@ export type LinkCartao = {
 };
 
 /** Vazio = o cartão por link fica desligado e a tela nem mostra a opção.
+ *  Link que a Stone diz que não existe mais sai da tela sozinho
+ *  (lib/followcamp-link-vivo.ts), mas continua aqui até ser trocado.
  *
- *  03/10/2026: o link que o Arthur mandou. Lido na página pública dele (sem
- *  pagar nada): vendido por GUIA CHURCH COMUNIDADE EVANGELICA, CNPJ
- *  49.173.580/0001-08 (o mesmo da chave Pix); R$ 697,00; aceita Pix,
- *  crédito e débito (o débito só pela carteira digital); crédito SÓ À VISTA
- *  (a única parcela configurada é 1x de R$ 697,00), e por isso `parcelas: 1`.
- *  O item do link se chama "Follow Camp 2026": o nome se corrige no app da
- *  Stone, não aqui.
+ *  HISTÓRICO
+ *  · 03/10/2026, pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg: R$ 697,00, crédito só
+ *    à vista. MORREU antes de 29/10: uma pessoa avisou que o cartão "manda
+ *    para outro site que dá inválido", e a página da Stone dizia "Não
+ *    encontramos seu link de pagamento" (a consulta dela responde 404).
+ *  · 29/10/2026, pl_LOm8gN6yVarlNRvSB5c5ld9zq307A2Wv: o primeiro que o Arthur
+ *    mandou no dia. Já respondia 404 ("não existe ou expirou") e não entrou;
+ *    logo depois veio o "link correto atualizado", o de baixo.
+ *  · 29/10/2026, pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo: o que está no ar.
+ *    Lido na Stone sem pagar nada: vendido por GUIA CHURCH COMUNIDADE
+ *    EVANGELICA, CNPJ 49.173.580/0001-08 (o mesmo da chave Pix); item
+ *    "Inscrição Follow Camp 2027"; R$ 697,00; aceita Pix, crédito, débito
+ *    (pela carteira digital) e boleto (vence em 3 dias); crédito SÓ À VISTA
+ *    (a única parcela configurada é 1x de R$ 697,00), e por isso
+ *    `parcelas: 1`; bandeiras Visa, Mastercard, Elo, Amex, Hipercard, Diners,
+ *    Discover, JCB e Aura.
  *  Irmãos (R$ 627,30) ainda não têm link: na tela, o cartão fica fechado para
  *  eles e o Pix direto cobra o valor com desconto. */
 export const LINKS_CARTAO: readonly LinkCartao[] = [
-  /* 29/10/2026: SAIU. Uma pessoa avisou que o cartão "manda para outro site
-     que dá inválido". Medido: a página da Stone mostra "Não encontramos seu
-     link de pagamento. Esse link de pagamento não existe ou expirou", e a
-     consulta que ela faz (checkout-bff-prd.pagar.me/paymentlinks/<id>)
-     responde 404. O link pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg expirou ou foi
-     cancelado no app (o motivo só aparece lá). Até o Arthur criar outro, o
-     cartão some da tela e o Pix direto continua. Link novo: sem limite de
-     pagamentos e com validade até o fim do lote (ou sem prazo). */
+  { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo' },
 ];
 
 const HOST_DO_LINK = /(^|\.)(stone\.com\.br|pagar\.me)$/;

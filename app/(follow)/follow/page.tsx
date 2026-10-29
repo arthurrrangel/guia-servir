@@ -113,7 +113,7 @@ const SABADO = [
 ];
 
 /* o Follow Camp na faixa de areia, com a frase da copy do Follow (a do /eventos é a de sempre) */
-const CAMP_LEAD = 'O retiro do Follow no Carnaval, para quem tem de 13 a 24 anos. Tema de 2027: ' + FC27.tema + '. Louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Quatro refeições por dia, camisa oficial e atividade do começo ao fim.';
+const CAMP_LEAD = 'O retiro do Follow no Carnaval, para quem tem de 13 a 30 anos. Tema de 2027: ' + FC27.tema + '. Louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Quatro refeições por dia, camisa oficial e atividade do começo ao fim.';
 
 /* 23/10/2026: a página se refaz uma vez por dia, para as datas dos próximos
    sábados no JSON-LD (o Google só aceita evento com data) não ficarem no

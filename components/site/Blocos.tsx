@@ -399,9 +399,9 @@ export function FaixaCamp({ href, lead }: { href: string; lead?: string }) {
         <div className="s-so-texto s-rev">
           <Chapeu forte={FC27.nome} resto={FC27.datas} />
           {/* 21/10/2026: as palavras da própria página do Camp ("cinco noites longe da rotina",
-              13 a 24 anos, Espaço Bethel); dizia "seis dias", que a página do Camp não diz */}
+              13 a 30 anos, Espaço Bethel); dizia "seis dias", que a página do Camp não diz */}
           <Vozes id="t-camp" className="s-h2 media" it="rotina">Cinco noites longe da rotina</Vozes>
-          <p className="s-lead"><UmaLinha semFim texto={lead ?? 'O retiro do Follow no Carnaval, pra quem tem de 13 a 24 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp.'} /></p>
+          <p className="s-lead"><UmaLinha semFim texto={lead ?? 'O retiro do Follow no Carnaval, pra quem tem de 13 a 30 anos: louvor, Palavra, natureza e gente da sua idade, no Espaço Bethel. Inscrição e pagamento na página do Camp.'} /></p>
           <div className="s-acoes">
             <Pil href={href} duro tom="preta">Quero ir no Camp</Pil>
           </div>

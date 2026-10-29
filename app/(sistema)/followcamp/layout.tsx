@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: 'GUIA Church', type: 'website', locale: 'pt_BR',
     title: 'Follow Camp 2027 · Eu me Rendo',
-    description: 'Retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027, no Carnaval.',
+    description: 'Retiro de jovens de 13 a 30 anos, de 05 a 10 de fevereiro de 2027, no Carnaval.',
     images: [{ url: '/followcamp/a/og.jpg', width: 1200, height: 630, alt: 'Follow Camp 2027' }],
   },
 };

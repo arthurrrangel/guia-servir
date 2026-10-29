@@ -27,7 +27,7 @@ const pixel = localFont({
 
 export const metadata: Metadata = {
   title: 'Ficha de inscrição · Follow Camp 2027',
-  description: 'Ficha de inscrição do Follow Camp 2027, retiro de jovens de 13 a 24 anos, de 05 a 10 de fevereiro de 2027.',
+  description: 'Ficha de inscrição do Follow Camp 2027, retiro de jovens de 13 a 30 anos, de 05 a 10 de fevereiro de 2027.',
   robots: { index: false, follow: false },
 };
 

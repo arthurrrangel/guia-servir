@@ -2,7 +2,7 @@
 
    O que este arquivo protege, em ordem de quanto custa errar:
 
-     1. A IDADE NO DIA DO CAMP. De 13 a 24 anos em 05/02/2027, aniversário no
+     1. A IDADE NO DIA DO CAMP. De 13 a 30 anos em 05/02/2027, aniversário no
         próprio dia contando; e quem é menor de 18 nesse dia precisa do
         responsável com CPF válido e do termo aceito.
      2. O BANCO (04/10/2026, migração 110). A ficha vai com as chaves que
@@ -16,9 +16,11 @@
      4. O RESTO DA FICHA: nomes, WhatsApp, irmão, pagamento, imagem,
         consentimento, isca.                                                  */
 import http from 'node:http';
+import { readFileSync } from 'node:fs';
 import {
   lerData, idadeEm, conferirFicha, fichaParaBanco, semFormula, termoDe, mensagemDaFicha,
   mensagemDeAviso, valorDaFicha, mascaraData, mascaraCpf, mascaraCelular, VERSAO_TERMO,
+  IDADE_MIN, IDADE_MAX,
 } from '../lib/followcamp-ficha.ts';
 
 let mal = 0;
@@ -60,7 +62,8 @@ for (const [mexe, campo, por] of [
   [{ campista: 'Maria' }, 'fc-campista', 'nome de uma palavra'],
   [{ nascimento: '14/13/2010' }, 'fc-nasc', 'mês 13'],
   [{ nascimento: '06/02/2014' }, 'fc-nasc', '12 anos no Camp'],
-  [{ nascimento: '05/02/2002' }, 'fc-nasc', '25 anos no Camp'],
+  [{ nascimento: '05/02/1996' }, 'fc-nasc', '31 anos no Camp (aniversário no dia)'],
+  [{ nascimento: '14/07/1990' }, 'fc-nasc', '36 anos no Camp'],
   [{ sexo: 'outro' }, 'fc-sexo', 'sexo fora da lista'],
   [{ camisa: 'XXL' }, 'fc-camisa', 'camisa fora da lista'],
   [{ whatsCampista: '(21) 3333-4444' }, 'fc-whats', 'fixo no WhatsApp do campista'],
@@ -80,7 +83,13 @@ for (const [mexe, campo, por] of [
   [{ site: 'http://spam' }, 'site', 'isca preenchida'],
 ]) ok(campoDe({ ...MENOR, ...mexe }) === campo, `${por}: esperava ${campo}, veio ${campoDe({ ...MENOR, ...mexe })}`);
 ok(campoDe({ ...MENOR, nascimento: '05/02/2014' }) === 'ok', '13 anos no dia exato do Camp entra');
-ok(campoDe({ ...MENOR, nascimento: '06/02/2002', ...{ respNome: '', respCpf: '', respWhats: '', respParentesco: '' }, emergNome: 'Ana Dias', emergWhats: '(21) 97777-6666', whatsCampista: '(21) 99594-6491' }) === 'ok', '24 anos no Camp entra');
+/* 29/10/2026: o teto passou de 24 para 30 anos (o banco já aceitava até 30) */
+const ADULTO_DE = n => ({ ...MENOR, nascimento: n, ...{ respNome: '', respCpf: '', respWhats: '', respParentesco: '' }, emergNome: 'Ana Dias', emergWhats: '(21) 97777-6666', whatsCampista: '(21) 99594-6491' });
+ok(campoDe(ADULTO_DE('06/02/2002')) === 'ok', '24 anos no Camp entra');
+ok(campoDe(ADULTO_DE('05/02/2002')) === 'ok', '25 anos no Camp entra (antes ficava de fora)');
+ok(campoDe(ADULTO_DE('05/02/1997')) === 'ok', '30 anos no dia exato do Camp entra');
+ok(campoDe(ADULTO_DE('06/02/1996')) === 'ok', '30 anos no Camp (faz 31 no dia seguinte) entra');
+ok(campoDe(ADULTO_DE('05/02/1996')) === 'fc-nasc', '31 anos no dia do Camp fica de fora');
 ok(campoDe({ ...MENOR, whatsCampista: '' }) === 'ok', 'menor sem WhatsApp próprio: ok');
 ok(campoDe({ ...ADULTO, whatsCampista: '' }) === 'fc-whats', 'adulto precisa do próprio WhatsApp');
 ok(campoDe({ ...ADULTO, emergWhats: ADULTO.whatsCampista }) === 'fc-emerg-whats', 'contato de emergência com o número do campista');
@@ -181,6 +190,29 @@ const bc = await import('../lib/followcamp-banco.ts');
   ok((await bc.gravarFicha(f, 500)).ok === false, 'banco fora do ar');
 }
 servidor.close();
+
+/* ------------------------------------- o texto das páginas segue a regra ---
+   29/10/2026: o teto subiu de 24 para 30 e o texto estava em 13 lugares, um
+   deles fora do padrão ("typicalAgeRange":"13-24", no JSON-LD da página do
+   Camp). Daqui em diante, mudar IDADE_MIN ou IDADE_MAX sem mudar o texto
+   reprova o teste (e o build da Vercel, que roda o npm test). */
+{
+  const FAIXA = `${IDADE_MIN} a ${IDADE_MAX}`;
+  const paginas = {
+    'public/followcamp/index.html': 8,
+    'app/(follow)/follow/page.tsx': 1,
+    'components/site/Blocos.tsx': 2,
+    'app/(sistema)/followcamp/inscricao/page.tsx': 1,
+    'app/(sistema)/followcamp/layout.tsx': 1,
+  };
+  for (const [arq, n] of Object.entries(paginas)) {
+    const t = readFileSync(new URL(`../${arq}`, import.meta.url), 'utf8');
+    const faixas = [...t.matchAll(/(\d+) a (\d+) anos/g)].map(m => `${m[1]} a ${m[2]}`);
+    ok(faixas.length === n && faixas.every(f => f === FAIXA), `${arq}: a faixa de idade do texto (${faixas.join(', ') || 'nenhuma'}) não é a da regra (${FAIXA}, ${n}x)`);
+  }
+  const lp = readFileSync(new URL('../public/followcamp/index.html', import.meta.url), 'utf8');
+  ok(lp.includes(`"typicalAgeRange":"${IDADE_MIN}-${IDADE_MAX}"`), 'JSON-LD da página do Camp: typicalAgeRange da regra');
+}
 
 if (mal) { console.error(`\n${mal} problema(s) na ficha do Follow Camp.`); process.exit(1); }
 console.log('ok  followcamp-ficha: idade no dia do Camp, responsável e termo, ficha no formato do banco, gravado só com ok:true');

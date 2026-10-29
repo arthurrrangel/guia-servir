@@ -4,6 +4,7 @@ import Minha from '@/components/followcamp/Minha';
 import { lerMinha } from '@/lib/followcamp-banco';
 import { TOKEN_OK } from '@/lib/followcamp-cobranca';
 import { TEM_PIX } from '@/lib/oferta';
+import { linksNaTela } from '@/lib/followcamp-link-vivo';
 
 /* =============================================================================
    /followcamp/minha/<token> — O LINK PESSOAL DA INSCRIÇÃO · 19/10/2026 (114)
@@ -16,6 +17,8 @@ import { TEM_PIX } from '@/lib/oferta';
    O token é a credencial: fora da busca (cabeçalho em next.config.mjs e o
    robots), e a página não mostra CPF, saúde nem telefone. Lida no servidor,
    pela chave de serviço (lib/followcamp-banco.ts, `lerMinha`), a cada visita.
+   O cartão só aparece se a Stone disser que o link ainda abre (29/10/2026,
+   lib/followcamp-link-vivo.ts).
    ============================================================================= */
 const poppins = localFont({
   src: [
@@ -49,10 +52,13 @@ export const viewport: Viewport = {
 
 export default async function Pagina({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const dados = TOKEN_OK.test(token) ? await lerMinha(token) : ({ ok: false, erro: 'LINK_INVALIDO' } as const);
+  const [dados, links] = await Promise.all([
+    TOKEN_OK.test(token) ? lerMinha(token) : Promise.resolve({ ok: false, erro: 'LINK_INVALIDO' } as const),
+    linksNaTela(),
+  ]);
   return (
     <div className={`${poppins.variable} ${pixel.variable}`}>
-      <Minha token={token} dados={dados} temPix={TEM_PIX} />
+      <Minha token={token} dados={dados} temPix={TEM_PIX} links={links} />
     </div>
   );
 }

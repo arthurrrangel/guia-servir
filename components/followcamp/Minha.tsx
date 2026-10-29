@@ -28,7 +28,7 @@ import { useRouter } from 'next/navigation';
 import qrcode from 'qrcode-generator';
 import { pixCopiaECola } from '@/lib/pix';
 import { PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '@/lib/oferta';
-import { FC27, codigoFC27, codigoLegivel, linkCartaoDe, linkWhatsApp } from '@/lib/followcamp';
+import { FC27, codigoFC27, codigoLegivel, linkCartaoDe, linkWhatsApp, type LinkCartao } from '@/lib/followcamp';
 import { contaDaFicha, diaMes, maxParcelas, planoDe, centavos, type EstadoParcela } from '@/lib/followcamp-carne';
 import { referenteDa } from '@/lib/followcamp-minha';
 import type { Minha as MinhaDados, MeuPagamento } from '@/lib/followcamp-banco';
@@ -101,7 +101,7 @@ async function prepararArquivo(f: File): Promise<{ base64: string } | { erro: st
   }
 }
 
-export default function Minha({ token, dados, temPix }: { token: string; dados: MinhaDados; temPix: boolean }) {
+export default function Minha({ token, dados, temPix, links }: { token: string; dados: MinhaDados; temPix: boolean; links: readonly LinkCartao[] }) {
   const router = useRouter();
   const [tema, setTema] = useState<'claro' | 'escuro' | null>(null);
   const [sistemaEscuro, setSistemaEscuro] = useState(false);
@@ -171,7 +171,8 @@ export default function Minha({ token, dados, temPix }: { token: string; dados: 
   const max = maxParcelas(agora);
   const carne = conta.carne || querCarne;
   const precisaPlano = carne && !conta.plano && conta.total != null && max > 0;
-  const link = conta.carne ? null : linkCartaoDe(referente, agora);
+  /* só o link que a Stone diz que ainda abre (a página manda a lista já conferida) */
+  const link = conta.carne ? null : linkCartaoDe(referente, agora, links);
   const podeCartao = !!link && conta.pago + conta.conferindo === 0 && conta.total != null && centavos(link.valor) === conta.total;
 
   const prox = conta.situacao?.proxima ?? null;

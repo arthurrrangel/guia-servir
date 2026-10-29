@@ -111,7 +111,7 @@ const D = em('2026-10-19T12:00:00-03:00');
   ok(conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaVista, [], D, LINK).ok, 'à vista: cartão no valor do link');
   ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 300 }), fichaVista, [], D, LINK).ok, 'cartão com outro valor');
   ok(!conferirPagamentoDoLink(pede({ meio: 'cartaoLink', valor: 697 }), fichaVista, [], D, []).ok, 'sem link configurado: o cartão é recusado');
-  ok(LINKS_CARTAO.every(x => x.url !== 'https://payment-link-v3.stone.com.br/pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg'), 'o link morto de 03/10 não volta');
+  ok(LINKS_CARTAO.every(x => !/pl_b1ZM7pm2zVEGwK1ues6lQqvn9jxyDRBg|pl_LOm8gN6yVarlNRvSB5c5ld9zq307A2Wv/.test(x.url)), 'os links mortos (03/10 e o primeiro de 29/10) não voltam');
   ok(!conferirPagamentoDoLink(pede({}), fichaVista, [{ valor: 697, conferido: true, codigo: 'FC27AAAAAAAA', referente: 'inscricao', forma: 'pix_direto' }], D).ok, 'quitado: nada a pagar');
   ok(!conferirPagamentoDoLink(pede({ titular: 'X' }), fichaVista, [], D).ok, 'nome de quem pagou inválido');
 

@@ -19,7 +19,7 @@
    no recebido até alguém achar o dinheiro na Stone. As contas moram em
    lib/followcamp-painel.ts, com teste.
    ============================================================================= */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useEu } from '@/components/demandas/Casca';
 import { Aviso, Cabecalho, Campo, Esqueleto, Kpi, Kpis, Opcoes, Pill, Secao, Subabas, Vazio, useEstreito } from '@/components/demandas/Ui';
 import {
@@ -31,10 +31,18 @@ import {
   dataHoraBr, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS, ROTULO_ORIGEM, FORMAS,
   type Situacao, type PagamentoBanco, type Forma, type Referente, type FormaDaFicha, type FichaLida, type Status,
 } from '@/lib/followcamp-painel';
-import { LOTES, valorIrmaos, soDigitos } from '@/lib/followcamp';
+import { LOTES, valorIrmaos, soDigitos, type LinkCartao } from '@/lib/followcamp';
 import { diaMes } from '@/lib/followcamp-carne';
 import { contatoDe, linkDoWhats, linkPessoal, mensagemDeCobranca, numeroWhats } from '@/lib/followcamp-cobranca';
 import s from './painel.module.css';
+
+/* 29/10/2026: o cartão por link morreu sem ninguém saber, e a mensagem do
+   Cobrar continuava oferecendo "ou no cartão". O painel pergunta ao
+   /api/followcamp/meios (que pergunta à Stone, lib/followcamp-link-vivo.ts):
+   cartão fora do ar = a mensagem não oferece cartão, e o aviso diz o motivo.
+   Sem resposta do meios, vale a lista do código, como antes. */
+type Cartao = { noAr: boolean; parado: string | null };
+const LinksDoCobrar = createContext<readonly LinkCartao[] | undefined>(undefined);
 
 type Aba = 'campistas' | 'conferir' | 'pagamentos' | 'lancar';
 
@@ -83,9 +91,16 @@ export default function Painel() {
   const [aberta, setAberta] = useState<string | null>(null);
   const [indo, setIndo] = useState(false);
   const [paraPagar, setParaPagar] = useState<string | null>(null);
+  const [cartao, setCartao] = useState<Cartao | null>(null);
   const estreito = useEstreito(760);
 
   const carregar = useCallback(async () => {
+    void fetch('/api/followcamp/meios', { cache: 'no-store' })
+      .then(x => (x.ok ? x.json() : null))
+      .then((j: { cartaoLink?: unknown; cartaoStone?: unknown; cartaoMotivo?: unknown } | null) => {
+        if (j) setCartao({ noAr: j.cartaoLink === true, parado: j.cartaoStone === 'parado' ? String(j.cartaoMotivo || 'a Stone não abre o link') : null });
+      })
+      .catch(() => { /* fica o que já se sabia */ });
     const r = await lerPainel();
     if (r.ok) { setDados({ eu: r.eu, agora: r.agora, fichas: r.fichas || [], pagamentos: r.pagamentos || [] }); setErro(''); }
     else setErro(recado(r, 'carregar o painel'));
@@ -133,6 +148,7 @@ export default function Painel() {
     .map(f => `${ROTULO_FORMA_DA_FICHA[f]} ${resumo.escolheram[f]}`);
 
   return (
+    <LinksDoCobrar.Provider value={cartao && !cartao.noAr ? [] : undefined}>
     <div className={s.painel}>
       <Cabecalho
         sobre="Administração"
@@ -148,6 +164,12 @@ export default function Painel() {
       />
 
       {erro ? <Aviso tom="bad">{erro}</Aviso> : null}
+      {cartao?.parado ? (
+        <Aviso tom="warn">
+          O cartão saiu do site: {cartao.parado}. Crie outro link de pagamento no app da Stone, no valor do lote, sem
+          limite de pagamentos e válido até o fim do lote, e passe o endereço novo para trocar no site. O Pix continua.
+        </Aviso>
+      ) : null}
 
       {dados ? (
         <>
@@ -267,6 +289,7 @@ export default function Painel() {
         </>
       ) : null}
     </div>
+    </LinksDoCobrar.Provider>
   );
 }
 
@@ -615,12 +638,13 @@ function textoDoPlano(x: Situacao): string {
 
 /** Abre o WhatsApp da pessoa certa com a mensagem pronta. Quem aperta enviar é a organização. */
 function Cobrar({ x }: { x: Situacao }) {
+  const links = useContext(LinksDoCobrar);
   const f = x.ficha;
   if (f.cancelada_em || !f.token) return null;
   const contato = contatoDe(f);
   const numero = contato ? numeroWhats(contato.whats) : null;
   if (!contato || !numero) return <span className={s.mudo}>sem WhatsApp</span>;
-  const texto = mensagemDeCobranca({ ficha: f, conta: x.conta, pagamentos: x.pagamentos, link: linkPessoal(f.token) });
+  const texto = mensagemDeCobranca({ ficha: f, conta: x.conta, pagamentos: x.pagamentos, link: linkPessoal(f.token), links });
   return (
     <a className="dm-btn dm-peq" href={linkDoWhats(numero, texto)} target="_blank" rel="noopener"
       aria-label={`Mandar mensagem no WhatsApp para ${contato.nome || f.campista} sobre ${f.campista}`}>
