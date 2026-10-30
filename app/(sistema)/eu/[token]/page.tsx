@@ -281,6 +281,16 @@ export default function Eu() {
     } catch { /* fica o que estava */ }
   }, [token]);
 
+  /* 30/10/2026 · O AVISO DE FALHA SOBREVIVE À RELEITURA DE FUNDO.
+     `carregar(false)` parte de que o envio salvou: dando certo, apaga a
+     barra; falhando, escreve "Salvou!". Depois de uma resposta que não gravou
+     (a chamada caiu, ou `eu_responder` devolveu `mudou:0`), isso apagava o
+     aviso ou o trocava por um sucesso que não houve. `responderItens` deixa
+     aqui o aviso que vale, e a releitura só mexe na barra quando ela mostra
+     outra coisa. A ação seguinte começa com `setErro('')`, e a barra volta ao
+     normal. (`marcarPosso` já segurava o aviso dele por conta própria.) */
+  const avisoFica = useRef('');
+
   /* inicial=true: primeira carga, pode mostrar tela cheia de erro/rede.
      inicial=false: reload de fundo após uma ação — NUNCA rebaixar a tela
      (o envio já salvou); no máximo um aviso discreto. */
@@ -321,11 +331,11 @@ export default function Eu() {
          não mandar a pessoa para cá de novo (01/10/2026) */
       if (/link inv/i.test(error.message || '')) { esquecerVinculo(token); if (inicial) setFase('erro'); return; }
       if (inicial) setFase('rede');
-      else setErro('Salvou! Só não consegui atualizar a tela agora, recarregue quando tiver sinal.');
+      else setErro(e => (e && e === avisoFica.current ? e : 'Salvou! Só não consegui atualizar a tela agora, recarregue quando tiver sinal.'));
       return;
     }
     if (!data?.length) { esquecerVinculo(token); if (inicial) setFase('erro'); return; }
-    setErro('');
+    setErro(e => (e && e === avisoFica.current ? e : ''));
     /* 16/09/2026: o aparelho passa a saber quem é a pessoa. Até aqui só quem
        entrava pelo PIN guardava o token; quem só usava o link pessoal era
        estranho para o site a cada visita. Com o token guardado, a barra de
@@ -571,7 +581,8 @@ export default function Eu() {
       return !i.plantao && restaurar.has(k) && i.status === status ? { ...i, status: restaurar.get(k)! } : i;
     }));
     if (ruins.length === rs.length) {
-      setFlash(''); setErro(aviseHumano(ruins[0].reason, 'salvar'));
+      avisoFica.current = aviseHumano(ruins[0].reason, 'salvar');
+      setFlash(''); setErro(avisoFica.current);
       setOcupado(''); return;
     }
     /* 75 · a tela agradecia mesmo quando nada tinha sido gravado. A função
@@ -580,17 +591,17 @@ export default function Eu() {
     const mudou = rs.filter(r => r.status === 'fulfilled')
       .map(r => ((r as PromiseFulfilledResult<any>).value as { mudou?: number } | null)?.mudou);
     if (mudou.length && mudou.every(m => m === 0)) {
-      setFlash('');
-      setErro('Esse posto não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.');
+      avisoFica.current = 'Esse posto não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.';
+      setFlash(''); setErro(avisoFica.current);
       await carregar(false);
       setOcupado(''); return;
     }
     if (ruins.length) {
-      setFlash('');
-      setErro(`${aviseHumano(ruins[0].reason, 'salvar')} Uma parte não entrou; confira a lista e toque de novo.`);
+      avisoFica.current = `${aviseHumano(ruins[0].reason, 'salvar')} Uma parte não entrou; confira a lista e toque de novo.`;
+      setFlash(''); setErro(avisoFica.current);
     } else if (naoGravadas.length) {
-      setFlash('');
-      setErro('Uma parte dos postos não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.');
+      avisoFica.current = 'Uma parte dos postos não está mais com você neste dia. Recarregue a página; se continuar, fale com quem organiza a sua área.';
+      setFlash(''); setErro(avisoFica.current);
     } else {
       /* honestidade: o sistema NÃO avisa o líder sozinho. Prometer isso fazia
          a pessoa não avisar por fora, achando que já estava resolvido. */
