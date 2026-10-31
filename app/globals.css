@@ -3760,12 +3760,31 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
 }
 
 /* ------------------------------------------------------------- o recado */
+/* A BARRA NUNCA PASSAVA DE METADE DA TELA, E A FRASE VIRAVA NOVE LINHAS DE
+   RÓTULO. 31/10/2026, medido em 390 × 844 com os tokens e a Inter do
+   repositório: 195 px de largura nas três mensagens.
+
+   1. `left:50%` com largura automática: o encaixe de um elemento fixo é
+      limitado ao espaço que sobra depois do `left`, metade da tela. O
+      `max-width` nunca chegava a valer. Agora a barra ocupa a tela toda
+      (`left:0; right:0`), encolhe até o conteúdo (`width:max-content`) e
+      se centraliza pela margem; o teto é o mesmo `100vw - 40px`, com um
+      limite de leitura no computador.
+   2. A barra mostra frases inteiras ("Uma parte não entrou; confira a lista
+      e toque de novo."), e `--t-min` é, pela própria régua, "rótulo mínimo,
+      raro, e nunca em frase". A frase passa a `--t-apoio`, caixa normal, sem
+      o espaçamento de rótulo. As cores ficam: branco sobre `--bad` é 6,8:1 e
+      sobre `--noite`, 15,3:1.
+   3. O aviso de falha fica até a próxima ação. Para a barra não esconder o
+      cartão que a mensagem manda tocar de novo, a página ganha chão embaixo
+      enquanto o aviso de falha existe (`.vol:has(> .vol-flash-ruim)`, logo
+      abaixo). O sucesso some sozinho em 2,6 s e não precisa de chão. */
 .vol-flash{
-  position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-  background:var(--noite); color:#fff; padding:var(--e3) var(--e5); z-index:60;
-  font-family:var(--fonte-display); font-weight:var(--p-forte);
-  font-size:var(--t-min); letter-spacing:var(--tr); text-transform:uppercase;
-  max-width:calc(100vw - 40px);
+  position:fixed; left:0; right:0; bottom:22px; margin:0 auto; z-index:60;
+  width:max-content; max-width:min(calc(100vw - 40px), 560px);
+  background:var(--noite); color:#fff; padding:var(--e3) var(--e4);
+  font-family:var(--fonte-display); font-weight:var(--p-rot);
+  font-size:var(--t-apoio); line-height:1.45; letter-spacing:0; text-transform:none;
 }
 /* A MESMA BARRA DIZ SUCESSO E FALHA, E A COR SEPARA — 20/09/2026.
 
@@ -3775,6 +3794,10 @@ body:has(.lid) .topo-in > *:last-child svg{ display:none }
    lugar; `--bad` é a mesma cor de estado que o resto do sistema usa, e o
    texto continua branco porque o fundo é escuro. */
 .vol-flash-ruim{ background:var(--bad) }
+/* com o aviso de falha na tela, o fim da página sobe acima dele: o último
+   cartão continua alcançável com rolagem. A maior barra medida, a de parte
+   não gravada em 320 px, tem 133 px, mais os 22 px do pé: 168 px cobrem. */
+.vol:has(> .vol-flash-ruim) .vol-in{ padding-bottom:calc(var(--e9) + var(--e6)) }
 .vol-nota{ margin-top:var(--e3); font-size:var(--t-apoio); line-height:1.65; color:var(--cinza); max-width:48ch }
 .vol-pe{ margin-top:var(--e8); padding-top:var(--e5); border-top:1px solid var(--linha) }
 
