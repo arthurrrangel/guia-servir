@@ -641,6 +641,15 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 /* o link da nota do pouso ("Dúvidas? Fale no WhatsApp", 21/10/2026): sublinhado
    claro, com altura de toque */
 .s .s-scrub-faixa .s-micro a{ display:inline-block; padding:12px 0; margin:-4px 0; color:var(--s-papel); font-weight:500; text-decoration:underline; text-decoration-thickness:1px; text-decoration-color:rgba(255,255,255,.5); text-underline-offset:3px }
+/* 30/10/2026: a nota do pouso da home (.onde: a rua e o WhatsApp, dois itens da
+   regra da primeira tela) era o menor texto da dobra no celular, 14 px. Vai a
+   16 px, com o mesmo peso, a mesma cor e as mesmas palavras. Só na tela de toque
+   de 280 a 759 px: com mouse (o computador, também com zoom) nada muda, porque o
+   bloco do pouso não deve crescer antes da decisão do zoom (25/10), e a 256 px
+   o chapéu já encosta na barra. */
+@media (min-width:280px) and (max-width:759px) and (hover:none) and (pointer:coarse){
+  .s .s-scrub-faixa.pouso .s-micro.onde{ font-size:16px }
+}
 
 /* O CHAPÉU SOBRE FOTO (21/10/2026). A medida nos pixels
    (scripts/auditoria-contraste-foto.mjs) achou o chapéu abaixo de 4,5:1 onde a

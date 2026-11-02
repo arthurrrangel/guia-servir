@@ -121,7 +121,7 @@ export default function Home() {
         pouso={{ titulo: 'Existe um lugar para você', it: 'para você', a: 0, primeiro: true, b: 0.16,
                  sub: ligaTexto(`Culto todo ${IGREJA.cultoDia.toLowerCase()}, às ${IGREJA.cultoHora}. Venha nos visitar.`) }}
         chapeu={<Chapeu forte={IGREJA.nome} resto={`Igreja na ${IGREJA.bairro}`} />}
-        micro={<p className="s-micro">{IGREJA.rua}<Sep />Dúvidas? <a href={canalDeConversa('Oi! Tenho uma dúvida sobre o culto de domingo.').href} target="_blank" rel="noreferrer">Fale no WhatsApp</a></p>}
+        micro={<p className="s-micro onde">{IGREJA.rua}<Sep />Dúvidas? <a href={canalDeConversa('Oi! Tenho uma dúvida sobre o culto de domingo.').href} target="_blank" rel="noreferrer">Fale no WhatsApp</a></p>}
       >
         <Pil href="/cultos#primeira-vez">Vou visitar</Pil>
         <Pil href="/como-chegar" tom="vidro">Como chegar</Pil>
