@@ -16,6 +16,13 @@ Sufixos: l = 1920x1080 (herói, computador), p = 1080x1920 (herói, celular),
 h = 1800x1200 (faixa 3:2), v = 1000x1250 (retrato 4:5), s = versão pequena
 (640 px de largura) do h ou do v. O código (1503-64) é o da folha de contato
 do Drive (culto 15.03, 64ª editada).
+
+18/11/2026: as fotos do guiachurch.com passaram a sair das 31 tratadas que o
+Arthur mandou (scripts/site-fotos-tratadas.py) e as antigas saíram do
+repositório. As linhas da igreja continuam na tabela, como registro de onde
+cada foto vinha, mas este script não as grava mais: os nomes de arquivo são
+os mesmos, e rodá-lo recolocaria as fotos antigas por cima das novas. Daqui
+saem só as do Guia Servir.
 """
 import os, sys, glob
 import numpy as np
@@ -83,10 +90,16 @@ def cortar(im, w, h, foco):
         y0 = int(round(foco[1] * H - ch / 2)); y0 = max(0, min(H - ch, y0)); x0 = 0
     return im.crop((x0, y0, x0 + cw, y0 + ch)).resize((w, h), Image.LANCZOS)
 
+# os lugares do guiachurch.com, que desde 18/11/2026 saem das fotos tratadas
+DA_IGREJA = ('home-', 'gente-', 'fecho-igreja', 'cultos-', 'sobre-', 'eventos-heroi', 'pg-heroi', 'ofertar-heroi')
+
 so = sys.argv[2:]  # opcional: só estes nomes
 for nome, codigo, foco, saidas, *resto in FOTOS:
     q = resto[0] if resto else 82
     if so and nome not in so:
+        continue
+    if nome.startswith(DA_IGREJA):
+        print(f'{nome}: é do guiachurch.com, sai de scripts/site-fotos-tratadas.py (não gravado)')
         continue
     bruto = ImageOps.exif_transpose(Image.open(achar('bruto', codigo))).convert('RGB')
     edit = ImageOps.exif_transpose(Image.open(achar('orig', codigo))).convert('RGB')

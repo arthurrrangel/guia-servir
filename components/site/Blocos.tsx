@@ -172,6 +172,9 @@ export function Ir({ href, className, children, duro }: { href: string; classNam
   return <Link href={href} className={className}>{children}</Link>;
 }
 
+/* o recorte em pé que é só do celular (a foto no alto, app/site.css) */
+const SO_CELULAR = '(orientation: portrait) and (max-width: 759px)';
+
 /* a foto de um lugar do registro, com a versão pequena quando existe */
 export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt, retrato }:
   { lugar: LugarDeFoto; className?: string; sizes?: string; prioridade?: boolean; alt?: string; retrato?: boolean }) {
@@ -179,8 +182,9 @@ export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt, r
   const srcSet = f.pequena ? `${f.pequena} 640w, ${f.arquivo} ${f.largura}w` : undefined;
   /* o ponto da foto que nunca sai do quadro: variável no estilo, e o CSS
      troca pelo do retrato quando a tela está em pé */
-  const r0: { foco?: string; celular?: string } | undefined = f.retrato;
-  const foco = { ...(f.foco ? { '--foco': f.foco } : {}), ...(r0?.foco ? { '--foco-r': r0.foco } : {}), ...(r0?.celular ? { '--foco-c': r0.celular } : {}) } as React.CSSProperties;
+  const r0: { foco?: string; celular?: string; tablet?: string } | undefined = f.retrato;
+  const foco = { ...(f.foco ? { '--foco': f.foco } : {}), ...(r0?.foco ? { '--foco-r': r0.foco } : {}), ...(r0?.celular ? { '--foco-c': r0.celular } : {}),
+    ...(r0?.tablet ? { '--foco-t': r0.tablet } : {}) } as React.CSSProperties;
   const img = (
     <img
       src={f.arquivo}
@@ -197,13 +201,15 @@ export function Img({ lugar, className = '', sizes = '100vw', prioridade, alt, r
     />
   );
   /* herói e fecho no celular em pé: o recorte em pé (<picture>), para não
-     ampliar uma faixa estreita da foto deitada */
+     ampliar uma faixa estreita da foto deitada. Com a foto no alto (`alto`,
+     18/11/2026) o recorte é 4:5 e só do celular; o tablet em pé fica com a
+     foto deitada, que é a forma da caixa dele */
   if (retrato && f.retrato) {
-    const r = f.retrato;
+    const r: NonNullable<Foto['retrato']> = f.retrato;
     const rSet = r.pequena ? `${r.pequena} 640w, ${r.arquivo} ${r.largura}w` : `${r.arquivo} ${r.largura}w`;
     return (
       <picture>
-        <source media="(orientation: portrait)" srcSet={rSet} sizes={sizes} width={r.largura} height={r.altura} />
+        <source media={r.alto ? SO_CELULAR : '(orientation: portrait)'} srcSet={rSet} sizes={sizes} width={r.largura} height={r.altura} />
         {img}
       </picture>
     );
@@ -270,8 +276,10 @@ export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
 export function Heroi({ id, lugar, video, chapeu, titulo, it, semPonto, longa, lead, micro, curto, porta, children }:
   { id: string; lugar?: LugarDeFoto; video?: string; chapeu: React.ReactNode; titulo: string; it?: string; semPonto?: boolean; longa?: boolean;
     lead?: React.ReactNode; micro?: React.ReactNode; curto?: boolean; porta?: boolean; children?: React.ReactNode }) {
+  const doLugar: Foto | undefined = lugar ? FOTOS[lugar] : undefined;
+  const r = doLugar?.retrato;
   return (
-    <section className={'s-heroi' + (curto ? ' curto' : '') + (porta ? ' porta' : '')} aria-labelledby={id}>
+    <section className={'s-heroi' + (curto ? ' curto' : '') + (porta ? ' porta' : '') + (r?.alto ? ' alto' : '')} aria-labelledby={id}>
       {lugar ? <Img lugar={lugar} prioridade retrato /> : video ? <Fundo video={video} prioridade /> : null}
       <div className="s-in s-heroi-in">
         {chapeu}
@@ -355,12 +363,17 @@ export function FaixaPerguntas({ id, tid, titulo, itens, tom = 'papel', soLargo 
    app/site.css). O título vai no corpo cheio; o resto é o mesmo fecho. */
 export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo, foto }:
   { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia' | 'janela'; id?: string; soLargo?: boolean;
-    /** só com tom "janela": a foto deitada e em pé (1920x1080 e 1080x1920) */
-    foto?: { l: string; p: string } }) {
+    /** só com tom "janela": a foto deitada e em pé (1920x1080 e 1080x1920).
+     *  `soCelular` (18/11/2026): o corte em pé é 4:5 e vale só no celular; o
+     *  tablet em pé fica com a deitada, que é a forma da faixa nele. É o da
+     *  home da igreja, que sai das fotos tratadas (a deitada inteira na
+     *  largura, 2000x900, e o corte do celular em 584x730:
+     *  scripts/site-fotos-tratadas.py diz por quê) */
+    foto?: { l: string; p: string; soCelular?: boolean } }) {
   const janela = tom === 'janela' && foto;
   const quadro = janela && (
     <picture>
-      <source media="(orientation: portrait)" srcSet={foto.p} type="image/webp" />
+      <source media={foto.soCelular ? SO_CELULAR : '(orientation: portrait)'} srcSet={foto.p} type="image/webp" />
       <img src={foto.l} width={1920} height={1080} alt="" loading="lazy" decoding="async" />
     </picture>
   );

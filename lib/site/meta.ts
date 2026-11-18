@@ -14,8 +14,9 @@ import type { QualSite } from '@/lib/site/nav';
    imagem 1200×630 com a versão.
 
    `OG_VERSAO`: mude quando os cartões (scripts/og-cartoes.py) mudarem.
+   18/11/2026: os sete do guiachurch.com passaram para as fotos tratadas.
    ============================================================================= */
-export const OG_VERSAO = '20261020';
+export const OG_VERSAO = '20261118';
 
 const NOME: Record<QualSite, string> = { igreja: 'GUIA Church', servir: 'GUIA Servir', follow: 'Follow' };
 const BASE: Record<QualSite, string> = { igreja: SITE_IGREJA, servir: SITE, follow: SITE_FOLLOW };

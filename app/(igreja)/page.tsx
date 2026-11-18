@@ -53,23 +53,26 @@ const PORTAS = [
 ];
 
 
-/* A CHEGADA: as cinco fotos do herói, na ordem do scroll (scripts/site-fotos-
-   drive.py, acervo do fotógrafo no Drive, cultos de 15.03 e 10.05 de 2026).
-   Cada uma entra com fusão entre a e b. */
+/* A CHEGADA: as cinco fotos do herói, na ordem do scroll. 18/11/2026: são as
+   fotos tratadas que o Arthur mandou (scripts/site-fotos-tratadas.py; as
+   fotos 19, 21, 14, 3 e 11 da pasta). Cada uma entra com fusão entre a e b.
+   `xp`: no tablet em pé, onde a foto deitada encosta (os quatro da porta
+   não cabem na largura: ficam os três da direita; no abraço, o homem ao lado
+   entra inteiro em vez de ficar com o rosto partido pela borda). */
 const CHEGADA: Foto[] = [
-  { l: '/site/home-1-l.webp', p: '/site/home-1-p.webp', a: 0, b: 0, alt: 'Pessoas chegando pela calçada, diante do muro da GUIA Church, num domingo de sol' },
-  { l: '/site/home-2-l.webp', p: '/site/home-2-p.webp', a: 0.17, b: 0.24, alt: 'Dois homens se abraçando na porta da igreja' },
-  { l: '/site/home-3-l.webp', p: '/site/home-3-p.webp', a: 0.38, b: 0.45, alt: 'Um pai com o filho no colo, rindo com uma amiga na entrada' },
-  { l: '/site/home-4-l.webp', p: '/site/home-4-p.webp', a: 0.6, b: 0.67, alt: 'A igreja em adoração, de olhos fechados' },
-  { l: '/site/home-5-l.webp', p: '/site/home-5-p.webp', a: 0.8, b: 0.87, alt: 'O pastor diante da igreja, durante a Palavra' },
+  { l: '/site/home-1-l.webp', p: '/site/home-1-p.webp', a: 0, b: 0, alt: 'Dois homens caminham abraçados para a entrada da igreja; ao lado, um voluntário de colete da GUIA' },
+  { l: '/site/home-2-l.webp', p: '/site/home-2-p.webp', a: 0.17, b: 0.24, alt: 'Quatro pessoas sorrindo juntas na porta da igreja', xp: 80 },
+  { l: '/site/home-3-l.webp', p: '/site/home-3-p.webp', a: 0.38, b: 0.45, alt: 'Duas mulheres num abraço demorado; ao lado, um homem com a mão no ombro de uma delas', xp: 65 },
+  { l: '/site/home-4-l.webp', p: '/site/home-4-p.webp', a: 0.6, b: 0.67, alt: 'Um homem e uma mulher de olhos fechados, com a mão no peito, durante o louvor' },
+  { l: '/site/home-5-l.webp', p: '/site/home-5-p.webp', a: 0.8, b: 0.87, alt: 'O pregador, de terno, com o dedo levantado durante a mensagem' },
 ];
 
-/* as três fotos da frase "é gente": a porta, a sala das crianças, o violão.
+/* as três fotos da frase "é gente": a porta, a sala das crianças, a música.
    As legendas são os pedaços da própria frase, ao pé da letra. */
 const GENTE = [
-  { id: 'gente-porta', legenda: 'chega mais cedo pra receber você na porta', alt: 'Uma mulher recebendo as pessoas na porta da igreja, sorrindo' },
-  { id: 'gente-kids', legenda: 'prepara a sala das crianças', alt: 'Uma professora do GUIA Kids mostrando um livro para as crianças' },
-  { id: 'gente-violao', legenda: 'afina o violão antes da primeira nota', alt: 'Um músico tocando guitarra no palco, antes do culto' },
+  { id: 'gente-porta', legenda: 'chega mais cedo pra receber você na porta', alt: 'Uma mulher de óculos abraça, sorrindo, quem chega à porta da igreja' },
+  { id: 'gente-kids', legenda: 'prepara a sala das crianças', alt: 'Uma voluntária do GUIA Kids sorri com duas meninas que fazem o sinal de paz' },
+  { id: 'gente-violao', legenda: 'afina o violão antes da primeira nota', alt: 'Um baixista toca no palco, ao lado de uma cantora de mão levantada' },
 ];
 
 const PERGUNTAS = [
@@ -112,6 +115,7 @@ export default function Home() {
       <Scrub
         rotulo={IGREJA.nome}
         altura={520}
+        alto
         fotos={CHEGADA}
         faixas={[
           { texto: 'Pessoas reais,', vozes: false, a: 0.2, b: 0.42, baixo: true },
@@ -150,10 +154,12 @@ export default function Home() {
                     16vw até ~1520 e 245 px dali para cima; arredondado para cima). Dizia
                     24vw no computador, 50% a mais que os 234 px reais a 1440: na tela
                     de escala 2 o navegador baixava as três de 1000 px (457 kB) quando
-                    as de 640 bastam (166 kB). A mesma foto, a mesma nitidez */}
+                    as de 640 bastam (166 kB). A mesma foto, a mesma nitidez.
+                    18/11/2026: as fotos tratadas são 4:5 de 800 x 1000 (a foto de
+                    origem tem 1000 px de altura); a grande passou de 1000w a 800w */}
                 {GENTE.map((g, i) => (
                   <figure key={g.id} className={`s-rev d${i + 1}`}>
-                    <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 1000w`} sizes="(max-width: 424px) 80vw, (max-width: 759px) 340px, (max-width: 999px) 31vw, (max-width: 1519px) 17vw, 250px" width={1000} height={1250} alt={g.alt} loading="lazy" decoding="async" /></div>
+                    <div className="s-foto v"><img src={`/site/${g.id}-v.webp`} srcSet={`/site/${g.id}-s.webp 640w, /site/${g.id}-v.webp 800w`} sizes="(max-width: 424px) 80vw, (max-width: 759px) 340px, (max-width: 999px) 31vw, (max-width: 1519px) 17vw, 250px" width={800} height={1000} alt={g.alt} loading="lazy" decoding="async" /></div>
                     <figcaption>{g.legenda}</figcaption>
                   </figure>
                 ))}
@@ -214,7 +220,7 @@ export default function Home() {
 
       {/* 8 · sempre cabe mais um: a igreja de pé, vista pelo chevron da marca,
           que abre com a rolagem até a foto inteira */}
-      <Fecho tom="janela" foto={{ l: '/site/fecho-igreja-l.webp', p: '/site/fecho-igreja-p.webp' }} titulo="Sempre cabe mais um" it="mais um"
+      <Fecho tom="janela" foto={{ l: '/site/fecho-igreja-l.webp', p: '/site/fecho-igreja-p.webp', soCelular: true }} titulo="Sempre cabe mais um" it="mais um"
              lead={`Domingo, às ${IGREJA.cultoHora}, tem um lugar com o seu nome. Vem conhecer. E se já é de casa, vem servir.`}>
         <Pil href="/cultos#primeira-vez">Vou conhecer</Pil>
         <Pil href={noServir('/')} tom="vidro">Quero servir</Pil>

@@ -45,16 +45,19 @@ SERIF = fonte_ttf(os.path.join(TIPOS, 'instrument-serif-italic.woff2'))
 def F(dados, tam):
     return ImageFont.truetype(io.BytesIO(dados), tam)
 
-def foto(nome, foco=(0.5, 0.5)):
+def foto(nome, foco=(0.5, 0.5), sat=0.86):
     im = Image.open(nome if os.path.isabs(nome) else os.path.join(FOTOS, nome)).convert('RGB')
     # cobre 1200×630 como object-fit: cover, com o foco
     r = max(W / im.width, H / im.height)
     im = im.resize((round(im.width * r), round(im.height * r)), Image.LANCZOS)
     x = round((im.width - W) * foco[0]); y = round((im.height - H) * foco[1])
     im = im.crop((x, y, x + W, y + H))
-    # saturação um pouco abaixo, como no site (filter: saturate(.86))
-    cinza = im.convert('L').convert('RGB')
-    im = Image.blend(cinza, im, 0.86)
+    # saturação um pouco abaixo, como no site (filter: saturate(.86)). As
+    # fotos tratadas do site da igreja (18/11/2026) entram com a cor do
+    # designer: sat=1, como na página (app/site.css, "AS FOTOS TRATADAS")
+    if sat < 1:
+        cinza = im.convert('L').convert('RGB')
+        im = Image.blend(cinza, im, sat)
     # véu: pesado à esquerda e embaixo, como o herói
     veu = Image.new('RGBA', (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(veu)
@@ -103,10 +106,10 @@ def quebra(d, texto, f, largura):
     linhas.append(atual)
     return linhas
 
-def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com', cor_chapeu=OURO):
+def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam=92, dominio='guiachurch.com', cor_chapeu=OURO, sat=0.86):
     if SO and nome_saida not in SO:
         return
-    im = foto(arquivo_foto, foco)
+    im = foto(arquivo_foto, foco, sat)
     d = ImageDraw.Draw(im)
     n = len(linhas)
     f_apoio = F(INTER_600, 27)
@@ -124,35 +127,44 @@ def cartao(nome_saida, arquivo_foto, chapeu, linhas, apoio, foco=(0.5, 0.5), tam
 P = lambda s: [(w, False) for w in s.split(' ')]
 IT = lambda s: [(s, True)]
 
-# 20/10/2026: os cartões saem das fotos do acervo do fotógrafo, as mesmas dos
-# heróis (public/site, scripts/site-fotos-drive.py), e cada página pública
-# tem o seu: a prévia no WhatsApp mostra a mesma foto que a página abre.
-# Só o og-sistema.jpg (os links do sistema) segue com a foto da equipe em
-# public/fotos.
+# 20/10/2026: os cartões saem das mesmas fotos dos heróis (public/site), e
+# cada página pública tem o seu: a prévia no WhatsApp mostra a mesma foto que
+# a página abre. Os do Guia Servir, das fotos do acervo do fotógrafo
+# (scripts/site-fotos-drive.py). Só o og-sistema.jpg (os links do sistema)
+# segue com a foto da equipe em public/fotos.
 SITE = os.path.join(RAIZ, 'public', 'site')
 def S(nome): return os.path.join(SITE, nome)
 
+# 18/11/2026: os sete cartões do guiachurch.com saem das fotos tratadas que o
+# Arthur mandou (scripts/site-fotos-tratadas.py), com a cor do designer (sat=1).
+# O da home é a foto que a home abre (o abraço de quem chega): o título do
+# cartão fica embaixo, à esquerda, e ali ela tem costas e camisa, não rosto.
 cartao('og.jpg', S('home-1-l.webp'), 'GUIA Church · Barra da Tijuca',
        [P('Existe um lugar'), IT('para você.')],
-       'Domingos às 10h · Follow aos sábados às 19h', foco=(0.42, 0.55))
-cartao('og-cultos.jpg', S('cultos-5-l.webp'), 'Cultos · Domingo, 10h',
+       'Domingos às 10h · Follow aos sábados às 19h', foco=(0.5, 0.3), sat=1)
+cartao('og-cultos.jpg', S('cultos-1-l.webp'), 'Cultos · Domingo, 10h',
        [P('Um domingo'), P('para') + IT('pertencer.')],
-       'Rua Pedra de Itaúna, 534 · Barra da Tijuca', foco=(0.55, 0.42))
-cartao('og-como-chegar.jpg', S('chegar-heroi.webp'), 'Onde fica',
+       'Rua Pedra de Itaúna, 534 · Barra da Tijuca', foco=(0.5, 0.2), sat=1)
+cartao('og-como-chegar.jpg', S('chegar-heroi-l.webp'), 'Onde fica',
        [P('Como') + IT('chegar.')],
-       'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro', foco=(0.55, 0.55))
-cartao('og-sobre.jpg', S('sobre-heroi-l.webp'), 'Quem somos',
+       'Rua Pedra de Itaúna, 534 · Barra da Tijuca, Rio de Janeiro', foco=(0.6, 0.2), sat=1)
+# o de /sobre são os quatro na porta (a segunda foto da home), e não o casal
+# do herói da página: no cartão o título de duas linhas toma três quartos da
+# largura, e o rosto dela, que fica abaixo do dele, caía embaixo do título em
+# qualquer corte (o batismo também: ela está na água, mais baixa). Nos quatro
+# da porta os rostos ficam na faixa de cima e o título, sobre a roupa
+cartao('og-sobre.jpg', S('home-2-l.webp'), 'Quem somos',
        [P('Uma igreja que parece'), P('com a vida') + IT('de quem chega.')],
-       'Grupo Unido, Interagindo e Avançando', foco=(0.64, 0.5), tam=76)
+       'Grupo Unido, Interagindo e Avançando', foco=(0.5, 1.0), tam=76, sat=1)
 cartao('og-eventos.jpg', S('eventos-heroi-l.webp'), 'Eventos · GUIA Church',
        [P('O que acontece'), IT('na semana.')],
-       'Domingo é o centro. Mas a vida da igreja não cabe num dia só.', foco=(0.5, 0.42))
+       'Domingo é o centro. Mas a vida da igreja não cabe num dia só.', foco=(0.5, 0.2), sat=1)
 cartao('og-pequena-guia.jpg', S('pg-heroi-l.webp'), 'Pequena Guia',
        [P('Relacionamentos'), P('que fortalecem') + IT('sua fé.')],
-       'Grupos durante a semana, perto de você', foco=(0.45, 0.45), tam=80)
+       'Grupos durante a semana, perto de você', foco=(0.5, 0.3), tam=80, sat=1)
 cartao('og-ofertar.jpg', S('ofertar-heroi-l.webp'), 'Doação · Dízimos e ofertas',
        [P('Ofertar é') + IT('adorar.')],
-       'Leva menos de um minuto, e você decide o valor.', foco=(0.55, 0.5))
+       'Leva menos de um minuto, e você decide o valor.', foco=(0.5, 0.3), sat=1)
 # o Guia Servir (guiaservir.com): a LP, as cinco áreas, o encaixo e o acesso
 cartao('og-servir.jpg', S('servir-pouso-l.webp'), 'Servir · GUIA Church',
        [P('Encontre o seu lugar'), IT('pra servir.')],

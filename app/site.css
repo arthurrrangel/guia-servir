@@ -438,6 +438,67 @@ html:has(> body > .s){ -webkit-text-size-adjust:100%; text-size-adjust:100% }
 @media(orientation:portrait) and (max-width:759px){
   .s picture img{ object-position:var(--foco-c, var(--foco-r, var(--foco, 50% 50%))) }
 }
+
+/* A FOTO NO ALTO · 18/11/2026
+   As fotos tratadas do site da igreja vieram deitadas (2000 x 1000). Em tela
+   em pé, cobrir o herói inteiro com uma delas era mostrar uma coluna de 562 px
+   ampliada duas vezes e meia, com os rostos embaixo do título, e partir ao
+   meio qualquer foto de duas pessoas. Com `.alto`, em pé a foto ocupa só o
+   alto do herói (a parte que o escuro do texto já deixava ver) e some na noite
+   onde o texto mora. O celular recebe o corte 4:5, de 800 px da foto; o tablet
+   em pé fica com a deitada. Vale para o herói que anda com o scroll
+   (components/site/Scrub.tsx, `alto`) e para o herói de página
+   (lib/site/fotos.ts, `retrato.alto`). Deitado, nada muda. */
+@media (orientation:portrait){
+  .s .s-scrub.alto .s-scrub-fotos{ bottom:auto; height:64%; overflow:hidden;
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 58%,rgba(0,0,0,0) 100%); mask-image:linear-gradient(180deg,#000 0,#000 58%,rgba(0,0,0,0) 100%) }
+  .s .s-heroi.alto > picture img{ bottom:auto; height:62%;
+    -webkit-mask-image:linear-gradient(180deg,#000 0,#000 56%,rgba(0,0,0,0) 100%); mask-image:linear-gradient(180deg,#000 0,#000 56%,rgba(0,0,0,0) 100%) }
+  /* as legendas ficam no meio do escuro que sobra embaixo da foto (o pouso
+     continua no pé, com as pílulas). O min() guarda a legenda de cinco linhas
+     no celular baixo: o meio dela nunca desce a menos de 130 px do pé */
+  .s .s-scrub.alto .s-scrub-faixa:not(.pouso){ top:min(80%,calc(100% - 130px)); bottom:auto; transform:translateY(-50%) }
+}
+/* O tablet em pé, no herói de página. Do celular para cima o texto do herói
+   fica no meio da altura (é a página do computador): com a foto só no alto,
+   o título atravessava os rostos (em /sobre, a testa dela). O texto desce
+   para o pé, que é onde a foto já virou noite, como no celular e no herói que
+   anda com o scroll; e a foto deitada, cortada para o computador com as
+   pessoas no lado direito, encosta onde elas estão (fotos.ts, `tablet`). */
+@media (orientation:portrait) and (min-width:760px){
+  .s .s-heroi.alto{ align-items:flex-end }
+  .s .s-heroi.alto .s-heroi-in{ padding-bottom:clamp(44px,5vh,64px) }
+  .s .s-heroi.alto > picture img{ object-position:var(--foco-t, var(--foco, 50% 50%)) }
+}
+
+/* O título comprido não atravessa o rosto. Na janela baixa do computador (o
+   notebook de 1366 x 768 mostra 657 px de página; o MacBook de 1440 x 900,
+   760) a letra do título segue a altura, e "Uma igreja que parece com a vida"
+   cabia numa linha só, de ponta a ponta: passava por cima dos olhos dele em
+   /sobre, e do cabelo das duas em /pequena-guia. Com a medida presa, o título
+   quebra onde já quebrava na janela alta ("Uma igreja que parece" / "com a
+   vida") e acaba antes das pessoas, que a janela de cada foto põe do meio para
+   a direita. Só nos heróis das fotos tratadas (`alto`) de título comprido
+   (`longa`), e só com a tela deitada. O celular deitado fica de fora: nele
+   a linha a mais empurrava a primeira pílula para baixo da barra do Safari
+   (o herói ali tem uns 330 px). Em troca, no celular deitado a foto encosta
+   no alto: a faixa mostra só dois terços da altura da foto, e com ela no
+   meio a linha única do título caía nos olhos; encostada em cima, cai no
+   cabelo. */
+@media (orientation:landscape) and (min-width:760px) and (min-height:501px){
+  .s .s-heroi.alto .s-h1.longa{ max-width:10.9em }
+}
+@media (orientation:landscape) and (max-height:500px){
+  .s .s-heroi.alto > picture img{ object-position:50% 0% }
+}
+
+/* AS FOTOS TRATADAS · 18/11/2026
+   As fotos do site da igreja chegam com a cor do designer. A casa tirava um
+   décimo da saturação de toda foto (os filtros acima e abaixo): em cima do
+   tratamento dele, isso muda a cor que ele entregou. No guiachurch.com a foto
+   aparece como veio; o escuro que segura o texto continua. O Guia Servir e o
+   Follow seguem com as fotos e o filtro de antes. */
+.s.s-igreja .s-heroi > picture img,.s.s-igreja .s-foto img,.s.s-igreja .s-janela-foto img{ filter:none }
 .s .s-heroi-video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; opacity:0; transition:opacity .9s var(--s-ease); pointer-events:none }
 .s .s-heroi-video.pronto{ opacity:1 }
 @media(prefers-reduced-motion:reduce){ .s .s-heroi-video{ display:none } }

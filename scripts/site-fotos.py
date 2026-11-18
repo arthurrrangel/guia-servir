@@ -6,6 +6,11 @@ continua no ar; os outros heróis passaram para as fotos do acervo do
 fotógrafo (scripts/site-fotos-drive.py) e os arquivos saíram de public/site.
 A lista fica como registro de onde cada recorte veio.
 
+18/11/2026: a fachada também saiu. Todas as fotos do guiachurch.com vêm das
+31 tratadas que o Arthur mandou (scripts/site-fotos-tratadas.py), e nenhuma
+delas mostra o prédio; o herói de /como-chegar é a foto das duas na porta.
+Nada do que este script grava está no ar.
+
 Os originais chegam como posts do Instagram (1080x1350, com logo e texto
 gravados por cima) e quadros dos vídeos (1276x718 e 720x1280). Este script
 recorta SÓ a área de foto limpa de cada um, aplica um tratamento leve e igual

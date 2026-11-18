@@ -3,7 +3,7 @@ import { og } from '@/lib/site/meta';
 import { IGREJA } from '@/lib/igreja';
 import { PEQUENAS_GUIAS } from '@/lib/pequenas-guias';
 import { noFollow } from '@/lib/site/sites';
-import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Heroi, Fecho, FaixaCamp, Ir, UmaLinha, ligaTexto } from '@/components/site/Blocos';
+import { Vozes, Sede, Arroba, Chapeu, Pil, Seta, Img, Heroi, Fecho, FaixaCamp, Ir, UmaLinha, ligaTexto } from '@/components/site/Blocos';
 import { FC27 } from '@/lib/followcamp';
 import { Schema } from '@/components/site/Schema';
 import { cultosDeDomingo, follows, followCamp } from '@/lib/site/eventos-schema';
@@ -78,8 +78,9 @@ export default function Eventos() {
         <div className="s-in">
           <Arroba className="topo" />
           <div className="s-duas inv">
-            {/* 20/10/2026: a foto do Follow (a mesma do site dele, guiafollow.com) */}
-            <div className="s-foto v s-rev"><img src="/follow/f3-p.webp" width={1080} height={1920} alt="Jovens em adoração no Follow, de mãos levantadas" loading="lazy" decoding="async" style={{ '--foco': '50% 40%' } as React.CSSProperties} /></div>
+            {/* 18/11/2026: das fotos tratadas (a 23, em preto e branco); até aqui era a
+                foto do site do Follow (public/follow/f3-p.webp) */}
+            <div className="s-foto v s-rev"><Img lugar="eventos-follow" sizes="(max-width: 999px) 90vw, 420px" /></div>
             <div className="s-rev d1">
               <Chapeu forte="Follow" resto={IGREJA.followHora ? `Sábado, ${IGREJA.followHora}` : 'Sábado'} />
               <Vozes id="t-follow" className="s-h2 media" it="jovens">O culto de jovens</Vozes>

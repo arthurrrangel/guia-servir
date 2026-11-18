@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 
 export default function IgrejaLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="s">
+    <div className="s s-igreja">
       <Tela />
       <a href="#conteudo" className="s-pular">Pular para o conteúdo</a>
       <Movimento />

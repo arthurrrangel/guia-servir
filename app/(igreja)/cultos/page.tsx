@@ -40,16 +40,17 @@ import ProximoCulto from '@/components/site/ProximoCulto';
    cartões e vira duas linhas de índice.
    ============================================================================= */
 
-/* o domingo em quatro momentos, nas fotos do Drive (scripts/site-fotos-drive.py) */
+/* o domingo em quatro momentos. 18/11/2026: nas fotos tratadas que o Arthur
+   mandou (scripts/site-fotos-tratadas.py; as fotos 25, 30, 6, 27 e 20) */
 /* 21/10/2026: o pouso abre o herói (a primeira tela diz quando, onde e como chegar)
    e os quatro momentos vêm depois, cada um sobre a sua foto: a acolhida ainda na
    foto da porta, o louvor, a Palavra, a oração; a última foto fecha */
 const DOMINGO: Foto[] = [
-  { l: '/site/cultos-1-l.webp', p: '/site/cultos-1-p.webp', a: 0, b: 0, alt: 'Uma mulher sorrindo na entrada da igreja, recebendo quem chega' },
-  { l: '/site/cultos-2-l.webp', p: '/site/cultos-2-p.webp', a: 0.35, b: 0.41, alt: 'A igreja adorando, de pé, durante o louvor' },
-  { l: '/site/cultos-3-l.webp', p: '/site/cultos-3-p.webp', a: 0.57, b: 0.63, alt: 'O pastor no púlpito, durante a mensagem' },
-  { l: '/site/cultos-4-l.webp', p: '/site/cultos-4-p.webp', a: 0.79, b: 0.85, alt: 'Pessoas orando de olhos fechados, lado a lado' },
-  { l: '/site/cultos-5-l.webp', p: '/site/cultos-5-p.webp', a: 0.93, b: 0.98, alt: 'O pastor de braços abertos diante da igreja' },
+  { l: '/site/cultos-1-l.webp', p: '/site/cultos-1-p.webp', a: 0, b: 0, alt: 'Um abraço de boas-vindas na entrada, ao lado da porta de vidro com a marca da GUIA Church' },
+  { l: '/site/cultos-2-l.webp', p: '/site/cultos-2-p.webp', a: 0.35, b: 0.41, alt: 'Uma cantora de olhos fechados ao microfone, com um guitarrista ao lado' },
+  { l: '/site/cultos-3-l.webp', p: '/site/cultos-3-p.webp', a: 0.57, b: 0.63, alt: 'O pregador no púlpito, com a mão levantada, durante a mensagem' },
+  { l: '/site/cultos-4-l.webp', p: '/site/cultos-4-p.webp', a: 0.79, b: 0.85, alt: 'Uma mulher ora com as mãos unidas junto ao rosto, entre dois homens de olhos fechados' },
+  { l: '/site/cultos-5-l.webp', p: '/site/cultos-5-p.webp', a: 0.93, b: 0.98, alt: 'Homens conversando e rindo juntos, ao ar livre' },
 ];
 
 export const metadata: Metadata = {
@@ -94,6 +95,7 @@ export default function Cultos() {
       <Scrub
         altura={600}
         rotulo="Cultos"
+        alto
         fotos={DOMINGO}
         faixas={MOMENTOS.map((m, i) => ({
           rotulo: `${m.n} · ${m.t}`, texto: m.d,

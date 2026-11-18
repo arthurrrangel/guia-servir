@@ -6,13 +6,18 @@
    ATUAL, o corte que o lugar faz, o ponto que não pode ser cortado e a
    instrução do que a foto precisa mostrar.
 
-   20/10/2026: as fotos são do acervo do fotógrafo (scripts/site-fotos-
-   drive.py grava public/site/<nome>-<l|p|h|v|s>.webp). Trocar uma foto é
-   gerar os arquivos pelo script e trocar UMA linha aqui. Os heróis que
-   andam com o scroll (home, cultos, servir, follow) listam as próprias
-   fotos na página, na ordem do scroll.
+   18/11/2026: AS FOTOS TRATADAS. O Arthur mandou 31 fotos tratadas pelo
+   designer ("use essas fotos no site, exclua todas as outras"), todas
+   deitadas, em 2000 x 1000, numeradas de 1 a 31. Todas as fotos do
+   guiachurch.com passaram a sair delas (scripts/site-fotos-tratadas.py grava
+   public/site/<nome>-<l|p|h|v|s>.webp e tem a tabela de qual foto foi para
+   qual lugar); as antigas da igreja saíram do repositório, a fachada
+   inclusive (nenhuma das 31 mostra o prédio). Os heróis que andam com o
+   scroll (home, cultos) listam as próprias fotos na página, na ordem do
+   scroll. As do Guia Servir, no fim deste arquivo, seguem sendo as do acervo
+   do fotógrafo (20/10/2026, scripts/site-fotos-drive.py).
 
-   `corte`: H = horizontal (3:2 a 16:9), V = vertical (4:5), Q = quadrada
+   `corte`: H = horizontal (3:2 a 2:1), V = vertical (4:5), Q = quadrada
    (vira círculo). `foco`: o ponto da imagem que fica no centro quando o
    lugar corta ("50% 30%" = centro, um pouco acima).
    ============================================================================= */
@@ -28,42 +33,52 @@ export type Foto = {
       outro corte da mesma, para não ampliar uma faixa estreita da horizontal.
       `celular`: o ponto no celular em pé (até 759 px), quando o texto do herói
       sobe tanto que cobriria o rosto: a foto sobe junto (21/10/2026, medido em
-      quatro celulares, sem esconder a cabeça embaixo da barra) */
-  retrato?: { arquivo: string; pequena?: string; largura: number; altura: number; foco?: string; celular?: string };
+      quatro celulares, sem esconder a cabeça embaixo da barra).
+      `alto` (18/11/2026): a foto no alto. O recorte é 4:5 (800 x 1000, da foto
+      deitada de 2000 x 1000), vale só no celular e ocupa o alto do herói, acima
+      do texto (app/site.css, "A FOTO NO ALTO"); o tablet em pé fica com a
+      deitada.
+      `tablet`: com `alto`, onde a foto deitada encosta no tablet em pé. A
+      janela dela foi cortada para o computador, com as pessoas no lado direito
+      (o texto mora à esquerda); no tablet em pé a caixa é mais estreita e o
+      texto desce para baixo da foto, então a foto encosta onde as pessoas
+      estão */
+  retrato?: { arquivo: string; pequena?: string; largura: number; altura: number; foco?: string; celular?: string; alto?: boolean; tablet?: string };
   alt: string;
   nota: string;
 };
 
 export const FOTOS = {
-  /* 13/10/2026: o Arthur pediu menos foto e mais vídeo ("use apenas as fotos
-     melhores"). Heróis, fechos, momentos do domingo, círculos e cartões
-     passaram a ser trechos dos vídeos da igreja (components/site/Midia.tsx,
-     scripts/site-videos.py). Ficaram duas fotos, onde a foto é melhor que o
-     vídeo: a fachada (é a informação de quem procura o prédio) e as duas
-     amigas do /sobre (a mais nítida e calorosa do material). */
-  'chegar-heroi': { arquivo: '/site/chegar-heroi.webp', pequena: '/site/chegar-heroi-s.webp', largura: 1920, altura: 1291, corte: 'H', foco: '55% 55%', alt: 'A fachada da GUIA Church, com o letreiro na entrada',
-    retrato: { arquivo: '/site/chegar-heroi-r.webp', pequena: '/site/chegar-heroi-r-s.webp', largura: 720, altura: 1172, foco: '50% 30%' },
-    nota: 'A fachada em alta: a casa, a placa redonda e o GUI> no muro.' },
-
-  /* 20/10/2026: O ACERVO DO FOTÓGRAFO (Drive MKT/CULTOS/2026), tratado por
-     scripts/site-fotos-drive.py: os heróis das páginas da igreja deixam o
-     quadro de vídeo (1276 px, do reel) e ganham a foto de domingo em 1920 e,
-     em pé, em 1080x1920. O código no fim da nota é o da folha de contato
-     (culto e número da editada). */
-  'sobre-heroi': { arquivo: '/site/sobre-heroi-l.webp', largura: 1920, altura: 1080, corte: 'H', foco: '64% 50%', alt: 'Cinco mulheres sorrindo juntas diante do muro da GUIA Church, num domingo de sol',
-    retrato: { arquivo: '/site/sobre-heroi-p.webp', largura: 1080, altura: 1920, foco: '64% 50%', celular: '64% 100%' },
-    nota: 'Cinco amigas no muro do GUI>, depois do culto (15.03, 65).' },
-  'sobre-geracoes': { arquivo: '/site/sobre-geracoes-h.webp', pequena: '/site/sobre-geracoes-s.webp', largura: 1800, altura: 1200, corte: 'H', foco: '45% 45%', alt: 'Três gerações de mulheres sorrindo juntas na porta da igreja',
-    nota: 'Três gerações na porta, num domingo de sol (15.03, 52).' },
-  'eventos-heroi': { arquivo: '/site/eventos-heroi-l.webp', largura: 1920, altura: 1080, corte: 'H', foco: '50% 42%', alt: 'Um ministro de louvor cantando de braços abertos, com o telão azul atrás',
-    retrato: { arquivo: '/site/eventos-heroi-p.webp', largura: 1080, altura: 1920, foco: '50% 42%' },
-    nota: 'O louvor de braços abertos (31.05, 04).' },
-  'pg-heroi': { arquivo: '/site/pg-heroi-l.webp', largura: 1920, altura: 1080, corte: 'H', foco: '45% 45%', alt: 'Um casal com dois filhos pequenos no colo, sorrindo na calçada da igreja',
-    retrato: { arquivo: '/site/pg-heroi-p.webp', largura: 1080, altura: 1920, foco: '45% 45%', celular: '45% 100%' },
-    nota: 'Uma família na calçada, depois do culto (31.05, 20).' },
-  'ofertar-heroi': { arquivo: '/site/ofertar-heroi-l.webp', largura: 1920, altura: 1080, corte: 'H', foco: '55% 50%', alt: 'Mãos segurando o cálice da ceia, na luz azul do culto',
-    retrato: { arquivo: '/site/ofertar-heroi-p.webp', largura: 1080, altura: 1920, foco: '55% 50%' },
-    nota: 'O cálice da ceia nas mãos (07.06, 04).' },
+  /* 18/11/2026: AS FOTOS TRATADAS nos heróis de página da igreja. O número no
+     fim da nota é o da foto na pasta que o Arthur mandou (1 a 31). No
+     computador o texto do herói mora à esquerda: a janela de cada foto
+     (scripts/site-fotos-tratadas.py) põe as pessoas no lado direito, depois
+     de onde o título acaba. No celular, a foto no alto, em 4:5.
+     O `foco` do retrato: no iPhone com o Safari a página visível tem uns
+     664 px, o texto do herói toma quase tudo e só os primeiros 100 px da foto
+     ficam claros. A caixa da foto fica mais baixa que o corte 4:5 e o que
+     sobra dele sai por cima: o segundo número do foco diz quanto, e foi
+     medido para o rosto de cada foto subir até essa faixa (em tela alta a
+     caixa tem a altura do corte e nada muda). */
+  'chegar-heroi': { arquivo: '/site/chegar-heroi-l.webp', largura: 1720, altura: 930, corte: 'H', foco: '50% 35%', alt: 'Duas mulheres sorrindo na entrada da igreja, diante da placa com o horário do culto',
+    retrato: { arquivo: '/site/chegar-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 62%', tablet: '63% 50%' },
+    nota: 'As duas na porta, com a placa do culto atrás (foto 22). Nenhuma das 31 mostra a fachada.' },
+  'sobre-heroi': { arquivo: '/site/sobre-heroi-l.webp', largura: 1260, altura: 703, corte: 'H', foco: '50% 50%', alt: 'Um casal jovem sorrindo, abraçado, na entrada da igreja',
+    retrato: { arquivo: '/site/sobre-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 50%', tablet: '100% 50%' },
+    nota: 'O casal na entrada, com o GUI> no vidro (foto 31).' },
+  'sobre-geracoes': { arquivo: '/site/sobre-geracoes-h.webp', pequena: '/site/sobre-geracoes-s.webp', largura: 1500, altura: 1000, corte: 'H', alt: 'Um jovem de olhos fechados na água, no momento do batismo, amparado por duas pessoas',
+    nota: 'O batismo (foto 18). O nome do lugar é o de antes (as três gerações na porta).' },
+  'eventos-heroi': { arquivo: '/site/eventos-heroi-l.webp', largura: 1650, altura: 892, corte: 'H', foco: '50% 30%', alt: 'Uma cantora de braços abertos e olhos fechados no palco, durante o louvor',
+    retrato: { arquivo: '/site/eventos-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 45%', tablet: '88% 50%' },
+    nota: 'O louvor de braços abertos (foto 8).' },
+  'eventos-follow': { arquivo: '/site/eventos-follow-v.webp', pequena: '/site/eventos-follow-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Um jovem de olhos fechados e mãos abertas, em adoração',
+    nota: 'O jovem em adoração, em preto e branco (foto 23).' },
+  'pg-heroi': { arquivo: '/site/pg-heroi-l.webp', largura: 1400, altura: 757, corte: 'H', foco: '50% 40%', alt: 'Duas mulheres num abraço apertado, num jardim',
+    retrato: { arquivo: '/site/pg-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 100%', tablet: '100% 50%' },
+    nota: 'O abraço no jardim (foto 26).' },
+  'ofertar-heroi': { arquivo: '/site/ofertar-heroi-l.webp', largura: 1700, altura: 773, corte: 'H', foco: '50% 40%', alt: 'Uma mulher de olhos fechados, com o cálice da ceia na mão',
+    retrato: { arquivo: '/site/ofertar-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 38%', tablet: '100% 50%' },
+    nota: 'O cálice da ceia na mão (foto 4).' },
 
   /* 20/10/2026: os heróis das cinco áreas do Guia Servir (as mesmas fotos do
      herói da LP; Mídia e Livraria vêm das fotos de 12/10, em public/fotos) */

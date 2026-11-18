@@ -49,8 +49,19 @@ export type Pouso = { titulo: string; it?: string; sub?: ReactNode; a: number; p
  *  `xp` (22/10/2026): de 0 a 100, onde o corte em pé encosta quando a tela é
  *  mais comprida que ele (o celular de 390x844 mostra uns 82% da largura do
  *  9:16; o iPad em pé e o iPhone SE mostram tudo). Sem ele, o centro. Serve
- *  para tirar da borda um rosto que ficaria em meia fatia. */
+ *  para tirar da borda um rosto que ficaria em meia fatia. Com a foto no alto
+ *  (`alto`), é onde a foto deitada encosta no tablet em pé. */
 export type Foto = { l: string; p: string; a: number; b: number; alt: string; xp?: number };
+
+/* A FOTO NO ALTO (18/11/2026). As fotos tratadas do site da igreja vieram
+   deitadas, em 2000 x 1000. Em tela em pé, o corte 9:16 de tela cheia só
+   aproveitava uma coluna de 562 px da foto (ampliada duas vezes e meia no
+   celular) e partia ao meio qualquer foto de duas pessoas. Com `alto`, em pé a
+   pilha ocupa só o alto do palco (a parte que o escuro do pé já deixava ver) e
+   some na noite embaixo, onde o texto mora: o celular recebe um corte 4:5, de
+   800 px da foto, e o tablet em pé fica com a foto deitada. A folha tem a
+   outra metade (app/site.css, "A FOTO NO ALTO"). */
+const SO_CELULAR = '(orientation: portrait) and (max-width: 759px)';
 
 const REDUZ = '(prefers-reduced-motion: reduce)';
 const SUAVIZACAO = 0.16;           /* por quadro de 60 fps; a sensação do scrub */
@@ -107,8 +118,10 @@ const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v
    cada faixa precisa de uns quatro a seis toques de rolagem inteira (o teste de
    flick, scripts/auditoria-flick.mjs), e um herói com cinco ou seis faixas precisa de
    mais chão que um de três */
-export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, altura, children }:
-  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; micro?: ReactNode; rotulo: string; altura?: number; children: ReactNode }) {
+export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, altura, alto, children }:
+  { fotos: Foto[]; faixas: Faixa[]; pouso: Pouso; chapeu?: ReactNode; micro?: ReactNode; rotulo: string; altura?: number;
+    /** em tela em pé, a foto ocupa o alto do palco; o corte `p` é 4:5 e só do celular */
+    alto?: boolean; children: ReactNode }) {
   const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -309,7 +322,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
     </div>
   );
   return (
-    <section ref={heroRef} className={'s-scrub' + (pouso.primeiro ? ' pouso-primeiro' : '')} aria-label={rotulo}
+    <section ref={heroRef} className={'s-scrub' + (pouso.primeiro ? ' pouso-primeiro' : '') + (alto ? ' alto' : '')} aria-label={rotulo}
              style={altura ? { '--s-scrub-vh': altura } as React.CSSProperties : undefined}>
       <div className="s-scrub-palco">
         <div className="s-scrub-fotos">
@@ -327,7 +340,7 @@ export default function Scrub({ fotos, faixas, pouso, chapeu, micro, rotulo, alt
             const adiar = !!pouso.primeiro && i > 0;
             return (
               <picture key={f.l} style={vars} className="s-scrub-quadro">
-                <source media="(orientation: portrait)" {...(adiar ? { 'data-srcset': f.p } : { srcSet: f.p })} type="image/webp" />
+                <source media={alto ? SO_CELULAR : '(orientation: portrait)'} {...(adiar ? { 'data-srcset': f.p } : { srcSet: f.p })} type="image/webp" />
                 <img className="s-scrub-foto" {...(adiar ? { 'data-src': f.l } : { src: f.l })} alt={f.alt} width={1920} height={1080} decoding="async" loading="eager"
                   fetchPriority={i === 0 ? 'high' : 'low'} draggable={false} />
               </picture>
