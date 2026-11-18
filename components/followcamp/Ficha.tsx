@@ -15,7 +15,7 @@
    a pessoa vai ao WhatsApp procurar o CPF da mãe). Some quando a ficha sai.
    ============================================================================= */
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { FC27, LOTES, loteVigente, valorIrmaos, emReais, linkWhatsApp, limpaNome } from '@/lib/followcamp';
+import { FC27, loteVigente, valorIrmaos, emReais, linkWhatsApp, limpaNome } from '@/lib/followcamp';
 import {
   SEXOS, CAMISAS, PARENTESCOS, PAGAMENTOS, TEXTO_MAX, IDADE_MIN, IDADE_MAX,
   lerData, idadeEm, mascaraData, mascaraCpf, mascaraCelular, conferirFicha, termoDe, textoImagem,
@@ -168,7 +168,7 @@ export default function Ficha() {
   const menor = naFaixa && idade! < 18;
   const quem = primeiroNome(r.campista) || 'o campista';
 
-  const lote = agora ? loteVigente(agora) : LOTES[0];
+  const lote = loteVigente(agora ?? new Date());
   const valor = lote ? (r.temIrmao === 'sim' ? valorIrmaos(lote.valor) : lote.valor) : null;
 
   /* o termo que aparece é o mesmo texto que vai para a planilha */

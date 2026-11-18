@@ -257,7 +257,10 @@ export default function Pagar({ temPagarme, temPixDireto, links }: { temPagarme:
     });
   }, [fase]);
 
-  const lote = agora ? loteVigente(agora) : LOTES[0];
+  /* 18/11/2026: antes do relógio da aba, o lote de AGORA, e não o 1º: a página
+     sai pronta do servidor (a cada 5 minutos) e dizia "1º lote, até 3 de novembro"
+     até o navegador acordar */
+  const lote = loteVigente(agora ?? new Date());
   const carne = agora ? carneAberto(agora) : true;
   const cheio = (lote ?? LOTES[0]).valor;
   const parcela = valorDeDigitos(parcelaDig);
