@@ -9,7 +9,8 @@
    por definição e por isso tem piso e teto.
 
    De onde vêm os números: PDF "Info faltantes - Guia Follow Camp" (30/09/2026).
-     · R$ 697 por campista, 1º lote até 3 de novembro;
+     · R$ 697 por campista, 1º lote até 3 de novembro (e, desde 18/11/2026,
+       o mesmo valor "até novo aviso", ver LOTES);
      · 10% de desconto quando dois ou mais irmãos se inscrevem;
      · Carnê Follow: parcelado, com quitação até 3 de janeiro.
    O que o PDF NÃO diz, e por isso está decidido aqui de forma conservadora:
@@ -39,13 +40,31 @@ export const FC27 = {
 } as const;
 
 /** `fim` é EXCLUSIVO: o primeiro instante em que o lote já não vale (00:00 do
- *  dia seguinte, em -03:00). "Até 3 de novembro" inclui o dia 3 inteiro. */
-export type Lote = { nome: string; valor: number; fim: string };
+ *  dia seguinte, em -03:00). "Até 3 de novembro" inclui o dia 3 inteiro.
+ *  `fim: null` = sem data: vale até a organização avisar o próximo lote. */
+export type Lote = { nome: string; valor: number; fim: string | null };
 
-/** Os lotes, em ordem. O 2º entra aqui quando a organização divulgar. */
+/** Os lotes, em ordem. O próximo entra aqui quando a organização divulgar.
+ *
+ *  18/11/2026: o 1º lote acabou em 03/11 e o 2º nunca saiu. Sem lote, a ficha
+ *  nova ficava "a confirmar" e a página pessoal não mostrava Pix nenhum: uma
+ *  mãe colou o link da inscrição no banco achando que era o código, outra
+ *  avisou que "não aparece a chave Pix". O Arthur: "R$ 697 até novo aviso".
+ *  Quando o próximo lote vier (valor e data), o "Lote atual" ganha `fim` e o
+ *  novo entra embaixo. */
 export const LOTES: readonly Lote[] = [
   { nome: '1º lote', valor: 697, fim: '2026-11-04T00:00:00-03:00' },
+  { nome: 'Lote atual', valor: 697, fim: null },
 ];
+
+/** Como a tela diz até quando o lote vale: "1º lote, até 3 de novembro" ou,
+ *  sem data, "Valor até novo aviso". */
+export function textoDoLote(l: Lote): string {
+  if (!l.fim) return 'Valor até novo aviso';
+  const ultimo = new Date(new Date(l.fim).getTime() - 1);
+  const dia = new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', day: 'numeric', month: 'long' }).format(ultimo);
+  return `${l.nome}, até ${dia}`;
+}
 
 export const DESCONTO_IRMAOS = 0.10;
 /** Exclusivo, como `Lote.fim`: "quitação até 3 de janeiro" inclui o dia 3. */
@@ -62,7 +81,7 @@ export const REFERENTES: readonly Referente[] = ['inscricao', 'irmaos', 'parcela
 
 export function loteVigente(agora = new Date()): Lote | null {
   const t = agora.getTime();
-  return LOTES.find(l => t < new Date(l.fim).getTime()) ?? null;
+  return LOTES.find(l => l.fim === null || t < new Date(l.fim).getTime()) ?? null;
 }
 
 export function carneAberto(agora = new Date()): boolean {
@@ -94,7 +113,7 @@ export function precoDe(ref: Referente, agora = new Date(), parcela?: number | n
   if (ref === 'inscricao' || ref === 'irmaos') {
     const lote = loteVigente(agora);
     if (!lote) {
-      return { ok: false, erro: 'O 1º lote terminou em 3 de novembro, e o valor do próximo lote ainda não saiu. Fale com a organização no WhatsApp.' };
+      return { ok: false, erro: 'O lote terminou, e o valor do próximo ainda não saiu. Fale com a organização no WhatsApp.' };
     }
     return { ok: true, valor: ref === 'irmaos' ? valorIrmaos(lote.valor) : lote.valor };
   }
@@ -268,6 +287,9 @@ export type LinkCartao = {
  *  eles e o Pix direto cobra o valor com desconto. */
 export const LINKS_CARTAO: readonly LinkCartao[] = [
   { lote: '1º lote', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo' },
+  /* 18/11/2026: o mesmo link, para o "Lote atual" (o mesmo R$ 697 à vista).
+     A Stone respondeu 200 nesse dia; se ele morrer, a trava tira da tela. */
+  { lote: 'Lote atual', ref: 'inscricao', valor: 697, parcelas: 1, url: 'https://payment-link-v3.stone.com.br/pl_2nDZ6b3MB09Lz1BhKtZeEaAGv5rYljOo' },
 ];
 
 const HOST_DO_LINK = /(^|\.)(stone\.com\.br|pagar\.me)$/;

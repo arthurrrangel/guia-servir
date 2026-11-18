@@ -34,7 +34,7 @@ import qrcode from 'qrcode-generator';
 import { pixCopiaECola } from '@/lib/pix';
 import { PIX_CHAVE, PIX_NOME, PIX_CIDADE, valorDeDigitos } from '@/lib/oferta';
 import {
-  FC27, LOTES, ROTULO, PARCELA_MIN, PARCELA_MAX, loteVigente, carneAberto, valorIrmaos, emReais,
+  FC27, LOTES, ROTULO, PARCELA_MIN, PARCELA_MAX, loteVigente, textoDoLote, carneAberto, valorIrmaos, emReais,
   conferirPedido, conferirPagador, codigoFC27, codigoLegivel, mensagemWhatsApp, linkWhatsApp,
   CODIGO_OK, soDigitos, limpaNome, nomeInvalido, linkDoLote, type Referente, type LinkCartao,
 } from '@/lib/followcamp';
@@ -564,7 +564,7 @@ export default function Pagar({ temPagarme, temPixDireto, links }: { temPagarme:
                 <fieldset className={s.opcoes}>
                   <legend>O que você está pagando</legend>
                   {([
-                    { id: 'inscricao' as const, nome: ROTULO.inscricao, preco: lote ? emReais(cheio) : '', dica: lote ? `${lote.nome}, até 3 de novembro.` : '1º lote encerrado. O valor do próximo lote ainda não saiu.', fechado: !lote },
+                    { id: 'inscricao' as const, nome: ROTULO.inscricao, preco: lote ? emReais(cheio) : '', dica: lote ? `${textoDoLote(lote)}.` : 'O lote terminou. O valor do próximo ainda não saiu.', fechado: !lote },
                     { id: 'irmaos' as const, nome: 'Inscrição com desconto de irmãos', preco: lote ? emReais(valorIrmaos(cheio)) : '', dica: '10% de desconto para cada irmão, quando dois ou mais se inscrevem.', fechado: !lote },
                     { id: 'parcela' as const, nome: ROTULO.parcela, preco: '', dica: !carne ? 'O Carnê Follow fechou em 3 de janeiro.' : carneAqui ? `Você escolhe o valor, de ${emReais(PARCELA_MIN)} a ${emReais(PARCELA_MAX)}. Quitação até 3 de janeiro.` : `Pelo site, o carnê vai no Pix, que ainda não abriu. Fale com a organização: ${FC27.whatsappTexto}.`, fechado: !carne || !carneAqui },
                   ]).map(o => (

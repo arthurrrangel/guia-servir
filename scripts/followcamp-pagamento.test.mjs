@@ -3,8 +3,9 @@
    O que este arquivo protege, em ordem de quanto custa errar:
 
      1. O VALOR. R$ 697 no 1º lote (o dia 3/11 inteiro), R$ 627,30 com
-        desconto de irmãos, parcela entre o piso e o teto e só como NÚMERO, e
-        nada de "inscrição" depois de 03/11 enquanto o 2º lote não tiver valor.
+        desconto de irmãos, parcela entre o piso e o teto e só como NÚMERO.
+        Depois de 03/11, o "Lote atual": o mesmo R$ 697 até novo aviso (18/11),
+        porque sem lote a ficha nova ficava sem valor e sem Pix.
      2. O PEDIDO QUE VAI À STONE. Centavos e não reais, customer com o que a doc
         exige para Pix, Idempotency-Key, o link do cartão até 12x com parcela
         mínima de R$ 50. Conferido contra um dublê HTTP local que GUARDA o que
@@ -26,7 +27,7 @@ import {
   precoDe, valorIrmaos, loteVigente, carneAberto, cpfValido, celularDe, nomeInvalido, emailValido,
   codigoFC27, CODIGO_OK, conferirPedido, conferirPagador, mensagemWhatsApp, codigoLegivel,
   maxParcelasCartao, nomeCurtoDe, descricaoDe,
-  LINKS_CARTAO, linkInvalido, linkCartaoDe, linkDoLote, temLinkCartao, LOTES,
+  LINKS_CARTAO, linkInvalido, linkCartaoDe, linkDoLote, temLinkCartao, LOTES, textoDoLote,
 } from '../lib/followcamp.ts';
 import { pixCopiaECola, pixValido, pixCampos } from '../lib/pix.ts';
 import { PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '../lib/oferta.ts';
@@ -45,10 +46,14 @@ const DIA_4_JAN = d('2027-01-04T00:00:00-03:00');
 ok(valorIrmaos(697) === 627.3, `irmãos: ${valorIrmaos(697)} != 627.3`);
 ok(precoDe('inscricao', ANTES).valor === 697, 'inscrição antes do prazo = 697');
 ok(precoDe('inscricao', FIM_DO_DIA_3).valor === 697, 'o dia 3/11 vale inteiro, até o último milissegundo');
-ok(!precoDe('inscricao', DIA_4).ok, 'inscrição em 04/11 fecha (2º lote sem valor)');
-ok(!precoDe('irmaos', DIA_4).ok, 'irmãos em 04/11 fecha');
+/* 18/11/2026: o 1º lote acabou sem 2º, e a ficha nova ficava sem valor e sem Pix.
+   O Arthur: "R$ 697 até novo aviso" (o "Lote atual", sem data de fim) */
+ok(precoDe('inscricao', DIA_4).valor === 697 && precoDe('irmaos', DIA_4).valor === 627.3, 'depois de 03/11: R$ 697 até novo aviso, irmãos R$ 627,30');
+ok(loteVigente(FIM_DO_DIA_3)?.nome === '1º lote' && loteVigente(DIA_4)?.nome === 'Lote atual', 'o 1º lote vai até 3/11 e o Lote atual começa em 04/11');
+ok(loteVigente(d('2027-06-01T12:00:00-03:00'))?.nome === 'Lote atual', 'sem data de fim: vale até a organização trocar');
 ok(precoDe('irmaos', ANTES).valor === 627.3, 'irmãos = 627,30');
-ok(loteVigente(DIA_4) === null, 'nenhum lote vigente em 04/11');
+ok(textoDoLote(LOTES[0]) === '1º lote, até 3 de novembro' && textoDoLote(LOTES[1]) === 'Valor até novo aviso', `texto do lote: ${textoDoLote(LOTES[0])} / ${textoDoLote(LOTES[1])}`);
+ok(LOTES.every((l, i) => i === LOTES.length - 1 || l.fim !== null), 'só o último lote pode ficar sem data');
 for (const [v, deve] of [[49.99, false], [50, true], [174.25, true], [697, true], [697.01, false], [100.005, false], [0, false], [-10, false], [NaN, false], ['200', false], [[300], false]]) {
   ok(precoDe('parcela', ANTES, v).ok === deve, `parcela ${JSON.stringify(v)} deveria ser ${deve ? 'aceita' : 'recusada'}`);
 }

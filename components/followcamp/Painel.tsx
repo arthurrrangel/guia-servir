@@ -31,7 +31,7 @@ import {
   dataHoraBr, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS, ROTULO_ORIGEM, FORMAS,
   type Situacao, type PagamentoBanco, type Forma, type Referente, type FormaDaFicha, type FichaLida, type Status,
 } from '@/lib/followcamp-painel';
-import { LOTES, valorIrmaos, soDigitos, type LinkCartao } from '@/lib/followcamp';
+import { LOTES, valorIrmaos, soDigitos, loteVigente, type LinkCartao } from '@/lib/followcamp';
 import { diaMes } from '@/lib/followcamp-carne';
 import { contatoDe, linkDoWhats, linkPessoal, mensagemDeCobranca, numeroWhats } from '@/lib/followcamp-cobranca';
 import { planilhaDePagamentos } from '@/lib/followcamp-planilha';
@@ -174,6 +174,17 @@ export default function Painel() {
         <Aviso tom="warn">
           O cartão saiu do site: {cartao.parado}. Crie outro link de pagamento no app da Stone, no valor do lote, sem
           limite de pagamentos e válido até o fim do lote, e passe o endereço novo para trocar no site. O Pix continua.
+        </Aviso>
+      ) : null}
+      {/* 18/11/2026: o 1º lote acabou sem 2º, e por duas semanas as fichas novas
+          entraram sem valor e sem Pix na página pessoal, sem ninguém ver aqui */}
+      {dados && !loteVigente(new Date(dados.agora)) ? (
+        <Aviso tom="warn">Nenhum lote vale hoje: fichas novas entram sem valor e a página pessoal delas não mostra Pix. Defina o próximo lote (valor e data).</Aviso>
+      ) : null}
+      {ativas.some(f => f.valor == null) ? (
+        <Aviso tom="warn">
+          {plural(ativas.filter(f => f.valor == null).length, 'ficha está', 'fichas estão')} sem valor (a confirmar): a página pessoal não mostra Pix para {ativas.filter(f => f.valor == null).length === 1 ? 'ela' : 'elas'}.
+          {' '}{ativas.filter(f => f.valor == null).map(f => f.campista).join(', ')}.
         </Aviso>
       ) : null}
 

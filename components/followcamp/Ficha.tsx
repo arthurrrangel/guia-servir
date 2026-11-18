@@ -444,21 +444,6 @@ export default function Ficha() {
               {fase === 'enviada' && link?.repetida && (
                 <p className={s.nota}>Já havia uma ficha com este nome e esta data de nascimento: ela foi atualizada, sem criar outra. O link da inscrição é o mesmo da primeira vez; se ele não estiver com você, peça à organização no WhatsApp.</p>
               )}
-              {fase === 'enviada' && link?.token && (
-                <>
-                  <div className={s.chave}>
-                    <div>
-                      <span>Seu link do Camp</span>
-                      <strong>guiaservir.com/followcamp/minha/{link.token}</strong>
-                    </div>
-                    <button type="button" onClick={() => {
-                      const url = `https://guiaservir.com/followcamp/minha/${link.token}`;
-                      navigator.clipboard?.writeText(url).then(() => setCopiado(true), () => setCopiado(false));
-                    }}>{copiado ? 'Copiado' : 'Copiar'}</button>
-                  </div>
-                  <p className={s.nota}>Guarde este link: por ele você paga (inteiro ou no carnê), manda o comprovante e acompanha o que já foi confirmado.</p>
-                </>
-              )}
               <div className={s.acoes}>
                 {fase === 'enviada' && link?.token
                   ? <a className={`${s.btn} ${s.fogo}`} href={`/followcamp/minha/${link.token}`}>Pagar agora</a>
@@ -467,6 +452,21 @@ export default function Ficha() {
                     : fase === 'enviada' && <a className={`${s.btn} ${s.zap}`} href={zapAviso} target="_blank" rel="noopener">Combinar o pagamento no WhatsApp</a>}
                 <button type="button" className={`${s.btn} ${s.claro}`} onClick={inscreverIrmao}>Inscrever um irmão</button>
               </div>
+              {/* 18/11/2026: o link ficava numa caixa igual à da chave Pix, com
+                  "Copiar" do lado, e uma mãe colou o link no banco como se fosse
+                  o código ("Código fora do padrão Pix Copia e Cola"). Agora ele
+                  vem depois do Pagar agora, como texto, e diz o que não é. */}
+              {fase === 'enviada' && link?.token && (
+                <>
+                  <p className={s.nota}>Guarde o link da sua inscrição: por ele você paga depois (inteiro ou no carnê), manda o comprovante e acompanha o que já foi confirmado. Ele não é código Pix; o Pix aparece quando você toca em Pagar agora.</p>
+                  <div className={s.acoes}>
+                    <button type="button" className={s.link} onClick={() => {
+                      const url = `https://guiaservir.com/followcamp/minha/${link.token}`;
+                      navigator.clipboard?.writeText(url).then(() => setCopiado(true), () => setCopiado(false));
+                    }}>{copiado ? 'Link copiado' : 'Copiar o link da inscrição'}</button>
+                  </div>
+                </>
+              )}
               {!enviada.irmao && <p className={s.nota}>Com irmão, os dois têm 10% de desconto: a organização acerta o valor desta ficha.</p>}
               <p className={s.nota}><b>O que levar:</b> {O_QUE_LEVAR}</p>
               <div className={s.acoes}><a className={s.link} href="/followcamp">Voltar para o Camp</a></div>

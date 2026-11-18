@@ -123,7 +123,8 @@ const CHAVES = [...Object.keys(TETO), 'nascimento', 'idade', 'valor', 'imagem'].
   ok(ad.responsavel_nome === null && ad.emergencia_nome === 'Ana Dias' && ad.emergencia_whats === '(21) 97777-6666'
     && ad.whats_campista === '(21) 99594-6491' && ad.imagem === false && ad.pagamento === 'cartao', 'adulto: emergência e WhatsApp próprio');
   ok(fichaParaBanco(conferirFicha({ ...MENOR, temIrmao: 'sim', irmao: 'João Souza' }).ficha, ANTES).valor === 627.3, 'irmão: R$ 627,30');
-  ok(fichaParaBanco(r.ficha, new Date('2026-11-04T00:00:00-03:00')).valor === null, 'depois do 1º lote: valor a confirmar (null), nunca o preço velho');
+  /* 18/11/2026: depois do 1º lote, o "Lote atual" (R$ 697 até novo aviso): a ficha nova nunca mais sai sem valor */
+  ok(fichaParaBanco(r.ficha, new Date('2026-11-04T00:00:00-03:00')).valor === 697, 'depois do 1º lote: R$ 697 até novo aviso, nunca "a confirmar"');
   ok(valorDaFicha({ irmao: '' }, ANTES) === 697, 'valor da ficha');
 }
 {

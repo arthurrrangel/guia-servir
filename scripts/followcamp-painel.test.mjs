@@ -99,7 +99,7 @@ const P = [
   ok(conferirInformado({ ...base, meio: 'cartaoLink', titular: 'Carlos Souza' }, ANTES, LINK).ok, 'link de 697 com quem pagou');
   ok(!conferirInformado({ ...base, meio: 'cartaoLink', referente: 'irmaos', irmao: 'João Souza', valor: 627.3 }, ANTES, LINK).ok, 'irmãos não têm link');
   ok(!conferirInformado({ ...base, meio: 'cartaoLink', titular: 'J0ão' }, ANTES, LINK).ok, 'quem pagou com dígito no nome');
-  ok(!conferirInformado(base, new Date('2026-11-04T00:00:00-03:00')).ok, 'depois do 1º lote: não registra a inscrição pelo preço velho');
+  ok(conferirInformado(base, new Date('2026-11-04T00:00:00-03:00')).ok, 'depois do 1º lote: o aviso da inscrição vale pelo Lote atual (R$ 697 até novo aviso)');
   ok(LINKS_CARTAO.every(l => conferirInformado({ ...base, meio: 'cartaoLink', referente: l.ref, irmao: l.ref === 'irmaos' ? 'João Souza' : '', valor: l.valor }, ANTES).ok),
     'os links de verdade passam no aviso');
 }
