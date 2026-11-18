@@ -10,8 +10,9 @@ import { linksNaTela } from '@/lib/followcamp-link-vivo';
    /followcamp/minha/<token> — O LINK PESSOAL DA INSCRIÇÃO · 19/10/2026 (114)
 
    Cada ficha tem um link. Por ele a pessoa vê o que deve, o que já foi
-   confirmado e o que está em conferência; escolhe o plano do carnê; paga no
-   Pix (ou no cartão, pelo link da Stone) e manda o comprovante. Tudo o que
+   confirmado e o que está em conferência; paga no Pix (ou no cartão, pelo
+   link da Stone, quem paga tudo de uma vez) e manda o comprovante. No carnê
+   (18/11/2026) a pessoa escolhe quanto paga de cada vez, até 03/01. Tudo o que
    ela faz aqui cai na ficha dela pelo token, sem depender do nome digitado.
 
    O token é a credencial: fora da busca (cabeçalho em next.config.mjs e o

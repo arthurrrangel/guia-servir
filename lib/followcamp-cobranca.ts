@@ -11,11 +11,15 @@
    contato de emergência.
 
    O TEXTO depende de onde a pessoa está, nesta ordem: quitado; avisou que
-   pagou e não mandou o comprovante; carnê sem plano; parcela vencida;
-   próxima parcela; inscrição em aberto; em conferência.
+   pagou e não mandou o comprovante; carnê vencido (passou de 03/01); carnê
+   sem sinal; carnê pagando; inscrição em aberto; em conferência.
+
+   18/11/2026: o carnê não tem plano nem parcela fixa. A mensagem diz quanto
+   falta e até quando (03/01), e que a pessoa escolhe quanto paga de cada
+   vez, pelo link.
    ============================================================================= */
-import { soDigitos, linkCartaoDe, LINKS_CARTAO, type LinkCartao } from './followcamp';
-import { centavos, diaMes, type Conta } from './followcamp-carne';
+import { soDigitos, linkCartaoDe, carneAberto, LINKS_CARTAO, type LinkCartao } from './followcamp';
+import { centavos, diaMes, PRAZO_DO_CARNE, type Conta } from './followcamp-carne';
 
 export const LINK_PESSOAL = 'https://guiaservir.com/followcamp/minha/';
 export const linkPessoal = (token: string) => LINK_PESSOAL + token;
@@ -89,6 +93,9 @@ export function mensagemDeCobranca(p: {
   const De = de.charAt(0).toUpperCase() + de.slice(1);
   const doCarne = contato?.quem === 'campista' ? 'do seu carnê' : `do carnê de ${primeiroNome(ficha.campista)}`;
   const oCarne = contato?.quem === 'campista' ? 'o seu carnê' : `o carnê de ${primeiroNome(ficha.campista)}`;
+  const OCarne = oCarne.charAt(0).toUpperCase() + oCarne.slice(1);
+  const ate = diaMes(PRAZO_DO_CARNE);
+  const agora = p.agora ?? new Date();
   const avisadoSemComprovante = p.pagamentos.filter(x => !x.conferido && !(x.comprovantes && x.comprovantes > 0));
 
   if (conta.quitado) {
@@ -98,23 +105,23 @@ export function mensagemDeCobranca(p: {
     const soma = avisadoSemComprovante.reduce((s, x) => s + centavos(Number(x.valor)), 0);
     return `${oi} Recebemos o aviso de pagamento de ${reais(soma)} para ${de}. Para confirmarmos, manda o comprovante por este link: ${link}`;
   }
-  if (conta.carne && !conta.plano) {
-    return `${oi} No link abaixo você escolhe em quantas parcelas quer pagar ${oCarne} (até 3, com a última até 03/01) e já paga a primeira no Pix. Lá mesmo você manda o comprovante: ${link}`;
-  }
-  const prox = conta.situacao?.proxima;
-  if (prox && prox.estado === 'vencida') {
-    return `${oi} A parcela ${prox.numero} ${doCarne} (${reais(prox.falta)}) venceu em ${diaMes(prox.vencimento)}. Para pagar no Pix e mandar o comprovante: ${link}. Se já pagou, é só mandar o comprovante pelo mesmo link.`;
-  }
-  if (prox) {
-    return `${oi} A parcela ${prox.numero} ${doCarne} (${reais(prox.falta)}) vence em ${diaMes(prox.vencimento)}. Para pagar no Pix e mandar o comprovante: ${link}`;
+  if (conta.carne && conta.falta != null && conta.falta > 0) {
+    if (conta.vencido) {
+      return `${oi} O prazo ${doCarne} era ${ate}, e ainda faltam ${reais(conta.falta)}. Para pagar no Pix e mandar o comprovante: ${link}. Se já pagou, é só mandar o comprovante pelo mesmo link.`;
+    }
+    if (conta.pago + conta.conferindo === 0) {
+      return `${oi} ${OCarne} é de ${reais(conta.falta)}, e você paga no Pix quanto quiser, quantas vezes quiser, até ${ate}. Pelo link abaixo você dá o sinal e manda o comprovante de cada pagamento: ${link}`;
+    }
+    return `${oi} Faltam ${reais(conta.falta)} ${doCarne}, até ${ate}. Você paga no Pix quanto quiser, quantas vezes quiser, e manda o comprovante pelo link: ${link}`;
   }
   if (conta.falta != null && conta.falta > 0) {
     /* 29/10/2026: "ou no cartão" só quando existe link do cartão para esta
        ficha e nada foi pago (a página pessoal só mostra o cartão assim). O
        link da Stone morreu e a mensagem seguia prometendo cartão. */
     const comCartao = conta.pago + conta.conferindo === 0
-      && linkCartaoDe(ficha.irmao ? 'irmaos' : 'inscricao', p.agora ?? new Date(), p.links ?? LINKS_CARTAO) !== null;
-    return `${oi} ${De} (${reais(conta.falta)}) ainda está em aberto. Pelo link você paga no Pix${comCartao ? ' ou no cartão' : ''} e manda o comprovante, e também dá para parcelar no carnê: ${link}`;
+      && linkCartaoDe(ficha.irmao ? 'irmaos' : 'inscricao', agora, p.links ?? LINKS_CARTAO) !== null;
+    const emPartes = carneAberto(agora) ? `, e também dá para pagar em partes no carnê, até ${ate}` : '';
+    return `${oi} ${De} (${reais(conta.falta)}) ainda está em aberto. Pelo link você paga no Pix${comCartao ? ' ou no cartão' : ''} e manda o comprovante${emPartes}: ${link}`;
   }
   return `${oi} Recebemos os comprovantes de ${de} e estamos conferindo. Você acompanha tudo por este link: ${link}`;
 }

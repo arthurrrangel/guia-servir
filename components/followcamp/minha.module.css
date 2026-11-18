@@ -17,21 +17,11 @@
 .estado[data-tom="aviso"]{border-color:var(--cacau);background:color-mix(in srgb,var(--sol) 26%,transparent)}
 .estado[data-tom="ruim"]{border-color:var(--rubi);color:var(--rubi);background:color-mix(in srgb,var(--rubi) 10%,transparent)}
 
-/* as parcelas do carnê: número, data, valor e estado na mesma linha */
-.parcelas{list-style:none;margin:16px 0 0;padding:16px 0 0;border-top:2px solid var(--linha);display:grid;gap:10px}
-.parcelas li{
-  display:grid;grid-template-columns:auto 1fr auto;grid-template-areas:"num data valor" "num estado estado";
-  align-items:center;gap:2px 12px;padding:10px 12px;border-radius:14px;border:2px solid var(--linha);background:var(--campo);
-}
-.pNum{grid-area:num;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--cacau);font:900 .9rem/1 var(--f)}
-.pData{grid-area:data;font:600 .95rem/1.3 var(--f)}
-.pValor{grid-area:valor;font:800 1rem/1.2 var(--f);font-variant-numeric:tabular-nums;white-space:nowrap}
-.pEstado{grid-area:estado;color:var(--tinta-2);font-size:.86rem;line-height:1.35}
-.parcelas li[data-estado="paga"] .pNum{background:var(--ok);border-color:var(--ok);color:#fff}
-.parcelas li[data-estado="paga"] .pEstado{color:var(--ok);font-weight:700}
-.parcelas li[data-estado="conferindo"] .pNum{background:color-mix(in srgb,var(--sol) 40%,transparent)}
-.parcelas li[data-estado="vencida"]{border-color:var(--rubi)}
-.parcelas li[data-estado="vencida"] .pEstado{color:var(--rubi);font-weight:700}
+/* a situação é dinheiro: o valor nunca quebra no meio ("R$ 300,0" e "0"
+   embaixo, visto em 18/11 a 390 px); quem quebra é o rótulo. O .resumo de
+   pagar.module.css quebra o valor de propósito (lá ele também mostra nome) */
+ul.valores li span{flex:1 1 auto;min-width:0}
+ul.valores li strong{flex:none;white-space:nowrap;overflow-wrap:normal}
 
 /* os pagamentos */
 .lista{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px}

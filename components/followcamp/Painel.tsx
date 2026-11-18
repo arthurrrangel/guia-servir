@@ -23,16 +23,16 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useEu } from '@/components/demandas/Casca';
 import { Aviso, Cabecalho, Campo, Esqueleto, Kpi, Kpis, Opcoes, Pill, Secao, Subabas, Vazio, useEstreito } from '@/components/demandas/Ui';
 import {
-  lerPainel, lancarFicha, cancelarFicha, registrarPagamento, ajustarPagamento, apagarPagamento, verComprovantes, definirPlano,
+  lerPainel, lancarFicha, cancelarFicha, registrarPagamento, ajustarPagamento, apagarPagamento, verComprovantes, passarParaOCarne,
   type DadosDoPainel, type ComprovanteDoBanco,
 } from '@/lib/followcamp-painel-api';
 import {
-  resumoDe, situacaoDe, ordenarSituacoes, csvFichas, nomeDoArquivo, lerFichaDoWhatsApp, reais, centavos,
+  resumoDe, situacaoDe, ordenarSituacoes, ultimoPagamentoDe, csvFichas, nomeDoArquivo, lerFichaDoWhatsApp, reais, centavos,
   dataHoraBr, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS, ROTULO_ORIGEM, FORMAS,
   type Situacao, type PagamentoBanco, type Forma, type Referente, type FormaDaFicha, type FichaLida, type Status,
 } from '@/lib/followcamp-painel';
-import { LOTES, valorIrmaos, soDigitos, loteVigente, type LinkCartao } from '@/lib/followcamp';
-import { diaMes } from '@/lib/followcamp-carne';
+import { LOTES, valorIrmaos, soDigitos, loteVigente, carneAberto, type LinkCartao } from '@/lib/followcamp';
+import { diaMes, PRAZO_DO_CARNE } from '@/lib/followcamp-carne';
 import { contatoDe, linkDoWhats, linkPessoal, mensagemDeCobranca, numeroWhats } from '@/lib/followcamp-cobranca';
 import { planilhaDePagamentos } from '@/lib/followcamp-planilha';
 import { TIPO_XLSX } from '@/lib/xlsx';
@@ -214,7 +214,7 @@ export default function Painel() {
           ]} />
 
           {aba === 'campistas' ? (
-            <Secao titulo="Campistas" sub="Quem mais precisa de olho vem primeiro: parcela vencida, a conferir, pagou parte, não pagou. Cobrar abre o WhatsApp da pessoa com a mensagem pronta. Toque no nome para ver a ficha inteira.">
+            <Secao titulo="Campistas" sub="Quem mais precisa de olho vem primeiro: carnê vencido (passou de 03/01), a conferir, pagou parte, não pagou. No carnê a pessoa paga quanto quiser até 03/01: o último pagamento mostra quem parou. Cobrar abre o WhatsApp da pessoa com a mensagem pronta. Toque no nome para ver a ficha inteira.">
               <input className={s.busca} type="search" placeholder="Buscar pelo nome" value={busca}
                 onChange={e => setBusca(e.target.value)} aria-label="Buscar campista pelo nome" />
               {filtradas.length === 0 ? (
@@ -235,7 +235,7 @@ export default function Painel() {
                         <span>Recebido {reais(x.recebido)}</span>
                         {x.aConferir ? <span className={s.conferirTxt}>+ {reais(x.aConferir)} a conferir</span> : null}
                       </div>
-                      {textoDoPlano(x) ? <small className={s.sub}>{textoDoPlano(x)}</small> : null}
+                      {textoDoCarne(x) ? <small className={s.sub}>{textoDoCarne(x)}</small> : null}
                       {!x.ficha.cancelada_em ? <div className="dm-linha"><Cobrar x={x} /></div> : null}
                       {aberta === x.ficha.id ? <Detalhes x={x} indo={indo} fazer={fazer} pagar={() => { setParaPagar(x.ficha.id); setAba('lancar'); }} /> : null}
                     </li>
@@ -338,7 +338,7 @@ function FichaNaTabela({ x, aberta, alternar, indo, fazer, pagar }: {
         </td>
         <td>
           <Pill tom={x.atrasado ? 'bad' : TOM[x.status]}>{x.atrasado ? 'Atrasado' : ROTULO_STATUS[x.status]}</Pill>
-          {textoDoPlano(x) ? <small className={s.sub}>{textoDoPlano(x)}</small> : null}
+          {textoDoCarne(x) ? <small className={s.sub}>{textoDoCarne(x)}</small> : null}
         </td>
         <td className="dm-fim">
           <div className={s.acoes}>
@@ -376,19 +376,11 @@ function Detalhes({ x, indo, fazer, pagar }: { x: Situacao; indo: boolean; fazer
     ['Desistência', f.cancelada_em ? `${dataHoraBr(f.cancelada_em)}${f.motivo ? ` · ${f.motivo}` : ''}` : null],
     ['Reenviou a ficha', f.atualizada_em ? dataHoraBr(f.atualizada_em) : null],
   ];
-  const parcelas = x.conta.situacao?.parcelas ?? [];
   return (
     <div className={s.detalhes}>
       <dl className={s.dl}>
         {itens.filter(([, v]) => v).map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
       </dl>
-      {parcelas.length ? (
-        <ul className={s.pagsDaFicha} aria-label="Parcelas do carnê">
-          {parcelas.map(p => (
-            <li key={p.numero}>{p.numero}ª · vence {diaMes(p.vencimento)} · {reais(p.valor)} · {ROTULO_PARCELA[p.estado]}{p.falta && p.falta < p.valor ? ` (faltam ${reais(p.falta)})` : ''}</li>
-          ))}
-        </ul>
-      ) : null}
       {x.pagamentos.length ? (
         <ul className={s.pagsDaFicha}>
           {x.pagamentos.map(p => (
@@ -396,7 +388,7 @@ function Detalhes({ x, indo, fazer, pagar }: { x: Situacao; indo: boolean; fazer
           ))}
         </ul>
       ) : null}
-      {!f.cancelada_em && f.token ? <LinkEPlano x={x} indo={indo} fazer={fazer} /> : null}
+      {!f.cancelada_em && f.token ? <LinkECarne x={x} indo={indo} fazer={fazer} /> : null}
       {desistindo ? (
         <div className={s.confirma}>
           <Campo rot={`Desistência de ${f.campista}: motivo (opcional)`}>
@@ -638,19 +630,20 @@ function NovaFicha({ indo, fazer }: { indo: boolean; fazer: Fazer }) {
 }
 
 /* ---------------------------------------------------------------- 114 ---
-   O plano, a cobrança e o comprovante. A conta vem pronta em `x.conta`
-   (lib/followcamp-carne.ts); aqui é só o que se vê. */
-const ROTULO_PARCELA = { paga: 'paga', conferindo: 'em conferência', aberta: 'em aberto', vencida: 'vencida' } as const;
+   O carnê, a cobrança e o comprovante. A conta vem pronta em `x.conta`
+   (lib/followcamp-carne.ts); aqui é só o que se vê.
 
-function textoDoPlano(x: Situacao): string {
-  if (x.ficha.cancelada_em || !x.conta.carne || x.status === 'quitado') return '';
-  const sit = x.conta.situacao;
-  if (!x.conta.plano || !sit) return 'Carnê sem plano: a pessoa escolhe no link';
-  const n = x.conta.plano.length;
-  const vencida = sit.parcelas.find(p => p.estado === 'vencida');
-  if (vencida) return `Carnê ${n}x · a ${vencida.numero}ª venceu em ${diaMes(vencida.vencimento)} (faltam ${reais(vencida.falta)})`;
-  if (sit.proxima) return `Carnê ${n}x · a ${sit.proxima.numero}ª vence em ${diaMes(sit.proxima.vencimento)}`;
-  return `Carnê ${n}x · em dia`;
+   18/11/2026: o carnê não tem plano. A pessoa paga quanto quiser até 03/01,
+   e a linha diz quanto falta, até quando e quando foi o último pagamento
+   (sem data no meio, é o que mostra quem parou de pagar). */
+function textoDoCarne(x: Situacao): string {
+  if (x.ficha.cancelada_em || !x.conta.carne || x.status === 'quitado' || x.conta.falta == null) return '';
+  const ate = diaMes(PRAZO_DO_CARNE);
+  const falta = x.conta.falta;
+  const ultimo = ultimoPagamentoDe(x);
+  if (x.conta.vencido) return `Carnê · o prazo era ${ate} e faltam ${reais(falta)}`;
+  if (falta === 0) return 'Carnê · tudo avisado, falta conferir';
+  return `Carnê · faltam ${reais(falta)} até ${ate} · ${ultimo ? `último pagamento em ${dataCurta(ultimo)}` : 'sem sinal ainda'}`;
 }
 
 /** Abre o WhatsApp da pessoa certa com a mensagem pronta. Quem aperta enviar é a organização. */
@@ -670,11 +663,15 @@ function Cobrar({ x }: { x: Situacao }) {
   );
 }
 
-function LinkEPlano({ x, indo, fazer }: { x: Situacao; indo: boolean; fazer: Fazer }) {
+function LinkECarne({ x, indo, fazer }: { x: Situacao; indo: boolean; fazer: Fazer }) {
   const f = x.ficha;
   const [copiado, setCopiado] = useState(false);
+  const [confirmando, setConfirmando] = useState(false);
   if (!f.token) return null;
   const url = linkPessoal(f.token);
+  /* só passa para o carnê: o banco não tem volta para à vista (a 114 grava
+     pagamento = 'carne'), por isso a confirmação antes */
+  const podePassar = !x.conta.carne && x.status !== 'quitado' && x.devido != null && carneAberto();
   return (
     <div className={s.linkEPlano}>
       <div className={s.linkPessoal}>
@@ -685,19 +682,22 @@ function LinkEPlano({ x, indo, fazer }: { x: Situacao; indo: boolean; fazer: Faz
           {copiado ? 'Copiado' : 'Copiar'}
         </button>
       </div>
-      <label className={s.planoCampo}>
-        <span className={s.mudo}>Plano do carnê</span>
-        <select value={f.parcelas ?? ''} disabled={indo} aria-label={`Plano do carnê de ${f.campista}`}
-          onChange={e => {
-            const v = e.target.value ? Number(e.target.value) : null;
-            void fazer(() => definirPlano(f.id, v), 'trocar o plano', v ? `Plano em ${v}x` : 'Plano tirado');
-          }}>
-          <option value="">Sem plano (paga inteiro ou escolhe no link)</option>
-          <option value="1">1 parcela</option>
-          <option value="2">2 parcelas</option>
-          <option value="3">3 parcelas</option>
-        </select>
-      </label>
+      {x.conta.carne ? (
+        <span className={s.mudo}>Carnê: a pessoa paga quanto quiser, pelo link, até {diaMes(PRAZO_DO_CARNE)}.</span>
+      ) : podePassar ? (
+        confirmando ? (
+          <div className="dm-linha">
+            <span>Passar {f.campista} para o carnê? Não tem volta pelo painel.</span>
+            <button type="button" className="dm-btn dm-peq" disabled={indo}
+              onClick={() => void fazer(() => passarParaOCarne(f.id), 'passar para o carnê', 'Ficha no carnê').then(() => setConfirmando(false))}>
+              Passar para o carnê
+            </button>
+            <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={() => setConfirmando(false)}>Voltar</button>
+          </div>
+        ) : (
+          <button type="button" className="dm-btn dm-txt dm-peq" disabled={indo} onClick={() => setConfirmando(true)}>Passar para o carnê</button>
+        )
+      ) : null}
     </div>
   );
 }

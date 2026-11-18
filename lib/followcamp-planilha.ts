@@ -8,8 +8,12 @@
                    conferido), por forma de pagamento, e o que pede atenção.
      Pagamentos    um por linha, em ordem de data, situação colorida, filtro
                    no cabeçalho e os totais embaixo.
-     Por campista  quanto cada um deve, pagou, tem a conferir e falta, a
-                   próxima parcela do carnê e com quem falar.
+     Por campista  quanto cada um deve, pagou, tem a conferir e falta, o
+                   prazo do carnê, o último pagamento e com quem falar.
+
+   18/11/2026: o carnê não tem plano (lib/followcamp-carne.ts). Sai "Próxima
+   parcela"/"Vence em" e "Carnê sem plano"; entra "Pagar até" (03/01) e
+   "Último pagamento", que no carnê sem data no meio é o que mostra quem parou.
 
    As contas são as do painel (lib/followcamp-painel.ts, com teste); aqui é só
    a forma. As cores são as de ESTADO do sistema (app/globals.css): verde ok,
@@ -19,11 +23,12 @@
    ============================================================================= */
 import { planilha, ref, serialDe, type Aba, type Celula, type Estilo } from './xlsx';
 import {
-  resumoDe, situacaoDe, ordenarSituacoes, FORMAS, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS,
+  resumoDe, situacaoDe, ordenarSituacoes, ultimoPagamentoDe, FORMAS, ROTULO_FORMA, ROTULO_FORMA_DA_FICHA, ROTULO_REFERENTE, ROTULO_STATUS,
   type FichaBanco, type PagamentoBanco, type Situacao, type Status,
 } from './followcamp-painel';
 import { contatoDe } from './followcamp-cobranca';
 import { codigoLegivel } from './followcamp';
+import { PRAZO_DO_CARNE, diaMes } from './followcamp-carne';
 
 const PRETO = '252525';
 const MUDO = '6B6B6B';
@@ -96,7 +101,8 @@ function alturaPara(texto: string, largura: number, minimo = 20): number {
 
 const tomDoStatus = (x: Situacao): Tom =>
   x.atrasado ? 'bad' : ({ quitado: 'ok', parcial: 'warn', a_conferir: 'info', pendente: 'neutro', cancelada: 'neutro' } as Record<Status, Tom>)[x.status];
-const rotuloDoStatus = (x: Situacao) => (x.atrasado ? 'Parcela vencida' : ROTULO_STATUS[x.status]);
+const rotuloDoStatus = (x: Situacao) => (x.atrasado ? 'Carnê vencido' : ROTULO_STATUS[x.status]);
+const VENCIDO = `Carnê vencido (passou de ${diaMes(PRAZO_DO_CARNE)})`;
 const ORIGEM: Record<PagamentoBanco['origem'], string> = { site: 'Avisou pelo site', manual: 'Lançado no painel', stone: 'API da Stone' };
 
 /* =================================================================== Resumo */
@@ -145,7 +151,7 @@ function abaResumo(fichas: readonly FichaBanco[], pagamentos: readonly Pagamento
   item('Pagou parte', conta(x => x.status === 'parcial' && !x.atrasado), '', 'warn', INTEIRO);
   item('A conferir', conta(x => x.status === 'a_conferir' && !x.atrasado), '', 'info', INTEIRO);
   item('Não pagou', conta(x => x.status === 'pendente' && !x.atrasado), '', 'neutro', INTEIRO);
-  item('Parcela vencida', conta(x => x.atrasado), '', 'bad', INTEIRO);
+  item(VENCIDO, conta(x => x.atrasado), '', 'bad', INTEIRO);
 
   secao('Recebido por forma de pagamento');
   const formas = FORMAS.filter(f => r.recebidoPorForma[f] > 0 || f === 'pix_direto' || f === 'link_stone' || f === 'dinheiro');
@@ -159,16 +165,14 @@ function abaResumo(fichas: readonly FichaBanco[], pagamentos: readonly Pagamento
   secao('Precisa de atenção');
   const nomes = (xs: Situacao[]) => xs.map(x => x.ficha.campista).join(', ');
   const vencidas = sits.filter(x => x.atrasado);
-  const semPlano = sits.filter(x => x.conta.carne && !x.conta.plano && x.status !== 'quitado');
   const avisos = pagamentos.filter(p => !p.conferido);
   const nada = sits.filter(x => x.status === 'pendente' && !x.atrasado);
-  item('Parcela vencida', vencidas.length, nomes(vencidas), vencidas.length ? 'bad' : 'ok', INTEIRO);
-  item('Carnê sem plano escolhido', semPlano.length, semPlano.length ? `${nomes(semPlano)}. Sem plano, o sistema não sabe quanto cada um deve em cada vencimento.` : '', semPlano.length ? 'warn' : 'ok', INTEIRO);
+  item(VENCIDO, vencidas.length, nomes(vencidas), vencidas.length ? 'bad' : 'ok', INTEIRO);
   item('Avisos a conferir', avisos.length, [...new Set(avisos.map(p => p.campista))].join(', '), avisos.length ? 'info' : 'ok', INTEIRO);
   item('Não pagaram nada', nada.length, nomes(nada), nada.length ? 'neutro' : 'ok', INTEIRO);
 
   add([], 14);
-  const legenda = 'Cores: verde, pago ou conferido · âmbar, pagou parte ou falta escolher · azul, esperando conferência · vermelho, parcela vencida · cinza, não pagou.';
+  const legenda = `Cores: verde, pago ou conferido · âmbar, pagou parte · azul, esperando conferência · vermelho, carnê vencido (passou de ${diaMes(PRAZO_DO_CARNE)}) · cinza, não pagou. No carnê a pessoa paga quanto quiser até ${diaMes(PRAZO_DO_CARNE)}.`;
   largo(add([null, { v: legenda, e: NOTA }], alturaPara(legenda, 110, 20)));
 
   return { nome: 'Resumo', larguras: L, linhas, alturas, mesclas, semGrade: true, corDaAba: PRETO, rodape: 'Follow Camp 2027 · Pagamentos' };
@@ -268,24 +272,20 @@ function abaPorCampista(fichas: readonly FichaBanco[], pagamentos: readonly Paga
     { t: 'Campista', w: larguraPara(sits.map(x => x.ficha.campista), 24, 50, true), v: (x, e) => ({ v: x.ficha.campista, e: { ...e, negrito: true } }) },
     { t: 'Idade', w: 7, a: 'centro', v: (x, e) => ({ v: x.ficha.idade ?? null, e: { ...e, formato: INTEIRO, alinhar: 'centro' } }) },
     { t: 'Na ficha', w: 14, v: (x, e) => ({ v: x.ficha.pagamento ? ROTULO_FORMA_DA_FICHA[x.ficha.pagamento] : '', e }) },
-    { t: 'Plano', w: 17, v: (x, e) => {
-      const t = x.conta.carne ? (x.conta.plano ? `Carnê ${x.conta.plano.length}x` : 'Carnê sem plano') : 'À vista';
-      return { v: t, e: !x.conta.plano && x.conta.carne && x.status !== 'quitado' && x.status !== 'cancelada' ? { ...e, cor: TOM.warn.cor, negrito: true } : e };
-    } },
+    /* "Na ficha" é o que a pessoa marcou; "Como paga" é como o sistema conta hoje (quem passou para o carnê depois) */
+    { t: 'Como paga', w: 13, v: (x, e) => ({ v: x.conta.carne ? 'Carnê' : 'À vista', e }) },
     { t: 'Total', w: 13, a: 'direita', v: (x, e) => money(x.devido, e) },
     { t: 'Recebido', w: 13, a: 'direita', v: (x, e) => money(x.recebido, e, x.recebido ? { cor: TOM.ok.cor, negrito: true } : {}) },
     { t: 'A conferir', w: 13, a: 'direita', v: (x, e) => money(x.aConferir, e, x.aConferir ? { cor: TOM.info.cor, negrito: true } : {}) },
     { t: 'Falta', w: 13, a: 'direita', v: (x, e) => (x.status === 'cancelada' ? { e } : money(x.falta, e, { negrito: true })) },
     { t: 'Situação', w: 16, a: 'centro', v: (x, e) => ({ v: rotuloDoStatus(x), e: comTom(e, tomDoStatus(x)) }) },
-    { t: 'Próxima parcela', w: 17, a: 'direita', v: (x, e) => {
-      const p = x.status === 'quitado' || x.status === 'cancelada' ? null : x.conta.situacao?.proxima ?? null;
-      return p ? { v: reaisDe(p.falta), e: { ...e, formato: MOEDA, alinhar: 'direita' } } : { e };
+    { t: 'Pagar até', w: 12, a: 'centro', v: (x, e) => {
+      if (!x.conta.carne || x.status === 'quitado' || x.status === 'cancelada') return { e };
+      return { v: dataDoExcel(PRAZO_DO_CARNE), e: { ...e, formato: DATA, alinhar: 'centro', ...(x.atrasado ? { cor: TOM.bad.cor, negrito: true } : {}) } };
     } },
-    { t: 'Vence em', w: 12, a: 'centro', v: (x, e) => {
-      const p = x.status === 'quitado' || x.status === 'cancelada' ? null : x.conta.situacao?.proxima ?? null;
-      if (!p) return { e };
-      const vencida = p.estado === 'vencida';
-      return { v: dataDoExcel(p.vencimento), e: { ...e, formato: DATA, alinhar: 'centro', ...(vencida ? { cor: TOM.bad.cor, negrito: true } : {}) } };
+    { t: 'Último pagamento', w: 17, a: 'centro', v: (x, e) => {
+      const u = ultimoPagamentoDe(x);
+      return u ? { v: dataDoExcel(u), e: { ...e, formato: DATA, alinhar: 'centro' } } : { e };
     } },
     { t: 'Contato', w: larguraPara(sits.map(contatoTexto), 18, 56), v: (x, e) =>
       ({ v: contatoTexto(x), e: contatoDe(x.ficha)?.quem === 'campista' ? { ...e, cor: MUDO } : e }) },

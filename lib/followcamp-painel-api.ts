@@ -7,6 +7,7 @@
 import { rpcCom, meuToken } from './demandas/api';
 import { sb } from './supabase';
 import type { FichaBanco, PagamentoBanco } from './followcamp-painel';
+import { MARCA_DO_CARNE } from './followcamp-carne';
 
 const rpc = <T>(nome: string, args: Record<string, unknown>) => rpcCom<T>(sb() as any, nome, args);
 const t = () => meuToken();
@@ -22,9 +23,12 @@ export const ajustarPagamento = (id: string, p: Record<string, unknown>) =>
   rpc<Record<string, never>>('fc27_pagamento_ajustar', { p_token: t(), p_id: id, p });
 export const apagarPagamento = (id: string) => rpc<Record<string, never>>('fc27_pagamento_apagar', { p_token: t(), p_id: id });
 
-/* 114 · o comprovante que a pessoa mandou pelo link, e o plano do carnê */
+/* 114 · o comprovante que a pessoa mandou pelo link, e o carnê */
 export type ComprovanteDoBanco = { id: string; tipo: string; criado_em: string; dados: string };
 export const verComprovantes = (pagamento: string) =>
   rpc<{ comprovantes: ComprovanteDoBanco[] }>('fc27_comprovante_ver', { p_token: t(), p_pagamento: pagamento });
-export const definirPlano = (ficha: string, parcelas: number | null) =>
-  rpc<Record<string, never>>('fc27_ficha_plano', { p_token: t(), p_ficha: ficha, p_parcelas: parcelas });
+/** 18/11/2026: o carnê não tem plano. O fc27_ficha_plano da 114 continua sendo
+ *  a porta: `parcelas` preenchida só marca a ficha como carnê, e o banco grava
+ *  pagamento = 'carne' junto (lib/followcamp-carne.ts, MARCA_DO_CARNE). */
+export const passarParaOCarne = (ficha: string) =>
+  rpc<Record<string, never>>('fc27_ficha_plano', { p_token: t(), p_ficha: ficha, p_parcelas: MARCA_DO_CARNE });

@@ -131,7 +131,9 @@ export async function lerMinha(token: string, teto = 8000): Promise<Minha> {
   }
 }
 
-/** A pessoa escolhe o plano do carnê (uma vez). */
+/** A ficha passa para o carnê (uma vez). A 114 chama de "plano"; desde
+ *  18/11/2026 o número não vale nada e vai sempre MARCA_DO_CARNE
+ *  (lib/followcamp-carne.ts): o banco grava pagamento = 'carne' junto. */
 export const escolherPlano = (token: string, parcelas: number) =>
   rpcDeServico('fc27_plano_escolher', { p_token: token, p_parcelas: parcelas });
 

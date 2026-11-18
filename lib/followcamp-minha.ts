@@ -1,5 +1,5 @@
 /* =============================================================================
-   O LINK PESSOAL: AS REGRAS — 19/10/2026 (migração 114)
+   O LINK PESSOAL: AS REGRAS — 19/10/2026 (migração 114), carnê livre 18/11/2026
 
    A página /followcamp/minha/<token> e as rotas dela leem estas regras, para
    a tela e o servidor nunca discordarem. Quem decide é o servidor: a tela só
@@ -8,9 +8,15 @@
    O QUE O SERVIDOR NÃO ACEITA DO NAVEGADOR: o "referente" (inscrição, irmãos
    ou parcela) sai da ficha, e o valor não passa do que falta. Pagar a mais
    pelo link é engano de digitação, não generosidade, e vira devolução.
+
+   QUANTO SE PAGA DE CADA VEZ (18/11/2026):
+     · à vista: o que falta, inteiro (no Pix, ou no cartão no valor do link);
+     · carnê: quanto a pessoa quiser, de PARCELA_MIN até o que falta (ou só
+       o que falta, quando falta menos que PARCELA_MIN). Sem plano e sem
+       data no meio: tudo até 03/01 (lib/followcamp-carne.ts).
    ============================================================================= */
-import { CODIGO_OK, linkCartaoDe, limpaNome, nomeInvalido, LINKS_CARTAO, type LinkCartao, type Referente } from './followcamp';
-import { contaDaFicha, maxParcelas, type FichaDaConta, type PagamentoDaConta } from './followcamp-carne';
+import { CODIGO_OK, carneAberto, linkCartaoDe, limpaNome, nomeInvalido, LINKS_CARTAO, type LinkCartao, type Referente } from './followcamp';
+import { contaDaFicha, minimoDoPagamento, type FichaDaConta, type PagamentoDaConta } from './followcamp-carne';
 
 export type Conferido<T> = { ok: true; dados: T } | { ok: false; erro: string };
 
@@ -28,6 +34,20 @@ export type PedidoDoLink = {
 };
 
 const centavos = (v: number) => Math.round(v * 100);
+const reais = (c: number) => (c / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/** O valor de UM pagamento do carnê, em centavos, contra o que falta. A
+ *  página pessoal mostra o mesmo recado que o servidor daria. */
+export function conferirValorDoCarne(valor: number, falta: number): Conferido<number> {
+  if (!Number.isInteger(valor) || valor <= 0) return { ok: false, erro: 'Digite o valor deste pagamento.' };
+  if (falta <= 0) return { ok: false, erro: 'Não falta nada a pagar nesta inscrição.' };
+  if (valor > falta) return { ok: false, erro: `Esse valor passa do que falta (${reais(falta)}).` };
+  const min = minimoDoPagamento(falta);
+  if (valor < min) {
+    return { ok: false, erro: min === falta ? `Falta só ${reais(falta)}: pague esse valor.` : `Cada pagamento do carnê é de pelo menos ${reais(min)}.` };
+  }
+  return { ok: true, dados: valor };
+}
 
 /** O referente sai da ficha, não do navegador. */
 export const referenteDa = (f: FichaDoLink): Referente =>
@@ -61,8 +81,12 @@ export function conferirPagamentoDoLink(
   const conta = contaDaFicha(ficha, pagamentos, agora);
   if (conta.total == null) return { ok: false, erro: 'A organização ainda vai confirmar o valor da sua inscrição.' };
   if (conta.falta == null || conta.falta <= 0) return { ok: false, erro: 'Não falta nada a pagar nesta inscrição.' };
-  if (centavos(valor) > conta.falta) {
-    return { ok: false, erro: `Esse valor passa do que falta (${(conta.falta / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}).` };
+  if (centavos(valor) > conta.falta) return { ok: false, erro: `Esse valor passa do que falta (${reais(conta.falta)}).` };
+  if (conta.carne) {
+    const v = conferirValorDoCarne(centavos(valor), conta.falta);
+    if (!v.ok) return v;
+  } else if (centavos(valor) !== conta.falta) {
+    return { ok: false, erro: `Na inscrição à vista o pagamento é o que falta (${reais(conta.falta)}). Para pagar em partes, escolha o carnê na sua página.` };
   }
 
   const referente = referenteDa(ficha);
@@ -74,13 +98,11 @@ export function conferirPagamentoDoLink(
   return { ok: true, dados: { codigo, meio, referente, valor, titular, repetido: false } };
 }
 
-/** O plano que a pessoa pode escolher agora (1 até o máximo que cabe nas datas). */
-export function conferirPlano(parcelas: unknown, agora = new Date()): Conferido<number> {
-  const n = typeof parcelas === 'number' ? parcelas : NaN;
-  const max = maxParcelas(agora);
-  if (max < 1) return { ok: false, erro: 'O carnê não aceita plano novo depois de 31 de dezembro. Pague o que falta no Pix ou no cartão.' };
-  if (!Number.isInteger(n) || n < 1 || n > max) return { ok: false, erro: `Escolha de 1 a ${max} parcela${max > 1 ? 's' : ''}.` };
-  return { ok: true, dados: n };
+/** A ficha à vista pode passar para o carnê enquanto o carnê está aberto
+ *  (até 03/01). Depois, quem ainda deve paga o que falta, inteiro. */
+export function conferirEntradaNoCarne(agora = new Date()): Conferido<true> {
+  if (!carneAberto(agora)) return { ok: false, erro: 'O carnê fechou em 3 de janeiro. Pague o que falta no Pix ou no cartão.' };
+  return { ok: true, dados: true };
 }
 
 /* ------------------------------------------------------------ o arquivo ---

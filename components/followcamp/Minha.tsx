@@ -1,20 +1,22 @@
 'use client';
 /* =============================================================================
-   O LINK PESSOAL DA INSCRIÇÃO — 19/10/2026 (migração 114)
+   O LINK PESSOAL DA INSCRIÇÃO — 19/10/2026 (migração 114), carnê livre 18/11/2026
 
    O Arthur: "preciso conseguir registrar com mais precisão os pagantes nesse
    formato de carnê" e "de quem paga por cartão ou pix [...] o sistema ir
    acompanhando tudo e tendo controle". Esta tela é a parte da pessoa:
 
      1. a situação: quanto é, quanto a organização já confirmou, quanto está
-        em conferência e quanto falta (e, no carnê, cada parcela com a data);
-     2. o plano do carnê, uma vez: 1, 2 ou 3 parcelas iguais (lib/followcamp-
-        carne.ts decide as datas e os valores);
-     3. pagar: Pix com QR (o código do pagamento vai no txid) ou, na inscrição
-        inteira, o link do cartão da Stone;
-     4. o comprovante: foto (reduzida aqui mesmo, para caber no celular de
-        quem manda e no banco) ou PDF. Ele vai para o pagamento certo, na ficha
-        certa, pelo link.
+        em conferência e quanto falta (e, no carnê, o prazo: 03/01);
+     2. pagar. À vista: o que falta, no Pix com QR (o código do pagamento vai
+        no txid) ou, na inscrição inteira, no link do cartão da Stone. No
+        carnê (18/11, o Arthur: "deixar ela escolher a quantia"): quanto a
+        pessoa quiser, no Pix, um sinal e depois o resto, quantas vezes
+        quiser até 03/01. Sem plano e sem parcela fixa (lib/followcamp-
+        carne.ts). A ficha à vista pode passar para o carnê daqui mesmo;
+     3. o comprovante de cada pagamento: foto (reduzida aqui mesmo, para
+        caber no celular de quem manda e no banco) ou PDF. Ele vai para o
+        pagamento certo, na ficha certa, pelo link.
 
    O QUE ESTA TELA PODE AFIRMAR: "confirmado" só o que a organização conferiu.
    O que a pessoa mandou fica "em conferência". Nunca "pagamento aprovado".
@@ -28,9 +30,9 @@ import { useRouter } from 'next/navigation';
 import qrcode from 'qrcode-generator';
 import { pixCopiaECola } from '@/lib/pix';
 import { PIX_CHAVE, PIX_NOME, PIX_CIDADE } from '@/lib/oferta';
-import { FC27, codigoFC27, codigoLegivel, linkCartaoDe, linkWhatsApp, type LinkCartao } from '@/lib/followcamp';
-import { contaDaFicha, diaMes, maxParcelas, planoDe, centavos, type EstadoParcela } from '@/lib/followcamp-carne';
-import { referenteDa } from '@/lib/followcamp-minha';
+import { FC27, carneAberto, codigoFC27, codigoLegivel, linkCartaoDe, linkWhatsApp, soDigitos, type LinkCartao } from '@/lib/followcamp';
+import { contaDaFicha, diaMes, minimoDoPagamento, centavos, PRAZO_DO_CARNE } from '@/lib/followcamp-carne';
+import { conferirValorDoCarne, referenteDa } from '@/lib/followcamp-minha';
 import type { Minha as MinhaDados, MeuPagamento } from '@/lib/followcamp-banco';
 import s from './pagar.module.css';
 import m from './minha.module.css';
@@ -44,7 +46,6 @@ const dataBr = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 
 type Andamento = { codigo: string; valor: number; meio: 'pixdireto' | 'cartaoLink'; criado: number };
 
-const ROTULO_ESTADO: Record<EstadoParcela, string> = { paga: 'Paga', conferindo: 'Em conferência', aberta: 'Em aberto', vencida: 'Vencida' };
 const ROTULO_FORMA: Record<string, string> = {
   pix_direto: 'Pix', link_stone: 'Cartão (Stone)', pix_stone: 'Pix (Stone)', cartao_stone: 'Cartão (Stone)', dinheiro: 'Dinheiro',
 };
@@ -105,9 +106,13 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
   const router = useRouter();
   const [tema, setTema] = useState<'claro' | 'escuro' | null>(null);
   const [sistemaEscuro, setSistemaEscuro] = useState(false);
-  const [escolha, setEscolha] = useState<number | null>(null);
-  const [querCarne, setQuerCarne] = useState(false);
-  const [valorOpcao, setValorOpcao] = useState<'proxima' | 'tudo'>('proxima');
+  /* o carnê: um sinal ou uma parte (o valor digitado) ou tudo o que falta */
+  const [modo, setModo] = useState<'parte' | 'tudo'>('parte');
+  const [valorDig, setValorDig] = useState('');
+  const [valorMal, setValorMal] = useState(false);
+  /* a ficha à vista pedindo o carnê: o aviso antes de confirmar, e o que já virou */
+  const [pedindoCarne, setPedindoCarne] = useState(false);
+  const [virouCarne, setVirouCarne] = useState(false);
   const [andamento, setAndamento] = useState<Andamento | null>(null);
   const [ocupado, setOcupado] = useState<string | null>(null);
   const [erro, setErro] = useState<string | null>(null);
@@ -168,24 +173,28 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
   const f = dados.ficha;
   const conta = contaDaFicha(f, dados.pagamentos, agora);
   const referente = referenteDa(f);
-  const max = maxParcelas(agora);
-  const carne = conta.carne || querCarne;
-  const precisaPlano = carne && !conta.plano && conta.total != null && max > 0;
+  const carne = conta.carne || virouCarne;
+  const aberto = carneAberto(agora);
+  const ate = diaMes(PRAZO_DO_CARNE);
+  const falta = conta.falta ?? 0;
+  const nadaPago = conta.pago + conta.conferindo === 0;
   /* só o link que a Stone diz que ainda abre (a página manda a lista já conferida) */
-  const link = conta.carne ? null : linkCartaoDe(referente, agora, links);
-  const podeCartao = !!link && conta.pago + conta.conferindo === 0 && conta.total != null && centavos(link.valor) === conta.total;
+  const link = carne ? null : linkCartaoDe(referente, agora, links);
+  const podeCartao = !!link && nadaPago && conta.total != null && centavos(link.valor) === conta.total;
 
-  const prox = conta.situacao?.proxima ?? null;
-  const valorProxima = prox ? prox.falta : conta.falta ?? 0;
-  const valorTudo = conta.falta ?? 0;
-  const aPagar = carne && conta.plano && valorOpcao === 'proxima' ? valorProxima : valorTudo;
+  /* o carnê: de PARCELA_MIN até o que falta; faltando menos, só o que falta */
+  const minimo = minimoDoPagamento(falta);
+  const soTudo = carne && falta > 0 && minimo === falta;
+  const escolhido = valorDig ? parseInt(valorDig, 10) : 0;
+  const aPagar = !carne || soTudo || modo === 'tudo' ? falta : escolhido;
 
   const estado: { rot: string; tom: 'ok' | 'aviso' | 'ruim' | 'neutro' } =
-    conta.quitado ? { rot: 'Quitada', tom: 'ok' }
-    : conta.situacao?.atrasada ? { rot: 'Parcela vencida', tom: 'ruim' }
-    : precisaPlano ? { rot: 'Falta escolher o plano do carnê', tom: 'aviso' }
+    conta.total == null ? { rot: 'Valor a confirmar', tom: 'neutro' }
+    : conta.quitado ? { rot: 'Quitada', tom: 'ok' }
+    : conta.vencido ? { rot: 'Prazo do carnê vencido', tom: 'ruim' }
     : conta.falta === 0 && conta.conferindo > 0 ? { rot: 'Em conferência', tom: 'neutro' }
-    : conta.situacao ? { rot: 'Em dia', tom: 'ok' }
+    : carne && !nadaPago ? { rot: 'Carnê em dia', tom: 'ok' }
+    : carne ? { rot: 'Falta o sinal', tom: 'aviso' }
     : { rot: 'Em aberto', tom: 'aviso' };
 
   function guardarAndamento(a: Andamento | null) {
@@ -196,17 +205,17 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
     } catch { /* ok */ }
   }
 
-  async function escolherPlano() {
-    if (!escolha) { setErro('Escolha em quantas parcelas.'); return; }
-    setErro(null); setOk(null); setOcupado('plano');
+  async function entrarNoCarne() {
+    setErro(null); setOk(null); setOcupado('carne');
     try {
       const r = await fetch('/api/followcamp/minha', {
-        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, parcelas: escolha }),
+        method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, carne: true }),
       });
       const j = await r.json().catch(() => null);
       if (!r.ok || !j?.ok) { setErro(j?.erro || 'Não deu certo agora. Tente de novo em instantes.'); setOcupado(null); return; }
-      setOk('Plano escolhido.');
-      setQuerCarne(false);
+      setOk('Pronto: a inscrição está no carnê. Escolha quanto vai pagar agora.');
+      setPedindoCarne(false);
+      setVirouCarne(true);
       router.refresh();
     } catch {
       setErro('Sem conexão. Confira a internet e tente de novo.');
@@ -215,8 +224,19 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
   }
 
   function comecar(meio: 'pixdireto' | 'cartaoLink') {
-    setErro(null); setOk(null);
-    const valor = meio === 'cartaoLink' && link ? centavos(link.valor) : aPagar;
+    setErro(null); setOk(null); setValorMal(false);
+    let valor = falta;
+    if (meio === 'cartaoLink' && link) valor = centavos(link.valor);
+    else if (carne) {
+      /* o mesmo recado que o servidor daria, antes de gerar o Pix */
+      const v = conferirValorDoCarne(aPagar, falta);
+      if (!v.ok) {
+        setErro(v.erro);
+        if (modo === 'parte' && !soTudo) { setValorMal(true); document.getElementById('fc-valor')?.focus(); }
+        return;
+      }
+      valor = v.dados;
+    }
     if (valor <= 0) return;
     guardarAndamento({ codigo: codigoFC27(), valor, meio, criado: Date.now() });
   }
@@ -252,7 +272,6 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
     ? pixCopiaECola({ chave: PIX_CHAVE, nome: PIX_NOME, cidade: PIX_CIDADE, valor: andamento.valor / 100, txid: andamento.codigo })
     : null;
 
-  const planoSimulado = (n: number) => (conta.total != null ? planoDe(conta.total, n, agora) : null);
   const semComprovante = dados.pagamentos.filter(p => !p.conferido && p.comprovantes === 0 && p.codigo);
 
   return (
@@ -269,82 +288,73 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
             <h2 id="fc-situacao" className={m.h2}>Situação</h2>
             <span className={m.estado} data-tom={estado.tom}>{estado.rot}</span>
           </div>
-          <ul className={s.resumo}>
+          <ul className={`${s.resumo} ${m.valores}`}>
             <li><span>Inscrição{f.irmao ? ' (com desconto de irmão)' : ''}</span><strong>{conta.total != null ? reais(conta.total) : 'a confirmar'}</strong></li>
             <li><span>Confirmado pela organização</span><strong>{reais(conta.pago)}</strong></li>
             {conta.conferindo > 0 && <li><span>Em conferência</span><strong>{reais(conta.conferindo)}</strong></li>}
             <li><span>Falta pagar</span><strong>{conta.falta != null ? reais(conta.falta) : 'a confirmar'}</strong></li>
+            {carne && !conta.quitado && conta.total != null && <li><span>Prazo do carnê</span><strong>até {ate}</strong></li>}
           </ul>
-          {conta.situacao && (
-            <ol className={m.parcelas} aria-label="Parcelas do carnê">
-              {conta.situacao.parcelas.map(p => (
-                <li key={p.numero} data-estado={p.estado}>
-                  <span className={m.pNum}>{p.numero}ª</span>
-                  <span className={m.pData}>vence {diaMes(p.vencimento)}</span>
-                  <strong className={m.pValor}>{reais(p.valor)}</strong>
-                  <span className={m.pEstado}>{ROTULO_ESTADO[p.estado]}{p.estado === 'aberta' || p.estado === 'vencida' ? (p.falta < p.valor ? ` · faltam ${reais(p.falta)}` : '') : ''}</span>
-                </li>
-              ))}
-            </ol>
-          )}
         </section>
 
         {erro && <p className={s.erro} role="alert">{erro}</p>}
         {ok && <p className={m.ok} role="status">{ok}</p>}
 
-        {/* 2 · o plano do carnê */}
-        {precisaPlano && (
-          <section className={s.painel} aria-labelledby="fc-plano">
-            <h2 id="fc-plano" className={s.cabecaPasso}><span>1</span>Em quantas parcelas?</h2>
-            <p className={s.ajuda}>Parcelas iguais, no Pix. Cada uma vence no dia 10, e a última até 03/01. Dá para pagar antes.</p>
-            <fieldset className={s.opcoes}>
-              <legend>Número de parcelas</legend>
-              {Array.from({ length: max }, (_, i) => i + 1).map(n => {
-                const pl = planoSimulado(n);
-                if (!pl) return null;
-                return (
-                  <label key={n} className={s.opcao} data-marcada={escolha === n}>
-                    <input type="radio" name="fc-parcelas" value={n} checked={escolha === n} onChange={() => setEscolha(n)} />
-                    <span className={s.bola} aria-hidden="true" />
-                    <span className={s.opNome}>{n === 1 ? 'Uma vez' : `${n} parcelas`}</span>
-                    <span className={s.opPreco}>{n === 1 ? reais(pl[0].valor) : `${n}× ${reais(pl[0].valor)}`}</span>
-                    <span className={s.opDica}>{pl.map(p => `${diaMes(p.vencimento)}: ${reais(p.valor)}`).join(' · ')}</span>
-                  </label>
-                );
-              })}
-            </fieldset>
-            <div className={s.acoes}>
-              <button type="button" className={`${s.btn} ${s.fogo}`} onClick={escolherPlano} disabled={ocupado === 'plano'}>
-                {ocupado === 'plano' ? 'Salvando…' : 'Confirmar o plano'}
-              </button>
-              {querCarne && <button type="button" className={s.link} onClick={() => setQuerCarne(false)}>Voltar</button>}
-            </div>
-          </section>
-        )}
-
-        {/* 3 · pagar */}
-        {!precisaPlano && (conta.falta ?? 0) > 0 && !andamento && (
+        {/* 2 · pagar no carnê: quanto quiser, até 03/01 */}
+        {carne && falta > 0 && !andamento && (
           <section className={s.painel} aria-labelledby="fc-pagar">
-            <h2 id="fc-pagar" className={s.cabecaPasso}><span>1</span>Pagar</h2>
-            {carne && conta.plano && prox && valorProxima !== valorTudo && (
+            <h2 id="fc-pagar" className={s.cabecaPasso}><span>1</span>{soTudo ? 'Pagar o que falta' : 'Quanto você vai pagar agora?'}</h2>
+            <p className={s.ajuda}>
+              {aberto
+                ? `No carnê você paga no Pix quanto quiser, quantas vezes quiser: ${nadaPago ? 'um sinal agora' : 'uma parte agora'} e o resto até ${ate}. A cada pagamento, mande o comprovante por aqui.`
+                : `O prazo do carnê era ${ate}. Pague o que falta no Pix e mande o comprovante por aqui.`}
+            </p>
+            {!soTudo && (
               <fieldset className={s.opcoes}>
                 <legend>Quanto pagar agora</legend>
-                <label className={s.opcao} data-marcada={valorOpcao === 'proxima'}>
-                  <input type="radio" name="fc-quanto" checked={valorOpcao === 'proxima'} onChange={() => setValorOpcao('proxima')} />
-                  <span className={s.bola} aria-hidden="true" />
-                  <span className={s.opNome}>Parcela {prox.numero}{prox.estado === 'vencida' ? ' (vencida)' : ''}</span>
-                  <span className={s.opPreco}>{reais(valorProxima)}</span>
-                  <span className={s.opDica}>vence {diaMes(prox.vencimento)}</span>
-                </label>
-                <label className={s.opcao} data-marcada={valorOpcao === 'tudo'}>
-                  <input type="radio" name="fc-quanto" checked={valorOpcao === 'tudo'} onChange={() => setValorOpcao('tudo')} />
+                <div>
+                  <label className={s.opcao} data-marcada={modo === 'parte'}>
+                    <input type="radio" name="fc-quanto" value="parte" checked={modo === 'parte'} onChange={() => { setModo('parte'); setValorMal(false); setErro(null); }} />
+                    <span className={s.bola} aria-hidden="true" />
+                    <span className={s.opNome}>{nadaPago ? 'Um sinal' : 'Uma parte'}</span>
+                    <span className={s.opPreco}>{modo === 'parte' && escolhido > 0 ? reais(escolhido) : ''}</span>
+                    <span className={s.opDica}>Você escolhe o valor: de {reais(minimo)} a {reais(falta)}.</span>
+                  </label>
+                  {modo === 'parte' && (
+                    <div className={`${s.extra} ${s.campo}`}>
+                      <label htmlFor="fc-valor">Valor deste pagamento</label>
+                      <input id="fc-valor" inputMode="numeric" autoComplete="off"
+                        value={valorDig ? reais(escolhido) : ''} placeholder="R$ 0,00"
+                        aria-invalid={valorMal || undefined}
+                        onChange={e => {
+                          setValorDig(soDigitos(e.target.value).replace(/^0+/, '').slice(0, 7));
+                          /* corrigiu o campo do recado: o recado sai (como em Pagar.tsx) */
+                          if (valorMal) { setValorMal(false); setErro(null); }
+                        }} />
+                    </div>
+                  )}
+                </div>
+                <label className={s.opcao} data-marcada={modo === 'tudo'}>
+                  <input type="radio" name="fc-quanto" value="tudo" checked={modo === 'tudo'} onChange={() => { setModo('tudo'); setValorMal(false); setErro(null); }} />
                   <span className={s.bola} aria-hidden="true" />
                   <span className={s.opNome}>Tudo o que falta</span>
-                  <span className={s.opPreco}>{reais(valorTudo)}</span>
+                  <span className={s.opPreco}>{reais(falta)}</span>
                 </label>
               </fieldset>
             )}
             <div className={s.total}><span>Valor</span><strong>{reais(aPagar)}</strong></div>
+            <div className={s.acoes}>
+              {temPix && <button type="button" className={`${s.btn} ${s.fogo}`} onClick={() => comecar('pixdireto')}>Pagar no Pix</button>}
+            </div>
+            {!temPix && <p className={s.nota}>O Pix pelo site está fora do ar agora. Fale com a organização no WhatsApp.</p>}
+          </section>
+        )}
+
+        {/* 2 · pagar à vista: o que falta, inteiro */}
+        {!carne && falta > 0 && !andamento && (
+          <section className={s.painel} aria-labelledby="fc-pagar">
+            <h2 id="fc-pagar" className={s.cabecaPasso}><span>1</span>Pagar</h2>
+            <div className={s.total}><span>Valor</span><strong>{reais(falta)}</strong></div>
             <div className={s.acoes}>
               {temPix && <button type="button" className={`${s.btn} ${s.fogo}`} onClick={() => comecar('pixdireto')}>Pagar no Pix</button>}
               {podeCartao && link && (
@@ -352,15 +362,29 @@ export default function Minha({ token, dados, temPix, links }: { token: string; 
                   Pagar no cartão ({reais(centavos(link.valor))}{link.parcelas > 1 ? ` em até ${link.parcelas}x` : ' à vista'})
                 </button>
               )}
-              {!carne && max > 0 && conta.pago + conta.conferindo === 0 && (
-                <button type="button" className={s.link} onClick={() => setQuerCarne(true)}>Prefiro parcelar no carnê</button>
+              {aberto && !pedindoCarne && (
+                <button type="button" className={s.link} onClick={() => { setPedindoCarne(true); setErro(null); setOk(null); }}>Prefiro pagar em partes no carnê</button>
               )}
             </div>
+            {pedindoCarne && (
+              <>
+                <p className={s.nota}>
+                  No carnê você paga no Pix quanto quiser, quantas vezes quiser: um sinal agora e o resto até {ate}.
+                  {podeCartao ? ' O cartão fica só para quem paga tudo de uma vez.' : ''} Depois de passar para o carnê, voltar para à vista é com a organização.
+                </p>
+                <div className={s.acoes}>
+                  <button type="button" className={`${s.btn} ${s.claro}`} onClick={() => void entrarNoCarne()} disabled={ocupado === 'carne'}>
+                    {ocupado === 'carne' ? 'Salvando…' : 'Quero pagar no carnê'}
+                  </button>
+                  <button type="button" className={s.link} onClick={() => setPedindoCarne(false)}>Voltar</button>
+                </div>
+              </>
+            )}
             {!temPix && <p className={s.nota}>O Pix pelo site está fora do ar agora. Fale com a organização no WhatsApp.</p>}
           </section>
         )}
 
-        {/* 3b · o pagamento em andamento */}
+        {/* 3 · o pagamento em andamento */}
         {andamento && (
           <section className={`${s.painel} ${s.pixCab}`} aria-labelledby="fc-andamento">
             <h2 id="fc-andamento">{andamento.meio === 'pixdireto' ? 'Pague no Pix' : 'Pague no cartão'}</h2>

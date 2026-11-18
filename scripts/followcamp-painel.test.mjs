@@ -182,6 +182,16 @@ const P = [
   ok(/<numFmt numFmtId="\d+" formatCode="&quot;R\$ &quot;#,##0\.00"\/>/.test(arqs['xl/styles.xml']) && /formatCode="dd\/mm\/yyyy"/.test(arqs['xl/styles.xml']), 'xlsx: moeda e data com formato');
   ok(/definedName name="_xlnm._FilterDatabase" localSheetId="1" hidden="1">&apos;Pagamentos&apos;!\$A\$4:\$[A-Z]+\$11</.test(arqs['xl/workbook.xml'])
     || /definedName name="_xlnm._FilterDatabase" localSheetId="1" hidden="1">'Pagamentos'!\$A\$4:\$[A-Z]+\$11</.test(arqs['xl/workbook.xml']), 'xlsx: o filtro tem o nome que o Excel espera');
+  /* 18/11/2026: o carnê sem plano. B é do carnê e deve: "Pagar até" 03/01, o
+     último pagamento, e nada de parcela; depois de 03/01, B aparece vencido */
+  ok(textos.includes('Pagar até') && textos.includes('Último pagamento') && textos.includes('Como paga') && textos.includes('Carnê'),
+    'xlsx: por campista com o prazo do carnê e o último pagamento');
+  ok(!textos.some(t => /Próxima parcela|Vence em|sem plano|Parcela vencida/i.test(t)), `xlsx: nada de plano nem parcela: ${textos.filter(t => /parcela|plano/i.test(t)).join(' | ')}`);
+  ok(new RegExp(`<v>${serialDe(2027, 1, 3)}</v>`).test(sheet3) && !textos.includes('Carnê vencido'), 'xlsx: antes de 03/01, a data do prazo e ninguém vencido');
+  const depois = abrir(planilhaDePagamentos(F, P2, new Date('2027-01-05T15:00:00Z')));
+  const textosDepois = [...depois.arqs['xl/sharedStrings.xml'].matchAll(/<t xml:space="preserve">([^<]*)<\/t>/g)].map(m => m[1]);
+  ok(textosDepois.includes('Carnê vencido') && textosDepois.includes('Carnê vencido (passou de 03/01)') && textosDepois.includes('Campista B'),
+    'xlsx: depois de 03/01, o carnê que deve aparece vencido, com o nome');
   /* vazia: abre do mesmo jeito, com o recado em vez da tabela */
   const v = abrir(planilhaDePagamentos([], [], agora));
   ok(v.crcOk && Object.values(v.arqs).every(bemFormado) && v.arqs['xl/sharedStrings.xml'].includes('Nenhum pagamento registrado ainda.'), 'xlsx: sem nada, a planilha abre e diz que não há pagamento');
