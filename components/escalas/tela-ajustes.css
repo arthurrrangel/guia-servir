@@ -65,6 +65,8 @@
 /* quem escolhe o posto (13/10/2026): as duas opções do tamanho delas, não
    esticadas na largura da caixa */
 .es-aj-pilha > .es-seg{justify-self:start}
+/* 19/11/2026 · o sábado pequeno: o seletor do padrão fica do tamanho do texto, como os outros */
+.es-aj-sabado .es-campo > .es-seg{justify-self:start;width:fit-content;max-width:100%}
 /* os campos lado a lado se alinham pela base: em 1024 "Máximo de escalas
    por pessoa por mês" quebra em duas linhas, e o seletor dele descia 18px
    abaixo do vizinho */

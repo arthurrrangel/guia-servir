@@ -14,6 +14,7 @@ import { aviseHumano } from '@/lib/erros';
 import { confirmar } from '@/lib/confirmar';
 import GruposPorArea from '@/components/escalas/GruposPorArea';
 import QuemEscolheOPosto from '@/components/escalas/QuemEscolheOPosto';
+import SabadoPequeno, { temPostoNoFollow } from '@/components/escalas/SabadoPequeno';
 import ChegadaNosAjustes from '@/components/escalas/ChegadaNosAjustes';
 import { cont } from '@/lib/plural';
 
@@ -552,6 +553,21 @@ function Ajustes() {
               <QuemEscolheOPosto key={equipe?.id || ''} S={S} gravar={m => gravar(m)} />
             </div>
           </section>
+
+          {/* O SÁBADO PEQUENO — 19/11/2026, pedido do Arthur: no Follow, escala
+              completa para o culto grande e só foto e filmagem para o
+              pequeno. Só para o ministério que tem posto no Follow. */}
+          {temPostoNoFollow(S) && (
+            <section className="es-caixa" id="sabado">
+              <div className="es-caixa-cab">
+                <h2>O sábado do Follow</h2>
+                <span className="es-peq es-mudo">Escala completa ou pequena, sábado a sábado</span>
+              </div>
+              <div className="es-caixa-corpo">
+                <SabadoPequeno key={equipe?.id || ''} S={S} gravar={m => gravar(m)} />
+              </div>
+            </section>
+          )}
 
           <section className="es-caixa" id="regras">
             <div className="es-caixa-cab">

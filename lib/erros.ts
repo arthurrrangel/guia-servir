@@ -154,6 +154,10 @@ const PORBANCO: Tradutor[] = [
      marcar "furou" ali dentro poria o furo na ficha de quem não faltou. */
   [/ESCALA_MUDOU_NO_POSTO/i,
    () => 'Outra pessoa entrou nesse posto enquanto você olhava. Recarreguei a escala — confira quem está lá agora e marque de novo.'],
+  /* 19/11/2026 · o sábado pequeno foi desligado nos Ajustes (em outra aba,
+     ou por outro líder) enquanto o cartão do sábado estava aberto */
+  [/SABADO_PEQUENO_DESLIGADO/,
+   () => 'O sábado pequeno está desligado nos Ajustes deste ministério: todo sábado tem a escala completa. Recarreguei a escala.'],
   /* salvar_dia. Aceita os dois nomes de propósito: a mensagem nasceu na RPC
      `salvar_dia` e passou a ser lançada por `salvarDia`, em JavaScript, quando
      a gravação virou diferença. A expressão tinha ficado para trás e a frase

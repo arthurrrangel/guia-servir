@@ -1,7 +1,7 @@
 'use client';
 import Shell, { useApp, copiar } from '@/components/Shell';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarConvidado, salvarDia, salvarDias, tirarNaoPosso } from '@/lib/db';
+import { apagarEvento, criarEvento, devolverNaoPosso, moverNoDia, mudarStatus, salvarConvidado, salvarDia, salvarDias, salvarFormatoDoSabado, tirarNaoPosso } from '@/lib/db';
 import { Cab, Kpis, Kpi, Secao, Pilula, Aviso, Dobra, Escolha, Fio, tomDoStatus, Tom } from '@/components/escalas/Pecas';
 import { leituraDoDia } from '@/components/escalas/leitura';
 import { rolarAte } from '@/components/escalas/ancora';
@@ -14,6 +14,8 @@ import {
   hojeISO, MESES, msgColeta, msgConfirmar, msgEscala, nomeDe, postoSimultaneoNoDia, problemas, respostaDe,
   respostasDoDia, resumoDia, Status, sugerirPlantao, tipoDoDia, SITUACOES, Estado, porqueNaoPode,
   gruposValidos, linkDoVoluntario, addDias, convidadoNoPosto, diaTemGente, CONVIDADO_TETO,
+  formatoDoDia, juntarComE, postosDoSabadoPequeno, quemSaiNoPequeno, rotuloDoSabadoPequeno, sabadoPequenoDe,
+  type FormatoDoSabado,
 } from '@/lib/engine';
 import MandarNosGrupos from '@/components/escalas/MandarNosGrupos';
 import RepertorioDoDia from '@/components/escalas/RepertorioDoDia';
@@ -495,6 +497,44 @@ function Escala() {
     } catch (e: any) { await falhouConvidado(e, snap); }
     setOcupado(false);
   }
+  /* 19/11/2026 · O SÁBADO PEQUENO, no cartão do sábado: escala completa ou
+     só os postos da escala pequena (lib/engine.ts, "O SÁBADO PEQUENO").
+     Passar para o pequeno tira da escala quem está nos outros postos, com a
+     pergunta antes, com nome e posto: sem isso a pessoa continuaria vendo o
+     sábado no link dela. Primeiro sai a gente, depois muda o formato: se a
+     segunda gravação falhar, o sábado fica completo com os postos vazios, à
+     vista, e não pequeno com gente escondida. */
+  async function mudarFormato(d: string, novo: FormatoDoSabado) {
+    const sp = sabadoPequenoDe(S);
+    if (!sp || !equipe) return;
+    if (formatoDoDia(S, d) === novo) return;
+    const rot = rotuloDoSabadoPequeno(S, sp.postos);
+    const sai = novo === 'pequeno' ? quemSaiNoPequeno(S, d, sp.postos) : [];
+    if (sai.length) {
+      const quem = juntarComE(sai.map(x => `${nomeDe(S, x.vid)} (${x.funcao}${x.status === 'confirmado' ? ', já confirmou' : ''})`));
+      if (!await confirmar({
+        titulo: `Só ${rot} em ${fmtLongo(d)}?`,
+        texto: `${sai.length === 1 ? 'Sai da escala' : 'Saem da escala'}: ${quem}. Os grupos que não servem recebem só uma linha avisando.`,
+        acao: 'Tirar e mudar',
+      })) return;
+    }
+    const tinhaGente = diaTemGente(S, d);
+    setOcupado(true);
+    const snap = retrato([d]);
+    try {
+      if (sai.length) {
+        const dd = garantirDia(S, d);
+        for (const x of sai) delete dd.slots[x.funcao];
+        pinta(); await salvarDia(S, d, equipe.id);
+      }
+      await salvarFormatoDoSabado(equipe.id, d, novo);
+      await recarregar();
+      aviso(novo === 'pequeno' ? `${fmtDia(d)}: só ${rot}`
+        : tinhaGente ? `${fmtDia(d)}: escala completa. Escolha quem faz os outros postos.` : `${fmtDia(d)}: escala completa`);
+    } catch (e: any) { await falhou(e, snap); }
+    setOcupado(false);
+  }
+
   /* as recusas do banco com o que fazer, e o resto pelo caminho de sempre */
   async function falhouConvidado(e: any, snap: ReturnType<typeof retrato>) {
     const cod = String(e?.message || '');
@@ -818,7 +858,7 @@ function Escala() {
               <div className="es-ec-dias">
                 {futuros.map(d => (
                   <DiaCard key={d} d={d} aberto={d === proximo || d === diaDoLink} passado={false}
-                    {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+                    {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento, mudarFormato }} />
                 ))}
               </div>
             </Secao>
@@ -838,7 +878,7 @@ function Escala() {
                 <div className="es-ec-dias">
                   {passados.map(d => (
                     <DiaCard key={d} d={d} aberto={false} passado
-                      {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+                      {...{ S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento, mudarFormato }} />
                   ))}
                 </div>
               )}
@@ -1052,6 +1092,8 @@ type AcoesDoDia = {
   novoPlantao: (d: string) => Promise<void>;
   /* evento esporádico (54): só existe para o dia que TEM evento */
   tirarOEvento: (cultoId: string, nome: string) => Promise<void>;
+  /* 19/11/2026 · o sábado pequeno: escala completa ou só a pequena */
+  mudarFormato: (d: string, formato: FormatoDoSabado) => Promise<void>;
 };
 
 type PropsDiaCard = AcoesDoDia & {
@@ -1065,9 +1107,11 @@ type PropsPosto = Pick<AcoesDoDia, 'ocupado' | 'trocar' | 'situacao' | 'travar' 
   d: string; f: FnDoDia; S: Estado; dia: any;
 };
 
-function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }: PropsDiaCard) {
+function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento, mudarFormato }: PropsDiaCard) {
   const dia = S.escalas[d];
   const doDia = funcoesDoDia(S, d);
+  /* 19/11/2026 · o sábado pequeno aparece na linha fechada também */
+  const pequeno = postosDoSabadoPequeno(S, d);
   const r = dia ? resumoDia(S, d) : null;
   const probs = dia ? problemas(S, d) : [];
   /* 108 · o posto de alguém de fora da lista está preenchido */
@@ -1113,13 +1157,14 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
         <b className="es-ec-dia-tit">{titulo}</b>
         <span className="es-ec-dia-sub">
           {preenchidos ? `${preenchidos} de ${cont(doDia.length, 'posto', 'postos')}` : cont(doDia.length, 'posto', 'postos')}
+          {pequeno ? ` · só ${rotuloDoSabadoPequeno(S, pequeno)}` : ''}
         </span>
         <span className="es-ec-dia-est"><Pilula tom={resumo.tom}>{resumo.txt}</Pilula></span>
       </summary>
 
       <div className="es-ec-dia-corpo">
         <Corpo {...{ d, passado, S, dia, doDia, r, probs, preenchidos, ocupado, semFuncoes, aviso,
-          gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento }} />
+          gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, tirarOEvento, mudarFormato }} />
         {/* tirar o evento fica DENTRO do dia, e não na lista de cima: quem
             quer remover está olhando para ele. E só aparece em evento — o
             domingo não se apaga por aqui (a RPC recusa, e a tela também não
@@ -1138,7 +1183,7 @@ function DiaCard({ d, aberto, passado, S, ocupado, semFuncoes, aviso, gerarUm, t
 }
 
 function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFuncoes, aviso,
-  gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao }: PropsCorpo) {
+  gerarUm, trocar, situacao, travar, marcarPrimeira, salvarObs, novoPlantao, mudarFormato }: PropsCorpo) {
   /* 01/10/2026: toda mensagem que vai para o grupo fecha com o link do
      ministério (nunca o de alguém), que leva cada pessoa à própria página */
   const { base, equipe, pinta, recarregar } = useApp();
@@ -1153,8 +1198,36 @@ function Corpo({ d, passado, S, dia, doDia, probs, preenchidos, ocupado, semFunc
   const hojeAqui = hojeISO();
   const comChegada = !!dia?.cultoId && !!equipe?.id && d <= hojeAqui && d >= addDias(hojeAqui, -30);
 
+  /* 19/11/2026 · O SÁBADO PEQUENO: a escolha do sábado que ainda vem, com o
+     recurso ligado nos Ajustes. É a primeira decisão do dia (ela diz quais
+     postos existem), por isso vem antes das ações. */
+  const sp = sabadoPequenoDe(S);
+  const pequeno = postosDoSabadoPequeno(S, d);
+  const rotPequeno = sp ? rotuloDoSabadoPequeno(S, pequeno || sp.postos) : '';
+  const comFormato = !passado && !!sp && !!rotPequeno && tipoDoDia(d) === 'follow' && !dia?.evento;
+
   return (
     <>
+      {comFormato && (
+        <div className="es-ec-formato">
+          <div className="es-seg" role="group" aria-label={`Escala de ${fmtLongo(d)}`}>
+            <button type="button" aria-pressed={!pequeno} disabled={ocupado}
+              onClick={() => mudarFormato(d, 'completo')}>
+              Escala completa
+            </button>
+            <button type="button" aria-pressed={!!pequeno} disabled={ocupado}
+              onClick={() => mudarFormato(d, 'pequeno')}>
+              Só {rotPequeno}
+            </button>
+          </div>
+          <small>
+            {pequeno
+              ? `Culto pequeno: só ${juntarComE(doDia.map((f: any) => f.nome))}. Os grupos que não servem recebem uma linha avisando.`
+              : 'Culto grande: todos os postos do Follow.'}
+          </small>
+        </div>
+      )}
+
       {/* AS AÇÕES DO DIA. Copiar a escala é a que o líder usa toda semana, e
           por isso é a de contorno, a mais forte do dia, QUANDO HÁ ESCALA. Num
           dia vazio (todo mês novo nasce assim) a mais forte oferecia copiar

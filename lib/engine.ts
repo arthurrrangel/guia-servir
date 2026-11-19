@@ -435,6 +435,10 @@ export type Config = {
      marcou (habilidade conferida). Id da função, ou o nome (harness e linha
      antiga), como em `GrupoZap.funcoes`. */
   postosFechados?: string[];
+  /* 19/11/2026 · O SÁBADO PEQUENO: no Follow, escala completa ou só os
+     postos da escala pequena, sábado a sábado (ver `postosDoSabadoPequeno`).
+     Ausente ou null = todo sábado com a escala completa, como sempre. */
+  sabadoPequeno?: SabadoPequeno | null;
 };
 /* GRUPOS POR ÁREA NO WHATSAPP — 01/10/2026.
 
@@ -1271,8 +1275,19 @@ export function cargaDoMes(S: Estado, ano: number, mes: number) {
    as mesmas posições de que no culto de domingo"), Mídia e Louvor têm no
    Follow os mesmos postos do domingo; Connect, GUIA Kids e Livraria não
    servem no Follow e não têm posto nele. Escalar num sábado um posto que só
-   vale no domingo seria criar vaga que não existe. */
+   vale no domingo seria criar vaga que não existe.
+
+   19/11/2026: e, no sábado do Follow, o FORMATO do dia (ver "O SÁBADO
+   PEQUENO", logo abaixo). No sábado pequeno, só os postos da escala pequena. */
 export function funcoesDoDia(S: Estado, data: string) {
+  const doTipo = funcoesDoTipo(S, data);
+  const lista = postosDoSabadoPequeno(S, data, doTipo);
+  return lista ? doTipo.filter(f => naLista(lista, f)) : doTipo;
+}
+
+/* Os postos do TIPO do dia, sem olhar o formato do sábado: o que era
+   `funcoesDoDia` até 19/11/2026, palavra por palavra. */
+function funcoesDoTipo(S: Estado, data: string) {
   /* EVENTO ESPORÁDICO: valem TODOS os postos ativos do ministério.
 
      `funcoes.tipos` responde "em qual culto RECORRENTE este posto existe" —
@@ -1288,6 +1303,174 @@ export function funcoesDoDia(S: Estado, data: string) {
   if (S.escalas[data]?.evento) return funcoesAtivas(S);
   const tipo = tipoDoDia(data);
   return funcoesAtivas(S).filter(f => !f.tipos?.length || f.tipos.includes(tipo));
+}
+
+/* =============================================================================
+   O SÁBADO PEQUENO — 19/11/2026.
+
+   O pedido do Arthur, depois do Follow de 21/11 (a escala completa saiu nos
+   oito grupos, e o culto só precisava de foto e filmagem): "tire a
+   configuracao do sistema pra sabado opcao de liberar compelto e opcao de
+   follow somente com foto e filmagem", "pra qdo for culto grande ter escala
+   completa mas qdo for culto pequeno usar outra escala".
+
+   Cada sábado do Follow tem um de dois formatos: a ESCALA COMPLETA (todos os
+   postos do Follow, como sempre) ou a PEQUENA (só os postos que o ministério
+   marcou nos Ajustes; na Mídia, FOTO, FILMAGEM e FILMAGEM 2). O líder escolhe
+   no cartão do sábado, na Escala. O sábado que ninguém escolheu segue o
+   padrão do ministério (na Mídia, o pequeno, escolha do Arthur), mas só de
+   `desde` em diante, e o sábado que já tinha gente quando o recurso foi
+   ligado (ou quando os Ajustes mudaram) fica como estava: "o sábado que já
+   está montado não muda sozinho".
+
+   NO SÁBADO PEQUENO os outros postos não existem: não entram no sorteio, na
+   conta de vagas, na cobrança nem na mensagem, porque todo caminho passa por
+   `funcoesDoDia`. O grupo do WhatsApp que não tem posto nele recebe UMA LINHA
+   escrita ("não vamos precisar de PROJEÇÃO"), e não uma escala com "não
+   precisa" em cada posto, que foi o que confundiu no dia 21 (Arthur: "fica
+   confuso assim, vc tem que escrever mesmo po").
+
+   ONDE MORA: em `config.dados`, que já é JSON; sem coluna nem migração. A
+   escolha de cada sábado guarda os próprios postos (`dias[data] = [...]`):
+   mudar a lista dos Ajustes depois não mexe num sábado já montado e mandado.
+
+   O QUE NÃO MUDA: domingo, evento, sábado completo e o ministério que não
+   liga o recurso. A mensagem e a assinatura deles saem idênticas, byte a
+   byte (scripts/sabado-pequeno.test.mjs). O robô guarda a assinatura de
+   cada envio e manda de novo o que mudou (ver lib/robo-grupos.ts).
+   ============================================================================= */
+export type FormatoDoSabado = 'completo' | 'pequeno';
+export type SabadoPequeno = {
+  /* os postos da escala pequena: id da função, ou o nome (harness e linha
+     antiga), como em `GrupoZap.funcoes` */
+  postos: string[];
+  /* como fica o sábado que ninguém escolheu, de `desde` em diante */
+  padrao: FormatoDoSabado;
+  /* AAAA-MM-DD: o dia em que o recurso foi ligado */
+  desde: string;
+  /* a escolha de cada sábado: 'completo', ou os postos da escala pequena dele */
+  dias?: Record<string, 'completo' | string[]>;
+};
+
+/** A configuração do sábado pequeno, se o que veio do banco tem a forma de uma. */
+export function sabadoPequenoDe(S: Estado): SabadoPequeno | null {
+  const sp = S.config?.sabadoPequeno as any;
+  if (!sp || typeof sp !== 'object' || !Array.isArray(sp.postos)) return null;
+  return sp as SabadoPequeno;
+}
+const naLista = (lista: string[], f: Funcao) => lista.includes(f.id || f.nome) || lista.includes(f.nome);
+const soTextos = (l: unknown): string[] =>
+  Array.isArray(l) ? l.filter((x): x is string => typeof x === 'string' && !!x) : [];
+const temDono = (o: object, k: string) => Object.prototype.hasOwnProperty.call(o, k);
+
+/** Os postos da escala pequena NESTE sábado; null quando o dia tem a escala
+    completa (domingo, evento, sábado completo, recurso desligado). */
+export function postosDoSabadoPequeno(S: Estado, data: string, doTipo?: Funcao[]): string[] | null {
+  if (tipoDoDia(data) !== 'follow' || S.escalas[data]?.evento) return null;
+  const sp = sabadoPequenoDe(S);
+  if (!sp) return null;
+  const dias = sp.dias && typeof sp.dias === 'object' ? sp.dias : {};
+  const escolha = temDono(dias, data) ? dias[data] : undefined;
+  let lista: string[];
+  if (Array.isArray(escolha)) lista = soTextos(escolha);
+  else if (escolha === 'completo') return null;
+  else if (sp.padrao === 'pequeno' && typeof sp.desde === 'string' && data >= sp.desde) lista = soTextos(sp.postos);
+  else return null;
+  /* nenhum posto do dia na lista (a função saiu ou foi desativada): o
+     sábado ficaria sem posto nenhum, em silêncio. Volta a ser completo. */
+  const fs = doTipo || funcoesDoTipo(S, data);
+  return lista.length && fs.some(f => naLista(lista, f)) ? lista : null;
+}
+export const formatoDoDia = (S: Estado, data: string): FormatoDoSabado =>
+  postosDoSabadoPequeno(S, data) ? 'pequeno' : 'completo';
+
+/** Os postos do Follow que o sábado pequeno deixou de fora (só os do grupo,
+    quando ele vem). Vazio em todo dia de escala completa. */
+export function foraDoSabadoPequeno(S: Estado, data: string, grupo?: GrupoZap): Funcao[] {
+  const doTipo = funcoesDoTipo(S, data);
+  const lista = postosDoSabadoPequeno(S, data, doTipo);
+  if (!lista) return [];
+  return doTipo.filter(f => !naLista(lista, f) && (!grupo || funcaoNoGrupo(grupo, f)));
+}
+
+/** "A, B e C" */
+export function juntarComE(xs: string[]): string {
+  return xs.length <= 1 ? (xs[0] || '') : `${xs.slice(0, -1).join(', ')} e ${xs[xs.length - 1]}`;
+}
+/** Como a escala pequena é chamada: "foto e filmagem" (os nomes dos postos,
+    em minúscula, sem o número do fim e sem repetir: FILMAGEM e FILMAGEM 2
+    são "filmagem"), na ordem dos postos. */
+export function rotuloDoSabadoPequeno(S: Estado, lista: string[]): string {
+  const nomes: string[] = [];
+  for (const f of funcoesAtivas(S)) {
+    if (!naLista(lista, f)) continue;
+    const base = f.nome.replace(/\s+\d+$/, '').trim().toLocaleLowerCase('pt-BR');
+    if (base && !nomes.includes(base)) nomes.push(base);
+  }
+  return juntarComE(nomes);
+}
+
+/** A linha do grupo que não tem posto no sábado pequeno: uma frase, e não
+    uma escala com "não precisa" em cada posto. '' quando o grupo serve. */
+export function msgSemPostoNoSabado(S: Estado, data: string, grupo: GrupoZap, agora?: Date): string {
+  const lista = postosDoSabadoPequeno(S, data);
+  const fora = foraDoSabadoPequeno(S, data, grupo);
+  if (!lista || !fora.length || funcoesDoDia(S, data).some(f => funcaoNoGrupo(grupo, f))) return '';
+  const frase = `Neste sábado (${fmtDia(data)}) o Follow vai ter só ${rotuloDoSabadoPequeno(S, lista)}: `
+    + `não vamos precisar de ${juntarComE(fora.map(f => f.nome))}.`;
+  const saud = saudacaoNaHora(S.config.saudacao, agora).trim();
+  return saud ? `${saud}${/[!?.,:;]$/.test(saud) ? '' : '!'} ${frase}` : frase;
+}
+
+/* os sábados de `hoje` em diante que já têm gente: os que "já estão montados" */
+function sabadosMontados(S: Estado, hoje: string): string[] {
+  return Object.keys(S.escalas)
+    .filter(d => d >= hoje && tipoDoDia(d) === 'follow' && !S.escalas[d]?.evento && diaTemGente(S, d))
+    .sort();
+}
+
+/** A configuração nova do sábado pequeno, pelos Ajustes (null desliga).
+    Antes de mudar, cada sábado montado de hoje em diante que ainda não
+    tinha escolha própria ganha a que ele tem agora: ligar o recurso, trocar
+    o padrão ou a lista de postos não mexe num sábado que já tem gente. */
+export function novoSabadoPequeno(S: Estado,
+  mudanca: { postos?: string[]; padrao?: FormatoDoSabado } | null, hoje: string): SabadoPequeno | null {
+  if (!mudanca) return null;
+  const atual = sabadoPequenoDe(S);
+  const dias: Record<string, 'completo' | string[]> = { ...(atual?.dias && typeof atual.dias === 'object' ? atual.dias : {}) };
+  for (const d of sabadosMontados(S, hoje)) {
+    if (temDono(dias, d)) continue;
+    const lista = postosDoSabadoPequeno(S, d);
+    dias[d] = lista ? [...lista] : 'completo';
+  }
+  const padrao = mudanca.padrao ?? atual?.padrao;
+  return {
+    postos: soTextos(mudanca.postos ?? atual?.postos),
+    padrao: padrao === 'completo' ? 'completo' : 'pequeno',
+    desde: atual && typeof atual.desde === 'string' ? atual.desde : hoje,
+    dias,
+  };
+}
+
+/** A configuração com a escolha de UM sábado (o cartão do dia, na Escala).
+    O sábado pequeno guarda a lista de agora. */
+export function comFormatoDoSabado(sp: SabadoPequeno, data: string, formato: FormatoDoSabado): SabadoPequeno {
+  const dias = sp.dias && typeof sp.dias === 'object' ? sp.dias : {};
+  return { ...sp, dias: { ...dias, [data]: formato === 'pequeno' ? soTextos(sp.postos) : 'completo' } };
+}
+
+/** Quem sai da escala se este sábado passar a ter só os postos de `lista`:
+    gente da lista do ministério nos outros postos do Follow. */
+export function quemSaiNoPequeno(S: Estado, data: string, lista: string[]): { funcao: string; vid: string; status: Status }[] {
+  const dia = S.escalas[data];
+  if (!dia) return [];
+  const out: { funcao: string; vid: string; status: Status }[] = [];
+  for (const f of funcoesDoTipo(S, data)) {
+    if (naLista(lista, f)) continue;
+    const sl = dia.slots?.[f.nome];
+    if (sl?.vid) out.push({ funcao: f.nome, vid: sl.vid, status: (sl.status || 'pendente') as Status });
+  }
+  return out;
 }
 
 /* OS DIAS DO MÊS QUE ESTE MINISTÉRIO PRECISA MONTAR.
@@ -1792,8 +1975,17 @@ export function ehCuringa(v: Voluntario, S?: Estado) {
   return Object.values(v.funcoes || {}).filter(n => n === 'titular' || n === 'reserva').length >= 2;
 }
 export function sugerirPlantao(S: Estado, data: string, qtd: number, fora?: ForaDoDia) {
+  /* 19/11/2026 · NO SÁBADO PEQUENO o plantão entra no lugar de quem furar na
+     FOTO ou na FILMAGEM: só quem pode pegar um dos postos do dia, e não o
+     curinga de qualquer área (o da Projeção não cobre a câmera). Em todo dia
+     de escala completa, o curinga de sempre. */
+  const pequeno = postosDoSabadoPequeno(S, data);
+  const doDia = pequeno ? funcoesDoDia(S, data) : [];
+  const cobre = (v: Voluntario) => pequeno
+    ? doDia.some(f => podeNoPosto(S, v, f.nome) && contaNoPosto(S, v, f.nome))
+    : ehCuringa(v, S);
   return S.voluntarios
-    .filter(v => v.ativo && ehCuringa(v, S) &&
+    .filter(v => v.ativo && cobre(v) &&
       !(v.indisponivel || []).includes(data) && !foraDe(fora, data, v.id) &&
       !ocupadoNoDia(S, data, v.id, null))
     .map(v => ({ id: v.id, nome: v.nome, carga: cargaJanela(S, v.id, data, S.config.janelaCarga), parado: diasDesdeUltima(S, v.id, data) }))
@@ -2315,7 +2507,9 @@ export function contaDoRecorte(S: Estado, data: string, grupo?: GrupoZap): Conta
   return c;
 }
 
-export type GrupoDoDia = { grupo: GrupoZap; funcoes: Funcao[]; conta: ContaDoRecorte };
+/* `fora` (19/11/2026): os postos do grupo que o sábado pequeno deixou de
+   fora. Vazio em todo dia de escala completa. */
+export type GrupoDoDia = { grupo: GrupoZap; funcoes: Funcao[]; conta: ContaDoRecorte; fora: Funcao[] };
 /** Cada grupo válido com a parte dele NESTE dia (só os postos que valem no tipo do dia). */
 export function gruposDoDia(S: Estado, data: string): GrupoDoDia[] {
   const doDia = funcoesDoDia(S, data);
@@ -2323,7 +2517,22 @@ export function gruposDoDia(S: Estado, data: string): GrupoDoDia[] {
     grupo,
     funcoes: doDia.filter(f => funcaoNoGrupo(grupo, f)),
     conta: contaDoRecorte(S, data, grupo),
+    fora: foraDoSabadoPequeno(S, data, grupo),
   }));
+}
+
+/* O QUE VAI EM CADA GRUPO, EM UM LUGAR SÓ (19/11/2026). O "Mandar nos
+   grupos" da Escala e o robô do WhatsApp (lib/robo-grupos.ts) montavam cada
+   um a sua linha; agora as duas saem daqui. Grupo com posto no dia: a parte
+   dele da escala. Grupo sem posto no sábado pequeno: a linha escrita. Grupo
+   sem nada no dia: vazio, como sempre (o robô pula). */
+export type MensagemDoGrupo = { texto: string; ass: string; vazio: boolean; linha: boolean };
+export function mensagemDoGrupo(S: Estado, data: string, x: GrupoDoDia, link: string, agora?: Date): MensagemDoGrupo {
+  const ass = assinaturaDoEnvio(S, data, x.grupo);
+  if (x.funcoes.length) return { texto: msgEscala(S, data, { link, grupo: x.grupo, agora }), ass, vazio: false, linha: false };
+  const linha = x.fora.length ? msgSemPostoNoSabado(S, data, x.grupo, agora) : '';
+  if (linha) return { texto: linha, ass, vazio: false, linha: true };
+  return { texto: '', ass, vazio: true, linha: false };
 }
 
 /** O endereço público: quem está em escalas.guiaservir.com manda guiaservir.com, que é o que todo mundo conhece. */
@@ -2350,10 +2559,20 @@ export function linkDoVoluntario(base: string, slug: string | null | undefined,
 export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
   const dia = S.escalas[data];
   const partes: string[] = [];
-  for (const f of funcoesDoDia(S, data)) {
+  /* 19/11/2026 · O SÁBADO PEQUENO. O grupo sem posto nele recebe só a linha
+     escrita: a assinatura é a dessa linha (os postos que ficaram de fora),
+     sem o recado, que a linha não leva. No grupo misto (Filmagem e Câmeras:
+     FILMAGEM fica, CÂMERA sai), os que saíram entram na conta. Em todo dia
+     de escala completa `fora` é vazio, e a assinatura é a de antes. */
+  const fora = grupo ? foraDoSabadoPequeno(S, data, grupo) : [];
+  const doDia = funcoesDoDia(S, data);
+  if (grupo && fora.length && !doDia.some(f => funcaoNoGrupo(grupo, f))) {
+    return hashDasPartes(['linha=' + fora.map(f => f.id || f.nome).sort().join(',')]);
+  }
+  for (const f of doDia) {
     if (grupo && !funcaoNoGrupo(grupo, f)) continue;
     const sl = dia?.slots?.[f.nome];
-    const fora = !sl?.vid || sl.status === 'recusado' || sl.status === 'furou';
+    const vago = !sl?.vid || sl.status === 'recusado' || sl.status === 'furou';
     /* 108 · quem é de fora da lista entra pelo texto: mudar "Guest" para
        "Guest Rafa" depois do envio pede mensagem nova. Posto sem ele
        continua com o '-' de antes, e a assinatura dos dias que já foram
@@ -2361,9 +2580,10 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
     const conv = convidadoNoPosto(S, data, f.nome);
     /* pela chave da função, e em ordem: renomear ou reordenar postos não
        muda quem foi chamado, e não pode acusar "mudou depois do envio" */
-    partes.push(`${f.id || f.nome}=${conv ? 'c:' + conv : fora ? '-' : sl!.vid}`);
+    partes.push(`${f.id || f.nome}=${conv ? 'c:' + conv : vago ? '-' : sl!.vid}`);
   }
   partes.sort();
+  if (fora.length) partes.push('sem=' + fora.map(f => f.id || f.nome).sort().join(','));
   if (!grupo) partes.push('p=' + [...(dia?.plantao || [])].sort().join(','));
   partes.push('o=' + (dia?.obs || ''));
   /* o setlist que entra depois do envio é motivo de mandar de novo. Só entra
@@ -2384,6 +2604,11 @@ export function assinaturaDoEnvio(S: Estado, data: string, grupo?: GrupoZap) {
      orientações depois do envio pede mensagem nova. Só entra quando existe:
      o dia sem dress code guarda a assinatura de antes (e o robô não reenvia) */
   if (dia?.dressCode) partes.push('d=' + parteDaAssinaturaDoDress(dia.dressCode));
+  return hashDasPartes(partes);
+}
+/* a conta de sempre (djb2 com xor, em base 36): mudar a conta muda a
+   assinatura de todo dia já mandado, e o robô manda tudo de novo */
+function hashDasPartes(partes: string[]) {
   let h = 5381;
   for (const ch of partes.join('|')) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
   return h.toString(36);
@@ -2399,6 +2624,15 @@ export function msgEscala(S: Estado, data: string,
      terceiro tipo de dia, e é ela que vai para o WhatsApp de todo mundo. */
   const L: string[] = [saudacaoNaHora(S.config.saudacao, opts.agora),
     `${tituloDoCulto(data, dia.evento)} (${fmtDia(data)})${g ? ` · ${g.nome.trim()}` : ''}`, ''];
+  /* 19/11/2026 · O SÁBADO PEQUENO, dito com todas as letras: no geral, que o
+     sábado é só de foto e filmagem; no grupo misto, os postos dele que não
+     servem. Dia de escala completa não ganha linha nenhuma. */
+  const pequeno = postosDoSabadoPequeno(S, data);
+  if (pequeno) {
+    const fora = g ? foraDoSabadoPequeno(S, data, g) : [];
+    if (!g) L.push(`Neste sábado vamos precisar só de ${rotuloDoSabadoPequeno(S, pequeno)}.`, '');
+    else if (fora.length) L.push(`Neste sábado não vamos precisar de ${juntarComE(fora.map(f => f.nome))}.`, '');
+  }
   for (const f of funcoesDoDia(S, data)) {
     /* no recorte de um grupo, só as funções dele; a vaga aberta continua
        aparecendo, e é justamente ali que alguém pode cobrir */

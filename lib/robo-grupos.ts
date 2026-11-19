@@ -24,7 +24,7 @@
 
 import {
   type Estado, assinaturaDoEnvio, funcoesDoDia, gruposDoDia, horaDoDia, msgConfirmar, msgEscala,
-  convidadoNoPosto,
+  convidadoNoPosto, mensagemDoGrupo,
 } from './engine';
 
 export type LinhaDoRobo = { gid: string; nome: string; texto: string; ass: string; vazio: boolean };
@@ -46,15 +46,16 @@ export function preenchidosDoDia(S: Estado, d: string): number {
   return funcoesDoDia(S, d).filter(f => dia?.slots?.[f.nome]?.vid || convidadoNoPosto(S, d, f.nome)).length;
 }
 
-/* as mesmas linhas do "Mandar nos grupos" (components/escalas/MandarNosGrupos.tsx) */
+/* as mesmas linhas do "Mandar nos grupos" (components/escalas/MandarNosGrupos.tsx):
+   desde 19/11/2026 as duas saem de `mensagemDoGrupo` (lib/engine.ts), que
+   também sabe a linha escrita do sábado pequeno */
 export function linhasDoRobo(S: Estado, d: string, link: string): LinhaDoRobo[] {
   return [
     { gid: 'geral', nome: 'Grupo geral', texto: msgEscala(S, d, { link }), ass: assinaturaDoEnvio(S, d), vazio: false },
-    ...gruposDoDia(S, d).map(x => ({
-      gid: x.grupo.id, nome: x.grupo.nome,
-      texto: x.funcoes.length ? msgEscala(S, d, { link, grupo: x.grupo }) : '',
-      ass: assinaturaDoEnvio(S, d, x.grupo), vazio: !x.funcoes.length,
-    })),
+    ...gruposDoDia(S, d).map(x => {
+      const m = mensagemDoGrupo(S, d, x, link);
+      return { gid: x.grupo.id, nome: x.grupo.nome, texto: m.texto, ass: m.ass, vazio: m.vazio };
+    }),
   ];
 }
 

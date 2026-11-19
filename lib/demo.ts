@@ -10,7 +10,7 @@
    conferidos) porque densidade falsa esconde problema de layout: uma tela
    linda com 3 pessoas costuma quebrar com 17.
    =========================================================================== */
-import { Estado, Nivel, type Status, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia } from './engine';
+import { Estado, Nivel, type Status, estadoVazio, garantirDia, cultosDoMes, cultosAte, hojeISO, funcoesDoDia, tipoDoDia, resumoDia, novoSabadoPequeno, comFormatoDoSabado, quemSaiNoPequeno } from './engine';
 import { type Folha, folhaDoBanco } from './cronograma';
 
 const F = (nome: string, ordem: number, simultanea = true, tipos = ['domingo', 'follow'], exigeSexo?: 'M' | 'F') =>
@@ -153,6 +153,19 @@ export function estadoDemo(variante = ''): Estado {
     S.config.postosFechados = ['f6'];
     const d0 = porVir[0] && S.escalas[porVir[0]];
     if (d0) delete d0.slots['FILMAGEM'];
+  }
+  /* 19/11/2026 · `?demo=sabado`: o sábado pequeno ligado (FOTO e FILMAGEM).
+     O primeiro sábado que vem fica pequeno (sem ninguém nos outros postos) e
+     os outros, montados, completos, para o harness desenhar a escolha no
+     cartão, a linha escrita dos grupos e a seção dos Ajustes. */
+  if (variante === 'sabado') {
+    const sabs = porVir.filter(d => tipoDoDia(d) === 'follow');
+    let sp = novoSabadoPequeno(S, { postos: ['f4', 'f5'], padrao: 'pequeno' }, hoje)!;
+    if (sabs[0]) {
+      sp = comFormatoDoSabado(sp, sabs[0], 'pequeno');
+      for (const x of quemSaiNoPequeno(S, sabs[0], sp.postos)) delete S.escalas[sabs[0]].slots[x.funcao];
+    }
+    S.config.sabadoPequeno = sp;
   }
   /* 107 · `?demo=hoje`: um evento HOJE e outro ontem, montados, para o
      harness desenhar a chegada do dia e o "como foi" (o mês do demo quase

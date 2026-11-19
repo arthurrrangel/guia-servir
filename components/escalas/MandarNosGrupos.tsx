@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   type ContaDoRecorte, type Estado, assinaturaDoEnvio, contaDoRecorte, gruposDoDia,
-  hojeISO, linkDoVoluntario, msgEscala,
+  hojeISO, linkDoVoluntario, mensagemDoGrupo, msgEscala, postosDoSabadoPequeno, rotuloDoSabadoPequeno,
 } from '@/lib/engine';
 import { copiar } from '@/components/Shell';
 import { Pilula } from '@/components/escalas/Pecas';
@@ -93,19 +93,26 @@ export default function MandarNosGrupos({ S, d, base, slug, equipeId, aviso, id 
     setEnvios(novo);
   };
 
+  /* 19/11/2026 · no sábado pequeno, o geral diz que é só foto e filmagem, e
+     o grupo sem posto nele recebe a linha escrita (lib/engine.ts,
+     `mensagemDoGrupo`, a mesma do robô) */
+  const pequeno = postosDoSabadoPequeno(S, d);
   const linhas = [
     {
       gid: 'geral', nome: 'Grupo geral', doGrupo: 'do grupo geral', noGrupo: 'no grupo geral',
-      sub: `escala inteira · ${descreve(contaDoRecorte(S, d))}`,
+      sub: `${pequeno ? `só ${rotuloDoSabadoPequeno(S, pequeno)}` : 'escala inteira'} · ${descreve(contaDoRecorte(S, d))}`,
       texto: msgEscala(S, d, { link }), ass: assinaturaDoEnvio(S, d), vazio: false,
     },
-    ...grupos.map(x => ({
-      gid: x.grupo.id, nome: x.grupo.nome,
-      doGrupo: `do grupo ${x.grupo.nome}`, noGrupo: `no grupo ${x.grupo.nome}`,
-      sub: x.funcoes.length ? descreve(x.conta) : 'nenhuma função deste grupo neste dia',
-      texto: x.funcoes.length ? msgEscala(S, d, { link, grupo: x.grupo }) : '',
-      ass: assinaturaDoEnvio(S, d, x.grupo), vazio: !x.funcoes.length,
-    })),
+    ...grupos.map(x => {
+      const m = mensagemDoGrupo(S, d, x, link);
+      return {
+        gid: x.grupo.id, nome: x.grupo.nome,
+        doGrupo: `do grupo ${x.grupo.nome}`, noGrupo: `no grupo ${x.grupo.nome}`,
+        sub: m.linha ? 'não serve neste sábado: vai só uma linha avisando'
+          : x.funcoes.length ? descreve(x.conta) : 'nenhuma função deste grupo neste dia',
+        texto: m.texto, ass: m.ass, vazio: m.vazio,
+      };
+    }),
   ];
 
   return (

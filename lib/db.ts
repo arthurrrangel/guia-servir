@@ -5,6 +5,7 @@ import { sb } from './supabase';
    Era o que impedia uma prova de ponta a ponta de importar este arquivo (o
    mesmo caso de lib/supabase.ts, 20/09/2026). */
 import { addDias, hojeISO, type Estado, type Nivel, type Repertorio, type Status } from './engine';
+import { comFormatoDoSabado, sabadoPequenoDe, type FormatoDoSabado } from './engine';
 import { ordemDoBanco, type ItemOrdem } from './engine';
 import type { MusicaDoBanco } from './ordem-do-culto';
 import type { CandidatoDaVaga, ChamadaDoLider } from './chamadas';
@@ -658,6 +659,23 @@ export async function roboPedir(equipeId: string, data: string): Promise<{ ok: t
 export async function salvarConfig(equipeId: string, dados: any) {
   const { error } = await sb()!.from('config').upsert({ equipe_id: equipeId, dados }, { onConflict: 'equipe_id' });
   if (error) throw error;
+}
+
+/* 19/11/2026 · O FORMATO DE UM SÁBADO (o cartão do dia, na Escala): escala
+   completa ou só os postos da escala pequena. A escolha mora em
+   `config.dados.sabadoPequeno.dias`, e a configuração vai inteira para o
+   banco; por isso lê a linha de agora antes de gravar, e não a que a tela
+   carregou: uma mudança dos Ajustes em outra aba não se perde aqui. */
+export async function salvarFormatoDoSabado(equipeId: string, data: string, formato: FormatoDoSabado) {
+  const s = sb()!;
+  const { data: linha, error } = await s.from('config').select('dados').eq('equipe_id', equipeId).maybeSingle();
+  if (error) throw error;
+  const dados = linha?.dados && typeof linha.dados === 'object' ? linha.dados as Record<string, any> : {};
+  const sp = sabadoPequenoDe({ config: dados } as any);
+  if (!sp) throw new Error('SABADO_PEQUENO_DESLIGADO');
+  const { error: e2 } = await s.from('config')
+    .upsert({ equipe_id: equipeId, dados: { ...dados, sabadoPequeno: comFormatoDoSabado(sp, data, formato) } }, { onConflict: 'equipe_id' });
+  if (e2) throw e2;
 }
 
 /* Era um update ou insert por função, em série, e nenhum deles olhava o erro:

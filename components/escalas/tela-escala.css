@@ -63,6 +63,12 @@
 .es-ec-nota{font-size:14px;line-height:21px;color:var(--es-ink-2)}
 .es-ec-nota b{color:var(--es-ink)}
 
+/* 19/11/2026 · o sábado pequeno: escala completa ou só a pequena, no topo
+   do cartão do sábado. A frase de baixo diz o que vale no dia. */
+.es-ec-formato{display:grid;gap:var(--es-e2);justify-items:start;min-width:0}
+.es-ec-formato > .es-seg{max-width:100%}
+.es-ec-formato > small{font-size:13px;line-height:18px;color:var(--es-mudo);overflow-wrap:anywhere}
+
 /* o rótulo pequeno de um bloco de leitura (relatório, disponibilidade) */
 .es-ec-rot{font-size:12px;line-height:16px;font-weight:500;color:var(--es-mudo)}
 
