@@ -85,6 +85,11 @@ export const FOTOS = {
     nota: 'A cantora de braço erguido, em preto e branco (foto 13).' },
   'virada-noite': { arquivo: '/site/virada-noite-v.webp', pequena: '/site/virada-noite-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Pessoas da igreja orando juntas, de olhos fechados e mão no peito',
     nota: 'A igreja orando junto (foto 17).' },
+  /* 21/11/2026 (tarde), "mais chamativo": a faixa de fotos da Virada (o que a noite tem: louvor, oração, as crianças, a igreja) */
+  'virada-louvor': { arquivo: '/site/virada-louvor-v.webp', pequena: '/site/virada-louvor-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Uma cantora de olhos fechados canta no louvor, na luz azul do palco', nota: 'Foto 30.' },
+  'virada-oracao': { arquivo: '/site/virada-oracao-v.webp', pequena: '/site/virada-oracao-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Uma mulher de óculos ora de olhos fechados, com as mãos juntas', nota: 'Foto 27.' },
+  'virada-kids': { arquivo: '/site/virada-kids-v.webp', pequena: '/site/virada-kids-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Uma menina sorrindo, sentada na sala das crianças', nota: 'Foto 9.' },
+  'virada-gente': { arquivo: '/site/virada-gente-v.webp', pequena: '/site/virada-gente-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Um homem sorrindo no meio da igreja, durante o culto', nota: 'Foto 12.' },
 
   /* 20/10/2026: os heróis das cinco áreas do Guia Servir (as mesmas fotos do
      herói da LP; Mídia e Livraria vêm das fotos de 12/10, em public/fotos) */

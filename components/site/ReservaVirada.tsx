@@ -20,8 +20,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import {
   VIRADA, MAX_POR_RESERVA, VINCULOS, conferirReserva, mascaraCpf, mascaraTelefone, pessoasPorExtenso,
-  whatsDaReserva, whatsDuvida, whatsListaDeEspera, type CampoDaReserva, type Reserva, type Vinculo,
+  whatsConvite, whatsDaReserva, whatsDuvida, whatsListaDeEspera, type CampoDaReserva, type Reserva, type Vinculo,
 } from '@/lib/virada';
+import { avisarVagas, lerVagas } from '@/lib/virada-vagas';
 import { medir } from '@/lib/site/medir-cliente';
 
 const Visto = () => (
@@ -62,14 +63,13 @@ export default function ReservaVirada() {
   /* as vagas de agora: com tudo ocupado, a tela já abre na lista de espera */
   useEffect(() => {
     let vivo = true;
-    fetch('/api/virada', { cache: 'no-store' })
-      .then(r => (r.ok ? r.json() : null))
-      .then(j => {
-        if (!vivo || !j) return;
-        if (typeof j.restantes === 'number') setRestantes(j.restantes);
-        if (j.aberta === false) setFase(typeof j.restantes === 'number' && j.restantes <= 0 ? { f: 'esgotado', restantes: 0 } : { f: 'fechada' });
-      })
-      .catch(() => { /* sem resposta: o formulário fica aberto, e a gravação confere */ });
+    /* a mesma consulta do cartão do ingresso (lib/virada-vagas.ts); sem
+       resposta, o formulário fica aberto, e a gravação confere */
+    lerVagas().then(j => {
+      if (!vivo || !j) return;
+      if (typeof j.restantes === 'number') setRestantes(j.restantes);
+      if (j.aberta === false) setFase(typeof j.restantes === 'number' && j.restantes <= 0 ? { f: 'esgotado', restantes: 0 } : { f: 'fechada' });
+    });
     return () => { vivo = false; };
   }, []);
 
@@ -96,7 +96,7 @@ export default function ReservaVirada() {
       });
       const j = await r.json().catch(() => ({}));
       if (j.ok && j.guardado) {
-        if (typeof j.restantes === 'number') setRestantes(j.restantes);
+        if (typeof j.restantes === 'number') { setRestantes(j.restantes); avisarVagas({ aberta: j.restantes > 0, restantes: j.restantes }); }
         setFase({ f: 'feito', r: v.reserva, repetida: !!j.repetida });
         if (!j.repetida) medir('reserva_virada', { pessoas: String(v.reserva.pessoas) });
       } else if (j.ok) {
@@ -133,8 +133,10 @@ export default function ReservaVirada() {
             </p>
             <div className="s-acoes centro">
               <a className="s-pil preta" href={AGENDA} target="_blank" rel="noreferrer">Pôr na agenda</a>
-              <a className="s-pil contorno" href={whatsDuvida()} target="_blank" rel="noreferrer" data-medir="whatsapp">Dúvidas no WhatsApp</a>
+              {/* 21/11/2026, "mais comercial": quem reservou chama mais alguém */}
+              <a className="s-pil contorno" href={whatsConvite()} target="_blank" rel="noreferrer">Convidar alguém</a>
             </div>
+            <p className="s-micro vr-resp-micro">Dúvidas? <a href={whatsDuvida()} target="_blank" rel="noreferrer" data-medir="whatsapp">Fale no WhatsApp</a>.</p>
           </>
         )}
         {fase.f === 'whats' && r && (
@@ -239,13 +241,13 @@ export default function ReservaVirada() {
       </div>
       {erro && !erro.campo && <p className="s-campo-dica vr-erro-geral" role="alert">{erro.texto}</p>}
       <div className="s-acoes vr-enviar">
-        <button type="submit" className="s-pil preta" aria-busy={enviando} disabled={enviando}>
-          {enviando ? 'Reservando…' : 'Quero reservar meu lugar'}
+        <button type="submit" className="s-pil vr-ouro" aria-busy={enviando} disabled={enviando}>
+          {enviando ? 'Reservando…' : 'Garantir meu lugar'}
         </button>
         <p className="s-micro">
           {restantes !== null && restantes > 0 && restantes <= 30
-            ? `Últimos ${restantes} lugares. Capacidade limitada a ${VIRADA.capacidade} pessoas.`
-            : `Capacidade limitada a ${VIRADA.capacidade} pessoas.`}
+            ? `Últimos ${restantes} lugares. Grátis, só ${VIRADA.capacidade} lugares.`
+            : `Grátis, só ${VIRADA.capacidade} lugares.`}
           {' '}Seus dados servem só para a sua reserva (<a href="/privacidade">privacidade</a>).
         </p>
       </div>

@@ -273,14 +273,17 @@ export function Perguntas({ itens, forma = 'faq', aberta = -1 }:
 /* O HERÓI DE FOTO (ou de vídeo, no /acessar e no /onde-me-encaixo): o chapéu,
    o título em duas vozes, a linha de apoio, as pílulas e o micro. A foto vem
    do registro (lib/site/fotos.ts), com o recorte em pé para o celular. */
-export function Heroi({ id, lugar, video, chapeu, titulo, it, semPonto, longa, lead, micro, curto, porta, children }:
+export function Heroi({ id, lugar, video, chapeu, titulo, it, semPonto, longa, lead, micro, curto, porta, enfeite, children }:
   { id: string; lugar?: LugarDeFoto; video?: string; chapeu: React.ReactNode; titulo: string; it?: string; semPonto?: boolean; longa?: boolean;
-    lead?: React.ReactNode; micro?: React.ReactNode; curto?: boolean; porta?: boolean; children?: React.ReactNode }) {
+    lead?: React.ReactNode; micro?: React.ReactNode; curto?: boolean; porta?: boolean;
+    /** 21/11/2026: uma camada de ornamento entre a foto e o texto (as faíscas da Virada) */
+    enfeite?: React.ReactNode; children?: React.ReactNode }) {
   const doLugar: Foto | undefined = lugar ? FOTOS[lugar] : undefined;
   const r = doLugar?.retrato;
   return (
     <section className={'s-heroi' + (curto ? ' curto' : '') + (porta ? ' porta' : '') + (r?.alto ? ' alto' : '')} aria-labelledby={id}>
       {lugar ? <Img lugar={lugar} prioridade retrato /> : video ? <Fundo video={video} prioridade /> : null}
+      {enfeite}
       <div className="s-in s-heroi-in">
         {chapeu}
         <Vozes as="h1" id={id} className={'s-h1' + (longa ? ' longa' : '')} it={it} semPonto={semPonto}>{titulo}</Vozes>
@@ -361,10 +364,12 @@ export function FaixaPerguntas({ id, tid, titulo, itens, tom = 'papel', soLargo 
    site (home, Follow): a foto vista pelo chevron da marca, que abre com a
    rolagem até a foto inteira (components/site/Janela.tsx, .s-janela em
    app/site.css). O título vai no corpo cheio; o resto é o mesmo fecho. */
-export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo, foto, micro }:
+export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, soLargo, foto, micro, enfeite }:
   { titulo: string; it?: string; lead?: string; chapeu?: React.ReactNode; children: React.ReactNode; tom?: 'noite' | 'papel' | 'areia' | 'janela'; id?: string; soLargo?: boolean;
     /** 21/11/2026: a linha pequena embaixo das ações ("Vagas limitadas a 150 pessoas.", na Virada) */
     micro?: React.ReactNode;
+    /** 21/11/2026: a camada de ornamento atrás do texto (as faíscas da Virada) */
+    enfeite?: React.ReactNode;
     /** só com tom "janela": a foto deitada e em pé (1920x1080 e 1080x1920).
      *  `soCelular` (18/11/2026): o corte em pé é 4:5 e vale só no celular; o
      *  tablet em pé fica com a deitada, que é a forma da faixa nele. É o da
@@ -387,6 +392,7 @@ export function Fecho({ titulo, it, lead, chapeu, children, tom = 'noite', id, s
           <Janela />
         </>
       )}
+      {enfeite}
       <div className="s-in s-centro">
         <Sede className="topo" />
         <div className="s-rev">

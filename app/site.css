@@ -2136,3 +2136,90 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 /* o fecho com a linha pequena embaixo das ações */
 .s .s-fim-micro{ margin-top:clamp(18px,2.4vw,28px); color:rgba(255,255,255,.8) }
 .s .s-faixa.papel .s-fim-micro,.s .s-faixa.areia .s-fim-micro{ color:var(--s-mudo) }
+
+/* =============================================================================
+   A VIRADA, MAIS COMERCIAL E CHAMATIVA · 21/11/2026 (tarde)
+   Dentro da identidade: as faíscas douradas no herói e no fecho, o ingresso
+   (o cartão claro sobre a noite, com a contagem), a linha do tempo da
+   programação que se acende ao rolar, e a barra da reserva no celular.
+   ============================================================================= */
+/* as faíscas: entre a foto e o texto (no herói, depois do escuro da foto; na
+   faixa de grão, acima do grão e abaixo do conteúdo) */
+.s .vr-faiscas{ position:absolute; inset:0; width:100%; height:100%; z-index:-1; pointer-events:none; opacity:0; transition:opacity 1.4s var(--s-ease) }
+.s .vr-faiscas.vivo{ opacity:1 }
+.s .s-grao > .vr-faiscas{ position:absolute; z-index:0 }
+
+/* o ingresso */
+.s .vr-ingresso{ max-width:1040px; margin-inline:auto }
+.s .vr-ingresso .s-chapeu{ justify-content:center; margin-bottom:clamp(10px,1.4vw,18px) }
+.s .vr-ingresso .s-lead{ margin-top:clamp(12px,1.4vw,18px) }
+.s .vr-fatos{ margin-top:clamp(28px,3.6vw,48px); text-align:left }
+.s .s-claro .s-fato{ background:rgba(20,20,20,.04); border-color:var(--s-linha) }
+.s .vr-ingresso .s-acoes{ margin-top:clamp(26px,3vw,40px) }
+.s .vr-vagas{ max-width:420px; margin:clamp(18px,2vw,26px) auto 0; display:grid; gap:8px }
+.s .vr-vagas-t{ font-size:15px; font-weight:600; letter-spacing:-.01em; color:var(--s-tinta) }
+.s .vr-vagas.poucas .vr-vagas-t{ color:var(--s-acento-escuro) }
+.s .vr-vagas-barra{ display:block; height:6px; border-radius:99px; background:rgba(20,20,20,.08); overflow:hidden }
+.s .vr-vagas-barra > span{ display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--s-acento-escuro),var(--s-acento)); transition:width .8s var(--s-ease) }
+
+/* a programação: no computador, a linha do tempo entre a hora e o texto, um
+   ponto por momento; no tablet e no celular, o ponto em cima da hora */
+@media (min-width:1000px){
+  .s .vr-noite{ --vr-gx:clamp(56px,5.4vw,92px); --vr-x:calc((100% - var(--vr-gx)) / 2.6 + var(--vr-gx) / 2); --vr-y:calc(clamp(30px,3.4vw,50px) / 2);
+    grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); column-gap:var(--vr-gx) }
+  .s .vr-noite > li{ position:relative; grid-template-columns:minmax(0,1fr) minmax(0,1.6fr); column-gap:var(--vr-gx) }
+  .s .vr-noite > li::before{ content:""; position:absolute; top:calc(var(--vr-y) - 7px); left:calc(var(--vr-x) - 7px); width:14px; height:14px; border-radius:50%; background:var(--s-acento); box-shadow:0 0 0 5px var(--s-areia),0 0 0 6px rgba(233,148,47,.4),0 0 22px 4px rgba(233,148,47,.35); z-index:1 }
+  .s .vr-noite > li:not(:last-child)::after{ content:""; position:absolute; top:var(--vr-y); bottom:calc(-1 * clamp(22px,3vw,40px) - var(--vr-y)); left:calc(var(--vr-x) - 1px); width:2px; border-radius:2px; background:linear-gradient(180deg,var(--s-acento),rgba(233,148,47,.4)); transform-origin:top }
+}
+@supports (grid-template-columns:subgrid){
+  @media (min-width:1000px){ .s .vr-noite > li{ grid-template-columns:subgrid } }
+}
+@media (max-width:999px){
+  .s .vr-noite li > b::before{ content:""; width:10px; height:10px; margin-bottom:10px; border-radius:50%; background:var(--s-acento); box-shadow:0 0 0 4px rgba(233,148,47,.18) }
+}
+/* ao rolar, cada ponto acende e cada trecho da linha se traça (onde o
+   navegador sabe animar pela rolagem; nos outros, tudo já aceso) */
+@supports (animation-timeline:view()){
+  @media (min-width:1000px) and (prefers-reduced-motion:no-preference){
+    .s .vr-noite > li::before{ animation:vr-acende linear both; animation-timeline:view(); animation-range:entry 60% cover 42% }
+    .s .vr-noite > li:not(:last-child)::after{ animation:vr-traca linear both; animation-timeline:view(); animation-range:cover 30% cover 62% }
+  }
+}
+@keyframes vr-acende{ from{ transform:scale(.4); opacity:.3 } to{ transform:scale(1); opacity:1 } }
+@keyframes vr-traca{ from{ transform:scaleY(0) } to{ transform:scaleY(1) } }
+
+/* depois de reservar: a linha das dúvidas embaixo das pílulas */
+.s .vr-resposta .vr-resp-micro{ color:var(--s-mudo) }
+.s .vr-resposta .vr-resp-micro a{ color:inherit; text-decoration:underline; text-underline-offset:.18em }
+
+/* a barra da reserva: só no celular, presa ao pé, entra de baixo */
+.s .vr-barra{ display:none }
+@media (max-width:759px){
+  .s .vr-barra{ display:block; position:fixed; left:0; right:0; bottom:0; z-index:57; padding:10px var(--s-gutter) calc(10px + env(safe-area-inset-bottom,0px));
+    background:rgba(17,17,19,.9); -webkit-backdrop-filter:blur(14px) saturate(1.3); backdrop-filter:blur(14px) saturate(1.3); border-top:1px solid rgba(255,255,255,.08);
+    transform:translateY(110%); visibility:hidden; transition:transform var(--s-t) var(--s-ease),visibility 0s linear var(--s-t) }
+  .s .vr-barra.ver{ transform:none; visibility:visible; transition:transform var(--s-t) var(--s-ease),visibility 0s }
+  .s .vr-barra .s-pil{ width:100% }
+}
+@media (prefers-reduced-motion:reduce){
+  .s .vr-barra,.s .vr-barra.ver{ transition:none }
+}
+
+/* "quero mais chamativo e comercialmente atrativo" (21/11/2026, fim da tarde):
+   a chamada principal da noite em laranja (só nesta página), o relógio do
+   ingresso e a faixa de fotos */
+.s .s-pil.vr-ouro{ background:var(--s-acento); color:#141416; border-color:var(--s-acento); font-weight:600; box-shadow:0 12px 32px -10px rgba(233,148,47,.6) }
+@media (hover:hover){
+  .s .s-pil.vr-ouro:hover{ background:#f2a446; border-color:#f2a446; box-shadow:0 16px 36px -10px rgba(233,148,47,.75) }
+}
+.s .vr-ingresso .s-h2.vr-conta-t{ max-width:none; font-size:clamp(26px,3vw,44px) }
+.s .vr-relogio{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(8px,1.2vw,16px); max-width:760px; margin:clamp(18px,2.4vw,30px) auto 0 }
+.s .vr-relogio-c{ display:grid; justify-items:center; gap:8px; padding:clamp(16px,2.4vw,30px) 4px clamp(14px,2vw,24px); border-radius:var(--s-r); background:var(--s-noite); color:var(--s-papel) }
+.s .vr-relogio-c b{ font-weight:800; font-size:clamp(38px,6.4vw,92px); letter-spacing:-.05em; line-height:.9; font-variant-numeric:tabular-nums }
+.s .vr-relogio-c small{ font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--s-acento) }
+.s .vr-fotos{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:clamp(10px,1.4vw,18px); max-width:1180px; margin:clamp(36px,5vw,72px) auto 0 }
+@media (max-width:759px){ .s .vr-fotos{ grid-template-columns:repeat(2,minmax(0,1fr)) } }
+@media (hover:hover) and (prefers-reduced-motion:no-preference){
+  .s .vr-fotos .s-foto img{ transition:transform .9s var(--s-ease) }
+  .s .vr-fotos .s-foto:hover img{ transform:scale(1.045) }
+}

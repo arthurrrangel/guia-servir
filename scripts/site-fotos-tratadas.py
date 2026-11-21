@@ -28,8 +28,8 @@ em lib/site/fotos.ts). Os cartões de compartilhamento saem destes arquivos:
 depois de trocar, scripts/og-cartoes.py com os nomes dos sete da igreja.
 
 As 31 originais não estão no repositório (vieram pela conversa, em PNG). Não
-usadas em nenhum lugar: 1, 2, 5, 7, 9, 12, 15, 16 e 28 (a 13 e a 17 foram
-para a Virada 2027, em 21/11/2026).
+usadas em nenhum lugar: 1, 2, 5, 7, 15, 16 e 28 (a 13, a 17, a 9 e a 12 foram
+para a Virada 2027, em 21/11/2026, com a 30 e a 27 de novo).
 """
 import os, sys
 from PIL import Image
@@ -89,6 +89,11 @@ FOTOS = [
     # 21/11/2026: a Virada 2027 (guiachurch.com/virada), com duas das que não tinham lugar
     ('virada-heroi', 13, [J(0, 50, 1450, 784), P(650)], 74), # grão forte do palco: 74 · a cantora de braço erguido, na luz do palco (P&B): ela fica à direita do título
     ('virada-noite', 17, [V(860)]),                          # a igreja orando junto, mão no peito
+    # 21/11/2026 (tarde), "mais chamativo": a faixa de fotos da Virada, quatro cortes 4:5
+    ('virada-louvor', 30, [V(540)]),                         # a cantora de olhos fechados, na luz azul
+    ('virada-oracao', 27, [V(460)]),                         # a mulher de óculos orando, de mãos juntas
+    ('virada-kids', 9, [V(600)]),                            # a menina sorrindo na sala das crianças
+    ('virada-gente', 12, [V(900)]),                          # o sorriso no meio da igreja
 ]
 
 PEQUENA = {'v': (640, 800), 'h': (640, 427)}

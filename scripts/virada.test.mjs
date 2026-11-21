@@ -12,7 +12,7 @@
    Roda com: node --import ./scripts/_ts.mjs scripts/virada.test.mjs */
 import {
   VIRADA, MAX_POR_RESERVA, conferirReserva, telefoneDe, mascaraCpf, mascaraTelefone, reservaAberta,
-  whatsDaReserva, whatsDuvida, whatsListaDeEspera,
+  whatsDaReserva, whatsDuvida, whatsListaDeEspera, whatsConvite, contagemDaVirada, fraseDaContagem, relogioDaVirada, fraseDasVagas,
 } from '@/lib/virada';
 import { resumoDe, csvDasReservas, nomeDoArquivo } from '@/lib/virada-painel';
 import { ehEvento, paginaPublica, NA_META } from '@/lib/site/medir';
@@ -187,6 +187,36 @@ ok(ehEvento('reserva_virada') && NA_META.reserva_virada.nome === 'CompleteRegist
   r = await post(BOA);
   Date.now = agora;
   ok(r.j.fechada === true && pedidos.length === n, 'depois que a noite começa: fechada, sem chamar o banco', JSON.stringify(r.j));
+}
+
+/* 9 · A CONTAGEM, O RELÓGIO E AS VAGAS (21/11/2026, "mais comercial") ------ */
+{
+  const em = (iso) => Date.parse(iso);
+  const c1 = contagemDaVirada(em('2026-11-21T17:00:00-03:00'));
+  ok(c1.fase === 'antes' && c1.dias === 40, '21/11 à tarde: faltam 40 dias', JSON.stringify(c1));
+  const c2 = contagemDaVirada(em('2026-12-30T23:30:00-03:00'));
+  ok(c2.fase === 'antes' && c2.dias === 1, '30/12 à noite: falta 1 dia (dia de calendário, não 24 h)', JSON.stringify(c2));
+  ok(fraseDaContagem(c2).texto === 'Falta 1 dia', 'a frase no singular');
+  ok(contagemDaVirada(em('2026-12-31T00:05:00-03:00')).fase === 'hoje', '31/12 de madrugada: é hoje');
+  ok(contagemDaVirada(em('2026-12-31T19:29:00-03:00')).fase === 'hoje', '31/12, 19h29: ainda é hoje');
+  ok(contagemDaVirada(em('2026-12-31T19:30:00-03:00')).fase === 'agora', '19h30: está acontecendo');
+  ok(contagemDaVirada(em('2027-01-01T00:59:00-03:00')).fase === 'agora', '0h59 do dia 1º: ainda acontecendo');
+  ok(contagemDaVirada(em('2027-01-01T01:00:00-03:00')).fase === 'depois', '1h do dia 1º: acabou');
+  ok(fraseDaContagem({ fase: 'depois' }).texto === '31 de dezembro', 'depois da noite: a data');
+  /* o fuso: meia-noite de Brasília é 3h UTC; às 2h UTC do dia 31 ainda é dia 30 aqui */
+  const c3 = contagemDaVirada(Date.UTC(2026, 11, 31, 2, 0));
+  ok(c3.fase === 'antes' && c3.dias === 1, 'o calendário é o de Brasília, não o UTC', JSON.stringify(c3));
+  const r1 = relogioDaVirada(em('2026-11-21T17:00:00-03:00'));
+  ok(r1 && r1.d === 40 && r1.h === 2 && r1.m === 30 && r1.s === 0, 'o relógio: 40 dias, 2 h e 30 min', JSON.stringify(r1));
+  const r2 = relogioDaVirada(em('2026-12-31T19:29:59-03:00'));
+  ok(r2 && r2.d === 0 && r2.h === 0 && r2.m === 0 && r2.s === 1, 'o último segundo', JSON.stringify(r2));
+  ok(relogioDaVirada(em('2026-12-31T19:30:00-03:00')) === null, 'às 19h30 o relógio para');
+  ok(fraseDasVagas(143) === 'Restam 143 de 150 lugares', 'vagas: restam X de 150');
+  ok(fraseDasVagas(30) === 'Últimos 30 lugares' && fraseDasVagas(1) === 'Último lugar', 'vagas: a urgência a partir de 30');
+  ok(/^Esgotado/.test(fraseDasVagas(0)), 'vagas: esgotado');
+  const conv = decodeURIComponent(whatsConvite().split('?text=')[1] || '');
+  ok(/^https:\/\/wa\.me\/\?text=/.test(whatsConvite()) && conv.includes('https://guiachurch.com/virada') && conv.includes('grátis'),
+    'o convite: o WhatsApp da pessoa, sem número, com o link da página', conv);
 }
 
 console.log(`virada: ${feitas - falhas}/${feitas}`);

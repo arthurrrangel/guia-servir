@@ -138,3 +138,58 @@ export function whatsDaReserva(r: Reserva): string {
 
 /** As vagas acabaram: a lista de espera é pelo WhatsApp. */
 export const whatsListaDeEspera = () => wa(`Oi! As vagas da ${VIRADA.nome} acabaram no site. Quero entrar na lista de espera.`);
+
+/** Depois de reservar: chamar alguém para ir junto. Abre o WhatsApp da
+ *  própria pessoa (sem número), com o convite e o endereço da página. */
+export const whatsConvite = () => `https://wa.me/?text=${encodeURIComponent(
+  `Vamos juntos na ${VIRADA.nome} da GUIA Church? 31 de dezembro, às ${VIRADA.chegada}, no ${VIRADA.local}. A reserva é grátis: https://guiachurch.com/virada`)}`;
+
+/* ------------------------------------------------------- a contagem --- */
+/* 21/11/2026, "mais comercial, chamativo": quanto falta, no calendário de
+   Brasília (o Brasil não tem horário de verão desde 2019: -03:00 o ano todo).
+   Conta dias de calendário, não blocos de 24 h: no dia 30, à noite, falta 1
+   dia, e não "é hoje". */
+const BRASILIA = -3 * 3600e3;
+const INICIO = Date.parse(VIRADA.fechaEm);                       /* 31/12, 19h30 */
+const FIM = Date.parse('2027-01-01T01:00:00-03:00');             /* o fim do brinde */
+const diaDe = (ms: number) => Math.floor((ms + BRASILIA) / 86400e3);
+
+export type Contagem =
+  | { fase: 'antes'; dias: number }   /* faltam N dias (N >= 1) */
+  | { fase: 'hoje' }                  /* 31/12, antes das 19h30 */
+  | { fase: 'agora' }                 /* das 19h30 à 1h */
+  | { fase: 'depois' };
+
+export function contagemDaVirada(agora: number): Contagem {
+  if (agora >= FIM) return { fase: 'depois' };
+  if (agora >= INICIO) return { fase: 'agora' };
+  const dias = diaDe(INICIO) - diaDe(agora);
+  return dias >= 1 ? { fase: 'antes', dias } : { fase: 'hoje' };
+}
+
+/** O relógio do ingresso: dias, horas, minutos e segundos até as 19h30 do
+ *  dia 31; null quando a noite já começou. */
+export function relogioDaVirada(agora: number): { d: number; h: number; m: number; s: number } | null {
+  const falta = Math.floor((INICIO - agora) / 1000);
+  if (falta <= 0) return null;
+  return { d: Math.floor(falta / 86400), h: Math.floor((falta % 86400) / 3600), m: Math.floor((falta % 3600) / 60), s: falta % 60 };
+}
+
+/** A frase da contagem: a parte em negrito e a palavra em itálico (a segunda
+ *  voz da casa). Depois da noite, a data (o que é verdade sempre). */
+export function fraseDaContagem(c: Contagem): { texto: string; it: string } {
+  switch (c.fase) {
+    case 'antes': return c.dias === 1 ? { texto: 'Falta 1 dia', it: 'dia' } : { texto: `Faltam ${c.dias} dias`, it: 'dias' };
+    case 'hoje': return { texto: 'É hoje', it: 'hoje' };
+    case 'agora': return { texto: 'Está acontecendo', it: 'acontecendo' };
+    default: return { texto: '31 de dezembro', it: 'dezembro' };
+  }
+}
+
+/** A linha das vagas, quando o banco diz quantas restam. Até 30, a urgência
+ *  é o número; zero, esgotou. */
+export function fraseDasVagas(restantes: number): string {
+  if (restantes <= 0) return 'Esgotado. Entre na lista de espera.';
+  if (restantes <= 30) return restantes === 1 ? 'Último lugar' : `Últimos ${restantes} lugares`;
+  return `Restam ${restantes} de ${VIRADA.capacidade} lugares`;
+}

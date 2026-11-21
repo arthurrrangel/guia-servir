@@ -72,7 +72,7 @@ try {
     /* 21/11/2026: no celular a linha de baixo é só o lugar; com as vagas e o
        "para quem é", o texto subia para cima do rosto da foto no celular baixo */
     const micro = (await p.locator('.s-heroi .s-micro').innerText()).replace(/\s+/g, ' ').trim();
-    ok(toque ? micro === 'Espaço Bethel, Barra de Guaratiba' : /Espaço Bethel, Barra de Guaratiba · Vagas limitadas\./.test(micro),
+    ok(toque ? micro === 'Espaço Bethel, Barra de Guaratiba' : /Espaço Bethel, Barra de Guaratiba · Grátis, só 150 lugares\./.test(micro),
       `${nome}: a linha de baixo do herói`, micro);
     ok(/31 de dezembro, 19h30/.test(await p.locator('.s-heroi .s-chapeu').innerText()), `${nome}: o chapéu com a data e a hora`);
     const largura = await p.evaluate(() => [document.scrollingElement.scrollWidth, innerWidth]);
@@ -84,13 +84,41 @@ try {
     const faq = (await p.locator('#t-vr-faq').locator('xpath=..').innerText()).replace(/\u00a0/g, ' ');
     ok(/A reserva é gratuita\?/.test(faq) && /Quantas pessoas posso reservar\?/.test(faq) && !/\[/.test(faq), `${nome}: as perguntas, sem colchete da copy`);
     ok(!/\[/.test(await p.locator('main').innerText()), `${nome}: nenhum colchete da copy na página`);
+    /* 21/11/2026 (tarde), "mais comercial", "chamativo": o ingresso com o relógio,
+       a chamada em laranja, as faíscas, a faixa de fotos. E "não terá ceia". */
+    const rel = await p.locator('.vr-relogio-c b').allInnerTexts();
+    const diasCertos = Math.floor((Date.parse('2026-12-31T19:30:00-03:00') - Date.now()) / 86400e3);
+    ok(rel.length === 4 && rel.every(t => /^\d{2,3}$/.test(t)) && Math.abs(Number(rel[0]) - diasCertos) <= 1,
+      `${nome}: o relógio do ingresso conta dias, horas, minutos e segundos`, rel.join(' '));
+    const fatos = (await p.locator('.vr-fatos .s-fato b').allInnerTexts()).join(' | ');
+    ok(fatos === 'Espaço Bethel | Jantar e fogos | Grátis', `${nome}: o ingresso diz onde, o que a noite tem e que é grátis`, fatos);
+    ok(!/ceia/i.test(await p.locator('main').innerText()), `${nome}: sem ceia na programação`);
+    const ouro = await p.locator('.s-heroi .s-pil.vr-ouro').evaluate(e => [e.textContent, getComputedStyle(e).backgroundColor]).catch(() => null);
+    ok(!!ouro && ouro[0] === 'Garantir meu lugar' && ouro[1] === 'rgb(233, 148, 47)', `${nome}: a chamada principal em laranja`, JSON.stringify(ouro));
+    ok(await p.locator('.s-heroi canvas.vr-faiscas.vivo').count() === 1, `${nome}: as faíscas do herói acesas`);
     await p.screenshot({ path: `${OUT}/${nome}-primeira-tela.png` });
     await p.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 400) { scrollTo(0, y); await new Promise(r => setTimeout(r, 25)); } scrollTo(0, 0); });
     await esperar(500);
     await p.screenshot({ path: `${OUT}/${nome}-pagina.png`, fullPage: true });
+    /* as fotos da faixa são preguiçosas: carregam quando chegam perto da tela */
+    await p.locator('.vr-fotos').scrollIntoViewIfNeeded();
+    await p.waitForFunction(() => [...document.querySelectorAll('.vr-fotos img')].every(i => i.complete && i.naturalWidth > 0), null, { timeout: 15000 }).catch(() => {});
+    const fotos = await p.locator('.vr-fotos img').evaluateAll(is => is.map(i => i.complete && i.naturalWidth > 0));
+    ok(fotos.length === 4 && fotos.every(Boolean), `${nome}: a faixa de fotos, quatro, carregadas`, JSON.stringify(fotos));
+    /* a barra da reserva: só no celular, quando nenhuma chamada está à vista (a
+       faixa de cookies tem a vez dela: a pessoa escolhe antes) */
+    await p.getByRole('button', { name: 'Agora não' }).click({ timeout: 3000 }).catch(() => {});
+    await p.evaluate(() => { const el = document.querySelector('[aria-labelledby="t-vr-2027"]'); scrollTo(0, el.getBoundingClientRect().top + scrollY); }); await esperar(700);
+    const barraMeio = await p.locator('.vr-barra.ver').count();
+    await p.evaluate(() => { const el = document.querySelector('#reserva'); scrollTo(0, el.getBoundingClientRect().top + scrollY); }); await esperar(700);
+    const barraForm = await p.locator('.vr-barra.ver').count();
+    const barraDisplay = await p.locator('.vr-barra').evaluate(e => getComputedStyle(e).display);
+    ok(toque ? (barraMeio === 1 && barraForm === 0) : barraDisplay === 'none',
+      `${nome}: ${toque ? 'a barra da reserva aparece no meio e some no formulário' : 'sem barra da reserva no computador'}`, `${barraMeio} ${barraForm} ${barraDisplay}`);
+    await p.evaluate(() => scrollTo(0, 0)); await esperar(400);
 
     /* 2 · a chamada leva à reserva; em branco, aponta o nome */
-    await p.getByRole('link', { name: 'Quero reservar meu lugar' }).first().click(); await esperar(900);
+    await p.getByRole('link', { name: 'Garantir meu lugar' }).first().click(); await esperar(900);
     ok(/#reserva$/.test(p.url()), `${nome}: a chamada leva à reserva`, p.url());
     await p.locator('form.vr-form button[type=submit]').click(); await esperar(300);
     ok(/Escreva seu nome completo/.test(await p.locator('form.vr-form [role=alert]').innerText()), `${nome}: em branco, o erro aponta o nome`);
@@ -191,6 +219,15 @@ try {
     ok(!!download && /^virada-2027-reservas-\d{4}-\d{2}-\d{2}\.csv$/.test(download.suggestedFilename()), `${nome}: a planilha baixa`, download?.suggestedFilename());
     await p.screenshot({ path: `${OUT}/${nome}-painel.png`, fullPage: true });
     ok(!erros.length, `${nome}: painel sem erro de página`, erros.join(' | '));
+    await c.close();
+  }
+  /* 9 · menos movimento: as faíscas não acendem, a página fica inteira */
+  {
+    const c = await nav.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, reducedMotion: 'reduce' });
+    const p = await c.newPage();
+    await p.goto(`${BASE}/virada`, { waitUntil: 'domcontentloaded' });
+    await p.waitForSelector('#t-vr', { timeout: 30000 }); await esperar(2200);
+    ok(await p.locator('canvas.vr-faiscas.vivo').count() === 0 && await p.locator('canvas.vr-faiscas').count() === 2, 'menos movimento: as faíscas ficam apagadas');
     await c.close();
   }
 } finally { await nav.close(); }
