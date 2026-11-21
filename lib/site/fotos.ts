@@ -81,7 +81,7 @@ export const FOTOS = {
     nota: 'O cálice da ceia na mão (foto 4).' },
   /* 21/11/2026: a Virada 2027 (guiachurch.com/virada), com duas das fotos tratadas que ainda não tinham lugar */
   'virada-heroi': { arquivo: '/site/virada-heroi-l.webp', largura: 1450, altura: 784, corte: 'H', foco: '50% 35%', alt: 'Uma cantora de olhos fechados e braço erguido, na luz do palco',
-    retrato: { arquivo: '/site/virada-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 30%', tablet: '80% 50%' },
+    retrato: { arquivo: '/site/virada-heroi-p.webp', largura: 800, altura: 1000, alto: true, foco: '50% 45%', tablet: '80% 50%' },
     nota: 'A cantora de braço erguido, em preto e branco (foto 13).' },
   'virada-noite': { arquivo: '/site/virada-noite-v.webp', pequena: '/site/virada-noite-s.webp', largura: 800, altura: 1000, corte: 'V', alt: 'Pessoas da igreja orando juntas, de olhos fechados e mão no peito',
     nota: 'A igreja orando junto (foto 17).' },

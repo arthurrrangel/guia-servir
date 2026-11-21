@@ -68,7 +68,12 @@ try {
     ok(/Um novo ano para ser transformado pela presença de Deus/.test(h1), `${nome}: o título`, h1);
     const dentro = async (sel) => { const b = await p.locator(sel).first().boundingBox(); return !!b && b.y >= 0 && b.y + b.height <= h; };
     ok(await dentro('.s-heroi .s-chapeu') && await dentro('.s-heroi .s-acoes'), `${nome}: data, título e chamadas na primeira tela`);
-    if (!toque || h >= 700) ok(await dentro('.s-heroi .s-micro'), `${nome}: o lugar e as vagas na primeira tela`);
+    if (!toque || h >= 700) ok(await dentro('.s-heroi .s-micro'), `${nome}: ${toque ? 'o lugar' : 'o lugar e as vagas'} na primeira tela`);
+    /* 21/11/2026: no celular a linha de baixo é só o lugar; com as vagas e o
+       "para quem é", o texto subia para cima do rosto da foto no celular baixo */
+    const micro = (await p.locator('.s-heroi .s-micro').innerText()).replace(/\s+/g, ' ').trim();
+    ok(toque ? micro === 'Espaço Bethel, Barra de Guaratiba' : /Espaço Bethel, Barra de Guaratiba · Vagas limitadas\./.test(micro),
+      `${nome}: a linha de baixo do herói`, micro);
     ok(/31 de dezembro, 19h30/.test(await p.locator('.s-heroi .s-chapeu').innerText()), `${nome}: o chapéu com a data e a hora`);
     const largura = await p.evaluate(() => [document.scrollingElement.scrollWidth, innerWidth]);
     ok(largura[0] <= largura[1], `${nome}: nada vaza para o lado`, largura.join(' > '));

@@ -2066,9 +2066,12 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
    a lista de "para quem é" e o formulário da reserva com a resposta no lugar.
    ============================================================================= */
 .s .vr-sep{ opacity:.7 }
+/* celular: só o lugar. Título de quatro linhas, duas pílulas e mais três
+   linhas embaixo empurravam o texto para cima do rosto da foto no celular
+   baixo (iPhone 13 com a barra do Safari: 390 x 664). "Vagas limitadas" e
+   "para quem é" seguem na página, logo abaixo */
 @media(max-width:759px){
-  .s .vr-sep{ display:none }
-  .s .vr-quebra{ display:block }
+  .s .vr-sep,.s .vr-quebra{ display:none }
 }
 .s .vr-abre{ max-width:980px; margin-inline:auto }
 .s .vr-abre .s-lead{ margin-inline:auto }
