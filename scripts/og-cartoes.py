@@ -165,6 +165,11 @@ cartao('og-pequena-guia.jpg', S('pg-heroi-l.webp'), 'Pequena Guia',
 cartao('og-ofertar.jpg', S('ofertar-heroi-l.webp'), 'Doação · Dízimos e ofertas',
        [P('Ofertar é') + IT('adorar.')],
        'Leva menos de um minuto, e você decide o valor.', foco=(0.5, 0.3), sat=1)
+# 21/11/2026: a Virada 2027 (guiachurch.com/virada), da foto do herói dela (a 13,
+# em preto e branco): a cantora fica à direita, e o título, no escuro da esquerda
+cartao('og-virada.jpg', S('virada-heroi-l.webp'), 'Virada 2027 · 31 de dezembro',
+       [P('Entre em 2027'), P('na presença'), IT('de Deus.')],
+       'Espaço Bethel, Barra de Guaratiba · Reserva gratuita', foco=(0.6, 0.2), tam=80, sat=1)
 # o Guia Servir (guiaservir.com): a LP, as cinco áreas, o encaixo e o acesso
 cartao('og-servir.jpg', S('servir-pouso-l.webp'), 'Servir · GUIA Church',
        [P('Encontre o seu lugar'), IT('pra servir.')],

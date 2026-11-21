@@ -248,16 +248,19 @@ const SECOES_ADMIN: { v: string; rot: string; icone: NomeDoIcone }[] = [
   { v: 'categorias', rot: 'Categorias', icone: 'categorias' }, { v: 'anexos', rot: 'Anexos', icone: 'anexos' },
   /* 110 · o painel do Follow Camp: página própria, não seção (`?secao=`) */
   { v: 'followcamp', rot: 'Follow Camp', icone: 'calendario' },
+  /* 118 · as reservas da Virada 2027 (21/11/2026): página própria, como o Camp */
+  { v: 'virada', rot: 'Virada 2027', icone: 'calendario' },
 ];
 const HREF_ADMIN = (v: string) => v === 'panorama' ? '/demandas/admin'
-  : v === 'followcamp' ? '/demandas/admin/followcamp' : `/demandas/admin?secao=${v}`;
+  : v === 'followcamp' ? '/demandas/admin/followcamp' : v === 'virada' ? '/demandas/admin/virada' : `/demandas/admin?secao=${v}`;
 function SecoesDaAdministracao({ caminho, secaoAberta, forma }: {
   caminho: string; secaoAberta: string | null; forma: 'lateral' | 'fita';
 }) {
   /* a ficha de uma pessoa é filha de Pessoas */
   const secao = caminho === '/demandas/admin' ? (secaoAberta || 'panorama')
     : caminho.startsWith('/demandas/admin/pessoas') ? 'pessoas'
-    : caminho.startsWith('/demandas/admin/followcamp') ? 'followcamp' : '';
+    : caminho.startsWith('/demandas/admin/followcamp') ? 'followcamp'
+    : caminho.startsWith('/demandas/admin/virada') ? 'virada' : '';
   const fita = useFitaQueRola<HTMLElement>();
   return (
     <nav className={`${forma === 'lateral' ? 'dm-nav dm-adm-faixa' : 'dm-subabas dm-adm-fita'}`} aria-label="Seções da administração"

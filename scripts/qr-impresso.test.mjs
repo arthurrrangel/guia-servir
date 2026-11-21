@@ -17,6 +17,7 @@ import config from '../next.config.mjs';
 /* endereço impresso → para quê (só para a frase de erro) */
 const IMPRESSOS = {
   '/fc': 'QR code do Follow Camp',
+  '/v27': 'QR code da Virada 2027 (21/11/2026)',
 };
 
 const redirecionamentos = await config.redirects();

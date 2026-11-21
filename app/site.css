@@ -2057,3 +2057,79 @@ html{ scroll-padding-top:calc(72px + 12px + env(safe-area-inset-top, 0px)) }
 @media(max-width:279px){
   .s .s-h2.media{ font-size:clamp(26px,11vw,34px) }
 }
+
+/* =============================================================================
+   A VIRADA 2027 (/virada) · 21/11/2026
+   A landing page da noite de 31 de dezembro na identidade do site: as peças
+   de sempre (herói, faixas, passos em serifa, perguntas, fecho) e o que só
+   ela tem: a hora de cada momento em serifa itálica, a declaração de 2027,
+   a lista de "para quem é" e o formulário da reserva com a resposta no lugar.
+   ============================================================================= */
+.s .vr-sep{ opacity:.7 }
+@media(max-width:759px){
+  .s .vr-sep{ display:none }
+  .s .vr-quebra{ display:block }
+}
+.s .vr-abre{ max-width:980px; margin-inline:auto }
+.s .vr-abre .s-lead{ margin-inline:auto }
+.s .vr-abre .s-lead + .s-lead{ margin-top:clamp(14px,1.6vw,22px) }
+
+/* a programação: a hora em serifa itálica, o nome do momento embaixo dela */
+.s .vr-noite li > b{ display:grid; gap:2px; justify-items:end }
+.s .vr-hora{ font-family:var(--s-serifa); font-style:italic; font-weight:400; font-size:clamp(30px,3.4vw,50px); letter-spacing:-.02em; line-height:1 }
+.s .vr-noite li > div > p{ font-weight:300; font-size:clamp(18px,1.9vw,27px); line-height:1.3; letter-spacing:-.012em; text-wrap:pretty }
+.s .vr-declaracao{ margin:clamp(14px,1.6vw,22px) 0 0; padding-left:clamp(16px,1.8vw,26px); border-left:2px solid var(--s-acento) }
+.s .vr-declaracao p{ font-family:var(--s-serifa); font-style:italic; font-weight:400; font-size:clamp(24px,2.6vw,38px); line-height:1.15; letter-spacing:-.015em; text-wrap:balance }
+/* tablet: uma coluna, tudo começa na esquerda (como os passos de sempre);
+   celular: tudo no eixo, e o traço da declaração vai para cima, no meio */
+@media(max-width:999px){
+  .s .vr-noite li > b{ justify-items:start }
+}
+@media(max-width:759px){
+  .s .vr-noite li > b{ justify-items:center }
+  .s .vr-declaracao{ border-left:0; padding:16px 0 0; background:linear-gradient(var(--s-acento),var(--s-acento)) top center / 56px 2px no-repeat }
+}
+
+/* para quem é */
+.s .vr-lista{ list-style:none; margin:var(--s-respiro, 24px) 0 0; padding:0; display:grid; gap:clamp(14px,1.6vw,20px) }
+.s .vr-lista li{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; font-weight:300; font-size:clamp(18px,1.6vw,23px); line-height:1.35; letter-spacing:-.012em; text-align:left }
+.s .vr-check{ display:grid; place-items:center; width:28px; height:28px; margin-top:2px; border-radius:50%; background:var(--s-acento); color:#111 }
+.s .vr-check svg{ width:16px; height:16px }
+@media(max-width:759px){
+  .s .vr-lista li{ grid-template-columns:1fr; justify-items:center; gap:8px }
+  .s .vr-check{ margin-top:0 }
+}
+
+/* a reserva */
+.s .vr-reserva .s-cab{ max-width:880px; margin-inline:auto }
+.s .vr-reserva .s-cab .s-lead{ margin-inline:auto }
+.s .vr-form{ max-width:860px; margin-inline:auto; text-align:left }
+.s .vr-vinculo{ border:0; margin:0; padding:0; min-width:0 }
+.s .vr-vinculo legend{ padding:0; margin-bottom:6px; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--s-mudo) }
+.s .vr-opcoes{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.s .vr-opcao{ position:relative; display:block; cursor:pointer }
+.s .vr-opcao input{ position:absolute; opacity:0; width:1px; height:1px }
+.s .vr-opcao span{ display:flex; align-items:center; justify-content:center; height:58px; padding:0 12px; background:#fff; border:1.5px solid var(--s-linha); color:var(--s-tinta); font-weight:400; font-size:clamp(16px,1.4vw,20px); letter-spacing:-.01em; text-transform:none; text-align:center; transition:background var(--s-t),border-color var(--s-t),color var(--s-t) }
+.s .vr-opcao input:checked + span{ background:var(--s-noite); border-color:var(--s-noite); color:var(--s-papel) }
+.s .vr-opcao input:focus-visible + span{ border-color:var(--s-acento); box-shadow:0 0 0 3px var(--s-acento-halo) }
+.s .vr-vinculo[aria-describedby] .vr-opcao span{ border-color:#d9534f }
+.s .vr-isca{ position:absolute; left:-10000px; width:1px; height:1px; overflow:hidden }
+.s .vr-erro-geral{ grid-column:1 / -1; text-align:center }
+.s .vr-enviar{ display:grid; justify-items:center; gap:14px; margin-top:clamp(16px,2vw,24px) }
+.s .vr-enviar .s-micro{ color:var(--s-mudo); text-align:center; max-width:34em }
+.s .vr-enviar .s-micro a,.s .s-fim-micro a{ color:inherit; text-decoration:underline; text-underline-offset:.18em }
+@media(max-width:759px){
+  .s .vr-enviar .s-pil{ width:100% }
+}
+
+/* a resposta toma o lugar do formulário */
+.s .vr-resposta{ max-width:720px; margin:clamp(10px,2vw,24px) auto 0; padding:clamp(28px,4vw,48px) clamp(20px,4vw,48px); background:#fff; border:1.5px solid var(--s-linha); text-align:center; display:grid; justify-items:center; gap:clamp(12px,1.6vw,18px); outline:0 }
+.s .vr-resposta .s-lead{ margin-inline:auto }
+.s .vr-resposta .s-acoes{ margin-top:6px }
+.s .vr-ok{ display:grid; place-items:center; width:56px; height:56px; border-radius:50%; background:var(--s-acento); color:#111 }
+.s .vr-ok svg{ width:28px; height:28px }
+.s .vr-resp-t{ font-weight:800; font-size:clamp(26px,3vw,40px); letter-spacing:-.04em; line-height:1.05; text-wrap:balance }
+
+/* o fecho com a linha pequena embaixo das ações */
+.s .s-fim-micro{ margin-top:clamp(18px,2.4vw,28px); color:rgba(255,255,255,.8) }
+.s .s-faixa.papel .s-fim-micro,.s .s-faixa.areia .s-fim-micro{ color:var(--s-mudo) }

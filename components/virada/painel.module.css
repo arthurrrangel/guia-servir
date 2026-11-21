@@ -1,0 +1,36 @@
+/* O painel da Virada 2027 (21/11/2026) mora dentro da Administração das
+   Demandas e usa a folha de lá (`demandas.css`): as peças, as cores e os
+   espaços são os do sistema. Aqui só o que é deste painel. */
+.painel{display:block}
+
+.busca{width:100%;max-width:320px;min-height:44px;padding:0 var(--dm-e3);border:1px solid var(--dm-linha-2);border-radius:var(--dm-r2);background:var(--dm-sup-2, var(--dm-fundo));color:var(--dm-ink);font:inherit;font-size:15px}
+.busca:focus-visible{outline:2px solid var(--dm-foco);outline-offset:1px}
+
+.tab td{vertical-align:top}
+.num,.tab th.num,.tab td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.nome{font-weight:600;color:var(--dm-ink)}
+.sub{display:block;margin-top:2px;color:var(--dm-mudo);font-size:13px;line-height:1.35;overflow-wrap:anywhere}
+.mudo{color:var(--dm-mudo)}
+.cpf{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tab tr[data-cancelada] td{color:var(--dm-mudo)}
+.tab tr[data-cancelada] .nome{text-decoration:line-through;color:var(--dm-mudo)}
+
+/* no celular, um cartão por reserva (as mesmas peças do painel do Follow Camp) */
+.cartoes{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:var(--dm-e2)}
+.cartao{display:flex;flex-direction:column;gap:var(--dm-e2);padding:var(--dm-e3) var(--dm-e4);border:1px solid var(--dm-linha);border-radius:var(--dm-r3);background:var(--dm-sup-2, var(--dm-fundo))}
+.cartaoTopo{display:flex;align-items:baseline;justify-content:space-between;gap:var(--dm-e2)}
+.cartaoTopo .nome{overflow-wrap:anywhere}
+.pessoas{flex:none;color:var(--dm-ink-2);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cartaoValores{display:flex;flex-wrap:wrap;gap:var(--dm-e1) var(--dm-e4);color:var(--dm-ink-2);font-size:14px;font-variant-numeric:tabular-nums}
+.cartaoFim{display:flex;justify-content:flex-end;margin-top:calc(-1 * var(--dm-e1))}
+.cartao[data-cancelada]{opacity:.75}
+.cartao[data-cancelada] .nome{text-decoration:line-through;color:var(--dm-mudo)}
+
+.lancar{display:grid;grid-template-columns:minmax(0,2fr) repeat(2,minmax(0,1.2fr)) minmax(0,1.2fr) minmax(0,.7fr);gap:var(--dm-e3);align-items:start}
+.fimLancar{grid-column:1 / -1;display:flex;justify-content:flex-end}
+@media(max-width:899px){
+  .lancar{grid-template-columns:1fr 1fr}
+  .lancar > :first-child{grid-column:1 / -1}
+  .fimLancar{justify-content:stretch}
+  .fimLancar > *{flex:1}
+}

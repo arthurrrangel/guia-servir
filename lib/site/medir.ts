@@ -22,7 +22,7 @@
    a escolha da faixa. Quem liga e dispara é components/site/Medidor.tsx.
    ============================================================================= */
 
-export type Evento = 'avisou_que_vai' | 'whatsapp' | 'mapa' | 'quero_servir' | 'cadastro_servir' | 'pix_copiado';
+export type Evento = 'avisou_que_vai' | 'whatsapp' | 'mapa' | 'quero_servir' | 'cadastro_servir' | 'pix_copiado' | 'reserva_virada';
 
 /** Como cada evento chega na Meta. Evento padrão quando existe um que diz a
  *  mesma coisa (a Meta otimiza por eles); próprio quando não existe. "Copiou
@@ -34,6 +34,8 @@ export const NA_META: Record<Evento, { padrao: boolean; nome: string }> = {
   quero_servir: { padrao: false, nome: 'QueroServir' },
   cadastro_servir: { padrao: true, nome: 'SubmitApplication' },
   pix_copiado: { padrao: false, nome: 'PixCopiado' },
+  /* 21/11/2026: a reserva da Virada 2027 gravada (guiachurch.com/virada) */
+  reserva_virada: { padrao: true, nome: 'CompleteRegistration' },
 };
 
 /** Como cada evento aparece no painel da Vercel */
@@ -44,6 +46,7 @@ export const NA_VERCEL: Record<Evento, string> = {
   quero_servir: 'Foi para o Servir',
   cadastro_servir: 'Cadastro no Servir',
   pix_copiado: 'Copiou o Pix',
+  reserva_virada: 'Reservou a Virada',
 };
 
 export const ehEvento = (s: string | null | undefined): s is Evento => !!s && Object.prototype.hasOwnProperty.call(NA_META, s);
@@ -55,7 +58,7 @@ export const ehEvento = (s: string | null | undefined): s is Evento => !!s && Ob
    fora de casa. Página nova do site entra aqui de propósito, ou não é medida.
    '/' e '/servir' são a mesma LP (o guiaservir.com reescreve a raiz), e
    '/follow' é a raiz do guiafollow.com, pelo mesmo caminho. */
-const PUBLICAS = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[a-z0-9-]+|servir\/[a-z0-9-]+\/cadastro|followcamp|follow)\/?$/;
+const PUBLICAS = /^\/(?:|sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|acessar|servir|servir\/onde-me-encaixo|servir\/[a-z0-9-]+|servir\/[a-z0-9-]+\/cadastro|followcamp|follow|virada)\/?$/;
 
 export function paginaPublica(caminho: string): boolean {
   return PUBLICAS.test(caminho);

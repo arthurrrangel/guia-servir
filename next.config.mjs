@@ -151,7 +151,7 @@ const NO_SERVIR = [{ type: 'host', value: '(?:escalas\\.)?guiaservir\\.com' }];
 const NA_IGREJA = [{ type: 'host', value: 'guiachurch\\.com' }];
 const NO_FOLLOW = [{ type: 'host', value: '(?:www\\.)?guiafollow\\.com' }];
 /* as páginas da igreja (app/(igreja)/) */
-const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade';
+const DA_IGREJA = 'sobre|cultos|como-chegar|eventos|pequena-guia|ofertar|privacidade|virada';
 /* o Servir (app/(servir)/) e o sistema (app/(sistema)/, menos o Follow Camp) */
 const DO_SERVIR = 'servir|acessar|eu|entrar|painel|escala|time|ajustes|equipe|candidatura|confirmar|cheguei|disponibilidade|cronograma|cronogramas|demandas|ministerios|dress';
 
@@ -163,6 +163,8 @@ const REGRAS_DOS_SITES = [
   { source: '/:p(followcamp|fc)', has: NO_FOLLOW, destination: `${IGREJA}/followcamp`, permanent: false },
   { source: '/followcamp/:resto+', has: NO_FOLLOW, destination: `${IGREJA}/followcamp/:resto+`, permanent: false },
   { source: '/follow', has: NO_FOLLOW, destination: '/', permanent: false },
+  /* 21/11/2026: a Virada 2027 é da igreja; quem digitar no domínio do Follow vai para ela */
+  { source: '/virada', has: NO_FOLLOW, destination: `${IGREJA}/virada`, permanent: false },
   { source: '/:pagina((?!api|_next|follow|tipos|fotos|site|_vercel)[^./]+)', has: NO_FOLLOW, destination: '/', permanent: false },
   /* o Follow visto dos outros dois sites */
   { source: '/follow', has: NA_IGREJA, destination: `${FOLLOW}/`, permanent: false },
@@ -304,6 +306,14 @@ const nextConfig = {
          salto, então a troca vale na hora até para quem já escaneou. A única
          coisa que mata o QR é o guiaservir.com deixar de existir. */
       { source: '/fc', destination: '/followcamp', permanent: false },
+      /* O ENDEREÇO DO QR CODE DA VIRADA 2027 (21/11/2026). Mesma regra do /fc:
+         o QR impresso guarda só guiachurch.com/v27, e para onde ele leva mora
+         aqui (temporário, 307). Hoje é a landing page da noite; depois do dia
+         31, pode virar a página que vier no lugar. Nunca apagar nem renomear
+         (scripts/qr-impresso.test.mjs). */
+      { source: '/v27', destination: '/virada', permanent: false },
+      /* o painel das reservas mora na Administração das Demandas */
+      { source: '/virada/reservas', destination: '/demandas/admin/virada', permanent: false },
     ];
   },
 };

@@ -63,6 +63,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_IGREJA}/sobre`, changeFrequency: 'yearly', priority: 0.7 },
     { url: `${SITE_IGREJA}/pequena-guia`, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${SITE_IGREJA}/eventos`, changeFrequency: 'weekly', priority: 0.7 },
+    /* 21/11/2026: a Virada 2027 (reserva até a noite de 31/12) */
+    { url: `${SITE_IGREJA}/virada`, changeFrequency: 'daily', priority: 0.8 },
     { url: `${SITE_IGREJA}/ofertar`, changeFrequency: 'yearly', priority: 0.5 },
     /* Follow Camp 2027: página de evento, com prazo. Sai daqui depois de
        10/02/2027, quando o retiro acabar, para o sitemap não prometer um
